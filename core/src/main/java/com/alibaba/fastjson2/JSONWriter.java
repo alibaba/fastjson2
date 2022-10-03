@@ -467,7 +467,7 @@ public abstract class JSONWriter
         }
 
         if ((defaultWriterFeatures & Feature.OptimizedForAscii.mask) != 0) {
-            return new JSONWriterUTF8JDK9(writeContext);
+            return new JSONWriterUTF8(writeContext);
         }
 
         return new JSONWriterUTF16(writeContext);
@@ -488,7 +488,7 @@ public abstract class JSONWriter
         if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+            jsonWriter = new JSONWriterUTF8(writeContext);
         } else {
             jsonWriter = new JSONWriterUTF16(writeContext);
         }
@@ -505,7 +505,7 @@ public abstract class JSONWriter
         if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+            jsonWriter = new JSONWriterUTF8(writeContext);
         } else {
             jsonWriter = new JSONWriterUTF16(writeContext);
         }
@@ -563,33 +563,17 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter ofUTF8() {
-        if (JVM_VERSION >= 9) {
-            return new JSONWriterUTF8JDK9(
-                    JSONFactory.createWriteContext());
-        } else {
-            return new JSONWriterUTF8(
-                    JSONFactory.createWriteContext());
-        }
+        return new JSONWriterUTF8(
+                JSONFactory.createWriteContext());
     }
 
     public static JSONWriter ofUTF8(JSONWriter.Context context) {
-        if (JVM_VERSION >= 9) {
-            return new JSONWriterUTF8JDK9(context);
-        } else {
-            return new JSONWriterUTF8(context);
-        }
+        return new JSONWriterUTF8(context);
     }
 
     public static JSONWriter ofUTF8(Feature... features) {
         Context writeContext = createWriteContext(features);
-
-        JSONWriter jsonWriter;
-        if (JVM_VERSION >= 9) {
-            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
-        } else {
-            jsonWriter = new JSONWriterUTF8(writeContext);
-        }
-
+        JSONWriter jsonWriter = new JSONWriterUTF8(writeContext);
         boolean pretty = (writeContext.features & JSONWriter.Feature.PrettyFormat.mask) != 0;
         if (pretty) {
             jsonWriter = new JSONWriterPretty(jsonWriter);
@@ -1623,7 +1607,7 @@ public abstract class JSONWriter
                     }
 
                     if (JVM_VERSION == 8) {
-                        char[] chars = getCharArray(name);
+                        char[] chars = name.toCharArray();
                         for (int j = 0; j < chars.length; j++) {
                             char ch = chars[j];
                             switch (ch) {
@@ -1850,27 +1834,6 @@ public abstract class JSONWriter
                             }
                         }
                     }
-                }
-            }
-
-            if (ascii) {
-                if (STRING_CREATOR_JDK11 != null) {
-                    byte[] bytes;
-                    if (off == buf.length) {
-                        bytes = buf;
-                    } else {
-                        bytes = new byte[off];
-                        System.arraycopy(buf, 0, bytes, 0, off);
-                    }
-                    return fullPath = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
-                }
-
-                if (STRING_CREATOR_JDK8 != null) {
-                    char[] chars = new char[off];
-                    for (int i = 0; i < off; i++) {
-                        chars[i] = (char) buf[i];
-                    }
-                    return fullPath = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                 }
             }
 

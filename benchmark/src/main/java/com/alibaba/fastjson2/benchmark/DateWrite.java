@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.benchmark;
 
 import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -14,8 +13,6 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-
-import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public class DateWrite {
     static final ZoneId ZONE_ID_SHANGHAI = ZoneId.of("Asia/Shanghai");
@@ -151,59 +148,29 @@ public class DateWrite {
             second = (int) secondOfDay;
         }
 
-        if (JDKUtils.STRING_CREATOR_JDK8 != null) {
-            char[] chars = new char[19];
+        byte[] bytes = new byte[19];
 
-            chars[0] = (char) (year / 1000 + '0');
-            chars[1] = (char) ((year / 100) % 10 + '0');
-            chars[2] = (char) ((year / 10) % 10 + '0');
-            chars[3] = (char) (year % 10 + '0');
-            chars[4] = '-';
-            chars[5] = (char) (month / 10 + '0');
-            chars[6] = (char) (month % 10 + '0');
-            chars[7] = '-';
-            chars[8] = (char) (dayOfMonth / 10 + '0');
-            chars[9] = (char) (dayOfMonth % 10 + '0');
-            chars[10] = ' ';
-            chars[11] = (char) (hour / 10 + '0');
-            chars[12] = (char) (hour % 10 + '0');
-            chars[13] = ':';
-            chars[14] = (char) (minute / 10 + '0');
-            chars[15] = (char) (minute % 10 + '0');
-            chars[16] = ':';
-            chars[17] = (char) (second / 10 + '0');
-            chars[18] = (char) (second % 10 + '0');
+        bytes[0] = (byte) (year / 1000 + '0');
+        bytes[1] = (byte) ((year / 100) % 10 + '0');
+        bytes[2] = (byte) ((year / 10) % 10 + '0');
+        bytes[3] = (byte) (year % 10 + '0');
+        bytes[4] = '-';
+        bytes[5] = (byte) (month / 10 + '0');
+        bytes[6] = (byte) (month % 10 + '0');
+        bytes[7] = '-';
+        bytes[8] = (byte) (dayOfMonth / 10 + '0');
+        bytes[9] = (byte) (dayOfMonth % 10 + '0');
+        bytes[10] = ' ';
+        bytes[11] = (byte) (hour / 10 + '0');
+        bytes[12] = (byte) (hour % 10 + '0');
+        bytes[13] = ':';
+        bytes[14] = (byte) (minute / 10 + '0');
+        bytes[15] = (byte) (minute % 10 + '0');
+        bytes[16] = ':';
+        bytes[17] = (byte) (second / 10 + '0');
+        bytes[18] = (byte) (second % 10 + '0');
 
-            return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-        } else {
-            byte[] bytes = new byte[19];
-
-            bytes[0] = (byte) (year / 1000 + '0');
-            bytes[1] = (byte) ((year / 100) % 10 + '0');
-            bytes[2] = (byte) ((year / 10) % 10 + '0');
-            bytes[3] = (byte) (year % 10 + '0');
-            bytes[4] = '-';
-            bytes[5] = (byte) (month / 10 + '0');
-            bytes[6] = (byte) (month % 10 + '0');
-            bytes[7] = '-';
-            bytes[8] = (byte) (dayOfMonth / 10 + '0');
-            bytes[9] = (byte) (dayOfMonth % 10 + '0');
-            bytes[10] = ' ';
-            bytes[11] = (byte) (hour / 10 + '0');
-            bytes[12] = (byte) (hour % 10 + '0');
-            bytes[13] = ':';
-            bytes[14] = (byte) (minute / 10 + '0');
-            bytes[15] = (byte) (minute % 10 + '0');
-            bytes[16] = ':';
-            bytes[17] = (byte) (second / 10 + '0');
-            bytes[18] = (byte) (second % 10 + '0');
-
-            if (STRING_CREATOR_JDK11 != null) {
-                return STRING_CREATOR_JDK11.apply(bytes, LATIN1);
-            } else {
-                return new String(bytes, 0, bytes.length);
-            }
-        }
+        return new String(bytes, 0, bytes.length);
     }
 
     public static void main(String[] args) throws Exception {
