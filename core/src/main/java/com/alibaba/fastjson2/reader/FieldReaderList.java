@@ -59,6 +59,11 @@ public class FieldReaderList<T, V>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
+        if (jsonReader.nextIfNull()) {
+            accept(object, null);
+            return;
+        }
+
         JSONReader.Context context = jsonReader.getContext();
         ObjectReader objectReader = getObjectReader(context);
 
