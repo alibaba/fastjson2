@@ -24,7 +24,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
 
-import static com.alibaba.fastjson2.codec.FieldInfo.JSON_WRITABLE_ANNOTATED;
+import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonJsonIgnore;
 
 public class ObjectWriterBaseModule
@@ -68,11 +68,11 @@ public class ObjectWriterBaseModule
                     continue;
                 }
 
-                if (annotationType == JSONWritable.class) {
-                    beanInfo.writerFeatures |= JSON_WRITABLE_ANNOTATED;
+                if (annotationType == JSONAutowired.class) {
+                    beanInfo.writerFeatures |= JSON_AUTO_WIRED_ANNOTATED;
 
-                    JSONWritable jsonWritable = (JSONWritable) annotation;
-                    String fieldName = jsonWritable.fieldName();
+                    JSONAutowired autowired = (JSONAutowired) annotation;
+                    String fieldName = autowired.writer();
                     if (!fieldName.isEmpty()) {
                         beanInfo.objectWriterFieldName = fieldName;
                     }
@@ -128,11 +128,11 @@ public class ObjectWriterBaseModule
                             continue;
                         }
 
-                        if (annotationType == JSONWritable.class) {
-                            beanInfo.writerFeatures |= JSON_WRITABLE_ANNOTATED;
+                        if (annotationType == JSONAutowired.class) {
+                            beanInfo.writerFeatures |= JSON_AUTO_WIRED_ANNOTATED;
 
-                            JSONWritable jsonWritable = (JSONWritable) annotation;
-                            String fieldName = jsonWritable.fieldName();
+                            JSONAutowired autowired = (JSONAutowired) annotation;
+                            String fieldName = autowired.writer();
                             if (!fieldName.isEmpty()) {
                                 beanInfo.objectWriterFieldName = fieldName;
                             }

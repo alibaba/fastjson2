@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface JSONWritable {
-    String fieldName() default "";
+public @interface JSONAutowired {
+    String reader() default "objectReader";
+    String writer() default "objectWriter";
 }

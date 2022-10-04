@@ -1,8 +1,7 @@
 package com.alibaba.fastjson2.builder;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.annotation.JSONReadable;
-import com.alibaba.fastjson2.annotation.JSONWritable;
+import com.alibaba.fastjson2.annotation.JSONAutowired;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaders;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -25,8 +24,7 @@ public class BuilderTest {
         assertEquals(bean.name, bean1.name);
     }
 
-    @JSONWritable
-    @JSONReadable
+    @JSONAutowired
     public static class Bean {
         public int id;
         public String name;
@@ -57,8 +55,7 @@ public class BuilderTest {
         assertEquals(bean.name, bean1.name);
     }
 
-    @JSONWritable
-    @JSONReadable
+    @JSONAutowired
     private static class Bean1 {
         public int id;
         public String name;
@@ -96,8 +93,7 @@ public class BuilderTest {
         String name;
     }
 
-    @JSONWritable(fieldName = "jsonObjectWriter")
-    @JSONReadable(fieldName = "jsonObjectReader")
+    @JSONAutowired(reader = "jsonObjectReader", writer = "jsonObjectWriter")
     public static class Bean2Mixin {
         static final ObjectWriter jsonObjectWriter = ObjectWriters.objectWriter(
                 Bean2.class,

@@ -374,10 +374,10 @@ public class ObjectReaderBaseModule
                     }
                 }
 
-                if (annotationType == JSONReadable.class) {
-                    beanInfo.readerFeatures |= FieldInfo.JSON_READABLE_ANNOTATED;
-                    JSONReadable jsonReadable = (JSONReadable) annotation;
-                    String fieldName = jsonReadable.fieldName();
+                if (annotationType == JSONAutowired.class) {
+                    beanInfo.readerFeatures |= FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
+                    JSONAutowired autowired = (JSONAutowired) annotation;
+                    String fieldName = autowired.reader();
                     if (!fieldName.isEmpty()) {
                         beanInfo.objectReaderFieldName = fieldName;
                     }
