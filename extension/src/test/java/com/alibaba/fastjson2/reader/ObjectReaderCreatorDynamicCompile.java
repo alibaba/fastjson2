@@ -24,10 +24,10 @@ public class ObjectReaderCreatorDynamicCompile
     public static final ObjectReaderCreatorDynamicCompile INSTANCE = new ObjectReaderCreatorDynamicCompile();
 
     @Override
-    public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, List<ObjectReaderModule> modules) {
+    public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, ObjectReaderProvider provider) {
         BeanInfo beanInfo = new BeanInfo();
 
-        for (ObjectReaderModule module : modules) {
+        for (ObjectReaderModule module : provider.modules) {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor != null) {
                 annotationProcessor.getBeanInfo(beanInfo, objectClass);

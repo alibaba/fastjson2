@@ -78,12 +78,12 @@ public final class MethodWriter {
     /**
      * The 'code' field of the Code attribute.
      */
-    private final ByteVector code = new ByteVector();
+    private final ByteVector code;
 
     /**
      * The number_of_entries field of the StackMapTable code attribute.
      */
-    private int stackMapTableNumberOfEntries;
+    int stackMapTableNumberOfEntries;
 
     /**
      * The 'entries' array of the StackMapTable code attribute.
@@ -110,7 +110,7 @@ public final class MethodWriter {
     private int[] previousFrame;
     private int[] currentFrame;
 
-    private boolean hasAsmInstructions;
+    boolean hasAsmInstructions;
 
     /**
      * The start offset of the last visited instruction. Used to set the offset field of type
@@ -133,16 +133,19 @@ public final class MethodWriter {
      * @param descriptor  the method's descriptor (see {@link Type}).
      */
     MethodWriter(
-            final SymbolTable symbolTable,
-            final int access,
-            final String name,
-            final String descriptor) {
+            SymbolTable symbolTable,
+            int access,
+            String name,
+            String descriptor,
+            int codeInitCapacity
+    ) {
         this.symbolTable = symbolTable;
         this.accessFlags = "<init>".equals(name) ? access | Constants.ACC_CONSTRUCTOR : access;
         this.nameIndex = symbolTable.addConstantUtf8(name);
         this.name = name;
         this.descriptorIndex = symbolTable.addConstantUtf8(descriptor);
         this.descriptor = descriptor;
+        this.code = new ByteVector(codeInitCapacity);
 
         // Update maxLocals and currentLocals.
         int argumentsSize = Type.getArgumentsAndReturnSizes(descriptor) >> 2;
@@ -153,14 +156,6 @@ public final class MethodWriter {
         // Create and visit the label for the first basic block.
         firstBasicBlock = new Label();
         visitLabel(firstBasicBlock);
-    }
-
-    boolean hasFrames() {
-        return stackMapTableNumberOfEntries > 0;
-    }
-
-    boolean hasAsmInstructions() {
-        return hasAsmInstructions;
     }
 
     // -----------------------------------------------------------------------------------------------
@@ -232,7 +227,7 @@ public final class MethodWriter {
     public void visitTypeInsn(final int opcode, final String type) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
-        Symbol typeSymbol = symbolTable.addConstantClass(type);
+        Symbol typeSymbol = symbolTable.addConstantUtf8Reference(/*CONSTANT_CLASS_TAG*/ 7, type);
         code.put12(opcode, typeSymbol.index);
         // If needed, update the maximum stack size and number of locals, and stack map frames.
         if (currentBasicBlock != null) {
@@ -244,7 +239,7 @@ public final class MethodWriter {
             final int opcode, final String owner, final String name, final String descriptor) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
-        Symbol fieldrefSymbol = symbolTable.addConstantFieldref(owner, name, descriptor);
+        Symbol fieldrefSymbol = symbolTable.addConstantMemberReference(/*CONSTANT_FIELDREF_TAG*/ 9, owner, name, descriptor);
         code.put12(opcode, fieldrefSymbol.index);
         // If needed, update the maximum stack size and number of locals, and stack map frames.
         if (currentBasicBlock != null) {
@@ -260,7 +255,12 @@ public final class MethodWriter {
             final boolean isInterface) {
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
-        Symbol methodrefSymbol = symbolTable.addConstantMethodref(owner, name, descriptor, isInterface);
+        Symbol methodrefSymbol = symbolTable.addConstantMemberReference(
+                isInterface ? /*CONSTANT_INTERFACE_METHODREF_TAG*/ 11 : /*CONSTANT_METHODREF_TAG*/ 10,
+                owner,
+                name,
+                descriptor
+        );
         if (opcode == Opcodes.INVOKEINTERFACE) {
             code.put12(Opcodes.INVOKEINTERFACE, methodrefSymbol.index)
                     .put11(methodrefSymbol.getArgumentsAndReturnSizes() >> 2, 0);
@@ -415,15 +415,19 @@ public final class MethodWriter {
     }
 
     public void visitLdcInsn(Class value) {
-        Type type = Type.getType(ASMUtils.desc(value));
+        // getTypeInternal(typeDescriptor, 0, typeDescriptor.length())
+        String desc = ASMUtils.desc(value);
+        Type type = Type.getTypeInternal(desc, 0, desc.length());
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
         Symbol constantSymbol;
-        int typeSort = type.getSort();
+//        int typeSort = type.getSort();
+        int typeSort = type.sort == Type.INTERNAL ? Type.OBJECT : type.sort;
         if (typeSort == Type.OBJECT) {
-            constantSymbol = symbolTable.addConstantClass(type.getInternalName());
+            // type.valueBuffer.substring(type.valueBegin, type.valueEnd)
+            constantSymbol = symbolTable.addConstantUtf8Reference(/*CONSTANT_CLASS_TAG*/ 7, type.valueBuffer.substring(type.valueBegin, type.valueEnd));
         } else { // type is a primitive or array type.
-            constantSymbol = symbolTable.addConstantClass(type.getDescriptor());
+            constantSymbol = symbolTable.addConstantUtf8Reference(/*CONSTANT_CLASS_TAG*/ 7, type.getDescriptor());
         }
         int constantIndex = constantSymbol.index;
         if (constantIndex >= 256) {
@@ -512,13 +516,10 @@ public final class MethodWriter {
     }
 
     public void visitMaxs(final int maxStack, final int maxLocals) {
-        computeAllFrames();
-    }
-
-    /**
-     * Computes all the stack map frames of the method, from scratch.
-     */
-    private void computeAllFrames() {
+        /**
+         * Computes all the stack map frames of the method, from scratch.
+         */
+        // computeAllFrames();
         // Create and visit the first (implicit) frame.
         Frame firstFrame = firstBasicBlock.frame;
         firstFrame.setInputFrameFromDescriptor(symbolTable, accessFlags, descriptor, this.maxLocals);
@@ -541,7 +542,7 @@ public final class MethodWriter {
             // By definition, basicBlock is reachable.
             basicBlock.flags |= Label.FLAG_REACHABLE;
             // Update the (absolute) maximum stack size.
-            int maxBlockStackSize = basicBlock.frame.getInputStackSize() + basicBlock.outputStackMax;
+            int maxBlockStackSize = basicBlock.frame.inputStack.length + basicBlock.outputStackMax;
             if (maxBlockStackSize > maxStackSize) {
                 maxStackSize = maxBlockStackSize;
             }
@@ -584,8 +585,7 @@ public final class MethodWriter {
                     // Emit a frame for this unreachable block, with no local and a Throwable on the stack
                     // (so that the ATHROW could consume this Throwable if it were reachable).
                     int frameIndex = visitFrameStart(startOffset, /* numLocal = */ 0, /* numStack = */ 1);
-                    currentFrame[frameIndex] =
-                            Frame.getAbstractTypeFromInternalName(symbolTable, "java/lang/Throwable");
+                    currentFrame[frameIndex] = Frame.REFERENCE_KIND | symbolTable.addType("java/lang/Throwable");
                     visitFrameEnd();
                     // The maximum stack size is now at least one, because of the Throwable declared above.
                     maxStackSize = Math.max(maxStackSize, 1);
@@ -595,10 +595,6 @@ public final class MethodWriter {
         }
 
         this.maxStack = maxStackSize;
-    }
-
-    public void visitEnd() {
-        // Nothing to do.
     }
 
     // -----------------------------------------------------------------------------------------------
@@ -672,7 +668,7 @@ public final class MethodWriter {
     void visitFrameEnd() {
         if (previousFrame != null) {
             if (stackMapTableEntries == null) {
-                stackMapTableEntries = new ByteVector();
+                stackMapTableEntries = new ByteVector(2048);
             }
             putFrame();
             ++stackMapTableNumberOfEntries;
@@ -777,7 +773,72 @@ public final class MethodWriter {
      */
     private void putAbstractTypes(final int start, final int end) {
         for (int i = start; i < end; ++i) {
-            Frame.putAbstractType(symbolTable, currentFrame[i], stackMapTableEntries);
+            final int abstractType = currentFrame[i];
+            final ByteVector output = stackMapTableEntries;
+
+            int arrayDimensions = (abstractType & Frame.DIM_MASK) >> Frame.DIM_SHIFT;
+            if (arrayDimensions == 0) {
+                int typeValue = abstractType & Frame.VALUE_MASK;
+                switch (abstractType & Frame.KIND_MASK) {
+                    case Frame.CONSTANT_KIND:
+                        output.putByte(typeValue);
+                        break;
+                    case Frame.REFERENCE_KIND:
+                        output
+                                .putByte(Frame.ITEM_OBJECT)
+                                .putShort(symbolTable.addConstantUtf8Reference(/*CONSTANT_CLASS_TAG*/ 7, symbolTable.typeTable[typeValue].value).index);
+                        break;
+                    case Frame.UNINITIALIZED_KIND:
+                        output.putByte(Frame.ITEM_UNINITIALIZED).putShort((int) symbolTable.typeTable[typeValue].data);
+                        break;
+                    default:
+                        throw new AssertionError();
+                }
+            } else {
+                // Case of an array type, we need to build its descriptor first.
+                StringBuilder typeDescriptor = new StringBuilder();
+                while (arrayDimensions-- > 0) {
+                    typeDescriptor.append('[');
+                }
+                if ((abstractType & Frame.KIND_MASK) == Frame.REFERENCE_KIND) {
+                    typeDescriptor
+                            .append('L')
+                            .append(symbolTable.typeTable[abstractType & Frame.VALUE_MASK].value)
+                            .append(';');
+                } else {
+                    switch (abstractType & Frame.VALUE_MASK) {
+                        case Frame.ITEM_ASM_BOOLEAN:
+                            typeDescriptor.append('Z');
+                            break;
+                        case Frame.ITEM_ASM_BYTE:
+                            typeDescriptor.append('B');
+                            break;
+                        case Frame.ITEM_ASM_CHAR:
+                            typeDescriptor.append('C');
+                            break;
+                        case Frame.ITEM_ASM_SHORT:
+                            typeDescriptor.append('S');
+                            break;
+                        case Frame.ITEM_INTEGER:
+                            typeDescriptor.append('I');
+                            break;
+                        case Frame.ITEM_FLOAT:
+                            typeDescriptor.append('F');
+                            break;
+                        case Frame.ITEM_LONG:
+                            typeDescriptor.append('J');
+                            break;
+                        case Frame.ITEM_DOUBLE:
+                            typeDescriptor.append('D');
+                            break;
+                        default:
+                            throw new AssertionError();
+                    }
+                }
+                output
+                        .putByte(Frame.ITEM_OBJECT)
+                        .putShort(symbolTable.addConstantUtf8Reference(/*CONSTANT_CLASS_TAG*/ 7, typeDescriptor.toString()).index);
+            }
         }
     }
 
@@ -797,7 +858,7 @@ public final class MethodWriter {
         // For ease of reference, we use here the same attribute order as in Section 4.7 of the JVMS.
         if (code.length > 0) {
             if (code.length > 65535) {
-                throw new JSONException("Method too large: " + symbolTable.getClassName() + "." + name + " " + descriptor + ", length " + code.length);
+                throw new JSONException("Method too large: " + symbolTable.className + "." + name + " " + descriptor + ", length " + code.length);
             }
             symbolTable.addConstantUtf8(Constants.CODE);
             // The Code attribute has 6 header bytes, plus 2, 2, 4 and 2 bytes respectively for max_stack,

@@ -230,7 +230,7 @@ public final class JSONFactory {
         }
     }
 
-    static byte[] allocateByteArray(int cacheIndex) {
+    public static byte[] allocateByteArray(int cacheIndex) {
         byte[] bytes;
         synchronized (BYTE_ARRAY_CACHE) {
             bytes = BYTE_ARRAY_CACHE[cacheIndex];

@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class JSONSchemaBenchmark {
+public class JSONSchemaBenchmark2 {
     @State(Scope.Thread)
     public static class BenchmarkState {
         // everit
@@ -97,7 +97,7 @@ public class JSONSchemaBenchmark {
 
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
-                .include(JSONSchemaBenchmark.class.getName())
+                .include(JSONSchemaBenchmark2.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .forks(1)

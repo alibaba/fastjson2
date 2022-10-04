@@ -41,9 +41,7 @@ public class ObjectWriterCreator {
         return createObjectWriter(
                 objectType,
                 0,
-                JSONFactory
-                        .getDefaultObjectWriterProvider()
-                        .getModules()
+                JSONFactory.getDefaultObjectWriterProvider()
         );
     }
 
@@ -58,7 +56,7 @@ public class ObjectWriterCreator {
             FieldWriter... fieldWriters
     ) {
         if (fieldWriters.length == 0) {
-            return createObjectWriter(objectClass, features, Collections.emptyList());
+            return createObjectWriter(objectClass, features, JSONFactory.getDefaultObjectWriterProvider());
         }
 
         boolean googleCollection = false;
@@ -73,31 +71,31 @@ public class ObjectWriterCreator {
             switch (fieldWriters.length) {
                 case 1:
                     if ((fieldWriters[0].features & FieldInfo.VALUE_MASK) == 0) {
-                        return new ObjectWriterAdapter1(objectClass, features, fieldWriters);
+                        return new ObjectWriter1(objectClass, features, fieldWriters);
                     }
                     return new ObjectWriterAdapter(objectClass, features, fieldWriters);
                 case 2:
-                    return new ObjectWriterAdapter2(objectClass, features, fieldWriters);
+                    return new ObjectWriter2(objectClass, features, fieldWriters);
                 case 3:
-                    return new ObjectWriterAdapter3(objectClass, features, fieldWriters);
+                    return new ObjectWriter3(objectClass, features, fieldWriters);
                 case 4:
-                    return new ObjectWriterAdapter4(objectClass, features, fieldWriters);
+                    return new ObjectWriter4(objectClass, features, fieldWriters);
                 case 5:
-                    return new ObjectWriterAdapter5(objectClass, features, fieldWriters);
+                    return new ObjectWriter5(objectClass, features, fieldWriters);
                 case 6:
-                    return new ObjectWriterAdapter6(objectClass, features, fieldWriters);
+                    return new ObjectWriter6(objectClass, features, fieldWriters);
                 case 7:
-                    return new ObjectWriterAdapter7(objectClass, features, fieldWriters);
+                    return new ObjectWriter7(objectClass, features, fieldWriters);
                 case 8:
-                    return new ObjectWriterAdapter8(objectClass, features, fieldWriters);
+                    return new ObjectWriter8(objectClass, features, fieldWriters);
                 case 9:
-                    return new ObjectWriterAdapter9(objectClass, features, fieldWriters);
+                    return new ObjectWriter9(objectClass, features, fieldWriters);
                 case 10:
-                    return new ObjectWriterAdapter10(objectClass, features, fieldWriters);
+                    return new ObjectWriter10(objectClass, features, fieldWriters);
                 case 11:
-                    return new ObjectWriterAdapter11(objectClass, features, fieldWriters);
+                    return new ObjectWriter11(objectClass, features, fieldWriters);
                 case 12:
-                    return new ObjectWriterAdapter12(objectClass, features, fieldWriters);
+                    return new ObjectWriter12(objectClass, features, fieldWriters);
                 default:
                     return new ObjectWriterAdapter(objectClass, features, fieldWriters);
             }
@@ -238,21 +236,28 @@ public class ObjectWriterCreator {
             long features,
             final List<ObjectWriterModule> modules
     ) {
-        final ObjectWriterProvider provider;
-        ObjectWriterProvider p = null;
-        BeanInfo beanInfo = new BeanInfo();
+        ObjectWriterProvider provider = null;
         for (ObjectWriterModule module : modules) {
-            if (p == null) {
-                p = module.getProvider();
+            if (provider == null) {
+                provider = module.getProvider();
             }
+        }
+        return createObjectWriter(objectClass, features, provider);
+    }
 
+    public ObjectWriter createObjectWriter(
+            final Class objectClass,
+            final long features,
+            final ObjectWriterProvider provider
+    ) {
+        BeanInfo beanInfo = new BeanInfo();
+        for (ObjectWriterModule module : provider.modules) {
             ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor == null) {
                 continue;
             }
             annotationProcessor.getBeanInfo(beanInfo, objectClass);
         }
-        provider = p;
 
         if (beanInfo.serializer != null && ObjectWriter.class.isAssignableFrom(beanInfo.serializer)) {
             try {
@@ -286,7 +291,7 @@ public class ObjectWriterCreator {
                 }
 
                 fieldInfo.init();
-                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
+                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, provider.modules, beanInfo, fieldInfo, field);
                 if (fieldWriter != null) {
                     fieldWriterMap.put(fieldWriter.fieldName, fieldWriter);
                 }
@@ -295,7 +300,7 @@ public class ObjectWriterCreator {
         } else {
             boolean fieldWritersCreated = false;
             fieldWriters = new ArrayList<>();
-            for (ObjectWriterModule module : modules) {
+            for (ObjectWriterModule module : provider.modules) {
                 if (module.createFieldWriters(this, objectClass, fieldWriters)) {
                     fieldWritersCreated = true;
                     break;
@@ -311,7 +316,7 @@ public class ObjectWriterCreator {
                     }
 
                     fieldInfo.init();
-                    FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
+                    FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, provider.modules, beanInfo, fieldInfo, field);
                     if (fieldWriter != null) {
                         fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
                     }
@@ -320,7 +325,7 @@ public class ObjectWriterCreator {
                 BeanUtils.getters(objectClass, method -> {
                     fieldInfo.init();
                     fieldInfo.features = writerFeatures;
-                    for (ObjectWriterModule module : modules) {
+                    for (ObjectWriterModule module : provider.modules) {
                         ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
                         if (annotationProcessor == null) {
                             continue;
@@ -426,41 +431,41 @@ public class ObjectWriterCreator {
             switch (fieldWriters.size()) {
                 case 1:
                     if ((fieldWriters.get(0).features & FieldInfo.VALUE_MASK) == 0) {
-                        writerAdapter = new ObjectWriterAdapter1(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                        writerAdapter = new ObjectWriter1(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
                     }
                     break;
                 case 2:
-                    writerAdapter = new ObjectWriterAdapter2(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    writerAdapter = new ObjectWriter2(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
                     break;
                 case 3:
-                    writerAdapter = new ObjectWriterAdapter3(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    writerAdapter = new ObjectWriter3(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
                     break;
                 case 4:
-                    writerAdapter = new ObjectWriterAdapter4(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    writerAdapter = new ObjectWriter4(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
                     break;
                 case 5:
-                    writerAdapter = new ObjectWriterAdapter5(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    writerAdapter = new ObjectWriter5(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
                     break;
                 case 6:
-                    writerAdapter = new ObjectWriterAdapter6(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    writerAdapter = new ObjectWriter6(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
                     break;
                 case 7:
-                    writerAdapter = new ObjectWriterAdapter7(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    writerAdapter = new ObjectWriter7(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
                     break;
                 case 8:
-                    writerAdapter = new ObjectWriterAdapter8(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    writerAdapter = new ObjectWriter8(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
                     break;
                 case 9:
-                    writerAdapter = new ObjectWriterAdapter9(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    writerAdapter = new ObjectWriter9(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
                     break;
                 case 10:
-                    writerAdapter = new ObjectWriterAdapter10(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    writerAdapter = new ObjectWriter10(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
                     break;
                 case 11:
-                    writerAdapter = new ObjectWriterAdapter11(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    writerAdapter = new ObjectWriter11(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
                     break;
                 case 12:
-                    writerAdapter = new ObjectWriterAdapter12(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    writerAdapter = new ObjectWriter12(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
                     break;
                 default:
                     break;
@@ -502,14 +507,16 @@ public class ObjectWriterCreator {
     }
 
     protected void handleIgnores(BeanInfo beanInfo, List<FieldWriter> fieldWriters) {
-        if (beanInfo.ignores != null && beanInfo.ignores.length > 0) {
-            for (int i = fieldWriters.size() - 1; i >= 0; i--) {
-                FieldWriter fieldWriter = fieldWriters.get(i);
-                for (String ignore : beanInfo.ignores) {
-                    if (ignore.equals(fieldWriter.fieldName)) {
-                        fieldWriters.remove(i);
-                        break;
-                    }
+        if (beanInfo.ignores == null || beanInfo.ignores.length == 0) {
+            return;
+        }
+
+        for (int i = fieldWriters.size() - 1; i >= 0; i--) {
+            FieldWriter fieldWriter = fieldWriters.get(i);
+            for (String ignore : beanInfo.ignores) {
+                if (ignore.equals(fieldWriter.fieldName)) {
+                    fieldWriters.remove(i);
+                    break;
                 }
             }
         }

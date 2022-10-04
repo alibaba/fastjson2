@@ -8,22 +8,24 @@ import java.util.List;
 import static com.alibaba.fastjson2.JSONWriter.Feature.BeanToArray;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName;
 
-final class ObjectWriterAdapter4<T>
+public class ObjectWriter5<T>
         extends ObjectWriterAdapter<T> {
-    final FieldWriter fieldWriter0;
-    final FieldWriter fieldWriter1;
-    final FieldWriter fieldWriter2;
-    final FieldWriter fieldWriter3;
+    public final FieldWriter fieldWriter0;
+    public final FieldWriter fieldWriter1;
+    public final FieldWriter fieldWriter2;
+    public final FieldWriter fieldWriter3;
+    public final FieldWriter fieldWriter4;
 
-    public ObjectWriterAdapter4(Class objectClass, long features, FieldWriter[] fieldWriters) {
+    public ObjectWriter5(Class objectClass, long features, FieldWriter[] fieldWriters) {
         super(objectClass, features, fieldWriters);
         fieldWriter0 = fieldWriters[0];
         fieldWriter1 = fieldWriters[1];
         fieldWriter2 = fieldWriters[2];
         fieldWriter3 = fieldWriters[3];
+        fieldWriter4 = fieldWriters[4];
     }
 
-    public ObjectWriterAdapter4(
+    public ObjectWriter5(
             Class<T> objectClass,
             String typeKey,
             String typeName,
@@ -35,6 +37,7 @@ final class ObjectWriterAdapter4<T>
         this.fieldWriter1 = fieldWriters.get(1);
         this.fieldWriter2 = fieldWriters.get(2);
         this.fieldWriter3 = fieldWriters.get(3);
+        this.fieldWriter4 = fieldWriters.get(4);
     }
 
     @Override
@@ -84,7 +87,33 @@ final class ObjectWriterAdapter4<T>
         fieldWriter1.write(jsonWriter, object);
         fieldWriter2.write(jsonWriter, object);
         fieldWriter3.write(jsonWriter, object);
+        fieldWriter4.write(jsonWriter, object);
 
         jsonWriter.endObject();
+    }
+
+    @Override
+    public final FieldWriter getFieldWriter(long hashCode) {
+        if (hashCode == fieldWriter0.hashCode) {
+            return fieldWriter0;
+        }
+
+        if (hashCode == fieldWriter1.hashCode) {
+            return fieldWriter1;
+        }
+
+        if (hashCode == fieldWriter2.hashCode) {
+            return fieldWriter2;
+        }
+
+        if (hashCode == fieldWriter3.hashCode) {
+            return fieldWriter3;
+        }
+
+        if (hashCode == fieldWriter4.hashCode) {
+            return fieldWriter4;
+        }
+
+        return null;
     }
 }

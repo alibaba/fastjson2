@@ -808,7 +808,7 @@ public class ObjectReaderProvider
 
         if (objectReader == null) {
             ObjectReaderCreator creator = getCreator();
-            objectReader = creator.createObjectReader(objectClass, objectType, fieldBased, modules);
+            objectReader = creator.createObjectReader(objectClass, objectType, fieldBased, this);
         }
 
         ObjectReader previous = getPreviousObjectReader(fieldBased, objectType, objectReader);

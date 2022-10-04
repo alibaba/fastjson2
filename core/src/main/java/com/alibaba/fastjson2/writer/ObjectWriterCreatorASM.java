@@ -33,6 +33,18 @@ public class ObjectWriterCreatorASM
     static final String TYPE_JSON_WRITER = ASMUtils.type(JSONWriter.class);
     static final String TYPE_FIELD_WRITER = ASMUtils.type(FieldWriter.class);
     static final String TYPE_OBJECT_WRITER_ADAPTER = ASMUtils.type(ObjectWriterAdapter.class);
+    static final String TYPE_OBJECT_WRITER_1 = ASMUtils.type(ObjectWriter1.class);
+    static final String TYPE_OBJECT_WRITER_2 = ASMUtils.type(ObjectWriter2.class);
+    static final String TYPE_OBJECT_WRITER_3 = ASMUtils.type(ObjectWriter3.class);
+    static final String TYPE_OBJECT_WRITER_4 = ASMUtils.type(ObjectWriter4.class);
+    static final String TYPE_OBJECT_WRITER_5 = ASMUtils.type(ObjectWriter5.class);
+    static final String TYPE_OBJECT_WRITER_6 = ASMUtils.type(ObjectWriter6.class);
+    static final String TYPE_OBJECT_WRITER_7 = ASMUtils.type(ObjectWriter7.class);
+    static final String TYPE_OBJECT_WRITER_8 = ASMUtils.type(ObjectWriter8.class);
+    static final String TYPE_OBJECT_WRITER_9 = ASMUtils.type(ObjectWriter9.class);
+    static final String TYPE_OBJECT_WRITER_10 = ASMUtils.type(ObjectWriter10.class);
+    static final String TYPE_OBJECT_WRITER_11 = ASMUtils.type(ObjectWriter11.class);
+    static final String TYPE_OBJECT_WRITER_12 = ASMUtils.type(ObjectWriter12.class);
 
     static final String[] INTERFACES = {TYPE_OBJECT_WRITER};
 
@@ -72,22 +84,48 @@ public class ObjectWriterCreatorASM
     static final String WRITE_NULLS = "WRITE_NULLS";
     static final String CONTEXT_FEATURES = "CONTEXT_FEATURES";
 
-    static String[] fieldWriterCache = new String[1024];
-
     static String fieldWriter(int i) {
-        String fieldName = fieldWriterCache[i];
-
-        if (fieldName != null) {
-            return fieldName;
+        switch (i) {
+            case 0:
+                return "fieldWriter0";
+            case 1:
+                return "fieldWriter1";
+            case 2:
+                return "fieldWriter2";
+            case 3:
+                return "fieldWriter3";
+            case 4:
+                return "fieldWriter4";
+            case 5:
+                return "fieldWriter5";
+            case 6:
+                return "fieldWriter6";
+            case 7:
+                return "fieldWriter7";
+            case 8:
+                return "fieldWriter8";
+            case 9:
+                return "fieldWriter9";
+            case 10:
+                return "fieldWriter10";
+            case 11:
+                return "fieldWriter11";
+            case 12:
+                return "fieldWriter12";
+            case 13:
+                return "fieldWriter13";
+            case 14:
+                return "fieldWriter14";
+            case 15:
+                return "fieldWriter15";
+            default:
+                String base = "fieldWriter";
+                int size = IOUtils.stringSize(i);
+                char[] chars = new char[base.length() + size];
+                base.getChars(0, base.length(), chars, 0);
+                IOUtils.getChars(i, chars.length, chars);
+                return new String(chars);
         }
-
-        String base = "fw";
-        int size = IOUtils.stringSize(i);
-        char[] chars = new char[base.length() + size];
-        base.getChars(0, base.length(), chars, 0);
-        IOUtils.getChars(i, chars.length, chars);
-        fieldWriterCache[i] = fieldName = new String(chars);
-        return fieldName;
     }
 
     public ObjectWriterCreatorASM() {
@@ -102,31 +140,20 @@ public class ObjectWriterCreatorASM
     public ObjectWriter createObjectWriter(
             Class objectClass,
             long features,
-            List<ObjectWriterModule> modules
+            ObjectWriterProvider provider
     ) {
-        ObjectWriterProvider provider;
-        {
-            ObjectWriterProvider p = null;
-            for (ObjectWriterModule module : modules) {
-                if (p == null) {
-                    p = module.getProvider();
-                }
-            }
-            provider = p;
-        }
-
         int modifiers = objectClass.getModifiers();
         boolean externalClass = classLoader.isExternalClass(objectClass);
         boolean publicClass = Modifier.isPublic(modifiers);
 
         if (!publicClass || externalClass) {
             if (!UNSAFE_SUPPORT) {
-                return super.createObjectWriter(objectClass, features, modules);
+                return super.createObjectWriter(objectClass, features, provider);
             }
         }
 
         BeanInfo beanInfo = new BeanInfo();
-        for (ObjectWriterModule module : modules) {
+        for (ObjectWriterModule module : provider.modules) {
             ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor == null) {
                 continue;
@@ -152,7 +179,7 @@ public class ObjectWriterCreatorASM
                 && !(objectClass.isInterface() || objectClass.isInterface());
 
         if (Throwable.class.isAssignableFrom(objectClass)) {
-            return super.createObjectWriter(objectClass, features, modules);
+            return super.createObjectWriter(objectClass, features, provider);
         }
 
         boolean record = BeanUtils.isRecord(objectClass);
@@ -167,7 +194,7 @@ public class ObjectWriterCreatorASM
                 }
 
                 fieldInfo.init();
-                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
+                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, provider.modules, beanInfo, fieldInfo, field);
                 if (fieldWriter != null) {
                     fieldWriterMap.put(fieldWriter.fieldName, fieldWriter);
                 }
@@ -177,7 +204,7 @@ public class ObjectWriterCreatorASM
             Map<String, FieldWriter> fieldWriterMap = new LinkedHashMap<>();
             List<FieldWriter> fieldWriterList = new ArrayList<>();
             boolean fieldWritersCreated = false;
-            for (ObjectWriterModule module : modules) {
+            for (ObjectWriterModule module : provider.modules) {
                 if (module.createFieldWriters(this, objectClass, fieldWriterList)) {
                     fieldWritersCreated = true;
                     break;
@@ -188,7 +215,7 @@ public class ObjectWriterCreatorASM
                 for (FieldWriter fieldWriter : fieldWriterList) {
                     Method method = fieldWriter.method;
                     if (method == null) {
-                        return super.createObjectWriter(objectClass, writerFeatures, modules);
+                        return super.createObjectWriter(objectClass, writerFeatures, provider);
                     }
                     fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
                 }
@@ -202,7 +229,7 @@ public class ObjectWriterCreatorASM
                         }
 
                         fieldInfo.init();
-                        FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
+                        FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, provider.modules, beanInfo, fieldInfo, field);
                         if (fieldWriter != null) {
                             fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
                         }
@@ -212,7 +239,7 @@ public class ObjectWriterCreatorASM
                 BeanUtils.getters(objectClass, method -> {
                     fieldInfo.init();
                     fieldInfo.features |= writerFeatures;
-                    for (ObjectWriterModule module : modules) {
+                    for (ObjectWriterModule module : provider.modules) {
                         ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
                         if (annotationProcessor == null) {
                             continue;
@@ -342,10 +369,10 @@ public class ObjectWriterCreatorASM
         }
 
         if (!match) {
-            return super.createObjectWriter(objectClass, writerFeatures, modules);
+            return super.createObjectWriter(objectClass, writerFeatures, provider);
         }
 
-        ClassWriter cw = new ClassWriter();
+        ClassWriter cw = new ClassWriter(null);
 
         String className = "ObjectWriter_" + seed.incrementAndGet();
         String classNameType;
@@ -374,25 +401,70 @@ public class ObjectWriterCreatorASM
             classNameFull = className;
         }
 
+        String objectWriterSupper;
+        switch (fieldWriters.size()) {
+            case 1:
+                objectWriterSupper = TYPE_OBJECT_WRITER_1;
+                break;
+            case 2:
+                objectWriterSupper = TYPE_OBJECT_WRITER_2;
+                break;
+            case 3:
+                objectWriterSupper = TYPE_OBJECT_WRITER_3;
+                break;
+            case 4:
+                objectWriterSupper = TYPE_OBJECT_WRITER_4;
+                break;
+            case 5:
+                objectWriterSupper = TYPE_OBJECT_WRITER_5;
+                break;
+            case 6:
+                objectWriterSupper = TYPE_OBJECT_WRITER_6;
+                break;
+            case 7:
+                objectWriterSupper = TYPE_OBJECT_WRITER_7;
+                break;
+            case 8:
+                objectWriterSupper = TYPE_OBJECT_WRITER_8;
+                break;
+            case 9:
+                objectWriterSupper = TYPE_OBJECT_WRITER_9;
+                break;
+            case 10:
+                objectWriterSupper = TYPE_OBJECT_WRITER_10;
+                break;
+            case 11:
+                objectWriterSupper = TYPE_OBJECT_WRITER_11;
+                break;
+            case 12:
+                objectWriterSupper = TYPE_OBJECT_WRITER_12;
+                break;
+            default:
+                objectWriterSupper = TYPE_OBJECT_WRITER_ADAPTER;
+                break;
+        }
+
         cw.visit(Opcodes.V1_8,
                 Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER,
                 classNameType,
-                TYPE_OBJECT_WRITER_ADAPTER,
+                objectWriterSupper,
                 INTERFACES
         );
 
         // // define fieldWriter
-        genFields(fieldWriters, cw);
+        genFields(fieldWriters, cw, objectWriterSupper);
 
         // init fieldWriter
-        genMethodInit(fieldWriters, cw, classNameType);
-
-        genGetFieldReader(
-                fieldWriters,
-                cw,
-                classNameType,
-                new ObjectWriterAdapter(objectClass, null, null, features, fieldWriters)
-        );
+        genMethodInit(fieldWriters, cw, classNameType, objectWriterSupper);
+//
+//        if (objectWriterSupper == TYPE_OBJECT_WRITER_ADAPTER) {
+//            genGetFieldReader(
+//                    fieldWriters,
+//                    cw,
+//                    classNameType,
+//                    new ObjectWriterAdapter(objectClass, null, null, features, fieldWriters)
+//            );
+//        }
 
         genMethodWriteJSONB(provider, objectClass, fieldWriters, cw, classNameType, writerFeatures);
 
@@ -429,7 +501,8 @@ public class ObjectWriterCreatorASM
         MethodWriter mw = cw.visitMethod(
                 Opcodes.ACC_PUBLIC,
                 "write",
-                METHOD_DESC_WRITE
+                METHOD_DESC_WRITE,
+                fieldWriters.size() < 6 ? 512 : 1024
         );
 
         final int OBJECT = 2;
@@ -571,7 +644,6 @@ public class ObjectWriterCreatorASM
         mw.visitLabel(return_);
         mw.visitInsn(Opcodes.RETURN);
         mw.visitMaxs(mwc.maxVariant + 1, mwc.maxVariant + 1);
-        mw.visitEnd();
     }
 
     private void genMethodWriteJSONB(
@@ -582,7 +654,12 @@ public class ObjectWriterCreatorASM
             String classNameType,
             long objectFeatures
     ) {
-        MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC, "writeJSONB", METHOD_DESC_WRITE);
+        MethodWriter mw = cw.visitMethod(
+                Opcodes.ACC_PUBLIC,
+                "writeJSONB",
+                METHOD_DESC_WRITE,
+                fieldWriters.size() < 6 ? 512 : 1024
+        );
 
         final int OBJECT = 2;
         final int FIELD_NAME = 3;
@@ -642,7 +719,6 @@ public class ObjectWriterCreatorASM
         mw.visitLabel(return_);
         mw.visitInsn(Opcodes.RETURN);
         mw.visitMaxs(mwc.maxVariant + 1, mwc.maxVariant + 1);
-        mw.visitEnd();
     }
 
     private void genMethodWriteArrayMappingJSONB(
@@ -657,7 +733,8 @@ public class ObjectWriterCreatorASM
         MethodWriter mw = cw.visitMethod(
                 Opcodes.ACC_PUBLIC,
                 "writeArrayMappingJSONB",
-                METHOD_DESC_WRITE
+                METHOD_DESC_WRITE,
+                512
         );
 
         final int OBJECT = 2;
@@ -708,7 +785,6 @@ public class ObjectWriterCreatorASM
 
         mw.visitInsn(Opcodes.RETURN);
         mw.visitMaxs(mwc.maxVariant + 1, mwc.maxVariant + 1);
-        mw.visitEnd();
     }
 
     private void gwValueJSONB(
@@ -864,7 +940,6 @@ public class ObjectWriterCreatorASM
     ) {
         Type fieldType = fieldWriter.fieldType;
         Class<?> fieldClass = fieldWriter.fieldClass;
-        String fieldName = fieldWriter.fieldName;
 
         String classNameType = mwc.classNameType;
         MethodWriter mw = mwc.mw;
@@ -1076,7 +1151,8 @@ public class ObjectWriterCreatorASM
     ) {
         MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC,
                 methodName,
-                METHOD_DESC_WRITE
+                METHOD_DESC_WRITE,
+                512
         );
 
         final int OBJECT = 2;
@@ -1142,7 +1218,6 @@ public class ObjectWriterCreatorASM
 
         mw.visitInsn(Opcodes.RETURN);
         mw.visitMaxs(mwc.maxVariant + 1, mwc.maxVariant + 1);
-        mw.visitEnd();
     }
 
     private void gwFieldValueArrayMapping(
@@ -2638,61 +2713,70 @@ public class ObjectWriterCreatorASM
         mw.visitLabel(endIfNull_);
     }
 
-    private void genMethodInit(List<FieldWriter> fieldWriters, ClassWriter cw, String classNameType) {
-        MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>",
-                "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;JLjava/util/List;)V");
+    private void genMethodInit(List<FieldWriter> fieldWriters, ClassWriter cw, String classNameType, String objectWriterSupper) {
+        MethodWriter mw = cw.visitMethod(
+                Opcodes.ACC_PUBLIC,
+                "<init>",
+                "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;JLjava/util/List;)V",
+                64
+        );
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
         mw.visitVarInsn(Opcodes.ALOAD, 1);
         mw.visitVarInsn(Opcodes.ALOAD, 2);
         mw.visitVarInsn(Opcodes.ALOAD, 3);
         mw.visitVarInsn(Opcodes.LLOAD, 4);
         mw.visitVarInsn(Opcodes.ALOAD, 6);
-        mw.visitMethodInsn(Opcodes.INVOKESPECIAL, TYPE_OBJECT_WRITER_ADAPTER, "<init>", "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;JLjava/util/List;)V", false);
+        mw.visitMethodInsn(Opcodes.INVOKESPECIAL, objectWriterSupper, "<init>", "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;JLjava/util/List;)V", false);
 
-        for (int i = 0; i < fieldWriters.size(); i++) {
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
-            mw.visitInsn(Opcodes.DUP);
+        if (objectWriterSupper == TYPE_OBJECT_WRITER_ADAPTER) {
+            for (int i = 0; i < fieldWriters.size(); i++) {
+                mw.visitVarInsn(Opcodes.ALOAD, THIS);
+                mw.visitInsn(Opcodes.DUP);
 
-            mw.visitFieldInsn(Opcodes.GETFIELD, TYPE_OBJECT_WRITER_ADAPTER, "fieldWriterArray", DESC_FIELD_WRITER_ARRAY);
-            switch (i) {
-                case 0:
-                    mw.visitInsn(Opcodes.ICONST_0);
-                    break;
-                case 1:
-                    mw.visitInsn(Opcodes.ICONST_1);
-                    break;
-                case 2:
-                    mw.visitInsn(Opcodes.ICONST_2);
-                    break;
-                case 3:
-                    mw.visitInsn(Opcodes.ICONST_3);
-                    break;
-                case 4:
-                    mw.visitInsn(Opcodes.ICONST_4);
-                    break;
-                case 5:
-                    mw.visitInsn(Opcodes.ICONST_5);
-                    break;
-                default:
-                    if (i >= 128) {
-                        mw.visitIntInsn(Opcodes.SIPUSH, i);
-                    } else {
-                        mw.visitIntInsn(Opcodes.BIPUSH, i);
-                    }
-                    break;
+                mw.visitFieldInsn(Opcodes.GETFIELD, TYPE_OBJECT_WRITER_ADAPTER, "fieldWriterArray", DESC_FIELD_WRITER_ARRAY);
+                switch (i) {
+                    case 0:
+                        mw.visitInsn(Opcodes.ICONST_0);
+                        break;
+                    case 1:
+                        mw.visitInsn(Opcodes.ICONST_1);
+                        break;
+                    case 2:
+                        mw.visitInsn(Opcodes.ICONST_2);
+                        break;
+                    case 3:
+                        mw.visitInsn(Opcodes.ICONST_3);
+                        break;
+                    case 4:
+                        mw.visitInsn(Opcodes.ICONST_4);
+                        break;
+                    case 5:
+                        mw.visitInsn(Opcodes.ICONST_5);
+                        break;
+                    default:
+                        if (i >= 128) {
+                            mw.visitIntInsn(Opcodes.SIPUSH, i);
+                        } else {
+                            mw.visitIntInsn(Opcodes.BIPUSH, i);
+                        }
+                        break;
+                }
+                mw.visitInsn(Opcodes.AALOAD); // fieldWriterArray
+                mw.visitTypeInsn(Opcodes.CHECKCAST,
+                        TYPE_FIELD_WRITER); // cast
+                mw.visitFieldInsn(Opcodes.PUTFIELD, classNameType, fieldWriter(i), DESC_FIELD_WRITER);
             }
-            mw.visitInsn(Opcodes.AALOAD); // fieldWriterArray
-            mw.visitTypeInsn(Opcodes.CHECKCAST,
-                    TYPE_FIELD_WRITER); // cast
-            mw.visitFieldInsn(Opcodes.PUTFIELD, classNameType, fieldWriter(i), DESC_FIELD_WRITER);
         }
 
         mw.visitInsn(Opcodes.RETURN);
         mw.visitMaxs(7, 7);
-        mw.visitEnd();
     }
 
-    private void genFields(List<FieldWriter> fieldWriters, ClassWriter cw) {
+    private void genFields(List<FieldWriter> fieldWriters, ClassWriter cw, String objectWriterSupper) {
+        if (objectWriterSupper != TYPE_OBJECT_WRITER_ADAPTER) {
+            return;
+        }
+
         for (int i = 0; i < fieldWriters.size(); i++) {
             cw.visitField(
                     Opcodes.ACC_PUBLIC,
@@ -2949,115 +3033,6 @@ public class ObjectWriterCreatorASM
         if (castToType != null) {
             mw.visitTypeInsn(Opcodes.CHECKCAST, castToType);
         }
-    }
-
-    private void genGetFieldReader(
-            List<FieldWriter> fieldWriters,
-            ClassWriter cw,
-            String classNameType,
-            ObjectWriterAdapter objectReaderAdapter) {
-        MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC,
-                "getFieldWriter",
-                "(J)" + DESC_FIELD_WRITER
-        );
-
-        final int HASH_CODE_64 = 1;
-        final int HASH_CODE_32 = 3;
-
-        Label rtnlt = new Label();
-        if (fieldWriters.size() <= 6) {
-            for (int i = 0; i < fieldWriters.size(); ++i) {
-                Label next_ = new Label(), get_ = new Label();
-                String fieldName = fieldWriters.get(i).fieldName;
-                long hashCode64 = Fnv.hashCode64(fieldName);
-
-                mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE_64);
-                mw.visitLdcInsn(hashCode64);
-                mw.visitInsn(Opcodes.LCMP);
-                mw.visitJumpInsn(Opcodes.IFNE, next_);
-
-                mw.visitLabel(get_);
-                mw.visitVarInsn(Opcodes.ALOAD, THIS);
-                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldWriter(i), DESC_FIELD_WRITER);
-                mw.visitJumpInsn(Opcodes.GOTO, rtnlt);
-
-                mw.visitLabel(next_);
-            }
-
-            mw.visitInsn(Opcodes.ACONST_NULL);
-            mw.visitInsn(Opcodes.ARETURN);
-        } else {
-            Map<Integer, List<Long>> map = new LinkedHashMap<>();
-
-            for (int i = 0; i < objectReaderAdapter.hashCodes.length; i++) {
-                long hashCode64 = objectReaderAdapter.hashCodes[i];
-                int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
-                List<Long> hashCode64List = map.get(hashCode32);
-                if (hashCode64List == null) {
-                    hashCode64List = new ArrayList<>();
-                    map.put(hashCode32, hashCode64List);
-                }
-                hashCode64List.add(hashCode64);
-            }
-            int[] hashCode32Keys = new int[map.size()];
-            {
-                int off = 0;
-                for (Integer key : map.keySet()) {
-                    hashCode32Keys[off++] = key;
-                }
-            }
-            Arrays.sort(hashCode32Keys);
-
-            // // int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));
-            mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE_64);
-            mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE_64);
-            mw.visitVarInsn(Opcodes.BIPUSH, 32);
-            mw.visitInsn(Opcodes.LUSHR);
-            mw.visitInsn(Opcodes.LXOR);
-            mw.visitInsn(Opcodes.L2I);
-            mw.visitVarInsn(Opcodes.ISTORE, HASH_CODE_32);
-
-            Label dflt = new Label();
-            Label[] labels = new Label[hashCode32Keys.length];
-            for (int i = 0; i < labels.length; i++) {
-                labels[i] = new Label();
-            }
-
-            mw.visitVarInsn(Opcodes.ILOAD, HASH_CODE_32);
-            mw.visitLookupSwitchInsn(dflt, hashCode32Keys, labels);
-
-            for (int i = 0; i < labels.length; i++) {
-                mw.visitLabel(labels[i]);
-
-                int hashCode32 = hashCode32Keys[i];
-                List<Long> hashCode64Array = map.get(hashCode32);
-                for (int j = 0; j < hashCode64Array.size(); ++j) {
-                    long hashCode64 = hashCode64Array.get(j);
-                    mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE_64);
-                    mw.visitLdcInsn(hashCode64);
-                    mw.visitInsn(Opcodes.LCMP);
-                    mw.visitJumpInsn(Opcodes.IFNE, dflt);
-
-                    int m = Arrays.binarySearch(objectReaderAdapter.hashCodes, hashCode64);
-                    int index = objectReaderAdapter.mapping[m];
-                    mw.visitVarInsn(Opcodes.ALOAD, THIS);
-                    mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldWriter(index), DESC_FIELD_WRITER);
-                    mw.visitJumpInsn(Opcodes.GOTO, rtnlt);
-                }
-
-                mw.visitJumpInsn(Opcodes.GOTO, dflt);
-            }
-
-            mw.visitLabel(dflt);
-            mw.visitInsn(Opcodes.ACONST_NULL);
-            mw.visitInsn(Opcodes.ARETURN);
-        }
-
-        mw.visitLabel(rtnlt);
-        mw.visitInsn(Opcodes.ARETURN);
-
-        mw.visitMaxs(5, 5);
-        mw.visitEnd();
     }
 
     static class MethodWriterContext {

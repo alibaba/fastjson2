@@ -10,6 +10,8 @@ import com.alibaba.fastjson2.benchmark.eishay.mixin.MediaMixin;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.reader.ObjectReaderCreator;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -31,8 +33,10 @@ public class EishayWriteStringNoneCache {
         try {
             InputStream is = EishayWriteString.class.getClassLoader().getResourceAsStream("data/eishay.json");
             String str = IOUtils.toString(is, "UTF-8");
-            mc = JSONReader.of(str)
-                    .read(MediaContent.class);
+
+            ObjectReaderProvider provider = new ObjectReaderProvider(ObjectReaderCreator.INSTANCE);
+            JSONReader.Context readContext = JSONFactory.createReadContext(provider);
+            mc = JSON.parseObject(str, MediaContent.class, readContext);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }

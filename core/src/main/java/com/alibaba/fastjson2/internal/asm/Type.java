@@ -35,145 +35,50 @@ package com.alibaba.fastjson2.internal.asm;
  * @author Chris Nokleberg
  */
 public final class Type {
-    /**
-     * The sort of the {@code void} type. See {@link #getSort}.
-     */
-    public static final int VOID = 0;
+    static final int VOID = 0;
+    static final int BOOLEAN = 1;
+    static final int CHAR = 2;
+    static final int BYTE = 3;
+    static final int SHORT = 4;
+    static final int INT = 5;
+    static final int FLOAT = 6;
+    static final int LONG = 7;
+    static final int DOUBLE = 8;
+    static final int ARRAY = 9;
+    static final int OBJECT = 10;
+    static final int METHOD = 11;
+    static final int INTERNAL = 12;
 
-    /**
-     * The sort of the {@code boolean} type. See {@link #getSort}.
-     */
-    public static final int BOOLEAN = 1;
+    static final Type VOID_TYPE = new Type(VOID, "VZCBSIFJD", VOID, VOID + 1);
+    static final Type BOOLEAN_TYPE = new Type(BOOLEAN, "VZCBSIFJD", BOOLEAN, BOOLEAN + 1);
+    static final Type CHAR_TYPE = new Type(CHAR, "VZCBSIFJD", CHAR, CHAR + 1);
+    static final Type BYTE_TYPE = new Type(BYTE, "VZCBSIFJD", BYTE, BYTE + 1);
+    static final Type SHORT_TYPE = new Type(SHORT, "VZCBSIFJD", SHORT, SHORT + 1);
+    static final Type INT_TYPE = new Type(INT, "VZCBSIFJD", INT, INT + 1);
+    static final Type FLOAT_TYPE = new Type(FLOAT, "VZCBSIFJD", FLOAT, FLOAT + 1);
+    static final Type LONG_TYPE = new Type(LONG, "VZCBSIFJD", LONG, LONG + 1);
+    static final Type DOUBLE_TYPE = new Type(DOUBLE, "VZCBSIFJD", DOUBLE, DOUBLE + 1);
 
-    /**
-     * The sort of the {@code char} type. See {@link #getSort}.
-     */
-    public static final int CHAR = 2;
+    static final Type TYPE_CLASS = new Type(10, "Ljava/lang/Class;", 1, 16);
+    static final Type TYPE_TYPE = new Type(10, "Ljava/lang/reflect/Type;", 1, 23);
+    static final Type TYPE_OBJECT = new Type(10, "Ljava/lang/Object;", 1, 17);
+    static final Type TYPE_STRING = new Type(10, "Ljava/lang/String;", 1, 17);
+    static final Type TYPE_LIST = new Type(10, "Ljava/util/List;", 1, 15);
+    static final Type TYPE_JSON_READER = new Type(10, "Lcom/alibaba/fastjson2/JSONReader;", 1, 33);
+    static final Type TYPE_JSON_WRITER = new Type(10, "Lcom/alibaba/fastjson2/JSONWriter;", 1, 33);
+    static final Type TYPE_SUPPLIER = new Type(10, "Ljava/util/function/Supplier;", 1, 28);
 
-    /**
-     * The sort of the {@code byte} type. See {@link #getSort}.
-     */
-    public static final int BYTE = 3;
+    static final Type[] TYPES_0 = new Type[] {TYPE_CLASS, TYPE_STRING, TYPE_STRING, LONG_TYPE, TYPE_LIST};
+    static final Type[] TYPES_1 = new Type[] {TYPE_JSON_WRITER, TYPE_OBJECT, TYPE_OBJECT, TYPE_TYPE, LONG_TYPE};
+    static final Type[] TYPES_2 = new Type[] {TYPE_CLASS, TYPE_SUPPLIER, TYPE_JSON_READER};
+    static final Type[] TYPES_3 = new Type[] {LONG_TYPE};
+    static final Type[] TYPES_4 = new Type[] {TYPE_JSON_READER, TYPE_TYPE, TYPE_OBJECT, LONG_TYPE};
 
-    /**
-     * The sort of the {@code short} type. See {@link #getSort}.
-     */
-    public static final int SHORT = 4;
+    final int sort;
+    final String valueBuffer;
+    final int valueBegin;
+    final int valueEnd;
 
-    /**
-     * The sort of the {@code int} type. See {@link #getSort}.
-     */
-    public static final int INT = 5;
-
-    /**
-     * The sort of the {@code float} type. See {@link #getSort}.
-     */
-    public static final int FLOAT = 6;
-
-    /**
-     * The sort of the {@code long} type. See {@link #getSort}.
-     */
-    public static final int LONG = 7;
-
-    /**
-     * The sort of the {@code double} type. See {@link #getSort}.
-     */
-    public static final int DOUBLE = 8;
-
-    /**
-     * The sort of array reference types. See {@link #getSort}.
-     */
-    public static final int ARRAY = 9;
-
-    /**
-     * The sort of object reference types. See {@link #getSort}.
-     */
-    public static final int OBJECT = 10;
-
-    /**
-     * The sort of method types. See {@link #getSort}.
-     */
-    public static final int METHOD = 11;
-
-    /**
-     * The (private) sort of object reference types represented with an internal name.
-     */
-    private static final int INTERNAL = 12;
-
-    /**
-     * The descriptors of the primitive types.
-     */
-    private static final String PRIMITIVE_DESCRIPTORS = "VZCBSIFJD";
-
-    /**
-     * The {@code void} type.
-     */
-    public static final Type VOID_TYPE = new Type(VOID, PRIMITIVE_DESCRIPTORS, VOID, VOID + 1);
-
-    /**
-     * The {@code boolean} type.
-     */
-    public static final Type BOOLEAN_TYPE =
-            new Type(BOOLEAN, PRIMITIVE_DESCRIPTORS, BOOLEAN, BOOLEAN + 1);
-
-    /**
-     * The {@code char} type.
-     */
-    public static final Type CHAR_TYPE = new Type(CHAR, PRIMITIVE_DESCRIPTORS, CHAR, CHAR + 1);
-
-    /**
-     * The {@code byte} type.
-     */
-    public static final Type BYTE_TYPE = new Type(BYTE, PRIMITIVE_DESCRIPTORS, BYTE, BYTE + 1);
-
-    /**
-     * The {@code short} type.
-     */
-    public static final Type SHORT_TYPE = new Type(SHORT, PRIMITIVE_DESCRIPTORS, SHORT, SHORT + 1);
-
-    /**
-     * The {@code int} type.
-     */
-    public static final Type INT_TYPE = new Type(INT, PRIMITIVE_DESCRIPTORS, INT, INT + 1);
-
-    /**
-     * The {@code float} type.
-     */
-    public static final Type FLOAT_TYPE = new Type(FLOAT, PRIMITIVE_DESCRIPTORS, FLOAT, FLOAT + 1);
-
-    /**
-     * The {@code long} type.
-     */
-    public static final Type LONG_TYPE = new Type(LONG, PRIMITIVE_DESCRIPTORS, LONG, LONG + 1);
-
-    /**
-     * The {@code double} type.
-     */
-    public static final Type DOUBLE_TYPE =
-            new Type(DOUBLE, PRIMITIVE_DESCRIPTORS, DOUBLE, DOUBLE + 1);
-
-    // -----------------------------------------------------------------------------------------------
-    // Fields
-    // -----------------------------------------------------------------------------------------------
-
-    private final int sort;
-
-    private final String valueBuffer;
-
-    private final int valueBegin;
-
-    private final int valueEnd;
-
-    /**
-     * Constructs a reference type.
-     *
-     * @param sort        the sort of this type, see {@link #sort}.
-     * @param valueBuffer a buffer containing the value of this field or method type.
-     * @param valueBegin  the beginning index, inclusive, of the value of this field or method type in
-     *                    valueBuffer.
-     * @param valueEnd    the end index, exclusive, of the value of this field or method type in
-     *                    valueBuffer.
-     */
     private Type(final int sort, final String valueBuffer, final int valueBegin, final int valueEnd) {
         this.sort = sort;
         this.valueBuffer = valueBuffer;
@@ -184,16 +89,16 @@ public final class Type {
     // -----------------------------------------------------------------------------------------------
     // Methods to get Type(s) from a descriptor, a reflected Method or Constructor, other types, etc.
     // -----------------------------------------------------------------------------------------------
-
-    /**
-     * Returns the {@link Type} corresponding to the given type descriptor.
-     *
-     * @param typeDescriptor a field or method type descriptor.
-     * @return the {@link Type} corresponding to the given type descriptor.
-     */
-    public static Type getType(final String typeDescriptor) {
-        return getTypeInternal(typeDescriptor, 0, typeDescriptor.length());
-    }
+//
+//    /**
+//     * Returns the {@link Type} corresponding to the given type descriptor.
+//     *
+//     * @param typeDescriptor a field or method type descriptor.
+//     * @return the {@link Type} corresponding to the given type descriptor.
+//     */
+//    public static Type getType(final String typeDescriptor) {
+//        return getTypeInternal(typeDescriptor, 0, typeDescriptor.length());
+//    }
 
     /**
      * Returns the {@link Type} values corresponding to the argument types of the given method
@@ -203,7 +108,25 @@ public final class Type {
      * @return the {@link Type} values corresponding to the argument types of the given method
      * descriptor.
      */
-    public static Type[] getArgumentTypes(final String methodDescriptor) {
+    static Type[] getArgumentTypes(final String methodDescriptor) {
+        switch (methodDescriptor) {
+            case "()V":
+                return new Type[0];
+            case "(J)Lcom/alibaba/fastjson2/reader/FieldReader;":
+            case "(J)Ljava/lang/Object;":
+                return TYPES_3;
+            case "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;JLjava/util/List;)V":
+                return TYPES_0;
+            case "(Lcom/alibaba/fastjson2/JSONWriter;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;J)V":
+                return TYPES_1;
+            case "(Ljava/lang/Class;Ljava/util/function/Supplier;[Lcom/alibaba/fastjson2/reader/FieldReader;)V":
+                return TYPES_2;
+            case "(Lcom/alibaba/fastjson2/JSONReader;Ljava/lang/reflect/Type;Ljava/lang/Object;J)Ljava/lang/Object;":
+                return TYPES_4;
+            default:
+                break;
+        }
+
         // First step: compute the number of argument types in methodDescriptor.
         int numArgumentTypes = 0;
         // Skip the first character, which is always a '('.
@@ -242,29 +165,29 @@ public final class Type {
         }
         return argumentTypes;
     }
-
-    /**
-     * Returns the start index of the return type of the given method descriptor.
-     *
-     * @param methodDescriptor a method descriptor.
-     * @return the start index of the return type of the given method descriptor.
-     */
-    static int getReturnTypeOffset(final String methodDescriptor) {
-        // Skip the first character, which is always a '('.
-        int currentOffset = 1;
-        // Skip the argument types, one at a each loop iteration.
-        while (methodDescriptor.charAt(currentOffset) != ')') {
-            while (methodDescriptor.charAt(currentOffset) == '[') {
-                currentOffset++;
-            }
-            if (methodDescriptor.charAt(currentOffset++) == 'L') {
-                // Skip the argument descriptor content.
-                int semiColumnOffset = methodDescriptor.indexOf(';', currentOffset);
-                currentOffset = Math.max(currentOffset, semiColumnOffset + 1);
-            }
-        }
-        return currentOffset + 1;
-    }
+//
+//    /**
+//     * Returns the start index of the return type of the given method descriptor.
+//     *
+//     * @param descriptor a method descriptor.
+//     * @return the start index of the return type of the given method descriptor.
+//     */
+//    static int getReturnTypeOffset(final String descriptor) {
+//        // Skip the first character, which is always a '('.
+//        int currentOffset = 1;
+//        // Skip the argument types, one at a each loop iteration.
+//        while (descriptor.charAt(currentOffset) != ')') {
+//            while (descriptor.charAt(currentOffset) == '[') {
+//                currentOffset++;
+//            }
+//            if (descriptor.charAt(currentOffset++) == 'L') {
+//                // Skip the argument descriptor content.
+//                int semiColumnOffset = descriptor.indexOf(';', currentOffset);
+//                currentOffset = Math.max(currentOffset, semiColumnOffset + 1);
+//            }
+//        }
+//        return currentOffset + 1;
+//    }
 
     /**
      * Returns the {@link Type} corresponding to the given field or method descriptor.
@@ -276,7 +199,7 @@ public final class Type {
      *                         descriptorBuffer.
      * @return the {@link Type} corresponding to the given type descriptor.
      */
-    private static Type getTypeInternal(
+    static Type getTypeInternal(
             final String descriptorBuffer, final int descriptorBegin, final int descriptorEnd) {
         switch (descriptorBuffer.charAt(descriptorBegin)) {
             case 'V':
@@ -300,6 +223,48 @@ public final class Type {
             case '[':
                 return new Type(ARRAY, descriptorBuffer, descriptorBegin, descriptorEnd);
             case 'L':
+                int len = descriptorEnd - descriptorBegin;
+                switch (len) {
+                    case 16:
+                        if (descriptorBuffer.regionMatches(descriptorBegin, TYPE_LIST.valueBuffer, 0, len)) {
+                            return TYPE_LIST;
+                        }
+                        break;
+                    case 17:
+                        if (descriptorBuffer.regionMatches(descriptorBegin, TYPE_CLASS.valueBuffer, 0, len)) {
+                            return TYPE_CLASS;
+                        }
+                        break;
+                    case 18:
+                        if (descriptorBuffer.regionMatches(descriptorBegin, TYPE_STRING.valueBuffer, 0, len)) {
+                            return TYPE_STRING;
+                        }
+                        if (descriptorBuffer.regionMatches(descriptorBegin, TYPE_OBJECT.valueBuffer, 0, len)) {
+                            return TYPE_OBJECT;
+                        }
+                        break;
+                    case 24:
+                        if (descriptorBuffer.regionMatches(descriptorBegin, TYPE_TYPE.valueBuffer, 0, len)) {
+                            return TYPE_TYPE;
+                        }
+                        break;
+                    case 29:
+                        if (descriptorBuffer.regionMatches(descriptorBegin, TYPE_SUPPLIER.valueBuffer, 0, len)) {
+                            return TYPE_SUPPLIER;
+                        }
+                        break;
+                    case 34:
+                        if (descriptorBuffer.regionMatches(descriptorBegin, TYPE_JSON_WRITER.valueBuffer, 0, len)) {
+                            return TYPE_JSON_WRITER;
+                        }
+                        if (descriptorBuffer.regionMatches(descriptorBegin, TYPE_JSON_READER.valueBuffer, 0, len)) {
+                            return TYPE_JSON_READER;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
                 return new Type(OBJECT, descriptorBuffer, descriptorBegin + 1, descriptorEnd - 1);
             case '(':
                 return new Type(METHOD, descriptorBuffer, descriptorBegin, descriptorEnd);
@@ -311,17 +276,17 @@ public final class Type {
     // -----------------------------------------------------------------------------------------------
     // Methods to get class names, internal names or descriptors.
     // -----------------------------------------------------------------------------------------------
-
-    /**
-     * Returns the internal name of the class corresponding to this object or array type. The internal
-     * name of a class is its fully qualified name (as returned by Class.getName(), where '.' are
-     * replaced by '/'). This method should only be used for an object or array type.
-     *
-     * @return the internal name of the class corresponding to this object type.
-     */
-    public String getInternalName() {
-        return valueBuffer.substring(valueBegin, valueEnd);
-    }
+//
+//    /**
+//     * Returns the internal name of the class corresponding to this object or array type. The internal
+//     * name of a class is its fully qualified name (as returned by Class.getName(), where '.' are
+//     * replaced by '/'). This method should only be used for an object or array type.
+//     *
+//     * @return the internal name of the class corresponding to this object type.
+//     */
+//    public String getInternalName() {
+//        return valueBuffer.substring(valueBegin, valueEnd);
+//    }
 
     /**
      * Returns the descriptor corresponding to this type.
@@ -330,10 +295,79 @@ public final class Type {
      */
     public String getDescriptor() {
         if (sort == OBJECT) {
+            switch (valueBuffer) {
+                case "(Ljava/lang/Class;Ljava/util/function/Supplier;[Lcom/alibaba/fastjson2/reader/FieldReader;)V":
+                    if (valueBegin == 2 && valueEnd == 17) {
+                        return "Ljava/lang/Class;";
+                    }
+                    if (valueBegin == 19 && valueEnd == 46) {
+                        return "Ljava/util/function/Supplier;";
+                    }
+                    break;
+                case "(Lcom/alibaba/fastjson2/JSONReader;Ljava/lang/reflect/Type;Ljava/lang/Object;J)Ljava/lang/Object;":
+                    if (valueBegin == 2 && valueEnd == 34) {
+                        return "Lcom/alibaba/fastjson2/JSONReader;";
+                    }
+                    if (valueBegin == 36 && valueEnd == 58) {
+                        return "Ljava/lang/reflect/Type;";
+                    }
+                    if (valueBegin == 60 && valueEnd == 76) {
+                        return "Ljava/lang/Object;";
+                    }
+                    break;
+                case "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;JLjava/util/List;)V":
+                    if (valueBegin == 2 && valueEnd == 17) {
+                        return "Ljava/lang/Class;";
+                    }
+                    if (valueBegin == 19 && valueEnd == 35) {
+                        return "Ljava/lang/String;";
+                    }
+                    if (valueBegin == 37 && valueEnd == 53) {
+                        return "Ljava/lang/String;";
+                    }
+                    if (valueBegin == 56 && valueEnd == 70) {
+                        return "Ljava/util/List;";
+                    }
+                    break;
+                case "(Lcom/alibaba/fastjson2/JSONWriter;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;J)V":
+                    if (valueBegin == 2 && valueEnd == 34) {
+                        return "Lcom/alibaba/fastjson2/JSONWriter;";
+                    }
+                    if (valueBegin == 36 && valueEnd == 52) {
+                        return "Ljava/lang/Object;";
+                    }
+                    if (valueBegin == 54 && valueEnd == 70) {
+                        return "Ljava/lang/Object;";
+                    }
+                    if (valueBegin == 72 && valueEnd == 94) {
+                        return "Ljava/lang/reflect/Type;";
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            if (valueBegin == 1 && valueEnd + 1 == valueBuffer.length()) {
+                return valueBuffer;
+            }
             return valueBuffer.substring(valueBegin - 1, valueEnd + 1);
         } else if (sort == INTERNAL) {
             return 'L' + valueBuffer.substring(valueBegin, valueEnd) + ';';
         } else {
+            switch (valueBuffer) {
+                case "VZCBSIFJD":
+                    if (valueBegin == 7 && valueEnd == 8) {
+                        return "J";
+                    }
+                    break;
+                case "(Ljava/lang/Class;Ljava/util/function/Supplier;[Lcom/alibaba/fastjson2/reader/FieldReader;)V":
+                    if (valueBegin == 47 && valueEnd == 90) {
+                        return "[Lcom/alibaba/fastjson2/reader/FieldReader;";
+                    }
+                    break;
+                default:
+                    break;
+            }
             return valueBuffer.substring(valueBegin, valueEnd);
         }
     }
@@ -341,10 +375,10 @@ public final class Type {
     // -----------------------------------------------------------------------------------------------
     // Methods to get the sort, dimension, size, and opcodes corresponding to a Type or descriptor.
     // -----------------------------------------------------------------------------------------------
-
-    public int getSort() {
-        return sort == INTERNAL ? OBJECT : sort;
-    }
+//
+//    public int getSort() {
+//        return sort == INTERNAL ? OBJECT : sort;
+//    }
 
     /**
      * Computes the size of the arguments and of the return value of a method.
@@ -356,6 +390,66 @@ public final class Type {
      * i &gt;&gt; 2}, and returnSize to {@code i &amp; 0x03}).
      */
     public static int getArgumentsAndReturnSizes(final String methodDescriptor) {
+        switch (methodDescriptor) {
+            case "()V":
+                return 4;
+            case "()I":
+            case "()Z":
+            case "()Ljava/lang/String;":
+            case "()Ljava/lang/Class;":
+                return 5;
+            case "()J":
+                return 6;
+            case "(I)V":
+            case "(Ljava/lang/String;)V":
+            case "(Lcom/alibaba/fastjson2/JSONWriter;)V":
+            case "(Ljava/lang/Object;)V":
+            case "(Ljava/lang/Enum;)V":
+                return 8;
+            case "(C)Z":
+            case "(Lcom/alibaba/fastjson2/JSONReader;)Lcom/alibaba/fastjson2/reader/ObjectReader;":
+            case "(Ljava/lang/Object;)Z":
+            case "(I)Ljava/lang/Object;":
+            case "(Lcom/alibaba/fastjson2/JSONReader;)Ljava/lang/Object;":
+            case "(Lcom/alibaba/fastjson2/JSONWriter;)Z":
+            case "(I)Ljava/lang/Integer;":
+                return 9;
+            case "(J)V":
+            case "(Lcom/alibaba/fastjson2/JSONReader;Ljava/lang/Object;)V":
+            case "(Ljava/util/List;Ljava/lang/reflect/Type;)V":
+            case "(Lcom/alibaba/fastjson2/JSONWriter;Ljava/lang/Enum;)V":
+            case "(Lcom/alibaba/fastjson2/JSONWriter;I)V":
+                return 12;
+            case "(J)Z":
+            case "(J)Ljava/lang/Object;":
+            case "(J)Lcom/alibaba/fastjson2/reader/FieldReader;":
+            case "(Ljava/lang/Object;Ljava/lang/reflect/Type;)Z":
+            case "(Lcom/alibaba/fastjson2/writer/FieldWriter;Ljava/lang/Object;)Ljava/lang/String;":
+            case "(Lcom/alibaba/fastjson2/JSONWriter;Ljava/lang/Class;)Lcom/alibaba/fastjson2/writer/ObjectWriter;":
+            case "(Lcom/alibaba/fastjson2/JSONWriter;Ljava/lang/reflect/Type;)Lcom/alibaba/fastjson2/writer/ObjectWriter;":
+                return 13;
+            case "(Lcom/alibaba/fastjson2/JSONReader;Ljava/lang/Object;Ljava/lang/String;)V":
+            case "(Ljava/lang/Class;Ljava/util/function/Supplier;[Lcom/alibaba/fastjson2/reader/FieldReader;)V":
+            case "(Lcom/alibaba/fastjson2/JSONWriter;ZLjava/util/List;)V":
+            case "(Lcom/alibaba/fastjson2/JSONWriter;J)V":
+                return 16;
+            case "(Ljava/lang/Object;JLjava/lang/Object;)V":
+            case "(Lcom/alibaba/fastjson2/JSONReader;Ljava/util/List;ILjava/lang/String;)V":
+                return 20;
+            case "(Lcom/alibaba/fastjson2/JSONReader;Ljava/lang/Class;J)Ljava/lang/Object;":
+            case "(Lcom/alibaba/fastjson2/JSONReader;Ljava/lang/Class;J)Lcom/alibaba/fastjson2/reader/ObjectReader;":
+                return 21;
+            case "(Lcom/alibaba/fastjson2/JSONReader;Ljava/lang/reflect/Type;Ljava/lang/Object;J)Ljava/lang/Object;":
+                return 25;
+            case "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;JLjava/util/List;)V":
+            case "(Lcom/alibaba/fastjson2/JSONWriter;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;J)V":
+                return 28;
+            case "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;JLcom/alibaba/fastjson2/schema/JSONSchema;Ljava/util/function/Supplier;Ljava/util/function/Function;[Lcom/alibaba/fastjson2/reader/FieldReader;)V":
+                return 40;
+            default:
+                break;
+        }
+
         int argumentsSize = 1;
         // Skip the first character, which is always a '('.
         int currentOffset = 1;
@@ -408,7 +502,8 @@ public final class Type {
             case DOUBLE:
                 return "double";
             case ARRAY:
-                StringBuilder stringBuilder = new StringBuilder(getElementType().getClassName());
+                Type elementType = getTypeInternal(valueBuffer, valueBegin + getDimensions(), valueEnd);
+                StringBuilder stringBuilder = new StringBuilder(elementType.getClassName());
                 for (int i = getDimensions(); i > 0; --i) {
                     stringBuilder.append("[]");
                 }
@@ -420,11 +515,10 @@ public final class Type {
                 throw new AssertionError();
         }
     }
-
-    public Type getElementType() {
-        final int numDimensions = getDimensions();
-        return getTypeInternal(valueBuffer, valueBegin + numDimensions, valueEnd);
-    }
+//
+//    public Type getElementType() {
+//        return getTypeInternal(valueBuffer, valueBegin + getDimensions(), valueEnd);
+//    }
 
     public int getDimensions() {
         int numDimensions = 1;

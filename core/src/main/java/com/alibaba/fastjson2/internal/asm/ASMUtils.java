@@ -1,16 +1,14 @@
 package com.alibaba.fastjson2.internal.asm;
 
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONPathCompilerReflect;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.function.*;
-import com.alibaba.fastjson2.reader.FieldReader;
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
+import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
-import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
+import com.alibaba.fastjson2.writer.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,9 +52,22 @@ public class ASMUtils {
         typeMapping.put(double.class, "D");
 
         Class[] classes = new Class[]{
+                String.class,
                 java.util.List.class,
                 java.util.Collection.class,
                 ObjectReader.class,
+                ObjectReader1.class,
+                ObjectReader2.class,
+                ObjectReader3.class,
+                ObjectReader4.class,
+                ObjectReader5.class,
+                ObjectReader6.class,
+                ObjectReader7.class,
+                ObjectReader8.class,
+                ObjectReader9.class,
+                ObjectReader10.class,
+                ObjectReader11.class,
+                ObjectReader12.class,
                 ObjectReaderAdapter.class,
                 FieldReader.class,
                 JSONReader.class,
@@ -72,7 +83,20 @@ public class ASMUtils {
                 UnsafeUtils.class,
                 ObjectWriter.class,
                 ObjectWriterAdapter.class,
+                ObjectWriter1.class,
+                ObjectWriter2.class,
+                ObjectWriter3.class,
+                ObjectWriter4.class,
+                ObjectWriter5.class,
+                ObjectWriter6.class,
+                ObjectWriter7.class,
+                ObjectWriter8.class,
+                ObjectWriter9.class,
+                ObjectWriter10.class,
+                ObjectWriter11.class,
+                ObjectWriter12.class,
                 com.alibaba.fastjson2.writer.FieldWriter.class,
+                JSONPathCompilerReflect.SingleNamePathTyped.class,
                 JSONWriter.class,
                 JSONWriter.Context.class,
                 JSONB.class
@@ -113,10 +137,45 @@ public class ASMUtils {
         }
 
         if (clazz.isArray()) {
-            return "[" + desc(clazz.getComponentType());
+            Class<?> componentType = clazz.getComponentType();
+            switch (componentType.getName()) {
+                case "com.alibaba.fastjson2.writer.FieldWriter":
+                    return "[Lcom/alibaba/fastjson2/writer/FieldWriter;";
+                case "com.alibaba.fastjson2.reader.FieldReader":
+                    return "[Lcom/alibaba/fastjson2/reader/FieldReader;";
+                default:
+                    return "[" + desc(componentType);
+            }
         }
 
         String className = clazz.getName();
+        switch (className) {
+            case "java.util.Date":
+                return "Ljava/util/Date;";
+            case "java.lang.String":
+                return "Ljava/lang/String;";
+            case "com.alibaba.fastjson2.writer.ObjectWriter":
+                return "Lcom/alibaba/fastjson2/writer/ObjectWriter;";
+            case "com.alibaba.fastjson2.JSONWriter":
+                return "Lcom/alibaba/fastjson2/JSONWriter;";
+            case "com.alibaba.fastjson2.writer.FieldWriter":
+                return "Lcom/alibaba/fastjson2/writer/FieldWriter;";
+            case "com.alibaba.fastjson2.JSONReader":
+                return "Lcom/alibaba/fastjson2/JSONReader;";
+            case "com.alibaba.fastjson2.reader.FieldReader":
+                return "Lcom/alibaba/fastjson2/reader/FieldReader;";
+            case "com.alibaba.fastjson2.reader.ObjectReader":
+                return "Lcom/alibaba/fastjson2/reader/ObjectReader;";
+            case "java.util.function.Supplier":
+                return "Ljava/util/function/Supplier;";
+            case "com.alibaba.fastjson2.schema.JSONSchema":
+                return "Lcom/alibaba/fastjson2/schema/JSONSchema;";
+            case "com.alibaba.fastjson2.annotation.JSONType":
+                return "Lcom/alibaba/fastjson2/annotation/JSONType;";
+            default:
+                break;
+        }
+
         char[] chars = descCacheRef.getAndSet(null);
         if (chars == null) {
             chars = new char[512];

@@ -92,7 +92,11 @@ public class ObjectReaderImplDate
         } else if (format != null) {
             ZonedDateTime zdt;
             if (yyyyMMddhhmmss19) {
-                millis = jsonReader.readMillis19();
+                if (jsonReader.isSupportSmartMatch()) {
+                    millis = jsonReader.readMillisFromString();
+                } else {
+                    millis = jsonReader.readMillis19();
+                }
                 if (millis != 0 || !jsonReader.wasNull()) {
                     return new Date(millis);
                 }

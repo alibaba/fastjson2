@@ -8,18 +8,16 @@ import java.util.List;
 import static com.alibaba.fastjson2.JSONWriter.Feature.BeanToArray;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName;
 
-final class ObjectWriterAdapter2<T>
+public class ObjectWriter1<T>
         extends ObjectWriterAdapter<T> {
-    final FieldWriter fieldWriter0;
-    final FieldWriter fieldWriter1;
+    public final FieldWriter fieldWriter0;
 
-    public ObjectWriterAdapter2(Class<T> objectClass, long features, FieldWriter[] fieldWriters) {
+    public ObjectWriter1(Class objectClass, long features, FieldWriter[] fieldWriters) {
         super(objectClass, features, fieldWriters);
         fieldWriter0 = fieldWriters[0];
-        fieldWriter1 = fieldWriters[1];
     }
 
-    public ObjectWriterAdapter2(
+    public ObjectWriter1(
             Class<T> objectClass,
             String typeKey,
             String typeName,
@@ -28,7 +26,6 @@ final class ObjectWriterAdapter2<T>
     ) {
         super(objectClass, typeKey, typeName, features, fieldWriters);
         this.fieldWriter0 = fieldWriters.get(0);
-        this.fieldWriter1 = fieldWriters.get(1);
     }
 
     @Override
@@ -74,8 +71,16 @@ final class ObjectWriterAdapter2<T>
         }
 
         fieldWriter0.write(jsonWriter, object);
-        fieldWriter1.write(jsonWriter, object);
 
         jsonWriter.endObject();
+    }
+
+    @Override
+    public final FieldWriter getFieldWriter(long hashCode) {
+        if (hashCode == fieldWriter0.hashCode) {
+            return fieldWriter0;
+        }
+
+        return null;
     }
 }
