@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.filter.ExtraProcessor;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -75,12 +76,21 @@ public abstract class ObjectReaderBean<T>
     }
 
     protected void processExtra(JSONReader jsonReader, Object object) {
-        if (extraFieldReader == null || object == null) {
-            jsonReader.skipValue();
+        if (extraFieldReader != null && object != null) {
+            extraFieldReader.processExtra(jsonReader, object);
             return;
         }
 
-        extraFieldReader.processExtra(jsonReader, object);
+        ExtraProcessor extraProcessor = jsonReader.getContext().getExtraProcessor();
+        if (extraProcessor != null) {
+            String fieldName = jsonReader.getFieldName();
+            Type type = extraProcessor.getType(fieldName);
+            Object extraValue = jsonReader.read(type);
+            extraProcessor.processExtra(object, fieldName, extraValue);
+            return;
+        }
+
+        jsonReader.skipValue();
     }
 
     public ObjectReader checkAutoType(JSONReader jsonReader, Class expectClass, long features) {

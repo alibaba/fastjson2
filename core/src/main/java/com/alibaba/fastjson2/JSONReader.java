@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
+import com.alibaba.fastjson2.filter.ExtraProcessor;
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.*;
@@ -2974,6 +2975,7 @@ public abstract class JSONReader
         Supplier<Map> objectSupplier;
         Supplier<List> arraySupplier;
         AutoTypeBeforeHandler autoTypeBeforeHandler;
+        ExtraProcessor extraProcessor;
 
         protected final ObjectReaderProvider provider;
         protected final SymbolTable symbolTable;
@@ -3031,6 +3033,14 @@ public abstract class JSONReader
             }
 
             return provider.getObjectReader(typeName, expectClass, this.features | features);
+        }
+
+        public ExtraProcessor getExtraProcessor() {
+            return extraProcessor;
+        }
+
+        public void setExtraProcessor(ExtraProcessor extraProcessor) {
+            this.extraProcessor = extraProcessor;
         }
 
         public Supplier<Map> getObjectSupplier() {
@@ -3168,6 +3178,10 @@ public abstract class JSONReader
                 autoTypeBeforeHandler = (AutoTypeBeforeHandler) filter;
             }
 
+            if (filter instanceof ExtraProcessor) {
+                extraProcessor = (ExtraProcessor) filter;
+            }
+
             for (Feature feature : features) {
                 this.features |= feature.mask;
             }
@@ -3177,6 +3191,10 @@ public abstract class JSONReader
             for (Filter filter : filters) {
                 if (filter instanceof AutoTypeBeforeHandler) {
                     autoTypeBeforeHandler = (AutoTypeBeforeHandler) filter;
+                }
+
+                if (filter instanceof ExtraProcessor) {
+                    extraProcessor = (ExtraProcessor) filter;
                 }
             }
 
