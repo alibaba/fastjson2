@@ -20,7 +20,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.alibaba.fastjson2.codec.FieldInfo.JSON_READABLE_ANNOTATED;
+import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectReaderCreator {
@@ -576,7 +576,7 @@ public class ObjectReaderCreator {
     }
 
     protected ObjectReader getAnnotatedObjectReader(ObjectReaderProvider provider, Class objectClass, BeanInfo beanInfo) {
-        if ((beanInfo.readerFeatures & JSON_READABLE_ANNOTATED) == 0) {
+        if ((beanInfo.readerFeatures & JSON_AUTO_WIRED_ANNOTATED) == 0) {
             return null;
         }
 

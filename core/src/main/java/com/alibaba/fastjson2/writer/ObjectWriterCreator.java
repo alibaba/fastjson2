@@ -20,7 +20,7 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.*;
 
-import static com.alibaba.fastjson2.codec.FieldInfo.JSON_WRITABLE_ANNOTATED;
+import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 
 public class ObjectWriterCreator {
@@ -194,7 +194,7 @@ public class ObjectWriterCreator {
     }
 
     protected ObjectWriter getAnnotatedObjectWriter(ObjectWriterProvider provider, Class objectClass, BeanInfo beanInfo) {
-        if ((beanInfo.writerFeatures & JSON_WRITABLE_ANNOTATED) == 0) {
+        if ((beanInfo.writerFeatures & JSON_AUTO_WIRED_ANNOTATED) == 0) {
             return null;
         }
 
