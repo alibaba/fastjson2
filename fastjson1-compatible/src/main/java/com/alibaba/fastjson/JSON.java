@@ -2,6 +2,7 @@ package com.alibaba.fastjson;
 
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.parser.ParserConfig;
+import com.alibaba.fastjson.parser.deserializer.ParseProcess;
 import com.alibaba.fastjson.serializer.*;
 import com.alibaba.fastjson.util.IOUtils;
 import com.alibaba.fastjson2.JSONFactory;
@@ -137,6 +138,41 @@ public class JSON {
 
         JSONReader jsonReader = JSONReader.of(str);
         JSONReader.Context context = jsonReader.getContext();
+        context.setArraySupplier(arraySupplier);
+        context.setObjectSupplier(defaultSupplier);
+
+        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
+        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
+            context.setDateFormat(defaultDateFormat);
+        }
+
+        config(context, features);
+
+        try {
+            ObjectReader<T> objectReader = jsonReader.getObjectReader(objectClass);
+            T object = objectReader.readObject(jsonReader, null, null, 0);
+            if (object != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            return object;
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
+            throw new JSONException(e.getMessage(), cause);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T parseObject(String str, Class<T> objectClass, ParseProcess processor, Feature... features) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+
+        JSONReader jsonReader = JSONReader.of(str);
+        JSONReader.Context context = jsonReader.getContext();
+        context.config(processor);
         context.setArraySupplier(arraySupplier);
         context.setObjectSupplier(defaultSupplier);
 
