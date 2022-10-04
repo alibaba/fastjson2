@@ -377,7 +377,7 @@ public class ObjectReaderAdapter<T>
                 }
             }
             if (fieldReader == null) {
-                jsonReader.skipValue();
+                processExtra(jsonReader, object);
                 continue;
             }
 

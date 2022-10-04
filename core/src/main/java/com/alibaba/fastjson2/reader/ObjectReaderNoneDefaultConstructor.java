@@ -121,7 +121,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
                 FieldReader fieldReader = getFieldReader(hashCode);
                 if (fieldReader == null) {
-                    jsonReader.skipValue();
+                    processExtra(jsonReader, null);
                     continue;
                 }
 
@@ -270,7 +270,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
             }
 
             if (fieldReader == null) {
-                jsonReader.skipValue();
+                processExtra(jsonReader, null);
                 continue;
             }
 
