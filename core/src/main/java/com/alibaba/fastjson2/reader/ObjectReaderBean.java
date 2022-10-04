@@ -170,11 +170,7 @@ public abstract class ObjectReaderBean<T>
             }
 
             if (fieldReader == null) {
-                if (this instanceof ObjectReaderBean) {
-                    processExtra(jsonReader, object);
-                } else {
-                    jsonReader.skipValue();
-                }
+                processExtra(jsonReader, object);
                 continue;
             }
 
@@ -298,11 +294,7 @@ public abstract class ObjectReaderBean<T>
             }
 
             if (fieldReader == null) {
-                if (this instanceof ObjectReaderBean) {
-                    processExtra(jsonReader, object);
-                } else {
-                    jsonReader.skipValue();
-                }
+                processExtra(jsonReader, object);
                 continue;
             }
 

@@ -1116,8 +1116,11 @@ public class ObjectReaderCreatorASM
                 mw.visitLabel(next_);
             }
 
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "skipValue", "()V", false);
+            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA, false);
+
             mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
         } else {
             // use switch
@@ -1227,8 +1230,12 @@ public class ObjectReaderCreatorASM
             mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
 
             mw.visitLabel(fieldReaderNull_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "skipValue", "()V", false);
+            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA, false);
+
             mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
         }
 
