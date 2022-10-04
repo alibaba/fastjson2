@@ -14,11 +14,11 @@ import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
-class ObjectReader3<T>
-        extends ObjectReaderBean<T> {
-    final FieldReader fieldReader0;
-    final FieldReader fieldReader1;
-    final FieldReader fieldReader2;
+public class ObjectReader3<T>
+        extends ObjectReaderAdapter<T> {
+    protected final FieldReader fieldReader0;
+    protected final FieldReader fieldReader1;
+    protected final FieldReader fieldReader2;
     final long hashCode0;
     final long hashCode1;
     final long hashCode2;
@@ -26,6 +26,10 @@ class ObjectReader3<T>
     final long hashCode0LCase;
     final long hashCode1LCase;
     final long hashCode2LCase;
+
+    protected ObjectReader objectReader0;
+    protected ObjectReader objectReader1;
+    protected ObjectReader objectReader2;
 
     ObjectReader3(
             Class objectClass,
@@ -37,11 +41,34 @@ class ObjectReader3<T>
             FieldReader fieldReader1,
             FieldReader fieldReader2
     ) {
-        super(objectClass, creator, null, features, schema, buildFunction);
+        this(
+                objectClass,
+                null,
+                null,
+                features,
+                schema,
+                creator,
+                buildFunction,
+                fieldReader0,
+                fieldReader1,
+                fieldReader2
+        );
+    }
 
-        this.fieldReader0 = fieldReader0;
-        this.fieldReader1 = fieldReader1;
-        this.fieldReader2 = fieldReader2;
+    public ObjectReader3(
+            Class objectClass,
+            String typeKey,
+            String typeName,
+            long features,
+            JSONSchema schema,
+            Supplier<T> creator,
+            Function buildFunction,
+            FieldReader... fieldReaders
+    ) {
+        super(objectClass, typeKey, typeName, features, schema, creator, buildFunction, fieldReaders);
+        this.fieldReader0 = fieldReaders[0];
+        this.fieldReader1 = fieldReaders[1];
+        this.fieldReader2 = fieldReaders[2];
 
         this.hashCode0 = fieldReader0.fieldNameHash;
         this.hashCode1 = fieldReader1.fieldNameHash;
@@ -71,21 +98,6 @@ class ObjectReader3<T>
         fieldReader0.acceptDefaultValue(object);
         fieldReader1.acceptDefaultValue(object);
         fieldReader2.acceptDefaultValue(object);
-    }
-
-    @Override
-    public long getFeatures() {
-        return features;
-    }
-
-    @Override
-    public Function getBuildFunction() {
-        return buildFunction;
-    }
-
-    @Override
-    public T createInstance(long features) {
-        return creator.get();
     }
 
     @Override

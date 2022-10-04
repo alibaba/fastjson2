@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 
 import java.lang.reflect.Field;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.Locale;
 
@@ -244,7 +246,16 @@ abstract class FieldReaderImplDate<T>
                         if (!formatHasHour) {
                             ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
                         } else {
-                            ldt = LocalDateTime.parse(str, formatter);
+                            try {
+                                ldt = LocalDateTime.parse(str, formatter);
+                            } catch (DateTimeParseException e) {
+                                if (jsonReader.isSupportSmartMatch(features)) {
+                                    ldt = DateUtils.parseZonedDateTime(str)
+                                            .toLocalDateTime();
+                                } else {
+                                    throw e;
+                                }
+                            }
                         }
 
                         ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());

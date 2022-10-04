@@ -63,4 +63,28 @@ public class Issue740 {
         @JSONField(format = "yyyy-MM-dd HH:mm:ss")
         public Date date;
     }
+
+    @Test
+    public void test2() {
+        assertNotNull(
+                JSON.parseObject(
+                        "{\"date\":\"2022-09-07T12:38:31.000+08:00\"}",
+                        Bean2.class,
+                        JSONReader.Feature.SupportSmartMatch
+                ).date
+        );
+        assertNotNull(
+                JSON.parseObject(
+                        "{\"date\":\"2022-09-07T12:38:31.000+08:00\"}".getBytes(StandardCharsets.UTF_8),
+                        Bean2.class,
+                        JSONReader.Feature.SupportSmartMatch
+                ).date
+        );
+    }
+
+    @Data
+    public static class Bean2{
+        @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+        public Date date;
+    }
 }

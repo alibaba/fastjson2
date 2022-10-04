@@ -36,7 +36,7 @@ public final class FieldWriter {
     /**
      * Where the constants used in this FieldWriter must be stored.
      */
-    private final SymbolTable symbolTable;
+//    private final SymbolTable symbolTable;
 
     // Note: fields are ordered as in the field_info structure, and those related to attributes are
     // ordered as in Section 4.7 of the JVMS.
@@ -66,7 +66,7 @@ public final class FieldWriter {
             final int access,
             final String name,
             final String descriptor) {
-        this.symbolTable = symbolTable;
+//        this.symbolTable = symbolTable;
         this.accessFlags = access;
         this.nameIndex = symbolTable.addConstantUtf8(name);
         this.descriptorIndex = symbolTable.addConstantUtf8(descriptor);

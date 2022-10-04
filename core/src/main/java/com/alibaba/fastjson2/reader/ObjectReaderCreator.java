@@ -149,7 +149,7 @@ public class ObjectReaderCreator {
 
     protected <T> ObjectReader<T> createObjectReaderWithBuilder(
             Class<T> objectType,
-            List<ObjectReaderModule> modules,
+            ObjectReaderProvider provider,
             BeanInfo beanInfo) {
         Function<Object, Object> builderFunction = null;
         if (beanInfo.buildMethod != null) {
@@ -169,7 +169,7 @@ public class ObjectReaderCreator {
         final FieldInfo fieldInfo = new FieldInfo();
         BeanUtils.setters(builderClass, false, method -> {
             fieldInfo.init();
-            for (ObjectReaderModule module : modules) {
+            for (ObjectReaderModule module : provider.modules) {
                 ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
                 if (annotationProcessor == null) {
                     continue;
@@ -280,7 +280,7 @@ public class ObjectReaderCreator {
 
     protected <T> ObjectReader<T> createObjectReaderWithCreator(
             Class<T> objectClass,
-            List<ObjectReaderModule> modules,
+            ObjectReaderProvider provider,
             BeanInfo beanInfo) {
         FieldInfo fieldInfo = new FieldInfo();
 
@@ -301,7 +301,7 @@ public class ObjectReaderCreator {
 
             Parameter parameter = parameters[i];
 
-            for (ObjectReaderModule module : modules) {
+            for (ObjectReaderModule module : provider.modules) {
                 ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
                 if (annotationProcessor == null) {
                     continue;
@@ -562,9 +562,7 @@ public class ObjectReaderCreator {
                 objectType,
                 objectType,
                 false,
-                JSONFactory
-                        .getDefaultObjectReaderProvider()
-                        .modules
+                JSONFactory.getDefaultObjectReaderProvider()
         );
     }
 
@@ -573,9 +571,7 @@ public class ObjectReaderCreator {
                 objectType,
                 objectType,
                 fieldBased,
-                JSONFactory
-                        .getDefaultObjectReaderProvider()
-                        .modules
+                JSONFactory.getDefaultObjectReaderProvider()
         );
     }
 
@@ -617,24 +613,17 @@ public class ObjectReaderCreator {
         return null;
     }
 
-    public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, List<ObjectReaderModule> modules) {
-        ObjectReaderProvider provider;
-        {
-            ObjectReaderProvider p = null;
-            for (ObjectReaderModule module : modules) {
-                if (p == null) {
-                    p = module.getProvider();
-                }
-            }
-            provider = p;
-        }
-
+    public <T> ObjectReader<T> createObjectReader(
+            Class<T> objectClass, Type objectType,
+            boolean fieldBased,
+            ObjectReaderProvider provider
+    ) {
         BeanInfo beanInfo = new BeanInfo();
         if (fieldBased) {
             beanInfo.readerFeatures |= JSONReader.Feature.FieldBased.mask;
         }
 
-        for (ObjectReaderModule module : modules) {
+        for (ObjectReaderModule module : provider.modules) {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor != null) {
                 annotationProcessor.getBeanInfo(beanInfo, objectClass);
@@ -659,7 +648,7 @@ public class ObjectReaderCreator {
         }
 
         if (Enum.class.isAssignableFrom(objectClass)) {
-            return createEnumReader(objectClass, beanInfo.createMethod, modules);
+            return createEnumReader(objectClass, beanInfo.createMethod, provider);
         }
 
         if (Throwable.class.isAssignableFrom(objectClass)) {
@@ -671,14 +660,14 @@ public class ObjectReaderCreator {
             fieldBased = false;
         }
 
-        FieldReader[] fieldReaderArray = createFieldReaders(objectClass, objectType, beanInfo, fieldBased, modules);
+        FieldReader[] fieldReaderArray = createFieldReaders(objectClass, objectType, beanInfo, fieldBased, provider);
 
         if (beanInfo.creatorConstructor != null || beanInfo.createMethod != null) {
-            return createObjectReaderWithCreator(objectClass, modules, beanInfo);
+            return createObjectReaderWithCreator(objectClass, provider, beanInfo);
         }
 
         if (beanInfo.builder != null) {
-            return createObjectReaderWithBuilder(objectClass, modules, beanInfo);
+            return createObjectReaderWithBuilder(objectClass, provider, beanInfo);
         }
 
         Constructor creatorConstructor = beanInfo.creatorConstructor;
@@ -759,7 +748,7 @@ public class ObjectReaderCreator {
                     && matchCount != parameterNames.length) {
                 if (creatorConstructor.getParameterCount() == 1) {
                     FieldInfo fieldInfo = new FieldInfo();
-                    for (ObjectReaderModule module : modules) {
+                    for (ObjectReaderModule module : provider.modules) {
                         ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
                         if (annotationProcessor != null) {
                             annotationProcessor.getFieldInfo(fieldInfo, objectClass, creatorConstructor, 0, creatorConstructor.getParameters()[0]);
@@ -855,9 +844,7 @@ public class ObjectReaderCreator {
                 objectClass,
                 null,
                 false,
-                JSONFactory
-                        .getDefaultObjectReaderProvider()
-                        .modules
+                JSONFactory.getDefaultObjectReaderProvider()
         );
     }
 
@@ -867,9 +854,7 @@ public class ObjectReaderCreator {
                 objectType,
                 null,
                 false,
-                JSONFactory
-                        .getDefaultObjectReaderProvider()
-                        .modules
+                JSONFactory.getDefaultObjectReaderProvider()
         );
     }
 
@@ -880,9 +865,9 @@ public class ObjectReaderCreator {
             FieldInfo fieldInfo,
             Field field,
             Map<String, FieldReader> fieldReaders,
-            List<ObjectReaderModule> modules) {
-        for (ObjectReaderModule module : modules
-        ) {
+            ObjectReaderProvider provider
+    ) {
+        for (ObjectReaderModule module : provider.modules) {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor != null) {
                 annotationProcessor.getFieldInfo(fieldInfo, objectClass, field);
@@ -965,8 +950,9 @@ public class ObjectReaderCreator {
             FieldInfo fieldInfo,
             Method method,
             Map<String, FieldReader> fieldReaders,
-            List<ObjectReaderModule> modules) {
-        for (ObjectReaderModule module : modules) {
+            ObjectReaderProvider provider
+    ) {
+        for (ObjectReaderModule module : provider.modules) {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor == null) {
                 continue;
@@ -1105,10 +1091,10 @@ public class ObjectReaderCreator {
         }
     }
 
-    protected <T> FieldReader[] createFieldReaders(Class<T> objectClass, Type objectType, BeanInfo beanInfo, boolean fieldBased, List<ObjectReaderModule> modules) {
+    protected <T> FieldReader[] createFieldReaders(Class<T> objectClass, Type objectType, BeanInfo beanInfo, boolean fieldBased, ObjectReaderProvider provider) {
         if (beanInfo == null) {
             beanInfo = new BeanInfo();
-            for (ObjectReaderModule module : modules) {
+            for (ObjectReaderModule module : provider.modules) {
                 ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
                 if (annotationProcessor != null) {
                     annotationProcessor.getBeanInfo(beanInfo, objectClass);
@@ -1128,26 +1114,26 @@ public class ObjectReaderCreator {
                 fieldInfo.init();
                 fieldInfo.features |= JSONReader.Feature.FieldBased.mask;
                 fieldInfo.features |= beanFeatures;
-                createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, modules);
+                createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, provider);
             });
         } else {
             BeanUtils.fields(objectClass, field -> {
                 fieldInfo.init();
                 fieldInfo.features |= beanFeatures;
-                createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, modules);
+                createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, provider);
             });
 
             BeanUtils.setters(objectClass, method -> {
                 fieldInfo.init();
                 fieldInfo.features |= beanFeatures;
-                createFieldReader(objectClass, objectType, namingStrategy, orders, fieldInfo, method, fieldReaders, modules);
+                createFieldReader(objectClass, objectType, namingStrategy, orders, fieldInfo, method, fieldReaders, provider);
             });
 
             if (objectClass.isInterface()) {
                 BeanUtils.getters(objectClass, method -> {
                     fieldInfo.init();
                     fieldInfo.features |= beanFeatures;
-                    createFieldReader(objectClass, objectType, namingStrategy, orders, fieldInfo, method, fieldReaders, modules);
+                    createFieldReader(objectClass, objectType, namingStrategy, orders, fieldInfo, method, fieldReaders, provider);
                 });
             }
         }
@@ -1178,6 +1164,10 @@ public class ObjectReaderCreator {
             throw new JSONException("get constructor error, class " + objectClass.getName(), e);
         }
 
+        return new ConstructorSupplier(constructor);
+    }
+
+    public <T> Supplier<T> createInstanceSupplier(Constructor constructor) {
         return new ConstructorSupplier(constructor);
     }
 
@@ -1884,7 +1874,7 @@ public class ObjectReaderCreator {
     protected ObjectReader createEnumReader(
             Class objectClass,
             Method createMethod,
-            List<ObjectReaderModule> modules
+            ObjectReaderProvider provider
     ) {
         FieldInfo fieldInfo = new FieldInfo();
 
@@ -1900,7 +1890,7 @@ public class ObjectReaderCreator {
             try {
                 fieldInfo.init();
                 Field field = objectClass.getField(name);
-                for (ObjectReaderModule module : modules) {
+                for (ObjectReaderModule module : provider.modules) {
                     ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
                     if (annotationProcessor != null) {
                         annotationProcessor.getFieldInfo(fieldInfo, objectClass, field);
@@ -1940,16 +1930,8 @@ public class ObjectReaderCreator {
             Arrays.sort(enumNameHashCodes);
         }
 
-        ObjectReaderProvider provider = null;
-        for (ObjectReaderModule module : modules) {
-            ObjectReaderProvider moduleProvider = module.getProvider();
-            if (moduleProvider != null) {
-                provider = moduleProvider;
-            }
-        }
-
         Member enumValueField = BeanUtils.getEnumValueField(objectClass, provider);
-        if (enumValueField == null && modules.size() > 0) {
+        if (enumValueField == null && provider.modules.size() > 0) {
             if (provider != null) {
                 Class fieldClassMixInSource = provider.getMixIn(objectClass);
                 if (fieldClassMixInSource != null) {

@@ -6,7 +6,7 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.RunnerException;
 
-public class JSONSchemaBenchmark {
+public class JSONSchemaBenchmark1 {
     static final JSONSchema SCHEMA_UUID = JSONObject.of("type", "string", "format", "uuid").to(JSONSchema::of);
     static final JSONSchema SCHEMA_DATETIME = JSONObject.of("type", "string", "format", "date-time").to(JSONSchema::of);
     static final JSONSchema SCHEMA_DATE = JSONObject.of("type", "string", "format", "date").to(JSONSchema::of);

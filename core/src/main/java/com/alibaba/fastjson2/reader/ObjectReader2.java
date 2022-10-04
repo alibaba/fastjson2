@@ -15,14 +15,17 @@ import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
 import static com.alibaba.fastjson2.JSONReader.Feature.SupportArrayToBean;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
-final class ObjectReader2<T>
-        extends ObjectReaderBean<T> {
-    protected final FieldReader first;
-    protected final FieldReader second;
-    protected final long firstHashCode;
-    protected final long secondHashCode;
-    protected final long firstHashCodeLCase;
-    protected final long secondHashCodeLCase;
+public class ObjectReader2<T>
+        extends ObjectReaderAdapter<T> {
+    protected final FieldReader fieldReader0;
+    protected final FieldReader fieldReader1;
+    protected final long hashCode0;
+    protected final long hashCode1;
+    protected final long hashCode0LCase;
+    protected final long hashCode1LCase;
+
+    protected ObjectReader objectReader0;
+    protected ObjectReader objectReader1;
 
     public ObjectReader2(
             Class objectClass,
@@ -31,47 +34,46 @@ final class ObjectReader2<T>
             Supplier<T> creator,
             Function buildFunction,
             FieldReader first,
-            FieldReader second) {
-        super(objectClass, creator, null, features, schema, buildFunction);
+            FieldReader second
+    ) {
+        this(objectClass, null, null, features, schema, creator, buildFunction, first, second);
+    }
 
-        this.first = first;
-        this.second = second;
+    public ObjectReader2(
+            Class objectClass,
+            String typeKey,
+            String typeName,
+            long features,
+            JSONSchema schema,
+            Supplier<T> creator,
+            Function buildFunction,
+            FieldReader... fieldReaders
+    ) {
+        super(objectClass, typeKey, typeName, features, schema, creator, buildFunction, fieldReaders);
 
-        this.firstHashCode = first.fieldNameHash;
-        this.firstHashCodeLCase = first.fieldNameHashLCase;
+        this.fieldReader0 = fieldReaders[0];
+        this.fieldReader1 = fieldReaders[1];
 
-        this.secondHashCode = second.fieldNameHash;
-        this.secondHashCodeLCase = second.fieldNameHashLCase;
+        this.hashCode0 = fieldReader0.fieldNameHash;
+        this.hashCode0LCase = fieldReader0.fieldNameHashLCase;
 
-        if (first.isUnwrapped()) {
-            extraFieldReader = first;
+        this.hashCode1 = fieldReader1.fieldNameHash;
+        this.hashCode1LCase = fieldReader1.fieldNameHashLCase;
+
+        if (fieldReader0.isUnwrapped()) {
+            extraFieldReader = fieldReader0;
         }
-        if (second.isUnwrapped()) {
-            extraFieldReader = second;
+        if (fieldReader1.isUnwrapped()) {
+            extraFieldReader = fieldReader1;
         }
 
-        hasDefaultValue = first.defaultValue != null || second.defaultValue != null;
+        hasDefaultValue = fieldReader0.defaultValue != null || fieldReader1.defaultValue != null;
     }
 
     @Override
     protected void initDefaultValue(T object) {
-        first.acceptDefaultValue(object);
-        second.acceptDefaultValue(object);
-    }
-
-    @Override
-    public long getFeatures() {
-        return features;
-    }
-
-    @Override
-    public Function getBuildFunction() {
-        return buildFunction;
-    }
-
-    @Override
-    public T createInstance(long features) {
-        return creator.get();
+        fieldReader0.acceptDefaultValue(object);
+        fieldReader1.acceptDefaultValue(object);
     }
 
     @Override
@@ -89,9 +91,9 @@ final class ObjectReader2<T>
 
         int entryCnt = jsonReader.startArray();
         if (entryCnt > 0) {
-            first.readFieldValue(jsonReader, object);
+            fieldReader0.readFieldValue(jsonReader, object);
             if (entryCnt > 1) {
-                second.readFieldValue(jsonReader, object);
+                fieldReader1.readFieldValue(jsonReader, object);
                 for (int i = 2; i < entryCnt; ++i) {
                     jsonReader.skipValue();
                 }
@@ -124,9 +126,9 @@ final class ObjectReader2<T>
 
             int entryCnt = jsonReader.startArray();
             if (entryCnt > 0) {
-                first.readFieldValue(jsonReader, object);
+                fieldReader0.readFieldValue(jsonReader, object);
                 if (entryCnt > 1) {
-                    second.readFieldValue(jsonReader, object);
+                    fieldReader1.readFieldValue(jsonReader, object);
                     for (int i = 2; i < entryCnt; ++i) {
                         jsonReader.skipValue();
                     }
@@ -170,18 +172,18 @@ final class ObjectReader2<T>
                 continue;
             }
 
-            if (hashCode == firstHashCode) {
-                first.readFieldValue(jsonReader, object);
-            } else if (hashCode == secondHashCode) {
-                second.readFieldValueJSONB(jsonReader, object);
+            if (hashCode == hashCode0) {
+                fieldReader0.readFieldValue(jsonReader, object);
+            } else if (hashCode == hashCode1) {
+                fieldReader1.readFieldValueJSONB(jsonReader, object);
             } else {
                 if (jsonReader.isSupportSmartMatch(features | this.features)) {
                     long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
-                    if (nameHashCodeLCase == firstHashCodeLCase) {
-                        first.readFieldValueJSONB(jsonReader, object);
+                    if (nameHashCodeLCase == hashCode0LCase) {
+                        fieldReader0.readFieldValueJSONB(jsonReader, object);
                         continue;
-                    } else if (nameHashCodeLCase == secondHashCodeLCase) {
-                        second.readFieldValueJSONB(jsonReader, object);
+                    } else if (nameHashCodeLCase == hashCode1LCase) {
+                        fieldReader1.readFieldValueJSONB(jsonReader, object);
                         continue;
                     }
                 }
@@ -231,8 +233,8 @@ final class ObjectReader2<T>
                     initDefaultValue(object);
                 }
 
-                first.readFieldValue(jsonReader, object);
-                second.readFieldValue(jsonReader, object);
+                fieldReader0.readFieldValue(jsonReader, object);
+                fieldReader1.readFieldValue(jsonReader, object);
                 if (jsonReader.current() != ']') {
                     throw new JSONException(jsonReader.info("array to bean end error"));
                 }
@@ -277,18 +279,18 @@ final class ObjectReader2<T>
                 }
             }
 
-            if (hashCode == firstHashCode) {
-                first.readFieldValue(jsonReader, object);
-            } else if (hashCode == secondHashCode) {
-                second.readFieldValue(jsonReader, object);
+            if (hashCode == hashCode0) {
+                fieldReader0.readFieldValue(jsonReader, object);
+            } else if (hashCode == hashCode1) {
+                fieldReader1.readFieldValue(jsonReader, object);
             } else {
                 if (jsonReader.isSupportSmartMatch(features | this.features)) {
                     long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
-                    if (nameHashCodeLCase == firstHashCodeLCase) {
-                        first.readFieldValue(jsonReader, object);
+                    if (nameHashCodeLCase == hashCode0LCase) {
+                        fieldReader0.readFieldValue(jsonReader, object);
                         continue;
-                    } else if (nameHashCodeLCase == secondHashCodeLCase) {
-                        second.readFieldValue(jsonReader, object);
+                    } else if (nameHashCodeLCase == hashCode1LCase) {
+                        fieldReader1.readFieldValue(jsonReader, object);
                         continue;
                     }
                 }
@@ -316,12 +318,12 @@ final class ObjectReader2<T>
 
     @Override
     public FieldReader getFieldReader(long hashCode) {
-        if (hashCode == firstHashCode) {
-            return first;
+        if (hashCode == hashCode0) {
+            return fieldReader0;
         }
 
-        if (hashCode == secondHashCode) {
-            return second;
+        if (hashCode == hashCode1) {
+            return fieldReader1;
         }
 
         return null;
@@ -329,12 +331,12 @@ final class ObjectReader2<T>
 
     @Override
     public FieldReader getFieldReaderLCase(long hashCode) {
-        if (hashCode == firstHashCodeLCase) {
-            return first;
+        if (hashCode == hashCode0LCase) {
+            return fieldReader0;
         }
 
-        if (hashCode == secondHashCodeLCase) {
-            return second;
+        if (hashCode == hashCode1LCase) {
+            return fieldReader1;
         }
 
         return null;

@@ -61,6 +61,12 @@ public class TypeUtils {
             }
         }
 
+        if (type instanceof GenericArrayType) {
+            Type genericComponentType = ((GenericArrayType) type).getGenericComponentType();
+            Class<?> componentClass = getClass(genericComponentType);
+            return getArrayClass(componentClass);
+        }
+
         return Object.class;
     }
 
@@ -1254,6 +1260,24 @@ public class TypeUtils {
     }
 
     public static Class<?> getArrayClass(Class componentClass) {
+        if (componentClass == int.class) {
+            return int[].class;
+        }
+        if (componentClass == byte.class) {
+            return byte[].class;
+        }
+        if (componentClass == short.class) {
+            return short[].class;
+        }
+        if (componentClass == long.class) {
+            return long[].class;
+        }
+        if (componentClass == String.class) {
+            return String[].class;
+        }
+        if (componentClass == Object.class) {
+            return Object[].class;
+        }
         return Array.newInstance(componentClass, 1).getClass();
     }
 

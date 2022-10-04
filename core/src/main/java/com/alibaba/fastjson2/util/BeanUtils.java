@@ -346,7 +346,7 @@ public abstract class BeanUtils {
         return constructors;
     }
 
-    public static Constructor getDefaultConstructor(Class objectClass) {
+    public static Constructor getDefaultConstructor(Class objectClass, boolean includeNoneStaticMember) {
         if (objectClass == StackTraceElement.class && JVM_VERSION >= 9) {
             return null;
         }
@@ -361,6 +361,10 @@ public abstract class BeanUtils {
             if (constructor.getParameterCount() == 0) {
                 return constructor;
             }
+        }
+
+        if (!includeNoneStaticMember) {
+            return null;
         }
 
         Class declaringClass = objectClass.getDeclaringClass();
@@ -1830,7 +1834,11 @@ public abstract class BeanUtils {
     }
 
     public static boolean isNoneStaticMemberClass(Class objectClass, Class memberClass) {
-        if (memberClass == null) {
+        if (memberClass == null
+                || memberClass.isPrimitive()
+                || memberClass == String.class
+                || memberClass == List.class
+        ) {
             return false;
         }
 

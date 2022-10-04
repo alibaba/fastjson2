@@ -47,7 +47,7 @@ public class ObjectReaderAdapter<T>
 
         this.constructor = objectClass == null
                 ? null
-                : BeanUtils.getDefaultConstructor(objectClass);
+                : BeanUtils.getDefaultConstructor(objectClass, true);
 
         if (constructor != null) {
             constructor.setAccessible(true);
@@ -102,17 +102,17 @@ public class ObjectReaderAdapter<T>
     }
 
     @Override
-    public String getTypeKey() {
+    public final String getTypeKey() {
         return typeKey;
     }
 
     @Override
-    public long getTypeKeyHash() {
+    public final long getTypeKeyHash() {
         return typeKeyHashCode;
     }
 
     @Override
-    public long getFeatures() {
+    public final long getFeatures() {
         return features;
     }
 
@@ -133,7 +133,7 @@ public class ObjectReaderAdapter<T>
     }
 
     @Override
-    public Function getBuildFunction() {
+    public final Function getBuildFunction() {
         return buildFunction;
     }
 

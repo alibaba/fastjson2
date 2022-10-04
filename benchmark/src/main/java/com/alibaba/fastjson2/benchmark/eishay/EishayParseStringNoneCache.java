@@ -1,12 +1,9 @@
 package com.alibaba.fastjson2.benchmark.eishay;
 
+import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.benchmark.eishay.mixin.ImageMixin;
-import com.alibaba.fastjson2.benchmark.eishay.mixin.MediaContentMixin;
-import com.alibaba.fastjson2.benchmark.eishay.mixin.MediaMixin;
-import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
-import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,23 +18,18 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
-public class EishayParseString {
+public class EishayParseStringNoneCache {
     static String str;
-    static final ObjectMapper mapper = new ObjectMapper();
-    static final Gson gson = new Gson();
-    static final ObjectReaderProvider provider = new ObjectReaderProvider();
+//    static final ObjectMapper mapper = new ObjectMapper();
+//    static final Gson gson = new Gson();
 
     static {
         try {
-            InputStream is = EishayParseString.class.getClassLoader().getResourceAsStream("data/eishay_compact.json");
+            InputStream is = EishayParseStringNoneCache.class.getClassLoader().getResourceAsStream("data/eishay_compact.json");
             str = IOUtils.toString(is, "UTF-8");
-            JSON.parseObject(str, MediaContent.class);
-
-            provider.mixIn(MediaContent.class, MediaContentMixin.class);
-            provider.mixIn(Image.class, ImageMixin.class);
-            provider.mixIn(Media.class, MediaMixin.class);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -45,43 +37,42 @@ public class EishayParseString {
 
     @Benchmark
     public void fastjson1(Blackhole bh) {
-        bh.consume(com.alibaba.fastjson.JSON.parseObject(str, MediaContent.class));
+        ParserConfig config = new ParserConfig();
+        bh.consume(com.alibaba.fastjson.JSON.parseObject(str, MediaContent.class, config));
     }
 
     @Benchmark
     public void fastjson2(Blackhole bh) {
-        bh.consume(JSON.parseObject(str, MediaContent.class));
-    }
-
-//    @Benchmark
-    public void fastjson2Mixin(Blackhole bh) {
-        bh.consume(JSON.parseObject(str, MediaContent.class, JSONFactory.createReadContext(provider)));
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        JSONReader.Context readContext = JSONFactory.createReadContext(provider);
+        bh.consume(JSON.parseObject(str, MediaContent.class, readContext));
     }
 
     @Benchmark
     public void jackson(Blackhole bh) throws Exception {
-        bh.consume(mapper.readValue(str, MediaContent.class));
+        ObjectMapper mapper = new ObjectMapper();
+        bh.consume(mapper.readValue(str, HashMap.class));
     }
 
 //    @Benchmark
     public void wastjson(Blackhole bh) throws Exception {
         bh.consume(
-                io.github.wycst.wast.json.JSON.parseObject(str, MediaContent.class)
+                io.github.wycst.wast.json.JSON.parse(str)
         );
     }
 
     @Benchmark
     public void gson(Blackhole bh) throws Exception {
+        Gson gson = new Gson();
         bh.consume(
-                gson.fromJson(str, MediaContent.class)
+                gson.fromJson(str, HashMap.class)
         );
     }
 
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
-                .include(EishayParseString.class.getName())
-                .exclude(EishayParseStringPretty.class.getName())
-                .exclude(EishayParseStringNoneCache.class.getName())
+                .include(EishayParseStringNoneCache.class.getName())
+                .exclude(EishayParseTreeStringPretty.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)
