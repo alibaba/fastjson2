@@ -190,6 +190,16 @@ public class ObjectWriterCreator {
             }
         }
 
+        if (writeUsingWriter == null) {
+            Class<?> fieldClass = field.getType();
+            if (fieldClass == Date.class && provider != null) {
+                ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                if (objectWriter != ObjectWriterImplDate.INSTANCE) {
+                    writeUsingWriter = objectWriter;
+                }
+            }
+        }
+
         return createFieldWriter(provider, fieldName, fieldInfo.ordinal, fieldInfo.features, fieldInfo.format, fieldInfo.label, field, writeUsingWriter);
     }
 
@@ -752,6 +762,15 @@ public class ObjectWriterCreator {
         method.setAccessible(true);
         Class<?> fieldClass = method.getReturnType();
         Type fieldType = method.getGenericReturnType();
+
+        if (initObjectWriter == null) {
+            if (fieldClass == Date.class && provider != null) {
+                ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                if (objectWriter != ObjectWriterImplDate.INSTANCE) {
+                    initObjectWriter = objectWriter;
+                }
+            }
+        }
 
         if (initObjectWriter != null) {
             FieldWriterObjectMethod objMethod = new FieldWriterObjectMethod(fieldName, ordinal, features, format, label, fieldType, fieldClass, method);
