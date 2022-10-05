@@ -922,6 +922,17 @@ public class JSONArray
     }
 
     /**
+     * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
+     *
+     * @param object Java Object to be serialized into JSON {@link String}
+     * @param features features to be enabled in serialization
+     * @since 2.0.15
+     */
+    public static String toJSONString(Object object, JSONWriter.Feature... features) {
+        return JSON.toJSONString(object, features);
+    }
+
+    /**
      * Serialize to JSONB bytes
      *
      * @param features features to be enabled in serialization

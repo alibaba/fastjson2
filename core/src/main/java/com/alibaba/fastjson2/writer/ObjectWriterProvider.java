@@ -245,7 +245,10 @@ public class ObjectWriterProvider
                 java.time.ZonedDateTime.class,
                 java.time.OffsetDateTime.class,
                 java.time.OffsetTime.class,
-                String.class
+                String.class,
+                Collections.emptyList().getClass(),
+                Collections.emptyMap().getClass(),
+                Collections.emptySet().getClass()
         };
 
         int[] codes = new int[classes.length];
