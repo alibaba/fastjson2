@@ -16,7 +16,6 @@ import java.util.IdentityHashMap;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 /**
@@ -721,41 +720,6 @@ public interface JSONB {
     static byte[] toBytes(String str) {
         if (str == null) {
             return new byte[]{BC_NULL};
-        }
-
-        if (JVM_VERSION == 8) {
-            char[] chars = str.toCharArray();
-            int strlen = chars.length;
-            if (strlen <= STR_ASCII_FIX_LEN) {
-                boolean ascii = true;
-                for (int i = 0; i < strlen; ++i) {
-                    if (chars[i] > 0x007F) {
-                        ascii = false;
-                        break;
-                    }
-                }
-
-                if (ascii) {
-                    byte[] bytes = new byte[chars.length + 1];
-                    bytes[0] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
-                    for (int i = 0; i < strlen; ++i) {
-                        bytes[i + 1] = (byte) chars[i];
-                    }
-                    return bytes;
-                }
-            }
-        } else if (UNSAFE_SUPPORT) {
-            int coder = UnsafeUtils.getStringCoder(str);
-            if (coder == 0) {
-                byte[] value = UnsafeUtils.getStringValue(str);
-                int strlen = value.length;
-                if (strlen <= STR_ASCII_FIX_LEN) {
-                    byte[] bytes = new byte[value.length + 1];
-                    bytes[0] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
-                    System.arraycopy(value, 0, bytes, 1, value.length);
-                    return bytes;
-                }
-            }
         }
 
         try (JSONWriter writer = new JSONWriterJSONB(
