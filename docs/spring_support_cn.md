@@ -11,7 +11,7 @@ Fastjson2采用多module的结构设计，对SpringFramework等框架的支持�
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension</artifactId>
-    <version>2.0.x</version>
+    <version>2.0.15</version>
 </dependency>
 ```
 
@@ -19,7 +19,7 @@ Fastjson2采用多module的结构设计，对SpringFramework等框架的支持�
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.x'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.15'
 }
 ```
 
