@@ -89,6 +89,75 @@ public static class Bean {
 }
 ```
 
+### 1.6 通过JSONField(value = true)配置JavaBean序列化字段和反序列化构造方式
+将@JSONField(value = true)配置在其中一个字段上，序列化时，会将对象序列化时按照该字段的值输出。将@JSONField(value = true)配置在构造函数参数上，而且该构造函数只有1个参数，就会按照这个参数来构造对象
+
+比如：
+```java
+public static class Bean2 {
+    private final int code;
+
+    public Bean2(@JSONField(value = true) int code) {
+        this.code = code;
+    }
+
+    @JSONField (value = true)
+    public int getCode() {
+        return code;
+    }
+}
+
+@Test
+public void test2() {
+    Bean2 bean = new Bean2(101);
+    String str = JSON.toJSONString(bean);
+    assertEquals("101", str);
+    Bean2 bean1 = JSON.parseObject(str, Bean2.class);
+    assertEquals(bean.code, bean1.code);
+}
+```
+
+### 1.6 通过JSONField(value = true)配置Enum基于其中一个字段序列化和反序列化
+将@JSONField(value = true)配置在enum字段上，序列化和序列化都会基于这个字段来进行，比如：
+```java
+public enum Type {
+    X(101, "Big"),
+    M(102, "Medium"),
+    S(103, "Small");
+
+    private final int code;
+    private final String name;
+
+    Type(int code, String name) {
+        this.code = code;
+        this.name = name;
+    }
+
+    @JSONField(value = true)
+    public int getCode() {
+        return code;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+public class Bean1 {
+    public Type type;
+}
+
+@Test
+public void test1() {
+    Bean1 bean = new Bean1();
+    bean.type = Type.M;
+    String str = JSON.toJSONString(bean);
+    assertEquals("{\"type\":102}", str);
+    Bean1 bean1 = JSON.parseObject(str, Bean1.class);
+    assertEquals(bean.type, bean1.type);
+}
+```
+
 ## 2. JSONType
 JSONType是配置在Class/Interface上的Annotation，可以配置改类型的所有字段的NamingStrategy、序列化和反序列化忽略的字段、JSONReader/JSONWriter的Features等。
 

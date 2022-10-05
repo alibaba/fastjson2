@@ -54,10 +54,11 @@ class Model {
 | DuplicateKeyValueAsArray        | 重复Key的Value不是替换而是组合成数组                                                                              |
 | AllowUnQuotedFieldNames         | 支持不带双引号的字段名                                                                                         |
 | NonStringKeyAsString            | 非String类型的Key当做String处理                                                                             |
+| Base64StringAsByteArray         | 将byte[]序列化为Base64格式的字符串                                                                             |
 
 # 5. JSONWriter.Feature介绍
 
-| JSONWriter.Feature                 | 介绍                                                                                      |
+| JSONWriter.Feature                | 介绍                                                                                      |
 |-----------------------------------|-----------------------------------------------------------------------------------------|
 | FieldBased                        | 基于字段反序列化，如果不配置，会默认基于public的field和getter方法序列化。配置后，会基于非static的field（包括private）做反序列化。      |
 | IgnoreNoneSerializable            | 序列化忽略非Serializable类型的字段                                                                 |
@@ -87,3 +88,4 @@ class Model {
 | NotWriteEmptyArray                | 数组类型字段当length为0时不输出                                                                     |
 | WriteNonStringKeyAsString         | 将Map中的非String类型的Key当做String类型输出                                                         |
 | ErrorOnNoneSerializable           | 序列化非Serializable对象时报错                                                                   |
+| WritePairAsJavaBean               | 将 Apache Common 包中的Pair对象当做JavaBean序列化                                                  |
