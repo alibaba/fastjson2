@@ -127,6 +127,10 @@ public abstract class JSONWriter
             return null;
         }
 
+        if (object == Collections.EMPTY_LIST || object == Collections.EMPTY_SET) {
+            return null;
+        }
+
         if (this.path == Path.ROOT) {
             this.path = fieldWriter.getRootParentPath();
         } else {
