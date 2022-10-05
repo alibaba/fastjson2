@@ -79,13 +79,6 @@ public final class JSONFactory {
         '4', '5', '6', '7', '8', '9', '+', '/'
     };
 
-    static final char[] DIGITS = {
-        '0', '1', '2', '3',
-        '4', '5', '6', '7',
-        '8', '9', 'a', 'b',
-        'c', 'd', 'e', 'f'
-    };
-
     static final int[] DIGITS2 = new int[]{
         +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
         +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
@@ -359,27 +352,7 @@ public final class JSONFactory {
     static ObjectWriterProvider defaultObjectWriterProvider = new ObjectWriterProvider();
     static ObjectReaderProvider defaultObjectReaderProvider = new ObjectReaderProvider();
 
-    static final JSONPathCompiler defaultJSONPathCompiler;
-    static {
-        JSONPathCompilerReflect compiler = null;
-        switch (JSONFactory.CREATOR) {
-            case "reflect":
-            case "lambda":
-                compiler = JSONPathCompilerReflect.INSTANCE;
-                break;
-            default:
-                try {
-                    compiler = JSONPathCompilerReflectASM.INSTANCE;
-                } catch (Throwable ignored) {
-                    // ignored
-                }
-                if (compiler == null) {
-                    compiler = JSONPathCompilerReflect.INSTANCE;
-                }
-                break;
-        }
-        defaultJSONPathCompiler = compiler;
-    }
+    static final JSONPathCompiler defaultJSONPathCompiler = JSONPathCompilerReflect.INSTANCE;
 
     static final ThreadLocal<ObjectReaderCreator> readerCreatorLocal = new ThreadLocal<>();
     static final ThreadLocal<ObjectReaderProvider> readerProviderLocal = new ThreadLocal<>();
