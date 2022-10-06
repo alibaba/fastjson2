@@ -13,7 +13,7 @@ public class EishayWriteBinaryArrayMappingTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayWriteBinaryArrayMapping-kryo millis : " + millis);
-            // zulu8.58.0.13 : 396
+            // zulu8.62.0.19 : 396
             // zulu11.52.13 :
             // zulu17.32.13 :
         }
@@ -27,9 +27,9 @@ public class EishayWriteBinaryArrayMappingTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayWriteBinaryArrayMapping-fastjson2_jsonb millis : " + millis);
-            // zulu8.58.0.13 : 182
-            // zulu11.52.13 :
-            // zulu17.32.13 :
+            // zulu8.62.0.19 : 190
+            // zulu11.52.13 : 105
+            // zulu17.32.13 : 105
         }
     }
 
@@ -41,9 +41,9 @@ public class EishayWriteBinaryArrayMappingTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayWriteBinaryArrayMapping-fury millis : " + millis);
-            // zulu8.58.0.13 : 271
-            // zulu11.52.13 :
-            // zulu17.32.13 :
+            // zulu8.62.0.19 : 271 314
+            // zulu11.52.13 : 236
+            // zulu17.32.13 : 283
         }
     }
 
