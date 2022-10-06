@@ -388,14 +388,19 @@ public class FastJsonProvider
             String dateFormat,
             int defaultFeatures,
             SerializerFeature... features) throws IOException {
-        com.alibaba.fastjson2.JSONWriter writer = com.alibaba.fastjson2.JSONWriter.ofUTF8();
-        JSONWriter.Context context = writer.getContext();
-        JSON.config(context, features);
+        for (SerializerFeature feature : features) {
+            defaultFeatures |= feature.mask;
+        }
+
+        JSONWriter.Context context = JSON.createWriteContext(config, defaultFeatures, features);
+        com.alibaba.fastjson2.JSONWriter writer = com.alibaba.fastjson2.JSONWriter.ofUTF8(context);
         context.setDateFormat(dateFormat);
 
         try {
             if (filters != null) {
-                JSON.configFilter(context, filters);
+                for (SerializeFilter filter : filters) {
+                    JSON.configFilter(context, filter);
+                }
             }
 
             writer.writeAny(object);

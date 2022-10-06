@@ -40,7 +40,7 @@ public class Issue703 {
         ObjectReaderProvider readers = new ObjectReaderProvider();
         readers.mixIn(Misc.PersistentEnum.class, PersistentEnumMixin.class);
         JSONReader.Context context = new JSONReader.Context(readers);
-        try (final JSONReader reader = JSONReader.of(context, json)) {
+        try (final JSONReader reader = JSONReader.of(json, context)) {
             ObjectReader<T> v = reader.getObjectReader(type);
             return v.readObject(reader, 0);
         }
@@ -82,7 +82,7 @@ public class Issue703 {
         ObjectReaderProvider readers = new ObjectReaderProvider(ObjectReaderCreatorLambda.INSTANCE);
         readers.mixIn(Misc.PersistentEnum.class, PersistentEnumMixin.class);
         JSONReader.Context context = new JSONReader.Context(readers);
-        try (final JSONReader reader = JSONReader.of(context, json)) {
+        try (final JSONReader reader = JSONReader.of(json, context)) {
             ObjectReader<T> v = reader.getObjectReader(type);
             return v.readObject(reader, 0);
         }
@@ -124,7 +124,7 @@ public class Issue703 {
         ObjectReaderProvider readers = new ObjectReaderProvider(ObjectReaderCreator.INSTANCE);
         readers.mixIn(Misc.PersistentEnum.class, PersistentEnumMixin.class);
         JSONReader.Context context = new JSONReader.Context(readers);
-        try (final JSONReader reader = JSONReader.of(context, json)) {
+        try (final JSONReader reader = JSONReader.of(json, context)) {
             ObjectReader<T> v = reader.getObjectReader(type);
             return v.readObject(reader, 0);
         }

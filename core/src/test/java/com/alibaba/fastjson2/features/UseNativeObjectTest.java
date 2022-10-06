@@ -41,15 +41,15 @@ public class UseNativeObjectTest {
     public void test2() {
         String str = "{}";
         {
-            JSONReader jsonReader = JSONReader.of(JSONFactory.createReadContext(HashMap::new), str);
+            JSONReader jsonReader = JSONReader.of(str, JSONFactory.createReadContext(HashMap::new));
             assertEquals(HashMap.class, jsonReader.readObject().getClass());
         }
         {
-            JSONReader jsonReader = JSONReader.of(JSONFactory.createReadContext(HashMap::new), str);
+            JSONReader jsonReader = JSONReader.of(str, JSONFactory.createReadContext(HashMap::new));
             assertEquals(HashMap.class, jsonReader.read(Object.class).getClass());
         }
         {
-            JSONReader jsonReader = JSONReader.of(JSONFactory.createReadContext(HashMap::new), str);
+            JSONReader jsonReader = JSONReader.of(str, JSONFactory.createReadContext(HashMap::new));
             assertEquals(HashMap.class, jsonReader.read(Map.class).getClass());
         }
     }

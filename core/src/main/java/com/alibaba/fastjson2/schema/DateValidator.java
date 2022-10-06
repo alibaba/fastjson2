@@ -67,7 +67,7 @@ final class DateValidator
             str.getChars(0, str.length(), chars, 1);
             chars[chars.length - 1] = '"';
 
-            return JSONReader.of(JSONSchema.CONTEXT, chars)
+            return JSONReader.of(chars, JSONSchema.CONTEXT)
                     .isLocalDate();
         } catch (DateTimeException | JSONException ignored) {
             return false;

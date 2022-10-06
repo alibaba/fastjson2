@@ -2417,7 +2417,12 @@ public abstract class JSONReader
         return new JSONReaderUTF8(context, utf8Bytes, 0, utf8Bytes.length);
     }
 
+    @Deprecated
     public static JSONReader of(JSONReader.Context context, byte[] utf8Bytes) {
+        return new JSONReaderUTF8(context, utf8Bytes, 0, utf8Bytes.length);
+    }
+
+    public static JSONReader of(byte[] utf8Bytes, JSONReader.Context context) {
         return new JSONReaderUTF8(context, utf8Bytes, 0, utf8Bytes.length);
     }
 
@@ -2430,7 +2435,18 @@ public abstract class JSONReader
                 chars.length);
     }
 
+    @Deprecated
     public static JSONReader of(Context context, char[] chars) {
+        return new JSONReaderUTF16(
+                context,
+                null,
+                chars,
+                0,
+                chars.length
+        );
+    }
+
+    public static JSONReader of(char[] chars, Context context) {
         return new JSONReaderUTF16(
                 context,
                 null,
@@ -2448,7 +2464,16 @@ public abstract class JSONReader
                 jsonbBytes.length);
     }
 
+    @Deprecated
     public static JSONReader ofJSONB(JSONReader.Context context, byte[] jsonbBytes) {
+        return new JSONReaderJSONB(
+                context,
+                jsonbBytes,
+                0,
+                jsonbBytes.length);
+    }
+
+    public static JSONReader ofJSONB(byte[] jsonbBytes, JSONReader.Context context) {
         return new JSONReaderJSONB(
                 context,
                 jsonbBytes,
@@ -2483,18 +2508,34 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(byte[] bytes, int offset, int length, Charset charset) {
-        Context ctx = JSONFactory.createReadContext();
+        Context context = JSONFactory.createReadContext();
 
         if (charset == StandardCharsets.UTF_8) {
-            return new JSONReaderUTF8(ctx, bytes, offset, length);
+            return new JSONReaderUTF8(context, bytes, offset, length);
         }
 
         if (charset == StandardCharsets.UTF_16) {
-            return new JSONReaderUTF16(ctx, bytes, offset, length);
+            return new JSONReaderUTF16(context, bytes, offset, length);
         }
 
         if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
-            return new JSONReaderASCII(ctx, null, bytes, offset, length);
+            return new JSONReaderASCII(context, null, bytes, offset, length);
+        }
+
+        throw new JSONException("not support charset " + charset);
+    }
+
+    public static JSONReader of(byte[] bytes, int offset, int length, Charset charset, Context context) {
+        if (charset == StandardCharsets.UTF_8) {
+            return new JSONReaderUTF8(context, bytes, offset, length);
+        }
+
+        if (charset == StandardCharsets.UTF_16) {
+            return new JSONReaderUTF16(context, bytes, offset, length);
+        }
+
+        if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
+            return new JSONReaderASCII(context, null, bytes, offset, length);
         }
 
         throw new JSONException("not support charset " + charset);
@@ -2508,9 +2549,25 @@ public abstract class JSONReader
         return new JSONReaderUTF16(JSONFactory.createReadContext(), null, chars, offset, length);
     }
 
+    public static JSONReader of(char[] chars, int offset, int length, Context context) {
+        return new JSONReaderUTF16(context, null, chars, offset, length);
+    }
+
     public static JSONReader of(InputStream is, Charset charset) {
         Context context = JSONFactory.createReadContext();
 
+        if (charset == StandardCharsets.UTF_8 || charset == null) {
+            return new JSONReaderUTF8(context, is);
+        }
+
+        if (charset == StandardCharsets.UTF_16) {
+            return new JSONReaderUTF16(context, is);
+        }
+
+        throw new JSONException("not support charset " + charset);
+    }
+
+    public static JSONReader of(InputStream is, Charset charset, Context context) {
         if (charset == StandardCharsets.UTF_8 || charset == null) {
             return new JSONReaderUTF8(context, is);
         }
@@ -2529,12 +2586,18 @@ public abstract class JSONReader
         );
     }
 
+    @Deprecated
     public static JSONReader of(Context context, String str) {
+        return of(str, context);
+    }
+
+    public static JSONReader of(String str) {
         if (str == null) {
             throw new NullPointerException();
         }
 
-        if (JVM_VERSION == 8 && UNSAFE_SUPPORT && str.length() > 1024 * 1024) {
+        Context context = JSONFactory.createReadContext();
+        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
             try {
                 int coder = STRING_CODER != null
                         ? STRING_CODER.applyAsInt(str)
@@ -2561,12 +2624,11 @@ public abstract class JSONReader
         return new JSONReaderUTF16(context, str, chars, 0, length);
     }
 
-    public static JSONReader of(String str) {
+    public static JSONReader of(String str, Context context) {
         if (str == null) {
             throw new NullPointerException();
         }
 
-        Context context = JSONFactory.createReadContext();
         if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
             try {
                 int coder = STRING_CODER != null

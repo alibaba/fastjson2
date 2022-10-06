@@ -108,7 +108,7 @@ public interface JSON {
             return null;
         }
 
-        try (JSONReader reader = JSONReader.of(context, text)) {
+        try (JSONReader reader = JSONReader.of(text, context)) {
             ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
             return objectReader.readObject(reader, null, null, 0);
         }
@@ -256,7 +256,7 @@ public interface JSON {
             return null;
         }
 
-        try (JSONReader reader = JSONReader.of(context, text)) {
+        try (JSONReader reader = JSONReader.of(text, context)) {
             if (reader.nextIfNull()) {
                 return null;
             }
@@ -799,7 +799,7 @@ public interface JSON {
             return null;
         }
 
-        try (JSONReader reader = JSONReader.of(context, text)) {
+        try (JSONReader reader = JSONReader.of(text, context)) {
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
 
             ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
@@ -1104,7 +1104,7 @@ public interface JSON {
             return null;
         }
 
-        try (JSONReader reader = JSONReader.of(context, utf8Bytes)) {
+        try (JSONReader reader = JSONReader.of(utf8Bytes, context)) {
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
             ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
 
