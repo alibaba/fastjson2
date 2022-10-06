@@ -1485,8 +1485,14 @@ public class JSONReaderTest1 {
     @Test
     public void testJSONB() {
         byte[] bytes = JSONB.toBytes("");
-        JSONReader jsonReader = JSONReader.ofJSONB(JSONFactory.createReadContext(), bytes);
-        assertThrows(JSONException.class, () -> jsonReader.readLocalDate11());
+        {
+            JSONReader jsonReader = JSONReader.ofJSONB(bytes, JSONFactory.createReadContext());
+            assertThrows(JSONException.class, () -> jsonReader.readLocalDate11());
+        }
+        {
+            JSONReader jsonReader = JSONReader.ofJSONB(JSONFactory.createReadContext(), bytes);
+            assertThrows(JSONException.class, () -> jsonReader.readLocalDate11());
+        }
     }
 
     @Test

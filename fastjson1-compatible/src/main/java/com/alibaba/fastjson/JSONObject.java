@@ -227,8 +227,7 @@ public class JSONObject
         }
 
         String json = JSON.toJSONString(obj);
-        JSONReader jsonReader = JSONReader.of(json);
-        config(jsonReader.getContext(), features);
+        JSONReader jsonReader = JSONReader.of(json, JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE, features));
 
         boolean fieldBased = jsonReader.getContext().isEnabled(JSONReader.Feature.FieldBased);
         ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
@@ -381,8 +380,7 @@ public class JSONObject
         }
 
         String json = JSON.toJSONString(obj);
-        JSONReader jsonReader = JSONReader.of(json);
-        config(jsonReader.getContext(), features);
+        JSONReader jsonReader = JSONReader.of(json, JSON.createReadContext(DEFAULT_PARSER_FEATURE, features));
 
         boolean fieldBased = jsonReader.getContext().isEnabled(JSONReader.Feature.FieldBased);
         ObjectReader objectReader = provider.getObjectReader(type, fieldBased);

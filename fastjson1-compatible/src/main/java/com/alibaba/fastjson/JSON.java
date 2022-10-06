@@ -46,6 +46,29 @@ public class JSON {
     public static int DEFAULT_PARSER_FEATURE;
     public static int DEFAULT_GENERATE_FEATURE;
 
+    static {
+        int features = 0;
+        features |= Feature.AutoCloseSource.getMask();
+        features |= Feature.InternFieldNames.getMask();
+        features |= Feature.UseBigDecimal.getMask();
+        features |= Feature.AllowUnQuotedFieldNames.getMask();
+        features |= Feature.AllowSingleQuotes.getMask();
+        features |= Feature.AllowArbitraryCommas.getMask();
+        features |= Feature.SortFeidFastMatch.getMask();
+        features |= Feature.IgnoreNotMatch.getMask();
+        DEFAULT_PARSER_FEATURE = features;
+    }
+
+    static {
+        int features = 0;
+        features |= SerializerFeature.QuoteFieldNames.getMask();
+        features |= SerializerFeature.SkipTransientField.getMask();
+        features |= SerializerFeature.WriteEnumUsingName.getMask();
+        features |= SerializerFeature.SortField.getMask();
+
+        DEFAULT_GENERATE_FEATURE = features;
+    }
+
     static final Supplier<List> arraySupplier = JSONArray::new;
     static final Supplier<Map> defaultSupplier = JSONObject::new;
     static final Supplier<Map> orderedSupplier = () -> new JSONObject(true);
@@ -60,21 +83,84 @@ public class JSON {
         writerProvider.register(new Fastjson1xWriterModule(writerProvider));
     }
 
-    public static JSONObject parseObject(String str) {
-        if (str == null || str.isEmpty()) {
-            return null;
+    static JSONReader.Context createReadContext(int featuresValue, Feature... features) {
+        for (Feature feature : features) {
+            featuresValue |= feature.mask;
         }
 
-        JSONReader reader = JSONReader.of(str);
-        JSONReader.Context context = reader.getContext();
-        context.config(JSONReader.Feature.AllowUnQuotedFieldNames);
-        context.setArraySupplier(arraySupplier);
-        context.setObjectSupplier(defaultSupplier);
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        JSONReader.Context context = new JSONReader.Context(provider);
+
+        if ((featuresValue & Feature.UseBigDecimal.mask) == 0) {
+            context.config(JSONReader.Feature.UseBigDecimalForDoubles);
+        }
+
+        if ((featuresValue & Feature.SupportArrayToBean.mask) != 0) {
+            context.config(JSONReader.Feature.SupportArrayToBean);
+        }
+
+        if ((featuresValue & Feature.ErrorOnEnumNotMatch.mask) != 0) {
+            context.config(JSONReader.Feature.ErrorOnEnumNotMatch);
+        }
+
+        if ((featuresValue & Feature.SupportNonPublicField.mask) != 0) {
+            context.config(JSONReader.Feature.FieldBased);
+        }
+
+        if ((featuresValue & Feature.SupportClassForName.mask) != 0) {
+            context.config(JSONReader.Feature.SupportClassForName);
+        }
+
+        if ((featuresValue & Feature.TrimStringFieldValue.mask) != 0) {
+            context.config(JSONReader.Feature.TrimString);
+        }
+
+        if ((featuresValue & Feature.ErrorOnNotSupportAutoType.mask) != 0) {
+            context.config(JSONReader.Feature.ErrorOnNotSupportAutoType);
+        }
+
+        if ((featuresValue & Feature.AllowUnQuotedFieldNames.mask) != 0) {
+            context.config(JSONReader.Feature.AllowUnQuotedFieldNames);
+        }
+
+        if ((featuresValue & Feature.UseNativeJavaObject.mask) != 0) {
+            context.config(JSONReader.Feature.UseNativeObject);
+        } else {
+            context.setArraySupplier(arraySupplier);
+            context.setObjectSupplier(
+                    (featuresValue & Feature.OrderedField.mask) != 0
+                            ? orderedSupplier
+                            : defaultSupplier
+            );
+        }
+
+        if ((featuresValue & Feature.NonStringKeyAsString.mask) != 0) {
+            context.config(JSONReader.Feature.NonStringKeyAsString);
+        }
+
+        if ((featuresValue & Feature.DisableFieldSmartMatch.mask) == 0) {
+            context.config(JSONReader.Feature.SupportSmartMatch);
+        }
+
+        if ((featuresValue & Feature.SupportAutoType.mask) != 0) {
+            context.config(JSONReader.Feature.SupportAutoType);
+        }
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
             context.setDateFormat(defaultDateFormat);
         }
+
+        return context;
+    }
+
+    public static JSONObject parseObject(String str) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+
+        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE);
+        JSONReader reader = JSONReader.of(str, context);
 
         try {
             Map<String, Object> map = new HashMap<>();
@@ -96,11 +182,8 @@ public class JSON {
             return null;
         }
 
-        JSONReader reader = JSONReader.of(text);
-        JSONReader.Context context = reader.getContext();
-        context.setArraySupplier(arraySupplier);
-        context.setObjectSupplier(defaultSupplier);
-        context.config(JSONReader.Feature.AllowUnQuotedFieldNames);
+        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader reader = JSONReader.of(text, context);
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
         if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
@@ -115,7 +198,6 @@ public class JSON {
             }
         }
 
-        config(context, features);
         try {
             Map<String, Object> map = ordered ? new LinkedHashMap() : new HashMap<>();
             reader.read(map, 0);
@@ -136,17 +218,8 @@ public class JSON {
             return null;
         }
 
-        JSONReader jsonReader = JSONReader.of(str);
-        JSONReader.Context context = jsonReader.getContext();
-        context.setArraySupplier(arraySupplier);
-        context.setObjectSupplier(defaultSupplier);
-
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
-        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setDateFormat(defaultDateFormat);
-        }
-
-        config(context, features);
+        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader jsonReader = JSONReader.of(str, context);
 
         try {
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectClass);
@@ -170,18 +243,9 @@ public class JSON {
             return null;
         }
 
-        JSONReader jsonReader = JSONReader.of(str);
-        JSONReader.Context context = jsonReader.getContext();
+        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader jsonReader = JSONReader.of(str, context);
         context.config(processor);
-        context.setArraySupplier(arraySupplier);
-        context.setObjectSupplier(defaultSupplier);
-
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
-        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setDateFormat(defaultDateFormat);
-        }
-
-        config(context, features);
 
         try {
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectClass);
@@ -208,16 +272,8 @@ public class JSON {
             return null;
         }
 
-        JSONReader jsonReader = JSONReader.of(str);
-        JSONReader.Context context = jsonReader.getContext();
-        context.setArraySupplier(arraySupplier);
-        context.setObjectSupplier(defaultSupplier);
-        context.config(JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.AllowUnQuotedFieldNames);
-
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
-        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setDateFormat(defaultDateFormat);
-        }
+        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE);
+        JSONReader jsonReader = JSONReader.of(str, context);
 
         try {
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectClass);
@@ -240,26 +296,8 @@ public class JSON {
             return null;
         }
 
-        boolean useNativeJavaObject = false;
-        for (Feature feature : features) {
-            if (feature == Feature.UseNativeJavaObject) {
-                useNativeJavaObject = true;
-            }
-        }
-
-        JSONReader jsonReader = JSONReader.of(str);
-        JSONReader.Context context = jsonReader.getContext();
-        if (!useNativeJavaObject) {
-            context.setArraySupplier(arraySupplier);
-            context.setObjectSupplier(defaultSupplier);
-        }
-
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
-        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setDateFormat(defaultDateFormat);
-        }
-
-        config(context, features);
+        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader jsonReader = JSONReader.of(str, context);
 
         try {
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
@@ -282,26 +320,8 @@ public class JSON {
             return null;
         }
 
-        boolean useNativeJavaObject = false;
-        for (Feature feature : features) {
-            if (feature == Feature.UseNativeJavaObject) {
-                useNativeJavaObject = true;
-            }
-        }
-
-        JSONReader jsonReader = JSONReader.of(str);
-        JSONReader.Context context = jsonReader.getContext();
-        if (!useNativeJavaObject) {
-            context.setArraySupplier(arraySupplier);
-            context.setObjectSupplier(defaultSupplier);
-        }
-
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
-        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setDateFormat(defaultDateFormat);
-        }
-
-        config(context, features);
+        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader jsonReader = JSONReader.of(str, context);
 
         try {
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
@@ -327,16 +347,8 @@ public class JSON {
             return null;
         }
 
-        JSONReader jsonReader = JSONReader.of(str);
-        JSONReader.Context context = jsonReader.getContext();
-        context.setArraySupplier(arraySupplier);
-        context.setObjectSupplier(defaultSupplier);
-        context.config(JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.AllowUnQuotedFieldNames);
-
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
-        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setDateFormat(defaultDateFormat);
-        }
+        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader jsonReader = JSONReader.of(str, context);
 
         try {
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
@@ -377,17 +389,8 @@ public class JSON {
             return null;
         }
 
-        JSONReader jsonReader = JSONReader.of(is, charset);
-        JSONReader.Context context = jsonReader.getContext();
-        context.setArraySupplier(arraySupplier);
-        context.setObjectSupplier(defaultSupplier);
-
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
-        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setDateFormat(defaultDateFormat);
-        }
-
-        config(context, features);
+        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader jsonReader = JSONReader.of(is, charset, context);
 
         try {
             ObjectReader<T> objectReader = jsonReader.getObjectReader(objectType);
@@ -413,15 +416,8 @@ public class JSON {
             return null;
         }
 
-        JSONReader reader = JSONReader.of(jsonBytes);
-        JSONReader.Context context = reader.getContext();
-        context.setArraySupplier(arraySupplier);
-        context.setObjectSupplier(defaultSupplier);
-
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
-        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setDateFormat(defaultDateFormat);
-        }
+        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader reader = JSONReader.of(jsonBytes, context);
 
         boolean ordered = false;
         for (Feature feature : features) {
@@ -431,7 +427,6 @@ public class JSON {
             }
         }
 
-        config(context, features);
         try {
             Map<String, Object> map = ordered ? new LinkedHashMap<>() : new HashMap<>();
             reader.read(map, 0);
@@ -452,17 +447,9 @@ public class JSON {
             return null;
         }
 
-        JSONReader jsonReader = JSONReader.of(jsonBytes);
-        JSONReader.Context context = jsonReader.getContext();
-        context.setObjectSupplier(defaultSupplier);
-        context.setArraySupplier(arraySupplier);
+        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader jsonReader = JSONReader.of(jsonBytes, context);
 
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
-        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setDateFormat(defaultDateFormat);
-        }
-
-        config(context, features);
         try {
             ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
             T object = objectReader.readObject(jsonReader, null, null, 0);
@@ -484,21 +471,13 @@ public class JSON {
             return null;
         }
 
-        JSONReader jsonReader = JSONReader.of(jsonBytes);
-        JSONReader.Context context = jsonReader.getContext();
-        context.setObjectSupplier(defaultSupplier);
-        context.setArraySupplier(arraySupplier);
-
-        String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
-        if (!"yyyy-MM-dd HH:mm:ss".equals(defaultDateFormat)) {
-            context.setDateFormat(defaultDateFormat);
-        }
+        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader jsonReader = JSONReader.of(jsonBytes, context);
 
         if (filter instanceof Filter) {
             context.config((Filter) filter);
         }
 
-        config(context, features);
         try {
             ObjectReader<T> objectReader = jsonReader.getObjectReader(type);
             T object = objectReader.readObject(jsonReader, null, null, 0);
@@ -520,71 +499,14 @@ public class JSON {
             return null;
         }
 
-        try (JSONReader jsonReader = JSONReader.of(str)) {
-            JSONReader.Context context = jsonReader.getContext();
-            context.setObjectSupplier(defaultSupplier);
-            context.setArraySupplier(arraySupplier);
-            config(context, features);
+        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        try (JSONReader jsonReader = JSONReader.of(str, context)) {
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
                 return jsonReader.read(JSONObject.class);
             }
             return jsonReader.readAny();
         } catch (Exception ex) {
             throw new JSONException(ex.getMessage(), ex);
-        }
-    }
-
-    protected static void config(JSONReader.Context context, Feature[] features) {
-        for (Feature feature : features) {
-            switch (feature) {
-                case SupportArrayToBean:
-                    context.config(JSONReader.Feature.SupportArrayToBean);
-                    break;
-                case SupportAutoType:
-                    context.config(JSONReader.Feature.SupportAutoType);
-                    break;
-                case ErrorOnEnumNotMatch:
-                    context.config(JSONReader.Feature.ErrorOnEnumNotMatch);
-                    break;
-                case SupportNonPublicField:
-                    context.config(JSONReader.Feature.FieldBased);
-                    break;
-                case SupportClassForName:
-                    context.config(JSONReader.Feature.SupportClassForName);
-                    break;
-                case TrimStringFieldValue:
-                    context.config(JSONReader.Feature.TrimString);
-                    break;
-                case ErrorOnNotSupportAutoType:
-                    context.config(JSONReader.Feature.ErrorOnNotSupportAutoType);
-                    break;
-                case AllowUnQuotedFieldNames:
-                    context.config(JSONReader.Feature.AllowUnQuotedFieldNames);
-                    break;
-                case OrderedField:
-                    context.setObjectSupplier(orderedSupplier);
-                    break;
-                case UseNativeJavaObject:
-                    context.config(JSONReader.Feature.UseNativeObject);
-                    break;
-                case NonStringKeyAsString:
-                    context.config(JSONReader.Feature.NonStringKeyAsString);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        boolean disableFieldSmartMatch = false;
-        for (Feature feature : features) {
-            if (feature == Feature.DisableFieldSmartMatch) {
-                disableFieldSmartMatch = true;
-                break;
-            }
-        }
-
-        if (!disableFieldSmartMatch) {
-            context.config(JSONReader.Feature.SupportSmartMatch);
         }
     }
 
@@ -617,8 +539,8 @@ public class JSON {
 
             int position = charBuf.position();
 
-            JSONReader jsonReader = JSONReader.of(chars, 0, position);
-            JSONReader.Context context = jsonReader.getContext();
+            JSONReader.Context context = createReadContext(features);
+            JSONReader jsonReader = JSONReader.of(chars, 0, position, context);
 
             for (Feature feature : Feature.values()) {
                 if ((features & feature.mask) != 0) {
@@ -675,14 +597,9 @@ public class JSON {
 
             int position = charByte.position();
 
-            JSONReader jsonReader = JSONReader.of(chars, 0, position);
+            JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+            JSONReader jsonReader = JSONReader.of(chars, 0, position, context);
 
-            JSONReader.Context context = jsonReader.getContext();
-            context.setObjectSupplier(defaultSupplier);
-            context.setArraySupplier(arraySupplier);
-            context.config(JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.AllowUnQuotedFieldNames);
-
-            config(context, features);
             T object = jsonReader.read(clazz);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
@@ -702,8 +619,9 @@ public class JSON {
             Charset charset,
             Type clazz,
             Feature... features) {
-        try (JSONReader jsonReader = JSONReader.of(input, off, len, charset)) {
-            config(jsonReader.getContext(), features);
+        try (JSONReader jsonReader =
+                     JSONReader.of(input, off, len, charset, createReadContext(DEFAULT_PARSER_FEATURE, features))
+        ) {
             T object = jsonReader.read(clazz);
             if (object != null) {
                 jsonReader.handleResolveTasks(object);
@@ -712,13 +630,120 @@ public class JSON {
         }
     }
 
+    public static JSONWriter.Context createWriteContext(SerializeConfig config, int featuresValue, SerializerFeature... features) {
+        for (SerializerFeature feature : features) {
+            featuresValue |= feature.mask;
+        }
+
+        JSONWriter.Context context = new JSONWriter.Context(config.getProvider());
+
+        if (config.fieldBased) {
+            context.config(JSONWriter.Feature.FieldBased);
+        }
+
+        if (config.propertyNamingStrategy != null
+                && config.propertyNamingStrategy != PropertyNamingStrategy.NeverUseThisValueExceptDefaultValue) {
+            NameFilter nameFilter = NameFilter.of(config.propertyNamingStrategy);
+            configFilter(context, nameFilter);
+        }
+
+        if ((featuresValue & SerializerFeature.DisableCircularReferenceDetect.mask) == 0) {
+            context.config(JSONWriter.Feature.ReferenceDetection);
+        }
+
+        if ((featuresValue & SerializerFeature.UseISO8601DateFormat.mask) != 0) {
+            context.setDateFormat("iso8601");
+        } else {
+            context.setDateFormat("millis");
+        }
+
+        if ((featuresValue & SerializerFeature.WriteMapNullValue.mask) != 0) {
+            context.config(JSONWriter.Feature.WriteMapNullValue);
+        }
+
+        if ((featuresValue & SerializerFeature.WriteNullListAsEmpty.mask) != 0) {
+            context.config(JSONWriter.Feature.WriteNullListAsEmpty);
+        }
+
+        if ((featuresValue & SerializerFeature.WriteNullStringAsEmpty.mask) != 0) {
+            context.config(JSONWriter.Feature.WriteNullStringAsEmpty);
+        }
+
+        if ((featuresValue & SerializerFeature.WriteNullNumberAsZero.mask) != 0) {
+            context.config(JSONWriter.Feature.WriteNullNumberAsZero);
+        }
+
+        if ((featuresValue & SerializerFeature.WriteNullBooleanAsFalse.mask) != 0) {
+            context.config(JSONWriter.Feature.WriteNullBooleanAsFalse);
+        }
+
+        if ((featuresValue & SerializerFeature.BrowserCompatible.mask) != 0) {
+            context.config(JSONWriter.Feature.BrowserCompatible);
+        }
+
+        if ((featuresValue & SerializerFeature.WriteClassName.mask) != 0) {
+            context.config(JSONWriter.Feature.WriteClassName);
+        }
+
+        if ((featuresValue & SerializerFeature.WriteNonStringValueAsString.mask) != 0) {
+            context.config(JSONWriter.Feature.WriteNonStringValueAsString);
+        }
+
+        if ((featuresValue & SerializerFeature.WriteEnumUsingToString.mask) != 0) {
+            context.config(JSONWriter.Feature.WriteEnumUsingToString);
+        }
+
+        if ((featuresValue & SerializerFeature.NotWriteRootClassName.mask) != 0) {
+            context.config(JSONWriter.Feature.NotWriteRootClassName);
+        }
+
+        if ((featuresValue & SerializerFeature.IgnoreErrorGetter.mask) != 0) {
+            context.config(JSONWriter.Feature.IgnoreErrorGetter);
+        }
+
+        if ((featuresValue & SerializerFeature.WriteDateUseDateFormat.mask) != 0) {
+            context.setDateFormat(JSON.DEFFAULT_DATE_FORMAT);
+        }
+
+        if ((featuresValue & SerializerFeature.BeanToArray.mask) != 0) {
+            context.config(JSONWriter.Feature.BeanToArray);
+        }
+
+        if ((featuresValue & SerializerFeature.UseSingleQuotes.mask) != 0) {
+            context.config(JSONWriter.Feature.UseSingleQuotes);
+        }
+
+        if ((featuresValue & SerializerFeature.MapSortField.mask) != 0) {
+            context.config(JSONWriter.Feature.MapSortField);
+        }
+
+        if ((featuresValue & SerializerFeature.PrettyFormat.mask) != 0) {
+            context.config(JSONWriter.Feature.PrettyFormat);
+        }
+
+        if ((featuresValue & SerializerFeature.WriteNonStringKeyAsString.mask) != 0) {
+            context.config(JSONWriter.Feature.WriteNonStringKeyAsString);
+        }
+
+        if ((featuresValue & SerializerFeature.IgnoreNonFieldGetter.mask) != 0) {
+            context.config(JSONWriter.Feature.IgnoreNonFieldGetter);
+        }
+
+        if (defaultTimeZone != null && defaultTimeZone != DEFAULT_TIME_ZONE) {
+            context.setZoneId(defaultTimeZone.toZoneId());
+        }
+
+        return context;
+    }
+
     public static String toJSONString(Object object, SerializeFilter[] filters, SerializerFeature... features) {
-        JSONWriter.Context context = JSONFactory.createWriteContext();
-        config(context, features);
+        JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
 
         try (JSONWriter writer = JSONWriter.of(context)) {
             writer.setRootObject(object);
-            configFilter(context, filters);
+            for (SerializeFilter filter : filters) {
+                configFilter(context, filter);
+            }
 
             if (object == null) {
                 writer.writeNull();
@@ -737,13 +762,7 @@ public class JSON {
         }
     }
 
-    public static void configFilter(JSONWriter.Context context, SerializeFilter... filters) {
-        for (SerializeFilter filter : filters) {
-            configFilter(context, filter);
-        }
-    }
-
-    static void configFilter(JSONWriter.Context context, SerializeFilter filter) {
+    public static void configFilter(JSONWriter.Context context, SerializeFilter filter) {
         if (filter instanceof NameFilter) {
             context.setNameFilter((NameFilter) filter);
         }
@@ -778,12 +797,12 @@ public class JSON {
     }
 
     public static byte[] toJSONBytes(Object object, SerializeFilter[] filters, SerializerFeature... features) {
-        JSONWriter.Context context = JSONFactory.createWriteContext();
-        config(context, features);
-
+        JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
         try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
             writer.setRootObject(object);
-            configFilter(context, filters);
+            for (SerializeFilter filter : filters) {
+                configFilter(context, filter);
+            }
 
             if (object == null) {
                 writer.writeNull();
@@ -803,11 +822,12 @@ public class JSON {
     }
 
     public static String toJSONString(Object object, boolean prettyFormat) {
-        JSONWriter.Context context = JSONFactory.createWriteContext(JSONWriter.Feature.ReferenceDetection);
-        if (prettyFormat) {
-            context.config(JSONWriter.Feature.PrettyFormat);
-        }
-        context.setDateFormat("millis");
+        SerializerFeature[] features = prettyFormat
+                ? new SerializerFeature[]{SerializerFeature.PrettyFormat}
+                : new SerializerFeature[0];
+        JSONWriter.Context context =
+                createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
+
         try (JSONWriter writer = JSONWriter.of(context)) {
             writer.setRootObject(object);
 
@@ -829,8 +849,7 @@ public class JSON {
     }
 
     public static String toJSONString(Object object) {
-        JSONWriter.Context context = JSONFactory.createWriteContext(JSONWriter.Feature.ReferenceDetection);
-        context.setDateFormat("millis");
+        JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE);
         try (JSONWriter writer = JSONWriter.of(context)) {
             writer.setRootObject(object);
 
@@ -854,15 +873,15 @@ public class JSON {
     }
 
     public static String toJSONString(Object object, SerializeFilter filter0, SerializeFilter filter1, SerializeFilter... filters) {
-        JSONWriter.Context context = JSONFactory.createWriteContext();
-        context.setDateFormat("millis");
+        JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE);
         configFilter(context, filter0);
         configFilter(context, filter1);
-        configFilter(context, filters);
+        for (SerializeFilter filter : filters) {
+            configFilter(context, filter);
+        }
 
         try (JSONWriter writer = JSONWriter.of(context)) {
             writer.setRootObject(object);
-            configFilter(context, filters);
 
             if (object == null) {
                 writer.writeNull();
@@ -882,9 +901,7 @@ public class JSON {
     }
 
     public static String toJSONString(Object object, SerializerFeature... features) {
-        JSONWriter.Context context = JSONFactory.createWriteContext();
-        context.setDateFormat("millis");
-        config(context, features);
+        JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
 
         try (JSONWriter writer = JSONWriter.of(context)) {
             writer.setRootObject(object);
@@ -907,8 +924,7 @@ public class JSON {
     }
 
     public static byte[] toJSONBytes(Object object) {
-        JSONWriter.Context context = JSONFactory.createWriteContext(JSONWriter.Feature.ReferenceDetection);
-        context.setDateFormat("millis");
+        JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE);
         try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
             writer.setRootObject(object);
 
@@ -934,8 +950,7 @@ public class JSON {
     }
 
     public static byte[] toJSONBytes(Object object, SerializerFeature... features) {
-        JSONWriter.Context context = JSONFactory.createWriteContext();
-        config(context, features);
+        JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
 
         try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
             writer.setRootObject(object);
@@ -957,106 +972,9 @@ public class JSON {
         }
     }
 
-    public static void config(JSONWriter.Context ctx, SerializerFeature[] features) {
-        ctx.setDateFormat("millis");
-        if (defaultTimeZone != null && defaultTimeZone != DEFAULT_TIME_ZONE) {
-            ctx.setZoneId(defaultTimeZone.toZoneId());
-        }
-
-        boolean disableCircularReferenceDetect = false;
-        for (SerializerFeature feature : features) {
-            if (feature == SerializerFeature.DisableCircularReferenceDetect) {
-                disableCircularReferenceDetect = true;
-                break;
-            }
-        }
-        if (!disableCircularReferenceDetect) {
-            ctx.config(JSONWriter.Feature.ReferenceDetection);
-        }
-
-        for (SerializerFeature feature : features) {
-            config(ctx, feature);
-        }
-    }
-
-    static void config(JSONWriter.Context context, SerializerFeature feature) {
-        switch (feature) {
-            case UseISO8601DateFormat:
-                context.setDateFormat("iso8601");
-                break;
-            case WriteMapNullValue:
-                context.config(JSONWriter.Feature.WriteNulls);
-                break;
-            case WriteNullListAsEmpty:
-                context.config(JSONWriter.Feature.WriteNullListAsEmpty);
-                break;
-            case WriteNullStringAsEmpty:
-                context.config(JSONWriter.Feature.WriteNullStringAsEmpty);
-                break;
-            case WriteNullNumberAsZero:
-                context.config(JSONWriter.Feature.WriteNullNumberAsZero);
-                break;
-            case WriteNullBooleanAsFalse:
-                context.config(JSONWriter.Feature.WriteNullBooleanAsFalse);
-                break;
-            case BrowserCompatible:
-                context.config(JSONWriter.Feature.BrowserCompatible);
-                break;
-            case WriteClassName:
-                context.config(JSONWriter.Feature.WriteClassName);
-                break;
-            case WriteNonStringValueAsString:
-                context.config(JSONWriter.Feature.WriteNonStringValueAsString);
-                break;
-            case WriteEnumUsingToString:
-                context.config(JSONWriter.Feature.WriteEnumUsingToString);
-                break;
-            case NotWriteRootClassName:
-                context.config(JSONWriter.Feature.NotWriteRootClassName);
-                break;
-            case IgnoreErrorGetter:
-                context.config(JSONWriter.Feature.IgnoreErrorGetter);
-                break;
-            case WriteDateUseDateFormat:
-                context.setDateFormat(JSON.DEFFAULT_DATE_FORMAT);
-                break;
-            case BeanToArray:
-                context.config(JSONWriter.Feature.BeanToArray);
-                break;
-            case UseSingleQuotes:
-                context.config(JSONWriter.Feature.UseSingleQuotes);
-                break;
-            case MapSortField:
-                context.config(JSONWriter.Feature.MapSortField);
-                break;
-            case PrettyFormat:
-                context.config(JSONWriter.Feature.PrettyFormat);
-                break;
-            case WriteNonStringKeyAsString:
-                context.config(JSONWriter.Feature.WriteNonStringKeyAsString);
-                break;
-            case IgnoreNonFieldGetter:
-                context.config(JSONWriter.Feature.IgnoreNonFieldGetter);
-                break;
-            default:
-                break;
-        }
-    }
-
     public static String toJSONString(Object object, SerializeConfig config, SerializerFeature... features) {
-        JSONWriter.Context context = JSONFactory.createWriteContext(config.getProvider());
+        JSONWriter.Context context = createWriteContext(config, DEFAULT_GENERATE_FEATURE, features);
         try (JSONWriter writer = JSONWriter.of(context)) {
-            if (config.propertyNamingStrategy != null
-                    && config.propertyNamingStrategy != PropertyNamingStrategy.NeverUseThisValueExceptDefaultValue) {
-                NameFilter nameFilter = NameFilter.of(config.propertyNamingStrategy);
-                configFilter(context, nameFilter);
-            }
-
-            if (config.fieldBased) {
-                context.config(JSONWriter.Feature.FieldBased);
-            }
-
-            config(context, features);
             writer.writeAny(object);
             return writer.toString();
         }
@@ -1067,8 +985,7 @@ public class JSON {
             SerializeConfig config,
             SerializeFilter filter,
             SerializerFeature... features) {
-        JSONWriter.Context context = JSONFactory.createWriteContext(config.getProvider());
-
+        JSONWriter.Context context = createWriteContext(config, DEFAULT_GENERATE_FEATURE, features);
         try (JSONWriter writer = JSONWriter.of(context)) {
             if (config.propertyNamingStrategy != null
                     && config.propertyNamingStrategy != PropertyNamingStrategy.NeverUseThisValueExceptDefaultValue) {
@@ -1080,12 +997,7 @@ public class JSON {
                 }
             }
 
-            if (config.fieldBased) {
-                context.config(JSONWriter.Feature.FieldBased);
-            }
-
             configFilter(context, filter);
-            config(context, features);
 
             if (object == null) {
                 writer.writeNull();
@@ -1103,11 +1015,10 @@ public class JSON {
             Object object,
             SerializeFilter filter,
             SerializerFeature... features) {
-        try (JSONWriter jsonWriter = JSONWriter.of()) {
-            JSONWriter.Context context = jsonWriter.getContext();
-            configFilter(context, filter);
-            config(context, features);
+        JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
+        configFilter(context, filter);
 
+        try (JSONWriter jsonWriter = JSONWriter.of(context)) {
             if (object == null) {
                 jsonWriter.writeNull();
             } else {
@@ -1120,19 +1031,8 @@ public class JSON {
     }
 
     public static String toJSONString(Object object, int defaultFeatures, SerializerFeature... features) {
-        try (JSONWriter jsonWriter = JSONWriter.of()) {
-            JSONWriter.Context context = jsonWriter.getContext();
-
-            if (defaultFeatures != 0) {
-                for (SerializerFeature feature : SerializerFeature.values()) {
-                    if ((defaultFeatures & feature.mask) != 0) {
-                        config(context, feature);
-                    }
-                }
-            }
-
-            config(context, features);
-
+        JSONWriter.Context context = createWriteContext(SerializeConfig.global, defaultFeatures, features);
+        try (JSONWriter jsonWriter = JSONWriter.of(context)) {
             if (object == null) {
                 jsonWriter.writeNull();
             } else {
@@ -1144,17 +1044,12 @@ public class JSON {
         }
     }
 
-    public static String toJSONStringWithDateFormat(Object object, String dateFormat,
-                                                    SerializerFeature... features) {
-        //return toJSONString(object, SerializeConfig.globalInstance, null, dateFormat, DEFAULT_GENERATE_FEATURE, features);
-        try (JSONWriter jsonWriter = JSONWriter.of()) {
-            for (SerializerFeature feature : features) {
-                if (feature == SerializerFeature.WriteMapNullValue) {
-                    jsonWriter.config(JSONWriter.Feature.WriteNulls);
-                }
-            }
-
-            JSONWriter.Context context = jsonWriter.getContext();
+    public static String toJSONStringWithDateFormat(
+            Object object, String dateFormat,
+            SerializerFeature... features
+    ) {
+        JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
+        try (JSONWriter jsonWriter = JSONWriter.of(context)) {
             context.setDateFormat(dateFormat);
 
             if (object == null) {
@@ -1185,12 +1080,14 @@ public class JSON {
             OutputStream os,
             Object object,
             SerializeFilter[] filters,
-            SerializerFeature... features) throws IOException {
-        try (JSONWriter jsonWriter = JSONWriter.ofUTF8()) {
-            JSONWriter.Context context = jsonWriter.getContext();
+            SerializerFeature... features
+    ) throws IOException {
+        JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
+        try (JSONWriter jsonWriter = JSONWriter.ofUTF8(context)) {
             jsonWriter.setRootObject(object);
-            config(context, features);
-            configFilter(context, filters);
+            for (SerializeFilter filter : filters) {
+                configFilter(context, filter);
+            }
 
             if (object == null) {
                 jsonWriter.writeNull();
@@ -1214,12 +1111,7 @@ public class JSON {
             return null;
         }
 
-        try (JSONReader jsonReader = JSONReader.of(str)) {
-            JSONReader.Context context = jsonReader.getContext();
-            context.setObjectSupplier(defaultSupplier);
-            context.setArraySupplier(arraySupplier);
-            config(context, features);
-
+        try (JSONReader jsonReader = JSONReader.of(str, createReadContext(DEFAULT_PARSER_FEATURE, features))) {
             if (jsonReader.nextIfNull()) {
                 return null;
             }
@@ -1236,11 +1128,7 @@ public class JSON {
         }
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
 
-        try (JSONReader reader = JSONReader.of(text)) {
-            JSONReader.Context context = reader.getContext();
-            context.setObjectSupplier(defaultSupplier);
-            context.setArraySupplier(arraySupplier);
-            context.config(JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.AllowUnQuotedFieldNames);
+        try (JSONReader reader = JSONReader.of(text, createReadContext(DEFAULT_PARSER_FEATURE))) {
             return reader.read(paramType);
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
@@ -1257,13 +1145,7 @@ public class JSON {
         }
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
 
-        try (JSONReader reader = JSONReader.of(text)) {
-            JSONReader.Context context = reader.getContext();
-            context.setObjectSupplier(defaultSupplier);
-            context.setArraySupplier(arraySupplier);
-
-            config(context, features);
-
+        try (JSONReader reader = JSONReader.of(text, createReadContext(DEFAULT_PARSER_FEATURE, features))) {
             return reader.read(paramType);
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
@@ -1314,12 +1196,7 @@ public class JSON {
         }
         List array = new JSONArray(types.length);
 
-        try (JSONReader reader = JSONReader.of(text)) {
-            JSONReader.Context context = reader.getContext();
-            context.setObjectSupplier(defaultSupplier);
-            context.setArraySupplier(arraySupplier);
-            context.config(JSONReader.Feature.SupportSmartMatch, JSONReader.Feature.AllowUnQuotedFieldNames);
-
+        try (JSONReader reader = JSONReader.of(text, createReadContext(DEFAULT_GENERATE_FEATURE))) {
             reader.startArray();
             for (Type itemType : types) {
                 array.add(

@@ -6094,7 +6094,7 @@ public abstract class JSONPath {
         boolean negative;
 
         public JSONPathParser(String str) {
-            this.jsonReader = JSONReader.of(PARSE_CONTEXT, this.path = str);
+            this.jsonReader = JSONReader.of(this.path = str, PARSE_CONTEXT);
 
             if (jsonReader.ch == 'l' && jsonReader.nextIfMatchIdent('l', 'a', 'x')) {
                 lax = true;
