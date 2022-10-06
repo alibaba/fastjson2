@@ -27,7 +27,7 @@ public class EishayWriteBinaryArrayMappingTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayWriteBinaryArrayMapping-fastjson2_jsonb millis : " + millis);
-            // zulu8.62.0.19 : 190
+            // zulu8.62.0.19 : 190 168
             // zulu11.52.13 : 105
             // zulu17.32.13 : 105
         }

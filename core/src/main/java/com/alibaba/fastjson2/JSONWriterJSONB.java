@@ -637,11 +637,49 @@ final class JSONWriterJSONB
         }
 
         char[] chars = JDKUtils.getCharArray(str);
+        final int strlen = chars.length;
 
         boolean ascii = true;
+
+        if (chars.length < STR_ASCII_FIX_LEN) {
+            final int mark = off;
+
+            int minCapacity = off + 1 + strlen;
+            if (minCapacity - bytes.length > 0) {
+                int oldCapacity = bytes.length;
+                int newCapacity = oldCapacity + (oldCapacity >> 1);
+                if (newCapacity - minCapacity < 0) {
+                    newCapacity = minCapacity;
+                }
+                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    throw new OutOfMemoryError();
+                }
+
+                // minCapacity is usually close to size, so this is a win:
+                bytes = Arrays.copyOf(bytes, newCapacity);
+            }
+
+            bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            for (int i = 0; i < chars.length; i++) {
+                char ch = chars[i];
+                if (ch > 0x007F) {
+                    ascii = false;
+                    break;
+                }
+                bytes[off++] = (byte) ch;
+            }
+
+            if (ascii) {
+                return;
+            }
+
+            off = mark;
+        }
+
         {
             int i = 0;
-            while (i + 4 <= chars.length) {
+            int upperBound = chars.length & ~3;
+            for (; i < upperBound; i += 4) {
                 char c0 = chars[i];
                 char c1 = chars[i + 1];
                 char c2 = chars[i + 2];
@@ -650,7 +688,6 @@ final class JSONWriterJSONB
                     ascii = false;
                     break;
                 }
-                i += 4;
             }
             if (ascii) {
                 for (; i < chars.length; ++i) {
@@ -662,7 +699,6 @@ final class JSONWriterJSONB
             }
         }
 
-        final int strlen = chars.length;
         int minCapacity = (ascii ? strlen : strlen * 3)
                 + off
                 + 5 /*max str len*/

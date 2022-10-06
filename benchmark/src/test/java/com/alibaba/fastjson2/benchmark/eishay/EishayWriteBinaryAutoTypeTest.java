@@ -41,7 +41,7 @@ public class EishayWriteBinaryAutoTypeTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayWriteBinaryAutoType-fastjson2JSONB_ArrayMapping millis : " + millis);
-            // zulu8.58.0.13 : 277
+            // zulu8.58.0.13 : 277 229
             // zulu11.52.13 : 181
             // zulu17.32.13 : 184
         }
@@ -55,7 +55,7 @@ public class EishayWriteBinaryAutoTypeTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayWriteBinaryAutoType-fastjson2JSONB_symbols millis : " + millis);
-            // zulu8.58.0.13 :
+            // zulu8.58.0.13 : 388
             // zulu11.52.13 :
             // zulu17.32.13 : 339
         }
@@ -69,16 +69,16 @@ public class EishayWriteBinaryAutoTypeTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayWriteBinaryAutoType-fastjson2_jsonb millis : " + millis);
-            // zulu8.62.0.19 : 414
+            // zulu8.62.0.19 : 414 405
             // zulu11.52.13 : 342
             // zulu17.32.13 : 358
         }
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2JSONB();
+//        fastjson2JSONB();
 //        fastjson2JSONB_symbols();
-//        fastjson2JSONB_ArrayMapping();
+        fastjson2JSONB_ArrayMapping();
 //        fastjson2UTF8Bytes();
 //        hessian();
     }
