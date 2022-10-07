@@ -428,6 +428,14 @@ public final class JSONFactory {
         return new JSONReader.Context(provider);
     }
 
+    public static JSONReader.Context createReadContext(JSONReader.Feature... features) {
+        JSONReader.Context context = new JSONReader.Context(
+                JSONFactory.getDefaultObjectReaderProvider()
+        );
+        context.config(features);
+        return context;
+    }
+
     public static JSONReader.Context createReadContext(ObjectReaderProvider provider, JSONReader.Feature... features) {
         JSONReader.Context context = new JSONReader.Context(provider);
         context.config(features);
