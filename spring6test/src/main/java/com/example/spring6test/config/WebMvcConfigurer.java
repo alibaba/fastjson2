@@ -18,8 +18,14 @@ import java.util.List;
 @Configuration
 @EnableWebMvc
 public class WebMvcConfigurer implements org.springframework.web.servlet.config.annotation.WebMvcConfigurer {
+    /**
+     * 与org.springframework.web.servlet.config.annotation.WebMvcConfigurer.configureMessageConverters()方法的区别是：
+     *  使用configureMessageConverters方法会导致springboot不会注入默认的消息转换器
+     *
+     * @param converters
+     */
     @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
         FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
         FastJsonConfig config = new FastJsonConfig();
         config.setDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -34,11 +40,6 @@ public class WebMvcConfigurer implements org.springframework.web.servlet.config.
         converters.add(0, converter);
     }
 
-    /**
-     * todo 序列化SimpleGrantedAuthority
-     *
-     * @param registry
-     */
     @Override
     public void configureViewResolvers(ViewResolverRegistry registry) {
         FastJsonJsonView fastJsonJsonView = new FastJsonJsonView();
