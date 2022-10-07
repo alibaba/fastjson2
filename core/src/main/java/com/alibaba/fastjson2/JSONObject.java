@@ -28,7 +28,6 @@ public class JSONObject
     private static final long serialVersionUID = 1L;
 
     static ObjectReader<JSONArray> arrayReader;
-    static ObjectWriter<JSONObject> objectWriter;
     static final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
             | PrettyFormat.mask
             | NotWriteEmptyArray.mask

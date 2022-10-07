@@ -85,6 +85,7 @@ public class EishayWriteString {
                 .include(EishayWriteString.class.getName())
                 .exclude(EishayWriteStringNoneCache.class.getName())
                 .exclude(EishayWriteStringTree.class.getName())
+                .exclude(EishayWriteStringTree1x.class.getName())
                 .mode(Mode.Throughput)
                 .warmupIterations(3)
                 .timeUnit(TimeUnit.MILLISECONDS)

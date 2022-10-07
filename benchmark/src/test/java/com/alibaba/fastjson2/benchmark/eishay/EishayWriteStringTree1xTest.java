@@ -2,9 +2,23 @@ package com.alibaba.fastjson2.benchmark.eishay;
 
 import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
-public class EishayWriteStringTreeTest {
-    static final EishayWriteStringTree benchmark = new EishayWriteStringTree();
+public class EishayWriteStringTree1xTest {
+    static final EishayWriteStringTree1x benchmark = new EishayWriteStringTree1x();
     static final int LOOP = 1_000_000;
+
+    public static void fastjson1() {
+        for (int j = 0; j < 10; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < LOOP; ++i) {
+                benchmark.fastjson1(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("fastjson1 millis : " + millis);
+            // zulu8.62.0.19 : 816
+            // zulu11.52.13 :
+            // zulu17.32.13 :
+        }
+    }
 
     public static void fastjson2() {
         for (int j = 0; j < 10; j++) {
@@ -14,9 +28,9 @@ public class EishayWriteStringTreeTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
-            // zulu8.62.0.19 : 507
-            // zulu11.52.13 : 523
-            // zulu17.32.13 : 539
+            // zulu8.62.0.19 : 579
+            // zulu11.52.13 :
+            // zulu17.32.13 :
         }
     }
 
@@ -28,7 +42,7 @@ public class EishayWriteStringTreeTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2-fastjson2_ReferenceDetection millis : " + millis);
-            // zulu8.62.0.19 : 624 596 591 575
+            // zulu8.62.0.19 : 619
             // zulu11.52.13 :
             // zulu17.32.13 :
         }
@@ -42,7 +56,7 @@ public class EishayWriteStringTreeTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2-jsonb millis : " + millis);
-            // zulu8.62.0.19 : 443 397 391 372
+            // zulu8.62.0.19 : 407
             // zulu11.52.13 :
             // zulu17.32.13 :
         }
@@ -92,8 +106,9 @@ public class EishayWriteStringTreeTest {
 
     public static void main(String[] args) throws Exception {
 //        fastjson2();
-        fastjson2_ReferenceDetection();
-//        fastjson2_jsonb();
+//        fastjson2_ReferenceDetection();
+        fastjson2_jsonb();
+//        fastjson1();
 //        jackson();
 //        wastjson();
 //        gson();

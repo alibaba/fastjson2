@@ -15,9 +15,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
 
-import static com.alibaba.fastjson2.util.IOUtils.*;
-
 public class TypeUtils {
+    public static final Class CLASS_JSON_OBJECT_1x;
+    public static final Class CLASS_JSON_ARRAY_1x;
+
     public static final Class CLASS_SINGLE_SET = Collections.singleton(1).getClass();
     public static final Class CLASS_UNMODIFIABLE_COLLECTION = Collections.unmodifiableCollection(new ArrayList<>()).getClass();
     public static final Class CLASS_UNMODIFIABLE_LIST = Collections.unmodifiableList(new ArrayList<>()).getClass();
@@ -248,6 +249,9 @@ public class TypeUtils {
     static final Map<String, Class> TYPE_MAPPINGS = new ConcurrentHashMap<>();
 
     static {
+        CLASS_JSON_OBJECT_1x = loadClass("com.alibaba.fastjson.JSONObject");
+        CLASS_JSON_ARRAY_1x = loadClass("com.alibaba.fastjson.JSONArray");
+
         NAME_MAPPINGS.put(byte.class, "B");
         NAME_MAPPINGS.put(short.class, "S");
         NAME_MAPPINGS.put(int.class, "I");
@@ -438,15 +442,13 @@ public class TypeUtils {
         }
 
         {
-            Class<?> objectClass = loadClass("com.alibaba.fastjson.JSONObject");
-            if (objectClass != null) {
-                TYPE_MAPPINGS.putIfAbsent("JO1", objectClass);
-                TYPE_MAPPINGS.putIfAbsent(objectClass.getName(), objectClass);
+            if (CLASS_JSON_OBJECT_1x != null) {
+                TYPE_MAPPINGS.putIfAbsent("JO1", CLASS_JSON_OBJECT_1x);
+                TYPE_MAPPINGS.putIfAbsent(CLASS_JSON_OBJECT_1x.getName(), CLASS_JSON_OBJECT_1x);
             }
-            Class<?> arrayClass = loadClass("com.alibaba.fastjson.JSONArray");
-            if (arrayClass != null) {
-                TYPE_MAPPINGS.putIfAbsent("JA1", arrayClass);
-                TYPE_MAPPINGS.putIfAbsent(arrayClass.getName(), arrayClass);
+            if (CLASS_JSON_ARRAY_1x != null) {
+                TYPE_MAPPINGS.putIfAbsent("JA1", CLASS_JSON_ARRAY_1x);
+                TYPE_MAPPINGS.putIfAbsent(CLASS_JSON_ARRAY_1x.getName(), CLASS_JSON_ARRAY_1x);
             }
         }
 
