@@ -41,6 +41,11 @@
             <artifactId>hessian</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.dslplatform</groupId>
+            <artifactId>dsl-json-java8</artifactId>
+            <version>1.9.9</version>
+        </dependency>
+        <dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
             <version>5.3.0</version>
