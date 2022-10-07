@@ -15,17 +15,16 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-public class EishayWriteStringTree {
-    static JSONObject mc;
+public class EishayWriteStringTree1x {
+    static com.alibaba.fastjson.JSONObject mc;
     static final ObjectMapper mapper = new ObjectMapper();
     static final Gson gson = new Gson();
 
     static {
         try {
-            InputStream is = EishayWriteStringTree.class.getClassLoader().getResourceAsStream("data/eishay.json");
+            InputStream is = EishayWriteStringTree1x.class.getClassLoader().getResourceAsStream("data/eishay.json");
             String str = IOUtils.toString(is, "UTF-8");
-            mc = (JSONObject) JSONReader.of(str)
-                    .readAny();
+            mc = com.alibaba.fastjson.JSON.parseObject(str);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -71,8 +70,7 @@ public class EishayWriteStringTree {
 
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
-                .include(EishayWriteStringTree.class.getName())
-                .exclude(EishayWriteStringTree1x.class.getName())
+                .include(EishayWriteStringTree1x.class.getName())
                 .mode(Mode.Throughput)
                 .warmupIterations(3)
                 .timeUnit(TimeUnit.MILLISECONDS)
