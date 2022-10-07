@@ -525,6 +525,7 @@ public class JSONTest {
         assertNull(JSON.parseObject("", JSONReader.Feature.SupportSmartMatch));
 
         assertNull(JSON.parseObject("null", JSONFactory.createReadContext()));
+        assertNull(JSON.parseObject("null", JSONFactory.createReadContext(JSONReader.Feature.SupportSmartMatch)));
         assertNull(JSON.parseObject("", JSONFactory.createReadContext()));
         assertEquals("{}", JSON.parseObject("{}", JSONFactory.createReadContext()).toString());
 
