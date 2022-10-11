@@ -414,7 +414,7 @@ public class ObjectWriterBaseModule
                         case "access": {
                             String access = ((Enum) result).name();
                             switch (access) {
-                                case "READ_ONLY":
+                                case "WRITE_ONLY":
                                     fieldInfo.ignore = true;
                                     break;
                                 default:
