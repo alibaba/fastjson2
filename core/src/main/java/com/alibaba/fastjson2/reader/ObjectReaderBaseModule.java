@@ -787,7 +787,7 @@ public class ObjectReaderBaseModule
                         case "access": {
                             String access = ((Enum) result).name();
                             switch (access) {
-                                case "WRITE_ONLY":
+                                case "READ_ONLY":
                                     fieldInfo.ignore = true;
                                     break;
                                 default:
