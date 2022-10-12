@@ -1902,6 +1902,12 @@ class JSONWriterUTF16
 
         boolean first = true;
         for (Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<String, Object> next = it.next();
+            Object value = next.getValue();
+            if (value == null && (context.features & Feature.WriteMapNullValue.mask) == 0) {
+                continue;
+            }
+
             if (!first) {
                 if (off == chars.length) {
                     int minCapacity = off + 1;
@@ -1918,12 +1924,6 @@ class JSONWriterUTF16
                     chars = Arrays.copyOf(chars, newCapacity);
                 }
                 chars[off++] = ',';
-            }
-
-            Map.Entry<String, Object> next = it.next();
-            Object value = next.getValue();
-            if (value == null && (context.features & Feature.WriteMapNullValue.mask) == 0) {
-                continue;
             }
 
             first = false;
