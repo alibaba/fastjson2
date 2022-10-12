@@ -914,8 +914,7 @@ public abstract class BeanUtils {
                 char[] chars = new char[methodNameLength - prefixLength];
                 methodName.getChars(prefixLength, methodNameLength, chars, 0);
                 char c0 = chars[0];
-                boolean c1UCase = chars.length > 1 && chars[1] >= 'A' && chars[1] <= 'Z';
-                if (c0 >= 'A' && c0 <= 'Z' && !c1UCase) {
+                if (c0 >= 'A' && c0 <= 'Z') {
                     chars[0] = (char) (c0 + 32);
                 }
                 return new String(chars);
