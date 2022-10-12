@@ -69,7 +69,7 @@ public class ObjectReaderCreatorLambda
             return annotatedObjectReader;
         }
 
-        if (Enum.class.isAssignableFrom(objectClass)) {
+        if (Enum.class.isAssignableFrom(objectClass) && (beanInfo.createMethod == null || beanInfo.createMethod.getParameterCount() == 1)) {
             return createEnumReader(objectClass, beanInfo.createMethod, provider);
         }
 
