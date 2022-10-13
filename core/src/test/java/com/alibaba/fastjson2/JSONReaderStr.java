@@ -76,6 +76,14 @@ public final class JSONReaderStr
 
     @Override
     public boolean nextIfMatch(char ch) {
+        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+            if (offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = str.charAt(offset++);
+            }
+        }
+
         if (this.ch != ch) {
             return false;
         }

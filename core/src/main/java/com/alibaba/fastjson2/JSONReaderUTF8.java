@@ -99,6 +99,14 @@ class JSONReaderUTF8
 
     @Override
     public boolean nextIfMatch(char e) {
+        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+            if (offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = (char) bytes[offset++];
+            }
+        }
+
         if (this.ch != e) {
             return false;
         }
