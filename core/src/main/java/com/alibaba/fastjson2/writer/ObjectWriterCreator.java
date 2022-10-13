@@ -812,7 +812,10 @@ public class ObjectWriterCreator {
             return new FieldWriterCharMethod(fieldName, ordinal, features, format, label, method, fieldClass);
         }
 
-        if (fieldClass.isEnum() && (BeanUtils.getEnumValueField(fieldClass, provider) == null && initObjectWriter == null)) {
+        if (fieldClass.isEnum()
+                && (BeanUtils.getEnumValueField(fieldClass, provider) == null && initObjectWriter == null)
+                && !BeanUtils.isWriteEnumAsJavaBean(fieldClass)
+        ) {
             return new FieldWriterEnumMethod(fieldName, ordinal, features, format, label, fieldClass, method);
         }
 
