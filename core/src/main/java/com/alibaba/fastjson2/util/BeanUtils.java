@@ -1,9 +1,8 @@
 package com.alibaba.fastjson2.util;
 
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.TypeReference;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
@@ -545,6 +544,28 @@ public abstract class BeanUtils {
 
             methodConsumer.accept(method);
         }
+    }
+
+    public static boolean isWriteEnumAsJavaBean(Class clazz) {
+        Annotation[] annotations = clazz.getAnnotations();
+        for (Annotation annotation : annotations) {
+            JSONType jsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
+            if (jsonType != null) {
+                return jsonType.writeEnumAsJavaBean();
+            }
+
+            Class<? extends Annotation> annotationType = annotation.annotationType();
+            String name = annotationType.getName();
+            if ("com.alibaba.fastjson.annotation.JSONType".equals(name)) {
+                BeanInfo beanInfo = new BeanInfo();
+                BeanUtils.annotationMethods(annotationType, method -> BeanUtils.processJSONType1x(beanInfo, annotation, method));
+                if (beanInfo.writeEnumAsJavaBean) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public static Member getEnumValueField(Class clazz, ObjectCodecProvider mixinProvider) {
@@ -1970,6 +1991,123 @@ public abstract class BeanUtils {
             if (entryKey.getClassLoader() == classLoader) {
                 it.remove();
             }
+        }
+    }
+
+    public static void processJSONType1x(BeanInfo beanInfo, Annotation jsonType1x, Method method) {
+        try {
+            Object result = method.invoke(jsonType1x);
+            switch (method.getName()) {
+                case "seeAlso": {
+                    Class<?>[] classes = (Class[]) result;
+                    if (classes.length != 0) {
+                        beanInfo.seeAlso = classes;
+                    }
+                    break;
+                }
+                case "typeName": {
+                    String typeName = (String) result;
+                    if (!typeName.isEmpty()) {
+                        beanInfo.typeName = typeName;
+                    }
+                    break;
+                }
+                case "typeKey": {
+                    String typeKey = (String) result;
+                    if (!typeKey.isEmpty()) {
+                        beanInfo.typeKey = typeKey;
+                    }
+                    break;
+                }
+                case "alphabetic": {
+                    Boolean alphabetic = (Boolean) result;
+                    if (!alphabetic.booleanValue()) {
+                        beanInfo.alphabetic = false;
+                    }
+                    break;
+                }
+                case "serializeFeatures":
+                case "serialzeFeatures": {
+                    Enum[] serializeFeatures = (Enum[]) result;
+                    for (Enum feature : serializeFeatures) {
+                        switch (feature.name()) {
+                            case "WriteMapNullValue":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNulls.mask;
+                                break;
+                            case "WriteNullListAsEmpty":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullListAsEmpty.mask;
+                                break;
+                            case "WriteNullStringAsEmpty":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullStringAsEmpty.mask;
+                                break;
+                            case "WriteNullNumberAsZero":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullNumberAsZero.mask;
+                                break;
+                            case "WriteNullBooleanAsFalse":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullBooleanAsFalse.mask;
+                                break;
+                            case "BrowserCompatible":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.BrowserCompatible.mask;
+                                break;
+                            case "WriteClassName":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteClassName.mask;
+                                break;
+                            case "WriteNonStringValueAsString":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
+                                break;
+                            case "WriteEnumUsingToString":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteEnumUsingToString.mask;
+                                break;
+                            case "NotWriteRootClassName":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteRootClassName.mask;
+                                break;
+                            case "IgnoreErrorGetter":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.IgnoreErrorGetter.mask;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                }
+                case "serializeEnumAsJavaBean": {
+                    boolean serializeEnumAsJavaBean = (Boolean) result;
+                    if (serializeEnumAsJavaBean) {
+                        beanInfo.writeEnumAsJavaBean = true;
+                    }
+                    break;
+                }
+                case "naming": {
+                    Enum naming = (Enum) result;
+                    beanInfo.namingStrategy = naming.name();
+                    break;
+                }
+                case "ignores": {
+                    String[] fields = (String[]) result;
+                    if (fields.length != 0) {
+                        beanInfo.ignores = fields;
+                    }
+                    break;
+                }
+                case "includes": {
+                    String[] fields = (String[]) result;
+                    if (fields.length != 0) {
+                        beanInfo.includes = fields;
+                    }
+                    break;
+                }
+                case "orders": {
+                    String[] fields = (String[]) result;
+                    if (fields.length != 0) {
+                        beanInfo.orders = fields;
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        } catch (Throwable ignored) {
+            ignored.printStackTrace();
         }
     }
 }
