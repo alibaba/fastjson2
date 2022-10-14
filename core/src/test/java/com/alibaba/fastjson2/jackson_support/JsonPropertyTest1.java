@@ -25,7 +25,7 @@ public class JsonPropertyTest1 {
     public static class Bean {
         public int id;
 
-        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+        @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
         public String name;
     }
 
@@ -46,7 +46,7 @@ public class JsonPropertyTest1 {
     public static class Bean1 {
         public int id;
 
-        @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         public String name;
     }
 }
