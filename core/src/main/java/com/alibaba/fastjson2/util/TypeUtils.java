@@ -17,6 +17,7 @@ import java.util.function.Function;
 
 public class TypeUtils {
     public static final Class CLASS_JSON_OBJECT_1x;
+    public static final Field FIELD_JSON_OBJECT_1x_map;
     public static final Class CLASS_JSON_ARRAY_1x;
 
     public static final Class CLASS_SINGLE_SET = Collections.singleton(1).getClass();
@@ -250,6 +251,19 @@ public class TypeUtils {
 
     static {
         CLASS_JSON_OBJECT_1x = loadClass("com.alibaba.fastjson.JSONObject");
+        {
+            Field field = null;
+            if (CLASS_JSON_OBJECT_1x != null) {
+                try {
+                    field = CLASS_JSON_OBJECT_1x.getDeclaredField("map");
+                    field.setAccessible(true);
+                } catch (Throwable ignore) {
+                    // ignore
+                }
+            }
+            FIELD_JSON_OBJECT_1x_map = field;
+        }
+
         CLASS_JSON_ARRAY_1x = loadClass("com.alibaba.fastjson.JSONArray");
 
         NAME_MAPPINGS.put(byte.class, "B");
@@ -1337,5 +1351,19 @@ public class TypeUtils {
             }
         }
         return false;
+    }
+
+    public static Map getInnerMap(Map object) {
+        if (object == null || CLASS_JSON_OBJECT_1x == null || !CLASS_JSON_OBJECT_1x.isInstance(object) || FIELD_JSON_OBJECT_1x_map == null) {
+            return object;
+        }
+
+        try {
+            object = (Map) FIELD_JSON_OBJECT_1x_map.get(object);
+        } catch (IllegalAccessException ignore) {
+            // ignore
+        }
+
+        return object;
     }
 }
