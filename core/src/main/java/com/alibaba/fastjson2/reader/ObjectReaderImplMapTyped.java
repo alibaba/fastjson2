@@ -239,11 +239,12 @@ class ObjectReaderImplMapTyped
 
         JSONReader.Context context = jsonReader.getContext();
         long contextFeatures = context.getFeatures() | features;
-        Map object;
+        Map object, innerMap = null;
         if (instanceType == HashMap.class) {
             Supplier<Map> objectSupplier = context.getObjectSupplier();
             if (mapType == Map.class && objectSupplier != null) {
                 object = objectSupplier.get();
+                innerMap = TypeUtils.getInnerMap(object);
             } else {
                 object = new HashMap<>();
             }
@@ -303,7 +304,13 @@ class ObjectReaderImplMapTyped
                 valueObjectReader = jsonReader.getObjectReader(valueType);
             }
             Object value = valueObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
-            Object origin = object.put(name, value);
+            Object origin;
+            if (innerMap != null) {
+                origin = innerMap.put(name, value);
+            } else {
+                origin = object.put(name, value);
+            }
+
             if (origin != null) {
                 if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {
