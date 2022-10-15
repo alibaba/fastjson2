@@ -346,9 +346,33 @@ public class ObjectReaderNoneDefaultConstructor<T>
             }
         }
 
-        return createInstanceNoneDefaultConstructor(
+        T object = createInstanceNoneDefaultConstructor(
                 valueMap == null
                         ? Collections.emptyMap()
-                        : valueMap);
+                        : valueMap
+        );
+
+        for (int i = 0; i < setterFieldReaders.length; i++) {
+            FieldReader fieldReader = setterFieldReaders[i];
+            Object fieldValue = map.get(fieldReader.fieldName);
+            if (fieldValue == null) {
+                continue;
+            }
+
+            Class<?> valueClass = fieldValue.getClass();
+            Class fieldClass = fieldReader.fieldClass;
+            if (valueClass != fieldClass) {
+                Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
+                if (typeConvert != null) {
+                    fieldValue = typeConvert.apply(fieldValue);
+                } else if (fieldValue instanceof Map) {
+                    ObjectReader objectReader = fieldReader.getObjectReader(JSONFactory.createReadContext(provider));
+                    fieldValue = objectReader.createInstance((Map) fieldValue, features | fieldReader.features);
+                }
+            }
+            fieldReader.accept(object, fieldValue);
+        }
+
+        return object;
     }
 }
