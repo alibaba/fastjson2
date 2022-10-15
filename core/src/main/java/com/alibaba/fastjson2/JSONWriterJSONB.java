@@ -94,7 +94,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -114,7 +114,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -143,7 +143,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -169,7 +169,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -194,7 +194,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -213,7 +213,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -238,7 +238,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -354,7 +354,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -388,7 +388,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -416,7 +416,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -451,7 +451,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -471,7 +471,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -535,7 +535,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -651,7 +651,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -710,7 +710,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -763,7 +763,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -786,7 +786,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -814,7 +814,7 @@ final class JSONWriterJSONB
                         if (newCapacity - minCapacity < 0) {
                             newCapacity = minCapacity;
                         }
-                        if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                        if (newCapacity - maxArraySize > 0) {
                             throw new OutOfMemoryError();
                         }
 
@@ -839,7 +839,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -870,7 +870,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -890,7 +890,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -911,7 +911,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -933,7 +933,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -956,7 +956,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -991,7 +991,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1018,7 +1018,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -1038,7 +1038,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -1059,7 +1059,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -1080,7 +1080,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1216,7 +1216,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1243,7 +1243,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -1263,7 +1263,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -1284,7 +1284,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -1305,7 +1305,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1333,7 +1333,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1354,7 +1354,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1389,7 +1389,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -1415,7 +1415,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1435,7 +1435,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1456,7 +1456,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1477,7 +1477,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1501,7 +1501,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1530,7 +1530,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1553,7 +1553,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -1575,7 +1575,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1610,7 +1610,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1633,7 +1633,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1798,7 +1798,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1876,7 +1876,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1909,7 +1909,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 

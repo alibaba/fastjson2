@@ -40,6 +40,7 @@ public abstract class JSONWriter
     protected Path path;
     protected String lastReference;
     protected final char quote;
+    protected final int maxArraySize;
 
     protected JSONWriter(Context context, Charset charset) {
         this.context = context;
@@ -48,6 +49,9 @@ public abstract class JSONWriter
         this.utf16 = charset == StandardCharsets.UTF_16;
 
         quote = (context.features & Feature.UseSingleQuotes.mask) == 0 ? '"' : '\'';
+
+        // 64M or 1G
+        maxArraySize = (context.features & LargeObject.mask) != 0 ? 1073741824 : 67108864;
     }
 
     public boolean isUTF8() {
@@ -1152,8 +1156,6 @@ public abstract class JSONWriter
 
     public abstract int flushTo(OutputStream out, Charset charset) throws IOException;
 
-    static int MAX_ARRAY_SIZE = 1024 * 1024 * 64; // 64M
-
     public static class Context {
         static ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
 
@@ -1518,7 +1520,12 @@ public abstract class JSONWriter
         /**
          * @since 2.0.13
          */
-        IgnoreNonFieldGetter(1L << 32);
+        IgnoreNonFieldGetter(1L << 32),
+
+        /**
+         * @since 2.0.16
+         */
+        LargeObject(1L << 33);
 
         public final long mask;
 
