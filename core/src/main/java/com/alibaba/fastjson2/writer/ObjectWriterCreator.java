@@ -763,10 +763,20 @@ public class ObjectWriterCreator {
         Class<?> fieldClass = method.getReturnType();
         Type fieldType = method.getGenericReturnType();
 
-        if (initObjectWriter == null) {
-            if (fieldClass == Date.class && provider != null) {
+        if (initObjectWriter == null && provider != null) {
+            if (fieldClass == Date.class) {
                 ObjectWriter objectWriter = provider.cache.get(fieldClass);
                 if (objectWriter != ObjectWriterImplDate.INSTANCE) {
+                    initObjectWriter = objectWriter;
+                }
+            } else if (fieldClass == Long.class) {
+                ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                if (objectWriter != ObjectWriterImplInt64.INSTANCE) {
+                    initObjectWriter = objectWriter;
+                }
+            } else if (fieldClass == BigDecimal.class) {
+                ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                if (objectWriter != ObjectWriterImplBigDecimal.INSTANCE) {
                     initObjectWriter = objectWriter;
                 }
             }
