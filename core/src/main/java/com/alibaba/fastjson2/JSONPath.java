@@ -4816,6 +4816,8 @@ public abstract class JSONPath {
                 if (index >= 0) {
                     if (index < list.size()) {
                         list.set(index, value);
+                    } else if (index <= list.size()) {
+                        list.add(value);
                     }
                 } else {
                     int itemIndex = list.size() + this.index;

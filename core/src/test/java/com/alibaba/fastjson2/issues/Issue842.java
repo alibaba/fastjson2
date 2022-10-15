@@ -1,7 +1,11 @@
 package com.alibaba.fastjson2.issues;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONPath;
 import org.junit.jupiter.api.Test;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -11,5 +15,14 @@ public class Issue842 {
         String str = "{\"items\": [{\"data\":{\"0\":\"abc\"}}]}";
         Object result = JSONPath.eval(str, "$.items[0].data.0");
         assertEquals("abc", result);
+    }
+
+    @Test
+    public void test1() {
+        String jsonPath = "$.items[0].data.0";
+
+        Map data = new LinkedHashMap<>();
+        JSONPath.set(data, jsonPath, "设置成功");
+        assertEquals("{\"items\":[{\"data\":[\"设置成功\"]}]}", JSON.toJSONString(data));
     }
 }
