@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderBean;
+import com.alibaba.fastjson2.reader.ObjectReaderNoneDefaultConstructor;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -20,9 +21,7 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -2827,7 +2826,9 @@ public interface JSON {
         }
 
         boolean fieldBased = false, beanToArray = false;
+        long featuresValue = 0;
         for (JSONWriter.Feature feature : features) {
+            featuresValue |= feature.mask;
             if (feature == JSONWriter.Feature.FieldBased) {
                 fieldBased = true;
             } else if (feature == JSONWriter.Feature.BeanToArray) {
@@ -2839,9 +2840,19 @@ public interface JSON {
         ObjectReader objectReader = defaultObjectReaderProvider.getObjectReader(objectClass, fieldBased);
 
         if (objectWriter instanceof ObjectWriterAdapter && objectReader instanceof ObjectReaderBean) {
-            T instance = (T) objectReader.createInstance();
-
             List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
+
+            if (objectReader instanceof ObjectReaderNoneDefaultConstructor) {
+                Map<String, Object> map = new HashMap(fieldWriters.size());
+                for (FieldWriter fieldWriter : fieldWriters) {
+                    Object fieldValue = fieldWriter.getFieldValue(object);
+                    map.put(fieldWriter.fieldName, fieldValue);
+                }
+
+                return (T) objectReader.createInstance(map, featuresValue);
+            }
+
+            T instance = (T) objectReader.createInstance(featuresValue);
             for (FieldWriter fieldWriter : fieldWriters) {
                 FieldReader fieldReader = objectReader.getFieldReader(fieldWriter.fieldName);
                 if (fieldReader == null) {
@@ -2864,6 +2875,83 @@ public interface JSON {
         }
 
         try (JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes, JSONReader.Feature.SupportAutoType, JSONReader.Feature.SupportClassForName)) {
+            if (beanToArray) {
+                jsonReader.context.config(JSONReader.Feature.SupportArrayToBean);
+            }
+
+            return (T) objectReader.readJSONBObject(jsonReader, null, null, 0);
+        }
+    }
+
+    /**
+     * use ObjectWriter and ObjectReader copy java object
+     *
+     * @param object the object to be copy
+     * @param targetClass target class
+     * @param features the specified features
+     * @since 2.0.16
+     */
+    static <T> T copyTo(Object object, Class<T> targetClass, JSONWriter.Feature... features) {
+        if (object == null) {
+            return null;
+        }
+
+        Class<?> objectClass = object.getClass();
+
+        boolean fieldBased = false, beanToArray = false;
+        long featuresValue = 0;
+        for (JSONWriter.Feature feature : features) {
+            featuresValue |= feature.mask;
+            if (feature == JSONWriter.Feature.FieldBased) {
+                fieldBased = true;
+            } else if (feature == JSONWriter.Feature.BeanToArray) {
+                beanToArray = true;
+            }
+        }
+
+        ObjectWriter objectWriter = defaultObjectWriterProvider.getObjectWriter(objectClass, targetClass, fieldBased);
+        ObjectReader objectReader = defaultObjectReaderProvider.getObjectReader(targetClass, fieldBased);
+
+        if (objectWriter instanceof ObjectWriterAdapter && objectReader instanceof ObjectReaderBean) {
+            List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
+
+            if (objectReader instanceof ObjectReaderNoneDefaultConstructor) {
+                Map<String, Object> map = new HashMap(fieldWriters.size());
+                for (FieldWriter fieldWriter : fieldWriters) {
+                    Object fieldValue = fieldWriter.getFieldValue(object);
+                    map.put(fieldWriter.fieldName, fieldValue);
+                }
+
+                return (T) objectReader.createInstance(map, featuresValue);
+            }
+
+            T instance = (T) objectReader.createInstance(featuresValue);
+            for (FieldWriter fieldWriter : fieldWriters) {
+                FieldReader fieldReader = objectReader.getFieldReader(fieldWriter.fieldName);
+                if (fieldReader == null) {
+                    continue;
+                }
+
+                Object fieldValue = fieldWriter.getFieldValue(object);
+                Object fieldValueCopied = copy(fieldValue);
+                fieldReader.accept(instance, fieldValueCopied);
+            }
+
+            return instance;
+        }
+
+        byte[] jsonbBytes;
+        try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
+            writer.config(JSONWriter.Feature.WriteClassName);
+            objectWriter.writeJSONB(writer, object, null, null, 0);
+            jsonbBytes = writer.getBytes();
+        }
+
+        try (JSONReader jsonReader = JSONReader.ofJSONB(
+                jsonbBytes,
+                JSONReader.Feature.SupportAutoType,
+                JSONReader.Feature.SupportClassForName)
+        ) {
             if (beanToArray) {
                 jsonReader.context.config(JSONReader.Feature.SupportArrayToBean);
             }

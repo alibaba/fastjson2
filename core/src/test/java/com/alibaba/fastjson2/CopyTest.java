@@ -46,6 +46,10 @@ public class CopyTest {
         Bean1 copy2 = JSON.copy(bean, JSONWriter.Feature.FieldBased, JSONWriter.Feature.BeanToArray);
         assertEquals(bean.v0, copy2.v0);
         assertEquals(bean.v1, copy2.v1);
+
+        Bean1 copy3 = JSON.copyTo(bean, Bean1.class, JSONWriter.Feature.FieldBased, JSONWriter.Feature.BeanToArray);
+        assertEquals(bean.v0, copy3.v0);
+        assertEquals(bean.v1, copy3.v1);
     }
 
     @Test
@@ -127,5 +131,88 @@ public class CopyTest {
         public void setBigDecimal(BigDecimal bigDecimal) {
             this.bigDecimal = bigDecimal;
         }
+    }
+
+    @Test
+    public void test4() {
+        Bean4 bean = new Bean4(101);
+        bean.setName("DataWorks");
+
+        Bean4 bean1 = JSON.copy(bean);
+        assertEquals(bean.id, bean1.id);
+        assertEquals(bean.name, bean1.name);
+
+        Bean4 bean2 = JSON.copyTo(bean, Bean4.class);
+        assertEquals(bean.id, bean2.id);
+        assertEquals(bean.name, bean2.name);
+    }
+
+    public static class Bean4 {
+        private final int id;
+        private String name;
+
+        public Bean4(int id) {
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
+    @Test
+    public void test5() {
+        Bean5 bean = new Bean5();
+        bean.id = 101;
+        bean.setName("DataWorks");
+
+        Bean5 bean1 = JSON.copy(bean);
+        assertEquals(0, bean1.id);
+        assertEquals(bean.name, bean1.name);
+
+        Bean5 bean2 = JSON.copyTo(bean, Bean5.class);
+        assertEquals(0, bean2.id);
+        assertEquals(bean.name, bean2.name);
+
+        Bean6 bean3 = JSON.copyTo(bean, Bean6.class);
+        assertEquals(bean.id, bean3.id);
+        assertEquals(bean.name, bean3.name);
+
+        Bean4 bean4 = JSON.copyTo(bean, Bean4.class);
+        assertEquals(bean.id, bean4.id);
+        assertEquals(bean.name, bean4.name);
+    }
+
+    public static class Bean5 {
+        private int id;
+        private String name;
+
+        public Bean5() {
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
+    public static class Bean6 {
+        public int id;
+        public String name;
     }
 }
