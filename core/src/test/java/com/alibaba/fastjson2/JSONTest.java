@@ -52,6 +52,13 @@ public class JSONTest {
     }
 
     @Test
+    public void isValid() {
+        assertFalse(JSON.isValid((char[]) null));
+        assertFalse(JSON.isValid(new char[0]));
+        assertFalse(JSON.isValid("{}1".toCharArray()));
+    }
+
+    @Test
     public void test_parseArray_0() {
         String str = "[1,2,3]";
         List<Object> array = JSON.parseArray(str, new Type[]{int.class, long.class, String.class});
