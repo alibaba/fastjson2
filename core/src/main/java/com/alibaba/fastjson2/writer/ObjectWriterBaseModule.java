@@ -640,7 +640,7 @@ public class ObjectWriterBaseModule
                 });
             }
 
-            if (beanInfo.kotlin && beanInfo.createParameterNames != null) {
+            if (beanInfo.kotlin && beanInfo.creatorConstructor != null && beanInfo.createParameterNames != null) {
                 String fieldName = BeanUtils.getterName(method, null);
                 for (int i = 0; i < beanInfo.createParameterNames.length; i++) {
                     if (fieldName.equals(beanInfo.createParameterNames[i])) {
