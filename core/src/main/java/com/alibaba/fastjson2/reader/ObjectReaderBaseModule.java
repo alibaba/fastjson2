@@ -60,6 +60,16 @@ public class ObjectReaderBaseModule
                 AtomicLong.class,
         };
 
+        Function<Object, Boolean> TO_BOOLEAN = new ToBoolean(null);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, Boolean.class, TO_BOOLEAN);
+        }
+
+        Function<Object, Boolean> TO_BOOLEAN_VALUE = new ToBoolean(Boolean.FALSE);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, boolean.class, TO_BOOLEAN_VALUE);
+        }
+
         Function<Object, String> TO_STRING = new ToString();
         for (Class type : numberTypes) {
             provider.registerTypeConvert(type, String.class, TO_STRING);
