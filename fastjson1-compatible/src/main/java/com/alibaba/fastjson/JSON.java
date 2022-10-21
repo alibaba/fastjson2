@@ -693,6 +693,10 @@ public class JSON {
             context.config(JSONWriter.Feature.WriteEnumUsingToString);
         }
 
+        if ((featuresValue & SerializerFeature.WriteEnumUsingName.mask) != 0) {
+            context.config(JSONWriter.Feature.WriteEnumsUsingName);
+        }
+
         if ((featuresValue & SerializerFeature.NotWriteRootClassName.mask) != 0) {
             context.config(JSONWriter.Feature.NotWriteRootClassName);
         }
