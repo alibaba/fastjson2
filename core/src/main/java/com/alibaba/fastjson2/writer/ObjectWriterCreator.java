@@ -779,6 +779,11 @@ public class ObjectWriterCreator {
                 if (objectWriter != ObjectWriterImplBigDecimal.INSTANCE) {
                     initObjectWriter = objectWriter;
                 }
+            } else if (Enum.class.isAssignableFrom(fieldClass)) {
+                ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                if (!(objectWriter instanceof ObjectWriterImplEnum)) {
+                    initObjectWriter = objectWriter;
+                }
             }
         }
 
