@@ -675,8 +675,9 @@ public abstract class BeanUtils {
             }
         }
 
+        Class superClass = objectClass.getSuperclass();
         if (TypeUtils.isProxy(objectClass)) {
-            Class superclass = objectClass.getSuperclass();
+            Class superclass = superClass;
             getters(superclass, methodConsumer);
             return;
         }
@@ -693,6 +694,8 @@ public abstract class BeanUtils {
             methods = objectClass.getMethods();
             methodCache.putIfAbsent(objectClass, methods);
         }
+
+        boolean protobufMessageV3 = superClass != null && superClass.getName().equals("com.google.protobuf.GeneratedMessageV3");
 
         for (Method method : methods) {
             int paramType = method.getParameterCount();
@@ -806,6 +809,29 @@ public abstract class BeanUtils {
 
             if (returnClass == Class.class && "getClass".equals(methodName)) {
                 continue;
+            }
+
+            if (protobufMessageV3) {
+                if (method.getDeclaringClass() == superClass) {
+                    continue;
+                }
+                Class<?> returnType = method.getReturnType();
+                boolean ignore = false;
+                switch (methodName) {
+                    case "getUnknownFields":
+                    case "getSerializedSize":
+                    case "getParserForType":
+                    case "getMessageBytes":
+                    case "getDefaultInstanceForType":
+                        ignore = returnType.getName().startsWith("com.google.protobuf.") || returnType == objectClass;
+                        break;
+                    default:
+                        break;
+                }
+
+                if (ignore) {
+                    continue;
+                }
             }
 
             methodConsumer.accept(method);
