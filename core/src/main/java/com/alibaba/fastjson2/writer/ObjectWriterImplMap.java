@@ -475,13 +475,23 @@ public final class ObjectWriterImplMap
                 jsonWriter.writeInt32((Integer) value);
                 continue;
             } else if (valueClass == Long.class) {
-                jsonWriter.writeInt64((Long) value);
+                ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueClass);
+                if (valueWriter == ObjectWriterImplInt64.INSTANCE) {
+                    jsonWriter.writeInt64((Long) value);
+                } else {
+                    jsonWriter.writeInt64((Long) value);
+                }
                 continue;
             } else if (valueClass == Boolean.class) {
                 jsonWriter.writeBool((Boolean) value);
                 continue;
             } else if (valueClass == BigDecimal.class) {
-                jsonWriter.writeDecimal((BigDecimal) value);
+                ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueClass);
+                if (valueWriter == ObjectWriterImplBigDecimal.INSTANCE) {
+                    jsonWriter.writeDecimal((BigDecimal) value);
+                } else {
+                    valueWriter.write(jsonWriter, value, key, this.valueType, this.features);
+                }
                 continue;
             }
 
