@@ -111,8 +111,8 @@ public class TypeUtils {
             return DateUtils.parseDate((String) obj);
         }
 
-        if (obj instanceof Long) {
-            return new Date(((Long) obj).longValue());
+        if (obj instanceof Long || obj instanceof Integer) {
+            return new Date(((Number) obj).longValue());
         }
 
         throw new JSONException("can not cast to Date from " + obj.getClass());
