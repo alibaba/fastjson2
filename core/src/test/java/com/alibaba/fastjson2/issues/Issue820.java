@@ -68,6 +68,13 @@ public class Issue820 {
         assertEquals("{\"value\":\"0\",\"value1\":\"0.11\"}", s);
     }
 
+    @Test
+    public void test1() {
+        Map<String, BigDecimal> map = new HashMap<>();
+        map.put("0", new BigDecimal("0.11"));
+        assertEquals("{\"0\":\"0.11\"}", JSON.toJSONString(map));
+    }
+
     public static class Bean {
         private Long value;
         private BigDecimal value1;
