@@ -26,6 +26,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONReader.EOI;
+import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreCheckClose;
 import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 
 public interface JSON {
@@ -48,7 +50,7 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(text)) {
             ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
             Object object = objectReader.readObject(reader, null, null, 0);
-            if (!reader.isEnd()) {
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
@@ -70,7 +72,11 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(text)) {
             reader.context.config(features);
             ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
-            return objectReader.readObject(reader, null, null, 0);
+            Object object = objectReader.readObject(reader, null, null, 0);
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
         }
     }
 
@@ -91,7 +97,11 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(text, offset, length)) {
             reader.context.config(features);
             ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
-            return objectReader.readObject(reader, null, null, 0);
+            Object object = objectReader.readObject(reader, null, null, 0);
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
         }
     }
 
@@ -109,7 +119,11 @@ public interface JSON {
 
         try (JSONReader reader = JSONReader.of(text, context)) {
             ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
-            return objectReader.readObject(reader, null, null, 0);
+            Object object = objectReader.readObject(reader, null, null, 0);
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
         }
     }
 
@@ -129,7 +143,7 @@ public interface JSON {
             reader.context.config(features);
             ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
             Object object = objectReader.readObject(reader, null, null, 0);
-            if (!reader.isEnd()) {
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
@@ -152,7 +166,7 @@ public interface JSON {
             reader.context.config(features);
             ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
             Object object = objectReader.readObject(reader, null, null, 0);
-            if (!reader.isEnd()) {
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
@@ -179,7 +193,7 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
-            if (!reader.isEnd()) {
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
@@ -207,6 +221,10 @@ public interface JSON {
             reader.read(object, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -236,7 +254,7 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
-            if (!reader.isEnd()) {
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
@@ -263,6 +281,9 @@ public interface JSON {
             reader.read(object, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -291,6 +312,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -318,6 +342,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -343,7 +370,7 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
-            if (!reader.isEnd()) {
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
@@ -371,7 +398,7 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
-            if (!reader.isEnd()) {
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
@@ -398,6 +425,9 @@ public interface JSON {
             reader.read(object, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -443,6 +473,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -471,7 +504,7 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
-            if (!reader.isEnd()) {
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
@@ -502,7 +535,7 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
-            if (!reader.isEnd()) {
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
@@ -538,6 +571,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -564,6 +600,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -602,6 +641,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -643,6 +685,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -665,6 +710,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -692,6 +740,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -721,6 +772,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -748,6 +802,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -779,7 +836,7 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
-            if (!reader.isEnd()) {
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
@@ -806,6 +863,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -839,6 +899,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -863,6 +926,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -889,6 +955,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -920,6 +989,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -947,7 +1019,7 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
-            if (!reader.isEnd()) {
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
@@ -973,6 +1045,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -1001,7 +1076,7 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
-            if (!reader.isEnd()) {
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
@@ -1026,6 +1101,9 @@ public interface JSON {
         if (reader.resolveTasks != null) {
             reader.handleResolveTasks(object);
         }
+        if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+            throw new JSONException(reader.info("input not end"));
+        }
         return object;
     }
 
@@ -1047,6 +1125,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -1082,6 +1163,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -1110,6 +1194,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -1148,6 +1235,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -1171,6 +1261,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -1196,6 +1289,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -1220,6 +1316,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -1252,6 +1351,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -1281,6 +1383,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -1309,6 +1414,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -1403,6 +1511,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return object;
         }
     }
@@ -1423,6 +1534,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -1449,6 +1563,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -1482,6 +1599,9 @@ public interface JSON {
             T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return object;
         }
@@ -1551,6 +1671,9 @@ public interface JSON {
                         T object = objectReader.readObject(jsonReader, null, null, 0);
                         if (jsonReader.resolveTasks != null) {
                             jsonReader.handleResolveTasks(object);
+                        }
+                        if (jsonReader.ch != EOI && (jsonReader.context.features & IgnoreCheckClose.mask) == 0) {
+                            throw new JSONException(jsonReader.info("input not end"));
                         }
 
                         consumer.accept(
@@ -1662,7 +1785,7 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(array);
             }
-            if (!reader.isEnd()) {
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
             return array;
@@ -1688,7 +1811,7 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(array);
             }
-            if (!reader.isEnd()) {
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
             return array;
@@ -1718,6 +1841,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(array);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return array;
         }
     }
@@ -1741,7 +1867,7 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(array);
             }
-            if (!reader.isEnd()) {
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
             return array;
@@ -1768,6 +1894,9 @@ public interface JSON {
             reader.read(array);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(array);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return array;
         }
@@ -1808,6 +1937,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(array);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return array;
         }
     }
@@ -1830,6 +1962,9 @@ public interface JSON {
             List<T> list = reader.readArray(type);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return list;
         }
@@ -1854,6 +1989,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return list;
         }
     }
@@ -1877,6 +2015,9 @@ public interface JSON {
             List<T> list = reader.readArray(type);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return list;
         }
@@ -1913,6 +2054,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(array);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return array;
         }
     }
@@ -1936,6 +2080,9 @@ public interface JSON {
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
             }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
             return list;
         }
     }
@@ -1958,6 +2105,9 @@ public interface JSON {
             List<T> list = reader.readArray(type);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return list;
         }
@@ -1989,6 +2139,9 @@ public interface JSON {
             List<T> list = reader.readArray(type);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
             }
             return list;
         }

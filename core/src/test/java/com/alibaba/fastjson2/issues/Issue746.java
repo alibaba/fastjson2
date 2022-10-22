@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue746 {
     @Test
     public void test() {
-        LoginUser loginUser = JSON.parseObject("{\"menuSet\":Set[],\"authorities\":Set[]}}", LoginUser.class);
+        LoginUser loginUser = JSON.parseObject("{\"menuSet\":Set[],\"authorities\":Set[]}", LoginUser.class);
         assertEquals(0, loginUser.menuSet.size());
         assertEquals(0, loginUser.authorities.size());
     }
