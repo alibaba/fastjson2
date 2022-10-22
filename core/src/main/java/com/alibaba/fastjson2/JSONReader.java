@@ -3304,7 +3304,12 @@ public abstract class JSONReader
         /**
          * @since 2.0.13
          */
-        Base64StringAsByteArray(1 << 19);
+        Base64StringAsByteArray(1 << 19),
+
+        /**
+         * @since 2.0.16
+         */
+        IgnoreCheckClose(1 << 20);
 
         public final long mask;
 
