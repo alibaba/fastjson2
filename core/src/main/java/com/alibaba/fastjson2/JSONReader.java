@@ -2611,29 +2611,9 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
-            try {
-                int coder = STRING_CODER != null
-                        ? STRING_CODER.applyAsInt(str)
-                        : UnsafeUtils.getStringCoder(str);
-                if (coder == 0) {
-                    byte[] bytes = STRING_VALUE != null
-                            ? STRING_VALUE.apply(str)
-                            : UnsafeUtils.getStringValue(str);
-                    return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
-                }
-            } catch (Exception e) {
-                throw new JSONException("unsafe get String.coder error");
-            }
-        }
 
         final int length = str.length();
-        char[] chars;
-        if (JVM_VERSION == 8) {
-            chars = JDKUtils.getCharArray(str);
-        } else {
-            chars = str.toCharArray();
-        }
+        char[] chars = str.toCharArray();
 
         return new JSONReaderUTF16(context, str, chars, 0, length);
     }
@@ -2643,29 +2623,8 @@ public abstract class JSONReader
             throw new NullPointerException();
         }
 
-        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
-            try {
-                int coder = STRING_CODER != null
-                        ? STRING_CODER.applyAsInt(str)
-                        : UnsafeUtils.getStringCoder(str);
-                if (coder == 0) {
-                    byte[] bytes = STRING_VALUE != null
-                            ? STRING_VALUE.apply(str)
-                            : UnsafeUtils.getStringValue(str);
-                    return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
-                }
-            } catch (Exception e) {
-                throw new JSONException("unsafe get String.coder error");
-            }
-        }
-
         final int length = str.length();
-        char[] chars;
-        if (JVM_VERSION == 8) {
-            chars = JDKUtils.getCharArray(str);
-        } else {
-            chars = str.toCharArray();
-        }
+        char[] chars = str.toCharArray();
 
         return new JSONReaderUTF16(context, str, chars, 0, length);
     }
@@ -2676,28 +2635,8 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
-            try {
-                int coder = STRING_CODER != null
-                        ? STRING_CODER.applyAsInt(str)
-                        : UnsafeUtils.getStringCoder(str);
-                if (coder == 0) {
-                    byte[] bytes = STRING_VALUE != null
-                            ? STRING_VALUE.apply(str)
-                            : UnsafeUtils.getStringValue(str);
-                    return new JSONReaderASCII(context, str, bytes, offset, length);
-                }
-            } catch (Exception e) {
-                throw new JSONException("unsafe get String.coder error");
-            }
-        }
 
-        char[] chars;
-        if (JVM_VERSION == 8) {
-            chars = JDKUtils.getCharArray(str);
-        } else {
-            chars = str.toCharArray();
-        }
+        char[] chars = str.toCharArray();
 
         return new JSONReaderUTF16(context, str, chars, offset, length);
     }
@@ -2707,28 +2646,7 @@ public abstract class JSONReader
             throw new NullPointerException();
         }
 
-        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
-            try {
-                int coder = STRING_CODER != null
-                        ? STRING_CODER.applyAsInt(str)
-                        : UnsafeUtils.getStringCoder(str);
-                if (coder == 0) {
-                    byte[] bytes = STRING_VALUE != null
-                            ? STRING_VALUE.apply(str)
-                            : UnsafeUtils.getStringValue(str);
-                    return new JSONReaderASCII(context, str, bytes, offset, length);
-                }
-            } catch (Exception e) {
-                throw new JSONException("unsafe get String.coder error");
-            }
-        }
-
-        char[] chars;
-        if (JVM_VERSION == 8) {
-            chars = JDKUtils.getCharArray(str);
-        } else {
-            chars = str.toCharArray();
-        }
+        char[] chars = str.toCharArray();
 
         return new JSONReaderUTF16(context, str, chars, offset, length);
     }
