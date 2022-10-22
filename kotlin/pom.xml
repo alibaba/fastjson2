@@ -41,16 +41,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.jetbrains.dokka</groupId>
-            <artifactId>dokka-analysis</artifactId>
-            <version>1.7.20</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.dokka</groupId>
-            <artifactId>kotlin-analysis-compiler</artifactId>
-            <version>1.7.20</version>
-        </dependency>
-        <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
         </dependency>
@@ -113,7 +103,7 @@
                     <plugin>
                         <groupId>org.jetbrains.dokka</groupId>
                         <artifactId>dokka-maven-plugin</artifactId>
-                        <version>1.7.20</version>
+                        <version>1.7.10</version>
                         <executions>
                             <execution>
                                 <phase>prepare-package</phase>
