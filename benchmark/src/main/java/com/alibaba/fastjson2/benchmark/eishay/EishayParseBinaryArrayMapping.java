@@ -30,12 +30,12 @@ public class EishayParseBinaryArrayMapping {
     static Kryo kryo;
     static byte[] kryoBytes;
     static byte[] furyBytes;
-//    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
-//            .withLanguage(io.fury.Language.JAVA)
-//            .withReferenceTracking(true)
-//            .disableSecureMode()
-//            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
-//            .buildThreadSafeFury();
+    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
+            .withLanguage(io.fury.Language.JAVA)
+            .withReferenceTracking(true)
+            .disableSecureMode()
+            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
+            .buildThreadSafeFury();
 
     static {
         try {
@@ -59,7 +59,7 @@ public class EishayParseBinaryArrayMapping {
             kryo.writeObject(output, mc);
             kryoBytes = output.toBytes();
 
-//            furyBytes = fury.serialize(mc);
+            furyBytes = fury.serialize(mc);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -88,9 +88,9 @@ public class EishayParseBinaryArrayMapping {
         );
     }
 
-//    @Benchmark
+    @Benchmark
     public void fury(Blackhole bh) {
-//        bh.consume(fury.deserialize(furyBytes));
+        bh.consume(fury.deserialize(furyBytes));
     }
 
     public static void main(String[] args) throws Exception {

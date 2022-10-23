@@ -87,13 +87,11 @@
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
         </dependency>
-        <!--
         <dependency>
             <groupId>io.fury</groupId>
             <artifactId>fury-core</artifactId>
             <version>0.9.0</version>
         </dependency>
-        -->
     </dependencies>
 
     <build>
