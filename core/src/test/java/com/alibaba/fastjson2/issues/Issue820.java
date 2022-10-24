@@ -58,14 +58,14 @@ public class Issue820 {
     public void test() {
         Map<String, Long> map = new HashMap<>();
         map.put("0", 0L);
-        String s = JSON.toJSONString(map);
-        assertEquals("{\"0\":0}", s);
+        assertEquals("{\"0\":\"0\"}", JSON.toJSONString(map));
+        assertEquals("{\"0\":\"0\"}", new String(JSON.toJSONBytes(map)));
 
         Bean t = new Bean();
         t.setValue(0L);
         t.setValue1(new BigDecimal("0.11"));
-        s = JSON.toJSONString(t);
-        assertEquals("{\"value\":\"0\",\"value1\":\"0.11\"}", s);
+        assertEquals("{\"value\":\"0\",\"value1\":\"0.11\"}", JSON.toJSONString(t));
+        assertEquals("{\"value\":\"0\",\"value1\":\"0.11\"}", new String(JSON.toJSONBytes(t)));
     }
 
     @Test
@@ -73,6 +73,7 @@ public class Issue820 {
         Map<String, BigDecimal> map = new HashMap<>();
         map.put("0", new BigDecimal("0.11"));
         assertEquals("{\"0\":\"0.11\"}", JSON.toJSONString(map));
+        assertEquals("{\"0\":\"0.11\"}", new String(JSON.toJSONBytes(map)));
     }
 
     public static class Bean {

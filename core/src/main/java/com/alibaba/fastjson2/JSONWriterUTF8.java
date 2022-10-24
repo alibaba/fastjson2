@@ -1183,12 +1183,12 @@ class JSONWriterUTF8
 
     @Override
     public void writeInt64(long i) {
-        if ((context.features & Feature.WriteNonStringValueAsString.mask) != 0
-                || ((context.features & Feature.BrowserCompatible.mask) != 0
-                && (i > 9007199254740991L || i < -9007199254740991L))) {
-            String str = Long.toString(i);
-            writeString(str);
-            return;
+        boolean writeAsString = false;
+        if ((context.features & (Feature.WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0) {
+            writeAsString = true;
+        } else if ((context.features & Feature.BrowserCompatible.mask) != 0
+                && (i > 9007199254740991L || i < -9007199254740991L)) {
+            writeAsString = true;
         }
 
         if (i == Long.MIN_VALUE) {
@@ -1246,6 +1246,9 @@ class JSONWriterUTF8
         {
             // inline ensureCapacity
             int minCapacity = off + size;
+            if (writeAsString) {
+                minCapacity += 2;
+            }
             if (minCapacity - this.bytes.length > 0) {
                 int oldCapacity = this.bytes.length;
                 int newCapacity = oldCapacity + (oldCapacity >> 1);
@@ -1260,7 +1263,11 @@ class JSONWriterUTF8
                 this.bytes = Arrays.copyOf(this.bytes, newCapacity);
             }
         }
-//        IOUtils.getChars(i, off + size, bytes);
+
+        if (writeAsString) {
+            bytes[off++] = '"';
+        }
+
         {
             int index = off + size;
             long q;
@@ -1311,6 +1318,10 @@ class JSONWriterUTF8
             }
         }
         off += size;
+
+        if (writeAsString) {
+            bytes[off++] = '"';
+        }
     }
 
     @Override
