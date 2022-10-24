@@ -479,7 +479,7 @@ public final class ObjectWriterImplMap
                 if (valueWriter == ObjectWriterImplInt64.INSTANCE) {
                     jsonWriter.writeInt64((Long) value);
                 } else {
-                    jsonWriter.writeInt64((Long) value);
+                    valueWriter.write(jsonWriter, value, strKey, Long.class, features);
                 }
                 continue;
             } else if (valueClass == Boolean.class) {
