@@ -940,7 +940,7 @@ public class ObjectReaderCreatorASM
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "startArray", "()I", false);
             mw.visitVarInsn(Opcodes.ISTORE, ENTRY_CNT);
 
-            genCreateObject(mw, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
+            genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
             mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
             Label fieldEnd_ = new Label();
@@ -980,14 +980,14 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(object_);
 
-        genCreateObject(mw, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
+        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfObjectStart", "()Z", false);
         mw.visitInsn(Opcodes.POP);
 
-        genCreateObject(mw, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
+        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
         // for (int i = 0; i < entry_cnt; ++i) {
@@ -1325,7 +1325,7 @@ public class ObjectReaderCreatorASM
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "startArray", "()I", false);
         mw.visitVarInsn(Opcodes.ISTORE, ENTRY_CNT);
 
-        genCreateObject(mw, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
+        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
         Label fieldEnd_ = new Label();
@@ -1469,7 +1469,7 @@ public class ObjectReaderCreatorASM
         mw.visitIntInsn(Opcodes.BIPUSH, '[');
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
 
-        genCreateObject(mw, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
+        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
         for (int i = 0; i < fieldReaderArray.length; ++i) {
@@ -1536,7 +1536,7 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(notNull_);
 
-        genCreateObject(mw, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
+        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
         // for (int i = 0; i < entry_cnt; ++i) {
@@ -1829,16 +1829,29 @@ public class ObjectReaderCreatorASM
         mw.visitMaxs(5, 10);
     }
 
-    private <T> void genCreateObject(MethodWriter mw, String classNameType, String TYPE_OBJECT, int FEATURES, boolean fieldBased, Constructor defaultConstructor) {
+    private <T> void genCreateObject(
+            MethodWriter mw,
+            Class<T> objectType,
+            String classNameType,
+            String TYPE_OBJECT,
+            int FEATURES,
+            boolean fieldBased,
+            Constructor defaultConstructor
+    ) {
         final int JSON_READER = 1;
 
-        // } else if (defaultConstructor != null && Modifier.isPublic(defaultConstructor.getModifiers()) && Modifier.isPublic(objectClass.getModifiers())) {
+        int objectModifiers = objectType.getModifiers();
+        boolean publicObject = Modifier.isPublic(objectModifiers) && !classLoader.isExternalClass(objectType);
+
         if (fieldBased || defaultConstructor == null || !Modifier.isPublic(defaultConstructor.getModifiers())) {
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "features", "(J)J", false);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classNameType, "createInstance", "(J)Ljava/lang/Object;", false);
+            if (publicObject) {
+                mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_OBJECT);
+            }
         } else {
             mw.visitTypeInsn(Opcodes.NEW, TYPE_OBJECT);
             mw.visitInsn(Opcodes.DUP);
