@@ -14,4 +14,12 @@ public class Issue858 {
         Object tmpObj = JSONPath.extract(tmpJson, tmpPath);
         assertEquals("[{\"key\":\"value1\"}]", JSON.toJSONString(tmpObj));
     }
+
+    @Test
+    public void test1() {
+        String tmpJson = "{\"arr\": [{ \"key\": \"value1\" }, { \"key\": \"value2\" }]}";
+        String tmpPath = "$.arr[?(key='value1')]";
+        Object tmpObj = JSONPath.extract(tmpJson, tmpPath);
+        assertEquals("[{\"key\":\"value1\"}]", JSON.toJSONString(tmpObj));
+    }
 }
