@@ -99,11 +99,16 @@ abstract class FieldWriterDate<T>
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (valueClass == fieldClass) {
+            ObjectWriterProvider provider = jsonWriter.getContext().getProvider();
             if (dateWriter == null) {
-                if (format == null) {
-                    return dateWriter = ObjectWriterImplDate.INSTANCE;
+                if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DATE_MASK) != 0) {
+                    dateWriter = provider.getObjectWriter(valueClass, valueClass, false);
+                } else {
+                    if (format == null) {
+                        return dateWriter = ObjectWriterImplDate.INSTANCE;
+                    }
+                    return dateWriter = new ObjectWriterImplDate(format, null);
                 }
-                return dateWriter = new ObjectWriterImplDate(format, null);
             }
 
             return dateWriter;
