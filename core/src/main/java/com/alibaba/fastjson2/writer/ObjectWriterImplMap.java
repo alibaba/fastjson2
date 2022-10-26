@@ -409,6 +409,7 @@ public final class ObjectWriterImplMap
             }
         }
 
+        ObjectWriterProvider provider = jsonWriter.getContext().getProvider();
         for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = it.next();
             Object value = entry.getValue();
@@ -475,10 +476,10 @@ public final class ObjectWriterImplMap
                 jsonWriter.writeInt32((Integer) value);
                 continue;
             } else if (valueClass == Long.class) {
-                ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueClass);
-                if (valueWriter == ObjectWriterImplInt64.INSTANCE) {
+                if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT64_MASK) == 0) {
                     jsonWriter.writeInt64((Long) value);
                 } else {
+                    ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueClass);
                     valueWriter.write(jsonWriter, value, strKey, Long.class, features);
                 }
                 continue;
@@ -486,10 +487,10 @@ public final class ObjectWriterImplMap
                 jsonWriter.writeBool((Boolean) value);
                 continue;
             } else if (valueClass == BigDecimal.class) {
-                ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueClass);
-                if (valueWriter == ObjectWriterImplBigDecimal.INSTANCE) {
+                if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DECIMAL_MASK) == 0) {
                     jsonWriter.writeDecimal((BigDecimal) value);
                 } else {
+                    ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueClass);
                     valueWriter.write(jsonWriter, value, key, this.valueType, this.features);
                 }
                 continue;

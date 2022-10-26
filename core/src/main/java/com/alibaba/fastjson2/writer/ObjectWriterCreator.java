@@ -765,19 +765,25 @@ public class ObjectWriterCreator {
 
         if (initObjectWriter == null && provider != null) {
             if (fieldClass == Date.class) {
-                ObjectWriter objectWriter = provider.cache.get(fieldClass);
-                if (objectWriter != ObjectWriterImplDate.INSTANCE) {
-                    initObjectWriter = objectWriter;
+                if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DATE_MASK) != 0) {
+                    ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                    if (objectWriter != ObjectWriterImplDate.INSTANCE) {
+                        initObjectWriter = objectWriter;
+                    }
                 }
             } else if (fieldClass == Long.class) {
-                ObjectWriter objectWriter = provider.cache.get(fieldClass);
-                if (objectWriter != ObjectWriterImplInt64.INSTANCE) {
-                    initObjectWriter = objectWriter;
+                if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT64_MASK) != 0) {
+                    ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                    if (objectWriter != ObjectWriterImplInt64.INSTANCE) {
+                        initObjectWriter = objectWriter;
+                    }
                 }
             } else if (fieldClass == BigDecimal.class) {
-                ObjectWriter objectWriter = provider.cache.get(fieldClass);
-                if (objectWriter != ObjectWriterImplBigDecimal.INSTANCE) {
-                    initObjectWriter = objectWriter;
+                if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DECIMAL_MASK) != 0) {
+                    ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                    if (objectWriter != ObjectWriterImplBigDecimal.INSTANCE) {
+                        initObjectWriter = objectWriter;
+                    }
                 }
             } else if (Enum.class.isAssignableFrom(fieldClass)) {
                 ObjectWriter objectWriter = provider.cache.get(fieldClass);

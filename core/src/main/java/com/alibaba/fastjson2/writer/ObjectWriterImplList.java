@@ -274,6 +274,7 @@ final class ObjectWriterImplList
         }
 
         JSONWriter.Context context = jsonWriter.getContext();
+        ObjectWriterProvider provider = context.getProvider();
 
         jsonWriter.startArray();
         for (int i = 0; i < list.size(); i++) {
@@ -292,16 +293,36 @@ final class ObjectWriterImplList
                 jsonWriter.writeString((String) item);
                 continue;
             } else if (itemClass == Integer.class) {
-                jsonWriter.writeInt32((Integer) item);
+                if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT32_MASK) == 0) {
+                    jsonWriter.writeInt32((Integer) item);
+                } else {
+                    ObjectWriter valueWriter = provider.getObjectWriter(itemClass, itemClass, false);
+                    valueWriter.write(jsonWriter, item, i, Integer.class, features);
+                }
                 continue;
             } else if (itemClass == Long.class) {
-                jsonWriter.writeInt64((Long) item);
+                if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT64_MASK) == 0) {
+                    jsonWriter.writeInt64((Long) item);
+                } else {
+                    ObjectWriter valueWriter = provider.getObjectWriter(itemClass, itemClass, false);
+                    valueWriter.write(jsonWriter, item, i, Long.class, features);
+                }
                 continue;
             } else if (itemClass == Boolean.class) {
-                jsonWriter.writeBool((Boolean) item);
+                if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT32_MASK) == 0) {
+                    jsonWriter.writeBool((Boolean) item);
+                } else {
+                    ObjectWriter valueWriter = provider.getObjectWriter(itemClass, itemClass, false);
+                    valueWriter.write(jsonWriter, item, i, Boolean.class, features);
+                }
                 continue;
             } else if (itemClass == BigDecimal.class) {
-                jsonWriter.writeDecimal((BigDecimal) item);
+                if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DECIMAL_MASK) == 0) {
+                    jsonWriter.writeDecimal((BigDecimal) item);
+                } else {
+                    ObjectWriter valueWriter = provider.getObjectWriter(itemClass, itemClass, false);
+                    valueWriter.write(jsonWriter, item, i, BigDecimal.class, features);
+                }
                 continue;
             }
 
