@@ -173,7 +173,7 @@
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-bom</artifactId>
                 <type>pom</type>
-                <version>3.21.8</version>
+                <version>3.21.9</version>
                 <scope>import</scope>
             </dependency>
             <dependency>
