@@ -510,6 +510,22 @@ public class JSON {
         }
     }
 
+    public static Object parse(String str, ParserConfig config) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+
+        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE);
+        try (JSONReader jsonReader = JSONReader.of(str, context)) {
+            if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
+                return jsonReader.read(JSONObject.class);
+            }
+            return jsonReader.readAny();
+        } catch (Exception ex) {
+            throw new JSONException(ex.getMessage(), ex);
+        }
+    }
+
     public static Object parse(byte[] input, int off, int len, CharsetDecoder charsetDecoder, Feature... features) {
         if (input == null || input.length == 0) {
             return null;
