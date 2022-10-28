@@ -84,11 +84,14 @@ public class JSON {
     }
 
     static JSONReader.Context createReadContext(int featuresValue, Feature... features) {
+        return createReadContext(JSONFactory.getDefaultObjectReaderProvider(), featuresValue, features);
+    }
+
+    static JSONReader.Context createReadContext(ObjectReaderProvider provider, int featuresValue, Feature... features) {
         for (Feature feature : features) {
             featuresValue |= feature.mask;
         }
 
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context context = new JSONReader.Context(provider);
 
         if ((featuresValue & Feature.UseBigDecimal.mask) == 0) {
@@ -159,7 +162,10 @@ public class JSON {
             return null;
         }
 
-        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE);
+        JSONReader.Context context = createReadContext(
+                JSONFactory.getDefaultObjectReaderProvider(),
+                DEFAULT_PARSER_FEATURE
+        );
         JSONReader reader = JSONReader.of(str, context);
 
         try {
@@ -182,7 +188,11 @@ public class JSON {
             return null;
         }
 
-        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader.Context context = createReadContext(
+                JSONFactory.getDefaultObjectReaderProvider(),
+                DEFAULT_PARSER_FEATURE,
+                features
+        );
         JSONReader reader = JSONReader.of(text, context);
 
         String defaultDateFormat = JSON.DEFFAULT_DATE_FORMAT;
@@ -218,7 +228,11 @@ public class JSON {
             return null;
         }
 
-        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader.Context context = createReadContext(
+                JSONFactory.getDefaultObjectReaderProvider(),
+                DEFAULT_PARSER_FEATURE,
+                features
+        );
         JSONReader jsonReader = JSONReader.of(str, context);
 
         try {
@@ -243,7 +257,11 @@ public class JSON {
             return null;
         }
 
-        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader.Context context = createReadContext(
+                JSONFactory.getDefaultObjectReaderProvider(),
+                DEFAULT_PARSER_FEATURE,
+                features
+        );
         JSONReader jsonReader = JSONReader.of(str, context);
         context.config(processor);
 
@@ -272,7 +290,10 @@ public class JSON {
             return null;
         }
 
-        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE);
+        JSONReader.Context context = createReadContext(
+                JSONFactory.getDefaultObjectReaderProvider(),
+                DEFAULT_PARSER_FEATURE
+        );
         JSONReader jsonReader = JSONReader.of(str, context);
 
         try {
@@ -296,7 +317,11 @@ public class JSON {
             return null;
         }
 
-        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader.Context context = createReadContext(
+                JSONFactory.getDefaultObjectReaderProvider(),
+                DEFAULT_PARSER_FEATURE,
+                features
+        );
         JSONReader jsonReader = JSONReader.of(str, context);
 
         try {
@@ -320,7 +345,11 @@ public class JSON {
             return null;
         }
 
-        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader.Context context = createReadContext(
+                JSONFactory.getDefaultObjectReaderProvider(),
+                DEFAULT_PARSER_FEATURE,
+                features
+        );
         JSONReader jsonReader = JSONReader.of(str, context);
 
         try {
@@ -347,7 +376,11 @@ public class JSON {
             return null;
         }
 
-        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader.Context context = createReadContext(
+                config.getProvider(),
+                DEFAULT_PARSER_FEATURE,
+                features
+        );
         JSONReader jsonReader = JSONReader.of(str, context);
 
         try {
@@ -389,7 +422,11 @@ public class JSON {
             return null;
         }
 
-        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader.Context context = createReadContext(
+                JSONFactory.getDefaultObjectReaderProvider(),
+                DEFAULT_PARSER_FEATURE,
+                features
+        );
         JSONReader jsonReader = JSONReader.of(is, charset, context);
 
         try {
@@ -416,7 +453,11 @@ public class JSON {
             return null;
         }
 
-        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader.Context context = createReadContext(
+                JSONFactory.getDefaultObjectReaderProvider(),
+                DEFAULT_PARSER_FEATURE,
+                features
+        );
         JSONReader reader = JSONReader.of(jsonBytes, context);
 
         boolean ordered = false;
@@ -447,7 +488,11 @@ public class JSON {
             return null;
         }
 
-        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader.Context context = createReadContext(
+                JSONFactory.getDefaultObjectReaderProvider(),
+                DEFAULT_PARSER_FEATURE,
+                features
+        );
         JSONReader jsonReader = JSONReader.of(jsonBytes, context);
 
         try {
@@ -471,7 +516,11 @@ public class JSON {
             return null;
         }
 
-        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader.Context context = createReadContext(
+                JSONFactory.getDefaultObjectReaderProvider(),
+                DEFAULT_PARSER_FEATURE,
+                features
+        );
         JSONReader jsonReader = JSONReader.of(jsonBytes, context);
 
         if (filter instanceof Filter) {
@@ -499,7 +548,11 @@ public class JSON {
             return null;
         }
 
-        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+        JSONReader.Context context = createReadContext(
+                JSONFactory.getDefaultObjectReaderProvider(),
+                DEFAULT_PARSER_FEATURE,
+                features
+        );
         try (JSONReader jsonReader = JSONReader.of(str, context)) {
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
                 return jsonReader.read(JSONObject.class);
@@ -515,7 +568,7 @@ public class JSON {
             return null;
         }
 
-        JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE);
+        JSONReader.Context context = createReadContext(config.getProvider(), DEFAULT_PARSER_FEATURE);
         try (JSONReader jsonReader = JSONReader.of(str, context)) {
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
                 return jsonReader.read(JSONObject.class);
@@ -555,7 +608,10 @@ public class JSON {
 
             int position = charBuf.position();
 
-            JSONReader.Context context = createReadContext(features);
+            JSONReader.Context context = createReadContext(
+                    JSONFactory.getDefaultObjectReaderProvider(),
+                    features
+            );
             JSONReader jsonReader = JSONReader.of(chars, 0, position, context);
 
             for (Feature feature : Feature.values()) {
@@ -613,7 +669,11 @@ public class JSON {
 
             int position = charByte.position();
 
-            JSONReader.Context context = createReadContext(DEFAULT_PARSER_FEATURE, features);
+            JSONReader.Context context = createReadContext(
+                    JSONFactory.getDefaultObjectReaderProvider(),
+                    DEFAULT_PARSER_FEATURE,
+                    features
+            );
             JSONReader jsonReader = JSONReader.of(chars, 0, position, context);
 
             T object = jsonReader.read(clazz);
@@ -636,7 +696,17 @@ public class JSON {
             Type clazz,
             Feature... features) {
         try (JSONReader jsonReader =
-                     JSONReader.of(input, off, len, charset, createReadContext(DEFAULT_PARSER_FEATURE, features))
+                     JSONReader.of(
+                             input,
+                             off,
+                             len,
+                             charset,
+                             createReadContext(
+                                     JSONFactory.getDefaultObjectReaderProvider(),
+                                     DEFAULT_PARSER_FEATURE,
+                                     features
+                             )
+                     )
         ) {
             T object = jsonReader.read(clazz);
             if (object != null) {
@@ -1131,7 +1201,10 @@ public class JSON {
             return null;
         }
 
-        try (JSONReader jsonReader = JSONReader.of(str, createReadContext(DEFAULT_PARSER_FEATURE, features))) {
+        try (JSONReader jsonReader = JSONReader.of(
+                str,
+                createReadContext(JSONFactory.getDefaultObjectReaderProvider(), DEFAULT_PARSER_FEATURE, features))
+        ) {
             if (jsonReader.nextIfNull()) {
                 return null;
             }
@@ -1148,7 +1221,10 @@ public class JSON {
         }
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
 
-        try (JSONReader reader = JSONReader.of(text, createReadContext(DEFAULT_PARSER_FEATURE))) {
+        try (JSONReader reader = JSONReader.of(
+                text,
+                createReadContext(JSONFactory.getDefaultObjectReaderProvider(), DEFAULT_PARSER_FEATURE))
+        ) {
             return reader.read(paramType);
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
@@ -1165,7 +1241,10 @@ public class JSON {
         }
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{type}, null, List.class);
 
-        try (JSONReader reader = JSONReader.of(text, createReadContext(DEFAULT_PARSER_FEATURE, features))) {
+        try (JSONReader reader = JSONReader.of(
+                text,
+                createReadContext(JSONFactory.getDefaultObjectReaderProvider(), DEFAULT_PARSER_FEATURE, features))
+        ) {
             return reader.read(paramType);
         } catch (com.alibaba.fastjson2.JSONException e) {
             Throwable cause = e.getCause();
@@ -1216,7 +1295,10 @@ public class JSON {
         }
         List array = new JSONArray(types.length);
 
-        try (JSONReader reader = JSONReader.of(text, createReadContext(DEFAULT_GENERATE_FEATURE))) {
+        try (JSONReader reader = JSONReader.of(
+                text,
+                createReadContext(JSONFactory.getDefaultObjectReaderProvider(), DEFAULT_GENERATE_FEATURE))
+        ) {
             reader.startArray();
             for (Type itemType : types) {
                 array.add(
