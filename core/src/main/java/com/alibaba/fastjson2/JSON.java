@@ -2793,7 +2793,7 @@ public interface JSON {
             return ((JSONObject) object).to(clazz);
         }
 
-        return TypeUtils.cast(object, clazz);
+        return TypeUtils.cast(object, clazz, JSONFactory.getDefaultObjectReaderProvider());
     }
 
     /**

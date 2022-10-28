@@ -2,9 +2,11 @@ package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2_vo.Int1;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -360,5 +362,36 @@ public class TypeUtilsTest {
         assertEquals(OptionalInt.empty(), TypeUtils.getDefaultValue(OptionalInt.class));
         assertEquals(OptionalLong.empty(), TypeUtils.getDefaultValue(OptionalLong.class));
         assertEquals(OptionalDouble.empty(), TypeUtils.getDefaultValue(OptionalDouble.class));
+    }
+
+    @Test
+    public void test2() {
+        assertEquals(
+                Integer.valueOf(1),
+                TypeUtils.cast("1", (Type) Integer.class)
+        );
+        assertNull(
+                TypeUtils.cast(null, (Type) Integer.class)
+        );
+
+        HashMap<Object, Object> map = new HashMap<>();
+        map.put("id", "123");
+
+        assertEquals(
+                Integer.valueOf(123),
+                ((Bean<Integer>) TypeUtils.cast(map, new TypeReference<Bean<Integer>>(){}.getType())).id
+        );
+
+        List<Map> list = new ArrayList<>();
+        list.add(map);
+
+        assertEquals(
+                Integer.valueOf(123),
+                ((List<Bean<Integer>>) TypeUtils.cast(list, new TypeReference<List<Bean<Integer>>>(){}.getType())).get(0).id
+        );
+    }
+
+    public static class Bean<T> {
+        public T id;
     }
 }
