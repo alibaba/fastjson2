@@ -82,7 +82,7 @@ public class JSONObject
     }
 
     public static <T> T toJavaObject(JSON json, Class<T> clazz) {
-        return com.alibaba.fastjson2.util.TypeUtils.cast(json, clazz);
+        return com.alibaba.fastjson2.util.TypeUtils.cast(json, clazz, JSONFactory.getDefaultObjectReaderProvider());
     }
 
     @Override
@@ -397,7 +397,7 @@ public class JSONObject
 
     public boolean getBooleanValue(String key) {
         Object value = get(key);
-        Boolean booleanVal = com.alibaba.fastjson2.util.TypeUtils.cast(value, Boolean.class);
+        Boolean booleanVal = com.alibaba.fastjson2.util.TypeUtils.toBoolean(value);
         if (booleanVal == null) {
             return false;
         }
@@ -791,17 +791,25 @@ public class JSONObject
 
     public Date getDate(String key) {
         Object value = get(key);
-        return com.alibaba.fastjson2.util.TypeUtils.cast(value, java.util.Date.class);
+        return com.alibaba.fastjson2.util.TypeUtils.toDate(value);
     }
 
     public java.sql.Date getSqlDate(String key) {
         Object value = get(key);
-        return com.alibaba.fastjson2.util.TypeUtils.cast(value, java.sql.Date.class);
+        return com.alibaba.fastjson2.util.TypeUtils.cast(
+                value,
+                java.sql.Date.class,
+                JSONFactory.getDefaultObjectReaderProvider()
+        );
     }
 
     public java.sql.Timestamp getTimestamp(String key) {
         Object value = get(key);
-        return com.alibaba.fastjson2.util.TypeUtils.cast(value, Timestamp.class);
+        return com.alibaba.fastjson2.util.TypeUtils.cast(
+                value,
+                Timestamp.class,
+                JSONFactory.getDefaultObjectReaderProvider()
+        );
     }
 
     @Override

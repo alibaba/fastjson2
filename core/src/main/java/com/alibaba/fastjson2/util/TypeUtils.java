@@ -158,7 +158,32 @@ public class TypeUtils {
         throw new JSONException("can not cast to Date from " + obj.getClass());
     }
 
+    public static <T> T cast(Object obj, Type type) {
+        if (type instanceof Class) {
+            return (T) cast(obj, (Class) type);
+        }
+
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+
+        if (obj instanceof Collection) {
+            ObjectReader objectReader = provider.getObjectReader(type);
+            return (T) objectReader.createInstance((Collection) obj);
+        }
+
+        if (obj instanceof Map) {
+            ObjectReader objectReader = provider.getObjectReader(type);
+            return (T) objectReader.createInstance((Map) obj, 0L);
+        }
+
+        String json = JSON.toJSONString(obj);
+        return JSON.parseObject(json, type);
+    }
+
     public static <T> T cast(Object obj, Class<T> targetClass) {
+        return cast(obj, targetClass, JSONFactory.getDefaultObjectReaderProvider());
+    }
+
+    public static <T> T cast(Object obj, Class<T> targetClass, ObjectReaderProvider provider) {
         if (obj == null) {
             return null;
         }
@@ -195,7 +220,6 @@ public class TypeUtils {
             return (T) new AtomicBoolean((Boolean) obj);
         }
 
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         if (obj instanceof Map) {
             ObjectReader objectReader = provider.getObjectReader(targetClass);
             return (T) objectReader.createInstance((Map) obj, 0L);

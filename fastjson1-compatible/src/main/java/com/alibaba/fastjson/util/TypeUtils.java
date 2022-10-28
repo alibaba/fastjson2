@@ -32,7 +32,7 @@ import java.util.*;
 public class TypeUtils {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T> T cast(Object obj, Class<T> clazz, ParserConfig config) {
-        return com.alibaba.fastjson2.util.TypeUtils.cast(obj, clazz);
+        return com.alibaba.fastjson2.util.TypeUtils.cast(obj, clazz, config.getProvider());
     }
 
     @SuppressWarnings("unchecked")
