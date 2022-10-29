@@ -6,7 +6,7 @@
 
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-parent</artifactId>
-    <version>2.0.18-SNAPSHOT</version>
+    <version>2.0.17.android-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
     <packaging>pom</packaging>
@@ -44,7 +44,7 @@
         <kotlin.compiler.apiVersion>1.5</kotlin.compiler.apiVersion>
 
         <junit5.version>5.9.1</junit5.version>
-        <kotest.version>5.5.3</kotest.version>
+        <kotest.version>5.5.2</kotest.version>
         <jmh.version>1.35</jmh.version>
 
         <!-- overridden by submodule that need skip deploy -->
@@ -258,7 +258,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.12.1</version>
+                <version>2.12.0</version>
             </dependency>
 
 
@@ -419,7 +419,7 @@
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-bom</artifactId>
                 <type>pom</type>
-                <version>5.7.5</version>
+                <version>5.7.4</version>
                 <scope>import</scope>
             </dependency>
 
