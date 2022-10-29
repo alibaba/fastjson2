@@ -7,6 +7,8 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+
 final class FieldWriterListFunc<T>
         extends FieldWriterList<T> {
     final Function<T, List> function;
@@ -46,7 +48,7 @@ final class FieldWriterListFunc<T>
 
         if (list == null) {
             long features = this.features | jsonWriter.getFeatures();
-            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullListAsEmpty.mask)) == 0) {
+            if ((features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask)) == 0) {
                 return false;
             }
             writeFieldName(jsonWriter);
@@ -54,7 +56,7 @@ final class FieldWriterListFunc<T>
             return true;
         }
 
-        if ((features & JSONWriter.Feature.NotWriteEmptyArray.mask) != 0 && list.isEmpty()) {
+        if ((features & NotWriteEmptyArray.mask) != 0 && list.isEmpty()) {
             return false;
         }
 

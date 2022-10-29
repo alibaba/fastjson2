@@ -6,6 +6,9 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.NullAsDefaultValue;
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNullListAsEmpty;
+
 final class ObjectWriterImplInt64Array
         extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplInt64Array INSTANCE = new ObjectWriterImplInt64Array();
@@ -15,7 +18,7 @@ final class ObjectWriterImplInt64Array
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {
-            if (jsonWriter.isEnabled(JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullListAsEmpty.mask)) {
+            if (jsonWriter.isEnabled(NullAsDefaultValue.mask | WriteNullListAsEmpty.mask)) {
                 jsonWriter.startArray();
                 jsonWriter.endArray();
             } else {

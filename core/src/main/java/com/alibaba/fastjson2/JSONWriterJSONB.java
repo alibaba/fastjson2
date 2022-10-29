@@ -249,6 +249,25 @@ final class JSONWriterJSONB
     }
 
     @Override
+    public void writeStringNull() {
+        if (off == bytes.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
+        bytes[off++] = BC_NULL;
+    }
+
+    @Override
     public void endArray() {
         level--;
     }

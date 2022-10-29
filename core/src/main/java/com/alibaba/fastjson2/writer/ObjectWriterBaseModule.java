@@ -874,7 +874,8 @@ public class ObjectWriterBaseModule
 
         if (Map.Entry.class.isAssignableFrom(objectClass)) {
             String objectClassName = objectClass.getName();
-            if (!"org.apache.commons.lang3.tuple.ImmutablePair".equals(objectClassName) && !"org.apache.commons.lang3.tuple.MutablePair".equals(objectClassName)
+            if (!"org.apache.commons.lang3.tuple.ImmutablePair".equals(objectClassName)
+                    && !"org.apache.commons.lang3.tuple.MutablePair".equals(objectClassName)
             ) {
                 return ObjectWriterImplMapEntry.INSTANCE;
             }
