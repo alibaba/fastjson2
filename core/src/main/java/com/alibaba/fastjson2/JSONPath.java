@@ -4814,6 +4814,11 @@ public abstract class JSONPath {
             if (object instanceof java.util.List) {
                 List list = (List) object;
                 if (index >= 0) {
+                    if (index > list.size()) {
+                        for (int i = list.size(); i < index; ++i) {
+                            list.add(null);
+                        }
+                    }
                     if (index < list.size()) {
                         list.set(index, value);
                     } else if (index <= list.size()) {
