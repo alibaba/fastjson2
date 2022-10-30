@@ -12,7 +12,7 @@ independent in the `extension` dependency.
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension</artifactId>
-    <version>2.0.16</version>
+    <version>2.0.17</version>
 </dependency>
 ```
 
@@ -20,7 +20,7 @@ independent in the `extension` dependency.
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.16'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.17'
 }
 ```
 
