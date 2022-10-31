@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.FieldInfo;
@@ -55,7 +56,8 @@ abstract class FieldWriterObject<T>
         array = fieldClass.isArray()
                 || Collection.class.isAssignableFrom(fieldClass)
                 || fieldClass == AtomicLongArray.class
-                || fieldClass == AtomicIntegerArray.class;
+                || fieldClass == AtomicIntegerArray.class
+                || method.getParameterTypes().getClass().isArray();
         number = Number.class.isAssignableFrom(fieldClass);
     }
 
