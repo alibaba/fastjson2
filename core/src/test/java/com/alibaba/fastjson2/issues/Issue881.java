@@ -11,7 +11,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue881 {
-
     @Test
     public void fastjson2Test() {
         TestClass<List<String>> testClass = new TestClass<>();
