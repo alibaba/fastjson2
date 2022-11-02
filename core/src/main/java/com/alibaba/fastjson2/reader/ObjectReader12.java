@@ -211,7 +211,7 @@ public class ObjectReader12<T>
         }
 
         if (hashCode == hashCode11LCase) {
-            return fieldReader10;
+            return fieldReader11;
         }
 
         return null;
