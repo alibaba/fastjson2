@@ -56,7 +56,7 @@ abstract class FieldWriterObject<T>
                 || Collection.class.isAssignableFrom(fieldClass)
                 || fieldClass == AtomicLongArray.class
                 || fieldClass == AtomicIntegerArray.class
-                || method.getParameterTypes().getClass().isArray();
+                || (method != null && method.getParameterTypes().getClass().isArray());
         number = Number.class.isAssignableFrom(fieldClass);
     }
 
