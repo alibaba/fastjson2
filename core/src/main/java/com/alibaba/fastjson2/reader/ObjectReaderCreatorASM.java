@@ -306,11 +306,11 @@ public class ObjectReaderCreatorASM
         }
 
         if (beanInfo.creatorConstructor != null || beanInfo.createMethod != null) {
-            return createObjectReaderWithCreator(objectClass, provider, beanInfo);
+            return createObjectReaderWithCreator(objectClass, objectType, provider, beanInfo);
         }
 
         if (beanInfo.builder != null) {
-            return createObjectReaderWithBuilder(objectClass, provider, beanInfo);
+            return createObjectReaderWithBuilder(objectClass, objectType, provider, beanInfo);
         }
 
         if (Throwable.class.isAssignableFrom(objectClass)) {
