@@ -48,6 +48,15 @@ class FieldReaderAnySetter<T>
     }
 
     @Override
+    public void acceptExtra(Object object, String name, Object value) {
+        try {
+            method.invoke(object, name, value);
+        } catch (Exception e) {
+            throw new JSONException("any set error");
+        }
+    }
+
+    @Override
     public boolean isReadOnly() {
         return true;
     }
