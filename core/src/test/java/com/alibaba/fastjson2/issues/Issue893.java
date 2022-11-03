@@ -2,8 +2,6 @@ package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.TypeReference;
-import com.alibaba.fastjson2.TypeReferenceTest;
 import com.alibaba.fastjson2.annotation.JSONCreator;
 import org.junit.jupiter.api.Test;
 
@@ -144,28 +142,6 @@ public class Issue893 {
             this.f10 = f10;
             this.f11 = f11;
             this.f12 = f12;
-        }
-    }
-
-    @Test
-    public void test22() {
-        User<DD> user = JSON.parseObject(
-                "{\"a\":1,\"b\":\"asd\",\"c\":{\"a\":9}}", new TypeReference<User<DD>>() {
-                }
-        );
-        assertEquals(DD.class, user.c.getClass());
-    }
-
-    static class DD {
-        public int a;
-    }
-
-    static class User<T> {
-        public int a;
-        private T c;
-
-        public void setC(T c) {
-            this.c = c;
         }
     }
 }
