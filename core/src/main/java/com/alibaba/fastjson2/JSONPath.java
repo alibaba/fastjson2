@@ -58,6 +58,7 @@ public abstract class JSONPath {
     public static Object eval(String str, String path) {
         return extract(str, path);
     }
+
     public static Object eval(Object rootObject, String path) {
         return JSONPath.of(path)
                 .eval(rootObject);
@@ -397,6 +398,7 @@ public abstract class JSONPath {
         return new JSONPathParser(path)
                 .parse();
     }
+
     static Operator parseOperator(JSONReader jsonReader) {
         Operator operator;
         switch (jsonReader.ch) {
@@ -1069,7 +1071,11 @@ public abstract class JSONPath {
             this.function = null;
         }
 
-        public NameFilter(String fieldName, long fieldNameNameHash, String[] fieldName2, long[] fieldNameNameHash2, Function function) {
+        public NameFilter(String fieldName,
+                          long fieldNameNameHash,
+                          String[] fieldName2,
+                          long[] fieldNameNameHash2,
+                          Function function) {
             this.fieldName = fieldName;
             this.fieldNameNameHash = fieldNameNameHash;
             this.fieldName2 = fieldName2;
@@ -1734,17 +1740,21 @@ public abstract class JSONPath {
             ObjectReader objectReader = provider.getObjectReader(rootObject.getClass());
             FieldReader fieldReader = objectReader.getFieldReader(nameHashCode);
 
-            if (value != null) {
-                Class<?> valueClass = value.getClass();
-                Class fieldClass = fieldReader.fieldClass;
-                if (valueClass != fieldClass) {
-                    java.util.function.Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
-                    if (typeConvert != null) {
-                        value = typeConvert.apply(value);
+            if (fieldReader != null) {
+                if (value != null) {
+                    Class<?> valueClass = value.getClass();
+                    Class fieldClass = fieldReader.fieldClass;
+                    if (valueClass != fieldClass) {
+                        java.util.function.Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
+                        if (typeConvert != null) {
+                            value = typeConvert.apply(value);
+                        }
                     }
                 }
+                fieldReader.accept(rootObject, value);
+            } else if (objectReader instanceof ObjectReaderBean) {
+                ((ObjectReaderBean) objectReader).acceptExtra(rootObject, name, value);
             }
-            fieldReader.accept(rootObject, value);
         }
 
         @Override
@@ -3010,7 +3020,7 @@ public abstract class JSONPath {
             if (object instanceof Map) {
                 Map map = (Map) object;
                 JSONArray array = new JSONArray(map.size());
-                for (Iterator<Map.Entry> it = ((Map) object).entrySet().iterator(); it.hasNext();) {
+                for (Iterator<Map.Entry> it = ((Map) object).entrySet().iterator(); it.hasNext(); ) {
                     Map.Entry entry = it.next();
                     array.add(
                             JSONObject.of("key", entry.getKey(), "value", entry.getValue())

@@ -93,6 +93,13 @@ public abstract class ObjectReaderBean<T>
         jsonReader.skipValue();
     }
 
+    public void acceptExtra(Object object, String fieldName, Object fieldValue) {
+        if (extraFieldReader == null || object == null) {
+            return;
+        }
+        extraFieldReader.acceptExtra(object, fieldName, fieldValue);
+    }
+
     public ObjectReader checkAutoType(JSONReader jsonReader, Class expectClass, long features) {
         if (jsonReader.nextIfMatch(BC_TYPED_ANY)) {
             long typeHash = jsonReader.readTypeHashCode();

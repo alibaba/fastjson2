@@ -76,6 +76,18 @@ class FieldReaderMapFieldReadOnly<T>
     }
 
     @Override
+    public void acceptExtra(Object object, String name, Object value) {
+        Map map;
+        try {
+            map = (Map) field.get(object);
+        } catch (Exception e) {
+            throw new JSONException("set " + fieldName + " error");
+        }
+
+        map.put(name, value);
+    }
+
+    @Override
     public boolean isReadOnly() {
         return true;
     }
