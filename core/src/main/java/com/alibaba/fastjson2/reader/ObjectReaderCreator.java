@@ -1048,8 +1048,8 @@ public class ObjectReaderCreator {
 
         ObjectReader initReader = fieldInfo.getInitReader();
         if (initReader == null) {
-            if (fieldClass == long.class) {
-                ObjectReader objectReader = provider.getObjectReader(fieldClass);
+            if (fieldClass == long.class || fieldClass == Long.class) {
+                ObjectReader objectReader = provider.getObjectReader(Long.class);
                 if (objectReader != ObjectReaderImplInt64.INSTANCE) {
                     initReader = objectReader;
                 }

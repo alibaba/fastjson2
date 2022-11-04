@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicLongArray;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
+import static com.alibaba.fastjson2.writer.ObjectWriterProvider.TYPE_INT64_MASK;
 
 public class ObjectWriterCreatorASM
         extends ObjectWriterCreator {
@@ -799,6 +800,11 @@ public class ObjectWriterCreatorASM
         Class<?> fieldClass = fieldWriter.fieldClass;
 
         boolean beanToArray = (features & JSONWriter.Feature.BeanToArray.mask) != 0 || table;
+        boolean userDefineWriter = false;
+        if ((fieldClass == long.class || fieldClass == Long.class || fieldClass == long[].class)
+                && (mwc.provider.userDefineMask & TYPE_INT64_MASK) != 0) {
+            userDefineWriter = mwc.provider.getObjectWriter(Long.class) != ObjectWriterImplInt64.INSTANCE;
+        }
 
         if (fieldClass == boolean.class
                 || fieldClass == boolean[].class
@@ -811,7 +817,7 @@ public class ObjectWriterCreatorASM
                 || fieldClass == int.class
                 || fieldClass == int[].class
                 || fieldClass == long.class
-                || fieldClass == long[].class
+                || (fieldClass == long[].class && !userDefineWriter)
                 || fieldClass == float.class
                 || fieldClass == float[].class
                 || fieldClass == double.class
@@ -1105,7 +1111,7 @@ public class ObjectWriterCreatorASM
         } else if (fieldClass == int[].class) {
             methodName = "writeInt32";
             methodDesc = "([I)V";
-        } else if (fieldClass == long[].class) {
+        } else if (fieldClass == long[].class && mwc.provider.getObjectWriter(Long.class) == ObjectWriterImplInt64.INSTANCE) {
             methodName = "writeInt64";
             methodDesc = "([J)V";
         } else if (fieldClass == float[].class) {
@@ -1232,6 +1238,12 @@ public class ObjectWriterCreatorASM
 
         final String TYPE_OBJECT = ASMUtils.type(objectType);
 
+        boolean userDefineWriter = false;
+        if ((fieldClass == long.class || fieldClass == Long.class || fieldClass == long[].class)
+                && (mwc.provider.userDefineMask & TYPE_INT64_MASK) != 0) {
+            userDefineWriter = mwc.provider.getObjectWriter(Long.class) != ObjectWriterImplInt64.INSTANCE;
+        }
+
         if (fieldClass == boolean.class
                 || fieldClass == boolean[].class
                 || fieldClass == char.class
@@ -1243,7 +1255,7 @@ public class ObjectWriterCreatorASM
                 || fieldClass == int.class
                 || fieldClass == int[].class
                 || fieldClass == long.class
-                || fieldClass == long[].class
+                || (fieldClass == long[].class && !userDefineWriter)
                 || fieldClass == float.class
                 || fieldClass == float[].class
                 || fieldClass == double.class
@@ -1538,7 +1550,9 @@ public class ObjectWriterCreatorASM
             gwFieldValueIntVA(mwc, fieldWriter, OBJECT, i, false);
         } else if (fieldClass == long.class) {
             gwFieldValueInt64V(mwc, fieldWriter, OBJECT, i, false);
-        } else if (fieldClass == long[].class) {
+        } else if (fieldClass == long[].class
+                && mwc.provider.getObjectWriter(Long.class) == ObjectWriterImplInt64.INSTANCE
+        ) {
             gwFieldValueInt64VA(mwc, fieldWriter, OBJECT, i, false);
         } else if (fieldClass == float.class) {
             gwFieldName(mwc, i);
@@ -1994,7 +2008,9 @@ public class ObjectWriterCreatorASM
             gwFieldValueIntVA(mwc, fieldWriter, OBJECT, i, true);
         } else if (fieldClass == long.class) {
             gwFieldValueInt64V(mwc, fieldWriter, OBJECT, i, true);
-        } else if (fieldClass == long[].class) {
+        } else if (fieldClass == long[].class
+                && mwc.provider.getObjectWriter(Long.class) == ObjectWriterImplInt64.INSTANCE
+        ) {
             gwFieldValueInt64VA(mwc, fieldWriter, OBJECT, i, true);
         } else if (fieldClass == float.class) {
             gwFieldName(mwc, i);
