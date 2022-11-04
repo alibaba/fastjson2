@@ -404,6 +404,9 @@ public abstract class FieldReader<T>
         jsonReader.skipValue();
     }
 
+    public void acceptExtra(Object object, String name, Object value) {
+    }
+
     public ObjectReader getItemObjectReader(JSONReader.Context ctx) {
         if (itemReader != null) {
             return itemReader;

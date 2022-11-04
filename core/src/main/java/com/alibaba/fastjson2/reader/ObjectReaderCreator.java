@@ -148,7 +148,8 @@ public class ObjectReaderCreator {
     }
 
     protected <T> ObjectReader<T> createObjectReaderWithBuilder(
-            Class<T> objectType,
+            Class<T> objectClass,
+            Type objectType,
             ObjectReaderProvider provider,
             BeanInfo beanInfo) {
         Function<Object, Object> builderFunction = null;
@@ -174,7 +175,7 @@ public class ObjectReaderCreator {
                 if (annotationProcessor == null) {
                     continue;
                 }
-                annotationProcessor.getFieldInfo(fieldInfo, objectType, method);
+                annotationProcessor.getFieldInfo(fieldInfo, objectClass, method);
             }
 
             if (fieldInfo.ignore) {
@@ -280,6 +281,7 @@ public class ObjectReaderCreator {
 
     protected <T> ObjectReader<T> createObjectReaderWithCreator(
             Class<T> objectClass,
+            Type objectType,
             ObjectReaderProvider provider,
             BeanInfo beanInfo) {
         FieldInfo fieldInfo = new FieldInfo();
@@ -341,7 +343,7 @@ public class ObjectReaderCreator {
             fieldReaders.put(fieldName,
                     createFieldReaderParam(
                             objectClass,
-                            objectClass,
+                            objectType,
                             fieldName,
                             i,
                             fieldInfo.features,
@@ -361,7 +363,7 @@ public class ObjectReaderCreator {
                     fieldReaders.putIfAbsent(alternateName,
                             createFieldReaderParam(
                                     objectClass,
-                                    objectClass,
+                                    objectType,
                                     alternateName,
                                     i,
                                     fieldInfo.features,
@@ -428,7 +430,7 @@ public class ObjectReaderCreator {
         FieldReader[] fieldReaderArray = new FieldReader[fieldReaders.size()];
         fieldReaders.values().toArray(fieldReaderArray);
 
-        FieldReader[] setterFieldReaders = createFieldReaders(objectClass);
+        FieldReader[] setterFieldReaders = createFieldReaders(objectClass, objectType);
         Arrays.sort(setterFieldReaders);
         Arrays.sort(fieldReaderArray);
 
@@ -614,7 +616,8 @@ public class ObjectReaderCreator {
     }
 
     public <T> ObjectReader<T> createObjectReader(
-            Class<T> objectClass, Type objectType,
+            Class<T> objectClass,
+            Type objectType,
             boolean fieldBased,
             ObjectReaderProvider provider
     ) {
@@ -663,11 +666,11 @@ public class ObjectReaderCreator {
         FieldReader[] fieldReaderArray = createFieldReaders(objectClass, objectType, beanInfo, fieldBased, provider);
 
         if (beanInfo.creatorConstructor != null || beanInfo.createMethod != null) {
-            return createObjectReaderWithCreator(objectClass, provider, beanInfo);
+            return createObjectReaderWithCreator(objectClass, objectType, provider, beanInfo);
         }
 
         if (beanInfo.builder != null) {
-            return createObjectReaderWithBuilder(objectClass, provider, beanInfo);
+            return createObjectReaderWithBuilder(objectClass, objectType, provider, beanInfo);
         }
 
         Constructor creatorConstructor = beanInfo.creatorConstructor;
@@ -1043,6 +1046,16 @@ public class ObjectReaderCreator {
         Type fieldType = method.getGenericParameterTypes()[0];
         Class fieldClass = method.getParameterTypes()[0];
 
+        ObjectReader initReader = fieldInfo.getInitReader();
+        if (initReader == null) {
+            if (fieldClass == long.class) {
+                ObjectReader objectReader = provider.getObjectReader(fieldClass);
+                if (objectReader != ObjectReaderImplInt64.INSTANCE) {
+                    initReader = objectReader;
+                }
+            }
+        }
+
         FieldReader fieldReader = createFieldReaderMethod(
                 objectClass,
                 objectType,
@@ -1056,7 +1069,7 @@ public class ObjectReaderCreator {
                 fieldType,
                 fieldClass,
                 method,
-                fieldInfo.getInitReader()
+                initReader
         );
 
         FieldReader origin = fieldReaders.putIfAbsent(fieldName, fieldReader);
@@ -1085,7 +1098,7 @@ public class ObjectReaderCreator {
                                         fieldType,
                                         fieldClass,
                                         method,
-                                        null
+                                        initReader
                                 ));
             }
         }

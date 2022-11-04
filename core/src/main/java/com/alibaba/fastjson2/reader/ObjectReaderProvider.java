@@ -387,6 +387,10 @@ public class ObjectReaderProvider
     }
 
     public ObjectReader register(Type type, ObjectReader objectReader) {
+        if (objectReader == null) {
+            return cache.remove(type);
+        }
+
         return cache.put(type, objectReader);
     }
 

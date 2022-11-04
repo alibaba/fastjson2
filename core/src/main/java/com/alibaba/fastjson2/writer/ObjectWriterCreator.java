@@ -771,7 +771,7 @@ public class ObjectWriterCreator {
                         initObjectWriter = objectWriter;
                     }
                 }
-            } else if (fieldClass == Long.class) {
+            } else if (fieldClass == long.class || fieldClass == Long.class) {
                 if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT64_MASK) != 0) {
                     ObjectWriter objectWriter = provider.cache.get(fieldClass);
                     if (objectWriter != ObjectWriterImplInt64.INSTANCE) {

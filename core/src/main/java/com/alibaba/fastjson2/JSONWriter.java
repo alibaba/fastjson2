@@ -1530,7 +1530,7 @@ public abstract class JSONWriter
         /**
          * @since 2.0.17
          */
-        WriteLongAsString(1 << 34);
+        WriteLongAsString(1L << 34);
 
         public final long mask;
 

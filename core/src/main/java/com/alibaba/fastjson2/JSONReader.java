@@ -908,6 +908,20 @@ public abstract class JSONReader
             return LocalDateTime.ofInstant(instant, context.getZoneId());
         }
 
+        if (str.startsWith("/Date(") && str.endsWith(")/")) {
+            String dotnetDateStr = str.substring(6, str.length() - 2);
+            int i = dotnetDateStr.indexOf('+');
+            if (i == -1) {
+                i = dotnetDateStr.indexOf('-');
+            }
+            if (i != -1) {
+                dotnetDateStr = dotnetDateStr.substring(0, i);
+            }
+            long millis = Long.parseLong(dotnetDateStr);
+            Instant instant = Instant.ofEpochMilli(millis);
+            return LocalDateTime.ofInstant(instant, context.getZoneId());
+        }
+
         throw new JSONException(info("read LocalDateTime error " + str));
     }
 
