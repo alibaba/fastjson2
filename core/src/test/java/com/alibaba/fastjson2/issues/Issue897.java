@@ -53,4 +53,16 @@ public class Issue897 {
             return this.extra.get(key);
         }
     }
+
+    @Test
+    public void test1() {
+        String json = "{\"name\": \"lisi\", \"age\": 12}";
+        People p = JSON.parseObject(json, People.class);
+
+        assertEquals("lisi", p.name); // 成功
+        assertEquals(12, p.extra.get("age"));
+
+        JSONPath.set(p, "$.age", 13);
+        assertEquals(13, p.extra.get("age"));
+    }
 }
