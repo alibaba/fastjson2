@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.*;
 import java.util.function.Consumer;
 
+import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
 import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 
 /**
@@ -417,7 +418,7 @@ public abstract class BeanUtils {
                     && method.getReturnType() == Void.TYPE
                     && method.getParameterTypes()[0] == String.class
             ) {
-                Annotation[] annotations = method.getAnnotations();
+                Annotation[] annotations = getAnnotations(method);
 
                 boolean unwrapped = false;
                 for (Annotation annotation : annotations) {
@@ -547,7 +548,7 @@ public abstract class BeanUtils {
     }
 
     public static boolean isWriteEnumAsJavaBean(Class clazz) {
-        Annotation[] annotations = clazz.getAnnotations();
+        Annotation[] annotations = getAnnotations(clazz);
         for (Annotation annotation : annotations) {
             JSONType jsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
             if (jsonType != null) {
@@ -591,7 +592,7 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            if (isJSONField(method.getAnnotations())) {
+            if (isJSONField(getAnnotations(method))) {
                 return method;
             }
 
@@ -600,7 +601,7 @@ public abstract class BeanUtils {
                 for (Class enumInterface : interfaces) {
                     getters(enumInterface, e -> {
                         if (e.getName().equals(method.getName())) {
-                            if (isJSONField(e.getAnnotations())) {
+                            if (isJSONField(getAnnotations(e))) {
                                 memberRef.set(method);
                             }
                         }
@@ -616,7 +617,7 @@ public abstract class BeanUtils {
                     if (mixIn != null) {
                         getters(mixIn, e -> {
                             if (e.getName().equals(method.getName())) {
-                                if (isJSONField(e.getAnnotations())) {
+                                if (isJSONField(getAnnotations(e))) {
                                     memberRef.set(method);
                                 }
                             }
@@ -637,7 +638,7 @@ public abstract class BeanUtils {
         }
 
         for (Field field : fields) {
-            if (isJSONField(field.getAnnotations())) {
+            if (isJSONField(getAnnotations(field))) {
                 member = field;
                 break;
             }
@@ -781,7 +782,7 @@ public abstract class BeanUtils {
             }
 
             if (!nameMatch) {
-                Annotation[] annotations = method.getAnnotations();
+                Annotation[] annotations = getAnnotations(method);
                 for (Annotation annotation : annotations) {
                     Class<? extends Annotation> annotationType = annotation.annotationType();
                     String annotationTypeName = annotationType.getName();

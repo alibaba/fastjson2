@@ -2,7 +2,9 @@ package com.alibaba.fastjson2.util;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Parameter;
 import java.util.*;
 
 /**
@@ -128,7 +130,7 @@ public final class AnnotationUtils {
             }
         }
 
-        return findMetaAnnotation(annotationType, element.getAnnotations(), inherited, visited);
+        return findMetaAnnotation(annotationType, getAnnotations(element), inherited, visited);
     }
 
     /**
@@ -159,5 +161,36 @@ public final class AnnotationUtils {
             }
         }
         return null;
+    }
+
+    public static Annotation[] getAnnotations(AccessibleObject accessibleObject) {
+        try {
+            return accessibleObject.getAnnotations();
+        } catch (Throwable ignored) {
+            return new Annotation[0];
+        }
+    }
+
+    public static Annotation[] getAnnotations(Class objectClass) {
+        try {
+            return objectClass.getAnnotations();
+        } catch (Throwable ignored) {
+            return new Annotation[0];
+        }
+    }
+
+    public static Annotation[] getAnnotations(Parameter parameter) {
+        try {
+            return parameter.getAnnotations();
+        } catch (Throwable ignored) {
+            return new Annotation[0];
+        }
+    }
+    public static Annotation[] getAnnotations(AnnotatedElement element) {
+        try {
+            return element.getAnnotations();
+        } catch (Throwable ignored) {
+            return new Annotation[0];
+        }
     }
 }
