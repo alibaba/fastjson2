@@ -2,8 +2,6 @@ package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
-import lombok.Getter;
-import lombok.Setter;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -20,10 +18,24 @@ public class Issue881 {
                 JSON.toJSONString(testClass));
     }
 
-    @Getter
-    @Setter
     static class TestClass<T> {
         private T stringList;
         private String str;
+
+        public T getStringList() {
+            return stringList;
+        }
+
+        public void setStringList(T stringList) {
+            this.stringList = stringList;
+        }
+
+        public String getStr() {
+            return str;
+        }
+
+        public void setStr(String str) {
+            this.str = str;
+        }
     }
 }
