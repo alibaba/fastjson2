@@ -1046,6 +1046,16 @@ public class ObjectReaderCreator {
         Type fieldType = method.getGenericParameterTypes()[0];
         Class fieldClass = method.getParameterTypes()[0];
 
+        ObjectReader initReader = fieldInfo.getInitReader();
+        if (initReader == null) {
+            if (fieldClass == long.class) {
+                ObjectReader objectReader = provider.getObjectReader(fieldClass);
+                if (objectReader != ObjectReaderImplInt64.INSTANCE) {
+                    initReader = objectReader;
+                }
+            }
+        }
+
         FieldReader fieldReader = createFieldReaderMethod(
                 objectClass,
                 objectType,
@@ -1059,7 +1069,7 @@ public class ObjectReaderCreator {
                 fieldType,
                 fieldClass,
                 method,
-                fieldInfo.getInitReader()
+                initReader
         );
 
         FieldReader origin = fieldReaders.putIfAbsent(fieldName, fieldReader);
@@ -1088,7 +1098,7 @@ public class ObjectReaderCreator {
                                         fieldType,
                                         fieldClass,
                                         method,
-                                        null
+                                        initReader
                                 ));
             }
         }
