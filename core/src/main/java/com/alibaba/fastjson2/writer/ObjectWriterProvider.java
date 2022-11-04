@@ -17,12 +17,11 @@ import java.util.concurrent.ConcurrentMap;
 
 public class ObjectWriterProvider
         implements ObjectCodecProvider {
-    static final int TYPE_BOOLEAN_MASK = 1;
     static final int TYPE_INT32_MASK = 1 << 1;
-    static final int TYPE_INT64_MASK = 1 << 3;
-    static final int TYPE_DECIMAL_MASK = 1 << 5;
-    static final int TYPE_DATE_MASK = 1 << 6;
-    static final int TYPE_ENUM_MASK = 1 << 7;
+    static final int TYPE_INT64_MASK = 1 << 2;
+    static final int TYPE_DECIMAL_MASK = 1 << 3;
+    static final int TYPE_DATE_MASK = 1 << 4;
+    static final int TYPE_ENUM_MASK = 1 << 5;
 
     final ConcurrentMap<Type, ObjectWriter> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectWriter> cacheFieldBased = new ConcurrentHashMap<>();

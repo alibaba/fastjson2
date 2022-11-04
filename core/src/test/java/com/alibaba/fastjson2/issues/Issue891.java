@@ -20,7 +20,7 @@ public class Issue891 {
 
     @BeforeEach
     public void setUp() {
-        JSON.register(long.class, new ObjectWriter<Long>() {
+        JSON.register(Long.class, new ObjectWriter<Long>() {
             @Override
             public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
                 writerCount++;
@@ -33,7 +33,7 @@ public class Issue891 {
             }
         });
 
-        JSON.register(long.class, new ObjectReader<Long>() {
+        JSON.register(Long.class, new ObjectReader<Long>() {
             @Override
             public Long readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
                 readerCount++;
@@ -48,8 +48,8 @@ public class Issue891 {
 
     @AfterEach
     public void tearDown() {
-        JSON.register(long.class, (ObjectWriter) null);
-        JSON.register(long.class, (ObjectReader) null);
+        JSON.register(Long.class, (ObjectWriter) null);
+        JSON.register(Long.class, (ObjectReader) null);
     }
 
     @Test
@@ -73,6 +73,30 @@ public class Issue891 {
         }
 
         public void setStatus(long status) {
+            this.status = status;
+        }
+    }
+
+    @Test
+    public void test1() {
+        Bean1 t = new Bean1();
+        t.setStatus(new long[]{12345678L});
+        assertEquals("{\"status\":[\"12345678\"]}", JSON.toJSONString(t));
+        assertTrue(writerCount > 0);
+
+        String str = "{\"status\":[\"12345678\"]}";
+        Bean1 v = JSON.parseObject(str, Bean1.class);
+        assertEquals(12345678, v.getStatus()[0]);
+    }
+
+    public static class Bean1 {
+        long[] status;
+
+        public long[] getStatus() {
+            return status;
+        }
+
+        public void setStatus(long[] status) {
             this.status = status;
         }
     }
