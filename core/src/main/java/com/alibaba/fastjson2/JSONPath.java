@@ -35,9 +35,15 @@ public abstract class JSONPath {
     JSONReader.Context readerContext;
     JSONWriter.Context writerContext;
     final String path;
+    final long features;
 
-    protected JSONPath(String path) {
+    protected JSONPath(String path, Feature... features) {
         this.path = path;
+        long featuresValue = 0;
+        for (Feature feature : features) {
+            featuresValue |= feature.mask;
+        }
+        this.features = featuresValue;
     }
 
     public boolean isPrevious() {
@@ -52,6 +58,12 @@ public abstract class JSONPath {
     public static Object extract(String json, String path) {
         JSONReader jsonReader = JSONReader.of(json);
         JSONPath jsonPath = JSONPath.of(path);
+        return jsonPath.extract(jsonReader);
+    }
+
+    public static Object extract(String json, String path, Feature... features) {
+        JSONReader jsonReader = JSONReader.of(json);
+        JSONPath jsonPath = JSONPath.of(path, features);
         return jsonPath.extract(jsonReader);
     }
 
@@ -397,6 +409,15 @@ public abstract class JSONPath {
 
         return new JSONPathParser(path)
                 .parse();
+    }
+
+    public static JSONPath of(String path, Feature... features) {
+        if ("#-1".equals(path)) {
+            return PreviousPath.INSTANCE;
+        }
+
+        return new JSONPathParser(path)
+                .parse(features);
     }
 
     static Operator parseOperator(JSONReader jsonReader) {
@@ -1624,17 +1645,18 @@ public abstract class JSONPath {
         final long nameHashCode;
         final String name;
 
-        public SingleNamePath(String path, NameSegment segment) {
-            super(path);
+        public SingleNamePath(String path, NameSegment segment, Feature... features) {
+            super(path, features);
             this.name = segment.name;
             this.nameHashCode = segment.nameHashCode;
         }
 
         @Override
         public Object eval(Object root) {
+            Object value;
             if (root instanceof Map) {
                 Map map = (Map) root;
-                Object value = map.get(name);
+                value = map.get(name);
                 if (value == null) {
                     boolean isNum = IOUtils.isNumber(this.name);
                     Long longValue = null;
@@ -1656,21 +1678,29 @@ public abstract class JSONPath {
                         }
                     }
                 }
-                return value;
+            } else {
+                JSONWriter.Context writerContext = getWriterContext();
+                ObjectWriter objectWriter = writerContext.getObjectWriter(root.getClass());
+                if (objectWriter == null) {
+                    return null;
+                }
+
+                FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
+                if (fieldWriter == null) {
+                    return null;
+                }
+
+                value = fieldWriter.getFieldValue(root);
             }
 
-            JSONWriter.Context writerContext = getWriterContext();
-            ObjectWriter objectWriter = writerContext.getObjectWriter(root.getClass());
-            if (objectWriter == null) {
-                return null;
+            if ((features & Feature.AlwaysReturnList.mask) != 0) {
+                if (value == null) {
+                    value = new JSONArray();
+                } else if (!(value instanceof List)) {
+                    value = JSONArray.of(value);
+                }
             }
-
-            FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
-            if (fieldWriter == null) {
-                return null;
-            }
-
-            return fieldWriter.getFieldValue(root);
+            return value;
         }
 
         @Override
@@ -1888,7 +1918,6 @@ public abstract class JSONPath {
                     long nameHashCode = jsonReader.readFieldNameHashCode();
                     boolean match = nameHashCode == this.nameHashCode;
 
-                    char ch = jsonReader.ch;
                     if (!match) {
                         jsonReader.skipValue();
                         continue;
@@ -1928,6 +1957,15 @@ public abstract class JSONPath {
                         default:
                             throw new JSONException("TODO : " + jsonReader.ch);
                     }
+
+                    if ((features & Feature.AlwaysReturnList.mask) != 0) {
+                        if (val == null) {
+                            val = new JSONArray();
+                        } else if (!(val instanceof List)) {
+                            val = JSONArray.of(val);
+                        }
+                    }
+
                     return val;
                 }
             }
@@ -2422,8 +2460,8 @@ public abstract class JSONPath {
         final Segment second;
         final boolean ref;
 
-        public TwoSegmentPath(String path, Segment first, Segment second) {
-            super(path);
+        public TwoSegmentPath(String path, Segment first, Segment second, Feature... features) {
+            super(path, features);
             this.first = first;
             this.second = second;
             this.ref = (first instanceof IndexSegment || first instanceof NameSegment)
@@ -2472,7 +2510,15 @@ public abstract class JSONPath {
 
             Context context1 = new Context(this, context0, second, null, 0);
             second.eval(context1);
-            return context1.value;
+            Object contextValue = context1.value;
+            if ((features & Feature.AlwaysReturnList.mask) != 0) {
+                if (contextValue == null) {
+                    contextValue = new JSONArray();
+                } else if (!(contextValue instanceof List)) {
+                    contextValue = JSONArray.of(contextValue);
+                }
+            }
+            return contextValue;
         }
 
         @Override
@@ -2609,8 +2655,8 @@ public abstract class JSONPath {
         final List<Segment> segments;
         final boolean ref;
 
-        private MultiSegmentPath(String path, List<Segment> segments) {
-            super(path);
+        private MultiSegmentPath(String path, List<Segment> segments, Feature... features) {
+            super(path, features);
             this.segments = segments;
 
             boolean ref = true;
@@ -2717,7 +2763,16 @@ public abstract class JSONPath {
 
                 segment.eval(context);
             }
-            return context.value;
+
+            Object contextValue = context.value;
+            if ((context.path.features & Feature.AlwaysReturnList.mask) != 0) {
+                if (contextValue == null) {
+                    contextValue = new JSONArray();
+                } else if (!(contextValue instanceof List)) {
+                    contextValue = JSONArray.of(contextValue);
+                }
+            }
+            return contextValue;
         }
 
         @Override
@@ -6130,7 +6185,7 @@ public abstract class JSONPath {
             }
         }
 
-        JSONPath parse() {
+        JSONPath parse(Feature... features) {
             if (dollar && jsonReader.ch == EOI) {
                 if (negative) {
                     return new SingleSegmentPath(FUNCTION_NEGATIVE, path);
@@ -6204,7 +6259,6 @@ public abstract class JSONPath {
                     segments.add(segment);
                 }
                 segmentIndex++;
-                continue;
             }
 
             if (negative) {
@@ -6223,17 +6277,17 @@ public abstract class JSONPath {
 
             if (segmentIndex == 1) {
                 if (first instanceof NameSegment) {
-                    return new SingleNamePath(path, (NameSegment) first);
+                    return new SingleNamePath(path, (NameSegment) first, features);
                 }
 
                 return new SingleSegmentPath(first, path);
             }
 
             if (segmentIndex == 2) {
-                return new TwoSegmentPath(path, first, second);
+                return new TwoSegmentPath(path, first, second, features);
             }
 
-            return new MultiSegmentPath(path, segments);
+            return new MultiSegmentPath(path, segments, features);
         }
 
         private Segment parseArrayAccess() {
@@ -6873,6 +6927,15 @@ public abstract class JSONPath {
             }
 
             return segment;
+        }
+    }
+
+    public enum Feature {
+        AlwaysReturnList(1);
+        public final long mask;
+
+        Feature(long mask) {
+            this.mask = mask;
         }
     }
 }
