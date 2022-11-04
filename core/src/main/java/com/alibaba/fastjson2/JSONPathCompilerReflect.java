@@ -238,7 +238,8 @@ public class JSONPathCompilerReflect
                 throw new UnsupportedOperationException();
             }
 
-            return fieldWriter.getFieldValue(object);
+            Object fieldValue = fieldWriter.getFieldValue(object);
+            return fieldValue;
         }
 
         @Override

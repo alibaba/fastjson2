@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
 
 public class JSONObject
         extends LinkedHashMap<String, Object>
@@ -1536,7 +1537,7 @@ public class JSONObject
      */
     private String getJSONFieldName(Method method) {
         String name = null;
-        Annotation[] annotations = method.getAnnotations();
+        Annotation[] annotations = getAnnotations(method);
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
             JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
