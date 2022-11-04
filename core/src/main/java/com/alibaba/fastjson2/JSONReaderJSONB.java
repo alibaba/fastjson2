@@ -1043,6 +1043,9 @@ class JSONReaderJSONB
                             Class contextClass = TypeUtils.getMapping(typeName);
                             if (contextClass == null) {
                                 try {
+                                    if (contextClassLoader == null) {
+                                        contextClassLoader = JSON.class.getClassLoader();
+                                    }
                                     contextClass = contextClassLoader.loadClass(typeName);
                                 } catch (ClassNotFoundException ignored) {
                                 }

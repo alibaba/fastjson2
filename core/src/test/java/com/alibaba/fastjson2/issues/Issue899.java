@@ -14,8 +14,14 @@ public class Issue899 {
         ClassLoader prevContextCL = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(null);
-            Bean o = (Bean) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType);
-            assertEquals(bean.id, o.id);
+            {
+                Bean o = (Bean) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType);
+                assertEquals(bean.id, o.id);
+            }
+            {
+                Bean o = (Bean) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType);
+                assertEquals(bean.id, o.id);
+            }
         } finally {
             Thread.currentThread().setContextClassLoader(prevContextCL);
         }
