@@ -23,6 +23,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
 import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonJsonIgnore;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
@@ -212,7 +213,7 @@ public class ObjectReaderBaseModule
 
             if (mixInSource != null && mixInSource != objectClass) {
                 beanInfo.mixIn = true;
-                getBeanInfo(beanInfo, mixInSource.getAnnotations());
+                getBeanInfo(beanInfo, getAnnotations(mixInSource));
 
                 BeanUtils.staticMethod(mixInSource,
                         method -> getCreator(beanInfo, objectClass, method)
@@ -223,7 +224,7 @@ public class ObjectReaderBaseModule
                 );
             }
 
-            Annotation[] annotations = objectClass.getAnnotations();
+            Annotation[] annotations = getAnnotations(objectClass);
             getBeanInfo(beanInfo, annotations);
 
             for (Annotation annotation : annotations) {
@@ -505,7 +506,7 @@ public class ObjectReaderBaseModule
                             if (builderClass != void.class && builderClass != Void.class) {
                                 beanInfo.builder = builderClass;
 
-                                for (Annotation builderAnnotation : builderClass.getAnnotations()) {
+                                for (Annotation builderAnnotation : getAnnotations(builderClass)) {
                                     Class<? extends Annotation> builderAnnotationClass = builderAnnotation.annotationType();
                                     String builderAnnotationName = builderAnnotationClass.getName();
 
@@ -563,13 +564,13 @@ public class ObjectReaderBaseModule
                 }
                 if (mixInConstructor != null) {
                     Parameter mixInParam = mixInConstructor.getParameters()[paramIndex];
-                    processAnnotation(fieldInfo, mixInParam.getAnnotations());
+                    processAnnotation(fieldInfo, getAnnotations(mixInParam));
                 }
             }
 
             Annotation[] annotations = null;
             try {
-                annotations = parameter.getAnnotations();
+                annotations = getAnnotations(parameter);
             } catch (ArrayIndexOutOfBoundsException ignored) {
                 // ignored
             }
@@ -590,11 +591,11 @@ public class ObjectReaderBaseModule
                 }
                 if (mixInMethod != null) {
                     Parameter mixInParam = mixInMethod.getParameters()[paramIndex];
-                    processAnnotation(fieldInfo, mixInParam.getAnnotations());
+                    processAnnotation(fieldInfo, getAnnotations(mixInParam));
                 }
             }
 
-            processAnnotation(fieldInfo, parameter.getAnnotations());
+            processAnnotation(fieldInfo, getAnnotations(parameter));
         }
 
         @Override
@@ -612,7 +613,7 @@ public class ObjectReaderBaseModule
                 }
             }
 
-            processAnnotation(fieldInfo, field.getAnnotations());
+            processAnnotation(fieldInfo, getAnnotations(field));
         }
 
         @Override
@@ -633,7 +634,7 @@ public class ObjectReaderBaseModule
 
             String jsonFieldName = null;
 
-            Annotation[] annotations = method.getAnnotations();
+            Annotation[] annotations = getAnnotations(method);
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
                 JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
@@ -1083,7 +1084,7 @@ public class ObjectReaderBaseModule
     }
 
     private void getCreator(BeanInfo beanInfo, Class<?> objectClass, Constructor constructor) {
-        Annotation[] annotations = constructor.getAnnotations();
+        Annotation[] annotations = getAnnotations(constructor);
 
         boolean creatorMethod = false;
         for (Annotation annotation : annotations) {
@@ -1146,7 +1147,7 @@ public class ObjectReaderBaseModule
     }
 
     private void getCreator(BeanInfo beanInfo, Class<?> objectClass, Method method) {
-        Annotation[] annotations = method.getAnnotations();
+        Annotation[] annotations = getAnnotations(method);
 
         boolean creatorMethod = false;
         JSONCreator jsonCreator = null;

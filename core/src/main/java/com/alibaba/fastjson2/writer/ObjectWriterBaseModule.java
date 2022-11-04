@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
 
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
+import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
 import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonJsonIgnore;
 
 public class ObjectWriterBaseModule
@@ -60,7 +61,7 @@ public class ObjectWriterBaseModule
 
             Annotation jsonType1x = null;
             JSONType jsonType = null;
-            Annotation[] annotations = objectClass.getAnnotations();
+            Annotation[] annotations = getAnnotations(objectClass);
             for (Annotation annotation : annotations) {
                 Class annotationType = annotation.annotationType();
                 jsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
@@ -120,7 +121,7 @@ public class ObjectWriterBaseModule
                 if (mixInSource != null) {
                     beanInfo.mixIn = true;
 
-                    Annotation[] mixInAnnotations = mixInSource.getAnnotations();
+                    Annotation[] mixInAnnotations = getAnnotations(mixInSource);
                     for (Annotation annotation : mixInAnnotations) {
                         Class<? extends Annotation> annotationType = annotation.annotationType();
                         jsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
@@ -261,7 +262,7 @@ public class ObjectWriterBaseModule
             }
 
             JSONField jsonField = null;
-            Annotation[] annotations = field.getAnnotations();
+            Annotation[] annotations = getAnnotations(field);
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
                 if (jsonField == null) {
@@ -609,7 +610,7 @@ public class ObjectWriterBaseModule
                 fieldInfo.ignore = true;
             }
 
-            Annotation[] annotations = method.getAnnotations();
+            Annotation[] annotations = getAnnotations(method);
             processAnnotations(fieldInfo, annotations);
 
             if (!objectClass.getName().startsWith("java.lang") && !BeanUtils.isRecord(objectClass)) {
