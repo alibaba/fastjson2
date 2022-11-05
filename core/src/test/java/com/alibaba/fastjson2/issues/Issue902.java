@@ -27,13 +27,6 @@ public class Issue902 {
 
         JSONObject object = JSON.parseObject(str);
         assertEquals(
-                "[\"John\"]",
-                JSONPath
-                        .of("$.firstName", JSONPath.Feature.AlwaysReturnList)
-                        .eval(object)
-                        .toString()
-        );
-        assertEquals(
                 "[\"iPhone\",\"home\"]",
                 JSONPath
                         .of("$.phoneNumbers.type", JSONPath.Feature.AlwaysReturnList)
@@ -41,130 +34,43 @@ public class Issue902 {
                         .toString()
         );
         assertEquals(
-                "[\"iPhone\"]",
+                "[\"iPhone\",\"home\"]",
+                JSONPath.extract(str, "$.phoneNumbers.type", JSONPath.Feature.AlwaysReturnList)
+                        .toString()
+        );
+
+        validate(str, object, "$.phoneNumbers[0].type");
+        validate(str, object, "$.address.streetAddress");
+        validate(str, object, "$.eee");
+        validate(str, object, "$.address.eee");
+        validate(str, object, "$.phoneNumbers[10].type");
+        validate(str, object, "$.phoneNumbers[*]");
+        validate(str, object, "$.phoneNumbers");
+        validate(str, object, "$.phoneNumbers[0]");
+        validate(str, object, "$.phoneNumbers[0].*");
+        validate(str, object, "$.*");
+        validate(str, object, "$.firstName");
+        validate(str, object, "$.age");
+    }
+
+    private void validate(String str, JSONObject object, String path) {
+        String expected = JSON.toJSONString(
+                JsonPath.using(conf)
+                        .parse(str)
+                        .read(path)
+        );
+        assertEquals(
+                expected,
                 JSONPath
-                        .of("$.phoneNumbers[0].type", JSONPath.Feature.AlwaysReturnList)
+                        .of(path, JSONPath.Feature.AlwaysReturnList)
                         .eval(object)
                         .toString()
         );
         assertEquals(
-                "[\"naist street\"]",
-                JSONPath
-                        .of("$.address.streetAddress", JSONPath.Feature.AlwaysReturnList)
-                        .eval(object)
+                expected,
+                JSONPath.extract(str, path, JSONPath.Feature.AlwaysReturnList)
                         .toString()
         );
-        assertEquals(
-                "[]",
-                JSONPath
-                        .of("$.eee", JSONPath.Feature.AlwaysReturnList)
-                        .eval(object)
-                        .toString()
-        );
-        assertEquals(
-                "[]",
-                JSONPath
-                        .of("$.address.eee", JSONPath.Feature.AlwaysReturnList)
-                        .eval(object)
-                        .toString()
-        );
-        assertEquals(
-                "[]",
-                JSONPath
-                        .of("$.phoneNumbers[10].type", JSONPath.Feature.AlwaysReturnList)
-                        .eval(object)
-                        .toString()
-        );
-
-        {
-            String path = "$.phoneNumbers[*]";
-            assertEquals(
-                    JSON.toJSONString(
-                            JsonPath.using(conf)
-                                    .parse(str)
-                                    .read(path)
-                    ),
-                    JSONPath
-                            .of(path, JSONPath.Feature.AlwaysReturnList)
-                            .eval(object)
-                            .toString()
-            );
-        }
-
-        {
-            String path = "$.phoneNumbers";
-            assertEquals(
-                    JSON.toJSONString(
-                            JsonPath.using(conf)
-                                    .parse(str)
-                                    .read(path)
-                    ),
-                    JSONPath
-                            .of(path, JSONPath.Feature.AlwaysReturnList)
-                            .eval(object)
-                            .toString()
-            );
-        }
-
-        {
-            String path = "$.phoneNumbers[0]";
-            assertEquals(
-                    JSON.toJSONString(
-                            JsonPath.using(conf)
-                                    .parse(str)
-                                    .read(path)
-                    ),
-                    JSONPath
-                            .of(path, JSONPath.Feature.AlwaysReturnList)
-                            .eval(object)
-                            .toString()
-            );
-        }
-
-        {
-            String path = "$.phoneNumbers[0].*";
-            assertEquals(
-                    JSON.toJSONString(
-                            JsonPath.using(conf)
-                                    .parse(str)
-                                    .read(path)
-                    ),
-                    JSONPath
-                            .of(path, JSONPath.Feature.AlwaysReturnList)
-                            .eval(object)
-                            .toString()
-            );
-        }
-
-        {
-            String path = "$.*";
-            assertEquals(
-                    JSON.toJSONString(
-                            JsonPath.using(conf)
-                                    .parse(str)
-                                    .read(path)
-                    ),
-                    JSONPath
-                            .of(path, JSONPath.Feature.AlwaysReturnList)
-                            .eval(object)
-                            .toString()
-            );
-        }
-
-        {
-            String path = "$.age";
-            assertEquals(
-                    JSON.toJSONString(
-                            JsonPath.using(conf)
-                                    .parse(str)
-                                    .read(path)
-                    ),
-                    JSONPath
-                            .of(path, JSONPath.Feature.AlwaysReturnList)
-                            .eval(object)
-                            .toString()
-            );
-        }
     }
 
     @Test
