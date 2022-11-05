@@ -5924,7 +5924,11 @@ public abstract class JSONPath {
                 if (context.next != null) {
                     context.value = new Sequence(list);
                 } else {
-                    context.value = object;
+                    if ((context.path.features & Feature.AlwaysReturnList.mask) != 0) {
+                        context.value = JSONArray.of(object);
+                    } else {
+                        context.value = object;
+                    }
                 }
                 context.eval = true;
                 return;
