@@ -67,5 +67,12 @@ public class Issue902 {
                         .eval(object)
                         .toString()
         );
+        assertEquals(
+                "[[{\"type\":\"iPhone\",\"number\":\"0123-4567-8888\"},{\"type\":\"home\",\"number\":\"0123-4567-8910\"}]]",
+                JSONPath
+                        .of("$.phoneNumbers[*]", JSONPath.Feature.AlwaysReturnList)
+                        .eval(object)
+                        .toString()
+        );
     }
 }
