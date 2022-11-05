@@ -1910,6 +1910,10 @@ public abstract class JSONPath {
                         throw new JSONException("TODO");
                     }
                 }
+
+                if ((features & Feature.AlwaysReturnList.mask) != 0) {
+                    return new JSONArray();
+                }
                 return null;
             }
 
@@ -1937,11 +1941,14 @@ public abstract class JSONPath {
                         case '7':
                         case '8':
                         case '9':
-                            return jsonReader.readNumber();
+                            val = jsonReader.readNumber();
+                            break;
                         case '[':
-                            return jsonReader.readArray();
+                            val = jsonReader.readArray();
+                            break;
                         case '{':
-                            return jsonReader.readObject();
+                            val = jsonReader.readObject();
+                            break;
                         case '"':
                         case '\'':
                             val = jsonReader.readString(); //
@@ -1961,13 +1968,17 @@ public abstract class JSONPath {
                     if ((features & Feature.AlwaysReturnList.mask) != 0) {
                         if (val == null) {
                             val = new JSONArray();
-                        } else if (!(val instanceof List)) {
+                        } else {
                             val = JSONArray.of(val);
                         }
                     }
 
                     return val;
                 }
+            }
+
+            if ((features & Feature.AlwaysReturnList.mask) != 0) {
+                return new JSONArray();
             }
             return null;
         }
@@ -2366,8 +2377,8 @@ public abstract class JSONPath {
         final Segment segment;
         final boolean ref;
 
-        public SingleSegmentPath(Segment segment, String path) {
-            super(path);
+        public SingleSegmentPath(Segment segment, String path, Feature... features) {
+            super(path, features);
             this.segment = segment;
             this.ref = segment instanceof IndexSegment || segment instanceof NameSegment;
         }
@@ -2635,7 +2646,17 @@ public abstract class JSONPath {
                 second.accept(jsonReader, context1);
             }
 
-            return context1.value;
+            Object contextValue = context1.value;
+
+            if ((features & Feature.AlwaysReturnList.mask) != 0) {
+                if (contextValue == null) {
+                    contextValue = new JSONArray();
+                } else if (!(contextValue instanceof List)) {
+                    contextValue = JSONArray.of(contextValue);
+                }
+            }
+
+            return contextValue;
         }
 
         @Override
@@ -2952,6 +2973,14 @@ public abstract class JSONPath {
             Object value = context.value;
             if (value instanceof Sequence) {
                 value = ((Sequence) value).values;
+            }
+
+            if ((features & Feature.AlwaysReturnList.mask) != 0) {
+                if (value == null) {
+                    value = new JSONArray();
+                } else if (!(value instanceof List)) {
+                    value = JSONArray.of(value);
+                }
             }
             return value;
         }
@@ -6028,6 +6057,7 @@ public abstract class JSONPath {
                 throw new JSONException("TODO");
             }
 
+            boolean alwaysReturnList = context.next == null && (context.path.features & Feature.AlwaysReturnList.mask) != 0;
             List<Object> values = new JSONArray();
 
             if (jsonReader.nextIfMatch('{')) {
@@ -6082,7 +6112,11 @@ public abstract class JSONPath {
                     }
 
                     if (val instanceof Collection) {
-                        values.addAll((Collection) val);
+                        if (alwaysReturnList) {
+                            values.add(val);
+                        } else {
+                            values.addAll((Collection) val);
+                        }
                     } else {
                         values.add(val);
                     }
@@ -6280,7 +6314,7 @@ public abstract class JSONPath {
                     return new SingleNamePath(path, (NameSegment) first, features);
                 }
 
-                return new SingleSegmentPath(first, path);
+                return new SingleSegmentPath(first, path, features);
             }
 
             if (segmentIndex == 2) {
