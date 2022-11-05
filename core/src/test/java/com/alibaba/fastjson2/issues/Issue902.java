@@ -135,6 +135,36 @@ public class Issue902 {
                             .toString()
             );
         }
+
+        {
+            String path = "$.*";
+            assertEquals(
+                    JSON.toJSONString(
+                            JsonPath.using(conf)
+                                    .parse(str)
+                                    .read(path)
+                    ),
+                    JSONPath
+                            .of(path, JSONPath.Feature.AlwaysReturnList)
+                            .eval(object)
+                            .toString()
+            );
+        }
+
+        {
+            String path = "$.age";
+            assertEquals(
+                    JSON.toJSONString(
+                            JsonPath.using(conf)
+                                    .parse(str)
+                                    .read(path)
+                    ),
+                    JSONPath
+                            .of(path, JSONPath.Feature.AlwaysReturnList)
+                            .eval(object)
+                            .toString()
+            );
+        }
     }
 
     @Test
