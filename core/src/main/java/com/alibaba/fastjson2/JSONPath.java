@@ -1696,7 +1696,7 @@ public abstract class JSONPath {
             if ((features & Feature.AlwaysReturnList.mask) != 0) {
                 if (value == null) {
                     value = new JSONArray();
-                } else if (!(value instanceof List)) {
+                } else {
                     value = JSONArray.of(value);
                 }
             }
@@ -5924,11 +5924,7 @@ public abstract class JSONPath {
                 if (context.next != null) {
                     context.value = new Sequence(list);
                 } else {
-                    if ((context.path.features & Feature.AlwaysReturnList.mask) != 0) {
-                        context.value = JSONArray.of(object);
-                    } else {
-                        context.value = object;
-                    }
+                    context.value = object;
                 }
                 context.eval = true;
                 return;
