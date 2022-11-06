@@ -19,8 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * Created by wenshao on 16/05/2017.
  */
 public class Issue1202 {
-
-    private final String DATE_TEXT = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
+    private final String dateText = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
 
     @BeforeEach
     void setup() {
@@ -29,10 +28,9 @@ public class Issue1202 {
 
     @Nested
     class Model1Test {
-
         @Test
         public void test_for_issue_0() {
-            Model1 model = JSON.parseObject(DATE_TEXT, Model1.class);
+            Model1 model = JSON.parseObject(dateText, Model1.class);
             assertNotNull(model.getDate());
         }
 
@@ -42,7 +40,7 @@ public class Issue1202 {
 
             for (ObjectReaderCreator creator : creators) {
                 ObjectReader<Model1> objectReader = creator.createObjectReader(Model1.class);
-                Model1 model = objectReader.readObject(JSONReader.of(DATE_TEXT));
+                Model1 model = objectReader.readObject(JSONReader.of(dateText));
                 assertNotNull(model.getDate());
             }
         }
@@ -65,7 +63,7 @@ public class Issue1202 {
     class Model2Test {
         @Test
         public void test_for_issue_2() throws Exception {
-            Model2 model = JSON.parseObject(DATE_TEXT, Model2.class);
+            Model2 model = JSON.parseObject(dateText, Model2.class);
             assertNotNull(model.date);
         }
 
@@ -75,7 +73,7 @@ public class Issue1202 {
 
             for (ObjectReaderCreator creator : creators) {
                 ObjectReader<Model2> objectReader = creator.createObjectReader(Model2.class);
-                Model2 model = objectReader.readObject(JSONReader.of(DATE_TEXT));
+                Model2 model = objectReader.readObject(JSONReader.of(dateText));
                 assertNotNull(model.date);
             }
         }
@@ -90,7 +88,7 @@ public class Issue1202 {
     class Model3Test {
         @Test
         public void test_for_issue_3() throws Exception {
-            Model3 model = JSON.parseObject(DATE_TEXT, Model3.class);
+            Model3 model = JSON.parseObject(dateText, Model3.class);
             assertNotNull(model.date);
         }
 
@@ -100,7 +98,7 @@ public class Issue1202 {
 
             for (ObjectReaderCreator creator : creators) {
                 ObjectReader<Model3> objectReader = creator.createObjectReader(Model3.class);
-                Model3 model = objectReader.readObject(JSONReader.of(DATE_TEXT));
+                Model3 model = objectReader.readObject(JSONReader.of(dateText));
                 assertNotNull(model.date);
             }
         }
@@ -118,5 +116,4 @@ public class Issue1202 {
             }
         }
     }
-
 }
