@@ -42,6 +42,21 @@ public class ObjectReader12Test {
             assertEquals(12, bean.f12);
         }
         {
+            Bean bean = JSON.parseObject(str).to(Bean.class);
+            assertEquals(1, bean.f01);
+            assertEquals(2, bean.f02);
+            assertEquals(3, bean.f03);
+            assertEquals(4, bean.f04);
+            assertEquals(5, bean.f05);
+            assertEquals(6, bean.f06);
+            assertEquals(7, bean.f07);
+            assertEquals(8, bean.f08);
+            assertEquals(9, bean.f09);
+            assertEquals(10, bean.f10);
+            assertEquals(11, bean.f11);
+            assertEquals(12, bean.f12);
+        }
+        {
             Bean1 bean = JSON.parseObject(str, Bean1.class);
             assertEquals(1, bean.f01);
             assertEquals(2, bean.f02);
