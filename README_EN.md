@@ -32,7 +32,7 @@ Related Documents:
 - `JSONB` format documentation:  
   [https://alibaba.github.io/fastjson2/jsonb_format_cn](https://alibaba.github.io/fastjson2/jsonb_format_cn)
 - `FASTJSON v2`'s performance has been significantly improved. For the benchmark, see here:  
-  [https://alibaba.github.io/fastjson2/benchmark_cn](https://alibaba.github.io/fastjson2/benchmark_cn)
+  [https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark](https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark)
 
 # 1. Prepare
 

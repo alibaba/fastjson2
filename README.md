@@ -32,7 +32,7 @@
 - `JSONB`格式文档：
   [https://alibaba.github.io/fastjson2/jsonb_format_cn](https://alibaba.github.io/fastjson2/jsonb_format_cn)
 - `FASTJSON v2`性能有了很大提升，具体性能数据看这里：  
-  [https://alibaba.github.io/fastjson2/benchmark_cn](https://alibaba.github.io/fastjson2/benchmark_cn)
+  [https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark](https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark)
 - `FASTJSON`用户升级指南看这里 [https://github.com/alibaba/fastjson2/wiki/fastjson_1_upgrade_cn](https://github.com/alibaba/fastjson2/wiki/fastjson_1_upgrade_cn)
 
 # 1. 使用准备
