@@ -18,9 +18,18 @@ public class ValueFilterTest5 {
         Map map = new HashMap();
         map.put(1, "男");
         map.put(2, "女");
+
         JSON.register(Bean.class, ValueFilter.of("gender", map));
         String str = JSON.toJSONString(bean);
         assertEquals("{\"gender\":\"男\",\"id\":100}", str);
+
+        JSON.register(
+                Bean.class,
+                NameFilter.of(
+                        e -> "id".equals(e) ? "xid" : e
+                )
+        );
+        assertEquals("{\"gender\":\"男\",\"xid\":100}", JSON.toJSONString(bean));
     }
 
     public static class Bean {
