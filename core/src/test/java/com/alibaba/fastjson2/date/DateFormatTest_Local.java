@@ -18,6 +18,8 @@ public class DateFormatTest_Local {
     @Test
     void localeDateTest() {
         final String date = "{\"today\": \"2022 March 10\"}";
+        LocaleSetter.setLocaleToEnglish();
+
         assertAll(() -> JSON.parseObject(date, Today.class));
     }
 
@@ -25,10 +27,9 @@ public class DateFormatTest_Local {
     void localeDateTest_CN() {
         final String date = "{\"today\": \"2022 五月 10\"}";
 
-        Today today;
         try (JSONReader reader = JSONReader.of(date)) {
             reader.getContext().setLocale(Locale.CHINESE);
-            today = reader.read(Today.class);
+            reader.read(Today.class);
         }
     }
 

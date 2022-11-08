@@ -4,14 +4,14 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.date.LocaleSetter;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
-import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -21,9 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class Issue1202 {
     private final String dateText = "{\"date\":\"Apr 27, 2017 5:02:17 PM\"}";
 
-    @BeforeEach
-    void setup() {
-        Locale.setDefault(Locale.ENGLISH);
+    @BeforeAll
+    static void setup() {
+        LocaleSetter.setLocaleToEnglish();
     }
 
     @Nested
