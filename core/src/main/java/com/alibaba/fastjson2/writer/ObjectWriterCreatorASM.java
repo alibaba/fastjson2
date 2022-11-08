@@ -486,7 +486,17 @@ public class ObjectWriterCreatorASM
 
         try {
             Constructor<?> constructor = deserClass.getConstructor(Class.class, String.class, String.class, long.class, List.class);
-            return (ObjectWriter) constructor.newInstance(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+            ObjectWriterAdapter objectWriter = (ObjectWriterAdapter) constructor.newInstance(
+                    objectClass,
+                    beanInfo.typeKey,
+                    beanInfo.typeName,
+                    writerFeatures,
+                    fieldWriters
+            );
+            if (beanInfo.serializeFilters != null) {
+                configSerializeFilters(beanInfo, objectWriter);
+            }
+            return objectWriter;
         } catch (Throwable e) {
             throw new JSONException("create objectWriter error, objectType " + objectClass, e);
         }
