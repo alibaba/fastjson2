@@ -19,6 +19,8 @@ public class DateFormatTest_Local_OptinalDate {
     @Test
     void localeDateTest() {
         final String date = "{\"today\": \"2022 March 10\"}";
+        LocaleSetter.setLocaleToEnglish();
+
         assertAll(() -> JSON.parseObject(date, Today.class));
     }
 
