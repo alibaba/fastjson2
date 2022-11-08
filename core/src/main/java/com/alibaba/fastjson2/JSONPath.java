@@ -580,7 +580,9 @@ public abstract class JSONPath {
         AND,
         OR,
         REG_MATCH,
-        STARTS_WITH
+        STARTS_WITH,
+        CONTAINS,
+        NOT_CONTAINS
     }
 
     abstract static class FilterSegment
@@ -959,6 +961,91 @@ public abstract class JSONPath {
                 }
 
                 return not;
+            }
+
+            return not;
+        }
+    }
+
+    static final class NameLongContainsSegment
+            extends NameFilter {
+        private final long[] values;
+        private final boolean not;
+
+        public NameLongContainsSegment(
+                String fieldName,
+                long fieldNameNameHash,
+                String[] fieldName2,
+                long[] fieldNameNameHash2,
+                long[] values, boolean not) {
+            super(fieldName, fieldNameNameHash, fieldName2, fieldNameNameHash2, null);
+            this.values = values;
+            this.not = not;
+        }
+
+        @Override
+        public boolean apply(Object fieldValue) {
+            if (fieldValue instanceof Collection) {
+                Collection collection = (Collection) fieldValue;
+
+                boolean containsAll = true;
+                for (long value : values) {
+                    boolean containsItem = false;
+                    for (Object item : collection) {
+                        long longItem;
+                        if (item instanceof Byte
+                                || item instanceof Short
+                                || item instanceof Integer
+                                || item instanceof Long) {
+                            longItem = ((Number) item).longValue();
+                            if (longItem == value) {
+                                containsItem = true;
+                                break;
+                            }
+                        }
+
+                        if (item instanceof Float) {
+                            if (value == (Float) item) {
+                                containsItem = true;
+                                break;
+                            }
+                        }
+
+                        if (item instanceof Double) {
+                            if (value == (Double) item) {
+                                containsItem = true;
+                                break;
+                            }
+                        }
+
+                        if (item instanceof BigDecimal) {
+                            BigDecimal decimal = (BigDecimal) item;
+                            long longValue = decimal.longValue();
+                            if (value == longValue && decimal.equals(BigDecimal.valueOf(value))) {
+                                containsItem = true;
+                                break;
+                            }
+                        }
+
+                        if (item instanceof BigInteger) {
+                            BigInteger bigiInt = (BigInteger) item;
+                            long longValue = bigiInt.longValue();
+                            if (value == longValue && bigiInt.equals(BigInteger.valueOf(value))) {
+                                containsItem = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!containsItem) {
+                        containsAll = false;
+                        break;
+                    }
+                }
+
+                if (containsAll) {
+                    return !not;
+                }
             }
 
             return not;
@@ -1414,6 +1501,44 @@ public abstract class JSONPath {
                 if (value == fieldValue) {
                     return !not;
                 } else if (value != null && value.equals(fieldValue)) {
+                    return !not;
+                }
+            }
+
+            return not;
+        }
+    }
+
+    static final class NameStringContainsSegment
+            extends NameFilter {
+        private final String[] values;
+        private final boolean not;
+
+        public NameStringContainsSegment(
+                String fieldName,
+                long fieldNameNameHash,
+                String[] fieldName2,
+                long[] fieldNameNameHash2,
+                String[] values, boolean not) {
+            super(fieldName, fieldNameNameHash, fieldName2, fieldNameNameHash2, null);
+            this.values = values;
+            this.not = not;
+        }
+
+        @Override
+        public boolean apply(Object fieldValue) {
+            if (fieldValue instanceof Collection) {
+                Collection collection = (Collection) fieldValue;
+
+                boolean containsAll = true;
+                for (String value : values) {
+                    if (!collection.contains(value)) {
+                        containsAll = false;
+                        break;
+                    }
+                }
+
+                if (containsAll) {
                     return !not;
                 }
             }
@@ -6702,27 +6827,7 @@ public abstract class JSONPath {
                 }
             }
 
-            Function function = null;
-            if (jsonReader.ch == '(') {
-                jsonReader.next();
-                if (!jsonReader.nextIfMatch(')')) {
-                    throw new JSONException("syntax error, function " + fieldName);
-                }
-                switch (fieldName) {
-                    case "type":
-                        fieldName = null;
-                        hashCode = 0;
-                        function = TypeFunction.INSTANCE;
-                        break;
-                    case "size":
-                        fieldName = null;
-                        hashCode = 0;
-                        function = SizeFunction.INSTANCE;
-                        break;
-                    default:
-                        throw new JSONException("syntax error, function not support " + fieldName);
-                }
-            }
+            String functionName = null;
 
             long[] hashCode2 = null;
             String[] fieldName2 = null;
@@ -6730,6 +6835,11 @@ public abstract class JSONPath {
                 jsonReader.next();
                 long hash = jsonReader.readFieldNameHashCodeUnquote();
                 String str = jsonReader.getFieldName();
+
+                if (jsonReader.ch == '(') {
+                    functionName = str;
+                    break;
+                }
 
                 if (hashCode2 == null) {
                     hashCode2 = new long[]{hash};
@@ -6742,7 +6852,42 @@ public abstract class JSONPath {
                 }
             }
 
-            Operator operator = parseOperator(jsonReader);
+            Operator operator = null;
+            Function function = null;
+            if (jsonReader.ch == '(') {
+                if (functionName == null) {
+                    functionName = fieldName;
+                    fieldName = null;
+                }
+
+                switch (functionName) {
+                    case "type":
+                        hashCode = 0;
+                        function = TypeFunction.INSTANCE;
+                        break;
+                    case "size":
+                        hashCode = 0;
+                        function = SizeFunction.INSTANCE;
+                        break;
+                    case "contains":
+                        hashCode = 0;
+                        operator = Operator.CONTAINS;
+                        break;
+                    default:
+                        throw new JSONException("syntax error, function not support " + fieldName);
+                }
+
+                if (function != null) {
+                    jsonReader.next();
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException("syntax error, function " + functionName);
+                    }
+                }
+            }
+
+            if (operator == null) {
+                operator = parseOperator(jsonReader);
+            }
 
             switch (operator) {
                 case REG_MATCH:
@@ -6784,7 +6929,12 @@ public abstract class JSONPath {
                         }
                         String[] strArray = new String[list.size()];
                         list.toArray(strArray);
-                        segment = new NameStringInSegment(fieldName, hashCode, strArray, operator == Operator.NOT_IN);
+                        segment = new NameStringInSegment(
+                                fieldName,
+                                hashCode,
+                                strArray,
+                                operator == Operator.NOT_IN
+                        );
                     } else if (jsonReader.isNumber()) {
                         List<Number> list = new ArrayList<>();
                         while (jsonReader.isNumber()) {
@@ -6795,6 +6945,58 @@ public abstract class JSONPath {
                             values[i] = list.get(i).longValue();
                         }
                         segment = new NameIntInSegment(fieldName, hashCode, fieldName2, hashCode2, function, values, operator == Operator.NOT_IN);
+                    } else {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+
+                    return segment;
+                }
+                case CONTAINS: {
+                    if (jsonReader.ch != '(') {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+                    jsonReader.next();
+
+                    Segment segment;
+                    if (jsonReader.isString()) {
+                        List<String> list = new ArrayList<>();
+                        while (jsonReader.isString()) {
+                            list.add(jsonReader.readString());
+                        }
+                        String[] strArray = new String[list.size()];
+                        list.toArray(strArray);
+                        segment = new NameStringContainsSegment(
+                                fieldName,
+                                hashCode,
+                                fieldName2,
+                                hashCode2,
+                                strArray,
+                                operator == Operator.NOT_CONTAINS
+                        );
+                    } else if (jsonReader.isNumber()) {
+                        List<Number> list = new ArrayList<>();
+                        while (jsonReader.isNumber()) {
+                            list.add(jsonReader.readNumber());
+                        }
+                        long[] values = new long[list.size()];
+                        for (int i = 0; i < list.size(); i++) {
+                            values[i] = list.get(i).longValue();
+                        }
+                        segment = new NameLongContainsSegment(
+                                fieldName,
+                                hashCode,
+                                fieldName2,
+                                hashCode2,
+                                values,
+                                operator == Operator.NOT_CONTAINS
+                        );
                     } else {
                         throw new JSONException(jsonReader.info("jsonpath syntax error"));
                     }
