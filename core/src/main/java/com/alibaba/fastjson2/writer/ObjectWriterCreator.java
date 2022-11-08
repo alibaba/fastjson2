@@ -486,34 +486,25 @@ public class ObjectWriterCreator {
         }
 
         if (beanInfo.serializeFilters != null) {
-            for (Class<? extends Filter> filterClass : beanInfo.serializeFilters) {
-                if (!Filter.class.isAssignableFrom(filterClass)) {
-                    continue;
-                }
-
-                try {
-                    Filter filter = filterClass.newInstance();
-                    if (filter instanceof PropertyFilter) {
-                        writerAdapter.setPropertyFilter((PropertyFilter) filter);
-                    }
-
-                    if (filter instanceof ValueFilter) {
-                        writerAdapter.setValueFilter((ValueFilter) filter);
-                    }
-
-                    if (filter instanceof NameFilter) {
-                        writerAdapter.setNameFilter((NameFilter) filter);
-                    }
-                    if (filter instanceof PropertyPreFilter) {
-                        writerAdapter.setPropertyPreFilter((PropertyPreFilter) filter);
-                    }
-                } catch (InstantiationException | IllegalAccessException ignored) {
-                }
-            }
-            // return super.createObjectWriter(objectClass, features, modules);
+            configSerializeFilters(beanInfo, writerAdapter);
         }
 
         return writerAdapter;
+    }
+
+    protected static void configSerializeFilters(BeanInfo beanInfo, ObjectWriterAdapter writerAdapter) {
+        for (Class<? extends Filter> filterClass : beanInfo.serializeFilters) {
+            if (!Filter.class.isAssignableFrom(filterClass)) {
+                continue;
+            }
+
+            try {
+                Filter filter = filterClass.newInstance();
+                writerAdapter.setFilter(filter);
+            } catch (InstantiationException | IllegalAccessException ignored) {
+                //ignored
+            }
+        }
     }
 
     protected void handleIgnores(BeanInfo beanInfo, List<FieldWriter> fieldWriters) {

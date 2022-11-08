@@ -216,7 +216,12 @@ public class JSONBTest5 {
 
     @Test
     public void nextIfEmptyString() {
-        assertTrue(JSONReader.ofJSONB(JSONB.toBytes("")).nextIfEmptyString());
+        assertTrue(
+                JSONReader.ofJSONB(
+                            JSONB.toBytes("")
+                        )
+                        .nextIfEmptyString()
+        );
         assertFalse(JSONReader.ofJSONB(JSONB.toBytes("1")).nextIfEmptyString());
     }
 }

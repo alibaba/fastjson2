@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.filter.Filter;
+import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.reader.FieldReader;
@@ -2877,6 +2877,32 @@ public interface JSON {
      */
     static ObjectWriter<?> registerIfAbsent(Type type, ObjectWriter<?> objectWriter) {
         return JSONFactory.getDefaultObjectWriterProvider().registerIfAbsent(type, objectWriter);
+    }
+
+    /**
+     * Register ObjectWriterFilter
+     * @param type
+     * @param filter
+     * @since 2.0.19
+     */
+    static void register(Class type, Filter filter) {
+        boolean writerFilter
+                = filter instanceof AfterFilter
+                || filter instanceof BeforeFilter
+                || filter instanceof ContextNameFilter
+                || filter instanceof ContextValueFilter
+                || filter instanceof LabelFilter
+                || filter instanceof NameFilter
+                || filter instanceof PropertyFilter
+                || filter instanceof PropertyPreFilter
+                || filter instanceof ValueFilter;
+        if (writerFilter) {
+            ObjectWriter objectWriter
+                    = JSONFactory
+                    .getDefaultObjectWriterProvider()
+                    .getObjectWriter(type);
+            objectWriter.setFilter(filter);
+        }
     }
 
     /**

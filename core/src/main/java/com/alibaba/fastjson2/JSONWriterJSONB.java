@@ -594,7 +594,7 @@ final class JSONWriterJSONB
                     }
                 }
 
-                boolean utf16 = asciiCount == 0 || (check_cnt >> 1) / asciiCount >= 3; // utf16字符占比>=1/3
+                boolean utf16 = value.length != 0 && (asciiCount == 0 || (check_cnt >> 1) / asciiCount >= 3); // utf16字符占比>=1/3
 
                 if (!utf16) {
                     int maxSize = value.length * 3;
