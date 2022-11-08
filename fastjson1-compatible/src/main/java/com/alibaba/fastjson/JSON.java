@@ -826,6 +826,42 @@ public class JSON {
         return context;
     }
 
+    public static String toJSONString(
+            Object object,
+            SerializeConfig config,
+            SerializeFilter[] filters,
+            String dateFormat,
+            int defaultFeatures,
+            SerializerFeature... features
+    ) {
+        JSONWriter.Context context = createWriteContext(config, defaultFeatures, features);
+        if (dateFormat != null && !dateFormat.isEmpty()) {
+            context.setDateFormat(dateFormat);
+        }
+
+        try (JSONWriter writer = JSONWriter.of(context)) {
+            writer.setRootObject(object);
+            for (SerializeFilter filter : filters) {
+                configFilter(context, filter);
+            }
+
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                Class<?> valueClass = object.getClass();
+                ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+
+            return writer.toString();
+        } catch (com.alibaba.fastjson2.JSONException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            throw new JSONException("toJSONString error", cause);
+        } catch (RuntimeException ex) {
+            throw new JSONException("toJSONString error", ex);
+        }
+    }
+
     public static String toJSONString(Object object, SerializeFilter[] filters, SerializerFeature... features) {
         JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
 
