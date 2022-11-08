@@ -179,7 +179,7 @@ public class ObjectWriterAdapter<T>
                 || propertyFilter != null
                 || nameFilter != null
                 || valueFilter != null
-                || containsNoneFieldGetter ? jsonWriter.hasFilter(IgnoreNonFieldGetter.mask) : jsonWriter.hasFilter();
+                || (containsNoneFieldGetter ? jsonWriter.hasFilter(IgnoreNonFieldGetter.mask) : jsonWriter.hasFilter());
     }
 
     public void setPropertyFilter(PropertyFilter propertyFilter) {
@@ -408,11 +408,37 @@ public class ObjectWriterAdapter<T>
         }
 
         PropertyPreFilter propertyPreFilter = context.getPropertyPreFilter();
+        if (propertyPreFilter == null) {
+            propertyPreFilter = this.propertyPreFilter;
+        }
+
         NameFilter nameFilter = context.getNameFilter();
+        if (nameFilter == null) {
+            nameFilter = this.nameFilter;
+        } else {
+            if (this.nameFilter != null) {
+                nameFilter = NameFilter.compose(this.nameFilter, nameFilter);
+            }
+        }
+
         ContextNameFilter contextNameFilter = context.getContextNameFilter();
+
         ValueFilter valueFilter = context.getValueFilter();
+        if (valueFilter == null) {
+            valueFilter = this.valueFilter;
+        } else {
+            if (this.valueFilter != null) {
+                valueFilter = ValueFilter.compose(this.valueFilter, valueFilter);
+            }
+        }
+
         ContextValueFilter contextValueFilter = context.getContextValueFilter();
+
         PropertyFilter propertyFilter = context.getPropertyFilter();
+        if (propertyFilter == null) {
+            propertyFilter = this.propertyFilter;
+        }
+
         LabelFilter labelFilter = context.getLabelFilter();
 
         for (int i = 0, size = fieldWriters.size(); i < size; ++i) {
@@ -442,7 +468,13 @@ public class ObjectWriterAdapter<T>
             }
 
             // fast return
-            if (nameFilter == null && propertyFilter == null && valueFilter == null && contextValueFilter == null && contextNameFilter == null) {
+            if (nameFilter == null
+                    && propertyFilter == null
+                    && valueFilter == null
+                    && contextValueFilter == null
+                    && contextNameFilter == null
+                    && valueFilter == null
+            ) {
                 fieldWriter.write(jsonWriter, object);
                 continue;
             }

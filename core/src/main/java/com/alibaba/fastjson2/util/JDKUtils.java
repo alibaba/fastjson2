@@ -131,7 +131,7 @@ public class JDKUtils {
             }
 
             boolean lookupLambda;
-            if (JVM_VERSION > 8 && JVM_VERSION < 16) {
+            if (JVM_VERSION > 8 && JVM_VERSION < 16 && !openj9) {
                 lookupLambda = true;
             } else {
                 List<String> inputArguments = ManagementFactory

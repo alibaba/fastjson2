@@ -1,9 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.filter.PropertyFilter;
-import com.alibaba.fastjson2.filter.PropertyPreFilter;
-import com.alibaba.fastjson2.filter.ValueFilter;
+import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
@@ -136,5 +134,34 @@ public interface ObjectWriter<T> {
 
     default void writeWithFilter(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         throw new UnsupportedOperationException();
+    }
+
+    default void setPropertyFilter(PropertyFilter propertyFilter) {
+    }
+
+    default void setValueFilter(ValueFilter valueFilter) {
+    }
+
+    default void setNameFilter(NameFilter nameFilter) {
+    }
+
+    default void setPropertyPreFilter(PropertyPreFilter propertyPreFilter) {
+    }
+
+    default void setFilter(Filter filter) {
+        if (filter instanceof PropertyFilter) {
+            setPropertyFilter((PropertyFilter) filter);
+        }
+
+        if (filter instanceof ValueFilter) {
+            setValueFilter((ValueFilter) filter);
+        }
+
+        if (filter instanceof NameFilter) {
+            setNameFilter((NameFilter) filter);
+        }
+        if (filter instanceof PropertyPreFilter) {
+            setPropertyPreFilter((PropertyPreFilter) filter);
+        }
     }
 }
