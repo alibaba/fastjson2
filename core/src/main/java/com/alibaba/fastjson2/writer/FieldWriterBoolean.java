@@ -2,18 +2,30 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
 abstract class FieldWriterBoolean
-        extends FieldWriterImpl {
+        extends FieldWriter {
     volatile byte[] utf8ValueTrue;
     volatile byte[] utf8ValueFalse;
     volatile char[] utf16ValueTrue;
     volatile char[] utf16ValueFalse;
 
-    FieldWriterBoolean(String name, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass);
+    FieldWriterBoolean(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
+        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
     }
 
     @Override

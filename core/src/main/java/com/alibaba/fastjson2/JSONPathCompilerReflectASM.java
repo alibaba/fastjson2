@@ -63,7 +63,7 @@ class JSONPathCompilerReflectASM
         ObjectWriter objectWriter = path.getWriterContext().getObjectWriter(objectClass);
         FieldWriter fieldWriter = objectWriter.getFieldWriter(fieldName);
 
-        ClassWriter cw = new ClassWriter();
+        ClassWriter cw = new ClassWriter(null);
 
         String className = "JSONPath_" + seed.incrementAndGet();
         String classNameType;
@@ -97,8 +97,12 @@ class JSONPathCompilerReflectASM
         {
             final int PATH = 1, CLASS = 2, OBJECT_READER = 3, FIELD_READER = 4, OBJECT_WRITER = 5, FIELD_WRITER = 6;
 
-            MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>",
-                    METHOD_SINGLE_NAME_PATH_TYPED_INIT);
+            MethodWriter mw = cw.visitMethod(
+                    Opcodes.ACC_PUBLIC,
+                    "<init>",
+                    METHOD_SINGLE_NAME_PATH_TYPED_INIT,
+                    64
+            );
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitVarInsn(Opcodes.ALOAD, PATH);
             mw.visitVarInsn(Opcodes.ALOAD, CLASS);
@@ -111,18 +115,18 @@ class JSONPathCompilerReflectASM
 
             mw.visitInsn(Opcodes.RETURN);
             mw.visitMaxs(3, 3);
-            mw.visitEnd();
         }
 
         if (fieldReader != null) {
-            Class fieldClass = fieldReader.getFieldClass();
+            Class fieldClass = fieldReader.fieldClass;
             int OBJECT = 1, VALUE = 2;
 
             if (fieldClass == int.class) {
                 MethodWriter mw = cw.visitMethod(
                         Opcodes.ACC_PUBLIC,
                         "setInt",
-                        "(Ljava/lang/Object;I)V"
+                        "(Ljava/lang/Object;I)V",
+                        64
                 );
                 mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
                 mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_OBJECT);
@@ -132,13 +136,13 @@ class JSONPathCompilerReflectASM
 
                 mw.visitInsn(Opcodes.RETURN);
                 mw.visitMaxs(2, 2);
-                mw.visitEnd();
             }
             if (fieldClass == long.class) {
                 MethodWriter mw = cw.visitMethod(
                         Opcodes.ACC_PUBLIC,
                         "setLong",
-                        "(Ljava/lang/Object;J)V"
+                        "(Ljava/lang/Object;J)V",
+                        64
                 );
                 mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
                 mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_OBJECT);
@@ -148,14 +152,14 @@ class JSONPathCompilerReflectASM
 
                 mw.visitInsn(Opcodes.RETURN);
                 mw.visitMaxs(2, 2);
-                mw.visitEnd();
             }
 
             {
                 MethodWriter mw = cw.visitMethod(
                         Opcodes.ACC_PUBLIC,
                         "set",
-                        "(Ljava/lang/Object;Ljava/lang/Object;)V"
+                        "(Ljava/lang/Object;Ljava/lang/Object;)V",
+                        64
                 );
                 mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
                 mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_OBJECT);
@@ -189,19 +193,19 @@ class JSONPathCompilerReflectASM
 
                 mw.visitInsn(Opcodes.RETURN);
                 mw.visitMaxs(2, 2);
-                mw.visitEnd();
             }
         }
 
         if (fieldWriter != null) {
-            Class fieldClass = fieldReader.getFieldClass();
+            Class fieldClass = fieldReader.fieldClass;
 
             int OBJECT = 1;
 
             MethodWriter mw = cw.visitMethod(
                     Opcodes.ACC_PUBLIC,
                     "eval",
-                    "(Ljava/lang/Object;)Ljava/lang/Object;"
+                    "(Ljava/lang/Object;)Ljava/lang/Object;",
+                    64
             );
             mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
             mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_OBJECT);
@@ -226,7 +230,6 @@ class JSONPathCompilerReflectASM
 
             mw.visitInsn(Opcodes.ARETURN);
             mw.visitMaxs(2, 2);
-            mw.visitEnd();
         }
 
         byte[] code = cw.toByteArray();
@@ -245,9 +248,9 @@ class JSONPathCompilerReflectASM
     }
 
     private void gwSetValue(MethodWriter mw, String TYPE_OBJECT, FieldReader fieldReader) {
-        Method method = fieldReader.getMethod();
-        Field field = fieldReader.getField();
-        Class fieldClass = fieldReader.getFieldClass();
+        Method method = fieldReader.method;
+        Field field = fieldReader.field;
+        Class fieldClass = fieldReader.fieldClass;
         String fieldClassDesc = ASMUtils.desc(fieldClass);
 
         if (method != null) {
@@ -263,9 +266,9 @@ class JSONPathCompilerReflectASM
     }
 
     private void gwGetValue(MethodWriter mw, String TYPE_OBJECT, FieldWriter fieldWriter) {
-        Method method = fieldWriter.getMethod();
-        Field field = fieldWriter.getField();
-        Class fieldClass = fieldWriter.getFieldClass();
+        Method method = fieldWriter.method;
+        Field field = fieldWriter.field;
+        Class fieldClass = fieldWriter.fieldClass;
         String fieldClassDesc = ASMUtils.desc(fieldClass);
 
         if (method != null) {

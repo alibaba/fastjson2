@@ -7,16 +7,8 @@ import java.lang.reflect.Field;
 
 final class FieldWriterInt8ValField<T>
         extends FieldWriterInt8<T> {
-    final Field field;
-
     FieldWriterInt8ValField(String name, int ordinal, long features, String format, String label, Field field) {
-        super(name, ordinal, features, format, label, byte.class);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, features, format, label, byte.class, field, null);
     }
 
     @Override
@@ -24,7 +16,7 @@ final class FieldWriterInt8ValField<T>
         try {
             return field.get(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 
@@ -34,7 +26,7 @@ final class FieldWriterInt8ValField<T>
         try {
             value = field.getByte(o);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
 
         writeInt8(jsonWriter, value);
@@ -47,7 +39,7 @@ final class FieldWriterInt8ValField<T>
             byte value = field.getByte(object);
             jsonWriter.writeInt32(value);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 }

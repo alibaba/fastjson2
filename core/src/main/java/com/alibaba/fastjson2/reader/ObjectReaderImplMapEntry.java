@@ -5,9 +5,10 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Type;
 import java.util.AbstractMap;
+import java.util.Map;
 
 class ObjectReaderImplMapEntry
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     final Type keyType;
     final Type valueType;
 
@@ -15,6 +16,7 @@ class ObjectReaderImplMapEntry
     volatile ObjectReader valueReader;
 
     public ObjectReaderImplMapEntry(Type keyType, Type valueType) {
+        super(Map.Entry.class);
         this.keyType = keyType;
         this.valueType = valueType;
     }

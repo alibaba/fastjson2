@@ -9,8 +9,7 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderInt16Func<T, V>
-        extends FieldReaderImpl<T> {
-    final Method method;
+        extends FieldReader<T> {
     final BiConsumer<T, V> function;
 
     public FieldReaderInt16Func(
@@ -24,14 +23,8 @@ final class FieldReaderInt16Func<T, V>
             Method method,
             BiConsumer<T, V> function
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, locale, defaultValue, schema);
-        this.method = method;
+        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, locale, defaultValue, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.FieldInfo;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -12,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 abstract class FieldWriterObject<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     volatile Class initValueClass;
     volatile ObjectWriter initObjectWriter;
     final boolean unwrapped;
@@ -31,8 +33,18 @@ abstract class FieldWriterObject<T>
             "initObjectWriter"
     );
 
-    protected FieldWriterObject(String name, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass);
+    protected FieldWriterObject(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
+        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
         this.unwrapped = (features & FieldInfo.UNWRAPPED_MASK) != 0;
 
         if (fieldClass == Currency.class) {
@@ -60,7 +72,17 @@ abstract class FieldWriterObject<T>
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
-            ObjectWriter formattedWriter = FieldWriter.getObjectWriter(fieldType, fieldClass, format, null, valueClass);
+            ObjectWriter formattedWriter = null;
+            if (format == null) {
+                JSONWriter.Context context = jsonWriter.getContext();
+                boolean fieldBased = ((features | context.getFeatures()) & JSONWriter.Feature.FieldBased.mask) != 0;
+                formattedWriter = context.getProvider().getObjectWriterFromCache(valueClass, valueClass, fieldBased);
+            }
+
+            if (formattedWriter == null) {
+                formattedWriter = FieldWriter.getObjectWriter(fieldType, fieldClass, format, null, valueClass);
+            }
+
             if (formattedWriter == null) {
                 boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
                 formattedWriter = jsonWriter.getObjectWriter(valueClass);
@@ -70,7 +92,10 @@ abstract class FieldWriterObject<T>
                 return formattedWriter;
             } else {
                 if (initObjectWriter == null) {
-                    initObjectWriterUpdater.compareAndSet(this, null, initObjectWriter);
+                    boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
+                    if (success) {
+                        initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
+                    }
                 }
                 return formattedWriter;
             }
@@ -166,7 +191,7 @@ abstract class FieldWriterObject<T>
                 return true;
             }
 
-            String refPath = jsonWriter.setPath(name, this, value);
+            String refPath = jsonWriter.setPath(this, value);
             if (refPath != null) {
                 writeFieldName(jsonWriter);
                 jsonWriter.writeReference(refPath);
@@ -217,7 +242,7 @@ abstract class FieldWriterObject<T>
 
             if (valueWriter instanceof ObjectWriterAdapter) {
                 ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) valueWriter;
-                List<FieldWriter> fieldWriters = writerAdapter.getFieldWriters();
+                List<FieldWriter> fieldWriters = writerAdapter.fieldWriters;
                 for (FieldWriter fieldWriter : fieldWriters) {
                     fieldWriter.write(jsonWriter, value);
                 }
@@ -229,15 +254,15 @@ abstract class FieldWriterObject<T>
         boolean jsonb = jsonWriter.isJSONB();
         if ((this.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
             if (jsonb) {
-                valueWriter.writeArrayMappingJSONB(jsonWriter, value, name, fieldType, this.features);
+                valueWriter.writeArrayMappingJSONB(jsonWriter, value, fieldName, fieldType, this.features);
             } else {
-                valueWriter.writeArrayMapping(jsonWriter, value, name, fieldType, this.features);
+                valueWriter.writeArrayMapping(jsonWriter, value, fieldName, fieldType, this.features);
             }
         } else {
             if (jsonb) {
-                valueWriter.writeJSONB(jsonWriter, value, name, fieldType, this.features);
+                valueWriter.writeJSONB(jsonWriter, value, fieldName, fieldType, this.features);
             } else {
-                valueWriter.write(jsonWriter, value, name, fieldType, this.features);
+                valueWriter.write(jsonWriter, value, fieldName, fieldType, this.features);
             }
         }
 
@@ -280,7 +305,7 @@ abstract class FieldWriterObject<T>
                 return;
             }
 
-            String refPath = jsonWriter.setPath(name, value);
+            String refPath = jsonWriter.setPath(fieldName, value);
             if (refPath != null) {
                 jsonWriter.writeReference(refPath);
                 jsonWriter.popPath(value);
@@ -290,12 +315,12 @@ abstract class FieldWriterObject<T>
 
         if (jsonWriter.isJSONB()) {
             if (jsonWriter.isBeanToArray()) {
-                valueWriter.writeArrayMappingJSONB(jsonWriter, value, name, fieldClass, features);
+                valueWriter.writeArrayMappingJSONB(jsonWriter, value, fieldName, fieldClass, features);
             } else {
-                valueWriter.writeJSONB(jsonWriter, value, name, fieldClass, features);
+                valueWriter.writeJSONB(jsonWriter, value, fieldName, fieldClass, features);
             }
         } else {
-            valueWriter.write(jsonWriter, value, name, fieldClass, features);
+            valueWriter.write(jsonWriter, value, fieldName, fieldClass, features);
         }
 
         if (refDetect) {

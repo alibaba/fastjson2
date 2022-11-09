@@ -36,6 +36,30 @@ public class EishayParseStringTest {
         }
     }
 
+    public static void fastjson2Mixin() {
+        for (int j = 0; j < 10; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.fastjson2Mixin(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("fastjson2Mixin millis : " + millis);
+            // zulu8.62.0.19 : 639
+            // zulu11.52.13 : 575
+            // zulu17.32.13 :
+            // zulu18.28.13 :
+            // zulu19.0.75 :
+            // corretto-8 :
+            // corretto-11 :
+            // corretto-17 :
+            // corretto-18 :
+            // oracle-jdk-17.0.4 :
+            // oracle-jdk-18.0.2 :
+            // graalvm-ce-java17-22.2.0 :
+            // graalvm-ee-java17-22.2.0 :
+        }
+    }
+
     public static void fastjson1() throws Exception {
         for (int j = 0; j < 10; j++) {
             long start = System.currentTimeMillis();
@@ -125,10 +149,11 @@ public class EishayParseStringTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2_test();
+//        fastjson2();
+        fastjson2Mixin();
 //        jackson_test();
 //        fastjson1_test();
 //        gson_test();
-        wastjson();
+//        wastjson();
     }
 }

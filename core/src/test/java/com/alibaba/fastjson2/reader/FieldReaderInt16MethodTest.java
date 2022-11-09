@@ -17,7 +17,7 @@ public class FieldReaderInt16MethodTest {
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
         assertEquals((short) 123, bean.value);
-        assertNotNull(fieldReader.getMethod());
+        assertNotNull(fieldReader.method);
 
         fieldReader.accept(bean, (short) 101);
         assertEquals((short) 101, bean.value);

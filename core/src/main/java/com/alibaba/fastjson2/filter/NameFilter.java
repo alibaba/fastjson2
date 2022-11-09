@@ -3,6 +3,8 @@ package com.alibaba.fastjson2.filter;
 import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.util.BeanUtils;
 
+import java.util.function.Function;
+
 public interface NameFilter
         extends Filter {
     String process(Object object, String name, Object value);
@@ -18,5 +20,9 @@ public interface NameFilter
                         before.process(object, name, value),
                         value
                 );
+    }
+
+    static NameFilter of(Function<String, String> function) {
+        return (object, name, value) -> function.apply(name);
     }
 }

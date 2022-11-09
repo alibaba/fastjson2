@@ -18,9 +18,7 @@ public class ObjectReaderAdapter<T>
         extends ObjectReaderBean<T> {
     protected final String typeKey;
     protected final long typeKeyHashCode;
-    final long features;
-    final Supplier<T> creator;
-    final Function buildFunction;
+
     final FieldReader[] fieldReaders;
     final long[] hashCodes;
     final short[] mapping;
@@ -30,6 +28,10 @@ public class ObjectReaderAdapter<T>
 
     final Constructor constructor;
     volatile boolean instantiationError;
+
+    public ObjectReaderAdapter(Class objectClass, Supplier<T> creator, FieldReader... fieldReaders) {
+        this(objectClass, null, null, 0, null, creator, null, fieldReaders);
+    }
 
     public ObjectReaderAdapter(
             Class objectClass,
@@ -41,11 +43,11 @@ public class ObjectReaderAdapter<T>
             Function buildFunction,
             FieldReader... fieldReaders
     ) {
-        super(objectClass, typeName, schema);
+        super(objectClass, creator, typeName, features, schema, buildFunction);
 
         this.constructor = objectClass == null
                 ? null
-                : BeanUtils.getDefaultConstructor(objectClass);
+                : BeanUtils.getDefaultConstructor(objectClass, true);
 
         if (constructor != null) {
             constructor.setAccessible(true);
@@ -59,24 +61,21 @@ public class ObjectReaderAdapter<T>
             typeKeyHashCode = Fnv.hashCode64(typeKey);
         }
 
-        this.features = features;
-        this.creator = creator;
-        this.buildFunction = buildFunction;
         this.fieldReaders = fieldReaders;
 
         long[] hashCodes = new long[fieldReaders.length];
         long[] hashCodesLCase = new long[fieldReaders.length];
         for (int i = 0; i < fieldReaders.length; i++) {
             FieldReader fieldReader = fieldReaders[i];
-            String fieldName = fieldReader.getFieldName();
-            hashCodes[i] = Fnv.hashCode64(fieldName);
-            hashCodesLCase[i] = Fnv.hashCode64LCase(fieldName);
+            String fieldName = fieldReader.fieldName;
+            hashCodes[i] = fieldReader.fieldNameHash;
+            hashCodesLCase[i] = fieldReader.fieldNameHashLCase;
 
             if (fieldReader.isUnwrapped()) {
                 this.extraFieldReader = fieldReader;
             }
 
-            if (fieldReader.getDefaultValue() != null) {
+            if (fieldReader.defaultValue != null) {
                 this.hasDefaultValue = true;
             }
         }
@@ -103,17 +102,17 @@ public class ObjectReaderAdapter<T>
     }
 
     @Override
-    public String getTypeKey() {
+    public final String getTypeKey() {
         return typeKey;
     }
 
     @Override
-    public long getTypeKeyHash() {
+    public final long getTypeKeyHash() {
         return typeKeyHashCode;
     }
 
     @Override
-    public long getFeatures() {
+    public final long getFeatures() {
         return features;
     }
 
@@ -134,12 +133,16 @@ public class ObjectReaderAdapter<T>
     }
 
     @Override
-    public Function getBuildFunction() {
+    public final Function getBuildFunction() {
         return buildFunction;
     }
 
     @Override
     public T readArrayMappingObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         jsonReader.nextIfMatch('[');
         Object object = creator.get();
 
@@ -162,16 +165,28 @@ public class ObjectReaderAdapter<T>
 
     @Override
     public T readArrayMappingJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         ObjectReader autoTypeReader = checkAutoType(jsonReader, this.objectClass, this.features | features);
         if (autoTypeReader != null && autoTypeReader != this && autoTypeReader.getObjectClass() != this.objectClass) {
             return (T) autoTypeReader.readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
-        jsonReader.startArray();
+        int entryCnt = jsonReader.startArray();
         Object object = createInstance(0);
 
-        for (FieldReader fieldReader : fieldReaders) {
+        for (int i = 0; i < fieldReaders.length; i++) {
+            if (i >= entryCnt) {
+                continue;
+            }
+            FieldReader fieldReader = fieldReaders[i];
             fieldReader.readFieldValue(jsonReader, object);
+        }
+
+        for (int i = fieldReaders.length; i < entryCnt; i++) {
+            jsonReader.skipValue();
         }
 
         if (buildFunction != null) {
@@ -208,7 +223,7 @@ public class ObjectReaderAdapter<T>
     @Override
     protected void initDefaultValue(T object) {
         for (FieldReader fieldReader : fieldReaders) {
-            Object defaultValue = fieldReader.getDefaultValue();
+            Object defaultValue = fieldReader.defaultValue;
             if (defaultValue != null) {
                 fieldReader.accept(object, defaultValue);
             }
@@ -308,6 +323,10 @@ public class ObjectReaderAdapter<T>
             return (T) autoTypeReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         if (jsonReader.isArray()) {
             if (jsonReader.isSupportBeanArray()) {
                 return readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
@@ -358,7 +377,7 @@ public class ObjectReaderAdapter<T>
                 }
             }
             if (fieldReader == null) {
-                jsonReader.skipValue();
+                processExtra(jsonReader, object);
                 continue;
             }
 

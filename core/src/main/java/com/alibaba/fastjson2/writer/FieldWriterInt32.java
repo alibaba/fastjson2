@@ -3,17 +3,29 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.IOUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
 abstract class FieldWriterInt32<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     volatile byte[][] utf8ValueCache;
     volatile char[][] utf16ValueCache;
     final boolean toString;
 
-    protected FieldWriterInt32(String name, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass);
+    protected FieldWriterInt32(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
+        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
         toString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0
                 || "string".equals(format);
     }

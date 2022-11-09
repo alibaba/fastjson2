@@ -5,9 +5,9 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONReader.AutoTypeBeforeHandler;
-import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -35,6 +35,8 @@ public class ObjectReaderProvider
     static AutoTypeBeforeHandler DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
     static Consumer<Class> DEFAULT_AUTO_TYPE_HANDLER;
     static boolean DEFAULT_AUTO_TYPE_HANDLER_INIT_ERROR;
+
+    static Long hashCodeCache;
 
     static {
         {
@@ -146,8 +148,6 @@ public class ObjectReaderProvider
 
     private AutoTypeBeforeHandler autoTypeBeforeHandler = DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
     private Consumer<Class> autoTypeHandler = DEFAULT_AUTO_TYPE_HANDLER;
-
-    private PropertyNamingStrategy namingStrategy = PropertyNamingStrategy.CamelCase;
 
     {
         denyHashCodes = new long[]{
@@ -387,6 +387,10 @@ public class ObjectReaderProvider
     }
 
     public ObjectReader register(Type type, ObjectReader objectReader) {
+        if (objectReader == null) {
+            return cache.remove(type);
+        }
+
         return cache.put(type, objectReader);
     }
 
@@ -417,6 +421,54 @@ public class ObjectReaderProvider
 
     public boolean unregister(ObjectReaderModule module) {
         return modules.remove(module);
+    }
+
+    public void cleanup(Class objectClass) {
+        mixInCache.remove(objectClass);
+        cache.remove(objectClass);
+        cacheFieldBased.remove(objectClass);
+        for (ConcurrentHashMap<Long, ObjectReader> tlc : tclHashCaches.values()) {
+            for (Iterator<Map.Entry<Long, ObjectReader>> it = tlc.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<Long, ObjectReader> entry = it.next();
+                ObjectReader reader = entry.getValue();
+                if (reader.getObjectClass() == objectClass) {
+                    it.remove();
+                }
+            }
+        }
+        BeanUtils.cleanupCache(objectClass);
+    }
+
+    public void cleanup(ClassLoader classLoader) {
+        for (Iterator<Map.Entry<Class, Class>> it = mixInCache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Class, Class> entry = it.next();
+            if (entry.getKey().getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        for (Iterator<Map.Entry<Type, ObjectReader>> it = cache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Type, ObjectReader> entry = it.next();
+            Type keyType = entry.getKey();
+            Class<?> keyClass = TypeUtils.getClass(keyType);
+            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        for (Iterator<Map.Entry<Type, ObjectReader>> it = cacheFieldBased.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Type, ObjectReader> entry = it.next();
+            Type keyType = entry.getKey();
+            Class<?> keyClass = TypeUtils.getClass(keyType);
+            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        int tclHash = System.identityHashCode(classLoader);
+        tclHashCaches.remove(tclHash);
+
+        BeanUtils.cleanupCache(classLoader);
     }
 
     public ObjectReaderCreator getCreator() {
@@ -484,7 +536,16 @@ public class ObjectReaderProvider
     }
 
     public ObjectReader getObjectReader(long hashCode) {
-        final Long hashCodeObj = hashCode;
+        final Long hashCodeObj;
+        if (hashCodeCache == null) {
+            hashCodeObj = hashCodeCache = new Long(hashCode);
+        } else {
+            if (hashCode == hashCodeCache.longValue()) {
+                hashCodeObj = hashCodeCache;
+            } else {
+                hashCodeObj = new Long(hashCode);
+            }
+        }
 
         ObjectReader objectReader = null;
         ClassLoader tcl = Thread.currentThread().getContextClassLoader();
@@ -748,7 +809,7 @@ public class ObjectReaderProvider
 
         if (objectReader == null) {
             ObjectReaderCreator creator = getCreator();
-            objectReader = creator.createObjectReader(objectClass, objectType, fieldBased, modules);
+            objectReader = creator.createObjectReader(objectClass, objectType, fieldBased, this);
         }
 
         ObjectReader previous = getPreviousObjectReader(fieldBased, objectType, objectReader);

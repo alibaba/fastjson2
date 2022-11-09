@@ -3,15 +3,26 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.IOUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 abstract class FieldWriterInt8<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     final byte[][] utf8ValueCache = new byte[256][];
     final char[][] utf16ValueCache = new char[256][];
 
-    FieldWriterInt8(String name, int ordinal, long features, String format, String label, Class fieldClass) {
-        super(name, ordinal, features, format, label, fieldClass, fieldClass);
+    FieldWriterInt8(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
+        super(name, ordinal, features, format, label, fieldClass, fieldClass, field, method);
     }
 
     protected void writeInt8(JSONWriter jsonWriter, byte value) {

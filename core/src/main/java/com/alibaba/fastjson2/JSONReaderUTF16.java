@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -12,8 +12,9 @@ import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_ERROR;
-import static com.alibaba.fastjson2.JSONFactory.Utils.STRING_CREATOR_JDK8;
+import static com.alibaba.fastjson2.util.DateUtils.localDateTime;
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK8;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 import static java.time.ZoneOffset.UTC;
 
@@ -232,7 +233,7 @@ final class JSONReaderUTF16
         super(ctx);
         this.input = input;
 
-        cacheIndex = JSONFactory.cacheIndex();
+        cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
         char[] chars = JSONFactory.allocateCharArray(cacheIndex);
 
         if (chars == null) {
@@ -343,7 +344,7 @@ final class JSONReaderUTF16
     JSONReaderUTF16(Context ctx, InputStream input) {
         super(ctx);
         this.input = input;
-        final int cacheIndex = JSONFactory.cacheIndex();
+        final int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
         byte[] bytes = JSONFactory.allocateByteArray(cacheIndex);
 
         char[] chars;
@@ -419,6 +420,14 @@ final class JSONReaderUTF16
 
     @Override
     public boolean nextIfMatch(char ch) {
+        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+            if (offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = chars[offset++];
+            }
+        }
+
         if (this.ch != ch) {
             return false;
         }
@@ -430,7 +439,7 @@ final class JSONReaderUTF16
         }
 
         this.ch = chars[offset];
-        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+        while (this.ch == '\0' || (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
                 this.ch = EOI;
@@ -673,7 +682,7 @@ final class JSONReaderUTF16
         }
 
         ch = chars[offset];
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
                 ch = EOI;
@@ -3598,24 +3607,13 @@ final class JSONReaderUTF16
                     offset++;
                 }
 
-                if (JDKUtils.JVM_VERSION == 8) {
-                    if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
-                        try {
-                            STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
-                        } catch (Throwable e) {
-                            STRING_CREATOR_ERROR = true;
-                        }
-                    }
-                    if (STRING_CREATOR_JDK8 != null) {
-                        str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                    } else {
-                        str = new String(chars);
-                    }
+                if (STRING_CREATOR_JDK8 != null) {
+                    str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                 } else {
                     str = new String(chars);
                 }
             } else {
-                if (this.str != null && JDKUtils.JVM_VERSION > 8) {
+                if (this.str != null && JVM_VERSION > 8) {
                     str = this.str.substring(this.offset, offset);
                 } else {
                     str = new String(chars, this.offset, offset - this.offset);
@@ -5904,46 +5902,13 @@ final class JSONReaderUTF16
             S8 = c28;
             zoneIdBegin = 29;
             isTimeZone = c29 == '|';
-        } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
-                && len == 23) {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = c17;
-            s1 = c18;
-
-            S0 = c20;
-            S1 = c21;
-            S2 = c22;
-            S3 = '0';
-            S4 = '0';
-            S5 = '0';
-            S6 = '0';
-            S7 = '0';
-            S8 = '0';
-            zoneIdBegin = 23;
-            isTimeZone = false;
         } else {
             return null;
         }
 
         char first = chars[this.offset + zoneIdBegin];
 
-        LocalDateTime ldt = getLocalDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2, S3, S4, S5, S6, S7, S8);
+        LocalDateTime ldt = localDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2, S3, S4, S5, S6, S7, S8);
 
         ZoneId zoneId;
         if (isTimeZone) {
@@ -5966,7 +5931,7 @@ final class JSONReaderUTF16
                         zoneIdStr = null;
                     }
                 }
-                zoneId = getZoneId(ldt, zoneIdStr);
+                zoneId = DateUtils.getZoneId(zoneIdStr, context.zoneId);
             }
         }
 
@@ -6146,7 +6111,8 @@ final class JSONReaderUTF16
 
     @Override
     public long readMillis19() {
-        if (ch != '"' && ch != '\'') {
+        char quote = ch;
+        if (quote != '"' && quote != '\'') {
             throw new JSONException("date only support string input");
         }
 
@@ -6311,13 +6277,17 @@ final class JSONReaderUTF16
             dom = 1;
         }
 
+        if (chars[offset + 19] != quote) {
+            throw new JSONException(info("illegal date input"));
+        }
         offset += 20;
+
         next();
         if (comma = (ch == ',')) {
             next();
         }
 
-        return millis(year, month, dom, hour, minute, second, nanoOfSecond);
+        return DateUtils.millis(context.getZoneId(), year, month, dom, hour, minute, second, nanoOfSecond);
     }
 
     @Override
@@ -6452,7 +6422,7 @@ final class JSONReaderUTF16
             return null;
         }
 
-        LocalDateTime ldt = getLocalDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2, S3, S4, S5, S6, S7, S8);
+        LocalDateTime ldt = localDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2, S3, S4, S5, S6, S7, S8);
         if (ldt == null) {
             return null;
         }

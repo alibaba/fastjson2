@@ -36,4 +36,11 @@ public class TLongIntHashMapTest {
             assertEquals(0, map.get(value));
         }
     }
+
+    @Test
+    public void test_2() {
+        TLongIntHashMap map = new TLongIntHashMap();
+        assertEquals(102, map.putIfAbsent(101, 102));
+        assertEquals(102, map.putIfAbsent(101, 103));
+    }
 }

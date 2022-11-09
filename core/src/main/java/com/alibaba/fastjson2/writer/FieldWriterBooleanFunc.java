@@ -5,18 +5,11 @@ import java.util.function.Function;
 
 final class FieldWriterBooleanFunc
         extends FieldWriterBoolean {
-    final Method method;
     final Function function;
 
     protected FieldWriterBooleanFunc(String fieldName, int ordinal, long features, String format, String label, Method method, Function function) {
-        super(fieldName, ordinal, features, format, label, Boolean.class, Boolean.class);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, Boolean.class, Boolean.class, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

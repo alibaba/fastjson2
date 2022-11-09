@@ -1,5 +1,5 @@
 package com.alibaba.fastjson.parser;
 
-public class JSONLexerBase
+public abstract class JSONLexerBase
         implements JSONLexer {
 }

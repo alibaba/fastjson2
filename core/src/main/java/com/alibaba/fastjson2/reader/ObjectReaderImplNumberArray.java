@@ -10,8 +10,12 @@ import java.util.Collection;
 import java.util.function.Function;
 
 class ObjectReaderImplNumberArray
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplNumberArray INSTANCE = new ObjectReaderImplNumberArray();
+
+    public ObjectReaderImplNumberArray() {
+        super(Number[].class);
+    }
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {

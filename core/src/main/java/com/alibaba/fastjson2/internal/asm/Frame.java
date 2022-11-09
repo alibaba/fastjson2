@@ -36,7 +36,7 @@ class Frame {
 
     static final int SAME_FRAME = 0;
     static final int SAME_LOCALS_1_STACK_ITEM_FRAME = 64;
-    static final int RESERVED = 128;
+//    static final int RESERVED = 128;
     static final int SAME_LOCALS_1_STACK_ITEM_FRAME_EXTENDED = 247;
     static final int CHOP_FRAME = 248;
     static final int SAME_FRAME_EXTENDED = 251;
@@ -53,47 +53,47 @@ class Frame {
     static final int ITEM_OBJECT = 7;
     static final int ITEM_UNINITIALIZED = 8;
     // Additional, ASM specific constants used in abstract types below.
-    private static final int ITEM_ASM_BOOLEAN = 9;
-    private static final int ITEM_ASM_BYTE = 10;
-    private static final int ITEM_ASM_CHAR = 11;
-    private static final int ITEM_ASM_SHORT = 12;
+    static final int ITEM_ASM_BOOLEAN = 9;
+    static final int ITEM_ASM_BYTE = 10;
+    static final int ITEM_ASM_CHAR = 11;
+    static final int ITEM_ASM_SHORT = 12;
 
     // The size and offset in bits of each field of an abstract type.
 
-    private static final int DIM_SIZE = 6;
-    private static final int KIND_SIZE = 4;
-    private static final int FLAGS_SIZE = 2;
-    private static final int VALUE_SIZE = 32 - DIM_SIZE - KIND_SIZE - FLAGS_SIZE;
+    static final int DIM_SIZE = 6;
+    static final int KIND_SIZE = 4;
+    static final int FLAGS_SIZE = 2;
+    static final int VALUE_SIZE = 32 - DIM_SIZE - KIND_SIZE - FLAGS_SIZE;
 
-    private static final int DIM_SHIFT = KIND_SIZE + FLAGS_SIZE + VALUE_SIZE;
-    private static final int KIND_SHIFT = FLAGS_SIZE + VALUE_SIZE;
-    private static final int FLAGS_SHIFT = VALUE_SIZE;
+    static final int DIM_SHIFT = KIND_SIZE + FLAGS_SIZE + VALUE_SIZE;
+    static final int KIND_SHIFT = FLAGS_SIZE + VALUE_SIZE;
+    static final int FLAGS_SHIFT = VALUE_SIZE;
 
     // Bitmasks to get each field of an abstract type.
 
-    private static final int DIM_MASK = ((1 << DIM_SIZE) - 1) << DIM_SHIFT;
-    private static final int KIND_MASK = ((1 << KIND_SIZE) - 1) << KIND_SHIFT;
-    private static final int VALUE_MASK = (1 << VALUE_SIZE) - 1;
+    static final int DIM_MASK = ((1 << DIM_SIZE) - 1) << DIM_SHIFT;
+    static final int KIND_MASK = ((1 << KIND_SIZE) - 1) << KIND_SHIFT;
+    static final int VALUE_MASK = (1 << VALUE_SIZE) - 1;
 
     // Constants to manipulate the DIM field of an abstract type.
 
     /**
      * The constant to be added to an abstract type to get one with one more array dimension.
      */
-    private static final int ARRAY_OF = +1 << DIM_SHIFT;
+    static final int ARRAY_OF = +1 << DIM_SHIFT;
 
     /**
      * The constant to be added to an abstract type to get one with one less array dimension.
      */
-    private static final int ELEMENT_OF = -1 << DIM_SHIFT;
+    static final int ELEMENT_OF = -1 << DIM_SHIFT;
 
     // Possible values for the KIND field of an abstract type.
 
-    private static final int CONSTANT_KIND = 1 << KIND_SHIFT;
-    private static final int REFERENCE_KIND = 2 << KIND_SHIFT;
-    private static final int UNINITIALIZED_KIND = 3 << KIND_SHIFT;
-    private static final int LOCAL_KIND = 4 << KIND_SHIFT;
-    private static final int STACK_KIND = 5 << KIND_SHIFT;
+    static final int CONSTANT_KIND = 1 << KIND_SHIFT;
+    static final int REFERENCE_KIND = 2 << KIND_SHIFT;
+    static final int UNINITIALIZED_KIND = 3 << KIND_SHIFT;
+    static final int LOCAL_KIND = 4 << KIND_SHIFT;
+    static final int STACK_KIND = 5 << KIND_SHIFT;
 
     // Possible flags for the FLAGS field of an abstract type.
 
@@ -135,7 +135,7 @@ class Frame {
     /**
      * The input stack map frame stack. This is an array of abstract types.
      */
-    private int[] inputStack;
+    int[] inputStack;
 
     /**
      * The output stack map frame locals. This is an array of abstract types.
@@ -189,19 +189,19 @@ class Frame {
     Frame(final Label owner) {
         this.owner = owner;
     }
-
-    /**
-     * Returns the abstract type corresponding to the internal name of a class.
-     *
-     * @param symbolTable  the type table to use to lookup and store type {@link Symbol}.
-     * @param internalName the internal name of a class. This must <i>not</i> be an array type
-     *                     descriptor.
-     * @return the abstract type value corresponding to the given internal name.
-     */
-    static int getAbstractTypeFromInternalName(
-            final SymbolTable symbolTable, final String internalName) {
-        return REFERENCE_KIND | symbolTable.addType(internalName);
-    }
+//
+//    /**
+//     * Returns the abstract type corresponding to the internal name of a class.
+//     *
+//     * @param symbolTable  the type table to use to lookup and store type {@link Symbol}.
+//     * @param internalName the internal name of a class. This must <i>not</i> be an array type
+//     *                     descriptor.
+//     * @return the abstract type value corresponding to the given internal name.
+//     */
+//    static int getAbstractTypeFromInternalName(
+//            final SymbolTable symbolTable, final String internalName) {
+//        return REFERENCE_KIND | symbolTable.addType(internalName);
+//    }
 
     /**
      * Returns the abstract type corresponding to the given type descriptor.
@@ -213,7 +213,7 @@ class Frame {
      */
     private static int getAbstractTypeFromDescriptor(
             final SymbolTable symbolTable, final String buffer, final int offset) {
-        String internalName;
+        String internalName = null;
         switch (buffer.charAt(offset)) {
             case 'V':
                 return 0;
@@ -230,7 +230,124 @@ class Frame {
             case 'D':
                 return DOUBLE;
             case 'L':
-                internalName = buffer.substring(offset + 1, buffer.length() - 1);
+                if (offset == 0) {
+                    switch (buffer) {
+                        case "Ljava/lang/Object;":
+                            internalName = "java/lang/Object";
+                            break;
+                        case "Ljava/lang/Class;":
+                            internalName = "java/lang/Class";
+                            break;
+                        case "Ljava/lang/String;":
+                            internalName = "java/lang/String";
+                            break;
+                        case "Ljava/util/List;":
+                            internalName = "java/util/List";
+                            break;
+                        case "Ljava/lang/reflect/Type;":
+                            internalName = "java/lang/reflect/Type";
+                            break;
+                        case "Ljava/util/function/Supplier;":
+                            internalName = "java/util/function/Supplier";
+                            break;
+                        case "Lsun/misc/Unsafe;":
+                            internalName = "sun/misc/Unsafe";
+                            break;
+                        case "Lcom/alibaba/fastjson2/JSONReader;":
+                            internalName = "com/alibaba/fastjson2/JSONReader";
+                            break;
+                        case "Lcom/alibaba/fastjson2/reader/FieldReader;":
+                            internalName = "com/alibaba/fastjson2/reader/FieldReader";
+                            break;
+                        case "Lcom/alibaba/fastjson2/reader/ObjectReader;":
+                            internalName = "com/alibaba/fastjson2/reader/ObjectReader";
+                            break;
+                        case "Lcom/alibaba/fastjson2/JSONWriter;":
+                            internalName = "com/alibaba/fastjson2/JSONWriter";
+                            break;
+                        case "Lcom/alibaba/fastjson2/writer/FieldWriter;":
+                            internalName = "com/alibaba/fastjson2/writer/FieldWriter";
+                            break;
+                        default:
+                            break;
+                    }
+                } else if (offset == 2) {
+                    switch (buffer) {
+                        case "()Ljava/lang/Class;":
+                            internalName = "java/lang/Class";
+                            break;
+                        case "()Ljava/lang/String;":
+                            internalName = "java/lang/String";
+                            break;
+                        default:
+                            break;
+                    }
+                } else if (offset == 3) {
+                    switch (buffer) {
+                        case "(J)Lcom/alibaba/fastjson2/reader/FieldReader;":
+                            internalName = "com/alibaba/fastjson2/reader/FieldReader";
+                            break;
+                        case "(I)Ljava/lang/Object;":
+                            internalName = "java/lang/Object";
+                            break;
+                        case "(I)Ljava/lang/Integer;":
+                            internalName = "java/lang/Integer";
+                            break;
+                        default:
+                            break;
+                    }
+                } else if (offset == 36) {
+                    switch (buffer) {
+                        case "(Lcom/alibaba/fastjson2/JSONReader;)Lcom/alibaba/fastjson2/reader/ObjectReader;":
+                            internalName = "com/alibaba/fastjson2/reader/ObjectReader";
+                            break;
+                        case "(Lcom/alibaba/fastjson2/JSONReader;)Ljava/lang/Object;":
+                            internalName = "java/lang/Object";
+                            break;
+                        default:
+                            break;
+                    }
+                } else if (offset == 54) {
+                    switch (buffer) {
+                        case "(Lcom/alibaba/fastjson2/JSONReader;Ljava/lang/Class;J)Lcom/alibaba/fastjson2/reader/ObjectReader;":
+                            internalName = "com/alibaba/fastjson2/reader/ObjectReader";
+                            break;
+                        case "(Lcom/alibaba/fastjson2/JSONReader;Ljava/lang/Class;J)Ljava/lang/Object;":
+                            internalName = "java/lang/Object";
+                            break;
+                        default:
+                            break;
+                    }
+                } else {
+                    switch (buffer) {
+                        case "(Lcom/alibaba/fastjson2/JSONWriter;Ljava/lang/Class;)Lcom/alibaba/fastjson2/writer/ObjectWriter;":
+                            if (offset == 53) {
+                                internalName = "com/alibaba/fastjson2/writer/ObjectWriter";
+                            }
+                            break;
+                        case "(Lcom/alibaba/fastjson2/JSONWriter;Ljava/lang/reflect/Type;)Lcom/alibaba/fastjson2/writer/ObjectWriter;":
+                            if (offset == 60) {
+                                internalName = "com/alibaba/fastjson2/writer/ObjectWriter";
+                            }
+                            break;
+                        case "(Lcom/alibaba/fastjson2/writer/FieldWriter;Ljava/lang/Object;)Ljava/lang/String;":
+                            if (offset == 62) {
+                                internalName = "java/lang/String";
+                            }
+                            break;
+                        case "(Lcom/alibaba/fastjson2/JSONReader;Ljava/lang/reflect/Type;Ljava/lang/Object;J)Ljava/lang/Object;":
+                            if (offset == 79) {
+                                internalName = "java/lang/Object";
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                if (internalName == null) {
+                    internalName = buffer.substring(offset + 1, buffer.length() - 1);
+                }
                 return REFERENCE_KIND | symbolTable.addType(internalName);
             case '[':
                 int elementDescriptorOffset = offset + 1;
@@ -264,7 +381,21 @@ class Frame {
                         typeValue = DOUBLE;
                         break;
                     case 'L':
-                        internalName = buffer.substring(elementDescriptorOffset + 1, buffer.length() - 1);
+                        if (offset == 0) {
+                            switch (buffer) {
+                                case "[Lcom/alibaba/fastjson2/writer/FieldWriter;":
+                                    internalName = "com/alibaba/fastjson2/reader/FieldReader";
+                                    break;
+                                case "[Lcom/alibaba/fastjson2/reader/FieldReader;":
+                                    internalName = "Lcom/alibaba/fastjson2/reader/FieldReader";
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        if (internalName == null) {
+                            internalName = buffer.substring(elementDescriptorOffset + 1, buffer.length() - 1);
+                        }
                         typeValue = REFERENCE_KIND | symbolTable.addType(internalName);
                         break;
                     default:
@@ -301,7 +432,7 @@ class Frame {
         if ((access & Opcodes.ACC_STATIC) == 0) {
             if ((access & Constants.ACC_CONSTRUCTOR) == 0) {
                 inputLocals[inputLocalIndex++] =
-                        REFERENCE_KIND | symbolTable.addType(symbolTable.getClassName());
+                        REFERENCE_KIND | symbolTable.addType(symbolTable.className);
             } else {
                 inputLocals[inputLocalIndex++] = UNINITIALIZED_THIS;
             }
@@ -317,10 +448,6 @@ class Frame {
         while (inputLocalIndex < maxLocals) {
             inputLocals[inputLocalIndex++] = TOP;
         }
-    }
-
-    final int getInputStackSize() {
-        return inputStack.length;
     }
 
     // -----------------------------------------------------------------------------------------------
@@ -403,8 +530,81 @@ class Frame {
      * @param descriptor  a type or method descriptor (in which case its return type is pushed).
      */
     private void push(final SymbolTable symbolTable, final String descriptor) {
-        int typeDescriptorOffset =
-                descriptor.charAt(0) == '(' ? Type.getReturnTypeOffset(descriptor) : 0;
+        final int typeDescriptorOffset;
+        switch (descriptor) {
+            case "()J":
+            case "()V":
+            case "()Z":
+            case "()I":
+            case "()Ljava/lang/Class;":
+                typeDescriptorOffset = 2;
+                break;
+            case "(I)V":
+            case "(J)V":
+            case "(J)Z":
+            case "(I)Ljava/lang/Object;":
+            case "(I)Ljava/lang/Integer;":
+                typeDescriptorOffset = 3;
+                break;
+            case "(Ljava/lang/Enum;)V":
+                typeDescriptorOffset = 18;
+                break;
+            case "(Ljava/lang/Object;)Z":
+            case "(Ljava/lang/String;)V":
+            case "(Ljava/lang/Object;)V":
+                typeDescriptorOffset = 20;
+                break;
+            case "(Lcom/alibaba/fastjson2/JSONWriter;)V":
+            case "(Lcom/alibaba/fastjson2/JSONWriter;)Z":
+                typeDescriptorOffset = 36;
+                break;
+            case "(Lcom/alibaba/fastjson2/JSONWriter;I)V":
+            case "(Lcom/alibaba/fastjson2/JSONWriter;J)V":
+                typeDescriptorOffset = 37;
+                break;
+            case "(Ljava/lang/Object;Ljava/lang/reflect/Type;)Z":
+                typeDescriptorOffset = 44;
+                break;
+            case "(Lcom/alibaba/fastjson2/JSONWriter;Ljava/lang/Enum;)V":
+                typeDescriptorOffset = 52;
+                break;
+            case "(Lcom/alibaba/fastjson2/JSONWriter;Ljava/lang/Class;)Lcom/alibaba/fastjson2/writer/ObjectWriter;":
+            case "(Lcom/alibaba/fastjson2/JSONWriter;ZLjava/util/List;)V":
+                typeDescriptorOffset = 53;
+                break;
+            case "(Lcom/alibaba/fastjson2/JSONWriter;Ljava/lang/reflect/Type;)Lcom/alibaba/fastjson2/writer/ObjectWriter;":
+                typeDescriptorOffset = 60;
+                break;
+            case "(Lcom/alibaba/fastjson2/writer/FieldWriter;Ljava/lang/Object;)Ljava/lang/String;":
+                typeDescriptorOffset = 62;
+                break;
+            case "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;JLjava/util/List;)V":
+                typeDescriptorOffset = 72;
+                break;
+            case "(Lcom/alibaba/fastjson2/JSONWriter;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;J)V":
+                typeDescriptorOffset = 97;
+                break;
+            default:
+                if (descriptor.charAt(0) == '(') {
+                    int currentOffset = 1;
+                    // Skip the argument types, one at a each loop iteration.
+                    while (descriptor.charAt(currentOffset) != ')') {
+                        while (descriptor.charAt(currentOffset) == '[') {
+                            currentOffset++;
+                        }
+                        if (descriptor.charAt(currentOffset++) == 'L') {
+                            // Skip the argument descriptor content.
+                            int semiColumnOffset = descriptor.indexOf(';', currentOffset);
+                            currentOffset = Math.max(currentOffset, semiColumnOffset + 1);
+                        }
+                    }
+                    typeDescriptorOffset = currentOffset + 1;
+                } else {
+                    typeDescriptorOffset = 0;
+                }
+                break;
+        }
+
         int abstractType = getAbstractTypeFromDescriptor(symbolTable, descriptor, typeDescriptorOffset);
         if (abstractType != 0) {
             push(abstractType);
@@ -510,10 +710,10 @@ class Frame {
                 }
                 if (abstractType == initializedType) {
                     if (abstractType == UNINITIALIZED_THIS) {
-                        return REFERENCE_KIND | symbolTable.addType(symbolTable.getClassName());
+                        return REFERENCE_KIND | symbolTable.addType(symbolTable.className);
                     } else {
                         return REFERENCE_KIND
-                                | symbolTable.addType(symbolTable.getType(abstractType & VALUE_MASK).value);
+                                | symbolTable.addType(symbolTable.typeTable[abstractType & VALUE_MASK].value);
                     }
                 }
             }
@@ -1086,82 +1286,82 @@ class Frame {
         }
         methodWriter.visitFrameEnd();
     }
-
-    /**
-     * Put the given abstract type in the given ByteVector, using the JVMS verification_type_info
-     * format used in StackMapTable attributes.
-     *
-     * @param symbolTable  the type table to use to lookup and store type {@link Symbol}.
-     * @param abstractType an abstract type, restricted to {@link Frame#CONSTANT_KIND}, {@link
-     *                     Frame#REFERENCE_KIND} or {@link Frame#UNINITIALIZED_KIND} types.
-     * @param output       where the abstract type must be put.
-     * @see <a href="https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.7.4">JVMS
-     * 4.7.4</a>
-     */
-    static void putAbstractType(
-            final SymbolTable symbolTable, final int abstractType, final ByteVector output) {
-        int arrayDimensions = (abstractType & Frame.DIM_MASK) >> DIM_SHIFT;
-        if (arrayDimensions == 0) {
-            int typeValue = abstractType & VALUE_MASK;
-            switch (abstractType & KIND_MASK) {
-                case CONSTANT_KIND:
-                    output.putByte(typeValue);
-                    break;
-                case REFERENCE_KIND:
-                    output
-                            .putByte(ITEM_OBJECT)
-                            .putShort(symbolTable.addConstantClass(symbolTable.getType(typeValue).value).index);
-                    break;
-                case UNINITIALIZED_KIND:
-                    output.putByte(ITEM_UNINITIALIZED).putShort((int) symbolTable.getType(typeValue).data);
-                    break;
-                default:
-                    throw new AssertionError();
-            }
-        } else {
-            // Case of an array type, we need to build its descriptor first.
-            StringBuilder typeDescriptor = new StringBuilder();
-            while (arrayDimensions-- > 0) {
-                typeDescriptor.append('[');
-            }
-            if ((abstractType & KIND_MASK) == REFERENCE_KIND) {
-                typeDescriptor
-                        .append('L')
-                        .append(symbolTable.getType(abstractType & VALUE_MASK).value)
-                        .append(';');
-            } else {
-                switch (abstractType & VALUE_MASK) {
-                    case Frame.ITEM_ASM_BOOLEAN:
-                        typeDescriptor.append('Z');
-                        break;
-                    case Frame.ITEM_ASM_BYTE:
-                        typeDescriptor.append('B');
-                        break;
-                    case Frame.ITEM_ASM_CHAR:
-                        typeDescriptor.append('C');
-                        break;
-                    case Frame.ITEM_ASM_SHORT:
-                        typeDescriptor.append('S');
-                        break;
-                    case Frame.ITEM_INTEGER:
-                        typeDescriptor.append('I');
-                        break;
-                    case Frame.ITEM_FLOAT:
-                        typeDescriptor.append('F');
-                        break;
-                    case Frame.ITEM_LONG:
-                        typeDescriptor.append('J');
-                        break;
-                    case Frame.ITEM_DOUBLE:
-                        typeDescriptor.append('D');
-                        break;
-                    default:
-                        throw new AssertionError();
-                }
-            }
-            output
-                    .putByte(ITEM_OBJECT)
-                    .putShort(symbolTable.addConstantClass(typeDescriptor.toString()).index);
-        }
-    }
+//
+//    /**
+//     * Put the given abstract type in the given ByteVector, using the JVMS verification_type_info
+//     * format used in StackMapTable attributes.
+//     *
+//     * @param symbolTable  the type table to use to lookup and store type {@link Symbol}.
+//     * @param abstractType an abstract type, restricted to {@link Frame#CONSTANT_KIND}, {@link
+//     *                     Frame#REFERENCE_KIND} or {@link Frame#UNINITIALIZED_KIND} types.
+//     * @param output       where the abstract type must be put.
+//     * @see <a href="https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.7.4">JVMS
+//     * 4.7.4</a>
+//     */
+//    static void putAbstractType(
+//            final SymbolTable symbolTable, final int abstractType, final ByteVector output) {
+//        int arrayDimensions = (abstractType & Frame.DIM_MASK) >> DIM_SHIFT;
+//        if (arrayDimensions == 0) {
+//            int typeValue = abstractType & VALUE_MASK;
+//            switch (abstractType & KIND_MASK) {
+//                case CONSTANT_KIND:
+//                    output.putByte(typeValue);
+//                    break;
+//                case REFERENCE_KIND:
+//                    output
+//                            .putByte(ITEM_OBJECT)
+//                            .putShort(symbolTable.addConstantUtf8Reference(/*CONSTANT_CLASS_TAG*/ 7, symbolTable.typeTable[typeValue].value).index);
+//                    break;
+//                case UNINITIALIZED_KIND:
+//                    output.putByte(ITEM_UNINITIALIZED).putShort((int) symbolTable.typeTable[typeValue].data);
+//                    break;
+//                default:
+//                    throw new AssertionError();
+//            }
+//        } else {
+//            // Case of an array type, we need to build its descriptor first.
+//            StringBuilder typeDescriptor = new StringBuilder();
+//            while (arrayDimensions-- > 0) {
+//                typeDescriptor.append('[');
+//            }
+//            if ((abstractType & KIND_MASK) == REFERENCE_KIND) {
+//                typeDescriptor
+//                        .append('L')
+//                        .append(symbolTable.typeTable[abstractType & VALUE_MASK].value)
+//                        .append(';');
+//            } else {
+//                switch (abstractType & VALUE_MASK) {
+//                    case Frame.ITEM_ASM_BOOLEAN:
+//                        typeDescriptor.append('Z');
+//                        break;
+//                    case Frame.ITEM_ASM_BYTE:
+//                        typeDescriptor.append('B');
+//                        break;
+//                    case Frame.ITEM_ASM_CHAR:
+//                        typeDescriptor.append('C');
+//                        break;
+//                    case Frame.ITEM_ASM_SHORT:
+//                        typeDescriptor.append('S');
+//                        break;
+//                    case Frame.ITEM_INTEGER:
+//                        typeDescriptor.append('I');
+//                        break;
+//                    case Frame.ITEM_FLOAT:
+//                        typeDescriptor.append('F');
+//                        break;
+//                    case Frame.ITEM_LONG:
+//                        typeDescriptor.append('J');
+//                        break;
+//                    case Frame.ITEM_DOUBLE:
+//                        typeDescriptor.append('D');
+//                        break;
+//                    default:
+//                        throw new AssertionError();
+//                }
+//            }
+//            output
+//                    .putByte(ITEM_OBJECT)
+//                    .putShort(symbolTable.addConstantUtf8Reference(/*CONSTANT_CLASS_TAG*/ 7, typeDescriptor.toString()).index);
+//        }
+//    }
 }

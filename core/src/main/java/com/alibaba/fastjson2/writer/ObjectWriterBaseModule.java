@@ -2,8 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.annotation.JSONField;
-import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.annotation.*;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.Filter;
@@ -25,6 +24,8 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
 
+import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
+import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
 import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonJsonIgnore;
 
 public class ObjectWriterBaseModule
@@ -60,11 +61,22 @@ public class ObjectWriterBaseModule
 
             Annotation jsonType1x = null;
             JSONType jsonType = null;
-            Annotation[] annotations = objectClass.getAnnotations();
+            Annotation[] annotations = getAnnotations(objectClass);
             for (Annotation annotation : annotations) {
                 Class annotationType = annotation.annotationType();
-                if (annotationType == JSONType.class) {
-                    jsonType = (JSONType) annotation;
+                jsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
+                if (jsonType == annotation) {
+                    continue;
+                }
+
+                if (annotationType == JSONAutowired.class) {
+                    beanInfo.writerFeatures |= JSON_AUTO_WIRED_ANNOTATED;
+
+                    JSONAutowired autowired = (JSONAutowired) annotation;
+                    String fieldName = autowired.writer();
+                    if (!fieldName.isEmpty()) {
+                        beanInfo.objectWriterFieldName = fieldName;
+                    }
                     continue;
                 }
 
@@ -109,13 +121,25 @@ public class ObjectWriterBaseModule
                 if (mixInSource != null) {
                     beanInfo.mixIn = true;
 
-                    Annotation[] mixInAnnotations = mixInSource.getAnnotations();
+                    Annotation[] mixInAnnotations = getAnnotations(mixInSource);
                     for (Annotation annotation : mixInAnnotations) {
                         Class<? extends Annotation> annotationType = annotation.annotationType();
-                        if (annotationType == JSONType.class) {
-                            jsonType = (JSONType) annotation;
+                        jsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
+                        if (jsonType == annotation) {
                             continue;
                         }
+
+                        if (annotationType == JSONAutowired.class) {
+                            beanInfo.writerFeatures |= JSON_AUTO_WIRED_ANNOTATED;
+
+                            JSONAutowired autowired = (JSONAutowired) annotation;
+                            String fieldName = autowired.writer();
+                            if (!fieldName.isEmpty()) {
+                                beanInfo.objectWriterFieldName = fieldName;
+                            }
+                            continue;
+                        }
+
                         String annotationTypeName = annotationType.getName();
                         switch (annotationTypeName) {
                             case "com.alibaba.fastjson.annotation.JSONType":
@@ -198,7 +222,7 @@ public class ObjectWriterBaseModule
                 }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;
-                BeanUtils.annotationMethods(jsonType1x.annotationType(), method -> processJSONType1x(beanInfo, annotation, method));
+                BeanUtils.annotationMethods(jsonType1x.annotationType(), method -> BeanUtils.processJSONType1x(beanInfo, annotation, method));
             }
 
             if (beanInfo.seeAlso != null && beanInfo.seeAlso.length != 0) {
@@ -238,12 +262,16 @@ public class ObjectWriterBaseModule
             }
 
             JSONField jsonField = null;
-            Annotation[] annotations = field.getAnnotations();
+            Annotation[] annotations = getAnnotations(field);
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                if (annotationType == JSONField.class) {
-                    jsonField = (JSONField) annotation;
+                if (jsonField == null) {
+                    jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                    if (jsonField == annotation) {
+                        continue;
+                    }
                 }
+
                 String annotationTypeName = annotationType.getName();
                 boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
                 switch (annotationTypeName) {
@@ -387,7 +415,7 @@ public class ObjectWriterBaseModule
                         case "access": {
                             String access = ((Enum) result).name();
                             switch (access) {
-                                case "READ_ONLY":
+                                case "WRITE_ONLY":
                                     fieldInfo.ignore = true;
                                     break;
                                 default:
@@ -582,7 +610,7 @@ public class ObjectWriterBaseModule
                 fieldInfo.ignore = true;
             }
 
-            Annotation[] annotations = method.getAnnotations();
+            Annotation[] annotations = getAnnotations(method);
             processAnnotations(fieldInfo, annotations);
 
             if (!objectClass.getName().startsWith("java.lang") && !BeanUtils.isRecord(objectClass)) {
@@ -594,12 +622,17 @@ public class ObjectWriterBaseModule
                     char[] chars = fieldName.toCharArray();
                     chars[0] = (char) (firstChar + 32);
                     fieldName0 = new String(chars);
+                } else if (firstChar >= 'a' && firstChar <= 'z' && fieldName.length() > 2 && fieldName.charAt(1) == '_') {
+                    char[] chars = fieldName.toCharArray();
+                    chars[0] = (char) (firstChar - 32);
+                    fieldName0 = new String(chars);
                 } else {
                     fieldName0 = null;
                 }
                 BeanUtils.declaredFields(objectClass, field -> {
                     String name = field.getName();
                     if (name.equals(fieldName) || (fieldName0 != null && name.equals(fieldName0))) {
+                        fieldInfo.features |= FieldInfo.FIELD_MASK;
                         int modifiers = field.getModifiers();
                         if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
                             getFieldInfo(beanInfo, fieldInfo, objectClass, field);
@@ -608,7 +641,7 @@ public class ObjectWriterBaseModule
                 });
             }
 
-            if (beanInfo.kotlin && beanInfo.createParameterNames != null) {
+            if (beanInfo.kotlin && beanInfo.creatorConstructor != null && beanInfo.createParameterNames != null) {
                 String fieldName = BeanUtils.getterName(method, null);
                 for (int i = 0; i < beanInfo.createParameterNames.length; i++) {
                     if (fieldName.equals(beanInfo.createParameterNames[i])) {
@@ -623,8 +656,9 @@ public class ObjectWriterBaseModule
         private void processAnnotations(FieldInfo fieldInfo, Annotation[] annotations) {
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                if (annotationType == JSONField.class) {
-                    loadFieldInfo(fieldInfo, (JSONField) annotation);
+                JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                if (Objects.nonNull(jsonField)) {
+                    loadFieldInfo(fieldInfo, jsonField);
                     continue;
                 }
 
@@ -740,123 +774,6 @@ public class ObjectWriterBaseModule
         }
     }
 
-    private void processJSONType1x(BeanInfo beanInfo, Annotation jsonType1x, Method method) {
-        try {
-            Object result = method.invoke(jsonType1x);
-            switch (method.getName()) {
-                case "seeAlso": {
-                    Class<?>[] classes = (Class[]) result;
-                    if (classes.length != 0) {
-                        beanInfo.seeAlso = classes;
-                    }
-                    break;
-                }
-                case "typeName": {
-                    String typeName = (String) result;
-                    if (!typeName.isEmpty()) {
-                        beanInfo.typeName = typeName;
-                    }
-                    break;
-                }
-                case "typeKey": {
-                    String typeKey = (String) result;
-                    if (!typeKey.isEmpty()) {
-                        beanInfo.typeKey = typeKey;
-                    }
-                    break;
-                }
-                case "alphabetic": {
-                    Boolean alphabetic = (Boolean) result;
-                    if (!alphabetic.booleanValue()) {
-                        beanInfo.alphabetic = false;
-                    }
-                    break;
-                }
-                case "serializeFeatures":
-                case "serialzeFeatures": {
-                    Enum[] serializeFeatures = (Enum[]) result;
-                    for (Enum feature : serializeFeatures) {
-                        switch (feature.name()) {
-                            case "WriteMapNullValue":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNulls.mask;
-                                break;
-                            case "WriteNullListAsEmpty":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullListAsEmpty.mask;
-                                break;
-                            case "WriteNullStringAsEmpty":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullStringAsEmpty.mask;
-                                break;
-                            case "WriteNullNumberAsZero":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullNumberAsZero.mask;
-                                break;
-                            case "WriteNullBooleanAsFalse":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullBooleanAsFalse.mask;
-                                break;
-                            case "BrowserCompatible":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.BrowserCompatible.mask;
-                                break;
-                            case "WriteClassName":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteClassName.mask;
-                                break;
-                            case "WriteNonStringValueAsString":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
-                                break;
-                            case "WriteEnumUsingToString":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteEnumUsingToString.mask;
-                                break;
-                            case "NotWriteRootClassName":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteRootClassName.mask;
-                                break;
-                            case "IgnoreErrorGetter":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.IgnoreErrorGetter.mask;
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    break;
-                }
-                case "serializeEnumAsJavaBean": {
-                    boolean serializeEnumAsJavaBean = (Boolean) result;
-                    if (serializeEnumAsJavaBean) {
-                        beanInfo.writeEnumAsJavaBean = true;
-                    }
-                    break;
-                }
-                case "naming": {
-                    Enum naming = (Enum) result;
-                    beanInfo.namingStrategy = naming.name();
-                    break;
-                }
-                case "ignores": {
-                    String[] fields = (String[]) result;
-                    if (fields.length != 0) {
-                        beanInfo.ignores = fields;
-                    }
-                    break;
-                }
-                case "includes": {
-                    String[] fields = (String[]) result;
-                    if (fields.length != 0) {
-                        beanInfo.includes = fields;
-                    }
-                    break;
-                }
-                case "orders": {
-                    String[] fields = (String[]) result;
-                    if (fields.length != 0) {
-                        beanInfo.orders = fields;
-                    }
-                    break;
-                }
-                default:
-                    break;
-            }
-        } catch (Throwable ignored) {
-            ignored.printStackTrace();
-        }
-    }
-
     ObjectWriter getExternalObjectWriter(String className, Class objectClass) {
         switch (className) {
             case "java.sql.Time":
@@ -958,7 +875,8 @@ public class ObjectWriterBaseModule
 
         if (Map.Entry.class.isAssignableFrom(objectClass)) {
             String objectClassName = objectClass.getName();
-            if (!"org.apache.commons.lang3.tuple.ImmutablePair".equals(objectClassName) && !"org.apache.commons.lang3.tuple.MutablePair".equals(objectClassName)
+            if (!"org.apache.commons.lang3.tuple.ImmutablePair".equals(objectClassName)
+                    && !"org.apache.commons.lang3.tuple.MutablePair".equals(objectClassName)
             ) {
                 return ObjectWriterImplMapEntry.INSTANCE;
             }
@@ -1070,7 +988,7 @@ public class ObjectWriterBaseModule
                 }
 
                 BeanInfo beanInfo = new BeanInfo();
-                getAnnotationProcessor().getBeanInfo(beanInfo, clazz);
+                annotationProcessor.getBeanInfo(beanInfo, clazz);
                 if (!beanInfo.writeEnumAsJavaBean) {
                     return new ObjectWriterImplEnum(null, clazz, valueField, 0);
                 }
@@ -1176,7 +1094,7 @@ public class ObjectWriterBaseModule
             BeanInfo beanInfo = new BeanInfo();
             Class mixIn = provider.getMixIn(clazz);
             if (mixIn != null) {
-                getAnnotationProcessor().getBeanInfo(beanInfo, mixIn);
+                annotationProcessor.getBeanInfo(beanInfo, mixIn);
             }
 
             if (Date.class.isAssignableFrom(clazz)) {

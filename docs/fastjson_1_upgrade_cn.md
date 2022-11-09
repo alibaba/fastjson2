@@ -1,12 +1,12 @@
 # FASTJSON 1.x升级指南
 
 ## 1. 为什么要升级
-* 性能更好，具体性能数据 [https://alibaba.github.io/fastjson2/benchmark_cn](https://alibaba.github.io/fastjson2/benchmark_cn)
+* 性能更好，具体性能数据 https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark
 * 支持JDK新特性，包括JDK 14引入的Record，Lambda表达式的更原生支持，GraalVM Native-Image支持
 * 原生支持kotlin
-* 支持 JSON Schema [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
+* 支持 JSON Schema https://github.com/alibaba/fastjson2/wiki/json_schema_cn
 * 统一文本和二进制API，在RPC、Redis场景也可以使用FASTJSON v2
-* 更安全，完全删除autoType白名单，提升安全性 [https://alibaba.github.io/fastjson2/autotype_cn](https://alibaba.github.io/fastjson2/autotype_cn)
+* 更安全，完全删除autoType白名单，提升安全性 https://github.com/alibaba/fastjson2/wiki/fastjson2_autotype_cn
 * 新版本会长期维护，目标为下一个时间提供高性能JSON库，提需求能更快得到响应，提BUG也更快修复
 
 ## 2. 如何升级
@@ -85,4 +85,24 @@ FASTJSON v2中有比较完善的扩展机制，如下：
 * Feature介绍 [https://alibaba.github.io/fastjson2/features_cn](https://alibaba.github.io/fastjson2/features_cn)
 * 使用Mixin注入Anntation定制序列化和反序列化 [https://alibaba.github.io/fastjson2/mixin_cn](https://alibaba.github.io/fastjson2/mixin_cn)
 * 实现ObjectWriter和ObjectReader实现定制序列化和反序列化 [https://alibaba.github.io/fastjson2/register_custom_reader_writer_cn](https://alibaba.github.io/fastjson2/register_custom_reader_writer_cn)
+
+## 4.3. 常见的类扩展升级映射
+| fastjson1                                                   | fastjson2                                             |
+|-------------------------------------------------------------|-------------------------------------------------------|
+| com.alibaba.fastjson.parser.ParserConfig                    | com.alibaba.fastjson2.reader.ObjectReaderProvider     |
+| com.alibaba.fastjson.parser.deserializer.ExtraProcessor     | com.alibaba.fastjson2.filter.ExtraProcessor           |
+| com.alibaba.fastjson.parser.deserializer.ObjectDeserializer | com.alibaba.fastjson2.reader.ObjectReader             |
+| com.alibaba.fastjson.serializer.AfterFilter                 | com.alibaba.fastjson2.filter.AfterFilter              |
+| com.alibaba.fastjson.serializer.BeforeFilter                | com.alibaba.fastjson2.filter.BeforeFilter             |
+| com.alibaba.fastjson.serializer.ContextValueFilter          | com.alibaba.fastjson2.filter.ContextValueFilter       |
+| com.alibaba.fastjson.serializer.LabelFilter                 | com.alibaba.fastjson2.filter.LabelFilter              |
+| com.alibaba.fastjson.serializer.NameFilter                  | com.alibaba.fastjson2.filter.NameFilter               |
+| com.alibaba.fastjson.serializer.PascalNameFilter            | com.alibaba.fastjson2.filter.PascalNameFilter         |
+| com.alibaba.fastjson.serializer.PropertyFilter              | com.alibaba.fastjson2.filter.PropertyFilter           |
+| com.alibaba.fastjson.serializer.ObjectSerializer            | com.alibaba.fastjson2.writer.ObjectWriter             |
+| com.alibaba.fastjson.serializer.SerializeConfig             | com.alibaba.fastjson2.writer.ObjectWriterProvider     |
+| com.alibaba.fastjson.serializer.ToStringSerializer          | com.alibaba.fastjson2.writer.ObjectWriterImplToString |
+| com.alibaba.fastjson.serializer.ValueFilter                 | com.alibaba.fastjson2.filter.ValueFilter              |
+
+
 

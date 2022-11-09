@@ -1,18 +1,16 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JdbcSupport;
 import com.alibaba.fastjson2.util.JodaSupport;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.io.Serializable;
+import java.lang.reflect.*;
 import java.time.*;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
@@ -20,79 +18,194 @@ import java.util.zip.GZIPOutputStream;
 import static java.time.temporal.ChronoField.SECOND_OF_DAY;
 import static java.time.temporal.ChronoField.YEAR;
 
-public interface FieldWriter<T>
-        extends Comparable {
-    String getFieldName();
+public abstract class FieldWriter<T>
+        implements Comparable {
+    public final String fieldName;
+    public final Type fieldType;
+    public final Class fieldClass;
+    public final long features;
+    public final int ordinal;
+    public final String format;
+    public final String label;
+    public final Field field;
+    public final Method method;
 
-    Class getFieldClass();
+    final long hashCode;
+    final byte[] nameWithColonUTF8;
+    final char[] nameWithColonUTF16;
+    byte[] nameJSONB;
+    final boolean fieldClassSerializable;
+    final JSONWriter.Path rootParentPath;
 
-    default ObjectWriter getInitWriter() {
-        return null;
-    }
+    final boolean symbol;
+    final boolean trim;
+    final boolean raw;
 
-    default boolean isFieldClassSerializable() {
-        return false;
-    }
+    transient JSONWriter.Path path;
 
-    default boolean unwrapped() {
-        return false;
-    }
+    FieldWriter(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
+        this.fieldName = name;
+        this.ordinal = ordinal;
+        this.format = format;
+        this.label = label;
+        this.hashCode = Fnv.hashCode64(name);
+        this.features = features;
+        this.fieldType = fieldType;
+        this.fieldClass = fieldClass;
+        this.fieldClassSerializable = fieldClass != null && (Serializable.class.isAssignableFrom(fieldClass) || !Modifier.isFinal(fieldClass.getModifiers()));
+        this.field = field;
+        this.method = method;
 
-    Type getFieldType();
+        this.symbol = "symbol".equals(format);
+        this.trim = "trim".equals(format);
+        this.raw = (features & FieldInfo.RAW_VALUE_MASK) != 0;
+        this.rootParentPath = new JSONWriter.Path(JSONWriter.Path.ROOT, name);
 
-    JSONWriter.Path getRootParentPath();
-
-    default Type getItemType() {
-        return null;
-    }
-
-    default Class getItemClass() {
-        return null;
-    }
-
-    default int ordinal() {
-        return -1;
-    }
-
-    default Field getField() {
-        return null;
-    }
-
-    default String getLabel() {
-        return null;
-    }
-
-    default Method getMethod() {
-        return null;
-    }
-
-    default Member getFieldOrMethod() {
-        Field field = getField();
-        if (field != null) {
-            return field;
+        int nameLength = name.length();
+        int utflen = nameLength + 3;
+        for (int i = 0; i < nameLength; ++i) {
+            char c = name.charAt(i);
+            if ((c >= 0x0001) && (c <= 0x007F)) {
+                // skip
+            } else if (c > 0x07FF) {
+                utflen += 2;
+            } else {
+                utflen += 1;
+            }
         }
-        return getMethod();
+
+        byte[] bytes = new byte[utflen];
+        int off = 0;
+        bytes[off++] = '"';
+        for (int i = 0; i < nameLength; ++i) {
+            char c = name.charAt(i);
+            if ((c >= 0x0001) && (c <= 0x007F)) {
+                bytes[off++] = (byte) c;
+            } else if (c > 0x07FF) {
+                // 2 bytes, 11 bits
+                bytes[off++] = (byte) (0xE0 | ((c >> 12) & 0x0F));
+                bytes[off++] = (byte) (0x80 | ((c >> 6) & 0x3F));
+                bytes[off++] = (byte) (0x80 | ((c >> 0) & 0x3F));
+            } else {
+                bytes[off++] = (byte) (0xC0 | ((c >> 6) & 0x1F));
+                bytes[off++] = (byte) (0x80 | ((c >> 0) & 0x3F));
+            }
+        }
+        bytes[off++] = '"';
+        bytes[off++] = ':';
+
+        nameWithColonUTF8 = bytes;
+
+        nameWithColonUTF16 = new char[nameLength + 3];
+        nameWithColonUTF16[0] = '"';
+        name.getChars(0, name.length(), nameWithColonUTF16, 1);
+        nameWithColonUTF16[nameWithColonUTF16.length - 2] = '"';
+        nameWithColonUTF16[nameWithColonUTF16.length - 1] = ':';
     }
 
-    default long getFeatures() {
-        return 0;
+    public boolean isFieldClassSerializable() {
+        return fieldClassSerializable;
     }
 
-    default Object getFieldValue(T object) {
+    public boolean isDateFormatMillis() {
+        return false;
+    }
+
+    public boolean isDateFormatISO8601() {
+        return false;
+    }
+
+    public void writeEnumJSONB(JSONWriter jsonWriter, Enum e) {
         throw new UnsupportedOperationException();
     }
 
+    public ObjectWriter getInitWriter() {
+        return null;
+    }
+
+    public boolean unwrapped() {
+        return false;
+    }
+
+    public final void writeFieldName(JSONWriter jsonWriter) {
+        if (jsonWriter.isJSONB()) {
+            if (nameJSONB == null) {
+                nameJSONB = JSONB.toBytes(fieldName);
+            }
+            jsonWriter.writeNameRaw(nameJSONB, hashCode);
+            return;
+        }
+
+        boolean ueSingleQuotes = jsonWriter.isUseSingleQuotes();
+
+        if (!ueSingleQuotes) {
+            if (jsonWriter.isUTF8()) {
+                jsonWriter.writeNameRaw(nameWithColonUTF8);
+                return;
+            }
+
+            if (jsonWriter.isUTF16()) {
+                jsonWriter.writeNameRaw(nameWithColonUTF16);
+                return;
+            }
+        }
+
+        jsonWriter.writeName(fieldName);
+        jsonWriter.writeColon();
+    }
+
+    public final JSONWriter.Path getRootParentPath() {
+        return rootParentPath;
+    }
+
+    public final JSONWriter.Path getPath(JSONWriter.Path parent) {
+        if (path == null) {
+            return path = new JSONWriter.Path(parent, fieldName);
+        }
+
+        if (path.parent == parent) {
+            return path;
+        }
+
+        return new JSONWriter.Path(parent, fieldName);
+    }
+
+    public Type getItemType() {
+        return null;
+    }
+
+    public Class getItemClass() {
+        return null;
+    }
+
     @Override
-    default int compareTo(Object o) {
+    public String toString() {
+        return fieldName;
+    }
+
+    public abstract Object getFieldValue(T object);
+
+    @Override
+    public int compareTo(Object o) {
         FieldWriter otherFieldWriter = (FieldWriter) o;
 
-        String thisName = this.getFieldName();
-        String otherName = otherFieldWriter.getFieldName();
+        String thisName = this.fieldName;
+        String otherName = otherFieldWriter.fieldName;
 
         int nameCompare = thisName.compareTo(otherName);
 
-        Member thisMember = this.getFieldOrMethod();
-        Member otherMember = otherFieldWriter.getFieldOrMethod();
+        Member thisMember = this.field != null ? this.field : this.method;
+        Member otherMember = otherFieldWriter.field != null ? otherFieldWriter.field : otherFieldWriter.method;
 
         if (thisMember != null && otherMember != null && thisMember.getClass() != otherMember.getClass()) {
             Class otherDeclaringClass = otherMember.getDeclaringClass();
@@ -107,8 +220,8 @@ public interface FieldWriter<T>
         }
 
         if (nameCompare != 0) {
-            int thisOrdinal = this.ordinal();
-            int otherOrdinal = otherFieldWriter.ordinal();
+            int thisOrdinal = this.ordinal;
+            int otherOrdinal = otherFieldWriter.ordinal;
             if (thisOrdinal < otherOrdinal) {
                 return -1;
             }
@@ -129,8 +242,8 @@ public interface FieldWriter<T>
             return nameCompare;
         }
 
-        Class otherFieldClass = otherFieldWriter.getFieldClass();
-        Class thisFieldClass = this.getFieldClass();
+        Class otherFieldClass = otherFieldWriter.fieldClass;
+        Class thisFieldClass = this.fieldClass;
         if (thisFieldClass != otherFieldClass && thisFieldClass != null && otherFieldClass != null) {
             if (thisFieldClass.isAssignableFrom(otherFieldClass)) {
                 return 1;
@@ -149,25 +262,21 @@ public interface FieldWriter<T>
         return nameCompare;
     }
 
-    void writeFieldName(JSONWriter jsonWriter);
-
-    void writeEnumJSONB(JSONWriter jsonWriter, Enum e);
-
-    default void writeEnum(JSONWriter jsonWriter, Enum e) {
+    public void writeEnum(JSONWriter jsonWriter, Enum e) {
         writeFieldName(jsonWriter);
         jsonWriter.writeEnum(e);
     }
 
-    default void writeBinary(JSONWriter jsonWriter, byte[] value) {
+    public void writeBinary(JSONWriter jsonWriter, byte[] value) {
         if (value == null && !jsonWriter.isWriteNulls()) {
             return;
         }
 
         writeFieldName(jsonWriter);
-        if ("base64".equals(getFormat())
-                || (jsonWriter.getFeatures(getFeatures()) & JSONWriter.Feature.WriteByteArrayAsBase64.mask) != 0) {
+        if ("base64".equals(format)
+                || (jsonWriter.getFeatures(this.features) & JSONWriter.Feature.WriteByteArrayAsBase64.mask) != 0) {
             jsonWriter.writeBase64(value);
-        } else if ("gzip,base64".equals(getFormat())) {
+        } else if ("gzip,base64".equals(format)) {
             GZIPOutputStream gzipOut = null;
             try {
                 ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
@@ -191,7 +300,7 @@ public interface FieldWriter<T>
         }
     }
 
-    default void writeInt16(JSONWriter jsonWriter, short[] value) {
+    public void writeInt16(JSONWriter jsonWriter, short[] value) {
         if (value == null && !jsonWriter.isWriteNulls()) {
             return;
         }
@@ -200,22 +309,40 @@ public interface FieldWriter<T>
         jsonWriter.writeInt16(value);
     }
 
-    default void writeInt32(JSONWriter jsonWriter, int value) {
+    public void writeInt32(JSONWriter jsonWriter, int value) {
         writeFieldName(jsonWriter);
         jsonWriter.writeInt32(value);
     }
 
-    default void writeInt64(JSONWriter jsonWriter, long value) {
+    public void writeInt64(JSONWriter jsonWriter, long value) {
         writeFieldName(jsonWriter);
         jsonWriter.writeInt64(value);
     }
 
-    default void writeString(JSONWriter jsonWriter, String value) {
+    public void writeString(JSONWriter jsonWriter, String value) {
         writeFieldName(jsonWriter);
-        jsonWriter.writeString(value);
+
+        if (value == null && (features & (JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) != 0) {
+            jsonWriter.writeString("");
+            return;
+        }
+
+        if (trim && value != null) {
+            value = value.trim();
+        }
+
+        if (symbol && jsonWriter.isJSONB()) {
+            jsonWriter.writeSymbol(value);
+        } else {
+            if (raw) {
+                jsonWriter.writeRaw(value);
+            } else {
+                jsonWriter.writeString(value);
+            }
+        }
     }
 
-    default void writeString(JSONWriter jsonWriter, char[] value) {
+    public void writeString(JSONWriter jsonWriter, char[] value) {
         if (value == null && !jsonWriter.isWriteNulls()) {
             return;
         }
@@ -224,31 +351,21 @@ public interface FieldWriter<T>
         jsonWriter.writeString(value);
     }
 
-    default void writeFloat(JSONWriter jsonWriter, float value) {
+    public void writeFloat(JSONWriter jsonWriter, float value) {
         writeFieldName(jsonWriter);
         jsonWriter.writeFloat(value);
     }
 
-    default void writeDouble(JSONWriter jsonWriter, double value) {
+    public void writeDouble(JSONWriter jsonWriter, double value) {
         writeFieldName(jsonWriter);
         jsonWriter.writeDouble(value);
     }
 
-    default void writeDate(JSONWriter jsonWriter, Date value) {
-        if (value == null) {
-            writeFieldName(jsonWriter);
-            jsonWriter.writeNull();
-            return;
-        }
-
-        writeDate(jsonWriter, value.getTime());
-    }
-
-    default void writeBool(JSONWriter jsonWriter, boolean value) {
+    public void writeBool(JSONWriter jsonWriter, boolean value) {
         throw new UnsupportedOperationException();
     }
 
-    default void writeBool(JSONWriter jsonWriter, boolean[] value) {
+    public void writeBool(JSONWriter jsonWriter, boolean[] value) {
         if (value == null && !jsonWriter.isWriteNulls()) {
             return;
         }
@@ -257,7 +374,7 @@ public interface FieldWriter<T>
         jsonWriter.writeBool(value);
     }
 
-    default void writeFloat(JSONWriter jsonWriter, float[] value) {
+    public void writeFloat(JSONWriter jsonWriter, float[] value) {
         if (value == null && !jsonWriter.isWriteNulls()) {
             return;
         }
@@ -266,7 +383,7 @@ public interface FieldWriter<T>
         jsonWriter.writeFloat(value);
     }
 
-    default void writeDouble(JSONWriter jsonWriter, double[] value) {
+    public void writeDouble(JSONWriter jsonWriter, double[] value) {
         if (value == null && !jsonWriter.isWriteNulls()) {
             return;
         }
@@ -275,7 +392,7 @@ public interface FieldWriter<T>
         jsonWriter.writeDouble(value);
     }
 
-    default void writeDate(JSONWriter jsonWriter, boolean writeFieldName, Date value) {
+    public void writeDate(JSONWriter jsonWriter, boolean writeFieldName, Date value) {
         if (value == null) {
             if (writeFieldName) {
                 writeFieldName(jsonWriter);
@@ -288,23 +405,11 @@ public interface FieldWriter<T>
         writeDate(jsonWriter, writeFieldName, value.getTime());
     }
 
-    default void writeDate(JSONWriter jsonWriter, long millis) {
+    public void writeDate(JSONWriter jsonWriter, long millis) {
         writeDate(jsonWriter, true, millis);
     }
 
-    default boolean isDateFormatMillis() {
-        return false;
-    }
-
-    default boolean isDateFormatISO8601() {
-        return false;
-    }
-
-    default String getFormat() {
-        return null;
-    }
-
-    default void writeDate(JSONWriter jsonWriter, boolean writeFieldName, long millis) {
+    public void writeDate(JSONWriter jsonWriter, boolean writeFieldName, long millis) {
         if (jsonWriter.isJSONB()) {
             jsonWriter.writeMillis(millis);
             return;
@@ -405,7 +510,7 @@ public interface FieldWriter<T>
                 int second = zdt.getSecond();
                 int milliSeconds = zdt.getNano() / 1000_000;
                 int offsetSeconds = zdt.getOffset().getTotalSeconds();
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, milliSeconds, offsetSeconds);
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, milliSeconds, offsetSeconds, true);
                 return;
             }
 
@@ -418,24 +523,24 @@ public interface FieldWriter<T>
         }
     }
 
-    default ObjectWriter getItemWriter(JSONWriter writer, Type itemType) {
+    public ObjectWriter getItemWriter(JSONWriter writer, Type itemType) {
         return writer
                 .getObjectWriter(itemType, null);
     }
 
-    void writeValue(JSONWriter jsonWriter, T object);
+    public abstract void writeValue(JSONWriter jsonWriter, T object);
 
-    boolean write(JSONWriter jsonWriter, T o);
+    public abstract boolean write(JSONWriter jsonWriter, T o);
 
-    default ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
+    public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         return jsonWriter.getObjectWriter(valueClass);
     }
 
-    default void writeList(JSONWriter jsonWriter, boolean writeFieldName, List list) {
+    public void writeList(JSONWriter jsonWriter, boolean writeFieldName, List list) {
         throw new UnsupportedOperationException();
     }
 
-    default void writeListStr(JSONWriter jsonWriter, boolean writeFieldName, List<String> list) {
+    public void writeListStr(JSONWriter jsonWriter, boolean writeFieldName, List<String> list) {
         throw new UnsupportedOperationException();
     }
 

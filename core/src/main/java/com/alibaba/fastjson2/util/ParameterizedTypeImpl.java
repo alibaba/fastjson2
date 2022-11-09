@@ -22,6 +22,12 @@ public class ParameterizedTypeImpl
         this.rawType = rawType;
     }
 
+    public ParameterizedTypeImpl(Type rawType, Type... actualTypeArguments) {
+        this.rawType = rawType;
+        this.actualTypeArguments = actualTypeArguments;
+        this.ownerType = null;
+    }
+
     @Override
     public Type[] getActualTypeArguments() {
         return actualTypeArguments;

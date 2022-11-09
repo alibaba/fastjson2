@@ -1,7 +1,7 @@
 # 通过Features配置序列化和反序列化的行为
 
 # 1. Feature介绍
-在fastjson 2.x中，有两个Feature，分别用来配置序列化和反序列化的行为
+在fastjson 2.x中，有两个Feature，分别用来配置序列化和反序列化的行为。
 * JSONWriter.Feature 配置序列化的行为
 * JSONReader.Feature 配置反序列化的行为
 
@@ -41,7 +41,7 @@ class Model {
 | SupportArrayToBean              | 支持数据映射的方式                                                                                           |
 | InitStringFieldAsEmpty          | 初始化String字段为空字符串""                                                                                  |
 | SupportAutoType                 | 支持自动类型，要读取带"@type"类型信息的JSON数据，需要显示打开SupportAutoType                                                 |
-| SupportSmartMatch               | 默认下是camal case精确匹配，打开这个后，能够智能识别camal/upper/pascal/snake/Kebab五中case                                 |
+| SupportSmartMatch               | 默认下是camel case精确匹配，打开这个后，能够智能识别camel/upper/pascal/snake/Kebab五中case                                 |
 | UseNativeObject                 | 默认是使用JSONObject和JSONArray，配置后会使用LinkedHashMap和ArrayList                                             |
 | SupportClassForName             | 支持类型为Class的字段，使用Class.forName。为了安全这个是默认关闭的                                                          |
 | IgnoreSetNullValue              | 忽略输入为null的字段                                                                                        |
@@ -54,10 +54,11 @@ class Model {
 | DuplicateKeyValueAsArray        | 重复Key的Value不是替换而是组合成数组                                                                              |
 | AllowUnQuotedFieldNames         | 支持不带双引号的字段名                                                                                         |
 | NonStringKeyAsString            | 非String类型的Key当做String处理                                                                             |
+| Base64StringAsByteArray         | 将byte[]序列化为Base64格式的字符串                                                                             |
 
-# 5. JSONWrier.Feature介绍
+# 5. JSONWriter.Feature介绍
 
-| JSONWrier.Feature                 | 介绍                                                                                      |
+| JSONWriter.Feature                | 介绍                                                                                      |
 |-----------------------------------|-----------------------------------------------------------------------------------------|
 | FieldBased                        | 基于字段反序列化，如果不配置，会默认基于public的field和getter方法序列化。配置后，会基于非static的field（包括private）做反序列化。      |
 | IgnoreNoneSerializable            | 序列化忽略非Serializable类型的字段                                                                 |
@@ -87,6 +88,4 @@ class Model {
 | NotWriteEmptyArray                | 数组类型字段当length为0时不输出                                                                     |
 | WriteNonStringKeyAsString         | 将Map中的非String类型的Key当做String类型输出                                                         |
 | ErrorOnNoneSerializable           | 序列化非Serializable对象时报错                                                                   |
-
-
-
+| WritePairAsJavaBean               | 将 Apache Common 包中的Pair对象当做JavaBean序列化                                                  |

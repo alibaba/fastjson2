@@ -14,14 +14,12 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public class DateWrite {
     static final ZoneId ZONE_ID_SHANGHAI = ZoneId.of("Asia/Shanghai");
     static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZONE_ID_SHANGHAI);
-    static BiFunction<char[], Boolean, String> JDK_STR_CREATOR;
-    static Function<byte[], String> STR_CREATOR_JDK11;
 
     static final ThreadLocal<SimpleDateFormat> formatThreadLocal = ThreadLocal.withInitial(
             () -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -153,7 +151,7 @@ public class DateWrite {
             second = (int) secondOfDay;
         }
 
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (JDKUtils.STRING_CREATOR_JDK8 != null) {
             char[] chars = new char[19];
 
             chars[0] = (char) (year / 1000 + '0');
@@ -176,10 +174,7 @@ public class DateWrite {
             chars[17] = (char) (second / 10 + '0');
             chars[18] = (char) (second % 10 + '0');
 
-            if (JDK_STR_CREATOR == null) {
-                JDK_STR_CREATOR = JDKUtils.getStringCreatorJDK8();
-            }
-            return JDK_STR_CREATOR.apply(chars, Boolean.TRUE);
+            return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
         } else {
             byte[] bytes = new byte[19];
 
@@ -203,13 +198,8 @@ public class DateWrite {
             bytes[17] = (byte) (second / 10 + '0');
             bytes[18] = (byte) (second % 10 + '0');
 
-            if (JDKUtils.JVM_VERSION <= 11) {
-                if (STR_CREATOR_JDK11 == null) {
-                    STR_CREATOR_JDK11 = JDKUtils.getStringCreatorJDK11();
-                }
-                return STR_CREATOR_JDK11.apply(bytes);
-            } else if (JDKUtils.JVM_VERSION >= 17) {
-                return (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
+            if (STRING_CREATOR_JDK11 != null) {
+                return STRING_CREATOR_JDK11.apply(bytes, LATIN1);
             } else {
                 return new String(bytes, 0, bytes.length);
             }

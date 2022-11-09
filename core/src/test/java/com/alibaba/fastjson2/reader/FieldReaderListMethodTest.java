@@ -15,7 +15,7 @@ public class FieldReaderListMethodTest {
         Bean bean = new Bean();
         ObjectReader<Bean> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("values");
-        assertNotNull(fieldReader.getMethod());
+        assertNotNull(fieldReader.method);
         assertEquals(Long.class, fieldReader.getItemType());
 
         fieldReader.accept(
@@ -52,7 +52,7 @@ public class FieldReaderListMethodTest {
         Bean1 bean = new Bean1(123);
         ObjectReader<Bean1> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean1.class);
         FieldReader fieldReader = objectReader.getFieldReader("values");
-        assertNotNull(fieldReader.getMethod());
+        assertNotNull(fieldReader.method);
         assertEquals(Long.class, fieldReader.getItemType());
 
         fieldReader.accept(

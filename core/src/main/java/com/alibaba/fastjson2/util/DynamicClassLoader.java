@@ -7,12 +7,8 @@ import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.filter.PropertyFilter;
 import com.alibaba.fastjson2.filter.PropertyPreFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
-import com.alibaba.fastjson2.reader.FieldReader;
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
-import com.alibaba.fastjson2.writer.FieldWriter;
-import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
+import com.alibaba.fastjson2.reader.*;
+import com.alibaba.fastjson2.writer.*;
 
 import java.lang.reflect.Type;
 import java.security.PrivilegedAction;
@@ -44,6 +40,19 @@ public class DynamicClassLoader
                 FieldReader.class,
 
                 ObjectReader.class,
+                ObjectReader1.class,
+                ObjectReader2.class,
+                ObjectReader3.class,
+                ObjectReader4.class,
+                ObjectReader5.class,
+                ObjectReader6.class,
+                ObjectReader6.class,
+                ObjectReader7.class,
+                ObjectReader8.class,
+                ObjectReader9.class,
+                ObjectReader10.class,
+                ObjectReader11.class,
+                ObjectReader12.class,
                 ObjectReaderAdapter.class,
 
                 // writers
@@ -58,6 +67,18 @@ public class DynamicClassLoader
                 ValueFilter.class,
 
                 ObjectWriter.class,
+                ObjectWriter1.class,
+                ObjectWriter2.class,
+                ObjectWriter3.class,
+                ObjectWriter4.class,
+                ObjectWriter5.class,
+                ObjectWriter6.class,
+                ObjectWriter7.class,
+                ObjectWriter8.class,
+                ObjectWriter9.class,
+                ObjectWriter10.class,
+                ObjectWriter11.class,
+                ObjectWriter12.class,
                 ObjectWriterAdapter.class,
 
                 java.util.List.class,
@@ -70,12 +91,9 @@ public class DynamicClassLoader
     }
 
     static {
-        DOMAIN = (java.security.ProtectionDomain) java.security.AccessController.doPrivileged(new PrivilegedAction<Object>() {
-            @Override
-            public Object run() {
-                return DynamicClassLoader.class.getProtectionDomain();
-            }
-        });
+        DOMAIN = (java.security.ProtectionDomain) java.security.AccessController.doPrivileged(
+                (PrivilegedAction<Object>) () -> DynamicClassLoader.class.getProtectionDomain()
+        );
     }
 
     private final ClassLoader parent;

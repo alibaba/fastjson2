@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.SymbolTable;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.*;
 
@@ -10,13 +8,28 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-final class ObjectWriterImplMap
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
+import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
+
+public final class ObjectWriterImplMap
         extends ObjectWriterBaseModule.PrimitiveImpl {
     static final byte[] TYPE_NAME_JSONObject1O = JSONB.toBytes("JO10");
     static final long TYPE_HASH_JSONObject1O = Fnv.hashCode64("JO10");
+
+    static final ObjectWriterImplMap INSTANCE = new ObjectWriterImplMap(String.class, Object.class, JSONObject.class, JSONObject.class, 0);
+    static final ObjectWriterImplMap INSTANCE_1x;
+
+    static {
+        if (CLASS_JSON_OBJECT_1x == null) {
+            INSTANCE_1x = null;
+        } else {
+            INSTANCE_1x = new ObjectWriterImplMap(String.class, Object.class, CLASS_JSON_OBJECT_1x, CLASS_JSON_OBJECT_1x, 0);
+        }
+    }
 
     final Type objectType;
     final Class objectClass;
@@ -66,7 +79,7 @@ final class ObjectWriterImplMap
             jsonObject1InnerMap = BeanUtils.getDeclaredField(objectClass, "map");
             if (jsonObject1InnerMap != null) {
                 jsonObject1InnerMap.setAccessible(true);
-                if (JDKUtils.UNSAFE_SUPPORT) {
+                if (UNSAFE_SUPPORT) {
                     jsonObject1InnerMapOffset = UnsafeUtils.objectFieldOffset(jsonObject1InnerMap);
                 }
             }
@@ -76,6 +89,14 @@ final class ObjectWriterImplMap
     }
 
     public static ObjectWriterImplMap of(Class objectClass) {
+        if (objectClass == JSONObject.class) {
+            return INSTANCE;
+        }
+
+        if (objectClass == CLASS_JSON_OBJECT_1x) {
+            return INSTANCE_1x;
+        }
+
         return new ObjectWriterImplMap(null, null, objectClass, objectClass, 0);
     }
 
@@ -258,6 +279,16 @@ final class ObjectWriterImplMap
                 continue;
             }
 
+            if (valueClass == Integer.class) {
+                jsonWriter.writeInt32((Integer) value);
+                continue;
+            }
+
+            if (valueClass == Long.class) {
+                jsonWriter.writeInt64((Long) value);
+                continue;
+            }
+
             boolean valueRefDetecChanged = false;
             boolean valueRefDetect;
             if (valueClass == this.valueType) {
@@ -301,7 +332,18 @@ final class ObjectWriterImplMap
             } else if (itemClass == valueClass) {
                 valueWriter = itemWriter;
             } else {
-                valueWriter = provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                if (valueClass == JSONObject.class) {
+                    valueWriter = ObjectWriterImplMap.INSTANCE;
+                } else if (valueClass == CLASS_JSON_OBJECT_1x) {
+                    valueWriter = ObjectWriterImplMap.INSTANCE_1x;
+                } else if (valueClass == JSONArray.class) {
+                    valueWriter = ObjectWriterImplList.INSTANCE;
+                } else if (valueClass == TypeUtils.CLASS_JSON_ARRAY_1x) {
+                    valueWriter = ObjectWriterImplList.INSTANCE;
+                } else {
+                    valueWriter = provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                }
+
                 if (itemWriter == null) {
                     itemWriter = valueWriter;
                     itemClass = valueClass;
@@ -367,6 +409,7 @@ final class ObjectWriterImplMap
             }
         }
 
+        ObjectWriterProvider provider = jsonWriter.getContext().getProvider();
         for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = it.next();
             Object value = entry.getValue();
@@ -425,24 +468,64 @@ final class ObjectWriterImplMap
             }
             jsonWriter.writeColon();
 
-            Class<?> valueType = value.getClass();
-            if (valueType == String.class) {
+            Class<?> valueClass = value.getClass();
+            if (valueClass == String.class) {
                 jsonWriter.writeString((String) value);
+                continue;
+            } else if (valueClass == Integer.class) {
+                jsonWriter.writeInt32((Integer) value);
+                continue;
+            } else if (valueClass == Long.class) {
+                if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT64_MASK) == 0) {
+                    jsonWriter.writeInt64((Long) value);
+                } else {
+                    ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueClass);
+                    valueWriter.write(jsonWriter, value, strKey, Long.class, features);
+                }
+                continue;
+            } else if (valueClass == Boolean.class) {
+                jsonWriter.writeBool((Boolean) value);
+                continue;
+            } else if (valueClass == BigDecimal.class) {
+                if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DECIMAL_MASK) == 0) {
+                    jsonWriter.writeDecimal((BigDecimal) value);
+                } else {
+                    ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueClass);
+                    valueWriter.write(jsonWriter, value, key, this.valueType, this.features);
+                }
                 continue;
             }
 
+            boolean isPrimitiveOrEnum;
             ObjectWriter valueWriter;
-            if (valueType == this.valueType) {
+            if (valueClass == this.valueType) {
                 if (this.valueWriter != null) {
                     valueWriter = this.valueWriter;
                 } else {
-                    valueWriter = this.valueWriter = jsonWriter.getObjectWriter(valueType);
+                    valueWriter = this.valueWriter = jsonWriter.getObjectWriter(valueClass);
                 }
+                isPrimitiveOrEnum = ObjectWriterProvider.isPrimitiveOrEnum(value.getClass());
             } else {
-                valueWriter = jsonWriter.getObjectWriter(valueType);
+                if (valueClass == JSONObject.class) {
+                    valueWriter = ObjectWriterImplMap.INSTANCE;
+                    isPrimitiveOrEnum = false;
+                } else if (valueClass == CLASS_JSON_OBJECT_1x) {
+                    valueWriter = ObjectWriterImplMap.INSTANCE_1x;
+                    isPrimitiveOrEnum = false;
+                } else if (valueClass == JSONArray.class) {
+                    valueWriter = ObjectWriterImplList.INSTANCE;
+                    isPrimitiveOrEnum = false;
+                } else if (valueClass == TypeUtils.CLASS_JSON_ARRAY_1x) {
+                    valueWriter = ObjectWriterImplList.INSTANCE;
+                    isPrimitiveOrEnum = false;
+                } else {
+                    valueWriter = jsonWriter.getObjectWriter(valueClass);
+                    isPrimitiveOrEnum = ObjectWriterProvider.isPrimitiveOrEnum(value.getClass());
+                }
             }
 
-            if (refDetect && strKey != null && !ObjectWriterProvider.isPrimitiveOrEnum(value.getClass())) {
+            boolean valueRefDetect = refDetect && strKey != null && !isPrimitiveOrEnum;
+            if (valueRefDetect) {
                 if (value == object) {
                     jsonWriter.writeReference("..");
                     continue;
@@ -458,7 +541,7 @@ final class ObjectWriterImplMap
 
             valueWriter.write(jsonWriter, value, key, this.valueType, this.features);
 
-            if (refDetect) {
+            if (valueRefDetect) {
                 jsonWriter.popPath(value);
             }
         }

@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.FieldReader;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2_vo.*;
@@ -1484,8 +1485,14 @@ public class JSONReaderTest1 {
     @Test
     public void testJSONB() {
         byte[] bytes = JSONB.toBytes("");
-        JSONReader jsonReader = JSONReader.ofJSONB(JSONFactory.createReadContext(), bytes);
-        assertThrows(JSONException.class, () -> jsonReader.readLocalDate11());
+        {
+            JSONReader jsonReader = JSONReader.ofJSONB(bytes, JSONFactory.createReadContext());
+            assertThrows(JSONException.class, () -> jsonReader.readLocalDate11());
+        }
+        {
+            JSONReader jsonReader = JSONReader.ofJSONB(JSONFactory.createReadContext(), bytes);
+            assertThrows(JSONException.class, () -> jsonReader.readLocalDate11());
+        }
     }
 
     @Test
@@ -1893,9 +1900,7 @@ public class JSONReaderTest1 {
         LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, 0, 0);
         long epochMilli = ldt.atZone(zoneId).toInstant().toEpochMilli();
 
-        JSONReader jsonReader = JSONReader.of("123");
-        jsonReader.context.setZoneId(zoneId);
-        long millis = jsonReader.millis(year, month, dom, hour, minute, 0, 0);
+        long millis = DateUtils.millis(zoneId, year, month, dom, hour, minute, 0, 0);
         assertEquals(epochMilli, millis, ldt.toString());
     }
 }

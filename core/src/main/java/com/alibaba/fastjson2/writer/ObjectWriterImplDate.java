@@ -166,17 +166,19 @@ final class ObjectWriterImplDate
                 second = (int) secondOfDay;
             }
 
-            int mos = (int) Math.floorMod(millis, 1000L);
-            if (mos == 0 && !formatISO8601) {
-                if (hour == 0 && minute == 0 && second == 0 && "java.sql.Date".equals(date.getClass().getName())) {
-                    jsonWriter.writeDateYYYMMDD10(year, month, dayOfMonth);
+            if (year >= 0 && year <= 9999) {
+                int mos = (int) Math.floorMod(millis, 1000L);
+                if (mos == 0 && !formatISO8601) {
+                    if (hour == 0 && minute == 0 && second == 0 && "java.sql.Date".equals(date.getClass().getName())) {
+                        jsonWriter.writeDateYYYMMDD10(year, month, dayOfMonth);
+                    } else {
+                        jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
+                    }
                 } else {
-                    jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
+                    jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, mos, offsetSeconds, formatISO8601);
                 }
-            } else {
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, mos, offsetSeconds);
+                return;
             }
-            return;
         }
 
         DateTimeFormatter formatter;

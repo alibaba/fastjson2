@@ -7,9 +7,7 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.schema.JSONSchema;
-import com.alibaba.fastjson2.util.BeanUtils;
-import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
@@ -22,13 +20,19 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
+
 public class JSONObject
         extends LinkedHashMap<String, Object>
         implements InvocationHandler {
     private static final long serialVersionUID = 1L;
 
     static ObjectReader<JSONArray> arrayReader;
-    static ObjectWriter<JSONObject> objectWriter;
+    static final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
+            | PrettyFormat.mask
+            | NotWriteEmptyArray.mask
+            | NotWriteDefaultValue.mask;
 
     /**
      * default
@@ -287,6 +291,19 @@ public class JSONObject
 
         if (value instanceof String) {
             return (String) value;
+        }
+
+        if (value instanceof Date) {
+            long timeMillis = ((Date) value).getTime();
+            return DateUtils.toString(timeMillis, false, IOUtils.DEFAULT_ZONE_ID);
+        }
+
+        if (value instanceof Boolean
+                || value instanceof Character
+                || value instanceof Number
+                || value instanceof UUID
+                || value instanceof Enum) {
+            return value.toString();
         }
 
         return JSON.toJSONString(value);
@@ -993,9 +1010,6 @@ public class JSONObject
 
         if (value instanceof Number) {
             long millis = ((Number) value).longValue();
-            if (millis == 0) {
-                return null;
-            }
             return new Date(millis);
         }
 
@@ -1039,10 +1053,8 @@ public class JSONObject
     @SuppressWarnings("unchecked")
     public String toString() {
         try (JSONWriter writer = JSONWriter.of()) {
-            if (objectWriter == null) {
-                objectWriter = writer.getObjectWriter(JSONObject.class);
-            }
-            objectWriter.write(writer, this, null, null, 0);
+            writer.setRootObject(this);
+            writer.write(this);
             return writer.toString();
         }
     }
@@ -1056,10 +1068,8 @@ public class JSONObject
     @SuppressWarnings("unchecked")
     public String toString(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.of(features)) {
-            if (objectWriter == null) {
-                objectWriter = writer.getObjectWriter(JSONObject.class);
-            }
-            objectWriter.write(writer, this, null, null, 0);
+            writer.setRootObject(this);
+            writer.write(this);
             return writer.toString();
         }
     }
@@ -1094,10 +1104,8 @@ public class JSONObject
     @SuppressWarnings("unchecked")
     public byte[] toJSONBBytes(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
-            if (objectWriter == null) {
-                objectWriter = writer.getObjectWriter(JSONObject.class);
-            }
-            objectWriter.write(writer, this, null, null, 0);
+            writer.setRootObject(this);
+            writer.write(this);
             return writer.getBytes();
         }
     }
@@ -1529,11 +1537,11 @@ public class JSONObject
      */
     private String getJSONFieldName(Method method) {
         String name = null;
-        Annotation[] annotations = method.getAnnotations();
+        Annotation[] annotations = getAnnotations(method);
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
-            if (annotationType == JSONField.class) {
-                JSONField jsonField = (JSONField) annotation;
+            JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+            if (Objects.nonNull(jsonField)) {
                 name = jsonField.name();
                 if (name.isEmpty()) {
                     name = null;
@@ -1853,6 +1861,7 @@ public class JSONObject
 
     /**
      * See {@link JSON#parse} for details
+     *
      * @since 2.0.13
      */
     public static JSONObject parse(String text, JSONReader.Feature... features) {

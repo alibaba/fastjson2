@@ -1,9 +1,10 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.util.Arrays;
+
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONWriterUTF8JDK9
         extends JSONWriterUTF8 {
@@ -13,7 +14,7 @@ final class JSONWriterUTF8JDK9
 
     @Override
     public void writeString(String str) {
-        if (!JDKUtils.UNSAFE_SUPPORT || JDKUtils.JVM_VERSION == 8) {
+        if (!UNSAFE_SUPPORT || JVM_VERSION == 8) {
             super.writeString(str);
             return;
         }
@@ -28,8 +29,12 @@ final class JSONWriterUTF8JDK9
             return;
         }
 
-        int coder = UnsafeUtils.getStringCoder(str);
-        byte[] value = UnsafeUtils.getStringValue(str);
+        int coder = STRING_CODER != null
+                ? STRING_CODER.applyAsInt(str)
+                : UnsafeUtils.getStringCoder(str);
+        byte[] value = STRING_VALUE != null
+                ? STRING_VALUE.apply(str)
+                : UnsafeUtils.getStringValue(str);
 
         if (coder == 0) {
             boolean escape = false;
@@ -96,7 +101,7 @@ final class JSONWriterUTF8JDK9
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -225,7 +230,7 @@ final class JSONWriterUTF8JDK9
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 

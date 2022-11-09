@@ -947,8 +947,8 @@ public class JSONObjectTest {
     public void test_getDate() {
         assertNull(JSONObject.of("id", null).getDate("id"));
         assertNull(JSONObject.of("id", "").getDate("id"));
-        assertNull(JSONObject.of("id", 0).getDate("id"));
-        assertNull(JSONObject.of("id", 0L).getDate("id"));
+        assertEquals(0, JSONObject.of("id", 0).getDate("id").getTime());
+        assertEquals(0L, JSONObject.of("id", 0L).getDate("id").getTime());
 
         long millis = System.currentTimeMillis();
         Date date = new Date(millis);

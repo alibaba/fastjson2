@@ -30,7 +30,12 @@ package com.alibaba.fastjson2.internal.asm;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
 public class ClassWriter {
+    private Function<String, Class> typeProvider;
     /**
      * The minor_version and major_version fields of the JVMS ClassFile structure. minor_version is
      * stored in the 16 most significant bits, and major_version in the 16 least significant bits.
@@ -80,8 +85,9 @@ public class ClassWriter {
 
     private MethodWriter lastMethod;
 
-    public ClassWriter() {
+    public ClassWriter(Function<String, Class> typeProvider) {
         symbolTable = new SymbolTable(this);
+        this.typeProvider = typeProvider;
     }
 
     public final void visit(
@@ -93,12 +99,12 @@ public class ClassWriter {
         this.version = version;
         this.accessFlags = access;
         this.thisClass = symbolTable.setMajorVersionAndClassName(version & 0xFFFF, name);
-        this.superClass = superName == null ? 0 : symbolTable.addConstantClass(superName).index;
+        this.superClass = superName == null ? 0 : symbolTable.addConstantUtf8Reference(/*CONSTANT_CLASS_TAG*/ 7, superName).index;
         if (interfaces != null && interfaces.length > 0) {
             interfaceCount = interfaces.length;
             this.interfaces = new int[interfaceCount];
             for (int i = 0; i < interfaceCount; ++i) {
-                this.interfaces[i] = symbolTable.addConstantClass(interfaces[i]).index;
+                this.interfaces[i] = symbolTable.addConstantUtf8Reference(/*CONSTANT_CLASS_TAG*/ 7, interfaces[i]).index;
             }
         }
     }
@@ -118,11 +124,13 @@ public class ClassWriter {
     }
 
     public final MethodWriter visitMethod(
-            final int access,
-            final String name,
-            final String descriptor) {
+            int access,
+            String name,
+            String descriptor,
+            int codeInitCapacity
+    ) {
         MethodWriter methodWriter =
-                new MethodWriter(symbolTable, access, name, descriptor);
+                new MethodWriter(symbolTable, access, name, descriptor, codeInitCapacity);
         if (firstMethod == null) {
             firstMethod = methodWriter;
         } else {
@@ -159,24 +167,29 @@ public class ClassWriter {
 
         // For ease of reference, we use here the same attribute order as in Section 4.7 of the JVMS.
         int attributesCount = 0;
-        if (symbolTable.computeBootstrapMethodsSize() > 0) {
-            ++attributesCount;
-            size += symbolTable.computeBootstrapMethodsSize();
-        }
+//        if (symbolTable.computeBootstrapMethodsSize() > 0) {
+//            ++attributesCount;
+//            size += symbolTable.computeBootstrapMethodsSize();
+//        }
 
         // IMPORTANT: this must be the last part of the ClassFile size computation, because the previous
         // statements can add attribute names to the constant pool, thereby changing its size!
-        size += symbolTable.getConstantPoolLength();
-        int constantPoolCount = symbolTable.getConstantPoolCount();
+        size += symbolTable.constantPool.length;
+        int constantPoolCount = symbolTable.constantPoolCount;
         if (constantPoolCount > 0xFFFF) {
-            throw new JSONException("Class too large: " + symbolTable.getClassName() + ", constantPoolCount " + constantPoolCount);
+            throw new JSONException("Class too large: " + symbolTable.className + ", constantPoolCount " + constantPoolCount);
         }
 
         // Second step: allocate a ByteVector of the correct size (in order to avoid any array copy in
         // dynamic resizes) and fill it with the ClassFile content.
         ByteVector result = new ByteVector(size);
         result.putInt(0xCAFEBABE).putInt(version);
-        symbolTable.putConstantPool(result);
+        result.putShort(constantPoolCount)
+                .putByteArray(
+                        symbolTable.constantPool.data,
+                        0,
+                        symbolTable.constantPool.length
+                ); // symbolTable.putConstantPool(result);
         int mask = 0;
         result.putShort(accessFlags & ~mask).putShort(thisClass).putShort(superClass);
         result.putShort(interfaceCount);
@@ -194,14 +207,14 @@ public class ClassWriter {
         boolean hasAsmInstructions = false;
         methodWriter = firstMethod;
         while (methodWriter != null) {
-            hasFrames |= methodWriter.hasFrames();
-            hasAsmInstructions |= methodWriter.hasAsmInstructions();
+            hasFrames |= methodWriter.stackMapTableNumberOfEntries > 0;
+            hasAsmInstructions |= methodWriter.hasAsmInstructions;
             methodWriter.putMethodInfo(result);
             methodWriter = (MethodWriter) methodWriter.mv;
         }
         // For ease of reference, we use here the same attribute order as in Section 4.7 of the JVMS.
         result.putShort(attributesCount);
-        symbolTable.putBootstrapMethods(result);
+//        symbolTable.putBootstrapMethods(result);
 
         // Third step: replace the ASM specific instructions, if any.
         if (hasAsmInstructions) {
@@ -209,6 +222,32 @@ public class ClassWriter {
         } else {
             return result.data;
         }
+    }
+
+    protected Class loadClass(String type) {
+        switch (type) {
+            case "java/util/List":
+                return List.class;
+            case "java/util/ArrayList":
+                return ArrayList.class;
+            case "java/lang/Object":
+                return Object.class;
+            default:
+                break;
+        }
+
+        String className1 = type.replace('/', '.');
+
+        Class clazz = null;
+        if (typeProvider != null) {
+            clazz = typeProvider.apply(className1);
+        }
+
+        if (clazz == null) {
+            clazz = TypeUtils.loadClass(className1);
+        }
+
+        return clazz;
     }
 
     /**
@@ -224,12 +263,14 @@ public class ClassWriter {
      * @return the internal name of the common super class of the two given classes.
      */
     protected String getCommonSuperClass(final String type1, final String type2) {
-        Class<?> class1 = TypeUtils.loadClass(type1.replace('/', '.'));
+        Class<?> class1 = loadClass(type1);
+
         if (class1 == null) {
-            throw new JSONException(type1);
+            throw new JSONException("class not found " + type1);
         }
 
-        Class<?> class2 = TypeUtils.loadClass(type2.replace('/', '.'));
+        Class<?> class2 = loadClass(type2);
+
         if (class2 == null) {
             return "java/lang/Object";
         }
@@ -246,6 +287,7 @@ public class ClassWriter {
             do {
                 class1 = class1.getSuperclass();
             } while (!class1.isAssignableFrom(class2));
+
             return class1.getName().replace('.', '/');
         }
     }

@@ -11,15 +11,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1276 {
     @Test
     public void test_for_issue() throws Exception {
-        MyException myException = new MyException(100, "error msg");
-        String str = JSON.toJSONString(myException);
-        System.out.println(str);
+        MyException e = new MyException(100, "error msg");
+        String str = JSON.toJSONString(e);
 
-        MyException myException1 = JSON.parseObject(str, MyException.class);
-        assertEquals(myException.getCode(), myException1.getCode());
-
-        String str1 = JSON.toJSONString(myException1);
-        assertEquals(str, str1);
+        MyException e1 = JSON.parseObject(str, MyException.class);
+        assertEquals(e.getCode(), e1.getCode());
+        assertEquals(e.getMessage(), e1.getMessage());
     }
 
     public static class MyException

@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderBean;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -15,6 +16,8 @@ import java.util.IdentityHashMap;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 /**
  * x92          # type_char int
@@ -314,7 +317,7 @@ public interface JSONB {
     static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider);
-        try (JSONReader jsonReader = JDKUtils.UNSAFE_SUPPORT
+        try (JSONReader jsonReader = UNSAFE_SUPPORT
                 ? new JSONReaderJSONBUF(
                 ctx,
                 jsonbBytes,
@@ -384,7 +387,7 @@ public interface JSONB {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider, symbolTable);
 
-        try (JSONReader reader = JDKUtils.UNSAFE_SUPPORT
+        try (JSONReader reader = UNSAFE_SUPPORT
                 ? new JSONReaderJSONBUF(
                 ctx,
                 jsonbBytes,
@@ -507,7 +510,7 @@ public interface JSONB {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider);
 
-        try (JSONReader jsonReader = JDKUtils.UNSAFE_SUPPORT
+        try (JSONReader jsonReader = UNSAFE_SUPPORT
                 ? new JSONReaderJSONBUF(
                 ctx,
                 jsonbBytes,
@@ -536,7 +539,10 @@ public interface JSONB {
             } else {
                 boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
                 ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
-                if ((ctx.features & JSONReader.Feature.SupportArrayToBean.mask) != 0 && jsonReader.isArray()) {
+                if ((ctx.features & JSONReader.Feature.SupportArrayToBean.mask) != 0
+                        && jsonReader.isArray()
+                        && objectReader instanceof ObjectReaderBean
+                ) {
                     object = objectReader.readArrayMappingJSONBObject(jsonReader, null, null, 0);
                 } else {
                     object = objectReader.readJSONBObject(jsonReader, null, null, 0);
@@ -717,7 +723,7 @@ public interface JSONB {
             return new byte[]{BC_NULL};
         }
 
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (JVM_VERSION == 8) {
             char[] chars = JDKUtils.getCharArray(str);
             int strlen = chars.length;
             if (strlen <= STR_ASCII_FIX_LEN) {
@@ -738,7 +744,7 @@ public interface JSONB {
                     return bytes;
                 }
             }
-        } else if (JDKUtils.UNSAFE_SUPPORT) {
+        } else if (UNSAFE_SUPPORT) {
             int coder = UnsafeUtils.getStringCoder(str);
             if (coder == 0) {
                 byte[] value = UnsafeUtils.getStringValue(str);
@@ -808,7 +814,9 @@ public interface JSONB {
                 writer.writeNull();
             } else {
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                JSONWriter.Context context = writer.context;
+                boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
+                ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
                 objectWriter.writeJSONB(writer, object, null, null, 0);
             }
             return writer.getBytes();
@@ -824,6 +832,8 @@ public interface JSONB {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
+
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.writeJSONB(writer, object, null, null, 0);
@@ -840,6 +850,8 @@ public interface JSONB {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
+
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.writeJSONB(writer, object, null, null, 0);
@@ -860,6 +872,8 @@ public interface JSONB {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
+
                 Class<?> valueClass = object.getClass();
 
                 boolean fieldBased = (ctx.features & JSONWriter.Feature.FieldBased.mask) != 0;
@@ -888,6 +902,8 @@ public interface JSONB {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
+
                 Class<?> valueClass = object.getClass();
 
                 boolean fieldBased = (ctx.features & JSONWriter.Feature.FieldBased.mask) != 0;
@@ -958,6 +974,8 @@ public interface JSONB {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
+
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
                 objectWriter.writeJSONB(writer, object, null, null, 0);

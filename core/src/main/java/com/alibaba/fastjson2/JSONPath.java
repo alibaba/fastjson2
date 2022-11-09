@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.function.impl.ToDouble;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -27,6 +26,8 @@ import java.util.regex.Pattern;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
 import static com.alibaba.fastjson2.JSONReader.EOI;
+import static com.alibaba.fastjson2.util.JDKUtils.LATIN1;
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK11;
 
 public abstract class JSONPath {
     static final JSONReader.Context PARSE_CONTEXT = JSONFactory.createReadContext();
@@ -34,9 +35,15 @@ public abstract class JSONPath {
     JSONReader.Context readerContext;
     JSONWriter.Context writerContext;
     final String path;
+    final long features;
 
-    protected JSONPath(String path) {
+    protected JSONPath(String path, Feature... features) {
         this.path = path;
+        long featuresValue = 0;
+        for (Feature feature : features) {
+            featuresValue |= feature.mask;
+        }
+        this.features = featuresValue;
     }
 
     public boolean isPrevious() {
@@ -54,9 +61,16 @@ public abstract class JSONPath {
         return jsonPath.extract(jsonReader);
     }
 
+    public static Object extract(String json, String path, Feature... features) {
+        JSONReader jsonReader = JSONReader.of(json);
+        JSONPath jsonPath = JSONPath.of(path, features);
+        return jsonPath.extract(jsonReader);
+    }
+
     public static Object eval(String str, String path) {
         return extract(str, path);
     }
+
     public static Object eval(Object rootObject, String path) {
         return JSONPath.of(path)
                 .eval(rootObject);
@@ -133,7 +147,7 @@ public abstract class JSONPath {
                     || type == Boolean.class
                     || type == Character.class
                     || type == UUID.class
-                    || type.isEnum()
+                    || javaObject instanceof Enum
                     || javaObject instanceof Number
                     || javaObject instanceof Date;
 
@@ -396,6 +410,16 @@ public abstract class JSONPath {
         return new JSONPathParser(path)
                 .parse();
     }
+
+    public static JSONPath of(String path, Feature... features) {
+        if ("#-1".equals(path)) {
+            return PreviousPath.INSTANCE;
+        }
+
+        return new JSONPathParser(path)
+                .parse(features);
+    }
+
     static Operator parseOperator(JSONReader jsonReader) {
         Operator operator;
         switch (jsonReader.ch) {
@@ -556,7 +580,9 @@ public abstract class JSONPath {
         AND,
         OR,
         REG_MATCH,
-        STARTS_WITH
+        STARTS_WITH,
+        CONTAINS,
+        NOT_CONTAINS
     }
 
     abstract static class FilterSegment
@@ -941,6 +967,91 @@ public abstract class JSONPath {
         }
     }
 
+    static final class NameLongContainsSegment
+            extends NameFilter {
+        private final long[] values;
+        private final boolean not;
+
+        public NameLongContainsSegment(
+                String fieldName,
+                long fieldNameNameHash,
+                String[] fieldName2,
+                long[] fieldNameNameHash2,
+                long[] values, boolean not) {
+            super(fieldName, fieldNameNameHash, fieldName2, fieldNameNameHash2, null);
+            this.values = values;
+            this.not = not;
+        }
+
+        @Override
+        public boolean apply(Object fieldValue) {
+            if (fieldValue instanceof Collection) {
+                Collection collection = (Collection) fieldValue;
+
+                boolean containsAll = true;
+                for (long value : values) {
+                    boolean containsItem = false;
+                    for (Object item : collection) {
+                        long longItem;
+                        if (item instanceof Byte
+                                || item instanceof Short
+                                || item instanceof Integer
+                                || item instanceof Long) {
+                            longItem = ((Number) item).longValue();
+                            if (longItem == value) {
+                                containsItem = true;
+                                break;
+                            }
+                        }
+
+                        if (item instanceof Float) {
+                            if (value == (Float) item) {
+                                containsItem = true;
+                                break;
+                            }
+                        }
+
+                        if (item instanceof Double) {
+                            if (value == (Double) item) {
+                                containsItem = true;
+                                break;
+                            }
+                        }
+
+                        if (item instanceof BigDecimal) {
+                            BigDecimal decimal = (BigDecimal) item;
+                            long longValue = decimal.longValue();
+                            if (value == longValue && decimal.equals(BigDecimal.valueOf(value))) {
+                                containsItem = true;
+                                break;
+                            }
+                        }
+
+                        if (item instanceof BigInteger) {
+                            BigInteger bigiInt = (BigInteger) item;
+                            long longValue = bigiInt.longValue();
+                            if (value == longValue && bigiInt.equals(BigInteger.valueOf(value))) {
+                                containsItem = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!containsItem) {
+                        containsAll = false;
+                        break;
+                    }
+                }
+
+                if (containsAll) {
+                    return !not;
+                }
+            }
+
+            return not;
+        }
+    }
+
     static final class NameIntBetweenSegment
             extends NameFilter {
         private final long begin;
@@ -1068,7 +1179,11 @@ public abstract class JSONPath {
             this.function = null;
         }
 
-        public NameFilter(String fieldName, long fieldNameNameHash, String[] fieldName2, long[] fieldNameNameHash2, Function function) {
+        public NameFilter(String fieldName,
+                          long fieldNameNameHash,
+                          String[] fieldName2,
+                          long[] fieldNameNameHash2,
+                          Function function) {
             this.fieldName = fieldName;
             this.fieldNameNameHash = fieldNameNameHash;
             this.fieldName2 = fieldName2;
@@ -1394,6 +1509,44 @@ public abstract class JSONPath {
         }
     }
 
+    static final class NameStringContainsSegment
+            extends NameFilter {
+        private final String[] values;
+        private final boolean not;
+
+        public NameStringContainsSegment(
+                String fieldName,
+                long fieldNameNameHash,
+                String[] fieldName2,
+                long[] fieldNameNameHash2,
+                String[] values, boolean not) {
+            super(fieldName, fieldNameNameHash, fieldName2, fieldNameNameHash2, null);
+            this.values = values;
+            this.not = not;
+        }
+
+        @Override
+        public boolean apply(Object fieldValue) {
+            if (fieldValue instanceof Collection) {
+                Collection collection = (Collection) fieldValue;
+
+                boolean containsAll = true;
+                for (String value : values) {
+                    if (!collection.contains(value)) {
+                        containsAll = false;
+                        break;
+                    }
+                }
+
+                if (containsAll) {
+                    return !not;
+                }
+            }
+
+            return not;
+        }
+    }
+
     static final class NameMatchFilter
             extends NameFilter {
         final String startsWithValue;
@@ -1617,17 +1770,18 @@ public abstract class JSONPath {
         final long nameHashCode;
         final String name;
 
-        public SingleNamePath(String path, NameSegment segment) {
-            super(path);
+        public SingleNamePath(String path, NameSegment segment, Feature... features) {
+            super(path, features);
             this.name = segment.name;
             this.nameHashCode = segment.nameHashCode;
         }
 
         @Override
         public Object eval(Object root) {
+            Object value;
             if (root instanceof Map) {
                 Map map = (Map) root;
-                Object value = map.get(name);
+                value = map.get(name);
                 if (value == null) {
                     boolean isNum = IOUtils.isNumber(this.name);
                     Long longValue = null;
@@ -1649,21 +1803,29 @@ public abstract class JSONPath {
                         }
                     }
                 }
-                return value;
+            } else {
+                JSONWriter.Context writerContext = getWriterContext();
+                ObjectWriter objectWriter = writerContext.getObjectWriter(root.getClass());
+                if (objectWriter == null) {
+                    return null;
+                }
+
+                FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
+                if (fieldWriter == null) {
+                    return null;
+                }
+
+                value = fieldWriter.getFieldValue(root);
             }
 
-            JSONWriter.Context writerContext = getWriterContext();
-            ObjectWriter objectWriter = writerContext.getObjectWriter(root.getClass());
-            if (objectWriter == null) {
-                return null;
+            if ((features & Feature.AlwaysReturnList.mask) != 0) {
+                if (value == null) {
+                    value = new JSONArray();
+                } else {
+                    value = JSONArray.of(value);
+                }
             }
-
-            FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
-            if (fieldWriter == null) {
-                return null;
-            }
-
-            return fieldWriter.getFieldValue(root);
+            return value;
         }
 
         @Override
@@ -1733,17 +1895,21 @@ public abstract class JSONPath {
             ObjectReader objectReader = provider.getObjectReader(rootObject.getClass());
             FieldReader fieldReader = objectReader.getFieldReader(nameHashCode);
 
-            if (value != null) {
-                Class<?> valueClass = value.getClass();
-                Class fieldClass = fieldReader.getFieldClass();
-                if (valueClass != fieldClass) {
-                    java.util.function.Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
-                    if (typeConvert != null) {
-                        value = typeConvert.apply(value);
+            if (fieldReader != null) {
+                if (value != null) {
+                    Class<?> valueClass = value.getClass();
+                    Class fieldClass = fieldReader.fieldClass;
+                    if (valueClass != fieldClass) {
+                        java.util.function.Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
+                        if (typeConvert != null) {
+                            value = typeConvert.apply(value);
+                        }
                     }
                 }
+                fieldReader.accept(rootObject, value);
+            } else if (objectReader instanceof ObjectReaderBean) {
+                ((ObjectReaderBean) objectReader).acceptExtra(rootObject, name, value);
             }
-            fieldReader.accept(rootObject, value);
         }
 
         @Override
@@ -1778,7 +1944,7 @@ public abstract class JSONPath {
 
             if (value != null) {
                 Class<?> valueClass = value.getClass();
-                Class fieldClass = fieldReader.getFieldClass();
+                Class fieldClass = fieldReader.fieldClass;
                 if (valueClass != fieldClass) {
                     java.util.function.Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
                     if (typeConvert != null) {
@@ -1869,6 +2035,10 @@ public abstract class JSONPath {
                         throw new JSONException("TODO");
                     }
                 }
+
+                if ((features & Feature.AlwaysReturnList.mask) != 0) {
+                    return new JSONArray();
+                }
                 return null;
             }
 
@@ -1877,7 +2047,6 @@ public abstract class JSONPath {
                     long nameHashCode = jsonReader.readFieldNameHashCode();
                     boolean match = nameHashCode == this.nameHashCode;
 
-                    char ch = jsonReader.ch;
                     if (!match) {
                         jsonReader.skipValue();
                         continue;
@@ -1897,11 +2066,14 @@ public abstract class JSONPath {
                         case '7':
                         case '8':
                         case '9':
-                            return jsonReader.readNumber();
+                            val = jsonReader.readNumber();
+                            break;
                         case '[':
-                            return jsonReader.readArray();
+                            val = jsonReader.readArray();
+                            break;
                         case '{':
-                            return jsonReader.readObject();
+                            val = jsonReader.readObject();
+                            break;
                         case '"':
                         case '\'':
                             val = jsonReader.readString(); //
@@ -1917,8 +2089,21 @@ public abstract class JSONPath {
                         default:
                             throw new JSONException("TODO : " + jsonReader.ch);
                     }
+
+                    if ((features & Feature.AlwaysReturnList.mask) != 0) {
+                        if (val == null) {
+                            val = new JSONArray();
+                        } else {
+                            val = JSONArray.of(val);
+                        }
+                    }
+
                     return val;
                 }
+            }
+
+            if ((features & Feature.AlwaysReturnList.mask) != 0) {
+                return new JSONArray();
             }
             return null;
         }
@@ -2317,8 +2502,8 @@ public abstract class JSONPath {
         final Segment segment;
         final boolean ref;
 
-        public SingleSegmentPath(Segment segment, String path) {
-            super(path);
+        public SingleSegmentPath(Segment segment, String path, Feature... features) {
+            super(path, features);
             this.segment = segment;
             this.ref = segment instanceof IndexSegment || segment instanceof NameSegment;
         }
@@ -2411,8 +2596,8 @@ public abstract class JSONPath {
         final Segment second;
         final boolean ref;
 
-        public TwoSegmentPath(String path, Segment first, Segment second) {
-            super(path);
+        public TwoSegmentPath(String path, Segment first, Segment second, Feature... features) {
+            super(path, features);
             this.first = first;
             this.second = second;
             this.ref = (first instanceof IndexSegment || first instanceof NameSegment)
@@ -2461,7 +2646,15 @@ public abstract class JSONPath {
 
             Context context1 = new Context(this, context0, second, null, 0);
             second.eval(context1);
-            return context1.value;
+            Object contextValue = context1.value;
+            if ((features & Feature.AlwaysReturnList.mask) != 0) {
+                if (contextValue == null) {
+                    contextValue = new JSONArray();
+                } else if (!(contextValue instanceof List)) {
+                    contextValue = JSONArray.of(contextValue);
+                }
+            }
+            return contextValue;
         }
 
         @Override
@@ -2484,6 +2677,19 @@ public abstract class JSONPath {
                     ((Map) root).put(((NameSegment) first).name, emptyValue);
                 } else if (root instanceof List && first instanceof IndexSegment) {
                     ((List) root).set(((IndexSegment) first).index, emptyValue);
+                } else if (root != null) {
+                    Class<?> parentObjectClass = root.getClass();
+                    JSONReader.Context readerContext = getReaderContext();
+                    ObjectReader<?> objectReader = readerContext.getObjectReader(parentObjectClass);
+                    if (first instanceof NameSegment) {
+                        FieldReader fieldReader = objectReader.getFieldReader(((NameSegment) first).nameHashCode);
+                        if (fieldReader != null) {
+                            ObjectReader fieldObjectReader = fieldReader.getObjectReader(readerContext);
+                            Object fieldValue = fieldObjectReader.createInstance();
+                            fieldReader.accept(root, fieldValue);
+                            context0.value = fieldValue;
+                        }
+                    }
                 }
             }
 
@@ -2565,7 +2771,17 @@ public abstract class JSONPath {
                 second.accept(jsonReader, context1);
             }
 
-            return context1.value;
+            Object contextValue = context1.value;
+
+            if ((features & Feature.AlwaysReturnList.mask) != 0) {
+                if (contextValue == null) {
+                    contextValue = new JSONArray();
+                } else if (!(contextValue instanceof List)) {
+                    contextValue = JSONArray.of(contextValue);
+                }
+            }
+
+            return contextValue;
         }
 
         @Override
@@ -2585,8 +2801,8 @@ public abstract class JSONPath {
         final List<Segment> segments;
         final boolean ref;
 
-        private MultiSegmentPath(String path, List<Segment> segments) {
-            super(path);
+        private MultiSegmentPath(String path, List<Segment> segments, Feature... features) {
+            super(path, features);
             this.segments = segments;
 
             boolean ref = true;
@@ -2693,7 +2909,16 @@ public abstract class JSONPath {
 
                 segment.eval(context);
             }
-            return context.value;
+
+            Object contextValue = context.value;
+            if ((context.path.features & Feature.AlwaysReturnList.mask) != 0) {
+                if (contextValue == null) {
+                    contextValue = new JSONArray();
+                } else if (!(contextValue instanceof List)) {
+                    contextValue = JSONArray.of(contextValue);
+                }
+            }
+            return contextValue;
         }
 
         @Override
@@ -2738,7 +2963,26 @@ public abstract class JSONPath {
                     if (parentObject instanceof Map && segment instanceof NameSegment) {
                         ((Map) parentObject).put(((NameSegment) segment).name, emptyValue);
                     } else if (parentObject instanceof List && segment instanceof IndexSegment) {
-                        ((List) parentObject).set(((IndexSegment) segment).index, emptyValue);
+                        List list = (List) parentObject;
+                        int index = ((IndexSegment) segment).index;
+                        if (index == list.size()) {
+                            list.add(emptyValue);
+                        } else {
+                            list.set(index, emptyValue);
+                        }
+                    } else if (parentObject != null) {
+                        Class<?> parentObjectClass = parentObject.getClass();
+                        JSONReader.Context readerContext = getReaderContext();
+                        ObjectReader<?> objectReader = readerContext.getObjectReader(parentObjectClass);
+                        if (segment instanceof NameSegment) {
+                            FieldReader fieldReader = objectReader.getFieldReader(((NameSegment) segment).nameHashCode);
+                            if (fieldReader != null) {
+                                ObjectReader fieldObjectReader = fieldReader.getObjectReader(readerContext);
+                                Object fieldValue = fieldObjectReader.createInstance();
+                                fieldReader.accept(parentObject, fieldValue);
+                                context.value = fieldValue;
+                            }
+                        }
                     }
                 }
             }
@@ -2855,6 +3099,14 @@ public abstract class JSONPath {
             if (value instanceof Sequence) {
                 value = ((Sequence) value).values;
             }
+
+            if ((features & Feature.AlwaysReturnList.mask) != 0) {
+                if (value == null) {
+                    value = new JSONArray();
+                } else if (!(value instanceof List)) {
+                    value = JSONArray.of(value);
+                }
+            }
             return value;
         }
 
@@ -2943,6 +3195,52 @@ public abstract class JSONPath {
 
         public void setLong(Context context, long value) {
             set(context, Long.valueOf(value));
+        }
+    }
+
+    static final class EntrySetSegment
+            extends Segment
+            implements EvalSegment {
+        static final EntrySetSegment INSTANCE = new EntrySetSegment();
+
+        @Override
+        public void accept(JSONReader jsonReader, Context context) {
+            if (jsonReader.isObject()) {
+                jsonReader.next();
+                JSONArray array = new JSONArray();
+                while (!jsonReader.nextIfObjectEnd()) {
+                    String fieldName = jsonReader.readFieldName();
+                    Object value = jsonReader.readAny();
+                    array.add(
+                            JSONObject.of("key", fieldName, "value", value)
+                    );
+                }
+                context.value = array;
+                return;
+            }
+            throw new JSONException("TODO");
+        }
+
+        @Override
+        public void eval(Context context) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+            if (object instanceof Map) {
+                Map map = (Map) object;
+                JSONArray array = new JSONArray(map.size());
+                for (Iterator<Map.Entry> it = ((Map) object).entrySet().iterator(); it.hasNext(); ) {
+                    Map.Entry entry = it.next();
+                    array.add(
+                            JSONObject.of("key", entry.getKey(), "value", entry.getValue())
+                    );
+                }
+                context.value = array;
+                context.eval = true;
+                return;
+            }
+
+            throw new JSONException("TODO");
         }
     }
 
@@ -3852,7 +4150,7 @@ public abstract class JSONPath {
 
             if (value != null) {
                 Class<?> valueClass = value.getClass();
-                Class fieldClass = fieldReader.getFieldClass();
+                Class fieldClass = fieldReader.fieldClass;
                 if (valueClass != fieldClass) {
                     java.util.function.Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
                     if (typeConvert != null) {
@@ -4735,8 +5033,15 @@ public abstract class JSONPath {
             if (object instanceof java.util.List) {
                 List list = (List) object;
                 if (index >= 0) {
+                    if (index > list.size()) {
+                        for (int i = list.size(); i < index; ++i) {
+                            list.add(null);
+                        }
+                    }
                     if (index < list.size()) {
                         list.set(index, value);
+                    } else if (index <= list.size()) {
+                        list.add(value);
                     }
                 } else {
                     int itemIndex = list.size() + this.index;
@@ -5062,8 +5367,8 @@ public abstract class JSONPath {
             bytes[bytes.length - 1] = ']';
 
             String str;
-            if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
-                str = (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
+            if (STRING_CREATOR_JDK11 != null) {
+                str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
             } else {
                 str = new String(bytes, StandardCharsets.US_ASCII);
             }
@@ -5877,6 +6182,7 @@ public abstract class JSONPath {
                 throw new JSONException("TODO");
             }
 
+            boolean alwaysReturnList = context.next == null && (context.path.features & Feature.AlwaysReturnList.mask) != 0;
             List<Object> values = new JSONArray();
 
             if (jsonReader.nextIfMatch('{')) {
@@ -5931,7 +6237,11 @@ public abstract class JSONPath {
                     }
 
                     if (val instanceof Collection) {
-                        values.addAll((Collection) val);
+                        if (alwaysReturnList) {
+                            values.add(val);
+                        } else {
+                            values.addAll((Collection) val);
+                        }
                     } else {
                         values.add(val);
                     }
@@ -6015,7 +6325,7 @@ public abstract class JSONPath {
         boolean negative;
 
         public JSONPathParser(String str) {
-            this.jsonReader = JSONReader.of(PARSE_CONTEXT, this.path = str);
+            this.jsonReader = JSONReader.of(this.path = str, PARSE_CONTEXT);
 
             if (jsonReader.ch == 'l' && jsonReader.nextIfMatchIdent('l', 'a', 'x')) {
                 lax = true;
@@ -6034,7 +6344,7 @@ public abstract class JSONPath {
             }
         }
 
-        JSONPath parse() {
+        JSONPath parse(Feature... features) {
             if (dollar && jsonReader.ch == EOI) {
                 if (negative) {
                     return new SingleSegmentPath(FUNCTION_NEGATIVE, path);
@@ -6108,7 +6418,6 @@ public abstract class JSONPath {
                     segments.add(segment);
                 }
                 segmentIndex++;
-                continue;
             }
 
             if (negative) {
@@ -6127,17 +6436,17 @@ public abstract class JSONPath {
 
             if (segmentIndex == 1) {
                 if (first instanceof NameSegment) {
-                    return new SingleNamePath(path, (NameSegment) first);
+                    return new SingleNamePath(path, (NameSegment) first, features);
                 }
 
-                return new SingleSegmentPath(first, path);
+                return new SingleSegmentPath(first, path, features);
             }
 
             if (segmentIndex == 2) {
-                return new TwoSegmentPath(path, first, second);
+                return new TwoSegmentPath(path, first, second, features);
             }
 
-            return new MultiSegmentPath(path, segments);
+            return new MultiSegmentPath(path, segments, features);
         }
 
         private Segment parseArrayAccess() {
@@ -6322,6 +6631,9 @@ public abstract class JSONPath {
                             case "values":
                                 segment = ValuesSegment.INSTANCE;
                                 break;
+                            case "entrySet":
+                                segment = EntrySetSegment.INSTANCE;
+                                break;
                             case "min":
                                 segment = MinSegment.INSTANCE;
                                 break;
@@ -6421,315 +6733,9 @@ public abstract class JSONPath {
         Segment parseFilter() {
             boolean parentheses = jsonReader.nextIfMatch('(');
 
-            if (jsonReader.ch == '@') {
+            boolean at = jsonReader.ch == '@';
+            if (at) {
                 jsonReader.next();
-                if (jsonReader.ch != '.') {
-                    Operator operator = parseOperator(jsonReader);
-
-                    Segment segment = null;
-                    if (jsonReader.isNumber()) {
-                        Number number = jsonReader.readNumber();
-                        if (number instanceof Integer || number instanceof Long) {
-                            segment = new NameIntOpSegment(null, 0, null, null, null, operator, number.longValue());
-                        }
-                    } else if (jsonReader.isString()) {
-                        String string = jsonReader.readString();
-
-                        switch (operator) {
-                            case STARTS_WITH:
-                                segment = new StartsWithSegment(null, 0, string);
-                                break;
-                            default:
-                                throw new JSONException("syntax error, " + string);
-                        }
-                    }
-
-                    while (jsonReader.ch == '&' || jsonReader.ch == '|') {
-                        segment = parseFilterRest(segment);
-                    }
-
-                    if (segment != null) {
-                        if (parentheses) {
-                            if (!jsonReader.nextIfMatch(')')) {
-                                throw new JSONException(jsonReader.info("jsonpath syntax error"));
-                            }
-                        }
-                        return segment;
-                    }
-
-                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
-                }
-
-                jsonReader.next();
-                long hashCode = jsonReader.readFieldNameHashCodeUnquote();
-                String fieldName = jsonReader.getFieldName();
-
-                if (parentheses) {
-                    if (jsonReader.nextIfMatch(')')) {
-                        NameExistsFilter segment = new NameExistsFilter(fieldName, hashCode);
-                        return segment;
-                    }
-                }
-
-                Function function = null;
-                if (jsonReader.ch == '(') {
-                    jsonReader.next();
-                    if (!jsonReader.nextIfMatch(')')) {
-                        throw new JSONException("syntax error, function " + fieldName);
-                    }
-                    switch (fieldName) {
-                        case "type":
-                            fieldName = null;
-                            hashCode = 0;
-                            function = TypeFunction.INSTANCE;
-                            break;
-                        case "size":
-                            fieldName = null;
-                            hashCode = 0;
-                            function = SizeFunction.INSTANCE;
-                            break;
-                        default:
-                            throw new JSONException("syntax error, function not support " + fieldName);
-                    }
-                }
-
-                long[] hashCode2 = null;
-                String[] fieldName2 = null;
-                while (jsonReader.ch == '.') {
-                    jsonReader.next();
-                    long hash = jsonReader.readFieldNameHashCodeUnquote();
-                    String str = jsonReader.getFieldName();
-
-                    if (hashCode2 == null) {
-                        hashCode2 = new long[] {hash};
-                        fieldName2 = new String[] {str};
-                    } else {
-                        hashCode2 = Arrays.copyOf(hashCode2, hashCode2.length + 1);
-                        hashCode2[hashCode2.length - 1] = hash;
-                        fieldName2 = Arrays.copyOf(fieldName2, fieldName2.length + 1);
-                        fieldName2[fieldName2.length - 1] = str;
-                    }
-                }
-
-                Operator operator = parseOperator(jsonReader);
-
-                switch (operator) {
-                    case REG_MATCH:
-                    case RLIKE:
-                    case NOT_RLIKE: {
-                        String regex;
-                        boolean ignoreCase;
-                        if (jsonReader.isString()) {
-                            regex = jsonReader.readString();
-                            ignoreCase = false;
-                        } else {
-                            regex = jsonReader.readPattern();
-                            ignoreCase = jsonReader.nextIfMatch('i');
-                        }
-
-                        Pattern pattern = ignoreCase
-                                ? Pattern.compile(regex, Pattern.CASE_INSENSITIVE)
-                                : Pattern.compile(regex);
-
-                        Segment segment = new NameRLikeSegment(fieldName, hashCode, pattern, operator == Operator.NOT_RLIKE);
-                        if (!jsonReader.nextIfMatch(')')) {
-                            throw new JSONException(jsonReader.info("jsonpath syntax error"));
-                        }
-
-                        return segment;
-                    }
-                    case IN:
-                    case NOT_IN: {
-                        if (jsonReader.ch != '(') {
-                            throw new JSONException(jsonReader.info("jsonpath syntax error"));
-                        }
-                        jsonReader.next();
-
-                        Segment segment;
-                        if (jsonReader.isString()) {
-                            List<String> list = new ArrayList<>();
-                            while (jsonReader.isString()) {
-                                list.add(jsonReader.readString());
-                            }
-                            String[] strArray = new String[list.size()];
-                            list.toArray(strArray);
-                            segment = new NameStringInSegment(fieldName, hashCode, strArray, operator == Operator.NOT_IN);
-                        } else if (jsonReader.isNumber()) {
-                            List<Number> list = new ArrayList<>();
-                            while (jsonReader.isNumber()) {
-                                list.add(jsonReader.readNumber());
-                            }
-                            long[] values = new long[list.size()];
-                            for (int i = 0; i < list.size(); i++) {
-                                values[i] = list.get(i).longValue();
-                            }
-                            segment = new NameIntInSegment(fieldName, hashCode, fieldName2, hashCode2, function, values, operator == Operator.NOT_IN);
-                        } else {
-                            throw new JSONException(jsonReader.info("jsonpath syntax error"));
-                        }
-
-                        if (!jsonReader.nextIfMatch(')')) {
-                            throw new JSONException(jsonReader.info("jsonpath syntax error"));
-                        }
-                        if (!jsonReader.nextIfMatch(')')) {
-                            throw new JSONException(jsonReader.info("jsonpath syntax error"));
-                        }
-
-                        return segment;
-                    }
-                    case BETWEEN:
-                    case NOT_BETWEEN: {
-                        Segment segment;
-                        if (jsonReader.isNumber()) {
-                            Number begin = jsonReader.readNumber();
-                            String and = jsonReader.readFieldNameUnquote();
-                            if (!"and".equalsIgnoreCase(and)) {
-                                throw new JSONException("syntax error, " + and);
-                            }
-                            Number end = jsonReader.readNumber();
-                            segment = new NameIntBetweenSegment(fieldName, hashCode, begin.longValue(), end.longValue(), operator == Operator.NOT_BETWEEN);
-                        } else {
-                            throw new JSONException(jsonReader.info("jsonpath syntax error"));
-                        }
-
-                        if (parentheses) {
-                            if (!jsonReader.nextIfMatch(')')) {
-                                throw new JSONException(jsonReader.info("jsonpath syntax error"));
-                            }
-                        }
-
-                        return segment;
-                    }
-                    default:
-                        break;
-                }
-
-                Segment segment = null;
-                switch (jsonReader.ch) {
-                    case '-':
-                    case '+':
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9': {
-                        Number number = jsonReader.readNumber();
-                        if (number instanceof Integer || number instanceof Long) {
-                            segment = new NameIntOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, number.longValue());
-                        } else if (number instanceof BigDecimal) {
-                            segment = new NameDecimalOpSegment(fieldName, hashCode, operator, (BigDecimal) number);
-                        } else {
-                            throw new JSONException(jsonReader.info("jsonpath syntax error"));
-                        }
-                        break;
-                    }
-                    case '"':
-                    case '\'': {
-                        String strVal = jsonReader.readString();
-                        int p0 = strVal.indexOf('%');
-                        if (p0 == -1) {
-                            if (operator == Operator.LIKE) {
-                                operator = Operator.EQ;
-                            } else if (operator == Operator.NOT_LIKE) {
-                                operator = Operator.NE;
-                            }
-                        }
-
-                        if (operator == Operator.LIKE || operator == Operator.NOT_LIKE) {
-                            String[] items = strVal.split("%");
-
-                            String startsWithValue = null;
-                            String endsWithValue = null;
-                            String[] containsValues = null;
-                            if (p0 == 0) {
-                                if (strVal.charAt(strVal.length() - 1) == '%') {
-                                    containsValues = new String[items.length - 1];
-                                    System.arraycopy(items, 1, containsValues, 0, containsValues.length);
-                                } else {
-                                    endsWithValue = items[items.length - 1];
-                                    if (items.length > 2) {
-                                        containsValues = new String[items.length - 2];
-                                        System.arraycopy(items, 1, containsValues, 0, containsValues.length);
-                                    }
-                                }
-                            } else if (strVal.charAt(strVal.length() - 1) == '%') {
-                                if (items.length == 1) {
-                                    startsWithValue = items[0];
-                                } else {
-                                    containsValues = items;
-                                }
-                            } else {
-                                if (items.length == 1) {
-                                    startsWithValue = items[0];
-                                } else if (items.length == 2) {
-                                    startsWithValue = items[0];
-                                    endsWithValue = items[1];
-                                } else {
-                                    startsWithValue = items[0];
-                                    endsWithValue = items[items.length - 1];
-                                    containsValues = new String[items.length - 2];
-                                    System.arraycopy(items, 1, containsValues, 0, containsValues.length);
-                                }
-                            }
-                            segment = new NameMatchFilter(
-                                    fieldName,
-                                    hashCode,
-                                    startsWithValue,
-                                    endsWithValue,
-                                    containsValues,
-                                    operator == Operator.NOT_LIKE
-                            );
-                        } else {
-                            segment = new NameStringOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, strVal);
-                        }
-                        break;
-                    }
-                    case 't': {
-                        String ident = jsonReader.readFieldNameUnquote();
-                        if ("true".equalsIgnoreCase(ident)) {
-                            segment = new NameIntOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, 1);
-                            break;
-                        }
-                        break;
-                    }
-                    case 'f': {
-                        String ident = jsonReader.readFieldNameUnquote();
-                        if ("false".equalsIgnoreCase(ident)) {
-                            segment = new NameIntOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, 0);
-                            break;
-                        }
-                        break;
-                    }
-                    case '[': {
-                        JSONArray array = jsonReader.read(JSONArray.class);
-                        segment = new NameArrayOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, array);
-                        break;
-                    }
-                    case '{': {
-                        JSONObject object = jsonReader.read(JSONObject.class);
-                        segment = new NameObjectOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, object);
-                        break;
-                    }
-                    default:
-                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
-                }
-
-                if (jsonReader.ch == '&' || jsonReader.ch == '|' || jsonReader.ch == 'a' || jsonReader.ch == 'o') {
-                    segment = parseFilterRest(segment);
-                }
-
-                if (parentheses) {
-                    if (!jsonReader.nextIfMatch(')')) {
-                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
-                    }
-                }
-
-                return segment;
             } else if (jsonReader.nextIfMatchIdent('e', 'x', 'i', 's', 't', 's')) {
                 if (!jsonReader.nextIfMatch('(')) {
                     throw new JSONException(jsonReader.info("exists"));
@@ -6753,9 +6759,419 @@ public abstract class JSONPath {
                 }
 
                 throw new JSONException(jsonReader.info("jsonpath syntax error"));
-            } else {
+            }
+
+            boolean starts = jsonReader.nextIfMatchIdent('s', 't', 'a', 'r', 't', 's');
+            if ((at && starts) || (jsonReader.ch != '.' && !JSONReader.isFirstIdentifier(jsonReader.ch))) {
+                if (!at) {
+                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                }
+
+                Operator operator;
+                if (starts) {
+                    jsonReader.readFieldNameHashCodeUnquote();
+                    String fieldName = jsonReader.getFieldName();
+                    if (!"with".equalsIgnoreCase(fieldName)) {
+                        throw new JSONException("not support operator : " + fieldName);
+                    }
+                    operator = Operator.STARTS_WITH;
+                } else {
+                    operator = parseOperator(jsonReader);
+                }
+
+                Segment segment = null;
+                if (jsonReader.isNumber()) {
+                    Number number = jsonReader.readNumber();
+                    if (number instanceof Integer || number instanceof Long) {
+                        segment = new NameIntOpSegment(null, 0, null, null, null, operator, number.longValue());
+                    }
+                } else if (jsonReader.isString()) {
+                    String string = jsonReader.readString();
+
+                    switch (operator) {
+                        case STARTS_WITH:
+                            segment = new StartsWithSegment(null, 0, string);
+                            break;
+                        default:
+                            throw new JSONException("syntax error, " + string);
+                    }
+                }
+
+                while (jsonReader.ch == '&' || jsonReader.ch == '|') {
+                    segment = parseFilterRest(segment);
+                }
+
+                if (segment != null) {
+                    if (parentheses) {
+                        if (!jsonReader.nextIfMatch(')')) {
+                            throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                        }
+                    }
+                    return segment;
+                }
+
                 throw new JSONException(jsonReader.info("jsonpath syntax error"));
             }
+
+            if (at) {
+                jsonReader.next();
+            }
+
+            long hashCode = jsonReader.readFieldNameHashCodeUnquote();
+            String fieldName = jsonReader.getFieldName();
+
+            if (parentheses) {
+                if (jsonReader.nextIfMatch(')')) {
+                    NameExistsFilter segment = new NameExistsFilter(fieldName, hashCode);
+                    return segment;
+                }
+            }
+
+            String functionName = null;
+
+            long[] hashCode2 = null;
+            String[] fieldName2 = null;
+            while (jsonReader.ch == '.') {
+                jsonReader.next();
+                long hash = jsonReader.readFieldNameHashCodeUnquote();
+                String str = jsonReader.getFieldName();
+
+                if (jsonReader.ch == '(') {
+                    functionName = str;
+                    break;
+                }
+
+                if (hashCode2 == null) {
+                    hashCode2 = new long[]{hash};
+                    fieldName2 = new String[]{str};
+                } else {
+                    hashCode2 = Arrays.copyOf(hashCode2, hashCode2.length + 1);
+                    hashCode2[hashCode2.length - 1] = hash;
+                    fieldName2 = Arrays.copyOf(fieldName2, fieldName2.length + 1);
+                    fieldName2[fieldName2.length - 1] = str;
+                }
+            }
+
+            Operator operator = null;
+            Function function = null;
+            if (jsonReader.ch == '(') {
+                if (functionName == null) {
+                    functionName = fieldName;
+                    fieldName = null;
+                }
+
+                switch (functionName) {
+                    case "type":
+                        hashCode = 0;
+                        function = TypeFunction.INSTANCE;
+                        break;
+                    case "size":
+                        hashCode = 0;
+                        function = SizeFunction.INSTANCE;
+                        break;
+                    case "contains":
+                        hashCode = 0;
+                        operator = Operator.CONTAINS;
+                        break;
+                    default:
+                        throw new JSONException("syntax error, function not support " + fieldName);
+                }
+
+                if (function != null) {
+                    jsonReader.next();
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException("syntax error, function " + functionName);
+                    }
+                }
+            }
+
+            if (operator == null) {
+                operator = parseOperator(jsonReader);
+            }
+
+            switch (operator) {
+                case REG_MATCH:
+                case RLIKE:
+                case NOT_RLIKE: {
+                    String regex;
+                    boolean ignoreCase;
+                    if (jsonReader.isString()) {
+                        regex = jsonReader.readString();
+                        ignoreCase = false;
+                    } else {
+                        regex = jsonReader.readPattern();
+                        ignoreCase = jsonReader.nextIfMatch('i');
+                    }
+
+                    Pattern pattern = ignoreCase
+                            ? Pattern.compile(regex, Pattern.CASE_INSENSITIVE)
+                            : Pattern.compile(regex);
+
+                    Segment segment = new NameRLikeSegment(fieldName, hashCode, pattern, operator == Operator.NOT_RLIKE);
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+
+                    return segment;
+                }
+                case IN:
+                case NOT_IN: {
+                    if (jsonReader.ch != '(') {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+                    jsonReader.next();
+
+                    Segment segment;
+                    if (jsonReader.isString()) {
+                        List<String> list = new ArrayList<>();
+                        while (jsonReader.isString()) {
+                            list.add(jsonReader.readString());
+                        }
+                        String[] strArray = new String[list.size()];
+                        list.toArray(strArray);
+                        segment = new NameStringInSegment(
+                                fieldName,
+                                hashCode,
+                                strArray,
+                                operator == Operator.NOT_IN
+                        );
+                    } else if (jsonReader.isNumber()) {
+                        List<Number> list = new ArrayList<>();
+                        while (jsonReader.isNumber()) {
+                            list.add(jsonReader.readNumber());
+                        }
+                        long[] values = new long[list.size()];
+                        for (int i = 0; i < list.size(); i++) {
+                            values[i] = list.get(i).longValue();
+                        }
+                        segment = new NameIntInSegment(fieldName, hashCode, fieldName2, hashCode2, function, values, operator == Operator.NOT_IN);
+                    } else {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+
+                    return segment;
+                }
+                case CONTAINS: {
+                    if (jsonReader.ch != '(') {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+                    jsonReader.next();
+
+                    Segment segment;
+                    if (jsonReader.isString()) {
+                        List<String> list = new ArrayList<>();
+                        while (jsonReader.isString()) {
+                            list.add(jsonReader.readString());
+                        }
+                        String[] strArray = new String[list.size()];
+                        list.toArray(strArray);
+                        segment = new NameStringContainsSegment(
+                                fieldName,
+                                hashCode,
+                                fieldName2,
+                                hashCode2,
+                                strArray,
+                                operator == Operator.NOT_CONTAINS
+                        );
+                    } else if (jsonReader.isNumber()) {
+                        List<Number> list = new ArrayList<>();
+                        while (jsonReader.isNumber()) {
+                            list.add(jsonReader.readNumber());
+                        }
+                        long[] values = new long[list.size()];
+                        for (int i = 0; i < list.size(); i++) {
+                            values[i] = list.get(i).longValue();
+                        }
+                        segment = new NameLongContainsSegment(
+                                fieldName,
+                                hashCode,
+                                fieldName2,
+                                hashCode2,
+                                values,
+                                operator == Operator.NOT_CONTAINS
+                        );
+                    } else {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+                    if (!jsonReader.nextIfMatch(')')) {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+
+                    return segment;
+                }
+                case BETWEEN:
+                case NOT_BETWEEN: {
+                    Segment segment;
+                    if (jsonReader.isNumber()) {
+                        Number begin = jsonReader.readNumber();
+                        String and = jsonReader.readFieldNameUnquote();
+                        if (!"and".equalsIgnoreCase(and)) {
+                            throw new JSONException("syntax error, " + and);
+                        }
+                        Number end = jsonReader.readNumber();
+                        segment = new NameIntBetweenSegment(fieldName, hashCode, begin.longValue(), end.longValue(), operator == Operator.NOT_BETWEEN);
+                    } else {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+
+                    if (parentheses) {
+                        if (!jsonReader.nextIfMatch(')')) {
+                            throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                        }
+                    }
+
+                    return segment;
+                }
+                default:
+                    break;
+            }
+
+            Segment segment = null;
+            switch (jsonReader.ch) {
+                case '-':
+                case '+':
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9': {
+                    Number number = jsonReader.readNumber();
+                    if (number instanceof Integer || number instanceof Long) {
+                        segment = new NameIntOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, number.longValue());
+                    } else if (number instanceof BigDecimal) {
+                        segment = new NameDecimalOpSegment(fieldName, hashCode, operator, (BigDecimal) number);
+                    } else {
+                        throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                    }
+                    break;
+                }
+                case '"':
+                case '\'': {
+                    String strVal = jsonReader.readString();
+                    int p0 = strVal.indexOf('%');
+                    if (p0 == -1) {
+                        if (operator == Operator.LIKE) {
+                            operator = Operator.EQ;
+                        } else if (operator == Operator.NOT_LIKE) {
+                            operator = Operator.NE;
+                        }
+                    }
+
+                    if (operator == Operator.LIKE || operator == Operator.NOT_LIKE) {
+                        String[] items = strVal.split("%");
+
+                        String startsWithValue = null;
+                        String endsWithValue = null;
+                        String[] containsValues = null;
+                        if (p0 == 0) {
+                            if (strVal.charAt(strVal.length() - 1) == '%') {
+                                containsValues = new String[items.length - 1];
+                                System.arraycopy(items, 1, containsValues, 0, containsValues.length);
+                            } else {
+                                endsWithValue = items[items.length - 1];
+                                if (items.length > 2) {
+                                    containsValues = new String[items.length - 2];
+                                    System.arraycopy(items, 1, containsValues, 0, containsValues.length);
+                                }
+                            }
+                        } else if (strVal.charAt(strVal.length() - 1) == '%') {
+                            if (items.length == 1) {
+                                startsWithValue = items[0];
+                            } else {
+                                containsValues = items;
+                            }
+                        } else {
+                            if (items.length == 1) {
+                                startsWithValue = items[0];
+                            } else if (items.length == 2) {
+                                startsWithValue = items[0];
+                                endsWithValue = items[1];
+                            } else {
+                                startsWithValue = items[0];
+                                endsWithValue = items[items.length - 1];
+                                containsValues = new String[items.length - 2];
+                                System.arraycopy(items, 1, containsValues, 0, containsValues.length);
+                            }
+                        }
+                        segment = new NameMatchFilter(
+                                fieldName,
+                                hashCode,
+                                startsWithValue,
+                                endsWithValue,
+                                containsValues,
+                                operator == Operator.NOT_LIKE
+                        );
+                    } else {
+                        segment = new NameStringOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, strVal);
+                    }
+                    break;
+                }
+                case 't': {
+                    String ident = jsonReader.readFieldNameUnquote();
+                    if ("true".equalsIgnoreCase(ident)) {
+                        segment = new NameIntOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, 1);
+                        break;
+                    }
+                    break;
+                }
+                case 'f': {
+                    String ident = jsonReader.readFieldNameUnquote();
+                    if ("false".equalsIgnoreCase(ident)) {
+                        segment = new NameIntOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, 0);
+                        break;
+                    }
+                    break;
+                }
+                case '[': {
+                    JSONArray array = jsonReader.read(JSONArray.class);
+                    segment = new NameArrayOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, array);
+                    break;
+                }
+                case '{': {
+                    JSONObject object = jsonReader.read(JSONObject.class);
+                    segment = new NameObjectOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, object);
+                    break;
+                }
+                default:
+                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
+            }
+
+            if (jsonReader.ch == '&' || jsonReader.ch == '|' || jsonReader.ch == 'a' || jsonReader.ch == 'o') {
+                segment = parseFilterRest(segment);
+            }
+
+            if (parentheses) {
+                if (!jsonReader.nextIfMatch(')')) {
+                    throw new JSONException(jsonReader.info("jsonpath syntax error"));
+                }
+            }
+
+            return segment;
+        }
+    }
+
+    public enum Feature {
+        AlwaysReturnList(1);
+        public final long mask;
+
+        Feature(long mask) {
+            this.mask = mask;
         }
     }
 }

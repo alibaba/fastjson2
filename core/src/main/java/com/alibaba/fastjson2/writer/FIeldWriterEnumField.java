@@ -7,16 +7,8 @@ import java.lang.reflect.Field;
 
 final class FIeldWriterEnumField
         extends FieldWriterEnum {
-    final Field field;
-
     protected FIeldWriterEnumField(String name, int ordinal, long features, String format, String label, Class fieldType, Field field) {
-        super(name, ordinal, features, format, label, fieldType);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, features, format, label, fieldType, field, null);
     }
 
     @Override
@@ -24,7 +16,7 @@ final class FIeldWriterEnumField
         try {
             return field.get(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 

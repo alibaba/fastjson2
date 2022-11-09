@@ -55,4 +55,15 @@ public class JSONPath_18 {
         Object object = new Object();
         assertSame(object, JSONPath.of("$").eval(object));
     }
+
+    @Test
+    public void testEntrySet() {
+        assertEquals(
+                "[{\"key\":\"sls_log_archive.mytable/project_id=101/category=log_game/import_time=1655031945_0\",\"value\":[1323,19483761]}]",
+                JSONPath
+                        .of("$.inputs.entrySet()")
+                        .eval(JSON.parseObject(str))
+                        .toString()
+        );
+    }
 }

@@ -14,7 +14,7 @@ public class Date20WriteTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("Date20-fastjson2 : " + millis);
 
-            // zulu8.62.0.19 : 775 638 620
+            // zulu8.62.0.19 : 775 638 620 573
             // zulu11.52.13 :
             // zulu17.32.13 :
             // zulu18.28.13 :

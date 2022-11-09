@@ -8,18 +8,11 @@ import java.util.function.Function;
 
 final class FieldWriterCalendarFunc<T>
         extends FieldWriterDate<T> {
-    final Method method;
     final Function<T, Calendar> function;
 
     FieldWriterCalendarFunc(String fieldName, int ordinal, long features, String dateTimeFormat, String label, Method method, Function<T, Calendar> function) {
-        super(fieldName, ordinal, features, dateTimeFormat, label, Calendar.class, Calendar.class);
-        this.method = method;
+        super(fieldName, ordinal, features, dateTimeFormat, label, Calendar.class, Calendar.class, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

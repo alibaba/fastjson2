@@ -4,8 +4,6 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
-import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Type;
@@ -14,87 +12,93 @@ import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
+import static com.alibaba.fastjson2.JSONReader.Feature.SupportArrayToBean;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectReader2<T>
-        extends ObjectReaderBean<T> {
-    final long features;
-    final Supplier<T> defaultCreator;
-    final Function buildFunction;
-    private final FieldReader first;
-    private final FieldReader second;
-    private final long firstHashCode;
-    private final long secondHashCode;
-    private final long firstHashCodeLCase;
-    private final long secondHashCodeLCase;
+        extends ObjectReaderAdapter<T> {
+    protected final FieldReader fieldReader0;
+    protected final FieldReader fieldReader1;
+    protected final long hashCode0;
+    protected final long hashCode1;
+    protected final long hashCode0LCase;
+    protected final long hashCode1LCase;
+
+    protected ObjectReader objectReader0;
+    protected ObjectReader objectReader1;
 
     public ObjectReader2(
             Class objectClass,
             long features,
             JSONSchema schema,
-            Supplier<T> defaultCreator,
+            Supplier<T> creator,
             Function buildFunction,
             FieldReader first,
-            FieldReader second) {
-        super(objectClass, null, schema);
+            FieldReader second
+    ) {
+        this(objectClass, null, null, features, schema, creator, buildFunction, first, second);
+    }
 
-        this.features = features;
-        this.defaultCreator = defaultCreator;
-        this.buildFunction = buildFunction;
+    public ObjectReader2(
+            Class objectClass,
+            String typeKey,
+            String typeName,
+            long features,
+            JSONSchema schema,
+            Supplier<T> creator,
+            Function buildFunction,
+            FieldReader... fieldReaders
+    ) {
+        super(objectClass, typeKey, typeName, features, schema, creator, buildFunction, fieldReaders);
 
-        this.first = first;
-        this.second = second;
+        this.fieldReader0 = fieldReaders[0];
+        this.fieldReader1 = fieldReaders[1];
 
-        String fieldName0 = first.getFieldName();
-        this.firstHashCode = Fnv.hashCode64(fieldName0);
-        this.firstHashCodeLCase = Fnv.hashCode64LCase(fieldName0);
+        this.hashCode0 = fieldReader0.fieldNameHash;
+        this.hashCode0LCase = fieldReader0.fieldNameHashLCase;
 
-        String fieldName1 = second.getFieldName();
-        this.secondHashCode = Fnv.hashCode64(fieldName1);
-        this.secondHashCodeLCase = Fnv.hashCode64LCase(fieldName1);
+        this.hashCode1 = fieldReader1.fieldNameHash;
+        this.hashCode1LCase = fieldReader1.fieldNameHashLCase;
 
-        if (first.isUnwrapped()) {
-            extraFieldReader = first;
+        if (fieldReader0.isUnwrapped()) {
+            extraFieldReader = fieldReader0;
         }
-        if (second.isUnwrapped()) {
-            extraFieldReader = second;
+        if (fieldReader1.isUnwrapped()) {
+            extraFieldReader = fieldReader1;
         }
 
-        hasDefaultValue = first.getDefaultValue() != null || second.getDefaultValue() != null;
+        hasDefaultValue = fieldReader0.defaultValue != null || fieldReader1.defaultValue != null;
     }
 
     @Override
     protected void initDefaultValue(T object) {
-        first.setDefault(object);
-        second.setDefault(object);
-    }
-
-    @Override
-    public long getFeatures() {
-        return features;
-    }
-
-    @Override
-    public Function getBuildFunction() {
-        return buildFunction;
-    }
-
-    @Override
-    public T createInstance(long features) {
-        return defaultCreator.get();
+        fieldReader0.acceptDefaultValue(object);
+        fieldReader1.acceptDefaultValue(object);
     }
 
     @Override
     public T readArrayMappingJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         ObjectReader autoTypeReader = checkAutoType(jsonReader, this.objectClass, this.features | features);
         if (autoTypeReader != null && autoTypeReader != this && autoTypeReader.getObjectClass() != this.objectClass) {
             return (T) autoTypeReader.readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
-        jsonReader.startArray();
-        Object object = defaultCreator.get();
+        Object object = creator.get();
 
-        first.readFieldValue(jsonReader, object);
-        second.readFieldValue(jsonReader, object);
+        int entryCnt = jsonReader.startArray();
+        if (entryCnt > 0) {
+            fieldReader0.readFieldValue(jsonReader, object);
+            if (entryCnt > 1) {
+                fieldReader1.readFieldValue(jsonReader, object);
+                for (int i = 2; i < entryCnt; ++i) {
+                    jsonReader.skipValue();
+                }
+            }
+        }
 
         if (buildFunction != null) {
             return (T) buildFunction.apply(object);
@@ -105,24 +109,31 @@ public class ObjectReader2<T>
 
     @Override
     public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.typeNameHash, this.features | features);
         if (autoTypeReader != null && autoTypeReader.getObjectClass() != this.objectClass) {
             return (T) autoTypeReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         if (jsonReader.isArray()) {
-            int entryCnt = jsonReader.startArray();
-            if (entryCnt != 2) {
-                throw new JSONException(jsonReader.info("not support input entryCount " + entryCnt));
-            }
-
-            T object = defaultCreator.get();
+            T object = creator.get();
             if (hasDefaultValue) {
                 initDefaultValue(object);
             }
 
-            first.readFieldValue(jsonReader, object);
-            second.readFieldValue(jsonReader, object);
+            int entryCnt = jsonReader.startArray();
+            if (entryCnt > 0) {
+                fieldReader0.readFieldValue(jsonReader, object);
+                if (entryCnt > 1) {
+                    fieldReader1.readFieldValue(jsonReader, object);
+                    for (int i = 2; i < entryCnt; ++i) {
+                        jsonReader.skipValue();
+                    }
+                }
+            }
 
             if (buildFunction != null) {
                 return (T) buildFunction.apply(object);
@@ -135,9 +146,9 @@ public class ObjectReader2<T>
         }
 
         T object;
-        if (defaultCreator != null) {
-            object = defaultCreator.get();
-        } else if (JDKUtils.UNSAFE_SUPPORT && ((features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.FieldBased.mask) != 0) {
+        if (creator != null) {
+            object = creator.get();
+        } else if (UNSAFE_SUPPORT && ((features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.FieldBased.mask) != 0) {
             try {
                 object = (T) UnsafeUtils.UNSAFE.allocateInstance(objectClass);
             } catch (InstantiationException e) {
@@ -161,18 +172,18 @@ public class ObjectReader2<T>
                 continue;
             }
 
-            if (hashCode == firstHashCode) {
-                first.readFieldValue(jsonReader, object);
-            } else if (hashCode == secondHashCode) {
-                second.readFieldValueJSONB(jsonReader, object);
+            if (hashCode == hashCode0) {
+                fieldReader0.readFieldValue(jsonReader, object);
+            } else if (hashCode == hashCode1) {
+                fieldReader1.readFieldValueJSONB(jsonReader, object);
             } else {
                 if (jsonReader.isSupportSmartMatch(features | this.features)) {
                     long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
-                    if (nameHashCodeLCase == firstHashCodeLCase) {
-                        first.readFieldValueJSONB(jsonReader, object);
+                    if (nameHashCodeLCase == hashCode0LCase) {
+                        fieldReader0.readFieldValueJSONB(jsonReader, object);
                         continue;
-                    } else if (nameHashCodeLCase == secondHashCodeLCase) {
-                        second.readFieldValueJSONB(jsonReader, object);
+                    } else if (nameHashCodeLCase == hashCode1LCase) {
+                        fieldReader1.readFieldValueJSONB(jsonReader, object);
                         continue;
                     }
                 }
@@ -199,6 +210,10 @@ public class ObjectReader2<T>
 
     @Override
     public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         if (jsonReader.isJSONB()) {
             return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
@@ -211,15 +226,15 @@ public class ObjectReader2<T>
         long featuresAll = jsonReader.features(this.features | features);
         T object;
         if (jsonReader.isArray()) {
-            if ((featuresAll & JSONReader.Feature.SupportArrayToBean.mask) != 0) {
+            if ((featuresAll & SupportArrayToBean.mask) != 0) {
                 jsonReader.next();
-                object = defaultCreator.get();
+                object = creator.get();
                 if (hasDefaultValue) {
                     initDefaultValue(object);
                 }
 
-                first.readFieldValue(jsonReader, object);
-                second.readFieldValue(jsonReader, object);
+                fieldReader0.readFieldValue(jsonReader, object);
+                fieldReader1.readFieldValue(jsonReader, object);
                 if (jsonReader.current() != ']') {
                     throw new JSONException(jsonReader.info("array to bean end error"));
                 }
@@ -231,7 +246,7 @@ public class ObjectReader2<T>
         }
 
         jsonReader.nextIfMatch('{');
-        object = defaultCreator.get();
+        object = creator.get();
         if (hasDefaultValue) {
             initDefaultValue(object);
         }
@@ -264,18 +279,18 @@ public class ObjectReader2<T>
                 }
             }
 
-            if (hashCode == firstHashCode) {
-                first.readFieldValue(jsonReader, object);
-            } else if (hashCode == secondHashCode) {
-                second.readFieldValue(jsonReader, object);
+            if (hashCode == hashCode0) {
+                fieldReader0.readFieldValue(jsonReader, object);
+            } else if (hashCode == hashCode1) {
+                fieldReader1.readFieldValue(jsonReader, object);
             } else {
                 if (jsonReader.isSupportSmartMatch(features | this.features)) {
                     long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
-                    if (nameHashCodeLCase == firstHashCodeLCase) {
-                        first.readFieldValue(jsonReader, object);
+                    if (nameHashCodeLCase == hashCode0LCase) {
+                        fieldReader0.readFieldValue(jsonReader, object);
                         continue;
-                    } else if (nameHashCodeLCase == secondHashCodeLCase) {
-                        second.readFieldValue(jsonReader, object);
+                    } else if (nameHashCodeLCase == hashCode1LCase) {
+                        fieldReader1.readFieldValue(jsonReader, object);
                         continue;
                     }
                 }
@@ -303,12 +318,12 @@ public class ObjectReader2<T>
 
     @Override
     public FieldReader getFieldReader(long hashCode) {
-        if (hashCode == firstHashCode) {
-            return first;
+        if (hashCode == hashCode0) {
+            return fieldReader0;
         }
 
-        if (hashCode == secondHashCode) {
-            return second;
+        if (hashCode == hashCode1) {
+            return fieldReader1;
         }
 
         return null;
@@ -316,12 +331,12 @@ public class ObjectReader2<T>
 
     @Override
     public FieldReader getFieldReaderLCase(long hashCode) {
-        if (hashCode == firstHashCodeLCase) {
-            return first;
+        if (hashCode == hashCode0LCase) {
+            return fieldReader0;
         }
 
-        if (hashCode == secondHashCodeLCase) {
-            return second;
+        if (hashCode == hashCode1LCase) {
+            return fieldReader1;
         }
 
         return null;

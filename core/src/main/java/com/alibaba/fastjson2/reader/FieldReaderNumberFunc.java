@@ -8,8 +8,7 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderNumberFunc<T, V>
-        extends FieldReaderImpl<T> {
-    final Method method;
+        extends FieldReader<T> {
     final BiConsumer<T, V> function;
 
     public FieldReaderNumberFunc(
@@ -23,14 +22,8 @@ final class FieldReaderNumberFunc<T, V>
             Method method,
             BiConsumer<T, V> function
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, null, defaultValue, schema);
-        this.method = method;
+        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, null, defaultValue, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override
@@ -69,5 +62,10 @@ final class FieldReaderNumberFunc<T, V>
         }
 
         function.accept(object, (V) fieldValue);
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return jsonReader.readNumber();
     }
 }

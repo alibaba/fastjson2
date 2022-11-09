@@ -6,18 +6,12 @@ import java.lang.reflect.Type;
 import java.util.function.Function;
 
 public final class ObjectReaderImplFromString<T>
-        extends ObjectReaderBaseModule.PrimitiveImpl<T> {
+        extends ObjectReaderPrimitive<T> {
     final Function<String, T> creator;
-    final Class objectClass;
 
     public ObjectReaderImplFromString(Class<T> objectClass, Function<String, T> creator) {
-        this.objectClass = objectClass;
+        super(objectClass);
         this.creator = creator;
-    }
-
-    @Override
-    public Class getObjectClass() {
-        return objectClass;
     }
 
     @Override

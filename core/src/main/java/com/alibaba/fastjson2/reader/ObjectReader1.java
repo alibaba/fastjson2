@@ -4,8 +4,6 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
-import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Type;
@@ -14,53 +12,48 @@ import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
-final class ObjectReader1<T>
-        extends ObjectReaderBean<T> {
-    final long features;
-    final Supplier<T> defaultCreator;
-    final Function buildFunction;
-    final FieldReader fieldReader;
+public class ObjectReader1<T>
+        extends ObjectReaderAdapter<T> {
+    protected final FieldReader fieldReader0;
+    final long hashCode0;
+    final long hashCode0LCase;
 
-    final long hashCode;
-    final long hashCodeLCase;
+    protected ObjectReader objectReader0;
 
-    ObjectReader1(
+    public ObjectReader1(
             Class objectClass,
             long features,
             JSONSchema schema,
-            Supplier<T> defaultCreator,
+            Supplier<T> creator,
             Function buildFunction,
-            FieldReader fieldReader) {
-        super(objectClass, null, schema);
+            FieldReader fieldReader
+    ) {
+        this(objectClass, null, null, features, schema, creator, buildFunction, fieldReader);
+    }
 
-        this.features = features;
-        this.defaultCreator = defaultCreator;
-        this.buildFunction = buildFunction;
-        this.fieldReader = fieldReader;
-        this.hashCode = Fnv.hashCode64(fieldReader.getFieldName());
-        this.hashCodeLCase = Fnv.hashCode64LCase(fieldReader.getFieldName());
+    public ObjectReader1(
+            Class objectClass,
+            String typeKey,
+            String typeName,
+            long features,
+            JSONSchema schema,
+            Supplier<T> creator,
+            Function buildFunction,
+            FieldReader... fieldReaders
+    ) {
+        super(objectClass, typeKey, typeName, features, schema, creator, buildFunction, fieldReaders);
 
-        if (fieldReader.isUnwrapped()) {
-            extraFieldReader = fieldReader;
+        this.fieldReader0 = fieldReaders[0];
+        this.hashCode0 = fieldReader0.fieldNameHash;
+        this.hashCode0LCase = fieldReader0.fieldNameHashLCase;
+
+        if (fieldReader0.isUnwrapped()) {
+            extraFieldReader = fieldReader0;
         }
 
-        hasDefaultValue = fieldReader.getDefaultValue() != null;
-    }
-
-    @Override
-    public long getFeatures() {
-        return features;
-    }
-
-    @Override
-    public Function getBuildFunction() {
-        return buildFunction;
-    }
-
-    @Override
-    public T createInstance(long features) {
-        return defaultCreator.get();
+        hasDefaultValue = fieldReader0.defaultValue != null;
     }
 
     @Override
@@ -70,15 +63,24 @@ final class ObjectReader1<T>
 
     @Override
     public T readArrayMappingJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         ObjectReader autoTypeReader = checkAutoType(jsonReader, this.objectClass, this.features | features);
         if (autoTypeReader != null && autoTypeReader != this && autoTypeReader.getObjectClass() != this.objectClass) {
             return (T) autoTypeReader.readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
-        jsonReader.startArray();
-        Object object = defaultCreator.get();
+        Object object = creator.get();
 
-        fieldReader.readFieldValue(jsonReader, object);
+        int entryCnt = jsonReader.startArray();
+        if (entryCnt > 0) {
+            fieldReader0.readFieldValue(jsonReader, object);
+            for (int i = 1; i < entryCnt; ++i) {
+                jsonReader.skipValue();
+            }
+        }
 
         if (buildFunction != null) {
             return (T) buildFunction.apply(object);
@@ -89,19 +91,24 @@ final class ObjectReader1<T>
 
     @Override
     public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         ObjectReader autoTypeReader = checkAutoType(jsonReader, this.objectClass, this.features | features);
         if (autoTypeReader != null && autoTypeReader != this && autoTypeReader.getObjectClass() != this.objectClass) {
             return (T) autoTypeReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         if (jsonReader.isArray()) {
+            Object object = creator.get();
             int entryCnt = jsonReader.startArray();
-            if (entryCnt != 1) {
-                throw new JSONException(jsonReader.info("not support input entryCount " + entryCnt));
+            if (entryCnt > 0) {
+                fieldReader0.readFieldValue(jsonReader, object);
+                for (int i = 1; i < entryCnt; ++i) {
+                    jsonReader.skipValue();
+                }
             }
-
-            Object object = defaultCreator.get();
-            fieldReader.readFieldValue(jsonReader, object);
 
             if (buildFunction != null) {
                 return (T) buildFunction.apply(object);
@@ -118,9 +125,9 @@ final class ObjectReader1<T>
         }
 
         T object;
-        if (defaultCreator != null) {
-            object = defaultCreator.get();
-        } else if (JDKUtils.UNSAFE_SUPPORT && ((features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.FieldBased.mask) != 0) {
+        if (creator != null) {
+            object = creator.get();
+        } else if (UNSAFE_SUPPORT && ((features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.FieldBased.mask) != 0) {
             try {
                 object = (T) UnsafeUtils.UNSAFE.allocateInstance(objectClass);
             } catch (InstantiationException e) {
@@ -165,12 +172,12 @@ final class ObjectReader1<T>
                 continue;
             }
 
-            if (hashCode == this.hashCode) {
-                fieldReader.readFieldValueJSONB(jsonReader, object);
+            if (hashCode == this.hashCode0) {
+                fieldReader0.readFieldValueJSONB(jsonReader, object);
             } else {
                 if (jsonReader.isSupportSmartMatch(features | this.features)
-                        && jsonReader.getNameHashCodeLCase() == this.hashCodeLCase) {
-                    fieldReader.readFieldValue(jsonReader, object);
+                        && jsonReader.getNameHashCodeLCase() == this.hashCode0LCase) {
+                    fieldReader0.readFieldValue(jsonReader, object);
                 } else {
                     processExtra(jsonReader, object);
                 }
@@ -190,11 +197,15 @@ final class ObjectReader1<T>
 
     @Override
     protected void initDefaultValue(T object) {
-        fieldReader.setDefault(object);
+        fieldReader0.acceptDefaultValue(object);
     }
 
     @Override
     public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         if (jsonReader.isJSONB()) {
             return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
@@ -207,9 +218,9 @@ final class ObjectReader1<T>
         if (jsonReader.isArray()) {
             if ((featuresAll & JSONReader.Feature.SupportArrayToBean.mask) != 0) {
                 jsonReader.next();
-                Object object = defaultCreator.get();
+                Object object = creator.get();
 
-                fieldReader.readFieldValue(jsonReader, object);
+                fieldReader0.readFieldValue(jsonReader, object);
                 if (!jsonReader.nextIfMatch(']')) {
                     throw new JSONException(jsonReader.info("array to bean end error, " + jsonReader.current()));
                 }
@@ -226,8 +237,8 @@ final class ObjectReader1<T>
         }
 
         jsonReader.nextIfMatch('{');
-        T object = defaultCreator != null
-                ? defaultCreator.get()
+        T object = creator != null
+                ? creator.get()
                 : null;
 
         if (hasDefaultValue) {
@@ -261,12 +272,12 @@ final class ObjectReader1<T>
                 break;
             }
 
-            if (hashCode == this.hashCode) {
-                fieldReader.readFieldValue(jsonReader, object);
+            if (hashCode == this.hashCode0) {
+                fieldReader0.readFieldValue(jsonReader, object);
             } else {
                 if (jsonReader.isSupportSmartMatch(features | this.features)
-                        && jsonReader.getNameHashCodeLCase() == this.hashCodeLCase) {
-                    fieldReader.readFieldValue(jsonReader, object);
+                        && jsonReader.getNameHashCodeLCase() == this.hashCode0LCase) {
+                    fieldReader0.readFieldValue(jsonReader, object);
                 } else {
                     processExtra(jsonReader, object);
                 }
@@ -288,8 +299,8 @@ final class ObjectReader1<T>
 
     @Override
     public FieldReader getFieldReader(long hashCode) {
-        if (hashCode == this.hashCode) {
-            return fieldReader;
+        if (hashCode == this.hashCode0) {
+            return fieldReader0;
         }
 
         return null;
@@ -297,8 +308,8 @@ final class ObjectReader1<T>
 
     @Override
     public FieldReader getFieldReaderLCase(long hashCode) {
-        if (hashCode == this.hashCodeLCase) {
-            return fieldReader;
+        if (hashCode == this.hashCode0LCase) {
+            return fieldReader0;
         }
 
         return null;
@@ -306,10 +317,10 @@ final class ObjectReader1<T>
 
     @Override
     public boolean setFieldValue(Object object, String fieldName, long fieldNameHashCode, int value) {
-        if (this.hashCode != fieldNameHashCode) {
+        if (this.hashCode0 != fieldNameHashCode) {
             return false;
         }
-        fieldReader.accept(object, value);
+        fieldReader0.accept(object, value);
         return true;
     }
 }

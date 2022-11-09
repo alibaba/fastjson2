@@ -17,7 +17,7 @@ public class FieldReaderFloatValueFuncTest {
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
         assertEquals(123F, bean.value);
-        assertNotNull(fieldReader.getMethod());
+        assertNotNull(fieldReader.method);
 
         assertThrows(JSONException.class, () -> fieldReader.accept(bean, new Object()));
 

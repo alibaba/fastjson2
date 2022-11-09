@@ -9,19 +9,12 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderInt32Func<T, V>
-        extends FieldReaderImpl<T> {
-    final Method method;
+        extends FieldReader<T> {
     final BiConsumer<T, V> function;
 
     FieldReaderInt32Func(String fieldName, Class<V> fieldClass, int ordinal, String format, Locale locale, Object defaultValue, JSONSchema schema, Method method, BiConsumer<T, V> function) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, locale, defaultValue, schema);
-        this.method = method;
+        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, locale, defaultValue, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

@@ -3,13 +3,14 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.GuavaSupport;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
+
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 
 public final class ObjectReaderImplList
         implements ObjectReader {
@@ -136,6 +137,10 @@ public final class ObjectReaderImplList
             return new ObjectReaderImplListStr(listClass, instanceClass);
         }
 
+        if (itemType == Long.class && builder == null) {
+            return new ObjectReaderImplListInt64(listClass, instanceClass);
+        }
+
         return new ObjectReaderImplList(type, listClass, instanceClass, itemType, builder);
     }
 
@@ -213,7 +218,7 @@ public final class ObjectReaderImplList
     @Override
     public Object createInstance(long features) {
         if (instanceType == ArrayList.class) {
-            return JDKUtils.JVM_VERSION == 8 ? new ArrayList(10) : new ArrayList();
+            return JVM_VERSION == 8 ? new ArrayList(10) : new ArrayList();
         }
 
         if (instanceType == LinkedList.class) {
@@ -449,6 +454,15 @@ public final class ObjectReaderImplList
         }
 
         if (!jsonReader.nextIfMatch('[')) {
+            if (itemClass != Object.class && itemObjectReader != null) {
+                Object item = itemObjectReader.readObject(jsonReader, itemType, 0, 0);
+                list.add(item);
+                if (builder != null) {
+                    list = (Collection) builder.apply(list);
+                }
+                return list;
+            }
+
             throw new JSONException(jsonReader.info());
         }
 

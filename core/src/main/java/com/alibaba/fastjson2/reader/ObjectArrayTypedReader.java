@@ -12,8 +12,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 final class ObjectArrayTypedReader
-        extends ObjectReaderBaseModule.PrimitiveImpl {
-    final Class objectClass;
+        extends ObjectReaderPrimitive {
     final Class componentType;
     final Class componentClass;
     final long componentClassHash;
@@ -21,7 +20,7 @@ final class ObjectArrayTypedReader
     final long typeNameHashCode;
 
     ObjectArrayTypedReader(Class objectClass) {
-        this.objectClass = objectClass;
+        super(objectClass);
         this.componentType = objectClass.getComponentType();
         String componentTypeName = TypeUtils.getTypeName(componentType);
         this.componentClassHash = Fnv.hashCode64(componentTypeName);
@@ -29,11 +28,6 @@ final class ObjectArrayTypedReader
         typeNameHashCode = Fnv.hashCode64(this.typeName);
 
         this.componentClass = TypeUtils.getClass(componentType);
-    }
-
-    @Override
-    public Class getObjectClass() {
-        return objectClass;
     }
 
     @Override

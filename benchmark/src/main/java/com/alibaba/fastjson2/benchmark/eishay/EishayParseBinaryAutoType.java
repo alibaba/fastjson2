@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.SymbolTable;
+import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
+import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
@@ -37,9 +39,12 @@ public class EishayParseBinaryAutoType {
 
     static MediaContent mc;
     static byte[] fastjson2JSONBBytes;
+    static byte[] fastjson2JSONBBytes_arrayMapping;
     static byte[] fastjson2JSONBBytes_symbols;
     static byte[] hessianBytes;
     static byte[] javaSerializeBytes;
+
+    static JSONReader.AutoTypeBeforeHandler autoTypeFilter = JSONReader.autoTypeFilter(true, Media.class, MediaContent.class, Image.class);
 
     static {
         try {
@@ -56,6 +61,17 @@ public class EishayParseBinaryAutoType {
                     JSONWriter.Feature.NotWriteDefaultValue,
                     JSONWriter.Feature.NotWriteHashMapArrayListClassName,
                     JSONWriter.Feature.WriteNameAsSymbol);
+
+            fastjson2JSONBBytes_arrayMapping = JSONB.toBytes(mc, JSONWriter.Feature.WriteClassName,
+                    JSONWriter.Feature.IgnoreNoneSerializable,
+                    JSONWriter.Feature.FieldBased,
+                    JSONWriter.Feature.ReferenceDetection,
+                    JSONWriter.Feature.WriteNulls,
+                    JSONWriter.Feature.NotWriteDefaultValue,
+                    JSONWriter.Feature.NotWriteHashMapArrayListClassName,
+                    JSONWriter.Feature.WriteNameAsSymbol,
+                    JSONWriter.Feature.BeanToArray
+            );
 
             fastjson2JSONBBytes_symbols = JSONB.toBytes(
                     mc,
@@ -96,6 +112,36 @@ public class EishayParseBinaryAutoType {
                         fastjson2JSONBBytes,
                         Object.class,
                         JSONReader.Feature.SupportAutoType,
+                        JSONReader.Feature.IgnoreNoneSerializable,
+                        JSONReader.Feature.UseDefaultConstructorAsPossible,
+                        JSONReader.Feature.UseNativeObject,
+                        JSONReader.Feature.FieldBased)
+        );
+    }
+
+    @Benchmark
+    public void fastjson2JSONBBytes_arrayMapping(Blackhole bh) {
+        bh.consume(
+                JSONB.parseObject(
+                        fastjson2JSONBBytes_arrayMapping,
+                        Object.class,
+                        JSONReader.Feature.SupportAutoType,
+                        JSONReader.Feature.IgnoreNoneSerializable,
+                        JSONReader.Feature.UseDefaultConstructorAsPossible,
+                        JSONReader.Feature.UseNativeObject,
+                        JSONReader.Feature.FieldBased,
+                        JSONReader.Feature.SupportArrayToBean
+                )
+        );
+    }
+
+    @Benchmark
+    public void fastjson2JSONB_autoTypeFilter(Blackhole bh) {
+        bh.consume(
+                JSONB.parseObject(
+                        fastjson2JSONBBytes,
+                        Object.class,
+                        autoTypeFilter,
                         JSONReader.Feature.IgnoreNoneSerializable,
                         JSONReader.Feature.UseDefaultConstructorAsPossible,
                         JSONReader.Feature.UseNativeObject,

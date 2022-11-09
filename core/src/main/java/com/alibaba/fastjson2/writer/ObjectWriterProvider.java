@@ -4,26 +4,32 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.GuavaSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class ObjectWriterProvider
         implements ObjectCodecProvider {
+    static final int TYPE_INT32_MASK = 1 << 1;
+    static final int TYPE_INT64_MASK = 1 << 2;
+    static final int TYPE_DECIMAL_MASK = 1 << 3;
+    static final int TYPE_DATE_MASK = 1 << 4;
+    static final int TYPE_ENUM_MASK = 1 << 5;
+
     final ConcurrentMap<Type, ObjectWriter> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectWriter> cacheFieldBased = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
     final ObjectWriterCreator creator;
     final List<ObjectWriterModule> modules = new ArrayList<>();
+
+    volatile long userDefineMask;
 
     public ObjectWriterProvider() {
         init();
@@ -74,6 +80,42 @@ public class ObjectWriterProvider
     }
 
     public ObjectWriter register(Type type, ObjectWriter objectWriter) {
+        if (type == Integer.class) {
+            if (objectWriter == null || objectWriter == ObjectWriterImplInt32.INSTANCE) {
+                userDefineMask &= ~TYPE_INT32_MASK;
+            } else {
+                userDefineMask |= TYPE_INT32_MASK;
+            }
+        } else if (type == Long.class || type == long.class) {
+            if (objectWriter == null || objectWriter == ObjectWriterImplInt64.INSTANCE) {
+                userDefineMask &= ~TYPE_INT64_MASK;
+            } else {
+                userDefineMask |= TYPE_INT64_MASK;
+            }
+        } else if (type == BigDecimal.class) {
+            if (objectWriter == null || objectWriter == ObjectWriterImplBigDecimal.INSTANCE) {
+                userDefineMask &= ~TYPE_DECIMAL_MASK;
+            } else {
+                userDefineMask |= TYPE_DECIMAL_MASK;
+            }
+        } else if (type == Date.class) {
+            if (objectWriter == null || objectWriter == ObjectWriterImplDate.INSTANCE) {
+                userDefineMask &= ~TYPE_DATE_MASK;
+            } else {
+                userDefineMask |= TYPE_DATE_MASK;
+            }
+        } else if (type == Enum.class) {
+            if (objectWriter == null) {
+                userDefineMask &= ~TYPE_ENUM_MASK;
+            } else {
+                userDefineMask |= TYPE_ENUM_MASK;
+            }
+        }
+
+        if (objectWriter == null) {
+            return cache.remove(type);
+        }
+
         return cache.put(type, objectWriter);
     }
 
@@ -124,6 +166,12 @@ public class ObjectWriterProvider
 
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
         return getObjectWriter(objectType, objectClass, false);
+    }
+
+    public ObjectWriter getObjectWriterFromCache(Type objectType, Class objectClass, boolean fieldBased) {
+        return fieldBased
+                ? cacheFieldBased.get(objectType)
+                : cache.get(objectType);
     }
 
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass, boolean fieldBased) {
@@ -187,7 +235,7 @@ public class ObjectWriterProvider
             objectWriter = creator.createObjectWriter(
                     objectClass,
                     fieldBased ? JSONWriter.Feature.FieldBased.mask : 0,
-                    modules
+                    this
             );
             ObjectWriter previous = fieldBased
                     ? cacheFieldBased.putIfAbsent(objectType, objectWriter)
@@ -237,7 +285,10 @@ public class ObjectWriterProvider
                 java.time.ZonedDateTime.class,
                 java.time.OffsetDateTime.class,
                 java.time.OffsetTime.class,
-                String.class
+                String.class,
+                Collections.emptyList().getClass(),
+                Collections.emptyMap().getClass(),
+                Collections.emptySet().getClass()
         };
 
         int[] codes = new int[classes.length];
@@ -263,5 +314,42 @@ public class ObjectWriterProvider
     public static boolean isNotReferenceDetect(final Class<?> clazz) {
         return Arrays.binarySearch(NOT_REFERENCES_TYPE_HASH_CODES, System.identityHashCode(clazz)) >= 0
                 || ((clazz.getModifiers() & ENUM) != 0 && clazz.getSuperclass() == Enum.class);
+    }
+
+    public void cleanup(Class objectClass) {
+        mixInCache.remove(objectClass);
+        cache.remove(objectClass);
+        cacheFieldBased.remove(objectClass);
+
+        BeanUtils.cleanupCache(objectClass);
+    }
+
+    public void cleanup(ClassLoader classLoader) {
+        for (Iterator<Map.Entry<Class, Class>> it = mixInCache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Class, Class> entry = it.next();
+            if (entry.getKey().getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        for (Iterator<Map.Entry<Type, ObjectWriter>> it = cache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Type, ObjectWriter> entry = it.next();
+            Type keyType = entry.getKey();
+            Class<?> keyClass = TypeUtils.getClass(keyType);
+            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        for (Iterator<Map.Entry<Type, ObjectWriter>> it = cacheFieldBased.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Type, ObjectWriter> entry = it.next();
+            Type keyType = entry.getKey();
+            Class<?> keyClass = TypeUtils.getClass(keyType);
+            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        BeanUtils.cleanupCache(classLoader);
     }
 }

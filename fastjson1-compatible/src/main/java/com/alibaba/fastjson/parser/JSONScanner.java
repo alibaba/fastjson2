@@ -9,4 +9,9 @@ public class JSONScanner
     public JSONScanner(JSONReader reader) {
         this.reader = reader;
     }
+
+    @Override
+    public JSONReader getReader() {
+        return reader;
+    }
 }

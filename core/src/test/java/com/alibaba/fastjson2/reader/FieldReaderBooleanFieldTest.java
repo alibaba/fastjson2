@@ -17,7 +17,7 @@ public class FieldReaderBooleanFieldTest {
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, true);
         assertEquals(true, bean.value);
-        assertNotNull(fieldReader.getField());
+        assertNotNull(fieldReader.field);
 
         fieldReader.accept(bean, 0);
         assertEquals(false, bean.value);

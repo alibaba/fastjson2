@@ -9,7 +9,6 @@ import java.util.function.Function;
 final class FieldWriterEnumFunc
         extends FieldWriterEnum {
     final Type fieldType;
-    final Method method;
     final Function function;
 
     protected FieldWriterEnumFunc(
@@ -22,9 +21,8 @@ final class FieldWriterEnumFunc
             Class fieldClass,
             Method method,
             Function function) {
-        super(name, ordinal, features, format, label, fieldClass);
+        super(name, ordinal, features, format, label, fieldClass, null, method);
         this.fieldType = fieldType;
-        this.method = method;
         this.function = function;
     }
 
@@ -45,6 +43,11 @@ final class FieldWriterEnumFunc
 
         writeEnum(jsonWriter, value);
         return true;
+    }
+
+    @Override
+    public Object getFieldValue(Object object) {
+        return function.apply(object);
     }
 
     @Override

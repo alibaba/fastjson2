@@ -1,20 +1,14 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
-import com.alibaba.fastjson2.reader.ObjectReaderImplInstant;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.reader.*;
 
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -22,7 +16,16 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
 
 public class TypeUtils {
+    public static final Class CLASS_JSON_OBJECT_1x;
+    public static final Field FIELD_JSON_OBJECT_1x_map;
+    public static final Class CLASS_JSON_ARRAY_1x;
+
     public static final Class CLASS_SINGLE_SET = Collections.singleton(1).getClass();
+    public static final Class CLASS_UNMODIFIABLE_COLLECTION = Collections.unmodifiableCollection(new ArrayList<>()).getClass();
+    public static final Class CLASS_UNMODIFIABLE_LIST = Collections.unmodifiableList(new ArrayList<>()).getClass();
+    public static final Class CLASS_UNMODIFIABLE_SET = Collections.unmodifiableSet(new HashSet<>()).getClass();
+    public static final Class CLASS_UNMODIFIABLE_SORTED_SET = Collections.unmodifiableSortedSet(new TreeSet<>()).getClass();
+    public static final Class CLASS_UNMODIFIABLE_NAVIGABLE_SET = Collections.unmodifiableNavigableSet(new TreeSet<>()).getClass();
 
     static class Cache {
         volatile char[] chars;
@@ -58,6 +61,12 @@ public class TypeUtils {
             if (upperBounds.length == 1) {
                 return getMapping(upperBounds[0]);
             }
+        }
+
+        if (type instanceof GenericArrayType) {
+            Type genericComponentType = ((GenericArrayType) type).getGenericComponentType();
+            Class<?> componentClass = getClass(genericComponentType);
+            return getArrayClass(componentClass);
         }
 
         return Object.class;
@@ -99,23 +108,11 @@ public class TypeUtils {
         }
 
         if (obj instanceof String) {
-            String str = (String) obj;
-
-            if (str.isEmpty() || "null".equals(str)) {
-                return null;
-            }
-
-            JSONReader jsonReader;
-            if (str.charAt(0) != '"') {
-                jsonReader = JSONReader.of('"' + str + '"');
-            } else {
-                jsonReader = JSONReader.of(str);
-            }
-            return jsonReader.read(Date.class);
+            return DateUtils.parseDate((String) obj);
         }
 
-        if (obj instanceof Long) {
-            return new Date(((Long) obj).longValue());
+        if (obj instanceof Long || obj instanceof Integer) {
+            return new Date(((Number) obj).longValue());
         }
 
         throw new JSONException("can not cast to Date from " + obj.getClass());
@@ -161,7 +158,32 @@ public class TypeUtils {
         throw new JSONException("can not cast to Date from " + obj.getClass());
     }
 
+    public static <T> T cast(Object obj, Type type) {
+        if (type instanceof Class) {
+            return (T) cast(obj, (Class) type);
+        }
+
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+
+        if (obj instanceof Collection) {
+            ObjectReader objectReader = provider.getObjectReader(type);
+            return (T) objectReader.createInstance((Collection) obj);
+        }
+
+        if (obj instanceof Map) {
+            ObjectReader objectReader = provider.getObjectReader(type);
+            return (T) objectReader.createInstance((Map) obj, 0L);
+        }
+
+        String json = JSON.toJSONString(obj);
+        return JSON.parseObject(json, type);
+    }
+
     public static <T> T cast(Object obj, Class<T> targetClass) {
+        return cast(obj, targetClass, JSONFactory.getDefaultObjectReaderProvider());
+    }
+
+    public static <T> T cast(Object obj, Class<T> targetClass, ObjectReaderProvider provider) {
         if (obj == null) {
             return null;
         }
@@ -198,7 +220,6 @@ public class TypeUtils {
             return (T) new AtomicBoolean((Boolean) obj);
         }
 
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         if (obj instanceof Map) {
             ObjectReader objectReader = provider.getObjectReader(targetClass);
             return (T) objectReader.createInstance((Map) obj, 0L);
@@ -253,6 +274,22 @@ public class TypeUtils {
     static final Map<String, Class> TYPE_MAPPINGS = new ConcurrentHashMap<>();
 
     static {
+        CLASS_JSON_OBJECT_1x = loadClass("com.alibaba.fastjson.JSONObject");
+        {
+            Field field = null;
+            if (CLASS_JSON_OBJECT_1x != null) {
+                try {
+                    field = CLASS_JSON_OBJECT_1x.getDeclaredField("map");
+                    field.setAccessible(true);
+                } catch (Throwable ignore) {
+                    // ignore
+                }
+            }
+            FIELD_JSON_OBJECT_1x_map = field;
+        }
+
+        CLASS_JSON_ARRAY_1x = loadClass("com.alibaba.fastjson.JSONArray");
+
         NAME_MAPPINGS.put(byte.class, "B");
         NAME_MAPPINGS.put(short.class, "S");
         NAME_MAPPINGS.put(int.class, "I");
@@ -311,21 +348,29 @@ public class TypeUtils {
         NAME_MAPPINGS.put(UUID[][].class, "[[UUID");
 
         NAME_MAPPINGS.put(Object.class, "Object");
+        NAME_MAPPINGS.put(Object[].class, "[O");
 
         NAME_MAPPINGS.put(HashMap.class, "M");
         TYPE_MAPPINGS.put("HashMap", HashMap.class);
+        TYPE_MAPPINGS.put("java.util.HashMap", HashMap.class);
 
         NAME_MAPPINGS.put(LinkedHashMap.class, "LM");
         TYPE_MAPPINGS.put("LinkedHashMap", LinkedHashMap.class);
+        TYPE_MAPPINGS.put("java.util.LinkedHashMap", LinkedHashMap.class);
 
         NAME_MAPPINGS.put(TreeMap.class, "TM");
         TYPE_MAPPINGS.put("TreeMap", TreeMap.class);
 
         NAME_MAPPINGS.put(ArrayList.class, "A");
         TYPE_MAPPINGS.put("ArrayList", ArrayList.class);
+        TYPE_MAPPINGS.put("java.util.ArrayList", ArrayList.class);
 
         NAME_MAPPINGS.put(LinkedList.class, "LA");
+        TYPE_MAPPINGS.put("LA", LinkedList.class);
         TYPE_MAPPINGS.put("LinkedList", LinkedList.class);
+        TYPE_MAPPINGS.put("java.util.LinkedList", LinkedList.class);
+        TYPE_MAPPINGS.put("java.util.concurrent.ConcurrentLinkedQueue", ConcurrentLinkedQueue.class);
+        TYPE_MAPPINGS.put("java.util.concurrent.ConcurrentLinkedDeque", ConcurrentLinkedDeque.class);
 
         //java.util.LinkedHashMap.class,
 
@@ -334,6 +379,7 @@ public class TypeUtils {
         NAME_MAPPINGS.put(LinkedHashSet.class, "LinkedHashSet");
         NAME_MAPPINGS.put(ConcurrentHashMap.class, "ConcurrentHashMap");
         NAME_MAPPINGS.put(ConcurrentLinkedQueue.class, "ConcurrentLinkedQueue");
+        NAME_MAPPINGS.put(ConcurrentLinkedDeque.class, "ConcurrentLinkedDeque");
         NAME_MAPPINGS.put(JSONObject.class, "JSONObject");
         NAME_MAPPINGS.put(JSONArray.class, "JSONArray");
         NAME_MAPPINGS.put(Currency.class, "Currency");
@@ -417,6 +463,9 @@ public class TypeUtils {
 
         TYPE_MAPPINGS.put("JO10", JSONObject1O.class);
         TYPE_MAPPINGS.put("[O", Object[].class);
+        TYPE_MAPPINGS.put("[Ljava.lang.Object;", Object[].class);
+        TYPE_MAPPINGS.put("[java.lang.Object", Object[].class);
+        TYPE_MAPPINGS.put("[Object", Object[].class);
         TYPE_MAPPINGS.put("StackTraceElement", StackTraceElement.class);
         TYPE_MAPPINGS.put("[StackTraceElement", StackTraceElement[].class);
 
@@ -431,15 +480,13 @@ public class TypeUtils {
         }
 
         {
-            Class<?> objectClass = loadClass("com.alibaba.fastjson.JSONObject");
-            if (objectClass != null) {
-                TYPE_MAPPINGS.putIfAbsent("JO1", objectClass);
-                TYPE_MAPPINGS.putIfAbsent(objectClass.getName(), objectClass);
+            if (CLASS_JSON_OBJECT_1x != null) {
+                TYPE_MAPPINGS.putIfAbsent("JO1", CLASS_JSON_OBJECT_1x);
+                TYPE_MAPPINGS.putIfAbsent(CLASS_JSON_OBJECT_1x.getName(), CLASS_JSON_OBJECT_1x);
             }
-            Class<?> arrayClass = loadClass("com.alibaba.fastjson.JSONArray");
-            if (arrayClass != null) {
-                TYPE_MAPPINGS.putIfAbsent("JA1", arrayClass);
-                TYPE_MAPPINGS.putIfAbsent(arrayClass.getName(), arrayClass);
+            if (CLASS_JSON_ARRAY_1x != null) {
+                TYPE_MAPPINGS.putIfAbsent("JA1", CLASS_JSON_ARRAY_1x);
+                TYPE_MAPPINGS.putIfAbsent(CLASS_JSON_ARRAY_1x.getName(), CLASS_JSON_ARRAY_1x);
             }
         }
 
@@ -455,6 +502,7 @@ public class TypeUtils {
         NAME_MAPPINGS.put(new TreeMap().values().getClass(), "List");
         NAME_MAPPINGS.put(new ConcurrentHashMap().values().getClass(), "List");
         NAME_MAPPINGS.put(new ConcurrentSkipListMap().values().getClass(), "List");
+
         TYPE_MAPPINGS.put("List", ArrayList.class);
         TYPE_MAPPINGS.put("java.util.ImmutableCollections$Map1", HashMap.class);
         TYPE_MAPPINGS.put("java.util.ImmutableCollections$MapN", LinkedHashMap.class);
@@ -585,7 +633,7 @@ public class TypeUtils {
             return Long.parseLong(str);
         }
 
-        throw new JSONException("can not cast to long");
+        throw new JSONException("can not cast to long from " + value.getClass());
     }
 
     public static Integer toInteger(Object value) {
@@ -1074,6 +1122,8 @@ public class TypeUtils {
         }
 
         switch (className) {
+            case "O":
+            case "Object":
             case "java.lang.Object":
                 return Object.class;
             case "class java.util.Collections$EmptyMap":
@@ -1088,14 +1138,51 @@ public class TypeUtils {
                 return OptionalInt.class;
             case "java.util.OptionalLong":
                 return OptionalLong.class;
+            case "List":
             case "java.util.List":
                 return List.class;
+            case "A":
+            case "ArrayList":
             case "java.util.ArrayList":
                 return ArrayList.class;
+            case "LA":
+            case "LinkedList":
+            case "java.util.LinkedList":
+                return LinkedList.class;
+            case "Map":
             case "java.util.Map":
                 return Map.class;
+            case "M":
+            case "HashMap":
             case "java.util.HashMap":
                 return HashMap.class;
+            case "LM":
+            case "LinkedHashMap":
+            case "java.util.LinkedHashMap":
+                return LinkedHashMap.class;
+            case "ConcurrentHashMap":
+                return ConcurrentHashMap.class;
+            case "ConcurrentLinkedQueue":
+                return ConcurrentLinkedQueue.class;
+            case "ConcurrentLinkedDeque":
+                return ConcurrentLinkedDeque.class;
+            case "JSONObject":
+                return JSONObject.class;
+            case "JO1":
+                className = "com.alibaba.fastjson.JSONObject";
+                break;
+            case "Set":
+            case "java.util.Set":
+                return Set.class;
+            case "HashSet":
+            case "java.util.HashSet":
+                return HashSet.class;
+            case "LinkedHashSet":
+            case "java.util.LinkedHashSet":
+                return LinkedHashSet.class;
+            case "TreeSet":
+            case "java.util.TreeSet":
+                return TreeSet.class;
             case "java.lang.Class":
                 return Class.class;
             case "java.lang.Integer":
@@ -1155,10 +1242,27 @@ public class TypeUtils {
             case "[Z":
             case "boolean[]":
                 return boolean[].class;
+            case "[O":
+                return Object[].class;
+            case "UUID":
+                return UUID.class;
+            case "Date":
+                return Date.class;
+            case "Calendar":
+                return Calendar.class;
             case "java.io.IOException":
                 return java.io.IOException.class;
+            case "java.util.Collections$UnmodifiableRandomAccessList":
+                return CLASS_UNMODIFIABLE_LIST;
+            case "java.util.Collections$SingletonSet":
+                return CLASS_SINGLE_SET;
             default:
                 break;
+        }
+
+        Class mapping = TYPE_MAPPINGS.get(className);
+        if (mapping != null) {
+            return mapping;
         }
 
         if (className.charAt(0) == 'L' && className.charAt(className.length() - 1) == ';') {
@@ -1196,6 +1300,24 @@ public class TypeUtils {
     }
 
     public static Class<?> getArrayClass(Class componentClass) {
+        if (componentClass == int.class) {
+            return int[].class;
+        }
+        if (componentClass == byte.class) {
+            return byte[].class;
+        }
+        if (componentClass == short.class) {
+            return short[].class;
+        }
+        if (componentClass == long.class) {
+            return long[].class;
+        }
+        if (componentClass == String.class) {
+            return String[].class;
+        }
+        if (componentClass == Object.class) {
+            return Object[].class;
+        }
         return Array.newInstance(componentClass, 1).getClass();
     }
 
@@ -1253,5 +1375,19 @@ public class TypeUtils {
             }
         }
         return false;
+    }
+
+    public static Map getInnerMap(Map object) {
+        if (object == null || CLASS_JSON_OBJECT_1x == null || !CLASS_JSON_OBJECT_1x.isInstance(object) || FIELD_JSON_OBJECT_1x_map == null) {
+            return object;
+        }
+
+        try {
+            object = (Map) FIELD_JSON_OBJECT_1x_map.get(object);
+        } catch (IllegalAccessException ignore) {
+            // ignore
+        }
+
+        return object;
     }
 }

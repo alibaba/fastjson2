@@ -15,18 +15,14 @@ import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
 class ObjectReaderImplInt8Array
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplInt8Array INSTANCE = new ObjectReaderImplInt8Array(null);
 
     final String format;
 
     public ObjectReaderImplInt8Array(String format) {
+        super(Byte[].class);
         this.format = format;
-    }
-
-    @Override
-    public Class getObjectClass() {
-        return Byte[].class;
     }
 
     @Override

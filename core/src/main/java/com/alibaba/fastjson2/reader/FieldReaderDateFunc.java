@@ -9,7 +9,6 @@ import java.util.function.BiConsumer;
 
 final class FieldReaderDateFunc<T>
         extends FieldReaderImplDate<T> {
-    final Method method;
     final BiConsumer<T, Date> function;
 
     public FieldReaderDateFunc(
@@ -23,14 +22,8 @@ final class FieldReaderDateFunc<T>
             JSONSchema schema,
             Method method,
             BiConsumer<T, Date> function) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema);
-        this.method = method;
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

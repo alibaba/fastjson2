@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.JSONFactory.Utils.*;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONReaderASCII
         extends JSONReaderUTF8 {
@@ -27,7 +27,7 @@ final class JSONReaderASCII
         }
 
         ch = (char) (bytes[offset] & 0xFF);
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
                 ch = EOI;
@@ -40,6 +40,14 @@ final class JSONReaderASCII
 
     @Override
     public boolean nextIfMatch(char ch) {
+        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+            if (offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = (char) bytes[offset++];
+            }
+        }
+
         if (this.ch != ch) {
             return false;
         }
@@ -51,7 +59,7 @@ final class JSONReaderASCII
         }
 
         this.ch = (char) (bytes[offset] & 0xFF);
-        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+        while (this.ch == '\0' || (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
                 this.ch = EOI;
@@ -725,7 +733,7 @@ final class JSONReaderASCII
             }
         }
 
-        if (JDKUtils.JVM_VERSION > 8) {
+        if (JDKUtils.STRING_CREATOR_JDK11 != null) {
             byte[] chars = new byte[nameLength];
 
             int offset = nameBegin;
@@ -785,11 +793,7 @@ final class JSONReaderASCII
             }
 
             if (chars != null) {
-                if (JDKUtils.UNSAFE_ASCII_CREATOR != null) {
-                    return (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(chars);
-                }
-
-                return new String(chars, 0, chars.length, StandardCharsets.US_ASCII);
+                return STRING_CREATOR_JDK11.apply(chars, LATIN1);
             }
         }
 
@@ -1114,14 +1118,6 @@ final class JSONReaderASCII
                     int indexMask = ((int) nameValue1) & (NAME_CACHE2.length - 1);
                     JSONFactory.NameCacheEntry2 entry = NAME_CACHE2[indexMask];
                     if (entry == null) {
-                        if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
-                            try {
-                                STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
-                            } catch (Throwable e) {
-                                STRING_CREATOR_ERROR = true;
-                            }
-                        }
-
                         char[] chars = new char[length];
                         for (int i = 0; i < length; ++i) {
                             chars[i] = (char) (bytes[nameBegin + i] & 0xFF);
@@ -1143,14 +1139,6 @@ final class JSONReaderASCII
                     int indexMask = ((int) nameValue0) & (NAME_CACHE.length - 1);
                     JSONFactory.NameCacheEntry entry = NAME_CACHE[indexMask];
                     if (entry == null) {
-                        if (STRING_CREATOR_JDK8 == null && !STRING_CREATOR_ERROR) {
-                            try {
-                                STRING_CREATOR_JDK8 = JDKUtils.getStringCreatorJDK8();
-                            } catch (Throwable e) {
-                                STRING_CREATOR_ERROR = true;
-                            }
-                        }
-
                         char[] chars = new char[length];
                         for (int i = 0; i < length; ++i) {
                             chars[i] = (char) (bytes[nameBegin + i] & 0xFF);
@@ -1250,21 +1238,9 @@ final class JSONReaderASCII
 
             str = new String(chars);
         } else {
-            if (JDKUtils.JVM_VERSION >= 9) {
-                if (STRING_CREATOR_JDK11 == null && !STRING_CREATOR_ERROR) {
-                    try {
-                        STRING_CREATOR_JDK11 = JDKUtils.getStringCreatorJDK11();
-                    } catch (Throwable e) {
-                        STRING_CREATOR_ERROR = true;
-                    }
-                }
-
-                if (STRING_CREATOR_JDK11 == null) {
-                    str = new String(bytes, start, this.offset - start, StandardCharsets.US_ASCII);
-                } else {
-                    byte[] bytes = Arrays.copyOfRange(this.bytes, start, offset);
-                    str = STRING_CREATOR_JDK11.apply(bytes);
-                }
+            if (STRING_CREATOR_JDK11 != null) {
+                byte[] bytes = Arrays.copyOfRange(this.bytes, start, offset);
+                str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
             } else {
                 str = new String(bytes, start, this.offset - start, StandardCharsets.US_ASCII);
             }
@@ -1412,24 +1388,9 @@ final class JSONReaderASCII
             } else {
                 if (this.str != null) {
                     str = this.str.substring(this.offset, offset);
-                } else if (JDKUtils.JVM_VERSION == 11 && !STRING_CREATOR_ERROR) {
-                    if (STRING_CREATOR_JDK11 == null) {
-                        try {
-                            STRING_CREATOR_JDK11 = JDKUtils.getStringCreatorJDK11();
-                        } catch (Throwable e) {
-                            STRING_CREATOR_ERROR = true;
-                        }
-                    }
-
-                    if (STRING_CREATOR_JDK11 == null) {
-                        str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.US_ASCII);
-                    } else {
-                        byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
-                        str = STRING_CREATOR_JDK11.apply(bytes);
-                    }
-                } else if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_ASCII_CREATOR != null) {
+                } else if (STRING_CREATOR_JDK11 != null) {
                     byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
-                    str = (String) JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
+                    str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
                 } else {
                     str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.US_ASCII);
                 }

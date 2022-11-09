@@ -4,8 +4,11 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,11 +17,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.Locale;
 
 abstract class FieldReaderImplDate<T>
-        extends FieldReaderImpl<T> {
+        extends FieldReader<T> {
     DateTimeFormatter formatter;
 
     ObjectReader dateReader;
@@ -39,8 +43,11 @@ abstract class FieldReaderImplDate<T>
             String format,
             Locale locale,
             Object defaultValue,
-            JSONSchema schema) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema);
+            JSONSchema schema,
+            Method method,
+            Field field
+    ) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field);
         this.useSimpleFormatter = "yyyyMMddHHmmssSSSZ".equals(format);
         this.yyyyMMddhhmmss19 = "yyyy-MM-dd HH:mm:ss".equals(format);
 
@@ -99,7 +106,11 @@ abstract class FieldReaderImplDate<T>
         } else {
             long millis;
             if (yyyyMMddhhmmss19) {
-                millis = jsonReader.readMillis19();
+                if ((jsonReader.features(features) & JSONReader.Feature.SupportSmartMatch.mask) != 0 && jsonReader.isString()) {
+                    millis = jsonReader.readMillisFromString();
+                } else {
+                    millis = jsonReader.readMillis19();
+                }
             } else if (format != null) {
                 String str = jsonReader.readString();
                 if ((formatUnixTime || formatMillis) && IOUtils.isNumber(str)) {
@@ -148,6 +159,15 @@ abstract class FieldReaderImplDate<T>
 
     @Override
     public ObjectReader getObjectReader(JSONReader jsonReader) {
+        if (dateReader == null) {
+            dateReader = format == null
+                    ? ObjectReaderImplDate.INSTANCE
+                    : new ObjectReaderImplDate(format, locale);
+        }
+        return dateReader;
+    }
+
+    public ObjectReader getObjectReader(JSONReader.Context context) {
         if (dateReader == null) {
             dateReader = format == null
                     ? ObjectReaderImplDate.INSTANCE
@@ -226,7 +246,16 @@ abstract class FieldReaderImplDate<T>
                         if (!formatHasHour) {
                             ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
                         } else {
-                            ldt = LocalDateTime.parse(str, formatter);
+                            try {
+                                ldt = LocalDateTime.parse(str, formatter);
+                            } catch (DateTimeParseException e) {
+                                if (jsonReader.isSupportSmartMatch(features)) {
+                                    ldt = DateUtils.parseZonedDateTime(str)
+                                            .toLocalDateTime();
+                                } else {
+                                    throw e;
+                                }
+                            }
                         }
 
                         ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());

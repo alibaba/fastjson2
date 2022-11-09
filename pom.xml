@@ -6,7 +6,7 @@
 
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-parent</artifactId>
-    <version>2.0.14-SNAPSHOT</version>
+    <version>2.0.19-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
     <packaging>pom</packaging>
@@ -32,19 +32,19 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <fastjson1x.version>1.2.83</fastjson1x.version>
-        <jackson.version>2.13.4</jackson.version>
-        <jetty.version>11.0.11</jetty.version>
+        <jackson.version>2.14.0</jackson.version>
+        <jetty.version>11.0.12</jetty.version>
         <jersey.version>2.37</jersey.version>
-        <springframework.version>5.3.22</springframework.version>
+        <springframework.version>5.3.23</springframework.version>
 
-        <kotlin.version>1.7.10</kotlin.version>
+        <kotlin.version>1.7.20</kotlin.version>
         <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <!-- https://kotlinlang.org/docs/maven.html#specifying-compiler-options -->
         <kotlin.compiler.apiVersion>1.5</kotlin.compiler.apiVersion>
 
-        <junit5.version>5.9.0</junit5.version>
-        <kotest.version>5.4.2</kotest.version>
+        <junit5.version>5.9.1</junit5.version>
+        <kotest.version>5.5.4</kotest.version>
         <jmh.version>1.35</jmh.version>
 
         <!-- overridden by submodule that need skip deploy -->
@@ -145,7 +145,7 @@
             <dependency>
                 <groupId>com.chinamobile.cmos</groupId>
                 <artifactId>sms-core</artifactId>
-                <version>2.1.13.1</version>
+                <version>2.1.13.2</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
@@ -162,7 +162,7 @@
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
-                <version>2.9.1</version>
+                <version>2.10</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -173,7 +173,7 @@
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-bom</artifactId>
                 <type>pom</type>
-                <version>3.21.5</version>
+                <version>3.21.9</version>
                 <scope>import</scope>
             </dependency>
             <dependency>
@@ -194,7 +194,7 @@
             <dependency>
                 <groupId>com.networknt</groupId>
                 <artifactId>json-schema-validator</artifactId>
-                <version>1.0.72</version>
+                <version>1.0.73</version>
             </dependency>
             <dependency>
                 <groupId>com.squareup.retrofit2</groupId>
@@ -235,7 +235,7 @@
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-core</artifactId>
-                <version>3.4.22</version>
+                <version>3.5.0</version>
             </dependency>
             <dependency>
                 <groupId>io.springfox</groupId>
@@ -258,7 +258,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.11.1</version>
+                <version>2.12.1</version>
             </dependency>
 
 
@@ -327,7 +327,7 @@
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>5.6.11.Final</version>
+                <version>5.6.12.Final</version>
             </dependency>
 
             <dependency>
@@ -344,7 +344,7 @@
             <dependency>
                 <groupId>org.javassist</groupId>
                 <artifactId>javassist</artifactId>
-                <version>3.29.1-GA</version>
+                <version>3.29.2-GA</version>
             </dependency>
 
             <dependency>
@@ -358,7 +358,7 @@
             <dependency>
                 <groupId>org.json</groupId>
                 <artifactId>json</artifactId>
-                <version>20220320</version>
+                <version>20220924</version>
             </dependency>
 
             <dependency>
@@ -412,14 +412,14 @@
                 <groupId>org.springframework.data</groupId>
                 <artifactId>spring-data-bom</artifactId>
                 <type>pom</type>
-                <version>2021.2.2</version>
+                <version>2021.2.5</version>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-bom</artifactId>
                 <type>pom</type>
-                <version>5.7.3</version>
+                <version>5.7.5</version>
                 <scope>import</scope>
             </dependency>
 
@@ -600,7 +600,8 @@
                                 com/alibaba/fastjson/issue_2300/Issue*.java,
                                 com/alibaba/fastjson2/naming/*.java,
                                 com/alibaba/json/bvt/**/*.java,
-                                com/alibaba/fastjson2/issues/Issue485.java
+                                com/alibaba/fastjson2/issues/Issue485.java,
+                                com/alibaba/fastjson2/issues/Issue765.java
                             </excludes>
                         </configuration>
                     </execution>
@@ -685,7 +686,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.2</version>
+                    <version>3.3.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-source-plugin</artifactId>
@@ -725,7 +726,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.4.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>

@@ -5,12 +5,11 @@ import com.alibaba.fastjson2.JSONReader;
 import java.lang.reflect.Type;
 
 class ObjectReaderImplBoolean
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplBoolean INSTANCE = new ObjectReaderImplBoolean();
 
-    @Override
-    public Class getObjectClass() {
-        return Boolean.class;
+    ObjectReaderImplBoolean() {
+        super(Boolean.class);
     }
 
     @Override

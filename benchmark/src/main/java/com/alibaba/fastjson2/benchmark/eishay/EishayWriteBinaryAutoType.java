@@ -83,6 +83,7 @@ public class EishayWriteBinaryAutoType {
         );
     }
 
+    @Benchmark
     public void fastjson2JSONB_ArrayMapping(Blackhole bh) {
         bh.consume(
                 JSONB.toBytes(

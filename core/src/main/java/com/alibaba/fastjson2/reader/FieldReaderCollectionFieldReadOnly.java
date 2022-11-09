@@ -10,8 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 final class FieldReaderCollectionFieldReadOnly<T>
-        extends FieldReaderObjectField<T>
-        implements FieldReaderReadOnly<T> {
+        extends FieldReaderObjectField<T> {
     FieldReaderCollectionFieldReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Field field) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, null, schema, field);
     }
@@ -49,12 +48,12 @@ final class FieldReaderCollectionFieldReadOnly<T>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        if (fieldObjectReader == null) {
-            fieldObjectReader = jsonReader
+        if (initReader == null) {
+            initReader = jsonReader
                     .getContext()
                     .getObjectReader(fieldType);
         }
-        Object value = fieldObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
+        Object value = initReader.readObject(jsonReader, fieldType, fieldName, 0);
         accept(object, value);
     }
 }

@@ -55,6 +55,10 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
     @Override
     public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         byte type = jsonReader.getType();
         if (type == BC_NULL) {
             jsonReader.next();
@@ -80,7 +84,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
                     if (valueMap == null) {
                         valueMap = new LinkedHashMap<>();
                     }
-                    valueMap.put(fieldReader.getFieldNameHash(), fieldValue);
+                    valueMap.put(fieldReader.fieldNameHash, fieldValue);
                 }
             } else {
                 throw new JSONException(jsonReader.info("expect object, but " + JSONB.typeName(jsonReader.getType())));
@@ -117,7 +121,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
                 FieldReader fieldReader = getFieldReader(hashCode);
                 if (fieldReader == null) {
-                    jsonReader.skipValue();
+                    processExtra(jsonReader, null);
                     continue;
                 }
 
@@ -136,7 +140,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 if (valueMap == null) {
                     valueMap = new LinkedHashMap<>();
                 }
-                valueMap.put(fieldReader.getFieldNameHash(), fieldValue);
+                valueMap.put(fieldReader.fieldNameHash, fieldValue);
             }
         }
 
@@ -147,7 +151,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
         T object = createInstanceNoneDefaultConstructor(args);
         if (setterFieldReaders != null) {
             for (FieldReader fieldReader : setterFieldReaders) {
-                Object fieldValue = args.get(fieldReader.getFieldNameHash());
+                Object fieldValue = args.get(fieldReader.fieldNameHash);
                 fieldReader.accept(object, fieldValue);
             }
         }
@@ -170,6 +174,10 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
     @Override
     public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
         if (jsonReader.isJSONB()) {
             return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
@@ -182,7 +190,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 if (valueMap == null) {
                     valueMap = new LinkedHashMap<>();
                 }
-                long hash = fieldReaders[i].getFieldNameHash();
+                long hash = fieldReaders[i].fieldNameHash;
                 valueMap.put(hash, fieldValue);
             }
 
@@ -232,7 +240,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
                     if (autoTypeObjectReader == null) {
                         String typeName = jsonReader.getString();
-                        autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);
+                        autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass, this.features);
                     }
                 } else {
                     String typeName = jsonReader.getString();
@@ -241,7 +249,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
                 if (autoTypeObjectReader == null) {
                     String typeName = jsonReader.getString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass, features);
+                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass, this.features);
                 }
 
                 if (autoTypeObjectReader != null) {
@@ -262,7 +270,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
             }
 
             if (fieldReader == null) {
-                jsonReader.skipValue();
+                processExtra(jsonReader, null);
                 continue;
             }
 
@@ -270,7 +278,14 @@ public class ObjectReaderNoneDefaultConstructor<T>
             if (valueMap == null) {
                 valueMap = new LinkedHashMap<>();
             }
-            valueMap.put(fieldReader.getFieldNameHash(), fieldValue);
+
+            long hash;
+            if (fieldReader instanceof FieldReaderObjectParam) {
+                hash = ((FieldReaderObjectParam<?>) fieldReader).paramNameHash;
+            } else {
+                hash = fieldReader.fieldNameHash;
+            }
+            valueMap.put(hash, fieldValue);
         }
 
         T object = createInstanceNoneDefaultConstructor(
@@ -281,7 +296,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
         if (setterFieldReaders != null && valueMap != null) {
             for (int i = 0; i < setterFieldReaders.length; i++) {
                 FieldReader fieldReader = setterFieldReaders[i];
-                Object fieldValue = valueMap.get(fieldReader.getFieldNameHash());
+                Object fieldValue = valueMap.get(fieldReader.fieldNameHash);
                 if (fieldValue != null) {
                     fieldReader.accept(object, fieldValue);
                 }
@@ -308,7 +323,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
             if (fieldReader != null) {
                 if (fieldValue != null) {
                     Class<?> valueClass = fieldValue.getClass();
-                    Class fieldClass = fieldReader.getFieldClass();
+                    Class fieldClass = fieldReader.fieldClass;
                     if (valueClass != fieldClass) {
                         Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
                         if (typeConvert != null) {
@@ -320,13 +335,44 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 if (valueMap == null) {
                     valueMap = new LinkedHashMap<>();
                 }
-                valueMap.put(fieldReader.getFieldNameHash(), fieldValue);
+
+                long hash;
+                if (fieldReader instanceof FieldReaderObjectParam) {
+                    hash = ((FieldReaderObjectParam<?>) fieldReader).paramNameHash;
+                } else {
+                    hash = fieldReader.fieldNameHash;
+                }
+                valueMap.put(hash, fieldValue);
             }
         }
 
-        return createInstanceNoneDefaultConstructor(
+        T object = createInstanceNoneDefaultConstructor(
                 valueMap == null
                         ? Collections.emptyMap()
-                        : valueMap);
+                        : valueMap
+        );
+
+        for (int i = 0; i < setterFieldReaders.length; i++) {
+            FieldReader fieldReader = setterFieldReaders[i];
+            Object fieldValue = map.get(fieldReader.fieldName);
+            if (fieldValue == null) {
+                continue;
+            }
+
+            Class<?> valueClass = fieldValue.getClass();
+            Class fieldClass = fieldReader.fieldClass;
+            if (valueClass != fieldClass) {
+                Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
+                if (typeConvert != null) {
+                    fieldValue = typeConvert.apply(fieldValue);
+                } else if (fieldValue instanceof Map) {
+                    ObjectReader objectReader = fieldReader.getObjectReader(JSONFactory.createReadContext(provider));
+                    fieldValue = objectReader.createInstance((Map) fieldValue, features | fieldReader.features);
+                }
+            }
+            fieldReader.accept(object, fieldValue);
+        }
+
+        return object;
     }
 }

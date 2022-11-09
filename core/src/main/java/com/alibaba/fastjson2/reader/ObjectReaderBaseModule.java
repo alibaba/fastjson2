@@ -1,10 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.annotation.JSONBuilder;
-import com.alibaba.fastjson2.annotation.JSONCreator;
-import com.alibaba.fastjson2.annotation.JSONField;
-import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.annotation.*;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.impl.*;
@@ -13,9 +10,7 @@ import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
@@ -28,7 +23,9 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
 import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonJsonIgnore;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectReaderBaseModule
         implements ObjectReaderModule {
@@ -63,6 +60,16 @@ public class ObjectReaderBaseModule
                 AtomicInteger.class,
                 AtomicLong.class,
         };
+
+        Function<Object, Boolean> TO_BOOLEAN = new ToBoolean(null);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, Boolean.class, TO_BOOLEAN);
+        }
+
+        Function<Object, Boolean> TO_BOOLEAN_VALUE = new ToBoolean(Boolean.FALSE);
+        for (Class type : numberTypes) {
+            provider.registerTypeConvert(type, boolean.class, TO_BOOLEAN_VALUE);
+        }
 
         Function<Object, String> TO_STRING = new ToString();
         for (Class type : numberTypes) {
@@ -205,7 +212,8 @@ public class ObjectReaderBaseModule
             }
 
             if (mixInSource != null && mixInSource != objectClass) {
-                getBeanInfo(beanInfo, mixInSource.getAnnotations());
+                beanInfo.mixIn = true;
+                getBeanInfo(beanInfo, getAnnotations(mixInSource));
 
                 BeanUtils.staticMethod(mixInSource,
                         method -> getCreator(beanInfo, objectClass, method)
@@ -216,7 +224,7 @@ public class ObjectReaderBaseModule
                 );
             }
 
-            Annotation[] annotations = objectClass.getAnnotations();
+            Annotation[] annotations = getAnnotations(objectClass);
             getBeanInfo(beanInfo, annotations);
 
             for (Annotation annotation : annotations) {
@@ -367,23 +375,25 @@ public class ObjectReaderBaseModule
         }
 
         private void getBeanInfo(BeanInfo beanInfo, Annotation[] annotations) {
-            JSONType jsonType = null;
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                if (annotationType == JSONType.class) {
-                    jsonType = (JSONType) annotation;
+                JSONType jsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
+                if (jsonType != null) {
+                    getBeanInfo1x(beanInfo, annotation);
+                    if (jsonType == annotation) {
+                        continue;
+                    }
                 }
-                String annotationTypeName = annotationType.getName();
-                switch (annotationTypeName) {
-                    case "com.alibaba.fastjson2.annotation.JSONType":
-                        getBeanInfo1x(beanInfo, annotation);
-                        break;
-                    default:
-                        break;
+
+                if (annotationType == JSONAutowired.class) {
+                    beanInfo.readerFeatures |= FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
+                    JSONAutowired autowired = (JSONAutowired) annotation;
+                    String fieldName = autowired.reader();
+                    if (!fieldName.isEmpty()) {
+                        beanInfo.objectReaderFieldName = fieldName;
+                    }
                 }
             }
-
-            getBeanInfo(beanInfo, jsonType);
         }
 
         void getBeanInfo1x(BeanInfo beanInfo, Annotation annotation) {
@@ -396,20 +406,22 @@ public class ObjectReaderBaseModule
                     switch (name) {
                         case "seeAlso": {
                             Class<?>[] classes = (Class<?>[]) result;
-                            beanInfo.seeAlso = classes;
-                            beanInfo.seeAlsoNames = new String[classes.length];
-                            for (int i = 0; i < classes.length; i++) {
-                                Class<?> item = classes[i];
+                            if (classes.length != 0) {
+                                beanInfo.seeAlso = classes;
+                                beanInfo.seeAlsoNames = new String[classes.length];
+                                for (int i = 0; i < classes.length; i++) {
+                                    Class<?> item = classes[i];
 
-                                BeanInfo itemBeanInfo = new BeanInfo();
-                                getBeanInfo(itemBeanInfo, item);
-                                String typeName = itemBeanInfo.typeName;
-                                if (typeName == null || typeName.isEmpty()) {
-                                    typeName = item.getSimpleName();
+                                    BeanInfo itemBeanInfo = new BeanInfo();
+                                    getBeanInfo(itemBeanInfo, item);
+                                    String typeName = itemBeanInfo.typeName;
+                                    if (typeName == null || typeName.isEmpty()) {
+                                        typeName = item.getSimpleName();
+                                    }
+                                    beanInfo.seeAlsoNames[i] = typeName;
                                 }
-                                beanInfo.seeAlsoNames[i] = typeName;
+                                beanInfo.readerFeatures |= JSONReader.Feature.SupportAutoType.mask;
                             }
-                            beanInfo.readerFeatures |= JSONReader.Feature.SupportAutoType.mask;
                             break;
                         }
                         case "typeKey": {
@@ -432,13 +444,31 @@ public class ObjectReaderBaseModule
                             break;
                         }
                         case "ignores": {
-                            beanInfo.ignores = (String[]) result;
+                            String[] ignores = (String[]) result;
+                            if (ignores.length > 0) {
+                                beanInfo.ignores = ignores;
+                            }
                             break;
                         }
                         case "orders": {
                             String[] fields = (String[]) result;
                             if (fields.length != 0) {
                                 beanInfo.orders = fields;
+                            }
+                            break;
+                        }
+                        case "schema": {
+                            String schema = (String) result;
+                            schema = schema.trim();
+                            if (!schema.isEmpty()) {
+                                beanInfo.schema = schema;
+                            }
+                            break;
+                        }
+                        case "deserializer": {
+                            Class<?> deserializer = (Class) result;
+                            if (ObjectReader.class.isAssignableFrom(deserializer)) {
+                                beanInfo.deserializer = deserializer;
                             }
                             break;
                         }
@@ -464,20 +494,36 @@ public class ObjectReaderBaseModule
                             }
                             break;
                         }
+                        case "deserializeFeatures": {
+                            JSONReader.Feature[] features = (JSONReader.Feature[]) result;
+                            for (JSONReader.Feature feature : features) {
+                                beanInfo.readerFeatures |= feature.mask;
+                            }
+                            break;
+                        }
                         case "builder": {
                             Class<?> builderClass = (Class) result;
                             if (builderClass != void.class && builderClass != Void.class) {
                                 beanInfo.builder = builderClass;
 
-                                for (Annotation builderAnnation : builderClass.getAnnotations()) {
-                                    Class<? extends Annotation> builderAnnationClass = builderAnnation.annotationType();
-                                    String builderAnnationName = builderAnnationClass.getName();
+                                for (Annotation builderAnnotation : getAnnotations(builderClass)) {
+                                    Class<? extends Annotation> builderAnnotationClass = builderAnnotation.annotationType();
+                                    String builderAnnotationName = builderAnnotationClass.getName();
 
-                                    switch (builderAnnationName) {
+                                    switch (builderAnnotationName) {
                                         case "com.alibaba.fastjson.annotation.JSONPOJOBuilder":
-                                            getBeanInfo1xJSONPOJOBuilder(beanInfo, builderClass, builderAnnation, builderAnnationClass);
+                                            getBeanInfo1xJSONPOJOBuilder(beanInfo, builderClass, builderAnnotation, builderAnnotationClass);
                                             break;
                                         default:
+                                            JSONBuilder jsonBuilder = AnnotationUtils.findAnnotation(builderClass, JSONBuilder.class);
+                                            if (jsonBuilder != null) {
+                                                String buildMethodName = jsonBuilder.buildMethod();
+                                                beanInfo.buildMethod = BeanUtils.buildMethod(builderClass, buildMethodName);
+                                                String withPrefix = jsonBuilder.withPrefix();
+                                                if (!withPrefix.isEmpty()) {
+                                                    beanInfo.builderWithPrefix = withPrefix;
+                                                }
+                                            }
                                             break;
                                     }
                                 }
@@ -507,77 +553,6 @@ public class ObjectReaderBaseModule
             });
         }
 
-        void getBeanInfo(BeanInfo beanInfo, JSONType jsonType) {
-            if (jsonType == null) {
-                return;
-            }
-
-            Class<?>[] classes = jsonType.seeAlso();
-            if (classes.length != 0) {
-                beanInfo.seeAlso = classes;
-                beanInfo.seeAlsoNames = new String[classes.length];
-                for (int i = 0; i < classes.length; i++) {
-                    Class<?> item = classes[i];
-
-                    BeanInfo itemBeanInfo = new BeanInfo();
-                    getBeanInfo(itemBeanInfo, item);
-                    String typeName = itemBeanInfo.typeName;
-                    if (typeName == null || typeName.isEmpty()) {
-                        typeName = item.getSimpleName();
-                    }
-                    beanInfo.seeAlsoNames[i] = typeName;
-                }
-                beanInfo.readerFeatures |= JSONReader.Feature.SupportAutoType.mask;
-            }
-
-            String jsonTypeKey = jsonType.typeKey();
-            if (!jsonTypeKey.isEmpty()) {
-                beanInfo.typeKey = jsonTypeKey;
-            }
-
-            String typeName = jsonType.typeName();
-            if (!typeName.isEmpty()) {
-                beanInfo.typeName = typeName;
-            }
-
-            beanInfo.namingStrategy =
-                    jsonType.naming().name();
-
-            for (JSONReader.Feature feature : jsonType.deserializeFeatures()) {
-                beanInfo.readerFeatures |= feature.mask;
-            }
-
-            Class<?> builderClass = jsonType.builder();
-            if (builderClass != void.class && builderClass != Void.class) {
-                beanInfo.builder = builderClass;
-
-                JSONBuilder jsonBuilder = builderClass.getAnnotation(JSONBuilder.class);
-                if (jsonBuilder != null) {
-                    String buildMethodName = jsonBuilder.buildMethod();
-                    beanInfo.buildMethod = BeanUtils.buildMethod(builderClass, buildMethodName);
-                    String withPrefix = jsonBuilder.withPrefix();
-                    if (!withPrefix.isEmpty()) {
-                        beanInfo.builderWithPrefix = withPrefix;
-                    }
-                }
-            }
-
-            Class<?> deserializer = jsonType.deserializer();
-            if (ObjectReader.class.isAssignableFrom(deserializer)) {
-                beanInfo.deserializer = deserializer;
-            }
-
-            String[] ignores = jsonType.ignores();
-            if (ignores.length > 0) {
-                beanInfo.ignores = ignores;
-            }
-
-            String schema = jsonType.schema().trim();
-            if (!schema.isEmpty()) {
-                beanInfo.schema = schema;
-            }
-        }
-
         @Override
         public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Constructor constructor, int paramIndex, Parameter parameter) {
             Class mixInSource = provider.mixInCache.get(objectClass);
@@ -589,13 +564,13 @@ public class ObjectReaderBaseModule
                 }
                 if (mixInConstructor != null) {
                     Parameter mixInParam = mixInConstructor.getParameters()[paramIndex];
-                    processAnnotation(fieldInfo, mixInParam.getAnnotations());
+                    processAnnotation(fieldInfo, getAnnotations(mixInParam));
                 }
             }
 
             Annotation[] annotations = null;
             try {
-                annotations = parameter.getAnnotations();
+                annotations = getAnnotations(parameter);
             } catch (ArrayIndexOutOfBoundsException ignored) {
                 // ignored
             }
@@ -616,11 +591,11 @@ public class ObjectReaderBaseModule
                 }
                 if (mixInMethod != null) {
                     Parameter mixInParam = mixInMethod.getParameters()[paramIndex];
-                    processAnnotation(fieldInfo, mixInParam.getAnnotations());
+                    processAnnotation(fieldInfo, getAnnotations(mixInParam));
                 }
             }
 
-            processAnnotation(fieldInfo, parameter.getAnnotations());
+            processAnnotation(fieldInfo, getAnnotations(parameter));
         }
 
         @Override
@@ -638,7 +613,7 @@ public class ObjectReaderBaseModule
                 }
             }
 
-            processAnnotation(fieldInfo, field.getAnnotations());
+            processAnnotation(fieldInfo, getAnnotations(field));
         }
 
         @Override
@@ -657,12 +632,18 @@ public class ObjectReaderBaseModule
                 }
             }
 
-            JSONField jsonField = null;
-            Annotation[] annotations = method.getAnnotations();
+            String jsonFieldName = null;
+
+            Annotation[] annotations = getAnnotations(method);
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                if (annotationType == JSONField.class) {
-                    jsonField = (JSONField) annotation;
+                JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                if (jsonField != null) {
+                    getFieldInfo(fieldInfo, jsonField);
+                    jsonFieldName = jsonField.name();
+                    if (jsonField == annotation) {
+                        continue;
+                    }
                 }
 
                 boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
@@ -699,8 +680,6 @@ public class ObjectReaderBaseModule
                 }
             }
 
-            getFieldInfo(fieldInfo, jsonField);
-
             String fieldName;
             if (methodName.startsWith("set")) {
                 fieldName = BeanUtils.setterName(methodName, null);
@@ -708,16 +687,20 @@ public class ObjectReaderBaseModule
                 fieldName = BeanUtils.getterName(methodName, null); // readOnlyProperty
             }
 
-            String fieldName2;
+            String fieldName1, fieldName2;
             char c0, c1;
             if (fieldName.length() > 1
                     && (c0 = fieldName.charAt(0)) >= 'A' && c0 <= 'Z'
                     && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z'
-                    && (jsonField == null || jsonField.name().isEmpty())) {
+                    && (jsonFieldName == null || jsonFieldName.isEmpty())) {
                 char[] chars = fieldName.toCharArray();
                 chars[0] = (char) (chars[0] + 32);
+                fieldName1 = new String(chars);
+
+                chars[1] = (char) (chars[1] + 32);
                 fieldName2 = new String(chars);
             } else {
+                fieldName1 = null;
                 fieldName2 = null;
             }
 
@@ -727,25 +710,36 @@ public class ObjectReaderBaseModule
                     if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
                         getFieldInfo(fieldInfo, objectClass, field);
                     }
+                    fieldInfo.features |= FieldInfo.FIELD_MASK;
+                } else if (fieldName1 != null && field.getName().equals(fieldName1)) {
+                    int modifiers = field.getModifiers();
+                    if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
+                        getFieldInfo(fieldInfo, objectClass, field);
+                    }
+                    fieldInfo.features |= FieldInfo.FIELD_MASK;
                 } else if (fieldName2 != null && field.getName().equals(fieldName2)) {
                     int modifiers = field.getModifiers();
                     if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
                         getFieldInfo(fieldInfo, objectClass, field);
                     }
+                    fieldInfo.features |= FieldInfo.FIELD_MASK;
                 }
             });
 
-            if (fieldName2 != null && fieldInfo.fieldName == null && fieldInfo.alternateNames == null) {
-                fieldInfo.alternateNames = new String[]{fieldName2};
+            if (fieldName1 != null && fieldInfo.fieldName == null && fieldInfo.alternateNames == null) {
+                fieldInfo.alternateNames = new String[]{fieldName1, fieldName2};
             }
         }
 
         private void processAnnotation(FieldInfo fieldInfo, Annotation[] annotations) {
-            JSONField jsonField = null;
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                if (annotationType == JSONField.class) {
-                    jsonField = (JSONField) annotation;
+                JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                if (jsonField != null) {
+                    getFieldInfo(fieldInfo, jsonField);
+                    if (jsonField == annotation) {
+                        continue;
+                    }
                 }
 
                 boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
@@ -781,8 +775,6 @@ public class ObjectReaderBaseModule
                         break;
                 }
             }
-
-            getFieldInfo(fieldInfo, jsonField);
         }
 
         private void processJacksonJsonProperty(FieldInfo fieldInfo, Annotation annotation) {
@@ -806,7 +798,7 @@ public class ObjectReaderBaseModule
                         case "access": {
                             String access = ((Enum) result).name();
                             switch (access) {
-                                case "WRITE_ONLY":
+                                case "READ_ONLY":
                                     fieldInfo.ignore = true;
                                     break;
                                 default:
@@ -1092,15 +1084,23 @@ public class ObjectReaderBaseModule
     }
 
     private void getCreator(BeanInfo beanInfo, Class<?> objectClass, Constructor constructor) {
-        Annotation[] annotations = constructor.getAnnotations();
+        Annotation[] annotations = getAnnotations(constructor);
 
         boolean creatorMethod = false;
-        JSONCreator jsonCreator = null;
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
-            if (annotationType == JSONCreator.class) {
-                jsonCreator = (JSONCreator) annotation;
-                continue;
+
+            JSONCreator jsonCreator = AnnotationUtils.findAnnotation(annotation, JSONCreator.class);
+            if (jsonCreator != null) {
+                String[] createParameterNames = jsonCreator.parameterNames();
+                if (createParameterNames.length != 0) {
+                    beanInfo.createParameterNames = createParameterNames;
+                }
+
+                creatorMethod = true;
+                if (jsonCreator == annotation) {
+                    continue;
+                }
             }
 
             switch (annotationType.getName()) {
@@ -1132,15 +1132,6 @@ public class ObjectReaderBaseModule
             }
         }
 
-        if (jsonCreator != null) {
-            String[] createParameterNames = jsonCreator.parameterNames();
-            if (createParameterNames.length != 0) {
-                beanInfo.createParameterNames = createParameterNames;
-            }
-
-            creatorMethod = true;
-        }
-
         if (!creatorMethod) {
             return;
         }
@@ -1156,16 +1147,17 @@ public class ObjectReaderBaseModule
     }
 
     private void getCreator(BeanInfo beanInfo, Class<?> objectClass, Method method) {
-        Annotation[] annotations = method.getAnnotations();
+        Annotation[] annotations = getAnnotations(method);
 
         boolean creatorMethod = false;
         JSONCreator jsonCreator = null;
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
-            if (annotationType == JSONCreator.class) {
-                jsonCreator = (JSONCreator) annotation;
+            jsonCreator = AnnotationUtils.findAnnotation(annotation, JSONCreator.class);
+            if (jsonCreator == annotation) {
                 continue;
             }
+
             switch (annotationType.getName()) {
                 case "com.alibaba.fastjson.annotation.JSONCreator":
                     creatorMethod = true;
@@ -1680,7 +1672,7 @@ public class ObjectReaderBaseModule
                             int.class);
 
                     return creator
-                            .createObjectReaderNoneDefaultConstrutor(
+                            .createObjectReaderNoneDefaultConstructor(
                                     constructor,
                                     "className",
                                     "methodName",
@@ -1695,7 +1687,7 @@ public class ObjectReaderBaseModule
                 BeanInfo beanInfo = new BeanInfo();
                 annotationProcessor.getBeanInfo(beanInfo, objectClass);
                 if (beanInfo.seeAlso != null && beanInfo.seeAlso.length == 0) {
-                    return new InterfaceImpl(type);
+                    return new ObjectReaderInterfaceImpl(type);
                 }
             }
         }
@@ -1902,7 +1894,7 @@ public class ObjectReaderBaseModule
             case "java.lang.RuntimeException":
             case "java.io.IOException":
             case "java.io.UncheckedIOException":
-                if (!JDKUtils.UNSAFE_SUPPORT) {
+                if (!UNSAFE_SUPPORT) {
                     return new ObjectReaderException((Class) type);
                 }
                 break;
@@ -1921,100 +1913,5 @@ public class ObjectReaderBaseModule
             return new ObjectReaderImplMapString(mapType, instanceType, 0);
         }
         return new ObjectReaderImplMapTyped(mapType, instanceType, keyType, valueType, 0, null);
-    }
-
-    abstract static class PrimitiveImpl<T>
-            implements ObjectReader<T> {
-        @Override
-        public T createInstance(long features) {
-            throw new JSONException("UnsupportedOperation");
-        }
-
-        @Override
-        public FieldReader getFieldReader(long hashCode) {
-            return null;
-        }
-
-        @Override
-        public abstract T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features);
-    }
-
-    static class InterfaceImpl
-            extends PrimitiveImpl {
-        final Type interfaceType;
-        final Class interfaceClass;
-
-        public InterfaceImpl(Type interfaceType) {
-            this.interfaceType = interfaceType;
-            this.interfaceClass = TypeUtils.getClass(interfaceType);
-        }
-
-        @Override
-        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-            if (jsonReader.nextIfMatch('{')) {
-                long hash = jsonReader.readFieldNameHashCode();
-                JSONReader.Context context = jsonReader.getContext();
-
-                if (hash == HASH_TYPE && context.isEnabled(JSONReader.Feature.SupportAutoType)) {
-                    long typeHash = jsonReader.readTypeHashCode();
-                    ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
-                    if (autoTypeObjectReader == null) {
-                        String typeName = jsonReader.getString();
-                        autoTypeObjectReader = context.getObjectReaderAutoType(typeName, interfaceClass);
-
-                        if (autoTypeObjectReader == null) {
-                            throw new JSONException(jsonReader.info("auoType not support : " + typeName));
-                        }
-                    }
-
-                    return autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
-                }
-
-                return ObjectReaderImplMap.INSTANCE.readObject(jsonReader, fieldType, fieldName, 0);
-            }
-
-            Object value;
-            switch (jsonReader.current()) {
-                case '-':
-                case '+':
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                case '.':
-                    value = jsonReader.readNumber();
-                    break;
-                case '[':
-                    value = jsonReader.readArray();
-                    break;
-                case '"':
-                case '\'':
-                    value = jsonReader.readString();
-                    break;
-                case 't':
-                case 'f':
-                    value = jsonReader.readBoolValue();
-                    break;
-                case 'n':
-                    jsonReader.readNull();
-                    value = null;
-                    break;
-                default:
-                    throw new JSONException(jsonReader.info());
-            }
-
-            return value;
-        }
-
-        @Override
-        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-            return jsonReader.readAny();
-        }
     }
 }

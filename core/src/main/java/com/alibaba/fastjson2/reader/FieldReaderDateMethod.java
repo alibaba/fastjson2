@@ -9,7 +9,6 @@ import java.util.Locale;
 
 final class FieldReaderDateMethod<T>
         extends FieldReaderImplDate<T> {
-    private Method method;
     FieldReaderDateMethod(
             String fieldName,
             Class fieldClass,
@@ -20,13 +19,7 @@ final class FieldReaderDateMethod<T>
             JSONSchema schema,
             Method method
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, null, schema);
-        this.method = method;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, null, schema, method, null);
     }
 
     @Override

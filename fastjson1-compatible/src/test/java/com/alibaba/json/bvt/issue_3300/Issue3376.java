@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @Author ：Nanqi
- * @Date ：Created in 01:25 2020/8/2
+ * Date Created in 01:25 2020/8/2
  */
 public class Issue3376 {
     @Test

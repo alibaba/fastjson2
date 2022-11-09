@@ -9,6 +9,8 @@ public class FieldInfo {
     public static final long UNWRAPPED_MASK = 1L << 49;
     public static final long RAW_VALUE_MASK = 1L << 50;
     public static final long READ_USING_MASK = 1L << 51;
+    public static final long FIELD_MASK = 1L << 52;
+    public static final long JSON_AUTO_WIRED_ANNOTATED = 1L << 53;
 
     public String fieldName;
     public String format;

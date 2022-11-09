@@ -8,8 +8,7 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderStringFunc<T, V>
-        extends FieldReaderImpl<T> {
-    final Method method;
+        extends FieldReader<T> {
     final BiConsumer<T, V> function;
 
     final String format;
@@ -27,17 +26,11 @@ final class FieldReaderStringFunc<T, V>
             Method method,
             BiConsumer<T, V> function
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema);
-        this.method = method;
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
         this.function = function;
 
         this.format = format;
         trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

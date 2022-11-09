@@ -7,10 +7,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+
 final class FieldWriterListField<T>
         extends FieldWriterList<T> {
-    final Field field;
-
     protected FieldWriterListField(
             String fieldName,
             Type itemType,
@@ -22,13 +22,7 @@ final class FieldWriterListField<T>
             Class fieldClass,
             Field field
     ) {
-        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, field, null);
     }
 
     @Override
@@ -36,7 +30,7 @@ final class FieldWriterListField<T>
         try {
             return field.get(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 
@@ -56,7 +50,7 @@ final class FieldWriterListField<T>
 
         if (value == null) {
             long features = this.features | context.getFeatures();
-            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullListAsEmpty.mask)) != 0) {
+            if ((features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask)) != 0) {
                 writeFieldName(jsonWriter);
                 jsonWriter.writeArrayNull();
                 return true;
@@ -65,7 +59,7 @@ final class FieldWriterListField<T>
             }
         }
 
-        String refPath = jsonWriter.setPath(name, this, value);
+        String refPath = jsonWriter.setPath(this, value);
         if (refPath != null) {
             writeFieldName(jsonWriter);
             jsonWriter.writeReference(refPath);
@@ -94,7 +88,7 @@ final class FieldWriterListField<T>
         boolean refDetect = jsonWriter.isRefDetect();
 
         if (refDetect) {
-            String refPath = jsonWriter.setPath(name, value);
+            String refPath = jsonWriter.setPath(fieldName, value);
             if (refPath != null) {
                 jsonWriter.writeReference(refPath);
                 jsonWriter.popPath(value);

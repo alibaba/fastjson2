@@ -3,12 +3,12 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
 
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
 
 class FieldReaderInt32ValueField<T>
@@ -16,7 +16,7 @@ class FieldReaderInt32ValueField<T>
     final long fieldOffset;
     FieldReaderInt32ValueField(String fieldName, Class fieldType, int ordinal, String format, Integer defaultValue, JSONSchema schema, Field field) {
         super(fieldName, fieldType, fieldType, ordinal, 0, format, defaultValue, schema, field);
-        fieldOffset = JDKUtils.UNSAFE_SUPPORT ? UnsafeUtils.objectFieldOffset(field) : 0;
+        fieldOffset = UNSAFE_SUPPORT ? UnsafeUtils.objectFieldOffset(field) : 0;
     }
 
     @Override
@@ -27,7 +27,7 @@ class FieldReaderInt32ValueField<T>
             schema.assertValidate(fieldInt);
         }
 
-        if (JDKUtils.UNSAFE_SUPPORT) {
+        if (UNSAFE_SUPPORT) {
             UNSAFE.putInt(object, fieldOffset, fieldInt);
         } else {
             try {
@@ -62,13 +62,13 @@ class FieldReaderInt32ValueField<T>
             schema.assertValidate(intValue);
         }
 
-        if (JDKUtils.UNSAFE_SUPPORT) {
+        if (UNSAFE_SUPPORT) {
             UNSAFE.putInt(object, fieldOffset, intValue);
         } else {
             try {
                 field.setInt(object, intValue);
             } catch (Exception e) {
-                throw new JSONException("set " + getFieldName() + " error", e);
+                throw new JSONException("set " + fieldName + " error", e);
             }
         }
     }
@@ -80,7 +80,7 @@ class FieldReaderInt32ValueField<T>
         }
 
         int intValue = (int) value;
-        if (JDKUtils.UNSAFE_SUPPORT) {
+        if (UNSAFE_SUPPORT) {
             UNSAFE.putInt(object, fieldOffset, intValue);
         } else {
             try {

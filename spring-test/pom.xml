@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.alibaba.fastjson2</groupId>
         <artifactId>fastjson2-parent</artifactId>
-        <version>2.0.14-SNAPSHOT</version>
+        <version>2.0.19-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -16,7 +16,7 @@
     <properties>
         <java.version>8</java.version>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <spring.boot.version>2.7.1</spring.boot.version>
+        <spring.boot.version>2.7.5</spring.boot.version>
     </properties>
 
     <!-- 使用 aliyun 的 Maven 源，提升下载速度 -->
@@ -71,7 +71,7 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
-            <version>5.8.6</version>
+            <version>5.8.9</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

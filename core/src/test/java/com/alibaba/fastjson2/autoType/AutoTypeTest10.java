@@ -66,7 +66,7 @@ public class AutoTypeTest10 {
         object.put("data", list);
 
         byte[] bytes = JSONB.toBytes(object, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
-        System.out.println(JSON.toJSONString(JSONB.parse(bytes, JSONReader.Feature.SupportAutoType)));
+        JSONBDump.dump(bytes);
 
         com.alibaba.fastjson.JSONObject object2 = (com.alibaba.fastjson.JSONObject) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         ArrayList list2 = (ArrayList) object2.get("data");

@@ -8,19 +8,12 @@ import com.alibaba.fastjson2.schema.JSONSchema;
 import java.lang.reflect.Method;
 
 final class FieldReaderCharValueFunc<T>
-        extends FieldReaderImpl<T> {
-    final Method method;
+        extends FieldReader<T> {
     final ObjCharConsumer<T> function;
 
     FieldReaderCharValueFunc(String fieldName, int ordinal, String format, Character defaultValue, JSONSchema schema, Method method, ObjCharConsumer<T> function) {
-        super(fieldName, char.class, char.class, ordinal, 0, format, null, defaultValue, schema);
-        this.method = method;
+        super(fieldName, char.class, char.class, ordinal, 0, format, null, defaultValue, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

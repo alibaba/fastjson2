@@ -17,6 +17,8 @@ public class Issue1082 {
             Model_1082 m = (Model_1082) JSON.parseObject("{}", Model_1082.class);
         } catch (JSONException ex) {
             error = ex;
+        } catch (NullPointerException ex) {
+            error = ex;
         }
         assertNotNull(error);
     }

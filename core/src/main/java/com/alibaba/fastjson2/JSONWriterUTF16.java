@@ -1,8 +1,7 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.RyuDouble;
-import com.alibaba.fastjson2.util.RyuFloat;
+import com.alibaba.fastjson2.util.*;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -12,10 +11,13 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.UUID;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.JSONWriter.Feature.NotWriteDefaultValue;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 
 class JSONWriterUTF16
@@ -28,7 +30,7 @@ class JSONWriterUTF16
     JSONWriterUTF16(Context ctx) {
         super(ctx, StandardCharsets.UTF_16);
 
-        cachedIndex = JSONFactory.cacheIndex();
+        cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
         chars = JSONFactory.allocateCharArray(cachedIndex);
         if (chars == null) {
             chars = new char[1024];
@@ -50,7 +52,7 @@ class JSONWriterUTF16
     }
 
     @Override
-    protected void write0(char c) {
+    protected final void write0(char c) {
         if (off == chars.length) {
             int minCapacity = off + 1;
             int oldCapacity = chars.length;
@@ -58,7 +60,7 @@ class JSONWriterUTF16
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -77,7 +79,7 @@ class JSONWriterUTF16
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -98,7 +100,7 @@ class JSONWriterUTF16
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -118,7 +120,7 @@ class JSONWriterUTF16
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -138,7 +140,7 @@ class JSONWriterUTF16
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -158,7 +160,7 @@ class JSONWriterUTF16
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -178,7 +180,7 @@ class JSONWriterUTF16
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -201,8 +203,48 @@ class JSONWriterUTF16
         }
 
         boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
-        final int strlen = str.length();
         boolean escape = false;
+
+        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
+            byte coder = UnsafeUtils.getStringCoder(str);
+            if (coder == 0) {
+                byte[] value = UnsafeUtils.getStringValue(str);
+                int minCapacity = off + value.length + 2;
+                if (minCapacity - chars.length > 0) {
+                    int oldCapacity = chars.length;
+                    int newCapacity = oldCapacity + (oldCapacity >> 1);
+                    if (newCapacity - minCapacity < 0) {
+                        newCapacity = minCapacity;
+                    }
+                    if (newCapacity - maxArraySize > 0) {
+                        throw new OutOfMemoryError();
+                    }
+
+                    // minCapacity is usually close to size, so this is a win:
+                    chars = Arrays.copyOf(chars, newCapacity);
+                }
+
+                final int mark = off;
+                chars[off++] = quote;
+
+                for (int i = 0; i < value.length; i++) {
+                    byte c = value[i];
+                    if (c == '\\' || c == quote || c < ' ') {
+                        escape = true;
+                        break;
+                    }
+                    chars[off++] = (char) c;
+                }
+
+                if (!escape) {
+                    chars[off++] = quote;
+                    return;
+                }
+                off = mark;
+            }
+        }
+
+        final int strlen = str.length();
         {
             int i = 0;
             // vector optimize 8
@@ -285,7 +327,7 @@ class JSONWriterUTF16
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -430,7 +472,7 @@ class JSONWriterUTF16
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -560,7 +602,7 @@ class JSONWriterUTF16
         if (off == chars.length) {
             int oldCapacity = chars.length;
             int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -700,7 +742,7 @@ class JSONWriterUTF16
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -721,7 +763,7 @@ class JSONWriterUTF16
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -833,7 +875,7 @@ class JSONWriterUTF16
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -854,7 +896,7 @@ class JSONWriterUTF16
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -883,7 +925,7 @@ class JSONWriterUTF16
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -908,7 +950,7 @@ class JSONWriterUTF16
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -966,7 +1008,7 @@ class JSONWriterUTF16
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1016,12 +1058,12 @@ class JSONWriterUTF16
 
     @Override
     public void writeInt64(long i) {
-        if ((context.features & Feature.WriteNonStringValueAsString.mask) != 0
-                || ((context.features & Feature.BrowserCompatible.mask) != 0
-                && (i > 9007199254740991L || i < -9007199254740991L))) {
-            String str = Long.toString(i);
-            writeString(str);
-            return;
+        boolean writeAsString = false;
+        if ((context.features & (Feature.WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0) {
+            writeAsString = true;
+        } else if ((context.features & Feature.BrowserCompatible.mask) != 0
+                && (i > 9007199254740991L || i < -9007199254740991L)) {
+            writeAsString = true;
         }
 
         if (i == Long.MIN_VALUE) {
@@ -1079,13 +1121,16 @@ class JSONWriterUTF16
         {
             // inline ensureCapacity
             int minCapacity = off + size;
+            if (writeAsString) {
+                minCapacity += 2;
+            }
             if (minCapacity - this.chars.length > 0) {
                 int oldCapacity = this.chars.length;
                 int newCapacity = oldCapacity + (oldCapacity >> 1);
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1094,7 +1139,10 @@ class JSONWriterUTF16
             }
         }
 
-//        getChars(i, off + size, chars);
+        if (writeAsString) {
+            chars[off++] = '"';
+        }
+
         {
             int index = off + size;
             long q;
@@ -1145,6 +1193,9 @@ class JSONWriterUTF16
             }
         }
         off += size;
+        if (writeAsString) {
+            chars[off++] = '"';
+        }
     }
 
     @Override
@@ -1181,14 +1232,14 @@ class JSONWriterUTF16
             return;
         }
 
-        int minCapacity = values.length * 16 + 1;
+        int minCapacity = off + values.length * 16 + 1;
         if (minCapacity - chars.length > 0) {
             int oldCapacity = chars.length;
             int newCapacity = oldCapacity + (oldCapacity >> 1);
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1292,7 +1343,7 @@ class JSONWriterUTF16
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1321,6 +1372,36 @@ class JSONWriterUTF16
     }
 
     @Override
+    public void writeDateTime14(
+            int year,
+            int month,
+            int dayOfMonth,
+            int hour,
+            int minute,
+            int second) {
+        ensureCapacity(off + 16);
+
+        chars[off++] = quote;
+
+        chars[off++] = (char) (year / 1000 + '0');
+        chars[off++] = (char) ((year / 100) % 10 + '0');
+        chars[off++] = (char) ((year / 10) % 10 + '0');
+        chars[off++] = (char) (year % 10 + '0');
+        chars[off++] = (char) (month / 10 + '0');
+        chars[off++] = (char) (month % 10 + '0');
+        chars[off++] = (char) (dayOfMonth / 10 + '0');
+        chars[off++] = (char) (dayOfMonth % 10 + '0');
+        chars[off++] = (char) (hour / 10 + '0');
+        chars[off++] = (char) (hour % 10 + '0');
+        chars[off++] = (char) (minute / 10 + '0');
+        chars[off++] = (char) (minute % 10 + '0');
+        chars[off++] = (char) (second / 10 + '0');
+        chars[off++] = (char) (second % 10 + '0');
+
+        chars[off++] = quote;
+    }
+
+    @Override
     public void writeDateTime19(
             int year,
             int month,
@@ -1330,7 +1411,7 @@ class JSONWriterUTF16
             int second) {
         ensureCapacity(off + 21);
 
-        chars[off++] = '"';
+        chars[off++] = quote;
 
         chars[off++] = (char) (year / 1000 + '0');
         chars[off++] = (char) ((year / 100) % 10 + '0');
@@ -1352,7 +1433,7 @@ class JSONWriterUTF16
         chars[off++] = (char) (second / 10 + '0');
         chars[off++] = (char) (second % 10 + '0');
 
-        chars[off++] = '"';
+        chars[off++] = quote;
     }
 
     @Override
@@ -1363,16 +1444,16 @@ class JSONWriterUTF16
 
         int yearSize = IOUtils.stringSize(year);
         int len = 8 + yearSize;
-        char[] chars = new char[len];
-        chars[0] = '"';
-        Arrays.fill(chars, 1, len - 1, '0');
-        IOUtils.getChars(year, yearSize + 1, chars);
-        chars[yearSize + 1] = '-';
-        IOUtils.getChars(month, yearSize + 4, chars);
-        chars[yearSize + 4] = '-';
-        IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
-        chars[len - 1] = '"';
-        writeRaw(chars);
+        ensureCapacity(off + len);
+        chars[off] = quote;
+        Arrays.fill(chars, off + 1, off + len - 1, '0');
+        IOUtils.getChars(year, off + yearSize + 1, chars);
+        chars[off + yearSize + 1] = '-';
+        IOUtils.getChars(month, off + yearSize + 4, chars);
+        chars[off + yearSize + 4] = '-';
+        IOUtils.getChars(dayOfMonth, off + yearSize + 7, chars);
+        chars[off + len - 1] = quote;
+        off += len;
     }
 
     @Override
@@ -1419,27 +1500,26 @@ class JSONWriterUTF16
             small = nano;
         }
 
-        char[] chars = new char[len];
-        chars[0] = '"';
-        Arrays.fill(chars, 1, len - 1, '0');
-        IOUtils.getChars(year, yearSize + 1, chars);
-        chars[yearSize + 1] = '-';
-        IOUtils.getChars(month, yearSize + 4, chars);
-        chars[yearSize + 4] = '-';
-        IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
-        chars[yearSize + 7] = ' ';
-        IOUtils.getChars(hour, yearSize + 10, chars);
-        chars[yearSize + 10] = ':';
-        IOUtils.getChars(minute, yearSize + 13, chars);
-        chars[yearSize + 13] = ':';
-        IOUtils.getChars(second, yearSize + 16, chars);
+        ensureCapacity(off + len);
+        chars[off] = quote;
+        Arrays.fill(chars, off + 1, off + len - 1, '0');
+        IOUtils.getChars(year, off + yearSize + 1, chars);
+        chars[off + yearSize + 1] = '-';
+        IOUtils.getChars(month, off + yearSize + 4, chars);
+        chars[off + yearSize + 4] = '-';
+        IOUtils.getChars(dayOfMonth, off + yearSize + 7, chars);
+        chars[off + yearSize + 7] = ' ';
+        IOUtils.getChars(hour, off + yearSize + 10, chars);
+        chars[off + yearSize + 10] = ':';
+        IOUtils.getChars(minute, off + yearSize + 13, chars);
+        chars[off + yearSize + 13] = ':';
+        IOUtils.getChars(second, off + yearSize + 16, chars);
         if (small != 0) {
-            chars[yearSize + 16] = '.';
-            IOUtils.getChars(small, len - 1, chars);
+            chars[off + yearSize + 16] = '.';
+            IOUtils.getChars(small, off + len - 1, chars);
         }
-        chars[len - 1] = '"';
-
-        writeRaw(chars);
+        chars[off + len - 1] = quote;
+        off += len;
     }
 
     @Override
@@ -1451,7 +1531,8 @@ class JSONWriterUTF16
             int minute,
             int second,
             int millis,
-            int offsetSeconds
+            int offsetSeconds,
+            boolean timeZone
     ) {
         int millislen;
         if (millis == 0) {
@@ -1467,103 +1548,276 @@ class JSONWriterUTF16
                 millislen = 4;
             }
         }
-        int zonelen = offsetSeconds == 0 ? 1 : 6;
+        int zonelen;
+        if (timeZone) {
+            zonelen = offsetSeconds == 0 ? 1 : 6;
+        } else {
+            zonelen = 0;
+        }
         int offset = offsetSeconds / 3600;
         int len = 21 + millislen + zonelen;
-        char[] chars = new char[len];
+        ensureCapacity(off + len);
 
-        chars[0] = '"';
-        chars[1] = (char) (year / 1000 + '0');
-        chars[2] = (char) ((year / 100) % 10 + '0');
-        chars[3] = (char) ((year / 10) % 10 + '0');
-        chars[4] = (char) (year % 10 + '0');
-        chars[5] = '-';
-        chars[6] = (char) (month / 10 + '0');
-        chars[7] = (char) (month % 10 + '0');
-        chars[8] = '-';
-        chars[9] = (char) (dayOfMonth / 10 + '0');
-        chars[10] = (char) (dayOfMonth % 10 + '0');
-        chars[11] = 'T';
-        chars[12] = (char) (hour / 10 + '0');
-        chars[13] = (char) (hour % 10 + '0');
-        chars[14] = ':';
-        chars[15] = (char) (minute / 10 + '0');
-        chars[16] = (char) (minute % 10 + '0');
-        chars[17] = ':';
-        chars[18] = (char) (second / 10 + '0');
-        chars[19] = (char) (second % 10 + '0');
+        chars[off + 0] = quote;
+        chars[off + 1] = (char) (year / 1000 + '0');
+        chars[off + 2] = (char) ((year / 100) % 10 + '0');
+        chars[off + 3] = (char) ((year / 10) % 10 + '0');
+        chars[off + 4] = (char) (year % 10 + '0');
+        chars[off + 5] = '-';
+        chars[off + 6] = (char) (month / 10 + '0');
+        chars[off + 7] = (char) (month % 10 + '0');
+        chars[off + 8] = '-';
+        chars[off + 9] = (char) (dayOfMonth / 10 + '0');
+        chars[off + 10] = (char) (dayOfMonth % 10 + '0');
+        chars[off + 11] = timeZone ? 'T' : ' ';
+        chars[off + 12] = (char) (hour / 10 + '0');
+        chars[off + 13] = (char) (hour % 10 + '0');
+        chars[off + 14] = ':';
+        chars[off + 15] = (char) (minute / 10 + '0');
+        chars[off + 16] = (char) (minute % 10 + '0');
+        chars[off + 17] = ':';
+        chars[off + 18] = (char) (second / 10 + '0');
+        chars[off + 19] = (char) (second % 10 + '0');
         if (millislen > 0) {
-            chars[20] = '.';
-            Arrays.fill(chars, 21, 20 + millislen, '0');
+            chars[off + 20] = '.';
+            Arrays.fill(chars, off + 21, off + 20 + millislen, '0');
             if (millis < 10) {
-                IOUtils.getChars(millis, 20 + millislen, chars);
+                IOUtils.getChars(millis, off + 20 + millislen, chars);
             } else {
                 if (millis % 100 == 0) {
-                    IOUtils.getChars(millis / 100, 20 + millislen, chars);
+                    IOUtils.getChars(millis / 100, off + 20 + millislen, chars);
                 } else if (millis % 10 == 0) {
-                    IOUtils.getChars(millis / 10, 20 + millislen, chars);
+                    IOUtils.getChars(millis / 10, off + 20 + millislen, chars);
                 } else {
-                    IOUtils.getChars(millis, 20 + millislen, chars);
+                    IOUtils.getChars(millis, off + 20 + millislen, chars);
                 }
             }
         }
-        if (offsetSeconds == 0) {
-            chars[20 + millislen] = 'Z';
-        } else {
-            int offsetAbs = Math.abs(offset);
-
-            if (offset >= 0) {
-                chars[20 + millislen] = '+';
+        if (timeZone) {
+            if (offsetSeconds == 0) {
+                chars[off + 20 + millislen] = 'Z';
             } else {
-                chars[20 + millislen] = '-';
-            }
-            chars[20 + millislen + 1] = '0';
-            IOUtils.getChars(offsetAbs, 20 + millislen + 3, chars);
-            chars[20 + millislen + 3] = ':';
-            chars[20 + millislen + 4] = '0';
-            int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
-            if (offsetMinutes < 0) {
-                offsetMinutes = -offsetMinutes;
-            }
-            IOUtils.getChars(offsetMinutes, 20 + millislen + zonelen, chars);
-        }
-        chars[chars.length - 1] = '"';
+                int offsetAbs = Math.abs(offset);
 
-        writeRaw(chars);
+                if (offset >= 0) {
+                    chars[off + 20 + millislen] = '+';
+                } else {
+                    chars[off + 20 + millislen] = '-';
+                }
+                chars[off + 20 + millislen + 1] = '0';
+                IOUtils.getChars(offsetAbs, off + 20 + millislen + 3, chars);
+                chars[off + 20 + millislen + 3] = ':';
+                chars[off + 20 + millislen + 4] = '0';
+                int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
+                if (offsetMinutes < 0) {
+                    offsetMinutes = -offsetMinutes;
+                }
+                IOUtils.getChars(offsetMinutes, off + 20 + millislen + zonelen, chars);
+            }
+        }
+        chars[off + len - 1] = quote;
+        off += len;
+    }
+
+    @Override
+    public void writeDateYYYMMDD8(int year, int month, int dayOfMonth) {
+        ensureCapacity(off + 10);
+
+        chars[off] = quote;
+        chars[off + 1] = (char) (year / 1000 + '0');
+        chars[off + 2] = (char) ((year / 100) % 10 + '0');
+        chars[off + 3] = (char) ((year / 10) % 10 + '0');
+        chars[off + 4] = (char) (year % 10 + '0');
+        chars[off + 5] = (char) (month / 10 + '0');
+        chars[off + 6] = (char) (month % 10 + '0');
+        chars[off + 7] = (char) (dayOfMonth / 10 + '0');
+        chars[off + 8] = (char) (dayOfMonth % 10 + '0');
+        chars[off + 9] = quote;
+        off += 10;
     }
 
     @Override
     public void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
-        char[] chars = new char[10];
+        ensureCapacity(off + 12);
 
-        chars[0] = (char) (year / 1000 + '0');
-        chars[1] = (char) ((year / 100) % 10 + '0');
-        chars[2] = (char) ((year / 10) % 10 + '0');
-        chars[3] = (char) (year % 10 + '0');
-        chars[4] = '-';
-        chars[5] = (char) (month / 10 + '0');
-        chars[6] = (char) (month % 10 + '0');
-        chars[7] = '-';
-        chars[8] = (char) (dayOfMonth / 10 + '0');
-        chars[9] = (char) (dayOfMonth % 10 + '0');
-
-        writeString(chars);
+        chars[off] = quote;
+        chars[off + 1] = (char) (year / 1000 + '0');
+        chars[off + 2] = (char) ((year / 100) % 10 + '0');
+        chars[off + 3] = (char) ((year / 10) % 10 + '0');
+        chars[off + 4] = (char) (year % 10 + '0');
+        chars[off + 5] = '-';
+        chars[off + 6] = (char) (month / 10 + '0');
+        chars[off + 7] = (char) (month % 10 + '0');
+        chars[off + 8] = '-';
+        chars[off + 9] = (char) (dayOfMonth / 10 + '0');
+        chars[off + 10] = (char) (dayOfMonth % 10 + '0');
+        chars[off + 11] = quote;
+        off += 12;
     }
 
     @Override
     public void writeTimeHHMMSS8(int hour, int minute, int second) {
-        char[] chars = new char[8];
+        ensureCapacity(off + 10);
 
-        chars[0] = (char) (hour / 10 + '0');
-        chars[1] = (char) (hour % 10 + '0');
-        chars[2] = ':';
-        chars[3] = (char) (minute / 10 + '0');
-        chars[4] = (char) (minute % 10 + '0');
-        chars[5] = ':';
-        chars[6] = (char) (second / 10 + '0');
-        chars[7] = (char) (second % 10 + '0');
+        chars[off] = quote;
+        chars[off + 1] = (char) (hour / 10 + '0');
+        chars[off + 2] = (char) (hour % 10 + '0');
+        chars[off + 3] = ':';
+        chars[off + 4] = (char) (minute / 10 + '0');
+        chars[off + 5] = (char) (minute % 10 + '0');
+        chars[off + 6] = ':';
+        chars[off + 7] = (char) (second / 10 + '0');
+        chars[off + 8] = (char) (second % 10 + '0');
+        chars[off + 9] = quote;
 
-        writeString(chars);
+        off += 10;
+    }
+
+    @Override
+    public void writeLocalTime(LocalTime time) {
+        int hour = time.getHour();
+        int minute = time.getMinute();
+        int second = time.getSecond();
+        int nano = time.getNano();
+
+        int len = 10;
+        int small;
+        if (nano % 1000_000_000 == 0) {
+            small = 0;
+        } else if (nano % 1000_000_00 == 0) {
+            len += 2;
+            small = nano / 1000_000_00;
+        } else if (nano % 1000_000_0 == 0) {
+            len += 3;
+            small = nano / 1000_000_0;
+        } else if (nano % 1000_000 == 0) {
+            len += 4;
+            small = nano / 1000_000;
+        } else if (nano % 1000_00 == 0) {
+            len += 5;
+            small = nano / 1000_00;
+        } else if (nano % 1000_0 == 0) {
+            len += 6;
+            small = nano / 1000_0;
+        } else if (nano % 1000 == 0) {
+            len += 7;
+            small = nano / 1000;
+        } else if (nano % 100 == 0) {
+            len += 8;
+            small = nano / 100;
+        } else if (nano % 10 == 0) {
+            len += 9;
+            small = nano / 10;
+        } else {
+            len += 10;
+            small = nano;
+        }
+
+        ensureCapacity(off + len);
+        chars[off] = quote;
+        Arrays.fill(chars, off + 1, off + len - 1, '0');
+        IOUtils.getChars(hour, off + 3, chars);
+        chars[off + 3] = ':';
+        IOUtils.getChars(minute, off + 6, chars);
+        chars[off + 6] = ':';
+        IOUtils.getChars(second, off + 9, chars);
+        if (small != 0) {
+            chars[off + 9] = '.';
+            IOUtils.getChars(small, off + len - 1, chars);
+        }
+        chars[off + len - 1] = quote;
+
+        off += len;
+    }
+
+    @Override
+    public void writeZonedDateTime(ZonedDateTime dateTime) {
+        if (dateTime == null) {
+            writeNull();
+            return;
+        }
+
+        int year = dateTime.getYear();
+        int month = dateTime.getMonthValue();
+        int dayOfMonth = dateTime.getDayOfMonth();
+        int hour = dateTime.getHour();
+        int minute = dateTime.getMinute();
+        int second = dateTime.getSecond();
+        int nano = dateTime.getNano();
+        String zoneId = dateTime.getZone().getId();
+
+        int len = 17;
+
+        int zoneSize;
+        if ("UTC".equals(zoneId)) {
+            zoneId = "Z";
+            zoneSize = 1;
+        } else {
+            zoneSize = 2 + zoneId.length();
+        }
+        len += zoneSize;
+
+        int yearSize = IOUtils.stringSize(year);
+        len += yearSize;
+        int small;
+        if (nano % 1000_000_000 == 0) {
+            small = 0;
+        } else if (nano % 1000_000_00 == 0) {
+            len += 2;
+            small = nano / 1000_000_00;
+        } else if (nano % 1000_000_0 == 0) {
+            len += 3;
+            small = nano / 1000_000_0;
+        } else if (nano % 1000_000 == 0) {
+            len += 4;
+            small = nano / 1000_000;
+        } else if (nano % 1000_00 == 0) {
+            len += 5;
+            small = nano / 1000_00;
+        } else if (nano % 1000_0 == 0) {
+            len += 6;
+            small = nano / 1000_0;
+        } else if (nano % 1000 == 0) {
+            len += 7;
+            small = nano / 1000;
+        } else if (nano % 100 == 0) {
+            len += 8;
+            small = nano / 100;
+        } else if (nano % 10 == 0) {
+            len += 9;
+            small = nano / 10;
+        } else {
+            len += 10;
+            small = nano;
+        }
+
+        ensureCapacity(off + len);
+        chars[off] = quote;
+        Arrays.fill(chars, off + 1, off + len - 1, '0');
+        IOUtils.getChars(year, off + yearSize + 1, chars);
+        chars[off + yearSize + 1] = '-';
+        IOUtils.getChars(month, off + yearSize + 4, chars);
+        chars[off + yearSize + 4] = '-';
+        IOUtils.getChars(dayOfMonth, off + yearSize + 7, chars);
+        chars[off + yearSize + 7] = 'T';
+        IOUtils.getChars(hour, off + yearSize + 10, chars);
+        chars[off + yearSize + 10] = ':';
+        IOUtils.getChars(minute, off + yearSize + 13, chars);
+        chars[off + yearSize + 13] = ':';
+        IOUtils.getChars(second, off + yearSize + 16, chars);
+        if (small != 0) {
+            chars[off + yearSize + 16] = '.';
+            IOUtils.getChars(small, off + len - 1 - zoneSize, chars);
+        }
+        if (zoneSize == 1) {
+            chars[off + len - 2] = 'Z';
+        } else {
+            chars[off + len - zoneSize - 1] = '[';
+            zoneId.getChars(0, zoneId.length(), chars, off + len - zoneSize);
+            chars[off + len - 2] = ']';
+        }
+        chars[off + len - 1] = quote;
+        off += len;
     }
 
     @Override
@@ -1619,5 +1873,263 @@ class JSONWriterUTF16
     @Override
     public void writeRaw(byte[] bytes) {
         throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
+    public final void write(JSONObject map) {
+        if (map == null) {
+            this.writeNull();
+            return;
+        }
+
+        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
+                | PrettyFormat.mask
+                | NotWriteEmptyArray.mask
+                | NotWriteDefaultValue.mask;
+
+        if ((context.features & NONE_DIRECT_FEATURES) != 0) {
+            ObjectWriter objectWriter = context.getObjectWriter(map.getClass());
+            objectWriter.write(this, map, null, null, 0);
+            return;
+        }
+
+        if (off == chars.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = chars.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            chars = Arrays.copyOf(chars, newCapacity);
+        }
+        chars[off++] = '{';
+
+        boolean first = true;
+        for (Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<String, Object> next = it.next();
+            Object value = next.getValue();
+            if (value == null && (context.features & Feature.WriteMapNullValue.mask) == 0) {
+                continue;
+            }
+
+            if (!first) {
+                if (off == chars.length) {
+                    int minCapacity = off + 1;
+                    int oldCapacity = chars.length;
+                    int newCapacity = oldCapacity + (oldCapacity >> 1);
+                    if (newCapacity - minCapacity < 0) {
+                        newCapacity = minCapacity;
+                    }
+                    if (newCapacity - maxArraySize > 0) {
+                        throw new OutOfMemoryError();
+                    }
+
+                    // minCapacity is usually close to size, so this is a win:
+                    chars = Arrays.copyOf(chars, newCapacity);
+                }
+                chars[off++] = ',';
+            }
+
+            first = false;
+            writeString(next.getKey());
+
+            if (off == chars.length) {
+                int minCapacity = off + 1;
+                int oldCapacity = chars.length;
+                int newCapacity = oldCapacity + (oldCapacity >> 1);
+                if (newCapacity - minCapacity < 0) {
+                    newCapacity = minCapacity;
+                }
+                if (newCapacity - maxArraySize > 0) {
+                    throw new OutOfMemoryError();
+                }
+
+                // minCapacity is usually close to size, so this is a win:
+                chars = Arrays.copyOf(chars, newCapacity);
+            }
+            chars[off++] = ':';
+
+            if (value == null) {
+                writeNull();
+                continue;
+            }
+
+            Class<?> valueClass = value.getClass();
+            if (valueClass == String.class) {
+                writeString((String) value);
+                continue;
+            }
+
+            if (valueClass == Integer.class) {
+                writeInt32((Integer) value);
+                continue;
+            }
+
+            if (valueClass == Long.class) {
+                writeInt64((Long) value);
+                continue;
+            }
+
+            if (valueClass == Boolean.class) {
+                writeBool((Boolean) value);
+                continue;
+            }
+
+            if (valueClass == BigDecimal.class) {
+                writeDecimal((BigDecimal) value);
+                continue;
+            }
+
+            if (valueClass == JSONArray.class) {
+                write((JSONArray) value);
+                continue;
+            }
+
+            if (valueClass == JSONObject.class) {
+                write((JSONObject) value);
+                continue;
+            }
+
+            ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
+            objectWriter.write(this, value, null, null, 0);
+        }
+
+        if (off == chars.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = chars.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            chars = Arrays.copyOf(chars, newCapacity);
+        }
+        chars[off++] = '}';
+    }
+
+    @Override
+    public final void write(List array) {
+        if (array == null) {
+            this.writeArrayNull();
+            return;
+        }
+
+        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
+                | PrettyFormat.mask
+                | NotWriteEmptyArray.mask
+                | NotWriteDefaultValue.mask;
+
+        if ((context.features & NONE_DIRECT_FEATURES) != 0) {
+            ObjectWriter objectWriter = context.getObjectWriter(array.getClass());
+            objectWriter.write(this, array, null, null, 0);
+            return;
+        }
+
+        if (off == chars.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = chars.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            chars = Arrays.copyOf(chars, newCapacity);
+        }
+        chars[off++] = '[';
+
+        boolean first = true;
+        for (int i = 0, size = array.size(); i < size; i++) {
+            if (!first) {
+                if (off == chars.length) {
+                    int minCapacity = off + 1;
+                    int oldCapacity = chars.length;
+                    int newCapacity = oldCapacity + (oldCapacity >> 1);
+                    if (newCapacity - minCapacity < 0) {
+                        newCapacity = minCapacity;
+                    }
+                    if (newCapacity - maxArraySize > 0) {
+                        throw new OutOfMemoryError();
+                    }
+
+                    // minCapacity is usually close to size, so this is a win:
+                    chars = Arrays.copyOf(chars, newCapacity);
+                }
+                chars[off++] = ',';
+            }
+            first = false;
+            Object value = array.get(i);
+
+            if (value == null) {
+                writeNull();
+                continue;
+            }
+
+            Class<?> valueClass = value.getClass();
+            if (valueClass == String.class) {
+                writeString((String) value);
+                continue;
+            }
+
+            if (valueClass == Integer.class) {
+                writeInt32((Integer) value);
+                continue;
+            }
+
+            if (valueClass == Long.class) {
+                writeInt64((Long) value);
+                continue;
+            }
+
+            if (valueClass == Boolean.class) {
+                writeBool((Boolean) value);
+                continue;
+            }
+
+            if (valueClass == BigDecimal.class) {
+                writeDecimal((BigDecimal) value);
+                continue;
+            }
+
+            if (valueClass == JSONArray.class) {
+                write((JSONArray) value);
+                continue;
+            }
+
+            if (valueClass == JSONObject.class) {
+                write((JSONObject) value);
+                continue;
+            }
+
+            ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
+            objectWriter.write(this, value, null, null, 0);
+        }
+        if (off == chars.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = chars.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            chars = Arrays.copyOf(chars, newCapacity);
+        }
+        chars[off++] = ']';
     }
 }

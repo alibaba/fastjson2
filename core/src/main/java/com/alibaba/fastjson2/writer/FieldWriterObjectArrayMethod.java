@@ -8,9 +8,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+
 final class FieldWriterObjectArrayMethod<T>
-        extends FieldWriterImpl<T> {
-    final Method method;
+        extends FieldWriter<T> {
     final Type itemType;
     final Class itemClass;
     ObjectWriter itemObjectWriter;
@@ -26,8 +27,7 @@ final class FieldWriterObjectArrayMethod<T>
             Class fieldClass,
             Method method
     ) {
-        super(fieldName, ordinal, features, format, label, fieldType, fieldClass);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, fieldType, fieldClass, null, method);
         this.itemType = itemType;
         if (itemType instanceof Class) {
             itemClass = (Class) itemType;
@@ -37,16 +37,11 @@ final class FieldWriterObjectArrayMethod<T>
     }
 
     @Override
-    public Method getMethod() {
-        return method;
-    }
-
-    @Override
     public Object getFieldValue(Object object) {
         try {
             return method.invoke(object);
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 
@@ -69,7 +64,7 @@ final class FieldWriterObjectArrayMethod<T>
 
         if (value == null) {
             long features = this.features | jsonWriter.getFeatures();
-            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullListAsEmpty.mask)) != 0) {
+            if ((features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask)) != 0) {
                 writeFieldName(jsonWriter);
                 jsonWriter.writeArrayNull();
                 return true;
@@ -105,7 +100,7 @@ final class FieldWriterObjectArrayMethod<T>
         boolean refDetect = jsonWriter.isRefDetect();
 
         if (refDetect) {
-            String path = jsonWriter.setPath(name, array);
+            String path = jsonWriter.setPath(fieldName, array);
             if (path != null) {
                 jsonWriter.writeReference(path);
                 return;

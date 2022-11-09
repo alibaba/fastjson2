@@ -1,4 +1,7 @@
 package com.alibaba.fastjson.parser.deserializer;
 
-public interface ParseProcess {
+import com.alibaba.fastjson2.filter.Filter;
+
+public interface ParseProcess
+        extends Filter {
 }

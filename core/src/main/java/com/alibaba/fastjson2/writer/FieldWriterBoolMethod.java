@@ -7,16 +7,8 @@ import java.lang.reflect.Method;
 
 final class FieldWriterBoolMethod
         extends FieldWriterBoolean {
-    final Method method;
-
     protected FieldWriterBoolMethod(String fieldName, int ordinal, long features, String format, String label, Method method, Class fieldClass) {
-        super(fieldName, ordinal, features, format, label, fieldClass, fieldClass);
-        this.method = method;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
+        super(fieldName, ordinal, features, format, label, fieldClass, fieldClass, null, method);
     }
 
     @Override
@@ -24,7 +16,7 @@ final class FieldWriterBoolMethod
         try {
             return method.invoke(object);
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw new JSONException("invoke getter method error, " + name, e);
+            throw new JSONException("invoke getter method error, " + fieldName, e);
         }
     }
 }

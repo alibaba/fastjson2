@@ -47,9 +47,9 @@ public class ObjectReaderCreatorLambda
     public static final ObjectReaderCreatorLambda INSTANCE = new ObjectReaderCreatorLambda();
 
     @Override
-    public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, List<ObjectReaderModule> modules) {
+    public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, ObjectReaderProvider provider) {
         BeanInfo beanInfo = new BeanInfo();
-        for (ObjectReaderModule module : modules) {
+        for (ObjectReaderModule module : provider.modules) {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor != null) {
                 annotationProcessor.getBeanInfo(beanInfo, objectClass);
@@ -64,8 +64,13 @@ public class ObjectReaderCreatorLambda
             }
         }
 
-        if (Enum.class.isAssignableFrom(objectClass)) {
-            return createEnumReader(objectClass, beanInfo.createMethod, modules);
+        ObjectReader annotatedObjectReader = getAnnotatedObjectReader(provider, objectClass, beanInfo);
+        if (annotatedObjectReader != null) {
+            return annotatedObjectReader;
+        }
+
+        if (Enum.class.isAssignableFrom(objectClass) && (beanInfo.createMethod == null || beanInfo.createMethod.getParameterCount() == 1)) {
+            return createEnumReader(objectClass, beanInfo.createMethod, provider);
         }
 
         if (fieldBased && (objectClass.isInterface() || objectClass.isInterface())) {
@@ -81,14 +86,14 @@ public class ObjectReaderCreatorLambda
 
         Constructor constructor = constructorRef.get();
         if (constructor == null || !constructor.isAccessible() || Modifier.isAbstract(classModifiers) || Modifier.isInterface(classModifiers)) {
-            return super.createObjectReader(objectClass, objectType, fieldBased, modules);
+            return super.createObjectReader(objectClass, objectType, fieldBased, provider);
         }
 
         final Supplier<T> supplier;
         try {
             supplier = lambdaConstrunctor(objectClass);
         } catch (IllegalAccessException | NoSuchMethodException ignored) {
-            return super.createObjectReader(objectClass, objectType, fieldBased, modules);
+            return super.createObjectReader(objectClass, objectType, fieldBased, provider);
         } catch (Throwable e) {
             throw new JSONException("get constructor error, objectClass : " + objectClass, e);
         }
@@ -100,7 +105,7 @@ public class ObjectReaderCreatorLambda
 
         BeanUtils.setters(objectClass, method -> {
             fieldInfo.init();
-            for (ObjectReaderModule module : modules) {
+            for (ObjectReaderModule module : provider.modules) {
                 ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
                 if (annotationProcessor == null) {
                     continue;
@@ -108,8 +113,9 @@ public class ObjectReaderCreatorLambda
                 annotationProcessor.getFieldInfo(fieldInfo, objectClass, method);
             }
 
-            String fieldName = BeanUtils.setterName(method.getName(), beanInfo.namingStrategy);
+            String fieldName;
             if (method.getParameterCount() == 0) {
+                fieldName = BeanUtils.getterName(method.getName(), beanInfo.namingStrategy);
                 FieldReader fieldReader = super.createFieldReaderMethod(
                         objectClass,
                         objectType,
@@ -131,6 +137,8 @@ public class ObjectReaderCreatorLambda
                     fieldReaders.put(fieldName, fieldReader);
                 }
                 return;
+            } else {
+                fieldName = BeanUtils.setterName(method.getName(), beanInfo.namingStrategy);
             }
 
             Type fieldType = method.getGenericParameterTypes()[0];
@@ -157,35 +165,38 @@ public class ObjectReaderCreatorLambda
         });
 
         BeanUtils.fields(objectClass,
-                 field -> {
+                field -> {
                     fieldInfo.init();
-                    for (ObjectReaderModule module : modules) {
+                    for (ObjectReaderModule module : provider.modules) {
                         ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
                         if (annotationProcessor != null) {
                             annotationProcessor.getFieldInfo(fieldInfo, objectClass, field);
                         }
                     }
 
+                    if (fieldInfo.ignore) {
+                        return;
+                    }
+
                     String fieldName = field.getName();
-                    fieldReaders.put(
+                    FieldReader<Object> fieldReader = createFieldReader(
+                            objectClass,
+                            objectClass,
                             fieldName,
-                            createFieldReader(
-                                    objectClass,
-                                    objectClass,
-                                    fieldName,
-                                    fieldInfo.ordinal,
-                                    fieldInfo.features,
-                                    fieldInfo.format,
-                                    fieldInfo.locale,
-                                    fieldInfo.defaultValue,
-                                    fieldInfo.schema,
-                                    field.getGenericType(),
-                                    field.getType(),
-                                    field,
-                                    fieldInfo.getInitReader()
-                            )
+                            fieldInfo.ordinal,
+                            fieldInfo.features,
+                            fieldInfo.format,
+                            fieldInfo.locale,
+                            fieldInfo.defaultValue,
+                            fieldInfo.schema,
+                            field.getGenericType(),
+                            field.getType(),
+                            field,
+                            fieldInfo.getInitReader()
                     );
-                });
+                    fieldReaders.put(fieldName, fieldReader);
+                }
+        );
 
         FieldReader[] fieldReaderArray = new FieldReader[fieldReaders.size()];
 
@@ -217,9 +228,11 @@ public class ObjectReaderCreatorLambda
             Method method,
             ObjectReader initReader
     ) {
-        if ((method != null && method.getReturnType() != void.class)
+        if ((method != null && (method.getReturnType() != void.class || method.getParameterCount() == 0))
                 || !Modifier.isPublic(objectClass.getModifiers())
-                || isExternalClass(objectClass)) {
+                || isExternalClass(objectClass)
+                || initReader != null
+        ) {
             return super.createFieldReaderMethod(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, schema, fieldType, fieldClass, method, initReader);
         }
         return createFieldReaderLambda(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, schema, fieldType, fieldClass, method, initReader);

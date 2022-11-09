@@ -7,8 +7,6 @@ import java.lang.reflect.Type;
 
 class FieldWriterObjectField<T>
         extends FieldWriterObject<T> {
-    final Field field;
-
     protected FieldWriterObjectField(
             String name,
             int ordinal,
@@ -19,13 +17,7 @@ class FieldWriterObjectField<T>
             Class fieldClass,
             Field field
     ) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, features, format, label, fieldType, fieldClass, field, null);
     }
 
     @Override
@@ -33,7 +25,7 @@ class FieldWriterObjectField<T>
         try {
             return field.get(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 }
