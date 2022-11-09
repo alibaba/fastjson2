@@ -8,7 +8,6 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,16 +17,22 @@ import java.util.stream.Collectors;
  * @date 2022/11/9 13:58
  */
 @Data
-public class TestJson implements Serializable {
+public class TestJson
+        implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     private PathObj pathObj = new PathObj();
 
     @Data
-    public static class PathObj implements Serializable {
+    public static class PathObj
+            implements Serializable {
+
         private static final long serialVersionUID = 1L;
 
-        private final List<String> homePathList = CmsConstants.homePathList;
+        @SuppressWarnings("checkstyle:ModifierOrder")
+        //Collections.singletonList("/index") List.of("/index")
+        public final List<String> homePathList = Arrays.asList("/index");
 
     }
 
@@ -36,13 +41,6 @@ public class TestJson implements Serializable {
         System.out.println(toJsonStrWithClass(new TestJson()));
         TestJson parse = (TestJson) parse(toJsonStrWithClass(new TestJson()));
         System.out.println(toJsonStrWithClass(parse));
-
-    }
-
-    public static final class CmsConstants {
-        public final static List<String> homePathList = Arrays.asList("/index");
-//        public final static List<String> homePathList = Collections.singletonList("/index");
-//        public final static List<String> homePathList = List.of("/index");
 
     }
 
