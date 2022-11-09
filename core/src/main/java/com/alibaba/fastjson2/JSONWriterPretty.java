@@ -283,6 +283,11 @@ final class JSONWriterPretty
     }
 
     @Override
+    public byte[] getBytes(Charset charset) {
+        return jsonWriter.getBytes(charset);
+    }
+
+    @Override
     public void flushTo(Writer to) {
         jsonWriter.flushTo(to);
     }

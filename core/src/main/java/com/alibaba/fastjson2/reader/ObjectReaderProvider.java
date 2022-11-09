@@ -376,6 +376,10 @@ public class ObjectReaderProvider
         return mixInCache.get(target);
     }
 
+    public void cleanupMixIn() {
+        mixInCache.clear();
+    }
+
     public void mixIn(Class target, Class mixinSource) {
         if (mixinSource == null) {
             mixInCache.remove(target);

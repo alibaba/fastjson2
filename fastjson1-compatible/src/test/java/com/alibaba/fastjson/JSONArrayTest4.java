@@ -2,7 +2,10 @@ package com.alibaba.fastjson;
 
 import org.junit.jupiter.api.Test;
 
+import java.sql.Date;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class JSONArrayTest4 {
     @Test
@@ -11,5 +14,12 @@ public class JSONArrayTest4 {
         JSONArray array = (JSONArray) object.get("value");
         assertEquals(0, array.size());
         assertEquals(array, array.clone());
+    }
+
+    @Test
+    public void test1() {
+        JSONArray array = new JSONArray().fluentAdd("2018-07-14 00:00:00");
+        Date date = array.getSqlDate(0);
+        assertNotNull(date);
     }
 }

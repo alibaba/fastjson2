@@ -169,7 +169,7 @@ public class JSONObject
     public JSONArray getJSONArray(String key) {
         Object value = map.get(key);
 
-        if (value instanceof JSONArray) {
+        if (value == null || value instanceof JSONArray) {
             return (JSONArray) value;
         }
 

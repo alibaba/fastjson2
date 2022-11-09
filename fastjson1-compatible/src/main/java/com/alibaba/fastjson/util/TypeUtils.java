@@ -22,14 +22,19 @@ import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.reader.ObjectReader;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.*;
 
 /**
  * @author wenshao[szujobs@hotmail.com]
  */
 public class TypeUtils {
+    public static final long fnv1a_64_magic_hashcode = 0xcbf29ce484222325L;
+    public static final long fnv1a_64_magic_prime = 0x100000001b3L;
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T> T cast(Object obj, Class<T> clazz, ParserConfig config) {
         return com.alibaba.fastjson2.util.TypeUtils.cast(obj, clazz, config.getProvider());
@@ -40,12 +45,7 @@ public class TypeUtils {
         if (obj == null) {
             return null;
         }
-        if (type instanceof Class) {
-            return cast(obj, (Class<T>) type, mapping);
-        }
-        if (type instanceof ParameterizedType) {
-            return cast(obj, (ParameterizedType) type, mapping);
-        }
+
         if (obj instanceof String) {
             String strVal = (String) obj;
             if (strVal.length() == 0 //
@@ -54,6 +54,15 @@ public class TypeUtils {
                 return null;
             }
         }
+
+        if (type instanceof Class) {
+            return cast(obj, (Class<T>) type, mapping);
+        }
+
+        if (type instanceof ParameterizedType) {
+            return cast(obj, (ParameterizedType) type, mapping);
+        }
+
         if (type instanceof TypeVariable) {
             return (T) obj;
         }
@@ -311,5 +320,185 @@ public class TypeUtils {
 
     public static boolean isProxy(Class<?> clazz) {
         return com.alibaba.fastjson2.util.TypeUtils.isProxy(clazz);
+    }
+
+    public static String castToString(Object value) {
+        if (value == null) {
+            return null;
+        }
+        return value.toString();
+    }
+
+    public static long fnv1a_64_lower(String key) {
+        long hashCode = fnv1a_64_magic_hashcode;
+        for (int i = 0; i < key.length(); ++i) {
+            char ch = key.charAt(i);
+            if (ch >= 'A' && ch <= 'Z') {
+                ch = (char) (ch + 32);
+            }
+            hashCode ^= ch;
+            hashCode *= fnv1a_64_magic_prime;
+        }
+        return hashCode;
+    }
+
+    public static long fnv1a_64(String key) {
+        long hashCode = fnv1a_64_magic_hashcode;
+        for (int i = 0; i < key.length(); ++i) {
+            char ch = key.charAt(i);
+            hashCode ^= ch;
+            hashCode *= fnv1a_64_magic_prime;
+        }
+        return hashCode;
+    }
+
+    public static Long castToLong(Object value) {
+        return com.alibaba.fastjson2.util.TypeUtils.toLong(value);
+    }
+
+    public static Integer castToInt(Object value) {
+        return com.alibaba.fastjson2.util.TypeUtils.toInteger(value);
+    }
+
+    public static Boolean castToBoolean(Object value) {
+        return com.alibaba.fastjson2.util.TypeUtils.toBoolean(value);
+    }
+
+    public static long longExtractValue(Number number) {
+        if (number instanceof BigDecimal) {
+            return ((BigDecimal) number).longValueExact();
+        }
+
+        return number.longValue();
+    }
+
+    public static <A extends Annotation> A getAnnotation(Class<?> targetClass, Class<A> annotationClass) {
+        A targetAnnotation = targetClass.getAnnotation(annotationClass);
+
+        Class<?> mixInClass = null;
+        Type type = JSON.getMixInAnnotations(targetClass);
+        if (type instanceof Class<?>) {
+            mixInClass = (Class<?>) type;
+        }
+
+        if (mixInClass != null) {
+            A mixInAnnotation = mixInClass.getAnnotation(annotationClass);
+            Annotation[] annotations = mixInClass.getAnnotations();
+            if (mixInAnnotation == null && annotations.length > 0) {
+                for (Annotation annotation : annotations) {
+                    mixInAnnotation = annotation.annotationType().getAnnotation(annotationClass);
+                    if (mixInAnnotation != null) {
+                        break;
+                    }
+                }
+            }
+            if (mixInAnnotation != null) {
+                return mixInAnnotation;
+            }
+        }
+
+        Annotation[] targetClassAnnotations = targetClass.getAnnotations();
+        if (targetAnnotation == null && targetClassAnnotations.length > 0) {
+            for (Annotation annotation : targetClassAnnotations) {
+                targetAnnotation = annotation.annotationType().getAnnotation(annotationClass);
+                if (targetAnnotation != null) {
+                    break;
+                }
+            }
+        }
+        return targetAnnotation;
+    }
+
+    public static <A extends Annotation> A getAnnotation(Field field, Class<A> annotationClass) {
+        A targetAnnotation = field.getAnnotation(annotationClass);
+
+        Class<?> clazz = field.getDeclaringClass();
+        A mixInAnnotation;
+        Class<?> mixInClass = null;
+        Type type = JSON.getMixInAnnotations(clazz);
+        if (type instanceof Class<?>) {
+            mixInClass = (Class<?>) type;
+        }
+
+        if (mixInClass != null) {
+            Field mixInField = null;
+            String fieldName = field.getName();
+            // 递归从MixIn类的父类中查找注解（如果有父类的话）
+            for (Class<?> currClass = mixInClass; currClass != null && currClass != Object.class; currClass = currClass.getSuperclass()) {
+                try {
+                    mixInField = currClass.getDeclaredField(fieldName);
+                    break;
+                } catch (NoSuchFieldException e) {
+                    // skip
+                }
+            }
+            if (mixInField == null) {
+                return targetAnnotation;
+            }
+            mixInAnnotation = mixInField.getAnnotation(annotationClass);
+            if (mixInAnnotation != null) {
+                return mixInAnnotation;
+            }
+        }
+        return targetAnnotation;
+    }
+
+    public static <A extends Annotation> A getAnnotation(Method method, Class<A> annotationClass) {
+        A targetAnnotation = method.getAnnotation(annotationClass);
+
+        Class<?> clazz = method.getDeclaringClass();
+        A mixInAnnotation;
+        Class<?> mixInClass = null;
+        Type type = JSON.getMixInAnnotations(clazz);
+        if (type instanceof Class<?>) {
+            mixInClass = (Class<?>) type;
+        }
+
+        if (mixInClass != null) {
+            Method mixInMethod = null;
+            String methodName = method.getName();
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            // 递归从MixIn类的父类中查找注解（如果有父类的话）
+            for (Class<?> currClass = mixInClass; currClass != null && currClass != Object.class; currClass = currClass.getSuperclass()) {
+                try {
+                    mixInMethod = currClass.getDeclaredMethod(methodName, parameterTypes);
+                    break;
+                } catch (NoSuchMethodException e) {
+                    // skip
+                }
+            }
+            if (mixInMethod == null) {
+                return targetAnnotation;
+            }
+            mixInAnnotation = mixInMethod.getAnnotation(annotationClass);
+            if (mixInAnnotation != null) {
+                return mixInAnnotation;
+            }
+        }
+        return targetAnnotation;
+    }
+
+    public static Double castToDouble(Object value) {
+        return com.alibaba.fastjson2.util.TypeUtils.toDouble(value);
+    }
+
+    public static <T> T castToJavaBean(Object obj, Class<T> clazz) {
+        return com.alibaba.fastjson2.util.TypeUtils.cast(obj, clazz);
+    }
+
+    public static Class<?> getClass(Type type) {
+        return com.alibaba.fastjson2.util.TypeUtils.getClass(type);
+    }
+
+    public static BigDecimal castToBigDecimal(Object value) {
+        return com.alibaba.fastjson2.util.TypeUtils.toBigDecimal(value);
+    }
+
+    public static Timestamp castToTimestamp(final Object value) {
+        return com.alibaba.fastjson2.util.TypeUtils.cast(value, Timestamp.class);
+    }
+
+    public static java.sql.Date castToSqlDate(final Object value) {
+        return com.alibaba.fastjson2.util.TypeUtils.cast(value, java.sql.Date.class);
     }
 }

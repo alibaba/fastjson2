@@ -1871,6 +1871,33 @@ class JSONWriterUTF16
     }
 
     @Override
+    public byte[] getBytes(Charset charset) {
+        boolean ascii = true;
+        for (int i = 0; i < off; i++) {
+            if (chars[i] >= 0x80) {
+                ascii = false;
+                break;
+            }
+        }
+
+        if (ascii) {
+            if (charset == StandardCharsets.UTF_8
+                    || charset == StandardCharsets.ISO_8859_1
+                    || charset == StandardCharsets.US_ASCII
+            ) {
+                byte[] bytes = new byte[off];
+                for (int i = 0; i < off; i++) {
+                    bytes[i] = (byte) chars[i];
+                }
+                return bytes;
+            }
+        }
+
+        String str = new String(chars, 0, off);
+        return str.getBytes(charset);
+    }
+
+    @Override
     public void writeRaw(byte[] bytes) {
         throw new JSONException("UnsupportedOperation");
     }
