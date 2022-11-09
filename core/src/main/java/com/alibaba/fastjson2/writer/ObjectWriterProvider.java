@@ -71,6 +71,10 @@ public class ObjectWriterProvider
         cache.remove(target);
     }
 
+    public void cleanupMixIn() {
+        mixInCache.clear();
+    }
+
     public ObjectWriterCreator getCreator() {
         ObjectWriterCreator contextCreator = JSONFactory.getContextWriterCreator();
         if (contextCreator != null) {

@@ -102,6 +102,16 @@ class JSONWriterUTF8
     }
 
     @Override
+    public byte[] getBytes(Charset charset) {
+        if (charset == StandardCharsets.UTF_8) {
+            return Arrays.copyOf(bytes, off);
+        }
+
+        String str = toString();
+        return str.getBytes(charset);
+    }
+
+    @Override
     public int flushTo(OutputStream to) throws IOException {
         int len = off;
         to.write(bytes, 0, off);

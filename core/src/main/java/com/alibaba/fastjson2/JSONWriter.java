@@ -1143,6 +1143,8 @@ public abstract class JSONWriter
 
     public abstract byte[] getBytes();
 
+    public abstract byte[] getBytes(Charset charset);
+
     public void flushTo(java.io.Writer to) {
         try {
             String json = this.toString();

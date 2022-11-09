@@ -1,5 +1,6 @@
 package com.alibaba.fastjson;
 
+import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
@@ -9,6 +10,7 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -21,6 +23,9 @@ public class JSONArray
     static ObjectReader<JSONObject> objectReader;
 
     private List list = new com.alibaba.fastjson2.JSONArray();
+
+    protected transient Object relatedArray;
+    protected transient Type componentType;
 
     public JSONArray() {
     }
@@ -464,8 +469,8 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return short
-     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable short
-     * @throws JSONException             Unsupported type conversion to short value
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable short
+     * @throws JSONException Unsupported type conversion to short value
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public short getShortValue(int index) {
@@ -497,8 +502,8 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return float
-     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable float
-     * @throws JSONException             Unsupported type conversion to float value
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable float
+     * @throws JSONException Unsupported type conversion to float value
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public float getFloatValue(int index) {
@@ -530,8 +535,8 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return double
-     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable double
-     * @throws JSONException             Unsupported type conversion to double value
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable double
+     * @throws JSONException Unsupported type conversion to double value
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public double getDoubleValue(int index) {
@@ -583,8 +588,8 @@ public class JSONArray
      *
      * @param index index of the element to return
      * @return byte
-     * @throws NumberFormatException     If the value of get is {@link String} and it contains no parsable byte
-     * @throws JSONException             Unsupported type conversion to byte value
+     * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable byte
+     * @throws JSONException Unsupported type conversion to byte value
      * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
      */
     public byte getByteValue(int index) {
@@ -642,6 +647,11 @@ public class JSONArray
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigInteger");
+    }
+
+    public java.sql.Date getSqlDate(int index) {
+        Object object = get(index);
+        return TypeUtils.cast(object, java.sql.Date.class);
     }
 
     public Date getDate(int index) {
@@ -860,5 +870,30 @@ public class JSONArray
         }
 
         return this.list.equals(obj);
+    }
+
+    @Override
+    public <T> T toJavaObject(Type type) {
+        return com.alibaba.fastjson.util.TypeUtils.cast(this, type, ParserConfig.getGlobalInstance());
+    }
+
+    @Deprecated
+    public Type getComponentType() {
+        return componentType;
+    }
+
+    @Deprecated
+    public void setComponentType(Type componentType) {
+        this.componentType = componentType;
+    }
+
+    @Deprecated
+    public Object getRelatedArray() {
+        return relatedArray;
+    }
+
+    @Deprecated
+    public void setRelatedArray(Object relatedArray) {
+        this.relatedArray = relatedArray;
     }
 }

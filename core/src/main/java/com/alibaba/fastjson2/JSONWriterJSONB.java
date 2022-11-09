@@ -2105,6 +2105,11 @@ final class JSONWriterJSONB
     }
 
     @Override
+    public byte[] getBytes(Charset charset) {
+        throw new JSONException("not support operator");
+    }
+
+    @Override
     public int flushTo(OutputStream to) throws IOException {
         int len = off;
         to.write(bytes, 0, off);

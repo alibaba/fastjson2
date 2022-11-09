@@ -1,18 +1,25 @@
 package com.alibaba.fastjson;
 
 import com.alibaba.fastjson.parser.Feature;
+import com.alibaba.fastjson.parser.ParserConfig;
+import com.alibaba.fastjson.parser.deserializer.ParseProcess;
+import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializeFilter;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -91,6 +98,544 @@ public class JSONTest {
             byte[] bytes = jsonWriter.getBytes();
             assertNull(JSONB.parse(bytes));
         }
+    }
+
+    @Test
+    public void parseArray() {
+        JSONArray jsonArray = JSON.parseArray("[1,2,3]");
+        assertEquals("[1,2,3]", jsonArray.toJSONString());
+    }
+
+    @Test
+    public void parse() {
+        JSONArray jsonArray = (JSONArray) JSON.parse("[1,2,3]");
+        assertEquals("[1,2,3]", jsonArray.toJSONString());
+    }
+
+    @Test
+    public void parse1() {
+        JSONArray jsonArray = (JSONArray) JSON.parse("[1,2,3]", Feature.ErrorOnNotSupportAutoType);
+        assertEquals("[1,2,3]", jsonArray.toJSONString());
+    }
+
+    @Test
+    public void parse2() {
+        byte[] bytes = "[1,2,3]".getBytes(StandardCharsets.UTF_8);
+        JSONArray jsonArray = (JSONArray) JSON.parse(bytes);
+        assertEquals("[1,2,3]", jsonArray.toJSONString());
+    }
+
+    @Test
+    public void parse3() {
+        byte[] bytes = "[1,2,3]".getBytes(StandardCharsets.UTF_8);
+        JSONArray jsonArray = (JSONArray) JSON.parse(bytes, Feature.ErrorOnNotSupportAutoType);
+        assertEquals("[1,2,3]", jsonArray.toJSONString());
+    }
+
+    @Test
+    public void parse4() {
+        assertNull(JSON.parse(null, ParserConfig.global, Feature.ErrorOnNotSupportAutoType));
+        assertNull(JSON.parse("", ParserConfig.global, Feature.ErrorOnNotSupportAutoType));
+
+        String str = "[1,2,3]";
+        JSONArray jsonArray = (JSONArray) JSON.parse(str, ParserConfig.global, Feature.ErrorOnNotSupportAutoType);
+        assertEquals("[1,2,3]", jsonArray.toJSONString());
+    }
+
+    @Test
+    public void parse5() {
+        assertNull(JSON.parse(null, ParserConfig.global));
+        assertNull(JSON.parse("", ParserConfig.global));
+
+        String str = "[1,2,3]";
+        JSONArray jsonArray = (JSONArray) JSON.parse(str, ParserConfig.global);
+        assertEquals("[1,2,3]", jsonArray.toJSONString());
+    }
+
+    @Test
+    public void toJSONBytes() {
+        assertEquals(
+                "null",
+                new String(
+                        JSON.toJSONBytes(
+                                null,
+                                SerializeConfig.global,
+                                new SerializeFilter[0],
+                                JSON.DEFAULT_GENERATE_FEATURE,
+                                SerializerFeature.BrowserSecure)
+                )
+        );
+        assertEquals(
+                "[]",
+                new String(
+                        JSON.toJSONBytes(
+                                Collections.emptyList(),
+                                SerializeConfig.global,
+                                new SerializeFilter[0],
+                                JSON.DEFAULT_GENERATE_FEATURE,
+                                SerializerFeature.BrowserSecure)
+                )
+        );
+
+        assertEquals(
+                "null",
+                new String(
+                        JSON.toJSONBytes(
+                                null,
+                                SerializeConfig.global,
+                                new SerializeFilter[0],
+                                null,
+                                JSON.DEFAULT_GENERATE_FEATURE,
+                                SerializerFeature.BrowserSecure)
+                )
+        );
+        assertEquals(
+                "[]",
+                new String(
+                        JSON.toJSONBytes(
+                                Collections.emptyList(),
+                                SerializeConfig.global,
+                                new SerializeFilter[0],
+                                null,
+                                JSON.DEFAULT_GENERATE_FEATURE,
+                                SerializerFeature.BrowserSecure)
+                )
+        );
+
+        assertEquals(
+                "null",
+                new String(
+                        JSON.toJSONBytes(
+                                null,
+                                SerializeConfig.global,
+                                (SerializeFilter) null,
+                                SerializerFeature.BrowserSecure)
+                )
+        );
+        assertEquals(
+                "[]",
+                new String(
+                        JSON.toJSONBytes(
+                                Collections.emptyList(),
+                                SerializeConfig.global,
+                                (SerializeFilter) null,
+                                SerializerFeature.BrowserSecure)
+                )
+        );
+
+        assertEquals(
+                "null",
+                new String(
+                        JSON.toJSONBytes(
+                                null,
+                                SerializeConfig.global,
+                                SerializerFeature.BrowserSecure)
+                )
+        );
+        assertEquals(
+                "[]",
+                new String(
+                        JSON.toJSONBytes(
+                                Collections.emptyList(),
+                                SerializeConfig.global,
+                                SerializerFeature.BrowserSecure)
+                )
+        );
+
+        assertEquals(
+                "null",
+                new String(
+                        JSON.toJSONBytes(
+                                null,
+                                JSON.DEFAULT_GENERATE_FEATURE,
+                                SerializerFeature.BrowserSecure)
+                )
+        );
+        assertEquals(
+                "[]",
+                new String(
+                        JSON.toJSONBytes(
+                                Collections.emptyList(),
+                                JSON.DEFAULT_GENERATE_FEATURE,
+                                SerializerFeature.BrowserSecure)
+                )
+        );
+    }
+
+    @Test
+    public void toJSONBytes1() {
+        assertEquals(
+                "[]",
+                new String(
+                        JSON.toJSONBytes(
+                                StandardCharsets.UTF_8,
+                                Collections.emptyList(),
+                                SerializeConfig.global,
+                                new SerializeFilter[0],
+                                (String) null,
+                                JSON.DEFAULT_GENERATE_FEATURE,
+                                SerializerFeature.BrowserSecure)
+                )
+        );
+        assertEquals(
+                "[]",
+                new String(
+                        JSON.toJSONBytes(
+                                StandardCharsets.UTF_8,
+                                Collections.emptyList(),
+                                SerializeConfig.global,
+                                new SerializeFilter[0],
+                                "",
+                                JSON.DEFAULT_GENERATE_FEATURE,
+                                SerializerFeature.BrowserSecure)
+                )
+        );
+        assertEquals(
+                "[]",
+                new String(
+                        JSON.toJSONBytes(
+                                StandardCharsets.UTF_8,
+                                Collections.emptyList(),
+                                SerializeConfig.global,
+                                new SerializeFilter[0],
+                                JSON.DEFFAULT_DATE_FORMAT,
+                                JSON.DEFAULT_GENERATE_FEATURE,
+                                SerializerFeature.BrowserSecure)
+                )
+        );
+    }
+
+    @Test
+    public void writeJSONString() throws Exception {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        JSON.writeJSONString(
+                os,
+                StandardCharsets.UTF_8,
+                Collections.emptyList(),
+                SerializerFeature.BrowserSecure
+        );
+
+        assertEquals(
+                "[]",
+                os.toString(StandardCharsets.UTF_8)
+        );
+    }
+
+    @Test
+    public void writeJSONString1() throws Exception {
+        StringWriter os = new StringWriter();
+        JSON.writeJSONString(
+                os,
+                Collections.emptyList(),
+                SerializerFeature.BrowserSecure
+        );
+
+        assertEquals(
+                "[]",
+                os.toString()
+        );
+    }
+
+    @Test
+    public void writeJSONString2() throws Exception {
+        StringWriter os = new StringWriter();
+        JSON.writeJSONString(
+                os,
+                Collections.emptyList(),
+                JSON.DEFAULT_GENERATE_FEATURE,
+                SerializerFeature.BrowserSecure
+        );
+
+        assertEquals(
+                "[]",
+                os.toString()
+        );
+    }
+
+    @Test
+    public void writeJSONString3() throws Exception {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        JSON.writeJSONString(
+                os,
+                Collections.emptyList(),
+                JSON.DEFAULT_GENERATE_FEATURE,
+                SerializerFeature.BrowserSecure
+        );
+
+        assertEquals(
+                "[]",
+                os.toString(StandardCharsets.UTF_8)
+        );
+    }
+
+    @Test
+    public void writeJSONString4() throws Exception {
+        {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            JSON.writeJSONString(
+                    os,
+                    StandardCharsets.UTF_8,
+                    Collections.emptyList(),
+                    SerializeConfig.global,
+                    new SerializeFilter[0],
+                    "",
+                    JSON.DEFAULT_GENERATE_FEATURE,
+                    SerializerFeature.BrowserSecure
+            );
+
+            assertEquals(
+                    "[]",
+                    os.toString(StandardCharsets.UTF_8)
+            );
+        }
+        {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            JSON.writeJSONString(
+                    os,
+                    StandardCharsets.UTF_8,
+                    Collections.emptyList(),
+                    SerializeConfig.global,
+                    new SerializeFilter[0],
+                    null,
+                    JSON.DEFAULT_GENERATE_FEATURE,
+                    SerializerFeature.BrowserSecure
+            );
+
+            assertEquals(
+                    "[]",
+                    os.toString(StandardCharsets.UTF_8)
+            );
+        }
+    }
+
+    @Test
+    public void parseObject() {
+        byte[] bytes = "{}".getBytes();
+
+        assertEquals(
+                new HashMap<>(),
+                JSON.parseObject(
+                        bytes,
+                        StandardCharsets.UTF_8,
+                        HashMap.class,
+                        ParserConfig.global, (ParseProcess) null,
+                        JSON.DEFAULT_PARSER_FEATURE,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+        assertEquals(
+                new HashMap<>(),
+                JSON.parseObject(
+                        bytes,
+                        0,
+                        bytes.length,
+                        StandardCharsets.UTF_8,
+                        HashMap.class,
+                        ParserConfig.global, (ParseProcess) null,
+                        JSON.DEFAULT_PARSER_FEATURE,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+
+        assertNull(
+                JSON.parseObject(
+                        (byte[]) null,
+                        StandardCharsets.UTF_8,
+                        HashMap.class,
+                        ParserConfig.global, (ParseProcess) null,
+                        JSON.DEFAULT_PARSER_FEATURE,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+        assertNull(
+                JSON.parseObject(
+                        new byte[0],
+                        StandardCharsets.UTF_8,
+                        HashMap.class,
+                        ParserConfig.global, (ParseProcess) null,
+                        JSON.DEFAULT_PARSER_FEATURE,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+
+        assertNull(
+                JSON.parseObject(
+                        (byte[]) null,
+                        0,
+                        0,
+                        StandardCharsets.UTF_8,
+                        HashMap.class,
+                        ParserConfig.global, (ParseProcess) null,
+                        JSON.DEFAULT_PARSER_FEATURE,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+        assertNull(
+                JSON.parseObject(
+                        new byte[0],
+                        0,
+                        0,
+                        StandardCharsets.UTF_8,
+                        HashMap.class,
+                        ParserConfig.global, (ParseProcess) null,
+                        JSON.DEFAULT_PARSER_FEATURE,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+    }
+
+    @Test
+    public void parseObject1() {
+        char[] chars = "{}".toCharArray();
+        assertEquals(
+                new HashMap<>(),
+                JSON.parseObject(
+                        chars,
+                        chars.length,
+                        HashMap.class,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+
+        assertNull(
+                JSON.parseObject(
+                        (char[]) null,
+                        0,
+                        HashMap.class,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+        assertNull(
+                JSON.parseObject(
+                        new char[0],
+                        0,
+                        HashMap.class,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+    }
+
+    @Test
+    public void parseObject2() {
+        String str = "{}";
+        assertEquals(
+                new HashMap<>(),
+                JSON.parseObject(
+                        str,
+                        HashMap.class,
+                        ParserConfig.global,
+                        null,
+                        JSON.DEFAULT_PARSER_FEATURE,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+
+        assertNull(
+                JSON.parseObject(
+                        (String) null,
+                        HashMap.class,
+                        ParserConfig.global,
+                        null,
+                        JSON.DEFAULT_PARSER_FEATURE,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+        assertNull(
+                JSON.parseObject(
+                        "",
+                        HashMap.class,
+                        ParserConfig.global,
+                        null,
+                        JSON.DEFAULT_PARSER_FEATURE,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+    }
+
+    @Test
+    public void parseObject3() {
+        String str = "{}";
+        assertEquals(
+                new HashMap<>(),
+                JSON.parseObject(
+                        str,
+                        HashMap.class,
+                        (ParseProcess) null,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+
+        assertNull(
+                JSON.parseObject(
+                        (String) null,
+                        HashMap.class,
+                        (ParseProcess) null,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+        assertNull(
+                JSON.parseObject(
+                        "",
+                        HashMap.class,
+                        (ParseProcess) null,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+    }
+
+    @Test
+    public void parseObject4() throws Exception {
+        byte[] bytes = "{}".getBytes(StandardCharsets.UTF_8);
+        {
+            ByteArrayInputStream is = new ByteArrayInputStream(bytes);
+            assertEquals(
+                    new HashMap<>(),
+                    JSON.parseObject(
+                            is,
+                            StandardCharsets.UTF_8,
+                            HashMap.class,
+                            ParserConfig.global,
+                            (ParseProcess) null,
+                            JSON.DEFAULT_PARSER_FEATURE,
+                            Feature.ErrorOnNotSupportAutoType
+                    )
+            );
+        }
+
+        {
+            ByteArrayInputStream is = new ByteArrayInputStream(bytes);
+            assertEquals(
+                    new HashMap<>(),
+                    JSON.parseObject(
+                            is,
+                            StandardCharsets.UTF_8,
+                            HashMap.class,
+                            (ParserConfig) null,
+                            (ParseProcess) null,
+                            JSON.DEFAULT_PARSER_FEATURE,
+                            Feature.ErrorOnNotSupportAutoType
+                    )
+            );
+        }
+
+        {
+            assertNull(
+                    JSON.parseObject(
+                            (InputStream) null,
+                            StandardCharsets.UTF_8,
+                            HashMap.class,
+                            (ParserConfig) null,
+                            (ParseProcess) null,
+                            JSON.DEFAULT_PARSER_FEATURE,
+                            Feature.ErrorOnNotSupportAutoType
+                    )
+            );
+        }
+    }
+
+    @Test
+    public void toJSON() {
+        assertEquals("123", JSON.toJSON("123", SerializeConfig.global));
     }
 
     public static class BeanAware
