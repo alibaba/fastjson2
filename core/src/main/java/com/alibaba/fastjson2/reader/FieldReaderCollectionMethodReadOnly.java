@@ -49,7 +49,9 @@ class FieldReaderCollectionMethodReadOnly<T>
 
         String name = collection.getClass().getName();
         if ("java.util.Collections$UnmodifiableRandomAccessList".equals(name)
-                || "java.util.Collections$UnmodifiableRandomAccessList".equals(name)) {
+                || "java.util.Arrays$ArrayList".equals(name)
+                || "java.util.Collections$SingletonList".equals(name)
+                || name.startsWith("java.util.ImmutableCollections$")) {
             return;
         }
 
