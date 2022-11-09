@@ -1120,6 +1120,9 @@ public class TypeUtils {
         if (className.length() >= 192) {
             return null;
         }
+        if (className.startsWith("java.util.ImmutableCollections$")) {
+            return CLASS_UNMODIFIABLE_LIST;
+        }
 
         switch (className) {
             case "O":
@@ -1253,6 +1256,8 @@ public class TypeUtils {
             case "java.io.IOException":
                 return java.io.IOException.class;
             case "java.util.Collections$UnmodifiableRandomAccessList":
+            case "java.util.Arrays$ArrayList":
+            case "java.util.Collections$SingletonList":
                 return CLASS_UNMODIFIABLE_LIST;
             case "java.util.Collections$SingletonSet":
                 return CLASS_SINGLE_SET;
