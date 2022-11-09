@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.reader.ObjectReaderImplDate;
 
 import java.nio.charset.StandardCharsets;
 import java.time.*;
+import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.TimeZone;
@@ -48,6 +49,9 @@ public class DateUtils {
             char last = str.charAt(strlen - 1);
             ZoneId zoneId = last == 'Z' ? UTC : DEFAULT_ZONE_ID;
             LocalDateTime ldt = DateUtils.parseLocalDateTime(str, 0, strlen);
+            if (ldt == null && "0000-00-00".equals(str)) {
+                ldt = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
+            }
             ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, zoneId, null);
             long seconds = zdt.toEpochSecond();
             int nanos = ldt.getNano();
@@ -2222,6 +2226,10 @@ public class DateUtils {
                 && m1 >= '0' && m1 <= '9'
         ) {
             month = (m0 - '0') * 10 + (m1 - '0');
+
+            if ((month == 0 && year != 0) || month >= 12) {
+                throw new DateTimeParseException("illegal input", str.substring(off, off + 19), 0);
+            }
         } else {
             throw new DateTimeParseException("illegal input", str.substring(off, off + 19), 0);
         }
@@ -2231,6 +2239,24 @@ public class DateUtils {
                 && d1 >= '0' && d1 <= '9'
         ) {
             dom = (d0 - '0') * 10 + (d1 - '0');
+
+            int max = 31;
+            switch (month) {
+                case 2:
+                    boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
+                    max = leapYear ? 29 : 28;
+                    break;
+                case 4:
+                case 6:
+                case 9:
+                case 11:
+                    max = 30;
+                    break;
+            }
+
+            if ((dom == 0 && year != 0) || dom > max) {
+                throw new DateTimeParseException("illegal input", str.substring(off, off + 19), 0);
+            }
         } else {
             throw new DateTimeParseException("illegal input", str.substring(off, off + 19), 0);
         }

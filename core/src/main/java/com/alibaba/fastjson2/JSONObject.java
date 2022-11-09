@@ -1008,6 +1008,10 @@ public class JSONObject
             return (Date) value;
         }
 
+        if (value instanceof String) {
+            return DateUtils.parseDate((String) value);
+        }
+
         if (value instanceof Number) {
             long millis = ((Number) value).longValue();
             return new Date(millis);
