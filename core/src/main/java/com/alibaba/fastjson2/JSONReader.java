@@ -1516,6 +1516,8 @@ public abstract class JSONReader
                 }
             }
         }
+
+        nextIfMatch(',');
     }
 
     public <T> T read(Class<T> type) {
@@ -2636,6 +2638,13 @@ public abstract class JSONReader
     public static JSONReader of(java.io.Reader is) {
         return new JSONReaderUTF16(
                 JSONFactory.createReadContext(),
+                is
+        );
+    }
+
+    public static JSONReader of(java.io.Reader is, Context context) {
+        return new JSONReaderUTF16(
+                context,
                 is
         );
     }
