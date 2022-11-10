@@ -65,14 +65,29 @@ public class JdbcSupport {
             }
         }
 
-        if (objectClass.getName().equals("java.sql.Clob")) {
-            if (CLASS_CLOB == null) {
-                CLASS_CLOB = objectClass;
-            }
-            return true;
-        }
+        String objectClassName = objectClass.getName();
+        switch (objectClassName) {
+            case "java.sql.Clob":
+                if (CLASS_CLOB == null) {
+                    CLASS_CLOB = objectClass;
+                }
+                return true;
+            default:
+                if (objectClassName.startsWith("oracle.sql.") || objectClassName.startsWith("oracle.jdbc.")) {
+                    if (CLASS_CLOB == null && !CLASS_CLOB_ERROR) {
+                        try {
+                            CLASS_CLOB = Class.forName("java.sql.Clob");
+                        } catch (Throwable ignored) {
+                            CLASS_CLOB_ERROR = true;
+                        }
+                    }
+                }
 
-        return false;
+                if (CLASS_CLOB != null) {
+                    return CLASS_CLOB.isAssignableFrom(objectClass);
+                }
+                return false;
+        }
     }
 
     static class ClobWriter
