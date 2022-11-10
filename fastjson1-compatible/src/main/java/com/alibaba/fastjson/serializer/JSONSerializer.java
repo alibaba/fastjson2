@@ -10,6 +10,7 @@ import java.util.List;
 public class JSONSerializer {
     public final SerializeWriter out;
     final JSONWriter raw;
+    SerialContext context;
 
     public JSONSerializer() {
         this(new SerializeWriter());
@@ -158,5 +159,13 @@ public class JSONSerializer {
 
     public static void write(SerializeWriter out, Object object) {
         out.raw.writeAny(object);
+    }
+
+    public SerialContext getContext() {
+        return context;
+    }
+
+    public void setContext(SerialContext context) {
+        this.context = context;
     }
 }

@@ -992,10 +992,6 @@ public class JSONObject
         return com.alibaba.fastjson2.JSON.parseObject(str, type);
     }
 
-    public <T> T toJavaObject(TypeReference typeReference) {
-        return toJavaObject(typeReference.getType());
-    }
-
     public <T> T toJavaObject(Class<T> clazz) {
         if (clazz == Map.class) {
             return (T) this;

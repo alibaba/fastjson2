@@ -92,7 +92,7 @@ public class SerializeConfig {
             return (ObjectSerializer) objectWriter;
         }
 
-        return new ObjectSerializerWrapper(objectWriter);
+        return new JavaBeanSerializer(objectWriter);
     }
 
     public final ObjectSerializer get(Type type) {
@@ -101,6 +101,6 @@ public class SerializeConfig {
             return (ObjectSerializer) objectWriter;
         }
 
-        return new ObjectSerializerWrapper(objectWriter);
+        return new JavaBeanSerializer(objectWriter);
     }
 }

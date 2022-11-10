@@ -1764,12 +1764,10 @@ public abstract class JSONReader
         Object[] list = new Object[types.length];
         for (int i = 0; i < types.length; i++) {
             if (i != 0) {
-                if (nextIfMatch(',')) {
-                    next();
-                } else if (nextIfMatch(']')) {
+                if (nextIfMatch(']')) {
                     arrayEnd = true;
                     break;
-                } else {
+                } else if (isEnd()) {
                     break;
                 }
             }
@@ -1777,6 +1775,10 @@ public abstract class JSONReader
             Type itemType = types[i];
             Object item = read(itemType);
             list[i] = item;
+
+            if (i == types.length - 1) {
+                arrayEnd = true;
+            }
         }
 
         if (!arrayEnd) {

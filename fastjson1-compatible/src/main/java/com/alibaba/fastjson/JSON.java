@@ -84,7 +84,7 @@ public abstract class JSON {
         writerProvider.register(new Fastjson1xWriterModule(writerProvider));
     }
 
-    static JSONReader.Context createReadContext(int featuresValue, Feature... features) {
+    public static JSONReader.Context createReadContext(int featuresValue, Feature... features) {
         return createReadContext(JSONFactory.getDefaultObjectReaderProvider(), featuresValue, features);
     }
 
@@ -410,6 +410,11 @@ public abstract class JSON {
         }
     }
 
+    public static <T> T parseObject(String input, Type clazz, ParserConfig config, int featureValues,
+                                    Feature... features) {
+        return parseObject(input, clazz, config, null, featureValues, features);
+    }
+
     public static <T> T parseObject(String str, Type objectType, ParseProcess processor, Feature... features) {
         if (str == null || str.isEmpty()) {
             return null;
@@ -471,6 +476,10 @@ public abstract class JSON {
 
     public static <T> T parseObject(String str, TypeReference typeReference, Feature... features) {
         return parseObject(str, typeReference.getType(), features);
+    }
+
+    public static <T> T parseObject(String input, Type clazz, int featureValues, Feature... features) {
+        return (T) parseObject(input, clazz, ParserConfig.global, featureValues, features);
     }
 
     public static <T> T parseObject(String str, Class<T> objectClass) {
@@ -649,6 +658,16 @@ public abstract class JSON {
     public static <T> T parseObject(
             InputStream is,
             Charset charset,
+            Type type,
+            ParserConfig config,
+            Feature... features
+    ) throws IOException {
+        return (T) parseObject(is, charset, type, config, null, DEFAULT_PARSER_FEATURE, features);
+    }
+
+    public static <T> T parseObject(
+            InputStream is,
+            Charset charset,
             Type objectType,
             Feature... features) throws IOException {
         if (is == null) {
@@ -795,6 +814,10 @@ public abstract class JSON {
         }
     }
 
+    public static Object parse(String text, int features) {
+        return parse(text, ParserConfig.global, features);
+    }
+
     public static Object parse(String str, Feature... features) {
         if (str == null || str.isEmpty()) {
             return null;
@@ -837,6 +860,22 @@ public abstract class JSON {
         }
 
         JSONReader.Context context = createReadContext(config.getProvider(), DEFAULT_PARSER_FEATURE);
+        try (JSONReader jsonReader = JSONReader.of(str, context)) {
+            if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
+                return jsonReader.read(JSONObject.class);
+            }
+            return jsonReader.readAny();
+        } catch (Exception ex) {
+            throw new JSONException(ex.getMessage(), ex);
+        }
+    }
+
+    public static Object parse(String str, ParserConfig config, int features) {
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+
+        JSONReader.Context context = createReadContext(config.getProvider(), features);
         try (JSONReader jsonReader = JSONReader.of(str, context)) {
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
                 return jsonReader.read(JSONObject.class);
@@ -1152,6 +1191,15 @@ public abstract class JSON {
         } catch (RuntimeException ex) {
             throw new JSONException("toJSONString error", ex);
         }
+    }
+
+    public static String toJSONString(
+            Object object,
+            SerializeConfig config,
+            SerializeFilter[] filters,
+            SerializerFeature... features
+    ) {
+        return toJSONString(object, config, filters, null, DEFAULT_GENERATE_FEATURE, features);
     }
 
     public static String toJSONString(Object object, SerializeFilter[] filters, SerializerFeature... features) {
@@ -1511,6 +1559,20 @@ public abstract class JSON {
         }
     }
 
+    public static byte[] toJSONBytes(Object object, SerializeFilter filter) {
+        return toJSONBytes(object, SerializeConfig.global, new SerializeFilter[] {filter}, DEFAULT_GENERATE_FEATURE);
+    }
+
+    public static byte[] toJSONBytes(Object object, SerializeFilter filter, SerializerFeature... features) {
+        return toJSONBytes(
+                object,
+                SerializeConfig.global,
+                new SerializeFilter[]{filter},
+                DEFAULT_GENERATE_FEATURE,
+                features
+        );
+    }
+
     public static byte[] toJSONBytes(
             Object object,
             SerializeConfig config,
@@ -1570,6 +1632,15 @@ public abstract class JSON {
         } catch (RuntimeException ex) {
             throw new JSONException("toJSONBytes error", ex);
         }
+    }
+
+    public static byte[] toJSONBytes(
+            Object object,
+            SerializeConfig config,
+            int defaultFeatures,
+            SerializerFeature... features
+    ) {
+        return toJSONBytes(object, config, new SerializeFilter[0], defaultFeatures, features);
     }
 
     public static String toJSONString(Object object, SerializeConfig config, SerializerFeature... features) {
@@ -1953,9 +2024,14 @@ public abstract class JSON {
         return com.alibaba.fastjson2.JSON.isValidObject(str);
     }
 
+    public abstract <T> T toJavaObject(Class<T> objectClass);
+
     public abstract <T> T toJavaObject(Type type);
 
-    public abstract <T> T toJavaObject(Class<T> objectClass);
+    public <T> T toJavaObject(TypeReference typeReference) {
+        Type type = typeReference != null ? typeReference.getType() : Object.class;
+        return toJavaObject(type);
+    }
 
     public static <T> T toJavaObject(JSON json, Class<T> clazz) {
         if (json instanceof JSONObject) {
