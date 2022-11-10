@@ -523,6 +523,8 @@ public abstract class JSONReader
 
     public abstract boolean nextIfMatchIdent(char c0, char c1, char c2, char c3);
 
+    public abstract boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4);
+
     public abstract boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5);
 
     public abstract Integer readInt32();
@@ -558,7 +560,7 @@ public abstract class JSONReader
         }
     }
 
-    protected long getInt64Value() {
+    public long getInt64Value() {
         switch (valueType) {
             case JSON_TYPE_DEC:
                 return getNumber().longValue();
@@ -1747,7 +1749,45 @@ public abstract class JSONReader
         return list;
     }
 
+    public Object[] readArray(Type[] types) {
+        if (nextIfNull()) {
+            return null;
+        }
+
+        if (!nextIfMatch('[')) {
+            throw new JSONException(info("syntax error"));
+        }
+
+        boolean arrayEnd = false;
+        Object[] list = new Object[types.length];
+        for (int i = 0; i < types.length; i++) {
+            if (i != 0) {
+                if (nextIfMatch(',')) {
+                    next();
+                } else if (nextIfMatch(']')) {
+                    arrayEnd = true;
+                    break;
+                } else {
+                    break;
+                }
+            }
+
+            Type itemType = types[i];
+            Object item = read(itemType);
+            list[i] = item;
+        }
+
+        if (!arrayEnd) {
+            throw new JSONException(info("syntax error"));
+        }
+        return list;
+    }
+
     public void readArray(List list, Type itemType) {
+        readArray((Collection) list, itemType);
+    }
+
+    public void readArray(Collection list, Type itemType) {
         if (nextIfMatch('[')) {
             for (; ; ) {
                 if (nextIfMatch(']')) {

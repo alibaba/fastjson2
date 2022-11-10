@@ -1390,4 +1390,14 @@ public class TypeUtils {
 
         return object;
     }
+
+    public static Type getCollectionItemType(Type fieldType) {
+        if (fieldType instanceof ParameterizedType) {
+            return getCollectionItemType((ParameterizedType) fieldType);
+        }
+        if (fieldType instanceof Class<?>) {
+            return getCollectionItemType((Class<?>) fieldType);
+        }
+        return Object.class;
+    }
 }

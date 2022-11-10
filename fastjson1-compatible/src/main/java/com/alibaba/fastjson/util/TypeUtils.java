@@ -365,6 +365,10 @@ public class TypeUtils {
     }
 
     public static long longExtractValue(Number number) {
+        if (number == null) {
+            return 0;
+        }
+
         if (number instanceof BigDecimal) {
             return ((BigDecimal) number).longValueExact();
         }
@@ -500,5 +504,103 @@ public class TypeUtils {
 
     public static java.sql.Date castToSqlDate(final Object value) {
         return com.alibaba.fastjson2.util.TypeUtils.cast(value, java.sql.Date.class);
+    }
+
+    public static byte byteValue(BigDecimal decimal) {
+        if (decimal == null) {
+            return 0;
+        }
+
+        int scale = decimal.scale();
+        if (scale >= -100 && scale <= 100) {
+            return decimal.byteValue();
+        }
+
+        return decimal.byteValueExact();
+    }
+
+    public static short shortValue(BigDecimal decimal) {
+        if (decimal == null) {
+            return 0;
+        }
+
+        int scale = decimal.scale();
+        if (scale >= -100 && scale <= 100) {
+            return decimal.shortValue();
+        }
+
+        return decimal.shortValueExact();
+    }
+
+    public static int intValue(BigDecimal decimal) {
+        if (decimal == null) {
+            return 0;
+        }
+
+        int scale = decimal.scale();
+        if (scale >= -100 && scale <= 100) {
+            return decimal.intValue();
+        }
+
+        return decimal.intValueExact();
+    }
+
+    public static long longValue(BigDecimal decimal) {
+        if (decimal == null) {
+            return 0;
+        }
+
+        int scale = decimal.scale();
+        if (scale >= -100 && scale <= 100) {
+            return decimal.longValue();
+        }
+
+        return decimal.longValueExact();
+    }
+
+    public static Character castToChar(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Character) {
+            return (Character) value;
+        }
+        if (value instanceof String) {
+            String strVal = (String) value;
+            if (strVal.length() == 0) {
+                return null;
+            }
+            if (strVal.length() != 1) {
+                throw new JSONException("can not cast to char, value : " + value);
+            }
+            return strVal.charAt(0);
+        }
+        throw new JSONException("can not cast to char, value : " + value);
+    }
+
+    public static Short castToShort(Object value) {
+        return com.alibaba.fastjson2.util.TypeUtils.toShort(value);
+    }
+
+    public static Byte castToByte(Object value) {
+        return com.alibaba.fastjson2.util.TypeUtils.toByte(value);
+    }
+
+    public static Float castToFloat(Object value) {
+        return com.alibaba.fastjson2.util.TypeUtils.toFloat(value);
+    }
+
+    public static Date castToDate(Object value) {
+        return com.alibaba.fastjson2.util.TypeUtils.toDate(value);
+    }
+
+    public static byte[] castToBytes(Object value) {
+        if (value instanceof byte[]) {
+            return (byte[]) value;
+        }
+        if (value instanceof String) {
+            return IOUtils.decodeBase64((String) value);
+        }
+        throw new JSONException("can not cast to byte[], value : " + value);
     }
 }

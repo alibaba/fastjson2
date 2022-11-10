@@ -15,6 +15,10 @@ public class JSONSerializer {
         this(new SerializeWriter());
     }
 
+    public JSONSerializer(SerializeConfig config) {
+        this(new SerializeWriter(config));
+    }
+
     public JSONSerializer(JSONWriter raw) {
         this(new SerializeWriter(raw));
     }
@@ -138,5 +142,21 @@ public class JSONSerializer {
 
     public List<AfterFilter> getAfterFilters() {
         return this.out.getAfterFilters();
+    }
+
+    public SerializeConfig getMapping() {
+        return out.config;
+    }
+
+    public SerializeWriter getWriter() {
+        return out;
+    }
+
+    public ObjectSerializer getObjectWriter(Class<?> clazz) {
+        return out.config.getObjectWriter(clazz);
+    }
+
+    public static void write(SerializeWriter out, Object object) {
+        out.raw.writeAny(object);
     }
 }

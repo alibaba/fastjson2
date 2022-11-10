@@ -143,7 +143,7 @@ public class ObjectReaderProvider
     final ObjectReaderCreator creator;
     final List<ObjectReaderModule> modules = new ArrayList<>();
 
-    private final long[] denyHashCodes;
+    private long[] denyHashCodes;
     private long[] acceptHashCodes;
 
     private AutoTypeBeforeHandler autoTypeBeforeHandler = DEFAULT_AUTO_TYPE_BEFORE_HANDLER;
@@ -360,6 +360,19 @@ public class ObjectReaderProvider
                 System.arraycopy(this.acceptHashCodes, 0, hashCodes, 0, this.acceptHashCodes.length);
                 Arrays.sort(hashCodes);
                 this.acceptHashCodes = hashCodes;
+            }
+        }
+    }
+
+    public void addAutoTypeDeny(String name) {
+        if (name != null && name.length() != 0) {
+            long hash = Fnv.hashCode64(name);
+            if (Arrays.binarySearch(this.denyHashCodes, hash) < 0) {
+                long[] hashCodes = new long[this.denyHashCodes.length + 1];
+                hashCodes[hashCodes.length - 1] = hash;
+                System.arraycopy(this.denyHashCodes, 0, hashCodes, 0, this.denyHashCodes.length);
+                Arrays.sort(hashCodes);
+                this.denyHashCodes = hashCodes;
             }
         }
     }

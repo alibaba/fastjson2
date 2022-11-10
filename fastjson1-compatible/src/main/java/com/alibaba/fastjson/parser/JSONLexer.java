@@ -12,4 +12,12 @@ public interface JSONLexer {
     int VALUE_NULL = 5;
 
     com.alibaba.fastjson2.JSONReader getReader();
+
+    String stringVal();
+
+    boolean isBlankInput();
+
+    int intValue();
+
+    long longValue();
 }

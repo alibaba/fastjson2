@@ -8,6 +8,33 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 public class JSONPath {
+    private final com.alibaba.fastjson2.JSONPath path;
+
+    private JSONPath(com.alibaba.fastjson2.JSONPath path) {
+        this.path = path;
+    }
+
+    public static JSONPath compile(String path) {
+        if (path == null) {
+            throw new JSONException("jsonpath can not be null");
+        }
+
+        return new JSONPath(com.alibaba.fastjson2.JSONPath.of(path));
+    }
+
+    public Object eval(Object object) {
+        return path.eval(object);
+    }
+
+    public boolean set(Object object, Object value) {
+        path.set(object, value);
+        return true;
+    }
+
+    public String getPath() {
+        return path.toString();
+    }
+
     public static <T> T read(String json, String path, Type clazz, ParserConfig parserConfig) {
         com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
         Object r = jsonPath.extract(JSONReader.of(json));

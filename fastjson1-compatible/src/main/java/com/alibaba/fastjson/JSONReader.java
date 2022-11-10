@@ -44,6 +44,35 @@ public class JSONReader
         }
     }
 
+    public Object readObject() {
+        return raw.readObject();
+    }
+
+    public void readObject(Object object) {
+        raw.readObject(object);
+    }
+
+    public Integer readInteger() {
+        return raw.readInt32();
+    }
+
+    public Long readLong() {
+        return raw.readInt64();
+    }
+
+    public String readString() {
+        return raw.readString();
+    }
+
+    public boolean hasNext() {
+        if (raw.isEnd()) {
+            return false;
+        }
+
+        char ch = raw.current();
+        return ch != ']' && ch != '}';
+    }
+
     public Locale getLocal() {
         return raw.getContext().getLocale();
     }

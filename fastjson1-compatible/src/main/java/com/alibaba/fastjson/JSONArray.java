@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.function.Function;
 
@@ -652,6 +653,11 @@ public class JSONArray
     public java.sql.Date getSqlDate(int index) {
         Object object = get(index);
         return TypeUtils.cast(object, java.sql.Date.class);
+    }
+
+    public Timestamp getTimestamp(int index) {
+        Object object = get(index);
+        return TypeUtils.cast(object, java.sql.Timestamp.class);
     }
 
     public Date getDate(int index) {
