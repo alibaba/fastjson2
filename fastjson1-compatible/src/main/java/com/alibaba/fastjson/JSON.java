@@ -1004,9 +1004,11 @@ public abstract class JSON {
         }
     }
 
-    public static JSONWriter.Context createWriteContext(SerializeConfig config,
-                                                        int featuresValue,
-                                                        SerializerFeature... features) {
+    public static JSONWriter.Context createWriteContext(
+            SerializeConfig config,
+            int featuresValue,
+            SerializerFeature... features
+    ) {
         for (SerializerFeature feature : features) {
             featuresValue |= feature.mask;
         }
@@ -1894,6 +1896,31 @@ public abstract class JSON {
         }
     }
 
+    public static <T> List<T> parseArray(String text, Class<T> clazz, ParserConfig config) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        if (config == null) {
+            config = ParserConfig.global;
+        }
+
+        ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{clazz}, null, List.class);
+
+        try (JSONReader reader = JSONReader.of(
+                text,
+                createReadContext(config.getProvider(), DEFAULT_PARSER_FEATURE))
+        ) {
+            return reader.read(paramType);
+        } catch (com.alibaba.fastjson2.JSONException e) {
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                cause = e;
+            }
+            throw new JSONException(e.getMessage(), cause);
+        }
+    }
+
     public static <T> List<T> parseArray(String text, Class<T> type, Feature... features) {
         if (text == null || text.isEmpty()) {
             return null;
@@ -1965,6 +1992,19 @@ public abstract class JSON {
         return object;
     }
 
+    public static Object toJSON(Object javaObject, ParserConfig config) {
+        if (javaObject instanceof JSON) {
+            return javaObject;
+        }
+
+        String str = JSON.toJSONString(javaObject);
+        Object object = JSON.parse(str, config);
+        if (object instanceof List) {
+            return new JSONArray((List) object);
+        }
+        return object;
+    }
+
     public static List<Object> parseArray(String text, Type[] types) {
         if (text == null || text.isEmpty()) {
             return null;
@@ -2028,5 +2068,22 @@ public abstract class JSON {
 
     public String toJSONString() {
         return com.alibaba.fastjson2.JSON.toJSONString(this, JSONWriter.Feature.ReferenceDetection);
+    }
+
+    public String toString(SerializerFeature... features) {
+        return JSON.toJSONString(this, features);
+    }
+
+    public void writeJSONString(Appendable appendable) {
+        if (appendable instanceof Writer) {
+            JSON.writeJSONString((Writer) appendable, this);
+            return;
+        }
+
+        try {
+            appendable.append(JSON.toJSONString(this));
+        } catch (IOException e) {
+            throw new JSONException(e.getMessage(), e);
+        }
     }
 }

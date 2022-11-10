@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.PropertyNamingStrategy;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
@@ -73,5 +74,33 @@ public class SerializeConfig {
                 throw new JSONException("serializer write error", e);
             }
         }
+    }
+
+    public void addFilter(Class<?> clazz, SerializeFilter filter) {
+        ObjectWriter objectWriter = provider.getObjectWriter(clazz);
+        objectWriter.setFilter(filter);
+    }
+
+    @Deprecated
+    public boolean put(Object type, Object value) {
+        return put((Type) type, (ObjectSerializer) value);
+    }
+
+    public ObjectSerializer getObjectWriter(Class<?> clazz) {
+        ObjectWriter objectWriter = provider.getObjectWriter(clazz);
+        if (objectWriter instanceof ObjectSerializer) {
+            return (ObjectSerializer) objectWriter;
+        }
+
+        return new ObjectSerializerWrapper(objectWriter);
+    }
+
+    public final ObjectSerializer get(Type type) {
+        ObjectWriter objectWriter = provider.getObjectWriter(type, TypeUtils.getClass(type));
+        if (objectWriter instanceof ObjectSerializer) {
+            return (ObjectSerializer) objectWriter;
+        }
+
+        return new ObjectSerializerWrapper(objectWriter);
     }
 }

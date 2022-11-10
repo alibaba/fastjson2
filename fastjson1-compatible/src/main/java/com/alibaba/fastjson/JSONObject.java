@@ -18,7 +18,6 @@ package com.alibaba.fastjson;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.parser.ParserConfig;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.util.IOUtils;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.alibaba.fastjson2.JSONException;
@@ -1030,9 +1029,5 @@ public class JSONObject
     @Override
     public String toString() {
         return com.alibaba.fastjson2.JSON.toJSONString(this, JSONWriter.Feature.ReferenceDetection);
-    }
-
-    public String toString(SerializerFeature... features) {
-        return JSON.toJSONString(this, features);
     }
 }
