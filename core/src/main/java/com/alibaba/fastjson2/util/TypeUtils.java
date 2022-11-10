@@ -21,6 +21,7 @@ public class TypeUtils {
     public static final Class CLASS_JSON_ARRAY_1x;
 
     public static final Class CLASS_SINGLE_SET = Collections.singleton(1).getClass();
+    public static final Class CLASS_SINGLE_List = Collections.singletonList(1).getClass();
     public static final Class CLASS_UNMODIFIABLE_COLLECTION = Collections.unmodifiableCollection(new ArrayList<>()).getClass();
     public static final Class CLASS_UNMODIFIABLE_LIST = Collections.unmodifiableList(new ArrayList<>()).getClass();
     public static final Class CLASS_UNMODIFIABLE_SET = Collections.unmodifiableSet(new HashSet<>()).getClass();
@@ -1121,7 +1122,11 @@ public class TypeUtils {
             return null;
         }
         if (className.startsWith("java.util.ImmutableCollections$")) {
-            return CLASS_UNMODIFIABLE_LIST;
+            try {
+                return Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                return CLASS_UNMODIFIABLE_LIST;
+            }
         }
 
         switch (className) {
@@ -1256,9 +1261,11 @@ public class TypeUtils {
             case "java.io.IOException":
                 return java.io.IOException.class;
             case "java.util.Collections$UnmodifiableRandomAccessList":
-            case "java.util.Arrays$ArrayList":
-            case "java.util.Collections$SingletonList":
                 return CLASS_UNMODIFIABLE_LIST;
+            case "java.util.Arrays$ArrayList":
+                return Arrays.asList(1).getClass();
+            case "java.util.Collections$SingletonList":
+                return CLASS_SINGLE_List;
             case "java.util.Collections$SingletonSet":
                 return CLASS_SINGLE_SET;
             default:
