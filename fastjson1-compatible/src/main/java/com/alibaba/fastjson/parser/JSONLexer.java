@@ -20,4 +20,6 @@ public interface JSONLexer {
     int intValue();
 
     long longValue();
+
+    void nextToken();
 }

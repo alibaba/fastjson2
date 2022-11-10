@@ -25,4 +25,16 @@ public class ListSerializer
         List<?> list = (List<?>) object;
         out.write(list);
     }
+
+    public void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType) throws IOException {
+        JSONWriter out = serializer.out.raw;
+
+        if (object == null) {
+            out.writeArrayNull();
+            return;
+        }
+
+        List<?> list = (List<?>) object;
+        out.write(list);
+    }
 }

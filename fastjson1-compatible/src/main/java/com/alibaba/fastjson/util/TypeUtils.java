@@ -603,4 +603,8 @@ public class TypeUtils {
         }
         throw new JSONException("can not cast to byte[], value : " + value);
     }
+
+    public static List<FieldInfo> computeGetters(Class<?> clazz, Map<String, String> aliasMap) {
+        throw new JSONException("not support operation");
+    }
 }

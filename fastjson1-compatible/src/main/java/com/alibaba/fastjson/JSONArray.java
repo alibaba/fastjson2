@@ -776,6 +776,16 @@ public class JSONArray
         return null;
     }
 
+    public <T> T getObject(int index, Type type) {
+        Object obj = list.get(index);
+        if (type instanceof Class) {
+            return (T) TypeUtils.cast(obj, (Class) type);
+        } else {
+            String json = JSON.toJSONString(obj);
+            return (T) JSON.parseObject(json, type);
+        }
+    }
+
     public <T> T getObject(int index, Class<T> clazz) {
         Object obj = list.get(index);
         if (obj == null) {

@@ -1,10 +1,13 @@
 package com.alibaba.fastjson.parser;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
 public class JSONScanner
         extends JSONLexerBase {
     private final JSONReader reader;
+    private boolean orderedField;
 
     public JSONScanner(JSONReader reader) {
         this.reader = reader;
@@ -14,9 +17,17 @@ public class JSONScanner
         this.reader = JSONReader.of(str);
     }
 
+    public JSONScanner(String str, int features) {
+        this.reader = JSONReader.of(str, JSON.createReadContext(features));
+    }
+
     @Override
     public JSONReader getReader() {
         return reader;
+    }
+
+    public boolean isOrderedField() {
+        return orderedField;
     }
 
     public String stringVal() {
@@ -56,6 +67,9 @@ public class JSONScanner
             case UseNativeJavaObject:
                 rawFeature = JSONReader.Feature.UseNativeObject;
                 break;
+            case OrderedField:
+                orderedField = state;
+                break;
             default:
                 break;
         }
@@ -84,5 +98,59 @@ public class JSONScanner
     @Override
     public long longValue() {
         return reader.getInt64Value();
+    }
+
+    public final void nextToken() {
+        char ch = reader.current();
+        switch (ch) {
+            case '[':
+            case ']':
+            case '{':
+            case '}':
+            case ':':
+                reader.next();
+                break;
+            default:
+                break;
+        }
+
+        if (reader.nextIfNull()) {
+            return;
+        }
+
+        throw new JSONException("not support operation");
+    }
+
+    public final void nextToken(int expect) {
+        boolean match = true;
+        switch (expect) {
+            case JSONToken.COLON:
+                match = reader.nextIfMatch(':');
+                break;
+            case JSONToken.LBRACE:
+                match = reader.nextIfMatch('{');
+                break;
+            case JSONToken.LBRACKET:
+                match = reader.nextIfMatch('[');
+                break;
+            case JSONToken.RBRACE:
+                match = reader.nextIfMatch('}');
+                break;
+            case JSONToken.RBRACKET:
+                match = reader.nextIfMatch(']');
+                break;
+            case JSONToken.SET:
+                match = reader.nextIfSet();
+                break;
+            case JSONToken.NULL:
+                match = reader.nextIfNull();
+                break;
+            default:
+                throw new JSONException("not support operation");
+        }
+
+        if (!match) {
+            throw new JSONException("not support operation");
+        }
     }
 }

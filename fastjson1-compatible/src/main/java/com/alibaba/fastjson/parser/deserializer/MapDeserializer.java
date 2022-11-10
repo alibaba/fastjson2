@@ -32,4 +32,8 @@ public class MapDeserializer
         map.putAll(object);
         return map;
     }
+
+    public static Map parseMap(DefaultJSONParser parser, Map<String, Object> map, Type valueType, Object fieldName) {
+        return parseMap(parser, map, valueType, fieldName, 0);
+    }
 }

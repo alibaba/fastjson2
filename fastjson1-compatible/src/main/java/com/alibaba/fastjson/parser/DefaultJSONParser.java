@@ -1,6 +1,7 @@
 package com.alibaba.fastjson.parser;
 
 import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONToken;
 import com.alibaba.fastjson2.JSONReader;
 
@@ -84,8 +85,8 @@ public class DefaultJSONParser
     }
 
     @Deprecated
-    public void parse(Object fieldName) {
-        reader.readObject();
+    public Object parse(Object fieldName) {
+        return reader.readAny();
     }
 
     @Deprecated
@@ -164,6 +165,16 @@ public class DefaultJSONParser
                     "syntax error, expect " + JSONToken.name(token) + ", actual " + reader.current()
             );
         }
+    }
+
+    public JSONObject parseObject() {
+        if (reader.nextIfNull()) {
+            return null;
+        }
+
+        JSONObject object = new JSONObject(lexer.isOrderedField());
+        reader.read(object, 0L);
+        return object;
     }
 
     public void config(Feature feature, boolean state) {
