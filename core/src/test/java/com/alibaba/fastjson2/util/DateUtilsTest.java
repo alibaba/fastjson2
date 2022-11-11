@@ -120,6 +120,19 @@ public class DateUtilsTest {
     }
 
     @Test
+    public void parseDate_L8() {
+        String str = "20220203";
+        LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2022, 2, 3), LocalTime.MIN);
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID)
+                        .toInstant()
+                        .toEpochMilli(),
+                DateUtils.parseDate(str)
+                        .getTime()
+        );
+    }
+
+    @Test
     public void parseDate_L9() {
         String str = "2022년1월2일";
         LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2022, 1, 2), LocalTime.MIN);
@@ -228,6 +241,36 @@ public class DateUtilsTest {
     public void parseDate_L10() {
         String str = "2022년11월12일";
         LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2022, 11, 12), LocalTime.MIN);
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str).getTime()
+        );
+    }
+
+    @Test
+    public void parseDate_L10_1() {
+        String str = "2021-02-02";
+        LocalDateTime ldt = LocalDateTime.of(LocalDate.of(2021, 2, 2), LocalTime.MIN);
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str).getTime()
+        );
+    }
+
+    @Test
+    public void parseDate_L18_0() {
+        String str = "2021-02-02 10:12:34";
+        LocalDateTime ldt = LocalDateTime.of(2021, 2, 2, 10, 12, 34);
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str).getTime()
+        );
+    }
+
+    @Test
+    public void parseDate_L19_0() {
+        String str = "2021-02-02  10:12:34";
+        LocalDateTime ldt = LocalDateTime.of(2021, 2, 2, 10, 12, 34);
         assertEquals(
                 ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
                 DateUtils.parseDate(str).getTime()
