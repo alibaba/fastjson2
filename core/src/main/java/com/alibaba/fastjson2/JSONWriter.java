@@ -620,6 +620,8 @@ public abstract class JSONWriter
 
     public abstract void writeBase64(byte[] bytes);
 
+    public abstract void writeHex(byte[] bytes);
+
     protected abstract void write0(char ch);
 
     public abstract void writeRaw(String str);
@@ -831,7 +833,7 @@ public abstract class JSONWriter
 
     public void writeBool(boolean[] value) {
         if (value == null) {
-            writeNull();
+            writeArrayNull();
             return;
         }
 

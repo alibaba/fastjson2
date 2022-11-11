@@ -15,6 +15,7 @@ import java.time.*;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteByteArrayAsBase64;
 import static java.time.temporal.ChronoField.SECOND_OF_DAY;
 import static java.time.temporal.ChronoField.YEAR;
 
@@ -274,9 +275,12 @@ public abstract class FieldWriter<T>
 
         writeFieldName(jsonWriter);
         if ("base64".equals(format)
-                || (jsonWriter.getFeatures(this.features) & JSONWriter.Feature.WriteByteArrayAsBase64.mask) != 0) {
+                || (format == null && (jsonWriter.getFeatures(this.features) & WriteByteArrayAsBase64.mask) != 0)
+        ) {
             jsonWriter.writeBase64(value);
-        } else if ("gzip,base64".equals(format)) {
+        } else if ("hex".equals(format)) {
+            jsonWriter.writeHex(value);
+        } else if ("gzip,base64".equals(format) || "gzip".equals(format)) {
             GZIPOutputStream gzipOut = null;
             try {
                 ByteArrayOutputStream byteOut = new ByteArrayOutputStream();

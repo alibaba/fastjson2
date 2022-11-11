@@ -23,11 +23,18 @@ public class ParserConfig {
     }
 
     private ObjectReaderProvider provider;
+    public final boolean fieldBase;
 
     public ParserConfig() {
+        this.fieldBase = false;
     }
 
     public ParserConfig(ClassLoader parentClassLoader) {
+        this.fieldBase = false;
+    }
+
+    public ParserConfig(boolean fieldBase) {
+        this.fieldBase = fieldBase;
     }
 
     public ObjectReaderProvider getProvider() {

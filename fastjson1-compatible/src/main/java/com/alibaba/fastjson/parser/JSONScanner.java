@@ -70,6 +70,10 @@ public class JSONScanner
             case UseNativeJavaObject:
                 rawFeature = JSONReader.Feature.UseNativeObject;
                 break;
+            case UseBigDecimal:
+                rawFeature = JSONReader.Feature.UseBigDecimalForDoubles;
+                not = true;
+                break;
             case OrderedField:
                 orderedField = state;
                 break;
@@ -87,6 +91,50 @@ public class JSONScanner
 
         JSONReader.Context context = reader.getContext();
         context.config(rawFeature, state);
+    }
+
+    public boolean isEnabled(Feature feature) {
+        JSONReader.Feature rawFeature = null;
+
+        switch (feature) {
+            case AllowUnQuotedFieldNames:
+                rawFeature = JSONReader.Feature.AllowUnQuotedFieldNames;
+                break;
+            case SupportArrayToBean:
+                rawFeature = JSONReader.Feature.SupportArrayToBean;
+                break;
+            case DisableFieldSmartMatch:
+                rawFeature = JSONReader.Feature.SupportSmartMatch;
+                break;
+            case SupportAutoType:
+                rawFeature = JSONReader.Feature.SupportAutoType;
+                break;
+            case NonStringKeyAsString:
+                rawFeature = JSONReader.Feature.NonStringKeyAsString;
+                break;
+            case ErrorOnEnumNotMatch:
+                rawFeature = JSONReader.Feature.ErrorOnEnumNotMatch;
+                break;
+            case SupportClassForName:
+                rawFeature = JSONReader.Feature.SupportClassForName;
+                break;
+            case ErrorOnNotSupportAutoType:
+                rawFeature = JSONReader.Feature.ErrorOnNotSupportAutoType;
+                break;
+            case UseNativeJavaObject:
+                rawFeature = JSONReader.Feature.UseNativeObject;
+                break;
+            case UseBigDecimal:
+                return !reader.isEnabled(JSONReader.Feature.UseBigDecimalForDoubles);
+            default:
+                break;
+        }
+
+        if (rawFeature == null) {
+            return true;
+        }
+
+        return reader.isEnabled(rawFeature);
     }
 
     @Override

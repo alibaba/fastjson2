@@ -16,6 +16,7 @@ import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.*;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
@@ -1307,6 +1308,10 @@ public class ObjectReaderBaseModule
 
         if (type == URI.class) {
             return new ObjectReaderImplFromString<URI>(URI.class, e -> URI.create(e));
+        }
+
+        if (type == Charset.class) {
+            return new ObjectReaderImplFromString<Charset>(Charset.class, e -> Charset.forName(e));
         }
 
         if (type == File.class) {

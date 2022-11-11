@@ -308,6 +308,11 @@ final class JSONWriterPretty
     }
 
     @Override
+    public void writeHex(byte[] bytes) {
+        jsonWriter.writeHex(bytes);
+    }
+
+    @Override
     public void writeRaw(char ch) {
         jsonWriter.writeRaw(ch);
     }

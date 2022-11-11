@@ -26,6 +26,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.util.Wrapper;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
@@ -44,7 +45,7 @@ import java.util.function.Function;
  */
 public class JSONObject
         extends JSON
-        implements Map<String, Object>, Cloneable, Serializable, InvocationHandler {
+        implements Map<String, Object>, Cloneable, Serializable, InvocationHandler, Wrapper {
     static ObjectReader<JSONArray> arrayReader;
     static ObjectReader<JSONObject> objectReader;
 
@@ -1025,5 +1026,13 @@ public class JSONObject
     @Override
     public String toString() {
         return com.alibaba.fastjson2.JSON.toJSONString(this, JSONWriter.Feature.ReferenceDetection);
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> iface) {
+        if (iface == Map.class) {
+            return (T) map;
+        }
+        return (T) this;
     }
 }

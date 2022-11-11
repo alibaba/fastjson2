@@ -155,6 +155,8 @@ public abstract class JSON {
             context.setDateFormat(defaultDateFormat);
         }
 
+        context.config(JSONReader.Feature.Base64StringAsByteArray);
+
         return context;
     }
 
@@ -578,6 +580,11 @@ public abstract class JSON {
                 DEFAULT_PARSER_FEATURE,
                 features
         );
+
+        if (config.fieldBase) {
+            context.config(JSONReader.Feature.FieldBased);
+        }
+
         JSONReader jsonReader = JSONReader.of(str, context);
 
         try {
@@ -1153,6 +1160,8 @@ public abstract class JSON {
         if (defaultTimeZone != null && defaultTimeZone != DEFAULT_TIME_ZONE) {
             context.setZoneId(defaultTimeZone.toZoneId());
         }
+
+        context.config(JSONWriter.Feature.WriteByteArrayAsBase64);
 
         return context;
     }

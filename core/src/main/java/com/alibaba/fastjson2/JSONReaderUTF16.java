@@ -91,6 +91,50 @@ final class JSONReaderUTF16
         }
     }
 
+    protected byte[] readHex() {
+        next();
+        if (ch != '\'') {
+            throw new JSONException("illegal state. " + ch);
+        }
+        int start = offset;
+        offset++;
+
+        for (; ; ) {
+            ch = chars[offset++];
+            if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F')) {
+                // continue;
+            } else if (ch == '\'') {
+                ch = chars[offset++];
+                break;
+            } else {
+                throw new JSONException("illegal state. " + ch);
+            }
+        }
+
+        int len = offset - start - 2;
+        if (len == 0) {
+            return new byte[0];
+        }
+
+        if (len % 2 != 0) {
+            throw new JSONException("illegal state. " + len);
+        }
+
+        byte[] bytes = new byte[len / 2];
+        for (int i = 0; i < bytes.length; ++i) {
+            char c0 = chars[start + i * 2];
+            char c1 = chars[start + i * 2 + 1];
+
+            int b0 = c0 - (c0 <= 57 ? 48 : 55);
+            int b1 = c1 - (c1 <= 57 ? 48 : 55);
+            bytes[i] = (byte) ((b0 << 4) | b1);
+        }
+
+        nextIfMatch(',');
+
+        return bytes;
+    }
+
     @Override
     public boolean isReference() {
         if (ch != '{') {

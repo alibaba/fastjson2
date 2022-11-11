@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 
@@ -38,7 +39,17 @@ final class ObjectReaderImplCurrency
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        String strVal = jsonReader.readString();
+        String strVal;
+        if (jsonReader.isObject()) {
+            JSONObject jsonObject = new JSONObject();
+            jsonReader.readObject(jsonObject);
+            strVal = jsonObject.getString("currency");
+            if (strVal == null) {
+                strVal = jsonObject.getString("currencyCode");
+            }
+        } else {
+            strVal = jsonReader.readString();
+        }
         if (strVal == null || strVal.isEmpty()) {
             return null;
         }

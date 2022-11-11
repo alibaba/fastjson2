@@ -209,7 +209,11 @@ public abstract class JSONReader
                     if (resolvedObject instanceof List) {
                         int index = (Integer) resolvedName;
                         List list = (List) resolvedObject;
-                        list.set(index, fieldValue);
+                        if (index == list.size()) {
+                            list.add(fieldValue);
+                        } else {
+                            list.set(index, fieldValue);
+                        }
                         continue;
                     }
 
@@ -477,7 +481,13 @@ public abstract class JSONReader
         return false;
     }
 
+    protected abstract byte[] readHex();
+
     public byte[] readBinary() {
+        if (ch == 'x') {
+            return readHex();
+        }
+
         if (isString()) {
             String str = readString();
             if (str.isEmpty()) {
@@ -1407,6 +1417,13 @@ public abstract class JSONReader
             }
         }
 
+        Map map;
+        if (object instanceof Wrapper) {
+            map = ((Wrapper) object).unwrap(Map.class);
+        } else {
+            map = object;
+        }
+
         for_:
         for (int i = 0; ; ++i) {
             if (ch == '/') {
@@ -1507,7 +1524,8 @@ public abstract class JSONReader
                 default:
                     throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
             }
-            Object origin = object.put(name, value);
+
+            Object origin = map.put(name, value);
             if (origin != null) {
                 long contextFeatures = features | context.getFeatures();
                 if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
