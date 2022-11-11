@@ -24,4 +24,8 @@ public interface JSONLexer {
     void nextToken();
 
     void nextToken(int expect);
+
+    char getCurrent();
+
+    boolean isEOF();
 }

@@ -9,6 +9,8 @@ public class JSONScanner
     private final JSONReader reader;
     private boolean orderedField;
 
+    private String strVal;
+
     public JSONScanner(JSONReader reader) {
         this.reader = reader;
     }
@@ -30,8 +32,9 @@ public class JSONScanner
         return orderedField;
     }
 
+    @Override
     public String stringVal() {
-        return reader.getString();
+        return strVal;
     }
 
     public void config(Feature feature, boolean state) {
@@ -86,6 +89,7 @@ public class JSONScanner
         context.config(rawFeature, state);
     }
 
+    @Override
     public boolean isBlankInput() {
         return reader.isEnd();
     }
@@ -101,6 +105,7 @@ public class JSONScanner
     }
 
     public final void nextToken() {
+        strVal = null;
         char ch = reader.current();
         switch (ch) {
             case '[':
@@ -109,7 +114,32 @@ public class JSONScanner
             case '}':
             case ':':
                 reader.next();
-                break;
+                return;
+            case '"':
+            case '\'':
+                strVal = reader.readString();
+                return;
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+            case '-':
+            case '+':
+                reader.readNumber();
+                return;
+            case 't':
+            case 'f':
+                reader.readBoolValue();
+                return;
+            case 'n':
+                reader.readNull();
+                return;
             default:
                 break;
         }
@@ -121,7 +151,14 @@ public class JSONScanner
         throw new JSONException("not support operation");
     }
 
+    @Override
+    public char getCurrent() {
+        return reader.current();
+    }
+
+    @Override
     public final void nextToken(int expect) {
+        strVal = null;
         boolean match = true;
         switch (expect) {
             case JSONToken.COLON:
@@ -152,5 +189,10 @@ public class JSONScanner
         if (!match) {
             throw new JSONException("not support operation");
         }
+    }
+
+    @Override
+    public boolean isEOF() {
+        return reader.isEnd();
     }
 }

@@ -2113,7 +2113,18 @@ public abstract class BeanUtils {
                 case "ignores": {
                     String[] fields = (String[]) result;
                     if (fields.length != 0) {
-                        beanInfo.ignores = fields;
+                        if (beanInfo.ignores == null) {
+                            beanInfo.ignores = fields;
+                        } else {
+                            LinkedHashSet<String> ignoresSet = new LinkedHashSet<>();
+                            for (String ignore : beanInfo.ignores) {
+                                ignoresSet.add(ignore);
+                            }
+                            for (String ignore : fields) {
+                                ignoresSet.add(ignore);
+                            }
+                            beanInfo.ignores = ignoresSet.toArray(new String[ignoresSet.size()]);
+                        }
                     }
                     break;
                 }
