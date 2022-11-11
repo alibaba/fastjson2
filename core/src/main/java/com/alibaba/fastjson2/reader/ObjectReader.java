@@ -107,13 +107,13 @@ public interface ObjectReader<T> {
                     typedFieldValue = ((JSONObject) fieldValue).to(fieldType);
                 } else if (fieldValue instanceof JSONArray) {
                     typedFieldValue = ((JSONArray) fieldValue).to(fieldType);
-                } else if (!fieldClass.isInstance(fieldValue) && fieldReader.format == null) {
-                    typedFieldValue = TypeUtils.cast(fieldValue, fieldClass);
+                } else if (features == 0 && !fieldClass.isInstance(fieldValue) && fieldReader.format == null) {
+                    typedFieldValue = TypeUtils.cast(fieldValue, fieldClass, provider);
                 } else {
                     String fieldValueJSONString = JSON.toJSONString(fieldValue);
                     try (JSONReader jsonReader = JSONReader.of(fieldValueJSONString)) {
                         ObjectReader fieldObjectReader = fieldReader.getObjectReader(jsonReader);
-                        typedFieldValue = fieldObjectReader.readObject(jsonReader, null, entry.getKey(), 0);
+                        typedFieldValue = fieldObjectReader.readObject(jsonReader, null, entry.getKey(), features);
                     }
                 }
             }
