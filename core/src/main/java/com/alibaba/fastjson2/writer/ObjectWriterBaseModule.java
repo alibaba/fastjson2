@@ -822,6 +822,8 @@ public class ObjectWriterBaseModule
                 return null;
             case "org.javamoney.moneta.internal.JDKCurrencyAdapter":
                 return ObjectWriterImplToString.INSTANCE;
+            case "com.fasterxml.jackson.databind.node.ObjectNode":
+                return ObjectWriterImplToString.DIRECT;
             case "org.javamoney.moneta.Money":
                 return MoneySupport.createMonetaryAmountWriter();
             case "org.javamoney.moneta.spi.DefaultNumberValue":
