@@ -15,15 +15,18 @@ public class DefaultJSONParser
     private final JSONReader reader;
     private final ParserConfig config;
     private final JSONScanner lexer;
+    private Object input;
 
     public DefaultJSONParser(String text) {
         this(JSONReader.of(text), ParserConfig.global);
+        this.input = text;
     }
 
     public DefaultJSONParser(final Object input, final JSONLexer lexer, final ParserConfig config) {
         this.lexer = (JSONScanner) lexer;
         this.reader = lexer.getReader();
         this.config = config;
+        this.input = input;
     }
 
     public ParserConfig getConfig() {
@@ -184,5 +187,16 @@ public class DefaultJSONParser
     @Override
     public void close() {
         this.reader.close();
+    }
+
+    public String getInput() {
+        if (input instanceof char[]) {
+            return new String((char[]) input);
+        }
+        return input.toString();
+    }
+
+    public boolean isEnabled(Feature feature) {
+        return lexer.isEnabled(feature);
     }
 }

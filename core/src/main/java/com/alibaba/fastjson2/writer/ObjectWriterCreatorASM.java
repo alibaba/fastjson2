@@ -1858,7 +1858,10 @@ public class ObjectWriterCreatorASM
             WRITE_NULL_METHOD = "writeNumberNull";
         } else if (fieldClass == Boolean.class) {
             WRITE_NULL_METHOD = "writeBooleanNull";
-        } else if (fieldClass == String.class) {
+        } else if (fieldClass == String.class
+                || fieldClass == Appendable.class
+                || fieldClass == StringBuffer.class
+                || fieldClass == StringBuilder.class) {
             WRITE_NULL_METHOD = "writeStringNull";
         } else {
             WRITE_NULL_METHOD = "writeNull";

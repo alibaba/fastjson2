@@ -58,6 +58,10 @@ class ObjectReaderImplInt8Array
             return Arrays.copyOf(values, size);
         }
 
+        if (jsonReader.current() == 'x') {
+            return jsonReader.readBinary();
+        }
+
         if (jsonReader.isString()) {
             String strVal = jsonReader.readString();
             if (strVal.isEmpty()) {
@@ -68,7 +72,7 @@ class ObjectReaderImplInt8Array
                 return Base64.getDecoder().decode(strVal);
             }
 
-            if ("gzip,base64".equals(format)) {
+            if ("gzip,base64".equals(format) || "gzip".equals(format)) {
                 byte[] bytes = Base64.getDecoder().decode(strVal);
 
                 GZIPInputStream gzipIn = null;

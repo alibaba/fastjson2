@@ -8,6 +8,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.UseSingleQuotes;
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
+
 abstract class FieldWriterInt32<T>
         extends FieldWriter<T> {
     volatile byte[][] utf8ValueCache;
@@ -26,7 +29,7 @@ abstract class FieldWriterInt32<T>
             Method method
     ) {
         super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
-        toString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0
+        toString = (features & WriteNonStringValueAsString.mask) != 0
                 || "string".equals(format);
     }
 
@@ -38,7 +41,8 @@ abstract class FieldWriterInt32<T>
             return;
         }
 
-        boolean writeNonStringValueAsString = (jsonWriter.getFeatures() & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        long jsonWriterFeatures = jsonWriter.getFeatures();
+        boolean writeNonStringValueAsString = (jsonWriterFeatures & (WriteNonStringValueAsString.mask | UseSingleQuotes.mask)) != 0;
 
         if (jsonWriter.isUTF8() && !writeNonStringValueAsString) {
             if (value >= -1 && value < 1039) {

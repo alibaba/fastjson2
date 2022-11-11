@@ -475,7 +475,17 @@ public final class ObjectReaderImplList
             if (itemType == String.class) {
                 item = jsonReader.readString();
             } else if (itemObjectReader != null) {
-                item = itemObjectReader.readObject(jsonReader, itemType, i, 0);
+                if (jsonReader.isReference()) {
+                    String reference = jsonReader.readReference();
+                    if ("..".equals(reference)) {
+                        item = this;
+                    } else {
+                        jsonReader.addResolveTask(list, i, JSONPath.of(reference));
+                        continue;
+                    }
+                } else {
+                    item = itemObjectReader.readObject(jsonReader, itemType, i, 0);
+                }
             } else {
                 throw new JSONException(jsonReader.info("TODO : " + itemType));
             }

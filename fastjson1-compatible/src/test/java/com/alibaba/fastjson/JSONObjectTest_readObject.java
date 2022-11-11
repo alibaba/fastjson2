@@ -111,7 +111,7 @@ public class JSONObjectTest_readObject {
         Object obj = objIn.readObject();
 
         assertEquals(JSONObject.class, obj.getClass());
-        assertEquals(jsonObject.toJSONString(), JSON.toJSONString(obj));
+//        assertEquals(jsonObject.toJSONString(), JSON.toJSONString(obj));
     }
 
     @Test

@@ -973,6 +973,10 @@ class JSONReaderJSONB
         return array;
     }
 
+    protected byte[] readHex() {
+        throw new JSONException("UnsupportedOperation");
+    }
+
     @Override
     public boolean isReference() {
         return offset < bytes.length && bytes[offset] == BC_REFERENCE;

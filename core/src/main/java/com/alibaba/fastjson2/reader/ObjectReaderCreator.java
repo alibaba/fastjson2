@@ -1430,7 +1430,7 @@ public class ObjectReaderCreator {
             fieldClassResolved = TypeUtils.getMapping(fieldTypeResolved);
         }
 
-        if (fieldClass == List.class) {
+        if (fieldClass == List.class || fieldClass == ArrayList.class) {
             if (fieldTypeResolved instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) fieldTypeResolved;
                 Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();

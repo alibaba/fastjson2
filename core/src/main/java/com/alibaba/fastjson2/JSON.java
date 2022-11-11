@@ -2579,7 +2579,7 @@ public interface JSON {
 
         try (JSONReader jsonReader = JSONReader.of(text)) {
             jsonReader.skipValue();
-            return jsonReader.isEnd();
+            return jsonReader.isEnd() && !jsonReader.comma;
         } catch (JSONException error) {
             return false;
         }

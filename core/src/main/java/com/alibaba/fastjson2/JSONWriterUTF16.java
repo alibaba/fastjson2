@@ -614,10 +614,15 @@ class JSONWriterUTF16
 
     @Override
     public void writeBase64(byte[] bytes) {
+        if (bytes == null) {
+            writeArrayNull();
+            return;
+        }
+
         int charsLen = ((bytes.length - 1) / 3 + 1) << 2; // base64 character count
 
         ensureCapacity(off + charsLen + 2);
-        chars[off++] = '"';
+        chars[off++] = quote;
 
         int eLen = (bytes.length / 3) * 3; // Length of even 24-bits.
 
@@ -645,7 +650,34 @@ class JSONWriterUTF16
             chars[off++] = '=';
         }
 
-        chars[off++] = '"';
+        chars[off++] = quote;
+    }
+
+    @Override
+    public void writeHex(byte[] bytes) {
+        if (bytes == null) {
+            writeNull();
+            return;
+        }
+
+        int charsLen = bytes.length * 2 + 3;
+
+        ensureCapacity(off + charsLen + 2);
+        chars[off++] = 'x';
+        chars[off++] = '\'';
+
+        for (int i = 0; i < bytes.length; ++i) {
+            byte b = bytes[i];
+
+            int a = b & 0xFF;
+            int b0 = a >> 4;
+            int b1 = a & 0xf;
+
+            chars[off++] = (char) (b0 + (b0 < 10 ? 48 : 55));
+            chars[off++] = (char) (b1 + (b1 < 10 ? 48 : 55));
+        }
+
+        chars[off++] = '\'';
     }
 
     @Override
@@ -1228,7 +1260,7 @@ class JSONWriterUTF16
     @Override
     public void writeFloat(float[] values) {
         if (values == null) {
-            writeNull();
+            writeArrayNull();
             return;
         }
 

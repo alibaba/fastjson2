@@ -103,4 +103,9 @@ public class SerializeConfig {
 
         return new JavaBeanSerializer(objectWriter);
     }
+
+    public final ObjectSerializer createJavaBeanSerializer(Class<?> clazz) {
+        ObjectWriter objectWriter = provider.getCreator().createObjectWriter(clazz);
+        return new JavaBeanSerializer(objectWriter);
+    }
 }
