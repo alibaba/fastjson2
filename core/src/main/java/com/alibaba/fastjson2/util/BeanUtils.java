@@ -1036,6 +1036,7 @@ public abstract class BeanUtils {
         }
 
         switch (namingStrategy) {
+            case "NoChange":
             case "NeverUseThisValueExceptDefaultValue":
             case "CamelCase": {
                 char c0 = methodName.charAt(0);
