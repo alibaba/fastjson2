@@ -562,6 +562,11 @@ public abstract class JSONReader
 
     public long getInt64Value() {
         switch (valueType) {
+            case JSON_TYPE_INT:
+                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                    return negative ? -mag3 : mag3;
+                }
+                return getNumber().longValue();
             case JSON_TYPE_DEC:
                 return getNumber().longValue();
             case JSON_TYPE_BOOL:
