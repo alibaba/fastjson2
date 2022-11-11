@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -96,11 +97,45 @@ public class TypeUtilsTest {
         );
     }
 
+    @Test
+    public void test_for_computeGetters() {
+        List<FieldInfo> fieldInfoList = TypeUtils.computeGetters(Bean.class, null);
+        assertEquals(1, fieldInfoList.size());
+        assertEquals("id", fieldInfoList.get(0).name);
+    }
+
     public static class Bean {
         public int id;
 
         public int getId() {
             return id;
         }
+    }
+
+    @Test
+    public void test_for_computeGetters1() {
+        List<FieldInfo> fieldInfoList = TypeUtils.computeGetters(Bean1.class, null);
+        assertEquals(2, fieldInfoList.size());
+        assertEquals("ID", fieldInfoList.get(0).name);
+        assertEquals("values", fieldInfoList.get(1).name);
+    }
+
+    public static class Bean1<T> {
+        @JSONField(name = "ID")
+        public int getId() {
+            return 0;
+        }
+
+        public List<T> getValues() {
+            return null;
+        }
+    }
+
+    @Test
+    public void test() throws Exception {
+        assertFalse(TypeUtils.isKotlin(Bean1.class));
+        assertEquals(0, TypeUtils.getKoltinConstructorParameters(Bean1.class).length);
+        assertFalse(TypeUtils.isKotlinIgnore(Bean1.class, "aa"));
+        assertEquals(0, TypeUtils.getParameterAnnotations(Bean1.class.getConstructor()).length);
     }
 }
