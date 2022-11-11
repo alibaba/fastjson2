@@ -47,8 +47,10 @@ final class ObjectReaderImplClass
         }
 
         String className = jsonReader.getString();
-        if (!context.isEnabled(JSONReader.Feature.SupportClassForName)) {
-            throw new JSONException(jsonReader.info("not support ClassForName : " + className + ", you can config 'JSONReader.Feature.SupportClassForName'"));
+        boolean classForName = ((context.getFeatures() | features) & JSONReader.Feature.SupportClassForName.mask) != 0;
+        if (!classForName) {
+            String msg = jsonReader.info("not support ClassForName : " + className + ", you can config 'JSONReader.Feature.SupportClassForName'");
+            throw new JSONException(msg);
         }
 
         Class mappingClass = TypeUtils.getMapping(className);
