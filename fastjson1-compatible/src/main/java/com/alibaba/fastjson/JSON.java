@@ -1660,6 +1660,10 @@ public abstract class JSON {
         }
     }
 
+    public static String toJSONStringZ(Object object, SerializeConfig mapping, SerializerFeature... features) {
+        return toJSONString(object, mapping, new SerializeFilter[0], null, 0, features);
+    }
+
     public static String toJSONString(
             Object object,
             SerializeConfig config,

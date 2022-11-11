@@ -19,6 +19,9 @@ final class ObjectWriterImplDate
     static final char[] PREFIX_CHARS = "new Date(".toCharArray();
     static final byte[] PREFIX_BYTES = "new Date(".getBytes(StandardCharsets.UTF_8);
 
+    static final char[] PREFIX_CHARS_SQL = "{\"@type\":\"java.sql.Date\",\"val\":".toCharArray();
+    static final byte[] PREFIX_BYTES_SQL = "{\"@type\":\"java.sql.Date\",\"val\":".getBytes(StandardCharsets.UTF_8);
+
     public ObjectWriterImplDate(String format, Locale locale) {
         super(format, locale);
     }
@@ -47,13 +50,28 @@ final class ObjectWriterImplDate
         long millis = date.getTime();
 
         if (jsonWriter.isWriteTypeInfo(object, fieldType)) {
+            char end = ')';
             if (jsonWriter.isUTF16()) {
-                jsonWriter.writeRaw(PREFIX_CHARS);
+                char[] prefix;
+                if ("java.sql.Date".equals(date.getClass().getName())) {
+                    prefix = PREFIX_CHARS_SQL;
+                    end = '}';
+                } else {
+                    prefix = PREFIX_CHARS;
+                }
+                jsonWriter.writeRaw(prefix);
             } else {
-                jsonWriter.writeRaw(PREFIX_BYTES);
+                byte[] prefix;
+                if ("java.sql.Date".equals(date.getClass().getName())) {
+                    prefix = PREFIX_BYTES_SQL;
+                    end = '}';
+                } else {
+                    prefix = PREFIX_BYTES;
+                }
+                jsonWriter.writeRaw(prefix);
             }
             jsonWriter.writeInt64(millis);
-            jsonWriter.writeRaw(')');
+            jsonWriter.writeRaw(end);
             return;
         }
 

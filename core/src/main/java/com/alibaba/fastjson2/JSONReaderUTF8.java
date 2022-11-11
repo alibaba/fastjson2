@@ -7147,7 +7147,7 @@ class JSONReaderUTF8
             }
             ch = (char) bytes[offset];
         }
-        if (offset == offset4 && ch != '(') {
+        if (offset == offset4 && ch != '(' && ch != ':') {
             return false;
         }
 

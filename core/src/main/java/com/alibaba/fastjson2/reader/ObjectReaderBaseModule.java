@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
 import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonJsonIgnore;
@@ -1328,6 +1329,10 @@ public class ObjectReaderBaseModule
                             throw new JSONException("read URL error", ex);
                         }
                     });
+        }
+
+        if (type == Pattern.class) {
+            return new ObjectReaderImplFromString<Pattern>(Pattern.class, e -> Pattern.compile(e));
         }
 
         if (type == Class.class) {

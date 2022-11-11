@@ -265,7 +265,7 @@ public final class JSONReaderStr
             }
             ch = str.charAt(offset);
         }
-        if (offset == offset4 && ch != '(') {
+        if (offset == offset4 && ch != '(' && ch != ':') {
             return false;
         }
 

@@ -2954,9 +2954,25 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass.isEnum()) {
+            BeanInfo beanInfo = new BeanInfo();
+            for (ObjectWriterModule module : provider.modules) {
+                ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
+                if (annotationProcessor != null) {
+                    annotationProcessor.getBeanInfo(beanInfo, fieldClass);
+                }
+            }
+
+            boolean writeEnumAsJavaBean = beanInfo.writeEnumAsJavaBean;
+            if (!writeEnumAsJavaBean) {
+                ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                if (objectWriter != null && !(objectWriter instanceof ObjectWriterImplEnum)) {
+                    writeEnumAsJavaBean = true;
+                }
+            }
+
             Member enumValueField = BeanUtils.getEnumValueField(fieldClass, provider);
 
-            if (enumValueField == null) {
+            if (enumValueField == null && !writeEnumAsJavaBean) {
                 return new FIeldWriterEnumField(fieldName, ordinal, features, format, label, fieldClass, field);
             }
         }
