@@ -3,7 +3,6 @@ package com.alibaba.fastjson.util;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.annotation.JSONField;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.Map;
 
@@ -28,7 +27,7 @@ public class FieldInfo
     public final boolean fieldAccess;
     public final boolean fieldTransient;
 
-    public final char[] names;
+    public final char[] nameChars;
 
     public final boolean isEnum;
     public final boolean jsonDirect;
@@ -40,84 +39,36 @@ public class FieldInfo
 
     public final long nameHashCode;
 
-    public FieldInfo(String name, //
-                     Class<?> declaringClass, //
-                     Class<?> fieldClass, //
-                     Type fieldType, //
-                     Field field, //
-                     int ordinal, //
-                     int serialzeFeatures, //
-                     int parserFeatures) {
-        if (ordinal < 0) {
-            ordinal = 0;
-        }
-
-        this.name = name;
-        this.declaringClass = declaringClass;
-        this.fieldClass = fieldClass;
-        this.fieldType = fieldType;
-        this.method = null;
-        this.field = field;
-        this.ordinal = ordinal;
-        this.serialzeFeatures = serialzeFeatures;
-        this.parserFeatures = parserFeatures;
-
-        isEnum = fieldClass.isEnum();
-
-        if (field != null) {
-            int modifiers = field.getModifiers();
-            fieldAccess = (modifiers & Modifier.PUBLIC) != 0 || method == null;
-            fieldTransient = Modifier.isTransient(modifiers);
-        } else {
-            fieldTransient = false;
-            fieldAccess = false;
-        }
-
-        names = genFieldNameChars();
-
-        if (field != null) {
-            TypeUtils.setAccessible(field);
-        }
-
-        this.label = "";
-        fieldAnnotation = field == null ? null : TypeUtils.getAnnotation(field, JSONField.class);
-        methodAnnotation = null;
-        this.getOnly = false;
-        this.jsonDirect = false;
-        this.unwrapped = false;
-        this.format = null;
-        this.alternateNames = new String[0];
-
-        nameHashCode = nameHashCode64(name, fieldAnnotation);
-    }
-
-    public FieldInfo(String name, //
-                     Method method, //
-                     Field field, //
-                     Class<?> clazz, //
-                     Type type, //
-                     int ordinal, //
-                     int serialzeFeatures, //
-                     int parserFeatures, //
-                     JSONField fieldAnnotation, //
-                     JSONField methodAnnotation, //
-                     String label) {
+    public FieldInfo(
+            String name,
+            Method method,
+            Field field,
+            Class<?> clazz,
+            Type type,
+            int ordinal,
+            int serialzeFeatures,
+            int parserFeatures,
+            JSONField fieldAnnotation,
+            JSONField methodAnnotation,
+            String label
+    ) {
         this(name, method, field, clazz, type, ordinal, serialzeFeatures, parserFeatures,
                 fieldAnnotation, methodAnnotation, label, null);
     }
 
-    public FieldInfo(String name, //
-                     Method method, //
-                     Field field, //
-                     Class<?> clazz, //
-                     Type type, //
-                     int ordinal, //
-                     int serialzeFeatures, //
-                     int parserFeatures, //
-                     JSONField fieldAnnotation, //
-                     JSONField methodAnnotation, //
-                     String label,
-                     Map<TypeVariable, Type> genericInfo) {
+    public FieldInfo(
+            String name,
+            Method method,
+            Field field,
+            Class<?> clazz,
+            Type type,
+            int ordinal,
+            int serialzeFeatures,
+            int parserFeatures,
+            JSONField fieldAnnotation,
+            JSONField methodAnnotation,
+            String label,
+            Map<TypeVariable, Type> genericInfo) {
         if (field != null) {
             String fieldName = field.getName();
             if (fieldName.equals(name)) {
@@ -176,7 +127,7 @@ public class FieldInfo
         }
         this.format = format;
 
-        names = genFieldNameChars();
+        nameChars = genFieldNameChars();
 
         if (method != null) {
             TypeUtils.setAccessible(method);
@@ -260,32 +211,12 @@ public class FieldInfo
         return name_chars;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends Annotation> T getAnnation(Class<T> annotationClass) {
-        if (annotationClass == JSONField.class) {
-            return (T) getAnnotation();
-        }
-
-        T annotatition = null;
-        if (method != null) {
-            annotatition = TypeUtils.getAnnotation(method, annotationClass);
-        }
-
-        if (annotatition == null && field != null) {
-            annotatition = TypeUtils.getAnnotation(field, annotationClass);
-        }
-
-        return annotatition;
-    }
-
-    public static Type getFieldType(final Class<?> clazz, final Type type, Type fieldType) {
-        return getFieldType(clazz, type, fieldType, null);
-    }
-
-    public static Type getFieldType(final Class<?> clazz,
-                                    final Type type,
-                                    Type fieldType,
-                                    Map<TypeVariable, Type> genericInfo) {
+    public static Type getFieldType(
+            final Class<?> clazz,
+            final Type type,
+            Type fieldType,
+            Map<TypeVariable, Type> genericInfo
+    ) {
         if (clazz == null || type == null) {
             return fieldType;
         }

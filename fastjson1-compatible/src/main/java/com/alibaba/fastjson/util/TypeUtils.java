@@ -691,6 +691,10 @@ public class TypeUtils {
         throw new JSONException("can not cast to byte[], value : " + value);
     }
 
+    public static List<FieldInfo> computeGetters(Class<?> clazz, Map<String, String> aliasMap) {
+        return computeGetters(clazz, aliasMap, true);
+    }
+
     public static List<FieldInfo> computeGetters(Class<?> clazz, Map<String, String> aliasMap, boolean sorted) {
         JSONType jsonType = TypeUtils.getAnnotation(clazz, JSONType.class);
         Map<String, Field> fieldCacheMap = new HashMap<String, Field>();
@@ -1243,7 +1247,7 @@ public class TypeUtils {
         return null;
     }
 
-    private static boolean isKotlinIgnore(Class clazz, String methodName) {
+    static boolean isKotlinIgnore(Class clazz, String methodName) {
         if (kotlinIgnores == null && !kotlinIgnores_error) {
             try {
                 Map<Class, String[]> map = new HashMap<Class, String[]>();

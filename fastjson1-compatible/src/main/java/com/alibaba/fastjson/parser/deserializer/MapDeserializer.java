@@ -36,4 +36,16 @@ public class MapDeserializer
     public static Map parseMap(DefaultJSONParser parser, Map<String, Object> map, Type valueType, Object fieldName) {
         return parseMap(parser, map, valueType, fieldName, 0);
     }
+
+    public static Object parseMap(
+            DefaultJSONParser parser,
+            Map<Object, Object> map,
+            Type keyType,
+            Type valueType,
+            Object fieldName
+    ) {
+        JSONReader jsonReader = parser.getRawReader();
+        jsonReader.read(map, keyType, valueType, 0L);
+        return map;
+    }
 }

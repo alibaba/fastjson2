@@ -1520,6 +1520,57 @@ public abstract class JSONReader
         nextIfMatch(',');
     }
 
+    public void read(Map object, Type keyType, Type valueType, long features) {
+        boolean match = nextIfMatch('{');
+        if (!match) {
+            throw new JSONException("illegal input， offset " + offset + ", char " + ch);
+        }
+
+        ObjectReader keyReader = context.getObjectReader(keyType);
+        ObjectReader valueReader = context.getObjectReader(valueType);
+
+        for_:
+        for (int i = 0; ; ++i) {
+            if (ch == '/') {
+                skipLineComment();
+            }
+
+            if (nextIfMatch('}')) {
+                break;
+            }
+
+            if (i != 0 && !comma) {
+                throw new JSONException(info());
+            }
+
+            Object name;
+
+            if (keyType == String.class) {
+                name = readFieldName();
+            } else {
+                name = keyReader.readObject(this, null, null, 0L);
+                nextIfMatch(':');
+            }
+
+            Object value = valueReader.readObject(this, null, null, 0L);
+            Object origin = object.put(name, value);
+            if (origin != null) {
+                long contextFeatures = features | context.getFeatures();
+                if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
+                    if (origin instanceof Collection) {
+                        ((Collection) origin).add(value);
+                        object.put(name, value);
+                    } else {
+                        JSONArray array = JSONArray.of(origin, value);
+                        object.put(name, array);
+                    }
+                }
+            }
+        }
+
+        nextIfMatch(',');
+    }
+
     public <T> T read(Class<T> type) {
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = context.provider.getObjectReader(type, fieldBased);

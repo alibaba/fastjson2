@@ -22,4 +22,6 @@ public interface JSONLexer {
     long longValue();
 
     void nextToken();
+
+    void nextToken(int expect);
 }
