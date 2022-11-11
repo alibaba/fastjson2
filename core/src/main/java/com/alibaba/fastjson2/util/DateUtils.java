@@ -44,6 +44,34 @@ public class DateUtils {
             millis = zdt.toInstant().toEpochMilli();
         } else if (IOUtils.isNumber(str)) {
             millis = Long.parseLong(str);
+
+            if (strlen == 8 && millis >= 19700101 && millis <= 21000101) {
+                int year = (int) millis / 10000;
+                int month = ((int) millis % 10000) / 100;
+                int dom = (int) millis % 100;
+
+                if (month >= 1 && month <= 12) {
+                    int max = 31;
+                    switch (month) {
+                        case 2:
+                            boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
+                            max = leapYear ? 29 : 28;
+                            break;
+                        case 4:
+                        case 6:
+                        case 9:
+                        case 11:
+                            max = 30;
+                            break;
+                    }
+                    if (dom <= max) {
+                        LocalDateTime ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+                        ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, DEFAULT_ZONE_ID, null);
+                        long seconds = zdt.toEpochSecond();
+                        millis = seconds * 1000L;
+                    }
+                }
+            }
         } else {
             char last = str.charAt(strlen - 1);
             ZoneId zoneId = last == 'Z' ? UTC : DEFAULT_ZONE_ID;
@@ -1734,6 +1762,37 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 19;
+        } else if (c4 == '-' && c7 == '-' && (c10 == ' ' && c11 == ' ') && c14 == ':' && c17 == ':' && len == 20) {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c12;
+            h1 = c13;
+
+            i0 = c15;
+            i1 = c16;
+
+            s0 = c18;
+            s1 = c19;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 20;
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && (len == 21 || c21 == '[' || c21 == '+' || c21 == '-' || c21 == 'Z')) {
             y0 = c0;
