@@ -239,4 +239,9 @@ public class SerializeWriter
 
         return false;
     }
+
+    public SerializeWriter append(char c) {
+        raw.writeRaw(c);
+        return this;
+    }
 }

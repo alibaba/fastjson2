@@ -63,6 +63,10 @@ public class ObjectReaderImplValue<I, T>
 
         I value = (I) valueReader.readObject(jsonReader, fieldType, fieldName, features | this.features);
 
+        if (value == null) {
+            return null;
+        }
+
         if (schema != null) {
             schema.validate(value);
         }

@@ -833,6 +833,7 @@ public class ObjectWriterBaseModule
             case "java.net.Inet6Address":
             case "java.net.InetSocketAddress":
             case "java.text.SimpleDateFormat":
+            case "java.util.regex.Pattern":
                 return ObjectWriterMisc.INSTANCE;
             case "org.apache.commons.lang3.tuple.Pair":
             case "org.apache.commons.lang3.tuple.MutablePair":

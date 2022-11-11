@@ -151,7 +151,15 @@ public class ObjectReaderImplDate
                 millis += nanos / 1000_000;
             }
         } else {
-            millis = jsonReader.readMillisFromString();
+            if (jsonReader.isTypeRedirect() && jsonReader.nextIfMatchIdent('"', 'v', 'a', 'l', '"')) {
+                jsonReader.nextIfMatch(':');
+                millis = jsonReader.readInt64Value();
+                jsonReader.nextIfMatch('}');
+                jsonReader.setTypeRedirect(false);
+            } else {
+                millis = jsonReader.readMillisFromString();
+            }
+
             if (millis == 0 && jsonReader.wasNull()) {
                 return null;
             }

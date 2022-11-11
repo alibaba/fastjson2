@@ -12,7 +12,8 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 public class SerializeConfig {
-    public static SerializeConfig global = new SerializeConfig(null);
+    public static final SerializeConfig global = new SerializeConfig(null);
+    public static final SerializeConfig globalInstance = global;
 
     public final boolean fieldBased;
     public PropertyNamingStrategy propertyNamingStrategy;
@@ -77,7 +78,7 @@ public class SerializeConfig {
     }
 
     public void addFilter(Class<?> clazz, SerializeFilter filter) {
-        ObjectWriter objectWriter = provider.getObjectWriter(clazz);
+        ObjectWriter objectWriter = getProvider().getObjectWriter(clazz);
         objectWriter.setFilter(filter);
     }
 
@@ -87,7 +88,7 @@ public class SerializeConfig {
     }
 
     public ObjectSerializer getObjectWriter(Class<?> clazz) {
-        ObjectWriter objectWriter = provider.getObjectWriter(clazz);
+        ObjectWriter objectWriter = getProvider().getObjectWriter(clazz);
         if (objectWriter instanceof ObjectSerializer) {
             return (ObjectSerializer) objectWriter;
         }
@@ -96,7 +97,7 @@ public class SerializeConfig {
     }
 
     public final ObjectSerializer get(Type type) {
-        ObjectWriter objectWriter = provider.getObjectWriter(type, TypeUtils.getClass(type));
+        ObjectWriter objectWriter = getProvider().getObjectWriter(type, TypeUtils.getClass(type));
         if (objectWriter instanceof ObjectSerializer) {
             return (ObjectSerializer) objectWriter;
         }
@@ -105,7 +106,13 @@ public class SerializeConfig {
     }
 
     public final ObjectSerializer createJavaBeanSerializer(Class<?> clazz) {
-        ObjectWriter objectWriter = provider.getCreator().createObjectWriter(clazz);
+        ObjectWriter objectWriter = getProvider().getCreator().createObjectWriter(clazz);
         return new JavaBeanSerializer(objectWriter);
+    }
+
+    public void configEnumAsJavaBean(Class<? extends Enum>... enumClasses) {
+        for (Class<? extends Enum> enumClass : enumClasses) {
+            put(enumClass, createJavaBeanSerializer(enumClass));
+        }
     }
 }

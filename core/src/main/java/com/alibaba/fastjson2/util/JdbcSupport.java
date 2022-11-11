@@ -389,15 +389,16 @@ public class JdbcSupport {
             ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, zoneId);
             int offsetSeconds = zdt.getOffset().getTotalSeconds();
 
-            if (formatISO8601 || ctx.isDateFormatISO8601()) {
+            if ((formatISO8601 || ctx.isDateFormatISO8601()) && (zdt.getNano() % 1000_000 == 0)) {
                 int year = zdt.getYear();
                 int month = zdt.getMonthValue();
                 int dayOfMonth = zdt.getDayOfMonth();
                 int hour = zdt.getHour();
                 int minute = zdt.getMinute();
                 int second = zdt.getSecond();
-                int nano = zdt.getNano() / 1000_000;
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds, true);
+                int nano = zdt.getNano();
+                int millis = nano / 1000_000;
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, true);
                 return;
             }
 

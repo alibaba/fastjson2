@@ -720,7 +720,7 @@ public abstract class JSONWriter
 
     public void writeInt16(short[] value) {
         if (value == null) {
-            writeNull();
+            writeArrayNull();
             return;
         }
         startArray();

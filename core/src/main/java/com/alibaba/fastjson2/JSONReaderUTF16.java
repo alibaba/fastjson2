@@ -654,7 +654,7 @@ final class JSONReaderUTF16
             ch = chars[offset];
         }
 
-        if (offset == offset4 && ch != '(') {
+        if (offset == offset4 && ch != '(' && ch != ':') {
             return false;
         }
 

@@ -267,18 +267,18 @@ public abstract class FieldReader<T>
         }
 
         if (this.method != null && o.method != null) {
-            Class<?> thisFieldDeclaringClass = this.method.getDeclaringClass();
-            Class<?> otherFieldDeclaringClass = o.method.getDeclaringClass();
+            Class<?> thisMethodDeclaringClass = this.method.getDeclaringClass();
+            Class<?> otherMethodDeclaringClass = o.method.getDeclaringClass();
 
-            for (Class superClass = thisFieldDeclaringClass.getSuperclass(); superClass != null && superClass != Object.class; superClass = superClass.getSuperclass()) {
-                if (superClass == otherFieldDeclaringClass) {
-                    return 1;
+            for (Class superClass = thisMethodDeclaringClass.getSuperclass(); superClass != null && superClass != Object.class; superClass = superClass.getSuperclass()) {
+                if (superClass == otherMethodDeclaringClass) {
+                    return -1;
                 }
             }
 
-            for (Class superClass = otherFieldDeclaringClass.getSuperclass(); superClass != null && superClass != Object.class; superClass = superClass.getSuperclass()) {
-                if (superClass == thisFieldDeclaringClass) {
-                    return -1;
+            for (Class superClass = otherMethodDeclaringClass.getSuperclass(); superClass != null && superClass != Object.class; superClass = superClass.getSuperclass()) {
+                if (superClass == thisMethodDeclaringClass) {
+                    return 1;
                 }
             }
 

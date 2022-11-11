@@ -24,6 +24,8 @@ public class ParserConfig {
 
     private ObjectReaderProvider provider;
     public final boolean fieldBase;
+    private boolean asmEnable;
+    private boolean autoTypeSupport;
 
     public ParserConfig() {
         this.fieldBase = false;
@@ -35,6 +37,14 @@ public class ParserConfig {
 
     public ParserConfig(boolean fieldBase) {
         this.fieldBase = fieldBase;
+    }
+
+    public boolean isAsmEnable() {
+        return asmEnable;
+    }
+
+    public void setAsmEnable(boolean asmEnable) {
+        this.asmEnable = asmEnable;
     }
 
     public ObjectReaderProvider getProvider() {
@@ -64,13 +74,11 @@ public class ParserConfig {
     }
 
     public boolean isAutoTypeSupport() {
-        return false;
+        return autoTypeSupport;
     }
 
     public void setAutoTypeSupport(boolean autoTypeSupport) {
-        if (autoTypeSupport) {
-            throw new JSONException("not support operation");
-        }
+        this.autoTypeSupport = autoTypeSupport;
     }
 
     public void addAccept(String name) {
