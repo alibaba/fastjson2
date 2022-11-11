@@ -72,8 +72,16 @@ public class JdbcSupport {
                     CLASS_CLOB = objectClass;
                 }
                 return true;
+            case "java.sql.NClob":
+                return true;
             default:
-                if (objectClassName.startsWith("oracle.sql.") || objectClassName.startsWith("oracle.jdbc.")) {
+                if (objectClassName.startsWith("oracle.sql.")
+                        || objectClassName.startsWith("oracle.jdbc.")
+                        || objectClassName.startsWith("org.h2.jdbc.")
+                        || objectClassName.startsWith("com.mysql.cj.jdbc.")
+                        || objectClassName.startsWith("org.mariadb.jdbc.")
+                        || objectClassName.startsWith("org.postgresql.jdbc.")
+                ) {
                     if (CLASS_CLOB == null && !CLASS_CLOB_ERROR) {
                         try {
                             CLASS_CLOB = Class.forName("java.sql.Clob");

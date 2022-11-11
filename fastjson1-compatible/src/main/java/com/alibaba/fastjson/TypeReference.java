@@ -124,4 +124,14 @@ public class TypeReference<T> {
     public Type getType() {
         return type;
     }
+
+    public static Type intern(ParameterizedTypeImpl type) {
+        Type cachedType = classTypeCache.get(type);
+        if (cachedType == null) {
+            classTypeCache.putIfAbsent(type, type);
+            cachedType = classTypeCache.get(type);
+        }
+
+        return cachedType;
+    }
 }
