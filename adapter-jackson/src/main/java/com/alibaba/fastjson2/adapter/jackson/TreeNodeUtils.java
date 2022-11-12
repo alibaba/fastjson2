@@ -1,0 +1,43 @@
+package com.alibaba.fastjson2.adapter.jackson;
+
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.*;
+
+import java.math.BigDecimal;
+
+public class TreeNodeUtils {
+    public static JsonNode as(Object value) {
+        if (value instanceof String) {
+            return new TextNode((String) value);
+        }
+
+        if (value instanceof Long) {
+            return new LongNode((Long) value);
+        }
+
+        if (value instanceof Integer) {
+            return new IntegerNode((Integer) value);
+        }
+
+        if (value instanceof BigDecimal) {
+            return new DecimalNode((BigDecimal) value);
+        }
+
+        if (value instanceof Double) {
+            return new DoubleNode((Double) value);
+        }
+
+        if (value instanceof JSONObject) {
+            return new ObjectNode((JSONObject) value);
+        }
+
+        if (value instanceof JSONArray) {
+            return new ArrayNode((JSONArray) value);
+        }
+
+        throw new JSONException("TODO");
+    }
+}
