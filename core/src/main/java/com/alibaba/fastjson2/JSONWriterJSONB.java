@@ -1902,6 +1902,11 @@ final class JSONWriterJSONB
     }
 
     @Override
+    public void writeHex(byte[] bytes) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
     public void writeRaw(char ch) {
         throw new JSONException("UnsupportedOperation");
     }
@@ -1976,6 +1981,11 @@ final class JSONWriterJSONB
     @Override
     public byte[] getBytes() {
         return Arrays.copyOf(bytes, off);
+    }
+
+    @Override
+    public byte[] getBytes(Charset charset) {
+        throw new JSONException("not support operator");
     }
 
     @Override
