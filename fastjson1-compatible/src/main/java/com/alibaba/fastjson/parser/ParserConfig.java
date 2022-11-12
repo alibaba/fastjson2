@@ -82,7 +82,7 @@ public class ParserConfig {
     }
 
     public void addAccept(String name) {
-        provider.addAutoTypeAccept(name);
+        getProvider().addAutoTypeAccept(name);
     }
 
     public void addDeny(String name) {

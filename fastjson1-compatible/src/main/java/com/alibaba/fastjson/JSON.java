@@ -855,7 +855,7 @@ public abstract class JSON {
             if (jsonReader.isObject() && !jsonReader.isSupportAutoType(0)) {
                 return jsonReader.read(JSONObject.class);
             }
-            return jsonReader.readAny();
+            return jsonReader.read(Object.class);
         } catch (Exception ex) {
             throw new JSONException(ex.getMessage(), ex);
         }
