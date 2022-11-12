@@ -1863,8 +1863,18 @@ class JSONWriterUTF16
     }
 
     @Override
-    public int flushTo(OutputStream to, Charset charset) throws IOException {
-        throw new JSONException("UnsupportedOperation");
+    public int flushTo(OutputStream out, Charset charset) throws IOException {
+        if (off == 0) {
+            return 0;
+        }
+
+        if (out == null) {
+            throw new JSONException("out is null");
+        }
+
+        byte[] bytes = getBytes(charset);
+        out.write(bytes);
+        return bytes.length;
     }
 
     @Override
@@ -1926,6 +1936,9 @@ class JSONWriterUTF16
         }
 
         String str = new String(chars, 0, off);
+        if (charset == null) {
+            charset = StandardCharsets.UTF_8;
+        }
         return str.getBytes(charset);
     }
 

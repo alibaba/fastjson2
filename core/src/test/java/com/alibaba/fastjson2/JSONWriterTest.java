@@ -298,6 +298,7 @@ public class JSONWriterTest {
     public void unSupportedUTF16() {
         JSONWriter jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
         assertNull(jsonWriter.getSymbolTable());
+        jsonWriter.writeNull();
 
         assertThrows(JSONException.class, () -> jsonWriter.writeRaw((byte) 0));
         assertThrows(JSONException.class, () -> jsonWriter.writeNameRaw(new byte[0], 0, 0));
