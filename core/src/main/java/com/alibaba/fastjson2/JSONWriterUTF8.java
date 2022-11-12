@@ -2219,6 +2219,9 @@ class JSONWriterUTF8
         if (charset != null && charset != StandardCharsets.UTF_8) {
             throw new JSONException("UnsupportedOperation");
         }
+        if (off == 0) {
+            return 0;
+        }
 
         int len = off;
         out.write(bytes, 0, off);

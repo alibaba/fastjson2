@@ -551,6 +551,9 @@ public abstract class JSONReader
             case JSON_TYPE_BOOL:
                 return boolValue ? 1 : 0;
             case JSON_TYPE_NULL:
+                if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                    throw new JSONException(info("int value not support input null"));
+                }
                 return 0;
             case JSON_TYPE_STRING: {
                 return toInt32(stringValue);
@@ -582,6 +585,9 @@ public abstract class JSONReader
             case JSON_TYPE_BOOL:
                 return boolValue ? 1 : 0;
             case JSON_TYPE_NULL:
+                if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                    throw new JSONException(info("int value not support input null"));
+                }
                 return 0;
             case JSON_TYPE_STRING: {
                 return toInt64(stringValue);
@@ -3448,7 +3454,11 @@ public abstract class JSONReader
         /**
          * @since 2.0.16
          */
-        IgnoreCheckClose(1 << 20);
+        IgnoreCheckClose(1 << 20),
+        /**
+         * @since 2.0.20
+         */
+        ErrorOnNullForPrimitives(1 << 21);
 
         public final long mask;
 
