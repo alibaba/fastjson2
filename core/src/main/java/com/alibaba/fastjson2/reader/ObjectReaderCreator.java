@@ -95,7 +95,9 @@ public class ObjectReaderCreator {
         return new ConstructorFunction(constructor, paramNames);
     }
 
-    public <T> Function<Map<Long, Object>, T> createFunction(Constructor constructor, Constructor markerConstructor, String... paramNames) {
+    public <T> Function<Map<Long, Object>, T> createFunction(Constructor constructor,
+                                                             Constructor markerConstructor,
+                                                             String... paramNames) {
         if (markerConstructor == null) {
             constructor.setAccessible(true);
         } else {
@@ -577,7 +579,9 @@ public class ObjectReaderCreator {
         );
     }
 
-    protected ObjectReader getAnnotatedObjectReader(ObjectReaderProvider provider, Class objectClass, BeanInfo beanInfo) {
+    protected ObjectReader getAnnotatedObjectReader(ObjectReaderProvider provider,
+                                                    Class objectClass,
+                                                    BeanInfo beanInfo) {
         if ((beanInfo.readerFeatures & JSON_AUTO_WIRED_ANNOTATED) == 0) {
             return null;
         }
@@ -976,16 +980,30 @@ public class ObjectReaderCreator {
                 fieldName = BeanUtils.getterName(method, namingStrategy);
             }
 
-            if (fieldName.length() > 2
-                    && fieldName.charAt(0) >= 'A' && fieldName.charAt(0) <= 'Z'
-                    && fieldName.charAt(1) >= 'A' && fieldName.charAt(1) <= 'Z'
+            char c0 = '\0', c1;
+            int len = fieldName.length();
+            if (len > 0) {
+                c0 = fieldName.charAt(0);
+            }
+
+            if ((len == 1 && c0 >= 'a' && c0 <= 'z')
+                    || (len > 2 && c0 >= 'A' && c0 <= 'Z' && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z')
             ) {
                 char[] chars = fieldName.toCharArray();
-                chars[0] = (char) (chars[0] + 32);
+                if (len == 1) {
+                    chars[0] = (char) (chars[0] - 32);
+                } else {
+                    chars[0] = (char) (chars[0] + 32);
+                }
                 String fieldName1 = new String(chars);
                 Field field = BeanUtils.getDeclaredField(objectClass, fieldName1);
-                if (field != null && Modifier.isPublic(field.getModifiers())) {
-                    fieldName = field.getName();
+                if (field != null) {
+                    if (Modifier.isPublic(field.getModifiers())) {
+                        fieldName = field.getName();
+                    } else if (len == 1) {
+                        fieldInfo.alternateNames = new String[]{fieldName};
+                        fieldName = field.getName();
+                    }
                 }
             }
         } else {
@@ -1104,7 +1122,11 @@ public class ObjectReaderCreator {
         }
     }
 
-    protected <T> FieldReader[] createFieldReaders(Class<T> objectClass, Type objectType, BeanInfo beanInfo, boolean fieldBased, ObjectReaderProvider provider) {
+    protected <T> FieldReader[] createFieldReaders(Class<T> objectClass,
+                                                   Type objectType,
+                                                   BeanInfo beanInfo,
+                                                   boolean fieldBased,
+                                                   ObjectReaderProvider provider) {
         if (beanInfo == null) {
             beanInfo = new BeanInfo();
             for (ObjectReaderModule module : provider.modules) {

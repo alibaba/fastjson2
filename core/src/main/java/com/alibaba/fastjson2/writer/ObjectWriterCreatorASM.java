@@ -259,15 +259,25 @@ public class ObjectWriterCreatorASM
                         } else {
                             fieldName = BeanUtils.getterName(method, beanInfo.namingStrategy);
 
-                            if (fieldName.length() > 2
-                                    && fieldName.charAt(0) >= 'A' && fieldName.charAt(0) <= 'Z'
-                                    && fieldName.charAt(1) >= 'A' && fieldName.charAt(1) <= 'Z'
+                            char c0 = '\0', c1;
+                            int len = fieldName.length();
+                            if (len > 0) {
+                                c0 = fieldName.charAt(0);
+                            }
+
+                            if ((len == 1 && c0 >= 'a' && c0 <= 'z')
+                                    || (len > 2 && c0 >= 'A' && c0 <= 'Z' && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z')
                             ) {
                                 char[] chars = fieldName.toCharArray();
-                                chars[0] = (char) (chars[0] + 32);
+                                if (c0 >= 'a' && c0 <= 'z') {
+                                    chars[0] = (char) (chars[0] - 32);
+                                } else {
+                                    chars[0] = (char) (chars[0] + 32);
+                                }
                                 String fieldName1 = new String(chars);
                                 Field field = BeanUtils.getDeclaredField(objectClass, fieldName1);
-                                if (field != null && Modifier.isPublic(field.getModifiers())) {
+
+                                if (field != null && (len == 1 || Modifier.isPublic(field.getModifiers()))) {
                                     fieldName = field.getName();
                                 }
                             }
@@ -2746,7 +2756,10 @@ public class ObjectWriterCreatorASM
         mw.visitLabel(endIfNull_);
     }
 
-    private void genMethodInit(List<FieldWriter> fieldWriters, ClassWriter cw, String classNameType, String objectWriterSupper) {
+    private void genMethodInit(List<FieldWriter> fieldWriters,
+                               ClassWriter cw,
+                               String classNameType,
+                               String objectWriterSupper) {
         MethodWriter mw = cw.visitMethod(
                 Opcodes.ACC_PUBLIC,
                 "<init>",

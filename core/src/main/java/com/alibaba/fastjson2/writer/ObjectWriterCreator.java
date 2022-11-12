@@ -349,6 +349,29 @@ public class ObjectWriterCreator {
                     String fieldName;
                     if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
                         fieldName = BeanUtils.getterName(method, beanInfo.namingStrategy);
+
+                        char c0 = '\0', c1;
+                        int len = fieldName.length();
+                        if (len > 0) {
+                            c0 = fieldName.charAt(0);
+                        }
+
+                        if ((len == 1 && c0 >= 'a' && c0 <= 'z')
+                                || (len > 2 && c0 >= 'A' && c0 <= 'Z' && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z')
+                        ) {
+                            char[] chars = fieldName.toCharArray();
+                            if (c0 >= 'a' && c0 <= 'z') {
+                                chars[0] = (char) (chars[0] - 32);
+                            } else {
+                                chars[0] = (char) (chars[0] + 32);
+                            }
+                            String fieldName1 = new String(chars);
+                            Field field = BeanUtils.getDeclaredField(objectClass, fieldName1);
+
+                            if (field != null && (len == 1 || Modifier.isPublic(field.getModifiers()))) {
+                                fieldName = field.getName();
+                            }
+                        }
                     } else {
                         fieldName = fieldInfo.fieldName;
                     }
