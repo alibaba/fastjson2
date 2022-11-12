@@ -170,6 +170,10 @@ abstract class FieldWriterObject<T>
                     jsonWriter.writeArrayNull();
                 } else if (number) {
                     jsonWriter.writeNumberNull();
+                } else if (fieldClass == Appendable.class
+                        || fieldClass == StringBuffer.class
+                        || fieldClass == StringBuilder.class) {
+                    jsonWriter.writeStringNull();
                 } else {
                     jsonWriter.writeNull();
                 }
