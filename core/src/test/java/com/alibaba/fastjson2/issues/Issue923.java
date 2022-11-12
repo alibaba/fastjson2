@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.AccessLevel;
 import lombok.ToString;
 import lombok.Value;
@@ -39,5 +40,18 @@ public class Issue923 {
             String name;
             T value;
         }
+    }
+
+    @Test
+    public void test1() {
+        Bean1 bean = new Bean1(101);
+        String str = JSON.toJSONString(bean);
+        assertEquals("{\"ID\":101}", str);
+    }
+
+    @Value
+    public static class Bean1 {
+        @JSONField(name = "ID")
+        int id;
     }
 }
