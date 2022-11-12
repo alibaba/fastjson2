@@ -1,4 +1,4 @@
-package com.alibaba.json.bvt.issue_1300;
+package com.alibaba.fastjson.issue_1300;
 
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
@@ -11,7 +11,6 @@ import org.glassfish.jersey.server.JSONP;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.*;
@@ -21,7 +20,10 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
+
 import java.util.Date;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Issue1341
         extends JerseyTest {
@@ -151,7 +153,7 @@ public class Issue1341
 
         config.register(fastJsonProvider);
 
-        config.packages("com.alibaba.json.bvt.issue_1300");
+        config.packages(Issue1341.class.getPackage().getName());
         return config;
     }
 
@@ -159,7 +161,7 @@ public class Issue1341
     public void test() {
         final String reponse = target("book1341").path("123").request().accept("application/javascript").get(String.class);
         System.out.println(reponse);
-        Assertions.assertTrue(reponse.indexOf("Python源码剖析") > 0);
-        Assertions.assertTrue(reponse.indexOf("电子工业出版社") > 0);
+        assertTrue(reponse.indexOf("Python源码剖析") > 0);
+        assertTrue(reponse.indexOf("电子工业出版社") > 0);
     }
 }

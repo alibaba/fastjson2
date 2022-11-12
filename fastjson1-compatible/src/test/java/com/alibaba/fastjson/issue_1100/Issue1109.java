@@ -1,4 +1,4 @@
-package com.alibaba.json.bvt.issue_1100;
+package com.alibaba.fastjson.issue_1100;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.tuple.Pair;
