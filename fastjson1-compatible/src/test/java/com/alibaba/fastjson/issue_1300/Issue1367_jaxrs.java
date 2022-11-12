@@ -1,6 +1,5 @@
-package com.alibaba.json.bvt.issue_1300;
+package com.alibaba.fastjson.issue_1300;
 
-import com.alibaba.fastjson.issue_1300.Issue1367;
 import com.alibaba.fastjson.support.jaxrs.FastJsonProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -48,7 +47,6 @@ public class Issue1367_jaxrs
         public String parameterizedTypeBean(Issue1367.ParameterizedTypeBean<String> parameterizedTypeBean) {
             return parameterizedTypeBean.getT();
         }
-
     }
 
     @Override
@@ -83,10 +81,12 @@ public class Issue1367_jaxrs
     public void testTypeVariableBean() throws Exception {
         String request = "{\"id\": 1}";
 
-        Response response = target("beanController").path("typeVariableBean").request().
-                accept("application/json;charset=UTF-8").post(Entity.json(request));
+        Response response = target("beanController")
+                .path("typeVariableBean")
+                .request()
+                .accept("application/json;charset=UTF-8")
+                .post(Entity.json(request));
 
         System.out.println(response.readEntity(String.class));
-
     }
 }

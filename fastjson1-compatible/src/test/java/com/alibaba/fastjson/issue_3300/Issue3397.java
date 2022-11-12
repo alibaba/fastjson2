@@ -1,4 +1,4 @@
-package com.alibaba.json.bvt.issue_3300;
+package com.alibaba.fastjson.issue_3300;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;

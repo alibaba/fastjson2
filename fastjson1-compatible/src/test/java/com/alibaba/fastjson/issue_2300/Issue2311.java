@@ -1,4 +1,4 @@
-package com.alibaba.json.bvt.issue_2300;
+package com.alibaba.fastjson.issue_2300;
 
 import com.alibaba.fastjson.JSONPath;
 import com.jayway.jsonpath.JsonPath;
