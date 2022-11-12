@@ -22,8 +22,8 @@ public class Issue4239 {
                 .id(1)
                 .name("joker")
                 .pwd("123@321")
-                .time(LocalDateTime.now())
-                .time2(LocalDateTime.now())
+                .time(LocalDateTime.of(2022, 11, 12, 0, 0, 0))
+                .time2(LocalDateTime.of(2022, 11, 12, 0, 0, 0))
                 .build();
 
         String beanToJsonStr = JSON.toJSONString(entity, NameFilter.of(PropertyNamingStrategy.UpperCase));
