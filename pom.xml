@@ -606,7 +606,8 @@
                                 com/alibaba/fastjson2/naming/*.java,
                                 com/alibaba/json/bvt/**/*.java,
                                 com/alibaba/fastjson2/issues/Issue485.java,
-                                com/alibaba/fastjson2/issues/Issue765.java
+                                com/alibaba/fastjson2/issues/Issue765.java,
+                                com/alibaba/fastjson2/issues/Issue924.java
                             </excludes>
                         </configuration>
                     </execution>
