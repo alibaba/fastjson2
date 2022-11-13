@@ -12,6 +12,11 @@ public abstract class JsonNode
 
     public abstract String asText();
 
+    @Override
+    public String toString() {
+        return asText();
+    }
+
     public JsonNode path(String fieldName) {
         return null;
     }

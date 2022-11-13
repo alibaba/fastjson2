@@ -64,7 +64,7 @@ public abstract class JsonParser {
             return flags;
         }
 
-        private Feature(boolean defaultState) {
+        Feature(boolean defaultState) {
             _mask = (1 << ordinal());
             _defaultState = defaultState;
         }

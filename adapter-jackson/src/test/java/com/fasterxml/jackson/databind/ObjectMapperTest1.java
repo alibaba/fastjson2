@@ -1,7 +1,5 @@
-package com.alibaba.fastjson2.adapter.jackson;
+package com.fasterxml.jackson.databind;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;

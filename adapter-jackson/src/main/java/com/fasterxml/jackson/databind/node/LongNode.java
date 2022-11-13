@@ -1,10 +1,9 @@
 package com.fasterxml.jackson.databind.node;
 
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.fasterxml.jackson.databind.JsonNode;
 
 public class LongNode
-        extends JsonNode {
+        extends ValueNode {
     private long value;
 
     public LongNode(@JSONField(name = "value", value = true) long value) {

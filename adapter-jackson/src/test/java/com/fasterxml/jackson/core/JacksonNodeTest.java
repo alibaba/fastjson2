@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.adapter.jackson;
+package com.fasterxml.jackson.core;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

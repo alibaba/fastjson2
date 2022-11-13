@@ -2,21 +2,21 @@ package com.fasterxml.jackson.databind.node;
 
 import com.alibaba.fastjson2.annotation.JSONField;
 
-public class IntegerNode
+public class FloatNode
         extends ValueNode {
-    private int value;
+    private float value;
 
-    public IntegerNode(@JSONField(name = "value", value = true) int value) {
+    public FloatNode(@JSONField(name = "value", value = true) float value) {
         this.value = value;
     }
 
     @JSONField(name = "value", value = true)
-    public int getValue() {
+    public float getValue() {
         return value;
     }
 
     @Override
     public String asText() {
-        return Integer.toString(value);
+        return Float.toString(value);
     }
 }

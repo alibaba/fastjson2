@@ -7,11 +7,12 @@ import com.alibaba.fastjson2.annotation.JSONType;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Iterator;
 
 @JSONType(includes = "jsonArray")
 public class ArrayNode
-        extends JsonNode {
+        extends ContainerNode {
     final JSONArray jsonArray;
 
     public ArrayNode() {
@@ -32,12 +33,62 @@ public class ArrayNode
         return jsonArray.toString();
     }
 
+    @Override
+    public int size() {
+        return jsonArray.size();
+    }
+
+    public ArrayNode add(Float v) {
+        jsonArray.add(v);
+        return this;
+    }
+
+    public ArrayNode add(Double v) {
+        jsonArray.add(v);
+        return this;
+    }
+
     public ArrayNode add(BigDecimal v) {
         jsonArray.add(v);
         return this;
     }
 
+    public ArrayNode add(BigInteger v) {
+        jsonArray.add(v);
+        return this;
+    }
+
+    public ArrayNode add(Long v) {
+        jsonArray.add(v);
+        return this;
+    }
+
+    public ArrayNode add(Integer v) {
+        jsonArray.add(v);
+        return this;
+    }
+
+    public ArrayNode add(Short v) {
+        jsonArray.add(v);
+        return this;
+    }
+
+    public ArrayNode add(Byte v) {
+        jsonArray.add(v);
+        return this;
+    }
+
     public ArrayNode add(String v) {
+        jsonArray.add(v);
+        return this;
+    }
+
+    public ArrayNode add(boolean v) {
+        jsonArray.add(v);
+        return this;
+    }
+
+    public ArrayNode add(Boolean v) {
         jsonArray.add(v);
         return this;
     }

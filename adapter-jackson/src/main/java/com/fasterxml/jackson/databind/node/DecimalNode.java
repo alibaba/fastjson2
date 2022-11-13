@@ -1,12 +1,11 @@
 package com.fasterxml.jackson.databind.node;
 
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import java.math.BigDecimal;
 
 public class DecimalNode
-        extends JsonNode {
+        extends ValueNode {
     private BigDecimal value;
 
     public DecimalNode(@JSONField(name = "value", value = true) BigDecimal value) {
