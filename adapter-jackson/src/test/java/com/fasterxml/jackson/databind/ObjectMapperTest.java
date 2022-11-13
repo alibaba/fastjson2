@@ -1,7 +1,6 @@
-package com.alibaba.fastjson2.adapter.jackson;
+package com.fasterxml.jackson.databind;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;

@@ -1,8 +1,5 @@
-package com.alibaba.fastjson2.adapter.jackson;
+package com.fasterxml.jackson.core;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -2,21 +2,23 @@ package com.fasterxml.jackson.databind.node;
 
 import com.alibaba.fastjson2.annotation.JSONField;
 
-public class IntegerNode
-        extends ValueNode {
-    private int value;
+import java.math.BigInteger;
 
-    public IntegerNode(@JSONField(name = "value", value = true) int value) {
+public class BigIntegerNode
+        extends ValueNode {
+    private BigInteger value;
+
+    public BigIntegerNode(@JSONField(name = "value", value = true) BigInteger value) {
         this.value = value;
     }
 
     @JSONField(name = "value", value = true)
-    public int getValue() {
+    public BigInteger getValue() {
         return value;
     }
 
     @Override
     public String asText() {
-        return Integer.toString(value);
+        return value.toString();
     }
 }

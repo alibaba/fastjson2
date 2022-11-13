@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.databind.node;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -19,5 +20,10 @@ public class TextNode
     @Override
     public String asText() {
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return JSON.toJSONString(value);
     }
 }

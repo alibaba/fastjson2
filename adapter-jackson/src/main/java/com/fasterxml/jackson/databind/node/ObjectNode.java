@@ -6,9 +6,12 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 @JSONType(includes = "jsonObject")
 public class ObjectNode
-        extends JsonNode {
+        extends ContainerNode {
     final JSONObject object;
 
     public ObjectNode() {
@@ -38,7 +41,42 @@ public class ObjectNode
         return object.toString();
     }
 
+    public ObjectNode put(String fieldName, Short v) {
+        object.put(fieldName, v);
+        return this;
+    }
+
+    public ObjectNode put(String fieldName, Integer v) {
+        object.put(fieldName, v);
+        return this;
+    }
+
+    public ObjectNode put(String fieldName, Long v) {
+        object.put(fieldName, v);
+        return this;
+    }
+
     public ObjectNode put(String fieldName, boolean v) {
+        object.put(fieldName, v);
+        return this;
+    }
+
+    public ObjectNode put(String fieldName, Float v) {
+        object.put(fieldName, v);
+        return this;
+    }
+
+    public ObjectNode put(String fieldName, Double v) {
+        object.put(fieldName, v);
+        return this;
+    }
+
+    public ObjectNode put(String fieldName, BigDecimal v) {
+        object.put(fieldName, v);
+        return this;
+    }
+
+    public ObjectNode put(String fieldName, BigInteger v) {
         object.put(fieldName, v);
         return this;
     }
@@ -52,6 +90,16 @@ public class ObjectNode
         ArrayNode arrayNode = new ArrayNode();
         object.put(propertyName, arrayNode);
         return arrayNode;
+    }
+
+    public ObjectNode removeAll() {
+        object.clear();
+        return this;
+    }
+
+    @Override
+    public int size() {
+        return object.size();
     }
 
     public String toString() {

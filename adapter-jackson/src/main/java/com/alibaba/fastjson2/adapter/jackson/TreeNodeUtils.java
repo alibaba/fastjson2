@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.*;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public class TreeNodeUtils {
     public static JsonNode as(Object value) {
@@ -26,6 +27,14 @@ public class TreeNodeUtils {
             return new DecimalNode((BigDecimal) value);
         }
 
+        if (value instanceof BigInteger) {
+            return new BigIntegerNode((BigInteger) value);
+        }
+
+        if (value instanceof Float) {
+            return new FloatNode((Float) value);
+        }
+
         if (value instanceof Double) {
             return new DoubleNode((Double) value);
         }
@@ -36,6 +45,15 @@ public class TreeNodeUtils {
 
         if (value instanceof JSONArray) {
             return new ArrayNode((JSONArray) value);
+        }
+
+        if (value instanceof Boolean) {
+            boolean booleanValue = ((Boolean) value).booleanValue();
+            return booleanValue ? BooleanNode.TRUE : BooleanNode.FALSE;
+        }
+
+        if (value instanceof Short) {
+            return new ShortNode((Short) value);
         }
 
         throw new JSONException("TODO");

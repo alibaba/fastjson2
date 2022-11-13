@@ -523,7 +523,7 @@ public enum MapperFeature implements ConfigFeature {
     APPLY_DEFAULT_VALUES(true);
 
     private final boolean _defaultState;
-    private final long _mask;
+    private final long mask;
 
     // @since 2.13
     public static long collectLongDefaults() {
@@ -538,7 +538,7 @@ public enum MapperFeature implements ConfigFeature {
 
     private MapperFeature(boolean defaultState) {
         _defaultState = defaultState;
-        _mask = (1L << ordinal());
+        mask = (1L << ordinal());
     }
 
     @Override
@@ -551,22 +551,22 @@ public enum MapperFeature implements ConfigFeature {
     public int getMask() {
         // 25-Feb-2021, tatu: Not 100% sure what to do here; should not be
         //     called any more
-        return (int) _mask;
+        return (int) mask;
     }
 
     // @since 2.13
     public long getLongMask() {
-        return _mask;
+        return mask;
     }
 
     @Override
     @Deprecated
     public boolean enabledIn(int flags) {
-        return (flags & _mask) != 0;
+        return (flags & mask) != 0;
     }
 
     // @since 2.13
     public boolean enabledIn(long flags) {
-        return (flags & _mask) != 0;
+        return (flags & mask) != 0;
     }
 }

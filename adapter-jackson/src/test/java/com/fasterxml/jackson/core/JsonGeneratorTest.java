@@ -1,8 +1,5 @@
-package com.alibaba.fastjson2.adapter.jackson;
+package com.fasterxml.jackson.core;
 
-import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;

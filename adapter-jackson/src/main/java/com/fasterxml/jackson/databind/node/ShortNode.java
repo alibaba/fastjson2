@@ -1,10 +1,9 @@
 package com.fasterxml.jackson.databind.node;
 
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.fasterxml.jackson.databind.JsonNode;
 
 public class ShortNode
-        extends JsonNode {
+        extends ValueNode {
     private short value;
 
     public ShortNode(@JSONField(name = "value", value = true) short value) {
