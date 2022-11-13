@@ -2392,6 +2392,10 @@ class JSONReaderUTF8
                         && bytes[offset++] == 'l'
                         && bytes[offset++] == 'l'
                 ) {
+                    if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                        throw new JSONException(info("long value not support input null"));
+                    }
+
                     wasNull = true;
                     value = true;
                     if (offset == end) {
@@ -2629,6 +2633,9 @@ class JSONReaderUTF8
                         && bytes[offset++] == 'l'
                         && bytes[offset++] == 'l'
                 ) {
+                    if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                        throw new JSONException(info("long value not support input null"));
+                    }
                     wasNull = true;
                     value = true;
                     if (offset == end) {
