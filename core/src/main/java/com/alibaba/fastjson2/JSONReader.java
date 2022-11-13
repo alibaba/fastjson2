@@ -586,7 +586,7 @@ public abstract class JSONReader
                 return boolValue ? 1 : 0;
             case JSON_TYPE_NULL:
                 if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
-                    throw new JSONException(info("int value not support input null"));
+                    throw new JSONException(info("long value not support input null"));
                 }
                 return 0;
             case JSON_TYPE_STRING: {
@@ -660,6 +660,10 @@ public abstract class JSONReader
     public abstract float readFloatValue();
 
     public Float readFloat() {
+        if (nextIfNull()) {
+            return null;
+        }
+
         wasNull = false;
         float value = readFloatValue();
         if (wasNull) {
@@ -671,6 +675,10 @@ public abstract class JSONReader
     public abstract double readDoubleValue();
 
     public Double readDouble() {
+        if (nextIfNull()) {
+            return null;
+        }
+
         wasNull = false;
         double value = readDoubleValue();
         if (wasNull) {
@@ -1752,6 +1760,10 @@ public abstract class JSONReader
                     && mag2 == 0
                     && mag3 == 1;
         } else if (ch == 'n') {
+            if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                throw new JSONException(info("boolean value not support input null"));
+            }
+
             wasNull = true;
             readNull();
             return false;

@@ -2854,6 +2854,9 @@ class JSONReaderJSONB
 
         switch (type) {
             case BC_NULL:
+                if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                    throw new JSONException(info("long value not support input null"));
+                }
                 wasNull = true;
                 return 0;
             case BC_FALSE:
@@ -3021,6 +3024,10 @@ class JSONReaderJSONB
 
         switch (type) {
             case BC_NULL:
+                if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                    throw new JSONException(info("int value not support input null"));
+                }
+
                 wasNull = true;
                 return 0;
             case BC_FALSE:
@@ -3158,6 +3165,12 @@ class JSONReaderJSONB
 
     @Override
     public Integer readInt32() {
+        if (bytes[offset] == BC_NULL) {
+            offset++;
+            wasNull = true;
+            return null;
+        }
+
         wasNull = false;
         int value = readInt32Value();
         if (wasNull) {
@@ -3168,6 +3181,12 @@ class JSONReaderJSONB
 
     @Override
     public Long readInt64() {
+        if (bytes[offset] == BC_NULL) {
+            offset++;
+            wasNull = true;
+            return null;
+        }
+
         long value = readInt64Value();
         if (wasNull) {
             return null;
@@ -3196,6 +3215,9 @@ class JSONReaderJSONB
 
         switch (type) {
             case BC_NULL:
+                if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                    throw new JSONException(info("long value not support input null"));
+                }
                 wasNull = true;
                 return 0;
             case BC_INT8:
@@ -3357,6 +3379,9 @@ class JSONReaderJSONB
         byte type = bytes[offset++];
         switch (type) {
             case BC_NULL:
+                if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                    throw new JSONException(info("long value not support input null"));
+                }
                 wasNull = true;
                 return 0;
             case BC_INT8:
@@ -4452,6 +4477,9 @@ class JSONReaderJSONB
             case BC_FALSE:
                 return false;
             case BC_NULL:
+                if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                    throw new JSONException(info("long value not support input null"));
+                }
                 wasNull = true;
                 return false;
             case BC_STR_ASCII_FIX_1:

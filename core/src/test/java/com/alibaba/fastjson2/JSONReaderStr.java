@@ -2447,6 +2447,10 @@ public final class JSONReaderStr
                         && str.charAt(offset++) == 'l'
                         && str.charAt(offset++) == 'l'
                 ) {
+                    if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                        throw new JSONException(info("long value not support input null"));
+                    }
+
                     wasNull = true;
                     value = true;
                     if (offset == end) {
@@ -2684,6 +2688,10 @@ public final class JSONReaderStr
                         && str.charAt(offset++) == 'l'
                         && str.charAt(offset++) == 'l'
                 ) {
+                    if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                        throw new JSONException(info("long value not support input null"));
+                    }
+
                     wasNull = true;
                     value = true;
                     if (offset == end) {
