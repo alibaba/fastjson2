@@ -75,6 +75,11 @@
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.fury</groupId>
+            <artifactId>fury-core</artifactId>
+            <version>0.9.2</version>
+        </dependency>
+        <dependency>
             <groupId>io.github.wycst</groupId>
             <artifactId>wast</artifactId>
             <version>0.0.8</version>
@@ -86,11 +91,6 @@
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.fury</groupId>
-            <artifactId>fury-core</artifactId>
-            <version>0.9.2</version>
         </dependency>
     </dependencies>
 
