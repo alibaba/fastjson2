@@ -45,7 +45,7 @@
 
         <junit5.version>5.9.1</junit5.version>
         <kotest.version>5.5.4</kotest.version>
-        <jmh.version>1.35</jmh.version>
+        <jmh.version>1.36</jmh.version>
 
         <!-- overridden by submodule that need skip deploy -->
         <maven.deploy.skip>false</maven.deploy.skip>
