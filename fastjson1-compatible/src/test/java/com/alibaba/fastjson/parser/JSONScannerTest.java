@@ -3,6 +3,9 @@ package com.alibaba.fastjson.parser;
 import com.alibaba.fastjson.JSON;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONScannerTest {
@@ -27,14 +30,43 @@ public class JSONScannerTest {
     public void test2() {
         JSONScanner lexer = new JSONScanner("{\"id\":123}");
         lexer.nextToken();
+        assertEquals(JSONToken.LBRACE, lexer.token());
         lexer.nextToken();
+        assertEquals(JSONToken.LITERAL_STRING, lexer.token());
         assertEquals(':', lexer.getCurrent());
         assertEquals("id", lexer.stringVal());
         lexer.nextToken();
+        assertEquals(JSONToken.COLON, lexer.token());
         lexer.nextToken();
+        assertEquals(JSONToken.LITERAL_INT, lexer.token());
         assertEquals(123, lexer.intValue());
         assertEquals(123L, lexer.longValue());
         assertEquals('}', lexer.getCurrent());
+        lexer.nextToken();
+        assertEquals(JSONToken.RBRACE, lexer.token());
+        lexer.nextToken();
+        assertEquals(JSONToken.EOF, lexer.token());
+    }
+
+    @Test
+    public void testNumber() {
+        JSONScanner lexer = new JSONScanner("{\"id\":123.34}");
+        lexer.nextToken();
+        assertEquals(JSONToken.LBRACE, lexer.token());
+        lexer.nextToken();
+        assertEquals(JSONToken.LITERAL_STRING, lexer.token());
+        assertEquals(':', lexer.getCurrent());
+        assertEquals("id", lexer.stringVal());
+        lexer.nextToken();
+        assertEquals(JSONToken.COLON, lexer.token());
+        lexer.nextToken();
+        assertEquals(JSONToken.LITERAL_FLOAT, lexer.token());
+        assertEquals(new BigDecimal("123.34"), lexer.decimalValue());
+        assertEquals('}', lexer.getCurrent());
+        lexer.nextToken();
+        assertEquals(JSONToken.RBRACE, lexer.token());
+        lexer.nextToken();
+        assertEquals(JSONToken.EOF, lexer.token());
     }
 
     @Test
