@@ -43,6 +43,13 @@ public class EishayParseBinaryAutoType {
     static byte[] fastjson2JSONBBytes_symbols;
     static byte[] hessianBytes;
     static byte[] javaSerializeBytes;
+    static byte[] furyBytes;
+    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
+            .withLanguage(io.fury.Language.JAVA)
+            .withReferenceTracking(true)
+            .disableSecureMode()
+            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
+            .buildThreadSafeFury();
 
     static JSONReader.AutoTypeBeforeHandler autoTypeFilter = JSONReader.autoTypeFilter(true, Media.class, MediaContent.class, Image.class);
 
@@ -52,6 +59,8 @@ public class EishayParseBinaryAutoType {
             String str = IOUtils.toString(is, "UTF-8");
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
+
+            furyBytes = fury.serialize(mc);
 
             fastjson2JSONBBytes = JSONB.toBytes(mc, JSONWriter.Feature.WriteClassName,
                     JSONWriter.Feature.IgnoreNoneSerializable,
@@ -175,6 +184,11 @@ public class EishayParseBinaryAutoType {
         ByteArrayInputStream bytesIn = new ByteArrayInputStream(hessianBytes);
         Hessian2Input hessian2Input = new Hessian2Input(bytesIn);
         bh.consume(hessian2Input.readObject());
+    }
+
+    @Benchmark
+    public void fury(Blackhole bh) {
+        bh.consume(fury.deserialize(furyBytes));
     }
 
     public static void main(String[] args) throws Exception {

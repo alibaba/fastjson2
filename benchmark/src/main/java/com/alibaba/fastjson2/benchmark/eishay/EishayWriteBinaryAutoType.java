@@ -35,6 +35,13 @@ public class EishayWriteBinaryAutoType {
             "player"
     );
 
+    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
+            .withLanguage(io.fury.Language.JAVA)
+            .withReferenceTracking(true)
+            .disableSecureMode()
+            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
+            .buildThreadSafeFury();
+
     static {
         try {
             InputStream is = EishayWriteBinaryAutoType.class.getClassLoader().getResourceAsStream("data/eishay.json");
@@ -117,6 +124,12 @@ public class EishayWriteBinaryAutoType {
         hessian2Output.writeObject(mc);
         hessian2Output.flush();
         bh.consume(byteArrayOutputStream.toByteArray());
+    }
+
+    @Benchmark
+    public void fury(Blackhole bh) {
+        byte[] bytes = fury.serialize(mc);
+        bh.consume(bytes);
     }
 
     public static void main(String[] args) throws RunnerException {
