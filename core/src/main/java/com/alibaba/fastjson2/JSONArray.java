@@ -1278,6 +1278,18 @@ public class JSONArray
         return creator.apply(object);
     }
 
+    public JSONObject addObject() {
+        JSONObject object = new JSONObject();
+        add(object);
+        return object;
+    }
+
+    public JSONArray addArray() {
+        JSONArray array = new JSONArray();
+        add(array);
+        return array;
+    }
+
     /**
      * Chained addition of elements
      *

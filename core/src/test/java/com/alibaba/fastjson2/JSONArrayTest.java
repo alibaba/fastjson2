@@ -1435,4 +1435,19 @@ public class JSONArrayTest {
             assertEquals(values[i].toString(), array.getString(i));
         }
     }
+
+    @Test
+    public void test() {
+        JSONArray root = new JSONArray();
+        JSONArray array = root.addArray();
+        array.add(1);
+        assertEquals("[[1]]", root.toString());
+    }
+
+    @Test
+    public void test1() {
+        JSONArray root = new JSONArray();
+        root.addObject().put("id", 123);
+        assertEquals("[{\"id\":123}]", root.toString());
+    }
 }
