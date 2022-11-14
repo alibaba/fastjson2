@@ -79,6 +79,11 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         Enum e = (Enum) object;
 
+        if (jsonWriter.isEnabled(JSONWriter.Feature.WriteEnumUsingToString)) {
+            jsonWriter.writeString(e.toString());
+            return;
+        }
+
         if (valueField != null) {
             Object fieldValue;
             try {
@@ -94,12 +99,6 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
             }
         }
 
-        String str;
-        if (jsonWriter.isEnabled(JSONWriter.Feature.WriteEnumUsingToString)) {
-            str = e.toString();
-        } else {
-            str = e.name();
-        }
-        jsonWriter.writeString(str);
+        jsonWriter.writeString(e.name());
     }
 }

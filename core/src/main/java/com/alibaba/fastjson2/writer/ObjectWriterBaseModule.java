@@ -972,10 +972,22 @@ public class ObjectWriterBaseModule
         if (objectType instanceof Class) {
             Class clazz = (Class) objectType;
 
-            if (clazz.isEnum()) {
+            if (TimeUnit.class.isAssignableFrom(clazz)) {
+                return new ObjectWriterImplEnum(null, TimeUnit.class, null, 0);
+            }
+
+            if (Enum.class.isAssignableFrom(clazz)) {
+                Class enumClass = clazz;
+                if (!enumClass.isEnum()) {
+                    Class superclass = enumClass.getSuperclass();
+                    if (superclass.isEnum()) {
+                        enumClass = superclass;
+                    }
+                }
+
                 Member valueField = BeanUtils.getEnumValueField(clazz, provider);
                 if (valueField == null) {
-                    Class mixInSource = provider.mixInCache.get(objectClass);
+                    Class mixInSource = provider.mixInCache.get(enumClass);
                     Member mixedValueField = BeanUtils.getEnumValueField(mixInSource, provider);
                     if (mixedValueField instanceof Field) {
                         try {
@@ -993,12 +1005,8 @@ public class ObjectWriterBaseModule
                 BeanInfo beanInfo = new BeanInfo();
                 annotationProcessor.getBeanInfo(beanInfo, clazz);
                 if (!beanInfo.writeEnumAsJavaBean) {
-                    return new ObjectWriterImplEnum(null, clazz, valueField, 0);
+                    return new ObjectWriterImplEnum(null, enumClass, valueField, 0);
                 }
-            }
-
-            if (TimeUnit.class.isAssignableFrom(clazz)) {
-                return new ObjectWriterImplEnum(null, TimeUnit.class, null, 0);
             }
 
             if (clazz == boolean[].class) {
