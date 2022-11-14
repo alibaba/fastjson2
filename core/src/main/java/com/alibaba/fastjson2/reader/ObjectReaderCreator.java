@@ -28,7 +28,12 @@ public class ObjectReaderCreator {
 
     public <T> ObjectReader<T> createObjectReaderNoneDefaultConstructor(Constructor constructor, String... paramNames) {
         Function<Map<Long, Object>, T> function = createFunction(constructor, paramNames);
-        FieldReader[] fieldReaders = createFieldReaders(constructor.getParameters(), paramNames);
+        FieldReader[] fieldReaders = createFieldReaders(
+                JSONFactory.getDefaultObjectReaderProvider(),
+                constructor,
+                constructor.getParameters(),
+                paramNames
+        );
         return createObjectReaderNoneDefaultConstructor(constructor.getDeclaringClass(), function, fieldReaders);
     }
 
@@ -53,13 +58,30 @@ public class ObjectReaderCreator {
 
     public <T> ObjectReader<T> createObjectReaderFactoryMethod(Method factoryMethod, String... paramNames) {
         Function<Map<Long, Object>, Object> factoryFunction = createFactoryFunction(factoryMethod, paramNames);
-        FieldReader[] fieldReaders = createFieldReaders(factoryMethod.getParameters(), paramNames);
+        FieldReader[] fieldReaders = createFieldReaders(
+                JSONFactory.getDefaultObjectReaderProvider(),
+                factoryMethod,
+                factoryMethod.getParameters(),
+                paramNames
+        );
         return new ObjectReaderNoneDefaultConstructor(null, null, null, 0, factoryFunction, null, paramNames, fieldReaders, null);
     }
 
-    public FieldReader[] createFieldReaders(Parameter[] parameters, String... paramNames) {
+    public FieldReader[] createFieldReaders(
+            ObjectReaderProvider provider,
+            Executable owner,
+            Parameter[] parameters,
+            String... paramNames
+    ) {
+        Class<?> declaringClass = null;
+        if (owner != null) {
+            declaringClass = owner.getDeclaringClass();
+        }
+
         FieldReader[] fieldReaders = new FieldReader[parameters.length];
         for (int i = 0; i < parameters.length; i++) {
+            FieldInfo fieldInfo = new FieldInfo();
+
             Parameter parameter = parameters[i];
             String paramName;
             if (i < paramNames.length) {
@@ -67,14 +89,29 @@ public class ObjectReaderCreator {
             } else {
                 paramName = parameter.getName();
             }
+
+            if (owner instanceof Constructor) {
+                Field field = BeanUtils.getDeclaredField(declaringClass, paramName);
+                if (field != null) {
+                    provider.getFieldInfo(fieldInfo, declaringClass, field);
+                }
+            }
+
+            String fieldName;
+            if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
+                fieldName = paramName;
+            } else {
+                fieldName = fieldInfo.fieldName;
+            }
+
             Type paramType = parameter.getParameterizedType();
             fieldReaders[i] = createFieldReaderParam(
                     null,
                     null,
-                    paramName,
+                    fieldName,
                     i,
-                    0,
-                    null,
+                    fieldInfo.features,
+                    fieldInfo.format,
                     paramType,
                     parameter.getType(),
                     paramName,
@@ -801,7 +838,12 @@ public class ObjectReaderCreator {
                 }
 
                 Function<Map<Long, Object>, T> function = new ConstructorFunction(alternateConstructors, creatorConstructor, parameterNames);
-                FieldReader[] paramFieldReaders = createFieldReaders(creatorConstructor.getParameters(), parameterNames);
+                FieldReader[] paramFieldReaders = createFieldReaders(
+                        provider,
+                        creatorConstructor,
+                        creatorConstructor.getParameters(),
+                        parameterNames
+                );
                 return new ObjectReaderNoneDefaultConstructor(
                         objectClass,
                         beanInfo.typeKey,

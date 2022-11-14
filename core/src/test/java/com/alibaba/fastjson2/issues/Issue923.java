@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.AccessLevel;
 import lombok.ToString;
@@ -53,5 +54,27 @@ public class Issue923 {
     public static class Bean1 {
         @JSONField(name = "ID")
         int id;
+    }
+
+    @Test
+    public void test2() {
+        String json = "{\"id\":1, \"name\":\"Name\", \"user_name\":\"User name\"}";
+        User object = JSON.parseObject(json, User.class);
+        assertEquals(1, object.id);
+        assertEquals("Name", object.name);
+        assertEquals("User name", object.userName);
+
+        String result = JSON.toJSONString(object, JSONWriter.Feature.WriteNulls);
+        assertEquals("{\"id\":1,\"name\":\"Name\",\"user_name\":\"User name\"}", result);
+    }
+
+    @Value
+    public class User {
+        @JSONField(name = "id")
+        int id;
+        @JSONField(name = "name")
+        String name;
+        @JSONField(name = "user_name")
+        String userName;
     }
 }

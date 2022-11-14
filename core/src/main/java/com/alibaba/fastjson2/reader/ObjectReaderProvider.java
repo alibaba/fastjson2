@@ -5,13 +5,16 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONReader.AutoTypeBeforeHandler;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
+import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -734,6 +737,15 @@ public class ObjectReaderProvider
 
     public List<ObjectReaderModule> getModules() {
         return modules;
+    }
+
+    public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Field field) {
+        for (ObjectReaderModule module : modules) {
+            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
+            if (annotationProcessor != null) {
+                annotationProcessor.getFieldInfo(fieldInfo, objectClass, field);
+            }
+        }
     }
 
     public ObjectReader getObjectReader(Type objectType) {
