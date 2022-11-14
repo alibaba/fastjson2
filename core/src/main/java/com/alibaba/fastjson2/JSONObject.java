@@ -110,6 +110,15 @@ public class JSONObject
         return super.get(key);
     }
 
+    public Object getByPath(String jsonPath) {
+        JSONPath path = JSONPath.of(jsonPath);
+        if (path instanceof JSONPath.SingleNamePath) {
+            String name = ((JSONPath.SingleNamePath) path).name;
+            return get(name);
+        }
+        return path.eval(this);
+    }
+
     /**
      * Returns true if this map contains a mapping for the specified key
      *
@@ -1559,6 +1568,18 @@ public class JSONObject
             }
         }
         return name;
+    }
+
+    public JSONArray putArray(String name) {
+        JSONArray array = new JSONArray();
+        put(name, array);
+        return array;
+    }
+
+    public JSONObject putObject(String name) {
+        JSONObject object = new JSONObject();
+        put(name, object);
+        return object;
     }
 
     /**
