@@ -1381,6 +1381,7 @@ public class TypeUtils {
                 case "org.hibernate.proxy.HibernateProxy":
                 case "org.springframework.context.annotation.ConfigurationClassEnhancer$EnhancedConfiguration":
                 case "org.mockito.cglib.proxy.Factory":
+                case "net.sf.cglib.proxy.Factory":
                     return true;
                 default:
                     break;
