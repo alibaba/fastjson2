@@ -1,5 +1,7 @@
 package com.alibaba.fastjson.parser;
 
+import java.math.BigDecimal;
+
 public interface JSONLexer {
     char EOI = 0x1A;
     int NOT_MATCH = -1;
@@ -14,6 +16,8 @@ public interface JSONLexer {
     com.alibaba.fastjson2.JSONReader getReader();
 
     String stringVal();
+
+    BigDecimal decimalValue();
 
     boolean isBlankInput();
 

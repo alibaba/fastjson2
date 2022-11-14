@@ -4,11 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
+import java.math.BigDecimal;
+
 public class JSONScanner
         extends JSONLexerBase {
     private final JSONReader reader;
     private boolean orderedField;
 
+    protected int token;
     private String strVal;
 
     public JSONScanner(JSONReader reader) {
@@ -35,6 +38,14 @@ public class JSONScanner
     @Override
     public String stringVal() {
         return strVal;
+    }
+
+    public BigDecimal decimalValue() {
+        return reader.getBigDecimal();
+    }
+
+    public int token() {
+        return token;
     }
 
     public void config(Feature feature, boolean state) {
@@ -157,15 +168,29 @@ public class JSONScanner
         char ch = reader.current();
         switch (ch) {
             case '[':
+                reader.next();
+                token = JSONToken.LBRACKET;
+                return;
             case ']':
+                reader.next();
+                token = JSONToken.RBRACKET;
+                return;
             case '{':
+                reader.next();
+                token = JSONToken.LBRACE;
+                return;
             case '}':
+                reader.next();
+                token = JSONToken.RBRACE;
+                return;
             case ':':
                 reader.next();
+                token = JSONToken.COLON;
                 return;
             case '"':
             case '\'':
                 strVal = reader.readString();
+                token = JSONToken.LITERAL_STRING;
                 return;
             case '0':
             case '1':
@@ -179,14 +204,24 @@ public class JSONScanner
             case '9':
             case '-':
             case '+':
-                reader.readNumber();
+                Number number = reader.readNumber();
+                if (number instanceof BigDecimal || number instanceof Float || number instanceof Double) {
+                    token = JSONToken.LITERAL_FLOAT;
+                } else {
+                    token = JSONToken.LITERAL_INT;
+                }
                 return;
             case 't':
             case 'f':
-                reader.readBoolValue();
+                boolean boolValue = reader.readBoolValue();
+                token = boolValue ? JSONToken.TRUE : JSONToken.FALSE;
                 return;
             case 'n':
                 reader.readNull();
+                token = JSONToken.NULL;
+                return;
+            case EOI:
+                token = JSONToken.EOF;
                 return;
             default:
                 break;
