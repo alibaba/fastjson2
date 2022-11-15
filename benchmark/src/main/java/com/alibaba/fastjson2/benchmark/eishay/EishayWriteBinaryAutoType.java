@@ -39,7 +39,6 @@ public class EishayWriteBinaryAutoType {
             .withLanguage(io.fury.Language.JAVA)
             .withReferenceTracking(true)
             .disableSecureMode()
-            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
             .buildThreadSafeFury();
 
     static {
@@ -74,6 +73,7 @@ public class EishayWriteBinaryAutoType {
         );
     }
 
+    @Benchmark
     public void fastjson2JSONB_symbols(Blackhole bh) {
         bh.consume(
                 JSONB.toBytes(

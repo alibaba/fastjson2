@@ -48,7 +48,6 @@ public class EishayParseBinaryAutoType {
             .withLanguage(io.fury.Language.JAVA)
             .withReferenceTracking(true)
             .disableSecureMode()
-            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
             .buildThreadSafeFury();
 
     static JSONReader.AutoTypeBeforeHandler autoTypeFilter = JSONReader.autoTypeFilter(true, Media.class, MediaContent.class, Image.class);
@@ -129,7 +128,7 @@ public class EishayParseBinaryAutoType {
     }
 
     @Benchmark
-    public void fastjson2JSONBBytes_arrayMapping(Blackhole bh) {
+    public void fastjson2JSONB_arrayMapping(Blackhole bh) {
         bh.consume(
                 JSONB.parseObject(
                         fastjson2JSONBBytes_arrayMapping,
@@ -158,6 +157,7 @@ public class EishayParseBinaryAutoType {
         );
     }
 
+    @Benchmark
     public void fastjson2JSONB_symbols(Blackhole bh) {
         bh.consume(
                 JSONB.parseObject(
