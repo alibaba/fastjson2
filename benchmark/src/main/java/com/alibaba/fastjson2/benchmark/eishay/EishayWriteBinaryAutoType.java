@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.benchmark.eishay;
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.caucho.hessian.io.Hessian2Output;
+import io.fury.serializers.CompatibleMode;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -38,6 +39,13 @@ public class EishayWriteBinaryAutoType {
     static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
             .withLanguage(io.fury.Language.JAVA)
             .withReferenceTracking(true)
+            .disableSecureMode()
+            .buildThreadSafeFury();
+
+    static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
+            .withLanguage(io.fury.Language.JAVA)
+            .withReferenceTracking(true)
+            .withCompatibleMode(CompatibleMode.COMPATIBLE)
             .disableSecureMode()
             .buildThreadSafeFury();
 
@@ -129,6 +137,12 @@ public class EishayWriteBinaryAutoType {
     @Benchmark
     public void fury(Blackhole bh) {
         byte[] bytes = fury.serialize(mc);
+        bh.consume(bytes);
+    }
+
+    @Benchmark
+    public void furyCompatible(Blackhole bh) {
+        byte[] bytes = furyCompatible.serialize(mc);
         bh.consume(bytes);
     }
 

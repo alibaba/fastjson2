@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
+import io.fury.serializers.CompatibleMode;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -44,9 +45,18 @@ public class EishayParseBinaryAutoType {
     static byte[] hessianBytes;
     static byte[] javaSerializeBytes;
     static byte[] furyBytes;
+    static byte[] furyCompatibleBytes;
+
     static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
             .withLanguage(io.fury.Language.JAVA)
             .withReferenceTracking(true)
+            .disableSecureMode()
+            .buildThreadSafeFury();
+
+    static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
+            .withLanguage(io.fury.Language.JAVA)
+            .withReferenceTracking(true)
+            .withCompatibleMode(CompatibleMode.COMPATIBLE)
             .disableSecureMode()
             .buildThreadSafeFury();
 
@@ -60,6 +70,7 @@ public class EishayParseBinaryAutoType {
                     .read(MediaContent.class);
 
             furyBytes = fury.serialize(mc);
+            furyCompatibleBytes = furyCompatible.serialize(mc);
 
             fastjson2JSONBBytes = JSONB.toBytes(mc, JSONWriter.Feature.WriteClassName,
                     JSONWriter.Feature.IgnoreNoneSerializable,
@@ -189,6 +200,11 @@ public class EishayParseBinaryAutoType {
     @Benchmark
     public void fury(Blackhole bh) {
         bh.consume(fury.deserialize(furyBytes));
+    }
+
+    @Benchmark
+    public void furyCompatible(Blackhole bh) {
+        bh.consume(furyCompatible.deserialize(furyCompatibleBytes));
     }
 
     public static void main(String[] args) throws Exception {
