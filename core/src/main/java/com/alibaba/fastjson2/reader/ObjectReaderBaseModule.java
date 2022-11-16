@@ -1557,8 +1557,8 @@ public class ObjectReaderBaseModule
             return ObjectReaderImplAtomicReference.INSTANCE;
         }
 
-        if (type == Object[].class) {
-            return ObjectArrayReader.INSTANCE;
+        if (type instanceof MultiType) {
+            return new ObjectArrayReaderMultiType((MultiType) type);
         }
 
         if (type == StringBuffer.class || type == StringBuilder.class) {

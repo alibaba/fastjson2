@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.BeanUtils;
+import com.alibaba.fastjson2.util.MultiType;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -300,5 +301,9 @@ public abstract class TypeReference<T> {
         return new ParameterizedTypeImpl(
             argTypes, thisClass, rawType
         );
+    }
+
+    public static Type of(Type... types) {
+        return new MultiType(types);
     }
 }

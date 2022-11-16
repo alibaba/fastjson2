@@ -973,6 +973,22 @@ class JSONReaderJSONB
         return array;
     }
 
+    @Override
+    public List readList(Type[] types) {
+        if (nextIfNull()) {
+            return null;
+        }
+
+        int entryCnt = startArray();
+        JSONArray array = new JSONArray(entryCnt);
+        for (int i = 0; i < entryCnt; i++) {
+            Type itemType = types[i];
+            array.add(read(itemType));
+        }
+        return array;
+    }
+
+    @Override
     protected byte[] readHex() {
         throw new JSONException("UnsupportedOperation");
     }

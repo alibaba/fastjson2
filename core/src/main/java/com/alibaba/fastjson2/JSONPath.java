@@ -15,6 +15,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.nio.charset.Charset;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -274,6 +275,16 @@ public abstract class JSONPath {
         }
     }
 
+    public Object extract(byte[] jsonBytes, int off, int len, Charset charset) {
+        if (jsonBytes == null) {
+            return null;
+        }
+
+        try (JSONReader jsonReader = JSONReader.of(jsonBytes, off, len, charset, createContext())) {
+            return extract(jsonReader);
+        }
+    }
+
     public abstract Object extract(JSONReader jsonReader);
 
     public abstract String extractScalar(JSONReader jsonReader);
@@ -517,7 +528,6 @@ public abstract class JSONPath {
                         if (!(three instanceof JSONPathSegmentName)) {
                             allThreeName = false;
                         }
-                        allThreeName = false;
                     } else {
                         allThreeName = false;
                     }
