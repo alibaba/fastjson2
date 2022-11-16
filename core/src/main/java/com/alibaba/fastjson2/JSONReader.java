@@ -1843,6 +1843,36 @@ public abstract class JSONReader
         return list;
     }
 
+    public List readList(Type[] types) {
+        if (nextIfNull()) {
+            return null;
+        }
+
+        List list = new ArrayList(types.length);
+        if (!nextIfMatch('[')) {
+            throw new JSONException("syntax error : " + ch);
+        }
+
+        for (int i = 0; ; ++i) {
+            if (nextIfMatch(']')) {
+                break;
+            }
+            Type itemType = types[i];
+            Object item = read(itemType);
+            list.add(item);
+
+            if (ch == '}' || ch == EOI) {
+                throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
+            }
+        }
+
+        if (comma = (ch == ',')) {
+            next();
+        }
+
+        return list;
+    }
+
     public Object[] readArray(Type[] types) {
         if (nextIfNull()) {
             return null;

@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderBean;
 import com.alibaba.fastjson2.reader.ObjectReaderNoneDefaultConstructor;
+import com.alibaba.fastjson2.util.MultiType;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -716,6 +717,10 @@ public interface JSON {
             }
             return object;
         }
+    }
+
+    static <T> T parseObject(String text, Type... types) {
+        return parseObject(text, new MultiType(types));
     }
 
     /**
@@ -1960,6 +1965,52 @@ public interface JSON {
         try (JSONReader reader = JSONReader.of(text)) {
             reader.context.config(features);
             List<T> list = reader.readArray(type);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return list;
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into {@link List}
+     *
+     * @param text the JSON {@link String} to be parsed
+     * @param type specify the {@link Type} to be converted
+     */
+    static <T> List<T> parseArray(String text, Type type) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            List<T> list = reader.readArray(type);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return list;
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into {@link List}
+     *
+     * @param text the JSON {@link String} to be parsed
+     * @param types specify the {@link Type} to be converted
+     */
+    static <T> List<T> parseArray(String text, Type... types) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            List<T> list = reader.readList(types);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
             }

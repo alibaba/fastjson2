@@ -295,18 +295,65 @@ public interface JSONB {
         return array;
     }
 
+    static <T> List<T> parseArray(byte[] jsonbBytes, Type type) {
+        if (jsonbBytes == null || jsonbBytes.length == 0) {
+            return null;
+        }
+
+        Type paramType = new ParameterizedTypeImpl(
+                new Type[]{type}, null, List.class
+        );
+
+        try (JSONReader reader = JSONReader.ofJSONB(jsonbBytes)) {
+            List<T> list = reader.read(paramType);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            return list;
+        }
+    }
+
     static <T> List<T> parseArray(byte[] jsonbBytes, Type type, JSONReader.Feature... features) {
         if (jsonbBytes == null || jsonbBytes.length == 0) {
             return null;
         }
 
-        ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(
+        Type paramType = new ParameterizedTypeImpl(
                 new Type[]{type}, null, List.class
         );
 
         try (JSONReader reader = JSONReader.ofJSONB(jsonbBytes, features)) {
             reader.context.config(features);
             List<T> list = reader.read(paramType);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            return list;
+        }
+    }
+
+    static <T> List<T> parseArray(byte[] jsonbBytes, Type... types) {
+        if (jsonbBytes == null || jsonbBytes.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.ofJSONB(jsonbBytes)) {
+            List<T> list = reader.readList(types);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            return list;
+        }
+    }
+
+    static <T> List<T> parseArray(byte[] jsonbBytes, Type[] types, JSONReader.Feature... features) {
+        if (jsonbBytes == null || jsonbBytes.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.ofJSONB(jsonbBytes, features)) {
+            reader.context.config(features);
+            List<T> list = reader.readList(types);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
             }
@@ -360,6 +407,10 @@ public interface JSONB {
             jsonReader.handleResolveTasks(object);
         }
         return object;
+    }
+
+    static <T> T parseObject(byte[] jsonbBytes, Type... types) {
+        return parseObject(jsonbBytes, new MultiType(types));
     }
 
     static <T> T parseObject(byte[] jsonbBytes, Type objectType, SymbolTable symbolTable) {
