@@ -159,6 +159,21 @@ public class TypeUtils {
         throw new JSONException("can not cast to Date from " + obj.getClass());
     }
 
+    public static Object[] cast(Object obj, Type[] types) {
+        Object[] array = new Object[types.length];
+
+        if (obj instanceof Collection) {
+            Collection collection = (Collection) obj;
+            int i = 0;
+            for (Object item : (Collection) obj) {
+                int index = i++;
+                array[index] = TypeUtils.cast(item, types[index]);
+            }
+        }
+
+        return array;
+    }
+
     public static <T> T cast(Object obj, Type type) {
         if (type instanceof Class) {
             return (T) cast(obj, (Class) type);

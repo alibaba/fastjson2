@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.*;
 import com.alibaba.fastjson2.codec.BeanInfo;
@@ -1007,6 +1008,10 @@ public class ObjectWriterBaseModule
                 if (!beanInfo.writeEnumAsJavaBean) {
                     return new ObjectWriterImplEnum(null, enumClass, valueField, 0);
                 }
+            }
+
+            if (JSONPath.class.isAssignableFrom(clazz)) {
+                return ObjectWriterImplToString.INSTANCE;
             }
 
             if (clazz == boolean[].class) {

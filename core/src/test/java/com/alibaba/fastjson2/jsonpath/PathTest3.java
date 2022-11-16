@@ -637,7 +637,7 @@ public class PathTest3 {
         JSONPath path = JSONPath.of("$..book[?(@.isbn)][0]");
         assertEquals("$..book[?(@.isbn)][0]", path.toString());
 
-        Class<?> clazz = Class.forName("com.alibaba.fastjson2.JSONPath$MultiSegmentPath");
+        Class<?> clazz = Class.forName("com.alibaba.fastjson2.JSONPathPathMulti");
         Field field = clazz.getDeclaredField("segments");
         field.setAccessible(true);
         List segments = (List) field.get(path);
@@ -651,7 +651,7 @@ public class PathTest3 {
         JSONPath path = JSONPath.of("$.book.author.id");
         assertEquals("$.book.author.id", path.toString());
 
-        Class<?> clazz = Class.forName("com.alibaba.fastjson2.JSONPath$MultiSegmentPath");
+        Class<?> clazz = Class.forName("com.alibaba.fastjson2.JSONPathPathMulti");
         Field field = clazz.getDeclaredField("segments");
         field.setAccessible(true);
         List segments = (List) field.get(path);

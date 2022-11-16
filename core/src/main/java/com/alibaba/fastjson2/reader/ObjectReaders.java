@@ -63,8 +63,12 @@ public class ObjectReaders {
         throw new JSONException("TODO");
     }
 
-    public static FieldReader fieldReader(String fieldName, Class fieldType) {
-        return ObjectReaderCreator.INSTANCE.createFieldReader(null, fieldName, fieldType, fieldType, (Method) null);
+    public static FieldReader fieldReader(String fieldName, Class fieldClass) {
+        return ObjectReaderCreator.INSTANCE.createFieldReader(null, fieldName, fieldClass, fieldClass, (Method) null);
+    }
+
+    public static FieldReader fieldReader(String fieldName, Type fieldType, Class fieldClass) {
+        return ObjectReaderCreator.INSTANCE.createFieldReader(null, fieldName, fieldType, fieldClass, (Method) null);
     }
 
     public static <T> FieldReader fieldReaderBool(String fieldName, ObjBoolConsumer<T> function) {
@@ -112,6 +116,15 @@ public class ObjectReaders {
             BiConsumer<T, V> function
     ) {
         return ObjectReaderCreator.INSTANCE.createFieldReader(fieldName, fieldClass, fieldClass, null, function);
+    }
+
+    public static <T, V> FieldReader fieldReader(
+            String fieldName,
+            Type fieldType,
+            Class<V> fieldClass,
+            BiConsumer<T, V> function
+    ) {
+        return ObjectReaderCreator.INSTANCE.createFieldReader(fieldName, fieldType, fieldClass, null, function);
     }
 
     public static <T, U> FieldReader fieldReader(
