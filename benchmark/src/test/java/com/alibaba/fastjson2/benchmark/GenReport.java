@@ -54,32 +54,38 @@ public class GenReport {
                         benchmarkResult.libraryResults.put("fastjson1UTF8Bytes", fastjson1UTF8Bytes);
                     }
                 }
-            } else if (benchmarkResult.libraryResults.size() == 6) {
+            } else if (benchmarkResult.libraryResults.size() == 8) {
                 LibResult jsonb = benchmarkResult.libraryResults.get("fastjson2JSONB");
+                LibResult fastjson2JSONB_symbols = benchmarkResult.libraryResults.get("fastjson2JSONB_symbols");
                 LibResult jsonbArrayMapping = benchmarkResult.libraryResults.get("fastjson2JSONBBytes_arrayMapping");
                 if (jsonbArrayMapping == null) {
-                    jsonbArrayMapping = benchmarkResult.libraryResults.get("fastjson2JSONB_ArrayMapping");
+                    jsonbArrayMapping = benchmarkResult.libraryResults.get("fastjson2JSONB_arrayMapping");
                 }
                 LibResult jsonbAutoTypeFilter = benchmarkResult.libraryResults.get("fastjson2JSONB_autoTypeFilter");
                 LibResult fury = benchmarkResult.libraryResults.get("fury");
+                LibResult furyCompatible = benchmarkResult.libraryResults.get("furyCompatible");
                 LibResult hessian = benchmarkResult.libraryResults.get("hessian");
                 LibResult javaSerialize = benchmarkResult.libraryResults.get("javaSerialize");
                 LibResult fastjson2UTF8Bytes = benchmarkResult.libraryResults.get("fastjson2UTF8Bytes");
 
-                if (jsonb != null && jsonbArrayMapping != null && jsonbAutoTypeFilter != null && fury != null && hessian != null && javaSerialize != null) {
+                if (jsonb != null && jsonbArrayMapping != null && jsonbAutoTypeFilter != null && fury != null && furyCompatible != null && hessian != null && javaSerialize != null) {
                     benchmarkResult.libraryResults.clear();
                     benchmarkResult.libraryResults.put("fastjson2JSONB", jsonb);
+                    benchmarkResult.libraryResults.put("fastjson2JSONB_symbols", fastjson2JSONB_symbols);
                     benchmarkResult.libraryResults.put("fastjson2JSONB_autoTypeFilter", jsonbAutoTypeFilter);
                     benchmarkResult.libraryResults.put("fastjson2JSONB_arrayMapping", jsonbArrayMapping);
                     benchmarkResult.libraryResults.put("fury", fury);
+                    benchmarkResult.libraryResults.put("furyCompatible", furyCompatible);
                     benchmarkResult.libraryResults.put("hessian", hessian);
                     benchmarkResult.libraryResults.put("javaSerialize", javaSerialize);
-                } else if (jsonb != null && jsonbArrayMapping != null && fastjson2UTF8Bytes != null && fury != null && hessian != null && javaSerialize != null) {
+                } else if (jsonb != null && jsonbArrayMapping != null && fastjson2UTF8Bytes != null && fury != null && furyCompatible != null && hessian != null && javaSerialize != null) {
                     benchmarkResult.libraryResults.clear();
                     benchmarkResult.libraryResults.put("fastjson2JSONB", jsonb);
+                    benchmarkResult.libraryResults.put("fastjson2JSONB_symbols", fastjson2JSONB_symbols);
                     benchmarkResult.libraryResults.put("fastjson2UTF8Bytes", fastjson2UTF8Bytes);
                     benchmarkResult.libraryResults.put("fastjson2JSONB_arrayMapping", jsonbArrayMapping);
                     benchmarkResult.libraryResults.put("fury", fury);
+                    benchmarkResult.libraryResults.put("furyCompatible", furyCompatible);
                     benchmarkResult.libraryResults.put("hessian", hessian);
                     benchmarkResult.libraryResults.put("javaSerialize", javaSerialize);
                 }
@@ -213,6 +219,7 @@ public class GenReport {
                 if (line.startsWith("```")) {
                     break;
                 }
+                line = line.trim();
 
 //                System.out.println(line);
                 String[] items = line.split("(\\s)+");
