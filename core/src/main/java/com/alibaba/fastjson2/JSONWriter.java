@@ -539,6 +539,10 @@ public abstract class JSONWriter
         );
     }
 
+    public static JSONWriter ofJSONB(JSONWriter.Context context) {
+        return new JSONWriterJSONB(context, null);
+    }
+
     public static JSONWriter ofJSONB(Feature... features) {
         return new JSONWriterJSONB(
                 new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features),
