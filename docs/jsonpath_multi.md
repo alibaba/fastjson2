@@ -1,4 +1,4 @@
-对同一个JSON做多个JSONPath求值的场景，FASTJSON2提供了专门的API，如下：
+对同一个JSON做多个JSONPath求值的场景，FASTJSON2提供了专门的API，能提升性能，如下：
 ```java
 public class JSONPath {
     public static JSONPath of(String[] paths, Type[] types) {
@@ -26,10 +26,9 @@ new Type[]{Long.class, String.class, Date.class}
 );
 
 Object[] expected = new Object[]{1001L, "DataWorks", DateUtils.parseDate("2017-07-14")};
-{
-Object[] result = (Object[]) jsonPath.eval(object);
-assertArrayEquals(expected, result);
-}
+
+Object[] evalResult = (Object[]) jsonPath.eval(object);
+assertArrayEquals(expected, evalResult);
 
 String jsonStr = object.toString();
 Object[] result = (Object[]) jsonPath.extract(jsonStr);
