@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.function.BiFunction;
 
 class JSONPathTyped
@@ -91,6 +92,14 @@ class JSONPathTyped
 
             if (type == Long.class) {
                 return new JSONPathSingleNameLong((JSONPathSingleName) jsonPath);
+            }
+
+            if (type == String.class) {
+                return new JSONPathSingleNameString((JSONPathSingleName) jsonPath);
+            }
+
+            if (type == BigDecimal.class) {
+                return new JSONPathSingleNameDecimal((JSONPathSingleName) jsonPath);
             }
         }
 
