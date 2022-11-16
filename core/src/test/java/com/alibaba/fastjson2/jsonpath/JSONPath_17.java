@@ -16,8 +16,8 @@ public class JSONPath_17 {
     public void test_for_jsonpath() throws Exception {
         String str = "cartGroups[0].cartItemGroups[0].cartItems[0].item.category.categoryExtra.stdCategoryDO.pathList";
         JSONPath path = JSONPath.of(str);
-        assertEquals("com.alibaba.fastjson2.JSONPath$MultiSegmentPath", path.getClass().getName());
-        Class<?> pathClass = Class.forName("com.alibaba.fastjson2.JSONPath$MultiSegmentPath");
+        assertEquals("com.alibaba.fastjson2.JSONPathPathMulti", path.getClass().getName());
+        Class<?> pathClass = Class.forName("com.alibaba.fastjson2.JSONPathPathMulti");
         Field field = pathClass.getDeclaredField("segments");
         field.setAccessible(true);
         List segments = (List) field.get(path);

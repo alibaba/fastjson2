@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.jsonpath;
 
 import com.alibaba.fastjson2.JSONPath;
+import com.alibaba.fastjson2.JSONReader;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -18,7 +19,9 @@ public class JSONPath_0 {
 
     @Test
     public void test_null() {
-        assertNull(JSONPath.of("$").extract(null));
+        assertNull(JSONPath.of("$").extract((String) null));
+        assertNull(JSONPath.of("$").extract((byte[]) null));
+        assertNull(JSONPath.of("$").extract((JSONReader) null));
     }
 
     @Test

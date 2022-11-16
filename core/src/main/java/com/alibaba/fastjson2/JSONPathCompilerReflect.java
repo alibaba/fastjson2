@@ -15,28 +15,28 @@ public class JSONPathCompilerReflect
     public JSONPath compile(
             Class objectClass, JSONPath path
     ) {
-        if (path instanceof JSONPath.SingleNamePath) {
-            return compileSingleNamePath(objectClass, (JSONPath.SingleNamePath) path);
+        if (path instanceof JSONPathSingleName) {
+            return compileSingleNamePath(objectClass, (JSONPathSingleName) path);
         }
 
-        if (path instanceof JSONPath.TwoSegmentPath) {
-            JSONPath.TwoSegmentPath twoSegmentPath = (JSONPath.TwoSegmentPath) path;
+        if (path instanceof JSONPathTwoSegment) {
+            JSONPathTwoSegment twoSegmentPath = (JSONPathTwoSegment) path;
 
-            JSONPath.Segment first = compile(objectClass, path, twoSegmentPath.first, null);
-            JSONPath.Segment segment = compile(objectClass, path, twoSegmentPath.second, first);
+            JSONPathSegment first = compile(objectClass, path, twoSegmentPath.first, null);
+            JSONPathSegment segment = compile(objectClass, path, twoSegmentPath.second, first);
 
             if (first != twoSegmentPath.first || segment != twoSegmentPath.second) {
                 if (first instanceof NameSegmentTyped && segment instanceof NameSegmentTyped) {
                     return new TwoNameSegmentTypedPath(twoSegmentPath.path, (NameSegmentTyped) first, (NameSegmentTyped) segment);
                 }
-                return new JSONPath.TwoSegmentPath(twoSegmentPath.path, first, segment);
+                return new JSONPathTwoSegment(twoSegmentPath.path, first, segment);
             }
         }
 
         return path;
     }
 
-    protected JSONPath compileSingleNamePath(Class objectClass, JSONPath.SingleNamePath path) {
+    protected JSONPath compileSingleNamePath(Class objectClass, JSONPathSingleName path) {
         String fieldName = path.name;
 
         ObjectReader objectReader = path.getReaderContext().getObjectReader(objectClass);
@@ -48,9 +48,9 @@ public class JSONPathCompilerReflect
         return new SingleNamePathTyped(path.path, objectClass, objectReader, fieldReader, objectWriter, fieldWriter);
     }
 
-    protected JSONPath.Segment compile(Class objectClass, JSONPath path, JSONPath.Segment segment, JSONPath.Segment parent) {
-        if (segment instanceof JSONPath.NameSegment) {
-            JSONPath.NameSegment nameSegment = (JSONPath.NameSegment) segment;
+    protected JSONPathSegment compile(Class objectClass, JSONPath path, JSONPathSegment segment, JSONPathSegment parent) {
+        if (segment instanceof JSONPathSegmentName) {
+            JSONPathSegmentName nameSegment = (JSONPathSegmentName) segment;
             String fieldName = nameSegment.name;
 
             JSONReader.Context readerContext = path.getReaderContext();
@@ -92,7 +92,7 @@ public class JSONPathCompilerReflect
     }
 
     public static class TwoNameSegmentTypedPath
-            extends JSONPath.TwoSegmentPath {
+            extends JSONPathTwoSegment {
         final NameSegmentTyped first;
         final NameSegmentTyped second;
         public TwoNameSegmentTypedPath(String path, NameSegmentTyped first, NameSegmentTyped second) {
@@ -161,7 +161,7 @@ public class JSONPathCompilerReflect
     }
 
     public static class NameSegmentTyped
-            extends JSONPath.NameSegment {
+            extends JSONPathSegmentName {
         final Class objectClass;
         final FieldReader fieldReader;
         final FieldWriter fieldWriter;

@@ -1849,7 +1849,7 @@ public class ObjectReaderCreator {
         return new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, field);
     }
 
-    <T, V> FieldReader createFieldReader(
+    public <T, V> FieldReader createFieldReader(
             String fieldName,
             Type fieldType,
             Class<V> fieldClass,
@@ -1859,7 +1859,7 @@ public class ObjectReaderCreator {
         return createFieldReader(null, null, fieldName, fieldType, fieldClass, 0, 0, null, null, null, method, function, null);
     }
 
-    <T, V> FieldReader createFieldReader(
+    public <T, V> FieldReader createFieldReader(
             Class objectClass,
             Type objectType,
             String fieldName,

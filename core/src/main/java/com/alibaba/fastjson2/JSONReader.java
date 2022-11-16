@@ -3477,6 +3477,20 @@ public abstract class JSONReader
         Feature(long mask) {
             this.mask = mask;
         }
+
+        public static long of(Feature[] features) {
+            if (features == null) {
+                return 0;
+            }
+
+            long value = 0;
+
+            for (Feature feature : features) {
+                value |= feature.mask;
+            }
+
+            return value;
+        }
     }
 
     static class ResolveTask {

@@ -11,10 +11,11 @@ import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -26,8 +27,6 @@ import java.util.regex.Pattern;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
 import static com.alibaba.fastjson2.JSONReader.EOI;
-import static com.alibaba.fastjson2.util.JDKUtils.LATIN1;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK11;
 
 public abstract class JSONPath {
     static final JSONReader.Context PARSE_CONTEXT = JSONFactory.createReadContext();
@@ -44,6 +43,11 @@ public abstract class JSONPath {
             featuresValue |= feature.mask;
         }
         this.features = featuresValue;
+    }
+
+    protected JSONPath(String path, long features) {
+        this.path = path;
+        this.features = features;
     }
 
     public boolean isPrevious() {
@@ -246,6 +250,30 @@ public abstract class JSONPath {
 
     public abstract Object eval(Object object);
 
+    protected JSONReader.Context createContext() {
+        return JSONFactory.createReadContext();
+    }
+
+    public Object extract(String jsonStr) {
+        if (jsonStr == null) {
+            return null;
+        }
+
+        try (JSONReader jsonReader = JSONReader.of(jsonStr, createContext())) {
+            return extract(jsonReader);
+        }
+    }
+
+    public Object extract(byte[] jsonBytes) {
+        if (jsonBytes == null) {
+            return null;
+        }
+
+        try (JSONReader jsonReader = JSONReader.of(jsonBytes, createContext())) {
+            return extract(jsonReader);
+        }
+    }
+
     public abstract Object extract(JSONReader jsonReader);
 
     public abstract String extractScalar(JSONReader jsonReader);
@@ -409,6 +437,171 @@ public abstract class JSONPath {
 
         return new JSONPathParser(path)
                 .parse();
+    }
+
+    public static JSONPath of(String path, Type type) {
+        JSONPath jsonPath = of(path);
+        return JSONPathTyped.of(jsonPath, type);
+    }
+
+    /**
+     * create multi-path jsonpath
+     *
+     * @param paths jsonpath array
+     * @param types item types
+     *
+     * @since 2.0.20
+     */
+    public static JSONPath of(String[] paths, Type[] types) {
+        return of(paths, types, null, null);
+    }
+
+    /**
+     * create multi-path jsonpath
+     *
+     * @param paths jsonpath array
+     * @param types item types
+     * @param formats item format
+     * @param zoneId zonedId
+     * @param features parse use JSONReader.Features
+     *
+     * @since 2.0.20
+     */
+    public static JSONPath of(
+            String[] paths,
+            Type[] types,
+            String[] formats,
+            ZoneId zoneId,
+            JSONReader.Feature... features
+    ) {
+        if (paths.length == 0) {
+            throw new JSONException("illegal paths, not support 0 length");
+        }
+
+        if (types == null) {
+            types = new Type[paths.length];
+            Arrays.fill(types, Object.class);
+        }
+
+        if (types.length != paths.length) {
+            throw new JSONException("types.length not equals paths.length");
+        }
+
+        JSONPath[] jsonPaths = new JSONPath[paths.length];
+        for (int i = 0; i < paths.length; i++) {
+            jsonPaths[i] = of(paths[i]);
+        }
+
+        boolean allSingleName = true;
+        boolean allTwoName = true;
+        boolean allThreeName = true;
+        for (JSONPath path : jsonPaths) {
+            if (allSingleName && !(path instanceof JSONPathSingleName)) {
+                allSingleName = false;
+            }
+            if (allTwoName) {
+                if (path instanceof JSONPathTwoSegment) {
+                    JSONPathTwoSegment two = (JSONPathTwoSegment) path;
+                    if (!(two.second instanceof JSONPathSegmentName)) {
+                        allTwoName = false;
+                    }
+                } else {
+                    allTwoName = false;
+                }
+            }
+            if (allThreeName) {
+                if (path instanceof JSONPathPathMulti) {
+                    JSONPathPathMulti multi = (JSONPathPathMulti) path;
+                    if (multi.segments.size() == 3) {
+                        JSONPathSegment three = multi.segments.get(2);
+                        if (!(three instanceof JSONPathSegmentName)) {
+                            allThreeName = false;
+                        }
+                        allThreeName = false;
+                    } else {
+                        allThreeName = false;
+                    }
+                } else {
+                    allThreeName = false;
+                }
+            }
+        }
+
+        long featuresValue = JSONReader.Feature.of(features);
+
+        if (allSingleName) {
+            return new JSONPathTypedMultiNames(jsonPaths, null, jsonPaths, types, formats, zoneId, featuresValue);
+        }
+
+        if (allTwoName) {
+            boolean samePrefix = true;
+            JSONPathSegment first0 = ((JSONPathTwoSegment) jsonPaths[0]).first;
+            for (int i = 1; i < jsonPaths.length; i++) {
+                JSONPathTwoSegment two = (JSONPathTwoSegment) jsonPaths[i];
+                if (!first0.equals(two.first)) {
+                    samePrefix = false;
+                    break;
+                }
+            }
+
+            if (samePrefix) {
+                JSONPathSingleName[] names = new JSONPathSingleName[jsonPaths.length];
+                for (int i = 0; i < jsonPaths.length; i++) {
+                    JSONPathTwoSegment two = (JSONPathTwoSegment) jsonPaths[i];
+                    JSONPathSegmentName name = (JSONPathSegmentName) two.second;
+                    names[i] = new JSONPathSingleName("$." + name, name);
+                }
+
+                JSONPath firstPath = jsonPaths[0];
+                String prefixPath = firstPath.path.substring(0, firstPath.path.length() - names[0].name.length() - 1);
+                JSONPath prefix = null;
+                if (first0 instanceof JSONPathSegmentName) {
+                    JSONPathSegmentName name = (JSONPathSegmentName) first0;
+                    prefix = new JSONPathSingleName(prefixPath, name);
+                } else if (first0 instanceof JSONPathSegmentIndex) {
+                    prefix = new JSONPathSingle(first0, prefixPath);
+                }
+
+                if (prefix != null) {
+                    return new JSONPathTypedMultiNames(jsonPaths, prefix, names, types, formats, zoneId, featuresValue);
+                }
+            }
+        }
+
+        if (allThreeName) {
+            boolean samePrefix = true;
+            JSONPathSegment first0 = ((JSONPathPathMulti) jsonPaths[0]).segments.get(0);
+            JSONPathSegment first1 = ((JSONPathPathMulti) jsonPaths[0]).segments.get(1);
+            for (int i = 1; i < jsonPaths.length; i++) {
+                JSONPathPathMulti multi = (JSONPathPathMulti) jsonPaths[i];
+                if (!first0.equals(multi.segments.get(0))) {
+                    samePrefix = false;
+                    break;
+                }
+                if (!first1.equals(multi.segments.get(1))) {
+                    samePrefix = false;
+                    break;
+                }
+            }
+
+            if (samePrefix) {
+                JSONPathSingleName[] names = new JSONPathSingleName[jsonPaths.length];
+                for (int i = 0; i < jsonPaths.length; i++) {
+                    JSONPathPathMulti multi = (JSONPathPathMulti) jsonPaths[i];
+                    JSONPathSegmentName name = (JSONPathSegmentName) multi.segments.get(2);
+                    names[i] = new JSONPathSingleName("$." + name, name);
+                }
+
+                JSONPath firstPath = jsonPaths[0];
+                String prefixPath = firstPath.path.substring(0, firstPath.path.length() - names[0].name.length() - 1);
+                JSONPath prefix = new JSONPathTwoSegment(prefixPath, first0, first1);
+                if (prefix != null) {
+                    return new JSONPathTypedMultiNames(jsonPaths, prefix, names, types, formats, zoneId, featuresValue);
+                }
+            }
+        }
+
+        return new JSONPathTypedMulti(jsonPaths, types, formats, zoneId, featuresValue);
     }
 
     public static JSONPath of(String path, Feature... features) {
@@ -586,7 +779,7 @@ public abstract class JSONPath {
     }
 
     abstract static class FilterSegment
-            extends Segment
+            extends JSONPathSegment
             implements EvalSegment {
         abstract boolean apply(Context context, Object object);
     }
@@ -814,7 +1007,7 @@ public abstract class JSONPath {
     }
 
     static final class GroupFilter
-            extends Segment
+            extends JSONPathSegment
             implements EvalSegment {
         final boolean and;
         final List<FilterSegment> filters;
@@ -1765,670 +1958,6 @@ public abstract class JSONPath {
         }
     }
 
-    static final class SingleNamePath
-            extends JSONPath {
-        final long nameHashCode;
-        final String name;
-
-        public SingleNamePath(String path, NameSegment segment, Feature... features) {
-            super(path, features);
-            this.name = segment.name;
-            this.nameHashCode = segment.nameHashCode;
-        }
-
-        @Override
-        public Object eval(Object root) {
-            Object value;
-            if (root instanceof Map) {
-                Map map = (Map) root;
-                value = map.get(name);
-                if (value == null) {
-                    boolean isNum = IOUtils.isNumber(this.name);
-                    Long longValue = null;
-
-                    for (Object o : map.entrySet()) {
-                        Map.Entry entry = (Map.Entry) o;
-                        Object entryKey = entry.getKey();
-                        if (entryKey instanceof Enum && ((Enum<?>) entryKey).name().equals(this.name)) {
-                            value = entry.getValue();
-                            break;
-                        } else if (entryKey instanceof Long) {
-                            if (longValue == null && isNum) {
-                                longValue = Long.parseLong(this.name);
-                            }
-                            if (entryKey.equals(longValue)) {
-                                value = entry.getValue();
-                                break;
-                            }
-                        }
-                    }
-                }
-            } else {
-                JSONWriter.Context writerContext = getWriterContext();
-                ObjectWriter objectWriter = writerContext.getObjectWriter(root.getClass());
-                if (objectWriter == null) {
-                    return null;
-                }
-
-                FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
-                if (fieldWriter == null) {
-                    return null;
-                }
-
-                value = fieldWriter.getFieldValue(root);
-            }
-
-            if ((features & Feature.AlwaysReturnList.mask) != 0) {
-                if (value == null) {
-                    value = new JSONArray();
-                } else {
-                    value = JSONArray.of(value);
-                }
-            }
-            return value;
-        }
-
-        @Override
-        public boolean remove(Object root) {
-            if (root == null) {
-                return false;
-            }
-
-            if (root instanceof Map) {
-                return ((Map<?, ?>) root).remove(name) != null;
-            }
-
-            ObjectReaderProvider provider = getReaderContext().getProvider();
-
-            ObjectReader objectReader = provider.getObjectReader(root.getClass());
-            if (objectReader == null) {
-                return false;
-            }
-
-            FieldReader fieldReader = objectReader.getFieldReader(nameHashCode);
-            if (fieldReader == null) {
-                return false;
-            }
-
-            try {
-                fieldReader.accept(root, null);
-            } catch (Exception ignored) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public boolean isRef() {
-            return true;
-        }
-
-        @Override
-        public boolean contains(Object root) {
-            if (root instanceof Map) {
-                return ((Map) root).containsKey(name);
-            }
-
-            ObjectWriterProvider provider = getWriterContext().getProvider();
-
-            ObjectWriter objectWriter = provider.getObjectWriter(root.getClass());
-            if (objectWriter == null) {
-                return false;
-            }
-
-            FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
-            if (fieldWriter == null) {
-                return false;
-            }
-
-            return fieldWriter.getFieldValue(root) != null;
-        }
-
-        @Override
-        public void set(Object rootObject, Object value) {
-            if (rootObject instanceof Map) {
-                Map map = (Map) rootObject;
-                map.put(name, value);
-                return;
-            }
-            ObjectReaderProvider provider = getReaderContext().getProvider();
-            ObjectReader objectReader = provider.getObjectReader(rootObject.getClass());
-            FieldReader fieldReader = objectReader.getFieldReader(nameHashCode);
-
-            if (fieldReader != null) {
-                if (value != null) {
-                    Class<?> valueClass = value.getClass();
-                    Class fieldClass = fieldReader.fieldClass;
-                    if (valueClass != fieldClass) {
-                        java.util.function.Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
-                        if (typeConvert != null) {
-                            value = typeConvert.apply(value);
-                        }
-                    }
-                }
-                fieldReader.accept(rootObject, value);
-            } else if (objectReader instanceof ObjectReaderBean) {
-                ((ObjectReaderBean) objectReader).acceptExtra(rootObject, name, value);
-            }
-        }
-
-        @Override
-        public void set(Object rootObject, Object value, JSONReader.Feature... readerFeatures) {
-            if (rootObject instanceof Map) {
-                Map map = (Map) rootObject;
-                Object origin = map.put(name, value);
-                if (origin != null) {
-                    boolean duplicateKeyValueAsArray = false;
-                    for (JSONReader.Feature feature : readerFeatures) {
-                        if (feature == JSONReader.Feature.DuplicateKeyValueAsArray) {
-                            duplicateKeyValueAsArray = true;
-                            break;
-                        }
-                    }
-
-                    if (duplicateKeyValueAsArray) {
-                        if (origin instanceof Collection) {
-                            ((Collection) origin).add(value);
-                            map.put(name, value);
-                        } else {
-                            JSONArray array = JSONArray.of(origin, value);
-                            map.put(name, array);
-                        }
-                    }
-                }
-                return;
-            }
-            ObjectReaderProvider provider = getReaderContext().getProvider();
-            ObjectReader objectReader = provider.getObjectReader(rootObject.getClass());
-            FieldReader fieldReader = objectReader.getFieldReader(nameHashCode);
-
-            if (value != null) {
-                Class<?> valueClass = value.getClass();
-                Class fieldClass = fieldReader.fieldClass;
-                if (valueClass != fieldClass) {
-                    java.util.function.Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
-                    if (typeConvert != null) {
-                        value = typeConvert.apply(value);
-                    }
-                }
-            }
-            fieldReader.accept(rootObject, value);
-        }
-
-        @Override
-        public void setCallback(Object object, BiFunction callback) {
-            if (object instanceof Map) {
-                Map map = (Map) object;
-                Object originValue = map.get(name);
-                if (originValue != null || map.containsKey(name)) {
-                    map.put(name, callback.apply(map, originValue));
-                }
-                return;
-            }
-
-            Class<?> objectClass = object.getClass();
-
-            if (readerContext == null) {
-                readerContext = JSONFactory.createReadContext();
-            }
-            FieldReader fieldReader = readerContext.provider
-                    .getObjectReader(objectClass)
-                    .getFieldReader(nameHashCode);
-
-            if (writerContext == null) {
-                writerContext = JSONFactory.createWriteContext();
-            }
-            FieldWriter fieldWriter = writerContext.provider
-                    .getObjectWriter(objectClass)
-                    .getFieldWriter(nameHashCode);
-
-            if (fieldReader != null && fieldWriter != null) {
-                Object fieldValue = fieldWriter.getFieldValue(object);
-                Object value = callback.apply(object, fieldValue);
-                fieldReader.accept(object, value);
-            }
-        }
-
-        @Override
-        public void setInt(Object obejct, int value) {
-            if (obejct instanceof Map) {
-                ((Map) obejct).put(name, value);
-                return;
-            }
-            ObjectReaderProvider provider = getReaderContext().getProvider();
-            ObjectReader objectReader = provider.getObjectReader(obejct.getClass());
-            objectReader.setFieldValue(obejct, name, nameHashCode, value);
-        }
-
-        @Override
-        public void setLong(Object object, long value) {
-            if (object instanceof Map) {
-                ((Map) object).put(name, value);
-                return;
-            }
-            ObjectReaderProvider provider = getReaderContext().getProvider();
-            ObjectReader objectReader = provider.getObjectReader(object.getClass());
-            objectReader.setFieldValue(object, name, nameHashCode, value);
-        }
-
-        @Override
-        public Object extract(JSONReader jsonReader) {
-            if (jsonReader.isJSONB()) {
-                if (jsonReader.isObject()) {
-                    jsonReader.nextIfObjectStart();
-                    while (!jsonReader.nextIfObjectEnd()) {
-                        long nameHashCode = jsonReader.readFieldNameHashCode();
-                        if (nameHashCode == 0) {
-                            continue;
-                        }
-
-                        boolean match = nameHashCode == this.nameHashCode;
-                        if (!match && (!jsonReader.isObject()) && !jsonReader.isArray()) {
-                            jsonReader.skipValue();
-                            continue;
-                        }
-
-                        if (jsonReader.isNumber()) {
-                            return jsonReader.readNumber();
-                        }
-
-                        throw new JSONException("TODO");
-                    }
-                }
-
-                if ((features & Feature.AlwaysReturnList.mask) != 0) {
-                    return new JSONArray();
-                }
-                return null;
-            }
-
-            if (jsonReader.nextIfObjectStart()) {
-                while (!jsonReader.nextIfObjectEnd()) {
-                    long nameHashCode = jsonReader.readFieldNameHashCode();
-                    boolean match = nameHashCode == this.nameHashCode;
-
-                    if (!match) {
-                        jsonReader.skipValue();
-                        continue;
-                    }
-
-                    Object val;
-                    switch (jsonReader.ch) {
-                        case '-':
-                        case '+':
-                        case '0':
-                        case '1':
-                        case '2':
-                        case '3':
-                        case '4':
-                        case '5':
-                        case '6':
-                        case '7':
-                        case '8':
-                        case '9':
-                            val = jsonReader.readNumber();
-                            break;
-                        case '[':
-                            val = jsonReader.readArray();
-                            break;
-                        case '{':
-                            val = jsonReader.readObject();
-                            break;
-                        case '"':
-                        case '\'':
-                            val = jsonReader.readString(); //
-                            break;
-                        case 't':
-                        case 'f':
-                            val = jsonReader.readBoolValue();
-                            break;
-                        case 'n':
-                            jsonReader.readNull();
-                            val = null;
-                            break;
-                        default:
-                            throw new JSONException("TODO : " + jsonReader.ch);
-                    }
-
-                    if ((features & Feature.AlwaysReturnList.mask) != 0) {
-                        if (val == null) {
-                            val = new JSONArray();
-                        } else {
-                            val = JSONArray.of(val);
-                        }
-                    }
-
-                    return val;
-                }
-            }
-
-            if ((features & Feature.AlwaysReturnList.mask) != 0) {
-                return new JSONArray();
-            }
-            return null;
-        }
-
-        @Override
-        public String extractScalar(JSONReader jsonReader) {
-            if (jsonReader.nextIfObjectStart()) {
-                for (; ; ) {
-                    if (jsonReader.ch == '}') {
-                        jsonReader.next();
-                        break;
-                    }
-
-                    long nameHashCode = jsonReader.readFieldNameHashCode();
-
-                    boolean match = nameHashCode == this.nameHashCode;
-                    char ch = jsonReader.ch;
-                    if (!match && ch != '{' && ch != '[') {
-                        jsonReader.skipValue();
-                        continue;
-                    }
-
-                    Object val;
-                    switch (jsonReader.ch) {
-                        case '-':
-                        case '+':
-                        case '0':
-                        case '1':
-                        case '2':
-                        case '3':
-                        case '4':
-                        case '5':
-                        case '6':
-                        case '7':
-                        case '8':
-                        case '9':
-                            val = jsonReader.readNumber();
-                            break;
-                        case '[':
-                            val = jsonReader.readArray();
-                            break;
-                        case '{':
-                            val = jsonReader.readObject();
-                            break;
-                        case '"':
-                        case '\'':
-                            val = jsonReader.readString(); //
-                            break;
-                        case 't':
-                        case 'f':
-                            val = jsonReader.readBoolValue();
-                            break;
-                        case 'n':
-                            jsonReader.readNull();
-                            val = null;
-                            break;
-                        default:
-                            throw new JSONException("TODO : " + jsonReader.ch);
-                    }
-
-                    return JSON.toJSONString(val);
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public long extractInt64Value(JSONReader jsonReader) {
-            if (jsonReader.nextIfObjectStart()) {
-                _for:
-                for (; ; ) {
-                    if (jsonReader.ch == '}') {
-                        jsonReader.wasNull = true;
-                        return 0;
-                    }
-
-                    long nameHashCode = jsonReader.readFieldNameHashCode();
-
-                    boolean match = nameHashCode == this.nameHashCode;
-                    if (!match) {
-                        jsonReader.skipValue();
-                        continue;
-                    }
-
-                    switch (jsonReader.ch) {
-                        case '-':
-                        case '+':
-                        case '0':
-                        case '1':
-                        case '2':
-                        case '3':
-                        case '4':
-                        case '5':
-                        case '6':
-                        case '7':
-                        case '8':
-                        case '9':
-                            return jsonReader.readInt64Value();
-                        case '[':
-                        case '{':
-                            Map object = jsonReader.readObject();
-                            return jsonReader.toLong(object);
-                        case '"':
-                        case '\'':
-                            String str = jsonReader.readString();
-                            return Long.parseLong(str);
-                        case 't':
-                        case 'f':
-                            boolean booleanValue = jsonReader.readBoolValue();
-                            return booleanValue ? 1L : 0L;
-                        case 'n':
-                            jsonReader.readNull();
-                            jsonReader.wasNull = true;
-                            return 0;
-                        case ']':
-                            jsonReader.next();
-                            break _for;
-                        default:
-                            throw new JSONException("TODO : " + jsonReader.ch);
-                    }
-                }
-            }
-
-            jsonReader.wasNull = true;
-            return 0;
-        }
-
-        @Override
-        public int extractInt32Value(JSONReader jsonReader) {
-            if (jsonReader.nextIfObjectStart()) {
-                _for:
-                for (; ; ) {
-                    if (jsonReader.ch == '}') {
-                        jsonReader.wasNull = true;
-                        return 0;
-                    }
-
-                    long nameHashCode = jsonReader.readFieldNameHashCode();
-
-                    boolean match = nameHashCode == this.nameHashCode;
-                    if (!match) {
-                        jsonReader.skipValue();
-                        continue;
-                    }
-
-                    switch (jsonReader.ch) {
-                        case '-':
-                        case '+':
-                        case '0':
-                        case '1':
-                        case '2':
-                        case '3':
-                        case '4':
-                        case '5':
-                        case '6':
-                        case '7':
-                        case '8':
-                        case '9':
-                            return jsonReader.readInt32Value();
-                        case '"':
-                        case '\'':
-                            String str = jsonReader.readString(); //
-                            return Integer.parseInt(str);
-                        case 't':
-                        case 'f':
-                            boolean booleanValue = jsonReader.readBoolValue();
-                            return booleanValue ? 1 : 0;
-                        case 'n':
-                            jsonReader.readNull();
-                            jsonReader.wasNull = true;
-                            return 0;
-                        case ']':
-                            jsonReader.next();
-                            break _for;
-                        default:
-                            throw new JSONException("TODO : " + jsonReader.ch);
-                    }
-                }
-            }
-
-            jsonReader.wasNull = true;
-            return 0;
-        }
-
-        @Override
-        public void extractScalar(JSONReader jsonReader, ValueConsumer consumer) {
-            if (jsonReader.nextIfObjectStart()) {
-                _for:
-                for (; ; ) {
-                    if (jsonReader.ch == '}') {
-                        consumer.acceptNull();
-                        return;
-                    }
-
-                    long nameHashCode = jsonReader.readFieldNameHashCode();
-
-                    boolean match = nameHashCode == this.nameHashCode;
-                    if (!match) {
-                        jsonReader.skipValue();
-                        continue;
-                    }
-
-                    switch (jsonReader.ch) {
-                        case '-':
-                        case '+':
-                        case '0':
-                        case '1':
-                        case '2':
-                        case '3':
-                        case '4':
-                        case '5':
-                        case '6':
-                        case '7':
-                        case '8':
-                        case '9': {
-                            jsonReader.readNumber(consumer, false);
-                            return;
-                        }
-                        case '[': {
-                            List array = jsonReader.readArray();
-                            consumer.accept(array);
-                            return;
-                        }
-                        case '{': {
-                            Map object = jsonReader.readObject();
-                            consumer.accept(object);
-                            return;
-                        }
-                        case '"':
-                        case '\'': {
-                            jsonReader.readString(consumer, false);
-                            return;
-                        }
-                        case 't':
-                        case 'f': {
-                            consumer.accept(
-                                    jsonReader.readBoolValue()
-                            );
-                            return;
-                        }
-                        case 'n':
-                            jsonReader.readNull();
-                            consumer.acceptNull();
-                            return;
-                        case ']':
-                            jsonReader.next();
-                            break _for;
-                        default:
-                            throw new JSONException("TODO : " + jsonReader.ch);
-                    }
-                }
-            }
-
-            consumer.acceptNull();
-        }
-
-        @Override
-        public void extract(JSONReader jsonReader, ValueConsumer consumer) {
-            if (jsonReader.nextIfObjectStart()) {
-                for (; ; ) {
-                    if (jsonReader.ch == '}') {
-                        consumer.acceptNull();
-                        return;
-                    }
-
-                    long nameHashCode = jsonReader.readFieldNameHashCode();
-
-                    boolean match = nameHashCode == this.nameHashCode;
-                    if (!match) {
-                        jsonReader.skipValue();
-                        continue;
-                    }
-
-                    switch (jsonReader.ch) {
-                        case '-':
-                        case '+':
-                        case '0':
-                        case '1':
-                        case '2':
-                        case '3':
-                        case '4':
-                        case '5':
-                        case '6':
-                        case '7':
-                        case '8':
-                        case '9': {
-                            jsonReader.readNumber(consumer, true);
-                            return;
-                        }
-                        case '[': {
-                            List array = jsonReader.readArray();
-                            consumer.accept(array);
-                            return;
-                        }
-                        case '{': {
-                            Map object = jsonReader.readObject();
-                            consumer.accept(object);
-                            return;
-                        }
-                        case '"':
-                        case '\'': {
-                            jsonReader.readString(consumer, true);
-                            return;
-                        }
-                        case 't':
-                        case 'f': {
-                            consumer.accept(
-                                    jsonReader.readBoolValue()
-                            );
-                            return;
-                        }
-                        case 'n':
-                            jsonReader.readNull();
-                            consumer.acceptNull();
-                            return;
-                        default:
-                            throw new JSONException("TODO : " + jsonReader.ch);
-                    }
-                }
-            }
-
-            consumer.acceptNull();
-        }
-    }
-
     static final class RootPath
             extends JSONPath {
         static final RootPath INSTANCE = new RootPath();
@@ -2497,668 +2026,18 @@ public abstract class JSONPath {
         }
     }
 
-    static final class SingleSegmentPath
-            extends JSONPath {
-        final Segment segment;
-        final boolean ref;
-
-        public SingleSegmentPath(Segment segment, String path, Feature... features) {
-            super(path, features);
-            this.segment = segment;
-            this.ref = segment instanceof IndexSegment || segment instanceof NameSegment;
-        }
-
-        @Override
-        public boolean remove(Object root) {
-            Context context = new Context(this, null, segment, null, 0);
-            context.root = root;
-            return segment.remove(context);
-        }
-
-        @Override
-        public boolean contains(Object root) {
-            Context context = new Context(this, null, segment, null, 0);
-            context.root = root;
-            return segment.contains(context);
-        }
-
-        @Override
-        public boolean isRef() {
-            return ref;
-        }
-
-        @Override
-        public Object eval(Object root) {
-            Context context = new Context(this, null, segment, null, 0);
-            context.root = root;
-            segment.eval(context);
-            return context.value;
-        }
-
-        @Override
-        public void set(Object root, Object value) {
-            Context context = new Context(this, null, segment, null, 0);
-            context.root = root;
-            segment.set(context, value);
-        }
-
-        @Override
-        public void set(Object root, Object value, JSONReader.Feature... readerFeatures) {
-            Context context = new Context(this, null, segment, null, 0);
-            context.root = root;
-            segment.set(context, value);
-        }
-
-        @Override
-        public void setCallback(Object root, BiFunction callback) {
-            Context context = new Context(this, null, segment, null, 0);
-            context.root = root;
-            segment.setCallback(context, callback);
-        }
-
-        @Override
-        public void setInt(Object root, int value) {
-            Context context = new Context(this, null, segment, null, 0);
-            context.root = root;
-            segment.setInt(context, value);
-        }
-
-        @Override
-        public void setLong(Object root, long value) {
-            Context context = new Context(this, null, segment, null, 0);
-            context.root = root;
-            segment.setLong(context, value);
-        }
-
-        @Override
-        public Object extract(JSONReader jsonReader) {
-            Context context = new Context(this, null, segment, null, 0);
-            if (segment instanceof EvalSegment) {
-                context.root = jsonReader.readAny();
-                segment.eval(context);
-            } else {
-                segment.accept(jsonReader, context);
-            }
-            return context.value;
-        }
-
-        @Override
-        public String extractScalar(JSONReader jsonReader) {
-            Context context = new Context(this, null, segment, null, 0);
-            segment.accept(jsonReader, context);
-            return JSON.toJSONString(context.value);
-        }
-    }
-
-    static class TwoSegmentPath
-            extends JSONPath {
-        final Segment first;
-        final Segment second;
-        final boolean ref;
-
-        public TwoSegmentPath(String path, Segment first, Segment second, Feature... features) {
-            super(path, features);
-            this.first = first;
-            this.second = second;
-            this.ref = (first instanceof IndexSegment || first instanceof NameSegment)
-                    && (second instanceof IndexSegment || second instanceof NameSegment);
-        }
-
-        @Override
-        public boolean remove(Object root) {
-            Context context0 = new Context(this, null, first, second, 0);
-            context0.root = root;
-            first.eval(context0);
-            if (context0.value == null) {
-                return false;
-            }
-
-            Context context1 = new Context(this, context0, second, null, 0);
-            return second.remove(context1);
-        }
-
-        @Override
-        public boolean contains(Object root) {
-            Context context0 = new Context(this, null, first, second, 0);
-            context0.root = root;
-            first.eval(context0);
-            if (context0.value == null) {
-                return false;
-            }
-
-            Context context1 = new Context(this, context0, second, null, 0);
-            return second.contains(context1);
-        }
-
-        @Override
-        public boolean isRef() {
-            return ref;
-        }
-
-        @Override
-        public Object eval(Object root) {
-            Context context0 = new Context(this, null, first, second, 0);
-            context0.root = root;
-            first.eval(context0);
-            if (context0.value == null) {
-                return null;
-            }
-
-            Context context1 = new Context(this, context0, second, null, 0);
-            second.eval(context1);
-            Object contextValue = context1.value;
-            if ((features & Feature.AlwaysReturnList.mask) != 0) {
-                if (contextValue == null) {
-                    contextValue = new JSONArray();
-                } else if (!(contextValue instanceof List)) {
-                    contextValue = JSONArray.of(contextValue);
-                }
-            }
-            return contextValue;
-        }
-
-        @Override
-        public void set(Object root, Object value) {
-            Context context0 = new Context(this, null, first, second, 0);
-            context0.root = root;
-            first.eval(context0);
-            if (context0.value == null) {
-                Object emptyValue;
-                if (second instanceof IndexSegment) {
-                    emptyValue = new JSONArray();
-                } else if (second instanceof NameSegment) {
-                    emptyValue = new JSONObject();
-                } else {
-                    return;
-                }
-
-                context0.value = emptyValue;
-                if (root instanceof Map && first instanceof NameSegment) {
-                    ((Map) root).put(((NameSegment) first).name, emptyValue);
-                } else if (root instanceof List && first instanceof IndexSegment) {
-                    ((List) root).set(((IndexSegment) first).index, emptyValue);
-                } else if (root != null) {
-                    Class<?> parentObjectClass = root.getClass();
-                    JSONReader.Context readerContext = getReaderContext();
-                    ObjectReader<?> objectReader = readerContext.getObjectReader(parentObjectClass);
-                    if (first instanceof NameSegment) {
-                        FieldReader fieldReader = objectReader.getFieldReader(((NameSegment) first).nameHashCode);
-                        if (fieldReader != null) {
-                            ObjectReader fieldObjectReader = fieldReader.getObjectReader(readerContext);
-                            Object fieldValue = fieldObjectReader.createInstance();
-                            fieldReader.accept(root, fieldValue);
-                            context0.value = fieldValue;
-                        }
-                    }
-                }
-            }
-
-            Context context1 = new Context(this, context0, second, null, 0);
-            second.set(context1, value);
-        }
-
-        @Override
-        public void set(Object root, Object value, JSONReader.Feature... readerFeatures) {
-            long features = 0;
-            for (JSONReader.Feature feature : readerFeatures) {
-                features |= feature.mask;
-            }
-
-            Context context0 = new Context(this, null, first, second, features);
-            context0.root = root;
-            first.eval(context0);
-            if (context0.value == null) {
-                return;
-            }
-
-            Context context1 = new Context(this, context0, second, null, features);
-            second.set(context1, value);
-        }
-
-        @Override
-        public void setCallback(Object root, BiFunction callback) {
-            Context context0 = new Context(this, null, first, second, 0);
-            context0.root = root;
-            first.eval(context0);
-            if (context0.value == null) {
-                return;
-            }
-
-            Context context1 = new Context(this, context0, second, null, 0);
-            second.setCallback(context1, callback);
-        }
-
-        @Override
-        public void setInt(Object root, int value) {
-            Context context0 = new Context(this, null, first, second, 0);
-            context0.root = root;
-            first.eval(context0);
-            if (context0.value == null) {
-                return;
-            }
-
-            Context context1 = new Context(this, context0, second, null, 0);
-            second.setInt(context1, value);
-        }
-
-        @Override
-        public void setLong(Object root, long value) {
-            Context context0 = new Context(this, null, first, second, 0);
-            context0.root = root;
-            first.eval(context0);
-            if (context0.value == null) {
-                return;
-            }
-
-            Context context1 = new Context(this, context0, second, null, 0);
-            second.setLong(context1, value);
-        }
-
-        @Override
-        public Object extract(JSONReader jsonReader) {
-            if (jsonReader == null) {
-                return null;
-            }
-
-            Context context0 = new Context(this, null, first, second, 0);
-            first.accept(jsonReader, context0);
-
-            Context context1 = new Context(this, context0, second, null, 0);
-
-            if (context0.eval) {
-                second.eval(context1);
-            } else {
-                second.accept(jsonReader, context1);
-            }
-
-            Object contextValue = context1.value;
-
-            if ((features & Feature.AlwaysReturnList.mask) != 0) {
-                if (contextValue == null) {
-                    contextValue = new JSONArray();
-                } else if (!(contextValue instanceof List)) {
-                    contextValue = JSONArray.of(contextValue);
-                }
-            }
-
-            return contextValue;
-        }
-
-        @Override
-        public String extractScalar(JSONReader jsonReader) {
-            Context context0 = new Context(this, null, first, second, 0);
-            first.accept(jsonReader, context0);
-
-            Context context1 = new Context(this, context0, second, null, 0);
-            second.accept(jsonReader, context1);
-
-            return JSON.toJSONString(context1.value);
-        }
-    }
-
-    static final class MultiSegmentPath
-            extends JSONPath {
-        final List<Segment> segments;
-        final boolean ref;
-
-        private MultiSegmentPath(String path, List<Segment> segments, Feature... features) {
-            super(path, features);
-            this.segments = segments;
-
-            boolean ref = true;
-            for (int i = 0, l = segments.size(); i < l; i++) {
-                Segment segment = segments.get(i);
-                if (segment instanceof IndexSegment || segment instanceof NameSegment) {
-                    continue;
-                }
-                ref = false;
-                break;
-            }
-            this.ref = ref;
-        }
-
-        @Override
-        public boolean remove(Object root) {
-            Context context = null;
-
-            int size = segments.size();
-            if (size == 0) {
-                return false;
-            }
-
-            for (int i = 0; i < size; i++) {
-                Segment segment = segments.get(i);
-                Segment nextSegment = null;
-                int nextIndex = i + 1;
-                if (nextIndex < size) {
-                    nextSegment = segments.get(nextIndex);
-                }
-                context = new Context(this, context, segment, nextSegment, 0);
-                if (i == 0) {
-                    context.root = root;
-                }
-
-                if (i == size - 1) {
-                    return segment.remove(context);
-                }
-                segment.eval(context);
-
-                if (context.value == null) {
-                    return false;
-                }
-            }
-
-            return false;
-        }
-
-        @Override
-        public boolean contains(Object root) {
-            Context context = null;
-
-            int size = segments.size();
-            if (size == 0) {
-                return root != null;
-            }
-
-            for (int i = 0; i < size; i++) {
-                Segment segment = segments.get(i);
-                Segment nextSegment = null;
-                int nextIndex = i + 1;
-                if (nextIndex < size) {
-                    nextSegment = segments.get(nextIndex);
-                }
-                context = new Context(this, context, segment, nextSegment, 0);
-                if (i == 0) {
-                    context.root = root;
-                }
-
-                if (i == size - 1) {
-                    return segment.contains(context);
-                }
-                segment.eval(context);
-            }
-
-            return false;
-        }
-
-        @Override
-        public boolean isRef() {
-            return ref;
-        }
-
-        @Override
-        public Object eval(Object root) {
-            Context context = null;
-
-            int size = segments.size();
-            if (size == 0) {
-                return root;
-            }
-
-            for (int i = 0; i < size; i++) {
-                Segment segment = segments.get(i);
-                Segment nextSegment = null;
-                int nextIndex = i + 1;
-                if (nextIndex < size) {
-                    nextSegment = segments.get(nextIndex);
-                }
-                context = new Context(this, context, segment, nextSegment, 0);
-                if (i == 0) {
-                    context.root = root;
-                }
-
-                segment.eval(context);
-            }
-
-            Object contextValue = context.value;
-            if ((context.path.features & Feature.AlwaysReturnList.mask) != 0) {
-                if (contextValue == null) {
-                    contextValue = new JSONArray();
-                } else if (!(contextValue instanceof List)) {
-                    contextValue = JSONArray.of(contextValue);
-                }
-            }
-            return contextValue;
-        }
-
-        @Override
-        public void set(Object root, Object value) {
-            Context context = null;
-            int size = segments.size();
-            for (int i = 0; i < size - 1; i++) {
-                Segment segment = segments.get(i);
-                Segment nextSegment = null;
-                int nextIndex = i + 1;
-                if (nextIndex < size) {
-                    nextSegment = segments.get(nextIndex);
-                }
-                context = new Context(this, context, segment, nextSegment, 0L);
-                if (i == 0) {
-                    context.root = root;
-                }
-
-                segment.eval(context);
-                if (context.value == null && nextSegment != null) {
-                    if (value == null) {
-                        return;
-                    }
-
-                    Object parentObject;
-                    if (i == 0) {
-                        parentObject = root;
-                    } else {
-                        parentObject = context.parent.value;
-                    }
-
-                    Object emptyValue;
-                    if (nextSegment instanceof IndexSegment) {
-                        emptyValue = new JSONArray();
-                    } else if (nextSegment instanceof NameSegment) {
-                        emptyValue = new JSONObject();
-                    } else {
-                        return;
-                    }
-                    context.value = emptyValue;
-
-                    if (parentObject instanceof Map && segment instanceof NameSegment) {
-                        ((Map) parentObject).put(((NameSegment) segment).name, emptyValue);
-                    } else if (parentObject instanceof List && segment instanceof IndexSegment) {
-                        List list = (List) parentObject;
-                        int index = ((IndexSegment) segment).index;
-                        if (index == list.size()) {
-                            list.add(emptyValue);
-                        } else {
-                            list.set(index, emptyValue);
-                        }
-                    } else if (parentObject != null) {
-                        Class<?> parentObjectClass = parentObject.getClass();
-                        JSONReader.Context readerContext = getReaderContext();
-                        ObjectReader<?> objectReader = readerContext.getObjectReader(parentObjectClass);
-                        if (segment instanceof NameSegment) {
-                            FieldReader fieldReader = objectReader.getFieldReader(((NameSegment) segment).nameHashCode);
-                            if (fieldReader != null) {
-                                ObjectReader fieldObjectReader = fieldReader.getObjectReader(readerContext);
-                                Object fieldValue = fieldObjectReader.createInstance();
-                                fieldReader.accept(parentObject, fieldValue);
-                                context.value = fieldValue;
-                            }
-                        }
-                    }
-                }
-            }
-            context = new Context(this, context, segments.get(0), null, 0L);
-            context.root = root;
-
-            Segment segment = segments.get(size - 1);
-            segment.set(context, value);
-        }
-
-        @Override
-        public void set(Object root, Object value, JSONReader.Feature... readerFeatures) {
-            long features = 0;
-            for (JSONReader.Feature feature : readerFeatures) {
-                features |= feature.mask;
-            }
-
-            Context context = null;
-            int size = segments.size();
-            for (int i = 0; i < size - 1; i++) {
-                Segment segment = segments.get(i);
-                Segment nextSegment = null;
-                int nextIndex = i + 1;
-                if (nextIndex < size) {
-                    nextSegment = segments.get(nextIndex);
-                }
-                context = new Context(this, context, segment, nextSegment, features);
-                if (i == 0) {
-                    context.root = root;
-                }
-
-                segment.eval(context);
-            }
-            context = new Context(this, context, segments.get(0), null, features);
-            context.root = root;
-
-            Segment segment = segments.get(size - 1);
-            segment.set(context, value);
-        }
-
-        @Override
-        public void setCallback(Object root, BiFunction callback) {
-            Context context = null;
-            int size = segments.size();
-            for (int i = 0; i < size - 1; i++) {
-                Segment segment = segments.get(i);
-                Segment nextSegment = null;
-                int nextIndex = i + 1;
-                if (nextIndex < size) {
-                    nextSegment = segments.get(nextIndex);
-                }
-                context = new Context(this, context, segment, nextSegment, 0);
-                if (i == 0) {
-                    context.root = root;
-                }
-
-                segment.eval(context);
-            }
-            context = new Context(this, context, segments.get(0), null, 0);
-            context.root = root;
-
-            Segment segment = segments.get(size - 1);
-            segment.setCallback(context, callback);
-        }
-
-        @Override
-        public void setInt(Object rootObject, int value) {
-            set(rootObject, value);
-        }
-
-        @Override
-        public void setLong(Object rootObject, long value) {
-            set(rootObject, value);
-        }
-
-        @Override
-        public Object extract(JSONReader jsonReader) {
-            if (jsonReader == null) {
-                return null;
-            }
-
-            int size = segments.size();
-            if (size == 0) {
-                return null;
-            }
-
-            boolean eval = false;
-            Context context = null;
-            for (int i = 0; i < size; i++) {
-                Segment segment = segments.get(i);
-                Segment nextSegment = null;
-
-                int nextIndex = i + 1;
-                if (nextIndex < size) {
-                    nextSegment = segments.get(nextIndex);
-                }
-
-                context = new Context(this, context, segment, nextSegment, 0);
-                if (eval) {
-                    segment.eval(context);
-                } else {
-                    segment.accept(jsonReader, context);
-                }
-
-                if (context.eval) {
-                    eval = true;
-                    if (context.value == null) {
-                        break;
-                    }
-                }
-            }
-
-            Object value = context.value;
-            if (value instanceof Sequence) {
-                value = ((Sequence) value).values;
-            }
-
-            if ((features & Feature.AlwaysReturnList.mask) != 0) {
-                if (value == null) {
-                    value = new JSONArray();
-                } else if (!(value instanceof List)) {
-                    value = JSONArray.of(value);
-                }
-            }
-            return value;
-        }
-
-        @Override
-        public String extractScalar(JSONReader jsonReader) {
-            int size = segments.size();
-            if (size == 0) {
-                return null;
-            }
-
-            boolean eval = false;
-            Context context = null;
-            for (int i = 0; i < size; i++) {
-                Segment segment = segments.get(i);
-                Segment nextSegment = null;
-
-                int nextIndex = i + 1;
-                if (nextIndex < size) {
-                    nextSegment = segments.get(nextIndex);
-                }
-
-                context = new Context(this, context, segment, nextSegment, 0);
-                if (eval) {
-                    segment.eval(context);
-                } else {
-                    segment.accept(jsonReader, context);
-                }
-
-                if (context.eval) {
-                    eval = true;
-                    if (context.value == null) {
-                        break;
-                    }
-                }
-            }
-
-            return JSON.toJSONString(context.value);
-        }
-    }
-
     static final class Context {
         final JSONPath path;
         final Context parent;
-        final Segment current;
-        final Segment next;
+        final JSONPathSegment current;
+        final JSONPathSegment next;
         final long readerFeatures;
         Object root;
         Object value;
 
         boolean eval;
 
-        Context(JSONPath path, Context parent, Segment current, Segment next, long readerFeatures) {
+        Context(JSONPath path, Context parent, JSONPathSegment current, JSONPathSegment next, long readerFeatures) {
             this.path = path;
             this.current = current;
             this.next = next;
@@ -3167,39 +2046,8 @@ public abstract class JSONPath {
         }
     }
 
-    abstract static class Segment {
-        public abstract void accept(JSONReader jsonReader, Context context);
-
-        public abstract void eval(Context context);
-
-        public boolean contains(Context context) {
-            eval(context);
-            return context.value != null;
-        }
-
-        public boolean remove(Context context) {
-            throw new JSONException("UnsupportedOperation " + getClass());
-        }
-
-        public void set(Context context, Object value) {
-            throw new JSONException("UnsupportedOperation " + getClass());
-        }
-
-        public void setCallback(Context context, BiFunction callback) {
-            throw new JSONException("UnsupportedOperation " + getClass());
-        }
-
-        public void setInt(Context context, int value) {
-            set(context, Integer.valueOf(value));
-        }
-
-        public void setLong(Context context, long value) {
-            set(context, Long.valueOf(value));
-        }
-    }
-
     static final class EntrySetSegment
-            extends Segment
+            extends JSONPathSegment
             implements EvalSegment {
         static final EntrySetSegment INSTANCE = new EntrySetSegment();
 
@@ -3245,7 +2093,7 @@ public abstract class JSONPath {
     }
 
     static final class KeysSegment
-            extends Segment
+            extends JSONPathSegment
             implements EvalSegment {
         static final KeysSegment INSTANCE = new KeysSegment();
 
@@ -3281,7 +2129,7 @@ public abstract class JSONPath {
     }
 
     static final class ValuesSegment
-            extends Segment
+            extends JSONPathSegment
             implements EvalSegment {
         static final ValuesSegment INSTANCE = new ValuesSegment();
 
@@ -3313,7 +2161,7 @@ public abstract class JSONPath {
     }
 
     static final class LengthSegment
-            extends Segment
+            extends JSONPathSegment
             implements EvalSegment {
         static final LengthSegment INSTANCE = new LengthSegment();
 
@@ -3361,7 +2209,7 @@ public abstract class JSONPath {
     static FunctionSegment FUNCTION_EXISTS = new FunctionSegment(JSONPath::exists);
 
     static final class FunctionSegment
-            extends Segment
+            extends JSONPathSegment
             implements EvalSegment {
         final Function function;
 
@@ -3604,7 +2452,7 @@ public abstract class JSONPath {
     }
 
     static final class MinSegment
-            extends Segment
+            extends JSONPathSegment
             implements EvalSegment {
         static final MinSegment INSTANCE = new MinSegment();
 
@@ -3671,7 +2519,7 @@ public abstract class JSONPath {
     }
 
     static final class MaxSegment
-            extends Segment
+            extends JSONPathSegment
             implements EvalSegment {
         static final MaxSegment INSTANCE = new MaxSegment();
 
@@ -3738,7 +2586,7 @@ public abstract class JSONPath {
     }
 
     static final class SumSegment
-            extends Segment
+            extends JSONPathSegment
             implements EvalSegment {
         static final SumSegment INSTANCE = new SumSegment();
 
@@ -3802,7 +2650,7 @@ public abstract class JSONPath {
     }
 
     static final class SelfSegment
-            extends Segment {
+            extends JSONPathSegment {
         static final SelfSegment INSTANCE = new SelfSegment();
 
         protected SelfSegment() {
@@ -3824,7 +2672,7 @@ public abstract class JSONPath {
     }
 
     static final class RootSegment
-            extends Segment {
+            extends JSONPathSegment {
         static final RootSegment INSTANCE = new RootSegment();
 
         protected RootSegment() {
@@ -3848,611 +2696,8 @@ public abstract class JSONPath {
         }
     }
 
-    static class NameSegment
-            extends Segment {
-        static final long HASH_NAME = Fnv.hashCode64("name");
-        static final long HASH_ORDINAL = Fnv.hashCode64("ordinal");
-
-        final String name;
-        final long nameHashCode;
-
-        public NameSegment(String name, long nameHashCode) {
-            this.name = name;
-            this.nameHashCode = nameHashCode;
-        }
-
-        @Override
-        public boolean remove(Context context) {
-            set(context, null);
-            return context.eval = true;
-        }
-
-        @Override
-        public boolean contains(Context context) {
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-
-            if (object == null) {
-                return false;
-            }
-
-            if (object instanceof Map) {
-                return ((Map<?, ?>) object).containsKey(name);
-            }
-
-            if (object instanceof Collection) {
-                for (Object item : (Collection) object) {
-                    if (item == null) {
-                        continue;
-                    }
-
-                    if (item instanceof Map) {
-                        if (((Map<?, ?>) item).get(name) != null) {
-                            return true;
-                        }
-                    }
-
-                    ObjectWriter<?> objectWriter = context.path
-                            .getWriterContext()
-                            .getObjectWriter(item.getClass());
-                    if (objectWriter instanceof ObjectWriterAdapter) {
-                        FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
-                        if (fieldWriter != null) {
-                            if (fieldWriter.getFieldValue(item) != null) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-                return false;
-            }
-
-            if (object instanceof Sequence) {
-                Sequence sequence = (Sequence) object;
-                for (Object item : sequence.values) {
-                    if (item == null) {
-                        continue;
-                    }
-
-                    if (item instanceof Map) {
-                        if (((Map<?, ?>) item).get(name) != null) {
-                            return true;
-                        }
-                    }
-
-                    ObjectWriter<?> objectWriter = context.path
-                            .getWriterContext()
-                            .getObjectWriter(item.getClass());
-                    if (objectWriter instanceof ObjectWriterAdapter) {
-                        FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
-                        if (fieldWriter != null) {
-                            if (fieldWriter.getFieldValue(item) != null) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-                return false;
-            }
-
-            if (object instanceof Object[]) {
-                Object[] array = (Object[]) object;
-                for (Object item : array) {
-                    if (item == null) {
-                        continue;
-                    }
-
-                    if (item instanceof Map) {
-                        if (((Map) item).get(name) != null) {
-                            return true;
-                        }
-                    }
-
-                    ObjectWriter<?> objectWriter = context.path
-                            .getWriterContext()
-                            .getObjectWriter(item.getClass());
-                    if (objectWriter instanceof ObjectWriterAdapter) {
-                        FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
-                        if (fieldWriter != null) {
-                            if (fieldWriter.getFieldValue(item) != null) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-
-            ObjectWriter<?> objectWriter = context.path
-                    .getWriterContext()
-                    .getObjectWriter(object.getClass());
-            if (objectWriter instanceof ObjectWriterAdapter) {
-                FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
-                if (fieldWriter != null) {
-                    return fieldWriter.getFieldValue(object) != null;
-                }
-            }
-
-            return false;
-        }
-
-        @Override
-        public void eval(Context context) {
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-
-            if (object == null) {
-                return;
-            }
-
-            if (object instanceof Map) {
-                Map map = (Map) object;
-                Object value = map.get(name);
-                if (value == null) {
-                    boolean isNum = IOUtils.isNumber(this.name);
-                    Long longValue = null;
-
-                    for (Object o : map.entrySet()) {
-                        Map.Entry entry = (Map.Entry) o;
-                        Object entryKey = entry.getKey();
-                        if (entryKey instanceof Enum && ((Enum<?>) entryKey).name().equals(this.name)) {
-                            value = entry.getValue();
-                            break;
-                        } else if (entryKey instanceof Long) {
-                            if (longValue == null && isNum) {
-                                longValue = Long.parseLong(this.name);
-                            }
-                            if (entryKey.equals(longValue)) {
-                                value = entry.getValue();
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                context.value = value;
-                return;
-            }
-
-            if (object instanceof Collection) {
-                Collection<?> collection = (Collection<?>) object;
-                int size = collection.size();
-                Collection values = null; // = new JSONArray(collection.size());
-                for (Object item : collection) {
-                    if (item instanceof Map) {
-                        Object val = ((Map<?, ?>) item).get(name);
-                        if (val == null) {
-                            continue;
-                        }
-                        if (val instanceof Collection) {
-                            if (size == 1) {
-                                values = (Collection) val;
-                            } else {
-                                if (values == null) {
-                                    values = new JSONArray(size);
-                                }
-                                values.addAll((Collection) val);
-                            }
-                        } else {
-                            if (values == null) {
-                                values = new JSONArray(size);
-                            }
-                            values.add(val);
-                        }
-                    }
-                }
-                context.value = values;
-                return;
-            }
-
-            if (object instanceof Sequence) {
-                List sequence = ((Sequence) object).values;
-                JSONArray values = new JSONArray(sequence.size());
-                for (int i = 0; i < sequence.size(); i++) {
-                    Object item = sequence.get(i);
-                    context.value = item;
-                    Context itemContext = new Context(context.path, context, context.current, context.next, context.readerFeatures);
-                    eval(itemContext);
-                    Object val = itemContext.value;
-
-                    if (val == null) {
-                        continue;
-                    }
-
-                    if (val instanceof Collection) {
-                        values.addAll((Collection) val);
-                    } else {
-                        values.add(val);
-                    }
-                }
-                if (context.next != null) {
-                    context.value = new Sequence(values);
-                } else {
-                    context.value = values;
-                }
-                context.eval = true;
-                return;
-            }
-
-            JSONWriter.Context writerContext = context.path.getWriterContext();
-            ObjectWriter<?> objectWriter = writerContext.getObjectWriter(object.getClass());
-            if (objectWriter instanceof ObjectWriterAdapter) {
-                FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
-                if (fieldWriter != null) {
-                    context.value = fieldWriter.getFieldValue(object);
-                }
-
-                return;
-            }
-
-            if (nameHashCode == HASH_NAME && object instanceof Enum) {
-                context.value = ((Enum<?>) object).name();
-                return;
-            }
-
-            if (nameHashCode == HASH_ORDINAL && object instanceof Enum) {
-                context.value = ((Enum<?>) object).ordinal();
-                return;
-            }
-
-            if (object instanceof String) {
-                String str = (String) object;
-                if (!str.isEmpty() && str.charAt(0) == '{') {
-                    context.value =
-                            JSONPath.of("$." + name)
-                                    .extract(
-                                            JSONReader.of(str));
-                    return;
-                }
-
-                context.value = null;
-                return;
-            }
-
-            if (object instanceof Number || object instanceof Boolean) {
-                context.value = null;
-                return;
-            }
-
-            throw new JSONException("not support : " + object.getClass());
-        }
-
-        @Override
-        public void set(Context context, Object value) {
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-
-            if (object instanceof Map) {
-                Map map = (Map) object;
-                Object origin = map.put(name, value);
-                if (origin != null) {
-                    if ((context.readerFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
-                        if (origin instanceof Collection) {
-                            ((Collection) origin).add(value);
-                            map.put(name, value);
-                        } else {
-                            JSONArray array = JSONArray.of(origin, value);
-                            map.put(name, array);
-                        }
-                    }
-                }
-                return;
-            }
-
-            ObjectReaderProvider provider = context.path.getReaderContext().getProvider();
-            ObjectReader objectReader = provider.getObjectReader(object.getClass());
-            FieldReader fieldReader = objectReader.getFieldReader(nameHashCode);
-            if (fieldReader == null) {
-                return;
-            }
-
-            if (value != null) {
-                Class<?> valueClass = value.getClass();
-                Class fieldClass = fieldReader.fieldClass;
-                if (valueClass != fieldClass) {
-                    java.util.function.Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
-                    if (typeConvert != null) {
-                        value = typeConvert.apply(value);
-                    }
-                }
-            }
-            fieldReader.accept(object, value);
-        }
-
-        @Override
-        public void setCallback(Context context, BiFunction callback) {
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-
-            if (object instanceof Map) {
-                Map map = (Map) object;
-                Object origin = map.get(name);
-                if (origin != null) {
-                    Object applyValue = callback.apply(map, origin);
-                    map.put(name, applyValue);
-                }
-                return;
-            }
-
-            ObjectReaderProvider provider = context.path.getReaderContext().getProvider();
-
-            ObjectReader objectReader = provider.getObjectReader(object.getClass());
-            ObjectWriter objectWriter = context.path
-                    .getWriterContext()
-                    .getProvider()
-                    .getObjectWriter(object.getClass());
-
-            FieldReader fieldReader = objectReader.getFieldReader(nameHashCode);
-            FieldWriter fieldWriter = objectWriter.getFieldWriter(nameHashCode);
-            if (fieldReader == null || fieldWriter == null) {
-                return;
-            }
-
-            Object fieldValue = fieldWriter.getFieldValue(object);
-            Object applyValue = callback.apply(object, fieldValue);
-            fieldReader.accept(object, applyValue);
-        }
-
-        @Override
-        public void accept(JSONReader jsonReader, Context context) {
-            if (context.parent != null
-                    && (context.parent.eval
-                    || context.parent.current instanceof FilterSegment
-                    || context.parent.current instanceof MultiIndexSegment)
-            ) {
-                eval(context);
-                return;
-            }
-
-            if (jsonReader.isJSONB()) {
-                if (jsonReader.nextIfObjectStart()) {
-                    for (int i = 0; ; ++i) {
-                        if (jsonReader.nextIfObjectEnd()) {
-                            break;
-                        }
-
-                        long nameHashCode = jsonReader.readFieldNameHashCode();
-                        if (nameHashCode == 0) {
-                            continue;
-                        }
-                        boolean match = nameHashCode == this.nameHashCode;
-                        if (!match) {
-                            jsonReader.skipValue();
-                            continue;
-                        }
-
-                        if (jsonReader.isArray() || jsonReader.isObject()) {
-                            if (context.next != null) {
-                                break;
-                            }
-                        }
-
-                        context.value = jsonReader.readAny();
-                        context.eval = true;
-                        break;
-                    }
-                    return;
-                } else if (jsonReader.isArray()
-                        && context.parent != null
-                        && context.parent.current instanceof AllSegment) {
-                    List values = new JSONArray();
-                    int itemCnt = jsonReader.startArray();
-                    for (int i = 0; i < itemCnt; i++) {
-                        if (jsonReader.nextIfMatch(BC_OBJECT)) {
-                            for (int j = 0; ; j++) {
-                                if (jsonReader.nextIfMatch(BC_OBJECT_END)) {
-                                    break;
-                                }
-
-                                long nameHashCode = jsonReader.readFieldNameHashCode();
-                                boolean match = nameHashCode == this.nameHashCode;
-
-                                if (!match) {
-                                    jsonReader.skipValue();
-                                    continue;
-                                }
-
-                                if (jsonReader.isArray() || jsonReader.isObject()) {
-                                    if (context.next != null) {
-                                        break;
-                                    }
-                                }
-
-                                values.add(jsonReader.readAny());
-                            }
-                        } else {
-                            jsonReader.skipValue();
-                        }
-                    }
-
-                    context.value = values;
-                    context.eval = true;
-                    return;
-                }
-
-                throw new JSONException("TODO");
-            }
-
-            if (jsonReader.nextIfObjectStart()) {
-                if (jsonReader.ch == '}') {
-                    jsonReader.next();
-                    // return object;
-                }
-
-                _for:
-                for (; ; ) {
-                    if (jsonReader.nextIfObjectEnd()) {
-                        jsonReader.next();
-                        break;
-                    }
-
-                    long nameHashCode = jsonReader.readFieldNameHashCode();
-                    boolean match = nameHashCode == this.nameHashCode;
-
-                    if (!match) {
-                        jsonReader.skipValue();
-                        if (jsonReader.ch == ',') {
-                            jsonReader.next();
-                        }
-                        continue;
-                    }
-
-                    Object val;
-                    switch (jsonReader.ch) {
-                        case '-':
-                        case '+':
-                        case '0':
-                        case '1':
-                        case '2':
-                        case '3':
-                        case '4':
-                        case '5':
-                        case '6':
-                        case '7':
-                        case '8':
-                        case '9':
-                            jsonReader.readNumber0();
-                            val = jsonReader.getNumber();
-                            break;
-                        case '[':
-                            if (context.next != null && !(context.next instanceof EvalSegment)
-                                    && !(context.next instanceof NameSegment)
-                                    && !(context.next instanceof AllSegment)) {
-                                break _for;
-                            }
-                            val = jsonReader.readArray();
-                            context.eval = true;
-                            break;
-                        case '{':
-                            if (context.next != null
-                                    && !(context.next instanceof EvalSegment)
-                                    && !(context.next instanceof AllSegment)) {
-                                break _for;
-                            }
-                            val = jsonReader.readObject();
-                            context.eval = true;
-                            break;
-                        case '"':
-                        case '\'':
-                            val = jsonReader.readString();
-                            break;
-                        case 't':
-                        case 'f':
-                            val = jsonReader.readBoolValue();
-                            break;
-                        case 'n':
-                            jsonReader.readNull();
-                            val = null;
-                            break;
-                        default:
-                            throw new JSONException("TODO : " + jsonReader.ch);
-                    }
-
-                    context.value = val;
-                    break;
-                }
-            } else if (jsonReader.ch == '[' && context.parent != null && context.parent.current instanceof AllSegment) {
-                jsonReader.next();
-                List values = new JSONArray();
-                while (jsonReader.ch != EOI) {
-                    if (jsonReader.ch == ']') {
-                        jsonReader.next();
-                        break;
-                    }
-                    if (jsonReader.ch == '{') {
-                        jsonReader.next();
-
-                        _for:
-                        for (; ; ) {
-                            if (jsonReader.ch == '}') {
-                                jsonReader.next();
-                                break;
-                            }
-
-                            long nameHashCode = jsonReader.readFieldNameHashCode();
-                            boolean match = nameHashCode == this.nameHashCode;
-
-                            if (!match) {
-                                jsonReader.skipValue();
-                                if (jsonReader.ch == ',') {
-                                    jsonReader.next();
-                                }
-                                continue;
-                            }
-
-                            Object val;
-                            switch (jsonReader.ch) {
-                                case '-':
-                                case '+':
-                                case '0':
-                                case '1':
-                                case '2':
-                                case '3':
-                                case '4':
-                                case '5':
-                                case '6':
-                                case '7':
-                                case '8':
-                                case '9':
-                                case '.':
-                                    jsonReader.readNumber0();
-                                    val = jsonReader.getNumber();
-                                    break;
-                                case '[':
-                                    if (context.next != null) {
-                                        break _for;
-                                    }
-                                    val = jsonReader.readArray();
-                                    break;
-                                case '{':
-                                    if (context.next != null) {
-                                        break _for;
-                                    }
-                                    val = jsonReader.readObject();
-                                    break;
-                                case '"':
-                                case '\'':
-                                    val = jsonReader.readString();
-                                    break;
-                                case 't':
-                                case 'f':
-                                    val = jsonReader.readBoolValue();
-                                    break;
-                                case 'n':
-                                    jsonReader.readNull();
-                                    val = null;
-                                    break;
-                                default:
-                                    throw new JSONException("TODO : " + jsonReader.ch);
-                            }
-                            values.add(val);
-                        }
-                    } else {
-                        jsonReader.skipValue();
-                    }
-
-                    if (jsonReader.ch == ',') {
-                        jsonReader.next();
-                    }
-                }
-
-                context.value = values;
-            }/* else if (jsonReader.ch == JSONReader.EOI) {
-                return;
-            }*/
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
-
     static final class CycleNameSegment
-            extends Segment {
+            extends JSONPathSegment {
         static final long HASH_STAR = Fnv.hashCode64("*");
         final String name;
         final long nameHashCode;
@@ -4839,545 +3084,8 @@ public abstract class JSONPath {
         }
     }
 
-    static final class IndexSegment
-            extends Segment {
-        static final IndexSegment ZERO = new IndexSegment(0);
-        static final IndexSegment ONE = new IndexSegment(1);
-        static final IndexSegment TWO = new IndexSegment(2);
-
-        static final IndexSegment LAST = new IndexSegment(-1);
-
-        final int index;
-
-        public IndexSegment(int index) {
-            this.index = index;
-        }
-
-        static IndexSegment of(int index) {
-            if (index == 0) {
-                return ZERO;
-            }
-            if (index == 1) {
-                return ONE;
-            }
-            if (index == 2) {
-                return TWO;
-            }
-            if (index == -1) {
-                return LAST;
-            }
-            return new IndexSegment(index);
-        }
-
-        @Override
-        public void eval(Context context) {
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-
-            if (object == null) {
-                context.eval = true;
-                return;
-            }
-
-            if (object instanceof java.util.List) {
-                List list = (List) object;
-                if (index >= 0) {
-                    if (index < list.size()) {
-                        context.value = list.get(index);
-                    }
-                } else {
-                    int itemIndex = list.size() + this.index;
-                    if (itemIndex >= 0) {
-                        context.value = list.get(itemIndex);
-                    }
-                }
-                context.eval = true;
-                return;
-            }
-
-            if ((object instanceof SortedSet || object instanceof LinkedHashSet)
-                    || (index == 0 && object instanceof Collection && ((Collection<?>) object).size() == 1)
-            ) {
-                Collection collection = (Collection) object;
-                int i = 0;
-                for (Iterator it = collection.iterator(); it.hasNext(); ++i) {
-                    Object item = it.next();
-                    if (i == index) {
-                        context.value = item;
-                        break;
-                    }
-                }
-                context.eval = true;
-                return;
-            }
-
-            if (object instanceof Object[]) {
-                Object[] array = (Object[]) object;
-                if (index >= 0) {
-                    if (index < array.length) {
-                        context.value = array[index];
-                    }
-                } else {
-                    int itemIndex = array.length + this.index;
-                    if (itemIndex >= 0) {
-                        context.value = array[itemIndex];
-                    }
-                }
-                context.eval = true;
-                return;
-            }
-
-            Class objectClass = object.getClass();
-            if (objectClass.isArray()) {
-                int length = Array.getLength(object);
-                if (index >= 0) {
-                    if (index < length) {
-                        context.value = Array.get(object, index);
-                    }
-                } else {
-                    int itemIndex = length + this.index;
-                    if (itemIndex >= 0) {
-                        context.value = Array.get(object, itemIndex);
-                    }
-                }
-                context.eval = true;
-                return;
-            }
-
-            if (object instanceof Sequence) {
-                List sequence = ((Sequence) object).values;
-                JSONArray values = new JSONArray(sequence.size());
-                for (int i = 0; i < sequence.size(); i++) {
-                    Object item = sequence.get(i);
-                    context.value = item;
-                    Context itemContext = new Context(context.path, context, context.current, context.next, context.readerFeatures);
-                    eval(itemContext);
-                    values.add(itemContext.value);
-                }
-                if (context.next != null) {
-                    context.value = new Sequence(values);
-                } else {
-                    context.value = values;
-                }
-                context.eval = true;
-                return;
-            }
-
-            if (Map.class.isAssignableFrom(objectClass)) {
-                Object value = eval((Map) object);
-                context.value = value;
-                context.eval = true;
-                return;
-            }
-
-            // lax mode
-            if (index == 0) {
-                context.value = object;
-                context.eval = true;
-                return;
-            }
-
-            throw new JSONException("jsonpath not support operate : " + context.path + ", objectClass" + objectClass.getName());
-        }
-
-        private Object eval(Map object) {
-            Map map = object;
-            Object value = map.get(index);
-            if (value == null) {
-                value = map.get(Integer.toString(index));
-            }
-
-            if (value == null) {
-                int size = map.size();
-                Iterator it = map.entrySet().iterator();
-                if (size == 1 || map instanceof LinkedHashMap || map instanceof SortedMap) {
-                    for (int i = 0; i <= index && i < size && it.hasNext(); ++i) {
-                        Map.Entry entry = (Map.Entry) it.next();
-                        Object entryKey = entry.getKey();
-                        Object entryValue = entry.getValue();
-                        if (entryKey instanceof Long) {
-                            if (entryKey.equals(Long.valueOf(index))) {
-                                value = entryValue;
-                                break;
-                            }
-                        } else {
-                            if (i == index) {
-                                value = entryValue;
-                            }
-                        }
-                    }
-                } else {
-                    for (int i = 0; i <= index && i < map.size() && it.hasNext(); ++i) {
-                        Map.Entry entry = (Map.Entry) it.next();
-                        Object entryKey = entry.getKey();
-                        Object entryValue = entry.getValue();
-                        if (entryKey instanceof Long) {
-                            if (entryKey.equals(Long.valueOf(index))) {
-                                value = entryValue;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            return value;
-        }
-
-        @Override
-        public void set(Context context, Object value) {
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-
-            if (object instanceof java.util.List) {
-                List list = (List) object;
-                if (index >= 0) {
-                    if (index > list.size()) {
-                        for (int i = list.size(); i < index; ++i) {
-                            list.add(null);
-                        }
-                    }
-                    if (index < list.size()) {
-                        list.set(index, value);
-                    } else if (index <= list.size()) {
-                        list.add(value);
-                    }
-                } else {
-                    int itemIndex = list.size() + this.index;
-                    if (itemIndex >= 0) {
-                        list.set(itemIndex, value);
-                    }
-                }
-                return;
-            }
-
-            if (object instanceof Object[]) {
-                Object[] array = (Object[]) object;
-                if (index >= 0) {
-                    array[index] = value;
-                } else {
-                    array[array.length + index] = value;
-                }
-                return;
-            }
-
-            if (object != null && object.getClass().isArray()) {
-                int length = Array.getLength(object);
-                if (index >= 0) {
-                    if (index < length) {
-                        Array.set(object, index, value);
-                    }
-                } else {
-                    int arrayIndex = length + index;
-                    if (arrayIndex >= 0) {
-                        Array.set(object, arrayIndex, value);
-                    }
-                }
-                return;
-            }
-
-            throw new JSONException("UnsupportedOperation");
-        }
-
-        @Override
-        public void setCallback(Context context, BiFunction callback) {
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-
-            if (object instanceof java.util.List) {
-                List list = (List) object;
-                if (index >= 0) {
-                    if (index < list.size()) {
-                        Object value = list.get(index);
-                        value = callback.apply(object, value);
-                        list.set(index, value);
-                    }
-                } else {
-                    int itemIndex = list.size() + this.index;
-                    if (itemIndex >= 0) {
-                        Object value = list.get(index);
-                        value = callback.apply(object, value);
-                        list.set(itemIndex, value);
-                    }
-                }
-                return;
-            }
-
-            if (object instanceof Object[]) {
-                Object[] array = (Object[]) object;
-                if (index >= 0) {
-                    if (index < array.length) {
-                        Object value = array[index];
-                        value = callback.apply(object, value);
-                        array[index] = value;
-                    }
-                } else {
-                    Object value = array[index];
-                    value = callback.apply(object, value);
-                    array[array.length + index] = value;
-                }
-                return;
-            }
-
-            if (object != null && object.getClass().isArray()) {
-                int length = Array.getLength(object);
-                if (index >= 0) {
-                    if (index < length) {
-                        Object value = Array.get(object, index);
-                        value = callback.apply(object, value);
-                        Array.set(object, index, value);
-                    }
-                } else {
-                    int arrayIndex = length + index;
-                    if (arrayIndex >= 0) {
-                        Object value = Array.get(object, index);
-                        value = callback.apply(object, value);
-                        Array.set(object, arrayIndex, value);
-                    }
-                }
-                return;
-            }
-
-            throw new JSONException("UnsupportedOperation");
-        }
-
-        @Override
-        public boolean remove(Context context) {
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-
-            if (object instanceof java.util.List) {
-                List list = (List) object;
-                if (index >= 0) {
-                    if (index < list.size()) {
-                        list.remove(index);
-                        return true;
-                    }
-                } else {
-                    int itemIndex = list.size() + this.index;
-                    if (itemIndex >= 0) {
-                        list.remove(itemIndex);
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            throw new JSONException("UnsupportedOperation");
-        }
-
-        @Override
-        public void setInt(Context context, int value) {
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-            if (object instanceof int[]) {
-                int[] array = (int[]) object;
-                if (index >= 0) {
-                    if (index < array.length) {
-                        array[index] = value;
-                    }
-                } else {
-                    int arrayIndex = array.length + index;
-                    if (arrayIndex >= 0) {
-                        array[arrayIndex] = value;
-                    }
-                }
-                return;
-            }
-
-            if (object instanceof long[]) {
-                long[] array = (long[]) object;
-                if (index >= 0) {
-                    if (index < array.length) {
-                        array[index] = value;
-                    }
-                } else {
-                    int arrayIndex = array.length + index;
-                    if (arrayIndex >= 0) {
-                        array[arrayIndex] = value;
-                    }
-                }
-                return;
-            }
-
-            set(context, value);
-        }
-
-        @Override
-        public void setLong(Context context, long value) {
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-            if (object instanceof int[]) {
-                int[] array = (int[]) object;
-                if (index >= 0) {
-                    if (index < array.length) {
-                        array[index] = (int) value;
-                    }
-                } else {
-                    int arrayIndex = array.length + index;
-                    if (arrayIndex >= 0) {
-                        array[arrayIndex] = (int) value;
-                    }
-                }
-                return;
-            }
-
-            if (object instanceof long[]) {
-                long[] array = (long[]) object;
-                if (index >= 0) {
-                    if (index < array.length) {
-                        array[index] = value;
-                    }
-                } else {
-                    int arrayIndex = array.length + index;
-                    if (arrayIndex >= 0) {
-                        array[arrayIndex] = value;
-                    }
-                }
-                return;
-            }
-
-            set(context, value);
-        }
-
-        @Override
-        public void accept(JSONReader jsonReader, Context context) {
-            if (context.parent != null
-                    && (context.parent.eval
-                    || (context.parent.current instanceof CycleNameSegment && context.next == null))
-            ) {
-                eval(context);
-                return;
-            }
-
-            if (jsonReader.isJSONB()) {
-                int itemCnt = jsonReader.startArray();
-                for (int i = 0; i < itemCnt; i++) {
-                    boolean match = index == i;
-                    if (!match) {
-                        jsonReader.skipValue();
-                        continue;
-                    }
-
-                    if (jsonReader.isArray() || jsonReader.isObject()) {
-                        if (context.next != null) {
-                            break;
-                        }
-                    }
-
-                    context.value = jsonReader.readAny();
-                    context.eval = true;
-                    break;
-                }
-                return;
-            }
-
-            if (jsonReader.ch == '{') {
-                Map object = jsonReader.readObject();
-                context.value = eval(object);
-                context.eval = true;
-                return;
-            }
-
-            jsonReader.next();
-            _for:
-            for (int i = 0; jsonReader.ch != EOI; ++i) {
-                if (jsonReader.ch == ']') {
-                    jsonReader.next();
-                    break;
-                }
-
-                boolean match = index == -1 || index == i;
-
-                if (!match) {
-                    jsonReader.skipValue();
-                    if (jsonReader.ch == ',') {
-                        jsonReader.next();
-                    }
-                    continue;
-                }
-
-                Object val;
-                switch (jsonReader.ch) {
-                    case '-':
-                    case '+':
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
-                    case '.':
-                        jsonReader.readNumber0();
-                        val = jsonReader.getNumber();
-                        break;
-                    case '[':
-                        if (context.next != null && !(context.next instanceof EvalSegment)) {
-                            break _for;
-                        }
-                        val = jsonReader.readArray();
-                        break;
-                    case '{':
-                        if (context.next != null && !(context.next instanceof EvalSegment)) {
-                            break _for;
-                        }
-                        val = jsonReader.readObject();
-                        break;
-                    case '"':
-                    case '\'':
-                        val = jsonReader.readString();
-                        break;
-                    case 't':
-                    case 'f':
-                        val = jsonReader.readBoolValue();
-                        break;
-                    case 'n':
-                        jsonReader.readNull();
-                        val = null;
-                        break;
-                    default:
-                        throw new JSONException("TODO : " + jsonReader.ch);
-                }
-
-                if (index == -1) {
-                    if (jsonReader.ch == ']') {
-                        context.value = val;
-                    }
-                } else {
-                    context.value = val;
-                }
-            }
-        }
-
-        @Override
-        public String toString() {
-            int size = (index < 0) ? IOUtils.stringSize(-index) + 1 : IOUtils.stringSize(index);
-            byte[] bytes = new byte[size + 2];
-            bytes[0] = '[';
-            IOUtils.getChars(index, bytes.length - 1, bytes);
-            bytes[bytes.length - 1] = ']';
-
-            String str;
-            if (STRING_CREATOR_JDK11 != null) {
-                str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
-            } else {
-                str = new String(bytes, StandardCharsets.US_ASCII);
-            }
-            return str;
-        }
-    }
-
     static final class RandomIndexSegment
-            extends Segment {
+            extends JSONPathSegment {
         public static final RandomIndexSegment INSTANCE = new RandomIndexSegment();
 
         Random random;
@@ -5518,7 +3226,7 @@ public abstract class JSONPath {
     }
 
     static final class RangeIndexSegment
-            extends Segment {
+            extends JSONPathSegment {
         final int begin;
         final int end;
 
@@ -5742,7 +3450,7 @@ public abstract class JSONPath {
     }
 
     static final class MultiIndexSegment
-            extends Segment {
+            extends JSONPathSegment {
         final int[] indexes;
 
         public MultiIndexSegment(int[] indexes) {
@@ -5918,7 +3626,7 @@ public abstract class JSONPath {
     }
 
     static final class MultiNameSegment
-            extends Segment {
+            extends JSONPathSegment {
         final String[] names;
         final long[] nameHashCodes;
         final Set<String> nameSet;
@@ -6018,7 +3726,7 @@ public abstract class JSONPath {
     }
 
     static final class AllSegment
-            extends Segment {
+            extends JSONPathSegment {
         static final AllSegment INSTANCE = new AllSegment(false);
         static final AllSegment INSTANCE_ARRAY = new AllSegment(true);
 
@@ -6317,10 +4025,10 @@ public abstract class JSONPath {
         boolean strict;
 
         int segmentIndex;
-        Segment first;
-        Segment second;
+        JSONPathSegment first;
+        JSONPathSegment second;
 
-        List<Segment> segments;
+        List<JSONPathSegment> segments;
 
         boolean negative;
 
@@ -6347,7 +4055,7 @@ public abstract class JSONPath {
         JSONPath parse(Feature... features) {
             if (dollar && jsonReader.ch == EOI) {
                 if (negative) {
-                    return new SingleSegmentPath(FUNCTION_NEGATIVE, path);
+                    return new JSONPathSingle(FUNCTION_NEGATIVE, path);
                 } else {
                     return RootPath.INSTANCE;
                 }
@@ -6366,7 +4074,7 @@ public abstract class JSONPath {
                 }
 
                 char ch = jsonReader.ch;
-                Segment segment;
+                JSONPathSegment segment;
                 if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_' || ch == '@') {
                     segment = parseProperty();
                 } else {
@@ -6377,11 +4085,11 @@ public abstract class JSONPath {
                     throw new JSONException("syntax error " + path);
                 }
 
-                return new TwoSegmentPath(path, segment, FUNCTION_EXISTS);
+                return new JSONPathTwoSegment(path, segment, FUNCTION_EXISTS);
             }
 
             while (jsonReader.ch != EOI) {
-                final Segment segment;
+                final JSONPathSegment segment;
 
                 char ch = jsonReader.ch;
                 if (ch == '.') {
@@ -6435,24 +4143,24 @@ public abstract class JSONPath {
             }
 
             if (segmentIndex == 1) {
-                if (first instanceof NameSegment) {
-                    return new SingleNamePath(path, (NameSegment) first, features);
+                if (first instanceof JSONPathSegmentName) {
+                    return new JSONPathSingleName(path, (JSONPathSegmentName) first, features);
                 }
 
-                return new SingleSegmentPath(first, path, features);
+                return new JSONPathSingle(first, path, features);
             }
 
             if (segmentIndex == 2) {
-                return new TwoSegmentPath(path, first, second, features);
+                return new JSONPathTwoSegment(path, first, second, features);
             }
 
-            return new MultiSegmentPath(path, segments, features);
+            return new JSONPathPathMulti(path, segments, features);
         }
 
-        private Segment parseArrayAccess() {
+        private JSONPathSegment parseArrayAccess() {
             jsonReader.next();
 
-            Segment segment;
+            JSONPathSegment segment;
             switch (jsonReader.ch) {
                 case '-':
                 case '0':
@@ -6501,7 +4209,7 @@ public abstract class JSONPath {
                         }
                         segment = new MultiIndexSegment(indics);
                     } else {
-                        segment = IndexSegment.of(index);
+                        segment = JSONPathSegmentIndex.of(index);
                     }
                     break;
                 }
@@ -6524,7 +4232,7 @@ public abstract class JSONPath {
                 case '\'':
                     String name = jsonReader.readString();
                     if (jsonReader.current() == ']') {
-                        segment = new NameSegment(name, Fnv.hashCode64(name));
+                        segment = new JSONPathSegmentName(name, Fnv.hashCode64(name));
                     } else if (jsonReader.isString()) {
                         List<String> names = new ArrayList<>();
                         names.add(name);
@@ -6558,7 +4266,7 @@ public abstract class JSONPath {
                 case 'l': {
                     String fieldName = jsonReader.readFieldNameUnquote();
                     if ("last".equals(fieldName)) {
-                        segment = IndexSegment.of(-1);
+                        segment = JSONPathSegmentIndex.of(-1);
                     } else {
                         throw new JSONException("not support : " + fieldName);
                     }
@@ -6575,8 +4283,8 @@ public abstract class JSONPath {
             return segment;
         }
 
-        private Segment parseProperty() {
-            final Segment segment;
+        private JSONPathSegment parseProperty() {
+            final JSONPathSegment segment;
             if (jsonReader.ch == '*') {
                 jsonReader.next();
                 segment = AllSegment.INSTANCE;
@@ -6607,11 +4315,11 @@ public abstract class JSONPath {
                         }
                     }
                 }
-                IndexSegment indexSegment = null;
+                JSONPathSegmentIndex indexSegment = null;
                 if (isNum) {
                     try {
                         int index = Integer.parseInt(name);
-                        indexSegment = IndexSegment.of(index);
+                        indexSegment = JSONPathSegmentIndex.of(index);
                     } catch (NumberFormatException ignored) {
                     }
                 }
@@ -6670,14 +4378,14 @@ public abstract class JSONPath {
                             throw new JSONException("not support syntax, path : " + path);
                         }
                     } else {
-                        segment = new NameSegment(name, hashCode);
+                        segment = new JSONPathSegmentName(name, hashCode);
                     }
                 }
             }
             return segment;
         }
 
-        Segment parseFilterRest(Segment segment) {
+        JSONPathSegment parseFilterRest(JSONPathSegment segment) {
             boolean and;
             switch (jsonReader.ch) {
                 case '&':
@@ -6716,7 +4424,7 @@ public abstract class JSONPath {
                     throw new JSONException("TODO : " + jsonReader.ch);
             }
 
-            Segment right = parseFilter();
+            JSONPathSegment right = parseFilter();
             if (segment instanceof GroupFilter) {
                 GroupFilter group = (GroupFilter) segment;
                 if (group.and == and) {
@@ -6730,7 +4438,7 @@ public abstract class JSONPath {
             return new GroupFilter(filters, and);
         }
 
-        Segment parseFilter() {
+        JSONPathSegment parseFilter() {
             boolean parentheses = jsonReader.nextIfMatch('(');
 
             boolean at = jsonReader.ch == '@';
@@ -6779,7 +4487,7 @@ public abstract class JSONPath {
                     operator = parseOperator(jsonReader);
                 }
 
-                Segment segment = null;
+                JSONPathSegment segment = null;
                 if (jsonReader.isNumber()) {
                     Number number = jsonReader.readNumber();
                     if (number instanceof Integer || number instanceof Long) {
@@ -6907,7 +4615,7 @@ public abstract class JSONPath {
                             ? Pattern.compile(regex, Pattern.CASE_INSENSITIVE)
                             : Pattern.compile(regex);
 
-                    Segment segment = new NameRLikeSegment(fieldName, hashCode, pattern, operator == Operator.NOT_RLIKE);
+                    JSONPathSegment segment = new NameRLikeSegment(fieldName, hashCode, pattern, operator == Operator.NOT_RLIKE);
                     if (!jsonReader.nextIfMatch(')')) {
                         throw new JSONException(jsonReader.info("jsonpath syntax error"));
                     }
@@ -6921,7 +4629,7 @@ public abstract class JSONPath {
                     }
                     jsonReader.next();
 
-                    Segment segment;
+                    JSONPathSegment segment;
                     if (jsonReader.isString()) {
                         List<String> list = new ArrayList<>();
                         while (jsonReader.isString()) {
@@ -6964,7 +4672,7 @@ public abstract class JSONPath {
                     }
                     jsonReader.next();
 
-                    Segment segment;
+                    JSONPathSegment segment;
                     if (jsonReader.isString()) {
                         List<String> list = new ArrayList<>();
                         while (jsonReader.isString()) {
@@ -7012,7 +4720,7 @@ public abstract class JSONPath {
                 }
                 case BETWEEN:
                 case NOT_BETWEEN: {
-                    Segment segment;
+                    JSONPathSegment segment;
                     if (jsonReader.isNumber()) {
                         Number begin = jsonReader.readNumber();
                         String and = jsonReader.readFieldNameUnquote();
@@ -7037,7 +4745,7 @@ public abstract class JSONPath {
                     break;
             }
 
-            Segment segment = null;
+            JSONPathSegment segment = null;
             switch (jsonReader.ch) {
                 case '-':
                 case '+':
