@@ -7,8 +7,8 @@ import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JSONPathTest6 {
-    JSONObject object = JSONObject.of("id", 1001, "name", "DataWorks");
+public class JSONPathTest7 {
+    JSONObject object = JSONObject.of("name", "DataWorks", "id", 1001);
     String json = object.toString();
     byte[] jsonBytes = json.getBytes();
     byte[] jsonbBytes = object.toJSONBBytes();

@@ -1,12 +1,14 @@
 package com.alibaba.fastjson2;
 
-final class JSONPathSingleNameInteger
+import java.math.BigDecimal;
+
+final class JSONPathSingleNameDecimal
         extends JSONPathTyped {
     final long nameHashCode;
     final String name;
 
-    public JSONPathSingleNameInteger(JSONPathSingleName jsonPath) {
-        super(jsonPath, Integer.class);
+    public JSONPathSingleNameDecimal(JSONPathSingleName jsonPath) {
+        super(jsonPath, BigDecimal.class);
         this.nameHashCode = jsonPath.nameHashCode;
         this.name = jsonPath.name;
     }
@@ -28,7 +30,7 @@ final class JSONPathSingleNameInteger
                         continue;
                     }
 
-                    return jsonReader.readInt32();
+                    return jsonReader.readBigDecimal();
                 }
             }
 
@@ -45,7 +47,7 @@ final class JSONPathSingleNameInteger
                     continue;
                 }
 
-                return jsonReader.readInt32();
+                return jsonReader.readBigDecimal();
             }
         }
 
