@@ -1780,10 +1780,13 @@ class JSONWriterUTF16
 
         int len = 17;
 
+        char firstZoneChar = '\0';
         int zoneSize;
         if ("UTC".equals(zoneId)) {
             zoneId = "Z";
             zoneSize = 1;
+        } else if (zoneId.length() != 0 && ((firstZoneChar = zoneId.charAt(0)) == '+' || firstZoneChar == '-')) {
+            zoneSize = zoneId.length();
         } else {
             zoneSize = 2 + zoneId.length();
         }
@@ -1843,6 +1846,8 @@ class JSONWriterUTF16
         }
         if (zoneSize == 1) {
             chars[off + len - 2] = 'Z';
+        } else if (firstZoneChar == '+' || firstZoneChar == '-') {
+            zoneId.getChars(0, zoneId.length(), chars, off + len - zoneSize - 1);
         } else {
             chars[off + len - zoneSize - 1] = '[';
             zoneId.getChars(0, zoneId.length(), chars, off + len - zoneSize);
