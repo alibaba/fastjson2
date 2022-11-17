@@ -50,7 +50,7 @@ class JSONPathParser {
     JSONPath parse(JSONPath.Feature... features) {
         if (dollar && jsonReader.ch == EOI) {
             if (negative) {
-                return new JSONPathSingle(JSONPathSegmentFunction.FUNCTION_NEGATIVE, path);
+                return new JSONPathSingle(JSONPathFunction.FUNC_NEGATIVE, path);
             } else {
                 return JSONPath.RootPath.INSTANCE;
             }
@@ -80,7 +80,7 @@ class JSONPathParser {
                 throw new JSONException("syntax error " + path);
             }
 
-            return new JSONPathTwoSegment(path, segment, JSONPathSegmentFunction.FUNCTION_EXISTS);
+            return new JSONPathTwoSegment(path, segment, JSONPathFunction.FUNC_EXISTS);
         }
 
         while (jsonReader.ch != EOI) {
@@ -125,14 +125,14 @@ class JSONPathParser {
 
         if (negative) {
             if (segmentIndex == 1) {
-                second = JSONPathSegmentFunction.FUNCTION_NEGATIVE;
+                second = JSONPathFunction.FUNC_NEGATIVE;
             } else if (segmentIndex == 2) {
                 segments = new ArrayList<>();
                 segments.add(first);
                 segments.add(second);
-                segments.add(JSONPathSegmentFunction.FUNCTION_NEGATIVE);
+                segments.add(JSONPathFunction.FUNC_NEGATIVE);
             } else {
-                segments.add(JSONPathSegmentFunction.FUNCTION_NEGATIVE);
+                segments.add(JSONPathFunction.FUNC_NEGATIVE);
             }
             segmentIndex++;
         }
@@ -347,23 +347,32 @@ class JSONPathParser {
                             segment = JSONPathSegment.SumSegment.INSTANCE;
                             break;
                         case "type":
-                            segment = JSONPathSegmentFunction.FUNCTION_TYPE;
+                            segment = JSONPathFunction.FUNC_TYPE;
                             break;
                         case "floor":
-                            segment = JSONPathSegmentFunction.FUNCTION_FLOOR;
+                            segment = JSONPathFunction.FUNC_FLOOR;
                             break;
                         case "ceil":
                         case "ceiling":
-                            segment = JSONPathSegmentFunction.FUNCTION_CEIL;
+                            segment = JSONPathFunction.FUNC_CEIL;
                             break;
                         case "double":
-                            segment = JSONPathSegmentFunction.FUNCTION_DOUBLE;
+                            segment = JSONPathFunction.FUNC_DOUBLE;
                             break;
                         case "abs":
-                            segment = JSONPathSegmentFunction.FUNCTION_ABS;
+                            segment = JSONPathFunction.FUNC_ABS;
+                            break;
+                        case "lower":
+                            segment = JSONPathFunction.FUNC_LOWER;
+                            break;
+                        case "upper":
+                            segment = JSONPathFunction.FUNC_UPPER;
+                            break;
+                        case "trim":
+                            segment = JSONPathFunction.FUNC_TRIM;
                             break;
                         case "negative":
-                            segment = JSONPathSegmentFunction.FUNCTION_NEGATIVE;
+                            segment = JSONPathFunction.FUNC_NEGATIVE;
                             break;
                         default:
                             throw new JSONException("not support syntax, path : " + path);
@@ -566,11 +575,11 @@ class JSONPathParser {
             switch (functionName) {
                 case "type":
                     hashCode = 0;
-                    function = JSONPathSegmentFunction.TypeFunction.INSTANCE;
+                    function = JSONPathFunction.TypeFunction.INSTANCE;
                     break;
                 case "size":
                     hashCode = 0;
-                    function = JSONPathSegmentFunction.SizeFunction.INSTANCE;
+                    function = JSONPathFunction.SizeFunction.INSTANCE;
                     break;
                 case "contains":
                     hashCode = 0;
