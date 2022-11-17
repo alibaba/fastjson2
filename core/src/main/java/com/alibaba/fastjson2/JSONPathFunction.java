@@ -13,20 +13,23 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-final class JSONPathSegmentFunction
+final class JSONPathFunction
         extends JSONPathSegment
         implements JSONPathSegment.EvalSegment {
-    static JSONPathSegmentFunction FUNCTION_TYPE = new JSONPathSegmentFunction(JSONPathSegmentFunction::type);
-    static JSONPathSegmentFunction FUNCTION_DOUBLE = new JSONPathSegmentFunction(new ToDouble(null));
-    static JSONPathSegmentFunction FUNCTION_FLOOR = new JSONPathSegmentFunction(JSONPathSegmentFunction::floor);
-    static JSONPathSegmentFunction FUNCTION_CEIL = new JSONPathSegmentFunction(JSONPathSegmentFunction::ceil);
-    static JSONPathSegmentFunction FUNCTION_ABS = new JSONPathSegmentFunction(JSONPathSegmentFunction::abs);
-    static JSONPathSegmentFunction FUNCTION_NEGATIVE = new JSONPathSegmentFunction(JSONPathSegmentFunction::negative);
-    static JSONPathSegmentFunction FUNCTION_EXISTS = new JSONPathSegmentFunction(JSONPathSegmentFunction::exists);
+    static JSONPathFunction FUNC_TYPE = new JSONPathFunction(JSONPathFunction::type);
+    static JSONPathFunction FUNC_DOUBLE = new JSONPathFunction(new ToDouble(null));
+    static JSONPathFunction FUNC_FLOOR = new JSONPathFunction(JSONPathFunction::floor);
+    static JSONPathFunction FUNC_CEIL = new JSONPathFunction(JSONPathFunction::ceil);
+    static JSONPathFunction FUNC_ABS = new JSONPathFunction(JSONPathFunction::abs);
+    static JSONPathFunction FUNC_NEGATIVE = new JSONPathFunction(JSONPathFunction::negative);
+    static JSONPathFunction FUNC_EXISTS = new JSONPathFunction(JSONPathFunction::exists);
+    static JSONPathFunction FUNC_LOWER = new JSONPathFunction(JSONPathFunction::lower);
+    static JSONPathFunction FUNC_UPPER = new JSONPathFunction(JSONPathFunction::upper);
+    static JSONPathFunction FUNC_TRIM = new JSONPathFunction(JSONPathFunction::trim);
 
     final Function function;
 
-    public JSONPathSegmentFunction(Function function) {
+    public JSONPathFunction(Function function) {
         this.function = function;
     }
 
@@ -265,6 +268,45 @@ final class JSONPathSegmentFunction
         }
 
         return "object";
+    }
+
+    static Object lower(Object value) {
+        if (value == null) {
+            return null;
+        }
+        String str;
+        if (value instanceof String) {
+            str = (String) value;
+        } else {
+            str = value.toString();
+        }
+        return str.toLowerCase();
+    }
+
+    static Object upper(Object value) {
+        if (value == null) {
+            return null;
+        }
+        String str;
+        if (value instanceof String) {
+            str = (String) value;
+        } else {
+            str = value.toString();
+        }
+        return str.toUpperCase();
+    }
+
+    static Object trim(Object value) {
+        if (value == null) {
+            return null;
+        }
+        String str;
+        if (value instanceof String) {
+            str = (String) value;
+        } else {
+            str = value.toString();
+        }
+        return str.trim();
     }
 
     @Override

@@ -304,7 +304,7 @@ public abstract class JSONPath {
     public void setCallback(Object object, Function callback) {
         setCallback(
                 object,
-                new JSONPathSegmentFunction.BiFunctionAdapter(callback)
+                new JSONPathFunction.BiFunctionAdapter(callback)
         );
     }
 
