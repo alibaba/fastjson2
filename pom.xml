@@ -52,7 +52,6 @@
     </properties>
 
     <modules>
-        <module>adapter-jackson</module>
         <module>benchmark</module>
         <module>core</module>
         <module>extension</module>
