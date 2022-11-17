@@ -5,8 +5,9 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 import java.util.Date;
+import java.util.function.BiFunction;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONPathTypedMultiTest {
     JSONObject object = JSONObject.of("id", 1001, "name", "DataWorks", "date", "2017-07-14");
@@ -17,6 +18,10 @@ public class JSONPathTypedMultiTest {
                 new String[]{"$.id", "$.name", "$.date"},
                 new Type[]{Long.class, String.class, Date.class}
         );
+        assertTrue(jsonPath.isRef());
+        assertFalse(jsonPath.isPrevious());
+        assertFalse(jsonPath.contains(JSONObject.of()));
+        assertTrue(jsonPath.contains(object));
 
         Object[] expected = new Object[]{1001L, "DataWorks", DateUtils.parseDate("2017-07-14")};
         {
@@ -27,6 +32,10 @@ public class JSONPathTypedMultiTest {
         String jsonStr = object.toString();
         Object[] result = (Object[]) jsonPath.extract(jsonStr);
         assertArrayEquals(expected, result);
+        assertEquals(
+                "[1001,\"DataWorks\",\"2017-07-14 00:00:00\"]",
+                jsonPath.extractScalar(JSONReader.of(object.toString()))
+        );
     }
 
     @Test
@@ -127,5 +136,57 @@ public class JSONPathTypedMultiTest {
         String jsonStr = root.toString();
         Object[] result = (Object[]) jsonPath.extract(jsonStr);
         assertArrayEquals(expected, result);
+    }
+
+    @Test
+    public void test6() {
+        JSONPathTypedMulti jsonPath = (JSONPathTypedMulti) JSONPath.of(
+                new String[]{"$.id", "$.values[0].name", "$.values[0].date"},
+                new Type[]{Long.class, String.class, Date.class}
+        );
+        assertThrows(
+                JSONException.class,
+                () -> jsonPath.set(new Object(), new Object())
+        );
+        assertThrows(
+                JSONException.class,
+                () -> jsonPath.set(new Object(), new Object(), JSONReader.Feature.ErrorOnEnumNotMatch)
+        );
+        assertThrows(
+                JSONException.class,
+                () -> jsonPath.setCallback(new Object(), (BiFunction) null)
+        );
+        assertThrows(
+                JSONException.class,
+                () -> jsonPath.setInt(new Object(), 1)
+        );
+        assertThrows(
+                JSONException.class,
+                () -> jsonPath.setLong(new Object(), 1)
+        );
+        assertThrows(
+                JSONException.class,
+                () -> jsonPath.remove(new Object())
+        );
+    }
+
+    @Test
+    public void test7() {
+        JSONPathTypedMulti jsonPath = (JSONPathTypedMulti) JSONPath.of(
+                new String[]{"$", "$.values[0].name", "$.values[0].date"},
+                new Type[]{JSONObject.class, String.class, Date.class}
+        );
+        assertFalse(jsonPath.contains(object));
+        assertTrue(jsonPath.isRef());
+    }
+
+    @Test
+    public void test8() {
+        JSONPathTypedMulti jsonPath = (JSONPathTypedMulti) JSONPath.of(
+                new String[]{"$.id.abs()", "$.values[0].name", "$.values[0].date"},
+                new Type[]{Integer.class, String.class, Date.class}
+        );
+        assertTrue(jsonPath.contains(object));
+        assertFalse(jsonPath.isRef());
     }
 }

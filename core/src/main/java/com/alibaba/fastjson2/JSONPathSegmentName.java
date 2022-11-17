@@ -371,8 +371,8 @@ class JSONPathSegmentName
     public void accept(JSONReader jsonReader, JSONPath.Context context) {
         if (context.parent != null
                 && (context.parent.eval
-                || context.parent.current instanceof JSONPath.FilterSegment
-                || context.parent.current instanceof JSONPath.MultiIndexSegment)
+                || context.parent.current instanceof JSONPathFilter
+                || context.parent.current instanceof MultiIndexSegment)
         ) {
             eval(context);
             return;
@@ -408,7 +408,7 @@ class JSONPathSegmentName
                 return;
             } else if (jsonReader.isArray()
                     && context.parent != null
-                    && context.parent.current instanceof JSONPath.AllSegment) {
+                    && context.parent.current instanceof AllSegment) {
                 List values = new JSONArray();
                 int itemCnt = jsonReader.startArray();
                 for (int i = 0; i < itemCnt; i++) {
@@ -489,9 +489,9 @@ class JSONPathSegmentName
                         val = jsonReader.getNumber();
                         break;
                     case '[':
-                        if (context.next != null && !(context.next instanceof JSONPath.EvalSegment)
+                        if (context.next != null && !(context.next instanceof EvalSegment)
                                 && !(context.next instanceof JSONPathSegmentName)
-                                && !(context.next instanceof JSONPath.AllSegment)) {
+                                && !(context.next instanceof AllSegment)) {
                             break _for;
                         }
                         val = jsonReader.readArray();
@@ -499,8 +499,8 @@ class JSONPathSegmentName
                         break;
                     case '{':
                         if (context.next != null
-                                && !(context.next instanceof JSONPath.EvalSegment)
-                                && !(context.next instanceof JSONPath.AllSegment)) {
+                                && !(context.next instanceof EvalSegment)
+                                && !(context.next instanceof AllSegment)) {
                             break _for;
                         }
                         val = jsonReader.readObject();
@@ -525,7 +525,7 @@ class JSONPathSegmentName
                 context.value = val;
                 break;
             }
-        } else if (jsonReader.ch == '[' && context.parent != null && context.parent.current instanceof JSONPath.AllSegment) {
+        } else if (jsonReader.ch == '[' && context.parent != null && context.parent.current instanceof AllSegment) {
             jsonReader.next();
             List values = new JSONArray();
             while (jsonReader.ch != EOI) {

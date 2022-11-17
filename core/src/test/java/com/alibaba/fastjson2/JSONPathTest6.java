@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -71,5 +72,6 @@ public class JSONPathTest6 {
         assertEquals(id, jsonPath.extract(JSONReader.ofJSONB(jsonbBytes)));
         assertEquals(id, jsonPath.extract(json));
         assertEquals(id, jsonPath.extract(jsonBytes));
+        assertEquals(id, jsonPath.extract(jsonBytes, 0, jsonBytes.length, StandardCharsets.US_ASCII));
     }
 }

@@ -421,7 +421,7 @@ final class JSONPathSegmentIndex
     public void accept(JSONReader jsonReader, JSONPath.Context context) {
         if (context.parent != null
                 && (context.parent.eval
-                || (context.parent.current instanceof JSONPath.CycleNameSegment && context.next == null))
+                || (context.parent.current instanceof CycleNameSegment && context.next == null))
         ) {
             eval(context);
             return;
@@ -493,13 +493,13 @@ final class JSONPathSegmentIndex
                     val = jsonReader.getNumber();
                     break;
                 case '[':
-                    if (context.next != null && !(context.next instanceof JSONPath.EvalSegment)) {
+                    if (context.next != null && !(context.next instanceof EvalSegment)) {
                         break _for;
                     }
                     val = jsonReader.readArray();
                     break;
                 case '{':
-                    if (context.next != null && !(context.next instanceof JSONPath.EvalSegment)) {
+                    if (context.next != null && !(context.next instanceof EvalSegment)) {
                         break _for;
                     }
                     val = jsonReader.readObject();

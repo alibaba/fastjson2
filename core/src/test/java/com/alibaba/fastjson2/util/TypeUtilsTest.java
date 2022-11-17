@@ -379,7 +379,8 @@ public class TypeUtilsTest {
 
         assertEquals(
                 Integer.valueOf(123),
-                ((Bean<Integer>) TypeUtils.cast(map, new TypeReference<Bean<Integer>>(){}.getType())).id
+                ((Bean<Integer>) TypeUtils.cast(map, new TypeReference<Bean<Integer>>() {
+                }.getType())).id
         );
 
         List<Map> list = new ArrayList<>();
@@ -387,8 +388,142 @@ public class TypeUtilsTest {
 
         assertEquals(
                 Integer.valueOf(123),
-                ((List<Bean<Integer>>) TypeUtils.cast(list, new TypeReference<List<Bean<Integer>>>(){}.getType())).get(0).id
+                ((List<Bean<Integer>>) TypeUtils.cast(list, new TypeReference<List<Bean<Integer>>>() {
+                }.getType())).get(0).id
         );
+    }
+
+    @Test
+    public void testToStringArray() {
+        assertNull(TypeUtils.toStringArray(null));
+
+        String[] strings = {"1", "2", "3"};
+        assertArrayEquals(strings, TypeUtils.toStringArray(strings));
+        assertArrayEquals(strings, TypeUtils.toStringArray(Arrays.asList(strings)));
+        assertArrayEquals(strings, TypeUtils.toStringArray(new Object[]{1, 2, 3}));
+    }
+
+    @Test
+    public void testCast() {
+        assertNull(TypeUtils.cast(null, new Type[0]));
+
+        assertArrayEquals(
+                new Object[]{
+                        1,
+                        2L,
+                        BigDecimal.valueOf(3)
+                },
+                TypeUtils.cast(
+                        new String[]{"1", "2", "3"},
+                        new Type[]{Integer.class, Long.class, BigDecimal.class})
+        );
+    }
+
+    @Test
+    public void loadClass() {
+        assertSame(
+                Collections.EMPTY_MAP.getClass(),
+                TypeUtils.loadClass("java.util.Collections$EmptyMap")
+        );
+        assertSame(
+                Collections.EMPTY_SET.getClass(),
+                TypeUtils.loadClass("java.util.Collections$EmptySet")
+        );
+        assertSame(
+                Collections.unmodifiableList(new ArrayList<>()).getClass(),
+                TypeUtils.loadClass("java.util.Collections$UnmodifiableRandomAccessList")
+        );
+        assertSame(
+                java.util.Optional.class,
+                TypeUtils.loadClass("java.util.Optional")
+        );
+        assertSame(
+                java.util.OptionalInt.class,
+                TypeUtils.loadClass("java.util.OptionalInt")
+        );
+        assertSame(
+                java.util.OptionalLong.class,
+                TypeUtils.loadClass("java.util.OptionalLong")
+        );
+        assertSame(
+                List.class,
+                TypeUtils.loadClass("java.util.List")
+        );
+        assertSame(
+                List.class,
+                TypeUtils.loadClass("List")
+        );
+        assertSame(
+                Set.class,
+                TypeUtils.loadClass("java.util.Set")
+        );
+        assertSame(
+                String[].class,
+                TypeUtils.loadClass("[String")
+        );
+        assertSame(
+                String[].class,
+                TypeUtils.loadClass("String[]")
+        );
+        assertSame(
+                byte[].class,
+                TypeUtils.loadClass("byte[]")
+        );
+        assertSame(
+                short[].class,
+                TypeUtils.loadClass("short[]")
+        );
+        assertSame(
+                short[].class,
+                TypeUtils.loadClass("[S")
+        );
+        assertSame(
+                int[].class,
+                TypeUtils.loadClass("[I")
+        );
+        assertSame(
+                int[].class,
+                TypeUtils.loadClass("int[]")
+        );
+        assertSame(
+                long[].class,
+                TypeUtils.loadClass("[J")
+        );
+        assertSame(
+                long[].class,
+                TypeUtils.loadClass("long[]")
+        );
+        assertSame(
+                float[].class,
+                TypeUtils.loadClass("[F")
+        );
+        assertSame(
+                float[].class,
+                TypeUtils.loadClass("float[]")
+        );
+        assertSame(
+                double[].class,
+                TypeUtils.loadClass("[D")
+        );
+        assertSame(
+                double[].class,
+                TypeUtils.loadClass("double[]")
+        );
+        assertSame(
+                boolean[].class,
+                TypeUtils.loadClass("[Z")
+        );
+        assertSame(
+                boolean[].class,
+                TypeUtils.loadClass("boolean[]")
+        );
+    }
+
+    @Test
+    public void getInnerMap() {
+        com.alibaba.fastjson.JSONObject object = new com.alibaba.fastjson.JSONObject();
+        Map innerMap = TypeUtils.getInnerMap(object);
+        assertSame(object.getInnerMap(), innerMap);
     }
 
     public static class Bean<T> {

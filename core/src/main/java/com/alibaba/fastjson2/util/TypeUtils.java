@@ -160,14 +160,28 @@ public class TypeUtils {
     }
 
     public static Object[] cast(Object obj, Type[] types) {
+        if (obj == null) {
+            return null;
+        }
+
         Object[] array = new Object[types.length];
 
         if (obj instanceof Collection) {
-            Collection collection = (Collection) obj;
             int i = 0;
             for (Object item : (Collection) obj) {
                 int index = i++;
                 array[index] = TypeUtils.cast(item, types[index]);
+            }
+        } else {
+            Class<?> objectClass = obj.getClass();
+            if (objectClass.isArray()) {
+                int length = Array.getLength(obj);
+                for (int i = 0; i < array.length && i < length; i++) {
+                    Object item = Array.get(obj, i);
+                    array[i] = TypeUtils.cast(item, types[i]);
+                }
+            } else {
+                throw new JSONException("can not cast to types " + JSON.toJSONString(types) + " from " + objectClass);
             }
         }
 
@@ -1166,20 +1180,13 @@ public class TypeUtils {
         if (className.length() >= 192) {
             return null;
         }
-        if (className.startsWith("java.util.ImmutableCollections$")) {
-            try {
-                return Class.forName(className);
-            } catch (ClassNotFoundException e) {
-                return CLASS_UNMODIFIABLE_LIST;
-            }
-        }
 
         switch (className) {
             case "O":
             case "Object":
             case "java.lang.Object":
                 return Object.class;
-            case "class java.util.Collections$EmptyMap":
+            case "java.util.Collections$EmptyMap":
                 return Collections.EMPTY_MAP.getClass();
             case "java.util.Collections$EmptyList":
                 return Collections.EMPTY_LIST.getClass();
@@ -1322,6 +1329,14 @@ public class TypeUtils {
             return mapping;
         }
 
+        if (className.startsWith("java.util.ImmutableCollections$")) {
+            try {
+                return Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                return CLASS_UNMODIFIABLE_LIST;
+            }
+        }
+
         if (className.charAt(0) == 'L' && className.charAt(className.length() - 1) == ';') {
             className = className.substring(1, className.length() - 1);
         }
@@ -1447,15 +1462,5 @@ public class TypeUtils {
         }
 
         return object;
-    }
-
-    public static Type getCollectionItemType(Type fieldType) {
-        if (fieldType instanceof ParameterizedType) {
-            return getCollectionItemType((ParameterizedType) fieldType);
-        }
-        if (fieldType instanceof Class<?>) {
-            return getCollectionItemType((Class<?>) fieldType);
-        }
-        return Object.class;
     }
 }

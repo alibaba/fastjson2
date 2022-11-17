@@ -82,7 +82,10 @@ class JSONPathTyped
         }
 
         if (jsonPath instanceof JSONPathTyped) {
-            return jsonPath;
+            JSONPathTyped jsonPathTyped = (JSONPathTyped) jsonPath;
+            if (jsonPathTyped.type.equals(type)) {
+                return jsonPath;
+            }
         }
 
         if (jsonPath instanceof JSONPathSingleName) {

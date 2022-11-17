@@ -22,12 +22,6 @@ final class JSONPathSingleName
         this.nameHashCode = segment.nameHashCode;
     }
 
-    public JSONPathSingleName(String path, JSONPathSegmentName segment, long features) {
-        super(path, features);
-        this.name = segment.name;
-        this.nameHashCode = segment.nameHashCode;
-    }
-
     @Override
     public Object eval(Object root) {
         Object value;
