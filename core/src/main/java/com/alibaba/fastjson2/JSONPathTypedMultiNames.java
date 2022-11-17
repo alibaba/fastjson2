@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.util.ObjectHolder;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -203,13 +204,40 @@ final class JSONPathTypedMultiNames
         }
 
         if (object instanceof Map) {
-            return objectReader.createInstance((Map) object, 0L);
+            Map map = (Map) object;
+            for (int i = 0; i < names.length; i++) {
+                Object result = map.get(names[i]);
+                Type type = types[i];
+                if (result != null && result.getClass() != type) {
+                    if (type == Long.class) {
+                        result = TypeUtils.toLong(result);
+                    } else if (type == BigDecimal.class) {
+                        result = TypeUtils.toBigDecimal(result);
+                    } else if (type == String[].class) {
+                        result = TypeUtils.toStringArray(result);
+                    } else {
+                        result = TypeUtils.cast(result, type);
+                    }
+                }
+                array[i] = result;
+            }
         } else {
             for (int i = 0; i < paths.length; i++) {
                 JSONPath jsonPath = namePaths[i];
                 Type type = types[i];
                 Object result = jsonPath.eval(object);
-                array[i] = TypeUtils.cast(result, type);
+                if (result != null && result.getClass() != type) {
+                    if (type == Long.class) {
+                        result = TypeUtils.toLong(result);
+                    } else if (type == BigDecimal.class) {
+                        result = TypeUtils.toBigDecimal(result);
+                    } else if (type == String[].class) {
+                        result = TypeUtils.toStringArray(result);
+                    } else {
+                        result = TypeUtils.cast(result, type);
+                    }
+                }
+                array[i] = result;
             }
         }
 

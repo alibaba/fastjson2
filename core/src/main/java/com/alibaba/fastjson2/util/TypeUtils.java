@@ -174,6 +174,36 @@ public class TypeUtils {
         return array;
     }
 
+    public static String[] toStringArray(Object object) {
+        if (object == null || object instanceof String[]) {
+            return (String[]) object;
+        }
+
+        if (object instanceof Collection) {
+            Collection collection = (Collection) object;
+            String[] array = new String[collection.size()];
+            int i = 0;
+            for (Object item : (Collection) object) {
+                int index = i++;
+                array[index] = item == null || (item instanceof String) ? (String) item : item.toString();
+            }
+            return array;
+        }
+
+        Class<?> objectClass = object.getClass();
+        if (objectClass.isArray()) {
+            int length = Array.getLength(object);
+            String[] array = new String[length];
+            for (int i = 0; i < array.length; i++) {
+                Object item = Array.get(object, i);
+                array[i] = item == null || (item instanceof String) ? (String) item : item.toString();
+            }
+            return array;
+        }
+
+        return cast(object, String[].class);
+    }
+
     public static <T> T cast(Object obj, Type type) {
         if (type instanceof Class) {
             return (T) cast(obj, (Class) type);
