@@ -5711,6 +5711,17 @@ class JSONReaderJSONB
     }
 
     @Override
+    public SavePoint mark() {
+        return new SavePoint(this.offset, this.type);
+    }
+
+    @Override
+    public void reset(SavePoint savePoint) {
+        this.offset = savePoint.offset;
+        this.type = (byte) savePoint.current;
+    }
+
+    @Override
     public final void close() {
         if (valueBytes != null) {
             JSONFactory.releaseByteArray(cachedIndex, valueBytes);
