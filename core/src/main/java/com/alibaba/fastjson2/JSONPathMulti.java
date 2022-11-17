@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-final class JSONPathPathMulti
+final class JSONPathMulti
         extends JSONPath {
     final List<JSONPathSegment> segments;
     final boolean ref;
 
-    JSONPathPathMulti(String path, List<JSONPathSegment> segments, Feature... features) {
+    JSONPathMulti(String path, List<JSONPathSegment> segments, Feature... features) {
         super(path, features);
         this.segments = segments;
 

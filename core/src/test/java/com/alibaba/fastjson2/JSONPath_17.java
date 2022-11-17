@@ -1,9 +1,7 @@
-package com.alibaba.fastjson2.jsonpath;
+package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.JSONPath;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,12 +13,8 @@ public class JSONPath_17 {
     @Test
     public void test_for_jsonpath() throws Exception {
         String str = "cartGroups[0].cartItemGroups[0].cartItems[0].item.category.categoryExtra.stdCategoryDO.pathList";
-        JSONPath path = JSONPath.of(str);
-        assertEquals("com.alibaba.fastjson2.JSONPathPathMulti", path.getClass().getName());
-        Class<?> pathClass = Class.forName("com.alibaba.fastjson2.JSONPathPathMulti");
-        Field field = pathClass.getDeclaredField("segments");
-        field.setAccessible(true);
-        List segments = (List) field.get(path);
+        JSONPathMulti path = (JSONPathMulti) JSONPath.of(str);
+        List segments = path.segments;
         assertEquals(11, segments.size());
     }
 

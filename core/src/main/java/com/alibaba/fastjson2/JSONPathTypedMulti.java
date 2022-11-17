@@ -70,42 +70,37 @@ class JSONPathTypedMulti
 
     @Override
     public String extractScalar(JSONReader jsonReader) {
-        Object[] array = new Object[paths.length];
-        for (int i = 0; i < paths.length; i++) {
-            JSONPath jsonPath = paths[i];
-            Object result = jsonPath.extract(jsonReader);
-            array[i] = TypeUtils.cast(result, types);
-        }
-        return JSON.toJSONString(array);
+        Object object = extract(jsonReader);
+        return JSON.toJSONString(object);
     }
 
     @Override
     public void set(Object object, Object value) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("unsupported operation");
     }
 
     @Override
     public void set(Object object, Object value, JSONReader.Feature... readerFeatures) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("unsupported operation");
     }
 
     @Override
     public void setCallback(Object object, BiFunction callback) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("unsupported operation");
     }
 
     @Override
     public void setInt(Object object, int value) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("unsupported operation");
     }
 
     @Override
     public void setLong(Object object, long value) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("unsupported operation");
     }
 
     @Override
     public boolean remove(Object object) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("unsupported operation");
     }
 }

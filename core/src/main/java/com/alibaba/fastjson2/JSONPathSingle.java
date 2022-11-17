@@ -78,7 +78,7 @@ final class JSONPathSingle
     @Override
     public Object extract(JSONReader jsonReader) {
         Context context = new Context(this, null, segment, null, 0);
-        if (segment instanceof EvalSegment) {
+        if (segment instanceof JSONPathSegment.EvalSegment) {
             context.root = jsonReader.readAny();
             segment.eval(context);
         } else {

@@ -1,19 +1,17 @@
-package com.alibaba.fastjson2.jsonpath;
+package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2_vo.Int1;
 import com.alibaba.fastjson2_vo.IntField1;
 import com.alibaba.fastjson2_vo.Integer1;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PathTest3 {
+public class JSONPathTest3 {
     @Test
     public void test_0() {
         Integer[] values = new Integer[]{1, 2, 3};
@@ -634,13 +632,10 @@ public class PathTest3 {
 
     @Test
     public void test_seg_toString() throws Exception {
-        JSONPath path = JSONPath.of("$..book[?(@.isbn)][0]");
+        JSONPathMulti path = (JSONPathMulti) JSONPath.of("$..book[?(@.isbn)][0]");
         assertEquals("$..book[?(@.isbn)][0]", path.toString());
 
-        Class<?> clazz = Class.forName("com.alibaba.fastjson2.JSONPathPathMulti");
-        Field field = clazz.getDeclaredField("segments");
-        field.setAccessible(true);
-        List segments = (List) field.get(path);
+        List segments = path.segments;
         assertEquals(3, segments.size());
         assertEquals("..book", segments.get(0).toString());
         assertEquals("?isbn", segments.get(1).toString());
@@ -648,13 +643,10 @@ public class PathTest3 {
 
     @Test
     public void test_seg_toString_1() throws Exception {
-        JSONPath path = JSONPath.of("$.book.author.id");
+        JSONPathMulti path = (JSONPathMulti) JSONPath.of("$.book.author.id");
         assertEquals("$.book.author.id", path.toString());
 
-        Class<?> clazz = Class.forName("com.alibaba.fastjson2.JSONPathPathMulti");
-        Field field = clazz.getDeclaredField("segments");
-        field.setAccessible(true);
-        List segments = (List) field.get(path);
+        List segments = path.segments;
         assertEquals(3, segments.size());
         assertEquals("book", segments.get(0).toString());
         assertEquals("author", segments.get(1).toString());
