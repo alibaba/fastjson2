@@ -3542,6 +3542,15 @@ public abstract class JSONReader
         }
     }
 
+    public SavePoint mark() {
+        return new SavePoint(this.offset, this.ch);
+    }
+
+    public void reset(SavePoint savePoint) {
+        this.offset = savePoint.offset;
+        this.ch = (char) savePoint.current;
+    }
+
     public String info() {
         return info(null);
     }
@@ -3555,5 +3564,15 @@ public abstract class JSONReader
 
     static boolean isFirstIdentifier(char ch) {
         return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '_' || ch == '$' || (ch >= '0' && ch <= '9') || ch > 0x7F;
+    }
+
+    public static class SavePoint {
+        protected final int offset;
+        protected final int current;
+
+        protected SavePoint(int offset, int current) {
+            this.offset = offset;
+            this.current = current;
+        }
     }
 }
