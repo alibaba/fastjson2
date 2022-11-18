@@ -3,8 +3,7 @@ package com.alibaba.fastjson.serializer;
 import com.alibaba.fastjson.JSON;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONSerializerTest {
     @Test
@@ -78,7 +77,9 @@ public class JSONSerializerTest {
 
     @Test
     public void writeNull() {
-        JSONSerializer writer = new JSONSerializer();
+        JSONSerializer writer = new JSONSerializer(SerializeConfig.global);
+        assertSame(SerializeConfig.global, writer.getMapping());
+        assertNotNull(writer.getWriter());
         writer.writeNull();
         assertEquals("null", writer.toString());
     }

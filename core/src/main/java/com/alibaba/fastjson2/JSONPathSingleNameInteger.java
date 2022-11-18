@@ -31,11 +31,7 @@ final class JSONPathSingleNameInteger
                     return jsonReader.readInt32();
                 }
             }
-
-            return null;
-        }
-
-        if (jsonReader.nextIfObjectStart()) {
+        } else if (jsonReader.nextIfObjectStart()) {
             while (!jsonReader.nextIfObjectEnd()) {
                 long nameHashCode = jsonReader.readFieldNameHashCode();
                 boolean match = nameHashCode == this.nameHashCode;

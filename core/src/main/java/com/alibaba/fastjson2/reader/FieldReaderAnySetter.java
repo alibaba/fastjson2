@@ -63,19 +63,6 @@ class FieldReaderAnySetter<T>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        if (initReader == null) {
-            initReader = jsonReader
-                    .getContext()
-                    .getObjectReader(fieldType);
-        }
-
-        Object value;
-        if (jsonReader.isJSONB()) {
-            value = initReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
-        } else {
-            value = initReader.readObject(jsonReader, fieldType, fieldName, features);
-        }
-
-        accept(object, value);
+        throw new UnsupportedOperationException();
     }
 }

@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.JSONReader;
 
 import java.io.Closeable;
 import java.lang.reflect.Type;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 
@@ -126,44 +127,80 @@ public class DefaultJSONParser
                 expect = ')';
                 break;
             case JSONToken.COMMA:
-                expect = ',';
-                break;
+                if (reader.hasComma() || reader.nextIfMatch(',')) {
+                    return;
+                }
+                throw new JSONException(
+                        "syntax error, expect ',', actual " + reader.current()
+                );
             case JSONToken.COLON:
                 expect = ':';
                 break;
             case JSONToken.TRUE:
-                if (reader.nextIfMatchIdent('t', 'r', 'u', 'e')) {
+                if (!reader.nextIfMatchIdent('t', 'r', 'u', 'e')) {
                     throw new JSONException(
                             "syntax error, expect true, actual " + reader.current()
                     );
                 }
                 return;
             case JSONToken.FALSE:
-                if (reader.nextIfMatchIdent('f', 'a', 'l', 's', 'e')) {
+                if (!reader.nextIfMatchIdent('f', 'a', 'l', 's', 'e')) {
                     throw new JSONException(
                             "syntax error, expect false, actual " + reader.current()
                     );
                 }
                 return;
             case JSONToken.NULL:
-                if (reader.nextIfNull()) {
+                if (!reader.nextIfNull()) {
                     throw new JSONException(
                             "syntax error, expect false, actual " + reader.current()
                     );
                 }
                 return;
+            case JSONToken.LITERAL_STRING: {
+                char ch = reader.current();
+                if (ch == '\"' || ch == '\'') {
+                    reader.readString();
+                    return;
+                }
+                throw new JSONException(
+                        "syntax error, expect string, actual " + ch
+                );
+            }
             case JSONToken.SET:
-                if (reader.nextIfSet()) {
+                if (!reader.nextIfSet()) {
                     throw new JSONException(
                             "syntax error, expect set, actual " + reader.current()
                     );
                 }
                 return;
+            case JSONToken.LITERAL_INT:
+            case JSONToken.LITERAL_FLOAT:
+                char ch = reader.current();
+                if (ch != '-' && ch != '+' && (ch < '0' || ch > '9')) {
+                    throw new JSONException(
+                            "syntax error, expect int, actual " + reader.current()
+                    );
+                }
+                Number number = reader.readNumber();
+                boolean isInt = number instanceof Integer || number instanceof Long || number instanceof BigInteger;
+                if (isInt) {
+                    if (token == JSONToken.LITERAL_INT) {
+                        return;
+                    }
+                } else {
+                    if (token == JSONToken.LITERAL_FLOAT) {
+                        return;
+                    }
+                }
+                throw new JSONException(
+                        "syntax error, expect int, actual " + reader.current()
+                );
             default:
                 throw new JSONException("not support accept token " + JSONToken.name(token));
         }
 
-        if (reader.nextIfMatch(expect)) {
+        if (!reader.nextIfMatch(expect)) {
             throw new JSONException(
                     "syntax error, expect " + JSONToken.name(token) + ", actual " + reader.current()
             );

@@ -37,6 +37,9 @@ public interface ObjectReader<T> {
         throw new UnsupportedOperationException(this.getClass().getName());
     }
 
+    default void acceptExtra(Object object, String fieldName, Object fieldValue) {
+    }
+
     default T createInstance(Map map, JSONReader.Feature... features) {
         long featuresValue = 0;
         for (JSONReader.Feature feature : features) {
@@ -78,12 +81,14 @@ public interface ObjectReader<T> {
         T object = createInstance(0L);
         for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             String entryKey = entry.getKey().toString();
+            Object fieldValue = entry.getValue();
+
             FieldReader fieldReader = getFieldReader(entryKey);
             if (fieldReader == null) {
+                acceptExtra(object, entryKey, entry.getValue());
                 continue;
             }
 
-            Object fieldValue = entry.getValue();
             Class fieldClass = fieldReader.fieldClass;
             Type fieldType = fieldReader.fieldType;
 

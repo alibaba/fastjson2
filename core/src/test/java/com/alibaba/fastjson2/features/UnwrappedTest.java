@@ -112,6 +112,18 @@ public class UnwrappedTest {
         assertEquals(bean2.properties, JSON.parseObject(str, ExtendableBean3.class, JSONReader.Feature.SupportSmartMatch).properties);
     }
 
+    @Test
+    public void test4() {
+        String str = "{\"name\":\"My bean\",\"attr1\":\"val1\"}";
+
+        ExtendableBean3 bean2 = JSON.parseObject(str)
+                .toJavaObject(ExtendableBean3.class);
+        assertEquals("My bean", bean2.name);
+        assertEquals("val1", bean2.properties.get("attr1"));
+
+        assertEquals(bean2.properties, JSON.parseObject(str, ExtendableBean3.class, JSONReader.Feature.SupportSmartMatch).properties);
+    }
+
     private static class ExtendableBean3 {
         private String name;
 

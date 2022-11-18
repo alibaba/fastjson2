@@ -115,8 +115,7 @@ public class JSONScanner
                 rawFeature = JSONReader.Feature.SupportArrayToBean;
                 break;
             case DisableFieldSmartMatch:
-                rawFeature = JSONReader.Feature.SupportSmartMatch;
-                break;
+                return !reader.isEnabled(JSONReader.Feature.SupportSmartMatch);
             case SupportAutoType:
                 rawFeature = JSONReader.Feature.SupportAutoType;
                 break;
@@ -241,37 +240,7 @@ public class JSONScanner
 
     @Override
     public final void nextToken(int expect) {
-        strVal = null;
-        boolean match = true;
-        switch (expect) {
-            case JSONToken.COLON:
-                match = reader.nextIfMatch(':');
-                break;
-            case JSONToken.LBRACE:
-                match = reader.nextIfMatch('{');
-                break;
-            case JSONToken.LBRACKET:
-                match = reader.nextIfMatch('[');
-                break;
-            case JSONToken.RBRACE:
-                match = reader.nextIfMatch('}');
-                break;
-            case JSONToken.RBRACKET:
-                match = reader.nextIfMatch(']');
-                break;
-            case JSONToken.SET:
-                match = reader.nextIfSet();
-                break;
-            case JSONToken.NULL:
-                match = reader.nextIfNull();
-                break;
-            default:
-                throw new JSONException("not support operation");
-        }
-
-        if (!match) {
-            throw new JSONException("not support operation");
-        }
+        nextToken();
     }
 
     @Override
