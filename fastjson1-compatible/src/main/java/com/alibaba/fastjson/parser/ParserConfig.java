@@ -86,11 +86,11 @@ public class ParserConfig {
     }
 
     public void addDeny(String name) {
-        provider.addAutoTypeDeny(name);
+        getProvider().addAutoTypeDeny(name);
     }
 
     public void addDenyInternal(String name) {
-        provider.addAutoTypeDeny(name);
+        getProvider().addAutoTypeDeny(name);
     }
 
     @Deprecated
@@ -99,11 +99,11 @@ public class ParserConfig {
     }
 
     public void addAutoTypeCheckHandler(AutoTypeCheckHandler h) {
-        if (provider.getAutoTypeBeforeHandler() != null) {
+        if (getProvider().getAutoTypeBeforeHandler() != null) {
             throw new JSONException("not support operation");
         }
 
-        provider.setAutoTypeBeforeHandler(h);
+        getProvider().setAutoTypeBeforeHandler(h);
     }
 
     /**
@@ -165,7 +165,7 @@ public class ParserConfig {
     }
 
     public ObjectDeserializer get(Type type) {
-        ObjectReader objectReader = provider.getObjectReader(type);
+        ObjectReader objectReader = getProvider().getObjectReader(type);
         if (objectReader instanceof ObjectDeserializer) {
             return (ObjectDeserializer) objectReader;
         }
@@ -173,7 +173,7 @@ public class ParserConfig {
     }
 
     public ObjectDeserializer getDeserializer(Type type) {
-        ObjectReader objectReader = provider.getObjectReader(type);
+        ObjectReader objectReader = getProvider().getObjectReader(type);
         if (objectReader instanceof ObjectDeserializer) {
             return (ObjectDeserializer) objectReader;
         }
@@ -185,7 +185,7 @@ public class ParserConfig {
             type = clazz;
         }
 
-        ObjectReader objectReader = provider.getObjectReader(type);
+        ObjectReader objectReader = getProvider().getObjectReader(type);
         if (objectReader instanceof ObjectDeserializer) {
             return (ObjectDeserializer) objectReader;
         }

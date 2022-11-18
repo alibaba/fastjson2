@@ -1,7 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.codec.FieldInfo;
@@ -54,33 +52,6 @@ public abstract class FieldReader<T>
             int ordinal,
             long features,
             String format,
-            Object defaultValue
-    ) {
-        this.fieldName = fieldName;
-        this.fieldType = fieldType;
-        this.fieldClass = fieldClass;
-        this.fieldClassSerializable = fieldClass != null && (Serializable.class.isAssignableFrom(fieldClass)
-                || !Modifier.isInterface(fieldClass.getModifiers()));
-        this.features = features;
-        this.fieldNameHash = Fnv.hashCode64(fieldName);
-        this.fieldNameHashLCase = Fnv.hashCode64LCase(fieldName);
-        this.ordinal = ordinal;
-        this.format = format;
-        this.locale = null;
-        this.defaultValue = defaultValue;
-        this.schema = null;
-        this.method = null;
-        this.field = null;
-        this.noneStaticMemberClass = BeanUtils.isNoneStaticMemberClass(null, fieldClass);
-    }
-
-    public FieldReader(
-            String fieldName,
-            Type fieldType,
-            Class fieldClass,
-            int ordinal,
-            long features,
-            String format,
             Locale locale,
             Object defaultValue,
             JSONSchema schema,
@@ -123,21 +94,6 @@ public abstract class FieldReader<T>
         if (reader != null) {
             return reader;
         }
-
-        if (format != null && !format.isEmpty()) {
-            String typeName = fieldType.getTypeName();
-            switch (typeName) {
-                case "java.sql.Time":
-                    return reader = JdbcSupport.createTimeReader((Class) fieldType, format, locale);
-                case "java.sql.Timestamp":
-                    return reader = JdbcSupport.createTimestampReader((Class) fieldType, format, locale);
-                case "java.sql.Date":
-                    return JdbcSupport.createDateReader((Class) fieldType, format, locale);
-                default:
-                    break;
-            }
-        }
-
         return reader = jsonReader.getObjectReader(fieldType);
     }
 
@@ -145,21 +101,6 @@ public abstract class FieldReader<T>
         if (reader != null) {
             return reader;
         }
-
-        if (format != null && !format.isEmpty()) {
-            String typeName = fieldType.getTypeName();
-            switch (typeName) {
-                case "java.sql.Time":
-                    return reader = JdbcSupport.createTimeReader((Class) fieldType, format, locale);
-                case "java.sql.Timestamp":
-                    return reader = JdbcSupport.createTimestampReader((Class) fieldType, format, locale);
-                case "java.sql.Date":
-                    return JdbcSupport.createDateReader((Class) fieldType, format, locale);
-                default:
-                    break;
-            }
-        }
-
         return reader = context.getObjectReader(fieldType);
     }
 
@@ -204,16 +145,6 @@ public abstract class FieldReader<T>
             path = referenceCache = JSONPath.of(reference);
         }
         jsonReader.addResolveTask(this, object, path);
-    }
-
-    public void addResolveTask(JSONReader jsonReader, Collection object, int i, String reference) {
-        JSONPath path;
-        if (referenceCache != null && referenceCache.toString().equals(reference)) {
-            path = referenceCache;
-        } else {
-            path = referenceCache = JSONPath.of(reference);
-        }
-        jsonReader.addResolveTask(object, i, path);
     }
 
     @Override
@@ -328,9 +259,7 @@ public abstract class FieldReader<T>
         readFieldValue(jsonReader, object);
     }
 
-    public Object readFieldValue(JSONReader jsonReader) {
-        return null;
-    }
+    public abstract Object readFieldValue(JSONReader jsonReader);
 
     public void accept(T object, boolean value) {
         accept(object, Boolean.valueOf(value));
@@ -369,26 +298,6 @@ public abstract class FieldReader<T>
     public abstract void readFieldValue(JSONReader jsonReader, T object);
 
     public ObjectReader checkObjectAutoType(JSONReader jsonReader) {
-        if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
-            long typeHash = jsonReader.readTypeHashCode();
-
-            boolean isSupportAutoType = jsonReader.isSupportAutoType(features);
-            if (!isSupportAutoType) {
-                throw new JSONException(jsonReader.info("autoType not support input " + jsonReader.getString()));
-            }
-
-            ObjectReader autoTypeObjectReader = jsonReader.getContext().getObjectReaderAutoType(typeHash);
-            if (autoTypeObjectReader == null) {
-                String typeName = jsonReader.getString();
-                autoTypeObjectReader = jsonReader.getContext().getObjectReaderAutoType(typeName, fieldClass, features);
-            }
-
-            if (autoTypeObjectReader == null) {
-                throw new JSONException("auotype not support : " + jsonReader.getString());
-            }
-
-            return autoTypeObjectReader;
-        }
         return null;
     }
 

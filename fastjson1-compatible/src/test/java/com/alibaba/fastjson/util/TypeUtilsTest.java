@@ -2,12 +2,15 @@ package com.alibaba.fastjson.util;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.parser.ParserConfig;
+import com.alibaba.fastjson2.util.BeanUtils;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,11 +22,25 @@ public class TypeUtilsTest {
         assertNull(TypeUtils.cast("NULL", (Type) HashMap.class, ParserConfig.global));
         assertNull(TypeUtils.cast("", (Type) HashMap.class, ParserConfig.global));
         assertNull(TypeUtils.cast(null, (Type) HashMap.class, ParserConfig.global));
+        assertNull(TypeUtils.castToChar(null));
+        assertNull(TypeUtils.castToShort(null));
+        assertNull(TypeUtils.castToByte(null));
+        assertNull(TypeUtils.castToFloat(null));
+        assertNull(TypeUtils.castToDate(null));
+        assertNull(TypeUtils.getGenericParamType(null));
+        assertEquals('A', TypeUtils.castToChar('A'));
+        assertEquals('A', TypeUtils.castToChar("A"));
 
         assertThrows(
                 Exception.class,
                 () -> TypeUtils.cast(new Object(), (Type) HashMap.class, ParserConfig.global)
         );
+    }
+
+    @Test
+    public void castToShort() {
+        assertNull(TypeUtils.castToShort(null));
+        assertEquals((short) 1, TypeUtils.castToShort(1));
     }
 
     @Test
@@ -137,5 +154,64 @@ public class TypeUtilsTest {
         assertEquals(0, TypeUtils.getKoltinConstructorParameters(Bean1.class).length);
         assertFalse(TypeUtils.isKotlinIgnore(Bean1.class, "aa"));
         assertEquals(0, TypeUtils.getParameterAnnotations(Bean1.class.getConstructor()).length);
+    }
+
+    @Test
+    public void checkPrimitiveArray() {
+        assertNotNull(TypeUtils.checkPrimitiveArray(new BeanUtils.GenericArrayTypeImpl(Integer.class)));
+        assertEquals(
+                int[][].class,
+                TypeUtils.checkPrimitiveArray(new BeanUtils.GenericArrayTypeImpl(int[].class))
+        );
+        assertEquals(
+                byte[].class,
+                TypeUtils.checkPrimitiveArray(new BeanUtils.GenericArrayTypeImpl(byte.class))
+        );
+        assertEquals(
+                short[].class,
+                TypeUtils.checkPrimitiveArray(new BeanUtils.GenericArrayTypeImpl(short.class))
+        );
+        assertEquals(
+                int[].class,
+                TypeUtils.checkPrimitiveArray(new BeanUtils.GenericArrayTypeImpl(int.class))
+        );
+        assertEquals(
+                long[].class,
+                TypeUtils.checkPrimitiveArray(new BeanUtils.GenericArrayTypeImpl(long.class))
+        );
+        assertEquals(
+                float[].class,
+                TypeUtils.checkPrimitiveArray(new BeanUtils.GenericArrayTypeImpl(float.class))
+        );
+        assertEquals(
+                double[].class,
+                TypeUtils.checkPrimitiveArray(new BeanUtils.GenericArrayTypeImpl(double.class))
+        );
+        assertEquals(
+                char[].class,
+                TypeUtils.checkPrimitiveArray(new BeanUtils.GenericArrayTypeImpl(char.class))
+        );
+        assertEquals(
+                boolean[].class,
+                TypeUtils.checkPrimitiveArray(new BeanUtils.GenericArrayTypeImpl(boolean.class))
+        );
+    }
+
+    @Test
+    public void castToJavaBean() {
+        Map map = new HashMap<>();
+        map.put("className", Bean.class.getName());
+        map.put("methodName", "m");
+        StackTraceElement element = TypeUtils.castToJavaBean(map, StackTraceElement.class, ParserConfig.global);
+        assertNotNull(element);
+    }
+
+    @Test
+    public void castToJavaBean1() {
+        Map map = new HashMap<>();
+        map.put("cCountry", Locale.US.getCountry());
+        map.put("language", Locale.US.getLanguage());
+        Locale element = TypeUtils.castToJavaBean(map, Locale.class, ParserConfig.global);
+        assertNotNull(element);
     }
 }

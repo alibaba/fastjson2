@@ -31,5 +31,10 @@ public class JSONTokenTest {
         assertEquals("Unknown", JSONToken.name(Integer.MAX_VALUE));
         assertEquals("Set", JSONToken.name(JSONToken.SET));
         assertEquals("TreeSet", JSONToken.name(JSONToken.TREE_SET));
+        assertEquals("undefined", JSONToken.name(JSONToken.UNDEFINED));
+        assertEquals("error", JSONToken.name(JSONToken.ERROR));
+        assertEquals(";", JSONToken.name(JSONToken.SEMI));
+        assertEquals(".", JSONToken.name(JSONToken.DOT));
+        assertEquals("hex", JSONToken.name(JSONToken.HEX));
     }
 }

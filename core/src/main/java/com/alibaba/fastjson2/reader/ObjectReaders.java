@@ -1,10 +1,10 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.function.*;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.*;
@@ -53,14 +53,10 @@ public class ObjectReaders {
         return ObjectReaderCreatorLambda.INSTANCE.createObjectReader(objectType);
     }
 
-    public static <T> ObjectReader<T> createObjectReader(
+    public static <T> ObjectReader<T> objectReader(
             Function<Map<Long, Object>, T> creator,
             FieldReader... fieldReaders) {
         return ObjectReaderCreator.INSTANCE.createObjectReaderNoneDefaultConstructor(null, creator, fieldReaders);
-    }
-
-    public static <T, U, R> ObjectReader<T> createObjectReader(BiFunction<T, U, R> function, FieldReader first, FieldReader second) {
-        throw new JSONException("TODO");
     }
 
     public static FieldReader fieldReader(String fieldName, Class fieldClass) {
@@ -153,5 +149,13 @@ public class ObjectReaders {
             BiConsumer<T, List<V>> function
     ) {
         return new FieldReaderListFuncImpl<>(listCreator, null, function, itemType, fieldName);
+    }
+
+    public static <T, V> FieldReader fieldReaderList(
+            String fieldName,
+            Type itemType,
+            BiConsumer<T, List<V>> function
+    ) {
+        return fieldReaderList(fieldName, itemType, ArrayList::new, function);
     }
 }

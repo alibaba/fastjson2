@@ -1217,7 +1217,6 @@ public class JSONObject
      * @param features features to be enabled in parsing
      * @deprecated since 2.0.4, please use {@link #to(Class, JSONReader.Feature...)}
      */
-    @Deprecated
     public <T> T toJavaObject(Class<T> clazz, JSONReader.Feature... features) {
         return to(clazz, features);
     }
@@ -1229,7 +1228,6 @@ public class JSONObject
      * @param features features to be enabled in parsing
      * @deprecated since 2.0.4, please use {@link #to(Type, JSONReader.Feature...)}
      */
-    @Deprecated
     public <T> T toJavaObject(Type type, JSONReader.Feature... features) {
         return to(type, features);
     }
@@ -1241,7 +1239,6 @@ public class JSONObject
      * @param features features to be enabled in parsing
      * @deprecated since 2.0.4, please use {@link #to(Type, JSONReader.Feature...)}
      */
-    @Deprecated
     public <T> T toJavaObject(TypeReference<?> typeReference, JSONReader.Feature... features) {
         return to(typeReference, features);
     }

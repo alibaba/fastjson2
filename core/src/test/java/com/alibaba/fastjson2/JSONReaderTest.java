@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
@@ -8,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Random;
 import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -819,5 +821,26 @@ public class JSONReaderTest {
             jsonReader.readFloat();
             assertFalse(jsonReader.hasComma(), jsonReader.getClass().getName());
         }
+    }
+
+    @Test
+    public void readHex() {
+        byte[] bytes = new byte[32];
+        new Random().nextBytes(bytes);
+        Bean bean = new Bean();
+        bean.value = bytes;
+
+        String str = JSON.toJSONString(bean);
+
+        Bean bean1 = JSON.parseObject(str, Bean.class);
+        assertArrayEquals(bean.value, bean1.value);
+
+        Bean bean2 = JSON.parseObject(str.getBytes(), Bean.class);
+        assertArrayEquals(bean.value, bean2.value);
+    }
+
+    public static class Bean {
+        @JSONField(format = "hex")
+        public byte[] value;
     }
 }

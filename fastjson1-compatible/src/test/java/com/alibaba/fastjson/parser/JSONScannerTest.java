@@ -125,4 +125,54 @@ public class JSONScannerTest {
         lexer.nextToken();
         assertTrue(lexer.isEOF());
     }
+
+    @Test
+    public void testArray() {
+        JSONScanner lexer = new JSONScanner("[]");
+        lexer.nextToken();
+        assertEquals(JSONToken.LBRACKET, lexer.token);
+        lexer.nextToken();
+        assertEquals(JSONToken.RBRACKET, lexer.token);
+        lexer.nextToken();
+        assertTrue(lexer.isEOF());
+    }
+
+    @Test
+    public void isEnabled() {
+        JSONScanner lexer = new JSONScanner("{\"id\":false}", 0);
+        assertTrue(lexer.isEnabled(Feature.OrderedField));
+
+        lexer.config(Feature.AllowUnQuotedFieldNames, true);
+        assertTrue(lexer.isEnabled(Feature.AllowUnQuotedFieldNames));
+
+        lexer.config(Feature.AllowSingleQuotes, true);
+        assertTrue(lexer.isEnabled(Feature.AllowSingleQuotes));
+
+        lexer.config(Feature.UseBigDecimal, true);
+        assertTrue(lexer.isEnabled(Feature.UseBigDecimal));
+
+        lexer.config(Feature.SupportArrayToBean, true);
+        assertTrue(lexer.isEnabled(Feature.SupportArrayToBean));
+
+        lexer.config(Feature.NonStringKeyAsString, true);
+        assertTrue(lexer.isEnabled(Feature.NonStringKeyAsString));
+
+        lexer.config(Feature.ErrorOnEnumNotMatch, true);
+        assertTrue(lexer.isEnabled(Feature.ErrorOnEnumNotMatch));
+
+        lexer.config(Feature.SupportClassForName, true);
+        assertTrue(lexer.isEnabled(Feature.SupportClassForName));
+
+        lexer.config(Feature.ErrorOnNotSupportAutoType, true);
+        assertTrue(lexer.isEnabled(Feature.ErrorOnNotSupportAutoType));
+
+        lexer.config(Feature.UseNativeJavaObject, true);
+        assertTrue(lexer.isEnabled(Feature.UseNativeJavaObject));
+
+        lexer.config(Feature.DisableFieldSmartMatch, true);
+        assertTrue(lexer.isEnabled(Feature.DisableFieldSmartMatch));
+
+        lexer.config(Feature.SupportAutoType, true);
+        assertTrue(lexer.isEnabled(Feature.SupportAutoType));
+    }
 }

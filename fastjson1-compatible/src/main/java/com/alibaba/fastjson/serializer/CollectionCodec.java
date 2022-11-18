@@ -31,7 +31,7 @@ public class CollectionCodec
     ) throws IOException {
         JSONWriter raw = serializer.out.raw;
         ObjectWriter<?> objectWriter = raw.getContext().getObjectWriter(object.getClass());
-        objectWriter.write(raw, objectWriter, fieldName, fieldType, 0L);
+        objectWriter.write(raw, object, fieldName, fieldType, 0L);
     }
 
     @Override
