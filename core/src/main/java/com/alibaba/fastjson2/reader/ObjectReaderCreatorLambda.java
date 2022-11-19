@@ -113,6 +113,8 @@ public class ObjectReaderCreatorLambda
                 annotationProcessor.getFieldInfo(fieldInfo, objectClass, method);
             }
 
+            ObjectReader initReader = getInitReader(provider, method.getReturnType(), fieldInfo);
+
             String fieldName;
             if (method.getParameterCount() == 0) {
                 fieldName = BeanUtils.getterName(method.getName(), beanInfo.namingStrategy);
@@ -129,7 +131,7 @@ public class ObjectReaderCreatorLambda
                         method.getGenericReturnType(),
                         method.getReturnType(),
                         method,
-                        null);
+                        initReader);
                 FieldReader origin = fieldReaders.putIfAbsent(fieldName,
                         fieldReader
                 );
@@ -156,7 +158,7 @@ public class ObjectReaderCreatorLambda
                     fieldType,
                     fieldClass,
                     method,
-                    fieldInfo.getInitReader()
+                    initReader
             );
             FieldReader origin = fieldReaders.putIfAbsent(fieldName, fieldReader);
             if (origin != null && origin.compareTo(fieldReader) > 0) {
@@ -179,6 +181,7 @@ public class ObjectReaderCreatorLambda
                     }
 
                     String fieldName = field.getName();
+                    ObjectReader initReader = getInitReader(provider, field.getType(), fieldInfo);
                     FieldReader<Object> fieldReader = createFieldReader(
                             objectClass,
                             objectClass,
@@ -192,7 +195,7 @@ public class ObjectReaderCreatorLambda
                             field.getGenericType(),
                             field.getType(),
                             field,
-                            fieldInfo.getInitReader()
+                            initReader
                     );
                     fieldReaders.put(fieldName, fieldReader);
                 }
