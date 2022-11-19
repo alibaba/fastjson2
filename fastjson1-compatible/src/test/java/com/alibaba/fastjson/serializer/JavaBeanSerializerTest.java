@@ -8,8 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class JavaBeanSerializerTest {
     @Test
     public void test() {
-        SerializeConfig config = SerializeConfig.global;
+        SerializeConfig config = new SerializeConfig();
         JavaBeanSerializer serializer = (JavaBeanSerializer) config.get(Bean.class);
+        config.put(Bean.class, (Object) serializer);
 
         Bean bean = new Bean();
         bean.id = 123;

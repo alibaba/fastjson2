@@ -2,7 +2,6 @@ package com.alibaba.fastjson.parser;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONToken;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.io.Closeable;

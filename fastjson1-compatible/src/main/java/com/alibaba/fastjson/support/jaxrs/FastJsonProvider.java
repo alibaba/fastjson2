@@ -329,11 +329,12 @@ public class FastJsonProvider
      * of given value. always return -1 to denote "not known".
      */
     @Override
-    public long getSize(Object t, //
-                        Class<?> type, //
-                        Type genericType, //
-                        Annotation[] annotations, //
-                        MediaType mediaType) {
+    public long getSize(
+            Object t,
+            Class<?> type,
+            Type genericType,
+            Annotation[] annotations,
+            MediaType mediaType) {
         return -1;
     }
 
@@ -341,13 +342,14 @@ public class FastJsonProvider
      * Method that JAX-RS container calls to serialize given value.
      */
     @Override
-    public void writeTo(Object obj, //
-                        Class<?> type, //
-                        Type genericType, //
-                        Annotation[] annotations, //
-                        MediaType mediaType, //
-                        MultivaluedMap<String, Object> httpHeaders, //
-                        OutputStream entityStream //
+    public void writeTo(
+            Object obj,
+            Class<?> type,
+            Type genericType,
+            Annotation[] annotations,
+            MediaType mediaType,
+            MultivaluedMap<String, Object> httpHeaders,
+            OutputStream entityStream
     ) throws IOException, WebApplicationException {
         FastJsonConfig fastJsonConfig = locateConfigProvider(type, mediaType);
         SerializerFeature[] serializerFeatures = fastJsonConfig.getSerializerFeatures();
@@ -364,14 +366,16 @@ public class FastJsonProvider
         }
 
         try {
-            writeJSONStringWithFastJsonConfig(entityStream, //
-                    fastJsonConfig.getCharset(), //
-                    obj, //
-                    fastJsonConfig.getSerializeConfig(), //
-                    fastJsonConfig.getSerializeFilters(), //
-                    fastJsonConfig.getDateFormat(), //
-                    JSON.DEFAULT_GENERATE_FEATURE, //
-                    fastJsonConfig.getSerializerFeatures());
+            writeJSONStringWithFastJsonConfig(
+                    entityStream,
+                    fastJsonConfig.getCharset(),
+                    obj,
+                    fastJsonConfig.getSerializeConfig(),
+                    fastJsonConfig.getSerializeFilters(),
+                    fastJsonConfig.getDateFormat(),
+                    JSON.DEFAULT_GENERATE_FEATURE,
+                    fastJsonConfig.getSerializerFeatures()
+            );
 
             entityStream.flush();
         } catch (JSONException ex) {
@@ -437,26 +441,27 @@ public class FastJsonProvider
      * Method that JAX-RS container calls to deserialize given value.
      */
     @Override
-    public Object readFrom(Class<Object> type, //
-                           Type genericType, //
-                           Annotation[] annotations, //
-                           MediaType mediaType, //
-                           MultivaluedMap<String, String> httpHeaders, //
-                           InputStream entityStream) throws IOException, WebApplicationException {
-//        try {
-//            FastJsonConfig fastJsonConfig = locateConfigProvider(type, mediaType);
-//
-//            JSON.parseObject(entityStream,
-//                    fastJsonConfig.getCharset(),
-//                    genericType,
-//                    fastJsonConfig.getParserConfig(),
-//                    fastJsonConfig.getParseProcess(),
-//                    JSON.DEFAULT_PARSER_FEATURE,
-//                    fastJsonConfig.getFeatures());
-//        } catch (JSONException ex) {
-//            throw new WebApplicationException(ex);
-//        }
-        throw new JSONException("TODO");
+    public Object readFrom(
+            Class<Object> type,
+            Type genericType,
+            Annotation[] annotations,
+            MediaType mediaType,
+            MultivaluedMap<String, String> httpHeaders,
+            InputStream entityStream
+    ) throws IOException, WebApplicationException {
+        try {
+            FastJsonConfig fastJsonConfig = locateConfigProvider(type, mediaType);
+
+            return JSON.parseObject(entityStream,
+                    fastJsonConfig.getCharset(),
+                    genericType,
+                    fastJsonConfig.getParserConfig(),
+                    fastJsonConfig.getParseProcess(),
+                    JSON.DEFAULT_PARSER_FEATURE,
+                    fastJsonConfig.getFeatures());
+        } catch (JSONException ex) {
+            throw new WebApplicationException(ex);
+        }
     }
 
     /**
