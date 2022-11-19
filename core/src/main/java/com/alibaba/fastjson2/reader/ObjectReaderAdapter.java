@@ -67,7 +67,6 @@ public class ObjectReaderAdapter<T>
         long[] hashCodesLCase = new long[fieldReaders.length];
         for (int i = 0; i < fieldReaders.length; i++) {
             FieldReader fieldReader = fieldReaders[i];
-            String fieldName = fieldReader.fieldName;
             hashCodes[i] = fieldReader.fieldNameHash;
             hashCodesLCase[i] = fieldReader.fieldNameHashLCase;
 

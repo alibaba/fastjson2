@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -14,8 +15,18 @@ import java.util.Map;
 
 class FieldReaderCollectionMethodReadOnly<T>
         extends FieldReaderObject<T> {
-    FieldReaderCollectionMethodReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, setter, null, null);
+    FieldReaderCollectionMethodReadOnly(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            JSONSchema schema,
+            Method setter,
+            Field field
+    ) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, setter, field, null);
         Type itemType = null;
         if (fieldType instanceof ParameterizedType) {
             Type[] actualTypeArguments = ((ParameterizedType) fieldType).getActualTypeArguments();

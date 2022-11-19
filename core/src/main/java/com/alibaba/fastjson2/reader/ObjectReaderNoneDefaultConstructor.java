@@ -288,10 +288,8 @@ public class ObjectReaderNoneDefaultConstructor<T>
             valueMap.put(hash, fieldValue);
         }
 
-        T object = createInstanceNoneDefaultConstructor(
-                valueMap == null
-                        ? Collections.emptyMap()
-                        : valueMap);
+        Map<Long, Object> argsMap = valueMap == null ? Collections.emptyMap() : valueMap;
+        T object = creator.apply(argsMap);
 
         if (setterFieldReaders != null && valueMap != null) {
             for (int i = 0; i < setterFieldReaders.length; i++) {
