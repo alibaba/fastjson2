@@ -25,19 +25,12 @@ class ConstructorFunction<T>
     Map<Set<Long>, long[]> alternateConstructorNameHashCodes;
     Map<Set<Long>, Type[]> alternateConstructorArgTypes;
 
-    ConstructorFunction(Constructor constructor, String... paramNames) {
-        this(null, constructor, null, paramNames);
-    }
-
-    ConstructorFunction(Constructor constructor, Constructor markerConstructor, String... paramNames) {
-        this(null, constructor, markerConstructor, paramNames);
-    }
-
-    ConstructorFunction(List<Constructor> alternateConstructors, Constructor constructor, String... paramNames) {
-        this(alternateConstructors, constructor, null, paramNames);
-    }
-
-    ConstructorFunction(List<Constructor> alternateConstructors, Constructor constructor, Constructor markerConstructor, String... paramNames) {
+    ConstructorFunction(
+            List<Constructor> alternateConstructors,
+            Constructor constructor,
+            Constructor markerConstructor,
+            String... paramNames
+    ) {
         this.kotlinMaker = markerConstructor != null;
         this.constructor = kotlinMaker ? markerConstructor : constructor;
         this.parameters = constructor.getParameters();
