@@ -104,6 +104,7 @@ public class ObjectReaderCreator {
                 fieldName = fieldInfo.fieldName;
             }
 
+            ObjectReader initReader = getInitReader(provider, parameter.getType(), fieldInfo);
             Type paramType = parameter.getParameterizedType();
             fieldReaders[i] = createFieldReaderParam(
                     null,
@@ -116,7 +117,8 @@ public class ObjectReaderCreator {
                     parameter.getType(),
                     paramName,
                     parameter,
-                    null
+                    null,
+                    initReader
             );
         }
         return fieldReaders;
@@ -961,21 +963,7 @@ public class ObjectReaderCreator {
         Type fieldType = field.getGenericType();
         Class<?> fieldClass = field.getType();
 
-        ObjectReader initReader = fieldInfo.getInitReader();
-        if (initReader == null) {
-            if (fieldClass == long.class || fieldClass == Long.class) {
-                ObjectReader objectReader = provider.getObjectReader(Long.class);
-                if (objectReader != ObjectReaderImplInt64.INSTANCE) {
-                    initReader = objectReader;
-                }
-            } else if (fieldClass == BigDecimal.class) {
-                ObjectReader objectReader = provider.getObjectReader(BigDecimal.class);
-                if (objectReader != ObjectReaderImplBigDecimal.INSTANCE) {
-                    initReader = objectReader;
-                }
-            }
-        }
-
+        ObjectReader initReader = getInitReader(provider, fieldClass, fieldInfo);
         FieldReader<Object> fieldReader = createFieldReader(
                 objectClass,
                 objectType,
@@ -1143,21 +1131,7 @@ public class ObjectReaderCreator {
         Type fieldType = method.getGenericParameterTypes()[0];
         Class fieldClass = method.getParameterTypes()[0];
 
-        ObjectReader initReader = fieldInfo.getInitReader();
-        if (initReader == null) {
-            if (fieldClass == long.class || fieldClass == Long.class) {
-                ObjectReader objectReader = provider.getObjectReader(Long.class);
-                if (objectReader != ObjectReaderImplInt64.INSTANCE) {
-                    initReader = objectReader;
-                }
-            } else if (fieldClass == BigDecimal.class) {
-                ObjectReader objectReader = provider.getObjectReader(BigDecimal.class);
-                if (objectReader != ObjectReaderImplBigDecimal.INSTANCE) {
-                    initReader = objectReader;
-                }
-            }
-        }
-
+        ObjectReader initReader = getInitReader(provider, fieldClass, fieldInfo);
         FieldReader fieldReader = createFieldReaderMethod(
                 objectClass,
                 objectType,
@@ -1347,6 +1321,52 @@ public class ObjectReaderCreator {
             Parameter parameter,
             JSONSchema schema
     ) {
+        return createFieldReaderParam(
+                objectClass,
+                objectType,
+                fieldName,
+                ordinal,
+                features,
+                format,
+                fieldType,
+                fieldClass,
+                paramName,
+                parameter,
+                schema,
+                null
+        );
+    }
+
+    public <T> FieldReader createFieldReaderParam(
+            Class<T> objectClass,
+            Type objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Type fieldType,
+            Class fieldClass,
+            String paramName,
+            Parameter parameter,
+            JSONSchema schema,
+            ObjectReader initReader
+    ) {
+        if (initReader != null) {
+            FieldReaderObjectParam paramReader = new FieldReaderObjectParam(
+                    fieldName,
+                    fieldType,
+                    fieldClass,
+                    paramName,
+                    parameter,
+                    ordinal,
+                    features,
+                    format,
+                    schema
+            );
+            paramReader.initReader = initReader;
+            return paramReader;
+        }
+
         if (fieldType == byte.class || fieldType == Byte.class) {
             return new FieldReaderInt8Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, schema);
         }
@@ -2127,5 +2147,28 @@ public class ObjectReaderCreator {
         }
 
         return new ObjectReaderImplEnum(objectClass, createMethod, enumValueField, enums, ordinalEnums, enumNameHashCodes);
+    }
+
+    static ObjectReader getInitReader(ObjectReaderProvider provider, Class fieldClass, FieldInfo fieldInfo) {
+        ObjectReader initReader = fieldInfo.getInitReader();
+        if (initReader == null) {
+            if (fieldClass == long.class || fieldClass == Long.class) {
+                ObjectReader objectReader = provider.getObjectReader(Long.class);
+                if (objectReader != ObjectReaderImplInt64.INSTANCE) {
+                    initReader = objectReader;
+                }
+            } else if (fieldClass == BigDecimal.class) {
+                ObjectReader objectReader = provider.getObjectReader(BigDecimal.class);
+                if (objectReader != ObjectReaderImplBigDecimal.INSTANCE) {
+                    initReader = objectReader;
+                }
+            } else if (fieldClass == BigInteger.class) {
+                ObjectReader objectReader = provider.getObjectReader(BigInteger.class);
+                if (objectReader != ObjectReaderImplBigInteger.INSTANCE) {
+                    initReader = objectReader;
+                }
+            }
+        }
+        return initReader;
     }
 }
