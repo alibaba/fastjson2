@@ -961,6 +961,21 @@ public class ObjectReaderCreator {
         Type fieldType = field.getGenericType();
         Class<?> fieldClass = field.getType();
 
+        ObjectReader initReader = fieldInfo.getInitReader();
+        if (initReader == null) {
+            if (fieldClass == long.class || fieldClass == Long.class) {
+                ObjectReader objectReader = provider.getObjectReader(Long.class);
+                if (objectReader != ObjectReaderImplInt64.INSTANCE) {
+                    initReader = objectReader;
+                }
+            } else if (fieldClass == BigDecimal.class) {
+                ObjectReader objectReader = provider.getObjectReader(BigDecimal.class);
+                if (objectReader != ObjectReaderImplBigDecimal.INSTANCE) {
+                    initReader = objectReader;
+                }
+            }
+        }
+
         FieldReader<Object> fieldReader = createFieldReader(
                 objectClass,
                 objectType,
@@ -974,7 +989,8 @@ public class ObjectReaderCreator {
                 fieldType,
                 fieldClass,
                 field,
-                fieldInfo.getInitReader());
+                initReader
+        );
 
         FieldReader previous = fieldReaders.putIfAbsent(fieldName, fieldReader);
         if (previous != null) {
@@ -1132,6 +1148,11 @@ public class ObjectReaderCreator {
             if (fieldClass == long.class || fieldClass == Long.class) {
                 ObjectReader objectReader = provider.getObjectReader(Long.class);
                 if (objectReader != ObjectReaderImplInt64.INSTANCE) {
+                    initReader = objectReader;
+                }
+            } else if (fieldClass == BigDecimal.class) {
+                ObjectReader objectReader = provider.getObjectReader(BigDecimal.class);
+                if (objectReader != ObjectReaderImplBigDecimal.INSTANCE) {
                     initReader = objectReader;
                 }
             }
@@ -1636,9 +1657,9 @@ public class ObjectReaderCreator {
             ObjectReader initReader
     ) {
         if (defaultValue != null && defaultValue.getClass() != fieldClass) {
-            Function typeConvert = JSONFactory
-                    .getDefaultObjectReaderProvider()
-                    .getTypeConvert(defaultValue.getClass(), fieldType);
+            ObjectReaderProvider provider = JSONFactory
+                    .getDefaultObjectReaderProvider();
+            Function typeConvert = provider.getTypeConvert(defaultValue.getClass(), fieldType);
             if (typeConvert != null) {
                 defaultValue = typeConvert.apply(defaultValue);
             } else {

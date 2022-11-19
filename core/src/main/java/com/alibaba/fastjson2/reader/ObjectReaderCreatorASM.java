@@ -222,7 +222,21 @@ public class ObjectReaderCreatorASM
             Field field,
             ObjectReader initReader
     ) {
-        return super.createFieldReader(objectClass, objectType, fieldName, ordinal, features, format, locale, defaultValue, schema, fieldType, fieldClass, field, initReader);
+        return super.createFieldReader(
+                objectClass,
+                objectType,
+                fieldName,
+                ordinal,
+                features,
+                format,
+                locale,
+                defaultValue,
+                schema,
+                fieldType,
+                fieldClass,
+                field,
+                initReader
+        );
     }
 
     private static class FieldReaderInfo {
