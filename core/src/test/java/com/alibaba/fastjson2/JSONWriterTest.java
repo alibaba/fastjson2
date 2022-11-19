@@ -896,4 +896,30 @@ public class JSONWriterTest {
             assertEquals(prettyResult, JSONB.toJSONString(jsonbBytes));
         }
     }
+
+    @Test
+    public void writeString1() {
+        char[] chars = "01234567890".toCharArray();
+
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.writeString(null, 0, 0);
+            assertEquals("null", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.writeString(null, 0, 0);
+            assertEquals("null", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.writeString(chars, 5, 1);
+            assertEquals("\"5\"", jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = new JSONWriterPretty(JSONWriter.ofUTF16());
+            jsonWriter.writeString(chars, 5, 1);
+            assertEquals("\"5\"", jsonWriter.toString());
+        }
+    }
 }

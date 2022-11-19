@@ -59,7 +59,7 @@ final class ObjectWriterImplDate
                 } else {
                     prefix = PREFIX_CHARS;
                 }
-                jsonWriter.writeRaw(prefix);
+                jsonWriter.writeRaw(prefix, 0, prefix.length);
             } else {
                 byte[] prefix;
                 if ("java.sql.Date".equals(date.getClass().getName())) {

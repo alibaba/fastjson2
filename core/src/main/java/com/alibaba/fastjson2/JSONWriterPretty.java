@@ -194,8 +194,8 @@ final class JSONWriterPretty
     }
 
     @Override
-    public void writeRaw(char[] chars) {
-        jsonWriter.writeRaw(chars);
+    public void writeRaw(char[] chars, int off, int len) {
+        jsonWriter.writeRaw(chars, off, len);
     }
 
     @Override
@@ -206,7 +206,7 @@ final class JSONWriterPretty
             writeComma();
         }
 
-        jsonWriter.writeRaw(chars);
+        jsonWriter.writeRaw(chars, 0, chars.length);
     }
 
     @Override

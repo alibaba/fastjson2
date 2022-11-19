@@ -352,7 +352,12 @@ public abstract class FieldWriter<T>
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeString(value);
+        if (value == null) {
+            jsonWriter.writeStringNull();
+            return;
+        }
+
+        jsonWriter.writeString(value, 0, value.length);
     }
 
     public void writeFloat(JSONWriter jsonWriter, float value) {

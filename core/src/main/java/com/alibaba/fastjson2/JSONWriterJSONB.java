@@ -314,15 +314,14 @@ final class JSONWriterJSONB
     }
 
     @Override
-    public void writeString(char[] str) {
+    public void writeString(char[] str, int stroff, int strlen) {
         if (str == null) {
             writeNull();
             return;
         }
 
-        final int strlen = str.length;
         boolean ascii = true;
-        for (int i = 0; i < strlen; ++i) {
+        for (int i = stroff; i < strlen; ++i) {
             if (str[i] > 0x007F) {
                 ascii = false;
                 break;
@@ -336,13 +335,13 @@ final class JSONWriterJSONB
                 bytes[off++] = BC_STR_ASCII;
                 writeInt32(strlen);
             }
-            for (int i = 0; i < strlen; ++i) {
+            for (int i = stroff; i < strlen; ++i) {
                 bytes[off++] = (byte) str[i];
             }
             return;
         }
 
-        writeString(new String(str));
+        writeString(new String(str, stroff, strlen));
     }
 
     @Override
