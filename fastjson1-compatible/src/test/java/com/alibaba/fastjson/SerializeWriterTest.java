@@ -1,6 +1,7 @@
 package com.alibaba.fastjson;
 
 import com.alibaba.fastjson.serializer.SerializeWriter;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,5 +45,20 @@ public class SerializeWriterTest {
         writer.writeLong(-1L);
         writer.write(',');
         assertEquals("-1,", writer.toString());
+    }
+
+    @Test
+    public void test_7() throws Exception {
+        SerializeWriter writer = new SerializeWriter();
+        writer.writeInt(-1);
+        writer.write((int) ',');
+        assertEquals("-1,", writer.toString());
+    }
+
+    @Test
+    public void test_8() throws Exception {
+        SerializeWriter writer = new SerializeWriter();
+        writer.writeNull(SerializerFeature.BeanToArray);
+        assertEquals("null", writer.toString());
     }
 }

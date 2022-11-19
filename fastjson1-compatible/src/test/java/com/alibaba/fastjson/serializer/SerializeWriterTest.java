@@ -61,10 +61,37 @@ public class SerializeWriterTest {
                 SerializerFeature.BeanToArray,
                 SerializerFeature.WriteEnumUsingToString,
                 SerializerFeature.WriteMapNullValue,
-                SerializerFeature.WriteEnumUsingName
+                SerializerFeature.WriteEnumUsingName,
+                SerializerFeature.WriteNullStringAsEmpty,
+                SerializerFeature.WriteNullNumberAsZero,
+                SerializerFeature.WriteNullBooleanAsFalse,
+                SerializerFeature.WriteClassName,
+                SerializerFeature.NotWriteRootClassName,
+                SerializerFeature.WriteNonStringKeyAsString,
+                SerializerFeature.NotWriteDefaultValue,
+                SerializerFeature.BrowserCompatible,
+                SerializerFeature.IgnoreNonFieldGetter,
+                SerializerFeature.WriteNonStringValueAsString,
+                SerializerFeature.IgnoreErrorGetter,
+                SerializerFeature.WriteBigDecimalAsPlain,
+                SerializerFeature.WriteNullListAsEmpty
         );
         assertTrue(writer.isEnabled(SerializerFeature.BeanToArray));
         assertTrue(writer.isEnabled(SerializerFeature.WriteEnumUsingToString));
+        assertTrue(writer.isEnabled(SerializerFeature.WriteMapNullValue));
         assertTrue(writer.isEnabled(SerializerFeature.WriteEnumUsingName));
+        assertTrue(writer.isEnabled(SerializerFeature.WriteNullListAsEmpty));
+        assertTrue(writer.isEnabled(SerializerFeature.WriteNullStringAsEmpty));
+        assertTrue(writer.isEnabled(SerializerFeature.WriteNullNumberAsZero));
+        assertTrue(writer.isEnabled(SerializerFeature.WriteNullBooleanAsFalse));
+        assertTrue(writer.isEnabled(SerializerFeature.WriteClassName));
+        assertTrue(writer.isEnabled(SerializerFeature.NotWriteRootClassName));
+        assertTrue(writer.isEnabled(SerializerFeature.WriteNonStringKeyAsString));
+        assertTrue(writer.isEnabled(SerializerFeature.NotWriteDefaultValue));
+        assertTrue(writer.isEnabled(SerializerFeature.BrowserCompatible));
+        assertTrue(writer.isEnabled(SerializerFeature.IgnoreNonFieldGetter));
+        assertTrue(writer.isEnabled(SerializerFeature.WriteNonStringValueAsString));
+        assertTrue(writer.isEnabled(SerializerFeature.IgnoreErrorGetter));
+        assertTrue(writer.isEnabled(SerializerFeature.WriteBigDecimalAsPlain));
     }
 }

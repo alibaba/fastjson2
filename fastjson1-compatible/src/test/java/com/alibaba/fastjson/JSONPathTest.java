@@ -18,8 +18,17 @@ public class JSONPathTest {
 
     @Test
     public void compile() {
-        JSONObject object = new JSONObject().fluentPut("id", 123);
         JSONPath path = JSONPath.compile("$.id");
+        assertEquals("$.id", path.getPath());
+
+        JSONObject object = new JSONObject().fluentPut("id", 123);
         assertEquals(123, path.eval(object));
+        path.set(object, 234);
+        assertEquals(234, object.getIntValue("id"));
+    }
+
+    @Test
+    public void error() {
+        assertThrows(Exception.class, () -> JSONPath.compile(null));
     }
 }

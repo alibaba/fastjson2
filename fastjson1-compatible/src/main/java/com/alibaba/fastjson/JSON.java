@@ -1157,6 +1157,14 @@ public abstract class JSON {
             context.config(JSONWriter.Feature.IgnoreNonFieldGetter);
         }
 
+        if ((featuresValue & SerializerFeature.NotWriteDefaultValue.mask) != 0) {
+            context.config(JSONWriter.Feature.NotWriteDefaultValue);
+        }
+
+        if ((featuresValue & SerializerFeature.WriteBigDecimalAsPlain.mask) != 0) {
+            context.config(JSONWriter.Feature.WriteBigDecimalAsPlain);
+        }
+
         if (defaultTimeZone != null && defaultTimeZone != DEFAULT_TIME_ZONE) {
             context.setZoneId(defaultTimeZone.toZoneId());
         }
