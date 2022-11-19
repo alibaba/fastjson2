@@ -641,6 +641,10 @@ public abstract class JSONWriter
     }
 
     public void writeRaw(char[] chars) {
+        writeRaw(chars, 0, chars.length);
+    }
+
+    public void writeRaw(char[] chars, int off, int charslen) {
         throw new JSONException("UnsupportedOperation");
     }
 
@@ -981,13 +985,22 @@ public abstract class JSONWriter
 
     public void writeString(char[] chars) {
         if (chars == null) {
-            writeNull();
+            writeStringNull();
+            return;
+        }
+
+        writeString(chars, 0, chars.length);
+    }
+
+    public void writeString(char[] chars, int off, int charslen) {
+        if (chars == null) {
+            writeStringNull();
             return;
         }
 
         write0('"');
         boolean special = false;
-        for (int i = 0; i < chars.length; ++i) {
+        for (int i = off; i < charslen; ++i) {
             if (chars[i] == '\\' || chars[i] == '"') {
                 special = true;
                 break;
@@ -995,9 +1008,9 @@ public abstract class JSONWriter
         }
 
         if (!special) {
-            writeRaw(chars);
+            writeRaw(chars, off, charslen);
         } else {
-            for (int i = 0; i < chars.length; ++i) {
+            for (int i = off; i < charslen; ++i) {
                 char ch = chars[i];
                 if (ch == '\\' || ch == '"') {
                     write0('\\');

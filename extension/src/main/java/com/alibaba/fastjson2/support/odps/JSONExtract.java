@@ -1,136 +1,60 @@
 package com.alibaba.fastjson2.support.odps;
 
-import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.reader.ValueConsumer;
-import com.alibaba.fastjson2.util.IOUtils;
-import com.aliyun.odps.io.NullWritable;
 import com.aliyun.odps.io.Text;
 import com.aliyun.odps.io.Writable;
-import com.aliyun.odps.udf.UDF;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
 
 public class JSONExtract
-        extends UDF {
-    static final byte[] BYTES_TRUE = new byte[]{'"', 't', 'r', 'u', 'e', '"'};
-    static final byte[] BYTES_FALSE = new byte[]{'"', 'f', 'a', 'l', 's', 'e', '"'};
-    private static JSONWritable[] cache = new JSONWritable[512];
-
-    static {
-        for (int i = -1; i < 511; ++i) {
-            int size = (i < 0) ? IOUtils.stringSize(-i) + 1 : IOUtils.stringSize(i);
-            byte[] bytes = new byte[size + 2];
-            bytes[0] = '"';
-            bytes[size + 1] = '"';
-            IOUtils.getChars(i, size + 1, bytes);
-            cache[i + 1] = new JSONWritable(bytes);
-        }
-    }
-
-    private final JSONPath path;
-    private JSONWritable text = new JSONWritable();
-
-    private ExtractValueConsumer valueConsumer = new ExtractValueConsumer();
-
+        extends JSONExtractScalar {
     public JSONExtract(String path) {
-        this.path = JSONPath.of(path);
+        super(path);
+        valueConsumer = new ExtractValueConsumer();
     }
 
     public Writable eval(Text input) {
-        JSONReader jsonReader = JSONReader.of(input.getBytes(),
+        JSONReader parser = JSONReader.of(input.getBytes(),
                 0,
                 input.getLength(), StandardCharsets.UTF_8
         );
 
-        path.extract(jsonReader, valueConsumer);
-        if (text == null) {
-            return NullWritable.get();
-        }
+        path.extract(parser, valueConsumer);
         return text;
     }
 
     class ExtractValueConsumer
-            implements ValueConsumer {
+            extends JSONExtractScalar.ExtractValueConsumer {
         @Override
         public void accept(byte[] bytes, int off, int len) {
+            if (off > 0) {
+                int end = off + len;
+                if (end < bytes.length
+                        && bytes[off - 1] == bytes[end]
+                ) {
+                    byte quote = bytes[end];
+                    if (quote == '"' || quote == '\'') {
+                        text.bytes = bytes;
+                        text.off = off - 1;
+                        text.length = len + 2;
+                        return;
+                    }
+                }
+            }
+
             text.bytes = bytes;
             text.off = off;
             text.length = len;
         }
 
         @Override
-        public void acceptNull() {
-            text = null;
-        }
-
-        @Override
-        public void accept(boolean val) {
-            text.set(val ? BYTES_TRUE : BYTES_FALSE);
-        }
-
-        @Override
-        public void accept(int val) {
-            if (val >= -1 && val < 511) {
-                text = cache[val + 1];
-                return;
-            }
-
-            int size = (val < 0) ? IOUtils.stringSize(-val) + 1 : IOUtils.stringSize(val);
-            text.setCapacity(size + 2, false);
-            byte[] bytes = text.bytes;
-            bytes[0] = '"';
-            bytes[size + 1] = '"';
-            IOUtils.getChars(val, size + 1, bytes);
-            text.length = size + 2;
-        }
-
-        @Override
-        public void accept(long val) {
-            int size = (val < 0) ? IOUtils.stringSize(-val) + 1 : IOUtils.stringSize(val);
-            byte[] bytes = new byte[size + 2];
-            bytes[0] = '"';
-            bytes[size + 1] = '"';
-            IOUtils.getChars(val, size + 1, bytes);
-            text.set(bytes);
-        }
-
-        @Override
-        public void accept(Number val) {
-            if (val instanceof Integer) {
-                accept(val.intValue());
-                return;
-            }
-
-            if (val instanceof Long) {
-                accept(val.longValue());
-                return;
-            }
-
-            String str = val.toString();
+        public void accept(String str) {
             int len = str.length() + 2;
-            byte[] bytes = new byte[len + 2];
+            byte[] bytes = new byte[len];
             bytes[0] = '"';
-            bytes[len + 1] = '"';
-            str.getBytes(0, len, bytes, 1);
+            bytes[len - 1] = '"';
+            str.getBytes(0, str.length(), bytes, 1);
             text.set(bytes);
-        }
-
-        @Override
-        public void accept(String val) {
-            text.set(val);
-        }
-
-        @Override
-        public void accept(Map object) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void accept(List array) {
-            throw new UnsupportedOperationException();
         }
     }
 }

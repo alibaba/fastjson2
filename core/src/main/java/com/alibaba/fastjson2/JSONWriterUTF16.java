@@ -597,7 +597,7 @@ class JSONWriterUTF16
     public void writeReference(String path) {
         this.lastReference = path;
 
-        writeRaw(REF_PREF);
+        writeRaw(REF_PREF, 0, REF_PREF.length);
         writeString(path);
         if (off == chars.length) {
             int oldCapacity = chars.length;
@@ -764,10 +764,10 @@ class JSONWriterUTF16
     }
 
     @Override
-    public void writeRaw(char[] chars) {
+    public void writeRaw(char[] chars, int off, int charslen) {
         {
             // inline ensureCapacity
-            int minCapacity = off + chars.length;
+            int minCapacity = this.off + charslen;
             if (minCapacity - this.chars.length > 0) {
                 int oldCapacity = this.chars.length;
                 int newCapacity = oldCapacity + (oldCapacity >> 1);
@@ -782,8 +782,8 @@ class JSONWriterUTF16
                 this.chars = Arrays.copyOf(this.chars, newCapacity);
             }
         }
-        System.arraycopy(chars, 0, this.chars, this.off, chars.length);
-        off += chars.length;
+        System.arraycopy(chars, off, this.chars, this.off, charslen);
+        this.off += charslen;
     }
 
     @Override

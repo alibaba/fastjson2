@@ -2927,9 +2927,16 @@ class JSONReaderUTF8
                 }
             }
 
-            byte[] bytes = new byte[bytesMaxiumLength];
-            int bytesLength = IOUtils.encodeUTF8(chars, 0, chars.length, bytes, 0);
-            consumer.accept(bytes, 0, bytesLength);
+            if (quoted) {
+                JSONWriter jsonWriter = JSONWriterUTF8.of();
+                jsonWriter.writeString(chars, 0, chars.length);
+                byte[] bytes = jsonWriter.getBytes();
+                consumer.accept(bytes, 0, bytes.length);
+            } else {
+                byte[] bytes = new byte[bytesMaxiumLength];
+                int bytesLength = IOUtils.encodeUTF8(chars, 0, chars.length, bytes, 0);
+                consumer.accept(bytes, 0, bytesLength);
+            }
         } else {
             int consumStart = quoted ? this.offset - 1 : this.offset;
             int consumLen = quoted ? offset - this.offset + 2 : offset - this.offset;

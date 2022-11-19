@@ -128,6 +128,17 @@ public class JSONWriterJSONBTest {
         }
         {
             JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[1]);
+            jsonWriter.writeString(new char[0]);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[1]);
+            char[] chars = "01234567890".toCharArray();
+            jsonWriter.writeString(chars, 5, 0);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
             bytes.set(jsonWriter, new byte[0]);
             jsonWriter.writeTypeName("abc");
         }
