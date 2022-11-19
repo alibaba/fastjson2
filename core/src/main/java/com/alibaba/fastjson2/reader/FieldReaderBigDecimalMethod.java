@@ -12,7 +12,18 @@ import java.util.Locale;
 
 final class FieldReaderBigDecimalMethod<T>
         extends FieldReaderObject<T> {
-    FieldReaderBigDecimalMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, BigDecimal defaultValue, JSONSchema schema, Method method) {
+    FieldReaderBigDecimalMethod(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            BigDecimal defaultValue,
+            JSONSchema schema,
+            Method method
+    ) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null, null);
     }
 
