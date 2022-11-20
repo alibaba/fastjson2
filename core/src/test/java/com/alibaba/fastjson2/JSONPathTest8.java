@@ -3,10 +3,10 @@ package com.alibaba.fastjson2;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONPathTest8 {
     @Test
@@ -75,5 +75,58 @@ public class JSONPathTest8 {
                 JSONPath.of("$.value", UUID.class)
                         .extract("{}")
         );
+    }
+
+    @Test
+    public void singleIndex() {
+        JSONPath path = JSONPath.of("$[-1]");
+        assertEquals(
+                4,
+                path.eval(
+                        JSONArray.of(1, 2, 3, 4)
+                )
+        );
+        assertEquals(
+                4,
+                path.eval(
+                        new Integer[]{1, 2, 3, 4}
+                )
+        );
+        assertNull(path.eval(null));
+
+        assertEquals(
+                4,
+                path.extract("[1,2,3,4]")
+        );
+    }
+
+    @Test
+    public void singleIndex1() {
+        JSONPath path = JSONPath.of("$[0]");
+
+        assertEquals(
+                4,
+                path.eval(
+                        Collections.singleton(4)
+                )
+        );
+
+        assertEquals(
+                1,
+                path.extract("[1,2,3,4]")
+        );
+        assertNull(path.extract("null"));
+        assertThrows(JSONException.class, () -> path.extract("{}"));
+    }
+
+    @Test
+    public void singleIndex2() {
+        JSONPath path = JSONPath.of("$[1]");
+
+        assertEquals(
+                2,
+                path.extract("[1,2,3,4]")
+        );
+        assertNull(path.eval(null));
     }
 }

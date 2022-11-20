@@ -142,6 +142,13 @@ class JSONPathParser {
                 return new JSONPathSingleName(path, (JSONPathSegmentName) first, features);
             }
 
+            if (first instanceof JSONPathSegmentIndex) {
+                JSONPathSegmentIndex firstIndex = (JSONPathSegmentIndex) first;
+                if (firstIndex.index >= 0) {
+                    return new JSONPathSingleIndex(path, firstIndex, features);
+                }
+            }
+
             return new JSONPathSingle(first, path, features);
         }
 
