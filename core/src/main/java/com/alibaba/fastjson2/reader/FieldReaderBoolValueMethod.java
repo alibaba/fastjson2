@@ -25,6 +25,16 @@ final class FieldReaderBoolValueMethod<T>
     }
 
     @Override
+    public void readFieldValueJSONB(JSONReader jsonReader, T object) {
+        boolean fieldValue = jsonReader.readBoolValue();
+        try {
+            method.invoke(object, fieldValue);
+        } catch (Exception e) {
+            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
+        }
+    }
+
+    @Override
     public void accept(T object, Object value) {
         boolean booleanValue = TypeUtils.toBooleanValue(value);
 

@@ -31,6 +31,21 @@ final class FieldReaderInt64Method<T>
     }
 
     @Override
+    public void readFieldValueJSONB(JSONReader jsonReader, T object) {
+        Long fieldValue = jsonReader.readInt64();
+
+        if (schema != null) {
+            schema.assertValidate(fieldValue);
+        }
+
+        try {
+            method.invoke(object, fieldValue);
+        } catch (Exception e) {
+            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
+        }
+    }
+
+    @Override
     public void accept(T object, Object value) {
         Long longValue = TypeUtils.toLong(value);
 

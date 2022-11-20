@@ -2427,6 +2427,10 @@ final class JSONReaderUTF16
                     throw new JSONException("int overflow, value " + bigInteger);
                 }
             } else {
+                if (valueType == JSON_TYPE_NULL && (context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                    throw new JSONException(info("int value not support input null"));
+                }
+
                 return getInt32Value();
             }
         }

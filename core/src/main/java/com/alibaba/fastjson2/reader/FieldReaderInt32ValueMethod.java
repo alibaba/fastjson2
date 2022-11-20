@@ -30,6 +30,21 @@ final class FieldReaderInt32ValueMethod<T>
     }
 
     @Override
+    public void readFieldValueJSONB(JSONReader jsonReader, T object) {
+        int fieldInt = jsonReader.readInt32Value();
+
+        if (schema != null) {
+            schema.assertValidate(fieldInt);
+        }
+
+        try {
+            method.invoke(object, fieldInt);
+        } catch (Exception e) {
+            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
+        }
+    }
+
+    @Override
     public void accept(T object, Object value) {
         int intValue = TypeUtils.toIntValue(value);
 

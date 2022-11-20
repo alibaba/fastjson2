@@ -31,6 +31,21 @@ final class FieldReaderDoubleValueMethod<T>
     }
 
     @Override
+    public void readFieldValueJSONB(JSONReader jsonReader, T object) {
+        double fieldValue = jsonReader.readDoubleValue();
+
+        if (schema != null) {
+            schema.assertValidate(fieldValue);
+        }
+
+        try {
+            method.invoke(object, fieldValue);
+        } catch (Exception e) {
+            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
+        }
+    }
+
+    @Override
     public void accept(T object, Object value) {
         double doubleValue = TypeUtils.toDoubleValue(value);
 
