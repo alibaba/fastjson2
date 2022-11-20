@@ -4,31 +4,66 @@ import com.alibaba.fastjson2.JSONWriter;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 
-public abstract class JsonGenerator
+public class JsonGenerator
         implements Closeable, Flushable {
-    private JSONWriter raw;
+    protected final JSONWriter jsonWriter;
+    protected final OutputStream out;
+    protected final Charset charset;
+    protected final JsonEncoding encoding;
 
-    public abstract void writeRaw(String text) throws IOException;
+    public JsonGenerator(JSONWriter jsonWriter, OutputStream out, JsonEncoding encoding) {
+        this.jsonWriter = jsonWriter;
+        this.out = out;
+        this.encoding = encoding;
+        this.charset = Charset.forName(encoding.getJavaName());
+    }
 
-    @Override
-    public abstract void flush() throws IOException;
+    public JSONWriter getJSONWriter() {
+        return jsonWriter;
+    }
 
-    public abstract void writeStartObject();
+    public void writeRaw(String text) {
+        jsonWriter.writeRaw(text);
+    }
 
-    public abstract void writeEndObject();
+    public void flush() throws IOException {
+        jsonWriter.flushTo(out, charset);
+    }
 
-    public abstract void writeEndArray();
+    public void writeStartObject() {
+        jsonWriter.startObject();
+    }
 
-    public abstract void writeFieldName(String name);
+    public void writeEndObject() {
+        jsonWriter.endObject();
+    }
 
-    public abstract void writeString(String text);
+    public void writeEndArray() {
+        jsonWriter.endArray();
+    }
 
-    public abstract void writeNumber(int v) throws IOException;
+    public void writeFieldName(String name) {
+        jsonWriter.writeName(name);
+        jsonWriter.writeRaw(':');
+    }
 
-    public abstract void writeNumber(long v) throws IOException;
+    public void writeString(String text) {
+        jsonWriter.writeString(text);
+    }
 
-    public abstract void writeNumber(BigDecimal v) throws IOException;
+    public void writeNumber(int v) throws IOException {
+        jsonWriter.writeInt32(v);
+    }
+
+    public void writeNumber(BigDecimal v) throws IOException {
+        jsonWriter.writeDecimal(v);
+    }
+
+    public void writeNumber(long v) throws IOException {
+        jsonWriter.writeInt64(v);
+    }
 
     public void writeStringField(String fieldName, String value) throws IOException {
         writeFieldName(fieldName);
@@ -43,6 +78,10 @@ public abstract class JsonGenerator
     public void writeNumberField(String fieldName, int value) throws IOException {
         writeFieldName(fieldName);
         writeNumber(value);
+    }
+
+    public void close() throws IOException {
+        jsonWriter.flushTo(out, charset);
     }
 
     public enum Feature {

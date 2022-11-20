@@ -989,7 +989,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    protected byte[] readHex() {
+    public byte[] readHex() {
         throw new JSONException("UnsupportedOperation");
     }
 

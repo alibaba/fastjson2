@@ -54,6 +54,10 @@ public abstract class JSONWriter
         maxArraySize = (context.features & LargeObject.mask) != 0 ? 1073741824 : 67108864;
     }
 
+    public Charset getCharset() {
+        return charset;
+    }
+
     public boolean isUTF8() {
         return utf8;
     }
@@ -63,6 +67,10 @@ public abstract class JSONWriter
     }
 
     public boolean isJSONB() {
+        return false;
+    }
+
+    public boolean isCSV() {
         return false;
     }
 
@@ -460,6 +468,20 @@ public abstract class JSONWriter
         return context.provider.getObjectWriter(objectType, objectClass, fieldBased);
     }
 
+    public static JSONWriter ofCSV(JSONWriter.Feature... features) {
+        Context context = createWriteContext(features);
+        context.config(BeanToArray);
+        return ofCSV(context);
+    }
+
+    public static JSONWriter ofCSV(Context writeContext) {
+        if (writeContext == null) {
+            writeContext = JSONFactory.createWriteContext();
+        }
+
+        return new JSONWriterUTF16CSV(writeContext);
+    }
+
     public static JSONWriter of() {
         Context writeContext = createWriteContext();
         if (JVM_VERSION == 8) {
@@ -651,6 +673,11 @@ public abstract class JSONWriter
     public abstract void writeChar(char ch);
 
     public abstract void writeRaw(char ch);
+
+    public void writeRaw(char c0, char c1) {
+        writeRaw(c0);
+        writeRaw(c1);
+    }
 
     public abstract void writeNameRaw(byte[] bytes);
 
@@ -1021,7 +1048,7 @@ public abstract class JSONWriter
         write0('"');
     }
 
-    protected abstract void writeString(char[] chars, int off, int len, boolean quote);
+    public abstract void writeString(char[] chars, int off, int len, boolean quote);
 
     public abstract void writeLocalDate(LocalDate date);
 

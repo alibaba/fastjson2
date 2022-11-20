@@ -162,6 +162,44 @@ public class ObjectReaderAdapter<T>
         return (T) object;
     }
 
+    public T readFromCSV(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
+        Object object = creator.get();
+
+        for (FieldReader fieldReader : fieldReaders) {
+            char ch = jsonReader.current();
+            if (ch == ',') {
+                jsonReader.next();
+                continue;
+            }
+            if (ch == '\r' || ch == '\n') {
+                break;
+            }
+
+            fieldReader.readFieldValue(jsonReader, object);
+
+            ch = jsonReader.current();
+            if (ch == ',') {
+                jsonReader.next();
+                continue;
+            }
+            if (ch == '\r' || ch == '\n') {
+                break;
+            }
+        }
+
+        jsonReader.nextIfMatch('\n');
+
+        if (buildFunction != null) {
+            return (T) buildFunction.apply(object);
+        }
+
+        return (T) object;
+    }
+
     @Override
     public T readArrayMappingJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (!serializable) {

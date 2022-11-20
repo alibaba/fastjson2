@@ -182,8 +182,8 @@ public class ObjectReaderNoneDefaultConstructor<T>
             return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
-        if (jsonReader.isArray() && jsonReader.isSupportBeanArray(features | this.features)) {
-            jsonReader.next();
+        if (jsonReader.isSupportBeanArray(features | this.features)
+                && jsonReader.nextIfMatch('[')) {
             LinkedHashMap<Long, Object> valueMap = null;
             for (int i = 0; i < fieldReaders.length; i++) {
                 Object fieldValue = fieldReaders[i].readFieldValue(jsonReader);
@@ -304,6 +304,23 @@ public class ObjectReaderNoneDefaultConstructor<T>
         jsonReader.nextIfMatch(',');
 
         return object;
+    }
+
+    public T readFromCSV(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (!serializable) {
+            jsonReader.errorOnNoneSerializable(objectClass);
+        }
+
+        LinkedHashMap<Long, Object> valueMap = new LinkedHashMap<>();
+        for (int i = 0; i < fieldReaders.length; i++) {
+            FieldReader fieldReader = fieldReaders[i];
+            Object fieldValue = fieldReader.readFieldValue(jsonReader);
+            valueMap.put(fieldReader.fieldNameHash, fieldValue);
+        }
+
+        jsonReader.nextIfMatch('\n');
+
+        return createInstanceNoneDefaultConstructor(valueMap);
     }
 
     @Override

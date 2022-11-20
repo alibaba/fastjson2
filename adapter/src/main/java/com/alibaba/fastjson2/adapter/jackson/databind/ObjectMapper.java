@@ -18,12 +18,17 @@ import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreCheckClose;
 
 public class ObjectMapper
         extends ObjectCodec {
-    private JsonFactory factory;
-
+    protected final JsonFactory factory;
     protected SerializationConfig serializationConfig;
     protected DeserializationConfig deserializationConfig;
 
     public ObjectMapper() {
+        this(new JsonFactory());
+    }
+
+    public ObjectMapper(JsonFactory factory) {
+        this.factory = factory;
+
         serializationConfig = new SerializationConfig();
         deserializationConfig = new DeserializationConfig();
     }

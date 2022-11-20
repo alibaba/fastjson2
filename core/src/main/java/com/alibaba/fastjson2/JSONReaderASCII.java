@@ -9,7 +9,7 @@ import java.util.Arrays;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
-final class JSONReaderASCII
+class JSONReaderASCII
         extends JSONReaderUTF8 {
     final String str;
 
