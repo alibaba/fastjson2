@@ -3,9 +3,12 @@ package com.alibaba.fastjson2.adapter.gson;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.adapter.gson.reflect.TypeToken;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+
+import java.lang.reflect.Type;
 
 public class Gson {
     ObjectReaderProvider readerProvider;
@@ -37,6 +40,21 @@ public class Gson {
             jsonReader.handleResolveTasks(object);
             return (T) object;
         }
+    }
+
+    public <T> T fromJson(String json, Type typeOfT) {
+        ObjectReaderProvider provider = getReaderProvider();
+        JSONReader.Context context = JSONFactory.createReadContext(provider);
+        ObjectReader objectReader = provider.getObjectReader(typeOfT);
+        try (JSONReader jsonReader = JSONReader.of(json, context)) {
+            Object object = objectReader.readObject(jsonReader, typeOfT, null, 0L);
+            jsonReader.handleResolveTasks(object);
+            return (T) object;
+        }
+    }
+
+    public <T> T fromJson(String json, TypeToken<T> typeToken) {
+        return fromJson(json, typeToken.getType());
     }
 
     public String toJson(Object src) {
