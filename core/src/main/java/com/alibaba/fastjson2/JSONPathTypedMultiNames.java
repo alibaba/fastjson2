@@ -250,6 +250,10 @@ final class JSONPathTypedMultiNames
             return objectReader.readObject(jsonReader, null, null, features);
         }
 
+        if (jsonReader.nextIfNull()) {
+            return null;
+        }
+
         if (prefixObjectReader != null) {
             ObjectHolder holder = (ObjectHolder) prefixObjectReader.readObject(jsonReader, null, null, features);
             Object object = holder.object;
@@ -259,19 +263,19 @@ final class JSONPathTypedMultiNames
             return object;
         }
 
-        if (prefix instanceof JSONPathSingle) {
-            JSONPathSegment prefixSegment = ((JSONPathSingle) prefix).segment;
-            if (prefixSegment instanceof JSONPathSegmentIndex) {
-                JSONPathSegmentIndex index = (JSONPathSegmentIndex) prefixSegment;
-                if (index.index == 0) {
-                    if (jsonReader.nextIfNull()) {
-                        return null;
-                    }
-
-                    if (jsonReader.nextIfMatch('[')) {
-                        return objectReader.readObject(jsonReader, null, null, features);
-                    }
+        if (prefix instanceof JSONPathSingleIndex) {
+            int index = ((JSONPathSingleIndex) prefix).index;
+            if (index >= 0) {
+                int max = jsonReader.startArray();
+                for (int i = 0; i < index && i < max; i++) {
+                    jsonReader.skipValue();
                 }
+
+                if (jsonReader.nextIfNull()) {
+                    return null;
+                }
+
+                return objectReader.readObject(jsonReader, null, null, features);
             }
         }
 
