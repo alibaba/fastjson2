@@ -12,12 +12,12 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 final class JSONPathSingleName
-        extends JSONPath {
+        extends JSONPathSingle {
     final long nameHashCode;
     final String name;
 
     public JSONPathSingleName(String path, JSONPathSegmentName segment, Feature... features) {
-        super(path, features);
+        super(segment, path, features);
         this.name = segment.name;
         this.nameHashCode = segment.nameHashCode;
     }
@@ -260,8 +260,7 @@ final class JSONPathSingleName
     @Override
     public Object extract(JSONReader jsonReader) {
         if (jsonReader.isJSONB()) {
-            if (jsonReader.isObject()) {
-                jsonReader.nextIfObjectStart();
+            if (jsonReader.nextIfObjectStart()) {
                 while (!jsonReader.nextIfObjectEnd()) {
                     long nameHashCode = jsonReader.readFieldNameHashCode();
                     if (nameHashCode == 0) {

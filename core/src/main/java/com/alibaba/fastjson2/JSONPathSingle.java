@@ -2,12 +2,18 @@ package com.alibaba.fastjson2;
 
 import java.util.function.BiFunction;
 
-final class JSONPathSingle
+class JSONPathSingle
         extends JSONPath {
     final JSONPathSegment segment;
     final boolean ref;
 
-    public JSONPathSingle(JSONPathSegment segment, String path, Feature... features) {
+    JSONPathSingle(JSONPathSegment segment, String path, Feature... features) {
+        super(path, features);
+        this.segment = segment;
+        this.ref = segment instanceof JSONPathSegmentIndex || segment instanceof JSONPathSegmentName;
+    }
+
+    JSONPathSingle(JSONPathSegment segment, String path, long features) {
         super(path, features);
         this.segment = segment;
         this.ref = segment instanceof JSONPathSegmentIndex || segment instanceof JSONPathSegmentName;

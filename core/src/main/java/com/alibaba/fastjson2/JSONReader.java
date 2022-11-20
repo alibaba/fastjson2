@@ -353,8 +353,10 @@ public abstract class JSONReader
     }
 
     public int startArray() {
-        next();
-        return 0;
+        if (!nextIfMatch('[')) {
+            throw new JSONException(info("illegal input, expect '[', but " + ch));
+        }
+        return Integer.MAX_VALUE;
     }
 
     public abstract boolean isReference();
