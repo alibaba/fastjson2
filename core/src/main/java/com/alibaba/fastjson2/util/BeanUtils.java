@@ -794,6 +794,7 @@ public abstract class BeanUtils {
                         case "com.fasterxml.jackson.annotation.JsonValue":
                         case "com.fasterxml.jackson.annotation.JsonRawValue":
                         case "com.fasterxml.jackson.annotation.JsonProperty":
+                        case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
                             if (JSONFactory.isUseJacksonAnnotation()) {
                                 nameMatch = true;
                             }

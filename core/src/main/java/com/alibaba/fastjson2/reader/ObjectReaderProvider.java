@@ -754,6 +754,15 @@ public class ObjectReaderProvider
         }
     }
 
+    public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Method method, int paramIndex, Parameter parameter) {
+        for (ObjectReaderModule module : modules) {
+            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
+            if (annotationProcessor != null) {
+                annotationProcessor.getFieldInfo(fieldInfo, objectClass, method, paramIndex, parameter);
+            }
+        }
+    }
+
     public ObjectReader getObjectReader(Type objectType) {
         return getObjectReader(objectType, false);
     }

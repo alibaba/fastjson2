@@ -192,7 +192,8 @@ public class ObjectReaderCreator {
             Class<T> objectClass,
             Type objectType,
             ObjectReaderProvider provider,
-            BeanInfo beanInfo) {
+            BeanInfo beanInfo
+    ) {
         Function<Object, Object> builderFunction = null;
         if (beanInfo.buildMethod != null) {
             builderFunction = createBuildFunction(beanInfo.buildMethod);
@@ -344,16 +345,10 @@ public class ObjectReaderCreator {
 
             Parameter parameter = parameters[i];
 
-            for (ObjectReaderModule module : provider.modules) {
-                ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-                if (annotationProcessor == null) {
-                    continue;
-                }
-                if (beanInfo.creatorConstructor != null) {
-                    annotationProcessor.getFieldInfo(fieldInfo, objectClass, beanInfo.creatorConstructor, i, parameter);
-                } else {
-                    annotationProcessor.getFieldInfo(fieldInfo, objectClass, beanInfo.createMethod, i, parameter);
-                }
+            if (beanInfo.creatorConstructor != null) {
+                provider.getFieldInfo(fieldInfo, objectClass, beanInfo.creatorConstructor, i, parameter);
+            } else {
+                provider.getFieldInfo(fieldInfo, objectClass, beanInfo.createMethod, i, parameter);
             }
 
             if (parameters.length == 1 && (fieldInfo.features & FieldInfo.VALUE_MASK) != 0) {
@@ -964,6 +959,13 @@ public class ObjectReaderCreator {
         Class<?> fieldClass = field.getType();
 
         ObjectReader initReader = getInitReader(provider, fieldClass, fieldInfo);
+        String schema = fieldInfo.schema;
+        if (fieldInfo.required) {
+            if (schema == null) {
+                schema = "{\"required\":true}";
+            }
+        }
+
         FieldReader<Object> fieldReader = createFieldReader(
                 objectClass,
                 objectType,
@@ -973,7 +975,7 @@ public class ObjectReaderCreator {
                 fieldInfo.format,
                 fieldInfo.locale,
                 fieldInfo.defaultValue,
-                fieldInfo.schema,
+                schema,
                 fieldType,
                 fieldClass,
                 field,
@@ -994,24 +996,22 @@ public class ObjectReaderCreator {
                     continue;
                 }
 
-                fieldReaders
-                        .putIfAbsent(
-                                alternateName,
-                                createFieldReader(
-                                        objectClass,
-                                        objectType,
-                                        alternateName,
-                                        fieldInfo.ordinal,
-                                        fieldInfo.features,
-                                        null,
-                                        fieldInfo.locale,
-                                        fieldInfo.defaultValue,
-                                        fieldInfo.schema,
-                                        fieldType,
-                                        fieldClass,
-                                        field,
-                                        null
-                                ));
+                FieldReader<Object> fieldReader1 = createFieldReader(
+                        objectClass,
+                        objectType,
+                        alternateName,
+                        fieldInfo.ordinal,
+                        fieldInfo.features,
+                        null,
+                        fieldInfo.locale,
+                        fieldInfo.defaultValue,
+                        schema,
+                        fieldType,
+                        fieldClass,
+                        field,
+                        null
+                );
+                fieldReaders.putIfAbsent(alternateName, fieldReader1);
             }
         }
     }
@@ -1180,11 +1180,13 @@ public class ObjectReaderCreator {
         }
     }
 
-    protected <T> FieldReader[] createFieldReaders(Class<T> objectClass,
-                                                   Type objectType,
-                                                   BeanInfo beanInfo,
-                                                   boolean fieldBased,
-                                                   ObjectReaderProvider provider) {
+    protected <T> FieldReader[] createFieldReaders(
+            Class<T> objectClass,
+            Type objectType,
+            BeanInfo beanInfo,
+            boolean fieldBased,
+            ObjectReaderProvider provider
+    ) {
         if (beanInfo == null) {
             beanInfo = new BeanInfo();
             for (ObjectReaderModule module : provider.modules) {
@@ -1199,6 +1201,7 @@ public class ObjectReaderCreator {
 
         Map<String, FieldReader> fieldReaders = new LinkedHashMap<>();
 
+        BeanInfo finalBeanInfo = beanInfo;
         final long beanFeatures = beanInfo.readerFeatures;
         final FieldInfo fieldInfo = new FieldInfo();
         final String[] orders = beanInfo.orders;
@@ -1214,6 +1217,13 @@ public class ObjectReaderCreator {
                 fieldInfo.init();
                 fieldInfo.features |= beanFeatures;
                 createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, provider);
+                if (fieldInfo.required) {
+                    String fieldName = fieldInfo.fieldName;
+                    if (fieldName == null || fieldName.isEmpty()) {
+                        fieldName = field.getName();
+                    }
+                    finalBeanInfo.required(fieldName);
+                }
             });
 
             BeanUtils.setters(objectClass, method -> {
