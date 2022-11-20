@@ -61,6 +61,10 @@ final class DateValidator
             return true;
         }
 
+        if (str.length() < 9 || str.length() > 40) {
+            return false;
+        }
+
         try {
             char[] chars = new char[str.length() + 2];
             chars[0] = '"';
