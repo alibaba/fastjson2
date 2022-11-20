@@ -56,6 +56,30 @@ public class JSONPathTypedMultiTest {
         String jsonStr = array.toString();
         Object[] result = (Object[]) jsonPath.extract(jsonStr);
         assertArrayEquals(expected, result);
+        assertNull(jsonPath.extract("null"));
+        assertNull(jsonPath.extract("[null]"));
+    }
+
+    @Test
+    public void test1a() {
+        JSONArray array = JSONArray.of(null, object);
+
+        JSONPath jsonPath = JSONPath.of(
+                new String[]{"$[1].id", "$[1].name", "$[1].date"},
+                new Type[]{Long.class, String.class, Date.class}
+        );
+
+        Object[] expected = new Object[]{1001L, "DataWorks", DateUtils.parseDate("2017-07-14")};
+        {
+            Object[] result = (Object[]) jsonPath.eval(array);
+            assertArrayEquals(expected, result);
+        }
+
+        String jsonStr = array.toString();
+        Object[] result = (Object[]) jsonPath.extract(jsonStr);
+        assertArrayEquals(expected, result);
+        assertNull(jsonPath.extract("null"));
+        assertNull(jsonPath.extract("[1,null]"));
     }
 
     @Test

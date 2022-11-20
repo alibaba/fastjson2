@@ -577,7 +577,8 @@ public abstract class JSONPath {
                         JSONPathSegmentName name = (JSONPathSegmentName) first0;
                         prefix = new JSONPathSingleName(prefixPath, name);
                     } else if (first0 instanceof JSONPathSegmentIndex) {
-                        prefix = new JSONPathSingle(first0, prefixPath);
+                        JSONPathSegmentIndex first0Index = ((JSONPathSegmentIndex) first0);
+                        prefix = new JSONPathSingleIndex(prefixPath, first0Index);
                     }
 
                     if (prefix != null) {
