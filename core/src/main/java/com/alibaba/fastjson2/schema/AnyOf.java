@@ -33,7 +33,7 @@ final class AnyOf
 
     @Override
     public Type getType() {
-        return Type.AllOf;
+        return Type.AnyOf;
     }
 
     @Override

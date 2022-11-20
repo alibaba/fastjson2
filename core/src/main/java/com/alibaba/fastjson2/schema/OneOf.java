@@ -33,7 +33,7 @@ final class OneOf
 
     @Override
     public Type getType() {
-        return Type.AllOf;
+        return Type.OneOf;
     }
 
     @Override
