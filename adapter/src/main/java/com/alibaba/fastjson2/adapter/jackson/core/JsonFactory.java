@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.adapter.jackson.core;
 
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.adapter.jackson.databind.JsonParserWrapper;
@@ -13,10 +14,24 @@ public class JsonFactory {
     private long parserFeatures;
     private long generatorFeatures;
 
+    public JSONWriter createJSONWriter() {
+        JSONWriter jsonWriter = JSONWriter.of();
+        return jsonWriter;
+    }
+
+    protected JSONReader.Context createReaderContext() {
+        return JSONFactory.createReadContext();
+    }
+
+    public JSONReader createJSONReader(String str) {
+        JSONReader jsonReader = JSONReader.of(str, createReaderContext());
+        return jsonReader;
+    }
+
     public JsonGenerator createGenerator(OutputStream out, JsonEncoding enc)
             throws IOException {
-        JSONWriter jsonWriter = JSONWriter.of();
-        return new JsonGeneratorWrapper(jsonWriter, out, enc);
+        JSONWriter jsonWriter = createJSONWriter();
+        return new JsonGenerator(jsonWriter, out, enc);
     }
 
     public JsonGenerator createGenerator(File f, JsonEncoding enc) throws IOException {

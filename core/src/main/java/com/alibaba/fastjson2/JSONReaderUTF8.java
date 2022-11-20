@@ -1762,7 +1762,7 @@ class JSONReaderUTF8
     }
 
     @Override
-    public final int readInt32Value() {
+    public int readInt32Value() {
         boolean negative = false;
         int firstOffset = offset;
         char firstChar = ch;
@@ -2024,7 +2024,7 @@ class JSONReaderUTF8
     }
 
     @Override
-    public final long readInt64Value() {
+    public long readInt64Value() {
         boolean negative = false;
         int firstOffset = offset;
         char firstChar = ch;
@@ -4467,10 +4467,9 @@ class JSONReaderUTF8
 
     @Override
     protected ZonedDateTime readZonedDateTimeX(int len) {
-        if (ch != '"' && ch != '\'') {
+        if (!isString()) {
             throw new JSONException("date only support string input");
         }
-        final char quote = ch;
 
         if (len < 19) {
             return null;
@@ -4991,7 +4990,7 @@ class JSONReaderUTF8
 
     @Override
     public LocalDate readLocalDate8() {
-        if (ch != '"' && ch != '\'') {
+        if (!isString()) {
             throw new JSONException("localDate only support string input");
         }
 
@@ -5075,7 +5074,7 @@ class JSONReaderUTF8
 
     @Override
     public LocalDate readLocalDate9() {
-        if (ch != '"' && ch != '\'') {
+        if (!isString()) {
             throw new JSONException("localDate only support string input");
         }
 
@@ -5162,7 +5161,7 @@ class JSONReaderUTF8
 
     @Override
     public LocalDate readLocalDate10() {
-        if (ch != '"' && ch != '\'') {
+        if (!isString()) {
             throw new JSONException("localDate only support string input");
         }
 
@@ -5276,7 +5275,7 @@ class JSONReaderUTF8
 
     @Override
     protected LocalDate readLocalDate11() {
-        if (ch != '"' && ch != '\'') {
+        if (!isString()) {
             throw new JSONException("localDate only support string input");
         }
 
@@ -5358,7 +5357,7 @@ class JSONReaderUTF8
 
     @Override
     protected LocalDateTime readLocalDateTime17() {
-        if (ch != '"' && ch != '\'') {
+        if (!isString()) {
             throw new JSONException("date only support string input");
         }
 
@@ -5516,7 +5515,7 @@ class JSONReaderUTF8
 
     @Override
     protected LocalTime readLocalTime5() {
-        if (ch != '"' && ch != '\'') {
+        if (!isString()) {
             throw new JSONException("localTime only support string input");
         }
 
@@ -5565,7 +5564,7 @@ class JSONReaderUTF8
 
     @Override
     protected LocalTime readLocalTime8() {
-        if (ch != '"' && ch != '\'') {
+        if (!isString()) {
             throw new JSONException("localTime only support string input");
         }
 
@@ -5628,7 +5627,7 @@ class JSONReaderUTF8
 
     @Override
     protected LocalTime readLocalTime11() {
-        if (ch != '"' && ch != '\'') {
+        if (!isString()) {
             throw new JSONException("localTime only support string input");
         }
 
@@ -5708,7 +5707,7 @@ class JSONReaderUTF8
 
     @Override
     protected LocalTime readLocalTime10() {
-        if (ch != '"' && ch != '\'') {
+        if (!isString()) {
             throw new JSONException("localTime only support string input");
         }
 
@@ -5787,7 +5786,7 @@ class JSONReaderUTF8
 
     @Override
     protected LocalTime readLocalTime12() {
-        if (ch != '"' && ch != '\'') {
+        if (!isString()) {
             throw new JSONException("localTime only support string input");
         }
 
@@ -5868,7 +5867,7 @@ class JSONReaderUTF8
 
     @Override
     protected LocalTime readLocalTime18() {
-        if (ch != '"' && ch != '\'') {
+        if (!isString()) {
             throw new JSONException("localTime only support string input");
         }
 
@@ -5974,7 +5973,7 @@ class JSONReaderUTF8
 
     @Override
     protected LocalDateTime readLocalDateTime16() {
-        if (ch != '"' && ch != '\'') {
+        if (!isString()) {
             throw new JSONException("date only support string input");
         }
 
@@ -6143,7 +6142,7 @@ class JSONReaderUTF8
 
     @Override
     protected LocalDateTime readLocalDateTime18() {
-        if (ch != '"' && ch != '\'') {
+        if (!isString()) {
             throw new JSONException("date only support string input");
         }
 
@@ -6339,7 +6338,7 @@ class JSONReaderUTF8
 
     @Override
     protected LocalDateTime readLocalDateTime19() {
-        if (ch != '"' && ch != '\'') {
+        if (!isString()) {
             throw new JSONException("date only support string input");
         }
 
@@ -6683,7 +6682,7 @@ class JSONReaderUTF8
 
     @Override
     protected LocalDateTime readLocalDateTimeX(int len) {
-        if (ch != '"') {
+        if (!isString()) {
             throw new JSONException("date only support string input");
         }
 
@@ -7212,7 +7211,8 @@ class JSONReaderUTF8
         return true;
     }
 
-    protected byte[] readHex() {
+    @Override
+    public byte[] readHex() {
         next();
         if (ch != '\'') {
             throw new JSONException("illegal state. " + ch);

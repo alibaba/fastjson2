@@ -18,13 +18,13 @@ import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK8;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 import static java.time.ZoneOffset.UTC;
 
-final class JSONReaderUTF16
+class JSONReaderUTF16
         extends JSONReader {
-    private final String str;
-    private final char[] chars;
-    private final int length;
-    private final int start;
-    private final int end;
+    protected final String str;
+    protected final char[] chars;
+    protected final int length;
+    protected final int start;
+    protected final int end;
 
     private int nameBegin;
     private int nameEnd;
@@ -91,7 +91,8 @@ final class JSONReaderUTF16
         }
     }
 
-    protected byte[] readHex() {
+    @Override
+    public byte[] readHex() {
         next();
         if (ch != '\'') {
             throw new JSONException("illegal state. " + ch);
@@ -3474,7 +3475,7 @@ final class JSONReaderUTF16
         return stringValue = new String(chars);
     }
 
-    private void readString0() {
+    protected void readString0() {
         char quote = this.ch;
         int offset = this.offset;
         int start = offset;
@@ -4497,7 +4498,7 @@ final class JSONReaderUTF16
     }
 
     @Override
-    public final int getStringLength() {
+    public int getStringLength() {
         if (ch != '"' && ch != '\'') {
             throw new JSONException("date only support string input : " + ch);
         }
@@ -5435,7 +5436,7 @@ final class JSONReaderUTF16
 
     @Override
     public LocalDate readLocalDate11() {
-        if (ch != '"' && ch != '\'') {
+        if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("localDate only support string input");
         }
 
@@ -5519,7 +5520,7 @@ final class JSONReaderUTF16
 
     @Override
     protected ZonedDateTime readZonedDateTimeX(int len) {
-        if (ch != '"' && ch != '\'') {
+        if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("date only support string input");
         }
 
@@ -6044,7 +6045,7 @@ final class JSONReaderUTF16
 
     @Override
     protected LocalDateTime readLocalDateTime19() {
-        if (ch != '"' && ch != '\'') {
+        if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("date only support string input");
         }
 
@@ -6389,7 +6390,7 @@ final class JSONReaderUTF16
 
     @Override
     protected LocalDateTime readLocalDateTimeX(int len) {
-        if (ch != '"' && ch != '\'') {
+        if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("date only support string input");
         }
 
@@ -6534,7 +6535,7 @@ final class JSONReaderUTF16
 
     @Override
     protected LocalTime readLocalTime10() {
-        if (ch != '"' && ch != '\'') {
+        if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("localTime only support string input");
         }
 
@@ -6613,7 +6614,7 @@ final class JSONReaderUTF16
 
     @Override
     protected LocalTime readLocalTime11() {
-        if (ch != '"' && ch != '\'') {
+        if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("localTime only support string input");
         }
 
@@ -6693,7 +6694,7 @@ final class JSONReaderUTF16
 
     @Override
     protected LocalTime readLocalTime12() {
-        if (ch != '"' && ch != '\'') {
+        if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("localTime only support string input");
         }
 
@@ -6774,7 +6775,7 @@ final class JSONReaderUTF16
 
     @Override
     protected LocalTime readLocalTime18() {
-        if (ch != '"' && ch != '\'') {
+        if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("localTime only support string input");
         }
 

@@ -47,6 +47,7 @@ public interface ObjectReader<T> {
         }
         return createInstance(map, featuresValue);
     }
+
     /**
      * @return {@link T}
      * @throws JSONException If a suitable ObjectReader is not found
@@ -315,4 +316,11 @@ public interface ObjectReader<T> {
      * @throws JSONException If a suitable ObjectReader is not found
      */
     T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features);
+
+    /**
+     * @since 2.0.20
+     */
+    default T readFromCSV(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        throw new JSONException("unsupported operation");
+    }
 }

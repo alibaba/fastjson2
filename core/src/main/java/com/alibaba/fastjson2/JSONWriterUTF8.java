@@ -1077,6 +1077,33 @@ class JSONWriterUTF8
     }
 
     @Override
+    public void writeRaw(char c0, char c1) {
+        if (c0 < 0 || c0 > 128) {
+            throw new JSONException("not support " + c0);
+        }
+        if (c1 < 0 || c1 > 128) {
+            throw new JSONException("not support " + c1);
+        }
+
+        if (off + 1 >= bytes.length) {
+            int minCapacity = off + 2;
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
+        bytes[off++] = (byte) c0;
+        bytes[off++] = (byte) c1;
+    }
+
+    @Override
     public void writeNameRaw(byte[] bytes, int off, int len) {
         {
             // inline ensureCapacity

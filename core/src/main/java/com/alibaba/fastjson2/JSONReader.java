@@ -50,7 +50,7 @@ public abstract class JSONReader
     static final char EOI = 0x1A;
     static final long SPACE = (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
 
-    final Context context;
+    protected final Context context;
     List<ResolveTask> resolveTasks;
 
     protected int offset;
@@ -262,6 +262,10 @@ public abstract class JSONReader
     }
 
     public boolean isJSONB() {
+        return false;
+    }
+
+    public boolean isCSV() {
         return false;
     }
 
@@ -483,7 +487,7 @@ public abstract class JSONReader
         return false;
     }
 
-    protected abstract byte[] readHex();
+    public abstract byte[] readHex();
 
     public byte[] readBinary() {
         if (ch == 'x') {
@@ -968,7 +972,7 @@ public abstract class JSONReader
             return instant.atZone(context.getZoneId());
         }
 
-        if (ch == '"' || ch == '\'') {
+        if (isString()) {
             if (context.dateFormat == null
                     || context.formatyyyyMMddhhmmss19
                     || context.formatyyyyMMddhhmmssT19
@@ -2813,6 +2817,68 @@ public abstract class JSONReader
         return new JSONReaderUTF16(context, str, chars, 0, length);
     }
 
+    public static JSONReader ofCSV(String str, JSONReader.Feature... features) {
+        Context context = createReadContext(features);
+        context.config(Feature.SupportArrayToBean);
+        return ofCSV(str, context);
+    }
+
+    public static JSONReader ofCSV(String str, Context context) {
+        if (str == null) {
+            throw new NullPointerException();
+        }
+
+        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
+            try {
+                int coder = STRING_CODER != null
+                        ? STRING_CODER.applyAsInt(str)
+                        : UnsafeUtils.getStringCoder(str);
+                if (coder == 0) {
+                    byte[] bytes = STRING_VALUE != null
+                            ? STRING_VALUE.apply(str)
+                            : UnsafeUtils.getStringValue(str);
+                    return new JSONReaderASCIICSV(context, str, bytes, 0, bytes.length);
+                }
+            } catch (Exception e) {
+                throw new JSONException("unsafe get String.coder error");
+            }
+        }
+
+        final int length = str.length();
+        char[] chars;
+        if (JVM_VERSION == 8) {
+            chars = JDKUtils.getCharArray(str);
+        } else {
+            chars = str.toCharArray();
+        }
+
+        return new JSONReaderUTF16CSV(context, str, chars, 0, length);
+    }
+
+    public static JSONReader ofCSV(byte[] bytes, int offset, int length) {
+        return ofCSV(bytes, offset, length, JSONFactory.createReadContext(Feature.SupportArrayToBean));
+    }
+
+    public static JSONReader ofCSV(char[] chars, int offset, int length) {
+        return ofCSV(chars, offset, length, JSONFactory.createReadContext());
+    }
+
+    public static JSONReader ofCSV(char[] chars, int offset, int length, Context context) {
+        return new JSONReaderUTF16CSV(context, null, chars, offset, length);
+    }
+
+    public static JSONReader ofCSV(byte[] bytes, int offset, int length, Context context) {
+        return ofCSV(bytes, offset, length, StandardCharsets.US_ASCII, context);
+    }
+
+    public static JSONReader ofCSV(byte[] bytes, int offset, int length, Charset charset, Context context) {
+        if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
+            return new JSONReaderASCIICSV(context, null, bytes, offset, length);
+        }
+
+        throw new JSONException("not support charset " + charset);
+    }
+
     public static JSONReader of(String str, Context context) {
         if (str == null) {
             throw new NullPointerException();
@@ -3243,6 +3309,34 @@ public abstract class JSONReader
             this.features = defaultReaderFeatures;
             this.provider = provider;
             this.symbolTable = symbolTable;
+        }
+
+        public boolean isFormatUnixTime() {
+            return formatUnixTime;
+        }
+
+        public boolean isFormatyyyyMMddhhmmss19() {
+            return formatyyyyMMddhhmmss19;
+        }
+
+        public boolean isFormatyyyyMMddhhmmssT19() {
+            return formatyyyyMMddhhmmssT19;
+        }
+
+        public boolean isFormatyyyyMMdd8() {
+            return formatyyyyMMdd8;
+        }
+
+        public boolean isFormatMillis() {
+            return formatMillis;
+        }
+
+        public boolean isFormatISO8601() {
+            return formatISO8601;
+        }
+
+        public boolean isFormatHasHour() {
+            return formatHasHour;
         }
 
         public ObjectReader getObjectReader(Type type) {

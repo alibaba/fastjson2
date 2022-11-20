@@ -6058,7 +6058,7 @@ public final class JSONReaderStr
         }
     }
 
-    protected byte[] readHex() {
+    public byte[] readHex() {
         next();
         if (ch != '\'') {
             throw new JSONException("illegal state. " + ch);
