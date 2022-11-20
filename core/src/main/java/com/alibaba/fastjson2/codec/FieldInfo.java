@@ -26,6 +26,7 @@ public class FieldInfo {
     public String defaultValue;
     public Locale locale;
     public String schema;
+    public boolean required;
 
     public ObjectReader getInitReader() {
         if (readUsing != null && ObjectReader.class.isAssignableFrom(readUsing)) {
@@ -46,6 +47,7 @@ public class FieldInfo {
         ordinal = 0;
         features = 0;
         ignore = false;
+        required = false;
         alternateNames = null;
         writeUsing = null;
         readUsing = null;

@@ -300,6 +300,7 @@ public class ObjectWriterBaseModule
                         processJSONField1x(fieldInfo, annotation);
                         break;
                     case "com.fasterxml.jackson.annotation.JsonProperty":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
                         if (useJacksonAnnotation) {
                             processJacksonJsonProperty(fieldInfo, annotation);
                         }
@@ -682,6 +683,7 @@ public class ObjectWriterBaseModule
                     case "java.beans.Transient":
                         fieldInfo.isTransient = true;
                         break;
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
                     case "com.fasterxml.jackson.annotation.JsonProperty": {
                         if (useJacksonAnnotation) {
                             processJacksonJsonProperty(fieldInfo, annotation);

@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONWriter.Feature;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JSONFieldTest5 {
     @Test
@@ -77,5 +78,27 @@ public class JSONFieldTest5 {
         public int getCode() {
             return code;
         }
+    }
+
+    @Test
+    public void test3() {
+        Bean3 bean = new Bean3();
+        bean.id = 1001;
+        String str = JSON.toJSONString(bean);
+        assertEquals("{\"bean_id\":1001}", str);
+
+        assertThrows(
+                Exception.class,
+                () -> JSON.parseObject("{\"bean_id\":null}", Bean3.class)
+        );
+        assertThrows(
+                Exception.class,
+                () -> JSON.parseObject("{}", Bean3.class)
+        );
+    }
+
+    public static class Bean3 {
+        @JSONField(name = "bean_id", required = true)
+        public Integer id;
     }
 }
