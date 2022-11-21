@@ -77,7 +77,7 @@
         <dependency>
             <groupId>io.github.wycst</groupId>
             <artifactId>wast</artifactId>
-            <version>0.0.8</version>
+            <version>0.0.9</version>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
