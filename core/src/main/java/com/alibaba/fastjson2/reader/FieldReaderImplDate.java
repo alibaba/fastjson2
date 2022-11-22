@@ -210,64 +210,72 @@ abstract class FieldReaderImplDate<T>
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         java.util.Date fieldValue;
-        if (jsonReader.isInt() && (format == null || formatUnixTime || formatMillis)) {
-            long millis = jsonReader.readInt64Value();
-            if (formatUnixTime) {
-                millis *= 1000L;
-            }
-            fieldValue = new java.util.Date(millis);
-        } else if (jsonReader.isNull()) {
-            jsonReader.readNull();
-            fieldValue = null;
-        } else if (useSimpleFormatter) {
-            String str = jsonReader.readString();
-            try {
-                fieldValue = new SimpleDateFormat(format).parse(str);
-            } catch (ParseException e) {
-                throw new JSONException(jsonReader.info("parse error : " + str), e);
-            }
-        } else {
-            if (format != null) {
+        try {
+            if (jsonReader.isInt() && (format == null || formatUnixTime || formatMillis)) {
+                long millis = jsonReader.readInt64Value();
+                if (formatUnixTime) {
+                    millis *= 1000L;
+                }
+                fieldValue = new java.util.Date(millis);
+            } else if (jsonReader.isNull()) {
+                jsonReader.readNull();
+                fieldValue = null;
+            } else if (useSimpleFormatter) {
                 String str = jsonReader.readString();
-                if (str.isEmpty() || "null".equals(str)) {
-                    fieldValue = null;
-                } else {
-                    long millis;
-                    if ((formatUnixTime || formatMillis) && IOUtils.isNumber(str)) {
-                        millis = Long.parseLong(str);
-                        if (formatUnixTime) {
-                            millis *= 1000L;
-                        }
+                try {
+                    fieldValue = new SimpleDateFormat(format).parse(str);
+                } catch (ParseException e) {
+                    throw new JSONException(jsonReader.info("parse error : " + str), e);
+                }
+            } else {
+                if (format != null) {
+                    String str = jsonReader.readString();
+                    if (str.isEmpty() || "null".equals(str)) {
+                        fieldValue = null;
                     } else {
-                        Locale locale = jsonReader.getContext().getLocale();
-                        DateTimeFormatter formatter = getFormatter(locale);
-
-                        LocalDateTime ldt;
-                        if (!formatHasHour) {
-                            ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
+                        long millis;
+                        if ((formatUnixTime || formatMillis) && IOUtils.isNumber(str)) {
+                            millis = Long.parseLong(str);
+                            if (formatUnixTime) {
+                                millis *= 1000L;
+                            }
                         } else {
-                            try {
-                                ldt = LocalDateTime.parse(str, formatter);
-                            } catch (DateTimeParseException e) {
-                                if (jsonReader.isSupportSmartMatch(features)) {
-                                    ldt = DateUtils.parseZonedDateTime(str)
-                                            .toLocalDateTime();
-                                } else {
-                                    throw e;
+                            Locale locale = jsonReader.getContext().getLocale();
+                            DateTimeFormatter formatter = getFormatter(locale);
+
+                            LocalDateTime ldt;
+                            if (!formatHasHour) {
+                                ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
+                            } else {
+                                try {
+                                    ldt = LocalDateTime.parse(str, formatter);
+                                } catch (DateTimeParseException e) {
+                                    if (jsonReader.isSupportSmartMatch(features)) {
+                                        ldt = DateUtils.parseZonedDateTime(str)
+                                                .toLocalDateTime();
+                                    } else {
+                                        throw e;
+                                    }
                                 }
                             }
-                        }
 
-                        ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());
-                        millis = zdt.toInstant().toEpochMilli();
+                            ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());
+                            millis = zdt.toInstant().toEpochMilli();
+                        }
+                        fieldValue = new java.util.Date(millis);
                     }
+                } else if (jsonReader.nextIfEmptyString()) {
+                    fieldValue = null;
+                } else {
+                    long millis = jsonReader.readMillisFromString();
                     fieldValue = new java.util.Date(millis);
                 }
-            } else if (jsonReader.nextIfEmptyString()) {
+            }
+        } catch (Exception e) {
+            if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
                 fieldValue = null;
             } else {
-                long millis = jsonReader.readMillisFromString();
-                fieldValue = new java.util.Date(millis);
+                throw e;
             }
         }
 

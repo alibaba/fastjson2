@@ -20,10 +20,11 @@ final class JSONPathTypedMultiIndexes
             JSONPath[] indexPaths,
             Type[] types,
             String[] formats,
+            long[] pathFeatures,
             ZoneId zoneId,
             long features
     ) {
-        super(paths, types, formats, zoneId, features);
+        super(paths, types, formats, pathFeatures, zoneId, features);
         this.prefix = prefix;
         this.indexPaths = indexPaths;
         int[] indexes = new int[paths.length];
@@ -53,36 +54,48 @@ final class JSONPathTypedMultiIndexes
             for (int i = 0; i < indexes.length; i++) {
                 Object result = list.get(indexes[i]);
                 Type type = types[i];
-                if (result != null && result.getClass() != type) {
-                    if (type == Long.class) {
-                        result = TypeUtils.toLong(result);
-                    } else if (type == BigDecimal.class) {
-                        result = TypeUtils.toBigDecimal(result);
-                    } else if (type == String[].class) {
-                        result = TypeUtils.toStringArray(result);
-                    } else {
-                        result = TypeUtils.cast(result, type);
+                try {
+                    if (result != null && result.getClass() != type) {
+                        if (type == Long.class) {
+                            result = TypeUtils.toLong(result);
+                        } else if (type == BigDecimal.class) {
+                            result = TypeUtils.toBigDecimal(result);
+                        } else if (type == String[].class) {
+                            result = TypeUtils.toStringArray(result);
+                        } else {
+                            result = TypeUtils.cast(result, type);
+                        }
+                    }
+                    array[i] = result;
+                } catch (Exception e) {
+                    if (!isIgnoreError(i)) {
+                        throw new JSONException("jsonpath eval path, path : " + paths[i] + ", msg : " + e.getMessage(), e);
                     }
                 }
-                array[i] = result;
             }
         } else {
             for (int i = 0; i < paths.length; i++) {
                 JSONPath jsonPath = indexPaths[i];
                 Type type = types[i];
-                Object result = jsonPath.eval(object);
-                if (result != null && result.getClass() != type) {
-                    if (type == Long.class) {
-                        result = TypeUtils.toLong(result);
-                    } else if (type == BigDecimal.class) {
-                        result = TypeUtils.toBigDecimal(result);
-                    } else if (type == String[].class) {
-                        result = TypeUtils.toStringArray(result);
-                    } else {
-                        result = TypeUtils.cast(result, type);
+                try {
+                    Object result = jsonPath.eval(object);
+                    if (result != null && result.getClass() != type) {
+                        if (type == Long.class) {
+                            result = TypeUtils.toLong(result);
+                        } else if (type == BigDecimal.class) {
+                            result = TypeUtils.toBigDecimal(result);
+                        } else if (type == String[].class) {
+                            result = TypeUtils.toStringArray(result);
+                        } else {
+                            result = TypeUtils.cast(result, type);
+                        }
+                    }
+                    array[i] = result;
+                } catch (Exception e) {
+                    if (!isIgnoreError(i)) {
+                        throw new JSONException("jsonpath eval path, path : " + paths[i] + ", msg : " + e.getMessage(), e);
                     }
                 }
-                array[i] = result;
             }
         }
 

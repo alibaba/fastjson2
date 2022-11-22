@@ -447,7 +447,18 @@ public abstract class JSONPath {
      * @since 2.0.20
      */
     public static JSONPath of(String[] paths, Type[] types) {
-        return of(paths, types, null, null);
+        return of(paths, types, null, null, (ZoneId) null);
+    }
+
+    /**
+     * create multi-path jsonpath
+     *
+     * @param paths jsonpath array
+     * @param types item types
+     * @since 2.0.20
+     */
+    public static JSONPath of(String[] paths, Type[] types, JSONReader.Feature... features) {
+        return of(paths, types, null, null, null, features);
     }
 
     /**
@@ -464,6 +475,7 @@ public abstract class JSONPath {
             String[] paths,
             Type[] types,
             String[] formats,
+            long[] pathFeatures,
             ZoneId zoneId,
             JSONReader.Feature... features
     ) {
@@ -542,11 +554,11 @@ public abstract class JSONPath {
         long featuresValue = JSONReader.Feature.of(features);
 
         if (allSingleName) {
-            return new JSONPathTypedMultiNames(jsonPaths, null, jsonPaths, types, formats, zoneId, featuresValue);
+            return new JSONPathTypedMultiNames(jsonPaths, null, jsonPaths, types, formats, pathFeatures, zoneId, featuresValue);
         }
 
         if (allSinglePositiveIndex) {
-            return new JSONPathTypedMultiIndexes(jsonPaths, null, jsonPaths, types, formats, zoneId, featuresValue);
+            return new JSONPathTypedMultiIndexes(jsonPaths, null, jsonPaths, types, formats, pathFeatures, zoneId, featuresValue);
         }
 
         if (allTwoName || allTwoIndexPositive) {
@@ -582,7 +594,7 @@ public abstract class JSONPath {
                     }
 
                     if (prefix != null) {
-                        return new JSONPathTypedMultiNames(jsonPaths, prefix, names, types, formats, zoneId, featuresValue);
+                        return new JSONPathTypedMultiNames(jsonPaths, prefix, names, types, formats, pathFeatures, zoneId, featuresValue);
                     }
                 } else if (allTwoIndexPositive) {
                     JSONPathSingleIndex[] indexes = new JSONPathSingleIndex[jsonPaths.length];
@@ -602,7 +614,7 @@ public abstract class JSONPath {
                     }
 
                     if (prefix != null) {
-                        return new JSONPathTypedMultiIndexes(jsonPaths, prefix, indexes, types, formats, zoneId, featuresValue);
+                        return new JSONPathTypedMultiIndexes(jsonPaths, prefix, indexes, types, formats, pathFeatures, zoneId, featuresValue);
                     }
                 }
             }
@@ -636,12 +648,12 @@ public abstract class JSONPath {
                 String prefixPath = firstPath.path.substring(0, firstPath.path.length() - names[0].name.length() - 1);
                 JSONPath prefix = new JSONPathTwoSegment(prefixPath, first0, first1);
                 if (prefix != null) {
-                    return new JSONPathTypedMultiNames(jsonPaths, prefix, names, types, formats, zoneId, featuresValue);
+                    return new JSONPathTypedMultiNames(jsonPaths, prefix, names, types, formats, pathFeatures, zoneId, featuresValue);
                 }
             }
         }
 
-        return new JSONPathTypedMulti(jsonPaths, types, formats, zoneId, featuresValue);
+        return new JSONPathTypedMulti(jsonPaths, types, formats, pathFeatures, zoneId, featuresValue);
     }
 
     public static JSONPath of(String path, Feature... features) {
@@ -961,7 +973,8 @@ public abstract class JSONPath {
     }
 
     public enum Feature {
-        AlwaysReturnList(1);
+        AlwaysReturnList(1),
+        NullOnError(1 << 1);
         public final long mask;
 
         Feature(long mask) {

@@ -15,6 +15,7 @@ final class FieldReaderNumberFunc<T, V>
             String fieldName,
             Class<V> fieldClass,
             int ordinal,
+            long features,
             String format,
             Locale locale,
             Number defaultValue,
@@ -22,7 +23,7 @@ final class FieldReaderNumberFunc<T, V>
             Method method,
             BiConsumer<T, V> function
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, null, defaultValue, schema, method, null);
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
         this.function = function;
     }
 
@@ -55,7 +56,16 @@ final class FieldReaderNumberFunc<T, V>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        Number fieldValue = jsonReader.readNumber();
+        Number fieldValue;
+        try {
+            fieldValue = jsonReader.readNumber();
+        } catch (Exception e) {
+            if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
+                fieldValue = null;
+            } else {
+                throw e;
+            }
+        }
 
         if (schema != null) {
             schema.assertValidate(fieldValue);

@@ -13,13 +13,22 @@ class JSONPathTypedMulti
     final JSONPath[] paths;
     final Type[] types;
     final String[] formats;
+    final long[] pathFeatures;
     final ZoneId zoneId;
 
-    protected JSONPathTypedMulti(JSONPath[] paths, Type[] types, String[] formats, ZoneId zoneId, long features) {
+    protected JSONPathTypedMulti(
+            JSONPath[] paths,
+            Type[] types,
+            String[] formats,
+            long[] pathFeatures,
+            ZoneId zoneId,
+            long features
+    ) {
         super(JSON.toJSONString(paths), features);
         this.types = types;
         this.paths = paths;
         this.formats = formats;
+        this.pathFeatures = pathFeatures;
         this.zoneId = zoneId;
     }
 
@@ -43,13 +52,27 @@ class JSONPathTypedMulti
         return false;
     }
 
+    protected boolean isIgnoreError(int index) {
+        if (pathFeatures != null && index < pathFeatures.length) {
+            long features = pathFeatures[index];
+            return (features & Feature.NullOnError.mask) != 0;
+        }
+        return false;
+    }
+
     @Override
     public Object eval(Object object) {
         Object[] array = new Object[paths.length];
         for (int i = 0; i < paths.length; i++) {
             JSONPath jsonPath = paths[i];
             Object result = jsonPath.eval(object);
-            array[i] = TypeUtils.cast(result, types[i]);
+            try {
+                array[i] = TypeUtils.cast(result, types[i]);
+            } catch (Exception e) {
+                if (!isIgnoreError(i)) {
+                    throw new JSONException("jsonpath eval path, path : " + jsonPath + ", msg : " + e.getMessage(), e);
+                }
+            }
         }
         return array;
     }
