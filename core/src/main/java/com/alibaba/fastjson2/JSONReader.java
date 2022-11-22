@@ -1506,7 +1506,11 @@ public abstract class JSONReader
                     value = readArray();
                     break;
                 case '{':
-                    value = readObject();
+                    if (typeRedirect) {
+                        value = ObjectReaderImplObject.INSTANCE.readObject(this, null, name, features);
+                    } else {
+                        value = readObject();
+                    }
                     break;
                 case '"':
                 case '\'':
