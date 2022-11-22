@@ -2285,7 +2285,7 @@ public class DateUtils {
         ) {
             month = (m0 - '0') * 10 + (m1 - '0');
 
-            if ((month == 0 && year != 0) || month >= 12) {
+            if ((month == 0 && year != 0) || month > 12) {
                 throw new DateTimeParseException("illegal input", str.substring(off, off + 19), 0);
             }
         } else {
