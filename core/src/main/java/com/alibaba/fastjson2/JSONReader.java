@@ -1811,7 +1811,9 @@ public abstract class JSONReader
 
         next();
 
-        nextIfMatch(',');
+        if (!isCSV()) {
+            nextIfMatch(',');
+        }
 
         return val;
     }

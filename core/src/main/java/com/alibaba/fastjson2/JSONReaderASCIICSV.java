@@ -13,6 +13,7 @@ final class JSONReaderASCIICSV
         extends JSONReaderASCII {
     JSONReaderASCIICSV(Context ctx, String str, byte[] bytes, int offset, int length) {
         super(ctx, str, bytes, offset, length);
+        super.csv = true;
     }
 
     @Override
@@ -82,27 +83,30 @@ final class JSONReaderASCIICSV
 
     public int getStringLength() {
         boolean quote = this.ch == '"';
-        int len = 1;
         if (!quote) {
+            int len = 1;
             for (int i = offset; i < end; ++i, len++) {
-                byte ch = bytes[i];
+                char ch = (char) this.bytes[i];
                 if (ch == ',' || ch == '\r' || ch == '\n') {
                     break;
                 }
             }
-        } else {
-            for (int i = offset; i < end; ++i, ++len) {
-                byte ch = bytes[i];
-                if (ch == '"') {
-                    if (i + 1 < end && bytes[i + 1] == '"') {
-                        ++i;
-                        ++len;
-                        continue;
-                    }
-                    break;
+            return len;
+        }
+
+        int len = 0;
+        for (int i = offset; i < end; ++i, ++len) {
+            char ch = (char) this.bytes[i];
+            if (ch == '"') {
+                if (i + 1 < end && (char) this.bytes[i + 1] == '"') {
+                    ++i;
+                    ++len;
+                    continue;
                 }
+                break;
             }
         }
+
         return len;
     }
 
@@ -170,400 +174,15 @@ final class JSONReaderASCIICSV
     }
 
     @Override
-    public int readInt32Value() {
-        boolean negative = false;
-        int firstOffset = offset;
-        char firstChar = ch;
-
-        int intValue = 0;
-
-        if (ch == '-') {
-            negative = true;
-            ch = (char) this.bytes[offset++];
-        } else if (ch == '+') {
-            ch = (char) this.bytes[offset++];
-        } else if (ch == ',') {
-            return 0;
-        }
-
-        boolean overflow = false;
-        while (ch >= '0' && ch <= '9') {
-            int intValue10 = intValue * 10 + (ch - '0');
-            if (intValue10 < intValue) {
-                overflow = true;
-                break;
-            } else {
-                intValue = intValue10;
-            }
-            if (offset == end) {
-                ch = EOI;
-                break;
-            }
-            ch = (char) this.bytes[offset++];
-        }
-
-        boolean notMatch = false;
-        if (ch == '.'
-                || ch == 'e'
-                || ch == 'E'
-                || ch == 't'
-                || ch == 'f'
-                || ch == 'n'
-                || overflow) {
-            notMatch = true;
-        }
-
-        if (notMatch) {
-            this.offset = firstOffset;
-            this.ch = firstChar;
-            readNumber0();
-            if (valueType == JSON_TYPE_INT) {
-                BigInteger bigInteger = getBigInteger();
-                try {
-                    return bigInteger.intValueExact();
-                } catch (ArithmeticException ex) {
-                    throw new JSONException("int overflow, value " + bigInteger);
-                }
-            } else {
-                if (valueType == JSON_TYPE_NULL && (context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
-                    throw new JSONException(info("int value not support input null"));
-                }
-
-                return getInt32Value();
-            }
-        }
-
-        while (ch == ' ') {
-            if (offset >= end) {
-                ch = EOI;
-            } else {
-                ch = (char) this.bytes[offset++];
-            }
-        }
-
-        return negative ? -intValue : intValue;
-    }
-
-    @Override
-    public long readInt64Value() {
-        boolean negative = false;
-        int firstOffset = offset;
-        char firstChar = ch;
-
-        long longValue = 0;
-
-        if (ch == '-') {
-            negative = true;
-            ch = (char) this.bytes[offset++];
-        } else if (ch == '+') {
-            ch = (char) this.bytes[offset++];
-        } else if (ch == ',') {
-            return 0;
-        }
-
-        boolean overflow = false;
-        while (ch >= '0' && ch <= '9') {
-            long intValue10 = longValue * 10 + (ch - '0');
-            if (intValue10 < longValue) {
-                overflow = true;
-                break;
-            } else {
-                longValue = intValue10;
-            }
-            if (offset >= end) {
-                ch = EOI;
-                break;
-            }
-
-            ch = (char) this.bytes[offset++];
-        }
-
-        boolean notMatch = false;
-        if (ch == '.'
-                || ch == 'e'
-                || ch == 'E'
-                || ch == 't'
-                || ch == 'f'
-                || ch == 'n'
-                || overflow) {
-            notMatch = true;
-        }
-
-        if (notMatch) {
-            this.offset = firstOffset;
-            this.ch = firstChar;
-            readNumber0();
-            if (valueType == JSON_TYPE_INT) {
-                BigInteger bigInteger = getBigInteger();
-                try {
-                    return bigInteger.longValueExact();
-                } catch (ArithmeticException ex) {
-                    throw new JSONException("long overflow, value " + bigInteger);
-                }
-            } else {
-                return getInt64Value();
-            }
-        }
-
-        while (ch == ' ') {
-            if (offset >= end) {
-                ch = EOI;
-            } else {
-                ch = (char) this.bytes[offset++];
-            }
-        }
-
-        return negative ? -longValue : longValue;
-    }
-
-    @Override
-    public void readNumber0() {
-        this.wasNull = false;
-        this.mag0 = 0;
-        this.mag1 = 0;
-        this.mag2 = 0;
-        this.mag3 = 0;
-        this.negative = false;
-        this.exponent = 0;
-        this.scale = 0;
-
-        char quote = '\0';
-        if (ch == '"') {
-            quote = ch;
-            ch = (char) this.bytes[offset++];
-
-            if (ch == quote) {
-                if (offset == end) {
-                    ch = EOI;
-                } else {
-                    ch = (char) this.bytes[offset++];
-                }
-                nextIfMatch(',');
-                wasNull = true;
-                return;
-            }
-        } else if (ch == ',') {
-            wasNull = true;
-            valueType = JSON_TYPE_NULL;
-            return;
-        }
-
-        final int start = offset;
-
-        final int limit, multmin;
-        if (ch == '-') {
-            limit = Integer.MIN_VALUE;
-            multmin = -214748364; // limit / 10;
-            negative = true;
-            ch = (char) this.bytes[offset++];
-        } else {
-            if (ch == '+') {
-                ch = (char) this.bytes[offset++];
-            }
-            limit = -2147483647; // -Integer.MAX_VALUE;
-            multmin = -214748364; // limit / 10;
-        }
-
-        // if (result < limit + digit) {
-        boolean intOverflow = false;
-        valueType = JSON_TYPE_INT;
-        while (ch >= '0' && ch <= '9') {
-            if (!intOverflow) {
-                int digit = ch - '0';
-                mag3 *= 10;
-                if (mag3 < multmin
-                        || mag3 < limit + digit) {
-                    intOverflow = true;
-                } else {
-                    mag3 -= digit;
-                    if (mag3 < multmin) {
-                        intOverflow = true;
-                    }
-                }
-            }
-            if (offset == end) {
-                ch = EOI;
-                offset++;
-                break;
-            }
-            ch = (char) this.bytes[offset++];
-        }
-
-        if (ch == '.') {
-            valueType = JSON_TYPE_DEC;
-            ch = (char) this.bytes[offset++];
-            while (ch >= '0' && ch <= '9') {
-                if (!intOverflow) {
-                    int digit = ch - '0';
-                    mag3 *= 10;
-                    if (mag3 < multmin
-                            || mag3 < limit + digit) {
-                        intOverflow = true;
-                    } else {
-                        mag3 -= digit;
-                        if (mag3 < multmin) {
-                            intOverflow = true;
-                        }
-                    }
-                }
-
-                this.scale++;
-                if (offset == end) {
-                    ch = EOI;
-                    offset++;
-                    break;
-                }
-                ch = (char) this.bytes[offset++];
-            }
-        }
-
-        if (intOverflow) {
-            int numStart = negative ? start : start - 1;
-
-            int numDigits = scale > 0 ? offset - 2 - numStart : offset - 1 - numStart;
-            if (numDigits > 38) {
-                valueType = JSON_TYPE_BIG_DEC;
-                stringValue = new String(this.bytes, numStart, offset - 1 - numStart);
-            } else {
-                bigInt(this.bytes, numStart, offset - 1);
-            }
-        } else {
-            mag3 = -mag3;
-        }
-
-        if (ch == 'e' || ch == 'E') {
-            boolean negativeExp = false;
-            int expValue = 0;
-            ch = (char) this.bytes[offset++];
-
-            if (ch == '-') {
-                negativeExp = true;
-                ch = (char) this.bytes[offset++];
-            } else if (ch == '+') {
-                ch = (char) this.bytes[offset++];
-            }
-
-            while (ch >= '0' && ch <= '9') {
-                int byteVal = (ch - '0');
-                expValue = expValue * 10 + byteVal;
-                if (expValue > MAX_EXP) {
-                    throw new JSONException("too large exp value : " + expValue);
-                }
-
-                if (offset == end) {
-                    ch = EOI;
-                    break;
-                }
-                ch = (char) this.bytes[offset++];
-            }
-
-            if (negativeExp) {
-                expValue = -expValue;
-            }
-
-            this.exponent = (short) expValue;
-            valueType = JSON_TYPE_DEC;
-        }
-
-        if (offset == start) {
-            if (ch == 'n') {
-                if (this.bytes[offset++] == 'u'
-                        && this.bytes[offset++] == 'l'
-                        && this.bytes[offset++] == 'l'
-                ) {
-                    wasNull = true;
-                    valueType = JSON_TYPE_NULL;
-                    if (offset == end) {
-                        ch = EOI;
-                        offset++;
-                    } else {
-                        ch = (char) this.bytes[offset++];
-                    }
-                }
-            } else if (ch == 't') {
-                if (this.bytes[offset++] == 'r'
-                        && this.bytes[offset++] == 'u'
-                        && this.bytes[offset++] == 'e'
-                ) {
-                    boolValue = true;
-                    valueType = JSON_TYPE_BOOL;
-                    if (offset == end) {
-                        ch = EOI;
-                        offset++;
-                    } else {
-                        ch = (char) this.bytes[offset++];
-                    }
-                }
-            } else if (ch == 'f') {
-                if (this.bytes[offset++] == 'a'
-                        && this.bytes[offset++] == 'l'
-                        && this.bytes[offset++] == 's'
-                        && this.bytes[offset++] == 'e'
-                ) {
-                    boolValue = false;
-                    valueType = JSON_TYPE_BOOL;
-                    if (offset == end) {
-                        ch = EOI;
-                        offset++;
-                    } else {
-                        ch = (char) this.bytes[offset++];
-                    }
-                }
-            } else if (ch == '{' && quote == 0) {
-                this.complex = readObject();
-                valueType = JSON_TYPE_OBJECT;
-                return;
-            } else if (ch == '[' && quote == 0) {
-                this.complex = readArray();
-                valueType = JSON_TYPE_ARRAY;
-                return;
-            }
-        }
-
-        if (quote != 0) {
-            if (ch != quote) {
-                this.offset -= 1;
-                this.ch = quote;
-                readString0();
-                valueType = JSON_TYPE_STRING;
-                return;
-            }
-
-            if (offset >= end) {
-                ch = EOI;
-            } else {
-                ch = (char) this.bytes[offset++];
-            }
-        }
-
-        while (ch == ' ') {
-            if (offset >= end) {
-                ch = EOI;
-            } else {
-                ch = (char) this.bytes[offset++];
-            }
-        }
-    }
-
-    public Integer readInt32() {
-        if (ch == ',') {
-            return null;
-        }
-
-        return readInt32Value();
-    }
-
-    public Long readInt64() {
-        if (ch == ',') {
-            return null;
-        }
-
-        return readInt64Value();
-    }
-
-    @Override
     public LocalDate readLocalDate10() {
-        char c0 = ch;
+        int offset = this.offset;
+        boolean quote = false;
+        if (ch == '"') {
+            quote = true;
+            offset++;
+        }
+
+        char c0 = (char) bytes[offset - 1];
         char c1 = (char) bytes[offset];
         char c2 = (char) bytes[offset + 1];
         char c3 = (char) bytes[offset + 2];
@@ -663,8 +282,12 @@ final class JSONReaderASCIICSV
             throw new JSONException(info(), e);
         }
 
-        offset += 9;
-        this.ch = (char) this.bytes[offset++];
+        if (quote) {
+            this.offset += 11;
+        } else {
+            this.offset += 9;
+        }
+        this.ch = (char) this.bytes[this.offset++];
         return ldt;
     }
 
@@ -1313,7 +936,7 @@ final class JSONReaderASCIICSV
 
         ZoneId zoneId;
         if (isTimeZone) {
-            String tzStr = new String(bytes, this.offset + zoneIdBegin, len - zoneIdBegin - 1);
+            String tzStr = new String(bytes, this.offset + zoneIdBegin, len - zoneIdBegin - 2);
             TimeZone timeZone = TimeZone.getTimeZone(tzStr);
             zoneId = timeZone.toZoneId();
         } else {
