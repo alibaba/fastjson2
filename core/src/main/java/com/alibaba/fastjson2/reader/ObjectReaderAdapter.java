@@ -11,6 +11,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -113,6 +115,10 @@ public class ObjectReaderAdapter<T>
     @Override
     public final long getFeatures() {
         return features;
+    }
+
+    public FieldReader[] getFieldReaders() {
+        return Arrays.copyOf(this.fieldReaders, this.fieldReaders.length);
     }
 
     public Object auoType(JSONReader jsonReader, Class expectClass, long features) {
@@ -265,6 +271,21 @@ public class ObjectReaderAdapter<T>
                 fieldReader.accept(object, defaultValue);
             }
         }
+    }
+
+    public T createInstance(Collection collection) {
+        T object = createInstance(0L);
+        int index = 0;
+        for (Iterator it = collection.iterator(); it.hasNext();) {
+            Object fieldValue = it.next();
+            if (index >= fieldReaders.length) {
+                break;
+            }
+            FieldReader fieldReader = fieldReaders[index];
+            fieldReader.accept(object, fieldValue);
+            index++;
+        }
+        return object;
     }
 
     @Override

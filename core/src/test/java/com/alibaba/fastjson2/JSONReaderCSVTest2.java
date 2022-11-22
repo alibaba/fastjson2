@@ -430,4 +430,30 @@ public class JSONReaderCSVTest2 {
             assertEquals(false, jsonReader.readBoolValue());
         }
     }
+
+    @Test
+    public void test_str() {
+        String str = "abc,\"\",cde\n";
+        {
+            char[] chars = str.toCharArray();
+            JSONReader jsonReader = JSONReader.ofCSV(chars, 0, chars.length);
+
+            assertEquals("abc", jsonReader.readString());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals("", jsonReader.readString());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals("cde", jsonReader.readString());
+        }
+
+        {
+            byte[] bytes = str.getBytes();
+            JSONReader jsonReader = JSONReader.ofCSV(bytes, 0, bytes.length);
+
+            assertEquals("abc", jsonReader.readString());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals("", jsonReader.readString());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals("cde", jsonReader.readString());
+        }
+    }
 }
