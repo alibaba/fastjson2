@@ -2001,7 +2001,7 @@ class JSONReaderUTF8
             }
         }
 
-        if(!csv) {
+        if (!csv) {
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 if (offset >= end) {
                     ch = EOI;

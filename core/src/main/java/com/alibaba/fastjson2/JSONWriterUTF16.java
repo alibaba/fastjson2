@@ -1388,7 +1388,7 @@ class JSONWriterUTF16
             return;
         }
 
-        int minCapacity = values.length * 25 + 1;
+        int minCapacity = off + values.length * 25 + 1;
         if (minCapacity - chars.length > 0) {
             int oldCapacity = chars.length;
             int newCapacity = oldCapacity + (oldCapacity >> 1);

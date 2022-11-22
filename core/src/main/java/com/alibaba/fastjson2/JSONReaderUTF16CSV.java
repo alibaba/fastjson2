@@ -2,7 +2,6 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.DateUtils;
 
-import java.math.BigInteger;
 import java.time.*;
 import java.util.TimeZone;
 
