@@ -2857,6 +2857,10 @@ public abstract class JSONReader
         return new JSONReaderUTF16CSV(context, str, chars, 0, length);
     }
 
+    public static JSONReader ofCSV(byte[] bytes) {
+        return ofCSV(bytes, 0, bytes.length);
+    }
+
     public static JSONReader ofCSV(byte[] bytes, int offset, int length) {
         return ofCSV(bytes, offset, length, JSONFactory.createReadContext(Feature.SupportArrayToBean));
     }

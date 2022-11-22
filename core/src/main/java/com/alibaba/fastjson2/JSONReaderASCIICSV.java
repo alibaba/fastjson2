@@ -164,11 +164,15 @@ final class JSONReaderASCIICSV
                     chars[index++] = ch;
                 }
                 str = new String(chars);
-                offset += len;
+                offset += len + 1;
             }
         }
 
-        ch = (char) bytes[offset++];
+        if (offset >= end) {
+            ch = EOI;
+        } else {
+            ch = (char) bytes[offset++];
+        }
         return str;
     }
 
@@ -966,6 +970,10 @@ final class JSONReaderASCIICSV
     }
 
     public void next() {
-        this.ch = (char) this.bytes[offset++];
+        if (offset >= end) {
+            this.ch = EOI;
+        } else {
+            this.ch = (char) this.bytes[offset++];
+        }
     }
 }

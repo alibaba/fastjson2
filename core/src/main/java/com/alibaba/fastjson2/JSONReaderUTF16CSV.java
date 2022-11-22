@@ -164,11 +164,15 @@ final class JSONReaderUTF16CSV
                     chars[index++] = ch;
                 }
                 str = new String(chars);
-                offset += len;
+                offset += len + 1;
             }
         }
 
-        ch = chars[offset++];
+        if (offset >= end) {
+            ch = EOI;
+        } else {
+            ch = chars[offset++];
+        }
         return str;
     }
 
@@ -1014,6 +1018,10 @@ final class JSONReaderUTF16CSV
     }
 
     public void next() {
-        this.ch = chars[offset++];
+        if (offset >= end) {
+            this.ch = EOI;
+        } else {
+            this.ch = chars[offset++];
+        }
     }
 }
