@@ -27,10 +27,11 @@ final class JSONPathTypedMultiNames
             JSONPath[] namePaths,
             Type[] types,
             String[] formats,
+            long[] pathFeatures,
             ZoneId zoneId,
             long features
     ) {
-        super(paths, types, formats, zoneId, features);
+        super(paths, types, formats, pathFeatures, zoneId, features);
         this.prefix = prefix;
         this.namePaths = namePaths;
         this.names = new String[paths.length];
@@ -48,6 +49,10 @@ final class JSONPathTypedMultiNames
             Class fieldClass = TypeUtils.getClass(fieldType);
             BiConsumer function = new FieldValueCallback(i);
 
+            long fieldFeatures = 0;
+            if (isIgnoreError(i)) {
+                fieldFeatures |= JSONReader.Feature.NullOnError.mask;
+            }
             fieldReaders[i] = ObjectReaderCreator.INSTANCE.createFieldReader(
                     null,
                     null,
@@ -55,7 +60,7 @@ final class JSONPathTypedMultiNames
                     fieldType,
                     fieldClass,
                     i,
-                    0,
+                    fieldFeatures,
                     format,
                     null,
                     null,
@@ -225,19 +230,25 @@ final class JSONPathTypedMultiNames
             for (int i = 0; i < paths.length; i++) {
                 JSONPath jsonPath = namePaths[i];
                 Type type = types[i];
-                Object result = jsonPath.eval(object);
-                if (result != null && result.getClass() != type) {
-                    if (type == Long.class) {
-                        result = TypeUtils.toLong(result);
-                    } else if (type == BigDecimal.class) {
-                        result = TypeUtils.toBigDecimal(result);
-                    } else if (type == String[].class) {
-                        result = TypeUtils.toStringArray(result);
-                    } else {
-                        result = TypeUtils.cast(result, type);
+                try {
+                    Object result = jsonPath.eval(object);
+                    if (result != null && result.getClass() != type) {
+                        if (type == Long.class) {
+                            result = TypeUtils.toLong(result);
+                        } else if (type == BigDecimal.class) {
+                            result = TypeUtils.toBigDecimal(result);
+                        } else if (type == String[].class) {
+                            result = TypeUtils.toStringArray(result);
+                        } else {
+                            result = TypeUtils.cast(result, type);
+                        }
+                    }
+                    array[i] = result;
+                } catch (Exception e) {
+                    if (!isIgnoreError(i)) {
+                        throw new JSONException("jsonpath eval path, path : " + paths[i] + ", msg : " + e.getMessage(), e);
                     }
                 }
-                array[i] = result;
             }
         }
 
@@ -254,15 +265,6 @@ final class JSONPathTypedMultiNames
             return null;
         }
 
-        if (prefixObjectReader != null) {
-            ObjectHolder holder = (ObjectHolder) prefixObjectReader.readObject(jsonReader, null, null, features);
-            Object object = holder.object;
-            if (object instanceof ObjectHolder) {
-                object = ((ObjectHolder) object).object;
-            }
-            return object;
-        }
-
         if (prefix instanceof JSONPathSingleIndex) {
             int index = ((JSONPathSingleIndex) prefix).index;
             if (index >= 0) {
@@ -276,6 +278,38 @@ final class JSONPathTypedMultiNames
                 }
 
                 return objectReader.readObject(jsonReader, null, null, features);
+            }
+        } else if (prefix instanceof JSONPathSingleName) {
+            JSONPathSingleName prefixName = (JSONPathSingleName) prefix;
+            long prefixNameHash = prefixName.nameHashCode;
+            if (!jsonReader.nextIfObjectStart()) {
+                throw new JSONException(jsonReader.info("illegal input, expect '[', but " + jsonReader.current()));
+            }
+
+            while (!jsonReader.nextIfObjectEnd()) {
+                long nameHashCode = jsonReader.readFieldNameHashCode();
+                boolean match = nameHashCode == prefixNameHash;
+                if (!match && (!jsonReader.isObject()) && !jsonReader.isArray()) {
+                    jsonReader.skipValue();
+                    continue;
+                }
+
+                break;
+            }
+
+            if (jsonReader.nextIfNull()) {
+                return null;
+            }
+
+            return objectReader.readObject(jsonReader, null, null, features);
+        } else {
+            if (prefixObjectReader != null) {
+                ObjectHolder holder = (ObjectHolder) prefixObjectReader.readObject(jsonReader, null, null, features);
+                Object object = holder.object;
+                if (object instanceof ObjectHolder) {
+                    object = ((ObjectHolder) object).object;
+                }
+                return object;
             }
         }
 

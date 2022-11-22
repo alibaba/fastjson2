@@ -2002,11 +2002,11 @@ public class ObjectReaderCreator {
             ObjectReader initReader
     ) {
         if (fieldClass == Integer.class) {
-            return new FieldReaderInt32Func<>(fieldName, fieldClass, ordinal, format, null, defaultValue, schema, method, function);
+            return new FieldReaderInt32Func<>(fieldName, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
         }
 
         if (fieldClass == Long.class) {
-            return new FieldReaderInt64Func<>(fieldName, fieldClass, ordinal, format, null, defaultValue, schema, method, function);
+            return new FieldReaderInt64Func<>(fieldName, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
         }
 
         if (fieldClass == String.class) {
@@ -2014,27 +2014,35 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == Boolean.class) {
-            return new FieldReaderBoolFunc<>(fieldName, fieldClass, ordinal, format, null, defaultValue, schema, method, function);
+            return new FieldReaderBoolFunc<>(fieldName, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
         }
 
         if (fieldClass == Short.class) {
-            return new FieldReaderInt16Func(fieldName, fieldClass, ordinal, format, null, defaultValue, schema, method, function);
+            return new FieldReaderInt16Func(fieldName, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
         }
 
         if (fieldClass == Byte.class) {
-            return new FieldReaderInt8Func(fieldName, fieldClass, ordinal, format, null, defaultValue, schema, method, function);
+            return new FieldReaderInt8Func(fieldName, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldReaderBigDecimalFunc(fieldName, fieldClass, ordinal, format, null, defaultValue, schema, method, function);
+            return new FieldReaderBigDecimalFunc(fieldName, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldReaderBigIntegerFunc(fieldName, fieldClass, ordinal, format, null, defaultValue, schema, method, function);
+            return new FieldReaderBigIntegerFunc(fieldName, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
+        }
+
+        if (fieldClass == Float.class) {
+            return new FieldReaderFloatFunc(fieldName, fieldClass, ordinal, features, format, null, (Float) defaultValue, schema, method, function);
+        }
+
+        if (fieldClass == Double.class) {
+            return new FieldReaderDoubleFunc(fieldName, fieldClass, ordinal, features, format, null, (Double) defaultValue, schema, method, function);
         }
 
         if (fieldClass == Number.class) {
-            return new FieldReaderNumberFunc(fieldName, fieldClass, ordinal, format, null, (Number) defaultValue, schema, method, function);
+            return new FieldReaderNumberFunc(fieldName, fieldClass, ordinal, features, format, null, (Number) defaultValue, schema, method, function);
         }
 
         if (fieldClass == Date.class) {

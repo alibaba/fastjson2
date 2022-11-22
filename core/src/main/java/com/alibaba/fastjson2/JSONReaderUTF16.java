@@ -3058,12 +3058,12 @@ class JSONReaderUTF16
                 this.offset -= 1;
                 this.ch = quote;
                 str = readString();
-            }
-
-            if (offset >= end) {
-                ch = EOI;
             } else {
-                ch = chars[offset++];
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
             }
         }
 
@@ -3301,12 +3301,12 @@ class JSONReaderUTF16
                 this.offset -= 1;
                 this.ch = quote;
                 str = readString();
-            }
-
-            if (offset >= end) {
-                ch = EOI;
             } else {
-                ch = chars[offset++];
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
             }
         }
 

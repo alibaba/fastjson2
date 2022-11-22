@@ -3602,7 +3602,12 @@ public abstract class JSONReader
         /**
          * @since 2.0.20
          */
-        ErrorOnNullForPrimitives(1 << 21);
+        ErrorOnNullForPrimitives(1 << 21),
+
+        /**
+         * @since 2.0.20
+         */
+        NullOnError(1 << 22);
 
         public final long mask;
 

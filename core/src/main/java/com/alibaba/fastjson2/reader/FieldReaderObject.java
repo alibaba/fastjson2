@@ -153,7 +153,13 @@ public class FieldReaderObject<T>
             throw ex;
         } catch (Exception | IllegalAccessError ex) {
             Member member = this.field != null ? this.field : this.method;
-            throw new JSONException(jsonReader.info("read field '" + member.getDeclaringClass().getName() + "." + member.getName()), ex);
+            String message;
+            if (member != null) {
+                message = "read field '" + member.getDeclaringClass().getName() + "." + member.getName();
+            } else {
+                message = "read field " + fieldName + " error";
+            }
+            throw new JSONException(jsonReader.info(message), ex);
         }
     }
 

@@ -17,6 +17,7 @@ final class FieldReaderBigIntegerFunc<T, V>
             String fieldName,
             Class<V> fieldClass,
             int ordinal,
+            long features,
             String format,
             Locale locale,
             Object defaultValue,
@@ -24,7 +25,7 @@ final class FieldReaderBigIntegerFunc<T, V>
             Method method,
             BiConsumer<T, V> function
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, locale, defaultValue, schema, method, null);
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
         this.function = function;
     }
 
@@ -60,7 +61,16 @@ final class FieldReaderBigIntegerFunc<T, V>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        BigInteger fieldValue = jsonReader.readBigInteger();
+        BigInteger fieldValue;
+        try {
+            fieldValue = jsonReader.readBigInteger();
+        } catch (Exception e) {
+            if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
+                fieldValue = null;
+            } else {
+                throw e;
+            }
+        }
 
         if (schema != null) {
             schema.assertValidate(fieldValue);

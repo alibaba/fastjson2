@@ -8,21 +8,21 @@ import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 
-final class FieldReaderBoolFunc<T, V>
+final class FieldReaderDoubleFunc<T>
         extends FieldReader<T> {
-    final BiConsumer<T, V> function;
+    final BiConsumer<T, Double> function;
 
-    FieldReaderBoolFunc(
+    public FieldReaderDoubleFunc(
             String fieldName,
-            Class<V> fieldClass,
+            Class fieldClass,
             int ordinal,
             long features,
             String format,
             Locale locale,
-            Object defaultValue,
+            Double defaultValue,
             JSONSchema schema,
             Method method,
-            BiConsumer<T, V> function
+            BiConsumer<T, Double> function
     ) {
         super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
         this.function = function;
@@ -30,20 +30,20 @@ final class FieldReaderBoolFunc<T, V>
 
     @Override
     public void accept(T object, Object value) {
-        Boolean booleanValue = TypeUtils.toBoolean(value);
+        Double doubleValue = TypeUtils.toDouble(value);
 
         if (schema != null) {
-            schema.validate(booleanValue);
+            schema.assertValidate(doubleValue);
         }
 
-        function.accept(object, (V) booleanValue);
+        function.accept(object, doubleValue);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        Boolean fieldValue;
+        Double fieldValue;
         try {
-            fieldValue = jsonReader.readBool();
+            fieldValue = jsonReader.readDouble();
         } catch (Exception e) {
             if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
                 fieldValue = null;
@@ -53,14 +53,14 @@ final class FieldReaderBoolFunc<T, V>
         }
 
         if (schema != null) {
-            schema.validate(fieldValue);
+            schema.assertValidate(fieldValue);
         }
 
-        function.accept(object, (V) fieldValue);
+        function.accept(object, fieldValue);
     }
 
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
-        return jsonReader.readBool();
+        return jsonReader.readFloatValue();
     }
 }

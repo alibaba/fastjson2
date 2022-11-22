@@ -12,8 +12,19 @@ final class FieldReaderInt8Func<T, V>
         extends FieldReader<T> {
     final BiConsumer<T, V> function;
 
-    FieldReaderInt8Func(String fieldName, Class<V> fieldClass, int ordinal, String format, Locale locale, Object defaultValue, JSONSchema schema, Method method, BiConsumer<T, V> function) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, locale, defaultValue, schema, method, null);
+    FieldReaderInt8Func(
+            String fieldName,
+            Class<V> fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method,
+            BiConsumer<T, V> function
+    ) {
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
         this.function = function;
     }
 
@@ -30,8 +41,17 @@ final class FieldReaderInt8Func<T, V>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        Integer value = jsonReader.readInt32();
-        Byte fieldValue = value == null ? null : value.byteValue();
+        Byte fieldValue;
+        try {
+            Integer value = jsonReader.readInt32();
+            fieldValue = value == null ? null : value.byteValue();
+        } catch (Exception e) {
+            if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
+                fieldValue = null;
+            } else {
+                throw e;
+            }
+        }
 
         if (schema != null) {
             schema.assertValidate(fieldValue);
