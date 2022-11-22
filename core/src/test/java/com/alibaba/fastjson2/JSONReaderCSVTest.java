@@ -70,38 +70,38 @@ public class JSONReaderCSVTest {
             JSONReader jsonReader = JSONReader.ofCSV(chars, 0, chars.length);
 
             assertTrue(jsonReader.isString());
-            assertEquals(17, jsonReader.getStringLength());
+            assertEquals(16, jsonReader.getStringLength());
             assertEquals("Free trip to A,B", jsonReader.readString());
 
             assertTrue(jsonReader.nextIfMatch(','));
 
             assertTrue(jsonReader.isString());
-            assertEquals(5, jsonReader.getStringLength());
+            assertEquals(4, jsonReader.getStringLength());
             assertEquals("5.89", jsonReader.readString());
 
             assertTrue(jsonReader.nextIfMatch(','));
 
             assertTrue(jsonReader.isString());
-            assertEquals(22, jsonReader.getStringLength());
+            assertEquals(21, jsonReader.getStringLength());
             assertEquals("Special rate \"1.79\"", jsonReader.readString());
         }
         {
             byte[] bytes = str.getBytes();
             JSONReader jsonReader = JSONReader.ofCSV(bytes, 0, bytes.length);
             assertTrue(jsonReader.isString());
-            assertEquals(17, jsonReader.getStringLength());
+            assertEquals(16, jsonReader.getStringLength());
             assertEquals("Free trip to A,B", jsonReader.readString());
 
             assertTrue(jsonReader.nextIfMatch(','));
 
             assertTrue(jsonReader.isString());
-            assertEquals(5, jsonReader.getStringLength());
+            assertEquals(4, jsonReader.getStringLength());
             assertEquals("5.89", jsonReader.readString());
 
             assertTrue(jsonReader.nextIfMatch(','));
 
             assertTrue(jsonReader.isString());
-            assertEquals(22, jsonReader.getStringLength());
+            assertEquals(21, jsonReader.getStringLength());
             assertEquals("Special rate \"1.79\"", jsonReader.readString());
         }
     }
@@ -289,6 +289,38 @@ public class JSONReaderCSVTest {
     }
 
     @Test
+    public void test10Quote() {
+        String str = "\"2022/07/14\",\"2022-07-14\",\"14.07.2022\",\"14-07-2022\"\n";
+        {
+            char[] chars = str.toCharArray();
+            JSONReader jsonReader = JSONReader.ofCSV(chars, 0, chars.length);
+            assertTrue(jsonReader.isCSV());
+            assertTrue(jsonReader.isArray());
+            assertEquals(LocalDate.of(2022, 7, 14), jsonReader.readLocalDate());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals(LocalDate.of(2022, 7, 14), jsonReader.readLocalDate());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals(LocalDate.of(2022, 7, 14), jsonReader.readLocalDate());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals(LocalDate.of(2022, 7, 14), jsonReader.readLocalDate());
+        }
+
+        {
+            byte[] bytes = str.getBytes();
+            JSONReader jsonReader = JSONReader.ofCSV(bytes, 0, bytes.length);
+            assertTrue(jsonReader.isCSV());
+            assertTrue(jsonReader.isArray());
+            assertEquals(LocalDate.of(2022, 7, 14), jsonReader.readLocalDate());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals(LocalDate.of(2022, 7, 14), jsonReader.readLocalDate());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals(LocalDate.of(2022, 7, 14), jsonReader.readLocalDate());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals(LocalDate.of(2022, 7, 14), jsonReader.readLocalDate());
+        }
+    }
+
+    @Test
     public void test11() {
         String str = "2022-07-14 12:13:14.1Z,2022-07-14 12:13:14.01Z,2022-07-14 12:13:14.001Z,2022-07-14 12:13:14.0001Z\n";
         {
@@ -427,6 +459,72 @@ public class JSONReaderCSVTest {
             assertEquals(null, jsonReader.readNumber());
             assertTrue(jsonReader.nextIfMatch(','));
             assertEquals(null, jsonReader.readBigInteger());
+        }
+    }
+
+    @Test
+    public void test16() {
+        String str = "2022-04-29T00:00:00[Asia/Shanghai],2022-07-14 12:13:14.0000001[Asia/Shanghai]\n";
+        {
+            char[] chars = str.toCharArray();
+            JSONReader jsonReader = JSONReader.ofCSV(chars, 0, chars.length);
+            assertTrue(jsonReader.isCSV());
+            assertTrue(jsonReader.isArray());
+            assertEquals(LocalDate.of(2022, 4, 29), jsonReader.readZonedDateTime().toLocalDate());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals(LocalDate.of(2022, 7, 14), jsonReader.readZonedDateTime().toLocalDate());
+        }
+
+        {
+            byte[] bytes = str.getBytes();
+            JSONReader jsonReader = JSONReader.ofCSV(bytes, 0, bytes.length);
+            assertTrue(jsonReader.isCSV());
+            assertTrue(jsonReader.isArray());
+            assertEquals(LocalDate.of(2022, 4, 29), jsonReader.readZonedDateTime().toLocalDate());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals(LocalDate.of(2022, 7, 14), jsonReader.readZonedDateTime().toLocalDate());
+        }
+    }
+
+    @Test
+    public void test17() {
+        String str = "2022-04-29T00:00Z[UTC],\"2022-04-29T00:00Z[UTC]\"\n";
+        {
+            char[] chars = str.toCharArray();
+            JSONReader jsonReader = JSONReader.ofCSV(chars, 0, chars.length);
+            assertTrue(jsonReader.isCSV());
+            assertTrue(jsonReader.isArray());
+            assertEquals(LocalDate.of(2022, 4, 29), jsonReader.readZonedDateTime().toLocalDate());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals(LocalDate.of(2022, 4, 29), jsonReader.readZonedDateTime().toLocalDate());
+        }
+
+        {
+            byte[] bytes = str.getBytes();
+            JSONReader jsonReader = JSONReader.ofCSV(bytes, 0, bytes.length);
+            assertTrue(jsonReader.isCSV());
+            assertTrue(jsonReader.isArray());
+            assertEquals(LocalDate.of(2022, 4, 29), jsonReader.readZonedDateTime().toLocalDate());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals(LocalDate.of(2022, 4, 29), jsonReader.readZonedDateTime().toLocalDate());
+        }
+    }
+
+    @Test
+    public void test18() {
+        String str = "\"2022年7月14日\",\"2022年11月2日\",\"2022년7월14일\",\"2022년11월2일\"\n";
+        {
+            char[] chars = str.toCharArray();
+            JSONReader jsonReader = JSONReader.ofCSV(chars, 0, chars.length);
+            assertTrue(jsonReader.isCSV());
+            assertTrue(jsonReader.isArray());
+            assertEquals(LocalDate.of(2022, 7, 14), jsonReader.readLocalDate());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals(LocalDate.of(2022, 11, 2), jsonReader.readLocalDate());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals(LocalDate.of(2022, 7, 14), jsonReader.readLocalDate());
+            assertTrue(jsonReader.nextIfMatch(','));
+            assertEquals(LocalDate.of(2022, 11, 2), jsonReader.readLocalDate());
         }
     }
 }
