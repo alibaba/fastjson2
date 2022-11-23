@@ -437,6 +437,10 @@ public final class JSONFactory {
     }
 
     public static JSONReader.Context createReadContext(ObjectReaderProvider provider, JSONReader.Feature... features) {
+        if (provider == null) {
+            provider = getDefaultObjectReaderProvider();
+        }
+
         JSONReader.Context context = new JSONReader.Context(provider);
         context.config(features);
         return context;

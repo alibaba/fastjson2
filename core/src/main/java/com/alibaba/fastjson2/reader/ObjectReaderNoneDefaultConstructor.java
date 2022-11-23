@@ -323,6 +323,54 @@ public class ObjectReaderNoneDefaultConstructor<T>
         return createInstanceNoneDefaultConstructor(valueMap);
     }
 
+    public T createInstance(Collection collection) {
+        int index = 0;
+
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+
+        LinkedHashMap<Long, Object> valueMap = new LinkedHashMap<>();
+        for (Iterator it = collection.iterator(); it.hasNext();) {
+            Object fieldValue = it.next();
+            if (index >= fieldReaders.length) {
+                break;
+            }
+            FieldReader fieldReader = fieldReaders[index];
+
+            if (fieldValue != null) {
+                Class<?> valueClass = fieldValue.getClass();
+                Class fieldClass = fieldReader.fieldClass;
+                if (valueClass != fieldClass) {
+                    Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
+                    if (typeConvert != null) {
+                        fieldValue = typeConvert.apply(fieldValue);
+                    }
+                }
+            }
+
+            if (valueMap == null) {
+                valueMap = new LinkedHashMap<>();
+            }
+
+            long hash;
+            if (fieldReader instanceof FieldReaderObjectParam) {
+                hash = ((FieldReaderObjectParam<?>) fieldReader).paramNameHash;
+            } else {
+                hash = fieldReader.fieldNameHash;
+            }
+            valueMap.put(hash, fieldValue);
+
+            index++;
+        }
+
+        T object = createInstanceNoneDefaultConstructor(
+                valueMap == null
+                        ? Collections.emptyMap()
+                        : valueMap
+        );
+
+        return object;
+    }
+
     @Override
     public T createInstance(Map map, long features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();

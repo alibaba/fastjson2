@@ -73,7 +73,8 @@ public class CSVParserTest3 {
 
     @Test
     public void testObject1() {
-        String str = "name,id\nDataWorks,101\n";
+        String str = "name,id\n" +
+                "DataWorks,101\n";
         CSVParser parser = CSVParser.of(str, Bean.class);
         parser.readHeader();
         Bean bean = parser.readLoneObject();

@@ -19,7 +19,11 @@ public class JsonFactory {
         return jsonWriter;
     }
 
-    protected JSONReader.Context createReaderContext() {
+    public boolean isCSV() {
+        return false;
+    }
+
+    public JSONReader.Context createReaderContext() {
         return JSONFactory.createReadContext();
     }
 

@@ -72,7 +72,7 @@ public class CSVParserTest1 {
         };
 
         {
-            CSVParser parser = CSVParser.of(str);
+            CSVParser parser = CSVParser.of(str.toCharArray());
             for (int i = 0; ; ++i) {
                 String[] line = parser.readLine();
                 if (line == null) {
