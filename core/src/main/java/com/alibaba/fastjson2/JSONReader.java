@@ -265,10 +265,6 @@ public abstract class JSONReader
         return false;
     }
 
-    public boolean isCSV() {
-        return false;
-    }
-
     public boolean isIgnoreNoneSerializable() {
         return (context.features & Feature.IgnoreNoneSerializable.mask) != 0;
     }
@@ -1815,9 +1811,7 @@ public abstract class JSONReader
 
         next();
 
-        if (!isCSV()) {
-            nextIfMatch(',');
-        }
+        nextIfMatch(',');
 
         return val;
     }
