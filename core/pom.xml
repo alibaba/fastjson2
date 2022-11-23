@@ -167,7 +167,7 @@
         <dependency>
             <groupId>org.apache.arrow</groupId>
             <artifactId>arrow-vector</artifactId>
-            <version>10.0.0</version>
+            <version>10.0.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
