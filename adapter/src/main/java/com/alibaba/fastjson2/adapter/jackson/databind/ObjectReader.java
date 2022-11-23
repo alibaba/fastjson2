@@ -35,10 +35,6 @@ public class ObjectReader {
         JSONReader.Context context = jsonReader.getContext();
         com.alibaba.fastjson2.reader.ObjectReader objectReader = context.getObjectReader(objectType);
 
-        if (jsonReader.isCSV()) {
-            return (T) objectReader.readFromCSV(jsonReader, null, null, 0L);
-        }
-
         Object object = objectReader
                 .readObject(jsonReader, null, null, 0L);
         return (T) object;
