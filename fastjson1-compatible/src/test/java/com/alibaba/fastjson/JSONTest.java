@@ -3,18 +3,18 @@ package com.alibaba.fastjson;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.parser.deserializer.ParseProcess;
-import com.alibaba.fastjson.serializer.SerializeConfig;
-import com.alibaba.fastjson.serializer.SerializeFilter;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson.serializer.*;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
@@ -714,7 +714,8 @@ public class JSONTest {
                 new HashMap<>(),
                 JSON.parseObject(
                         str,
-                        new TypeReference<HashMap<String, Integer>>(){}.getType(),
+                        new TypeReference<HashMap<String, Integer>>() {
+                        }.getType(),
                         0,
                         Feature.ErrorOnNotSupportAutoType
                 )
@@ -765,5 +766,44 @@ public class JSONTest {
     }
 
     static class Bean4Mixin {
+    }
+
+    @Test
+    public void parseArray2() {
+        assertThrows(JSONException.class, () -> JSON.parseArray("[", Long.class));
+    }
+
+    @Test
+    public void test5() {
+        SerializeConfig config = new SerializeConfig(true);
+        config.put(Bean5.class, new ObjectSerializer() {
+            @Override
+            public void write(
+                    JSONSerializer serializer,
+                    Object object,
+                    Object fieldName,
+                    Type fieldType,
+                    int features
+            ) throws IOException {
+                Bean5 bean = (Bean5) object;
+                if (bean == null) {
+                    serializer.writeNull();
+                    return;
+                }
+
+                JSONObject jsonObject = new JSONObject().fluentPut("id", bean.id);
+                serializer.write(jsonObject.toString());
+            }
+        });
+
+        Bean5 bean = new Bean5();
+        bean.id = 101;
+        bean.name = "DataWorks";
+        assertEquals("\"{\\\"id\\\":101}\"", JSON.toJSONString(bean, config));
+    }
+
+    public static class Bean5 {
+        public int id;
+        public String name;
     }
 }

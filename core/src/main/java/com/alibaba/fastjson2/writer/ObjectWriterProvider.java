@@ -84,6 +84,10 @@ public class ObjectWriterProvider
     }
 
     public ObjectWriter register(Type type, ObjectWriter objectWriter) {
+        return register(type, objectWriter, false);
+    }
+
+    public ObjectWriter register(Type type, ObjectWriter objectWriter, boolean fieldBased) {
         if (type == Integer.class) {
             if (objectWriter == null || objectWriter == ObjectWriterImplInt32.INSTANCE) {
                 userDefineMask &= ~TYPE_INT32_MASK;
@@ -117,10 +121,18 @@ public class ObjectWriterProvider
         }
 
         if (objectWriter == null) {
-            return cache.remove(type);
+            if (fieldBased) {
+                return cacheFieldBased.remove(type);
+            } else {
+                return cache.remove(type);
+            }
         }
 
-        return cache.put(type, objectWriter);
+        if (fieldBased) {
+            return cacheFieldBased.put(type, objectWriter);
+        } else {
+            return cache.put(type, objectWriter);
+        }
     }
 
     public ObjectWriter registerIfAbsent(Type type, ObjectWriter objectWriter) {
