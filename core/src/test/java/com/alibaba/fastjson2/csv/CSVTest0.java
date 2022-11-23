@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.csv;
 
-import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.reader.ObjectReader;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -22,9 +20,8 @@ public class CSVTest0 {
         String csv = jsonWriter.toString();
         assertEquals("1001,DataWorks\n", csv);
 
-        JSONReader jsonReader = JSONReader.ofCSV(csv);
-        ObjectReader objectReader = jsonReader.getContext().getObjectReader(Bean.class);
-        Bean bean1 = (Bean) objectReader.readFromCSV(jsonReader, null, null, 0L);
+        CSVParser parser = CSVParser.of(csv, Bean.class);
+        Bean bean1 = parser.readLoneObject();
         assertEquals(bean.id, bean1.id);
         assertEquals(bean.name, bean1.name);
     }
@@ -43,9 +40,8 @@ public class CSVTest0 {
 
         byte[] bytes = csv.getBytes(StandardCharsets.US_ASCII);
 
-        JSONReader jsonReader = JSONReader.ofCSV(bytes, 0, bytes.length);
-        ObjectReader objectReader = jsonReader.getContext().getObjectReader(Bean.class);
-        Bean bean1 = (Bean) objectReader.readFromCSV(jsonReader, null, null, 0L);
+        CSVParser parser = CSVParser.of(bytes, Bean.class);
+        Bean bean1 = parser.readLoneObject();
         assertEquals(bean.id, bean1.id);
         assertEquals(bean.name, bean1.name);
     }
@@ -64,9 +60,8 @@ public class CSVTest0 {
 
         char[] chars = csv.toCharArray();
 
-        JSONReader jsonReader = JSONReader.ofCSV(chars, 0, chars.length);
-        ObjectReader objectReader = jsonReader.getContext().getObjectReader(Bean.class);
-        Bean bean1 = (Bean) objectReader.readFromCSV(jsonReader, null, null, 0L);
+        CSVParser parser = CSVParser.of(chars, Bean.class);
+        Bean bean1 = parser.readLoneObject();
         assertEquals(bean.id, bean1.id);
         assertEquals(bean.name, bean1.name);
     }
@@ -96,10 +91,9 @@ public class CSVTest0 {
         assertEquals("1001,DataWorks\n" +
                 "1002,MaxCompute\n", csv);
 
-        JSONReader jsonReader = JSONReader.ofCSV(csv);
-        ObjectReader objectReader = jsonReader.getContext().getObjectReader(Bean.class);
-        Bean bean0 = (Bean) objectReader.readFromCSV(jsonReader, null, null, 0L);
-        Bean bean1 = (Bean) objectReader.readFromCSV(jsonReader, null, null, 0L);
+        CSVParser parser = CSVParser.of(csv, Bean.class);
+        Bean bean0 = parser.readLoneObject();
+        Bean bean1 = parser.readLoneObject();
 
         Bean[] beans1 = {bean0, bean1};
         for (int i = 0; i < beans.length; i++) {

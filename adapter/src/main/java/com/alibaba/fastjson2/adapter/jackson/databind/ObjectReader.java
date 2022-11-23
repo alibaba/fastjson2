@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.adapter.jackson.databind;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.adapter.jackson.core.JsonFactory;
+import com.alibaba.fastjson2.csv.CSVParser;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.io.IOException;
@@ -23,6 +24,13 @@ public class ObjectReader {
     }
 
     public <T> T readValue(String src, Class<T> valueType) throws IOException {
+        if (jsonFactory.isCSV()) {
+            JSONReader.Context context = jsonFactory.createReaderContext();
+            com.alibaba.fastjson2.reader.ObjectReader objectReader = context.getObjectReader(valueType);
+            CSVParser csvParser = CSVParser.of(src, objectClass);
+            return (T) csvParser.readLoneObject();
+        }
+
         JSONReader jsonReader = this.jsonFactory.createJSONReader(src);
         JSONReader.Context context = jsonReader.getContext();
         com.alibaba.fastjson2.reader.ObjectReader objectReader = context.getObjectReader(objectType);

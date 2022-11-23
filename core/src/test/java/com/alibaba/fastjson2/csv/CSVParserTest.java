@@ -2,25 +2,57 @@ package com.alibaba.fastjson2.csv;
 
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CSVParserTest {
+    String[][] lines = new String[][]{
+            new String[]{"1997", "Ford", "E350", "ac, abs, moon", "3000.00"},
+            new String[]{"1999", "Chevy", "Venture \"Extended Edition\"", "", "4900.00"},
+            new String[]{"1999", "Chevy", "Venture \"Extended Edition, Very Large\"", "", "5000.00"},
+            new String[]{"1996", "Jeep", "Grand Cherokee", "MUST SELL!\n" +
+                    "air, moon roof, loaded", "4799.00"},
+    };
+
     @Test
-    public void test() {
+    public void test0() {
         CSVParser parser = CSVParser.of(str);
         List<String> columns = parser.readHeader();
         assertEquals(5, columns.size());
 
-        String[][] lines = new String[][]{
-                new String[]{"1997", "Ford", "E350", "ac, abs, moon", "3000.00"},
-                new String[]{"1999", "Chevy", "Venture \"Extended Edition\"", "", "4900.00"},
-                new String[]{"1999", "Chevy", "Venture \"Extended Edition, Very Large\"", "", "5000.00"},
-                new String[]{"1996", "Jeep", "Grand Cherokee", "MUST SELL!\n" +
-                        "air, moon roof, loaded", "4799.00"},
-        };
+        for (int i = 0; ; ++i) {
+            String[] line = parser.readLine();
+            if (line == null) {
+                break;
+            }
+            assertArrayEquals(lines[i], line);
+        }
+    }
+
+    @Test
+    public void test0Chars() {
+        CSVParser parser = CSVParser.of(str.toCharArray());
+        List<String> columns = parser.readHeader();
+        assertEquals(5, columns.size());
+
+        for (int i = 0; ; ++i) {
+            String[] line = parser.readLine();
+            if (line == null) {
+                break;
+            }
+            assertArrayEquals(lines[i], line);
+        }
+    }
+
+    @Test
+    public void test0Bytes() {
+        CSVParser parser = CSVParser.of(str.getBytes(StandardCharsets.UTF_8));
+        List<String> columns = parser.readHeader();
+        assertEquals(5, columns.size());
+
         for (int i = 0; ; ++i) {
             String[] line = parser.readLine();
             if (line == null) {
