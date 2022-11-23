@@ -50,7 +50,7 @@ public class SerializeConfig {
         if (provider == null) {
             provider = JSONFactory.getDefaultObjectWriterProvider();
         }
-        return provider.register(type, new ObjectSerializerAdapter(value)) == null;
+        return provider.register(type, new ObjectSerializerAdapter(value), fieldBased) == null;
     }
 
     public void setAsmEnable(boolean value) {
