@@ -1830,11 +1830,14 @@ public abstract class JSONReader
             throw new JSONException("syntax error : " + ch);
         }
 
+        boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
+        ObjectReader objectReader = context.provider.getObjectReader(itemType, fieldBased);
+
         for (; ; ) {
             if (nextIfMatch(']')) {
                 break;
             }
-            Object item = read(itemType);
+            Object item = objectReader.readObject(this, null, null, 0);
             list.add(item);
 
             if (ch == '}' || ch == EOI) {
