@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.csv;
+package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
@@ -6,57 +6,55 @@ import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-class CSVParserUTF8
+class CSVParserUTF16
         extends CSVParser {
-    byte[] buf;
-    InputStream input;
-    Charset charset = StandardCharsets.UTF_8;
+    char[] buf;
+    Reader input;
 
-    CSVParserUTF8(Feature... features) {
+    CSVParserUTF16(Feature... features) {
         for (Feature feature : features) {
             this.features |= feature.mask;
         }
     }
 
-    CSVParserUTF8(byte[] bytes, int off, int len, ObjectReaderAdapter objectReader) {
+    CSVParserUTF16(Reader input, Type[] types) {
+        super(types);
+        this.input = input;
+    }
+
+    CSVParserUTF16(
+            char[] bytes,
+            int off,
+            int len,
+            ObjectReaderAdapter objectReader
+    ) {
         super(objectReader);
         this.buf = bytes;
         this.off = off;
         this.end = off + len;
     }
 
-    CSVParserUTF8(byte[] bytes, int off, int len, Type[] types) {
+    CSVParserUTF16(
+            char[] bytes,
+            int off,
+            int len,
+            Type[] types
+    ) {
         super(types);
         this.buf = bytes;
         this.off = off;
         this.end = off + len;
-        this.types = types;
-    }
-
-    CSVParserUTF8(InputStream input, Charset charset, Type[] types) {
-        super(types);
-        this.charset = charset;
-        this.input = input;
-    }
-
-    CSVParserUTF8(InputStream input, Map<String, Type> schema) {
-        this.input = input;
-        this.schema = schema;
     }
 
     boolean seekLine() throws IOException {
         if (buf == null) {
             if (input != null) {
-                buf = new byte[SIZE_256K];
+                buf = new char[SIZE_256K];
                 int cnt = input.read(buf);
                 if (cnt == -1) {
                     inputEnd = true;
@@ -78,10 +76,10 @@ class CSVParserUTF8
 
             for (int i = off; i < end; i++) {
                 if (i + 4 < end) {
-                    byte b0 = buf[i];
-                    byte b1 = buf[i + 1];
-                    byte b2 = buf[i + 2];
-                    byte b3 = buf[i + 3];
+                    char b0 = buf[i];
+                    char b1 = buf[i + 1];
+                    char b2 = buf[i + 2];
+                    char b3 = buf[i + 3];
                     if (b0 > '"' && b1 > '"' && b2 > '"' && b3 > '"') {
                         lineSize += 4;
                         i += 3;
@@ -89,7 +87,7 @@ class CSVParserUTF8
                     }
                 }
 
-                byte ch = buf[i];
+                char ch = buf[i];
                 if (ch == '"') {
                     lineSize++;
                     if (!quote) {
@@ -190,34 +188,8 @@ class CSVParserUTF8
         return true;
     }
 
-    Object readValue(byte[] bytes, int off, int len, Type type) {
-        if (type == Integer.class) {
-            return TypeUtils.parseInt(bytes, off, len);
-        }
-
-        if (type == Long.class) {
-            return TypeUtils.parseLong(bytes, off, len);
-        }
-
-        if (type == BigDecimal.class) {
-            return TypeUtils.parseBigDecimal(bytes, off, len);
-        }
-
-        if (type == Float.class) {
-            if (len == 0) {
-                return null;
-            }
-            return TypeUtils.parseFloat(bytes, off, len);
-        }
-
-        if (type == Double.class) {
-            if (len == 0) {
-                return null;
-            }
-            return TypeUtils.parseDouble(bytes, off, len);
-        }
-
-        String str = new String(bytes, off, len, charset);
+    Object readValue(char[] chars, int off, int len, Type type) {
+        String str = new String(chars, off, len);
         return TypeUtils.cast(str, type);
     }
 
@@ -258,13 +230,13 @@ class CSVParserUTF8
         int escapeCount = 0;
         int columnIndex = 0;
         for (int i = lineStart; i < lineEnd; ++i) {
-            byte ch = buf[i];
+            char ch = buf[i];
 
             if (quote) {
                 if (ch == '"') {
                     int n = i + 1;
                     if (n < lineEnd) {
-                        byte c1 = buf[n];
+                        char c1 = buf[n];
                         if (c1 == '"') {
                             valueSize += 2;
                             escapeCount++;
@@ -295,15 +267,15 @@ class CSVParserUTF8
                 if (quote) {
                     if (escapeCount == 0) {
                         if (type == null || type == String.class || type == Object.class) {
-                            value = new String(buf, valueStart + 1, valueSize, charset);
+                            value = new String(buf, valueStart + 1, valueSize);
                         } else {
                             value = readValue(buf, valueStart + 1, valueSize, type);
                         }
                     } else {
-                        byte[] bytes = new byte[valueSize - escapeCount];
+                        char[] bytes = new char[valueSize - escapeCount];
                         int valueEnd = valueStart + valueSize;
                         for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
-                            byte c = buf[j];
+                            char c = buf[j];
                             bytes[k++] = c;
                             if (c == '"' && buf[j + 1] == '"') {
                                 ++j;
@@ -311,14 +283,14 @@ class CSVParserUTF8
                         }
 
                         if (type == null || type == String.class || type == Object.class) {
-                            value = new String(bytes, 0, bytes.length, charset);
+                            value = new String(bytes);
                         } else {
                             value = readValue(bytes, 0, bytes.length, type);
                         }
                     }
                 } else {
                     if (type == null || type == String.class || type == Object.class) {
-                        value = new String(buf, valueStart, valueSize, charset);
+                        value = new String(buf, valueStart, valueSize);
                     } else {
                         value = readValue(buf, valueStart, valueSize, type);
                     }
@@ -353,15 +325,15 @@ class CSVParserUTF8
             if (quote) {
                 if (escapeCount == 0) {
                     if (type == null || type == String.class || type == Object.class) {
-                        value = new String(buf, valueStart + 1, valueSize, charset);
+                        value = new String(buf, valueStart + 1, valueSize);
                     } else {
                         value = readValue(buf, valueStart + 1, valueSize, type);
                     }
                 } else {
-                    byte[] bytes = new byte[valueSize - escapeCount];
+                    char[] bytes = new char[valueSize - escapeCount];
                     int valueEnd = lineEnd;
                     for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
-                        byte c = buf[j];
+                        char c = buf[j];
                         bytes[k++] = c;
                         if (c == '"' && buf[j + 1] == '"') {
                             ++j;
@@ -369,14 +341,14 @@ class CSVParserUTF8
                     }
 
                     if (type == null || type == String.class || type == Object.class) {
-                        value = new String(bytes, 0, bytes.length, charset);
+                        value = new String(bytes);
                     } else {
                         value = readValue(bytes, 0, bytes.length, type);
                     }
                 }
             } else {
                 if (type == null || type == String.class || type == Object.class) {
-                    value = new String(buf, valueStart, valueSize, charset);
+                    value = new String(buf, valueStart, valueSize);
                 } else {
                     value = readValue(buf, valueStart, valueSize, type);
                 }

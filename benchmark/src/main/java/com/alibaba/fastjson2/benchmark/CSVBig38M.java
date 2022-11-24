@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.benchmark;
 
-import com.alibaba.fastjson2.csv.CSVParser;
+import com.alibaba.fastjson2.support.csv.CSVParser;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.infra.Blackhole;
 

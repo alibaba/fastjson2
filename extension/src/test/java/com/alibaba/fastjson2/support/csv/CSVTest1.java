@@ -1,12 +1,10 @@
-package com.alibaba.fastjson2.csv;
+package com.alibaba.fastjson2.support.csv;
 
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.StandardCharsets;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CSVTest0 {
+public class CSVTest1 {
     @Test
     public void test() {
         Bean bean = new Bean();
@@ -20,46 +18,7 @@ public class CSVTest0 {
         assertEquals("1001,DataWorks\n", csv);
 
         CSVParser parser = CSVParser.of(csv, Bean.class);
-        Bean bean1 = parser.readLoneObject();
-        assertEquals(bean.id, bean1.id);
-        assertEquals(bean.name, bean1.name);
-    }
 
-    @Test
-    public void testASCII() {
-        Bean bean = new Bean();
-        bean.id = 1001;
-        bean.name = "DataWorks";
-
-        CSVWriter writer = CSVWriter.of();
-        writer.writeRowObject(bean);
-
-        String csv = writer.toString();
-        assertEquals("1001,DataWorks\n", csv);
-
-        byte[] bytes = csv.getBytes(StandardCharsets.US_ASCII);
-
-        CSVParser parser = CSVParser.of(bytes, Bean.class);
-        Bean bean1 = parser.readLoneObject();
-        assertEquals(bean.id, bean1.id);
-        assertEquals(bean.name, bean1.name);
-    }
-
-    @Test
-    public void testChars() {
-        Bean bean = new Bean();
-        bean.id = 1001;
-        bean.name = "DataWorks";
-
-        CSVWriter writer = CSVWriter.of();
-        writer.writeRowObject(bean);
-
-        String csv = writer.toString();
-        assertEquals("1001,DataWorks\n", csv);
-
-        char[] chars = csv.toCharArray();
-
-        CSVParser parser = CSVParser.of(chars, Bean.class);
         Bean bean1 = parser.readLoneObject();
         assertEquals(bean.id, bean1.id);
         assertEquals(bean.name, bean1.name);
@@ -102,7 +61,7 @@ public class CSVTest0 {
     }
 
     public static class Bean {
-        public int id;
+        public long id;
         public String name;
     }
 }

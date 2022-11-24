@@ -2,7 +2,7 @@ package com.alibaba.fastjson2.adapter.jackson.databind;
 
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.adapter.jackson.core.JsonFactory;
-import com.alibaba.fastjson2.csv.CSVWriter;
+import com.alibaba.fastjson2.support.csv.CSVWriter;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.io.ByteArrayOutputStream;
