@@ -1643,6 +1643,23 @@ public class ObjectReaderCreator {
             return new FieldReaderDateMethod(fieldName, fieldClass, ordinal, features, format, locale, jsonSchema, method);
         }
 
+        if (fieldClass == StackTraceElement[].class && method != null && method.getDeclaringClass() == Throwable.class) {
+            return new FieldReaderStackTrace(
+                    fieldName,
+                    fieldTypeResolved != null ? fieldTypeResolved : fieldType,
+                    fieldClass,
+                    ordinal,
+                    features,
+                    format,
+                    locale,
+                    defaultValue,
+                    jsonSchema,
+                    method,
+                    null,
+                    (BiConsumer<Throwable, StackTraceElement[]>) Throwable::setStackTrace
+            );
+        }
+
         if (fieldClass == StackTraceElement[].class && method.getDeclaringClass() == Throwable.class) {
             features |= JSONReader.Feature.IgnoreSetNullValue.mask;
         }

@@ -140,6 +140,10 @@ final class ObjectReaderException<T>
                 break;
             }
             long hash = jsonReader.readFieldNameHashCode();
+            if (hash == 0) {
+                String name = jsonReader.getFieldName();
+                hash = Fnv.hashCode64(name);
+            }
 
             if (i == 0 && hash == HASH_TYPE && jsonReader.isSupportAutoType(features)) {
                 long typeHash = jsonReader.readTypeHashCode();
@@ -283,7 +287,15 @@ final class ObjectReaderException<T>
         }
 
         if (stackTrace != null) {
-            object.setStackTrace(stackTrace);
+            int nullCount = 0;
+            for (StackTraceElement item : stackTrace) {
+                if (item == null) {
+                    nullCount++;
+                }
+            }
+            if (stackTrace.length == 0 || nullCount != stackTrace.length) {
+                object.setStackTrace(stackTrace);
+            }
         }
 
         if (stackTraceReference != null) {
