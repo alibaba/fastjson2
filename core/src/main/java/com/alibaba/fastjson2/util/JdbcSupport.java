@@ -73,6 +73,9 @@ public class JdbcSupport {
                 }
                 return true;
             case "java.sql.NClob":
+            case "oracle.sql.CLOB":
+            case "com.alibaba.druid.proxy.jdbc.ClobProxyImpl":
+            case "com.alibaba.druid.proxy.jdbc.NClobProxyImpl":
                 return true;
             default:
                 if (objectClassName.startsWith("oracle.sql.")

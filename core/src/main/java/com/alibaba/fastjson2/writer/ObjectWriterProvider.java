@@ -302,6 +302,7 @@ public class ObjectWriterProvider
                 java.time.OffsetDateTime.class,
                 java.time.OffsetTime.class,
                 String.class,
+                StackTraceElement.class,
                 Collections.emptyList().getClass(),
                 Collections.emptyMap().getClass(),
                 Collections.emptySet().getClass()
