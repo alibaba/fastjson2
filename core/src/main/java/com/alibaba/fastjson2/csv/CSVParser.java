@@ -12,6 +12,8 @@ import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
@@ -108,11 +110,39 @@ public abstract class CSVParser
     }
 
     public static CSVParser of(File file, Type... types) throws IOException {
-        return new CSVParserUTF8(new FileInputStream(file), types);
+        return new CSVParserUTF8(new FileInputStream(file), StandardCharsets.UTF_8, types);
+    }
+
+    public static CSVParser of(File file, Charset charset, Type... types) throws IOException {
+        if (charset == StandardCharsets.UTF_16
+                || charset == StandardCharsets.UTF_16LE
+                || charset == StandardCharsets.UTF_16BE) {
+            return new CSVParserUTF16(
+                    new InputStreamReader(new FileInputStream(file), charset), types
+            );
+        }
+
+        return new CSVParserUTF8(new FileInputStream(file), charset, types);
     }
 
     public static CSVParser of(InputStream in, Type... types) throws IOException {
-        return new CSVParserUTF8(in, types);
+        return new CSVParserUTF8(in, StandardCharsets.UTF_8, types);
+    }
+
+    public static CSVParser of(InputStream in, Charset charset, Type... types) throws IOException {
+        if (charset == StandardCharsets.UTF_16
+                || charset == StandardCharsets.UTF_16LE
+                || charset == StandardCharsets.UTF_16BE) {
+            return new CSVParserUTF16(
+                    new InputStreamReader(in, charset), types
+            );
+        }
+
+        return new CSVParserUTF8(in, charset, types);
+    }
+
+    public static CSVParser of(Reader in, Type... types) throws IOException {
+        return new CSVParserUTF16(in, types);
     }
 
     public static CSVParser of(File file, Map<String, Type> types) throws IOException {
@@ -120,8 +150,6 @@ public abstract class CSVParser
     }
 
     public static CSVParser of(String str, Type... types) {
-        JSONReader.Context context = JSONFactory.createReadContext();
-
         if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
             try {
                 int coder = STRING_CODER != null
@@ -150,9 +178,28 @@ public abstract class CSVParser
         return new CSVParserUTF8(utf8Bytes, 0, utf8Bytes.length, types);
     }
 
-    abstract void seekLine() throws IOException;
+    abstract boolean seekLine() throws IOException;
 
-    public abstract List<String> readHeader();
+    public List<String> readHeader() {
+        String[] columns = (String[]) readLineValues(true);
+
+        if (objectReader != null) {
+            JSONReader.Context context = JSONFactory.createReadContext(provider);
+            Type[] types = new Type[columns.length];
+            ObjectReader[] typeReaders = new ObjectReader[columns.length];
+            for (int i = 0; i < columns.length; i++) {
+                String column = columns[i];
+                FieldReader fieldReader = objectReader.getFieldReader(column);
+                types[i] = fieldReader.fieldType;
+                typeReaders[i] = fieldReader.getObjectReader(context);
+            }
+            this.types = types;
+            this.typeReaders = typeReaders;
+        }
+
+        this.columns = Arrays.asList(columns);
+        return this.columns;
+    }
 
     public <T> T readLoneObject() {
         if (objectReader == null) {

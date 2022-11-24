@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.DateUtils;
+import com.alibaba.fastjson2.util.FloatingDecimalStr;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.math.BigInteger;

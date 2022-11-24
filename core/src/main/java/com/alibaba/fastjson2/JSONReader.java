@@ -2330,7 +2330,7 @@ public abstract class JSONReader
                                         doubleChars = new char[20];
                                     }
                                     IOUtils.getChars(unsignedUnscaledVal, len, doubleChars);
-                                    return FloatingDecimal.floatValue(isNegative, len - scale, doubleChars, len);
+                                    return TypeUtils.floatValue(isNegative, len - scale, doubleChars, len);
                                 } else if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
                                     boolean isNegative;
                                     long unsignedUnscaledVal;
@@ -2368,7 +2368,7 @@ public abstract class JSONReader
                                         doubleChars = new char[20];
                                     }
                                     IOUtils.getChars(unsignedUnscaledVal, len, doubleChars);
-                                    return FloatingDecimal.doubleValue(isNegative, len - scale, doubleChars, len);
+                                    return TypeUtils.doubleValue(isNegative, len - scale, doubleChars, len);
                                 }
                             }
                             decimal = BigDecimal.valueOf(unscaledVal, scale);

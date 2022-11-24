@@ -38,7 +38,7 @@ public class CSVParserTest4 {
         assertEquals("Alaska", line1[1]);
         assertEquals("AK", line1[2]);
 
-        int rows = 2;
+        int rows = 3;
         while (true) {
             String[] line = parser.readLine();
             if (line == null) {
