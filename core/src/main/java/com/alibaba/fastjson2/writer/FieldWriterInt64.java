@@ -7,6 +7,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteLongAsString;
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
+
 abstract class FieldWriterInt64<T>
         extends FieldWriter<T> {
     volatile byte[][] utf8ValueCache;
@@ -28,9 +31,10 @@ abstract class FieldWriterInt64<T>
     }
 
     public void writeInt64(JSONWriter jsonWriter, long value) {
-        boolean writeNonStringValueAsString = (jsonWriter.getFeatures() & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        long features = jsonWriter.getFeatures() | this.features;
+        boolean noneString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
 
-        if (jsonWriter.isUTF8() && !writeNonStringValueAsString) {
+        if (jsonWriter.isUTF8() && !noneString) {
             if (value >= -1 && value < 1039) {
                 byte[] bytes = null;
                 if (utf8ValueCache == null) {
@@ -49,7 +53,7 @@ abstract class FieldWriterInt64<T>
                 jsonWriter.writeNameRaw(bytes);
                 return;
             }
-        } else if (jsonWriter.isUTF16() && !writeNonStringValueAsString) {
+        } else if (jsonWriter.isUTF16() && !noneString) {
             if (value >= -1 && value < 1039) {
                 char[] chars = null;
                 if (utf16ValueCache == null) {
