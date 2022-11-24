@@ -21,7 +21,7 @@
     <dependencies>
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
-            <artifactId>fastjson2</artifactId>
+            <artifactId>fastjson2-extension</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.csv;
+package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.util.TypeUtils;
 import org.junit.jupiter.api.Test;

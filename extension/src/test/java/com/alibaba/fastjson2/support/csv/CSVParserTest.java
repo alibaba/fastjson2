@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.csv;
+package com.alibaba.fastjson2.support.csv;
 
 import org.junit.jupiter.api.Test;
 
@@ -121,6 +121,8 @@ public class CSVParserTest {
                 }
                 assertArrayEquals(lines[i], line);
             }
+
+            parser.close();
         }
     }
 

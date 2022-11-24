@@ -1,10 +1,13 @@
-package com.alibaba.fastjson2.csv;
+package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.util.RyuDouble;
 import com.alibaba.fastjson2.util.RyuFloat;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.Flushable;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
