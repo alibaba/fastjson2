@@ -2387,11 +2387,16 @@ public abstract class JSONReader
                     BigInteger bigInt = getBigInt(negative, mag);
                     int adjustedScale = scale - exponent;
                     decimal = new BigDecimal(bigInt, adjustedScale);
+
+                    if (exponent != 0) {
+                        return decimal.doubleValue();
+                    }
                 }
 
                 if (exponent != 0) {
+                    String decimalStr = decimal.toPlainString();
                     double doubleValue = Double.parseDouble(
-                            decimal + "E" + exponent);
+                            decimalStr + "E" + exponent);
                     return Double.valueOf(doubleValue);
                 }
 
