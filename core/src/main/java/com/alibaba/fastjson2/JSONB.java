@@ -16,7 +16,6 @@ import java.util.IdentityHashMap;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 /**
  * x92          # type_char int
@@ -363,13 +362,7 @@ public interface JSONB {
     static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider);
-        try (JSONReader jsonReader = UNSAFE_SUPPORT
-                ? new JSONReaderJSONBUF(
-                ctx,
-                jsonbBytes,
-                0,
-                jsonbBytes.length)
-                : new JSONReaderJSONB(
+        try (JSONReader jsonReader = new JSONReaderJSONB(
                 ctx,
                 jsonbBytes,
                 0,
@@ -437,13 +430,7 @@ public interface JSONB {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider, symbolTable);
 
-        try (JSONReader reader = UNSAFE_SUPPORT
-                ? new JSONReaderJSONBUF(
-                ctx,
-                jsonbBytes,
-                0,
-                jsonbBytes.length)
-                : new JSONReaderJSONB(
+        try (JSONReader reader = new JSONReaderJSONB(
                 ctx,
                 jsonbBytes,
                 0,
@@ -560,13 +547,7 @@ public interface JSONB {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider);
 
-        try (JSONReader jsonReader = UNSAFE_SUPPORT
-                ? new JSONReaderJSONBUF(
-                ctx,
-                jsonbBytes,
-                0,
-                jsonbBytes.length)
-                : new JSONReaderJSONB(
+        try (JSONReader jsonReader = new JSONReaderJSONB(
                 ctx,
                 jsonbBytes,
                 0,
