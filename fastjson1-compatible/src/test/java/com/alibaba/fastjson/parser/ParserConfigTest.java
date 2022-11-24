@@ -1,6 +1,7 @@
 package com.alibaba.fastjson.parser;
 
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import org.junit.jupiter.api.Test;
@@ -61,5 +62,13 @@ public class ParserConfigTest {
 
     static class Bean {
         public int id;
+    }
+
+    public void test2() {
+        ParserConfig config0 = new ParserConfig();
+        ParserConfig config1 = new ParserConfig();
+        assertNotSame(config0.provider, config1.provider);
+
+        assertSame(JSONFactory.getDefaultObjectReaderProvider(), ParserConfig.getGlobalInstance().provider);
     }
 }

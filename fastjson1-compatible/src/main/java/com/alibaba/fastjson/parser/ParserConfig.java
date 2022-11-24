@@ -16,27 +16,32 @@ public class ParserConfig {
     public static final String DENY_PROPERTY = "fastjson.parser.deny";
     public static final String AUTOTYPE_ACCEPT = "fastjson.parser.autoTypeAccept";
 
-    public static ParserConfig global = new ParserConfig(null);
+    public static ParserConfig global = new ParserConfig(JSONFactory.getDefaultObjectReaderProvider(), false);
 
     public static ParserConfig getGlobalInstance() {
         return global;
     }
 
-    private ObjectReaderProvider provider;
+    final ObjectReaderProvider provider;
     public final boolean fieldBase;
     private boolean asmEnable;
     private boolean autoTypeSupport;
 
+    ParserConfig(ObjectReaderProvider provider, boolean fieldBase) {
+        this.provider = provider;
+        this.fieldBase = fieldBase;
+    }
+
     public ParserConfig() {
-        this.fieldBase = false;
+        this(new ObjectReaderProvider(), false);
     }
 
     public ParserConfig(ClassLoader parentClassLoader) {
-        this.fieldBase = false;
+        this(new ObjectReaderProvider(), false);
     }
 
     public ParserConfig(boolean fieldBase) {
-        this.fieldBase = fieldBase;
+        this(new ObjectReaderProvider(), fieldBase);
     }
 
     public boolean isAsmEnable() {
@@ -48,10 +53,6 @@ public class ParserConfig {
     }
 
     public ObjectReaderProvider getProvider() {
-        ObjectReaderProvider provider = this.provider;
-        if (provider == null) {
-            provider = JSONFactory.getDefaultObjectReaderProvider();
-        }
         return provider;
     }
 
