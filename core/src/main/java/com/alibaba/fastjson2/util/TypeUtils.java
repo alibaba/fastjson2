@@ -28,6 +28,938 @@ public class TypeUtils {
     public static final Class CLASS_UNMODIFIABLE_SORTED_SET = Collections.unmodifiableSortedSet(new TreeSet<>()).getClass();
     public static final Class CLASS_UNMODIFIABLE_NAVIGABLE_SET = Collections.unmodifiableNavigableSet(new TreeSet<>()).getClass();
 
+    public static double parseDouble(byte[] in, int off, int len) throws NumberFormatException {
+        boolean isNegative = false;
+        boolean signSeen = false;
+        int decExp;
+        byte c;
+        int end = off + len;
+
+        parseNumber:
+        try {
+            // throws NullPointerException if null
+            if (len == 0) {
+                throw new NumberFormatException("empty String");
+            }
+            int i = off;
+            switch (in[i]) {
+                case '-':
+                    isNegative = true;
+                case '+':
+                    i++;
+                    signSeen = true;
+            }
+
+            char[] digits = new char[len];
+
+            int nDigits = 0;
+            boolean decSeen = false;
+            int decPt = 0;
+            int nLeadZero = 0;
+            int nTrailZero = 0;
+
+            skipLeadingZerosLoop:
+            while (i < end) {
+                c = in[i];
+                if (c == '0') {
+                    nLeadZero++;
+                } else if (c == '.') {
+                    if (decSeen) {
+                        throw new NumberFormatException("multiple points");
+                    }
+                    decPt = i - off;
+                    if (signSeen) {
+                        decPt -= 1;
+                    }
+                    decSeen = true;
+                } else {
+                    break skipLeadingZerosLoop;
+                }
+                i++;
+            }
+            digitLoop:
+            while (i < end) {
+                c = in[i];
+                if (c >= '1' && c <= '9') {
+                    digits[nDigits++] = (char) c;
+                    nTrailZero = 0;
+                } else if (c == '0') {
+                    digits[nDigits++] = (char) c;
+                    nTrailZero++;
+                } else if (c == '.') {
+                    if (decSeen) {
+                        throw new NumberFormatException("multiple points");
+                    }
+                    decPt = i - off;
+                    if (signSeen) {
+                        decPt -= 1;
+                    }
+                    decSeen = true;
+                } else {
+                    break digitLoop;
+                }
+                i++;
+            }
+            nDigits -= nTrailZero;
+
+            boolean isZero = (nDigits == 0);
+            if (isZero && nLeadZero == 0) {
+                break parseNumber; // go throw exception
+            }
+            if (decSeen) {
+                decExp = decPt - nLeadZero;
+            } else {
+                decExp = nDigits + nTrailZero;
+            }
+
+            if ((i < end) && (((c = in[i]) == 'e') || (c == 'E'))) {
+                int expSign = 1;
+                int expVal = 0;
+                int reallyBig = Integer.MAX_VALUE / 10;
+                boolean expOverflow = false;
+                switch (in[++i]) {
+                    case '-':
+                        expSign = -1;
+                    case '+':
+                        i++;
+                }
+                int expAt = i;
+                expLoop:
+                while (i < end) {
+                    if (expVal >= reallyBig) {
+                        expOverflow = true;
+                    }
+                    c = in[i++];
+                    if (c >= '0' && c <= '9') {
+                        expVal = expVal * 10 + ((int) c - (int) '0');
+                    } else {
+                        i--;           // back up.
+                        break expLoop; // stop parsing exponent.
+                    }
+                }
+                int expLimit = FloatingDecimal.BIG_DECIMAL_EXPONENT + nDigits + nTrailZero;
+                if (expOverflow || (expVal > expLimit)) {
+                    decExp = expSign * expLimit;
+                } else {
+                    decExp = decExp + expSign * expVal;
+                }
+
+                if (i == expAt) {
+                    break parseNumber; // certainly bad
+                }
+            }
+
+            if (i < end && (i != end - 1)) {
+                break parseNumber; // go throw exception
+            }
+            if (isZero) {
+                return 0;
+            }
+            return doubleValue(isNegative, decExp, digits, nDigits);
+        } catch (StringIndexOutOfBoundsException e) {
+        }
+        throw new NumberFormatException("For input string: \"" + new String(in, off, len) + "\"");
+    }
+
+    public static double parseDouble(char[] in, int off, int len) throws NumberFormatException {
+        boolean isNegative = false;
+        boolean signSeen = false;
+        int decExp;
+        char c;
+        int end = off + len;
+
+        parseNumber:
+        try {
+            // throws NullPointerException if null
+            if (len == 0) {
+                throw new NumberFormatException("empty String");
+            }
+            int i = off;
+            switch (in[i]) {
+                case '-':
+                    isNegative = true;
+                case '+':
+                    i++;
+                    signSeen = true;
+            }
+
+            char[] digits = new char[len];
+
+            int nDigits = 0;
+            boolean decSeen = false;
+            int decPt = 0;
+            int nLeadZero = 0;
+            int nTrailZero = 0;
+
+            skipLeadingZerosLoop:
+            while (i < end) {
+                c = in[i];
+                if (c == '0') {
+                    nLeadZero++;
+                } else if (c == '.') {
+                    if (decSeen) {
+                        throw new NumberFormatException("multiple points");
+                    }
+                    decPt = i - off;
+                    if (signSeen) {
+                        decPt -= 1;
+                    }
+                    decSeen = true;
+                } else {
+                    break skipLeadingZerosLoop;
+                }
+                i++;
+            }
+            digitLoop:
+            while (i < end) {
+                c = in[i];
+                if (c >= '1' && c <= '9') {
+                    digits[nDigits++] = c;
+                    nTrailZero = 0;
+                } else if (c == '0') {
+                    digits[nDigits++] = c;
+                    nTrailZero++;
+                } else if (c == '.') {
+                    if (decSeen) {
+                        throw new NumberFormatException("multiple points");
+                    }
+                    decPt = i - off;
+                    if (signSeen) {
+                        decPt -= 1;
+                    }
+                    decSeen = true;
+                } else {
+                    break digitLoop;
+                }
+                i++;
+            }
+            nDigits -= nTrailZero;
+
+            boolean isZero = (nDigits == 0);
+            if (isZero && nLeadZero == 0) {
+                break parseNumber; // go throw exception
+            }
+            if (decSeen) {
+                decExp = decPt - nLeadZero;
+            } else {
+                decExp = nDigits + nTrailZero;
+            }
+
+            if ((i < end) && (((c = in[i]) == 'e') || (c == 'E'))) {
+                int expSign = 1;
+                int expVal = 0;
+                int reallyBig = Integer.MAX_VALUE / 10;
+                boolean expOverflow = false;
+                switch (in[++i]) {
+                    case '-':
+                        expSign = -1;
+                    case '+':
+                        i++;
+                }
+                int expAt = i;
+                expLoop:
+                while (i < end) {
+                    if (expVal >= reallyBig) {
+                        expOverflow = true;
+                    }
+                    c = in[i++];
+                    if (c >= '0' && c <= '9') {
+                        expVal = expVal * 10 + ((int) c - (int) '0');
+                    } else {
+                        i--;           // back up.
+                        break expLoop; // stop parsing exponent.
+                    }
+                }
+                int expLimit = FloatingDecimal.BIG_DECIMAL_EXPONENT + nDigits + nTrailZero;
+                if (expOverflow || (expVal > expLimit)) {
+                    decExp = expSign * expLimit;
+                } else {
+                    decExp = decExp + expSign * expVal;
+                }
+
+                if (i == expAt) {
+                    break parseNumber; // certainly bad
+                }
+            }
+
+            if (i < end && (i != end - 1)) {
+                break parseNumber; // go throw exception
+            }
+            if (isZero) {
+                return 0;
+            }
+            return doubleValue(isNegative, decExp, digits, nDigits);
+        } catch (StringIndexOutOfBoundsException e) {
+        }
+        throw new NumberFormatException("For input string: \"" + new String(in, off, len) + "\"");
+    }
+
+    public static float parseFloat(byte[] in, int off, int len) throws NumberFormatException {
+        boolean isNegative = false;
+        boolean signSeen = false;
+        int decExp;
+        byte c;
+        int end = off + len;
+
+        parseNumber:
+        try {
+            // throws NullPointerException if null
+            if (len == 0) {
+                throw new NumberFormatException("empty String");
+            }
+            int i = off;
+            switch (in[i]) {
+                case '-':
+                    isNegative = true;
+                case '+':
+                    i++;
+                    signSeen = true;
+            }
+
+            char[] digits = new char[len];
+
+            int nDigits = 0;
+            boolean decSeen = false;
+            int decPt = 0;
+            int nLeadZero = 0;
+            int nTrailZero = 0;
+
+            skipLeadingZerosLoop:
+            while (i < end) {
+                c = in[i];
+                if (c == '0') {
+                    nLeadZero++;
+                } else if (c == '.') {
+                    if (decSeen) {
+                        throw new NumberFormatException("multiple points");
+                    }
+                    decPt = i - off;
+                    if (signSeen) {
+                        decPt -= 1;
+                    }
+                    decSeen = true;
+                } else {
+                    break skipLeadingZerosLoop;
+                }
+                i++;
+            }
+            digitLoop:
+            while (i < end) {
+                c = in[i];
+                if (c >= '1' && c <= '9') {
+                    digits[nDigits++] = (char) c;
+                    nTrailZero = 0;
+                } else if (c == '0') {
+                    digits[nDigits++] = (char) c;
+                    nTrailZero++;
+                } else if (c == '.') {
+                    if (decSeen) {
+                        throw new NumberFormatException("multiple points");
+                    }
+                    decPt = i - off;
+                    if (signSeen) {
+                        decPt -= 1;
+                    }
+                    decSeen = true;
+                } else {
+                    break digitLoop;
+                }
+                i++;
+            }
+            nDigits -= nTrailZero;
+
+            boolean isZero = (nDigits == 0);
+            if (isZero && nLeadZero == 0) {
+                break parseNumber; // go throw exception
+            }
+            if (decSeen) {
+                decExp = decPt - nLeadZero;
+            } else {
+                decExp = nDigits + nTrailZero;
+            }
+
+            if ((i < end) && (((c = in[i]) == 'e') || (c == 'E'))) {
+                int expSign = 1;
+                int expVal = 0;
+                int reallyBig = Integer.MAX_VALUE / 10;
+                boolean expOverflow = false;
+                switch (in[++i]) {
+                    case '-':
+                        expSign = -1;
+                    case '+':
+                        i++;
+                }
+                int expAt = i;
+                expLoop:
+                while (i < end) {
+                    if (expVal >= reallyBig) {
+                        expOverflow = true;
+                    }
+                    c = in[i++];
+                    if (c >= '0' && c <= '9') {
+                        expVal = expVal * 10 + ((int) c - (int) '0');
+                    } else {
+                        i--;           // back up.
+                        break expLoop; // stop parsing exponent.
+                    }
+                }
+                int expLimit = FloatingDecimal.BIG_DECIMAL_EXPONENT + nDigits + nTrailZero;
+                if (expOverflow || (expVal > expLimit)) {
+                    decExp = expSign * expLimit;
+                } else {
+                    decExp = decExp + expSign * expVal;
+                }
+
+                if (i == expAt) {
+                    break parseNumber; // certainly bad
+                }
+            }
+
+            if (i < end && (i != end - 1)) {
+                break parseNumber; // go throw exception
+            }
+            if (isZero) {
+                return 0;
+            }
+            return floatValue(isNegative, decExp, digits, nDigits);
+        } catch (StringIndexOutOfBoundsException e) {
+        }
+        throw new NumberFormatException("For input string: \"" + new String(in, off, len) + "\"");
+    }
+
+    public static float parseFloat(char[] in, int off, int len) throws NumberFormatException {
+        boolean isNegative = false;
+        boolean signSeen = false;
+        int decExp;
+        char c;
+        int end = off + len;
+
+        parseNumber:
+        try {
+            // throws NullPointerException if null
+            if (len == 0) {
+                throw new NumberFormatException("empty String");
+            }
+            int i = off;
+            switch (in[i]) {
+                case '-':
+                    isNegative = true;
+                case '+':
+                    i++;
+                    signSeen = true;
+            }
+
+            char[] digits = new char[len];
+
+            int nDigits = 0;
+            boolean decSeen = false;
+            int decPt = 0;
+            int nLeadZero = 0;
+            int nTrailZero = 0;
+
+            skipLeadingZerosLoop:
+            while (i < end) {
+                c = in[i];
+                if (c == '0') {
+                    nLeadZero++;
+                } else if (c == '.') {
+                    if (decSeen) {
+                        throw new NumberFormatException("multiple points");
+                    }
+                    decPt = i - off;
+                    if (signSeen) {
+                        decPt -= 1;
+                    }
+                    decSeen = true;
+                } else {
+                    break skipLeadingZerosLoop;
+                }
+                i++;
+            }
+            digitLoop:
+            while (i < end) {
+                c = in[i];
+                if (c >= '1' && c <= '9') {
+                    digits[nDigits++] = c;
+                    nTrailZero = 0;
+                } else if (c == '0') {
+                    digits[nDigits++] = c;
+                    nTrailZero++;
+                } else if (c == '.') {
+                    if (decSeen) {
+                        throw new NumberFormatException("multiple points");
+                    }
+                    decPt = i - off;
+                    if (signSeen) {
+                        decPt -= 1;
+                    }
+                    decSeen = true;
+                } else {
+                    break digitLoop;
+                }
+                i++;
+            }
+            nDigits -= nTrailZero;
+
+            boolean isZero = (nDigits == 0);
+            if (isZero && nLeadZero == 0) {
+                break parseNumber; // go throw exception
+            }
+            if (decSeen) {
+                decExp = decPt - nLeadZero;
+            } else {
+                decExp = nDigits + nTrailZero;
+            }
+
+            if ((i < end) && (((c = in[i]) == 'e') || (c == 'E'))) {
+                int expSign = 1;
+                int expVal = 0;
+                int reallyBig = Integer.MAX_VALUE / 10;
+                boolean expOverflow = false;
+                switch (in[++i]) {
+                    case '-':
+                        expSign = -1;
+                    case '+':
+                        i++;
+                }
+                int expAt = i;
+                expLoop:
+                while (i < end) {
+                    if (expVal >= reallyBig) {
+                        expOverflow = true;
+                    }
+                    c = in[i++];
+                    if (c >= '0' && c <= '9') {
+                        expVal = expVal * 10 + ((int) c - (int) '0');
+                    } else {
+                        i--;           // back up.
+                        break expLoop; // stop parsing exponent.
+                    }
+                }
+                int expLimit = FloatingDecimal.BIG_DECIMAL_EXPONENT + nDigits + nTrailZero;
+                if (expOverflow || (expVal > expLimit)) {
+                    decExp = expSign * expLimit;
+                } else {
+                    decExp = decExp + expSign * expVal;
+                }
+
+                if (i == expAt) {
+                    break parseNumber; // certainly bad
+                }
+            }
+
+            if (i < end && (i != end - 1)) {
+                break parseNumber; // go throw exception
+            }
+            if (isZero) {
+                return 0;
+            }
+            return floatValue(isNegative, decExp, digits, nDigits);
+        } catch (StringIndexOutOfBoundsException e) {
+        }
+        throw new NumberFormatException("For input string: \"" + new String(in, off, len) + "\"");
+    }
+
+    public static double doubleValue(boolean isNegative, int decExp, char[] digits, int nDigits) {
+        int kDigits = Math.min(nDigits, FloatingDecimal.MAX_DECIMAL_DIGITS + 1);
+
+        int iValue = (int) digits[0] - (int) '0';
+        int iDigits = Math.min(kDigits, FloatingDecimal.INT_DECIMAL_DIGITS);
+        for (int i = 1; i < iDigits; i++) {
+            iValue = iValue * 10 + (int) digits[i] - (int) '0';
+        }
+        long lValue = (long) iValue;
+        for (int i = iDigits; i < kDigits; i++) {
+            lValue = lValue * 10L + (long) ((int) digits[i] - (int) '0');
+        }
+        double dValue = (double) lValue;
+        int exp = decExp - kDigits;
+
+        if (nDigits <= FloatingDecimal.MAX_DECIMAL_DIGITS) {
+            if (exp == 0 || dValue == 0.0) {
+                return (isNegative) ? -dValue : dValue; // small floating integer
+            } else if (exp >= 0) {
+                if (exp <= FloatingDecimal.MAX_SMALL_TEN) {
+                    double rValue = dValue * FloatingDecimal.SMALL_10_POW[exp];
+                    return (isNegative) ? -rValue : rValue;
+                }
+                int slop = FloatingDecimal.MAX_DECIMAL_DIGITS - kDigits;
+                if (exp <= FloatingDecimal.MAX_SMALL_TEN + slop) {
+                    dValue *= FloatingDecimal.SMALL_10_POW[slop];
+                    double rValue = dValue * FloatingDecimal.SMALL_10_POW[exp - slop];
+                    return (isNegative) ? -rValue : rValue;
+                }
+            } else {
+                if (exp >= -FloatingDecimal.MAX_SMALL_TEN) {
+                    double rValue = dValue / FloatingDecimal.SMALL_10_POW[-exp];
+                    return (isNegative) ? -rValue : rValue;
+                }
+            }
+        }
+
+        if (exp > 0) {
+            if (decExp > FloatingDecimal.MAX_DECIMAL_EXPONENT + 1) {
+                return (isNegative) ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
+            }
+            if ((exp & 15) != 0) {
+                dValue *= FloatingDecimal.SMALL_10_POW[exp & 15];
+            }
+            if ((exp >>= 4) != 0) {
+                int j;
+                for (j = 0; exp > 1; j++, exp >>= 1) {
+                    if ((exp & 1) != 0) {
+                        dValue *= FloatingDecimal.BIG_10_POW[j];
+                    }
+                }
+
+                double t = dValue * FloatingDecimal.BIG_10_POW[j];
+                if (Double.isInfinite(t)) {
+                    t = dValue / 2.0;
+                    t *= FloatingDecimal.BIG_10_POW[j];
+                    if (Double.isInfinite(t)) {
+                        return (isNegative) ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
+                    }
+                    t = Double.MAX_VALUE;
+                }
+                dValue = t;
+            }
+        } else if (exp < 0) {
+            exp = -exp;
+            if (decExp < FloatingDecimal.MIN_DECIMAL_EXPONENT - 1) {
+                return (isNegative) ? -0.0 : 0.0;
+            }
+            if ((exp & 15) != 0) {
+                dValue /= FloatingDecimal.SMALL_10_POW[exp & 15];
+            }
+            if ((exp >>= 4) != 0) {
+                int j;
+                for (j = 0; exp > 1; j++, exp >>= 1) {
+                    if ((exp & 1) != 0) {
+                        dValue *= FloatingDecimal.TINY_10_POW[j];
+                    }
+                }
+
+                double t = dValue * FloatingDecimal.TINY_10_POW[j];
+                if (t == 0.0) {
+                    t = dValue * 2.0;
+                    t *= FloatingDecimal.TINY_10_POW[j];
+                    if (t == 0.0) {
+                        return (isNegative) ? -0.0 : 0.0;
+                    }
+                    t = Double.MIN_VALUE;
+                }
+                dValue = t;
+            }
+        }
+
+        if (nDigits > FloatingDecimal.MAX_NDIGITS) {
+            nDigits = FloatingDecimal.MAX_NDIGITS + 1;
+            digits[FloatingDecimal.MAX_NDIGITS] = '1';
+        }
+        FDBigInteger bigD0 = new FDBigInteger(lValue, digits, kDigits, nDigits);
+        exp = decExp - nDigits;
+
+        long ieeeBits = Double.doubleToRawLongBits(dValue); // IEEE-754 bits of double candidate
+        final int B5 = Math.max(0, -exp); // powers of 5 in bigB, value is not modified inside correctionLoop
+        final int D5 = Math.max(0, exp); // powers of 5 in bigD, value is not modified inside correctionLoop
+        bigD0 = bigD0.multByPow52(D5, 0);
+        bigD0.makeImmutable();   // prevent bigD0 modification inside correctionLoop
+        FDBigInteger bigD = null;
+        int prevD2 = 0;
+
+        correctionLoop:
+        while (true) {
+            // here ieeeBits can't be NaN, Infinity or zero
+            int binexp = (int) (ieeeBits >>> FloatingDecimal.EXP_SHIFT);
+            long bigBbits = ieeeBits & FloatingDecimal.DOUBLE_SIGNIF_BIT_MASK;
+            if (binexp > 0) {
+                bigBbits |= FloatingDecimal.FRACT_HOB;
+            } else { // Normalize denormalized numbers.
+                assert bigBbits != 0L : bigBbits; // doubleToBigInt(0.0)
+                int leadingZeros = Long.numberOfLeadingZeros(bigBbits);
+                int shift = leadingZeros - (63 - FloatingDecimal.EXP_SHIFT);
+                bigBbits <<= shift;
+                binexp = 1 - shift;
+            }
+            binexp -= FloatingDecimal.DOUBLE_EXP_BIAS;
+            int lowOrderZeros = Long.numberOfTrailingZeros(bigBbits);
+            bigBbits >>>= lowOrderZeros;
+            final int bigIntExp = binexp - FloatingDecimal.EXP_SHIFT + lowOrderZeros;
+            final int bigIntNBits = FloatingDecimal.EXP_SHIFT + 1 - lowOrderZeros;
+
+            int B2 = B5; // powers of 2 in bigB
+            int D2 = D5; // powers of 2 in bigD
+            int Ulp2;   // powers of 2 in halfUlp.
+            if (bigIntExp >= 0) {
+                B2 += bigIntExp;
+            } else {
+                D2 -= bigIntExp;
+            }
+            Ulp2 = B2;
+            // shift bigB and bigD left by a number s. t.
+            // halfUlp is still an integer.
+            int hulpbias;
+            if (binexp <= -FloatingDecimal.DOUBLE_EXP_BIAS) {
+                // This is going to be a denormalized number
+                // (if not actually zero).
+                // half an ULP is at 2^-(EXP_BIAS+EXP_SHIFT+1)
+                hulpbias = binexp + lowOrderZeros + FloatingDecimal.DOUBLE_EXP_BIAS;
+            } else {
+                hulpbias = 1 + lowOrderZeros;
+            }
+            B2 += hulpbias;
+            D2 += hulpbias;
+            // if there are common factors of 2, we might just as well
+            // factor them out, as they add nothing useful.
+            int common2 = Math.min(B2, Math.min(D2, Ulp2));
+            B2 -= common2;
+            D2 -= common2;
+            Ulp2 -= common2;
+            // do multiplications by powers of 5 and 2
+            FDBigInteger bigB = FDBigInteger.valueOfMulPow52(bigBbits, B5, B2);
+            if (bigD == null || prevD2 != D2) {
+                bigD = bigD0.leftShift(D2);
+                prevD2 = D2;
+            }
+
+            FDBigInteger diff;
+            int cmpResult;
+            boolean overvalue;
+            if ((cmpResult = bigB.cmp(bigD)) > 0) {
+                overvalue = true; // our candidate is too big.
+                diff = bigB.leftInplaceSub(bigD); // bigB is not user further - reuse
+                if ((bigIntNBits == 1) && (bigIntExp > -FloatingDecimal.DOUBLE_EXP_BIAS + 1)) {
+                    // candidate is a normalized exact power of 2 and
+                    // is too big (larger than Double.MIN_NORMAL). We will be subtracting.
+                    // For our purposes, ulp is the ulp of the
+                    // next smaller range.
+                    Ulp2 -= 1;
+                    if (Ulp2 < 0) {
+                        // rats. Cannot de-scale ulp this far.
+                        // must scale diff in other direction.
+                        Ulp2 = 0;
+                        diff = diff.leftShift(1);
+                    }
+                }
+            } else if (cmpResult < 0) {
+                overvalue = false; // our candidate is too small.
+                diff = bigD.rightInplaceSub(bigB); // bigB is not user further - reuse
+            } else {
+                // the candidate is exactly right!
+                // this happens with surprising frequency
+                break correctionLoop;
+            }
+            cmpResult = diff.cmpPow52(B5, Ulp2);
+            if ((cmpResult) < 0) {
+                // difference is small.
+                // this is close enough
+                break correctionLoop;
+            } else if (cmpResult == 0) {
+                // difference is exactly half an ULP
+                // round to some other value maybe, then finish
+                if ((ieeeBits & 1) != 0) { // half ties to even
+                    ieeeBits += overvalue ? -1 : 1; // nextDown or nextUp
+                }
+                break correctionLoop;
+            } else {
+                // difference is non-trivial.
+                // could scale addend by ratio of difference to
+                // halfUlp here, if we bothered to compute that difference.
+                // Most of the time ( I hope ) it is about 1 anyway.
+                ieeeBits += overvalue ? -1 : 1; // nextDown or nextUp
+                if (ieeeBits == 0 || ieeeBits == FloatingDecimal.DOUBLE_EXP_BIT_MASK) { // 0.0 or Double.POSITIVE_INFINITY
+                    break correctionLoop; // oops. Fell off end of range.
+                }
+                continue; // try again.
+            }
+        }
+        if (isNegative) {
+            ieeeBits |= FloatingDecimal.DOUBLE_SIGN_BIT_MASK;
+        }
+        return Double.longBitsToDouble(ieeeBits);
+    }
+
+    public static float floatValue(boolean isNegative, int decExponent, char[] digits, int nDigits) {
+        int kDigits = Math.min(nDigits, FloatingDecimal.SINGLE_MAX_DECIMAL_DIGITS + 1);
+        int iValue = (int) digits[0] - (int) '0';
+        for (int i = 1; i < kDigits; i++) {
+            iValue = iValue * 10 + (int) digits[i] - (int) '0';
+        }
+        float fValue = (float) iValue;
+        int exp = decExponent - kDigits;
+
+        if (nDigits <= FloatingDecimal.SINGLE_MAX_DECIMAL_DIGITS) {
+            if (exp == 0 || fValue == 0.0f) {
+                return (isNegative) ? -fValue : fValue; // small floating integer
+            } else if (exp >= 0) {
+                if (exp <= FloatingDecimal.SINGLE_MAX_SMALL_TEN) {
+                    fValue *= FloatingDecimal.SINGLE_SMALL_10_POW[exp];
+                    return (isNegative) ? -fValue : fValue;
+                }
+                int slop = FloatingDecimal.SINGLE_MAX_DECIMAL_DIGITS - kDigits;
+                if (exp <= FloatingDecimal.SINGLE_MAX_SMALL_TEN + slop) {
+                    fValue *= FloatingDecimal.SINGLE_SMALL_10_POW[slop];
+                    fValue *= FloatingDecimal.SINGLE_SMALL_10_POW[exp - slop];
+                    return (isNegative) ? -fValue : fValue;
+                }
+            } else {
+                if (exp >= -FloatingDecimal.SINGLE_MAX_SMALL_TEN) {
+                    fValue /= FloatingDecimal.SINGLE_SMALL_10_POW[-exp];
+                    return (isNegative) ? -fValue : fValue;
+                }
+            }
+        } else if ((decExponent >= nDigits) && (nDigits + decExponent <= FloatingDecimal.MAX_DECIMAL_DIGITS)) {
+            long lValue = (long) iValue;
+            for (int i = kDigits; i < nDigits; i++) {
+                lValue = lValue * 10L + (long) ((int) digits[i] - (int) '0');
+            }
+            double dValue = (double) lValue;
+            exp = decExponent - nDigits;
+            dValue *= FloatingDecimal.SMALL_10_POW[exp];
+            fValue = (float) dValue;
+            return (isNegative) ? -fValue : fValue;
+        }
+        double dValue = fValue;
+        if (exp > 0) {
+            if (decExponent > FloatingDecimal.SINGLE_MAX_DECIMAL_EXPONENT + 1) {
+                return (isNegative) ? Float.NEGATIVE_INFINITY : Float.POSITIVE_INFINITY;
+            }
+            if ((exp & 15) != 0) {
+                dValue *= FloatingDecimal.SMALL_10_POW[exp & 15];
+            }
+            if ((exp >>= 4) != 0) {
+                int j;
+                for (j = 0; exp > 0; j++, exp >>= 1) {
+                    if ((exp & 1) != 0) {
+                        dValue *= FloatingDecimal.BIG_10_POW[j];
+                    }
+                }
+            }
+        } else if (exp < 0) {
+            exp = -exp;
+            if (decExponent < FloatingDecimal.SINGLE_MIN_DECIMAL_EXPONENT - 1) {
+                return (isNegative) ? -0.0f : 0.0f;
+            }
+            if ((exp & 15) != 0) {
+                dValue /= FloatingDecimal.SMALL_10_POW[exp & 15];
+            }
+            if ((exp >>= 4) != 0) {
+                int j;
+                for (j = 0; exp > 0; j++, exp >>= 1) {
+                    if ((exp & 1) != 0) {
+                        dValue *= FloatingDecimal.TINY_10_POW[j];
+                    }
+                }
+            }
+        }
+        fValue = Math.max(Float.MIN_VALUE, Math.min(Float.MAX_VALUE, (float) dValue));
+
+        if (nDigits > FloatingDecimal.SINGLE_MAX_NDIGITS) {
+            nDigits = FloatingDecimal.SINGLE_MAX_NDIGITS + 1;
+            digits[FloatingDecimal.SINGLE_MAX_NDIGITS] = '1';
+        }
+        FDBigInteger bigD0 = new FDBigInteger(iValue, digits, kDigits, nDigits);
+        exp = decExponent - nDigits;
+
+        int ieeeBits = Float.floatToRawIntBits(fValue); // IEEE-754 bits of float candidate
+        final int B5 = Math.max(0, -exp); // powers of 5 in bigB, value is not modified inside correctionLoop
+        final int D5 = Math.max(0, exp); // powers of 5 in bigD, value is not modified inside correctionLoop
+        bigD0 = bigD0.multByPow52(D5, 0);
+        bigD0.makeImmutable();   // prevent bigD0 modification inside correctionLoop
+        FDBigInteger bigD = null;
+        int prevD2 = 0;
+
+        correctionLoop:
+        while (true) {
+            // here ieeeBits can't be NaN, Infinity or zero
+            int binexp = ieeeBits >>> FloatingDecimal.SINGLE_EXP_SHIFT;
+            int bigBbits = ieeeBits & FloatingDecimal.FLOAT_SIGNIF_BIT_MASK;
+            if (binexp > 0) {
+                bigBbits |= FloatingDecimal.SINGLE_FRACT_HOB;
+            } else { // Normalize denormalized numbers.
+                assert bigBbits != 0 : bigBbits; // floatToBigInt(0.0)
+                int leadingZeros = Integer.numberOfLeadingZeros(bigBbits);
+                int shift = leadingZeros - (31 - FloatingDecimal.SINGLE_EXP_SHIFT);
+                bigBbits <<= shift;
+                binexp = 1 - shift;
+            }
+            binexp -= FloatingDecimal.FLOAT_EXP_BIAS;
+            int lowOrderZeros = Integer.numberOfTrailingZeros(bigBbits);
+            bigBbits >>>= lowOrderZeros;
+            final int bigIntExp = binexp - FloatingDecimal.SINGLE_EXP_SHIFT + lowOrderZeros;
+            final int bigIntNBits = FloatingDecimal.SINGLE_EXP_SHIFT + 1 - lowOrderZeros;
+
+            int B2 = B5; // powers of 2 in bigB
+            int D2 = D5; // powers of 2 in bigD
+            int Ulp2;   // powers of 2 in halfUlp.
+            if (bigIntExp >= 0) {
+                B2 += bigIntExp;
+            } else {
+                D2 -= bigIntExp;
+            }
+            Ulp2 = B2;
+
+            int hulpbias;
+            if (binexp <= -FloatingDecimal.FLOAT_EXP_BIAS) {
+                hulpbias = binexp + lowOrderZeros + FloatingDecimal.FLOAT_EXP_BIAS;
+            } else {
+                hulpbias = 1 + lowOrderZeros;
+            }
+            B2 += hulpbias;
+            D2 += hulpbias;
+
+            int common2 = Math.min(B2, Math.min(D2, Ulp2));
+            B2 -= common2;
+            D2 -= common2;
+            Ulp2 -= common2;
+            // do multiplications by powers of 5 and 2
+            FDBigInteger bigB = FDBigInteger.valueOfMulPow52(bigBbits, B5, B2);
+            if (bigD == null || prevD2 != D2) {
+                bigD = bigD0.leftShift(D2);
+                prevD2 = D2;
+            }
+
+            FDBigInteger diff;
+            int cmpResult;
+            boolean overvalue;
+            if ((cmpResult = bigB.cmp(bigD)) > 0) {
+                overvalue = true; // our candidate is too big.
+                diff = bigB.leftInplaceSub(bigD); // bigB is not user further - reuse
+                if ((bigIntNBits == 1) && (bigIntExp > -FloatingDecimal.FLOAT_EXP_BIAS + 1)) {
+                    Ulp2 -= 1;
+                    if (Ulp2 < 0) {
+                        Ulp2 = 0;
+                        diff = diff.leftShift(1);
+                    }
+                }
+            } else if (cmpResult < 0) {
+                overvalue = false; // our candidate is too small.
+                diff = bigD.rightInplaceSub(bigB); // bigB is not user further - reuse
+            } else {
+                break correctionLoop;
+            }
+            cmpResult = diff.cmpPow52(B5, Ulp2);
+            if ((cmpResult) < 0) {
+                break correctionLoop;
+            } else if (cmpResult == 0) {
+                if ((ieeeBits & 1) != 0) { // half ties to even
+                    ieeeBits += overvalue ? -1 : 1; // nextDown or nextUp
+                }
+                break correctionLoop;
+            } else {
+                ieeeBits += overvalue ? -1 : 1; // nextDown or nextUp
+                if (ieeeBits == 0 || ieeeBits == FloatingDecimal.FLOAT_EXP_BIT_MASK) { // 0.0 or Float.POSITIVE_INFINITY
+                    break correctionLoop; // oops. Fell off end of range.
+                }
+                continue; // try again.
+            }
+        }
+        if (isNegative) {
+            ieeeBits |= FloatingDecimal.FLOAT_SIGN_BIT_MASK;
+        }
+        return Float.intBitsToFloat(ieeeBits);
+    }
+
     static class Cache {
         volatile char[] chars;
     }
@@ -694,6 +1626,367 @@ public class TypeUtils {
         }
 
         throw new JSONException("can not cast to long from " + value.getClass());
+    }
+
+    public static Boolean parseBoolean(byte[] bytes, int off, int len) {
+        switch (len) {
+            case 0:
+                return null;
+            case 1: {
+                byte b0 = bytes[off];
+                if (b0 == '1' || b0 == 'Y') {
+                    return Boolean.TRUE;
+                }
+                if (b0 == '0' || b0 == 'N') {
+                    return Boolean.FALSE;
+                }
+                break;
+            }
+            case 4:
+                if (bytes[off] == 't' && bytes[off + 1] == 'r' && bytes[off + 2] == 'u' && bytes[off + 3] == 'e') {
+                    return Boolean.TRUE;
+                }
+                break;
+            case 5:
+                if (bytes[off] == 'f'
+                        && bytes[off + 1] == 'a'
+                        && bytes[off + 2] == 'l'
+                        && bytes[off + 3] == 's'
+                        && bytes[off + 4] == 'e') {
+                    return Boolean.FALSE;
+                }
+                break;
+            default:
+                break;
+        }
+
+        String str = new String(bytes, off, len);
+        return Boolean.parseBoolean(str);
+    }
+
+    public static Integer parseInt(byte[] bytes, int off, int len) {
+        switch (len) {
+            case 0:
+                return null;
+            case 1: {
+                byte b0 = bytes[off];
+                if (b0 >= '0' && b0 <= '9') {
+                    return b0 - '0';
+                }
+                break;
+            }
+            case 2: {
+                byte b0 = bytes[off];
+                byte b1 = bytes[off + 1];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9') {
+                    return (b0 - '0') * 10
+                            + (b1 - '0');
+                }
+                break;
+            }
+            case 3: {
+                byte b0 = bytes[off];
+                byte b1 = bytes[off + 1];
+                byte b2 = bytes[off + 2];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9') {
+                    return (b0 - '0') * 100
+                            + (b1 - '0') * 10
+                            + (b2 - '0');
+                }
+                break;
+            }
+            case 4: {
+                byte b0 = bytes[off];
+                byte b1 = bytes[off + 1];
+                byte b2 = bytes[off + 2];
+                byte b3 = bytes[off + 3];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                ) {
+                    return (b0 - '0') * 1000
+                            + (b1 - '0') * 100
+                            + (b2 - '0') * 10
+                            + (b3 - '0');
+                }
+                break;
+            }
+            case 5: {
+                byte b0 = bytes[off];
+                byte b1 = bytes[off + 1];
+                byte b2 = bytes[off + 2];
+                byte b3 = bytes[off + 3];
+                byte b4 = bytes[off + 4];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                        && b4 >= '0' && b4 <= '9'
+                ) {
+                    return (b0 - '0') * 10_000
+                            + (b1 - '0') * 1000
+                            + (b2 - '0') * 100
+                            + (b3 - '0') * 10
+                            + (b4 - '0');
+                }
+                break;
+            }
+            case 6: {
+                byte b0 = bytes[off];
+                byte b1 = bytes[off + 1];
+                byte b2 = bytes[off + 2];
+                byte b3 = bytes[off + 3];
+                byte b4 = bytes[off + 4];
+                byte b5 = bytes[off + 5];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                        && b4 >= '0' && b4 <= '9'
+                        && b5 >= '0' && b5 <= '9'
+                ) {
+                    return (b0 - '0') * 100_000
+                            + (b1 - '0') * 10_000
+                            + (b2 - '0') * 1_000
+                            + (b3 - '0') * 100
+                            + (b4 - '0') * 10
+                            + (b5 - '0');
+                }
+                break;
+            }
+            case 7: {
+                byte b0 = bytes[off];
+                byte b1 = bytes[off + 1];
+                byte b2 = bytes[off + 2];
+                byte b3 = bytes[off + 3];
+                byte b4 = bytes[off + 4];
+                byte b5 = bytes[off + 5];
+                byte b6 = bytes[off + 6];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                        && b4 >= '0' && b4 <= '9'
+                        && b5 >= '0' && b5 <= '9'
+                        && b6 >= '0' && b6 <= '9'
+                ) {
+                    return (b0 - '0') * 1_000_000
+                            + (b1 - '0') * 100_000
+                            + (b2 - '0') * 10_000
+                            + (b3 - '0') * 1_000
+                            + (b4 - '0') * 100
+                            + (b5 - '0') * 10
+                            + (b6 - '0');
+                }
+                break;
+            }
+            case 8: {
+                byte b0 = bytes[off];
+                byte b1 = bytes[off + 1];
+                byte b2 = bytes[off + 2];
+                byte b3 = bytes[off + 3];
+                byte b4 = bytes[off + 4];
+                byte b5 = bytes[off + 5];
+                byte b6 = bytes[off + 6];
+                byte b7 = bytes[off + 7];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                        && b4 >= '0' && b4 <= '9'
+                        && b5 >= '0' && b5 <= '9'
+                        && b6 >= '0' && b6 <= '9'
+                        && b7 >= '0' && b7 <= '9'
+                ) {
+                    return (b0 - '0') * 10_000_000
+                            + (b1 - '0') * 1_000_000
+                            + (b2 - '0') * 100_000
+                            + (b3 - '0') * 10_000
+                            + (b4 - '0') * 1_000
+                            + (b5 - '0') * 100
+                            + (b6 - '0') * 10
+                            + (b7 - '0');
+                }
+                break;
+            }
+            default:
+                break;
+        }
+
+        String str = new String(bytes, off, len);
+        return Integer.parseInt(str);
+    }
+
+    public static Long parseLong(byte[] bytes, int off, int len) {
+        switch (len) {
+            case 0:
+                return null;
+            case 1: {
+                byte b0 = bytes[off];
+                if (b0 >= '0' && b0 <= '9') {
+                    return (long) (b0 - '0');
+                }
+                break;
+            }
+            case 2: {
+                byte b0 = bytes[off];
+                byte b1 = bytes[off + 1];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9') {
+                    return (long) (b0 - '0') * 10
+                            + (b1 - '0');
+                }
+                break;
+            }
+            case 3: {
+                byte b0 = bytes[off];
+                byte b1 = bytes[off + 1];
+                byte b2 = bytes[off + 2];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9') {
+                    return (long) (b0 - '0') * 100
+                            + (b1 - '0') * 10
+                            + (b2 - '0');
+                }
+                break;
+            }
+            case 4: {
+                byte b0 = bytes[off];
+                byte b1 = bytes[off + 1];
+                byte b2 = bytes[off + 2];
+                byte b3 = bytes[off + 3];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9') {
+                    return (long) (b0 - '0') * 1000
+                            + (b1 - '0') * 100
+                            + (b2 - '0') * 10
+                            + (b3 - '0');
+                }
+                break;
+            }
+            case 5: {
+                byte b0 = bytes[off];
+                byte b1 = bytes[off + 1];
+                byte b2 = bytes[off + 2];
+                byte b3 = bytes[off + 3];
+                byte b4 = bytes[off + 4];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                        && b4 >= '0' && b4 <= '9'
+                ) {
+                    return (long) (b0 - '0') * 10_000
+                            + (b1 - '0') * 1000
+                            + (b2 - '0') * 100
+                            + (b3 - '0') * 10
+                            + (b4 - '0');
+                }
+                break;
+            }
+            case 6: {
+                byte b0 = bytes[off];
+                byte b1 = bytes[off + 1];
+                byte b2 = bytes[off + 2];
+                byte b3 = bytes[off + 3];
+                byte b4 = bytes[off + 4];
+                byte b5 = bytes[off + 5];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                        && b4 >= '0' && b4 <= '9'
+                        && b5 >= '0' && b5 <= '9'
+                ) {
+                    return (long) (b0 - '0') * 100_000
+                            + (b1 - '0') * 10_000
+                            + (b2 - '0') * 1_000
+                            + (b3 - '0') * 100
+                            + (b4 - '0') * 10
+                            + (b5 - '0');
+                }
+                break;
+            }
+            case 7: {
+                byte b0 = bytes[off];
+                byte b1 = bytes[off + 1];
+                byte b2 = bytes[off + 2];
+                byte b3 = bytes[off + 3];
+                byte b4 = bytes[off + 4];
+                byte b5 = bytes[off + 5];
+                byte b6 = bytes[off + 6];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                        && b4 >= '0' && b4 <= '9'
+                        && b5 >= '0' && b5 <= '9'
+                        && b6 >= '0' && b6 <= '9'
+                ) {
+                    return (long) (b0 - '0') * 1_000_000
+                            + (b1 - '0') * 100_000
+                            + (b2 - '0') * 10_000
+                            + (b3 - '0') * 1_000
+                            + (b4 - '0') * 100
+                            + (b5 - '0') * 10
+                            + (b6 - '0');
+                }
+                break;
+            }
+            case 8: {
+                byte b0 = bytes[off];
+                byte b1 = bytes[off + 1];
+                byte b2 = bytes[off + 2];
+                byte b3 = bytes[off + 3];
+                byte b4 = bytes[off + 4];
+                byte b5 = bytes[off + 5];
+                byte b6 = bytes[off + 6];
+                byte b7 = bytes[off + 7];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                        && b4 >= '0' && b4 <= '9'
+                        && b5 >= '0' && b5 <= '9'
+                        && b6 >= '0' && b6 <= '9'
+                        && b7 >= '0' && b7 <= '9'
+                ) {
+                    return (long) (b0 - '0') * 10_000_000
+                            + (b1 - '0') * 1_000_000
+                            + (b2 - '0') * 100_000
+                            + (b3 - '0') * 10_000
+                            + (b4 - '0') * 1_000
+                            + (b5 - '0') * 100
+                            + (b6 - '0') * 10
+                            + (b7 - '0');
+                }
+                break;
+            }
+            default:
+                break;
+        }
+
+        String str = new String(bytes, off, len);
+        return Long.parseLong(str);
+    }
+
+    public static BigDecimal parseBigDecimal(byte[] bytes, int off, int len) {
+        if (len == 0) {
+            return null;
+        }
+
+        char[] chars = new char[len];
+        for (int i = 0; i < len; i++) {
+            chars[i] = (char) bytes[off + i];
+        }
+        return new BigDecimal(chars, 0, chars.length);
     }
 
     public static Integer toInteger(Object value) {

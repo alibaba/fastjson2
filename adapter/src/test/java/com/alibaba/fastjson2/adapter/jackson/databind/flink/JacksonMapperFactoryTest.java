@@ -17,7 +17,7 @@ public class JacksonMapperFactoryTest {
     public void test() throws Exception {
         final CsvMapper mapper = JacksonMapperFactory.createCsvMapper();
 
-        final String instantString = "2022-08-07T12:00:33.107787800Z";
+        final String instantString = "2022-08-07T12:00:33.1077878Z";
         final Instant instant = Instant.parse(instantString);
         final String instantCsv = String.format("%s\n", instantString);
 

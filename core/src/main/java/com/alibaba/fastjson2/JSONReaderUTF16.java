@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -3075,7 +3076,7 @@ class JSONReaderUTF16
                     throw new JSONException(info(), ex);
                 }
             } else {
-                doubleValue = FloatingDecimal.parseDouble(chars, start - 1, len);
+                doubleValue = TypeUtils.parseDouble(chars, start - 1, len);
             }
 
             if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
@@ -3318,7 +3319,7 @@ class JSONReaderUTF16
                     throw new JSONException(info(), ex);
                 }
             } else {
-                floatValue = FloatingDecimal.parseFloat(chars, start - 1, len);
+                floatValue = TypeUtils.parseFloat(chars, start - 1, len);
             }
 
             if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {

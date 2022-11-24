@@ -2489,7 +2489,7 @@ class JSONReaderUTF8
                     throw new JSONException(info(), ex);
                 }
             } else {
-                doubleValue = FloatingDecimal.parseDouble(bytes, start - 1, len);
+                doubleValue = TypeUtils.parseDouble(bytes, start - 1, len);
             }
 
             if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
@@ -2731,7 +2731,7 @@ class JSONReaderUTF8
                     throw new JSONException(info(), ex);
                 }
             } else {
-                floatValue = FloatingDecimal.parseFloat(bytes, start - 1, len);
+                floatValue = TypeUtils.parseFloat(bytes, start - 1, len);
             }
 
             if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {

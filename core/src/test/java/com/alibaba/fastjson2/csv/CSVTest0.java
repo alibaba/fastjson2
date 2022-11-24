@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.csv;
 
-import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -14,10 +13,10 @@ public class CSVTest0 {
         bean.id = 1001;
         bean.name = "DataWorks";
 
-        JSONWriter jsonWriter = JSONWriter.ofCSV();
-        jsonWriter.writeAny(bean);
+        CSVWriter writer = CSVWriter.of();
+        writer.writeRowObject(bean);
 
-        String csv = jsonWriter.toString();
+        String csv = writer.toString();
         assertEquals("1001,DataWorks\n", csv);
 
         CSVParser parser = CSVParser.of(csv, Bean.class);
@@ -32,10 +31,10 @@ public class CSVTest0 {
         bean.id = 1001;
         bean.name = "DataWorks";
 
-        JSONWriter jsonWriter = JSONWriter.ofCSV();
-        jsonWriter.writeAny(bean);
+        CSVWriter writer = CSVWriter.of();
+        writer.writeRowObject(bean);
 
-        String csv = jsonWriter.toString();
+        String csv = writer.toString();
         assertEquals("1001,DataWorks\n", csv);
 
         byte[] bytes = csv.getBytes(StandardCharsets.US_ASCII);
@@ -52,10 +51,10 @@ public class CSVTest0 {
         bean.id = 1001;
         bean.name = "DataWorks";
 
-        JSONWriter jsonWriter = JSONWriter.ofCSV();
-        jsonWriter.writeAny(bean);
+        CSVWriter writer = CSVWriter.of();
+        writer.writeRowObject(bean);
 
-        String csv = jsonWriter.toString();
+        String csv = writer.toString();
         assertEquals("1001,DataWorks\n", csv);
 
         char[] chars = csv.toCharArray();
@@ -82,12 +81,12 @@ public class CSVTest0 {
             beans[1] = bean;
         }
 
-        JSONWriter jsonWriter = JSONWriter.ofCSV();
+        CSVWriter writer = CSVWriter.of();
         for (Bean bean : beans) {
-            jsonWriter.writeAny(bean);
+            writer.writeRowObject(bean);
         }
 
-        String csv = jsonWriter.toString();
+        String csv = writer.toString();
         assertEquals("1001,DataWorks\n" +
                 "1002,MaxCompute\n", csv);
 

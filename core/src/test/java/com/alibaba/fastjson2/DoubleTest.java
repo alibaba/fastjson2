@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2_vo.Double1;
 import org.junit.jupiter.api.Test;
 
@@ -298,7 +299,7 @@ public class DoubleTest {
     public void parseDouble0() {
         String str = "12345.6789";
         char[] chars = str.toCharArray();
-        double d0 = FloatingDecimal.parseDouble(chars, 0, chars.length);
+        double d0 = TypeUtils.parseDouble(chars, 0, chars.length);
         assertEquals(Double.parseDouble(str), d0);
     }
 

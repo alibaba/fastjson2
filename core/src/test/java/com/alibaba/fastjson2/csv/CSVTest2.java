@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.ZipInputStream;
@@ -119,6 +122,203 @@ public class CSVTest2 {
             }
             rowCount++;
         }
+        assertEquals(496774, rowCount);
+    }
+
+    @Test
+    public void testReadLines1() throws IOException {
+        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv.zip");
+        if (resource == null) {
+            return;
+        }
+
+        File file = new File(resource.getFile());
+        FileInputStream fileIn = new FileInputStream(file);
+        ZipInputStream zipIn = new ZipInputStream(fileIn);
+        zipIn.getNextEntry();
+
+        InputStreamReader inputReader = new InputStreamReader(zipIn);
+
+        int rowCount = 0;
+        CSVParser parser = CSVParser.of(inputReader);
+        while (true) {
+            Object[] line = parser.readLineValues();
+            if (line == null) {
+                break;
+            }
+            Integer id = TypeUtils.toIntValue(line[0]);
+            if (rowCount < 41214) {
+                assertEquals(rowCount, id);
+            }
+            rowCount++;
+        }
+        assertEquals(496774, rowCount);
+    }
+
+    @Test
+    public void testReadLines2() throws IOException {
+        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv");
+        if (resource == null) {
+            return;
+        }
+
+        File file = new File(resource.getFile());
+        int rowCount = 0;
+        CSVParser parser = CSVParser.of(file);
+        while (true) {
+            Object[] line = parser.readLineValues();
+            if (line == null) {
+                break;
+            }
+            Integer id = TypeUtils.toIntValue(line[0]);
+            if (rowCount < 41214) {
+                assertEquals(rowCount, id);
+            }
+            rowCount++;
+        }
+        assertEquals(496774, rowCount);
+    }
+
+    @Test
+    public void readLineValues() throws IOException {
+        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv");
+        if (resource == null) {
+            return;
+        }
+
+        Type[] types = new Type[] {
+                Integer.class, Integer.class, Integer.class, String.class, String.class, String.class, BigDecimal.class
+        };
+
+        File file = new File(resource.getFile());
+        int rowCount = 0;
+        CSVParser parser = CSVParser.of(file, types);
+        while (true) {
+            Object[] line = parser.readLineValues();
+            if (line == null) {
+                break;
+            }
+            Integer id = (Integer) line[0];
+            if (rowCount < 41214) {
+                assertEquals(rowCount, id);
+            }
+            rowCount++;
+        }
+        assertEquals(496774, rowCount);
+    }
+
+    @Test
+    public void readLineValues1() throws IOException {
+        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv");
+        if (resource == null) {
+            return;
+        }
+
+        Type[] types = new Type[] {
+                Long.class, Integer.class, Integer.class, String.class, String.class, String.class, BigDecimal.class
+        };
+
+        File file = new File(resource.getFile());
+        int rowCount = 0;
+        CSVParser parser = CSVParser.of(file, types);
+        while (true) {
+            Object[] line = parser.readLineValues();
+            if (line == null) {
+                break;
+            }
+            Long id = (Long) line[0];
+            if (rowCount < 41214) {
+                assertEquals(rowCount, id);
+            }
+            rowCount++;
+        }
+        assertEquals(496774, rowCount);
+    }
+
+    @Test
+    public void readLineValues2() throws IOException {
+        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv");
+        if (resource == null) {
+            return;
+        }
+
+        Type[] types = new Type[] {
+                Long.class, Long.class, Long.class, String.class, String.class, String.class, Float.class
+        };
+
+        File file = new File(resource.getFile());
+        int rowCount = 0;
+        CSVParser parser = CSVParser.of(file, types);
+        while (true) {
+            Object[] line = parser.readLineValues();
+            if (line == null) {
+                break;
+            }
+            Long id = (Long) line[0];
+            if (rowCount < 41214) {
+                assertEquals(rowCount, id);
+            }
+            rowCount++;
+        }
+        assertEquals(496774, rowCount);
+    }
+
+    @Test
+    public void readLineValues3() throws IOException {
+        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv");
+        if (resource == null) {
+            return;
+        }
+
+        Type[] types = new Type[] {
+                Long.class, Long.class, Long.class, String.class, String.class, String.class, Double.class
+        };
+
+        File file = new File(resource.getFile());
+        int rowCount = 0;
+        CSVParser parser = CSVParser.of(file, types);
+        while (true) {
+            Object[] line = parser.readLineValues();
+            if (line == null) {
+                break;
+            }
+            Long id = (Long) line[0];
+            if (rowCount < 41214) {
+                assertEquals(rowCount, id);
+            }
+            rowCount++;
+        }
+        assertEquals(496774, rowCount);
+    }
+
+    @Test
+    public void readLineValues3ReadAndWrite() throws IOException {
+        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv");
+        if (resource == null) {
+            return;
+        }
+
+        Type[] types = new Type[] {
+                Long.class, Long.class, Long.class, String.class, String.class, String.class, Double.class
+        };
+
+        File file = new File(resource.getFile());
+        File tempFile = File.createTempFile("fastjson", "csv");
+
+        int rowCount = 0;
+        CSVParser parser = CSVParser.of(file, types);
+        CSVWriter writer = CSVWriter.of(tempFile);
+        while (true) {
+            Object[] line = parser.readLineValues();
+            if (line == null) {
+                break;
+            }
+
+            writer.writeRow(line);
+            rowCount++;
+        }
+        writer.close();
+
         assertEquals(496774, rowCount);
     }
 }

@@ -70,10 +70,6 @@ public abstract class JSONWriter
         return false;
     }
 
-    public boolean isCSV() {
-        return false;
-    }
-
     public boolean isIgnoreNoneSerializable() {
         return (context.features & Feature.IgnoreNoneSerializable.mask) != 0;
     }
@@ -466,20 +462,6 @@ public abstract class JSONWriter
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         return context.provider.getObjectWriter(objectType, objectClass, fieldBased);
-    }
-
-    public static JSONWriter ofCSV(JSONWriter.Feature... features) {
-        Context context = createWriteContext(features);
-        context.config(BeanToArray);
-        return ofCSV(context);
-    }
-
-    public static JSONWriter ofCSV(Context writeContext) {
-        if (writeContext == null) {
-            writeContext = JSONFactory.createWriteContext();
-        }
-
-        return new JSONWriterUTF16CSV(writeContext);
     }
 
     public static JSONWriter of() {

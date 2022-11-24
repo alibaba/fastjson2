@@ -2,6 +2,10 @@ package com.alibaba.fastjson2.csv;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -85,6 +89,67 @@ public class CSVParserTest {
             assertEquals("Venture \"Extended Edition\"", line[2]);
             assertEquals("", line[3]);
             assertEquals("4900.00", line[4]);
+        }
+    }
+
+    @Test
+    public void testFile() throws Exception {
+        Charset[] charsets = new Charset[] {
+                StandardCharsets.UTF_8,
+                StandardCharsets.ISO_8859_1,
+                StandardCharsets.US_ASCII,
+                StandardCharsets.UTF_16,
+                StandardCharsets.UTF_16LE,
+                StandardCharsets.UTF_16BE
+        };
+
+        for (Charset charset : charsets) {
+            File file = File.createTempFile("abc", "txt");
+            FileOutputStream out = new FileOutputStream(file);
+            out.write(str.getBytes(charset));
+            out.flush();
+            out.close();
+
+            CSVParser parser = CSVParser.of(file, charset);
+            List<String> columns = parser.readHeader();
+            assertEquals(5, columns.size());
+
+            for (int i = 0; ; ++i) {
+                String[] line = parser.readLine();
+                if (line == null) {
+                    break;
+                }
+                assertArrayEquals(lines[i], line);
+            }
+        }
+    }
+
+    @Test
+    public void testInputStreamFile() throws Exception {
+        Charset[] charsets = new Charset[] {
+                StandardCharsets.UTF_8,
+                StandardCharsets.ISO_8859_1,
+                StandardCharsets.US_ASCII,
+                StandardCharsets.UTF_16,
+                StandardCharsets.UTF_16LE,
+                StandardCharsets.UTF_16BE
+        };
+
+        for (Charset charset : charsets) {
+            byte[] bytes = str.getBytes(charset);
+            ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+
+            CSVParser parser = CSVParser.of(in, charset);
+            List<String> columns = parser.readHeader();
+            assertEquals(5, columns.size());
+
+            for (int i = 0; ; ++i) {
+                String[] line = parser.readLine();
+                if (line == null) {
+                    break;
+                }
+                assertArrayEquals(lines[i], line);
+            }
         }
     }
 

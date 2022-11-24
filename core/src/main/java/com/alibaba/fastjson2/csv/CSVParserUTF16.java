@@ -1,10 +1,6 @@
 package com.alibaba.fastjson2.csv;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.reader.FieldReader;
-import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -24,6 +20,11 @@ class CSVParserUTF16
         for (Feature feature : features) {
             this.features |= feature.mask;
         }
+    }
+
+    CSVParserUTF16(Reader input, Type[] types) {
+        super(types);
+        this.input = input;
     }
 
     CSVParserUTF16(
@@ -50,14 +51,14 @@ class CSVParserUTF16
         this.end = off + len;
     }
 
-    void seekLine() throws IOException {
+    boolean seekLine() throws IOException {
         if (buf == null) {
             if (input != null) {
                 buf = new char[SIZE_256K];
                 int cnt = input.read(buf);
                 if (cnt == -1) {
                     inputEnd = true;
-                    throw new IOException();
+                    return false;
                 }
                 this.end = cnt;
 
@@ -112,20 +113,22 @@ class CSVParserUTF16
                 }
 
                 if (ch == '\n') {
-                    if (lineSize > 0) {
+                    if (lineSize > 0 || (features & Feature.IgnoreEmptyLine.mask) == 0) {
                         rowCount++;
                     }
+                    lineTerminated = true;
                     lineSize = 0;
                     lineEnd = i;
                     lineStart = lineNextStart;
                     lineNextStart = off = i + 1;
 
-                    lineTerminated = true;
                     break;
                 } else if (ch == '\r') {
-                    if (lineSize > 0) {
+                    if (lineSize > 0 || (features & Feature.IgnoreEmptyLine.mask) == 0) {
                         rowCount++;
                     }
+
+                    lineTerminated = true;
                     lineSize = 0;
                     lineEnd = i;
 
@@ -140,7 +143,6 @@ class CSVParserUTF16
                     lineStart = lineNextStart;
                     lineNextStart = off = i + 1;
 
-                    lineTerminated = true;
                     break;
                 } else {
                     lineSize++;
@@ -149,15 +151,11 @@ class CSVParserUTF16
 
             if (!lineTerminated) {
                 if (input != null && !inputEnd) {
-                    int mark_off = off;
-                    int mark_lineStart = lineStart;
-                    int mark_lineNextStart = lineNextStart;
-                    int mark_end = end;
-                    boolean mark_quote = quote;
-
                     int len = end - off;
                     if (off > 0) {
-                        System.arraycopy(buf, off, buf, 0, len);
+                        if (len > 0) {
+                            System.arraycopy(buf, off, buf, 0, len);
+                        }
                         lineStart = lineNextStart = 0;
                         off = 0;
                         end = len;
@@ -167,6 +165,9 @@ class CSVParserUTF16
                     int cnt = input.read(buf, end, buf.length - end);
                     if (cnt == -1) {
                         inputEnd = true;
+                        if (off == end) {
+                            return false;
+                        }
                     } else {
                         end += cnt;
                         continue;
@@ -180,107 +181,35 @@ class CSVParserUTF16
                 off = end;
             }
 
+            lineTerminated = off == end;
             break;
         }
+
+        return true;
     }
 
-    public List<String> readHeader() {
-        columns = new ArrayList<>();
-
-        try {
-            seekLine();
-        } catch (IOException e) {
-            throw new JSONException("seekLine error", e);
-        }
-
-        boolean quote = false;
-        int valueStart = lineStart;
-        int valueSize = 0;
-        int escapeCount = 0;
-        for (int i = lineStart; i < lineEnd; ++i) {
-            char ch = buf[i];
-
-            if (quote) {
-                if (ch == '"') {
-                    int n = i + 1;
-                    if (n < lineEnd && buf[n] == '"') {
-                        valueSize += 2;
-                        escapeCount++;
-                        ++i;
-                        continue;
-                    }
-                }
-            }
-
-            if (ch == '"') {
-                quote = true;
-                continue;
-            }
-
-            if (ch == ',') {
-                String column;
-                if (quote) {
-                    if (escapeCount == 0) {
-                        column = new String(buf, valueStart + 1, valueSize);
-                    } else {
-                        throw new JSONException("TODO");
-                    }
-                } else {
-                    column = new String(buf, valueStart, valueSize);
-                }
-
-                columns.add(column);
-                quote = false;
-                valueStart = i + 1;
-                valueSize = 0;
-                escapeCount = 0;
-                continue;
-            }
-
-            valueSize++;
-        }
-
-        if (valueSize > 0) {
-            String column;
-            if (quote) {
-                if (escapeCount == 0) {
-                    column = new String(buf, valueStart + 1, valueSize);
-                } else {
-                    throw new JSONException("TODO");
-                }
-            } else {
-                column = new String(buf, valueStart, valueSize);
-            }
-            columns.add(column);
-        }
-
-        if (objectReader != null) {
-            JSONReader.Context context = JSONFactory.createReadContext(provider);
-            Type[] types = new Type[columns.size()];
-            ObjectReader[] typeReaders = new ObjectReader[columns.size()];
-            for (int i = 0; i < columns.size(); i++) {
-                String column = columns.get(i);
-                FieldReader fieldReader = objectReader.getFieldReader(column);
-                types[i] = fieldReader.fieldType;
-                typeReaders[i] = fieldReader.getObjectReader(context);
-            }
-            this.types = types;
-            this.typeReaders = typeReaders;
-        }
-        return columns;
-    }
-
-    Object readValue(char[] buf, int valueStart, int valueSize, Type type) {
-        String str = new String(buf, valueStart, valueSize);
+    Object readValue(char[] chars, int off, int len, Type type) {
+        String str = new String(chars, off, len);
         return TypeUtils.cast(str, type);
     }
 
     public Object[] readLineValues(boolean strings) {
         try {
-            if (off >= end) {
+            if (inputEnd) {
                 return null;
             }
-            seekLine();
+
+            if (input == null) {
+                if (off >= end) {
+                    return null;
+                }
+            }
+
+            boolean result = seekLine();
+
+            if (!result) {
+                return null;
+            }
         } catch (IOException e) {
             throw new JSONException("seekLine error", e);
         }

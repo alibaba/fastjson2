@@ -1,10 +1,6 @@
 package com.alibaba.fastjson2.csv;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.reader.FieldReader;
-import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -12,6 +8,9 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +19,7 @@ class CSVParserUTF8
         extends CSVParser {
     byte[] buf;
     InputStream input;
+    Charset charset = StandardCharsets.UTF_8;
 
     CSVParserUTF8(Feature... features) {
         for (Feature feature : features) {
@@ -42,8 +42,9 @@ class CSVParserUTF8
         this.types = types;
     }
 
-    CSVParserUTF8(InputStream input, Type[] types) {
+    CSVParserUTF8(InputStream input, Charset charset, Type[] types) {
         super(types);
+        this.charset = charset;
         this.input = input;
     }
 
@@ -52,14 +53,14 @@ class CSVParserUTF8
         this.schema = schema;
     }
 
-    void seekLine() throws IOException {
+    boolean seekLine() throws IOException {
         if (buf == null) {
             if (input != null) {
                 buf = new byte[SIZE_256K];
                 int cnt = input.read(buf);
                 if (cnt == -1) {
                     inputEnd = true;
-                    throw new IOException();
+                    return false;
                 }
                 this.end = cnt;
 
@@ -114,20 +115,22 @@ class CSVParserUTF8
                 }
 
                 if (ch == '\n') {
-                    if (lineSize > 0) {
+                    if (lineSize > 0 || (features & Feature.IgnoreEmptyLine.mask) == 0) {
                         rowCount++;
                     }
+                    lineTerminated = true;
                     lineSize = 0;
                     lineEnd = i;
                     lineStart = lineNextStart;
                     lineNextStart = off = i + 1;
 
-                    lineTerminated = true;
                     break;
                 } else if (ch == '\r') {
-                    if (lineSize > 0) {
+                    if (lineSize > 0 || (features & Feature.IgnoreEmptyLine.mask) == 0) {
                         rowCount++;
                     }
+
+                    lineTerminated = true;
                     lineSize = 0;
                     lineEnd = i;
 
@@ -142,7 +145,6 @@ class CSVParserUTF8
                     lineStart = lineNextStart;
                     lineNextStart = off = i + 1;
 
-                    lineTerminated = true;
                     break;
                 } else {
                     lineSize++;
@@ -151,15 +153,11 @@ class CSVParserUTF8
 
             if (!lineTerminated) {
                 if (input != null && !inputEnd) {
-//                    int mark_off = off;
-//                    int mark_lineStart = lineStart;
-//                    int mark_lineNextStart = lineNextStart;
-//                    int mark_end = end;
-//                    boolean mark_quote = quote;
-
                     int len = end - off;
                     if (off > 0) {
-                        System.arraycopy(buf, off, buf, 0, len);
+                        if (len > 0) {
+                            System.arraycopy(buf, off, buf, 0, len);
+                        }
                         lineStart = lineNextStart = 0;
                         off = 0;
                         end = len;
@@ -169,6 +167,9 @@ class CSVParserUTF8
                     int cnt = input.read(buf, end, buf.length - end);
                     if (cnt == -1) {
                         inputEnd = true;
+                        if (off == end) {
+                            return false;
+                        }
                     } else {
                         end += cnt;
                         continue;
@@ -182,98 +183,41 @@ class CSVParserUTF8
                 off = end;
             }
 
+            lineTerminated = off == end;
             break;
         }
+
+        return true;
     }
 
-    public List<String> readHeader() {
-        columns = new ArrayList<>();
-
-        try {
-            seekLine();
-        } catch (IOException e) {
-            throw new JSONException("seekLine error", e);
+    Object readValue(byte[] bytes, int off, int len, Type type) {
+        if (type == Integer.class) {
+            return TypeUtils.parseInt(bytes, off, len);
         }
 
-        boolean quote = false;
-        int valueStart = lineStart;
-        int valueSize = 0;
-        int escapeCount = 0;
-        for (int i = lineStart; i < lineEnd; ++i) {
-            byte ch = buf[i];
-
-            if (quote) {
-                if (ch == '"') {
-                    int n = i + 1;
-                    if (n < lineEnd && buf[n] == '"') {
-                        valueSize += 2;
-                        escapeCount++;
-                        ++i;
-                        continue;
-                    }
-                }
-            }
-
-            if (ch == '"') {
-                quote = true;
-                continue;
-            }
-
-            if (ch == ',') {
-                String column;
-                if (quote) {
-                    if (escapeCount == 0) {
-                        column = new String(buf, valueStart + 1, valueSize);
-                    } else {
-                        throw new JSONException("TODO");
-                    }
-                } else {
-                    column = new String(buf, valueStart, valueSize);
-                }
-
-                columns.add(column);
-                quote = false;
-                valueStart = i + 1;
-                valueSize = 0;
-                escapeCount = 0;
-                continue;
-            }
-
-            valueSize++;
+        if (type == Long.class) {
+            return TypeUtils.parseLong(bytes, off, len);
         }
 
-        if (valueSize > 0) {
-            String column;
-            if (quote) {
-                if (escapeCount == 0) {
-                    column = new String(buf, valueStart + 1, valueSize);
-                } else {
-                    throw new JSONException("TODO");
-                }
-            } else {
-                column = new String(buf, valueStart, valueSize);
-            }
-            columns.add(column);
+        if (type == BigDecimal.class) {
+            return TypeUtils.parseBigDecimal(bytes, off, len);
         }
 
-        if (objectReader != null) {
-            JSONReader.Context context = JSONFactory.createReadContext(provider);
-            Type[] types = new Type[columns.size()];
-            ObjectReader[] typeReaders = new ObjectReader[columns.size()];
-            for (int i = 0; i < columns.size(); i++) {
-                String column = columns.get(i);
-                FieldReader fieldReader = objectReader.getFieldReader(column);
-                types[i] = fieldReader.fieldType;
-                typeReaders[i] = fieldReader.getObjectReader(context);
+        if (type == Float.class) {
+            if (len == 0) {
+                return null;
             }
-            this.types = types;
-            this.typeReaders = typeReaders;
+            return TypeUtils.parseFloat(bytes, off, len);
         }
-        return columns;
-    }
 
-    Object readValue(byte[] buf, int valueStart, int valueSize, Type type) {
-        String str = new String(buf, valueStart, valueSize);
+        if (type == Double.class) {
+            if (len == 0) {
+                return null;
+            }
+            return TypeUtils.parseDouble(bytes, off, len);
+        }
+
+        String str = new String(bytes, off, len, charset);
         return TypeUtils.cast(str, type);
     }
 
@@ -289,7 +233,11 @@ class CSVParserUTF8
                 }
             }
 
-            seekLine();
+            boolean result = seekLine();
+
+            if (!result) {
+                return null;
+            }
         } catch (IOException e) {
             throw new JSONException("seekLine error", e);
         }
@@ -347,7 +295,7 @@ class CSVParserUTF8
                 if (quote) {
                     if (escapeCount == 0) {
                         if (type == null || type == String.class || type == Object.class) {
-                            value = new String(buf, valueStart + 1, valueSize);
+                            value = new String(buf, valueStart + 1, valueSize, charset);
                         } else {
                             value = readValue(buf, valueStart + 1, valueSize, type);
                         }
@@ -363,14 +311,14 @@ class CSVParserUTF8
                         }
 
                         if (type == null || type == String.class || type == Object.class) {
-                            value = new String(bytes);
+                            value = new String(bytes, 0, bytes.length, charset);
                         } else {
                             value = readValue(bytes, 0, bytes.length, type);
                         }
                     }
                 } else {
                     if (type == null || type == String.class || type == Object.class) {
-                        value = new String(buf, valueStart, valueSize);
+                        value = new String(buf, valueStart, valueSize, charset);
                     } else {
                         value = readValue(buf, valueStart, valueSize, type);
                     }
@@ -405,7 +353,7 @@ class CSVParserUTF8
             if (quote) {
                 if (escapeCount == 0) {
                     if (type == null || type == String.class || type == Object.class) {
-                        value = new String(buf, valueStart + 1, valueSize);
+                        value = new String(buf, valueStart + 1, valueSize, charset);
                     } else {
                         value = readValue(buf, valueStart + 1, valueSize, type);
                     }
@@ -421,14 +369,14 @@ class CSVParserUTF8
                     }
 
                     if (type == null || type == String.class || type == Object.class) {
-                        value = new String(bytes);
+                        value = new String(bytes, 0, bytes.length, charset);
                     } else {
                         value = readValue(bytes, 0, bytes.length, type);
                     }
                 }
             } else {
                 if (type == null || type == String.class || type == Object.class) {
-                    value = new String(buf, valueStart, valueSize);
+                    value = new String(buf, valueStart, valueSize, charset);
                 } else {
                     value = readValue(buf, valueStart, valueSize, type);
                 }

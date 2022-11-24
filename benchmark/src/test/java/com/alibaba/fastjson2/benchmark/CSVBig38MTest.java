@@ -14,7 +14,7 @@ public class CSVBig38MTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("CSVBig38M-rowCount millis : " + millis);
-            // zulu8.62.0.19 : 419 393
+            // zulu8.62.0.19 : 336
         }
     }
 
@@ -26,11 +26,23 @@ public class CSVBig38MTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("CSVBig38M-readLines millis : " + millis);
-            // zulu8.62.0.19 :
+            // zulu8.62.0.19 : 2218
+        }
+    }
+
+    public static void readLineValues() throws Exception {
+        for (int j = 0; j < COUNT; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 10; ++i) {
+                benchmark.readLineValues(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("CSVBig38M-readLines millis : " + millis);
+            // zulu8.62.0.19 : 2267
         }
     }
 
     public static void main(String[] args) throws Exception {
-        readLines();
+        readLineValues();
     }
 }

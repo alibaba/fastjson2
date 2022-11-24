@@ -46,6 +46,7 @@ public final class JSONFactory {
     static final class NameCacheEntry {
         final String name;
         final long value;
+
         public NameCacheEntry(String name, long value) {
             this.name = name;
             this.value = value;
@@ -56,6 +57,7 @@ public final class JSONFactory {
         final String name;
         final long value0;
         final long value1;
+
         public NameCacheEntry2(String name, long value0, long value1) {
             this.name = name;
             this.value0 = value0;
@@ -69,24 +71,24 @@ public final class JSONFactory {
     static final BigInteger HIGH_BIGINT = BigInteger.valueOf(9007199254740991L);
 
     static final char[] CA = new char[]{
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-        'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-        'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-        'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-        'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-        'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-        'w', 'x', 'y', 'z', '0', '1', '2', '3',
-        '4', '5', '6', '7', '8', '9', '+', '/'
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+            'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+            'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+            'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+            'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+            'w', 'x', 'y', 'z', '0', '1', '2', '3',
+            '4', '5', '6', '7', '8', '9', '+', '/'
     };
 
     static final int[] DIGITS2 = new int[]{
-        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-        +0, +1, +2, +3, +4, +5, +6, +7, +8, +9, +0, +0, +0, +0, +0, +0,
-        +0, 10, 11, 12, 13, 14, 15, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-        +0, 10, 11, 12, 13, 14, 15
+            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, +1, +2, +3, +4, +5, +6, +7, +8, +9, +0, +0, +0, +0, +0, +0,
+            +0, 10, 11, 12, 13, 14, 15, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, 10, 11, 12, 13, 14, 15
     };
 
     static final long INFLATED = Long.MIN_VALUE;
@@ -223,7 +225,7 @@ public final class JSONFactory {
         }
     }
 
-    public static byte[] allocateByteArray(int cacheIndex) {
+    static byte[] allocateByteArray(int cacheIndex) {
         byte[] bytes;
         synchronized (BYTE_ARRAY_CACHE) {
             bytes = BYTE_ARRAY_CACHE[cacheIndex];
@@ -353,6 +355,7 @@ public final class JSONFactory {
     static ObjectReaderProvider defaultObjectReaderProvider = new ObjectReaderProvider();
 
     static final JSONPathCompiler defaultJSONPathCompiler;
+
     static {
         JSONPathCompilerReflect compiler = null;
         switch (JSONFactory.CREATOR) {
@@ -384,7 +387,6 @@ public final class JSONFactory {
     static final ObjectReader<JSONObject> OBJECT_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONObject.class);
 
     /**
-     *
      * @param objectSupplier
      * @since 2.0.15
      */
@@ -393,7 +395,6 @@ public final class JSONFactory {
     }
 
     /**
-     *
      * @param arraySupplier
      * @since 2.0.15
      */
