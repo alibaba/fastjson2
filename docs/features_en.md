@@ -91,4 +91,4 @@ class Model {
 | WriteNonStringKeyAsString         |                                                                                                                                                                                                                         |
 | ErrorOnNoneSerializable           |                                                                                                                                                                                                                         |
 | WritePairAsJavaBean               |                                                                                                                                                                                                                         |
-
+| LargeObject                       | This is a protection measure to prevent serialization of circular reference objects from consuming excessive resources.                                                                                                 |
