@@ -6,9 +6,12 @@ import java.lang.reflect.Type;
 import java.time.ZoneId;
 import java.util.Arrays;
 
-public class JSONPathTypedMultiNamesPrefixSingleName
+public class JSONPathTypedMultiNamesPrefixName1
         extends JSONPathTypedMultiNames {
-    JSONPathTypedMultiNamesPrefixSingleName(
+    final JSONPathSingleName prefixName;
+    final long prefixNameHash;
+
+    JSONPathTypedMultiNamesPrefixName1(
             JSONPath[] paths,
             JSONPath prefix,
             JSONPath[] namePaths,
@@ -18,21 +21,29 @@ public class JSONPathTypedMultiNamesPrefixSingleName
             ZoneId zoneId,
             long features) {
         super(paths, prefix, namePaths, types, formats, pathFeatures, zoneId, features);
+        prefixName = (JSONPathSingleName) prefix;
+        prefixNameHash = prefixName.nameHashCode;
     }
 
     @Override
     public Object extract(JSONReader jsonReader) {
         if (jsonReader.nextIfNull()) {
-            return null;
+            return new Object[paths.length];
         }
 
-        JSONPathSingleName prefixName = (JSONPathSingleName) prefix;
-        long prefixNameHash = prefixName.nameHashCode;
         if (!jsonReader.nextIfObjectStart()) {
             throw new JSONException(jsonReader.info("illegal input, expect '[', but " + jsonReader.current()));
         }
 
-        while (!jsonReader.nextIfObjectEnd()) {
+        while (true) {
+            if (jsonReader.nextIfObjectEnd()) {
+                return new Object[paths.length];
+            }
+
+            if (jsonReader.isEnd()) {
+                throw new JSONException(jsonReader.info("illegal input, expect '[', but " + jsonReader.current()));
+            }
+
             long nameHashCode = jsonReader.readFieldNameHashCode();
             boolean match = nameHashCode == prefixNameHash;
             if (!match) {
@@ -44,7 +55,7 @@ public class JSONPathTypedMultiNamesPrefixSingleName
         }
 
         if (jsonReader.nextIfNull()) {
-            return null;
+            return new Object[paths.length];
         }
 
         if (!jsonReader.nextIfObjectStart()) {

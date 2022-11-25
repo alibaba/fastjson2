@@ -554,7 +554,16 @@ public abstract class JSONPath {
         long featuresValue = JSONReader.Feature.of(features);
 
         if (allSingleName) {
-            return new JSONPathTypedMultiNames(jsonPaths, null, jsonPaths, types, formats, pathFeatures, zoneId, featuresValue);
+            return new JSONPathTypedMultiNames(
+                    jsonPaths,
+                    null,
+                    jsonPaths,
+                    types,
+                    formats,
+                    pathFeatures,
+                    zoneId,
+                    featuresValue
+            );
         }
 
         if (allSinglePositiveIndex) {
@@ -584,20 +593,34 @@ public abstract class JSONPath {
                     }
 
                     String prefixPath = firstPath.path.substring(0, firstPath.path.length() - names[0].name.length() - 1);
-                    JSONPath prefix = null;
                     if (first0 instanceof JSONPathSegmentName) {
                         JSONPathSegmentName name = (JSONPathSegmentName) first0;
-                        prefix = new JSONPathSingleName(prefixPath, name);
+                        JSONPath prefix = new JSONPathSingleName(prefixPath, name);
+
+                        return new JSONPathTypedMultiNamesPrefixName1(
+                                jsonPaths,
+                                prefix,
+                                names,
+                                types,
+                                formats,
+                                pathFeatures,
+                                zoneId,
+                                featuresValue
+                        );
                     } else if (first0 instanceof JSONPathSegmentIndex) {
                         JSONPathSegmentIndex first0Index = ((JSONPathSegmentIndex) first0);
-                        prefix = new JSONPathSingleIndex(prefixPath, first0Index);
-                    }
-
-                    if (prefix != null) {
-                        if (prefix instanceof JSONPathSingleName) {
-                            return new JSONPathTypedMultiNamesPrefixSingleName(jsonPaths, prefix, names, types, formats, pathFeatures, zoneId, featuresValue);
-                        } else {
-                            return new JSONPathTypedMultiNames(jsonPaths, prefix, names, types, formats, pathFeatures, zoneId, featuresValue);
+                        if (first0Index.index >= 0) {
+                            JSONPathSingleIndex prefix = new JSONPathSingleIndex(prefixPath, first0Index);
+                            return new JSONPathTypedMultiNamesPrefixIndex1(
+                                    jsonPaths,
+                                    prefix,
+                                    names,
+                                    types,
+                                    formats,
+                                    pathFeatures,
+                                    zoneId,
+                                    featuresValue
+                            );
                         }
                     }
                 } else if (allTwoIndexPositive) {
@@ -618,13 +641,20 @@ public abstract class JSONPath {
                     }
 
                     if (prefix != null) {
-                        return new JSONPathTypedMultiIndexes(jsonPaths, prefix, indexes, types, formats, pathFeatures, zoneId, featuresValue);
+                        return new JSONPathTypedMultiIndexes(
+                                jsonPaths,
+                                prefix,
+                                indexes,
+                                types,
+                                formats,
+                                pathFeatures,
+                                zoneId,
+                                featuresValue
+                        );
                     }
                 }
             }
-        }
-
-        if (allThreeName) {
+        } else if (allThreeName) {
             boolean samePrefix = true;
             JSONPathSegment first0 = ((JSONPathMulti) jsonPaths[0]).segments.get(0);
             JSONPathSegment first1 = ((JSONPathMulti) jsonPaths[0]).segments.get(1);
@@ -650,10 +680,31 @@ public abstract class JSONPath {
 
                 JSONPath firstPath = jsonPaths[0];
                 String prefixPath = firstPath.path.substring(0, firstPath.path.length() - names[0].name.length() - 1);
-                JSONPath prefix = new JSONPathTwoSegment(prefixPath, first0, first1);
-                if (prefix != null) {
-                    return new JSONPathTypedMultiNames(jsonPaths, prefix, names, types, formats, pathFeatures, zoneId, featuresValue);
+                JSONPathTwoSegment prefix = new JSONPathTwoSegment(prefixPath, first0, first1);
+
+                if (first0 instanceof JSONPathSegmentName && first1 instanceof JSONPathSegmentName) {
+                    return new JSONPathTypedMultiNamesPrefixName2(
+                            jsonPaths,
+                            prefix,
+                            names,
+                            types,
+                            formats,
+                            pathFeatures,
+                            zoneId,
+                            featuresValue
+                    );
                 }
+
+                return new JSONPathTypedMultiNames(
+                        jsonPaths,
+                        prefix,
+                        names,
+                        types,
+                        formats,
+                        pathFeatures,
+                        zoneId,
+                        featuresValue
+                );
             }
         }
 
