@@ -266,7 +266,7 @@ public class ParserTest {
 //        js.wr
     }
 
-    final String str = "{\"images\":\n" +
+    static final String str = "{\"images\":\n" +
             "\t[\n" +
             "\t\t{\n" +
             "\t\t\t\"height\":768,\n" +

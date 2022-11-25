@@ -594,7 +594,11 @@ public abstract class JSONPath {
                     }
 
                     if (prefix != null) {
-                        return new JSONPathTypedMultiNames(jsonPaths, prefix, names, types, formats, pathFeatures, zoneId, featuresValue);
+                        if (prefix instanceof JSONPathSingleName) {
+                            return new JSONPathTypedMultiNamesPrefixSingleName(jsonPaths, prefix, names, types, formats, pathFeatures, zoneId, featuresValue);
+                        } else {
+                            return new JSONPathTypedMultiNames(jsonPaths, prefix, names, types, formats, pathFeatures, zoneId, featuresValue);
+                        }
                     }
                 } else if (allTwoIndexPositive) {
                     JSONPathSingleIndex[] indexes = new JSONPathSingleIndex[jsonPaths.length];
