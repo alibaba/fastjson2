@@ -51,54 +51,15 @@ public class JdbcSupport {
     }
 
     public static boolean isClob(Class objectClass) {
-        if (CLASS_CLOB != null) {
-            return CLASS_CLOB.isAssignableFrom(objectClass);
-        }
-
-        Class[] interfaces = objectClass.getInterfaces();
-        for (Class i : interfaces) {
-            if (i.getName().equals("java.sql.Clob")) {
-                if (CLASS_CLOB == null) {
-                    CLASS_CLOB = i;
-                }
-                return true;
+        if (CLASS_CLOB == null && !CLASS_CLOB_ERROR) {
+            try {
+                CLASS_CLOB = Class.forName("java.sql.Clob");
+            } catch (Throwable e) {
+                CLASS_CLOB_ERROR = true;
             }
         }
 
-        String objectClassName = objectClass.getName();
-        switch (objectClassName) {
-            case "java.sql.Clob":
-                if (CLASS_CLOB == null) {
-                    CLASS_CLOB = objectClass;
-                }
-                return true;
-            case "java.sql.NClob":
-            case "oracle.sql.CLOB":
-            case "com.alibaba.druid.proxy.jdbc.ClobProxyImpl":
-            case "com.alibaba.druid.proxy.jdbc.NClobProxyImpl":
-                return true;
-            default:
-                if (objectClassName.startsWith("oracle.sql.")
-                        || objectClassName.startsWith("oracle.jdbc.")
-                        || objectClassName.startsWith("org.h2.jdbc.")
-                        || objectClassName.startsWith("com.mysql.cj.jdbc.")
-                        || objectClassName.startsWith("org.mariadb.jdbc.")
-                        || objectClassName.startsWith("org.postgresql.jdbc.")
-                ) {
-                    if (CLASS_CLOB == null && !CLASS_CLOB_ERROR) {
-                        try {
-                            CLASS_CLOB = Class.forName("java.sql.Clob");
-                        } catch (Throwable ignored) {
-                            CLASS_CLOB_ERROR = true;
-                        }
-                    }
-                }
-
-                if (CLASS_CLOB != null) {
-                    return CLASS_CLOB.isAssignableFrom(objectClass);
-                }
-                return false;
-        }
+        return CLASS_CLOB != null && CLASS_CLOB.isAssignableFrom(objectClass);
     }
 
     static class ClobWriter
