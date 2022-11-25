@@ -89,3 +89,4 @@ class Model {
 | WriteNonStringKeyAsString         | 将Map中的非String类型的Key当做String类型输出                                                         |
 | ErrorOnNoneSerializable           | 序列化非Serializable对象时报错                                                                   |
 | WritePairAsJavaBean               | 将 Apache Common 包中的Pair对象当做JavaBean序列化                                                  |
+| LargeObject                       | 这个是一个保护措施，是为了防止序列化有循环引用对象消耗过大资源的保护措施。                                 |
