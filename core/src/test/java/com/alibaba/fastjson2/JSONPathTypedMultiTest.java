@@ -56,8 +56,6 @@ public class JSONPathTypedMultiTest {
         String jsonStr = array.toString();
         Object[] result = (Object[]) jsonPath.extract(jsonStr);
         assertArrayEquals(expected, result);
-        assertNull(jsonPath.extract("null"));
-        assertNull(jsonPath.extract("[null]"));
     }
 
     @Test
@@ -78,8 +76,6 @@ public class JSONPathTypedMultiTest {
         String jsonStr = array.toString();
         Object[] result = (Object[]) jsonPath.extract(jsonStr);
         assertArrayEquals(expected, result);
-        assertNull(jsonPath.extract("null"));
-        assertNull(jsonPath.extract("[1,null]"));
     }
 
     @Test
