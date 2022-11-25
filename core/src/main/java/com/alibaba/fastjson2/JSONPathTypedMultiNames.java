@@ -9,15 +9,18 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-final class JSONPathTypedMultiNames
+class JSONPathTypedMultiNames
         extends JSONPathTypedMulti {
     final JSONPath prefix;
     final JSONPath[] namePaths;
     final String[] names;
-    final long[] nameHashCodes;
+    final long[] hashCodes;
+    final short[] mapping;
+    final FieldReader[] fieldReaders;
     final ObjectReader objectReader;
     final ObjectReader prefixObjectReader;
 
@@ -35,14 +38,14 @@ final class JSONPathTypedMultiNames
         this.prefix = prefix;
         this.namePaths = namePaths;
         this.names = new String[paths.length];
-        this.nameHashCodes = new long[paths.length];
 
-        FieldReader[] fieldReaders = new FieldReader[paths.length];
+        long[] hashCodes = new long[paths.length];
+        fieldReaders = new FieldReader[paths.length];
         for (int i = 0; i < paths.length; i++) {
             JSONPathSingleName jsonPathSingleName = (JSONPathSingleName) namePaths[i];
             String fieldName = jsonPathSingleName.name;
             names[i] = fieldName;
-            nameHashCodes[i] = jsonPathSingleName.nameHashCode;
+            hashCodes[i] = jsonPathSingleName.nameHashCode;
             String format = formats != null ? formats[i] : null;
 
             Type fieldType = types[i];
@@ -68,6 +71,16 @@ final class JSONPathTypedMultiNames
                     function,
                     null
             );
+        }
+
+        this.hashCodes = Arrays.copyOf(hashCodes, hashCodes.length);
+        Arrays.sort(this.hashCodes);
+
+        mapping = new short[this.hashCodes.length];
+        for (int i = 0; i < hashCodes.length; i++) {
+            long hashCode = hashCodes[i];
+            int index = Arrays.binarySearch(this.hashCodes, hashCode);
+            mapping[index] = (short) i;
         }
 
         objectReader = ObjectReaderCreator.INSTANCE.createObjectReader(
@@ -167,6 +180,16 @@ final class JSONPathTypedMultiNames
             }
         }
         this.prefixObjectReader = prefixObjectReader;
+    }
+
+    public FieldReader getFieldReader(long hashCode) {
+        int m = Arrays.binarySearch(hashCodes, hashCode);
+        if (m < 0) {
+            return null;
+        }
+
+        int index = this.mapping[m];
+        return fieldReaders[index];
     }
 
     static class FieldValueCallback
@@ -279,29 +302,6 @@ final class JSONPathTypedMultiNames
 
                 return objectReader.readObject(jsonReader, null, null, features);
             }
-        } else if (prefix instanceof JSONPathSingleName) {
-            JSONPathSingleName prefixName = (JSONPathSingleName) prefix;
-            long prefixNameHash = prefixName.nameHashCode;
-            if (!jsonReader.nextIfObjectStart()) {
-                throw new JSONException(jsonReader.info("illegal input, expect '[', but " + jsonReader.current()));
-            }
-
-            while (!jsonReader.nextIfObjectEnd()) {
-                long nameHashCode = jsonReader.readFieldNameHashCode();
-                boolean match = nameHashCode == prefixNameHash;
-                if (!match && (!jsonReader.isObject()) && !jsonReader.isArray()) {
-                    jsonReader.skipValue();
-                    continue;
-                }
-
-                break;
-            }
-
-            if (jsonReader.nextIfNull()) {
-                return null;
-            }
-
-            return objectReader.readObject(jsonReader, null, null, features);
         } else {
             if (prefixObjectReader != null) {
                 ObjectHolder holder = (ObjectHolder) prefixObjectReader.readObject(jsonReader, null, null, features);
