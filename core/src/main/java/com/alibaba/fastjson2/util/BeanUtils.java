@@ -237,9 +237,16 @@ public abstract class BeanUtils {
     }
 
     public static void declaredFields(Class objectClass, Consumer<Field> fieldConsumer) {
-        Class superclass = objectClass.getSuperclass();
-        if (superclass != null && superclass != Object.class) {
-            declaredFields(superclass, fieldConsumer);
+        Class superClass = objectClass.getSuperclass();
+
+        boolean protobufMessageV3 = false;
+        if (superClass != null
+                && superClass != Object.class
+        ) {
+            protobufMessageV3 = superClass.getName().equals("com.google.protobuf.GeneratedMessageV3");
+            if (!protobufMessageV3) {
+                declaredFields(superClass, fieldConsumer);
+            }
         }
 
         Field[] fields = declaredFieldCache.get(objectClass);
@@ -276,6 +283,15 @@ public abstract class BeanUtils {
             int modifiers = field.getModifiers();
             if (Modifier.isStatic(modifiers)) {
                 continue;
+            }
+
+            if (protobufMessageV3) {
+                String fieldName = field.getName();
+                Class<?> fieldClass = field.getType();
+                if ("cardsmap_".equals(fieldName)
+                        && fieldClass.getName().equals("com.google.protobuf.MapField")) {
+                    return;
+                }
             }
 
             fieldConsumer.accept(field);
