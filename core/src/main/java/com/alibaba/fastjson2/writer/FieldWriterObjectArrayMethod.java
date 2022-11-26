@@ -98,6 +98,7 @@ final class FieldWriterObjectArrayMethod<T>
         }
 
         boolean refDetect = jsonWriter.isRefDetect();
+        boolean previousItemRefDetect = refDetect;
 
         if (refDetect) {
             String path = jsonWriter.setPath(fieldName, array);
@@ -123,7 +124,7 @@ final class FieldWriterObjectArrayMethod<T>
                     continue;
                 }
 
-                boolean itemRefDetect = refDetect;
+                boolean itemRefDetect;
                 Class<?> itemClass = item.getClass();
                 ObjectWriter itemObjectWriter;
                 if (itemClass != previousClass) {
@@ -133,6 +134,9 @@ final class FieldWriterObjectArrayMethod<T>
                     if (itemRefDetect) {
                         itemRefDetect = !ObjectWriterProvider.isNotReferenceDetect(itemClass);
                     }
+                    previousItemRefDetect = itemRefDetect;
+                } else {
+                    itemRefDetect = previousItemRefDetect;
                 }
                 itemObjectWriter = previousObjectWriter;
 
