@@ -94,6 +94,7 @@ final class FieldWriterObjectArrayField<T>
 
         long features = jsonWriter.getFeatures();
         boolean refDetect = (features & JSONWriter.Feature.ReferenceDetection.mask) != 0;
+        boolean previousItemRefDetect = refDetect;
 
         if (writeFieldName) {
             if (array.length == 0 && (features & JSONWriter.Feature.NotWriteEmptyArray.mask) != 0) {
@@ -127,7 +128,7 @@ final class FieldWriterObjectArrayField<T>
                     continue;
                 }
 
-                boolean itemRefDetect = refDetect;
+                boolean itemRefDetect;
                 Class<?> itemClass = item.getClass();
                 ObjectWriter itemObjectWriter;
                 if (itemClass != previousClass) {
@@ -137,7 +138,11 @@ final class FieldWriterObjectArrayField<T>
                     if (itemRefDetect) {
                         itemRefDetect = !ObjectWriterProvider.isNotReferenceDetect(itemClass);
                     }
+                    previousItemRefDetect = itemRefDetect;
+                } else {
+                    itemRefDetect = previousItemRefDetect;
                 }
+
                 itemObjectWriter = previousObjectWriter;
 
                 if (itemRefDetect) {

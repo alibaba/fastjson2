@@ -34,14 +34,6 @@ final class FieldWriterListField<T>
         }
     }
 
-//    public boolean writeJSONBTable(JSONWriter jsonWriter, List objects) {
-//        if (itemObjectWriter == null) {
-//            itemObjectWriter = jsonWriter.getObjectWriter(itemType, itemClass);
-//        }
-//
-//        return itemObjectWriter.writeJSONBTable(jsonWriter, objects, getFieldName(), getFieldType(), getItemClass(), getFeatures());
-//    }
-
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
         List value = (List) getFieldValue(object);

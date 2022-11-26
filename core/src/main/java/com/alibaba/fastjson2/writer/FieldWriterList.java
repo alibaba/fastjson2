@@ -98,12 +98,14 @@ abstract class FieldWriterList<T>
         ObjectWriter previousObjectWriter = null;
 
         long features = this.features | jsonWriter.getFeatures();
-        boolean refDetect = (features & JSONWriter.Feature.ReferenceDetection.mask) != 0;
         boolean beanToArray = (features & JSONWriter.Feature.BeanToArray.mask) != 0;
 
         if ((features & JSONWriter.Feature.NotWriteEmptyArray.mask) != 0 && list.isEmpty() && writeFieldName) {
             return;
         }
+
+        boolean refDetect = (features & JSONWriter.Feature.ReferenceDetection.mask) != 0;
+        boolean previousItemRefDetect = refDetect;
 
         if (writeFieldName) {
             writeFieldName(jsonWriter);
@@ -184,16 +186,23 @@ abstract class FieldWriterList<T>
                 continue;
             }
 
+            boolean itemRefDetect;
             ObjectWriter itemObjectWriter;
             if (itemClass == previousClass) {
                 itemObjectWriter = previousObjectWriter;
+                itemRefDetect = previousItemRefDetect;
             } else {
+                itemRefDetect = jsonWriter.isRefDetect();
                 itemObjectWriter = getItemWriter(jsonWriter, itemClass);
                 previousClass = itemClass;
                 previousObjectWriter = itemObjectWriter;
+                if (itemRefDetect) {
+                    itemRefDetect = !ObjectWriterProvider.isNotReferenceDetect(itemClass);
+                }
+                previousItemRefDetect = itemRefDetect;
             }
 
-            if (refDetect) {
+            if (itemRefDetect) {
                 String refPath = jsonWriter.setPath(i, item);
                 if (refPath != null) {
                     jsonWriter.writeReference(refPath);

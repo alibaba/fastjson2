@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -23,7 +22,6 @@ public class GenericExceptionTest {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName,
                 JSONWriter.Feature.WriteNameAsSymbol
         );
-        JSONBDump.dump(jsonbBytes);
 
         GenericException exception1 = (GenericException) JSONB.parseObject(
                 jsonbBytes,
@@ -32,6 +30,7 @@ public class GenericExceptionTest {
                 JSONReader.Feature.UseNativeObject,
                 JSONReader.Feature.FieldBased
         );
+        assertNotNull(exception1);
     }
 
     @Test
