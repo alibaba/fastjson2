@@ -185,6 +185,20 @@ public class ObjectWriterCreatorASM
         }
 
         boolean record = BeanUtils.isRecord(objectClass);
+        Class superClass = objectClass.getSuperclass();
+        boolean protobufMessageV3 = superClass != null && superClass.getName().equals("com.google.protobuf.GeneratedMessageV3");
+        Class superClass1, superClass2;
+        if (protobufMessageV3) {
+            superClass1 = superClass.getSuperclass();
+            if (superClass1 != null) {
+                superClass2 = superClass1.getSuperclass();
+            } else {
+                superClass2 = null;
+            }
+        } else {
+            superClass1 = null;
+            superClass2 = null;
+        }
 
         List<FieldWriter> fieldWriters;
         if (fieldBased && !record) {
@@ -193,6 +207,19 @@ public class ObjectWriterCreatorASM
             BeanUtils.declaredFields(objectClass, field -> {
                 if (Modifier.isTransient(field.getModifiers())) {
                     return;
+                }
+
+                Class<?> declaring = field.getDeclaringClass();
+                if (protobufMessageV3) {
+                    if (declaring == superClass || declaring == superClass1 || declaring == superClass2) {
+                        return;
+                    }
+                    String fieldName = field.getName();
+                    Class<?> fieldClass = field.getType();
+                    if ("cardsmap_".equals(fieldName) && fieldClass.getName().equals("com.google.protobuf.MapField")) {
+                        return;
+                    }
+                    //cardsmap_
                 }
 
                 fieldInfo.init();
