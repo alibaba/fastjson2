@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author jiangqiang
- * @date 2022-09-11
+ * 2022-09-11
  */
 @Data
 @AllArgsConstructor
