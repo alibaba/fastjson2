@@ -25,13 +25,12 @@ import java.util.ResourceBundle;
 /**
  * Provides an output stream for sending binary data to the client. A
  * <code>ServletOutputStream</code> object is normally retrieved via the
- * {@link ServletResponse#getOutputStream} method.
+ * ServletResponse#getOutputStream method.
  * <p>
  * This is an abstract class that the servlet container implements. Subclasses
  * of this class must implement the <code>java.io.OutputStream.write(int)</code>
  * method.
  *
- * @see ServletResponse
  */
 public abstract class ServletOutputStream extends OutputStream {
 
@@ -251,9 +250,9 @@ public abstract class ServletOutputStream extends OutputStream {
     /**
      * Checks if a non-blocking write will succeed. If this returns
      * <code>false</code>, it will cause a callback to
-     * {@link WriteListener#onWritePossible()} when the buffer has emptied. If
+     * WriteListener#onWritePossible() when the buffer has emptied. If
      * this method returns <code>false</code> no further data must be written
-     * until the container calls {@link WriteListener#onWritePossible()}.
+     * until the container calls WriteListener#onWritePossible().
      *
      * @return <code>true</code> if data can be written, else <code>false</code>
      * @since Servlet 3.1
@@ -261,14 +260,14 @@ public abstract class ServletOutputStream extends OutputStream {
     public abstract boolean isReady();
 
     /**
-     * Sets the {@link WriteListener} for this {@link ServletOutputStream} and
+     * Sets the WriteListener for this {@link ServletOutputStream} and
      * thereby switches to non-blocking IO. It is only valid to switch to
      * non-blocking IO within async processing or HTTP upgrade processing.
      *
      * @param listener The non-blocking IO write listener
      * @throws IllegalStateException If this method is called if neither
      * async nor HTTP upgrade is in progress or
-     * if the {@link WriteListener} has already
+     * if the WriteListener has already
      * been set
      * @throws NullPointerException If listener is null
      * @since Servlet 3.1
