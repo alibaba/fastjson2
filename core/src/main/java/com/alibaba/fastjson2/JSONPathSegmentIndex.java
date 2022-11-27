@@ -8,8 +8,6 @@ import java.util.*;
 import java.util.function.BiFunction;
 
 import static com.alibaba.fastjson2.JSONReader.EOI;
-import static com.alibaba.fastjson2.util.JDKUtils.LATIN1;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK11;
 
 final class JSONPathSegmentIndex
         extends JSONPathSegment {
@@ -538,12 +536,6 @@ final class JSONPathSegmentIndex
         IOUtils.getChars(index, bytes.length - 1, bytes);
         bytes[bytes.length - 1] = ']';
 
-        String str;
-        if (STRING_CREATOR_JDK11 != null) {
-            str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
-        } else {
-            str = new String(bytes, StandardCharsets.US_ASCII);
-        }
-        return str;
+        return new String(bytes, StandardCharsets.US_ASCII);
     }
 }

@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -23,7 +22,7 @@ final class CSVWriterUTF16
             return;
         }
 
-        char[] chars = JDKUtils.getCharArray(str);
+        char[] chars = str.toCharArray();
         writeString(chars);
     }
 
