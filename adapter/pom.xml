@@ -6,7 +6,7 @@
     <parent>
         <artifactId>fastjson2-parent</artifactId>
         <groupId>com.alibaba.fastjson2</groupId>
-        <version>2.0.20.android-SNAPSHOT</version>
+        <version>2.0.20.android</version>
     </parent>
 
     <artifactId>fastjson2-adapter</artifactId>
