@@ -222,6 +222,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-spring-web</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>net.minidev</groupId>
             <artifactId>json-smart</artifactId>
             <scope>test</scope>
