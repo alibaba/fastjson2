@@ -7,16 +7,12 @@ import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-
-import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public abstract class CSVParser
         implements Closeable {
@@ -76,24 +72,7 @@ public abstract class CSVParser
     public static CSVParser of(String str, Class objectClass) {
         JSONReader.Context context = JSONFactory.createReadContext();
         ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
-
-        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
-            try {
-                int coder = STRING_CODER != null
-                        ? STRING_CODER.applyAsInt(str)
-                        : UnsafeUtils.getStringCoder(str);
-                if (coder == 0) {
-                    byte[] bytes = STRING_VALUE != null
-                            ? STRING_VALUE.apply(str)
-                            : UnsafeUtils.getStringValue(str);
-                    return new CSVParserUTF8(bytes, 0, bytes.length, objectReader);
-                }
-            } catch (Exception e) {
-                throw new JSONException("unsafe get String.coder error");
-            }
-        }
-
-        char[] chars = JDKUtils.getCharArray(str);
+        char[] chars = str.toCharArray();
         return new CSVParserUTF16(chars, 0, chars.length, objectReader);
     }
 
@@ -150,23 +129,7 @@ public abstract class CSVParser
     }
 
     public static CSVParser of(String str, Type... types) {
-        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
-            try {
-                int coder = STRING_CODER != null
-                        ? STRING_CODER.applyAsInt(str)
-                        : UnsafeUtils.getStringCoder(str);
-                if (coder == 0) {
-                    byte[] bytes = STRING_VALUE != null
-                            ? STRING_VALUE.apply(str)
-                            : UnsafeUtils.getStringValue(str);
-                    return new CSVParserUTF8(bytes, 0, bytes.length, types);
-                }
-            } catch (Exception e) {
-                throw new JSONException("unsafe get String.coder error");
-            }
-        }
-
-        char[] chars = JDKUtils.getCharArray(str);
+        char[] chars = str.toCharArray();
         return new CSVParserUTF16(chars, 0, chars.length, types);
     }
 
