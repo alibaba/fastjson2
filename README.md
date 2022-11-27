@@ -22,8 +22,8 @@
 - 支持`Java`服务端、客户端`Android`、大数据场景。
 - 支持`Kotlin` [https://alibaba.github.io/fastjson2/kotlin_cn](https://alibaba.github.io/fastjson2/kotlin_cn)
 - 支持`JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
-- 支持`Android 8+` [(2.0.19.android)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.19.android/)
-- 支持`Graal Native-Image` [(2.0.19.graal)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.19.graal/)
+- 支持`Android 8+` [(2.0.20.android)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.20.android/)
+- 支持`Graal Native-Image` [(2.0.20.graal)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.20.graal/)
 
 ![fastjson](docs/logo.jpg "fastjson")
 
@@ -47,7 +47,7 @@
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2</artifactId>
-    <version>2.0.19</version>
+    <version>2.0.20</version>
 </dependency>
 ```
 
@@ -55,7 +55,7 @@
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2:2.0.19'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.20'
 }
 ```
 
@@ -73,7 +73,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
-    <version>2.0.19</version>
+    <version>2.0.20</version>
 </dependency>
 ```
 
@@ -81,7 +81,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba:fastjson:2.0.19'
+    implementation 'com.alibaba:fastjson:2.0.20'
 }
 ```
 
@@ -95,7 +95,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-kotlin</artifactId>
-    <version>2.0.19</version>
+    <version>2.0.20</version>
 </dependency>
 ```
 
@@ -103,7 +103,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.19")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.20")
 }
 ```
 
@@ -117,7 +117,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension</artifactId>
-    <version>2.0.19</version>
+    <version>2.0.20</version>
 </dependency>
 ```
 
@@ -125,7 +125,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.19'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.20'
 }
 ```
 

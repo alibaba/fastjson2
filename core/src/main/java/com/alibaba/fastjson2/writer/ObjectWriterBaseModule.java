@@ -681,6 +681,7 @@ public class ObjectWriterBaseModule
                         processJSONField1x(fieldInfo, annotation);
                         break;
                     case "java.beans.Transient":
+                        fieldInfo.ignore = true;
                         fieldInfo.isTransient = true;
                         break;
                     case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
