@@ -2,6 +2,8 @@
 
 在FASTJSON2中，JSONPath是一等公民，支持通过JSONPath在不完整解析JSON Document的情况下，根据JSONPath读取内容；也支持用JSONPath对JavaBean求值，可以在Java框架中当做对象查询语言（OQL）来使用。
 
+## 语法兼容标准
+支持[SQL 2016](https://en.wikipedia.org/wiki/SQL:2016)的JSON Path的语法 [ISO/IEC 19075-6](https://www.iso.org/standard/78937.html)
 
 ## 1. 支持语法
 
@@ -35,6 +37,55 @@ $.store.book[0].title
 ```java
 $['store']['book'][0]['title']
 ```
+
+### 1.1 函数
+| Function      | 返回类型     | Description      |
+|---------------|----------|------------------|
+| type          | string   | 返回对象的类型          |
+| length/size   | integer  | 返回集合或者字符串的长度     |
+| first         | Any      | 集合中第一个元素         |
+| last          | Any      | 集合中最后一个元素        |
+| keys / keySet | sequence | 返回Map类型的KeySet   |
+| values        | sequence | Map类型的Values     |
+| entries       | sequence | Map类型的EntrySet   |
+| trim          | string   | 对字符串做trim后返回     |
+| double        | double   | 将目标类型转换为double类型 |
+| ceil          | number   | 对数值类型做ceil处理返回   |
+| abs           | number   | 返回对数值类型的绝对值      |
+| lower         | string   | 将字符串转换小写         |
+| upper         | string   | 将字符串转换成大写        |
+
+### 1.2 聚合函数
+| Function | 返回类型   | Description |
+|----------|--------|-------------|
+| min      |        |             |
+| max      |        |             |
+| avg      | double |             |
+
+### 1.3 Filter Operators
+| Operator        | Description  |
+|-----------------|--------------|
+| =               | 相等           |
+| !=  or <>       | 不等           |
+| >               | 大于           |
+| >=              | 大于等于         |
+| <               | 小于           |
+| <=              | 小于等于         |
+| ~=              |              |
+| like            | 类似SQL中LIKE语法 |
+| not like        |              |
+| rlike           |              |
+| not rlike       |              |
+| in              |              |
+| not in          |              |
+| between         |              |
+| not between     |              |
+| starts_with     |              |
+| not starts_with |              |
+| ends_with       |              |
+| not ends_with   |              |
+| contains        |              |
+| not contains    |              |
 
 ## 2. 语法举例
 
