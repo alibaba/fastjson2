@@ -81,6 +81,19 @@ public abstract class ObjectReaderBean<T>
             return;
         }
 
+        if ((jsonReader.features(features) & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
+            String fieldName = jsonReader.getFieldName();
+            if (fieldName.startsWith("is")) {
+                String fieldName1 = fieldName.substring(2);
+                long hashCode64LCase = Fnv.hashCode64LCase(fieldName1);
+                FieldReader fieldReader = getFieldReaderLCase(hashCode64LCase);
+                if (fieldReader != null) {
+                    fieldReader.readFieldValue(jsonReader, object);
+                    return;
+                }
+            }
+        }
+
         ExtraProcessor extraProcessor = jsonReader.getContext().getExtraProcessor();
         if (extraProcessor != null) {
             String fieldName = jsonReader.getFieldName();
