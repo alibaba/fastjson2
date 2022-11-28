@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONReader;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,15 +43,7 @@ public class Issue929 {
     public void test1WithFastJson2() {
         Bean1 bean = new Bean1();
         bean.isSuccess = true;
-        Bean1 bean1 = JSON.parseObject("{\"isSuccess\":true}", Bean1.class);
-        assertEquals(bean.isSuccess, bean1.isSuccess);
-    }
-
-    @Test
-    public void test1WithFastJson1() {
-        Bean1 bean = new Bean1();
-        bean.isSuccess = true;
-        Bean1 bean1 = com.alibaba.fastjson.JSON.parseObject("{\"isSuccess\":true}", Bean1.class);
+        Bean1 bean1 = JSON.parseObject("{\"isSuccess\":true}", Bean1.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(bean.isSuccess, bean1.isSuccess);
     }
 
