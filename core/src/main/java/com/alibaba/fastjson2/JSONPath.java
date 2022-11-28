@@ -854,6 +854,21 @@ public abstract class JSONPath {
                 operator = JSONPathFilter.Operator.STARTS_WITH;
                 break;
             }
+            case 'e':
+            case 'E':
+                jsonReader.readFieldNameHashCodeUnquote();
+                String fieldName = jsonReader.getFieldName();
+                if (!"ends".equalsIgnoreCase(fieldName)) {
+                    throw new JSONException("not support operator : " + fieldName);
+                }
+
+                jsonReader.readFieldNameHashCodeUnquote();
+                fieldName = jsonReader.getFieldName();
+                if (!"with".equalsIgnoreCase(fieldName)) {
+                    throw new JSONException("not support operator : " + fieldName);
+                }
+                operator = JSONPathFilter.Operator.ENDS_WITH;
+                break;
             default: {
                 jsonReader.readFieldNameHashCodeUnquote();
                 throw new JSONException("not support operator : " + jsonReader.getFieldName());

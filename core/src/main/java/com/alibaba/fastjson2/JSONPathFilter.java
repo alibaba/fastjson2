@@ -38,6 +38,7 @@ abstract class JSONPathFilter
         OR,
         REG_MATCH,
         STARTS_WITH,
+        ENDS_WITH,
         CONTAINS,
         NOT_CONTAINS
     }
@@ -258,6 +259,22 @@ abstract class JSONPathFilter
         boolean apply(Object fieldValue) {
             String propertyValue = fieldValue.toString();
             return propertyValue != null && propertyValue.startsWith(prefix);
+        }
+    }
+
+    static final class EndsWithSegment
+            extends NameFilter {
+        final String prefix;
+
+        public EndsWithSegment(String fieldName, long fieldNameNameHash, String prefix) {
+            super(fieldName, fieldNameNameHash);
+            this.prefix = prefix;
+        }
+
+        @Override
+        boolean apply(Object fieldValue) {
+            String propertyValue = fieldValue.toString();
+            return propertyValue != null && propertyValue.endsWith(prefix);
         }
     }
 
