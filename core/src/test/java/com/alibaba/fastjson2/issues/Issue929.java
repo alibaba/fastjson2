@@ -38,6 +38,22 @@ public class Issue929 {
         assertEquals(bean.isSuccess, bean1.isSuccess);
     }
 
+    @Test
+    public void test1WithFastJson2() {
+        Bean1 bean = new Bean1();
+        bean.isSuccess = true;
+        Bean1 bean1 = JSON.parseObject("{\"isSuccess\":true}", Bean1.class);
+        assertEquals(bean.isSuccess, bean1.isSuccess);
+    }
+
+    @Test
+    public void test1WithFastJson1() {
+        Bean1 bean = new Bean1();
+        bean.isSuccess = true;
+        Bean1 bean1 = com.alibaba.fastjson.JSON.parseObject("{\"isSuccess\":true}", Bean1.class);
+        assertEquals(bean.isSuccess, bean1.isSuccess);
+    }
+
     public static class Bean1 {
         private Boolean isSuccess;
 
