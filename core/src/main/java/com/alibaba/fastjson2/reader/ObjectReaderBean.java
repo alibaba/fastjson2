@@ -87,7 +87,7 @@ public abstract class ObjectReaderBean<T>
                 String fieldName1 = fieldName.substring(2);
                 long hashCode64LCase = Fnv.hashCode64LCase(fieldName1);
                 FieldReader fieldReader = getFieldReaderLCase(hashCode64LCase);
-                if (fieldReader != null) {
+                if (fieldReader != null && fieldReader.fieldClass == Boolean.class) {
                     fieldReader.readFieldValue(jsonReader, object);
                     return;
                 }
