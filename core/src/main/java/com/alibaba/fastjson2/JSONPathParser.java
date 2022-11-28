@@ -481,19 +481,20 @@ class JSONPathParser {
         }
 
         boolean starts = jsonReader.nextIfMatchIdent('s', 't', 'a', 'r', 't', 's');
-        if ((at && starts) || (jsonReader.ch != '.' && !JSONReader.isFirstIdentifier(jsonReader.ch))) {
+        boolean ends = (!starts) && jsonReader.nextIfMatchIdent('e', 'n', 'd', 's');
+        if ((at && (starts || ends)) || (jsonReader.ch != '.' && !JSONReader.isFirstIdentifier(jsonReader.ch))) {
             if (!at) {
                 throw new JSONException(jsonReader.info("jsonpath syntax error"));
             }
 
             JSONPathFilter.Operator operator;
-            if (starts) {
+            if (starts || ends) {
                 jsonReader.readFieldNameHashCodeUnquote();
                 String fieldName = jsonReader.getFieldName();
                 if (!"with".equalsIgnoreCase(fieldName)) {
                     throw new JSONException("not support operator : " + fieldName);
                 }
-                operator = JSONPathFilter.Operator.STARTS_WITH;
+                operator = starts ? JSONPathFilter.Operator.STARTS_WITH : JSONPathFilter.Operator.ENDS_WITH;
             } else {
                 operator = JSONPath.parseOperator(jsonReader);
             }
@@ -510,6 +511,9 @@ class JSONPathParser {
                 switch (operator) {
                     case STARTS_WITH:
                         segment = new JSONPathFilter.StartsWithSegment(null, 0, string);
+                        break;
+                    case ENDS_WITH:
+                        segment = new JSONPathFilter.EndsWithSegment(null, 0, string);
                         break;
                     default:
                         throw new JSONException("syntax error, " + string);
