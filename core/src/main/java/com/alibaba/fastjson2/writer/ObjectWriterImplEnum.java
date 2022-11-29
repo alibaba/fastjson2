@@ -27,8 +27,15 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
     final long[] hashCodes;
 
     byte[][] jsonbNames;
+    String[] annotationNames;
 
-    public ObjectWriterImplEnum(Class defineClass, Class enumType, Member valueField, long features) {
+    public ObjectWriterImplEnum(
+            Class defineClass,
+            Class enumType,
+            Member valueField,
+            String[] annotationNames,
+            long features
+    ) {
         this.defineClass = defineClass;
         this.enumType = enumType;
         this.features = features;
@@ -42,6 +49,7 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
             this.names[i] = name;
             hashCodes[i] = Fnv.hashCode64(name);
         }
+        this.annotationNames = annotationNames;
     }
 
     @Override
@@ -78,9 +86,8 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         Enum e = (Enum) object;
-
-        if (jsonWriter.isEnabled(JSONWriter.Feature.WriteEnumUsingToString)) {
-            jsonWriter.writeString(e.toString());
+        if (e == null) {
+            jsonWriter.writeNull();
             return;
         }
 
@@ -92,13 +99,30 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
                 } else {
                     fieldValue = ((Method) valueField).invoke(object);
                 }
-                jsonWriter.writeAny(fieldValue);
-                return;
+                if (fieldValue != object) {
+                    jsonWriter.writeAny(fieldValue);
+                    return;
+                }
             } catch (Exception error) {
                 throw new JSONException("getEnumValue error", error);
             }
         }
 
-        jsonWriter.writeString(e.name());
+        if (jsonWriter.isEnabled(JSONWriter.Feature.WriteEnumUsingToString)) {
+            jsonWriter.writeString(e.toString());
+            return;
+        }
+
+        String enumName = null;
+        if (annotationNames != null) {
+            int ordinal = e.ordinal();
+            if (ordinal < annotationNames.length) {
+                enumName = annotationNames[ordinal];
+            }
+        }
+        if (enumName == null) {
+            enumName = e.name();
+        }
+        jsonWriter.writeString(enumName);
     }
 }

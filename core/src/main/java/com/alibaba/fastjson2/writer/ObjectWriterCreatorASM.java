@@ -185,7 +185,6 @@ public class ObjectWriterCreatorASM
         }
 
         boolean record = BeanUtils.isRecord(objectClass);
-        Class superClass = objectClass.getSuperclass();
 
         List<FieldWriter> fieldWriters;
         if (fieldBased && !record) {
@@ -227,7 +226,11 @@ public class ObjectWriterCreatorASM
 
                 if (!record) {
                     BeanUtils.fields(objectClass, field -> {
-                        if (!fieldBased && !Modifier.isPublic(field.getModifiers())) {
+                        int fieldModifiers = field.getModifiers();
+                        if (!fieldBased && !Modifier.isPublic(fieldModifiers)) {
+                            return;
+                        }
+                        if (Modifier.isStatic(fieldModifiers)) {
                             return;
                         }
 
@@ -2987,7 +2990,10 @@ public class ObjectWriterCreatorASM
             Member enumValueField = BeanUtils.getEnumValueField(fieldClass, provider);
 
             if (enumValueField == null && !writeEnumAsJavaBean) {
-                return new FIeldWriterEnumField(fieldName, ordinal, features, format, label, fieldClass, field);
+                String[] enumAnnotationNames = BeanUtils.getEnumAnnotationNames(fieldClass);
+                if (enumAnnotationNames == null) {
+                    return new FIeldWriterEnumField(fieldName, ordinal, features, format, label, fieldClass, field);
+                }
             }
         }
 

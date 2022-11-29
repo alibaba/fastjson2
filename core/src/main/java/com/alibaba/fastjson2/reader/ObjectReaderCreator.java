@@ -1230,6 +1230,10 @@ public class ObjectReaderCreator {
         final String[] orders = beanInfo.orders;
         if (fieldBased) {
             BeanUtils.declaredFields(objectClass, field -> {
+                if (Modifier.isStatic(field.getModifiers())) {
+                    return;
+                }
+
                 fieldInfo.init();
                 fieldInfo.features |= JSONReader.Feature.FieldBased.mask;
                 fieldInfo.features |= beanFeatures;
@@ -1237,8 +1241,13 @@ public class ObjectReaderCreator {
             });
         } else {
             BeanUtils.fields(objectClass, field -> {
+                if (Modifier.isStatic(field.getModifiers())) {
+                    return;
+                }
+
                 fieldInfo.init();
                 fieldInfo.features |= beanFeatures;
+
                 createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, provider);
                 if (fieldInfo.required) {
                     String fieldName = fieldInfo.fieldName;
