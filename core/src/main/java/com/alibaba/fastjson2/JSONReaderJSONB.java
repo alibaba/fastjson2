@@ -1175,7 +1175,12 @@ class JSONReaderJSONB
                 this.strtype = (byte) strInfo;
                 strlen = ((int) strInfo) >> 8;
                 strBegin = (int) (strInfo >> 32);
-                return symbols[index];
+                long nameHashCode = symbols[index];
+                if (nameHashCode == 0) {
+                    nameHashCode = getNameHashCode();
+                    symbols[index] = nameHashCode;
+                }
+                return nameHashCode;
             }
             offset++;
         }
@@ -1852,6 +1857,64 @@ class JSONReaderJSONB
             }
         }
 
+        return hashCode;
+    }
+
+    protected long getNameHashCode() {
+        int offset = strBegin;
+
+        if (MIXED_HASH_ALGORITHM) {
+            long nameValue = 0;
+            for (int i = 0; i < strlen; offset++) {
+                byte c = bytes[offset];
+                if (c < 0 || i >= 8 || (i == 0 && bytes[strBegin] == 0)) {
+                    offset = strBegin;
+                    nameValue = 0;
+                    break;
+                }
+
+                switch (i) {
+                    case 0:
+                        nameValue = c;
+                        break;
+                    case 1:
+                        nameValue = ((c) << 8) + (nameValue & 0xFFL);
+                        break;
+                    case 2:
+                        nameValue = ((c) << 16) + (nameValue & 0xFFFFL);
+                        break;
+                    case 3:
+                        nameValue = ((c) << 24) + (nameValue & 0xFFFFFFL);
+                        break;
+                    case 4:
+                        nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                        break;
+                    case 5:
+                        nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                        break;
+                    case 6:
+                        nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                        break;
+                    case 7:
+                        nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                        break;
+                    default:
+                        break;
+                }
+                i++;
+            }
+
+            if (nameValue != 0) {
+                return nameValue;
+            }
+        }
+
+        long hashCode = Fnv.MAGIC_HASH_CODE;
+        for (int i = 0; i < strlen; ++i) {
+            byte c = bytes[offset++];
+            hashCode ^= c;
+            hashCode *= Fnv.MAGIC_PRIME;
+        }
         return hashCode;
     }
 

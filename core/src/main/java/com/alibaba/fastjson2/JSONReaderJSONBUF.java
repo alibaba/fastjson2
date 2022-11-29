@@ -324,9 +324,15 @@ final class JSONReaderJSONBUF
                 this.strtype = (byte) strInfo;
                 strlen = ((int) strInfo) >> 8;
                 strBegin = (int) (strInfo >> 32);
-                return symbols[index];
+                long nameHashCode = symbols[index];
+                if (nameHashCode == 0) {
+                    nameHashCode = getNameHashCode();
+                    symbols[index] = nameHashCode;
+                }
+                return nameHashCode;
+            } else {
+                offset++;
             }
-            offset++;
         }
 
         strBegin = offset;

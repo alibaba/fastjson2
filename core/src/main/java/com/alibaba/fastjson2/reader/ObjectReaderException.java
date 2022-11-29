@@ -140,10 +140,6 @@ final class ObjectReaderException<T>
                 break;
             }
             long hash = jsonReader.readFieldNameHashCode();
-            if (hash == 0) {
-                String name = jsonReader.getFieldName();
-                hash = Fnv.hashCode64(name);
-            }
 
             if (i == 0 && hash == HASH_TYPE && jsonReader.isSupportAutoType(features)) {
                 long typeHash = jsonReader.readTypeHashCode();
