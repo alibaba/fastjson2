@@ -197,9 +197,10 @@ public abstract class BeanUtils {
             fieldCache.putIfAbsent(objectClass, fields);
         }
 
+        boolean enumClass = Enum.class.isAssignableFrom(objectClass);
         for (Field field : fields) {
             int modifiers = field.getModifiers();
-            if (Modifier.isStatic(modifiers)) {
+            if (Modifier.isStatic(modifiers) && !enumClass) {
                 continue;
             }
 
@@ -585,18 +586,53 @@ public abstract class BeanUtils {
         return false;
     }
 
-    public static Member getEnumValueField(Class clazz, ObjectCodecProvider mixinProvider) {
-        if (clazz == null) {
+    public static String[] getEnumAnnotationNames(Class enumClass) {
+        Enum[] enumConstants = (Enum[]) enumClass.getEnumConstants();
+        String[] annotationNames = new String[enumConstants.length];
+        BeanUtils.fields(enumClass, field -> {
+            String fieldName = field.getName();
+            for (int i = 0; i < enumConstants.length; i++) {
+                Enum e = enumConstants[i];
+                String enumName = e.name();
+                if (fieldName.equals(enumName)) {
+                    JSONField annotation = field.getAnnotation(JSONField.class);
+                    if (annotation != null) {
+                        String annotationName = annotation.name();
+                        if (annotationName.length() != 0 && !annotationName.equals(enumName)) {
+                            annotationNames[i] = annotationName;
+                        }
+                    }
+                    break;
+                }
+            }
+        });
+
+        int nulls = 0;
+        for (int i = 0; i < annotationNames.length; i++) {
+            if (annotationNames[i] == null) {
+                nulls++;
+            }
+        }
+
+        if (nulls == annotationNames.length) {
             return null;
         }
 
-        Class[] interfaces = clazz.getInterfaces();
+        return annotationNames;
+    }
+
+    public static Member getEnumValueField(Class enumClass, ObjectCodecProvider mixinProvider) {
+        if (enumClass == null) {
+            return null;
+        }
+
+        Class[] interfaces = enumClass.getInterfaces();
 
         Member member = null;
-        Method[] methods = methodCache.get(clazz);
+        Method[] methods = methodCache.get(enumClass);
         if (methods == null) {
-            methods = clazz.getMethods();
-            methodCache.putIfAbsent(clazz, methods);
+            methods = enumClass.getMethods();
+            methodCache.putIfAbsent(enumClass, methods);
         }
 
         for (Method method : methods) {
@@ -608,6 +644,16 @@ public abstract class BeanUtils {
                 continue;
             }
 
+            Class<?> declaringClass = method.getDeclaringClass();
+            if (declaringClass == Enum.class || declaringClass == Object.class) {
+                continue;
+            }
+
+            String methodName = method.getName();
+            if (methodName.equals("values")) {
+                continue;
+            }
+
             if (isJSONField(getAnnotations(method))) {
                 return method;
             }
@@ -616,7 +662,7 @@ public abstract class BeanUtils {
                 AtomicReference<Member> memberRef = new AtomicReference<>();
                 for (Class enumInterface : interfaces) {
                     getters(enumInterface, e -> {
-                        if (e.getName().equals(method.getName())) {
+                        if (e.getName().equals(methodName)) {
                             if (isJSONField(getAnnotations(e))) {
                                 memberRef.set(method);
                             }
@@ -632,7 +678,7 @@ public abstract class BeanUtils {
 
                     if (mixIn != null) {
                         getters(mixIn, e -> {
-                            if (e.getName().equals(method.getName())) {
+                            if (e.getName().equals(methodName)) {
                                 if (isJSONField(getAnnotations(e))) {
                                     memberRef.set(method);
                                 }
@@ -647,16 +693,31 @@ public abstract class BeanUtils {
             }
         }
 
-        Field[] fields = fieldCache.get(clazz);
+        Field[] fields = fieldCache.get(enumClass);
         if (fields == null) {
-            fields = clazz.getFields();
-            fieldCache.putIfAbsent(clazz, fields);
+            fields = enumClass.getFields();
+            fieldCache.putIfAbsent(enumClass, fields);
         }
 
+        Enum[] enumConstants = (Enum[]) enumClass.getEnumConstants();
         for (Field field : fields) {
-            if (isJSONField(getAnnotations(field))) {
-                member = field;
-                break;
+            boolean found = false;
+            if (enumConstants != null) {
+                String fieldName = field.getName();
+                for (Enum e : enumConstants) {
+                    if (fieldName.equals(e.name())) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            Annotation[] annotations = getAnnotations(field);
+            if (isJSONField(annotations)) {
+                if (!found) {
+                    member = field;
+                    break;
+                }
             }
         }
 

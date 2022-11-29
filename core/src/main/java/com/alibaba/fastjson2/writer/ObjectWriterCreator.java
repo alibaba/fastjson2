@@ -321,7 +321,8 @@ public class ObjectWriterCreator {
                 Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
 
                 BeanUtils.fields(objectClass, field -> {
-                    if (!Modifier.isPublic(field.getModifiers())) {
+                    int fieldModifiers = field.getModifiers();
+                    if (Modifier.isStatic(fieldModifiers) || !Modifier.isPublic(fieldModifiers)) {
                         return;
                     }
 

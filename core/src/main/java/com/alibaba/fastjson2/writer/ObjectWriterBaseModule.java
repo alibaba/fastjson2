@@ -977,39 +977,13 @@ public class ObjectWriterBaseModule
             Class clazz = (Class) objectType;
 
             if (TimeUnit.class.isAssignableFrom(clazz)) {
-                return new ObjectWriterImplEnum(null, TimeUnit.class, null, 0);
+                return new ObjectWriterImplEnum(null, TimeUnit.class, null, null, 0);
             }
 
             if (Enum.class.isAssignableFrom(clazz)) {
-                Class enumClass = clazz;
-                if (!enumClass.isEnum()) {
-                    Class superclass = enumClass.getSuperclass();
-                    if (superclass.isEnum()) {
-                        enumClass = superclass;
-                    }
-                }
-
-                Member valueField = BeanUtils.getEnumValueField(clazz, provider);
-                if (valueField == null) {
-                    Class mixInSource = provider.mixInCache.get(enumClass);
-                    Member mixedValueField = BeanUtils.getEnumValueField(mixInSource, provider);
-                    if (mixedValueField instanceof Field) {
-                        try {
-                            valueField = clazz.getField(mixedValueField.getName());
-                        } catch (NoSuchFieldException ignored) {
-                        }
-                    } else if (mixedValueField instanceof Method) {
-                        try {
-                            valueField = clazz.getMethod(mixedValueField.getName());
-                        } catch (NoSuchMethodException ignored) {
-                        }
-                    }
-                }
-
-                BeanInfo beanInfo = new BeanInfo();
-                annotationProcessor.getBeanInfo(beanInfo, clazz);
-                if (!beanInfo.writeEnumAsJavaBean) {
-                    return new ObjectWriterImplEnum(null, enumClass, valueField, 0);
+                ObjectWriter enumWriter = createEnumWriter(clazz);
+                if (enumWriter != null) {
+                    return enumWriter;
                 }
             }
 
@@ -1238,6 +1212,41 @@ public class ObjectWriterBaseModule
         }
 
         return null;
+    }
+
+    private ObjectWriter createEnumWriter(Class enumClass) {
+        if (!enumClass.isEnum()) {
+            Class superclass = enumClass.getSuperclass();
+            if (superclass.isEnum()) {
+                enumClass = superclass;
+            }
+        }
+
+        Member valueField = BeanUtils.getEnumValueField(enumClass, provider);
+        if (valueField == null) {
+            Class mixInSource = provider.mixInCache.get(enumClass);
+            Member mixedValueField = BeanUtils.getEnumValueField(mixInSource, provider);
+            if (mixedValueField instanceof Field) {
+                try {
+                    valueField = enumClass.getField(mixedValueField.getName());
+                } catch (NoSuchFieldException ignored) {
+                }
+            } else if (mixedValueField instanceof Method) {
+                try {
+                    valueField = enumClass.getMethod(mixedValueField.getName());
+                } catch (NoSuchMethodException ignored) {
+                }
+            }
+        }
+
+        BeanInfo beanInfo = new BeanInfo();
+        annotationProcessor.getBeanInfo(beanInfo, enumClass);
+        if (beanInfo.writeEnumAsJavaBean) {
+            return null;
+        }
+
+        String[] annotationNames = BeanUtils.getEnumAnnotationNames(enumClass);
+        return new ObjectWriterImplEnum(null, enumClass, valueField, annotationNames, 0);
     }
 
     abstract static class PrimitiveImpl<T>
