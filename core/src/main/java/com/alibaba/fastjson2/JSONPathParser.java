@@ -317,80 +317,68 @@ class JSONPathParser {
                     }
                 }
             }
-            JSONPathSegmentIndex indexSegment = null;
-            if (isNum) {
-                try {
-                    int index = Integer.parseInt(name);
-                    indexSegment = JSONPathSegmentIndex.of(index);
-                } catch (NumberFormatException ignored) {
-                }
-            }
 
-            if (indexSegment != null) {
-                segment = indexSegment;
-            } else {
-                if (jsonReader.ch == '(') {
-                    switch (name) {
-                        case "length":
-                        case "size":
-                            segment = JSONPathSegment.LengthSegment.INSTANCE;
-                            break;
-                        case "keys":
-                            segment = JSONPathSegment.KeysSegment.INSTANCE;
-                            break;
-                        case "values":
-                            segment = JSONPathSegment.ValuesSegment.INSTANCE;
-                            break;
-                        case "entrySet":
-                            segment = JSONPathSegment.EntrySetSegment.INSTANCE;
-                            break;
-                        case "min":
-                            segment = JSONPathSegment.MinSegment.INSTANCE;
-                            break;
-                        case "max":
-                            segment = JSONPathSegment.MaxSegment.INSTANCE;
-                            break;
-                        case "sum":
-                            segment = JSONPathSegment.SumSegment.INSTANCE;
-                            break;
-                        case "type":
-                            segment = JSONPathFunction.FUNC_TYPE;
-                            break;
-                        case "floor":
-                            segment = JSONPathFunction.FUNC_FLOOR;
-                            break;
-                        case "ceil":
-                        case "ceiling":
-                            segment = JSONPathFunction.FUNC_CEIL;
-                            break;
-                        case "double":
-                            segment = JSONPathFunction.FUNC_DOUBLE;
-                            break;
-                        case "abs":
-                            segment = JSONPathFunction.FUNC_ABS;
-                            break;
-                        case "lower":
-                            segment = JSONPathFunction.FUNC_LOWER;
-                            break;
-                        case "upper":
-                            segment = JSONPathFunction.FUNC_UPPER;
-                            break;
-                        case "trim":
-                            segment = JSONPathFunction.FUNC_TRIM;
-                            break;
-                        case "negative":
-                            segment = JSONPathFunction.FUNC_NEGATIVE;
-                            break;
-                        default:
-                            throw new JSONException("not support syntax, path : " + path);
-                    }
-                    jsonReader.next();
-                    if (!jsonReader.nextIfMatch(')')) {
+            if (jsonReader.ch == '(') {
+                switch (name) {
+                    case "length":
+                    case "size":
+                        segment = JSONPathSegment.LengthSegment.INSTANCE;
+                        break;
+                    case "keys":
+                        segment = JSONPathSegment.KeysSegment.INSTANCE;
+                        break;
+                    case "values":
+                        segment = JSONPathSegment.ValuesSegment.INSTANCE;
+                        break;
+                    case "entrySet":
+                        segment = JSONPathSegment.EntrySetSegment.INSTANCE;
+                        break;
+                    case "min":
+                        segment = JSONPathSegment.MinSegment.INSTANCE;
+                        break;
+                    case "max":
+                        segment = JSONPathSegment.MaxSegment.INSTANCE;
+                        break;
+                    case "sum":
+                        segment = JSONPathSegment.SumSegment.INSTANCE;
+                        break;
+                    case "type":
+                        segment = JSONPathFunction.FUNC_TYPE;
+                        break;
+                    case "floor":
+                        segment = JSONPathFunction.FUNC_FLOOR;
+                        break;
+                    case "ceil":
+                    case "ceiling":
+                        segment = JSONPathFunction.FUNC_CEIL;
+                        break;
+                    case "double":
+                        segment = JSONPathFunction.FUNC_DOUBLE;
+                        break;
+                    case "abs":
+                        segment = JSONPathFunction.FUNC_ABS;
+                        break;
+                    case "lower":
+                        segment = JSONPathFunction.FUNC_LOWER;
+                        break;
+                    case "upper":
+                        segment = JSONPathFunction.FUNC_UPPER;
+                        break;
+                    case "trim":
+                        segment = JSONPathFunction.FUNC_TRIM;
+                        break;
+                    case "negative":
+                        segment = JSONPathFunction.FUNC_NEGATIVE;
+                        break;
+                    default:
                         throw new JSONException("not support syntax, path : " + path);
-                    }
-                } else {
-                    segment = new JSONPathSegmentName(name, hashCode);
                 }
+                jsonReader.next();
+                if (!jsonReader.nextIfMatch(')')) {
+                    throw new JSONException("not support syntax, path : " + path);
+                }
+            } else {
+                segment = new JSONPathSegmentName(name, hashCode);
             }
         }
         return segment;

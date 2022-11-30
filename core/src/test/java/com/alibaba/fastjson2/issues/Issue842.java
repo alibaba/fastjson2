@@ -24,6 +24,15 @@ public class Issue842 {
 
         Map data = new LinkedHashMap<>();
         JSONPath.set(data, jsonPath, "设置成功");
+        assertEquals("{\"items\":[{\"data\":{\"0\":\"设置成功\"}}]}", JSON.toJSONString(data));
+    }
+
+    @Test
+    public void test1a() {
+        String jsonPath = "$.items[0].data[0]";
+
+        Map data = new LinkedHashMap<>();
+        JSONPath.set(data, jsonPath, "设置成功");
         assertEquals("{\"items\":[{\"data\":[\"设置成功\"]}]}", JSON.toJSONString(data));
     }
 
@@ -31,6 +40,13 @@ public class Issue842 {
     public void test2() {
         Map data = new LinkedHashMap<>();
         JSONPath.set(data, "$.obj.5", "设置成功");
+        assertEquals("{\"obj\":{\"5\":\"设置成功\"}}", JSONObject.toJSONString(data));
+    }
+
+    @Test
+    public void test2a() {
+        Map data = new LinkedHashMap<>();
+        JSONPath.set(data, "$.obj[5]", "设置成功");
         assertEquals("{\"obj\":[null,null,null,null,null,\"设置成功\"]}", JSONObject.toJSONString(data));
     }
 
@@ -38,6 +54,13 @@ public class Issue842 {
     public void test3() {
         Map data = new LinkedHashMap<>();
         JSONPath.set(data, "$.obj.2.5", "设置成功");
+        assertEquals("{\"obj\":{\"2\":{\"5\":\"设置成功\"}}}", JSONObject.toJSONString(data));
+    }
+
+    @Test
+    public void test3a() {
+        Map data = new LinkedHashMap<>();
+        JSONPath.set(data, "$.obj[2][5]", "设置成功");
         assertEquals("{\"obj\":[null,null,[null,null,null,null,null,\"设置成功\"]]}", JSONObject.toJSONString(data));
     }
 }
