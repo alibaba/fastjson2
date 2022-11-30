@@ -16,4 +16,11 @@ public class Issue956 {
         JSONPath.set(data, "$.obj['5']", "设置成功");
         assertEquals("{\"obj\":{\"5\":\"设置成功\"}}", JSONObject.toJSONString(data));
     }
+
+    @Test
+    public void test1() {
+        Map data = new LinkedHashMap<>();
+        JSONPath.set(data, "$.obj.5", "设置成功");
+        assertEquals("{\"obj\":{\"5\":\"设置成功\"}}", JSONObject.toJSONString(data));
+    }
 }
