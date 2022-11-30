@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.util.Arrays;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONWriterUTF8JDK9
@@ -29,6 +30,8 @@ final class JSONWriterUTF8JDK9
             return;
         }
 
+        final boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+
         int coder = STRING_CODER != null
                 ? STRING_CODER.applyAsInt(str)
                 : UnsafeUtils.getStringCoder(str);
@@ -53,6 +56,15 @@ final class JSONWriterUTF8JDK9
                 if (c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote
                         || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\' || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\'
                         || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' ' || c4 < ' ' || c5 < ' ' || c6 < ' ' || c7 < ' '
+                        || (browserSecure
+                        && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'
+                        || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'
+                        || c2 == '<' || c2 == '>' || c2 == '(' || c2 == ')'
+                        || c3 == '<' || c3 == '>' || c3 == '(' || c3 == ')'
+                        || c4 == '<' || c4 == '>' || c4 == '(' || c4 == ')'
+                        || c5 == '<' || c5 == '>' || c5 == '(' || c5 == ')'
+                        || c6 == '<' || c6 == '>' || c6 == '(' || c6 == ')'
+                        || c7 == '<' || c7 == '>' || c7 == '(' || c7 == ')'))
                 ) {
                     escape = true;
                     break;
@@ -70,6 +82,11 @@ final class JSONWriterUTF8JDK9
                     if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
                             || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
                             || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
+                            || (browserSecure
+                            && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'
+                            || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'
+                            || c2 == '<' || c2 == '>' || c2 == '(' || c2 == ')'
+                            || c3 == '<' || c3 == '>' || c3 == '(' || c3 == ')'))
                     ) {
                         escape = true;
                         break;
@@ -81,7 +98,10 @@ final class JSONWriterUTF8JDK9
             if (!escape && valueOffset + 2 <= value.length) {
                 byte c0 = value[valueOffset];
                 byte c1 = value[valueOffset + 1];
-                if (c0 == quote || c1 == quote || c0 == '\\' || c1 == '\\' || c0 < ' ' || c1 < ' ') {
+                if (c0 == quote || c1 == quote || c0 == '\\' || c1 == '\\' || c0 < ' ' || c1 < ' '
+                        || (browserSecure && (c0 == '<' || c0 == '>' || c0 == '('
+                        || c0 == ')' || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'))
+                ) {
                     escape = true;
                 } else {
                     valueOffset += 2;
@@ -89,7 +109,8 @@ final class JSONWriterUTF8JDK9
             }
             if (!escape && valueOffset + 1 == value.length) {
                 byte c0 = value[valueOffset];
-                escape = c0 == quote || c0 == '\\' || c0 < ' ';
+                escape = c0 == quote || c0 == '\\' || c0 < ' '
+                        || (browserSecure && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'));
             }
 
             int minCapacity = off
@@ -195,6 +216,21 @@ final class JSONWriterUTF8JDK9
                             bytes[off++] = '0';
                             bytes[off++] = '1';
                             bytes[off++] = (byte) ('a' + (ch - 26));
+                            break;
+                        case '<':
+                        case '>':
+                        case '(':
+                        case ')':
+                            if (browserSecure) {
+                                bytes[off++] = '\\';
+                                bytes[off++] = 'u';
+                                bytes[off++] = (byte) DIGITS[(ch >>> 12) & 15];
+                                bytes[off++] = (byte) DIGITS[(ch >>> 8) & 15];
+                                bytes[off++] = (byte) DIGITS[(ch >>> 4) & 15];
+                                bytes[off++] = (byte) DIGITS[ch & 15];
+                            } else {
+                                bytes[off++] = ch;
+                            }
                             break;
                         default:
                             if (ch == quote) {

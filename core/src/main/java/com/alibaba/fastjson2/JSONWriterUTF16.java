@@ -203,6 +203,7 @@ class JSONWriterUTF16
         }
 
         boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
         boolean escape = false;
 
         if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
@@ -233,6 +234,12 @@ class JSONWriterUTF16
                         escape = true;
                         break;
                     }
+
+                    if (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')')) {
+                        escape = true;
+                        break;
+                    }
+
                     chars[off++] = (char) c;
                 }
 
@@ -265,6 +272,17 @@ class JSONWriterUTF16
                     break;
                 }
 
+                if (browserSecure) {
+                    if (c0 == '<' || c1 == '<' || c2 == '<' || c3 == '<' || c4 == '<' || c5 == '<' || c6 == '<' || c7 == '<'
+                            || c0 == '>' || c1 == '>' || c2 == '>' || c3 == '>' || c4 == '>' || c5 == '>' || c6 == '>' || c7 == '>'
+                            || c0 == '(' || c1 == '(' || c2 == '(' || c3 == '(' || c4 == '(' || c5 == '(' || c6 == '(' || c7 == '('
+                            || c0 == ')' || c1 == ')' || c2 == ')' || c3 == ')' || c4 == ')' || c5 == ')' || c6 == ')' || c7 == ')'
+                    ) {
+                        escape = true;
+                        break;
+                    }
+                }
+
                 if (escapeNoneAscii) {
                     if (c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F || c4 > 0x007F || c5 > 0x007F || c6 > 0x007F || c7 > 0x007F) {
                         escape = true;
@@ -290,6 +308,17 @@ class JSONWriterUTF16
                         break;
                     }
 
+                    if (browserSecure) {
+                        if (c0 == '<' || c1 == '<' || c2 == '<' || c3 == '<'
+                                || c0 == '>' || c1 == '>' || c2 == '>' || c3 == '>'
+                                || c0 == '(' || c1 == '(' || c2 == '(' || c3 == '('
+                                || c0 == ')' || c1 == ')' || c2 == ')' || c3 == ')'
+                        ) {
+                            escape = true;
+                            break;
+                        }
+                    }
+
                     if (escapeNoneAscii) {
                         if (c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F) {
                             escape = true;
@@ -306,6 +335,12 @@ class JSONWriterUTF16
                 char c1 = str.charAt(i + 1);
                 if (c0 == quote || c1 == quote || c0 == '\\' || c1 == '\\' || c0 < ' ' || c1 < ' ') {
                     escape = true;
+                } else if (browserSecure
+                        && (c0 == '<' || c1 == '<'
+                        || c0 == '>' || c1 == '>'
+                        || c0 == '(' || c1 == '(')
+                        || c0 == ')' || c1 == ')') {
+                    escape = true;
                 } else if (escapeNoneAscii && (c0 > 0x007F || c1 > 0x007F)) {
                     escape = true;
                 } else {
@@ -314,7 +349,9 @@ class JSONWriterUTF16
             }
             if (!escape && i + 1 == strlen) {
                 char c0 = str.charAt(i);
-                escape = c0 == '"' || c0 == '\\' || c0 < ' ' || (escapeNoneAscii && c0 > 0x007F);
+                escape = c0 == '"' || c0 == '\\' || c0 < ' '
+                        || (escapeNoneAscii && c0 > 0x007F)
+                        || (browserSecure && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'));
             }
         }
 
@@ -342,7 +379,7 @@ class JSONWriterUTF16
             return;
         }
 
-        if (escapeNoneAscii) {
+        if (escapeNoneAscii || browserSecure) {
             ensureCapacity(off + strlen * 6 + 2);
         } else {
             ensureCapacity(off + strlen * 2 + 2);
@@ -437,6 +474,21 @@ class JSONWriterUTF16
                     chars[off++] = '0';
                     chars[off++] = '1';
                     chars[off++] = (char) ('a' + (ch - 26));
+                    break;
+                case '<':
+                case '>':
+                case '(':
+                case ')':
+                    if (browserSecure && (ch == '<' || ch == '>' || ch == '(' || ch == ')')) {
+                        chars[off++] = '\\';
+                        chars[off++] = 'u';
+                        chars[off++] = DIGITS[(ch >>> 12) & 15];
+                        chars[off++] = DIGITS[(ch >>> 8) & 15];
+                        chars[off++] = DIGITS[(ch >>> 4) & 15];
+                        chars[off++] = DIGITS[ch & 15];
+                    } else {
+                        chars[off++] = ch;
+                    }
                     break;
                 default:
                     if (escapeNoneAscii && ch > 0x007F) {

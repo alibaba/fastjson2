@@ -300,6 +300,7 @@ class JSONWriterUTF8
 
         char[] chars = JDKUtils.getCharArray(str);
 
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
         boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
 
         // ensureCapacity
@@ -307,7 +308,7 @@ class JSONWriterUTF8
                 + chars.length * 3 // utf8 3 bytes
                 + 2;
 
-        if (escapeNoneAscii) {
+        if (escapeNoneAscii || browserSecure) {
             minCapacity += chars.length * 3;
         }
 
@@ -339,10 +340,24 @@ class JSONWriterUTF8
             char c5 = chars[i + 5];
             char c6 = chars[i + 6];
             char c7 = chars[i + 7];
-            if (c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote
-                    || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\' || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\'
-                    || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' ' || c4 < ' ' || c5 < ' ' || c6 < ' ' || c7 < ' '
-                    || c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F || c4 > 0x007F || c5 > 0x007F || c6 > 0x007F || c7 > 0x007F) {
+            if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
+                    || c4 == quote || c5 == quote || c6 == quote || c7 == quote
+                    || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
+                    || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\'
+                    || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
+                    || c4 < ' ' || c5 < ' ' || c6 < ' ' || c7 < ' '
+                    || c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F
+                    || c4 > 0x007F || c5 > 0x007F || c6 > 0x007F || c7 > 0x007F
+                    || (browserSecure
+                    && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'
+                    || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'
+                    || c2 == '<' || c2 == '>' || c2 == '(' || c2 == ')'
+                    || c3 == '<' || c3 == '>' || c3 == '(' || c3 == ')'
+                    || c4 == '<' || c4 == '>' || c4 == '(' || c4 == ')'
+                    || c5 == '<' || c5 == '>' || c5 == '(' || c5 == ')'
+                    || c6 == '<' || c6 == '>' || c6 == '(' || c6 == ')'
+                    || c7 == '<' || c7 == '>' || c7 == '(' || c7 == ')'))
+            ) {
                 break;
             }
 
@@ -367,7 +382,13 @@ class JSONWriterUTF8
             if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
                     || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
                     || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
-                    || c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F) {
+                    || c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F
+                    || (browserSecure
+                    && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'
+                    || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'
+                    || c2 == '<' || c2 == '>' || c2 == '(' || c2 == ')'
+                    || c3 == '<' || c3 == '>' || c3 == '(' || c3 == ')'))
+            ) {
                 break;
             }
 
@@ -387,6 +408,8 @@ class JSONWriterUTF8
                     || c0 == '\\' || c1 == '\\'
                     || c0 < ' ' || c1 < ' '
                     || c0 > 0x007F || c1 > 0x007F)
+                    && !(browserSecure && (c0 == '<' || c0 == '>' || c0 == '('
+                    || c0 == ')' || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'))
             ) {
                 bytes[off] = (byte) c0;
                 bytes[off + 1] = (byte) c1;
@@ -400,6 +423,7 @@ class JSONWriterUTF8
                     && c0 != '\\'
                     && c0 >= ' '
                     && c0 <= 0x007F
+                    && !(browserSecure && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'))
             ) {
                 bytes[off++] = (byte) c0;
                 bytes[off++] = (byte) quote;
@@ -489,6 +513,21 @@ class JSONWriterUTF8
                         bytes[off++] = '0';
                         bytes[off++] = '1';
                         bytes[off++] = (byte) ('a' + (ch - 26));
+                        break;
+                    case '<':
+                    case '>':
+                    case '(':
+                    case ')':
+                        if (browserSecure) {
+                            bytes[off++] = '\\';
+                            bytes[off++] = 'u';
+                            bytes[off++] = (byte) DIGITS[(ch >>> 12) & 15];
+                            bytes[off++] = (byte) DIGITS[(ch >>> 8) & 15];
+                            bytes[off++] = (byte) DIGITS[(ch >>> 4) & 15];
+                            bytes[off++] = (byte) DIGITS[ch & 15];
+                        } else {
+                            bytes[off++] = (byte) ch;
+                        }
                         break;
                     default:
                         if (ch == quote) {
