@@ -63,6 +63,9 @@ public class JSONSerializer {
             case BrowserCompatible:
                 ctx.config(JSONWriter.Feature.BrowserCompatible);
                 break;
+            case BrowserSecure:
+                ctx.config(JSONWriter.Feature.BrowserSecure);
+                break;
             case WriteClassName:
                 ctx.config(JSONWriter.Feature.WriteClassName);
                 break;

@@ -217,6 +217,9 @@ public class SerializeWriter
             case BrowserCompatible:
                 rawFeature = JSONWriter.Feature.BrowserCompatible;
                 break;
+            case BrowserSecure:
+                rawFeature = JSONWriter.Feature.BrowserSecure;
+                break;
             case IgnoreNonFieldGetter:
                 rawFeature = JSONWriter.Feature.IgnoreNonFieldGetter;
                 break;
