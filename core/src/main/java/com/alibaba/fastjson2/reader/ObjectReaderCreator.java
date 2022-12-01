@@ -1049,13 +1049,7 @@ public class ObjectReaderCreator {
             Map<String, FieldReader> fieldReaders,
             ObjectReaderProvider provider
     ) {
-        for (ObjectReaderModule module : provider.modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor == null) {
-                continue;
-            }
-            annotationProcessor.getFieldInfo(fieldInfo, objectClass, method);
-        }
+        provider.getFieldInfo(fieldInfo, objectClass, method);
 
         if (fieldInfo.ignore) {
             return;

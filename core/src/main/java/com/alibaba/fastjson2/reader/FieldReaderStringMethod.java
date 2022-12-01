@@ -12,7 +12,18 @@ final class FieldReaderStringMethod<T>
         extends FieldReaderObject<T> {
     final boolean trim;
 
-    FieldReaderStringMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, String defaultValue, JSONSchema schema, Method setter) {
+    FieldReaderStringMethod(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            String defaultValue,
+            JSONSchema schema,
+            Method setter
+    ) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter, null, null);
         trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
     }

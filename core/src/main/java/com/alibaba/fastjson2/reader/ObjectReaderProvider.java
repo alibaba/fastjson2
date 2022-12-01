@@ -445,7 +445,7 @@ public class ObjectReaderProvider
         cache.remove(objectClass);
         cacheFieldBased.remove(objectClass);
         for (ConcurrentHashMap<Long, ObjectReader> tlc : tclHashCaches.values()) {
-            for (Iterator<Map.Entry<Long, ObjectReader>> it = tlc.entrySet().iterator(); it.hasNext();) {
+            for (Iterator<Map.Entry<Long, ObjectReader>> it = tlc.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry<Long, ObjectReader> entry = it.next();
                 ObjectReader reader = entry.getValue();
                 if (reader.getObjectClass() == objectClass) {
@@ -457,14 +457,14 @@ public class ObjectReaderProvider
     }
 
     public void cleanup(ClassLoader classLoader) {
-        for (Iterator<Map.Entry<Class, Class>> it = mixInCache.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry<Class, Class>> it = mixInCache.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<Class, Class> entry = it.next();
             if (entry.getKey().getClassLoader() == classLoader) {
                 it.remove();
             }
         }
 
-        for (Iterator<Map.Entry<Type, ObjectReader>> it = cache.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry<Type, ObjectReader>> it = cache.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<Type, ObjectReader> entry = it.next();
             Type keyType = entry.getKey();
             Class<?> keyClass = TypeUtils.getClass(keyType);
@@ -473,7 +473,7 @@ public class ObjectReaderProvider
             }
         }
 
-        for (Iterator<Map.Entry<Type, ObjectReader>> it = cacheFieldBased.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry<Type, ObjectReader>> it = cacheFieldBased.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<Type, ObjectReader> entry = it.next();
             Type keyType = entry.getKey();
             Class<?> keyClass = TypeUtils.getClass(keyType);
@@ -745,7 +745,11 @@ public class ObjectReaderProvider
         }
     }
 
-    public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Constructor constructor, int paramIndex, Parameter parameter) {
+    public void getFieldInfo(FieldInfo fieldInfo,
+                             Class objectClass,
+                             Constructor constructor,
+                             int paramIndex,
+                             Parameter parameter) {
         for (ObjectReaderModule module : modules) {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor != null) {
@@ -754,7 +758,11 @@ public class ObjectReaderProvider
         }
     }
 
-    public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Method method, int paramIndex, Parameter parameter) {
+    public void getFieldInfo(FieldInfo fieldInfo,
+                             Class objectClass,
+                             Method method,
+                             int paramIndex,
+                             Parameter parameter) {
         for (ObjectReaderModule module : modules) {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor != null) {
@@ -894,6 +902,27 @@ public class ObjectReaderProvider
         @Override
         protected boolean removeEldestEntry(Map.Entry<String, Date> eldest) {
             return this.size() > this.maxSize;
+        }
+    }
+
+    public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Method method) {
+        for (ObjectReaderModule module : modules) {
+            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
+            if (annotationProcessor == null) {
+                continue;
+            }
+            annotationProcessor.getFieldInfo(fieldInfo, objectClass, method);
+        }
+
+        if (fieldInfo.fieldName == null && fieldInfo.alternateNames == null) {
+            String methodName = method.getName();
+            if (methodName.startsWith("set")) {
+                String findName = methodName.substring(3);
+                Field field = BeanUtils.getDeclaredField(objectClass, findName);
+                if (field != null) {
+                    fieldInfo.alternateNames = new String[]{findName};
+                }
+            }
         }
     }
 }
