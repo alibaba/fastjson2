@@ -2002,6 +2002,30 @@ public interface JSON {
      * Parse JSON {@link String} into {@link List}
      *
      * @param text the JSON {@link String} to be parsed
+     * @param type specify the {@link Class} to be converted
+     * @since 2.0.20
+     */
+    static <T> List<T> parseArray(String text, Class<T> type) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            List<T> list = reader.readArray(type);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(list);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return list;
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into {@link List}
+     *
+     * @param text the JSON {@link String} to be parsed
      * @param types specify the {@link Type} to be converted
      */
     static <T> List<T> parseArray(String text, Type... types) {
