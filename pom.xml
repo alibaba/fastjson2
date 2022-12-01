@@ -613,7 +613,8 @@
                                 com/fasterxml/jackson/core/*.java,
                                 com/fasterxml/jackson/databind/*.java,
                                 com/alibaba/fastjson2/adapter/http/*.java,
-                                com/alibaba/fastjson2/dubbo/GoogleProtobufBasic.java
+                                com/alibaba/fastjson2/dubbo/GoogleProtobufBasic.java,
+                                com/alibaba/fastjson2/issues/Issue983.java
                             </excludes>
                         </configuration>
                     </execution>
