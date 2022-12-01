@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -18,7 +19,7 @@ public class Issue1140 {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         JSON.writeTo(out, s);
 
-        String str = new String(out.toByteArray());
+        String str = new String(out.toByteArray(), StandardCharsets.UTF_8);
         assertEquals("\"\uD83C\uDDEB\uD83C\uDDF7\"", str);
     }
 }

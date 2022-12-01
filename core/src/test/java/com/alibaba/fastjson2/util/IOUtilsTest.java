@@ -34,7 +34,7 @@ public class IOUtilsTest {
 
         byte[] dst = new byte[100];
         int result = IOUtils.encodeUTF8(bytes, 0, bytes.length, dst, 0);
-        String str2 = new String(dst, 0, result);
+        String str2 = new String(dst, 0, result, StandardCharsets.UTF_8);
         assertEquals(str, str2);
     }
 
