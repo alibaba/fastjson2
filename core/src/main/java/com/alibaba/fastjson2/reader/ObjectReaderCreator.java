@@ -28,13 +28,16 @@ public class ObjectReaderCreator {
 
     public <T> ObjectReader<T> createObjectReaderNoneDefaultConstructor(Constructor constructor, String... paramNames) {
         Function<Map<Long, Object>, T> function = createFunction(constructor, paramNames);
+        Class declaringClass = constructor.getDeclaringClass();
         FieldReader[] fieldReaders = createFieldReaders(
                 JSONFactory.getDefaultObjectReaderProvider(),
+                declaringClass,
+                declaringClass,
                 constructor,
                 constructor.getParameters(),
                 paramNames
         );
-        return createObjectReaderNoneDefaultConstructor(constructor.getDeclaringClass(), function, fieldReaders);
+        return createObjectReaderNoneDefaultConstructor(declaringClass, function, fieldReaders);
     }
 
     public <T> ObjectReader<T> createObjectReaderNoneDefaultConstructor(
@@ -45,7 +48,19 @@ public class ObjectReaderCreator {
             FieldReader[] setterFieldReaders
     ) {
         Function<Map<Long, Object>, T> function = createFunction(constructor, paramNames);
-        return new ObjectReaderNoneDefaultConstructor(objectClass, null, null, 0, function, null, paramNames, paramFieldReaders, setterFieldReaders);
+        return new ObjectReaderNoneDefaultConstructor(
+                objectClass,
+                null,
+                null,
+                0,
+                function,
+                null,
+                paramNames,
+                paramFieldReaders,
+                setterFieldReaders,
+                null,
+                null
+        );
     }
 
     public <T> ObjectReader<T> createObjectReaderNoneDefaultConstructor(
@@ -53,22 +68,50 @@ public class ObjectReaderCreator {
             Function<Map<Long, Object>, T> creator,
             FieldReader... fieldReaders
     ) {
-        return new ObjectReaderNoneDefaultConstructor(objectClass, null, null, 0, creator, null, null, fieldReaders, null);
+        return new ObjectReaderNoneDefaultConstructor(
+                objectClass,
+                null,
+                null,
+                0,
+                creator,
+                null,
+                null,
+                fieldReaders,
+                null,
+                null,
+                null
+        );
     }
 
     public <T> ObjectReader<T> createObjectReaderFactoryMethod(Method factoryMethod, String... paramNames) {
         Function<Map<Long, Object>, Object> factoryFunction = createFactoryFunction(factoryMethod, paramNames);
         FieldReader[] fieldReaders = createFieldReaders(
                 JSONFactory.getDefaultObjectReaderProvider(),
+                null,
+                null,
                 factoryMethod,
                 factoryMethod.getParameters(),
                 paramNames
         );
-        return new ObjectReaderNoneDefaultConstructor(null, null, null, 0, factoryFunction, null, paramNames, fieldReaders, null);
+        return new ObjectReaderNoneDefaultConstructor(
+                null,
+                null,
+                null,
+                0,
+                factoryFunction,
+                null,
+                paramNames,
+                fieldReaders,
+                null,
+                null,
+                null
+        );
     }
 
     public FieldReader[] createFieldReaders(
             ObjectReaderProvider provider,
+            Class objectClass,
+            Type objectType,
             Executable owner,
             Parameter[] parameters,
             String... paramNames
@@ -104,7 +147,7 @@ public class ObjectReaderCreator {
                 fieldName = fieldInfo.fieldName;
             }
 
-            ObjectReader initReader = getInitReader(provider, parameter.getType(), fieldInfo);
+            ObjectReader initReader = getInitReader(provider, parameter.getParameterizedType(), parameter.getType(), fieldInfo);
             Type paramType = parameter.getParameterizedType();
             fieldReaders[i] = createFieldReaderParam(
                     null,
@@ -116,6 +159,7 @@ public class ObjectReaderCreator {
                     paramType,
                     parameter.getType(),
                     paramName,
+                    declaringClass,
                     parameter,
                     null,
                     initReader
@@ -330,13 +374,16 @@ public class ObjectReaderCreator {
 
         Map<String, FieldReader> fieldReaders = new LinkedHashMap<>();
 
+        Class declaringClass = null;
         Parameter[] parameters;
         String[] paramNames;
         if (beanInfo.creatorConstructor != null) {
             parameters = beanInfo.creatorConstructor.getParameters();
+            declaringClass = beanInfo.creatorConstructor.getDeclaringClass();
             paramNames = ASMUtils.lookupParameterNames(beanInfo.creatorConstructor);
         } else {
             parameters = beanInfo.createMethod.getParameters();
+            declaringClass = beanInfo.createMethod.getDeclaringClass();
             paramNames = ASMUtils.lookupParameterNames(beanInfo.createMethod);
         }
 
@@ -375,20 +422,44 @@ public class ObjectReaderCreator {
                 paramNames[i] = fieldName;
             }
 
+            String finalFieldName = fieldName;
+            Class<?> paramClass = parameter.getType();
+            BeanUtils.getters(objectClass, method -> {
+                if (method.getReturnType() != paramClass) {
+                    return;
+                }
+
+                FieldInfo methodFieldInfo = new FieldInfo();
+                provider.getFieldInfo(methodFieldInfo, objectClass, method);
+                String methodFieldName = methodFieldInfo.fieldName;
+                if (methodFieldName == null) {
+                    methodFieldName = BeanUtils.getterName(method, PropertyNamingStrategy.CamelCase.name());
+                }
+
+                if (methodFieldInfo.readUsing != null && finalFieldName.equals(methodFieldName)
+                ) {
+                    fieldInfo.readUsing = methodFieldInfo.readUsing;
+                }
+            });
+
             Type paramType = parameter.getParameterizedType();
-            fieldReaders.put(fieldName,
-                    createFieldReaderParam(
-                            objectClass,
-                            objectType,
-                            fieldName,
-                            i,
-                            fieldInfo.features,
-                            fieldInfo.format,
-                            paramType,
-                            parameter.getType(),
-                            fieldName,
-                            parameter,
-                            null));
+            ObjectReader initReader = getInitReader(provider, paramType, paramClass, fieldInfo);
+            FieldReader fieldReaderParam = createFieldReaderParam(
+                    objectClass,
+                    objectType,
+                    fieldName,
+                    i,
+                    fieldInfo.features,
+                    fieldInfo.format,
+                    paramType,
+                    paramClass,
+                    fieldName,
+                    declaringClass,
+                    parameter,
+                    null,
+                    initReader
+            );
+            fieldReaders.put(fieldName, fieldReaderParam);
 
             if (fieldInfo.alternateNames != null) {
                 for (String alternateName : fieldInfo.alternateNames) {
@@ -405,8 +476,9 @@ public class ObjectReaderCreator {
                                     fieldInfo.features,
                                     fieldInfo.format,
                                     paramType,
-                                    parameter.getType(),
+                                    paramClass,
                                     fieldName,
+                                    declaringClass,
                                     parameter,
                                     null
                             ));
@@ -502,7 +574,10 @@ public class ObjectReaderCreator {
                 null,
                 paramNames,
                 fieldReaderArray,
-                setterFieldReaders);
+                setterFieldReaders,
+                beanInfo.seeAlso,
+                beanInfo.seeAlsoNames
+        );
     }
 
     public <T> ObjectReader<T> createObjectReader(
@@ -696,8 +771,11 @@ public class ObjectReaderCreator {
 
         if (beanInfo.deserializer != null && ObjectReader.class.isAssignableFrom(beanInfo.deserializer)) {
             try {
-                return (ObjectReader<T>) beanInfo.deserializer.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
+                Constructor constructor = beanInfo.deserializer.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                return (ObjectReader<T>) constructor.newInstance();
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
+                     InvocationTargetException e) {
                 throw new JSONException("create deserializer error", e);
             }
         }
@@ -881,6 +959,8 @@ public class ObjectReaderCreator {
                 Function<Map<Long, Object>, T> function = new ConstructorFunction(alternateConstructors, creatorConstructor, null, parameterNames);
                 FieldReader[] paramFieldReaders = createFieldReaders(
                         provider,
+                        objectClass,
+                        objectType,
                         creatorConstructor,
                         creatorConstructor.getParameters(),
                         parameterNames
@@ -894,7 +974,9 @@ public class ObjectReaderCreator {
                         alternateConstructors,
                         parameterNames,
                         paramFieldReaders,
-                        fieldReaderArray
+                        fieldReaderArray,
+                        null,
+                        null
                 );
             }
         }
@@ -957,12 +1039,7 @@ public class ObjectReaderCreator {
             Map<String, FieldReader> fieldReaders,
             ObjectReaderProvider provider
     ) {
-        for (ObjectReaderModule module : provider.modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor != null) {
-                annotationProcessor.getFieldInfo(fieldInfo, objectClass, field);
-            }
-        }
+        provider.getFieldInfo(fieldInfo, objectClass, field);
 
         if (fieldInfo.ignore) {
             return;
@@ -981,7 +1058,7 @@ public class ObjectReaderCreator {
         Type fieldType = field.getGenericType();
         Class<?> fieldClass = field.getType();
 
-        ObjectReader initReader = getInitReader(provider, fieldClass, fieldInfo);
+        ObjectReader initReader = getInitReader(provider, fieldType, fieldClass, fieldInfo);
         String schema = fieldInfo.schema;
         if (fieldInfo.required) {
             if (schema == null) {
@@ -1148,7 +1225,7 @@ public class ObjectReaderCreator {
         Type fieldType = method.getGenericParameterTypes()[0];
         Class fieldClass = method.getParameterTypes()[0];
 
-        ObjectReader initReader = getInitReader(provider, fieldClass, fieldInfo);
+        ObjectReader initReader = getInitReader(provider, fieldType, fieldClass, fieldInfo);
         FieldReader fieldReader = createFieldReaderMethod(
                 objectClass,
                 objectType,
@@ -1224,22 +1301,15 @@ public class ObjectReaderCreator {
         final String[] orders = beanInfo.orders;
         if (fieldBased) {
             BeanUtils.declaredFields(objectClass, field -> {
-                if (Modifier.isStatic(field.getModifiers())) {
-                    return;
-                }
-
                 fieldInfo.init();
                 fieldInfo.features |= JSONReader.Feature.FieldBased.mask;
                 fieldInfo.features |= beanFeatures;
                 createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, provider);
             });
         } else {
-            BeanUtils.fields(objectClass, field -> {
-                if (Modifier.isStatic(field.getModifiers())) {
-                    return;
-                }
-
+            BeanUtils.declaredFields(objectClass, field -> {
                 fieldInfo.init();
+                fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
                 fieldInfo.features |= beanFeatures;
 
                 createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, provider);
@@ -1354,6 +1424,7 @@ public class ObjectReaderCreator {
             Type fieldType,
             Class fieldClass,
             String paramName,
+            Class declaringClass,
             Parameter parameter,
             JSONSchema schema
     ) {
@@ -1367,6 +1438,7 @@ public class ObjectReaderCreator {
                 fieldType,
                 fieldClass,
                 paramName,
+                declaringClass,
                 parameter,
                 schema,
                 null
@@ -1383,6 +1455,7 @@ public class ObjectReaderCreator {
             Type fieldType,
             Class fieldClass,
             String paramName,
+            Class declaringClass,
             Parameter parameter,
             JSONSchema schema,
             ObjectReader initReader
@@ -1419,7 +1492,22 @@ public class ObjectReaderCreator {
             return new FieldReaderInt64Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, schema);
         }
 
-        return new FieldReaderObjectParam(fieldName, fieldType, fieldClass, paramName, parameter, ordinal, features, format, schema);
+        Type fieldTypeResolved = null;
+        Class fieldClassResolved = null;
+        if (!(fieldType instanceof Class) && objectType != null) {
+            fieldTypeResolved = BeanUtils.getParamType(TypeReference.get(objectType), objectClass, declaringClass, parameter, fieldType);
+            if (fieldTypeResolved != null) {
+                fieldClassResolved = TypeUtils.getMapping(fieldTypeResolved);
+            }
+        }
+        if (fieldTypeResolved == null) {
+            fieldTypeResolved = fieldType;
+        }
+        if (fieldClassResolved == null) {
+            fieldClassResolved = fieldClass;
+        }
+
+        return new FieldReaderObjectParam(fieldName, fieldTypeResolved, fieldClassResolved, paramName, parameter, ordinal, features, format, schema);
     }
 
     public <T> FieldReader createFieldReaderMethod(
@@ -2210,8 +2298,49 @@ public class ObjectReaderCreator {
         return new ObjectReaderImplEnum(objectClass, createMethod, enumValueField, enums, ordinalEnums, enumNameHashCodes);
     }
 
-    static ObjectReader getInitReader(ObjectReaderProvider provider, Class fieldClass, FieldInfo fieldInfo) {
+    static ObjectReader getInitReader(ObjectReaderProvider provider,
+                                      Type fieldType,
+                                      Class fieldClass,
+                                      FieldInfo fieldInfo) {
         ObjectReader initReader = fieldInfo.getInitReader();
+        if (initReader == null && Map.class.isAssignableFrom(fieldClass) && (fieldInfo.keyUsing != null || fieldInfo.valueUsing != null)) {
+            ObjectReader keyReader = null;
+            if (fieldInfo.keyUsing != null) {
+                try {
+                    Constructor<?> constructor = fieldInfo.keyUsing.getDeclaredConstructor();
+                    constructor.setAccessible(true);
+                    keyReader = (ObjectReader) constructor.newInstance();
+                } catch (Exception ignored) {
+                    // ignored
+                }
+            }
+
+            ObjectReader valueReader = null;
+            if (fieldInfo.valueUsing != null) {
+                try {
+                    Constructor<?> constructor = fieldInfo.valueUsing.getDeclaredConstructor();
+                    constructor.setAccessible(true);
+                    valueReader = (ObjectReader) constructor.newInstance();
+                } catch (Exception ignored) {
+                    // ignored
+                }
+            }
+
+            if (keyReader != null || valueReader != null) {
+                ObjectReader reader = ObjectReaderImplMap.of(fieldType, fieldClass, fieldInfo.features);
+                if (reader instanceof ObjectReaderImplMapTyped) {
+                    ObjectReaderImplMapTyped mapReader = (ObjectReaderImplMapTyped) reader;
+                    if (keyReader != null) {
+                        mapReader.keyObjectReader = keyReader;
+                    }
+                    if (valueReader != null) {
+                        mapReader.valueObjectReader = valueReader;
+                    }
+
+                    return mapReader;
+                }
+            }
+        }
         if (initReader == null) {
             if (fieldClass == long.class || fieldClass == Long.class) {
                 ObjectReader objectReader = provider.getObjectReader(Long.class);

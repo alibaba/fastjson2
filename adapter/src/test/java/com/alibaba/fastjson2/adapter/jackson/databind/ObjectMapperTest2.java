@@ -7,10 +7,15 @@ import com.alibaba.fastjson2.adapter.jackson.core.Version;
 import com.alibaba.fastjson2.adapter.jackson.databind.deser.std.StdDeserializer;
 import com.alibaba.fastjson2.adapter.jackson.databind.module.SimpleModule;
 import com.alibaba.fastjson2.adapter.jackson.databind.ser.std.StdSerializer;
+import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -24,8 +29,24 @@ public class ObjectMapperTest2 {
         module.addSerializer(Car.class, new CustomCarSerializer());
         mapper.registerModule(module);
         Car car = new Car("yellow", "renault");
+        String expected = "{\"car_brand\":\"renault\"}";
+
         String carJson = mapper.writeValueAsString(car);
-        assertEquals("{\"car_brand\":\"renault\"}", carJson);
+        assertEquals(expected, carJson);
+
+        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+        mapper.writeValue(byteOut, car);
+        assertEquals(expected, new String(byteOut.toByteArray(), StandardCharsets.UTF_8));
+
+        StringWriter strWriter = new StringWriter();
+        mapper.writeValue(strWriter, car);
+        assertEquals(expected, strWriter.toString());
+
+        File tempFile = File.createTempFile("tmp", "json");
+        mapper.writeValue(tempFile, car);
+
+        Car car1 = mapper.readValue(tempFile, Car.class);
+        assertEquals(car.type, car1.type);
     }
 
     public static class CustomCarSerializer
@@ -48,7 +69,7 @@ public class ObjectMapperTest2 {
     }
 
     @Test
-    public void test1() {
+    public void test1() throws Exception {
         String json = "{ \"color\" : \"Black\", \"type\" : \"BMW\" }";
         ObjectMapper mapper = new ObjectMapper();
         SimpleModule module =
@@ -117,6 +138,7 @@ public class ObjectMapperTest2 {
             this.color = color;
         }
 
+        @JSONField(alternateNames = "car_brand")
         public void setType(String type) {
             this.type = type;
         }

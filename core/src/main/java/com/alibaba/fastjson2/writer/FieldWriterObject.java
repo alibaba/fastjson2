@@ -100,7 +100,7 @@ abstract class FieldWriterObject<T>
                 return formattedWriter;
             }
         } else {
-            boolean typeMatch = initValueClass == valueClass;
+            boolean typeMatch = initValueClass == valueClass || (initValueClass == Map.class && initValueClass.isAssignableFrom(valueClass));
             if (!typeMatch && initValueClass.isPrimitive()) {
                 typeMatch = (initValueClass == int.class && valueClass == Integer.class)
                         || (initValueClass == long.class && valueClass == Long.class)

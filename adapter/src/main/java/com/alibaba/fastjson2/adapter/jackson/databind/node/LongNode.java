@@ -19,4 +19,9 @@ public class LongNode
     public String asText() {
         return Long.toString(value);
     }
+
+    @Override
+    public int asInt(int defaultValue) {
+        return (int) value;
+    }
 }

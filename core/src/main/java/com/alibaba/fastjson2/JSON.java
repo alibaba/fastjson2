@@ -3133,7 +3133,7 @@ public interface JSON {
                 jsonReader.context.config(JSONReader.Feature.SupportArrayToBean);
             }
 
-            return (T) objectReader.readJSONBObject(jsonReader, null, null, 0);
+            return (T) objectReader.readJSONBObject(jsonReader, null, null, featuresValue);
         }
     }
 

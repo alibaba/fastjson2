@@ -23,4 +23,12 @@ public abstract class JsonSerializer<T>
             throw new JSONException("write error");
         }
     }
+
+    public Class<T> handledType() {
+        return null;
+    }
+
+    public abstract static class None
+            extends JsonSerializer<Object> {
+    }
 }

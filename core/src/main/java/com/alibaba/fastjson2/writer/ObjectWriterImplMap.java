@@ -37,6 +37,7 @@ public final class ObjectWriterImplMap
     final Type keyType;
     final Type valueType;
     final boolean valueTypeRefDetect;
+    volatile ObjectWriter keyWriter;
     volatile ObjectWriter valueWriter;
 
     final byte[] jsonbTypeInfo;
@@ -122,7 +123,11 @@ public final class ObjectWriterImplMap
     }
 
     @Override
-    public void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+    public void writeArrayMappingJSONB(JSONWriter jsonWriter,
+                                       Object object,
+                                       Object fieldName,
+                                       Type fieldType,
+                                       long features) {
         Map map = (Map) object;
 
         jsonWriter.startObject();
@@ -448,7 +453,9 @@ public final class ObjectWriterImplMap
             }
 
             String strKey = null;
-            if (key == null) {
+            if (keyWriter != null) {
+                keyWriter.write(jsonWriter, key, null, null, 0);
+            } else if (key == null) {
                 jsonWriter.writeName("null");
             } else if (key instanceof String) {
                 jsonWriter.writeName(strKey = (String) key);

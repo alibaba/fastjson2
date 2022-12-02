@@ -21,4 +21,9 @@ public class DecimalNode
     public String asText() {
         return value.toPlainString();
     }
+
+    @Override
+    public int asInt(int defaultValue) {
+        return value.intValue();
+    }
 }

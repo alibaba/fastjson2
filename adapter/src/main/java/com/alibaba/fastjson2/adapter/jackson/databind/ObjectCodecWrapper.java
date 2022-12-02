@@ -15,7 +15,7 @@ public class ObjectCodecWrapper
 
     @Override
     public <T extends TreeNode> T readTree(JsonParser p) throws IOException {
-        JSONReader jsonReader = p.getRaw();
+        JSONReader jsonReader = p.getJSONReader();
         Object any = jsonReader.readAny();
         return (T) TreeNodeUtils.as(any);
     }

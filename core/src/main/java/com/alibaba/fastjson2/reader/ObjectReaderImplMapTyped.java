@@ -292,7 +292,11 @@ class ObjectReaderImplMapTyped
                     }
                 }
             } else {
-                name = jsonReader.read(keyType);
+                if (keyObjectReader != null) {
+                    name = keyObjectReader.readObject(jsonReader, null, null, 0);
+                } else {
+                    name = jsonReader.read(keyType);
+                }
                 if (i == 0
                         && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
                         && name.equals(getTypeKey())) {

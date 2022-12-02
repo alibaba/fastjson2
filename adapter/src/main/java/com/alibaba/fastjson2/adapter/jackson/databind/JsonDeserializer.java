@@ -16,14 +16,20 @@ public abstract class JsonDeserializer<T>
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        JsonParser p = new JsonParserWrapper(jsonReader);
+        JsonParser p = new JsonParser(jsonReader);
         DeserializationContext ctx = new DeserializationContext(fieldType, fieldName, features);
         T object = null;
         try {
             object = deserialize(p, ctx);
+        } catch (JsonMappingException e) {
+            throw new JSONException(e.getMessage(), e.getCause());
         } catch (IOException e) {
             throw new JSONException("deserialize error", e);
         }
         return object;
+    }
+
+    public abstract static class None
+            extends JsonDeserializer<Object> {
     }
 }

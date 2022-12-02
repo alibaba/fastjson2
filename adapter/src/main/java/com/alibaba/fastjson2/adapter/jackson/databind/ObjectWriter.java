@@ -5,8 +5,7 @@ import com.alibaba.fastjson2.adapter.jackson.core.JsonFactory;
 import com.alibaba.fastjson2.support.csv.CSVWriter;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 
@@ -31,16 +30,39 @@ public class ObjectWriter {
             throws IOException {
         if (jsonFactory.isCSV()) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            CSVWriter writer = CSVWriter.of(out);
+            CSVWriter writer = CSVWriter.of(out, CSVWriter.Feature.AlwaysQuoteStrings);
             writer.writeRowObject(value);
             writer.close();
             String str = new String(out.toByteArray(), StandardCharsets.UTF_8);
             return str;
         }
+
         JSONWriter jsonWriter = jsonFactory.createJSONWriter();
         JSONWriter.Context context = jsonWriter.getContext();
         context.getObjectWriter(objectType, objectClass)
                 .write(jsonWriter, value, null, null, 0L);
         return jsonWriter.toString();
+    }
+
+    public void writeValue(File resultFile, Object value) throws IOException {
+        try (FileOutputStream fileOut = new FileOutputStream(resultFile)) {
+            if (jsonFactory.isCSV()) {
+                CSVWriter writer = CSVWriter.of(fileOut, CSVWriter.Feature.AlwaysQuoteStrings);
+                writer.writeRowObject(value);
+                writer.close();
+                return;
+            }
+
+            JSONWriter jsonWriter = jsonFactory.createJSONWriter();
+            JSONWriter.Context context = jsonWriter.getContext();
+            context.getObjectWriter(objectType, objectClass)
+                    .write(jsonWriter, value, null, null, 0L);
+            jsonWriter.flushTo(fileOut);
+        }
+    }
+
+    public ObjectWriter withDefaultPrettyPrinter() {
+        // TODO withDefaultPrettyPrinter
+        return this;
     }
 }

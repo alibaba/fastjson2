@@ -21,4 +21,9 @@ public class BigIntegerNode
     public String asText() {
         return value.toString();
     }
+
+    @Override
+    public int asInt(int defaultValue) {
+        return value.intValue();
+    }
 }

@@ -92,6 +92,11 @@ public class ArrayNode
         return this;
     }
 
+    public ArrayNode add(JsonNode value) {
+        jsonArray.add(value);
+        return this;
+    }
+
     public String toString() {
         return jsonArray.toString();
     }
@@ -102,26 +107,20 @@ public class ArrayNode
 
     @Override
     public Iterator<JsonNode> iterator() {
-        return new ArrayNodeIterator(jsonArray.iterator());
+        return new JsonNodeIterator(jsonArray.iterator());
     }
 
-    static class ArrayNodeIterator
-            implements Iterator<JsonNode> {
-        final Iterator iterator;
+    @Override
+    public Iterator<JsonNode> elements() {
+        return new JsonNodeIterator(this.iterator());
+    }
 
-        public ArrayNodeIterator(Iterator iterator) {
-            this.iterator = iterator;
+    @Override
+    public JsonNode get(int index) {
+        if ((index >= 0) && (index < jsonArray.size())) {
+            Object item = jsonArray.get(index);
+            return TreeNodeUtils.as(item);
         }
-
-        @Override
-        public boolean hasNext() {
-            return iterator.hasNext();
-        }
-
-        @Override
-        public JsonNode next() {
-            Object obj = iterator.next();
-            return TreeNodeUtils.as(obj);
-        }
+        return null;
     }
 }

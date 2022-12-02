@@ -52,6 +52,17 @@ public final class ObjectReaderImplList
             }
         } else {
             rawType = type;
+            if (listClass != null) {
+                Type superType = listClass.getGenericSuperclass();
+                if (superType instanceof ParameterizedType) {
+                    ParameterizedType parameterizedType = (ParameterizedType) superType;
+                    rawType = parameterizedType.getRawType();
+                    Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                    if (actualTypeArguments.length == 1) {
+                        itemType = actualTypeArguments[0];
+                    }
+                }
+            }
         }
 
         if (listClass == null) {

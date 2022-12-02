@@ -29,9 +29,23 @@ public class ObjectReaderNoneDefaultConstructor<T>
             List<Constructor> alternateConstructors,
             String[] paramNames,
             FieldReader[] paramFieldReaders,
-            FieldReader[] setterFieldReaders
+            FieldReader[] setterFieldReaders,
+            Class[] seeAlso,
+            String[] seeAlsoNames
     ) {
-        super(objectClass, typeKey, typeName, features, null, null, null, concat(paramFieldReaders, setterFieldReaders));
+        super(
+                objectClass,
+                typeKey,
+                typeName,
+                features,
+                null,
+                null,
+                null,
+                seeAlso,
+                seeAlsoNames,
+                concat(paramFieldReaders, setterFieldReaders)
+        );
+
         this.paramNames = paramNames;
         this.creator = creator;
         this.setterFieldReaders = setterFieldReaders;
@@ -236,7 +250,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 ObjectReader autoTypeObjectReader;
 
                 if (supportAutoType) {
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+                    autoTypeObjectReader = autoType(context, typeHash);
 
                     if (autoTypeObjectReader == null) {
                         String typeName = jsonReader.getString();

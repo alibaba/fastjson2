@@ -1,17 +1,188 @@
 package com.alibaba.fastjson2.adapter.jackson.core;
 
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.adapter.jackson.core.type.TypeReference;
+import com.alibaba.fastjson2.adapter.jackson.databind.ObjectCodecWrapper;
+import com.alibaba.fastjson2.adapter.jackson.databind.node.ObjectNode;
+import com.alibaba.fastjson2.adapter.jackson.databind.node.TreeNodeUtils;
 
+import java.io.Closeable;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Base64;
 
-public abstract class JsonParser {
-    public abstract boolean isClosed();
+public class JsonParser
+        implements Closeable {
+    protected final JSONReader jsonReader;
+    protected String stringValue;
+    protected Number number;
+    protected JsonToken token;
 
-    public abstract JsonToken nextToken() throws IOException;
+    public JsonParser(JSONReader jsonReader) {
+        this.jsonReader = jsonReader;
+    }
 
-    public abstract JSONReader getRaw();
+    public JSONReader getJSONReader() {
+        return jsonReader;
+    }
 
-    public abstract ObjectCodec getCodec();
+    public boolean isClosed() {
+        return jsonReader.isEnd();
+    }
+
+    public ObjectCodec getCodec() {
+        return new ObjectCodecWrapper();
+    }
+
+    public JsonLocation getCurrentLocation() {
+        // TODO getCurrentLocation
+        return new JsonLocation();
+    }
+
+    public JsonToken nextValue() throws IOException {
+        return nextToken();
+    }
+
+    public <T> T readValueAs(TypeReference<?> valueTypeRef) throws IOException {
+        return jsonReader.read(valueTypeRef.getType());
+    }
+
+    public <T extends TreeNode> T readValueAsTree() throws IOException {
+        if (token == JsonToken.START_OBJECT) {
+            JSONObject jsonObject = new JSONObject();
+            jsonReader.setTypeRedirect(true);
+            jsonReader.readObject(jsonObject, 0L);
+            return (T) new ObjectNode(jsonObject);
+        }
+
+        Object any = jsonReader.readAny();
+        return (T) TreeNodeUtils.as(any);
+    }
+
+    public byte[] getBinaryValue() throws IOException {
+        if (token == JsonToken.START_OBJECT) {
+            stringValue = jsonReader.readString();
+            jsonReader.nextIfMatch(':');
+        } else if (stringValue == null) {
+            char ch = jsonReader.current();
+            if (ch == '"') {
+                stringValue = jsonReader.readString();
+            }
+        }
+
+        String str = stringValue;
+        stringValue = null;
+        return Base64.getDecoder().decode(str);
+    }
+
+    public String getValueAsString() {
+        if (token == JsonToken.START_OBJECT) {
+            stringValue = jsonReader.readString();
+            jsonReader.nextIfMatch(':');
+        } else if (stringValue == null) {
+            char ch = jsonReader.current();
+            if (ch == '"') {
+                stringValue = jsonReader.readString();
+            }
+        }
+
+        String str = stringValue;
+        stringValue = null;
+        return str;
+    }
+
+    public long getLongValue() {
+        long value = number.longValue();
+        number = null;
+        return value;
+    }
+
+    public JsonToken nextToken() throws IOException {
+        char current = jsonReader.current();
+        if (current == ':' || current == ',') {
+            jsonReader.next();
+            current = jsonReader.current();
+        }
+
+        switch (current) {
+            case '{':
+                token = JsonToken.START_OBJECT;
+                jsonReader.next();
+                break;
+            case '}':
+                token = JsonToken.END_OBJECT;
+                jsonReader.next();
+                jsonReader.nextIfMatch(',');
+                break;
+            case '[':
+                token = JsonToken.START_ARRAY;
+                jsonReader.next();
+                break;
+            case ']':
+                token = JsonToken.END_ARRAY;
+                jsonReader.next();
+                jsonReader.nextIfMatch(',');
+                break;
+            case '"':
+                stringValue = jsonReader.readString();
+                if (jsonReader.current() == ':') {
+                    jsonReader.next();
+                    token = JsonToken.FIELD_NAME;
+                } else {
+                    token = JsonToken.VALUE_STRING;
+                }
+                break;
+            case '.':
+            case '+':
+            case '-':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                number = jsonReader.readNumber();
+                if (number instanceof Double || number instanceof Float || number instanceof BigDecimal) {
+                    token = JsonToken.VALUE_NUMBER_FLOAT;
+                } else {
+                    token = JsonToken.VALUE_NUMBER_INT;
+                }
+                break;
+            case 'n':
+                if (jsonReader.nextIfNull()) {
+                    token = JsonToken.VALUE_NULL;
+                } else {
+                    throw new IOException("TODO");
+                }
+                break;
+            case 't':
+                if (!jsonReader.nextIfMatchIdent('t', 'r', 'u', 'e')) {
+                    throw new IOException("TODO");
+                }
+                token = JsonToken.VALUE_TRUE;
+                break;
+            case 'f':
+                if (!jsonReader.nextIfMatchIdent('f', 'a', 'l', 's', 'e')) {
+                    throw new IOException("TODO");
+                }
+                token = JsonToken.VALUE_FALSE;
+                break;
+            default:
+                throw new IOException("TODO " + current);
+        }
+
+        return token;
+    }
+
+    @Override
+    public void close() throws IOException {
+        jsonReader.close();
+    }
 
     public enum Feature {
         AUTO_CLOSE_SOURCE(true),

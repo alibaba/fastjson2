@@ -275,7 +275,10 @@ public class ObjectReaderCreatorASM
     }
 
     @Override
-    public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, ObjectReaderProvider provider) {
+    public <T> ObjectReader<T> createObjectReader(Class<T> objectClass,
+                                                  Type objectType,
+                                                  boolean fieldBased,
+                                                  ObjectReaderProvider provider) {
         boolean externalClass = classLoader.isExternalClass(objectClass);
         int objectClassModifiers = objectClass.getModifiers();
         boolean publicClass = Modifier.isPublic(objectClassModifiers);
@@ -300,8 +303,10 @@ public class ObjectReaderCreatorASM
 
         if (beanInfo.deserializer != null && ObjectReader.class.isAssignableFrom(beanInfo.deserializer)) {
             try {
-                return (ObjectReader<T>) beanInfo.deserializer.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
+                Constructor constructor = beanInfo.deserializer.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                return (ObjectReader<T>) constructor.newInstance();
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 throw new JSONException("create deserializer error", e);
             }
         }

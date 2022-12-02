@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class JsonGenerator
         implements Closeable, Flushable {
@@ -12,24 +13,50 @@ public class JsonGenerator
     protected final OutputStream out;
     protected final Charset charset;
     protected final JsonEncoding encoding;
+    protected final Writer writer;
+
+    public JsonGenerator() {
+        this(JSONWriter.of(), null, JsonEncoding.UTF16_BE);
+    }
 
     public JsonGenerator(JSONWriter jsonWriter, OutputStream out, JsonEncoding encoding) {
         this.jsonWriter = jsonWriter;
         this.out = out;
         this.encoding = encoding;
         this.charset = Charset.forName(encoding.getJavaName());
+        this.writer = null;
+    }
+
+    public JsonGenerator(JSONWriter jsonWriter, Writer writer) {
+        this.jsonWriter = jsonWriter;
+        this.out = null;
+        this.encoding = JsonEncoding.UTF16_BE;
+        this.charset = StandardCharsets.UTF_16;
+        this.writer = writer;
     }
 
     public JSONWriter getJSONWriter() {
         return jsonWriter;
     }
 
+    public void writeNull() throws IOException {
+        jsonWriter.writeNull();
+    }
+
     public void writeRaw(String text) {
         jsonWriter.writeRaw(text);
     }
 
+    public void writeRaw(char ch) {
+        jsonWriter.writeRaw(ch);
+    }
+
     public void flush() throws IOException {
-        jsonWriter.flushTo(out, charset);
+        if (out != null) {
+            jsonWriter.flushTo(out, charset);
+        } else if (writer != null) {
+            jsonWriter.flushTo(writer);
+        }
     }
 
     public void writeStartObject() {
@@ -53,16 +80,20 @@ public class JsonGenerator
         jsonWriter.writeString(text);
     }
 
-    public void writeNumber(int v) throws IOException {
+    public void writeNumber(int v) {
         jsonWriter.writeInt32(v);
     }
 
-    public void writeNumber(BigDecimal v) throws IOException {
+    public void writeNumber(BigDecimal v) {
         jsonWriter.writeDecimal(v);
     }
 
-    public void writeNumber(long v) throws IOException {
+    public void writeNumber(long v) {
         jsonWriter.writeInt64(v);
+    }
+
+    public void writeBinary(byte[] data) {
+        jsonWriter.writeBinary(data);
     }
 
     public void writeStringField(String fieldName, String value) throws IOException {
@@ -75,13 +106,54 @@ public class JsonGenerator
         writeNumber(value);
     }
 
+    public void writeNumberField(String fieldName, long value) throws IOException {
+        writeFieldName(fieldName);
+        writeNumber(value);
+    }
+
     public void writeNumberField(String fieldName, int value) throws IOException {
         writeFieldName(fieldName);
         writeNumber(value);
     }
 
+    public void writeBinaryField(String fieldName, byte[] data) throws IOException {
+        writeFieldName(fieldName);
+        writeBinary(data);
+    }
+
+    public void writeArrayFieldStart(String fieldName) throws IOException {
+        writeFieldName(fieldName);
+        writeStartArray();
+    }
+
+    public void writeStartArray() throws IOException {
+        jsonWriter.startArray();
+    }
+
+    public void writeRawValue(String text) throws IOException {
+        jsonWriter.writeRaw(text);
+    }
+
+    public void writeObject(Object pojo) throws IOException {
+        jsonWriter.writeAny(pojo);
+    }
+
+    public void writeObjectField(String fieldName, Object pojo) throws IOException {
+        writeFieldName(fieldName);
+        writeObject(pojo);
+    }
+
+    public void writeObjectFieldStart(String fieldName) throws IOException {
+        writeFieldName(fieldName);
+        writeStartObject();
+    }
+
     public void close() throws IOException {
-        jsonWriter.flushTo(out, charset);
+        if (out != null) {
+            jsonWriter.flushTo(out, charset);
+        } else if (writer != null) {
+            jsonWriter.flushTo(writer);
+        }
     }
 
     public enum Feature {

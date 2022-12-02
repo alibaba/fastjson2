@@ -11,7 +11,7 @@ public class ObjectMapperTest {
     ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    public void test() {
+    public void test() throws Exception {
         Car car = new Car("yellow", "renault");
         String json = objectMapper.writeValueAsString(car);
         assertEquals("{\"color\":\"yellow\",\"type\":\"renault\"}", json);

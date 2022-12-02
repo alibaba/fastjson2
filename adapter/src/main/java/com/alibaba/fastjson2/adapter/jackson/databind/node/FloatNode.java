@@ -19,4 +19,9 @@ public class FloatNode
     public String asText() {
         return Float.toString(value);
     }
+
+    @Override
+    public int asInt(int defaultValue) {
+        return (int) value;
+    }
 }
