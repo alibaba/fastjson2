@@ -614,7 +614,8 @@
                                 com/fasterxml/jackson/databind/*.java,
                                 com/alibaba/fastjson2/adapter/http/*.java,
                                 com/alibaba/fastjson2/dubbo/GoogleProtobufBasic.java,
-                                com/alibaba/fastjson2/issues/Issue983.java
+                                com/alibaba/fastjson2/issues/Issue983.java,
+                                com/alibaba/fastjson2/protobuf/PersonOuterClass.java
                             </excludes>
                         </configuration>
                     </execution>

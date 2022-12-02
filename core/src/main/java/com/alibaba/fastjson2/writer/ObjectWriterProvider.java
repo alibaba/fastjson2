@@ -191,6 +191,15 @@ public class ObjectWriterProvider
     }
 
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass, boolean fieldBased) {
+        if (fieldBased) {
+            Class superclass = objectClass.getSuperclass();
+            if (superclass != null
+                    && superclass != Object.class
+                    && superclass.getName().equals("com.google.protobuf.GeneratedMessageV3")) {
+                fieldBased = false;
+            }
+        }
+
         ObjectWriter objectWriter = fieldBased
                 ? cacheFieldBased.get(objectType)
                 : cache.get(objectType);
