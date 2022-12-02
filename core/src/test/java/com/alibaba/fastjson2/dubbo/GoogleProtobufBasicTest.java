@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.dubbo;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
@@ -30,6 +31,9 @@ public class GoogleProtobufBasicTest {
                 features
         );
         assertNotNull(jsonbBytes);
+
+        String str = JSON.toJSONString(requestType, JSONWriter.Feature.PrettyFormat);
+        System.out.println(str);
     }
 
     @Test

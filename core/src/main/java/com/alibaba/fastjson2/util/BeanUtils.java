@@ -798,6 +798,34 @@ public abstract class BeanUtils {
 
             String methodName = method.getName();
 
+            boolean methodSkip = false;
+            switch (methodName) {
+                case "isInitialized":
+                case "getInitializationErrorString":
+                case "getSerializedSize":
+                    if (protobufMessageV3) {
+                        methodSkip = true;
+                    }
+                    break;
+                case "equals":
+                case "hashCode":
+                    methodSkip = true;
+                    break;
+                default:
+                    break;
+            }
+
+            if (methodSkip) {
+                continue;
+            }
+
+            if (protobufMessageV3) {
+                if ((methodName.endsWith("Type") || methodName.endsWith("Bytes"))
+                        && returnClass.getName().equals("com.google.protobuf.ByteString")) {
+                    continue;
+                }
+            }
+
             // skip thrift isSetXXX
             if (methodName.startsWith("isSet") && returnClass == boolean.class) {
                 boolean setterFound = false, unsetFound = false, getterFound = false;
