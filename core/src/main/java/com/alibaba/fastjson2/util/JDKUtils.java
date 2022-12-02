@@ -110,6 +110,7 @@ public class JDKUtils {
         ToIntFunction<String> stringCoder = null;
         Function<String, byte[]> stringValue = null;
 
+        Boolean compact_strings = null;
         try {
             if (JVM_VERSION == 8) {
                 MethodHandles.Lookup lookup = getLookup();
@@ -132,13 +133,24 @@ public class JDKUtils {
 
             boolean lookupLambda;
             if (JVM_VERSION > 8 && JVM_VERSION < 16 && !openj9) {
-                lookupLambda = true;
+                try {
+                    Field compact_strings_field = String.class.getDeclaredField("COMPACT_STRINGS");
+                    if (compact_strings_field != null) {
+                        compact_strings_field.setAccessible(true);
+                        compact_strings = (Boolean) compact_strings_field.get(null);
+                    }
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+
+                lookupLambda = compact_strings != null && compact_strings.booleanValue();
             } else {
                 List<String> inputArguments = ManagementFactory
                         .getRuntimeMXBean()
                         .getInputArguments();
                 lookupLambda = inputArguments.contains("--add-opens=java.base/java.lang.invoke=ALL-UNNAMED")
                         || inputArguments.contains("--add-opens=java.base/java.lang.invoke=com.alibaba.fastjson2");
+                compact_strings = !inputArguments.contains("-XX:-CompactStrings");
             }
 
             if (lookupLambda) {
@@ -195,7 +207,11 @@ public class JDKUtils {
             // ignored
         }
 
-        if (stringCreatorJDK11 == null && unsafeSupport && !openj9) {
+        if (stringCreatorJDK11 == null
+                && unsafeSupport
+                && (compact_strings == null || compact_strings.booleanValue())
+                && !openj9
+        ) {
             stringCreatorJDK11 = ((Supplier<BiFunction<byte[], Byte, String>>) () -> {
                 try {
                     return (BiFunction<byte[], Byte, String>) new UnsafeUtils.UnsafeStringCreator();
