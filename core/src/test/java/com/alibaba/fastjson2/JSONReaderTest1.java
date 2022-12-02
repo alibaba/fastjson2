@@ -1513,7 +1513,9 @@ public class JSONReaderTest1 {
 
     @Test
     public void testDates() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
+        DateTimeFormatter formatter = DateTimeFormatter
+                .ofPattern("yyyy-MM-dd HH:mm:ss", Locale.CHINA)
+                .withZone(IOUtils.SHANGHAI_ZONE_ID);
 
         char[] chars = "\"1900-01-01 00:00:00\"".toCharArray();
         for (int year = 1900; year < 2200; year++) {
