@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class Issue986 {
-
     @Test
     public void test_not_with_null() {
         JSONSchema jsonSchema = JSONSchema.parseSchema("{ \"not\": null }");
@@ -63,5 +62,4 @@ public class Issue986 {
                 )
         );
     }
-
 }
