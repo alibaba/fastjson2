@@ -129,7 +129,7 @@ public abstract class JSONSchema {
 
         JSONObject object = (JSONObject) not;
 
-        if (object != null && object.isEmpty()) {
+        if (object == null || object.isEmpty()) {
             return new Not(null, new Type[] {Type.Any}, null);
         }
 
