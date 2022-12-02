@@ -2,12 +2,14 @@ package com.alibaba.fastjson2.adapter.jackson.databind;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.adapter.jackson.core.*;
+import com.alibaba.fastjson2.adapter.jackson.databind.node.ArrayNode;
+import com.alibaba.fastjson2.adapter.jackson.databind.node.JsonNodeFactory;
 import com.alibaba.fastjson2.adapter.jackson.databind.node.ObjectNode;
 import com.alibaba.fastjson2.adapter.jackson.databind.node.TreeNodeUtils;
+import com.alibaba.fastjson2.adapter.jackson.databind.type.TypeFactory;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -15,10 +17,12 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreCheckClose;
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteByteArrayAsBase64;
 
 public class ObjectMapper
         extends ObjectCodec {
     protected final JsonFactory factory;
+    protected final TypeFactory typeFactory;
     protected SerializationConfig serializationConfig;
     protected DeserializationConfig deserializationConfig;
 
@@ -28,36 +32,131 @@ public class ObjectMapper
 
     public ObjectMapper(JsonFactory factory) {
         this.factory = factory;
+        this.typeFactory = new TypeFactory();
 
         serializationConfig = new SerializationConfig();
         deserializationConfig = new DeserializationConfig();
     }
 
-    public String writeValueAsString(Object object) {
-        JSONWriter.Context context = JSONFactory.createWriteContext(serializationConfig.writerProvider);
+    public String writeValueAsString(Object value) throws JsonProcessingException {
+        JSONWriter.Context context = createWriterContext();
 
         try (JSONWriter writer = JSONWriter.of(context)) {
-            if (object == null) {
+            if (value == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.setRootObject(value);
 
-                Class<?> valueClass = object.getClass();
+                Class<?> valueClass = value.getClass();
                 if (valueClass == JSONObject.class) {
-                    writer.write((JSONObject) object);
+                    writer.write((JSONObject) value);
                 } else {
                     boolean fieldBased = (context.getFeatures() & JSONWriter.Feature.FieldBased.mask) != 0;
-                    ObjectWriter<?> objectWriter = serializationConfig.writerProvider.getObjectWriter(valueClass, valueClass, fieldBased);
-                    objectWriter.write(writer, object, null, null, 0);
+                    com.alibaba.fastjson2.writer.ObjectWriter<?> objectWriter = serializationConfig.writerProvider.getObjectWriter(valueClass, valueClass, fieldBased);
+                    objectWriter.write(writer, value, null, null, 0);
                 }
             }
             return writer.toString();
         }
     }
 
-    public <T> T readValue(String content, Class<T> valueType) {
+    private JSONWriter.Context createWriterContext() {
+        return JSONFactory.createWriteContext(serializationConfig.writerProvider, WriteByteArrayAsBase64);
+    }
+
+    public byte[] writeValueAsBytes(Object value) throws JsonProcessingException {
+        JSONWriter.Context context = createWriterContext();
+
+        try (JSONWriter writer = JSONWriter.of(context)) {
+            if (value == null) {
+                writer.writeNull();
+            } else {
+                writer.setRootObject(value);
+
+                Class<?> valueClass = value.getClass();
+                if (valueClass == JSONObject.class) {
+                    writer.write((JSONObject) value);
+                } else {
+                    boolean fieldBased = (context.getFeatures() & JSONWriter.Feature.FieldBased.mask) != 0;
+                    com.alibaba.fastjson2.writer.ObjectWriter<?> objectWriter = serializationConfig.writerProvider.getObjectWriter(valueClass, valueClass, fieldBased);
+                    objectWriter.write(writer, value, null, null, 0);
+                }
+            }
+            return writer.getBytes();
+        }
+    }
+
+    public void writeValue(OutputStream out, Object value) throws IOException {
+        JSONWriter.Context context = createWriterContext();
+
+        try (JSONWriter writer = JSONWriter.of(context)) {
+            if (value == null) {
+                writer.writeNull();
+            } else {
+                writer.setRootObject(value);
+
+                Class<?> valueClass = value.getClass();
+                if (valueClass == JSONObject.class) {
+                    writer.write((JSONObject) value);
+                } else {
+                    boolean fieldBased = (context.getFeatures() & JSONWriter.Feature.FieldBased.mask) != 0;
+                    com.alibaba.fastjson2.writer.ObjectWriter<?> objectWriter = serializationConfig.writerProvider.getObjectWriter(valueClass, valueClass, fieldBased);
+                    objectWriter.write(writer, value, null, null, 0);
+                }
+            }
+            writer.flushTo(out);
+        }
+    }
+
+    public void writeValue(File resultFile, Object value) throws IOException {
+        JSONWriter.Context context = createWriterContext();
+
+        try (JSONWriter writer = JSONWriter.of(context); FileOutputStream out = new FileOutputStream(resultFile)) {
+            if (value == null) {
+                writer.writeNull();
+            } else {
+                writer.setRootObject(value);
+
+                Class<?> valueClass = value.getClass();
+                if (valueClass == JSONObject.class) {
+                    writer.write((JSONObject) value);
+                } else {
+                    boolean fieldBased = (context.getFeatures() & JSONWriter.Feature.FieldBased.mask) != 0;
+                    com.alibaba.fastjson2.writer.ObjectWriter<?> objectWriter = serializationConfig.writerProvider.getObjectWriter(valueClass, valueClass, fieldBased);
+                    objectWriter.write(writer, value, null, null, 0);
+                }
+            }
+            writer.flushTo(out);
+        }
+    }
+
+    public void writeValue(Writer w, Object value)
+            throws IOException, DatabindException {
+        JSONWriter.Context context = createWriterContext();
+
+        try (JSONWriter writer = JSONWriter.of(context)) {
+            if (value == null) {
+                writer.writeNull();
+            } else {
+                writer.setRootObject(value);
+
+                Class<?> valueClass = value.getClass();
+                if (valueClass == JSONObject.class) {
+                    writer.write((JSONObject) value);
+                } else {
+                    boolean fieldBased = (context.getFeatures() & JSONWriter.Feature.FieldBased.mask) != 0;
+                    com.alibaba.fastjson2.writer.ObjectWriter<?> objectWriter = serializationConfig.writerProvider.getObjectWriter(valueClass, valueClass, fieldBased);
+                    objectWriter.write(writer, value, null, null, 0);
+                }
+            }
+            writer.flushTo(w);
+        }
+    }
+
+    public <T> T readValue(String content, Class<T> valueType)
+            throws JsonMappingException, JsonParseException {
         if (content == null || content.isEmpty()) {
-            return null;
+            throw new JsonParseException("input is null or empty");
         }
 
         JSONReader.Context context = createReaderContext();
@@ -73,6 +172,8 @@ public class ObjectMapper
                 throw new JSONException(reader.info("input not end"));
             }
             return object;
+        } catch (JSONException e) {
+            throw new JsonMappingException(e.getMessage(), e.getCause());
         }
     }
 
@@ -93,13 +194,17 @@ public class ObjectMapper
             return null;
         }
 
+        if (valueType instanceof JavaType) {
+            valueType = ((JavaType) valueType).getType();
+        }
+
         JSONReader.Context context = createReaderContext();
         long features = context.getFeatures();
 
-        try (JSONReader reader = JSONReader.of(content)) {
+        try (JSONReader reader = JSONReader.of(content, context)) {
             ObjectReader<T> objectReader = context.getObjectReader(valueType);
 
-            T object = objectReader.readObject(reader, null, null, 0);
+            T object = objectReader.readObject(reader, valueType, null, 0);
             reader.handleResolveTasks(object);
             if ((!reader.isEnd()) && (features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
@@ -132,7 +237,8 @@ public class ObjectMapper
         }
     }
 
-    public <T> T readValue(InputStream input, Class<T> valueType) {
+    public <T> T readValue(InputStream input, Class<T> valueType)
+            throws JsonMappingException, JsonParseException {
         if (input == null) {
             return null;
         }
@@ -156,8 +262,17 @@ public class ObjectMapper
         }
     }
 
+    public <T> T readValue(JsonParser parser, JavaType javaType) throws IOException {
+        Type type = javaType.getType();
+        return parser.getJSONReader().read(type);
+    }
+
     public ObjectNode createObjectNode() {
         return new ObjectNode();
+    }
+
+    public ArrayNode createArrayNode() {
+        return new ArrayNode();
     }
 
     public ObjectMapper configure(SerializationFeature f, boolean state) {
@@ -204,7 +319,7 @@ public class ObjectMapper
 
     @Override
     public <T extends TreeNode> T readTree(JsonParser p) throws IOException {
-        Object any = p.getRaw().readAny();
+        Object any = p.getJSONReader().readAny();
         return (T) TreeNodeUtils.as(any);
     }
 
@@ -212,5 +327,78 @@ public class ObjectMapper
         JSONReader jsonReader = JSONReader.of(content);
         Object any = jsonReader.readAny();
         return TreeNodeUtils.as(any);
+    }
+
+    public JsonNode readTree(InputStream in) throws IOException {
+        JSONReader jsonReader = JSONReader.of(in, StandardCharsets.UTF_8);
+        Object any = jsonReader.readAny();
+        return TreeNodeUtils.as(any);
+    }
+
+    public ObjectMapper disable(SerializationFeature f) {
+        this.serializationConfig = this.serializationConfig.without(f);
+        return this;
+    }
+
+    public TypeFactory getTypeFactory() {
+        return typeFactory;
+    }
+
+    public <T extends JsonNode> T valueToTree(Object fromValue)
+            throws IllegalArgumentException {
+        return (T) TreeNodeUtils.as(fromValue);
+    }
+
+    public <T> T treeToValue(TreeNode n, Class<T> valueType)
+            throws IllegalArgumentException,
+            JsonProcessingException {
+        if (n instanceof ObjectNode) {
+            return ((ObjectNode) n).getJSONObject().to(valueType);
+        }
+
+        if (n instanceof ArrayNode) {
+            return ((ArrayNode) n).getJSONArray().to(valueType);
+        }
+
+        // TODO treeToValue
+        throw new JSONException("TODO");
+    }
+
+    public JsonNode readTree(byte[] content) throws IOException {
+        Object value = JSON.parse(content);
+        return TreeNodeUtils.as(value);
+    }
+
+    public ObjectWriter writer(PrettyPrinter pp) {
+        // TODO writer
+        throw new JSONException("TODO");
+    }
+
+    public ObjectMapper enable(DeserializationFeature feature) {
+        deserializationConfig.with(feature);
+        return this;
+    }
+
+    public ObjectMapper enable(DeserializationFeature first,
+                               DeserializationFeature... features) {
+        deserializationConfig.with(first);
+        for (DeserializationFeature feature : features) {
+            deserializationConfig.with(feature);
+        }
+        return this;
+    }
+
+    public JsonParser treeAsTokens(TreeNode n) {
+        String str = n.toString();
+        JSONReader jsonReader = JSONReader.of(str);
+        return new JsonParser(jsonReader);
+    }
+
+    public JavaType constructType(Type t) {
+        return typeFactory.constructType(t);
+    }
+
+    public JsonNodeFactory getNodeFactory() {
+        return deserializationConfig.getNodeFactory();
     }
 }

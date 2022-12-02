@@ -237,7 +237,16 @@ public abstract class BeanUtils {
         return fieldMap.get(fieldName);
     }
 
+    /**
+     * ignore static fields
+     */
     public static void declaredFields(Class objectClass, Consumer<Field> fieldConsumer) {
+        if (TypeUtils.isProxy(objectClass)) {
+            Class superclass = objectClass.getSuperclass();
+            declaredFields(superclass, fieldConsumer);
+            return;
+        }
+
         Class superClass = objectClass.getSuperclass();
 
         boolean protobufMessageV3 = false;
@@ -282,7 +291,7 @@ public abstract class BeanUtils {
 
         for (Field field : fields) {
             int modifiers = field.getModifiers();
-            if (Modifier.isStatic(modifiers)) {
+            if ((modifiers & Modifier.STATIC) != 0) {
                 continue;
             }
 
@@ -732,6 +741,7 @@ public abstract class BeanUtils {
                 case "com.alibaba.fastjson2.annotation.JSONField":
                     return true;
                 case "com.fasterxml.jackson.annotation.JsonValue":
+                case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonValue":
                     return JSONFactory.isUseJacksonAnnotation();
                 default:
                     break;
@@ -897,6 +907,7 @@ public abstract class BeanUtils {
                             nameMatch = true;
                             break;
                         case "com.fasterxml.jackson.annotation.JsonValue":
+                        case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonValue":
                         case "com.fasterxml.jackson.annotation.JsonRawValue":
                         case "com.fasterxml.jackson.annotation.JsonProperty":
                         case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
@@ -1441,6 +1452,17 @@ public abstract class BeanUtils {
         return null;
     }
 
+    public static Type getParamType(TypeReference type, Class<?> raw, Class declaringClass, Parameter field, Type fieldType) {
+        while (raw != Object.class) {
+            if (declaringClass == raw) {
+                return resolve(type.getType(), declaringClass, fieldType);
+            }
+            type = TypeReference.get(resolve(type.getType(), raw, raw.getGenericSuperclass()));
+            raw = type.getRawType();
+        }
+        return null;
+    }
+
     /**
      * Returns a new parameterized type, applying {@code typeArguments} to
      * {@code rawType} and enclosed by {@code ownerType}.
@@ -1967,7 +1989,7 @@ public abstract class BeanUtils {
         return obj;
     }
 
-    public static void processJacksonJsonJsonIgnore(FieldInfo fieldInfo, Annotation annotation) {
+    public static void processJacksonJsonIgnore(FieldInfo fieldInfo, Annotation annotation) {
         fieldInfo.ignore = true;
         Class<? extends Annotation> annotationClass = annotation.getClass();
         BeanUtils.annotationMethods(annotationClass, m -> {

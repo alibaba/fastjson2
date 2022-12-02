@@ -10,9 +10,7 @@ import com.alibaba.fastjson2.util.Fnv;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -31,6 +29,11 @@ public class ObjectReaderAdapter<T>
     final Constructor constructor;
     volatile boolean instantiationError;
 
+    // seeAlso
+    final Class[] seeAlso;
+    final String[] seeAlsoNames;
+    final Map<Long, Class> seeAlsoMapping;
+
     public ObjectReaderAdapter(Class objectClass, Supplier<T> creator, FieldReader... fieldReaders) {
         this(objectClass, null, null, 0, null, creator, null, fieldReaders);
     }
@@ -43,6 +46,32 @@ public class ObjectReaderAdapter<T>
             JSONSchema schema,
             Supplier<T> creator,
             Function buildFunction,
+            FieldReader... fieldReaders
+    ) {
+        this(
+                objectClass,
+                typeKey,
+                typeName,
+                features,
+                schema,
+                creator,
+                buildFunction,
+                null,
+                null,
+                fieldReaders
+        );
+    }
+
+    public ObjectReaderAdapter(
+            Class objectClass,
+            String typeKey,
+            String typeName,
+            long features,
+            JSONSchema schema,
+            Supplier<T> creator,
+            Function buildFunction,
+            Class[] seeAlso,
+            String[] seeAlsoNames,
             FieldReader... fieldReaders
     ) {
         super(objectClass, creator, typeName, features, schema, buildFunction);
@@ -99,6 +128,29 @@ public class ObjectReaderAdapter<T>
             long hashCode = hashCodesLCase[i];
             int index = Arrays.binarySearch(this.hashCodesLCase, hashCode);
             mappingLCase[index] = (short) i;
+        }
+
+        this.seeAlso = seeAlso;
+        if (seeAlso != null) {
+            this.seeAlsoMapping = new HashMap<>(seeAlso.length);
+            this.seeAlsoNames = new String[seeAlso.length];
+            for (int i = 0; i < seeAlso.length; i++) {
+                Class seeAlsoClass = seeAlso[i];
+
+                String seeAlsoTypeName = null;
+                if (seeAlsoNames != null && seeAlsoNames.length >= i + 1) {
+                    seeAlsoTypeName = seeAlsoNames[i];
+                }
+                if (seeAlsoTypeName == null || seeAlsoTypeName.isEmpty()) {
+                    seeAlsoTypeName = seeAlsoClass.getSimpleName();
+                }
+                long hashCode = Fnv.hashCode64(seeAlsoTypeName);
+                seeAlsoMapping.put(hashCode, seeAlsoClass);
+                this.seeAlsoNames[i] = seeAlsoTypeName;
+            }
+        } else {
+            this.seeAlsoMapping = null;
+            this.seeAlsoNames = null;
         }
     }
 
@@ -238,7 +290,7 @@ public class ObjectReaderAdapter<T>
     public T createInstance(Collection collection) {
         T object = createInstance(0L);
         int index = 0;
-        for (Iterator it = collection.iterator(); it.hasNext();) {
+        for (Iterator it = collection.iterator(); it.hasNext(); ) {
             Object fieldValue = it.next();
             if (index >= fieldReaders.length) {
                 break;
@@ -417,5 +469,32 @@ public class ObjectReaderAdapter<T>
         }
 
         return (T) object;
+    }
+
+    @Override
+    public ObjectReader autoType(ObjectReaderProvider provider, long typeHash) {
+        if (seeAlsoMapping != null && seeAlsoMapping.size() > 0) {
+            Class seeAlsoClass = seeAlsoMapping.get(typeHash);
+            if (seeAlsoClass == null) {
+                return null;
+            }
+            return provider.getObjectReader(seeAlsoClass);
+        }
+
+        return provider.getObjectReader(typeHash);
+    }
+
+    @Override
+    public ObjectReader autoType(JSONReader.Context context, long typeHash) {
+        if (seeAlsoMapping != null && seeAlsoMapping.size() > 0) {
+            Class seeAlsoClass = seeAlsoMapping.get(typeHash);
+            if (seeAlsoClass == null) {
+                return null;
+            }
+
+            return context.getObjectReader(seeAlsoClass);
+        }
+
+        return context.getObjectReaderAutoType(typeHash);
     }
 }

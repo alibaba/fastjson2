@@ -2,12 +2,17 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.codec.BeanInfo;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
+import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.GuavaSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -174,6 +179,36 @@ public class ObjectWriterProvider
 
     public List<ObjectWriterModule> getModules() {
         return modules;
+    }
+
+    public void getFieldInfo(BeanInfo beanInfo, FieldInfo fieldInfo, Class objectClass, Field field) {
+        for (ObjectWriterModule module : modules) {
+            ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
+            if (annotationProcessor == null) {
+                continue;
+            }
+            annotationProcessor.getFieldInfo(beanInfo, fieldInfo, objectClass, field);
+        }
+    }
+
+    public void getFieldInfo(BeanInfo beanInfo, FieldInfo fieldInfo, Class objectClass, Method method) {
+        for (ObjectWriterModule module : modules) {
+            ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
+            if (annotationProcessor == null) {
+                continue;
+            }
+            annotationProcessor.getFieldInfo(beanInfo, fieldInfo, objectClass, method);
+        }
+    }
+
+    public void getBeanInfo(BeanInfo beanInfo, Class objectClass) {
+        for (ObjectWriterModule module : modules) {
+            ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
+            if (annotationProcessor == null) {
+                continue;
+            }
+            annotationProcessor.getBeanInfo(beanInfo, objectClass);
+        }
     }
 
     public ObjectWriter getObjectWriter(Class objectClass) {

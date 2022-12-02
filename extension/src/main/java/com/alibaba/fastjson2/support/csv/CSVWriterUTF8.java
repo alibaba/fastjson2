@@ -32,7 +32,8 @@ final class CSVWriterUTF8
     byte[] bytes;
     int off;
 
-    public CSVWriterUTF8(OutputStream out, Charset charset) {
+    public CSVWriterUTF8(OutputStream out, Charset charset, Feature... features) {
+        super(features);
         this.out = out;
         this.charset = charset;
         this.bytes = new byte[1024 * 64];
@@ -342,6 +343,7 @@ final class CSVWriterUTF8
         off += size;
     }
 
+    @Override
     public void writeString(String str) {
         if (str == null) {
             return;
@@ -349,6 +351,18 @@ final class CSVWriterUTF8
 
         byte[] bytes = str.getBytes(charset);
         writeString(bytes);
+    }
+
+    @Override
+    protected void writeRaw(char ch) {
+        if (ch < 0 || ch > 127) {
+            throw new JSONException("unsupported operation");
+        }
+
+        if (off + 1 == bytes.length) {
+            flush();
+        }
+        bytes[off++] = (byte) ch;
     }
 
     private void writeString(byte[] utf8Bytes) {

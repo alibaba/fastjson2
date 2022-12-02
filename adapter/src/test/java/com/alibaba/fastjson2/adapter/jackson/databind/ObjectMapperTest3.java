@@ -5,11 +5,13 @@ import com.alibaba.fastjson2.adapter.jackson.annotation.JsonCreator;
 import com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ObjectMapperTest3 {
     @Test
-    public void test() {
+    public void test() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
 
         Bean bean = new Bean(1001);
@@ -18,6 +20,9 @@ public class ObjectMapperTest3 {
 
         Bean bean1 = JSON.parseObject(str, Bean.class);
         assertEquals(bean.id, bean1.id);
+
+        byte[] bytes = mapper.writeValueAsBytes(bean);
+        assertEquals(str, new String(bytes, StandardCharsets.UTF_8));
     }
 
     public static class Bean {
@@ -35,7 +40,7 @@ public class ObjectMapperTest3 {
     }
 
     @Test
-    public void test1() {
+    public void test1() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
 
         Bean1 bean = new Bean1();

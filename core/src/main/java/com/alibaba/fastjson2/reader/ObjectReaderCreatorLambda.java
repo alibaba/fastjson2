@@ -14,10 +14,7 @@ import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 
 import java.lang.invoke.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
@@ -49,17 +46,14 @@ public class ObjectReaderCreatorLambda
     @Override
     public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, ObjectReaderProvider provider) {
         BeanInfo beanInfo = new BeanInfo();
-        for (ObjectReaderModule module : provider.modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor != null) {
-                annotationProcessor.getBeanInfo(beanInfo, objectClass);
-            }
-        }
+        provider.getBeanInfo(beanInfo, objectClass);
 
         if (beanInfo.deserializer != null && ObjectReader.class.isAssignableFrom(beanInfo.deserializer)) {
             try {
-                return (ObjectReader<T>) beanInfo.deserializer.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
+                Constructor constructor = beanInfo.deserializer.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                return (ObjectReader<T>) constructor.newInstance();
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 throw new JSONException("create deserializer error", e);
             }
         }
@@ -113,7 +107,7 @@ public class ObjectReaderCreatorLambda
                 annotationProcessor.getFieldInfo(fieldInfo, objectClass, method);
             }
 
-            ObjectReader initReader = getInitReader(provider, method.getReturnType(), fieldInfo);
+            ObjectReader initReader = getInitReader(provider, method.getGenericReturnType(), method.getReturnType(), fieldInfo);
 
             String fieldName;
             if (method.getParameterCount() == 0) {
@@ -166,22 +160,20 @@ public class ObjectReaderCreatorLambda
             }
         });
 
-        BeanUtils.fields(objectClass,
+        BeanUtils.declaredFields(objectClass,
                 field -> {
                     fieldInfo.init();
-                    for (ObjectReaderModule module : provider.modules) {
-                        ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-                        if (annotationProcessor != null) {
-                            annotationProcessor.getFieldInfo(fieldInfo, objectClass, field);
-                        }
-                    }
+                    fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
+                    provider.getFieldInfo(fieldInfo, objectClass, field);
 
                     if (fieldInfo.ignore) {
                         return;
                     }
 
                     String fieldName = field.getName();
-                    ObjectReader initReader = getInitReader(provider, field.getType(), fieldInfo);
+                    Type fieldType = field.getGenericType();
+                    Class<?> fieldClass = field.getType();
+                    ObjectReader initReader = getInitReader(provider, fieldType, fieldClass, fieldInfo);
                     FieldReader<Object> fieldReader = createFieldReader(
                             objectClass,
                             objectClass,
@@ -192,8 +184,8 @@ public class ObjectReaderCreatorLambda
                             fieldInfo.locale,
                             fieldInfo.defaultValue,
                             fieldInfo.schema,
-                            field.getGenericType(),
-                            field.getType(),
+                            fieldType,
+                            fieldClass,
                             field,
                             initReader
                     );

@@ -1935,8 +1935,32 @@ class JSONWriterUTF16
     }
 
     @Override
-    public int flushTo(OutputStream to) throws IOException {
-        throw new JSONException("UnsupportedOperation");
+    public int flushTo(OutputStream out) throws IOException {
+        if (out == null) {
+            throw new JSONException("out is nulll");
+        }
+
+        boolean ascii = true;
+        for (int i = 0; i < off; i++) {
+            if (chars[i] >= 0x80) {
+                ascii = false;
+                break;
+            }
+        }
+
+        if (ascii) {
+            byte[] bytes = new byte[off];
+            for (int i = 0; i < off; i++) {
+                bytes[i] = (byte) chars[i];
+            }
+            out.write(bytes);
+            return bytes.length;
+        }
+
+        byte[] utf8 = new byte[off * 3];
+        int utf8Length = encodeUTF8(chars, 0, off, utf8, 0);
+        out.write(utf8, 0, utf8Length);
+        return utf8Length;
     }
 
     @Override

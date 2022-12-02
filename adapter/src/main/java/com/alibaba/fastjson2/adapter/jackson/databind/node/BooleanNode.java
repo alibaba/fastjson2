@@ -19,4 +19,9 @@ public class BooleanNode
     public boolean booleanValue() {
         return value;
     }
+
+    @Override
+    public int asInt(int defaultValue) {
+        return value ? 1 : 0;
+    }
 }

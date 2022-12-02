@@ -12,4 +12,9 @@ public abstract class StdDeserializer<T>
         valueClass = vc;
         valueType = null;
     }
+
+    protected StdDeserializer(JavaType valueType) {
+        this.valueType = valueType;
+        this.valueClass = valueType.getRawClass();
+    }
 }

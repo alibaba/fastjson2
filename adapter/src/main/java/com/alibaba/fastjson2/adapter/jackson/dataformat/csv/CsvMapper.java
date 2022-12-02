@@ -6,12 +6,14 @@ import com.alibaba.fastjson2.adapter.jackson.databind.ObjectWriter;
 
 public class CsvMapper
         extends ObjectMapper {
+    private CsvFactory factory;
     public CsvMapper() {
         this(new CsvFactory());
     }
 
-    public CsvMapper(CsvFactory f) {
-        super(f);
+    public CsvMapper(CsvFactory factory) {
+        super(factory);
+        this.factory = factory;
     }
 
     public ObjectWriter writerWithSchemaFor(Class<?> pojoType) {
@@ -20,5 +22,10 @@ public class CsvMapper
 
     public ObjectReader readerWithSchemaFor(Class<?> pojoType) {
         return new ObjectReader(this, deserializationConfig, pojoType);
+    }
+
+    public CsvMapper enable(CsvParser.Feature f) {
+        factory.enable(f);
+        return this;
     }
 }

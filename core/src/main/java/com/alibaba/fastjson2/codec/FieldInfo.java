@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.reader.ObjectReader;
 
+import java.lang.reflect.Constructor;
 import java.util.Locale;
 
 public class FieldInfo {
@@ -20,6 +21,8 @@ public class FieldInfo {
     public boolean ignore;
     public String[] alternateNames;
     public Class<?> writeUsing;
+    public Class<?> keyUsing;
+    public Class<?> valueUsing;
     public Class<?> readUsing;
     public boolean fieldClassMixIn;
     public boolean isTransient;
@@ -31,7 +34,9 @@ public class FieldInfo {
     public ObjectReader getInitReader() {
         if (readUsing != null && ObjectReader.class.isAssignableFrom(readUsing)) {
             try {
-                return (ObjectReader) readUsing.newInstance();
+                Constructor<?> constructor = readUsing.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                return (ObjectReader) constructor.newInstance();
             } catch (Exception ignored) {
                 // ignored
             }
@@ -50,6 +55,8 @@ public class FieldInfo {
         required = false;
         alternateNames = null;
         writeUsing = null;
+        keyUsing = null;
+        valueUsing = null;
         readUsing = null;
         fieldClassMixIn = false;
         isTransient = false;

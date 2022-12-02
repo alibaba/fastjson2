@@ -13,14 +13,15 @@ public class AutoTypeFilterTest1 {
     public void testSet() {
         RpcException e = new RpcException();
         e.setStackTrace(new StackTraceElement[0]);
-        byte[] bytes = JSONB.toBytes(e, JSONWriter.Feature.WriteClassName,
+        JSONWriter.Feature[] writerFeatures = {JSONWriter.Feature.WriteClassName,
                 JSONWriter.Feature.FieldBased,
                 JSONWriter.Feature.ErrorOnNoneSerializable,
                 JSONWriter.Feature.ReferenceDetection,
                 JSONWriter.Feature.WriteNulls,
                 JSONWriter.Feature.NotWriteDefaultValue,
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName,
-                JSONWriter.Feature.WriteNameAsSymbol);
+                JSONWriter.Feature.WriteNameAsSymbol};
+        byte[] bytes = JSONB.toBytes(e, writerFeatures);
 
         JSONBDump.dump(bytes);
 

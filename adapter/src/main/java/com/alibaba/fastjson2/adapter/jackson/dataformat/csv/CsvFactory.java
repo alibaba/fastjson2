@@ -7,4 +7,8 @@ public class CsvFactory
     public boolean isCSV() {
         return true;
     }
+
+    public CsvFactory enable(CsvParser.Feature f) {
+        return this;
+    }
 }

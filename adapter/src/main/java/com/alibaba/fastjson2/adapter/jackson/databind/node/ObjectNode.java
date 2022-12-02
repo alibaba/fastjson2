@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.adapter.jackson.databind.node;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.adapter.jackson.databind.JsonNode;
 import com.alibaba.fastjson2.annotation.JSONField;
@@ -7,6 +8,8 @@ import com.alibaba.fastjson2.annotation.JSONType;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Iterator;
+import java.util.Map;
 
 @JSONType(includes = "jsonObject")
 public class ObjectNode
@@ -91,6 +94,12 @@ public class ObjectNode
         return arrayNode;
     }
 
+    @Deprecated
+    public JsonNode put(String propertyName, JsonNode value) {
+        object.put(propertyName, value);
+        return this;
+    }
+
     public ObjectNode removeAll() {
         object.clear();
         return this;
@@ -103,5 +112,21 @@ public class ObjectNode
 
     public String toString() {
         return object.toString();
+    }
+
+    public Iterator<Map.Entry<String, JsonNode>> fields() {
+        // TODO fields
+        throw new JSONException("TODO");
+    }
+
+    @Override
+    public Iterator<JsonNode> elements() {
+        // TODO elements
+        throw new JSONException("TODO");
+    }
+
+    public <T extends JsonNode> T set(String propertyName, JsonNode value) {
+        this.object.put(propertyName, value);
+        return (T) this;
     }
 }

@@ -36,6 +36,10 @@ final class CSVWriterUTF16
         throw new JSONException("unsupported operation");
     }
 
+    protected void writeRaw(char ch) {
+        throw new JSONException("unsupported operation");
+    }
+
     @Override
     public void close() throws IOException {
         throw new JSONException("unsupported operation");

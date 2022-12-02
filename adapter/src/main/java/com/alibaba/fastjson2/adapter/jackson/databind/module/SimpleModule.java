@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.adapter.jackson.databind.module;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.adapter.jackson.core.Version;
 import com.alibaba.fastjson2.adapter.jackson.databind.JsonDeserializer;
 import com.alibaba.fastjson2.adapter.jackson.databind.JsonSerializer;
@@ -39,6 +40,19 @@ public class SimpleModule
             serializers = new SimpleSerializers();
         }
         serializers.addSerializer(type, ser);
+        return this;
+    }
+
+    public SimpleModule addSerializer(JsonSerializer<?> ser) {
+        Class<?> handledType = ser.handledType();
+        if (handledType == null) {
+            throw new JSONException("not support null handledType");
+        }
+
+        if (serializers == null) {
+            serializers = new SimpleSerializers();
+        }
+        serializers.addSerializer(handledType, ser);
         return this;
     }
 

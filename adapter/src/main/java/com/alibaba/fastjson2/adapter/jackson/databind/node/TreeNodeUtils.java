@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.adapter.jackson.databind.node;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
@@ -10,6 +11,14 @@ import java.math.BigInteger;
 
 public class TreeNodeUtils {
     public static JsonNode as(Object value) {
+        if (value == null) {
+            return NullNode.instance;
+        }
+
+        if (value instanceof JsonNode) {
+            return (JsonNode) value;
+        }
+
         if (value instanceof String) {
             return new TextNode((String) value);
         }
@@ -53,6 +62,15 @@ public class TreeNodeUtils {
 
         if (value instanceof Short) {
             return new ShortNode((Short) value);
+        }
+
+        Object object = JSON.toJSON(value);
+        if (object instanceof JSONObject) {
+            return new ObjectNode((JSONObject) object);
+        }
+
+        if (object instanceof JSONArray) {
+            return new ArrayNode((JSONArray) object);
         }
 
         throw new JSONException("TODO");

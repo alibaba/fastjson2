@@ -19,4 +19,8 @@ public class IntegerNode
     public String asText() {
         return Integer.toString(value);
     }
+
+    public int asInt(int defaultValue) {
+        return value;
+    }
 }

@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONReader.AutoTypeBeforeHandler;
+import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
@@ -736,6 +737,15 @@ public class ObjectReaderProvider
         return modules;
     }
 
+    public void getBeanInfo(BeanInfo beanInfo, Class objectClass) {
+        for (ObjectReaderModule module : modules) {
+            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
+            if (annotationProcessor != null) {
+                annotationProcessor.getBeanInfo(beanInfo, objectClass);
+            }
+        }
+    }
+
     public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Field field) {
         for (ObjectReaderModule module : modules) {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
@@ -745,11 +755,13 @@ public class ObjectReaderProvider
         }
     }
 
-    public void getFieldInfo(FieldInfo fieldInfo,
-                             Class objectClass,
-                             Constructor constructor,
-                             int paramIndex,
-                             Parameter parameter) {
+    public void getFieldInfo(
+            FieldInfo fieldInfo,
+            Class objectClass,
+            Constructor constructor,
+            int paramIndex,
+            Parameter parameter
+    ) {
         for (ObjectReaderModule module : modules) {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor != null) {
@@ -758,11 +770,12 @@ public class ObjectReaderProvider
         }
     }
 
-    public void getFieldInfo(FieldInfo fieldInfo,
-                             Class objectClass,
-                             Method method,
-                             int paramIndex,
-                             Parameter parameter) {
+    public void getFieldInfo(
+            FieldInfo fieldInfo,
+            Class objectClass,
+            Method method,
+            int paramIndex,
+            Parameter parameter) {
         for (ObjectReaderModule module : modules) {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor != null) {

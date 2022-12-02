@@ -26,7 +26,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
-import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonJsonIgnore;
+import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonIgnore;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectReaderBaseModule
@@ -232,21 +232,31 @@ public class ObjectReaderBaseModule
             for (Annotation annotation : annotations) {
                 boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                switch (annotationType.getName()) {
+                String annotationTypeName = annotationType.getName();
+                switch (annotationTypeName) {
                     case "com.alibaba.fastjson.annotation.JSONType":
                         getBeanInfo1x(beanInfo, annotation);
                         break;
                     case "com.fasterxml.jackson.annotation.JsonTypeInfo":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonTypeInfo":
                         if (useJacksonAnnotation) {
                             processJacksonJsonTypeInfo(beanInfo, annotation);
                         }
                         break;
+                    case "com.fasterxml.jackson.databind.annotation.JsonDeserialize":
+                    case "com.alibaba.fastjson2.adapter.jackson.databind.annotation.JsonDeserialize":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonDeserializer(beanInfo, annotation);
+                        }
+                        break;
                     case "com.fasterxml.jackson.annotation.JsonTypeName":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonTypeName":
                         if (useJacksonAnnotation) {
                             processJacksonJsonTypeName(beanInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonSubTypes":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonSubTypes":
                         if (useJacksonAnnotation) {
                             processJacksonJsonSubTypes(beanInfo, annotation);
                         }
@@ -341,6 +351,29 @@ public class ObjectReaderBaseModule
                         case "name": {
                             String value = (String) result;
                             beanInfo.seeAlsoNames[index] = value;
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            });
+        }
+
+        private void processJacksonJsonDeserializer(BeanInfo beanInfo, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "using": {
+                            Class using = processUsing((Class) result);
+                            if (using != null) {
+                                beanInfo.deserializer = using;
+                            }
                             break;
                         }
                         default:
@@ -556,7 +589,11 @@ public class ObjectReaderBaseModule
         }
 
         @Override
-        public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Constructor constructor, int paramIndex, Parameter parameter) {
+        public void getFieldInfo(FieldInfo fieldInfo,
+                                 Class objectClass,
+                                 Constructor constructor,
+                                 int paramIndex,
+                                 Parameter parameter) {
             Class mixInSource = provider.mixInCache.get(objectClass);
             if (mixInSource != null && mixInSource != objectClass) {
                 Constructor mixInConstructor = null;
@@ -583,7 +620,13 @@ public class ObjectReaderBaseModule
         }
 
         @Override
-        public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Method method, int paramIndex, Parameter parameter) {
+        public void getFieldInfo(
+                FieldInfo fieldInfo,
+                Class objectClass,
+                Method method,
+                int paramIndex,
+                Parameter parameter
+        ) {
             Class mixInSource = provider.mixInCache.get(objectClass);
             if (mixInSource != null && mixInSource != objectClass) {
                 Method mixInMethod = null;
@@ -615,7 +658,8 @@ public class ObjectReaderBaseModule
                 }
             }
 
-            processAnnotation(fieldInfo, getAnnotations(field));
+            Annotation[] annotations = getAnnotations(field);
+            processAnnotation(fieldInfo, annotations);
         }
 
         @Override
@@ -653,7 +697,13 @@ public class ObjectReaderBaseModule
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
                         if (useJacksonAnnotation) {
-                            processJacksonJsonJsonIgnore(fieldInfo, annotation);
+                            processJacksonJsonIgnore(fieldInfo, annotation);
+                        }
+                        break;
+                    case "com.alibaba.fastjson2.adapter.jackson.databind.annotation.JsonDeserialize":
+                    case "com.fasterxml.jackson.databind.annotation.JsonDeserialize":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonDeserialize(fieldInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAnySetter":
@@ -749,11 +799,13 @@ public class ObjectReaderBaseModule
                 String annotationTypeName = annotationType.getName();
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonIgnore":
                         if (useJacksonAnnotation) {
-                            processJacksonJsonJsonIgnore(fieldInfo, annotation);
+                            processJacksonJsonIgnore(fieldInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAnyGetter":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonAnyGetter":
                         if (useJacksonAnnotation) {
                             fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
                         }
@@ -761,13 +813,20 @@ public class ObjectReaderBaseModule
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
                         break;
-                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
                     case "com.fasterxml.jackson.annotation.JsonProperty":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
                         if (useJacksonAnnotation) {
                             processJacksonJsonProperty(fieldInfo, annotation);
                         }
                         break;
+                    case "com.fasterxml.jackson.databind.annotation.JsonDeserialize":
+                    case "com.alibaba.fastjson2.adapter.jackson.databind.annotation.JsonDeserialize":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonDeserialize(fieldInfo, annotation);
+                        }
+                        break;
                     case "com.fasterxml.jackson.annotation.JsonAlias":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonAlias":
                         if (useJacksonAnnotation) {
                             processJacksonJsonAlias(fieldInfo, annotation);
                         }
@@ -779,6 +838,60 @@ public class ObjectReaderBaseModule
                         break;
                 }
             }
+        }
+
+        private void processJacksonJsonDeserialize(FieldInfo fieldInfo, Annotation annotation) {
+            if (!JSONFactory.isUseJacksonAnnotation()) {
+                return;
+            }
+
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "using": {
+                            Class using = processUsing((Class) result);
+                            if (using != null) {
+                                fieldInfo.readUsing = using;
+                            }
+                            break;
+                        }
+                        case "keyUsing": {
+                            Class keyUsing = processUsing((Class) result);
+                            if (keyUsing != null) {
+                                fieldInfo.keyUsing = keyUsing;
+                            }
+                            break;
+                        }
+                        case "valueUsing": {
+                            Class valueUsing = processUsing((Class) result);
+                            if (valueUsing != null) {
+                                fieldInfo.keyUsing = valueUsing;
+                            }
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            });
+        }
+
+        private Class processUsing(Class using) {
+            String usingName = using.getName();
+            String noneClassName0 = "com.fasterxml.jackson.databind.JsonDeserializer$None";
+            String noneClassName1 = "com.alibaba.fastjson2.adapter.jackson.databind.JsonDeserializer$None";
+            if (!noneClassName0.equals(usingName)
+                    && !noneClassName1.equals(usingName)
+                    && ObjectReader.class.isAssignableFrom(using)
+            ) {
+                return using;
+            }
+            return null;
         }
 
         private void processJacksonJsonProperty(FieldInfo fieldInfo, Annotation annotation) {
@@ -806,6 +919,7 @@ public class ObjectReaderBaseModule
                                     fieldInfo.ignore = true;
                                     break;
                                 default:
+                                    fieldInfo.ignore = false;
                                     break;
                             }
                             break;
@@ -1072,7 +1186,10 @@ public class ObjectReaderBaseModule
         }
     }
 
-    private void getBeanInfo1xJSONPOJOBuilder(BeanInfo beanInfo, Class<?> builderClass, Annotation builderAnnatation, Class<? extends Annotation> builderAnnatationClass) {
+    private void getBeanInfo1xJSONPOJOBuilder(BeanInfo beanInfo,
+                                              Class<?> builderClass,
+                                              Annotation builderAnnatation,
+                                              Class<? extends Annotation> builderAnnatationClass) {
         BeanUtils.annotationMethods(builderAnnatationClass, method -> {
             try {
                 String methodName = method.getName();
@@ -1676,7 +1793,7 @@ public class ObjectReaderBaseModule
             }
 
             if (List.class.isAssignableFrom(objectClass)) {
-                return ObjectReaderImplList.of(objectClass, null, 0);
+                return ObjectReaderImplList.of(objectClass, objectClass, 0);
             }
 
             if (objectClass.isArray()) {

@@ -19,4 +19,9 @@ public class DoubleNode
     public String asText() {
         return Double.toString(value);
     }
+
+    @Override
+    public int asInt(int defaultValue) {
+        return (int) value;
+    }
 }

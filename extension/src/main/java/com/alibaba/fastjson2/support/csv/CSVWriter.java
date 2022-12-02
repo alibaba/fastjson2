@@ -17,7 +17,12 @@ import java.util.List;
 
 public abstract class CSVWriter
         implements Closeable, Flushable {
-    public CSVWriter() {
+    private long features;
+
+    public CSVWriter(Feature... features) {
+        for (Feature feature : features) {
+            this.features |= feature.mask;
+        }
     }
 
     public static CSVWriter of() {
@@ -74,7 +79,13 @@ public abstract class CSVWriter
 
         ZonedDateTime zdt = instant.atZone(ZoneOffset.UTC);
         String str = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(zdt);
-        writeRaw(str);
+        if ((features & Feature.AlwaysQuoteStrings.mask) != 0) {
+            writeRaw('"');
+            writeRaw(str);
+            writeRaw('"');
+        } else {
+            writeRaw(str);
+        }
     }
 
     public void writeDate(LocalDate date) {
@@ -93,10 +104,12 @@ public abstract class CSVWriter
         writeRaw(str);
     }
 
+    protected abstract void writeRaw(char ch);
+
     protected abstract void writeRaw(String str);
 
-    public static CSVWriter of(OutputStream out) {
-        return new CSVWriterUTF8(out, StandardCharsets.UTF_8);
+    public static CSVWriter of(OutputStream out, Feature... features) {
+        return new CSVWriterUTF8(out, StandardCharsets.UTF_8, features);
     }
 
     public static CSVWriter of(OutputStream out, Charset charset) {
@@ -109,5 +122,15 @@ public abstract class CSVWriter
         }
 
         return new CSVWriterUTF8(out, charset);
+    }
+
+    public enum Feature {
+        AlwaysQuoteStrings(1);
+
+        public final long mask;
+
+        Feature(long mask) {
+            this.mask = mask;
+        }
     }
 }
