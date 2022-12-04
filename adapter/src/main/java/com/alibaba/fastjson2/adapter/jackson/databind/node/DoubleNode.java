@@ -24,4 +24,26 @@ public class DoubleNode
     public int asInt(int defaultValue) {
         return (int) value;
     }
+
+    @Override
+    public long longValue() {
+        return (long) value;
+    }
+
+    @Override
+    public int intValue() {
+        return (int) value;
+    }
+
+    public static DoubleNode valueOf(double value) {
+        return new DoubleNode(value);
+    }
+
+    public boolean isDouble() {
+        return true;
+    }
+
+    public double asDouble() {
+        return value;
+    }
 }

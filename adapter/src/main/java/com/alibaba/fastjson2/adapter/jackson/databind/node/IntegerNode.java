@@ -23,4 +23,18 @@ public class IntegerNode
     public int asInt(int defaultValue) {
         return value;
     }
+
+    @Override
+    public long longValue() {
+        return value;
+    }
+
+    @Override
+    public int intValue() {
+        return value;
+    }
+
+    public double asDouble() {
+        return value;
+    }
 }

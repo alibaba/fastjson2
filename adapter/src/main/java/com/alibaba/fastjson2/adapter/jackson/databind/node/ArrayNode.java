@@ -7,12 +7,21 @@ import com.alibaba.fastjson2.annotation.JSONType;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.Iterator;
 
 @JSONType(includes = "jsonArray")
 public class ArrayNode
-        extends ContainerNode {
+        extends ContainerNode<ArrayNode> {
     final JSONArray jsonArray;
+
+    public ArrayNode(JsonNodeFactory nf) {
+        this.jsonArray = new JSONArray();
+    }
+
+    public ArrayNode(JsonNodeFactory nf, Collection values) {
+        this.jsonArray = new JSONArray(values);
+    }
 
     public ArrayNode() {
         this.jsonArray = new JSONArray();
@@ -122,5 +131,15 @@ public class ArrayNode
             return TreeNodeUtils.as(item);
         }
         return null;
+    }
+
+    @Override
+    public JsonNodeType getNodeType() {
+        return JsonNodeType.ARRAY;
+    }
+
+    public ArrayNode removeAll() {
+        jsonArray.clear();
+        return this;
     }
 }

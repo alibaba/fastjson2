@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.adapter.jackson.annotation.JsonCreator;
 import com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,6 +25,17 @@ public class ObjectMapperTest3 {
 
         byte[] bytes = mapper.writeValueAsBytes(bean);
         assertEquals(str, new String(bytes, StandardCharsets.UTF_8));
+
+        File tempFile = File.createTempFile("tmp", "json");
+        FileWriter fileWriter = new FileWriter(tempFile);
+        fileWriter.write(str);
+        fileWriter.close();
+
+        Bean bean2 = mapper.reader(Bean.class).readValue(tempFile, Bean.class);
+        assertEquals(bean.id, bean2.id);
+
+        Bean bean3 = mapper.reader(Bean.class).readValue(mapper.createParser(str));
+        assertEquals(bean.id, bean3.id);
     }
 
     public static class Bean {

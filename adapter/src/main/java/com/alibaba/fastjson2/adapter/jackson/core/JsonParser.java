@@ -1,11 +1,13 @@
 package com.alibaba.fastjson2.adapter.jackson.core;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.adapter.jackson.core.type.TypeReference;
 import com.alibaba.fastjson2.adapter.jackson.databind.ObjectCodecWrapper;
 import com.alibaba.fastjson2.adapter.jackson.databind.node.ObjectNode;
 import com.alibaba.fastjson2.adapter.jackson.databind.node.TreeNodeUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -42,6 +44,10 @@ public class JsonParser
 
     public JsonToken nextValue() throws IOException {
         return nextToken();
+    }
+
+    public <T> T readValueAs(Class<T> valueType) throws IOException {
+        return jsonReader.read(valueType);
     }
 
     public <T> T readValueAs(TypeReference<?> valueTypeRef) throws IOException {
@@ -96,6 +102,28 @@ public class JsonParser
         long value = number.longValue();
         number = null;
         return value;
+    }
+
+    public double getDoubleValue() {
+        double value = number.doubleValue();
+        number = null;
+        return value;
+    }
+
+    public float getFloatValue() {
+        float value = number.floatValue();
+        number = null;
+        return value;
+    }
+
+    public BigDecimal getDecimalValue() {
+        BigDecimal decimal = TypeUtils.toBigDecimal(number);
+        number = null;
+        return decimal;
+    }
+
+    public NumberType getNumberType() throws IOException {
+        throw new JSONException("TODO");
     }
 
     public JsonToken nextToken() throws IOException {
@@ -247,5 +275,37 @@ public class JsonParser
         public int getMask() {
             return mask;
         }
+    }
+
+    public enum NumberType {
+        INT, LONG, BIG_INTEGER, FLOAT, DOUBLE, BIG_DECIMAL
+    }
+
+    public boolean nextFieldName(SerializedString str) throws IOException {
+        throw new JSONException("TODO");
+    }
+
+    public boolean hasCurrentToken() {
+        throw new JSONException("TODO");
+    }
+
+    public JsonToken getCurrentToken() {
+        throw new JSONException("TODO");
+    }
+
+    public JsonParser skipChildren() throws IOException {
+        throw new JSONException("TODO");
+    }
+
+    public String getText() throws IOException {
+        throw new JSONException("TODO");
+    }
+
+    public byte[] getBinaryValue(Base64Variant bv) throws IOException {
+        throw new JSONException("TODO");
+    }
+
+    public JsonToken currentToken() {
+        return getCurrentToken();
     }
 }

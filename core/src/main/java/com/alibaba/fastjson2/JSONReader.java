@@ -7,11 +7,13 @@ import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -2745,6 +2747,12 @@ public abstract class JSONReader
 
     public static JSONReader of(char[] chars, int offset, int length, Context context) {
         return new JSONReaderUTF16(context, null, chars, offset, length);
+    }
+
+    public static JSONReader of(URL url, Context context) throws IOException {
+        try (InputStream is = url.openStream()) {
+            return of(is, StandardCharsets.UTF_8, context);
+        }
     }
 
     public static JSONReader of(InputStream is, Charset charset) {

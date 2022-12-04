@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.adapter.jackson.databind.annotation;
 
 import com.alibaba.fastjson2.adapter.jackson.databind.JsonDeserializer;
 import com.alibaba.fastjson2.adapter.jackson.databind.KeyDeserializer;
+import com.alibaba.fastjson2.adapter.jackson.databind.util.Converter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -19,4 +20,6 @@ public @interface JsonDeserialize {
 
     Class<? extends JsonDeserializer> contentUsing()
             default JsonDeserializer.None.class;
+
+    Class<? extends Converter> converter() default Converter.None.class;
 }

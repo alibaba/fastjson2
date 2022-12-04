@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.adapter.jackson.core.Version;
 import com.alibaba.fastjson2.adapter.jackson.databind.JsonDeserializer;
 import com.alibaba.fastjson2.adapter.jackson.databind.JsonSerializer;
+import com.alibaba.fastjson2.adapter.jackson.databind.jsontype.NamedType;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 
@@ -24,6 +25,13 @@ public class SimpleModule
         name = (getClass() == SimpleModule.class)
                 ? "SimpleModule-" + MODULE_ID_SEQ.getAndIncrement()
                 : getClass().getName();
+        version = Version.unknownVersion();
+        // 07-Jun-2021, tatu: [databind#3110] Not passed explicitly so...
+        hasExplicitName = false;
+    }
+
+    public SimpleModule(String name) {
+        this.name = name;
         version = Version.unknownVersion();
         // 07-Jun-2021, tatu: [databind#3110] Not passed explicitly so...
         hasExplicitName = false;
@@ -64,11 +72,19 @@ public class SimpleModule
         return this;
     }
 
+    public SimpleModule setMixInAnnotation(Class<?> targetType, Class<?> mixinClass) {
+        throw new JSONException("TODO");
+    }
+
     public ObjectWriterModule getWriterModule() {
         return serializers;
     }
 
     public ObjectReaderModule getReaderModule() {
         return deserializers;
+    }
+
+    public SimpleModule registerSubtypes(NamedType... subtypes) {
+        throw new JSONException("TODO");
     }
 }

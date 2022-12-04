@@ -24,10 +24,20 @@ public class JacksonNodeTest {
         // JSON树转JSON字符串
         String json = mapper.writeValueAsString(root);
         assertEquals("{\"id\":\"zhuan2quan\",\"name\":\"程序新视界\",\"interest\":[\"Java\",\"Spring Boot\",\"JVM\"]}", json);
+
+        interest.removeAll();
+
+        assertEquals(0, interest.size());
+        assertTrue(interest.isEmpty());
+        assertFalse(interest.isValueNode());
+        assertEquals(0, interest.doubleValue());
+        assertEquals(0, interest.floatValue());
+        assertEquals(0, interest.intValue());
+        assertEquals(0, interest.longValue());
     }
 
     @Test
-    public void testJsonToJsonNode() {
+    public void testJsonToJsonNode() throws Exception {
         String json = "{\"id\":\"zhuan2quan\",\"name\":\"程序新视界\",\"interest\":[\"Java\",\"Spring Boot\",\"JVM\"]}";
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonNode = mapper.readTree(json);

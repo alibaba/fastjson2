@@ -10,12 +10,17 @@ import java.lang.annotation.Target;
 public @interface JsonInclude {
     Include value() default Include.ALWAYS;
 
+    Class<?> valueFilter() default Void.class;
+
+    Class<?> contentFilter() default Void.class;
+
     enum Include {
         ALWAYS,
         NON_NULL,
         NON_ABSENT,
         NON_EMPTY,
         NON_DEFAULT,
-        USE_DEFAULTS
+        USE_DEFAULTS,
+        CUSTOM
     }
 }

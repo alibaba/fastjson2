@@ -1,7 +1,10 @@
 package com.alibaba.fastjson2.adapter.jackson.databind;
 
 import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteByteArrayAsBase64;
 
 public class SerializationConfig {
     private long serFeatures;
@@ -21,7 +24,6 @@ public class SerializationConfig {
     }
 
     public SerializationConfig with(MapperFeature f) {
-        // TODO
         return this;
     }
 
@@ -31,12 +33,22 @@ public class SerializationConfig {
     }
 
     public SerializationConfig with(SerializationFeature f) {
-        // TODO
+        serFeatures |= f.getMask();
         return this;
     }
 
     public SerializationConfig without(SerializationFeature f) {
-        // TODO
+        serFeatures &= ~f.getMask();
         return this;
+    }
+
+    protected JSONWriter.Context createWriterContext() {
+        JSONWriter.Context context = JSONFactory.createWriteContext(writerProvider, WriteByteArrayAsBase64);
+
+        if ((serFeatures & SerializationFeature.INDENT_OUTPUT.getMask()) != 0) {
+            context.config(JSONWriter.Feature.PrettyFormat);
+        }
+
+        return context;
     }
 }
