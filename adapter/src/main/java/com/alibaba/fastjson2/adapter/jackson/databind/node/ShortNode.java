@@ -19,4 +19,8 @@ public class ShortNode
     public String asText() {
         return Short.toString(value);
     }
+
+    public static ShortNode valueOf(short value) {
+        return new ShortNode(value);
+    }
 }

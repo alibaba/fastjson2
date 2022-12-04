@@ -65,4 +65,13 @@ public class TextNode
     public int hashCode() {
         return Objects.hash(value);
     }
+
+    public static TextNode valueOf(String v) {
+        return new TextNode(v);
+    }
+
+    @Override
+    public JsonNodeType getNodeType() {
+        return JsonNodeType.STRING;
+    }
 }

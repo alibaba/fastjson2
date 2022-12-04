@@ -221,6 +221,10 @@ class CSVParserUTF8
         return TypeUtils.cast(str, type);
     }
 
+    public boolean isEnd() {
+        return inputEnd;
+    }
+
     public Object[] readLineValues(boolean strings) {
         try {
             if (inputEnd) {

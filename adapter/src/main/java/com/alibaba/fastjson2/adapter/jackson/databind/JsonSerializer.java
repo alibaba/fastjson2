@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.adapter.jackson.core.JsonEncoding;
 import com.alibaba.fastjson2.adapter.jackson.core.JsonGenerator;
+import com.alibaba.fastjson2.adapter.jackson.databind.jsontype.TypeSerializer;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
@@ -30,5 +31,14 @@ public abstract class JsonSerializer<T>
 
     public abstract static class None
             extends JsonSerializer<Object> {
+    }
+
+    public void serializeWithType(
+            T value,
+            JsonGenerator gen,
+            SerializerProvider serializers,
+            TypeSerializer typeSer
+    ) throws IOException {
+        throw new JSONException("TODO");
     }
 }

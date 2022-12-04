@@ -22,6 +22,11 @@ class CSVParserUTF16
         }
     }
 
+    CSVParserUTF16(Reader input, ObjectReaderAdapter objectReader) {
+        super(objectReader);
+        this.input = input;
+    }
+
     CSVParserUTF16(Reader input, Type[] types) {
         super(types);
         this.input = input;
@@ -191,6 +196,10 @@ class CSVParserUTF16
     Object readValue(char[] chars, int off, int len, Type type) {
         String str = new String(chars, off, len);
         return TypeUtils.cast(str, type);
+    }
+
+    public boolean isEnd() {
+        return inputEnd;
     }
 
     public Object[] readLineValues(boolean strings) {

@@ -26,4 +26,35 @@ public class BigIntegerNode
     public int asInt(int defaultValue) {
         return value.intValue();
     }
+
+    @Override
+    public final JsonNodeType getNodeType() {
+        return JsonNodeType.NUMBER;
+    }
+
+    @Override
+    public long longValue() {
+        return value.longValue();
+    }
+
+    @Override
+    public int intValue() {
+        return value.intValue();
+    }
+
+    public static BigIntegerNode valueOf(BigInteger v) {
+        return new BigIntegerNode(v);
+    }
+
+    public boolean isBigInteger() {
+        return true;
+    }
+
+    public double asDouble() {
+        return value.doubleValue();
+    }
+
+    public BigInteger bigIntegerValue() {
+        return value;
+    }
 }

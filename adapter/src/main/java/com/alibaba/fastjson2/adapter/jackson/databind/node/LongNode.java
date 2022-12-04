@@ -2,6 +2,8 @@ package com.alibaba.fastjson2.adapter.jackson.databind.node;
 
 import com.alibaba.fastjson2.annotation.JSONField;
 
+import java.math.BigInteger;
+
 public class LongNode
         extends ValueNode {
     private long value;
@@ -23,5 +25,13 @@ public class LongNode
     @Override
     public int asInt(int defaultValue) {
         return (int) value;
+    }
+
+    public static LongNode valueOf(long value) {
+        return new LongNode(value);
+    }
+
+    public BigInteger bigIntegerValue() {
+        return BigInteger.valueOf(value);
     }
 }

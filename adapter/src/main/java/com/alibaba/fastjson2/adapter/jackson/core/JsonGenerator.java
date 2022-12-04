@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2.adapter.jackson.core;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.IOUtils;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -111,6 +113,16 @@ public class JsonGenerator
         writeNumber(value);
     }
 
+    public void writeNumberField(String fieldName, float value) throws IOException {
+        writeFieldName(fieldName);
+        writeNumber(value);
+    }
+
+    public void writeNumberField(String fieldName, double value) throws IOException {
+        writeFieldName(fieldName);
+        writeNumber(value);
+    }
+
     public void writeNumberField(String fieldName, int value) throws IOException {
         writeFieldName(fieldName);
         writeNumber(value);
@@ -121,9 +133,19 @@ public class JsonGenerator
         writeBinary(data);
     }
 
+    public void writeBooleanField(String fieldName, boolean value) throws IOException {
+        writeFieldName(fieldName);
+        writeBoolean(value);
+    }
+
     public void writeArrayFieldStart(String fieldName) throws IOException {
         writeFieldName(fieldName);
         writeStartArray();
+    }
+
+    public void writeNullField(String fieldName) throws IOException {
+        writeFieldName(fieldName);
+        writeNull();
     }
 
     public void writeStartArray() throws IOException {
@@ -151,8 +173,10 @@ public class JsonGenerator
     public void close() throws IOException {
         if (out != null) {
             jsonWriter.flushTo(out, charset);
+            IOUtils.close(out);
         } else if (writer != null) {
             jsonWriter.flushTo(writer);
+            IOUtils.close(writer);
         }
     }
 
@@ -285,5 +309,41 @@ public class JsonGenerator
         public int getMask() {
             return mask;
         }
+    }
+
+    public void copyCurrentStructure(JsonParser p) throws IOException {
+        throw new JSONException("TODO");
+    }
+
+    public JsonGenerator setRootValueSeparator(SerializableString sep) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void writeBinary(Base64Variant bv, byte[] data, int offset, int len) throws IOException {
+        throw new JSONException("TODO");
+    }
+
+    public int writeBinary(InputStream data, int dataLength) throws IOException {
+        throw new JSONException("TODO");
+    }
+
+    public int writeBinary(Base64Variant bv, InputStream data, int dataLength) throws IOException {
+        throw new JSONException("TODO");
+    }
+
+    public void writeBoolean(boolean state) throws IOException {
+        jsonWriter.writeBool(state);
+    }
+
+    public void writeNumber(float v) throws IOException {
+        jsonWriter.writeFloat(v);
+    }
+
+    public void writeNumber(double v) throws IOException {
+        jsonWriter.writeDouble(v);
+    }
+
+    public void writeArray(int[] array, int offset, int length) throws IOException {
+        throw new JSONException("TODO");
     }
 }

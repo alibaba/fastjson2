@@ -1177,6 +1177,7 @@ public abstract class JSONWriter
         try {
             String json = this.toString();
             to.write(json);
+            off = 0;
         } catch (IOException e) {
             throw new JSONException("flushTo error", e);
         }

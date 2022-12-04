@@ -17,4 +17,9 @@ public class NullNode
     public boolean isTextual() {
         return true;
     }
+
+    @Override
+    public JsonNodeType getNodeType() {
+        return JsonNodeType.NULL;
+    }
 }

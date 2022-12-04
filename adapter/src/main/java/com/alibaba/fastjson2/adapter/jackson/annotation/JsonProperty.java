@@ -14,6 +14,8 @@ public @interface JsonProperty {
 
     Access access() default Access.AUTO;
 
+    int index() default -1;
+
     enum Access {
         /**
          * Access setting which means that visibility rules are to be used

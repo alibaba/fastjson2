@@ -16,6 +16,14 @@ public class ObjectNode
         extends ContainerNode {
     final JSONObject object;
 
+    public ObjectNode(JsonNodeFactory nc) {
+        object = new JSONObject();
+    }
+
+    public ObjectNode(JsonNodeFactory nc, Map<String, JsonNode> kids) {
+        object = new JSONObject(kids);
+    }
+
     public ObjectNode() {
         object = new JSONObject();
     }
@@ -128,5 +136,14 @@ public class ObjectNode
     public <T extends JsonNode> T set(String propertyName, JsonNode value) {
         this.object.put(propertyName, value);
         return (T) this;
+    }
+
+    @Override
+    public JsonNodeType getNodeType() {
+        return JsonNodeType.OBJECT;
+    }
+
+    public boolean isObject() {
+        return true;
     }
 }

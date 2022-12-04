@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.adapter.jackson.databind;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.adapter.jackson.core.*;
+import com.alibaba.fastjson2.adapter.jackson.databind.exc.StreamReadException;
 import com.alibaba.fastjson2.adapter.jackson.databind.node.ArrayNode;
 import com.alibaba.fastjson2.adapter.jackson.databind.node.JsonNodeFactory;
 import com.alibaba.fastjson2.adapter.jackson.databind.node.ObjectNode;
@@ -17,12 +18,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreCheckClose;
-import static com.alibaba.fastjson2.JSONWriter.Feature.WriteByteArrayAsBase64;
 
 public class ObjectMapper
         extends ObjectCodec {
     protected final JsonFactory factory;
-    protected final TypeFactory typeFactory;
+    protected TypeFactory typeFactory;
     protected SerializationConfig serializationConfig;
     protected DeserializationConfig deserializationConfig;
 
@@ -61,7 +61,7 @@ public class ObjectMapper
     }
 
     private JSONWriter.Context createWriterContext() {
-        return JSONFactory.createWriteContext(serializationConfig.writerProvider, WriteByteArrayAsBase64);
+        return serializationConfig.createWriterContext();
     }
 
     public byte[] writeValueAsBytes(Object value) throws JsonProcessingException {
@@ -156,6 +156,30 @@ public class ObjectMapper
     public <T> T readValue(String content, Class<T> valueType)
             throws JsonMappingException, JsonParseException {
         if (content == null || content.isEmpty()) {
+            throw new JsonParseException("input is null or empty");
+        }
+
+        JSONReader.Context context = createReaderContext();
+        long features = context.getFeatures();
+
+        try (JSONReader reader = JSONReader.of(content, context)) {
+            boolean fieldBased = (features & JSONReader.Feature.FieldBased.mask) != 0;
+            ObjectReader<T> objectReader = deserializationConfig.readerProvider.getObjectReader(valueType, fieldBased);
+
+            T object = objectReader.readObject(reader, null, null, 0);
+            reader.handleResolveTasks(object);
+            if ((!reader.isEnd()) && (features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        } catch (JSONException e) {
+            throw new JsonMappingException(e.getMessage(), e.getCause());
+        }
+    }
+
+    public <T> T readValue(byte[] content, Class<T> valueType)
+            throws JsonMappingException, JsonParseException {
+        if (content == null || content.length == 0) {
             throw new JsonParseException("input is null or empty");
         }
 
@@ -282,6 +306,11 @@ public class ObjectMapper
         return this;
     }
 
+    @Deprecated
+    public ObjectMapper configure(MapperFeature f, boolean state) {
+        return this;
+    }
+
     public ObjectMapper configure(DeserializationFeature f, boolean state) {
         deserializationConfig = state
                 ? deserializationConfig.with(f)
@@ -323,7 +352,7 @@ public class ObjectMapper
         return (T) TreeNodeUtils.as(any);
     }
 
-    public JsonNode readTree(String content) {
+    public JsonNode readTree(String content) throws JsonProcessingException, JsonMappingException {
         JSONReader jsonReader = JSONReader.of(content);
         Object any = jsonReader.readAny();
         return TreeNodeUtils.as(any);
@@ -335,13 +364,33 @@ public class ObjectMapper
         return TreeNodeUtils.as(any);
     }
 
+    public JsonNode readTree(Reader r) throws IOException {
+        JSONReader jsonReader = JSONReader.of(r);
+        Object any = jsonReader.readAny();
+        return TreeNodeUtils.as(any);
+    }
+
     public ObjectMapper disable(SerializationFeature f) {
         this.serializationConfig = this.serializationConfig.without(f);
         return this;
     }
 
+    public ObjectMapper disable(DeserializationFeature f) {
+        this.deserializationConfig = this.deserializationConfig.without(f);
+        return this;
+    }
+
+    public ObjectMapper disable(MapperFeature f) {
+        return this;
+    }
+
     public TypeFactory getTypeFactory() {
         return typeFactory;
+    }
+
+    public ObjectMapper setTypeFactory(TypeFactory f) {
+        this.typeFactory = f;
+        return this;
     }
 
     public <T extends JsonNode> T valueToTree(Object fromValue)
@@ -369,13 +418,31 @@ public class ObjectMapper
         return TreeNodeUtils.as(value);
     }
 
+    public ObjectWriter writer() {
+        // TODO writer
+        throw new JSONException("TODO");
+    }
+
     public ObjectWriter writer(PrettyPrinter pp) {
         // TODO writer
         throw new JSONException("TODO");
     }
 
+    public ObjectWriter writer(FormatSchema schema) {
+        throw new JSONException("TODO");
+    }
+
     public ObjectMapper enable(DeserializationFeature feature) {
         deserializationConfig.with(feature);
+        return this;
+    }
+
+    public ObjectMapper enable(MapperFeature feature) {
+        return this;
+    }
+
+    public ObjectMapper enable(SerializationFeature feature) {
+        serializationConfig.with(feature);
         return this;
     }
 
@@ -400,5 +467,76 @@ public class ObjectMapper
 
     public JsonNodeFactory getNodeFactory() {
         return deserializationConfig.getNodeFactory();
+    }
+
+    public JsonFactory getFactory() {
+        return factory;
+    }
+
+    public JsonParser createParser(String content) throws IOException {
+        JSONReader jsonReader = JSONReader.of(content, createReaderContext());
+        return new JsonParser(jsonReader);
+    }
+
+    public JsonParser createParser(URL src) throws IOException {
+        JSONReader jsonReader = JSONReader.of(src, createReaderContext());
+        return new JsonParser(jsonReader);
+    }
+
+    public JsonParser createParser(byte[] jsonBytes) throws IOException {
+        JSONReader jsonReader = JSONReader.of(jsonBytes, createReaderContext());
+        return new JsonParser(jsonReader);
+    }
+
+    public JsonParser createParser(InputStream in) throws IOException {
+        JSONReader.Context context = createReaderContext();
+        JSONReader jsonReader = JSONReader.of(in, StandardCharsets.UTF_8, context);
+        return new JsonParser(jsonReader);
+    }
+
+    public com.alibaba.fastjson2.adapter.jackson.databind.ObjectReader reader() {
+        return new com.alibaba.fastjson2.adapter.jackson.databind.ObjectReader(
+                this,
+                deserializationConfig, null
+        );
+    }
+
+    public com.alibaba.fastjson2.adapter.jackson.databind.ObjectReader reader(Class<?> type) {
+        return new com.alibaba.fastjson2.adapter.jackson.databind.ObjectReader(
+                this,
+                deserializationConfig, type
+        );
+    }
+
+    public com.alibaba.fastjson2.adapter.jackson.databind.ObjectReader readerFor(Class type) {
+        return new com.alibaba.fastjson2.adapter.jackson.databind.ObjectReader(
+                this,
+                deserializationConfig, type
+        );
+    }
+
+    public com.alibaba.fastjson2.adapter.jackson.databind.ObjectReader readerFor(JavaType type) {
+        return new com.alibaba.fastjson2.adapter.jackson.databind.ObjectReader(
+                this,
+                deserializationConfig, type.getType()
+        );
+    }
+
+    public ObjectWriter writerWithDefaultPrettyPrinter() {
+        return new ObjectWriter(this, serializationConfig, null);
+    }
+
+    public JsonGenerator createGenerator(OutputStream out, JsonEncoding enc) throws IOException {
+        throw new JSONException("TODO");
+    }
+
+    public void writeTree(JsonGenerator g, JsonNode rootNode)
+            throws IOException {
+        throw new JSONException("TODO");
+    }
+
+    public <T> T readValue(JsonParser p, Class<T> valueType)
+            throws IOException, StreamReadException, DatabindException {
+        return p.getJSONReader().read(valueType);
     }
 }

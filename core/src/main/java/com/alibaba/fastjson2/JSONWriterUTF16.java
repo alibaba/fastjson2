@@ -40,7 +40,10 @@ class JSONWriterUTF16
     @Override
     public void flushTo(java.io.Writer to) {
         try {
-            to.write(chars, 0, off);
+            if (off > 0) {
+                to.write(chars, 0, off);
+                off = 0;
+            }
         } catch (IOException e) {
             throw new JSONException("flushTo error", e);
         }
@@ -1954,12 +1957,14 @@ class JSONWriterUTF16
                 bytes[i] = (byte) chars[i];
             }
             out.write(bytes);
+            off = 0;
             return bytes.length;
         }
 
         byte[] utf8 = new byte[off * 3];
         int utf8Length = encodeUTF8(chars, 0, off, utf8, 0);
         out.write(utf8, 0, utf8Length);
+        off = 0;
         return utf8Length;
     }
 
@@ -1975,6 +1980,7 @@ class JSONWriterUTF16
 
         byte[] bytes = getBytes(charset);
         out.write(bytes);
+        off = 0;
         return bytes.length;
     }
 

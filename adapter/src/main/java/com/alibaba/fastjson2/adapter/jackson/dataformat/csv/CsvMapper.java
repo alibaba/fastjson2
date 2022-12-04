@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.adapter.jackson.dataformat.csv;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.adapter.jackson.databind.ObjectMapper;
 import com.alibaba.fastjson2.adapter.jackson.databind.ObjectReader;
 import com.alibaba.fastjson2.adapter.jackson.databind.ObjectWriter;
@@ -27,5 +28,9 @@ public class CsvMapper
     public CsvMapper enable(CsvParser.Feature f) {
         factory.enable(f);
         return this;
+    }
+
+    public final CsvSchema schemaFor(Class<?> pojoType) {
+        throw new JSONException("TODO");
     }
 }

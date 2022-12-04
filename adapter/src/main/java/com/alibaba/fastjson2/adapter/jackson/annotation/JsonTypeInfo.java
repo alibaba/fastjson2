@@ -15,8 +15,13 @@ public @interface JsonTypeInfo {
 
     String property() default "";
 
+    boolean visible() default false;
+
     enum Id {
-        NAME("@type");
+        NONE(null),
+        NAME("@type"),
+        MINIMAL_CLASS("@c"),
+        CLASS("@class");
 
         private final String defaultPropertyName;
 

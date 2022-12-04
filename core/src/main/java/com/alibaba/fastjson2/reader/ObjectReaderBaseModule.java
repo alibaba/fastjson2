@@ -696,6 +696,7 @@ public class ObjectReaderBaseModule
                 String annotationTypeName = annotationType.getName();
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonIgnore":
                         if (useJacksonAnnotation) {
                             processJacksonJsonIgnore(fieldInfo, annotation);
                         }
@@ -707,6 +708,7 @@ public class ObjectReaderBaseModule
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAnySetter":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonAnySetter":
                         if (useJacksonAnnotation) {
                             fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
                         }
@@ -721,6 +723,7 @@ public class ObjectReaderBaseModule
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAlias":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonAlias":
                         if (useJacksonAnnotation) {
                             processJacksonJsonAlias(fieldInfo, annotation);
                         }

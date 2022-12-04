@@ -4,4 +4,8 @@ public interface TreeNode {
     TreeNode get(String fieldName);
 
     TreeNode get(int index);
+
+    JsonParser traverse(ObjectCodec codec);
+
+    boolean isMissingNode();
 }

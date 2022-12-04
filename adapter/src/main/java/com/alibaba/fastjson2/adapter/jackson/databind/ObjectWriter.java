@@ -1,7 +1,9 @@
 package com.alibaba.fastjson2.adapter.jackson.databind;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.adapter.jackson.core.JsonFactory;
+import com.alibaba.fastjson2.adapter.jackson.core.JsonProcessingException;
 import com.alibaba.fastjson2.support.csv.CSVWriter;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -64,5 +66,19 @@ public class ObjectWriter {
     public ObjectWriter withDefaultPrettyPrinter() {
         // TODO withDefaultPrettyPrinter
         return this;
+    }
+
+    public ObjectWriter withAttribute(Object key, Object value) {
+        return this;
+    }
+
+    public byte[] writeValueAsBytes(Object value)
+            throws JsonProcessingException {
+        throw new JSONException("TODO");
+    }
+
+    public void writeValue(OutputStream out, Object value)
+            throws IOException, DatabindException {
+        throw new JSONException("TODO");
     }
 }

@@ -73,6 +73,12 @@ public abstract class CSVParser
         this.typeReaders = readers;
     }
 
+    public static CSVParser of(Reader reader, Class objectClass) {
+        JSONReader.Context context = JSONFactory.createReadContext();
+        ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
+        return new CSVParserUTF16(reader, objectReader);
+    }
+
     public static CSVParser of(String str, Class objectClass) {
         JSONReader.Context context = JSONFactory.createReadContext();
         ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
@@ -202,6 +208,10 @@ public abstract class CSVParser
     }
 
     public <T> T readLoneObject() {
+        if (inputEnd) {
+            return null;
+        }
+
         if (objectReader == null) {
             throw new JSONException("unsupported operation");
         }
@@ -216,6 +226,7 @@ public abstract class CSVParser
         }
 
         Object[] values = readLineValues(false);
+
         if (columns != null) {
             Map map = new HashMap();
             for (int i = 0; i < values.length; i++) {
@@ -229,6 +240,8 @@ public abstract class CSVParser
             return (T) objectReader.createInstance(values == null ? Collections.emptyList() : Arrays.asList(values));
         }
     }
+
+    public abstract boolean isEnd();
 
     public final Object[] readLineValues() {
         return readLineValues(false);

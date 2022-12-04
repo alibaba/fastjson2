@@ -24,4 +24,28 @@ public class BooleanNode
     public int asInt(int defaultValue) {
         return value ? 1 : 0;
     }
+
+    @Override
+    public JsonNodeType getNodeType() {
+        return JsonNodeType.BOOLEAN;
+    }
+
+    @Override
+    public long longValue() {
+        return value ? 1 : 0;
+    }
+
+    @Override
+    public int intValue() {
+        return value ? 1 : 0;
+    }
+
+    @Override
+    public boolean asBoolean() {
+        return value;
+    }
+
+    public static BooleanNode valueOf(boolean v) {
+        return v ? TRUE : FALSE;
+    }
 }

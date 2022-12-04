@@ -7,6 +7,8 @@ import com.alibaba.fastjson2.adapter.jackson.core.Version;
 import com.alibaba.fastjson2.adapter.jackson.databind.deser.std.StdDeserializer;
 import com.alibaba.fastjson2.adapter.jackson.databind.module.SimpleModule;
 import com.alibaba.fastjson2.adapter.jackson.databind.ser.std.StdSerializer;
+import com.alibaba.fastjson2.adapter.jackson.datatype.jdk8.Jdk8Module;
+import com.alibaba.fastjson2.adapter.jackson.datatype.jsr310.JavaTimeModule;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -28,6 +30,8 @@ public class ObjectMapperTest2 {
                 new SimpleModule("CustomCarSerializer", new Version(1, 0, 0, null, null, null));
         module.addSerializer(Car.class, new CustomCarSerializer());
         mapper.registerModule(module);
+        mapper.registerModule(new Jdk8Module());
+        mapper.registerModule(new JavaTimeModule());
         Car car = new Car("yellow", "renault");
         String expected = "{\"car_brand\":\"renault\"}";
 

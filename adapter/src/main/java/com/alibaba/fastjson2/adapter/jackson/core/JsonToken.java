@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.adapter.jackson.core;
 
+import com.alibaba.fastjson2.JSONException;
+
 public enum JsonToken {
     START_OBJECT("{", JsonTokenId.ID_START_OBJECT),
     END_OBJECT("}", JsonTokenId.ID_END_OBJECT),
@@ -14,5 +16,11 @@ public enum JsonToken {
     VALUE_NULL("null", JsonTokenId.ID_NULL);
 
     JsonToken(String token, int id) {
+        // TODO isScalarValue
+    }
+
+    public final boolean isScalarValue() {
+        // TODO isScalarValue
+        throw new JSONException("TODO");
     }
 }

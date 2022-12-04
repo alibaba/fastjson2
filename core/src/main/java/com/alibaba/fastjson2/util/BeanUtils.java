@@ -460,6 +460,7 @@ public abstract class BeanUtils {
 
                     switch (annotationType.getName()) {
                         case "com.fasterxml.jackson.annotation.JsonAnySetter":
+                        case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonAnySetter":
                             if (JSONFactory.isUseJacksonAnnotation()) {
                                 unwrapped = true;
                             }
