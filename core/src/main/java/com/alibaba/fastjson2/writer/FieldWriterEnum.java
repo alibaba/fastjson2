@@ -63,7 +63,11 @@ abstract class FieldWriterEnum
         if (symbolTable != null && usingOrdinal && !usingToString) {
             int namingOrdinal = symbolTable.getOrdinalByHashCode(hashCodes[ordinal]);
             if (namingOrdinal >= 0) {
-                writeFieldName(jsonWriter);
+                if (nameJSONB == null) {
+                    nameJSONB = JSONB.toBytes(fieldName);
+                }
+                jsonWriter.writeNameRaw(nameJSONB, hashCode);
+
                 jsonWriter.writeRaw(JSONB.Constants.BC_STR_ASCII);
                 jsonWriter.writeInt32(-namingOrdinal);
                 return;
@@ -71,13 +75,21 @@ abstract class FieldWriterEnum
         }
 
         if (usingToString) {
-            writeFieldName(jsonWriter);
+            if (nameJSONB == null) {
+                nameJSONB = JSONB.toBytes(fieldName);
+            }
+            jsonWriter.writeNameRaw(nameJSONB, hashCode);
+
             jsonWriter.writeString(e.toString());
             return;
         }
 
         if (usingOrdinal) {
-            writeFieldName(jsonWriter);
+            if (nameJSONB == null) {
+                nameJSONB = JSONB.toBytes(fieldName);
+            }
+            jsonWriter.writeNameRaw(nameJSONB, hashCode);
+
             jsonWriter.writeInt32(ordinal);
             return;
         }
