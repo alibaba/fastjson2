@@ -29,6 +29,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.loadClass;
 
 public class ObjectReaderProvider
         implements ObjectCodecProvider {
+    static final ClassLoader FASTJSON2_CLASS_LOADER = JSON.class.getClassLoader();
     public static final boolean SAFE_MODE;
     static final String[] DENYS;
     static final String[] AUTO_TYPE_ACCEPT_LIST;
@@ -37,7 +38,17 @@ public class ObjectReaderProvider
     static Consumer<Class> DEFAULT_AUTO_TYPE_HANDLER;
     static boolean DEFAULT_AUTO_TYPE_HANDLER_INIT_ERROR;
 
-    static Long hashCodeCache;
+    static ObjectReaderCachePair readerCache;
+
+    static class ObjectReaderCachePair {
+        final long hashCode;
+        final ObjectReader reader;
+
+        public ObjectReaderCachePair(long hashCode, ObjectReader reader) {
+            this.hashCode = hashCode;
+            this.reader = reader;
+        }
+    }
 
     static {
         {
@@ -554,20 +565,15 @@ public class ObjectReaderProvider
     }
 
     public ObjectReader getObjectReader(long hashCode) {
-        final Long hashCodeObj;
-        if (hashCodeCache == null) {
-            hashCodeObj = hashCodeCache = new Long(hashCode);
-        } else {
-            if (hashCode == hashCodeCache.longValue()) {
-                hashCodeObj = hashCodeCache;
-            } else {
-                hashCodeObj = new Long(hashCode);
-            }
+        ObjectReaderCachePair pair = readerCache;
+        if (pair != null && pair.hashCode == hashCode) {
+            return pair.reader;
         }
 
+        Long hashCodeObj = new Long(hashCode);
         ObjectReader objectReader = null;
         ClassLoader tcl = Thread.currentThread().getContextClassLoader();
-        if (tcl != null && tcl != JSON.class.getClassLoader()) {
+        if (tcl != null && tcl != FASTJSON2_CLASS_LOADER) {
             int tclHash = System.identityHashCode(tcl);
             ConcurrentHashMap<Long, ObjectReader> tclHashCache = tclHashCaches.get(tclHash);
             if (tclHashCache != null) {
@@ -577,6 +583,10 @@ public class ObjectReaderProvider
 
         if (objectReader == null) {
             objectReader = hashCache.get(hashCodeObj);
+        }
+
+        if (objectReader != null && readerCache == null) {
+            readerCache = new ObjectReaderCachePair(hashCode, objectReader);
         }
 
         return objectReader;

@@ -12,7 +12,7 @@ public class UnsafeUtils {
     public static final Unsafe UNSAFE;
 
     static long STRING_CODER_OFFSET;
-    static long STRING_VALUE_OFFSET;
+    public static long STRING_VALUE_OFFSET;
 
     static {
         Unsafe unsafe = null;
@@ -76,6 +76,7 @@ public class UnsafeUtils {
             implements BiFunction {
         final long coderOffset;
         final long valueOffset;
+        static final Byte ZERO = (byte) 0;
 
         public UnsafeStringCreator() throws Exception {
             Field fieldCode = String.class.getDeclaredField("coder");
@@ -89,7 +90,10 @@ public class UnsafeUtils {
         public Object apply(Object value, Object coder) {
             try {
                 Object str = UNSAFE.allocateInstance(String.class);
-                UNSAFE.putByte(str, coderOffset, ((Byte) coder).byteValue());
+                if (coder != ZERO) {
+                    UNSAFE.putByte(str, coderOffset, ((Byte) coder).byteValue());
+                }
+
                 UNSAFE.putObject(str, valueOffset, value);
                 return str;
             } catch (Throwable ex) {

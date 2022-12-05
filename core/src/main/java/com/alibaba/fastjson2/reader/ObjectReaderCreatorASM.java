@@ -306,7 +306,8 @@ public class ObjectReaderCreatorASM
                 Constructor constructor = beanInfo.deserializer.getDeclaredConstructor();
                 constructor.setAccessible(true);
                 return (ObjectReader<T>) constructor.newInstance();
-            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException |
+                     InvocationTargetException e) {
                 throw new JSONException("create deserializer error", e);
             }
         }
@@ -551,15 +552,7 @@ public class ObjectReaderCreatorASM
                         "(J)Ljava/lang/Object;",
                         32
                 );
-                mw.visitTypeInsn(Opcodes.NEW, TYPE_OBJECT);
-                mw.visitInsn(Opcodes.DUP);
-                if (defaultConstructor.getParameterCount() == 0) {
-                    mw.visitMethodInsn(Opcodes.INVOKESPECIAL, TYPE_OBJECT, "<init>", "()V", false);
-                } else {
-                    Class paramType = defaultConstructor.getParameterTypes()[0];
-                    mw.visitInsn(Opcodes.ACONST_NULL);
-                    mw.visitMethodInsn(Opcodes.INVOKESPECIAL, TYPE_OBJECT, "<init>", "(" + ASMUtils.desc(paramType) + ")V", false);
-                }
+                newObject(mw, TYPE_OBJECT, defaultConstructor);
                 mw.visitInsn(Opcodes.ARETURN);
                 mw.visitMaxs(3, 3);
             }
@@ -594,6 +587,18 @@ public class ObjectReaderCreatorASM
                     .newInstance(objectClass, supplier, fieldReaderArray);
         } catch (Throwable e) {
             throw new JSONException("create objectReader error, objectType " + objectType.getTypeName(), e);
+        }
+    }
+
+    private static void newObject(MethodWriter mw, String TYPE_OBJECT, Constructor defaultConstructor) {
+        mw.visitTypeInsn(Opcodes.NEW, TYPE_OBJECT);
+        mw.visitInsn(Opcodes.DUP);
+        if (defaultConstructor.getParameterCount() == 0) {
+            mw.visitMethodInsn(Opcodes.INVOKESPECIAL, TYPE_OBJECT, "<init>", "()V", false);
+        } else {
+            Class paramType = defaultConstructor.getParameterTypes()[0];
+            mw.visitInsn(Opcodes.ACONST_NULL);
+            mw.visitMethodInsn(Opcodes.INVOKESPECIAL, TYPE_OBJECT, "<init>", "(" + ASMUtils.desc(paramType) + ")V", false);
         }
     }
 
@@ -1862,7 +1867,7 @@ public class ObjectReaderCreatorASM
         int objectModifiers = objectType.getModifiers();
         boolean publicObject = Modifier.isPublic(objectModifiers) && !classLoader.isExternalClass(objectType);
 
-        if (fieldBased || defaultConstructor == null || !Modifier.isPublic(defaultConstructor.getModifiers())) {
+        if (defaultConstructor == null || !publicObject || !Modifier.isPublic(defaultConstructor.getModifiers())) {
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
@@ -1872,15 +1877,7 @@ public class ObjectReaderCreatorASM
                 mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_OBJECT);
             }
         } else {
-            mw.visitTypeInsn(Opcodes.NEW, TYPE_OBJECT);
-            mw.visitInsn(Opcodes.DUP);
-            if (defaultConstructor.getParameterCount() == 0) {
-                mw.visitMethodInsn(Opcodes.INVOKESPECIAL, TYPE_OBJECT, "<init>", "()V", false);
-            } else {
-                Class paramType = defaultConstructor.getParameterTypes()[0];
-                mw.visitInsn(Opcodes.ACONST_NULL);
-                mw.visitMethodInsn(Opcodes.INVOKESPECIAL, TYPE_OBJECT, "<init>", "(" + ASMUtils.desc(paramType) + ")V", false);
-            }
+            newObject(mw, TYPE_OBJECT, defaultConstructor);
         }
     }
 
@@ -2411,13 +2408,14 @@ public class ObjectReaderCreatorASM
                     "(" + DESC_FIELD_CLASS + ")V", false);
             // TODO BUILD METHOD
         } else if (field != null) {
-            if (Modifier.isPublic(objectType.getModifiers())
-                    && Modifier.isPublic(fieldModifers)
-                    && !Modifier.isFinal(fieldModifers)
-                    && ObjectWriterProvider.isPrimitiveOrEnum(fieldClass)
+            String fieldClassName = fieldClass.getName();
+            boolean setDirect = (objectType.getModifiers() & Modifier.PUBLIC) != 0
+                    && (fieldModifers & Modifier.PUBLIC) != 0
+                    && (fieldModifers & Modifier.FINAL) == 0
+                    && (ObjectWriterProvider.isPrimitiveOrEnum(fieldClass) || fieldClassName.startsWith("java.") || fieldClass.getClassLoader() == ObjectReaderProvider.FASTJSON2_CLASS_LOADER)
                     && !classLoader.isExternalClass(objectType)
-                    && field.getDeclaringClass() == objectType
-            ) {
+                    && field.getDeclaringClass() == objectType;
+            if (setDirect) {
                 mw.visitFieldInsn(PUTFIELD, TYPE_OBJECT, field.getName(), DESC_FIELD_CLASS);
             } else {
                 Integer FIELD_VALUE = variants.get(fieldClass);

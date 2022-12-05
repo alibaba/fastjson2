@@ -1398,7 +1398,17 @@ class JSONReaderJSONB
                 || strtype == BC_STR_UTF16LE
                 || strtype == BC_STR_UTF16BE
         ) {
-            strlen = readLength();
+            byte strType = bytes[offset];
+            if (strType >= BC_INT32_NUM_MIN && strType <= BC_INT32_NUM_MAX) {
+                offset++;
+                strlen = strType;
+            } else if (strType >= BC_INT32_BYTE_MIN && strType <= BC_INT32_BYTE_MAX) {
+                offset++;
+                strlen = ((strType - BC_INT32_BYTE_ZERO) << 8)
+                        + (bytes[offset++] & 0xFF);
+            } else {
+                strlen = readLength();
+            }
             strBegin = offset;
         } else {
             throw new JSONException("string value not support input " + typeName(type)
