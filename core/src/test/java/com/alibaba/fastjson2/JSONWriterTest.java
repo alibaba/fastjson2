@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -926,5 +927,295 @@ public class JSONWriterTest {
             jsonWriter.writeString(chars, 5, 1);
             assertEquals("\"5\"", jsonWriter.toString());
         }
+    }
+
+    @Test
+    public void writeString2() {
+        List<String> list = Arrays.asList("a", "b");
+        String expected = "[\"a\",\"b\"]";
+
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.writeString(list);
+            assertEquals(expected, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.writeString(list);
+            assertEquals(expected, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.writeString(list);
+            assertEquals(expected, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofJSONB();
+            jsonWriter.writeString(list);
+            assertEquals(expected, jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void writeString3() {
+        List<String> list = Arrays.asList("中国", "浙江");
+        String expected = JSON.toJSONString(list);
+
+        {
+            JSONWriter jsonWriter = JSONWriter.of();
+            jsonWriter.writeString(list);
+            assertEquals(expected, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF8();
+            jsonWriter.writeString(list);
+            assertEquals(expected, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofUTF16();
+            jsonWriter.writeString(list);
+            assertEquals(expected, jsonWriter.toString());
+        }
+        {
+            JSONWriter jsonWriter = JSONWriter.ofJSONB();
+            jsonWriter.writeString(list);
+            assertEquals(expected, jsonWriter.toString());
+        }
+    }
+
+    @Test
+    public void test1() {
+        A a = new A();
+        a.id = 1001;
+        A a1 = new A();
+        a1.id = 1002;
+        a.value = a1;
+
+        byte[] jsonbBytes = JSONB.toBytes(a, WriteClassName);
+        assertEquals("{\n" +
+                "\t\"@type\":\"com.alibaba.fastjson2.JSONWriterTest$A#0\",\n" +
+                "\t\"@value\":{\n" +
+                "\t\t\"id\":1001,\n" +
+                "\t\t\"value\":{\n" +
+                "\t\t\t\"@type\":\"#0\",\n" +
+                "\t\t\t\"@value\":{\n" +
+                "\t\t\t\t\"id\":1002\n" +
+                "\t\t\t}\n" +
+                "\t\t}\n" +
+                "\t}\n" +
+                "}", new JSONBDump(jsonbBytes, true).toString());
+
+        A o = (A) JSONB.parseObject(jsonbBytes, Object.class, JSONReader.Feature.SupportAutoType);
+        assertEquals(a.id, o.id);
+        assertEquals(((A) a.value).id, ((A) o.value).id);
+    }
+
+    public static class A {
+        public Object value;
+        public int id;
+    }
+
+    @Test
+    public void test2() {
+        A a = new A();
+        a.id = 1001;
+        A a1 = new A();
+        a1.id = 1002;
+        a.value = a1;
+
+        byte[] jsonbBytes = JSONB.toBytes(a, WriteNameAsSymbol);
+        assertEquals(
+                "{\n" +
+                        "\t\"id#0\":1001,\n" +
+                        "\t\"value#1\":{\n" +
+                        "\t\t\"#0\":1002\n" +
+                        "\t}\n" +
+                        "}",
+                new JSONBDump(jsonbBytes, true).toString()
+        );
+
+        A o = JSONB.parseObject(jsonbBytes, A.class, JSONReader.Feature.SupportAutoType);
+        assertEquals(a.id, o.id);
+        assertEquals(a1.id, ((JSONObject) o.value).getIntValue("id"));
+    }
+
+    @Test
+    public void test3() {
+        A a = new A();
+        a.id = 1001;
+        A a1 = new A();
+        a1.id = 1002;
+        a.value = a1;
+
+        byte[] jsonbBytes = JSONB.toBytes(a, WriteNameAsSymbol);
+        assertEquals(
+                "{\n" +
+                        "\t\"id#0\":1001,\n" +
+                        "\t\"value#1\":{\n" +
+                        "\t\t\"#0\":1002\n" +
+                        "\t}\n" +
+                        "}",
+                new JSONBDump(jsonbBytes, true).toString()
+        );
+
+        JSONObject root = JSONB.parseObject(jsonbBytes);
+        assertEquals(a.id, root.getIntValue("id"));
+        assertEquals(a1.id, root.getJSONObject("value").getIntValue("id"));
+    }
+
+    @Test
+    public void test4() {
+        Bean4 a = new Bean4();
+        a.a1234567890id = 1001;
+        Bean4 a1 = new Bean4();
+        a1.a1234567890id = 1002;
+        a.value = a1;
+
+        byte[] jsonbBytes = JSONB.toBytes(a, WriteNameAsSymbol);
+        assertEquals(
+                "{\n" +
+                        "\t\"a1234567890id#0\":1001,\n" +
+                        "\t\"value#1\":{\n" +
+                        "\t\t\"#0\":1002\n" +
+                        "\t}\n" +
+                        "}",
+                new JSONBDump(jsonbBytes, true).toString()
+        );
+
+        JSONObject root = parseObject(jsonbBytes);
+        assertEquals(a.a1234567890id, root.getIntValue("a1234567890id"));
+        assertEquals(a1.a1234567890id, root.getJSONObject("value").getIntValue("a1234567890id"));
+    }
+
+    @Test
+    public void test4_uf() {
+        Bean4 a = new Bean4();
+        a.a1234567890id = 1001;
+        Bean4 a1 = new Bean4();
+        a1.a1234567890id = 1002;
+        a.value = a1;
+
+        byte[] jsonbBytes = JSONB.toBytes(a, WriteNameAsSymbol);
+        assertEquals(
+                "{\n" +
+                        "\t\"a1234567890id#0\":1001,\n" +
+                        "\t\"value#1\":{\n" +
+                        "\t\t\"#0\":1002\n" +
+                        "\t}\n" +
+                        "}",
+                new JSONBDump(jsonbBytes, true).toString()
+        );
+
+        JSONObject root = parseObjectUF(jsonbBytes);
+        assertEquals(a.a1234567890id, root.getIntValue("a1234567890id"));
+        assertEquals(a1.a1234567890id, root.getJSONObject("value").getIntValue("a1234567890id"));
+    }
+
+    @Test
+    public void test4_bean() {
+        Bean4 a = new Bean4();
+        a.a1234567890id = 1001;
+        Bean4 a1 = new Bean4();
+        a1.a1234567890id = 1002;
+        a.value = a1;
+
+        byte[] jsonbBytes = JSONB.toBytes(a, WriteNameAsSymbol);
+        assertEquals(
+                "{\n" +
+                        "\t\"a1234567890id#0\":1001,\n" +
+                        "\t\"value#1\":{\n" +
+                        "\t\t\"#0\":1002\n" +
+                        "\t}\n" +
+                        "}",
+                new JSONBDump(jsonbBytes, true).toString()
+        );
+
+        Bean4 o = parseObject(jsonbBytes, Bean4.class, JSONReader.Feature.SupportAutoType);
+        assertEquals(a.a1234567890id, o.a1234567890id);
+        assertEquals(a1.a1234567890id, o.value.a1234567890id);
+    }
+
+    @Test
+    public void test4_bean_uf() {
+        Bean4 a = new Bean4();
+        a.a1234567890id = 1001;
+        Bean4 a1 = new Bean4();
+        a1.a1234567890id = 1002;
+        a.value = a1;
+
+        byte[] jsonbBytes = JSONB.toBytes(a, WriteNameAsSymbol);
+        assertEquals(
+                "{\n" +
+                        "\t\"a1234567890id#0\":1001,\n" +
+                        "\t\"value#1\":{\n" +
+                        "\t\t\"#0\":1002\n" +
+                        "\t}\n" +
+                        "}",
+                new JSONBDump(jsonbBytes, true).toString()
+        );
+
+        Bean4 o = parseObjectUF(jsonbBytes, Bean4.class, JSONReader.Feature.SupportAutoType);
+        assertEquals(a.a1234567890id, o.a1234567890id);
+        assertEquals(a1.a1234567890id, o.value.a1234567890id);
+    }
+
+    public static class Bean4 {
+        public int a1234567890id;
+        public Bean4 value;
+    }
+
+    static JSONObject parseObject(byte[] jsonbBytes) {
+        JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider());
+        JSONReader reader = new JSONReaderJSONB(
+                context,
+                jsonbBytes,
+                0,
+                jsonbBytes.length);
+
+        JSONObject object = (JSONObject) reader.readObject();
+        if (reader.resolveTasks != null) {
+            reader.handleResolveTasks(object);
+        }
+        return object;
+    }
+
+    static JSONObject parseObjectUF(byte[] jsonbBytes) {
+        JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider());
+        JSONReader reader = new JSONReaderJSONBUF(
+                context,
+                jsonbBytes,
+                0,
+                jsonbBytes.length);
+
+        JSONObject object = (JSONObject) reader.readObject();
+        if (reader.resolveTasks != null) {
+            reader.handleResolveTasks(object);
+        }
+        return object;
+    }
+
+    static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass, JSONReader.Feature... features) {
+        JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider());
+        context.config(features);
+        JSONReader reader = new JSONReaderJSONB(
+                context,
+                jsonbBytes,
+                0,
+                jsonbBytes.length);
+
+        return reader.read(objectClass);
+    }
+
+    static <T> T parseObjectUF(byte[] jsonbBytes, Class<T> objectClass, JSONReader.Feature... features) {
+        JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider());
+        context.config(features);
+
+        JSONReader reader = new JSONReaderJSONBUF(
+                context,
+                jsonbBytes,
+                0,
+                jsonbBytes.length);
+
+        return reader.read(objectClass);
     }
 }

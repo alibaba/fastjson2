@@ -37,7 +37,13 @@ class JSONReaderJSONB
     protected final int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
 
     protected final SymbolTable symbolTable;
-    protected long[] symbols = new long[32];
+
+    protected long symbol0Hash;
+    protected int symbol0Begin;
+    protected int symbol0Length;
+    protected byte symbol0StrType;
+
+    protected long[] symbols;
 
     JSONReaderJSONB(Context ctx, byte[] bytes, int off, int length) {
         super(ctx);
@@ -1170,6 +1176,16 @@ class JSONReaderJSONB
                     return symbolTable.getHashCode(-symbol);
                 }
 
+                if (symbol == 0) {
+                    strtype = symbol0StrType;
+                    strlen = symbol0Length;
+                    strBegin = symbol0Begin;
+                    if (symbol0Hash == 0) {
+                        symbol0Hash = getNameHashCode();
+                    }
+                    return symbol0Hash;
+                }
+
                 int index = symbol * 2;
                 long strInfo = symbols[index + 1];
                 this.strtype = (byte) strInfo;
@@ -1291,12 +1307,23 @@ class JSONReaderJSONB
                 symbol = readInt32Value();
             }
 
+            if (symbol == 0) {
+                symbol0Begin = strBegin;
+                symbol0Length = strlen;
+                symbol0StrType = strtype;
+                symbol0Hash = hashCode;
+                return hashCode;
+            }
+
             long strInfo = ((long) strBegin << 32) + ((long) strlen << 8) + strtype;
 
             int minCapacity = symbol * 2 + 2;
-            if (symbols.length < minCapacity) {
+            if (symbols == null) {
+                symbols = new long[minCapacity < 32 ? 32 : minCapacity];
+            } else if (symbols.length < minCapacity) {
                 symbols = Arrays.copyOf(symbols, minCapacity + 16);
             }
+
             symbols[symbol * 2] = hashCode;
             symbols[symbol * 2 + 1] = strInfo;
         }
@@ -1367,7 +1394,15 @@ class JSONReaderJSONB
             }
 
             long refTypeHash;
-            if (typeIndex < 0) {
+            if (typeIndex == 0) {
+                strtype = symbol0StrType;
+                strlen = symbol0Length;
+                strBegin = symbol0Begin;
+                if (symbol0Hash == 0) {
+                    symbol0Hash = Fnv.hashCode64(getString());
+                }
+                refTypeHash = symbol0Hash;
+            } else if (typeIndex < 0) {
                 strlen = strtype;
                 refTypeHash = symbolTable.getHashCode(-typeIndex);
             } else {
@@ -1542,12 +1577,23 @@ class JSONReaderJSONB
             symbol = readInt32Value();
         }
 
-        int minCapacity = symbol * 2 + 2;
-        if (symbols.length < minCapacity) {
-            symbols = Arrays.copyOf(symbols, symbols.length + 16);
+        if (symbol == 0) {
+            symbol0Begin = strBegin;
+            symbol0Length = strlen;
+            symbol0StrType = strtype;
+            symbol0Hash = hashCode;
+        } else {
+            int minCapacity = symbol * 2 + 2;
+
+            if (symbols == null) {
+                symbols = new long[minCapacity < 32 ? 32 : minCapacity];
+            } else if (symbols.length < minCapacity) {
+                symbols = Arrays.copyOf(symbols, minCapacity + 16);
+            }
+
+            long strInfo = ((long) strBegin << 32) + ((long) strlen << 8) + strtype;
+            symbols[symbol * 2 + 1] = strInfo;
         }
-        long strInfo = ((long) strBegin << 32) + ((long) strlen << 8) + strtype;
-        symbols[symbol * 2 + 1] = strInfo;
 
         return hashCode;
     }
@@ -2196,6 +2242,13 @@ class JSONReaderJSONB
                     return symbolTable.getName(-symbol);
                 }
 
+                if (symbol == 0) {
+                    strtype = symbol0StrType;
+                    strlen = symbol0Length;
+                    strBegin = symbol0Begin;
+                    return getString();
+                }
+
                 int index = symbol * 2 + 1;
                 long strInfo = symbols[index];
                 strtype = (byte) strInfo;
@@ -2419,62 +2472,60 @@ class JSONReaderJSONB
                     int indexMask = ((int) nameValue1) & (NAME_CACHE2.length - 1);
                     JSONFactory.NameCacheEntry2 entry = NAME_CACHE2[indexMask];
                     if (entry == null) {
-                        String name;
                         if (STRING_CREATOR_JDK8 != null) {
                             char[] chars = new char[strlen];
                             for (int i = 0; i < strlen; ++i) {
                                 chars[i] = (char) bytes[offset + i];
                             }
-                            name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                            str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                         } else {
-                            name = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                            str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
                         }
 
-                        NAME_CACHE2[indexMask] = new JSONFactory.NameCacheEntry2(name, nameValue0, nameValue1);
+                        NAME_CACHE2[indexMask] = new JSONFactory.NameCacheEntry2(str, nameValue0, nameValue1);
                         offset += strlen;
-                        return name;
                     } else if (entry.value0 == nameValue0 && entry.value1 == nameValue1) {
                         offset += strlen;
-                        return entry.name;
+                        str = entry.name;
                     }
                 } else {
                     int indexMask = ((int) nameValue0) & (NAME_CACHE.length - 1);
                     JSONFactory.NameCacheEntry entry = NAME_CACHE[indexMask];
                     if (entry == null) {
-                        String name;
                         if (STRING_CREATOR_JDK8 != null) {
                             char[] chars = new char[strlen];
                             for (int i = 0; i < strlen; ++i) {
                                 chars[i] = (char) bytes[offset + i];
                             }
-                            name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                            str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                         } else {
-                            name = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                            str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
                         }
 
-                        NAME_CACHE[indexMask] = new JSONFactory.NameCacheEntry(name, nameValue0);
+                        NAME_CACHE[indexMask] = new JSONFactory.NameCacheEntry(str, nameValue0);
                         offset += strlen;
-                        return name;
                     } else if (entry.value == nameValue0) {
                         offset += strlen;
-                        return entry.name;
+                        str = entry.name;
                     }
                 }
             }
 
-            if (STRING_CREATOR_JDK8 != null && strlen >= 0) {
-                char[] chars = new char[strlen];
-                for (int i = 0; i < strlen; ++i) {
-                    chars[i] = (char) bytes[offset + i];
-                }
-                offset += strlen;
+            if (str == null) {
+                if (STRING_CREATOR_JDK8 != null && strlen >= 0) {
+                    char[] chars = new char[strlen];
+                    for (int i = 0; i < strlen; ++i) {
+                        chars[i] = (char) bytes[offset + i];
+                    }
+                    offset += strlen;
 
-                str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-            } else if (STRING_CREATOR_JDK11 != null && strlen >= 0) {
-                byte[] chars = new byte[strlen];
-                System.arraycopy(bytes, offset, chars, 0, strlen);
-                str = STRING_CREATOR_JDK11.apply(chars, LATIN1);
-                offset += strlen;
+                    str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                } else if (STRING_CREATOR_JDK11 != null && strlen >= 0) {
+                    byte[] chars = new byte[strlen];
+                    System.arraycopy(bytes, offset, chars, 0, strlen);
+                    str = STRING_CREATOR_JDK11.apply(chars, LATIN1);
+                    offset += strlen;
+                }
             }
             charset = StandardCharsets.US_ASCII;
         } else if (strtype == BC_STR_UTF8) {
@@ -2499,7 +2550,7 @@ class JSONReaderJSONB
                 if (utf16_len != -1) {
                     byte[] value = new byte[utf16_len];
                     System.arraycopy(valueBytes, 0, value, 0, utf16_len);
-                    str = (String) STRING_CREATOR_JDK11.apply(value, UTF16);
+                    str = STRING_CREATOR_JDK11.apply(value, UTF16);
                     offset += strlen;
                 }
             }
@@ -2547,13 +2598,21 @@ class JSONReaderJSONB
         if (typeSymbol) {
             int symbol = readInt32Value();
 
-            int minCapacity = symbol * 2 + 2;
-            if (symbols.length < minCapacity) {
-                symbols = Arrays.copyOf(symbols, symbols.length + 16);
-            }
+            if (symbol == 0) {
+                symbol0Begin = strBegin;
+                symbol0Length = strlen;
+                symbol0StrType = strtype;
+            } else {
+                int minCapacity = symbol * 2 + 2;
+                if (symbols == null) {
+                    symbols = new long[minCapacity < 32 ? 32 : minCapacity];
+                } else if (symbols.length < minCapacity) {
+                    symbols = Arrays.copyOf(symbols, symbols.length + 16);
+                }
 
-            long strInfo = ((long) strBegin << 32) + ((long) strlen << 8) + strtype;
-            symbols[symbol * 2 + 1] = strInfo;
+                long strInfo = ((long) strBegin << 32) + ((long) strlen << 8) + strtype;
+                symbols[symbol * 2 + 1] = strInfo;
+            }
         }
 
         return str;

@@ -13,7 +13,6 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.IdentityHashMap;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
@@ -655,6 +654,49 @@ public interface JSONB {
         }
     }
 
+    static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass, JSONReader.Context context) {
+        try (JSONReader jsonReader = UNSAFE_SUPPORT
+                ? new JSONReaderJSONBUF(
+                context,
+                jsonbBytes,
+                0,
+                jsonbBytes.length)
+                : new JSONReaderJSONB(
+                context,
+                jsonbBytes,
+                0,
+                jsonbBytes.length)
+        ) {
+            Object object;
+            if (objectClass == Object.class) {
+                ObjectReader autoTypeObjectReader;
+                byte type = jsonReader.getType();
+                if (type == BC_TYPED_ANY) {
+                    autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, 0);
+                    object = autoTypeObjectReader.readJSONBObject(jsonReader, null, null, context.features);
+                } else {
+                    object = jsonReader.readAny();
+                }
+            } else {
+                boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+                ObjectReader objectReader = context.provider.getObjectReader(objectClass, fieldBased);
+                if ((context.features & JSONReader.Feature.SupportArrayToBean.mask) != 0
+                        && jsonReader.isArray()
+                        && objectReader instanceof ObjectReaderBean
+                ) {
+                    object = objectReader.readArrayMappingJSONBObject(jsonReader, null, null, 0);
+                } else {
+                    object = objectReader.readJSONBObject(jsonReader, null, null, 0);
+                }
+            }
+
+            if (jsonReader.resolveTasks != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            return (T) object;
+        }
+    }
+
     static <T> T parseObject(byte[] jsonbBytes, Type objectClass, JSONReader.Feature... features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider);
@@ -952,11 +994,18 @@ public interface JSONB {
             if (object == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
+
+                boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
 
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
-                objectWriter.writeJSONB(writer, object, null, null, 0);
+                ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                if ((context.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
+                    objectWriter.writeArrayMappingJSONB(writer, object, null, null, 0);
+                } else {
+                    objectWriter.writeJSONB(writer, object, null, null, 0);
+                }
             }
             return writer.getBytes();
         }
@@ -1050,11 +1099,7 @@ public interface JSONB {
                 writer.writeNull();
             } else {
                 writer.rootObject = object;
-
-                if ((context.features & JSONWriter.Feature.ReferenceDetection.mask) != 0) {
-                    writer.refs = new IdentityHashMap(8);
-                    writer.refs.put(object, writer.path = JSONWriter.Path.ROOT);
-                }
+                writer.path = JSONWriter.Path.ROOT;
 
                 boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
 

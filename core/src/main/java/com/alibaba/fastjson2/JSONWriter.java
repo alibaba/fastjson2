@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
@@ -110,13 +111,7 @@ public abstract class JSONWriter
 
     public void setRootObject(Object rootObject) {
         this.rootObject = rootObject;
-        if ((context.features & JSONWriter.Feature.ReferenceDetection.mask) != 0) {
-            if (refs == null) {
-                refs = new IdentityHashMap(8);
-            }
-
-            refs.putIfAbsent(rootObject, this.path = Path.ROOT);
-        }
+        this.path = JSONWriter.Path.ROOT;
     }
 
     public String setPath(String name, Object object) {
@@ -126,15 +121,23 @@ public abstract class JSONWriter
 
         this.path = new Path(this.path, name);
 
-        if (refs == null) {
-            refs = new IdentityHashMap(8);
+        Path previous;
+        if (object == rootObject) {
+            previous = Path.ROOT;
+        } else {
+            if (refs == null) {
+                refs = new IdentityHashMap(8);
+                refs.put(object, this.path);
+                return null;
+            }
+
+            previous = refs.get(object);
+            if (previous == null) {
+                refs.put(object, this.path);
+                return null;
+            }
         }
 
-        Path previous = refs.get(object);
-        if (previous == null) {
-            refs.put(object, this.path);
-            return null;
-        }
         return previous.toString();
     }
 
@@ -153,15 +156,23 @@ public abstract class JSONWriter
             this.path = fieldWriter.getPath(path);
         }
 
-        if (refs == null) {
-            refs = new IdentityHashMap(8);
+        Path previous;
+        if (object == rootObject) {
+            previous = Path.ROOT;
+        } else {
+            if (refs == null) {
+                refs = new IdentityHashMap(8);
+                refs.put(object, this.path);
+                return null;
+            }
+
+            previous = refs.get(object);
+            if (previous == null) {
+                refs.put(object, this.path);
+                return null;
+            }
         }
 
-        Path previous = refs.get(object);
-        if (previous == null) {
-            refs.put(object, this.path);
-            return null;
-        }
         return previous.toString();
     }
 
@@ -186,15 +197,23 @@ public abstract class JSONWriter
             this.path = new Path(path, index);
         }
 
-        if (refs == null) {
-            refs = new IdentityHashMap(8);
+        Path previous;
+        if (object == rootObject) {
+            previous = Path.ROOT;
+        } else {
+            if (refs == null) {
+                refs = new IdentityHashMap(8);
+                refs.put(object, this.path);
+                return null;
+            }
+
+            previous = refs.get(object);
+            if (previous == null) {
+                refs.put(object, this.path);
+                return null;
+            }
         }
 
-        Path previous = refs.get(object);
-        if (previous == null) {
-            refs.put(object, this.path);
-            return null;
-        }
         return previous.toString();
     }
 
@@ -211,28 +230,11 @@ public abstract class JSONWriter
     }
 
     public final boolean hasFilter() {
-        return context.propertyPreFilter != null
-                || context.propertyFilter != null
-                || context.nameFilter != null
-                || context.valueFilter != null
-                || context.beforeFilter != null
-                || context.afterFilter != null
-                || context.labelFilter != null
-                || context.contextValueFilter != null
-                || context.contextNameFilter != null;
+        return context.hasFilter;
     }
 
     public final boolean hasFilter(long feature) {
-        return context.propertyPreFilter != null
-                || context.propertyFilter != null
-                || context.nameFilter != null
-                || context.valueFilter != null
-                || context.beforeFilter != null
-                || context.afterFilter != null
-                || context.labelFilter != null
-                || context.contextValueFilter != null
-                || context.contextNameFilter != null
-                || (context.features & feature) != 0;
+        return context.hasFilter || (context.features & feature) != 0;
     }
 
     public boolean isWriteNulls() {
@@ -283,6 +285,31 @@ public abstract class JSONWriter
 
     public boolean isIgnoreErrorGetter() {
         return (context.features & Feature.IgnoreErrorGetter.mask) != 0;
+    }
+
+    public boolean isWriteTypeInfo(Object object, Class fieldClass) {
+        long features = context.features;
+        if ((features & Feature.WriteClassName.mask) == 0) {
+            return false;
+        }
+
+        if (object == null) {
+            return false;
+        }
+
+        Class objectClass = object.getClass();
+        if (objectClass == fieldClass) {
+            return false;
+        }
+
+        if ((features & Feature.NotWriteHashMapArrayListClassName.mask) != 0) {
+            if (objectClass == HashMap.class || objectClass == ArrayList.class) {
+                return false;
+            }
+        }
+
+        return (features & Feature.NotWriteRootClassName.mask) == 0
+                || object != this.rootObject;
     }
 
     public boolean isWriteTypeInfo(Object object, Type fieldType) {
@@ -972,6 +999,34 @@ public abstract class JSONWriter
 
     public abstract void writeUUID(UUID value);
 
+    public void checkAndWriteTypeName(Object object, Class fieldClass) {
+        long features = context.features;
+        if ((features & Feature.WriteClassName.mask) == 0) {
+            return;
+        }
+
+        if (object == null) {
+            return;
+        }
+
+        Class objectClass = object.getClass();
+        if (objectClass == fieldClass) {
+            return;
+        }
+
+        if ((features & Feature.NotWriteHashMapArrayListClassName.mask) != 0) {
+            if (objectClass == HashMap.class || objectClass == ArrayList.class) {
+                return;
+            }
+        }
+
+        if ((features & Feature.NotWriteRootClassName.mask) != 0 && object == this.rootObject) {
+            return;
+        }
+
+        writeTypeName(TypeUtils.getTypeName(objectClass));
+    }
+
     public void writeTypeName(String typeName) {
         throw new JSONException("UnsupportedOperation");
     }
@@ -1003,6 +1058,19 @@ public abstract class JSONWriter
     }
 
     public abstract void writeString(String str);
+
+    public void writeString(List<String> list) {
+        startArray();
+        for (int i = 0, size = list.size(); i < size; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+
+            String str = list.get(i);
+            writeString(str);
+        }
+        endArray();
+    }
 
     public void writeSymbol(String string) {
         writeString(string);
@@ -1221,6 +1289,7 @@ public abstract class JSONWriter
         long features;
         ZoneId zoneId;
 
+        boolean hasFilter;
         PropertyPreFilter propertyPreFilter;
         PropertyFilter propertyFilter;
         NameFilter nameFilter;
@@ -1238,6 +1307,15 @@ public abstract class JSONWriter
 
             this.features = defaultWriterFeatures;
             this.provider = provider;
+        }
+
+        public Context(Feature... features) {
+            this.features = defaultWriterFeatures;
+            this.provider = JSONFactory.getDefaultObjectWriterProvider();
+
+            for (int i = 0; i < features.length; i++) {
+                this.features |= features[i].mask;
+            }
         }
 
         public Context(ObjectWriterProvider provider, Feature... features) {
@@ -1317,6 +1395,16 @@ public abstract class JSONWriter
                     this.contextNameFilter = (ContextNameFilter) filter;
                 }
             }
+
+            hasFilter = propertyPreFilter != null
+                    || propertyFilter != null
+                    || nameFilter != null
+                    || valueFilter != null
+                    || beforeFilter != null
+                    || afterFilter != null
+                    || labelFilter != null
+                    || contextValueFilter != null
+                    || contextNameFilter != null;
         }
 
         public <T> ObjectWriter<T> getObjectWriter(Class<T> objectType) {
@@ -1434,6 +1522,9 @@ public abstract class JSONWriter
 
         public void setPropertyPreFilter(PropertyPreFilter propertyPreFilter) {
             this.propertyPreFilter = propertyPreFilter;
+            if (propertyPreFilter != null) {
+                hasFilter = true;
+            }
         }
 
         public NameFilter getNameFilter() {
@@ -1442,6 +1533,9 @@ public abstract class JSONWriter
 
         public void setNameFilter(NameFilter nameFilter) {
             this.nameFilter = nameFilter;
+            if (nameFilter != null) {
+                hasFilter = true;
+            }
         }
 
         public ValueFilter getValueFilter() {
@@ -1450,6 +1544,9 @@ public abstract class JSONWriter
 
         public void setValueFilter(ValueFilter valueFilter) {
             this.valueFilter = valueFilter;
+            if (valueFilter != null) {
+                hasFilter = true;
+            }
         }
 
         public ContextValueFilter getContextValueFilter() {
@@ -1458,6 +1555,9 @@ public abstract class JSONWriter
 
         public void setContextValueFilter(ContextValueFilter contextValueFilter) {
             this.contextValueFilter = contextValueFilter;
+            if (contextValueFilter != null) {
+                hasFilter = true;
+            }
         }
 
         public ContextNameFilter getContextNameFilter() {
@@ -1466,6 +1566,9 @@ public abstract class JSONWriter
 
         public void setContextNameFilter(ContextNameFilter contextNameFilter) {
             this.contextNameFilter = contextNameFilter;
+            if (contextNameFilter != null) {
+                hasFilter = true;
+            }
         }
 
         public PropertyFilter getPropertyFilter() {
@@ -1474,6 +1577,9 @@ public abstract class JSONWriter
 
         public void setPropertyFilter(PropertyFilter propertyFilter) {
             this.propertyFilter = propertyFilter;
+            if (propertyFilter != null) {
+                hasFilter = true;
+            }
         }
 
         public AfterFilter getAfterFilter() {
@@ -1482,6 +1588,9 @@ public abstract class JSONWriter
 
         public void setAfterFilter(AfterFilter afterFilter) {
             this.afterFilter = afterFilter;
+            if (afterFilter != null) {
+                hasFilter = true;
+            }
         }
 
         public BeforeFilter getBeforeFilter() {
@@ -1490,6 +1599,9 @@ public abstract class JSONWriter
 
         public void setBeforeFilter(BeforeFilter beforeFilter) {
             this.beforeFilter = beforeFilter;
+            if (beforeFilter != null) {
+                hasFilter = true;
+            }
         }
 
         public LabelFilter getLabelFilter() {
@@ -1498,6 +1610,9 @@ public abstract class JSONWriter
 
         public void setLabelFilter(LabelFilter labelFilter) {
             this.labelFilter = labelFilter;
+            if (labelFilter != null) {
+                hasFilter = true;
+            }
         }
     }
 

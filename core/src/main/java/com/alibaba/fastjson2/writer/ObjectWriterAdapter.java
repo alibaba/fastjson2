@@ -18,6 +18,7 @@ import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
 public class ObjectWriterAdapter<T>
         implements ObjectWriter<T> {
+    boolean hasFilter;
     PropertyPreFilter propertyPreFilter;
     PropertyFilter propertyFilter;
     NameFilter nameFilter;
@@ -177,27 +178,36 @@ public class ObjectWriterAdapter<T>
 
     @Override
     public final boolean hasFilter(JSONWriter jsonWriter) {
-        return propertyPreFilter != null
-                || propertyFilter != null
-                || nameFilter != null
-                || valueFilter != null
+        return hasFilter
                 || (containsNoneFieldGetter ? jsonWriter.hasFilter(IgnoreNonFieldGetter.mask) : jsonWriter.hasFilter());
     }
 
     public void setPropertyFilter(PropertyFilter propertyFilter) {
         this.propertyFilter = propertyFilter;
+        if (propertyFilter != null) {
+            hasFilter = true;
+        }
     }
 
     public void setValueFilter(ValueFilter valueFilter) {
         this.valueFilter = valueFilter;
+        if (valueFilter != null) {
+            hasFilter = true;
+        }
     }
 
     public void setNameFilter(NameFilter nameFilter) {
         this.nameFilter = nameFilter;
+        if (nameFilter != null) {
+            hasFilter = true;
+        }
     }
 
     public void setPropertyPreFilter(PropertyPreFilter propertyPreFilter) {
         this.propertyPreFilter = propertyPreFilter;
+        if (propertyPreFilter != null) {
+            hasFilter = true;
+        }
     }
 
     @Override

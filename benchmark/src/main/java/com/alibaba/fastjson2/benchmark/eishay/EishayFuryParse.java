@@ -1,8 +1,8 @@
 package com.alibaba.fastjson2.benchmark.eishay;
 
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -17,6 +17,18 @@ import java.util.concurrent.TimeUnit;
 
 public class EishayFuryParse {
     static MediaContent mc;
+    static JSONReader.Feature[] features = {
+            JSONReader.Feature.SupportAutoType,
+            JSONReader.Feature.IgnoreNoneSerializable,
+            JSONReader.Feature.UseDefaultConstructorAsPossible,
+            JSONReader.Feature.UseNativeObject,
+            JSONReader.Feature.FieldBased
+    };
+
+    static JSONReader.Context context = new JSONReader.Context(
+            JSONFactory.getDefaultObjectReaderProvider(), features
+    );
+
     static byte[] fastjson2JSONBBytes;
     static byte[] furyCompatibleBytes;
 //
@@ -34,14 +46,7 @@ public class EishayFuryParse {
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
 
-            fastjson2JSONBBytes = JSONB.toBytes(mc, JSONWriter.Feature.WriteClassName,
-                    JSONWriter.Feature.IgnoreNoneSerializable,
-                    JSONWriter.Feature.FieldBased,
-                    JSONWriter.Feature.ReferenceDetection,
-                    JSONWriter.Feature.WriteNulls,
-                    JSONWriter.Feature.NotWriteDefaultValue,
-                    JSONWriter.Feature.NotWriteHashMapArrayListClassName,
-                    JSONWriter.Feature.WriteNameAsSymbol);
+            fastjson2JSONBBytes = JSONB.toBytes(mc, EishayFuryWrite.features);
 
 //            furyCompatibleBytes = furyCompatible.serialize(mc);
         } catch (Throwable ex) {
@@ -52,19 +57,12 @@ public class EishayFuryParse {
     @Benchmark
     public void fastjson2JSONB(Blackhole bh) {
         bh.consume(
-                JSONB.parseObject(
-                        fastjson2JSONBBytes,
-                        Object.class,
-                        JSONReader.Feature.SupportAutoType,
-                        JSONReader.Feature.IgnoreNoneSerializable,
-                        JSONReader.Feature.UseDefaultConstructorAsPossible,
-                        JSONReader.Feature.UseNativeObject,
-                        JSONReader.Feature.FieldBased)
+                JSONB.parseObject(fastjson2JSONBBytes, Object.class, context)
         );
     }
 
 //    @Benchmark
-    public void furyCompatible(Blackhole bh) {
+    public void fury(Blackhole bh) {
 //        bh.consume(furyCompatible.deserialize(furyCompatibleBytes));
     }
 

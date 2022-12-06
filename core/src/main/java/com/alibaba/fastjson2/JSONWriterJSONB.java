@@ -18,6 +18,7 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.CACHE_SIZE;
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNameAsSymbol;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONWriterJSONB
@@ -26,16 +27,20 @@ final class JSONWriterJSONB
     static final BigInteger BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
 
     private final int cachedIndex;
-
     private byte[] bytes;
-
-    TLongIntHashMap symbols;
+    private TLongIntHashMap symbols;
     private int symbolIndex;
+
+    protected long rootTypeNameHash;
 
     JSONWriterJSONB(Context ctx, SymbolTable symbolTable) {
         super(ctx, symbolTable, true, StandardCharsets.UTF_8);
-        cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
-        bytes = JSONFactory.allocateByteArray(cachedIndex);
+        this.cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
+        this.bytes = JSONFactory.allocateByteArray(cachedIndex);
+    }
+
+    public void config(Feature... features) {
+        context.config(features);
     }
 
     @Override
@@ -139,7 +144,6 @@ final class JSONWriterJSONB
 
     @Override
     public void startArray(int size) {
-        level++;
         if (off == bytes.length) {
             int minCapacity = off + 1;
             int oldCapacity = bytes.length;
@@ -428,7 +432,10 @@ final class JSONWriterJSONB
 
         boolean symbolExists = false;
         int symbol;
-        if (symbols != null) {
+        if (rootTypeNameHash == hash) {
+            symbolExists = true;
+            symbol = 0;
+        } else if (symbols != null) {
             symbol = symbols.putIfAbsent(hash, symbolIndex);
             if (symbol != symbolIndex) {
                 symbolExists = true;
@@ -436,7 +443,13 @@ final class JSONWriterJSONB
                 symbolIndex++;
             }
         } else {
-            symbols = new TLongIntHashMap(hash, symbol = symbolIndex++);
+            symbol = symbolIndex++;
+            if (symbol == 0) {
+                rootTypeNameHash = hash;
+            }
+            if (symbol != 0 || (context.features & WriteNameAsSymbol.mask) != 0) {
+                symbols = new TLongIntHashMap(hash, symbol);
+            }
         }
 
         if (symbolExists) {
@@ -503,6 +516,89 @@ final class JSONWriterJSONB
         return 5;
     }
 
+    public void writeString(List<String> list) {
+        if (list == null) {
+            writeArrayNull();
+            return;
+        }
+
+        final int size = list.size();
+        startArray(size);
+
+        if (JVM_VERSION > 8) {
+            int mark = off;
+            final int LATIN = 0;
+            boolean latinAll = true;
+
+            if (STRING_CODER != null && STRING_VALUE != null) {
+                for (int i = 0; i < size; i++) {
+                    String str = list.get(i);
+                    if (str == null) {
+                        writeNull();
+                    }
+                    int coder = STRING_CODER.applyAsInt(str);
+                    if (coder != LATIN) {
+                        latinAll = false;
+                        off = mark;
+                        break;
+                    }
+                    int strlen = str.length();
+                    if (strlen <= STR_ASCII_FIX_LEN) {
+                        bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+                    } else if (strlen >= INT32_BYTE_MIN && strlen <= INT32_BYTE_MAX) {
+                        bytes[off++] = BC_STR_ASCII;
+                        bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (strlen >> 8));
+                        bytes[off++] = (byte) (strlen);
+                    } else {
+                        bytes[off++] = BC_STR_ASCII;
+                        writeInt32(strlen);
+                    }
+                    byte[] value = STRING_VALUE.apply(str);
+                    System.arraycopy(value, 0, bytes, off, value.length);
+                    off += strlen;
+                }
+                if (latinAll) {
+                    return;
+                }
+            } else if (UNSAFE_SUPPORT) {
+                for (int i = 0; i < size; i++) {
+                    String str = list.get(i);
+                    if (str == null) {
+                        writeNull();
+                    }
+                    int coder = UnsafeUtils.getStringCoder(str);
+                    if (coder != LATIN) {
+                        latinAll = false;
+                        off = mark;
+                        break;
+                    }
+                    int strlen = str.length();
+                    if (strlen <= STR_ASCII_FIX_LEN) {
+                        bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+                    } else if (strlen >= INT32_BYTE_MIN && strlen <= INT32_BYTE_MAX) {
+                        bytes[off++] = BC_STR_ASCII;
+                        bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (strlen >> 8));
+                        bytes[off++] = (byte) (strlen);
+                    } else {
+                        bytes[off++] = BC_STR_ASCII;
+                        writeInt32(strlen);
+                    }
+                    byte[] value = UnsafeUtils.getStringValue(str);
+                    System.arraycopy(value, 0, bytes, off, value.length);
+                    off += strlen;
+                }
+                if (latinAll) {
+                    return;
+                }
+            }
+        }
+
+        for (int i = 0; i < size; i++) {
+            String str = list.get(i);
+            writeString(str);
+        }
+    }
+
     @Override
     public void writeString(String str) {
         if (str == null) {
@@ -549,7 +645,6 @@ final class JSONWriterJSONB
                     bytes[off++] = BC_STR_ASCII;
                     writeInt32(strlen);
                 }
-//                str.getBytes(0, strlen, bytes, off);
                 System.arraycopy(value, 0, bytes, off, value.length);
                 off += strlen;
                 return;
@@ -1400,6 +1495,22 @@ final class JSONWriterJSONB
         }
     }
 
+    static int size(int val) {
+        if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
+            return 1;
+        }
+
+        if (val >= INT32_BYTE_MIN && val <= INT32_BYTE_MAX) {
+            return 2;
+        }
+
+        if (val >= INT32_SHORT_MIN && val <= INT32_SHORT_MAX) {
+            return 3;
+        }
+
+        return 5;
+    }
+
     @Override
     public void writeInt32(int val) {
         if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
@@ -1595,7 +1706,7 @@ final class JSONWriterJSONB
             }
         }
 
-        if ((context.features & Feature.WriteNameAsSymbol.mask) == 0) {
+        if ((context.features & WriteNameAsSymbol.mask) == 0) {
             int minCapacity = this.off + name.length;
             if (minCapacity - this.bytes.length > 0) {
                 int oldCapacity = this.bytes.length;
@@ -2089,7 +2200,7 @@ final class JSONWriterJSONB
         }
 
         startObject();
-        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = it.next();
             writeAny(entry.getKey());
             writeAny(entry.getValue());
@@ -2105,7 +2216,7 @@ final class JSONWriterJSONB
         }
 
         startObject();
-        for (Iterator<Map.Entry<String, Object>> it = object.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry<String, Object>> it = object.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = it.next();
             writeAny(entry.getKey());
             writeAny(entry.getValue());
