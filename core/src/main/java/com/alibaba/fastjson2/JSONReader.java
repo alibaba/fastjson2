@@ -3555,7 +3555,12 @@ public abstract class JSONReader
         /**
          * @since 2.0.20
          */
-        NullOnError(1 << 22);
+        NullOnError(1 << 22),
+
+        /**
+         * @since 2.0.21
+         */
+        IgnoreAutoTypeNotMatch(1 << 23);
 
         public final long mask;
 

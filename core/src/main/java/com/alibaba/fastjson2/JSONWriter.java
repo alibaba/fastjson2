@@ -555,6 +555,10 @@ public abstract class JSONWriter
         return new JSONWriterJSONB(context, null);
     }
 
+    public static JSONWriter ofJSONB(JSONWriter.Context context, SymbolTable symbolTable) {
+        return new JSONWriterJSONB(context, symbolTable);
+    }
+
     public static JSONWriter ofJSONB(Feature... features) {
         return new JSONWriterJSONB(
                 new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features),
@@ -1180,6 +1184,8 @@ public abstract class JSONWriter
     @Override
     public void close() {
     }
+
+    public abstract int size();
 
     public abstract byte[] getBytes();
 
