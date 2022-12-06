@@ -452,6 +452,13 @@ public final class JSONFactory {
         return new JSONReader.Context(provider, symbolTable);
     }
 
+    public static JSONReader.Context createReadContext(SymbolTable symbolTable, JSONReader.Feature... features) {
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        JSONReader.Context context = new JSONReader.Context(provider, symbolTable);
+        context.config(features);
+        return context;
+    }
+
     public static JSONReader.Context createReadContext(Supplier<Map> objectSupplier, JSONReader.Feature... features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context context = new JSONReader.Context(provider);

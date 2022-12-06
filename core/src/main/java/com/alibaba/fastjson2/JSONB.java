@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
@@ -16,6 +17,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.JSONFactory.CACHE_SIZE;
 import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
@@ -557,6 +559,52 @@ public interface JSONB {
         return parseObject(jsonbBytes, typeReference.getType(), features);
     }
 
+    static <T> T parseObject(
+            InputStream in,
+            int length,
+            Type objectType,
+            JSONReader.Context context
+    ) throws IOException {
+        int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
+        byte[] bytes = JSONFactory.allocateByteArray(cachedIndex);
+        try {
+            if (bytes.length < length) {
+                bytes = new byte[length];
+            }
+            int read = in.read(bytes, 0, length);
+            if (read != length) {
+                throw new IllegalArgumentException("deserialize failed. expected read length: " + length + " but actual read: " + read);
+            }
+
+            return parseObject(bytes, 0, length, objectType, context);
+        } finally {
+            JSONFactory.releaseByteArray(cachedIndex, bytes);
+        }
+    }
+
+    static <T> T parseObject(
+            InputStream in,
+            int length,
+            Type objectType,
+            JSONReader.Feature... features
+    ) throws IOException {
+        int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
+        byte[] bytes = JSONFactory.allocateByteArray(cachedIndex);
+        try {
+            if (bytes.length < length) {
+                bytes = new byte[length];
+            }
+            int read = in.read(bytes, 0, length);
+            if (read != length) {
+                throw new IllegalArgumentException("deserialize failed. expected read length: " + length + " but actual read: " + read);
+            }
+
+            return parseObject(bytes, 0, length, objectType, features);
+        } finally {
+            JSONFactory.releaseByteArray(cachedIndex, bytes);
+        }
+    }
+
     static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass, JSONReader.Feature... features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context ctx = new JSONReader.Context(provider);
@@ -676,7 +724,8 @@ public interface JSONB {
                              int off,
                              int len,
                              Class<T> objectClass,
-                             JSONReader.Feature... features) {
+                             JSONReader.Feature... features
+    ) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
 
         JSONReader.Context ctx = new JSONReader.Context(provider);
@@ -701,16 +750,36 @@ public interface JSONB {
         return object;
     }
 
-    static <T> T parseObject(byte[] jsonbBytes, int off, int len, Type objectType, JSONReader.Feature... features) {
-        JSONReader reader = JSONReader.ofJSONB(jsonbBytes, off, len);
-        reader.getContext().config(features);
-        ObjectReader objectReader = reader.getObjectReader(objectType);
+    static <T> T parseObject(
+            byte[] jsonbBytes,
+            int off,
+            int len,
+            Type objectType,
+            JSONReader.Context ctx
+    ) {
+        try (JSONReader reader = new JSONReaderJSONB(ctx, jsonbBytes, off, len)) {
+            boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
+            ObjectReader objectReader = ctx.provider.getObjectReader(objectType, fieldBased);
 
-        T object = (T) objectReader.readJSONBObject(reader, null, null, 0);
-        if (reader.resolveTasks != null) {
-            reader.handleResolveTasks(object);
+            T object = (T) objectReader.readJSONBObject(reader, null, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
         }
-        return object;
+    }
+
+    static <T> T parseObject(byte[] jsonbBytes, int off, int len, Type objectType, JSONReader.Feature... features) {
+        try (JSONReader reader = JSONReader.ofJSONB(jsonbBytes, off, len)) {
+            reader.getContext().config(features);
+            ObjectReader objectReader = reader.getObjectReader(objectType);
+
+            T object = (T) objectReader.readJSONBObject(reader, null, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            return object;
+        }
     }
 
     static <T> T parseObject(byte[] jsonbBytes, int off, int len, Class<T> objectClass, SymbolTable symbolTable) {

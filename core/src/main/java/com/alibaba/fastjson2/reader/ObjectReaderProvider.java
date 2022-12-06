@@ -43,6 +43,7 @@ public class ObjectReaderProvider
     static class ObjectReaderCachePair {
         final long hashCode;
         final ObjectReader reader;
+        volatile int missCount;
 
         public ObjectReaderCachePair(long hashCode, ObjectReader reader) {
             this.hashCode = hashCode;
@@ -566,8 +567,14 @@ public class ObjectReaderProvider
 
     public ObjectReader getObjectReader(long hashCode) {
         ObjectReaderCachePair pair = readerCache;
-        if (pair != null && pair.hashCode == hashCode) {
-            return pair.reader;
+        if (pair != null) {
+            if (pair.hashCode == hashCode) {
+                return pair.reader;
+            } else {
+                if (pair.missCount++ > 16) {
+                    readerCache = null;
+                }
+            }
         }
 
         Long hashCodeObj = new Long(hashCode);
@@ -734,7 +741,9 @@ public class ObjectReaderProvider
                     afterAutoType(typeName, clazz);
                     return clazz;
                 } else {
-                    throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
+                    if ((features & JSONReader.Feature.IgnoreAutoTypeNotMatch.mask) == 0) {
+                        throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
+                    }
                 }
             }
         }

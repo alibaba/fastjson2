@@ -2119,6 +2119,11 @@ final class JSONWriterJSONB
     }
 
     @Override
+    public int size() {
+        return off;
+    }
+
+    @Override
     public byte[] getBytes(Charset charset) {
         throw new JSONException("not support operator");
     }

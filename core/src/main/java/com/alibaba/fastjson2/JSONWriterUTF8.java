@@ -123,6 +123,10 @@ class JSONWriterUTF8
         JSONFactory.releaseByteArray(cachedIndex, bytes);
     }
 
+    public int size() {
+        return off;
+    }
+
     @Override
     public byte[] getBytes() {
         return Arrays.copyOf(bytes, off);

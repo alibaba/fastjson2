@@ -2020,6 +2020,11 @@ class JSONWriterUTF16
     }
 
     @Override
+    public int size() {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
     public byte[] getBytes(Charset charset) {
         boolean ascii = true;
         for (int i = 0; i < off; i++) {
