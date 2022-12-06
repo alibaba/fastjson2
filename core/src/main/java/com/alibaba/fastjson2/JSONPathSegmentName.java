@@ -353,7 +353,7 @@ class JSONPathSegmentName
         ObjectReader objectReader = provider.getObjectReader(object.getClass());
         ObjectWriter objectWriter = context.path
                 .getWriterContext()
-                .getProvider()
+                .provider
                 .getObjectWriter(object.getClass());
 
         FieldReader fieldReader = objectReader.getFieldReader(nameHashCode);

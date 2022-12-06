@@ -27,10 +27,16 @@ public abstract class JSONWriter
         implements Closeable {
     static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
-    protected final Context context;
+    public final Context context;
+    public final boolean utf8;
+    public final boolean utf16;
+    public final boolean jsonb;
+    public final boolean useSingleQuote;
+    public final SymbolTable symbolTable;
+
     protected final Charset charset;
-    protected final boolean utf8;
-    protected final boolean utf16;
+    protected final char quote;
+    protected final int maxArraySize;
 
     protected boolean startObject;
     protected int level;
@@ -39,16 +45,22 @@ public abstract class JSONWriter
     protected IdentityHashMap<Object, Path> refs;
     protected Path path;
     protected String lastReference;
-    protected final char quote;
-    protected final int maxArraySize;
 
-    protected JSONWriter(Context context, Charset charset) {
+    protected JSONWriter(
+            Context context,
+            SymbolTable symbolTable,
+            boolean jsonb,
+            Charset charset
+    ) {
         this.context = context;
+        this.symbolTable = symbolTable;
         this.charset = charset;
-        this.utf8 = charset == StandardCharsets.UTF_8;
-        this.utf16 = charset == StandardCharsets.UTF_16;
+        this.jsonb = jsonb;
+        this.utf8 = !jsonb && charset == StandardCharsets.UTF_8;
+        this.utf16 = !jsonb && charset == StandardCharsets.UTF_16;
+        this.useSingleQuote = !jsonb && (context.features & Feature.UseSingleQuotes.mask) != 0;
 
-        quote = (context.features & Feature.UseSingleQuotes.mask) == 0 ? '"' : '\'';
+        quote = useSingleQuote ? '\'' : '"';
 
         // 64M or 1G
         maxArraySize = (context.features & LargeObject.mask) != 0 ? 1073741824 : 67108864;
@@ -58,16 +70,12 @@ public abstract class JSONWriter
         return charset;
     }
 
-    public boolean isUTF8() {
+    public final boolean isUTF8() {
         return utf8;
     }
 
-    public boolean isUTF16() {
+    public final boolean isUTF16() {
         return utf16;
-    }
-
-    public boolean isJSONB() {
-        return false;
     }
 
     public boolean isIgnoreNoneSerializable() {
@@ -80,8 +88,8 @@ public abstract class JSONWriter
                 && !Serializable.class.isAssignableFrom(object.getClass());
     }
 
-    public SymbolTable getSymbolTable() {
-        return null;
+    public final SymbolTable getSymbolTable() {
+        return symbolTable;
     }
 
     public void config(Feature... features) {
@@ -236,7 +244,7 @@ public abstract class JSONWriter
     }
 
     public boolean isUseSingleQuotes() {
-        return (context.features & Feature.UseSingleQuotes.mask) != 0;
+        return useSingleQuote;
     }
 
     public boolean isRefDetect(Object object) {
@@ -662,6 +670,10 @@ public abstract class JSONWriter
     }
 
     public abstract void writeNameRaw(byte[] bytes);
+
+    public void writeSymbol(int symbol) {
+        throw new JSONException("UnsupportedOperation");
+    }
 
     public void writeNameRaw(byte[] name, long nameHash) {
         throw new JSONException("UnsupportedOperation");
@@ -1190,7 +1202,7 @@ public abstract class JSONWriter
     public static class Context {
         static ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
 
-        final ObjectWriterProvider provider;
+        public final ObjectWriterProvider provider;
         DateTimeFormatter dateFormatter;
         String dateFormat;
         Locale locale;

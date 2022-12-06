@@ -38,7 +38,7 @@ final class ObjectWriterImplInt8ValueArray
 
         byte[] array = (byte[]) object;
 
-        String format = jsonWriter.getContext().getDateFormat();
+        String format = jsonWriter.context.getDateFormat();
         if ("millis".equals(format)) {
             format = null;
         }

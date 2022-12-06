@@ -36,10 +36,10 @@ final class ObjectWriterImplInt64ValueArray
             return;
         }
 
-        ObjectWriterProvider provider = jsonWriter.getContext().getProvider();
+        ObjectWriterProvider provider = jsonWriter.context.provider;
         ObjectWriter objectWriter = null;
         if ((provider.userDefineMask & TYPE_INT64_MASK) != 0) {
-            objectWriter = jsonWriter.getContext().getObjectWriter(Long.class);
+            objectWriter = jsonWriter.context.getObjectWriter(Long.class);
         }
 
         long[] array = (long[]) object;

@@ -633,7 +633,7 @@ abstract class JSONPathSegment {
                 return;
             }
 
-            ObjectWriterProvider provider = context.path.getWriterContext().getProvider();
+            ObjectWriterProvider provider = context.path.getWriterContext().provider;
             ObjectWriter objectWriter = provider.getObjectWriter(object.getClass());
 
             JSONArray array = new JSONArray(names.length);
@@ -677,7 +677,7 @@ abstract class JSONPathSegment {
                 return;
             }
 
-            ObjectWriterProvider provider = context.path.getWriterContext().getProvider();
+            ObjectWriterProvider provider = context.path.getWriterContext().provider;
             ObjectWriter objectWriter = provider.getObjectWriter(object.getClass());
 
             JSONArray array = new JSONArray(names.length);
@@ -793,7 +793,7 @@ abstract class JSONPathSegment {
                 return;
             }
 
-            ObjectWriterProvider provider = context.path.getWriterContext().getProvider();
+            ObjectWriterProvider provider = context.path.getWriterContext().provider;
             ObjectWriter objectWriter = provider.getObjectWriter(object.getClass());
             List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
             int size = fieldWriters.size();

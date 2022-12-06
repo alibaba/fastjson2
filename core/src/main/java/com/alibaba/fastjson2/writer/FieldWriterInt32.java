@@ -44,7 +44,7 @@ abstract class FieldWriterInt32<T>
         long jsonWriterFeatures = jsonWriter.getFeatures();
         boolean writeNonStringValueAsString = (jsonWriterFeatures & (WriteNonStringValueAsString.mask | UseSingleQuotes.mask)) != 0;
 
-        if (jsonWriter.isUTF8() && !writeNonStringValueAsString) {
+        if (jsonWriter.utf8 && !writeNonStringValueAsString) {
             if (value >= -1 && value < 1039) {
                 byte[] bytes = null;
                 if (utf8ValueCache == null) {
@@ -63,7 +63,7 @@ abstract class FieldWriterInt32<T>
                 jsonWriter.writeNameRaw(bytes);
                 return;
             }
-        } else if (jsonWriter.isUTF16() && !writeNonStringValueAsString) {
+        } else if (jsonWriter.utf16 && !writeNonStringValueAsString) {
             if (value >= -1 && value < 1039) {
                 char[] chars = null;
                 if (utf16ValueCache == null) {

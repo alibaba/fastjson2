@@ -66,9 +66,9 @@ public class GeoJsonWriterModule
             }
 
             GeoJsonPolygon polygon = (GeoJsonPolygon) object;
-            if (jsonWriter.isUTF8()) {
+            if (jsonWriter.utf8) {
                 jsonWriter.writeRaw(utf8Prefix);
-            } else if (jsonWriter.isUTF16()) {
+            } else if (jsonWriter.utf16) {
                 jsonWriter.writeRaw(charsPrefix);
             } else {
                 jsonWriter.startObject();
@@ -136,9 +136,9 @@ public class GeoJsonWriterModule
             }
 
             GeoJsonPoint point = (GeoJsonPoint) object;
-            if (jsonWriter.isUTF8()) {
+            if (jsonWriter.utf8) {
                 jsonWriter.writeRaw(utf8Prefix);
-            } else if (jsonWriter.isUTF16()) {
+            } else if (jsonWriter.utf16) {
                 jsonWriter.writeRaw(charsPrefix);
             } else {
                 jsonWriter.startObject();

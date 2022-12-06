@@ -19,7 +19,7 @@ final class JSONWriterPretty
     int startObjectOff;
 
     protected JSONWriterPretty(JSONWriter jsonWriter) {
-        super(jsonWriter.context, jsonWriter.charset);
+        super(jsonWriter.context, null, false, jsonWriter.charset);
         this.jsonWriter = jsonWriter;
     }
 

@@ -12,10 +12,10 @@ public class EishayFuryWriteTest {
                 benchmark.fastjson2JSONB(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("EishayWriteBinaryArrayMapping-fastjson2_jsonb millis : " + millis);
-            // zulu8.62.0.19 : 190 168
-            // zulu11.52.13 : 105
-            // zulu17.32.13 : 105
+            System.out.println("EishayFuryWrite-fastjson2_jsonb millis : " + millis);
+            // zulu8.62.0.19 : 415 385
+            // zulu11.52.13 : 360 346 336 330
+            // zulu17.38.21 : 367 345
         }
     }
 
@@ -23,19 +23,18 @@ public class EishayFuryWriteTest {
         for (int j = 0; j < 10; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 1000 * 1000; ++i) {
-//                benchmark.fury(BH);
+                benchmark.furyCompatible(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("EishayWriteBinaryArrayMapping-fury millis : " + millis);
-            // zulu8.62.0.19 : 271 314
-            // zulu11.52.13 : 236
-            // zulu17.32.13 : 283
+            System.out.println("EishayFuryWrite-fury millis : " + millis);
+            // zulu8.62.0.19 : 294
+            // zulu11.52.13 : 272
+            // zulu17.38.21 : 289
         }
     }
 
     public static void main(String[] args) throws Exception {
         fastjson2JSONB();
 //        fury();
-//        kryo();
     }
 }

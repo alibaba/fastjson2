@@ -44,14 +44,14 @@ final class ObjectWriterImplDate
             return;
         }
 
-        JSONWriter.Context ctx = jsonWriter.getContext();
+        JSONWriter.Context ctx = jsonWriter.context;
 
         Date date = (Date) object;
         long millis = date.getTime();
 
         if (jsonWriter.isWriteTypeInfo(object, fieldType)) {
             char end = ')';
-            if (jsonWriter.isUTF16()) {
+            if (jsonWriter.utf16) {
                 char[] prefix;
                 if ("java.sql.Date".equals(date.getClass().getName())) {
                     prefix = PREFIX_CHARS_SQL;

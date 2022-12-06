@@ -50,7 +50,7 @@ final class FieldWriterStringField<T>
 
         writeFieldName(jsonWriter);
 
-        if (symbol && jsonWriter.isJSONB()) {
+        if (symbol && jsonWriter.jsonb) {
             jsonWriter.writeSymbol(value);
         } else {
             if (raw) {

@@ -112,7 +112,7 @@ final class FieldWriterObjectArrayField<T>
             }
         }
 
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             Class arrayClass = array.getClass();
             if (arrayClass != this.fieldClass) {
                 jsonWriter.writeTypeName(

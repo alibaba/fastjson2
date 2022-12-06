@@ -79,17 +79,17 @@ public class EishayParseBinaryAutoTypeTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayParseBinaryAutoType-fastjson2JSONB_symbols millis : " + millis);
-            // zulu8.58.0.13 :
-            // zulu11.52.13 :
-            // zulu17.32.13 : 251 248 245 243
+            // zulu8.58.0.13 : 305
+            // zulu11.52.13 : 246
+            // zulu17.32.13 : 251 248 245 243 238
         }
     }
 
     public static void main(String[] args) throws Exception {
 //        fastjson2JSONB();
-        fastjson2JSONBBytes_arrayMapping();
+//        fastjson2JSONBBytes_arrayMapping();
 //        fastjson2JSONB_autoTypeFilter();
-//        fastjson2JSONB_symbols();
+        fastjson2JSONB_symbols();
 //        kryo_test();
     }
 }

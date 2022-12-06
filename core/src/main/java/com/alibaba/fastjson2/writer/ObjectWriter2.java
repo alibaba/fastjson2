@@ -35,7 +35,7 @@ public class ObjectWriter2<T>
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         long featuresAll = features | this.features | jsonWriter.getFeatures();
 
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             if ((featuresAll & BeanToArray.mask) != 0) {
                 writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
                 return;

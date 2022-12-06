@@ -33,7 +33,7 @@ abstract class FieldWriterInt8<T>
             return;
         }
 
-        if (jsonWriter.isUTF8()) {
+        if (jsonWriter.utf8) {
             byte[] bytes = utf8ValueCache[value + 128];
             if (bytes == null) {
                 int size = (value < 0) ? IOUtils.stringSize(-value) + 1 : IOUtils.stringSize(value);
@@ -45,7 +45,7 @@ abstract class FieldWriterInt8<T>
             jsonWriter.writeNameRaw(bytes);
             return;
         }
-        if (jsonWriter.isUTF16()) {
+        if (jsonWriter.utf16) {
             char[] bytes = utf16ValueCache[value + 128];
             if (bytes == null) {
                 int size = (value < 0) ? IOUtils.stringSize(-value) + 1 : IOUtils.stringSize(value);

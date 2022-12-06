@@ -562,7 +562,7 @@ public class JSONBDump {
                         if (type >= BC_INT32_NUM_MIN && type <= BC_INT32) {
                             int intValue = readInt32Value();
                             int size = (intValue < 0) ? IOUtils.stringSize(-intValue) + 1 : IOUtils.stringSize(intValue);
-                            if (jsonWriter.isUTF16()) {
+                            if (jsonWriter.utf16) {
                                 char[] chars = new char[size];
                                 IOUtils.getChars(intValue, chars.length, chars);
                                 jsonWriter.writeNameRaw(chars);

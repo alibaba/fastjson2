@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
 public class ObjectWriterAdapter<T>
@@ -32,6 +33,7 @@ public class ObjectWriterAdapter<T>
     byte[] typeKeyJSONB;
     protected final String typeName;
     protected final long typeNameHash;
+    protected long typeNameSymbolCache;
     protected byte[] typeNameJSONB;
 
     byte[] nameWithColonUTF8;
@@ -246,6 +248,35 @@ public class ObjectWriterAdapter<T>
     }
 
     protected void writeClassInfo(JSONWriter jsonWriter) {
+        SymbolTable symbolTable = jsonWriter.symbolTable;
+        if (symbolTable != null) {
+            int symbolTableIdentity = System.identityHashCode(symbolTable);
+
+            int symbol;
+            if (typeNameSymbolCache == 0) {
+                symbol = symbolTable.getOrdinalByHashCode(typeNameHash);
+                if (symbol != -1) {
+                    typeNameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
+                }
+            } else {
+                int identity = (int) typeNameSymbolCache;
+                if (identity == symbolTableIdentity) {
+                    symbol = (int) (typeNameSymbolCache >> 32);
+                } else {
+                    symbol = symbolTable.getOrdinalByHashCode(typeNameHash);
+                    if (symbol != -1) {
+                        typeNameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
+                    }
+                }
+            }
+
+            if (symbol != -1) {
+                jsonWriter.writeRaw(BC_TYPED_ANY);
+                jsonWriter.writeInt32(-symbol);
+                return;
+            }
+        }
+
         if (typeNameJSONB == null) {
             typeNameJSONB = JSONB.toBytes(typeName);
         }
@@ -263,7 +294,7 @@ public class ObjectWriterAdapter<T>
         long featuresAll = features | this.features | jsonWriter.getFeatures();
         boolean beanToArray = (featuresAll & BeanToArray.mask) != 0;
 
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             if (beanToArray) {
                 writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
                 return;
@@ -336,7 +367,7 @@ public class ObjectWriterAdapter<T>
 
     @Override
     public boolean writeTypeInfo(JSONWriter jsonWriter) {
-        if (jsonWriter.isUTF8()) {
+        if (jsonWriter.utf8) {
             if (nameWithColonUTF8 == null) {
                 byte[] chars = new byte[typeKey.length() + typeName.length() + 5];
                 chars[0] = '"';
@@ -351,7 +382,7 @@ public class ObjectWriterAdapter<T>
             }
             jsonWriter.writeNameRaw(nameWithColonUTF8);
             return true;
-        } else if (jsonWriter.isUTF16()) {
+        } else if (jsonWriter.utf16) {
             if (nameWithColonUTF16 == null) {
                 char[] chars = new char[typeKey.length() + typeName.length() + 5];
                 chars[0] = '"';
@@ -366,7 +397,7 @@ public class ObjectWriterAdapter<T>
             }
             jsonWriter.writeNameRaw(nameWithColonUTF16);
             return true;
-        } else if (jsonWriter.isJSONB()) {
+        } else if (jsonWriter.jsonb) {
             if (typeNameJSONB == null) {
                 typeNameJSONB = JSONB.toBytes(typeName);
             }
@@ -388,7 +419,7 @@ public class ObjectWriterAdapter<T>
     @Override
     public void writeWithFilter(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
-            if (jsonWriter.isJSONB()) {
+            if (jsonWriter.jsonb) {
                 writeClassInfo(jsonWriter);
                 jsonWriter.startObject();
             } else {
@@ -399,7 +430,7 @@ public class ObjectWriterAdapter<T>
             jsonWriter.startObject();
         }
 
-        JSONWriter.Context context = jsonWriter.getContext();
+        JSONWriter.Context context = jsonWriter.context;
         boolean ignoreNonFieldGetter = ((context.getFeatures() | features) & IgnoreNonFieldGetter.mask) != 0;
 
         BeforeFilter beforeFilter = context.getBeforeFilter();

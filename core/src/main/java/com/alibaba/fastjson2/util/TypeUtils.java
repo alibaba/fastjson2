@@ -27,6 +27,23 @@ public class TypeUtils {
     public static final Class CLASS_UNMODIFIABLE_SET = Collections.unmodifiableSet(new HashSet<>()).getClass();
     public static final Class CLASS_UNMODIFIABLE_SORTED_SET = Collections.unmodifiableSortedSet(new TreeSet<>()).getClass();
     public static final Class CLASS_UNMODIFIABLE_NAVIGABLE_SET = Collections.unmodifiableNavigableSet(new TreeSet<>()).getClass();
+    public static final ParameterizedType PARAM_TYPE_LIST_STR = new ParameterizedTypeImpl(List.class, String.class);
+
+    public static Type intern(Type type) {
+        if (type instanceof ParameterizedType) {
+            ParameterizedType paramType = (ParameterizedType) type;
+            Type rawType = paramType.getRawType();
+            Type[] actualTypeArguments = paramType.getActualTypeArguments();
+            if (rawType == List.class) {
+                if (actualTypeArguments.length == 1) {
+                    if (actualTypeArguments[0] == String.class) {
+                        return PARAM_TYPE_LIST_STR;
+                    }
+                }
+            }
+        }
+        return type;
+    }
 
     public static double parseDouble(byte[] in, int off, int len) throws NumberFormatException {
         boolean isNegative = false;

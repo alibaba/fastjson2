@@ -73,7 +73,7 @@ abstract class FieldWriterObjectFinal<T>
 
         ObjectWriter valueWriter = getObjectWriter(jsonWriter, fieldClass);
         writeFieldName(jsonWriter);
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             valueWriter.writeJSONB(jsonWriter, value, fieldName, fieldType, features);
         } else {
             valueWriter.write(jsonWriter, value, fieldName, fieldType, features);
@@ -108,7 +108,7 @@ abstract class FieldWriterObjectFinal<T>
         }
 
         ObjectWriter valueWriter = getObjectWriter(jsonWriter, fieldClass);
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             valueWriter.writeJSONB(jsonWriter, value, fieldName, fieldType, features);
         } else {
             valueWriter.write(jsonWriter, value, fieldName, fieldType, features);

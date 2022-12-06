@@ -26,6 +26,11 @@ public class JSONWriterTest {
         assertFalse(jsonWriter.isEnabled(JSONWriter.Feature.WriteNulls.mask));
         jsonWriter.getContext().config(JSONWriter.Feature.WriteNulls, true);
         assertTrue(jsonWriter.getContext().isEnabled(JSONWriter.Feature.WriteNulls));
+
+        assertTrue(JSONWriter.ofUTF8().isUTF8());
+        assertFalse(JSONWriter.ofUTF8().isUTF16());
+        assertFalse(JSONWriter.ofUTF16().isUTF8());
+        assertTrue(JSONWriter.ofUTF16().isUTF16());
     }
 
     @Test

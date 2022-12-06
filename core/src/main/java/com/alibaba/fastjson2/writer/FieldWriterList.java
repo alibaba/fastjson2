@@ -111,7 +111,7 @@ abstract class FieldWriterList<T>
             writeFieldName(jsonWriter);
         }
 
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             int size = list.size();
 
             if (jsonWriter.isWriteTypeInfo(list, fieldClass)) {
@@ -226,7 +226,7 @@ abstract class FieldWriterList<T>
             writeFieldName(jsonWriter);
         }
 
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             if (jsonWriter.isWriteTypeInfo(list, fieldClass)) {
                 jsonWriter.writeTypeName(
                         TypeUtils.getTypeName(list.getClass()));

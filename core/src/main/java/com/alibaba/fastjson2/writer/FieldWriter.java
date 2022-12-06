@@ -2,10 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JdbcSupport;
-import com.alibaba.fastjson2.util.JodaSupport;
+import com.alibaba.fastjson2.util.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -35,6 +32,8 @@ public abstract class FieldWriter<T>
     final byte[] nameWithColonUTF8;
     final char[] nameWithColonUTF16;
     byte[] nameJSONB;
+    long nameSymbolCache;
+
     final boolean fieldClassSerializable;
     final JSONWriter.Path rootParentPath;
 
@@ -61,7 +60,7 @@ public abstract class FieldWriter<T>
         this.label = label;
         this.hashCode = Fnv.hashCode64(name);
         this.features = features;
-        this.fieldType = fieldType;
+        this.fieldType = TypeUtils.intern(fieldType);
         this.fieldClass = fieldClass;
         this.fieldClassSerializable = fieldClass != null && (Serializable.class.isAssignableFrom(fieldClass) || !Modifier.isFinal(fieldClass.getModifiers()));
         this.field = field;
@@ -139,23 +138,46 @@ public abstract class FieldWriter<T>
     }
 
     public final void writeFieldName(JSONWriter jsonWriter) {
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             if (nameJSONB == null) {
                 nameJSONB = JSONB.toBytes(fieldName);
             }
+
+            SymbolTable symbolTable = jsonWriter.symbolTable;
+            if (symbolTable != null) {
+                int symbolTableIdentity = System.identityHashCode(symbolTable);
+
+                int symbol;
+                if (nameSymbolCache == 0) {
+                    symbol = symbolTable.getOrdinalByHashCode(hashCode);
+                    nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
+                } else {
+                    int identity = (int) nameSymbolCache;
+                    if (identity == symbolTableIdentity) {
+                        symbol = (int) (nameSymbolCache >> 32);
+                    } else {
+                        symbol = symbolTable.getOrdinalByHashCode(hashCode);
+                        nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
+                    }
+                }
+
+                if (symbol != -1) {
+                    jsonWriter.writeSymbol(-symbol);
+                    return;
+                }
+            }
+
             jsonWriter.writeNameRaw(nameJSONB, hashCode);
             return;
         }
 
-        boolean ueSingleQuotes = jsonWriter.isUseSingleQuotes();
-
-        if (!ueSingleQuotes) {
-            if (jsonWriter.isUTF8()) {
+        if (!jsonWriter.useSingleQuote) {
+            if (jsonWriter.utf8) {
                 jsonWriter.writeNameRaw(nameWithColonUTF8);
                 return;
             }
 
-            if (jsonWriter.isUTF16()) {
+            if (jsonWriter.utf16) {
                 jsonWriter.writeNameRaw(nameWithColonUTF16);
                 return;
             }
@@ -335,7 +357,7 @@ public abstract class FieldWriter<T>
             value = value.trim();
         }
 
-        if (symbol && jsonWriter.isJSONB()) {
+        if (symbol && jsonWriter.jsonb) {
             jsonWriter.writeSymbol(value);
         } else {
             if (raw) {
@@ -419,14 +441,14 @@ public abstract class FieldWriter<T>
     }
 
     public void writeDate(JSONWriter jsonWriter, boolean writeFieldName, long millis) {
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             jsonWriter.writeMillis(millis);
             return;
         }
 
         final int SECONDS_PER_DAY = 60 * 60 * 24;
 
-        JSONWriter.Context ctx = jsonWriter.getContext();
+        JSONWriter.Context ctx = jsonWriter.context;
         if (isDateFormatMillis() || ctx.isDateFormatMillis()) {
             if (writeFieldName) {
                 writeFieldName(jsonWriter);
