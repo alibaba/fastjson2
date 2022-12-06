@@ -31,7 +31,7 @@ class JSONWriterUTF8
     protected byte[] bytes;
 
     JSONWriterUTF8(Context ctx) {
-        super(ctx, StandardCharsets.UTF_8);
+        super(ctx, null, false, StandardCharsets.UTF_8);
         cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
         bytes = JSONFactory.allocateByteArray(cachedIndex);
     }

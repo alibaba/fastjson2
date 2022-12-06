@@ -31,7 +31,7 @@ final class ObjectWriterImplZonedDateTime
 
         ZonedDateTime zdt = (ZonedDateTime) object;
 
-        JSONWriter.Context ctx = jsonWriter.getContext();
+        JSONWriter.Context ctx = jsonWriter.context;
 
         if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
             long millis = zdt.toInstant().toEpochMilli();

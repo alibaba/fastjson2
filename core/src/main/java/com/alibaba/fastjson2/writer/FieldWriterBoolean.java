@@ -47,7 +47,7 @@ abstract class FieldWriterBoolean
             return;
         }
 
-        if (jsonWriter.isUTF8()) {
+        if (jsonWriter.utf8) {
             if (value) {
                 if (utf8ValueTrue == null) {
                     byte[] bytes = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + 4);
@@ -72,7 +72,7 @@ abstract class FieldWriterBoolean
             }
             return;
         }
-        if (jsonWriter.isUTF16()) {
+        if (jsonWriter.utf16) {
             if (value) {
                 if (utf16ValueTrue == null) {
                     char[] chars = Arrays.copyOf(nameWithColonUTF16, nameWithColonUTF16.length + 4);

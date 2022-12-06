@@ -221,7 +221,7 @@ public class JdbcSupport {
                 return;
             }
 
-            JSONWriter.Context context = jsonWriter.getContext();
+            JSONWriter.Context context = jsonWriter.context;
             if (formatUnixTime || context.isDateFormatUnixTime()) {
                 long millis = ((Date) object).getTime();
                 long seconds = millis / 1000;
@@ -338,7 +338,7 @@ public class JdbcSupport {
                 return;
             }
 
-            JSONWriter.Context ctx = jsonWriter.getContext();
+            JSONWriter.Context ctx = jsonWriter.context;
 
             Date date = (Date) object;
 

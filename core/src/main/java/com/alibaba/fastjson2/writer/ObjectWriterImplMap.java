@@ -186,7 +186,7 @@ public final class ObjectWriterImplMap
 
         Map map = (Map) object;
 
-        JSONWriter.Context context = jsonWriter.getContext();
+        JSONWriter.Context context = jsonWriter.context;
         jsonWriter.startObject();
 
         Type fieldValueType = this.valueType;
@@ -202,11 +202,10 @@ public final class ObjectWriterImplMap
         long contextFeatures = context.getFeatures();
         boolean writeNulls = (contextFeatures & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask)) != 0;
         boolean fieldBased = (contextFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
-        ObjectWriterProvider provider = context.getProvider();
+        ObjectWriterProvider provider = context.provider;
 
         Class itemClass = null;
         ObjectWriter itemWriter = null;
-        SymbolTable symbolTable = jsonWriter.getSymbolTable();
         boolean contextRefDetect = (contextFeatures & JSONWriter.Feature.ReferenceDetection.mask) != 0;
 
         int i = 0;
@@ -254,7 +253,7 @@ public final class ObjectWriterImplMap
                     key = entryKey.toString();
                 }
 
-                if (symbolTable != null) {
+                if (jsonWriter.symbolTable != null) {
                     jsonWriter.writeSymbol(key);
 
                     if (value instanceof String) {
@@ -375,7 +374,7 @@ public final class ObjectWriterImplMap
 
     @Override
     public boolean writeTypeInfo(JSONWriter jsonWriter) {
-        if (jsonWriter.isUTF8()) {
+        if (jsonWriter.utf8) {
             jsonWriter.writeNameRaw(typeInfoUTF8);
         } else {
             jsonWriter.writeNameRaw(typeInfoUTF16);
@@ -385,7 +384,7 @@ public final class ObjectWriterImplMap
 
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             writeJSONB(jsonWriter, object, fieldName, fieldType, features);
             return;
         }
@@ -414,7 +413,7 @@ public final class ObjectWriterImplMap
             }
         }
 
-        ObjectWriterProvider provider = jsonWriter.getContext().getProvider();
+        ObjectWriterProvider provider = jsonWriter.context.provider;
         for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = it.next();
             Object value = entry.getValue();
@@ -565,7 +564,7 @@ public final class ObjectWriterImplMap
         jsonWriter.startObject();
         Map map = (Map) object;
 
-        JSONWriter.Context context = jsonWriter.getContext();
+        JSONWriter.Context context = jsonWriter.context;
 
         BeforeFilter beforeFilter = context.getBeforeFilter();
         if (beforeFilter != null) {

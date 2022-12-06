@@ -56,7 +56,7 @@ public interface ObjectWriter<T> {
     }
 
     default void writeArrayMapping(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
             return;
         }
@@ -73,7 +73,7 @@ public interface ObjectWriter<T> {
                 fieldWriter.writeValue(jsonWriter, object);
             }
         } else {
-            JSONWriter.Context ctx = jsonWriter.getContext();
+            JSONWriter.Context ctx = jsonWriter.context;
             PropertyPreFilter propertyPreFilter = ctx.getPropertyPreFilter();
             ValueFilter valueFilter = ctx.getValueFilter();
             PropertyFilter propertyFilter = ctx.getPropertyFilter();

@@ -23,12 +23,6 @@ public class EishayFuryWrite {
 //            .disableSecureMode()
 //            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
 //            .buildThreadSafeFury();
-//
-//    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
-//            .withLanguage(io.fury.Language.JAVA)
-//            .withReferenceTracking(true)
-//            .disableSecureMode()
-//            .buildThreadSafeFury();
 
     static {
         try {
@@ -56,36 +50,12 @@ public class EishayFuryWrite {
                         JSONWriter.Feature.WriteNameAsSymbol)
         );
     }
-//
+
 //    @Benchmark
-//    public void furyCompatible(Blackhole bh) {
+    public void furyCompatible(Blackhole bh) {
 //        byte[] bytes = furyCompatible.serialize(mc);
 //        bh.consume(bytes);
-//    }
-
-    @Benchmark
-    public void fastjson2JSONB_ArrayMapping(Blackhole bh) {
-        bh.consume(
-                JSONB.toBytes(
-                        mc,
-                        JSONWriter.Feature.WriteClassName,
-                        JSONWriter.Feature.IgnoreNoneSerializable,
-                        JSONWriter.Feature.FieldBased,
-                        JSONWriter.Feature.ReferenceDetection,
-                        JSONWriter.Feature.WriteNulls,
-                        JSONWriter.Feature.NotWriteDefaultValue,
-                        JSONWriter.Feature.NotWriteHashMapArrayListClassName,
-                        JSONWriter.Feature.WriteNameAsSymbol,
-                        JSONWriter.Feature.BeanToArray
-                )
-        );
     }
-
-//    @Benchmark
-//    public void fury(Blackhole bh) {
-//        byte[] bytes = fury.serialize(mc);
-//        bh.consume(bytes);
-//    }
 
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()

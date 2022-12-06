@@ -37,7 +37,7 @@ final class ObjectWriterImplCalendar
             return;
         }
 
-        JSONWriter.Context ctx = jsonWriter.getContext();
+        JSONWriter.Context ctx = jsonWriter.context;
 
         Calendar date = (Calendar) object;
         long millis = date.getTimeInMillis();

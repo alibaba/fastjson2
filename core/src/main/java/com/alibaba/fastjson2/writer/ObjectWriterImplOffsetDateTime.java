@@ -23,7 +23,7 @@ final class ObjectWriterImplOffsetDateTime
             return;
         }
 
-        JSONWriter.Context ctx = jsonWriter.getContext();
+        JSONWriter.Context ctx = jsonWriter.context;
 
         OffsetDateTime odt = (OffsetDateTime) object;
 

@@ -65,7 +65,7 @@ final class FieldWriterListFunc<T>
 
         writeFieldName(jsonWriter);
 
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             int size = list.size();
             jsonWriter.startArray(size);
 
@@ -129,7 +129,7 @@ final class FieldWriterListFunc<T>
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             int size = list.size();
             jsonWriter.startArray(size);
 

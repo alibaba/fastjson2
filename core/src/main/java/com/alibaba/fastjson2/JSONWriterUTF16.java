@@ -28,7 +28,7 @@ class JSONWriterUTF16
     private final int cachedIndex;
 
     JSONWriterUTF16(Context ctx) {
-        super(ctx, StandardCharsets.UTF_16);
+        super(ctx, null, false, StandardCharsets.UTF_16);
 
         cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
         chars = JSONFactory.allocateCharArray(cachedIndex);

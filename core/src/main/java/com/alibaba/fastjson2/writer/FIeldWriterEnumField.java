@@ -41,7 +41,7 @@ final class FIeldWriterEnumField
             }
         }
 
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             writeEnumJSONB(jsonWriter, value);
         } else {
             writeEnum(jsonWriter, value);

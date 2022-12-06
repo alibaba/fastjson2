@@ -38,7 +38,7 @@ final class FieldWriterListField<T>
     public boolean write(JSONWriter jsonWriter, T object) {
         List value = (List) getFieldValue(object);
 
-        JSONWriter.Context context = jsonWriter.getContext();
+        JSONWriter.Context context = jsonWriter.context;
 
         if (value == null) {
             long features = this.features | context.getFeatures();

@@ -74,9 +74,9 @@ abstract class FieldWriterObject<T>
         if (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
             ObjectWriter formattedWriter = null;
             if (format == null) {
-                JSONWriter.Context context = jsonWriter.getContext();
+                JSONWriter.Context context = jsonWriter.context;
                 boolean fieldBased = ((features | context.getFeatures()) & JSONWriter.Feature.FieldBased.mask) != 0;
-                formattedWriter = context.getProvider().getObjectWriterFromCache(valueClass, valueClass, fieldBased);
+                formattedWriter = context.provider.getObjectWriterFromCache(valueClass, valueClass, fieldBased);
             }
 
             if (formattedWriter == null) {
@@ -255,7 +255,7 @@ abstract class FieldWriterObject<T>
         }
 
         writeFieldName(jsonWriter);
-        boolean jsonb = jsonWriter.isJSONB();
+        boolean jsonb = jsonWriter.jsonb;
         if ((this.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
             if (jsonb) {
                 valueWriter.writeArrayMappingJSONB(jsonWriter, value, fieldName, fieldType, this.features);
@@ -317,7 +317,7 @@ abstract class FieldWriterObject<T>
             }
         }
 
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             if (jsonWriter.isBeanToArray()) {
                 valueWriter.writeArrayMappingJSONB(jsonWriter, value, fieldName, fieldClass, features);
             } else {

@@ -170,7 +170,7 @@ final class ObjectWriterImplList
             return;
         }
 
-        JSONWriter.Context context = jsonWriter.getContext();
+        JSONWriter.Context context = jsonWriter.context;
 
         jsonWriter.startArray(size);
         for (int i = 0; i < size; i++) {
@@ -250,7 +250,7 @@ final class ObjectWriterImplList
         ObjectWriter previousObjectWriter = null;
         boolean previousRefDetect = true;
 
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             jsonWriter.startArray(list.size());
             for (int i = 0; i < list.size(); i++) {
                 Object item = list.get(i);
@@ -273,8 +273,8 @@ final class ObjectWriterImplList
             return;
         }
 
-        JSONWriter.Context context = jsonWriter.getContext();
-        ObjectWriterProvider provider = context.getProvider();
+        JSONWriter.Context context = jsonWriter.context;
+        ObjectWriterProvider provider = context.provider;
 
         jsonWriter.startArray();
         for (int i = 0; i < list.size(); i++) {

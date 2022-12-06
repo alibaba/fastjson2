@@ -34,7 +34,7 @@ abstract class FieldWriterInt64<T>
         long features = jsonWriter.getFeatures() | this.features;
         boolean noneString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
 
-        if (jsonWriter.isUTF8() && !noneString) {
+        if (jsonWriter.utf8 && !noneString) {
             if (value >= -1 && value < 1039) {
                 byte[] bytes = null;
                 if (utf8ValueCache == null) {
@@ -53,7 +53,7 @@ abstract class FieldWriterInt64<T>
                 jsonWriter.writeNameRaw(bytes);
                 return;
             }
-        } else if (jsonWriter.isUTF16() && !noneString) {
+        } else if (jsonWriter.utf16 && !noneString) {
             if (value >= -1 && value < 1039) {
                 char[] chars = null;
                 if (utf16ValueCache == null) {
@@ -76,7 +76,7 @@ abstract class FieldWriterInt64<T>
 
         writeFieldName(jsonWriter);
         if (browserCompatible
-                && !jsonWriter.isJSONB()
+                && !jsonWriter.jsonb
                 && (value > 9007199254740991L || value < -9007199254740991L)) {
             jsonWriter.writeString(Long.toString(value));
         } else {

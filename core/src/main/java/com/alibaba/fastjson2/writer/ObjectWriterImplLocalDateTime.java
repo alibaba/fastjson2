@@ -29,7 +29,7 @@ final class ObjectWriterImplLocalDateTime
             return;
         }
 
-        JSONWriter.Context ctx = jsonWriter.getContext();
+        JSONWriter.Context ctx = jsonWriter.context;
 
         LocalDateTime ldt = (LocalDateTime) object;
 

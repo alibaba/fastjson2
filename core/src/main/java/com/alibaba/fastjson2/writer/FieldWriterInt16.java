@@ -35,7 +35,7 @@ abstract class FieldWriterInt16<T>
             return;
         }
 
-        if (jsonWriter.isUTF8()) {
+        if (jsonWriter.utf8) {
             if (value >= -1 && value < 1039) {
                 byte[] bytes = null;
                 if (utf8ValueCache == null) {
@@ -54,7 +54,7 @@ abstract class FieldWriterInt16<T>
                 jsonWriter.writeNameRaw(bytes);
                 return;
             }
-        } else if (jsonWriter.isUTF16()) {
+        } else if (jsonWriter.utf16) {
             if (value >= -1 && value < 1039) {
                 char[] chars = null;
                 if (utf16ValueCache == null) {
@@ -73,7 +73,7 @@ abstract class FieldWriterInt16<T>
                 jsonWriter.writeNameRaw(chars);
                 return;
             }
-        } else if (jsonWriter.isJSONB()) {
+        } else if (jsonWriter.jsonb) {
             if (value >= -1 && value < 1039) {
                 byte[] bytes = null;
                 if (jsonbValueCache == null) {

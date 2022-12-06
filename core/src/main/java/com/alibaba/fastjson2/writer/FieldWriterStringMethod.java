@@ -36,7 +36,7 @@ final class FieldWriterStringMethod<T>
             value = value.trim();
         }
 
-        if (symbol && jsonWriter.isJSONB()) {
+        if (symbol && jsonWriter.jsonb) {
             jsonWriter.writeSymbol(value);
         } else {
             if (raw) {

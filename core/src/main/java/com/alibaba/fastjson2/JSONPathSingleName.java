@@ -115,7 +115,7 @@ final class JSONPathSingleName
             return ((Map) root).containsKey(name);
         }
 
-        ObjectWriterProvider provider = getWriterContext().getProvider();
+        ObjectWriterProvider provider = getWriterContext().provider;
 
         ObjectWriter objectWriter = provider.getObjectWriter(root.getClass());
         if (objectWriter == null) {

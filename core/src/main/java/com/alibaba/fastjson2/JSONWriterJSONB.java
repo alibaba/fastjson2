@@ -28,41 +28,19 @@ final class JSONWriterJSONB
     private final int cachedIndex;
 
     private byte[] bytes;
-    private SymbolTable symbolTable;
 
     TLongIntHashMap symbols;
     private int symbolIndex;
 
     JSONWriterJSONB(Context ctx, SymbolTable symbolTable) {
-        super(ctx, StandardCharsets.UTF_8);
+        super(ctx, symbolTable, true, StandardCharsets.UTF_8);
         cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
         bytes = JSONFactory.allocateByteArray(cachedIndex);
-        this.symbolTable = symbolTable;
     }
 
     @Override
     public void close() {
         JSONFactory.releaseByteArray(cachedIndex, bytes);
-    }
-
-    @Override
-    public boolean isUTF8() {
-        return false;
-    }
-
-    @Override
-    public boolean isUTF16() {
-        return false;
-    }
-
-    @Override
-    public boolean isJSONB() {
-        return true;
-    }
-
-    @Override
-    public SymbolTable getSymbolTable() {
-        return symbolTable;
     }
 
     @Override
@@ -1557,6 +1535,38 @@ final class JSONWriterJSONB
         }
         System.arraycopy(bytes, 0, this.bytes, off, bytes.length);
         off += bytes.length;
+    }
+
+    public void writeSymbol(int symbol) {
+        int minCapacity = off + 3;
+        if (minCapacity - bytes.length > 0) {
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
+
+        this.bytes[off++] = BC_SYMBOL;
+
+        if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
+            bytes[off++] = (byte) symbol;
+            return;
+        }
+
+        if (symbol >= INT32_BYTE_MIN && symbol <= INT32_BYTE_MAX) {
+            bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (symbol >> 8));
+            bytes[off++] = (byte) (symbol);
+            return;
+        }
+
+        writeInt32(symbol);
     }
 
     @Override

@@ -994,12 +994,12 @@ class JSONReaderJSONB
     }
 
     @Override
-    public boolean isReference() {
+    public final boolean isReference() {
         return offset < bytes.length && bytes[offset] == BC_REFERENCE;
     }
 
     @Override
-    public String readReference() {
+    public final String readReference() {
         if (bytes[offset] != BC_REFERENCE) {
             return null;
         }
@@ -1012,7 +1012,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public ObjectReader checkAutoType(Class expectClass, long expectClassHash, long features) {
+    public final ObjectReader checkAutoType(Class expectClass, long expectClassHash, long features) {
         ObjectReader autoTypeObjectReader = null;
         type = bytes[offset];
         if (type == BC_TYPED_ANY) {

@@ -29,7 +29,7 @@ final class ObjectWriterImplInstant
             return;
         }
 
-        JSONWriter.Context context = jsonWriter.getContext();
+        JSONWriter.Context context = jsonWriter.context;
 
         String dateFormat = this.format != null
                 ? this.format

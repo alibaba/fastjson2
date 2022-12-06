@@ -99,7 +99,7 @@ abstract class FieldWriterDate<T>
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (valueClass == fieldClass) {
-            ObjectWriterProvider provider = jsonWriter.getContext().getProvider();
+            ObjectWriterProvider provider = jsonWriter.context.provider;
             if (dateWriter == null) {
                 if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DATE_MASK) != 0) {
                     dateWriter = provider.getObjectWriter(valueClass, valueClass, false);
@@ -119,7 +119,7 @@ abstract class FieldWriterDate<T>
 
     @Override
     public void writeDate(JSONWriter jsonWriter, long timeMillis) {
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             writeFieldName(jsonWriter);
             jsonWriter.writeMillis(timeMillis);
             return;
@@ -127,7 +127,7 @@ abstract class FieldWriterDate<T>
 
         final int SECONDS_PER_DAY = 60 * 60 * 24;
 
-        JSONWriter.Context ctx = jsonWriter.getContext();
+        JSONWriter.Context ctx = jsonWriter.context;
 
         if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
             writeFieldName(jsonWriter);

@@ -9,7 +9,7 @@ import java.lang.reflect.Parameter;
 import java.util.Map;
 import java.util.function.Function;
 
-class FactoryFunction<T>
+final class FactoryFunction<T>
         implements Function<Map<Long, Object>, T> {
     final Method factoryMethod;
     final String[] paramNames;

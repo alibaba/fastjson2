@@ -60,7 +60,7 @@ public class ObjectWriter10<T>
         long featuresAll = features | this.features | jsonWriter.getFeatures();
         boolean beanToArray = (featuresAll & BeanToArray.mask) != 0;
 
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             if (beanToArray) {
                 writeArrayMappingJSONB(jsonWriter, object, fieldName, fieldType, features);
                 return;
