@@ -68,18 +68,7 @@ final class ObjectWriterImplListStr
             );
         }
 
-        List list = (List) object;
-
-        final int size = list.size();
-        jsonWriter.startArray(size);
-        for (int i = 0; i < size; i++) {
-            String item = (String) list.get(i);
-            if (item == null) {
-                jsonWriter.writeNull();
-                continue;
-            }
-            jsonWriter.writeString(item);
-        }
-        jsonWriter.endArray();
+        List<String> list = (List) object;
+        jsonWriter.writeString(list);
     }
 }

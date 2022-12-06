@@ -51,6 +51,16 @@ public class JSONBTest6 {
         assertEquals(bean.id, bean1.id);
     }
 
+    @Test
+    public void test2() throws Exception {
+        Bean bean = new Bean();
+        bean.id = 1001;
+
+        byte[] jsonbBytes = JSONB.toBytes(bean, new JSONWriter.Context(JSONWriter.Feature.WriteClassName));
+        Bean bean1 = JSONB.parseObject(jsonbBytes, (Type) Bean1.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.IgnoreAutoTypeNotMatch);
+        assertEquals(bean.id, bean1.id);
+    }
+
     public static class Bean {
         public int id;
     }

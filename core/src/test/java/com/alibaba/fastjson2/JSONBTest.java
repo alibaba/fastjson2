@@ -349,6 +349,12 @@ public class JSONBTest {
     }
 
     @Test
+    public void test_null_features1() {
+        byte[] jsonbBytes = JSONB.toBytes((Object) null, new JSONWriter.Context(JSONFactory.getDefaultObjectWriterProvider(), JSONWriter.Feature.WriteNulls));
+        assertNull(JSONB.parseObject(jsonbBytes, Object.class));
+    }
+
+    @Test
     public void test_true() {
         byte[] jsonbBytes = JSONB.toBytes(true);
         assertTrue((Boolean) JSONB.parseObject(jsonbBytes, Object.class));

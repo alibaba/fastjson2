@@ -231,25 +231,8 @@ abstract class FieldWriterList<T>
                 jsonWriter.writeTypeName(
                         TypeUtils.getTypeName(list.getClass()));
             }
-
-            final int listSize = list.size();
-            jsonWriter.startArray(listSize);
-            for (int i = 0, size = listSize; i < size; i++) {
-                String str = list.get(i);
-                jsonWriter.writeString(str);
-            }
-            return;
         }
 
-        jsonWriter.startArray();
-        for (int i = 0, size = list.size(); i < size; i++) {
-            if (i != 0) {
-                jsonWriter.writeComma();
-            }
-
-            String str = list.get(i);
-            jsonWriter.writeString(str);
-        }
-        jsonWriter.endArray();
+        jsonWriter.writeString(list);
     }
 }

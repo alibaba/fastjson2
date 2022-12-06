@@ -131,11 +131,38 @@ public class ObjectReader6Test {
         );
 
         assertEquals(
+                0,
+                JSONB.parseObject(
+                        JSONArray.of().toJSONBBytes(),
+                        Bean2.class,
+                        new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider(), JSONReader.Feature.SupportArrayToBean)
+                ).userId0
+        );
+
+        assertEquals(
                 101,
                 JSONB.parseObject(
                         JSONArray.of(101).toJSONBBytes(),
                         Bean2.class,
                         JSONReader.Feature.SupportArrayToBean
+                ).userId0
+        );
+
+        assertEquals(
+                101,
+                JSONB.parseObject(
+                        JSONArray.of(101).toJSONBBytes(),
+                        Bean2.class,
+                        new JSONReader.Context(JSONReader.Feature.SupportArrayToBean)
+                ).userId0
+        );
+
+        assertEquals(
+                101,
+                JSONB.parseObject(
+                        JSONArray.of(101).toJSONBBytes(),
+                        Bean2.class,
+                        new JSONReader.Context(JSONReader.Feature.SupportArrayToBean, JSONReader.Feature.FieldBased)
                 ).userId0
         );
 

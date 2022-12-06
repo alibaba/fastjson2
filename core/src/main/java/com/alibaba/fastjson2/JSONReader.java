@@ -3259,10 +3259,43 @@ public abstract class JSONReader
             this.symbolTable = null;
         }
 
+        public Context(Feature... features) {
+            this.features = defaultReaderFeatures;
+            this.provider = JSONFactory.getDefaultObjectReaderProvider();
+            this.objectSupplier = JSONFactory.defaultObjectSupplier;
+            this.arraySupplier = JSONFactory.defaultArraySupplier;
+            this.symbolTable = null;
+
+            for (Feature feature : features) {
+                this.features |= feature.mask;
+            }
+        }
+
+        public Context(ObjectReaderProvider provider, Feature... features) {
+            this.features = defaultReaderFeatures;
+            this.provider = provider;
+            this.objectSupplier = JSONFactory.defaultObjectSupplier;
+            this.arraySupplier = JSONFactory.defaultArraySupplier;
+            this.symbolTable = null;
+
+            for (Feature feature : features) {
+                this.features |= feature.mask;
+            }
+        }
+
         public Context(ObjectReaderProvider provider, SymbolTable symbolTable) {
             this.features = defaultReaderFeatures;
             this.provider = provider;
             this.symbolTable = symbolTable;
+        }
+
+        public Context(ObjectReaderProvider provider, SymbolTable symbolTable, Feature... features) {
+            this.features = defaultReaderFeatures;
+            this.provider = provider;
+            this.symbolTable = symbolTable;
+            for (Feature feature : features) {
+                this.features |= feature.mask;
+            }
         }
 
         public boolean isFormatUnixTime() {

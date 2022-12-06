@@ -40,6 +40,13 @@ final class JSONReaderJSONBUF
                     return symbolTable.getName(-symbol);
                 }
 
+                if (symbol == 0) {
+                    strtype = symbol0StrType;
+                    strlen = symbol0Length;
+                    strBegin = symbol0Begin;
+                    return getFieldName();
+                }
+
                 int index = symbol * 2 + 1;
                 long strInfo = symbols[index];
                 strtype = (byte) strInfo;
@@ -288,12 +295,21 @@ final class JSONReaderJSONBUF
         if (typeSymbol) {
             int symbol = readInt32Value();
 
-            int minCapacity = symbol * 2 + 2;
-            if (symbols.length < minCapacity) {
-                symbols = Arrays.copyOf(symbols, symbols.length + 16);
+            if (symbol == 0) {
+                symbol0Begin = strBegin;
+                symbol0Length = strlen;
+                symbol0StrType = strtype;
+            } else {
+                int minCapacity = symbol * 2 + 2;
+                if (symbols == null) {
+                    symbols = new long[minCapacity < 32 ? 32 : minCapacity];
+                } else if (symbols.length < minCapacity) {
+                    symbols = Arrays.copyOf(symbols, symbols.length + 16);
+                }
+
+                long strInfo = ((long) strBegin << 32) + ((long) strlen << 8) + strtype;
+                symbols[symbol * 2 + 1] = strInfo;
             }
-            long strInfo = ((long) strBegin << 32) + ((long) strlen << 8) + strtype;
-            symbols[symbol * 2 + 1] = strInfo;
         }
 
         return str;
@@ -317,6 +333,16 @@ final class JSONReaderJSONBUF
 
                 if (symbol < 0) {
                     return symbolTable.getHashCode(-symbol);
+                }
+
+                if (symbol == 0) {
+                    strtype = symbol0StrType;
+                    strlen = symbol0Length;
+                    strBegin = symbol0Begin;
+                    if (symbol0Hash == 0) {
+                        symbol0Hash = getNameHashCode();
+                    }
+                    return symbol0Hash;
                 }
 
                 int index = symbol * 2;
@@ -419,12 +445,23 @@ final class JSONReaderJSONBUF
                 symbol = readInt32Value();
             }
 
+            if (symbol == 0) {
+                symbol0Begin = strBegin;
+                symbol0Length = strlen;
+                symbol0StrType = strtype;
+                symbol0Hash = hashCode;
+                return hashCode;
+            }
+
             long strInfo = ((long) strBegin << 32) + ((long) strlen << 8) + strtype;
 
             int minCapacity = symbol * 2 + 2;
-            if (symbols.length < minCapacity) {
+            if (symbols == null) {
+                symbols = new long[minCapacity < 32 ? 32 : minCapacity];
+            } else if (symbols.length < minCapacity) {
                 symbols = Arrays.copyOf(symbols, minCapacity + 16);
             }
+
             symbols[symbol * 2] = hashCode;
             symbols[symbol * 2 + 1] = strInfo;
         }
