@@ -685,6 +685,7 @@ public class DateUtils {
 
     /**
      * yyyyMMddHHmm
+     *
      * @return
      */
     public static LocalDateTime parseLocalDateTime12(String str, int off) {
@@ -2864,5 +2865,71 @@ public class DateUtils {
         }
 
         return new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+    }
+
+    public static int month(char c0, char c1, char c2) {
+        switch (c0) {
+            case 'J':
+                // Jan
+                if (c1 == 'a' && c2 == 'n') {
+                    return 1;
+                }
+                if (c1 == 'u') {
+                    if (c2 == 'n') {
+                        return 6;
+                    }
+                    if (c2 == 'l') {
+                        return 7;
+                    }
+                }
+                break;
+            case 'F':
+                if (c1 == 'e' && c2 == 'b') {
+                    return 2;
+                }
+                break;
+            case 'M':
+                if (c1 == 'a') {
+                    if (c2 == 'r') {
+                        return 3;
+                    }
+                    if (c2 == 'y') {
+                        return 5;
+                    }
+                }
+                break;
+            case 'A':
+                if (c1 == 'p' && c2 == 'r') {
+                    return 4;
+                }
+                if (c1 == 'u' && c2 == 'g') {
+                    return 8;
+                }
+                break;
+            case 'S':
+                if (c1 == 'e' && c2 == 'p') {
+                    return 9;
+                }
+                break;
+            case 'O':
+                if (c1 == 'c' && c2 == 't') {
+                    return 10;
+                }
+                break;
+            case 'N':
+                if (c1 == 'o' && c2 == 'v') {
+                    return 11;
+                }
+                break;
+            case 'D':
+                if (c1 == 'e' && c2 == 'c') {
+                    return 12;
+                }
+                break;
+            default:
+                break;
+        }
+
+        return 0;
     }
 }
