@@ -25,6 +25,10 @@ public final class ObjectReaderImplObject
         return new JSONObject();
     }
 
+    public Object createInstance(Collection collection) {
+        return collection;
+    }
+
     @Override
     public Object createInstance(Map map, long features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
