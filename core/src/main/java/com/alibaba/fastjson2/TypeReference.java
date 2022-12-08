@@ -333,4 +333,8 @@ public abstract class TypeReference<T> {
     public static Type parametricType(Class<?> parametrized, Class<?>... parameterClasses) {
         return new ParameterizedTypeImpl(parametrized, parameterClasses);
     }
+
+    public static Type parametricType(Class<?> parametrized, Type... parameterTypes) {
+        return new ParameterizedTypeImpl(parametrized, parameterTypes);
+    }
 }
