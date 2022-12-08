@@ -2932,4 +2932,72 @@ public class DateUtils {
 
         return 0;
     }
+
+    public static int hourAfterNoon(char h0, char h1) {
+        if (h0 == '0') {
+            switch (h1) {
+                case '0':
+                    h0 = '1';
+                    h1 = '2';
+                    break;
+                case '1':
+                    h0 = '1';
+                    h1 = '3';
+                    break;
+                case '2':
+                    h0 = '1';
+                    h1 = '4';
+                    break;
+                case '3':
+                    h0 = '1';
+                    h1 = '5';
+                    break;
+                case '4':
+                    h0 = '1';
+                    h1 = '6';
+                    break;
+                case '5':
+                    h0 = '1';
+                    h1 = '7';
+                    break;
+                case '6':
+                    h0 = '1';
+                    h1 = '8';
+                    break;
+                case '7':
+                    h0 = '1';
+                    h1 = '9';
+                    break;
+                case '8':
+                    h0 = '2';
+                    h1 = '0';
+                    break;
+                case '9':
+                    h0 = '2';
+                    h1 = '1';
+                    break;
+                default:
+                    break;
+            }
+        } else if (h0 == '1') {
+            switch (h1) {
+                case '0':
+                    h0 = '2';
+                    h1 = '2';
+                    break;
+                case '1':
+                    h0 = '2';
+                    h1 = '3';
+                    break;
+                case '2':
+                    h0 = '2';
+                    h1 = '4';
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return h0 << 16 | h1;
+    }
 }

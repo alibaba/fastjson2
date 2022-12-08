@@ -6113,69 +6113,9 @@ class JSONReaderUTF16
         char first = chars[this.offset + zoneIdBegin];
 
         if (pm) {
-            if (h0 == '0') {
-                switch (h1) {
-                    case '0':
-                        h0 = '1';
-                        h1 = '2';
-                        break;
-                    case '1':
-                        h0 = '1';
-                        h1 = '3';
-                        break;
-                    case '2':
-                        h0 = '1';
-                        h1 = '4';
-                        break;
-                    case '3':
-                        h0 = '1';
-                        h1 = '5';
-                        break;
-                    case '4':
-                        h0 = '1';
-                        h1 = '6';
-                        break;
-                    case '5':
-                        h0 = '1';
-                        h1 = '7';
-                        break;
-                    case '6':
-                        h0 = '1';
-                        h1 = '8';
-                        break;
-                    case '7':
-                        h0 = '1';
-                        h1 = '9';
-                        break;
-                    case '8':
-                        h0 = '2';
-                        h1 = '0';
-                        break;
-                    case '9':
-                        h0 = '2';
-                        h1 = '1';
-                        break;
-                    default:
-                        break;
-                }
-            } else if (h0 == '1') {
-                switch (h1) {
-                    case '0':
-                        h0 = '2';
-                        h1 = '2';
-                        break;
-                    case '1':
-                        h0 = '2';
-                        h1 = '3';
-                        break;
-                    case '2':
-                        h0 = '2';
-                        h1 = '4';
-                        break;
-                    default:
-                        break;
-                }
-            }
+            int hourValue = DateUtils.hourAfterNoon(h0, h1);
+            h0 = (char) (hourValue >> 16);
+            h1 = (char) ((short) hourValue);
         }
 
         LocalDateTime ldt = localDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2, S3, S4, S5, S6, S7, S8);

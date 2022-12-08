@@ -2,13 +2,16 @@ package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.IOUtils;
 import org.junit.jupiter.api.Test;
 
+import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Issue997 {
     @Test
@@ -21,6 +24,38 @@ public class Issue997 {
         assertEquals(10, zdt.getHour());
         assertEquals(55, zdt.getMinute());
         assertEquals(19, zdt.getSecond());
+    }
+
+    @Test
+    public void test1() throws Exception {
+        String dateStr = "Dec 17, 2022 10:55:19 AM";
+        String json = "{\"date\":\"" + dateStr + "\"}";
+        String fmt = "MMM dd, yyyy hh:mm:ss a";
+        SimpleDateFormat format = new SimpleDateFormat(fmt);
+
+        Date date = format.parse(dateStr);
+
+        Bean bean = new Bean();
+        bean.date = date;
+        assertEquals(json, JSON.toJSONString(bean, new JSONWriter.Context(fmt)));
+
+        Bean bean1 = JSON.parseObject(json, Bean.class, new JSONReader.Context(fmt));
+        assertEquals(bean.date.getTime(), bean1.date.getTime());
+
+        Bean bean2 = JSON.parseObject(json, Bean.class);
+        assertEquals(bean.date.getTime(), bean2.date.getTime());
+    }
+
+    @Test
+    public void testError() {
+        String[] strings = {
+                "{\"date\":\"Aec 17, 2022 10:55:19 AM\"}"
+        };
+        for (String string : strings) {
+            assertThrows(Exception.class, () -> JSON.parseObject(string, Bean.class));
+            assertThrows(Exception.class, () -> JSONReader.of(string.toCharArray()).read(Bean.class));
+            assertThrows(Exception.class, () -> JSONReader.of(string.getBytes()).read(Bean.class));
+        }
     }
 
     @Test

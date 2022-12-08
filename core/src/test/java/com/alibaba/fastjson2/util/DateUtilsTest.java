@@ -1661,4 +1661,52 @@ public class DateUtilsTest {
     public void date2String1() {
         assertEquals("2022-09-24 17:14:03.001", DateUtils.toString(new Date(1664010843001L)));
     }
+
+    @Test
+    public void month() {
+        assertEquals(0, DateUtils.month('J', 'u', 'a'));
+        assertEquals(0, DateUtils.month('J', 'a', 'a'));
+        assertEquals(0, DateUtils.month('F', 'a', 'a'));
+        assertEquals(0, DateUtils.month('F', 'e', 'a'));
+        assertEquals(0, DateUtils.month('A', 'e', 'a'));
+        assertEquals(0, DateUtils.month('A', 'p', 'a'));
+        assertEquals(0, DateUtils.month('M', 'p', 'a'));
+        assertEquals(0, DateUtils.month('M', 'a', 'a'));
+        assertEquals(0, DateUtils.month('J', 'a', 'a'));
+        assertEquals(0, DateUtils.month('J', 'u', 'a'));
+        assertEquals(0, DateUtils.month('A', 'a', 'a'));
+        assertEquals(0, DateUtils.month('A', 'u', 'a'));
+        assertEquals(0, DateUtils.month('S', 'u', 'a'));
+        assertEquals(0, DateUtils.month('S', 'e', 'a'));
+        assertEquals(0, DateUtils.month('O', 'e', 'a'));
+        assertEquals(0, DateUtils.month('O', 'c', 'a'));
+        assertEquals(0, DateUtils.month('N', 'c', 'a'));
+        assertEquals(0, DateUtils.month('N', 'o', 'a'));
+        assertEquals(0, DateUtils.month('D', 'o', 'a'));
+        assertEquals(0, DateUtils.month('D', 'e', 'a'));
+        assertEquals(0, DateUtils.month('K', 'e', 'a'));
+
+        String[] strings = new String[] {
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec"
+        };
+
+        for (int i = 0; i < strings.length; i++) {
+            String str = strings[i];
+            char c0 = str.charAt(0);
+            char c1 = str.charAt(1);
+            char c2 = str.charAt(2);
+            assertEquals(i + 1, DateUtils.month(c0, c1, c2));
+        }
+    }
 }
