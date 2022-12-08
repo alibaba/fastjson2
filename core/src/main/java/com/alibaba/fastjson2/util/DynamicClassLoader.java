@@ -24,6 +24,8 @@ public class DynamicClassLoader
 
     private static Map<String, Class<?>> classMapping = new HashMap<String, Class<?>>();
 
+    private static DynamicClassLoader instance = new DynamicClassLoader();
+
     static {
         FASTJSON_PACKAGE = JSON.class.getPackage().getName() + ".";
         FASTJSON_CLASSLOADER = JSON.class.getClassLoader();
@@ -155,5 +157,9 @@ public class DynamicClassLoader
         }
 
         return true;
+    }
+
+    public static DynamicClassLoader getInstance() {
+        return instance;
     }
 }

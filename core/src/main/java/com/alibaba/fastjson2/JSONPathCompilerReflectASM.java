@@ -21,7 +21,9 @@ class JSONPathCompilerReflectASM
     // GraalVM not support
     // Android not support
     static final AtomicLong seed = new AtomicLong();
-    static final JSONPathCompilerReflectASM INSTANCE = new JSONPathCompilerReflectASM();
+    static final JSONPathCompilerReflectASM INSTANCE = new JSONPathCompilerReflectASM(
+            DynamicClassLoader.getInstance()
+    );
 
     static final String DESC_OBJECT_READER = ASMUtils.desc(ObjectReader.class);
     static final String DESC_FIELD_READER = ASMUtils.desc(FieldReader.class);
@@ -36,6 +38,10 @@ class JSONPathCompilerReflectASM
 
     public JSONPathCompilerReflectASM() {
         this.classLoader = new DynamicClassLoader();
+    }
+
+    public JSONPathCompilerReflectASM(DynamicClassLoader classLoader) {
+        this.classLoader = classLoader;
     }
 
     private boolean support(Class objectClass) {

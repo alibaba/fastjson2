@@ -12,7 +12,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.io.*;
+import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 public class EishayFuryParse {
@@ -22,21 +22,18 @@ public class EishayFuryParse {
             JSONReader.Feature.IgnoreNoneSerializable,
             JSONReader.Feature.UseDefaultConstructorAsPossible,
             JSONReader.Feature.UseNativeObject,
-            JSONReader.Feature.FieldBased
+            JSONReader.Feature.FieldBased,
+            JSONReader.Feature.SupportArrayToBean
     };
-
-    static JSONReader.Context context = new JSONReader.Context(
-            JSONFactory.getDefaultObjectReaderProvider(), features
-    );
+    static JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider(), features);
 
     static byte[] fastjson2JSONBBytes;
-    static byte[] furyCompatibleBytes;
+    static byte[] furyBytes;
 //
-//    static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
+//    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
 //            .withLanguage(io.fury.Language.JAVA)
 //            .withReferenceTracking(true)
 //            .disableSecureMode()
-//            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
 //            .buildThreadSafeFury();
 
     static {
@@ -46,9 +43,12 @@ public class EishayFuryParse {
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
 
-            fastjson2JSONBBytes = JSONB.toBytes(mc, EishayFuryWrite.features);
+            fastjson2JSONBBytes = JSONB.toBytes(
+                    mc,
+                    EishayFuryWrite.features
+            );
 
-//            furyCompatibleBytes = furyCompatible.serialize(mc);
+//            furyBytes = fury.serialize(mc);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -63,7 +63,7 @@ public class EishayFuryParse {
 
 //    @Benchmark
     public void fury(Blackhole bh) {
-//        bh.consume(furyCompatible.deserialize(furyCompatibleBytes));
+//        bh.consume(fury.deserialize(furyBytes));
     }
 
     public static void main(String[] args) throws Exception {

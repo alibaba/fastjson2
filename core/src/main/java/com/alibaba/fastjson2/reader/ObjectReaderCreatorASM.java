@@ -33,7 +33,7 @@ public class ObjectReaderCreatorASM
         extends ObjectReaderCreator {
     // GraalVM not support
     // Android not support
-    public static ObjectReaderCreatorASM INSTANCE = new ObjectReaderCreatorASM();
+    public static ObjectReaderCreatorASM INSTANCE = new ObjectReaderCreatorASM(DynamicClassLoader.getInstance());
 
     protected static final AtomicLong seed = new AtomicLong();
 
@@ -271,14 +271,17 @@ public class ObjectReaderCreatorASM
     }
 
     public ObjectReaderCreatorASM(ClassLoader classLoader) {
-        this.classLoader = new DynamicClassLoader(classLoader);
+        this.classLoader = classLoader instanceof DynamicClassLoader
+                ? (DynamicClassLoader) classLoader
+                : new DynamicClassLoader(classLoader);
     }
 
     @Override
-    public <T> ObjectReader<T> createObjectReader(Class<T> objectClass,
-                                                  Type objectType,
-                                                  boolean fieldBased,
-                                                  ObjectReaderProvider provider) {
+    public <T> ObjectReader<T> createObjectReader(
+            Class<T> objectClass,
+            Type objectType,
+            boolean fieldBased,
+            ObjectReaderProvider provider) {
         boolean externalClass = classLoader.isExternalClass(objectClass);
         int objectClassModifiers = objectClass.getModifiers();
         boolean publicClass = Modifier.isPublic(objectClassModifiers);

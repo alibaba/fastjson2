@@ -4,7 +4,8 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.benchmark.eishay.gen.EishayClassGen;
+import com.alibaba.fastjson2.util.DynamicClassLoader;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -17,9 +18,11 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-public class EishayFuryWriteArray {
-    static MediaContent mc;
-//
+public class EishayFuryWriteNoneCache {
+    static final Class[] classes = new Class[10_000];
+    static final Object[] objects = new Object[classes.length];
+    static int index;
+
 //    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
 //            .withLanguage(io.fury.Language.JAVA)
 //            .withReferenceTracking(true)
@@ -42,10 +45,16 @@ public class EishayFuryWriteArray {
 
     static {
         try {
-            InputStream is = EishayFuryWriteArray.class.getClassLoader().getResourceAsStream("data/eishay.json");
+            InputStream is = EishayFuryWriteNoneCache.class.getClassLoader().getResourceAsStream("data/eishay.json");
             String str = IOUtils.toString(is, "UTF-8");
-            mc = JSONReader.of(str)
-                    .read(MediaContent.class);
+
+            DynamicClassLoader classLoader = DynamicClassLoader.getInstance();
+            EishayClassGen gen = new EishayClassGen();
+            for (int i = 0; i < classes.length; i++) {
+                Class objectClass = gen.genMedia(classLoader, "com/alibaba/fastjson2/benchmark/eishay" + i);
+                classes[i] = objectClass;
+                objects[i] = JSONReader.of(str).read(objectClass);
+            }
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -53,20 +62,22 @@ public class EishayFuryWriteArray {
 
     @Benchmark
     public void fastjson2JSONB(Blackhole bh) {
+        Object object = objects[(index++) % objects.length];
         bh.consume(
-                JSONB.toBytes(mc, context)
+                JSONB.toBytes(object, context)
         );
     }
 
 //    @Benchmark
     public void fury(Blackhole bh) {
-//        byte[] bytes = fury.serialize(mc);
+//        Object object = objects[(index++) % objects.length];
+//        byte[] bytes = fury.serialize(object);
 //        bh.consume(bytes);
     }
 
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
-                .include(EishayFuryWriteArray.class.getName())
+                .include(EishayFuryWriteNoneCache.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)
