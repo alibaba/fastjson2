@@ -3271,6 +3271,19 @@ public abstract class JSONReader
             }
         }
 
+        public Context(String dateFormat, Feature... features) {
+            this.features = defaultReaderFeatures;
+            this.provider = JSONFactory.getDefaultObjectReaderProvider();
+            this.objectSupplier = JSONFactory.defaultObjectSupplier;
+            this.arraySupplier = JSONFactory.defaultArraySupplier;
+            this.symbolTable = null;
+
+            for (Feature feature : features) {
+                this.features |= feature.mask;
+            }
+            setDateFormat(dateFormat);
+        }
+
         public Context(ObjectReaderProvider provider, Feature... features) {
             this.features = defaultReaderFeatures;
             this.provider = provider;

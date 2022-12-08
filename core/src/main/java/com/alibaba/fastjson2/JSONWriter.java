@@ -1318,6 +1318,16 @@ public abstract class JSONWriter
             }
         }
 
+        public Context(String format, Feature... features) {
+            this.features = defaultWriterFeatures;
+            this.provider = JSONFactory.getDefaultObjectWriterProvider();
+
+            for (int i = 0; i < features.length; i++) {
+                this.features |= features[i].mask;
+            }
+            setDateFormat(format);
+        }
+
         public Context(ObjectWriterProvider provider, Feature... features) {
             if (provider == null) {
                 throw new IllegalArgumentException("objectWriterProvider must not null");
