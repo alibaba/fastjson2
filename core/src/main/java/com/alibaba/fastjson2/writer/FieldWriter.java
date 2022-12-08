@@ -220,15 +220,19 @@ public abstract class FieldWriter<T>
 
     @Override
     public int compareTo(Object o) {
-        FieldWriter otherFieldWriter = (FieldWriter) o;
+        FieldWriter other = (FieldWriter) o;
 
-        String thisName = this.fieldName;
-        String otherName = otherFieldWriter.fieldName;
-
-        int nameCompare = thisName.compareTo(otherName);
+        int thisOrdinal = this.ordinal;
+        int otherOrdinal = other.ordinal;
+        if (thisOrdinal < otherOrdinal) {
+            return -1;
+        }
+        if (thisOrdinal > otherOrdinal) {
+            return 1;
+        }
 
         Member thisMember = this.field != null ? this.field : this.method;
-        Member otherMember = otherFieldWriter.field != null ? otherFieldWriter.field : otherFieldWriter.method;
+        Member otherMember = other.field != null ? other.field : other.method;
 
         if (thisMember != null && otherMember != null && thisMember.getClass() != otherMember.getClass()) {
             Class otherDeclaringClass = otherMember.getDeclaringClass();
@@ -242,30 +246,23 @@ public abstract class FieldWriter<T>
             }
         }
 
-        if (nameCompare != 0) {
-            int thisOrdinal = this.ordinal;
-            int otherOrdinal = otherFieldWriter.ordinal;
-            if (thisOrdinal < otherOrdinal) {
-                return -1;
-            }
-            if (thisOrdinal > otherOrdinal) {
-                return 1;
-            }
-        } else {
-            if (thisMember instanceof Field && otherMember instanceof Method) {
-                return -1;
-            }
-
-            if (thisMember instanceof Method && otherMember instanceof Field) {
-                return 1;
-            }
-        }
+        String thisName = this.fieldName;
+        String otherName = other.fieldName;
+        int nameCompare = thisName.compareTo(otherName);
 
         if (nameCompare != 0) {
             return nameCompare;
         }
 
-        Class otherFieldClass = otherFieldWriter.fieldClass;
+        if (thisMember instanceof Field && otherMember instanceof Method) {
+            return -1;
+        }
+
+        if (thisMember instanceof Method && otherMember instanceof Field) {
+            return 1;
+        }
+
+        Class otherFieldClass = other.fieldClass;
         Class thisFieldClass = this.fieldClass;
         if (thisFieldClass != otherFieldClass && thisFieldClass != null && otherFieldClass != null) {
             if (thisFieldClass.isAssignableFrom(otherFieldClass)) {
