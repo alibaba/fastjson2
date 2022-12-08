@@ -815,9 +815,7 @@ public class ObjectWriterBaseModule
                             || (fieldName0 != null && name.equals(fieldName0))
                     ) {
                         fieldInfo.features |= FieldInfo.FIELD_MASK;
-                        if ((field.getModifiers() & (Modifier.PUBLIC | Modifier.STATIC)) == 0) {
-                            getFieldInfo(beanInfo, fieldInfo, objectClass, field);
-                        }
+                        getFieldInfo(beanInfo, fieldInfo, objectClass, field);
                     }
                 });
             }
