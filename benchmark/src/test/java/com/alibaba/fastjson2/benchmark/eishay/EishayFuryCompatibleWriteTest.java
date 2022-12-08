@@ -2,8 +2,8 @@ package com.alibaba.fastjson2.benchmark.eishay;
 
 import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
-public class EishayFuryWriteArrayTest {
-    static final EishayFuryWriteArray benchmark = new EishayFuryWriteArray();
+public class EishayFuryCompatibleWriteTest {
+    static final EishayFuryCompatibleWrite benchmark = new EishayFuryCompatibleWrite();
 
     public static void fastjson2JSONB() throws Exception {
         for (int j = 0; j < 10; j++) {
@@ -12,10 +12,10 @@ public class EishayFuryWriteArrayTest {
                 benchmark.fastjson2JSONB(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("EishayFuryWriteArray-fastjson2_jsonb millis : " + millis);
-            // zulu8.62.0.19 : 304 225 213 210 205
-            // zulu11.52.13 : 162 155 153 147
-            // zulu17.38.21 : 163 165 159
+            System.out.println("EishayFuryWrite-fastjson2_jsonb millis : " + millis);
+            // zulu8.62.0.19 : 415 385 402 386
+            // zulu11.52.13 : 360 346 336 330 328 325
+            // zulu17.38.21 : 367 345 339
         }
     }
 
@@ -26,10 +26,10 @@ public class EishayFuryWriteArrayTest {
                 benchmark.fury(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("EishayFuryWriteArray-fury millis : " + millis);
-            // zulu8.62.0.19 : 226
-            // zulu11.52.13 : 166
-            // zulu17.38.21 : 175
+            System.out.println("EishayFuryWrite-fury millis : " + millis);
+            // zulu8.62.0.19 : 294
+            // zulu11.52.13 : 272
+            // zulu17.38.21 : 289
         }
     }
 

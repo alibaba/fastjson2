@@ -26,7 +26,9 @@ public class ObjectWriterCreatorASM
         extends ObjectWriterCreator {
     // GraalVM not support
     // Android not support
-    public static final ObjectWriterCreatorASM INSTANCE = new ObjectWriterCreatorASM();
+    public static final ObjectWriterCreatorASM INSTANCE = new ObjectWriterCreatorASM(
+            DynamicClassLoader.getInstance()
+    );
 
     protected static final AtomicLong seed = new AtomicLong();
     protected final DynamicClassLoader classLoader;
@@ -135,7 +137,9 @@ public class ObjectWriterCreatorASM
     }
 
     public ObjectWriterCreatorASM(ClassLoader classLoader) {
-        this.classLoader = new DynamicClassLoader(classLoader);
+        this.classLoader = classLoader instanceof DynamicClassLoader
+                ? (DynamicClassLoader) classLoader
+                : new DynamicClassLoader(classLoader);
     }
 
     @Override

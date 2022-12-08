@@ -6,7 +6,7 @@ public class EishayFuryParseTest {
     static final EishayFuryParse benchmark = new EishayFuryParse();
 
     public static void fury() throws Exception {
-        System.out.println("EishayFuryParse-fury size " + benchmark.furyCompatibleBytes.length); // 670
+        System.out.println("EishayFuryParse-fury size " + benchmark.furyBytes.length); // 410
         System.out.println();
 
         for (int j = 0; j < 10; j++) {
@@ -15,15 +15,15 @@ public class EishayFuryParseTest {
                 benchmark.fury(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("EishayFuryParse-fury millis : " + millis);
-            // zulu8.58.0.13 : 330
-            // zulu11.52.13 : 490
-            // zulu17.38.21 : 335
+            System.out.println("EishayFuryParseArray-fury millis : " + millis);
+            // zulu8.58.0.13 : 302
+            // zulu11.52.13 : 346
+            // zulu17.38.21 :
         }
     }
 
     public static void fastjson2JSONB() throws Exception {
-        System.out.println("EishayFuryParse-fastjson2_jsonb size " + benchmark.fastjson2JSONBBytes.length); // 409
+        System.out.println("EishayFuryParse-fastjson2_jsonb size " + benchmark.fastjson2JSONBBytes.length); // 282
         System.out.println();
 
         for (int j = 0; j < 10; j++) {
@@ -32,10 +32,10 @@ public class EishayFuryParseTest {
                 benchmark.fastjson2JSONB(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("EishayFuryParse-fastjson2_jsonb millis : " + millis);
-            // zulu8.58.0.13 : 369 382
-            // zulu11.52.13 : 310 304
-            // zulu17.38.21 : 316 314 313 308
+            System.out.println("EishayFuryParseArray-fastjson2_jsonb millis : " + millis);
+            // zulu8.62.0.19 : 264 253
+            // zulu11.52.13 : 241 234
+            // zulu17.38.21 : 235
         }
     }
 
