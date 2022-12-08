@@ -469,6 +469,64 @@ public class ObjectReaderProvider
         BeanUtils.cleanupCache(objectClass);
     }
 
+    static boolean match(Type objectType, ObjectReader objectReader, ClassLoader classLoader) {
+        Class<?> objectClass = TypeUtils.getClass(objectType);
+        if (objectClass != null && objectClass.getClassLoader() == classLoader) {
+            return true;
+        }
+
+        if (objectType instanceof ParameterizedType) {
+            ParameterizedType paramType = (ParameterizedType) objectType;
+            Type rawType = paramType.getRawType();
+            if (match(rawType, objectReader, classLoader)) {
+                return true;
+            }
+
+            for (Type argType : paramType.getActualTypeArguments()) {
+                if (match(argType, objectReader, classLoader)) {
+                    return true;
+                }
+            }
+        }
+
+        if (objectReader instanceof ObjectReaderImplMapTyped) {
+            ObjectReaderImplMapTyped mapTyped = (ObjectReaderImplMapTyped) objectReader;
+            Class valueClass = mapTyped.valueClass;
+            if (valueClass != null && valueClass.getClassLoader() == classLoader) {
+                return true;
+            }
+            Class keyClass = TypeUtils.getClass(mapTyped.keyType);
+            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
+                return true;
+            }
+        } else if (objectReader instanceof ObjectReaderImplList) {
+            ObjectReaderImplList list = (ObjectReaderImplList) objectReader;
+            if (list.itemClass != null && list.itemClass.getClassLoader() == classLoader) {
+                return true;
+            }
+        } else if (objectReader instanceof ObjectReaderImplOptional) {
+            Class itemClass = ((ObjectReaderImplOptional) objectReader).itemClass;
+            if (itemClass != null && itemClass.getClassLoader() == classLoader) {
+                return true;
+            }
+        } else if (objectReader instanceof ObjectReaderAdapter) {
+            FieldReader[] fieldReaders = ((ObjectReaderAdapter<?>) objectReader).fieldReaders;
+            for (FieldReader fieldReader : fieldReaders) {
+                if (fieldReader.fieldClass != null && fieldReader.fieldClass.getClassLoader() == classLoader) {
+                    return true;
+                }
+                Type fieldType = fieldReader.fieldType;
+                if (fieldType instanceof ParameterizedType) {
+                    if (match(fieldType, null, classLoader)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
     public void cleanup(ClassLoader classLoader) {
         for (Iterator<Map.Entry<Class, Class>> it = mixInCache.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<Class, Class> entry = it.next();
@@ -479,18 +537,14 @@ public class ObjectReaderProvider
 
         for (Iterator<Map.Entry<Type, ObjectReader>> it = cache.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<Type, ObjectReader> entry = it.next();
-            Type keyType = entry.getKey();
-            Class<?> keyClass = TypeUtils.getClass(keyType);
-            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
+            if (match(entry.getKey(), entry.getValue(), classLoader)) {
                 it.remove();
             }
         }
 
         for (Iterator<Map.Entry<Type, ObjectReader>> it = cacheFieldBased.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<Type, ObjectReader> entry = it.next();
-            Type keyType = entry.getKey();
-            Class<?> keyClass = TypeUtils.getClass(keyType);
-            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
+            if (match(entry.getKey(), entry.getValue(), classLoader)) {
                 it.remove();
             }
         }

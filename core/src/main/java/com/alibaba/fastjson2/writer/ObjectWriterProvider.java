@@ -219,6 +219,11 @@ public class ObjectWriterProvider
         return getObjectWriter(objectType, objectClass, false);
     }
 
+    public ObjectWriter getObjectWriter(Type objectType) {
+        Class objectClass = TypeUtils.getClass(objectType);
+        return getObjectWriter(objectType, objectClass, false);
+    }
+
     public ObjectWriter getObjectWriterFromCache(Type objectType, Class objectClass, boolean fieldBased) {
         return fieldBased
                 ? cacheFieldBased.get(objectType)
@@ -385,6 +390,52 @@ public class ObjectWriterProvider
         BeanUtils.cleanupCache(objectClass);
     }
 
+    static boolean match(Type objectType, ObjectWriter objectWriter, ClassLoader classLoader, IdentityHashMap<ObjectWriter, Object> checkedMap) {
+        Class<?> objectClass = TypeUtils.getClass(objectType);
+        if (objectClass != null && objectClass.getClassLoader() == classLoader) {
+            return true;
+        }
+
+        if (checkedMap.containsKey(objectWriter)) {
+            return false;
+        }
+
+        if (objectWriter instanceof ObjectWriterImplMap) {
+            ObjectWriterImplMap mapTyped = (ObjectWriterImplMap) objectWriter;
+            Class valueClass = TypeUtils.getClass(mapTyped.valueType);
+            if (valueClass != null && valueClass.getClassLoader() == classLoader) {
+                return true;
+            }
+            Class keyClass = TypeUtils.getClass(mapTyped.keyType);
+            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
+                return true;
+            }
+        } else if (objectWriter instanceof ObjectWriterImplCollection) {
+            Class itemClass = TypeUtils.getClass(((ObjectWriterImplCollection) objectWriter).itemType);
+            if (itemClass != null && itemClass.getClassLoader() == classLoader) {
+                return true;
+            }
+        } else if (objectWriter instanceof ObjectWriterImplOptional) {
+            Class itemClass = TypeUtils.getClass(((ObjectWriterImplOptional) objectWriter).valueType);
+            if (itemClass != null && itemClass.getClassLoader() == classLoader) {
+                return true;
+            }
+        } else if (objectWriter instanceof ObjectWriterAdapter) {
+            checkedMap.put(objectWriter, null);
+            List<FieldWriter> fieldWriters = ((ObjectWriterAdapter<?>) objectWriter).fieldWriters;
+            for (FieldWriter fieldWriter : fieldWriters) {
+                if (fieldWriter instanceof FieldWriterObject) {
+                    ObjectWriter initObjectWriter = ((FieldWriterObject<?>) fieldWriter).initObjectWriter;
+                    if (match(null, initObjectWriter, classLoader, checkedMap)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
     public void cleanup(ClassLoader classLoader) {
         for (Iterator<Map.Entry<Class, Class>> it = mixInCache.entrySet().iterator(); it.hasNext();) {
             Map.Entry<Class, Class> entry = it.next();
@@ -393,20 +444,18 @@ public class ObjectWriterProvider
             }
         }
 
+        IdentityHashMap<ObjectWriter, Object> checkedMap = new IdentityHashMap();
+
         for (Iterator<Map.Entry<Type, ObjectWriter>> it = cache.entrySet().iterator(); it.hasNext();) {
             Map.Entry<Type, ObjectWriter> entry = it.next();
-            Type keyType = entry.getKey();
-            Class<?> keyClass = TypeUtils.getClass(keyType);
-            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
+            if (match(entry.getKey(), entry.getValue(), classLoader, checkedMap)) {
                 it.remove();
             }
         }
 
         for (Iterator<Map.Entry<Type, ObjectWriter>> it = cacheFieldBased.entrySet().iterator(); it.hasNext();) {
             Map.Entry<Type, ObjectWriter> entry = it.next();
-            Type keyType = entry.getKey();
-            Class<?> keyClass = TypeUtils.getClass(keyType);
-            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
+            if (match(entry.getKey(), entry.getValue(), classLoader, checkedMap)) {
                 it.remove();
             }
         }

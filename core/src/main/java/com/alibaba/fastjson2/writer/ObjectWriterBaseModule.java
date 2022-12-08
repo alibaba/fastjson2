@@ -1049,6 +1049,16 @@ public class ObjectWriterBaseModule
 
                 objectType = rawType;
             }
+
+            if (Map.class.isAssignableFrom(objectClass)) {
+                return ObjectWriterImplMap.of(objectType, objectClass);
+            }
+
+            if (objectClass == Optional.class) {
+                if (actualTypeArguments.length == 1) {
+                    return new ObjectWriterImplOptional(actualTypeArguments[0], null, null);
+                }
+            }
         }
 
         if (objectType == LinkedList.class) {
