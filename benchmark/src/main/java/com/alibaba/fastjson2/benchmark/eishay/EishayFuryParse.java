@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.benchmark.eishay;
 
 import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import org.apache.commons.io.IOUtils;
@@ -25,7 +24,6 @@ public class EishayFuryParse {
             JSONReader.Feature.FieldBased,
             JSONReader.Feature.SupportArrayToBean
     };
-    static JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider(), features);
 
     static byte[] fastjson2JSONBBytes;
     static byte[] furyBytes;
@@ -57,7 +55,7 @@ public class EishayFuryParse {
     @Benchmark
     public void fastjson2JSONB(Blackhole bh) {
         bh.consume(
-                JSONB.parseObject(fastjson2JSONBBytes, Object.class, context)
+                JSONB.parseObject(fastjson2JSONBBytes, Object.class, features)
         );
     }
 

@@ -4,38 +4,39 @@ import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
 public class EishayFuryParseTest {
     static final EishayFuryParse benchmark = new EishayFuryParse();
-
-    public static void fury() throws Exception {
-        System.out.println("EishayFuryParse-fury size " + benchmark.furyBytes.length); // 410
-        System.out.println();
-
-        for (int j = 0; j < 10; j++) {
-            long start = System.currentTimeMillis();
-            for (int i = 0; i < 1000 * 1000; ++i) {
-                benchmark.fury(BH);
-            }
-            long millis = System.currentTimeMillis() - start;
-            System.out.println("EishayFuryParseArray-fury millis : " + millis);
-            // zulu8.58.0.13 : 302
-            // zulu11.52.13 : 346
-            // zulu17.38.21 :
-        }
-    }
+    static final int COUNT = 10_000_000;
 
     public static void fastjson2JSONB() throws Exception {
         System.out.println("EishayFuryParse-fastjson2_jsonb size " + benchmark.fastjson2JSONBBytes.length); // 282
         System.out.println();
 
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
-            for (int i = 0; i < 1000 * 1000; ++i) {
+            for (int i = 0; i < COUNT; ++i) {
                 benchmark.fastjson2JSONB(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("EishayFuryParseArray-fastjson2_jsonb millis : " + millis);
-            // zulu8.62.0.19 : 264 253
-            // zulu11.52.13 : 241 234
-            // zulu17.38.21 : 235
+            System.out.println("EishayFuryParse-fastjson2_jsonb millis : " + millis);
+            // zulu8.62.0.19 : 2513
+            // zulu11.52.13 : 2352
+            // zulu17.38.21 : 2336
+        }
+    }
+
+    public static void fury() throws Exception {
+        System.out.println("EishayFuryParse-fury size " + benchmark.furyBytes.length); // 410
+        System.out.println();
+
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < COUNT; ++i) {
+                benchmark.fury(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("EishayFuryParse-fury millis : " + millis);
+            // zulu8.62.0.19 : 2642
+            // zulu11.52.13 : 2862
+            // zulu17.38.21 : 2958
         }
     }
 
