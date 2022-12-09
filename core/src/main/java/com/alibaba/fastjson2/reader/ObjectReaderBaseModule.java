@@ -26,8 +26,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
-import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonFormat;
-import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonIgnore;
+import static com.alibaba.fastjson2.util.BeanUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectReaderBaseModule
@@ -292,29 +291,6 @@ public class ObjectReaderBaseModule
             }
         }
 
-        private void processJacksonJsonTypeName(BeanInfo beanInfo, Annotation annotation) {
-            Class<? extends Annotation> annotationClass = annotation.getClass();
-            BeanUtils.annotationMethods(annotationClass, m -> {
-                String name = m.getName();
-                try {
-                    Object result = m.invoke(annotation);
-                    switch (name) {
-                        case "value": {
-                            String value = (String) result;
-                            if (!value.isEmpty()) {
-                                beanInfo.typeName = value;
-                            }
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                } catch (Throwable ignored) {
-                    // ignored
-                }
-            });
-        }
-
         private void processJacksonJsonSubTypes(BeanInfo beanInfo, Annotation annotation) {
             Class<? extends Annotation> annotationClass = annotation.getClass();
             BeanUtils.annotationMethods(annotationClass, m -> {
@@ -332,32 +308,6 @@ public class ObjectReaderBaseModule
                                     processJacksonJsonSubTypesType(beanInfo, i, subTypeAnn);
                                 }
                             }
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                } catch (Throwable ignored) {
-                    // ignored
-                }
-            });
-        }
-
-        private void processJacksonJsonSubTypesType(BeanInfo beanInfo, int index, Annotation annotation) {
-            Class<? extends Annotation> annotationClass = annotation.getClass();
-            BeanUtils.annotationMethods(annotationClass, m -> {
-                String name = m.getName();
-                try {
-                    Object result = m.invoke(annotation);
-                    switch (name) {
-                        case "value": {
-                            Class value = (Class) result;
-                            beanInfo.seeAlso[index] = value;
-                            break;
-                        }
-                        case "name": {
-                            String value = (String) result;
-                            beanInfo.seeAlsoNames[index] = value;
                             break;
                         }
                         default:
@@ -596,11 +546,13 @@ public class ObjectReaderBaseModule
         }
 
         @Override
-        public void getFieldInfo(FieldInfo fieldInfo,
-                                 Class objectClass,
-                                 Constructor constructor,
-                                 int paramIndex,
-                                 Parameter parameter) {
+        public void getFieldInfo(
+                FieldInfo fieldInfo,
+                Class objectClass,
+                Constructor constructor,
+                int paramIndex,
+                Parameter parameter
+        ) {
             Class mixInSource = provider.mixInCache.get(objectClass);
             if (mixInSource != null && mixInSource != objectClass) {
                 Constructor mixInConstructor = null;
@@ -741,9 +693,6 @@ public class ObjectReaderBaseModule
                             processJacksonJsonAlias(fieldInfo, annotation);
                         }
                         break;
-                    case "com.taobao.api.internal.mapping.ApiField":
-                        processTaobaoApiField(fieldInfo, annotation);
-                        break;
                     default:
                         break;
                 }
@@ -852,9 +801,6 @@ public class ObjectReaderBaseModule
                         if (useJacksonAnnotation) {
                             processJacksonJsonAlias(fieldInfo, annotation);
                         }
-                        break;
-                    case "com.taobao.api.internal.mapping.ApiField":
-                        processTaobaoApiField(fieldInfo, annotation);
                         break;
                     default:
                         break;
@@ -972,29 +918,6 @@ public class ObjectReaderBaseModule
                             String[] values = (String[]) result;
                             if (values.length != 0) {
                                 fieldInfo.alternateNames = values;
-                            }
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                } catch (Throwable ignored) {
-                    // ignored
-                }
-            });
-        }
-
-        private void processTaobaoApiField(FieldInfo fieldInfo, Annotation annotation) {
-            Class<? extends Annotation> annotationClass = annotation.getClass();
-            BeanUtils.annotationMethods(annotationClass, m -> {
-                String name = m.getName();
-                try {
-                    Object result = m.invoke(annotation);
-                    switch (name) {
-                        case "value": {
-                            String value = (String) result;
-                            if (!value.isEmpty()) {
-                                // fieldInfo.alternateNames = new String[]{value};
                             }
                             break;
                         }

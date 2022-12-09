@@ -2324,4 +2324,53 @@ public abstract class BeanUtils {
             }
         });
     }
+
+    public static void processJacksonJsonTypeName(BeanInfo beanInfo, Annotation annotation) {
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                switch (name) {
+                    case "value": {
+                        String value = (String) result;
+                        if (!value.isEmpty()) {
+                            beanInfo.typeName = value;
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
+    }
+
+    public static void processJacksonJsonSubTypesType(BeanInfo beanInfo, int index, Annotation annotation) {
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                switch (name) {
+                    case "value": {
+                        Class value = (Class) result;
+                        beanInfo.seeAlso[index] = value;
+                        break;
+                    }
+                    case "name": {
+                        String value = (String) result;
+                        beanInfo.seeAlsoNames[index] = value;
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
+    }
 }
