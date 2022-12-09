@@ -235,7 +235,13 @@ public class ObjectWriterCreatorASM
 
                         FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                         if (fieldWriter != null) {
-                            fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
+                            FieldWriter origin = fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
+                            if (origin != null) {
+                                int cmp = origin.compareTo(fieldWriter);
+                                if (cmp > 0) {
+                                    fieldWriterMap.put(fieldWriter.fieldName, fieldWriter);
+                                }
+                            }
                         }
                     });
                 }
@@ -366,7 +372,10 @@ public class ObjectWriterCreatorASM
                     array.add(
                             JSONObject.of(
                                     "name", fieldWriter.fieldName,
-                                    "type", fieldWriter.fieldClass
+                                    "type", fieldWriter.fieldClass,
+                                    "ordinal", fieldWriter.ordinal,
+                                    "field", fieldWriter.field,
+                                    "method", fieldWriter.method
                             )
                     );
                 }
