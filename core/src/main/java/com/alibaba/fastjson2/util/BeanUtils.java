@@ -2278,4 +2278,50 @@ public abstract class BeanUtils {
             ignored.printStackTrace();
         }
     }
+
+    public static void processJacksonJsonFormat(FieldInfo fieldInfo, Annotation annotation) {
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                switch (name) {
+                    case "pattern": {
+                        String pattern = (String) result;
+                        if (pattern.length() != 0) {
+                            fieldInfo.format = pattern;
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
+    }
+
+    public static void processJacksonJsonFormat(BeanInfo beanInfo, Annotation annotation) {
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                switch (name) {
+                    case "pattern": {
+                        String pattern = (String) result;
+                        if (pattern.length() != 0) {
+                            beanInfo.format = pattern;
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
+    }
 }
