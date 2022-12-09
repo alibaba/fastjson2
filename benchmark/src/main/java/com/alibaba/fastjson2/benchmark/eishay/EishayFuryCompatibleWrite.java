@@ -30,7 +30,6 @@ public class EishayFuryCompatibleWrite {
     static JSONWriter.Context context = new JSONWriter.Context(
             JSONFactory.getDefaultObjectWriterProvider(), features
     );
-
 //
 //    static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
 //            .withLanguage(io.fury.Language.JAVA)
