@@ -301,6 +301,8 @@ public class ObjectWriterCreator {
             return annotatedObjectWriter;
         }
 
+        boolean record = BeanUtils.isRecord(objectClass);
+
         long beanFeatures = beanInfo.writerFeatures;
         if (beanInfo.seeAlso != null) {
             beanFeatures &= ~JSONWriter.Feature.WriteClassName.mask;
@@ -309,7 +311,7 @@ public class ObjectWriterCreator {
         long writerFieldFeatures = features | beanFeatures;
         boolean fieldBased = (writerFieldFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
 
-        if (fieldBased && (objectClass.isInterface() || objectClass.isInterface())) {
+        if (fieldBased && (record || objectClass.isInterface() || objectClass.isInterface())) {
             fieldBased = false;
         }
 
@@ -339,14 +341,16 @@ public class ObjectWriterCreator {
             if (!fieldWritersCreated) {
                 Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
 
-                BeanUtils.declaredFields(objectClass, field -> {
-                    fieldInfo.init();
-                    fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
-                    FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
-                    if (fieldWriter != null) {
-                        fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
-                    }
-                });
+                if (!record) {
+                    BeanUtils.declaredFields(objectClass, field -> {
+                        fieldInfo.init();
+                        fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
+                        FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
+                        if (fieldWriter != null) {
+                            fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
+                        }
+                    });
+                }
 
                 BeanUtils.getters(objectClass, method -> {
                     fieldInfo.init();
