@@ -20,7 +20,6 @@ import java.util.*;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONObject.NONE_DIRECT_FEATURES;
-import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
 public class JSONArray
         extends ArrayList<Object> {
@@ -1449,5 +1448,17 @@ public class JSONArray
      */
     public static JSONArray parse(String text, JSONReader.Feature... features) {
         return JSON.parseArray(text, features);
+    }
+
+    /**
+     *
+     * Parse JSON {@link String} into {@link List}
+     *
+     * @param input the JSON {@link String} to be parsed
+     * @param type specify the {@link Class} to be converted
+     * @since 2.0.21
+     */
+    static <T> List<T> parseArray(String input, Class<T> type) {
+        return JSON.parseArray(input, type);
     }
 }

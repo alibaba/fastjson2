@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
@@ -352,7 +354,25 @@ public class ObjectWriterCreatorASM
 
         handleIgnores(beanInfo, fieldWriters);
         if (beanInfo.alphabetic) {
-            Collections.sort(fieldWriters);
+            try {
+                Collections.sort(fieldWriters);
+            } catch (Exception e) {
+                StringBuilder msg = new StringBuilder("fieldWriters sort error, objectClass ")
+                        .append(objectClass.getName())
+                        .append(", fields ");
+
+                JSONArray array = new JSONArray();
+                for (FieldWriter fieldWriter : fieldWriters) {
+                    array.add(
+                            JSONObject.of(
+                                    "name", fieldWriter.fieldName,
+                                    "type", fieldWriter.fieldClass
+                            )
+                    );
+                }
+                msg.append(array);
+                throw new JSONException(msg.toString(), e);
+            }
         }
 
         boolean match = true;
