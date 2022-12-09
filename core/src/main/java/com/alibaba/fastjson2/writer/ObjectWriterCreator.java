@@ -218,7 +218,12 @@ public class ObjectWriterCreator {
             }
         }
 
-        return createFieldWriter(provider, fieldName, fieldInfo.ordinal, fieldInfo.features, fieldInfo.format, fieldInfo.label, field, writeUsingWriter);
+        String format = fieldInfo.format;
+        if (format == null && beanInfo.format != null) {
+            format = beanInfo.format;
+        }
+
+        return createFieldWriter(provider, fieldName, fieldInfo.ordinal, fieldInfo.features, format, fieldInfo.label, field, writeUsingWriter);
     }
 
     protected ObjectWriter getAnnotatedObjectWriter(ObjectWriterProvider provider,

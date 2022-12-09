@@ -249,6 +249,8 @@ public class ObjectWriterCreatorASM
                 BeanUtils.getters(objectClass, method -> {
                     fieldInfo.init();
                     fieldInfo.features |= writerFieldFeatures;
+                    fieldInfo.format = beanInfo.format;
+
                     provider.getFieldInfo(beanInfo, fieldInfo, objectClass, method);
                     if (fieldInfo.ignore) {
                         return;

@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.*;
 
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
+import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonFormat;
 import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonIgnore;
 
 public class ObjectWriterBaseModule
@@ -109,6 +110,12 @@ public class ObjectWriterBaseModule
                     case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonPropertyOrder":
                         if (useJacksonAnnotation) {
                             processJacksonJsonPropertyOrder(beanInfo, annotation);
+                        }
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonFormat":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonFormat":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonFormat(beanInfo, annotation);
                         }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonTypeInfo":
@@ -341,6 +348,12 @@ public class ObjectWriterBaseModule
                     case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
                         if (useJacksonAnnotation) {
                             processJacksonJsonProperty(fieldInfo, annotation);
+                        }
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonFormat":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonFormat":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonFormat(fieldInfo, annotation);
                         }
                         break;
                     case "com.alibaba.fastjson2.adapter.jackson.databind.annotation.JsonSerialize":
@@ -870,6 +883,12 @@ public class ObjectWriterBaseModule
                         }
                         break;
                     }
+                    case "com.fasterxml.jackson.annotation.JsonFormat":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonFormat":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonFormat(fieldInfo, annotation);
+                        }
+                        break;
                     case "com.fasterxml.jackson.annotation.JsonValue":
                     case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonValue":
                         if (useJacksonAnnotation) {

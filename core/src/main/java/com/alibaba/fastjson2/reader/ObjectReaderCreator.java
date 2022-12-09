@@ -1297,6 +1297,7 @@ public class ObjectReaderCreator {
 
         BeanInfo finalBeanInfo = beanInfo;
         final long beanFeatures = beanInfo.readerFeatures;
+        final String beanFormat = beanInfo.format;
         final FieldInfo fieldInfo = new FieldInfo();
         final String[] orders = beanInfo.orders;
         if (fieldBased) {
@@ -1304,6 +1305,8 @@ public class ObjectReaderCreator {
                 fieldInfo.init();
                 fieldInfo.features |= JSONReader.Feature.FieldBased.mask;
                 fieldInfo.features |= beanFeatures;
+                fieldInfo.format = beanFormat;
+
                 createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, provider);
             });
         } else {
@@ -1311,6 +1314,7 @@ public class ObjectReaderCreator {
                 fieldInfo.init();
                 fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
                 fieldInfo.features |= beanFeatures;
+                fieldInfo.format = beanFormat;
 
                 createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, provider);
                 if (fieldInfo.required) {
@@ -1325,6 +1329,7 @@ public class ObjectReaderCreator {
             BeanUtils.setters(objectClass, method -> {
                 fieldInfo.init();
                 fieldInfo.features |= beanFeatures;
+                fieldInfo.format = beanFormat;
                 createFieldReader(objectClass, objectType, namingStrategy, orders, fieldInfo, method, fieldReaders, provider);
             });
 
