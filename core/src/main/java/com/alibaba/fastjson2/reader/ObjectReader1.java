@@ -210,7 +210,7 @@ public class ObjectReader1<T>
             return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
-        if (jsonReader.nextIfNull() || jsonReader.nextIfEmptyString()) {
+        if (jsonReader.nextIfNullOrEmptyString()) {
             return null;
         }
 

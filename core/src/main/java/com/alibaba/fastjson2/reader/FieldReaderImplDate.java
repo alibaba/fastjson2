@@ -264,7 +264,7 @@ abstract class FieldReaderImplDate<T>
                         }
                         fieldValue = new java.util.Date(millis);
                     }
-                } else if (jsonReader.nextIfEmptyString()) {
+                } else if (jsonReader.nextIfNullOrEmptyString()) {
                     fieldValue = null;
                 } else {
                     long millis = jsonReader.readMillisFromString();

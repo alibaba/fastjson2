@@ -344,7 +344,7 @@ public abstract class JSONReader
         return true;
     }
 
-    public abstract boolean nextIfEmptyString();
+    public abstract boolean nextIfNullOrEmptyString();
 
     public boolean nextIfObjectEnd() {
         if (this.ch != '}') {

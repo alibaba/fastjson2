@@ -110,8 +110,12 @@ public final class JSONReaderStr
     }
 
     @Override
-    public boolean nextIfEmptyString() {
+    public boolean nextIfNullOrEmptyString() {
         final char first = this.ch;
+        if (first == 'n' && offset + 2 < end && str.charAt(offset) == 'u') {
+            this.readNull();
+            return true;
+        }
         if ((first != '"' && first != '\'') || offset >= end || str.charAt(offset) != first) {
             return false;
         }

@@ -120,7 +120,7 @@ final class ObjectReaderException<T>
     public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         boolean objectStart = jsonReader.nextIfObjectStart();
         if (!objectStart) {
-            if (jsonReader.nextIfEmptyString()) {
+            if (jsonReader.nextIfNullOrEmptyString()) {
                 return null;
             }
         }

@@ -159,17 +159,9 @@ public abstract class ObjectReaderBean<T>
     }
 
     public void readObject(JSONReader jsonReader, Object object, long features) {
-        if (jsonReader.isJSONB()) {
-//            return readJSONBObject(jsonReader, features);
-        }
-
         if (jsonReader.nextIfNull()) {
             jsonReader.nextIfMatch(',');
             return;
-        }
-
-        if (jsonReader.isArray() && jsonReader.isSupportBeanArray(getFeatures() | features)) {
-//            return readArrayMappingObject(jsonReader);
         }
 
         boolean objectStart = jsonReader.nextIfMatch('{');
@@ -210,7 +202,7 @@ public abstract class ObjectReaderBean<T>
             return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
-        if (jsonReader.nextIfNull()) {
+        if (jsonReader.nextIfNullOrEmptyString()) {
             jsonReader.nextIfMatch(',');
             return null;
         }

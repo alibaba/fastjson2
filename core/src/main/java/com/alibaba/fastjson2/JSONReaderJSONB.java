@@ -190,7 +190,12 @@ class JSONReaderJSONB
     }
 
     @Override
-    public final boolean nextIfEmptyString() {
+    public final boolean nextIfNullOrEmptyString() {
+        if (bytes[offset] == BC_NULL) {
+            offset++;
+            return true;
+        }
+
         if (bytes[offset] != BC_STR_ASCII_FIX_MIN) {
             return false;
         }

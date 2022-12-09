@@ -1554,7 +1554,7 @@ public class ObjectReaderCreatorASM
         mw.visitJumpInsn(Opcodes.IFNE, notNull_);
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfNull", "()Z", false);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfNullOrEmptyString", "()Z", false);
         mw.visitJumpInsn(Opcodes.IFEQ, notNull_);
 
         mw.visitInsn(Opcodes.ACONST_NULL);
@@ -2151,10 +2151,10 @@ public class ObjectReaderCreatorASM
                         mw.visitJumpInsn(Opcodes.GOTO, loadList_);
                     } else if (itemType instanceof Class) {
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfEmptyString", "()Z", false);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfNullOrEmptyString", "()Z", false);
                         mw.visitJumpInsn(Opcodes.IFNE, loadNull_);
 
-                        // nextIfEmptyString
+                        // nextIfNullOrEmptyString
                         mw.visitTypeInsn(Opcodes.NEW, LIST_TYPE);
                         mw.visitInsn(Opcodes.DUP);
                         if (initCapacity) {
