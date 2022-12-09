@@ -231,10 +231,18 @@ public abstract class FieldWriter<T>
             return 1;
         }
 
+        String thisName = this.fieldName;
+        String otherName = other.fieldName;
+        int nameCompare = thisName.compareTo(otherName);
+
+        if (nameCompare != 0) {
+            return nameCompare;
+        }
+
         Member thisMember = this.field != null ? this.field : this.method;
         Member otherMember = other.field != null ? other.field : other.method;
 
-        if (thisMember != null && otherMember != null && thisMember.getClass() != otherMember.getClass()) {
+        if (thisMember != null && otherMember != null) {
             Class otherDeclaringClass = otherMember.getDeclaringClass();
             Class thisDeclaringClass = thisMember.getDeclaringClass();
             if (thisDeclaringClass != otherDeclaringClass && thisDeclaringClass != null && otherDeclaringClass != null) {
@@ -244,14 +252,6 @@ public abstract class FieldWriter<T>
                     return -1;
                 }
             }
-        }
-
-        String thisName = this.fieldName;
-        String otherName = other.fieldName;
-        int nameCompare = thisName.compareTo(otherName);
-
-        if (nameCompare != 0) {
-            return nameCompare;
         }
 
         if (thisMember instanceof Field && otherMember instanceof Method) {
@@ -272,10 +272,10 @@ public abstract class FieldWriter<T>
             }
         }
 
-        if (thisFieldClass == boolean.class) {
+        if (thisFieldClass == boolean.class && otherFieldClass != boolean.class) {
             return 1;
         }
-        if (otherFieldClass == boolean.class) {
+        if (otherFieldClass == boolean.class && thisFieldClass == boolean.class) {
             return -1;
         }
 

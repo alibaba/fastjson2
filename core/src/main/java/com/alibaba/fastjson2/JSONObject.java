@@ -1764,7 +1764,7 @@ public class JSONObject
      * @param value the value of the element
      */
     public static JSONObject of(String key, Object value) {
-        JSONObject object = new JSONObject(2);
+        JSONObject object = new JSONObject(1);
         object.put(key, value);
         return object;
     }
@@ -1783,7 +1783,7 @@ public class JSONObject
      * @since 2.0.2
      */
     public static JSONObject of(String k1, Object v1, String k2, Object v2) {
-        JSONObject object = new JSONObject(3);
+        JSONObject object = new JSONObject(2);
         object.put(k1, v1);
         object.put(k2, v2);
         return object;
@@ -1805,7 +1805,7 @@ public class JSONObject
      * @since 2.0.2
      */
     public static JSONObject of(String k1, Object v1, String k2, Object v2, String k3, Object v3) {
-        JSONObject object = new JSONObject(5);
+        JSONObject object = new JSONObject(3);
         object.put(k1, v1);
         object.put(k2, v2);
         object.put(k3, v3);
@@ -1816,7 +1816,7 @@ public class JSONObject
      * Pack three key-value pairs as {@link JSONObject}
      *
      * <pre>
-     * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2", "key3", "value3");
+     * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2", "key3", "value3", "key4", "value4");
      * </pre>
      *
      * @param k1 first key
@@ -1825,23 +1825,65 @@ public class JSONObject
      * @param v2 second value
      * @param k3 third key
      * @param v3 third value
-     * @param k4 third key
-     * @param v4 third value
+     * @param k4 foud key
+     * @param v4 foud value
      * @since 2.0.8
      */
-    public static JSONObject of(String k1,
-                                Object v1,
-                                String k2,
-                                Object v2,
-                                String k3,
-                                Object v3,
-                                String k4,
-                                Object v4) {
+    public static JSONObject of(
+            String k1,
+            Object v1,
+            String k2,
+            Object v2,
+            String k3,
+            Object v3,
+            String k4,
+            Object v4) {
+        JSONObject object = new JSONObject(4);
+        object.put(k1, v1);
+        object.put(k2, v2);
+        object.put(k3, v3);
+        object.put(k4, v4);
+        return object;
+    }
+
+    /**
+     * Pack three key-value pairs as {@link JSONObject}
+     *
+     * <pre>
+     * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2", "key3", "value3", "key4", "value4", "key5", "value5");
+     * </pre>
+     *
+     * @param k1 first key
+     * @param v1 first value
+     * @param k2 second key
+     * @param v2 second value
+     * @param k3 third key
+     * @param v3 third value
+     * @param k4 foud key
+     * @param v4 foud value
+     * @param k5 five key
+     * @param v5 five value
+     * @since 2.0.21
+     */
+    public static JSONObject of(
+            String k1,
+            Object v1,
+            String k2,
+            Object v2,
+            String k3,
+            Object v3,
+            String k4,
+            Object v4,
+            String k5,
+            Object v5
+
+    ) {
         JSONObject object = new JSONObject(5);
         object.put(k1, v1);
         object.put(k2, v2);
         object.put(k3, v3);
         object.put(k4, v4);
+        object.put(k5, v5);
         return object;
     }
 
