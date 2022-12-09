@@ -9,7 +9,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class Issues1001 {
+public class Issue1001 {
     @Test
     public void TestFastjson2() {
         User user = new User();
