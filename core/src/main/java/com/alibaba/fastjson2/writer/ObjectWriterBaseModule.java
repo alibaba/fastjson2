@@ -27,8 +27,7 @@ import java.util.concurrent.atomic.*;
 
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
-import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonFormat;
-import static com.alibaba.fastjson2.util.BeanUtils.processJacksonJsonIgnore;
+import static com.alibaba.fastjson2.util.BeanUtils.*;
 
 public class ObjectWriterBaseModule
         implements ObjectWriterModule {
@@ -404,56 +403,6 @@ public class ObjectWriterBaseModule
                                     Annotation item = value[i];
                                     processJacksonJsonSubTypesType(beanInfo, i, item);
                                 }
-                            }
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                } catch (Throwable ignored) {
-                    // ignored
-                }
-            });
-        }
-
-        private void processJacksonJsonSubTypesType(BeanInfo beanInfo, int index, Annotation annotation) {
-            Class<? extends Annotation> annotationClass = annotation.getClass();
-            BeanUtils.annotationMethods(annotationClass, m -> {
-                String name = m.getName();
-                try {
-                    Object result = m.invoke(annotation);
-                    switch (name) {
-                        case "value": {
-                            Class value = (Class) result;
-                            beanInfo.seeAlso[index] = value;
-                            break;
-                        }
-                        case "name": {
-                            String typeName = (String) result;
-                            if (typeName.length() != 0) {
-                                beanInfo.seeAlsoNames[index] = typeName;
-                            }
-                        }
-                        default:
-                            break;
-                    }
-                } catch (Throwable ignored) {
-                    // ignored
-                }
-            });
-        }
-
-        private void processJacksonJsonTypeName(BeanInfo beanInfo, Annotation annotation) {
-            Class<? extends Annotation> annotationClass = annotation.getClass();
-            BeanUtils.annotationMethods(annotationClass, m -> {
-                String name = m.getName();
-                try {
-                    Object result = m.invoke(annotation);
-                    switch (name) {
-                        case "value": {
-                            String value = (String) result;
-                            if (!value.isEmpty()) {
-                                beanInfo.typeName = value;
                             }
                             break;
                         }
