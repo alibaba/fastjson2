@@ -865,8 +865,14 @@ public class ObjectReaderCreator {
         }
 
         if (creatorConstructor != null && creatorConstructor.getParameterCount() != 0 && beanInfo.seeAlso == null) {
+            boolean record = BeanUtils.isRecord(objectClass);
+
             creatorConstructor.setAccessible(true);
             String[] parameterNames = beanInfo.createParameterNames;
+            if (record && parameterNames == null) {
+                parameterNames = BeanUtils.getRecordFieldNames(objectClass);
+            }
+
             if (parameterNames == null || parameterNames.length == 0) {
                 parameterNames = ASMUtils.lookupParameterNames(creatorConstructor);
             }
@@ -1291,6 +1297,7 @@ public class ObjectReaderCreator {
             }
         }
 
+        boolean recoard = BeanUtils.isRecord(objectClass);
         final String namingStrategy = beanInfo.namingStrategy;
 
         Map<String, FieldReader> fieldReaders = new LinkedHashMap<>();
@@ -1310,21 +1317,23 @@ public class ObjectReaderCreator {
                 createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, provider);
             });
         } else {
-            BeanUtils.declaredFields(objectClass, field -> {
-                fieldInfo.init();
-                fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
-                fieldInfo.features |= beanFeatures;
-                fieldInfo.format = beanFormat;
+            if (!recoard) {
+                BeanUtils.declaredFields(objectClass, field -> {
+                    fieldInfo.init();
+                    fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
+                    fieldInfo.features |= beanFeatures;
+                    fieldInfo.format = beanFormat;
 
-                createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, provider);
-                if (fieldInfo.required) {
-                    String fieldName = fieldInfo.fieldName;
-                    if (fieldName == null || fieldName.isEmpty()) {
-                        fieldName = field.getName();
+                    createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, provider);
+                    if (fieldInfo.required) {
+                        String fieldName = fieldInfo.fieldName;
+                        if (fieldName == null || fieldName.isEmpty()) {
+                            fieldName = field.getName();
+                        }
+                        finalBeanInfo.required(fieldName);
                     }
-                    finalBeanInfo.required(fieldName);
-                }
-            });
+                });
+            }
 
             BeanUtils.setters(objectClass, method -> {
                 fieldInfo.init();
