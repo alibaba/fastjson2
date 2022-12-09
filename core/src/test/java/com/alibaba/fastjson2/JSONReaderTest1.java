@@ -293,58 +293,58 @@ public class JSONReaderTest1 {
     @Test
     public void testNextIfEmptyString() {
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\'\',1")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\'\' , 1")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders("\'\' , 中")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals('中', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders("\'\' , ®")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals('®', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\"")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertFalse(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\",")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\" ,")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\" , ")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\"  ")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertFalse(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"")) {
-            assertFalse(jsonReader.nextIfEmptyString());
+            assertFalse(jsonReader.nextIfNullOrEmptyString());
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"a\"")) {
-            assertFalse(jsonReader.nextIfEmptyString());
+            assertFalse(jsonReader.nextIfNullOrEmptyString());
         }
     }
 

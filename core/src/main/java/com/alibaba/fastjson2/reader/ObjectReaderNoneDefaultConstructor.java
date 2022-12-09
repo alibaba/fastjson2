@@ -221,7 +221,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
         boolean objectStart = jsonReader.nextIfObjectStart();
         if (!objectStart && !jsonReader.isTypeRedirect()) {
-            if (jsonReader.nextIfEmptyString()) {
+            if (jsonReader.nextIfNullOrEmptyString()) {
                 return null;
             }
         }

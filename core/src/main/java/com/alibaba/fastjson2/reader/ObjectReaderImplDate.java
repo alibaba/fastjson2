@@ -80,7 +80,7 @@ public class ObjectReaderImplDate
             }
         }
 
-        if (jsonReader.nextIfEmptyString()) {
+        if (jsonReader.nextIfNullOrEmptyString()) {
             return null;
         }
 

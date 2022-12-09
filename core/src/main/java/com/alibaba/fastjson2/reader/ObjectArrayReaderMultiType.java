@@ -36,7 +36,7 @@ final class ObjectArrayReaderMultiType
             return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
-        if (jsonReader.readIfNull() || jsonReader.nextIfEmptyString()) {
+        if (jsonReader.nextIfNullOrEmptyString()) {
             return null;
         }
 

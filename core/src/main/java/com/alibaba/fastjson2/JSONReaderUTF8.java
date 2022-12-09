@@ -7159,8 +7159,13 @@ class JSONReaderUTF8
     }
 
     @Override
-    public boolean nextIfEmptyString() {
+    public boolean nextIfNullOrEmptyString() {
         final char first = this.ch;
+        if (first == 'n' && offset + 2 < end && bytes[offset] == 'u') {
+            this.readNull();
+            return true;
+        }
+
         if ((first != '"' && first != '\'') || offset >= end || this.bytes[offset] != first) {
             return false;
         }

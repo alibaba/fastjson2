@@ -220,8 +220,8 @@ public class JSONBTest5 {
                 JSONReader.ofJSONB(
                             JSONB.toBytes("")
                         )
-                        .nextIfEmptyString()
+                        .nextIfNullOrEmptyString()
         );
-        assertFalse(JSONReader.ofJSONB(JSONB.toBytes("1")).nextIfEmptyString());
+        assertFalse(JSONReader.ofJSONB(JSONB.toBytes("1")).nextIfNullOrEmptyString());
     }
 }
