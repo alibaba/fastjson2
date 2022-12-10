@@ -27,12 +27,12 @@ public class EishayFuryParse {
 
     static byte[] fastjson2JSONBBytes;
     static byte[] furyBytes;
-//
-//    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
-//            .withLanguage(io.fury.Language.JAVA)
-//            .withReferenceTracking(true)
-//            .disableSecureMode()
-//            .buildThreadSafeFury();
+
+    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
+            .withLanguage(io.fury.Language.JAVA)
+            .withReferenceTracking(true)
+            .disableSecureMode()
+            .buildThreadSafeFury();
 
     static {
         try {
@@ -46,7 +46,7 @@ public class EishayFuryParse {
                     EishayFuryWrite.features
             );
 
-//            furyBytes = fury.serialize(mc);
+            furyBytes = fury.serialize(mc);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -59,9 +59,9 @@ public class EishayFuryParse {
         );
     }
 
-//    @Benchmark
+    @Benchmark
     public void fury(Blackhole bh) {
-//        bh.consume(fury.deserialize(furyBytes));
+        bh.consume(fury.deserialize(furyBytes));
     }
 
     public static void main(String[] args) throws Exception {

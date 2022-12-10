@@ -31,13 +31,13 @@ public class EishayFuryCompatibleParse {
 
     static byte[] fastjson2JSONBBytes;
     static byte[] furyCompatibleBytes;
-//
-//    static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
-//            .withLanguage(io.fury.Language.JAVA)
-//            .withReferenceTracking(true)
-//            .disableSecureMode()
-//            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
-//            .buildThreadSafeFury();
+
+    static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
+            .withLanguage(io.fury.Language.JAVA)
+            .withReferenceTracking(true)
+            .disableSecureMode()
+            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
+            .buildThreadSafeFury();
 
     static {
         try {
@@ -48,7 +48,7 @@ public class EishayFuryCompatibleParse {
 
             fastjson2JSONBBytes = JSONB.toBytes(mc, EishayFuryCompatibleWrite.features);
 
-//            furyCompatibleBytes = furyCompatible.serialize(mc);
+            furyCompatibleBytes = furyCompatible.serialize(mc);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -61,9 +61,9 @@ public class EishayFuryCompatibleParse {
         );
     }
 
-//    @Benchmark
+    @Benchmark
     public void fury(Blackhole bh) {
-//        bh.consume(furyCompatible.deserialize(furyCompatibleBytes));
+        bh.consume(furyCompatible.deserialize(furyCompatibleBytes));
     }
 
     public static void main(String[] args) throws Exception {

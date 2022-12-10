@@ -23,11 +23,11 @@ public class EishayFuryWriteNoneCache {
     static final Object[] objects = new Object[classes.length];
     static int index;
 
-//    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
-//            .withLanguage(io.fury.Language.JAVA)
-//            .withReferenceTracking(true)
-//            .disableSecureMode()
-//            .buildThreadSafeFury();
+    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
+            .withLanguage(io.fury.Language.JAVA)
+            .withReferenceTracking(true)
+            .disableSecureMode()
+            .buildThreadSafeFury();
 
     static JSONWriter.Feature[] features = {
             JSONWriter.Feature.WriteClassName,
@@ -68,11 +68,11 @@ public class EishayFuryWriteNoneCache {
         );
     }
 
-//    @Benchmark
+    @Benchmark
     public void fury(Blackhole bh) {
-//        Object object = objects[(index++) % objects.length];
-//        byte[] bytes = fury.serialize(object);
-//        bh.consume(bytes);
+        Object object = objects[(index++) % objects.length];
+        byte[] bytes = fury.serialize(object);
+        bh.consume(bytes);
     }
 
     public static void main(String[] args) throws RunnerException {
@@ -80,7 +80,7 @@ public class EishayFuryWriteNoneCache {
                 .include(EishayFuryWriteNoneCache.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
-                .warmupIterations(3)
+                .warmupIterations(1)
                 .forks(1)
                 .build();
         new Runner(options).run();

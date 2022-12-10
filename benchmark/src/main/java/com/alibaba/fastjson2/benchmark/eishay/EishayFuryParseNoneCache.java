@@ -35,13 +35,13 @@ public class EishayFuryParseNoneCache {
     static byte[][] fastjson2JSONBBytes = new byte[COUNT][];
     static byte[][] furyBytes = new byte[COUNT][];
     static int index;
-//
-//    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
-//            .withLanguage(io.fury.Language.JAVA)
-//            .withReferenceTracking(true)
-//            .disableSecureMode()
-//            .withClassLoader(classLoader)
-//            .buildThreadSafeFury();
+
+    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
+            .withLanguage(io.fury.Language.JAVA)
+            .withReferenceTracking(true)
+            .disableSecureMode()
+            .withClassLoader(classLoader)
+            .buildThreadSafeFury();
 
     static {
         String classZipDataFile = "data/EishayFuryParseNoneCache_classes.bin.zip";
@@ -110,11 +110,11 @@ public class EishayFuryParseNoneCache {
         );
     }
 
-    //    @Benchmark
+    @Benchmark
     public void fury(Blackhole bh) {
         Thread.currentThread().setContextClassLoader(classLoader);
         byte[] bytes = furyBytes[index++];
-//        bh.consume(fury.deserialize(bytes));
+        bh.consume(fury.deserialize(bytes));
     }
 
     public static void main(String[] args) throws Exception {

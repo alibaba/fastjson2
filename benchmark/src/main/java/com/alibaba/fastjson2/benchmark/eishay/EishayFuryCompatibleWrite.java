@@ -30,13 +30,13 @@ public class EishayFuryCompatibleWrite {
     static JSONWriter.Context context = new JSONWriter.Context(
             JSONFactory.getDefaultObjectWriterProvider(), features
     );
-//
-//    static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
-//            .withLanguage(io.fury.Language.JAVA)
-//            .withReferenceTracking(true)
-//            .disableSecureMode()
-//            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
-//            .buildThreadSafeFury();
+
+    static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
+            .withLanguage(io.fury.Language.JAVA)
+            .withReferenceTracking(true)
+            .disableSecureMode()
+            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
+            .buildThreadSafeFury();
 
     static {
         try {
@@ -56,10 +56,10 @@ public class EishayFuryCompatibleWrite {
         );
     }
 
-//    @Benchmark
+    @Benchmark
     public void fury(Blackhole bh) {
-//        byte[] bytes = furyCompatible.serialize(mc);
-//        bh.consume(bytes);
+        byte[] bytes = furyCompatible.serialize(mc);
+        bh.consume(bytes);
     }
 
     public static void main(String[] args) throws RunnerException {

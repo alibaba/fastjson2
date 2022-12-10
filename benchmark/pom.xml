@@ -74,13 +74,11 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
-        <!--
         <dependency>
             <groupId>io.fury</groupId>
             <artifactId>fury-core</artifactId>
             <version>0.9.5</version>
         </dependency>
-        -->
         <dependency>
             <groupId>io.github.wycst</groupId>
             <artifactId>wast</artifactId>
