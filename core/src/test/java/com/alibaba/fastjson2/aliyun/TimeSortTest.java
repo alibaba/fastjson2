@@ -86,26 +86,6 @@ public class TimeSortTest {
         assertEquals(C2.class, fieldWriters.get(0).field.getDeclaringClass());
     }
 
-    // Android not support
-    // GraalVM not support
-    @Test
-    public void test2Lambda() {
-        ObjectWriter objectWriter = ObjectWriterCreatorLambda.INSTANCE.createObjectWriter(C2.class);
-        List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
-        assertEquals(1, fieldWriters.size());
-        assertEquals(C2.class, fieldWriters.get(0).field.getDeclaringClass());
-    }
-
-    // Android not support
-    // GraalVM not support
-    @Test
-    public void test2ASM() {
-        ObjectWriter objectWriter = ObjectWriterCreatorASM.INSTANCE.createObjectWriter(C2.class);
-        List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
-        assertEquals(1, fieldWriters.size());
-        assertEquals(C2.class, fieldWriters.get(0).field.getDeclaringClass());
-    }
-
     @Test
     public void testReader2() {
         ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(C2.class);

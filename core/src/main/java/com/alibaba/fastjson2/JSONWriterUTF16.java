@@ -209,51 +209,6 @@ class JSONWriterUTF16
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
         boolean escape = false;
 
-        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
-            byte coder = UnsafeUtils.getStringCoder(str);
-            if (coder == 0) {
-                byte[] value = UnsafeUtils.getStringValue(str);
-                int minCapacity = off + value.length + 2;
-                if (minCapacity - chars.length > 0) {
-                    int oldCapacity = chars.length;
-                    int newCapacity = oldCapacity + (oldCapacity >> 1);
-                    if (newCapacity - minCapacity < 0) {
-                        newCapacity = minCapacity;
-                    }
-                    if (newCapacity - maxArraySize > 0) {
-                        throw new OutOfMemoryError();
-                    }
-
-                    // minCapacity is usually close to size, so this is a win:
-                    chars = Arrays.copyOf(chars, newCapacity);
-                }
-
-                final int mark = off;
-                chars[off++] = quote;
-
-                for (int i = 0; i < value.length; i++) {
-                    byte c = value[i];
-                    if (c == '\\' || c == quote || c < ' ') {
-                        escape = true;
-                        break;
-                    }
-
-                    if (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')')) {
-                        escape = true;
-                        break;
-                    }
-
-                    chars[off++] = (char) c;
-                }
-
-                if (!escape) {
-                    chars[off++] = quote;
-                    return;
-                }
-                off = mark;
-            }
-        }
-
         final int strlen = str.length();
         {
             int i = 0;

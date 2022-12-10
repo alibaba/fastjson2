@@ -1,7 +1,5 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.JDKUtils;
-
 import java.util.Arrays;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
@@ -27,7 +25,7 @@ final class JSONWriterUTF16JDK8
 
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
         boolean escapeNoneAscii = (context.features & EscapeNoneAscii.mask) != 0;
-        char[] value = JDKUtils.getCharArray(str);
+        char[] value = str.toCharArray();
         final int strlen = value.length;
 
         boolean escape = false;

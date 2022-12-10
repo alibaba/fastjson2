@@ -906,18 +906,6 @@ public interface JSONB {
                     return bytes;
                 }
             }
-        } else if (UNSAFE_SUPPORT) {
-            int coder = UnsafeUtils.getStringCoder(str);
-            if (coder == 0) {
-                byte[] value = UnsafeUtils.getStringValue(str);
-                int strlen = value.length;
-                if (strlen <= STR_ASCII_FIX_LEN) {
-                    byte[] bytes = new byte[value.length + 1];
-                    bytes[0] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
-                    System.arraycopy(value, 0, bytes, 1, value.length);
-                    return bytes;
-                }
-            }
         }
 
         try (JSONWriter writer = new JSONWriterJSONB(
