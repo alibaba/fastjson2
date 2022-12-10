@@ -1686,7 +1686,7 @@ public class DateUtilsTest {
         assertEquals(0, DateUtils.month('D', 'e', 'a'));
         assertEquals(0, DateUtils.month('K', 'e', 'a'));
 
-        String[] strings = new String[] {
+        String[] strings = new String[]{
                 "Jan",
                 "Feb",
                 "Mar",
@@ -1707,6 +1707,107 @@ public class DateUtilsTest {
             char c1 = str.charAt(1);
             char c2 = str.charAt(2);
             assertEquals(i + 1, DateUtils.month(c0, c1, c2));
+        }
+    }
+
+    @Test
+    public void test() {
+        Date date = DateUtils.parseDate("Dec 7, 2022 10:55:19 AM");
+        ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+        assertEquals(2022, zdt.getYear());
+        assertEquals(12, zdt.getMonthValue());
+        assertEquals(7, zdt.getDayOfMonth());
+        assertEquals(10, zdt.getHour());
+        assertEquals(55, zdt.getMinute());
+        assertEquals(19, zdt.getSecond());
+    }
+
+    @Test
+    public void testMonth() {
+        String[] months = {
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec"
+        };
+
+        for (int i = 0; i < months.length; i++) {
+            String month = months[i];
+
+            for (int day = 1; day < 28; day++) {
+                for (int hour = 1; hour <= 9; hour++) {
+                    String str = month + " " + day + ", 2022 0" + hour + ":55:19 AM";
+
+                    Date date = DateUtils.parseDate(str);
+                    ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+                    assertEquals(2022, zdt.getYear());
+                    assertEquals(i + 1, zdt.getMonthValue());
+                    assertEquals(day, zdt.getDayOfMonth());
+                    assertEquals(hour, zdt.getHour());
+                    assertEquals(55, zdt.getMinute());
+                    assertEquals(19, zdt.getSecond());
+                }
+
+                for (int hour = 1; hour <= 9; hour++) {
+                    String str = month + " " + day + ", 2022 " + hour + ":55:19 AM";
+
+                    Date date = DateUtils.parseDate(str);
+                    ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+                    assertEquals(2022, zdt.getYear());
+                    assertEquals(i + 1, zdt.getMonthValue());
+                    assertEquals(day, zdt.getDayOfMonth());
+                    assertEquals(hour, zdt.getHour());
+                    assertEquals(55, zdt.getMinute());
+                    assertEquals(19, zdt.getSecond());
+                }
+
+                for (int hour = 0; hour <= 1; hour++) {
+                    String str = month + " " + day + ", 2022 1" + hour + ":55:19 AM";
+
+                    Date date = DateUtils.parseDate(str);
+                    ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+                    assertEquals(2022, zdt.getYear());
+                    assertEquals(i + 1, zdt.getMonthValue());
+                    assertEquals(day, zdt.getDayOfMonth());
+                    assertEquals(hour + 10, zdt.getHour());
+                    assertEquals(55, zdt.getMinute());
+                    assertEquals(19, zdt.getSecond());
+                }
+
+                for (int hour = 0; hour <= 9; hour++) {
+                    String str = month + " " + day + ", 2022 0" + hour + ":55:19 PM";
+
+                    Date date = DateUtils.parseDate(str);
+                    ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+                    assertEquals(2022, zdt.getYear());
+                    assertEquals(i + 1, zdt.getMonthValue());
+                    assertEquals(day, zdt.getDayOfMonth());
+                    assertEquals(hour + 12, zdt.getHour());
+                    assertEquals(55, zdt.getMinute());
+                    assertEquals(19, zdt.getSecond());
+                }
+
+                for (int hour = 0; hour <= 1; hour++) {
+                    String str = month + " " + day + ", 2022 1" + hour + ":55:19 PM";
+
+                    Date date = DateUtils.parseDate(str);
+                    ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+                    assertEquals(2022, zdt.getYear());
+                    assertEquals(i + 1, zdt.getMonthValue());
+                    assertEquals(day, zdt.getDayOfMonth());
+                    assertEquals(hour + 22, zdt.getHour());
+                    assertEquals(55, zdt.getMinute());
+                    assertEquals(19, zdt.getSecond());
+                }
+            }
         }
     }
 }
