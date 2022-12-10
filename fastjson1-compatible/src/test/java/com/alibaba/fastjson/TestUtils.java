@@ -3,8 +3,8 @@ package com.alibaba.fastjson;
 import com.alibaba.fastjson.util.IOUtils;
 
 public class TestUtils {
-    public static final boolean GRAALVM = false;
-    public static final boolean ANDROID = true;
+    public static final boolean GRAALVM = true;
+    public static final boolean ANDROID = false;
 
     /**
      * Encodes a raw byte array into a BASE64 <code>char[]</code> representation i accordance with RFC 2045.
