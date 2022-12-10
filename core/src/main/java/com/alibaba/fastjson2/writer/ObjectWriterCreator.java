@@ -347,7 +347,11 @@ public class ObjectWriterCreator {
                         fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
                         FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                         if (fieldWriter != null) {
-                            fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
+                            FieldWriter origin = fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
+
+                            if (origin != null && origin.compareTo(fieldWriter) > 0) {
+                                fieldWriterMap.put(fieldWriter.fieldName, fieldWriter);
+                            }
                         }
                     });
                 }
@@ -355,6 +359,7 @@ public class ObjectWriterCreator {
                 BeanUtils.getters(objectClass, method -> {
                     fieldInfo.init();
                     fieldInfo.features = writerFieldFeatures;
+                    fieldInfo.format = beanInfo.format;
                     provider.getFieldInfo(beanInfo, fieldInfo, objectClass, method);
                     if (fieldInfo.ignore) {
                         return;
@@ -757,7 +762,10 @@ public class ObjectWriterCreator {
 
             Member enumValueField = BeanUtils.getEnumValueField(fieldClass, provider);
             if (enumValueField == null && !writeEnumAsJavaBean) {
-                return new FIeldWriterEnumField(fieldName, ordinal, features, format, label, fieldClass, field);
+                String[] enumAnnotationNames = BeanUtils.getEnumAnnotationNames(fieldClass);
+                if (enumAnnotationNames == null) {
+                    return new FIeldWriterEnumField(fieldName, ordinal, features, format, label, fieldClass, field);
+                }
             }
         }
 
@@ -883,7 +891,10 @@ public class ObjectWriterCreator {
                 && (BeanUtils.getEnumValueField(fieldClass, provider) == null && initObjectWriter == null)
                 && !BeanUtils.isWriteEnumAsJavaBean(fieldClass)
         ) {
-            return new FieldWriterEnumMethod(fieldName, ordinal, features, format, label, fieldClass, method);
+            String[] enumAnnotationNames = BeanUtils.getEnumAnnotationNames(fieldClass);
+            if (enumAnnotationNames == null) {
+                return new FieldWriterEnumMethod(fieldName, ordinal, features, format, label, fieldClass, method);
+            }
         }
 
         if (fieldClass == Date.class) {
@@ -1020,7 +1031,10 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass.isEnum() && BeanUtils.getEnumValueField(fieldClass, provider) == null) {
-            return new FieldWriterEnumFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, method, function);
+            String[] enumAnnotationNames = BeanUtils.getEnumAnnotationNames(fieldClass);
+            if (enumAnnotationNames == null) {
+                return new FieldWriterEnumFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, method, function);
+            }
         }
 
         if (fieldType instanceof ParameterizedType) {

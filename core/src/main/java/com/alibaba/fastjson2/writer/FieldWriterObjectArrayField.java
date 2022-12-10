@@ -54,7 +54,7 @@ final class FieldWriterObjectArrayField<T>
                     .getObjectWriter(this.itemType, itemClass);
         }
         return jsonWriter
-                .getObjectWriter(itemType, null);
+                .getObjectWriter(itemType, TypeUtils.getClass(itemType));
     }
 
     @Override
