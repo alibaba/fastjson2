@@ -4,8 +4,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
-import com.alibaba.fastjson2.writer.FieldWriter;
-import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -81,7 +80,27 @@ public class TimeSortTest {
 
     @Test
     public void test2() {
-        ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(C2.class);
+        ObjectWriter objectWriter = ObjectWriterCreator.INSTANCE.createObjectWriter(C2.class);
+        List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
+        assertEquals(1, fieldWriters.size());
+        assertEquals(C2.class, fieldWriters.get(0).field.getDeclaringClass());
+    }
+
+    // Android not support
+    // GraalVM not support
+    @Test
+    public void test2Lambda() {
+        ObjectWriter objectWriter = ObjectWriterCreatorLambda.INSTANCE.createObjectWriter(C2.class);
+        List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
+        assertEquals(1, fieldWriters.size());
+        assertEquals(C2.class, fieldWriters.get(0).field.getDeclaringClass());
+    }
+
+    // Android not support
+    // GraalVM not support
+    @Test
+    public void test2ASM() {
+        ObjectWriter objectWriter = ObjectWriterCreatorASM.INSTANCE.createObjectWriter(C2.class);
         List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
         assertEquals(1, fieldWriters.size());
         assertEquals(C2.class, fieldWriters.get(0).field.getDeclaringClass());
