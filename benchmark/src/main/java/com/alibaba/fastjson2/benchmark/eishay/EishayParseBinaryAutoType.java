@@ -69,7 +69,6 @@ public class EishayParseBinaryAutoType {
                     JSONWriter.Feature.WriteNulls,
                     JSONWriter.Feature.NotWriteDefaultValue,
                     JSONWriter.Feature.NotWriteHashMapArrayListClassName,
-                    JSONWriter.Feature.WriteNameAsSymbol,
                     JSONWriter.Feature.BeanToArray
             );
 
@@ -116,22 +115,6 @@ public class EishayParseBinaryAutoType {
                         JSONReader.Feature.UseDefaultConstructorAsPossible,
                         JSONReader.Feature.UseNativeObject,
                         JSONReader.Feature.FieldBased)
-        );
-    }
-
-    @Benchmark
-    public void fastjson2JSONBBytes_arrayMapping(Blackhole bh) {
-        bh.consume(
-                JSONB.parseObject(
-                        fastjson2JSONBBytes_arrayMapping,
-                        Object.class,
-                        JSONReader.Feature.SupportAutoType,
-                        JSONReader.Feature.IgnoreNoneSerializable,
-                        JSONReader.Feature.UseDefaultConstructorAsPossible,
-                        JSONReader.Feature.UseNativeObject,
-                        JSONReader.Feature.FieldBased,
-                        JSONReader.Feature.SupportArrayToBean
-                )
         );
     }
 

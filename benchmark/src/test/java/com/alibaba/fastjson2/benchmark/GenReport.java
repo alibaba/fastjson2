@@ -9,7 +9,7 @@ import java.util.*;
 public class GenReport {
     @Test
     public void gen() throws Exception {
-        File file = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.20_raw.md");
+        File file = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.21_raw.md");
 
         Map<String, BenchmarkResult> benchResults = new LinkedHashMap<>();
 
@@ -54,40 +54,27 @@ public class GenReport {
                         benchmarkResult.libraryResults.put("fastjson1UTF8Bytes", fastjson1UTF8Bytes);
                     }
                 }
-            } else if (benchmarkResult.libraryResults.size() == 8) {
-                LibResult jsonb = benchmarkResult.libraryResults.get("fastjson2JSONB");
-                LibResult fastjson2JSONB_symbols = benchmarkResult.libraryResults.get("fastjson2JSONB_symbols");
-                LibResult jsonbArrayMapping = benchmarkResult.libraryResults.get("fastjson2JSONBBytes_arrayMapping");
-                if (jsonbArrayMapping == null) {
-                    jsonbArrayMapping = benchmarkResult.libraryResults.get("fastjson2JSONB_arrayMapping");
-                }
-                LibResult jsonbAutoTypeFilter = benchmarkResult.libraryResults.get("fastjson2JSONB_autoTypeFilter");
-                LibResult fury = benchmarkResult.libraryResults.get("fury");
-                LibResult furyCompatible = benchmarkResult.libraryResults.get("furyCompatible");
-                LibResult hessian = benchmarkResult.libraryResults.get("hessian");
-                LibResult javaSerialize = benchmarkResult.libraryResults.get("javaSerialize");
-                LibResult fastjson2UTF8Bytes = benchmarkResult.libraryResults.get("fastjson2UTF8Bytes");
-
-                if (jsonb != null && jsonbArrayMapping != null && jsonbAutoTypeFilter != null && fury != null && furyCompatible != null && hessian != null && javaSerialize != null) {
+            } else if (benchmarkResult.libraryResults.size() == 5) {
+                LibResult fastjson2 = benchmarkResult.libraryResults.get("fastjson2");
+                LibResult fastjson2_jsonb = benchmarkResult.libraryResults.get("fastjson2_jsonb");
+                LibResult fastjson1 = benchmarkResult.libraryResults.get("fastjson1");
+                LibResult jackson = benchmarkResult.libraryResults.get("jackson");
+                LibResult gson = benchmarkResult.libraryResults.get("gson");
+                LibResult dsljson = benchmarkResult.libraryResults.get("dsljson");
+                if (fastjson1 != null && fastjson2_jsonb != null && fastjson2 != null && jackson != null && gson != null) {
                     benchmarkResult.libraryResults.clear();
-                    benchmarkResult.libraryResults.put("fastjson2JSONB", jsonb);
-                    benchmarkResult.libraryResults.put("fastjson2JSONB_symbols", fastjson2JSONB_symbols);
-                    benchmarkResult.libraryResults.put("fastjson2JSONB_autoTypeFilter", jsonbAutoTypeFilter);
-                    benchmarkResult.libraryResults.put("fastjson2JSONB_arrayMapping", jsonbArrayMapping);
-                    benchmarkResult.libraryResults.put("fury", fury);
-                    benchmarkResult.libraryResults.put("furyCompatible", furyCompatible);
-                    benchmarkResult.libraryResults.put("hessian", hessian);
-                    benchmarkResult.libraryResults.put("javaSerialize", javaSerialize);
-                } else if (jsonb != null && jsonbArrayMapping != null && fastjson2UTF8Bytes != null && fury != null && furyCompatible != null && hessian != null && javaSerialize != null) {
+                    benchmarkResult.libraryResults.put("fastjson2", fastjson2);
+                    benchmarkResult.libraryResults.put("fastjson2_jsonb", fastjson2_jsonb);
+                    benchmarkResult.libraryResults.put("fastjson1", fastjson1);
+                    benchmarkResult.libraryResults.put("jackson", jackson);
+                    benchmarkResult.libraryResults.put("gson", gson);
+                } else if (fastjson1 != null && dsljson != null && fastjson2 != null && jackson != null && gson != null) {
                     benchmarkResult.libraryResults.clear();
-                    benchmarkResult.libraryResults.put("fastjson2JSONB", jsonb);
-                    benchmarkResult.libraryResults.put("fastjson2JSONB_symbols", fastjson2JSONB_symbols);
-                    benchmarkResult.libraryResults.put("fastjson2UTF8Bytes", fastjson2UTF8Bytes);
-                    benchmarkResult.libraryResults.put("fastjson2JSONB_arrayMapping", jsonbArrayMapping);
-                    benchmarkResult.libraryResults.put("fury", fury);
-                    benchmarkResult.libraryResults.put("furyCompatible", furyCompatible);
-                    benchmarkResult.libraryResults.put("hessian", hessian);
-                    benchmarkResult.libraryResults.put("javaSerialize", javaSerialize);
+                    benchmarkResult.libraryResults.put("fastjson2", fastjson2);
+                    benchmarkResult.libraryResults.put("dsljson", dsljson);
+                    benchmarkResult.libraryResults.put("fastjson1", fastjson1);
+                    benchmarkResult.libraryResults.put("jackson", jackson);
+                    benchmarkResult.libraryResults.put("gson", gson);
                 }
             }
 
@@ -128,7 +115,7 @@ public class GenReport {
 
                 int i = 0;
                 for (LibResult libResult : benchmarkResult.libraryResults.values()) {
-                    double score = libResult.scores.get(jdk);
+                    Double score = libResult.scores.get(jdk);
                     System.out.print("\t|\t");
                     System.out.print(score);
                     if (i != 0) {

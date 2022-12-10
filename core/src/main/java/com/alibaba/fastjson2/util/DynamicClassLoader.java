@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.util;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.NameFilter;
@@ -14,22 +13,19 @@ import java.lang.reflect.Type;
 import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DynamicClassLoader
         extends ClassLoader {
-    static final String FASTJSON_PACKAGE;
-    static final ClassLoader FASTJSON_CLASSLOADER;
-
     private static java.security.ProtectionDomain DOMAIN;
 
-    private static Map<String, Class<?>> classMapping = new HashMap<String, Class<?>>();
+    private static Map<String, Class<?>> classMapping = new HashMap<>();
 
     private static DynamicClassLoader instance = new DynamicClassLoader();
 
-    static {
-        FASTJSON_PACKAGE = JSON.class.getPackage().getName() + ".";
-        FASTJSON_CLASSLOADER = JSON.class.getClassLoader();
+    private Map<String, Class> classes = new ConcurrentHashMap<>();
 
+    static {
         Class[] classes = new Class[]{
                 Object.class,
                 Type.class,
@@ -82,10 +78,15 @@ public class DynamicClassLoader
                 ObjectWriter11.class,
                 ObjectWriter12.class,
                 ObjectWriterAdapter.class,
+                UnsafeUtils.class,
 
+                java.util.Collection.class,
                 java.util.List.class,
                 java.util.Map.class,
                 java.util.function.Supplier.class,
+                java.lang.Enum.class,
+                java.lang.Class.class,
+                java.lang.String.class
         };
         for (Class clazz : classes) {
             classMapping.put(clazz.getName(), clazz);
@@ -129,11 +130,41 @@ public class DynamicClassLoader
             return mappingClass;
         }
 
-//        if (name != null && name.startsWith(FASTJSON_PACKAGE) && name.indexOf("_") == -1) {
-//            return FASTJSON_CLASSLOADER.loadClass(name);
-//        }
+        Class clazz = classes.get(name);
+        if (clazz != null) {
+            return clazz;
+        }
 
-        return super.loadClass(name, resolve);
+        ClassNotFoundException error = null;
+        try {
+            return super.loadClass(name, resolve);
+        } catch (ClassNotFoundException e) {
+            error = e;
+        }
+
+        ClassLoader tcl = Thread.currentThread().getContextClassLoader();
+        if (tcl != null && tcl != this) {
+            try {
+                return tcl.loadClass(name);
+            } catch (ClassNotFoundException ignored) {
+                // ignored
+            }
+        }
+
+        throw error;
+    }
+
+    public void definePackage(String name) throws ClassFormatError {
+        if (getPackage(name) != null) {
+            return;
+        }
+        super.definePackage(name, "", "", "", "", "", "", null);
+    }
+
+    public Class<?> loadClass(String name, byte[] b, int off, int len) throws ClassFormatError {
+        Class<?> clazz = defineClass(name, b, off, len, DOMAIN);
+        classes.put(name, clazz);
+        return clazz;
     }
 
     public Class<?> defineClassPublic(String name, byte[] b, int off, int len) throws ClassFormatError {
