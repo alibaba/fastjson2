@@ -1,10 +1,16 @@
 package com.alibaba.fastjson2.benchmark.eishay.gen;
 
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.TypeReference;
+import com.alibaba.fastjson2.benchmark.eishay.EishayFuryWriteNoneCache;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.DynamicClassLoader;
 import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+import org.apache.commons.io.IOUtils;
 import org.objectweb.asm.*;
 
+import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,47 +20,89 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class EishayClassGen {
     public Class genMedia(DynamicClassLoader classLoader, String packageName) throws Exception {
-        Class playerClass = genEnum(classLoader, packageName + "/Media$Player", "JAVA", "FLASH");
+        classLoader.definePackage(packageName.replace('/', '.'));
 
-        Class mediaClass;
-        {
-            Map<String, java.lang.reflect.Type> fields = new LinkedHashMap<>();
-            fields.put("bitrate", long.class);
-            fields.put("duration", long.class);
-            fields.put("format", String.class);
-            fields.put("persons", TypeReference.collectionType(List.class, String.class));
-            fields.put("player", playerClass);
-            fields.put("size", long.class);
-            fields.put("title", String.class);
-            fields.put("uri", String.class);
-            fields.put("width", int.class);
+        LinkedHashMap<String, byte[]> codes = new LinkedHashMap();
+        LinkedHashMap<String, Class> classes = new LinkedHashMap();
 
-            mediaClass = genClass(classLoader, packageName + "/Media", fields);
+        genCode(packageName, codes);
+        codes.forEach((name, code) -> {
+            Class<?> clazz = classLoader.loadClass(name, code, 0, code.length);
+            classes.put(name, clazz);
+        });
+
+        String mediaContentClassName = packageName.replace('/', '.') + ".MediaContent";
+        return classes.get(mediaContentClassName);
+    }
+
+    public void genCode(String packageName, Map<String, byte[]> classBytes) {
+        String playerType = packageName + "/Media$Player";
+        String playerClassName = playerType.replace('/', '.');
+        byte[] playerCode = genEnum(playerType, "JAVA", "FLASH");
+        classBytes.put(playerClassName, playerCode);
+
+        String mediaType = packageName + "/Media";
+        String mediaClassName = mediaType.replace('/', '.');
+        byte[] mediaCode = genClass(mediaType,
+                new FieldInfo[]{
+                        new FieldInfo("bitrate", long.class),
+                        new FieldInfo("duration", long.class),
+                        new FieldInfo("format", String.class),
+                        new FieldInfo("height", int.class),
+                        new FieldInfo("persons", TypeReference.collectionType(List.class, String.class)),
+                        new FieldInfo("player", "L" + playerType + ";", null),
+                        new FieldInfo("size", long.class),
+                        new FieldInfo("title", String.class),
+                        new FieldInfo("uri", String.class),
+                        new FieldInfo("width", int.class),
+                        new FieldInfo("copyright", String.class)
+                });
+        classBytes.put(mediaClassName, mediaCode);
+
+        String sizeType = packageName + "/Image$Size";
+        String sizeClassName = sizeType.replace('/', '.');
+        byte[] sizeCode = genEnum(sizeType, "SMALL", "LARGE");
+        classBytes.put(sizeClassName, sizeCode);
+
+        String imageType = packageName + "/Image";
+        String imageClassName = imageType.replace('/', '.');
+        byte[] imageCode = genClass(imageType,
+                new FieldInfo[]{
+                        new FieldInfo("height", int.class),
+                        new FieldInfo("size", "L" + sizeType + ";", null),
+                        new FieldInfo("title", String.class),
+                        new FieldInfo("uri", String.class),
+                        new FieldInfo("width", int.class)
+                }
+        );
+        classBytes.put(imageClassName, imageCode);
+
+        String mediaContentType = packageName + "/MediaContent";
+        String mediaContentClassName = mediaContentType.replace('/', '.');
+        byte[] mediaContentCode = genClass(mediaContentType,
+                new FieldInfo("media", "L" + mediaType + ";", null),
+                new FieldInfo("images", "Ljava/util/List;", "Ljava/util/List<L" + imageType + ";>;")
+        );
+        classBytes.put(mediaContentClassName, mediaContentCode);
+    }
+
+    static class FieldInfo {
+        final String name;
+        final String desc;
+        final String signature;
+
+        FieldInfo(String name, java.lang.reflect.Type type) {
+            this.name = name;
+            Class fieldClass = TypeUtils.getClass(type);
+            this.desc = Type.getDescriptor(fieldClass);
+            this.signature = getSignature(type);
         }
 
-        Class sizeClass = genEnum(classLoader, packageName + "/Image$Size", "SMALL", "LARGE");
-        Class imageClass;
-        {
-            Map<String, java.lang.reflect.Type> fields = new LinkedHashMap<>();
-            fields.put("height", int.class);
-            fields.put("size", sizeClass);
-            fields.put("title", String.class);
-            fields.put("uri", String.class);
-            fields.put("width", int.class);
-
-            imageClass = genClass(classLoader, packageName + "/Image", fields);
+        FieldInfo(String name, String desc, String signature) {
+            this.name = name;
+            this.desc = desc;
+            this.signature = signature;
         }
-
-        Class mediaContentClass;
-        {
-            Map<String, java.lang.reflect.Type> fields = new LinkedHashMap<>();
-            fields.put("media", mediaClass);
-            fields.put("images", TypeReference.collectionType(List.class, imageClass));
-
-            mediaContentClass = genClass(classLoader, packageName + "/MediaContent", fields);
-        }
-
-        return mediaContentClass;
     }
 
     static String getSignature(java.lang.reflect.Type type) {
@@ -72,25 +120,23 @@ public class EishayClassGen {
         return null;
     }
 
-    public Class genClass(DynamicClassLoader classLoader, String type, Map<String, java.lang.reflect.Type> fields) {
+    public byte[] genClass(String type, FieldInfo... fields) {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        String desc = "L" + type + ";";
         cw.visit(
                 Opcodes.V1_8,
-                ACC_PUBLIC + ACC_FINAL + ACC_SUPER,
+                ACC_PUBLIC + ACC_SUPER,
                 type,
                 null,
                 "java/lang/Object",
-                null
+                new String[] {
+                        "java/io/Serializable"
+                }
         );
 
-        fields.forEach((fieldName, fieldType) -> {
-            Class fieldClass = TypeUtils.getClass(fieldType);
-            String fieldDesc = Type.getDescriptor(fieldClass);
-            String signature = getSignature(fieldType);
-            FieldVisitor fv = cw.visitField(ACC_PUBLIC, fieldName, fieldDesc, signature, null);
+        for (FieldInfo field : fields) {
+            FieldVisitor fv = cw.visitField(ACC_PUBLIC, field.name, field.desc, field.signature, null);
             fv.visitEnd();
-        });
+        }
 
         {
             MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V",
@@ -105,12 +151,10 @@ public class EishayClassGen {
 
         cw.visitEnd();
 
-        byte[] code = cw.toByteArray();
-        String fullName = type.replace('/', '.');
-        return classLoader.defineClassPublic(fullName, code, 0, code.length);
+        return cw.toByteArray();
     }
 
-    public Class genEnum(DynamicClassLoader classLoader, String type, String... values) {
+    public byte[] genEnum(String type, String... values) {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         String desc = "L" + type + ";";
         cw.visit(
@@ -209,7 +253,66 @@ public class EishayClassGen {
 
         cw.visitEnd();
 
-        byte[] code = cw.toByteArray();
-        return classLoader.defineClassPublic(type.replace('/', '.'), code, 0, code.length);
+        return cw.toByteArray();
+    }
+
+    public byte[][] genFastjsonJSONBBytes(int count, JSONWriter.Feature[] writerFeatures) throws Exception {
+        try (InputStream is = EishayFuryWriteNoneCache.class.getClassLoader()
+                .getResourceAsStream("data/eishay.json")
+        ) {
+            String str = IOUtils.toString(is, "UTF-8");
+
+            DynamicClassLoader classLoader = new DynamicClassLoader();
+            byte[][] bytes = new byte[count][];
+            EishayClassGen gen = new EishayClassGen();
+            for (int i = 0; i < count; i++) {
+                String packageName = "com/alibaba/fastjson2/benchmark/eishay" + i;
+                Class objectClass = gen.genMedia(classLoader, packageName);
+                ObjectReaderProvider provider = new ObjectReaderProvider();
+                Object object = JSONReader.of(str, JSONFactory.createReadContext(provider)).read(objectClass);
+
+                ObjectWriterProvider writerProvider = new ObjectWriterProvider();
+                bytes[i] = JSONB.toBytes(object, JSONFactory.createWriteContext(writerProvider, writerFeatures));
+            }
+            return bytes;
+        }
+    }
+
+    public LinkedHashMap<String, byte[]> genCodes(int count) throws Exception {
+        LinkedHashMap<String, byte[]> codeMap = new LinkedHashMap();
+        EishayClassGen gen = new EishayClassGen();
+        for (int i = 0; i < count; i++) {
+            String packageName = "com/alibaba/fastjson2/benchmark/eishay" + i;
+            gen.genCode(packageName, codeMap);
+        }
+        return codeMap;
+    }
+
+    public byte[][] genFuryBytes(int count) throws Exception {
+//        io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
+//                .withLanguage(io.fury.Language.JAVA)
+//                .withReferenceTracking(true)
+//                .disableSecureMode()
+//                .buildThreadSafeFury();
+//
+//        try (InputStream is = EishayFuryWriteNoneCache.class.getClassLoader()
+//                .getResourceAsStream("data/eishay.json")
+//        ) {
+//            String str = IOUtils.toString(is, "UTF-8");
+//
+//            DynamicClassLoader classLoader = new DynamicClassLoader();
+//            byte[][] bytes = new byte[count][];
+//            EishayClassGen gen = new EishayClassGen();
+//            for (int i = 0; i < count; i++) {
+//                String packageName = "com/alibaba/fastjson2/benchmark/eishay" + i;
+//                Class objectClass = gen.genMedia(classLoader, packageName);
+//                ObjectReaderProvider provider = new ObjectReaderProvider();
+//                Object object = JSONReader.of(str, JSONFactory.createReadContext(provider)).read(objectClass);
+//                bytes[i] = fury.serialize(object);
+//                System.out.println(java.time.LocalDateTime.now() + " write " + i + " done");
+//            }
+//            return bytes;
+//        }
+        throw new JSONException("TODO");
     }
 }

@@ -33,20 +33,6 @@ public class EishayWriteBinaryAutoTypeTest {
         }
     }
 
-    public static void fastjson2JSONB_ArrayMapping() throws Exception {
-        for (int j = 0; j < 10; j++) {
-            long start = System.currentTimeMillis();
-            for (int i = 0; i < 1000 * 1000; ++i) {
-                benchmark.fastjson2JSONB_ArrayMapping(BH);
-            }
-            long millis = System.currentTimeMillis() - start;
-            System.out.println("EishayWriteBinaryAutoType-fastjson2JSONB_ArrayMapping millis : " + millis);
-            // zulu8.58.0.13 : 277 229
-            // zulu11.52.13 : 181
-            // zulu17.32.13 : 184
-        }
-    }
-
     public static void fastjson2JSONB_symbols() throws Exception {
         for (int j = 0; j < 10; j++) {
             long start = System.currentTimeMillis();

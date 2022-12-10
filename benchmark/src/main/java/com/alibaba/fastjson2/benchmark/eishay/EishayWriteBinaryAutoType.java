@@ -84,24 +84,6 @@ public class EishayWriteBinaryAutoType {
     }
 
     @Benchmark
-    public void fastjson2JSONB_ArrayMapping(Blackhole bh) {
-        bh.consume(
-                JSONB.toBytes(
-                        mc,
-                        JSONWriter.Feature.WriteClassName,
-                        JSONWriter.Feature.IgnoreNoneSerializable,
-                        JSONWriter.Feature.FieldBased,
-                        JSONWriter.Feature.ReferenceDetection,
-                        JSONWriter.Feature.WriteNulls,
-                        JSONWriter.Feature.NotWriteDefaultValue,
-                        JSONWriter.Feature.NotWriteHashMapArrayListClassName,
-                        JSONWriter.Feature.WriteNameAsSymbol,
-                        JSONWriter.Feature.BeanToArray
-                )
-        );
-    }
-
-    @Benchmark
     public void javaSerialize(Blackhole bh) throws Exception {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);

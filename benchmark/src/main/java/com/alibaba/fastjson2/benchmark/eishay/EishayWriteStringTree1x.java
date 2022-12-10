@@ -44,7 +44,7 @@ public class EishayWriteStringTree1x {
         bh.consume(JSON.toJSONString(mc, JSONWriter.Feature.ReferenceDetection));
     }
 
-    @Benchmark
+//    @Benchmark
     public void fastjson2_jsonb(Blackhole bh) {
         bh.consume(JSONB.toBytes(mc));
     }
