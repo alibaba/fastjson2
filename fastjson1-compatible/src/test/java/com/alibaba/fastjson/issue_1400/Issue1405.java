@@ -1,7 +1,7 @@
 package com.alibaba.fastjson.issue_1400;
 
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
-import com.alibaba.fastjson.support.spring.FastJsonJsonView;
+import com.alibaba.fastjson.support.spring.annotation.FastJsonView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -91,7 +91,7 @@ public class Issue1405 {
 
         @Override
         public void configureViewResolvers(ViewResolverRegistry registry) {
-            FastJsonJsonView fastJsonJsonView = new FastJsonJsonView();
+            FastJsonView fastJsonJsonView = new FastJsonView();
             registry.enableContentNegotiation(fastJsonJsonView);
         }
     }

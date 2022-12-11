@@ -1,4 +1,4 @@
-package com.alibaba.fastjson.support.spring;
+package com.alibaba.fastjson.support.spring.annotation;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
@@ -27,7 +27,7 @@ import java.util.Set;
  * @since 2.0.2
  */
 
-public class FastJsonJsonView
+public class FastJsonView
         extends AbstractView {
     /**
      * renderedAttributes
@@ -52,7 +52,7 @@ public class FastJsonJsonView
     /**
      * Set default param.
      */
-    public FastJsonJsonView() {
+    public FastJsonView() {
         setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
         setExposePathVariables(false);
     }
