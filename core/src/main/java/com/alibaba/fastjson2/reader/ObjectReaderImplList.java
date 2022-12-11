@@ -181,7 +181,7 @@ public final class ObjectReaderImplList
     public Object createInstance(Collection collection) {
         int size = collection.size();
 
-        if (size == 0) {
+        if (size == 0 && (listClass == List.class)) {
             Collection list = Collections.emptyList();
             if (builder != null) {
                 return builder.apply(list);
