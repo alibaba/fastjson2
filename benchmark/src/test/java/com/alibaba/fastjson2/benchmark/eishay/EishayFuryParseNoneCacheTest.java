@@ -128,9 +128,9 @@ public class EishayFuryParseNoneCacheTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2JSONB();
+        fastjson2JSONB();
 //        fury();
-        genJSONBDataFiles();
+//        genJSONBDataFiles();
 //        genFuryDataFiles();
 //        genCodes();
 //        testSingle();
