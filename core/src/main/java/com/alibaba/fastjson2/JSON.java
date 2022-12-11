@@ -2246,7 +2246,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
 
                 Class<?> valueClass = object.getClass();
                 if (valueClass == JSONObject.class) {
@@ -2275,7 +2276,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
 
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
@@ -2312,7 +2314,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
                 Class<?> valueClass = object.getClass();
 
                 boolean fieldBased = (writeContext.features & JSONWriter.Feature.FieldBased.mask) != 0;
@@ -2335,7 +2338,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
                 if (filter != null) {
                     writer.context.configFilter(filter);
                 }
@@ -2360,7 +2364,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
                 if (filters != null && filters.length != 0) {
                     writer.context.configFilter(filters);
                 }
@@ -2385,7 +2390,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
                 if (format != null && !format.isEmpty()) {
                     writer.context.setDateFormat(format);
                 }
@@ -2411,7 +2417,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
                 if (format != null && !format.isEmpty()) {
                     writer.context.setDateFormat(format);
                 }
@@ -2437,7 +2444,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
 
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
@@ -2462,7 +2470,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
 
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
@@ -2483,7 +2492,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
 
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
@@ -2505,7 +2515,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
                 if (filters != null && filters.length != 0) {
                     writer.context.configFilter(filters);
                 }
@@ -2531,7 +2542,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
                 if (format != null && !format.isEmpty()) {
                     writer.context.setDateFormat(format);
                 }
@@ -2560,7 +2572,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
 
                 Class<?> valueClass = object.getClass();
                 ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
@@ -2587,7 +2600,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
                 if (filters != null && filters.length != 0) {
                     writer.context.configFilter(filters);
                 }
@@ -2622,7 +2636,8 @@ public interface JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
-                writer.setRootObject(object);
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
                 if (format != null && !format.isEmpty()) {
                     writer.context.setDateFormat(format);
                 }
