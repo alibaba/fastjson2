@@ -197,7 +197,7 @@ public class ObjectReaderCreatorASM
             return fieldName;
         }
 
-        String base = "itemObjectReader_";
+        String base = "itemReader";
         int size = IOUtils.stringSize(i);
         char[] chars = new char[base.length() + size];
         base.getChars(0, base.length(), chars, 0);
@@ -423,7 +423,7 @@ public class ObjectReaderCreatorASM
                 (e) -> objectClass.getName().equals(e) ? objectClass : null
         );
 
-        String className = "ObjectReader_" + seed.incrementAndGet();
+        String className = "ORG_" + seed.incrementAndGet() + "_" + fieldReaderArray.length + "_" + objectClass.getSimpleName();
         String classNameType;
         String classNameFull;
 
