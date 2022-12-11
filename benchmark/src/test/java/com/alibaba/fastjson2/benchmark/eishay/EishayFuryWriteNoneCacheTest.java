@@ -14,7 +14,7 @@ public class EishayFuryWriteNoneCacheTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayFuryWriteArray-fastjson2_jsonb millis : " + millis);
-            // zulu8.62.0.19 : 684
+            // zulu8.62.0.19 : 744
             // zulu11.52.13 : 507
             // zulu17.38.21 : 435
         }
@@ -35,7 +35,7 @@ public class EishayFuryWriteNoneCacheTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2JSONB();
-        fury();
+        fastjson2JSONB();
+//        fury();
     }
 }

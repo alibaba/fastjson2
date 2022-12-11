@@ -57,13 +57,18 @@ public class EishayFuryParseNoneCache {
                 ObjectInputStream is = new ObjectInputStream(zipIn);
                 Map<String, byte[]> codeMap = (Map<String, byte[]>) is.readObject();
                 Map<String, Class> classMap = new HashMap<>(codeMap.size());
+                String prefix = "com.alibaba.fastjson2.benchmark.eishay";
                 codeMap.forEach((name, code) -> {
+                    int index = Integer.parseInt(name.substring(prefix.length(), name.indexOf('.', prefix.length())));
+                    if (index > COUNT) {
+                        return;
+                    }
                     Class<?> clazz = classLoader.loadClass(name, code, 0, code.length);
                     classMap.put(name, clazz);
                 });
 
                 for (int i = 0; i < COUNT; i++) {
-                    String packageName = "com.alibaba.fastjson2.benchmark.eishay" + i;
+                    String packageName = prefix + i;
                     classLoader.definePackage(packageName);
                     String className = packageName + ".MediaContent";
                     Class mediaClass = classMap.get(className);
