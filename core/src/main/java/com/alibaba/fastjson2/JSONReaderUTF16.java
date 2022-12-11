@@ -4599,6 +4599,31 @@ class JSONReaderUTF16
             i1 = c12;
             s0 = c13;
             s1 = c14;
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':') {
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
+
+            int month = DateUtils.month(c2, c3, c4);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                throw new JSONException(info("illegal date input"));
+            }
+
+            d0 = '0';
+            d1 = c0;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = '0';
+            s1 = '0';
         } else {
             return null;
         }
@@ -4734,6 +4759,31 @@ class JSONReaderUTF16
 
             s0 = c15;
             s1 = c16;
+        } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c14 == ':') {
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            int month = DateUtils.month(c3, c4, c5);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                throw new JSONException(info("illegal date input"));
+            }
+
+            d0 = c0;
+            d1 = c1;
+
+            h0 = c12;
+            h1 = c13;
+
+            i0 = c15;
+            i1 = c16;
+
+            s0 = '0';
+            s1 = '0';
         } else {
             return null;
         }
@@ -5699,6 +5749,44 @@ class JSONReaderUTF16
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 19;
+        } else if (len == 20 && c2 == ' ' && c6 == ' ' && c11 == ' ' && c14 == ':' && c17 == ':') {
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            int month = DateUtils.month(c3, c4, c5);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = c0;
+            d1 = c1;
+
+            h0 = c12;
+            h1 = c13;
+
+            i0 = c15;
+            i1 = c16;
+
+            s0 = c18;
+            s1 = c19;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 20;
+            isTimeZone = false;
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && (len == 21 || c21 == '[' || c21 == '+' || c21 == '-' || c21 == 'Z')) {
             y0 = c0;
@@ -6160,6 +6248,84 @@ class JSONReaderUTF16
             S8 = '0';
             zoneIdBegin = 28;
             isTimeZone = c28 == '|';
+        } else if (len == 28 && c3 == ',' && c4 == ' ' && c6 == ' ' && c10 == ' ' && c15 == ' ' && c18 == ':' && c21 == ':' && c24 == ' ') {
+            // RFC 1123
+            y0 = c11;
+            y1 = c12;
+            y2 = c13;
+            y3 = c14;
+
+            int month = DateUtils.month(c7, c8, c9);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = '0';
+            d1 = c5;
+
+            h0 = c16;
+            h1 = c17;
+
+            i0 = c19;
+            i1 = c20;
+
+            s0 = c22;
+            s1 = c23;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 24;
+            isTimeZone = true;
+        } else if (len == 29 && c3 == ',' && c4 == ' ' && c7 == ' ' && c11 == ' ' && c16 == ' ' && c19 == ':' && c22 == ':' && c25 == ' ') {
+            // RFC 1123
+            y0 = c12;
+            y1 = c13;
+            y2 = c14;
+            y3 = c15;
+
+            int month = DateUtils.month(c8, c9, c10);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = c5;
+            d1 = c6;
+
+            h0 = c17;
+            h1 = c18;
+
+            i0 = c20;
+            i1 = c21;
+
+            s0 = c23;
+            s1 = c24;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 25;
+            isTimeZone = true;
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && (len == 29 || c29 == '[' || c29 == '|' || c29 == '+' || c29 == '-' || c29 == 'Z')) {
             y0 = c0;
@@ -6474,6 +6640,35 @@ class JSONReaderUTF16
 
             d0 = c8;
             d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c16 == ':') {
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
+
+            int month = DateUtils.month(c2, c3, c4);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                throw new JSONException(info("illegal date input"));
+            }
+
+            d0 = '0';
+            d1 = c0;
 
             h0 = c11;
             h1 = c12;
