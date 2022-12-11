@@ -417,7 +417,7 @@ public class ObjectWriterCreatorASM
 
         ClassWriter cw = new ClassWriter(null);
 
-        String className = "ObjectWriter_" + seed.incrementAndGet();
+        String className = "OWG_" + seed.incrementAndGet() + "_" + fieldWriters.size() + "_" + objectClass.getSimpleName();
         String classNameType;
         String classNameFull;
 
