@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
@@ -235,10 +237,89 @@ public class EnglishDateTest {
     }
 
     @Test
-    public void parseDateEror() {
+    public void parseLocalDateTime() {
+        {
+            String str = "3 Jun 2008 11:05:30";
+            LocalDateTime ldt = DateUtils.parseLocalDateTime(str);
+            assertEquals(2008, ldt.getYear());
+            assertEquals(6, ldt.getMonthValue());
+            assertEquals(3, ldt.getDayOfMonth());
+            assertEquals(11, ldt.getHour());
+            assertEquals(5, ldt.getMinute());
+            assertEquals(30, ldt.getSecond());
+        }
+
+        {
+            String str = "13 Jun 2008 11:05:30";
+            LocalDateTime ldt = DateUtils.parseLocalDateTime(str);
+            assertEquals(2008, ldt.getYear());
+            assertEquals(6, ldt.getMonthValue());
+            assertEquals(13, ldt.getDayOfMonth());
+            assertEquals(11, ldt.getHour());
+            assertEquals(5, ldt.getMinute());
+            assertEquals(30, ldt.getSecond());
+        }
+
+        {
+            String str = "3 Jun 2008 11:05";
+            LocalDateTime ldt = DateUtils.parseLocalDateTime(str);
+            assertEquals(2008, ldt.getYear());
+            assertEquals(6, ldt.getMonthValue());
+            assertEquals(3, ldt.getDayOfMonth());
+            assertEquals(11, ldt.getHour());
+            assertEquals(5, ldt.getMinute());
+            assertEquals(0, ldt.getSecond());
+        }
+        {
+            String str = "13 Jun 2008 11:05";
+            LocalDateTime ldt = DateUtils.parseLocalDateTime(str);
+            assertEquals(2008, ldt.getYear());
+            assertEquals(6, ldt.getMonthValue());
+            assertEquals(13, ldt.getDayOfMonth());
+            assertEquals(11, ldt.getHour());
+            assertEquals(5, ldt.getMinute());
+            assertEquals(0, ldt.getSecond());
+        }
+    }
+
+    @Test
+    public void parseLocalDateTimeError() {
+        assertThrows(Exception.class, () -> DateUtils.parseLocalDateTime("3 AAA 2008 11:05:30"));
+        assertThrows(Exception.class, () -> DateUtils.parseLocalDateTime("13 AAA 2008 11:05"));
+        assertThrows(Exception.class, () -> DateUtils.parseLocalDateTime("3 AAA 2008 11:05"));
+        assertThrows(Exception.class, () -> DateUtils.parseLocalDateTime("13 AAA 2008 11:05:30"));
+    }
+
+    @Test
+    public void parseDateError() {
         assertThrows(Exception.class, () -> DateUtils.parseDate("3 AAA 2008 11:05"));
         assertThrows(Exception.class, () -> DateUtils.parseDate("3 AAA 2008 11:05:30"));
         assertThrows(Exception.class, () -> DateUtils.parseDate("13 AAA 2008 11:05"));
         assertThrows(Exception.class, () -> DateUtils.parseDate("13 AAA 2008 11:05:30"));
+    }
+
+    @Test
+    public void parseLocalDate() {
+        {
+            String str = "3 Jun 2008";
+            LocalDate localDate = DateUtils.parseLocalDate(str);
+            assertEquals(2008, localDate.getYear());
+            assertEquals(6, localDate.getMonthValue());
+            assertEquals(3, localDate.getDayOfMonth());
+        }
+
+        {
+            String str = "13 Jun 2008";
+            LocalDate localDate = DateUtils.parseLocalDate(str);
+            assertEquals(2008, localDate.getYear());
+            assertEquals(6, localDate.getMonthValue());
+            assertEquals(13, localDate.getDayOfMonth());
+        }
+    }
+
+    @Test
+    public void parseLocalDateError() {
+        assertThrows(Exception.class, () -> DateUtils.parseLocalDate("3 AAA 2008"));
+        assertThrows(Exception.class, () -> DateUtils.parseLocalDate("13 AAA 2008"));
     }
 }

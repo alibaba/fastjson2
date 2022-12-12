@@ -147,6 +147,8 @@ public class DateUtils {
                 return parseLocalDateTime18(str, off);
             case 19:
                 return parseLocalDateTime19(str, off);
+            case 20:
+                return parseLocalDateTime20(str, off);
             default:
                 return parseLocalDateTimeX(str, off, len);
         }
@@ -555,6 +557,23 @@ public class DateUtils {
 
             d0 = '0';
             d1 = c8;
+        } else if (c1 == ' ' && c5 == ' ') {
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
+
+            int month = DateUtils.month(c2, c3, c4);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String input = str.substring(off, off + 16);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
+
+            d0 = '0';
+            d1 = c0;
         } else {
             throw new DateTimeParseException("illegal input", str.substring(off, off + 10), 0);
         }
@@ -639,6 +658,23 @@ public class DateUtils {
 
             d0 = c8;
             d1 = c9;
+        } else if (c2 == ' ' && c6 == ' ') {
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            int month = DateUtils.month(c3, c4, c5);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String input = str.substring(off, off + 16);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
+
+            d0 = c0;
+            d1 = c1;
         } else {
             String input = str.substring(off, off + 11);
             throw new DateTimeParseException("illegal input " + input, input, 0);
@@ -1502,10 +1538,100 @@ public class DateUtils {
 
             s0 = c17;
             s1 = c18;
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c16 == ':') {
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
+
+            int month = DateUtils.month(c2, c3, c4);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = '0';
+            d1 = c0;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
         } else {
             String input = str.substring(off, off + 19);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
+
+        LocalDateTime ldt = localDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, '0', '0', '0', '0', '0', '0', '0', '0', '0');
+        if (ldt == null) {
+            String input = str.substring(off, off + 19);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        return ldt;
+    }
+
+    public static LocalDateTime parseLocalDateTime20(String str, int off) {
+        if (off + 19 > str.length()) {
+            String input = str.substring(off);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        char c0 = str.charAt(off + 0);
+        char c1 = str.charAt(off + 1);
+        char c2 = str.charAt(off + 2);
+        char c3 = str.charAt(off + 3);
+        char c4 = str.charAt(off + 4);
+        char c5 = str.charAt(off + 5);
+        char c6 = str.charAt(off + 6);
+        char c7 = str.charAt(off + 7);
+        char c8 = str.charAt(off + 8);
+        char c9 = str.charAt(off + 9);
+        char c10 = str.charAt(off + 10);
+        char c11 = str.charAt(off + 11);
+        char c12 = str.charAt(off + 12);
+        char c13 = str.charAt(off + 13);
+        char c14 = str.charAt(off + 14);
+        char c15 = str.charAt(off + 15);
+        char c16 = str.charAt(off + 16);
+        char c17 = str.charAt(off + 17);
+        char c18 = str.charAt(off + 18);
+        char c19 = str.charAt(off + 19);
+
+        char y0 = c7;
+        char y1 = c8;
+        char y2 = c9;
+        char y3 = c10;
+
+        char m0, m1;
+
+        int month = DateUtils.month(c3, c4, c5);
+        if (month > 0) {
+            m0 = (char) ('0' + month / 10);
+            m1 = (char) ('0' + (month % 10));
+        } else {
+            m0 = '0';
+            m1 = '0';
+        }
+
+        char d0 = c0;
+        char d1 = c1;
+
+        char h0 = c12;
+        char h1 = c13;
+
+        char i0 = c15;
+        char i1 = c16;
+
+        char s0 = c18;
+        char s1 = c19;
 
         LocalDateTime ldt = localDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, '0', '0', '0', '0', '0', '0', '0', '0', '0');
         if (ldt == null) {
