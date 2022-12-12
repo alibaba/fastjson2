@@ -1060,6 +1060,10 @@ abstract class JSONPathSegment {
             } else {
                 context.value = values;
             }
+            if (context.value instanceof List && context.next instanceof JSONPathFilter) {
+                context.value = new JSONPath.Sequence((List) context.value);
+            }
+
             context.eval = true;
         }
 
@@ -1097,7 +1101,6 @@ abstract class JSONPathSegment {
             public void accept(Object key, Object value) {
                 if (name.equals(key)) {
                     values.add(value);
-                    return;
                 }
 
                 if (value instanceof Map) {
@@ -1138,8 +1141,6 @@ abstract class JSONPathSegment {
                             Object fieldValue = fieldWriter.getFieldValue(value);
                             accept(fieldValue);
                         }
-
-                        return;
                     } else if (nameHashCode == HASH_STAR) {
                         values.add(value);
                     }
