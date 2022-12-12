@@ -866,7 +866,11 @@ abstract class JSONPathFilter
                         }
                     }
                 }
-                context.value = new JSONPath.Sequence(array);
+                if (context.next != null) {
+                    context.value = new JSONPath.Sequence(array);
+                } else {
+                    context.value = array;
+                }
                 return;
             }
 
