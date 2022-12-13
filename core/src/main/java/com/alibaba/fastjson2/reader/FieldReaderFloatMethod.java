@@ -32,9 +32,15 @@ final class FieldReaderFloatMethod<T>
 
     @Override
     public void accept(T object, Object value) {
+        Float floatValue = TypeUtils.toFloat(value);
+
+        if (schema != null) {
+            schema.assertValidate(floatValue);
+        }
+
         try {
             method.invoke(object,
-                    TypeUtils.toFloat(value));
+                    floatValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

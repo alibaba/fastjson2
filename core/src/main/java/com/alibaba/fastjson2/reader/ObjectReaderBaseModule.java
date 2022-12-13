@@ -1742,6 +1742,9 @@ public class ObjectReaderBaseModule
             }
 
             if (objectClass.isArray()) {
+                if (objectClass.getComponentType() == Object.class) {
+                    return ObjectArrayReader.INSTANCE;
+                }
                 return new ObjectArrayTypedReader(objectClass);
             }
 
