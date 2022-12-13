@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.reader.ObjectReader;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -30,6 +31,18 @@ public class InterfaceTest {
         Bean bean3 = JSONObject.of("item", map).toJavaObject(Bean.class);
         assertNotNull(bean3.item);
         assertEquals(234, bean3.item.getId());
+    }
+
+    @Test
+    public void test1() {
+        if (TestUtils.GRAALVM) {
+            return;
+        }
+
+        ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Item.class);
+        Item item = (Item) objectReader.createInstance(0L);
+        item.setId(123);
+        assertEquals(123, item.getId());
     }
 
     public static class Bean {
