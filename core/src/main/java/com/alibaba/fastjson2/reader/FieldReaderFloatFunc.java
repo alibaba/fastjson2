@@ -61,6 +61,6 @@ final class FieldReaderFloatFunc<T>
 
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
-        return jsonReader.readFloatValue();
+        return jsonReader.readFloat();
     }
 }

@@ -31,13 +31,14 @@ final class FieldReaderDoubleMethod<T>
 
     @Override
     public void accept(T object, Object value) {
+        Double doubleValue = TypeUtils.toDouble(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(doubleValue);
         }
 
         try {
-            method.invoke(object,
-                    TypeUtils.toDouble(value));
+            method.invoke(object, doubleValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

@@ -31,7 +31,7 @@ public final class ObjectArrayReader
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.readIfNull()) {
+        if (jsonReader.nextIfNullOrEmptyString()) {
             return null;
         }
 
@@ -97,15 +97,6 @@ public final class ObjectArrayReader
             jsonReader.nextIfMatch(',');
 
             return Arrays.copyOf(values, size);
-        }
-
-        if (jsonReader.isString()) {
-            String str = jsonReader.readString();
-            if (str.isEmpty()) {
-                return null;
-            }
-
-            throw new JSONException(jsonReader.info("not support input " + str));
         }
 
         throw new JSONException(jsonReader.info("TODO"));
