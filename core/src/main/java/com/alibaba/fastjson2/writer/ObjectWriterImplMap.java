@@ -608,15 +608,21 @@ public final class ObjectWriterImplMap
             }
 
             if (value == null) {
-                continue;
+                if ((jsonWriter.getFeatures(features) & JSONWriter.Feature.WriteNulls.mask) == 0) {
+                    continue;
+                }
             }
 
             jsonWriter.writeName(key);
             jsonWriter.writeColon();
 
-            Class<?> valueType = value.getClass();
-            ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueType);
-            valueWriter.write(jsonWriter, value, fieldName, fieldType, this.features);
+            if (value == null) {
+                jsonWriter.writeNull();
+            } else {
+                Class<?> valueType = value.getClass();
+                ObjectWriter valueWriter = jsonWriter.getObjectWriter(valueType);
+                valueWriter.write(jsonWriter, value, fieldName, fieldType, this.features);
+            }
         }
 
         if (afterFilter != null) {
