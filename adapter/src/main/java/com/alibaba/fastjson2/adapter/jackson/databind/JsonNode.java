@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.adapter.jackson.core.*;
 import com.alibaba.fastjson2.adapter.jackson.databind.jsontype.TypeSerializer;
 import com.alibaba.fastjson2.adapter.jackson.databind.node.JsonNodeType;
+import com.alibaba.fastjson2.annotation.JSONField;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -108,6 +109,7 @@ public abstract class JsonNode
         throw new JSONException("TODO");
     }
 
+    @JSONField(serialize = false)
     public JsonNodeType getNodeType() {
         throw new JSONException("TODO");
     }
@@ -194,7 +196,7 @@ public abstract class JsonNode
         return 0;
     }
 
-    public float doubleValue() {
+    public double doubleValue() {
         return 0;
     }
 

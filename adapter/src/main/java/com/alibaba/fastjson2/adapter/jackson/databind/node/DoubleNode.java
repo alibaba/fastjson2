@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.adapter.jackson.databind.node;
 
+import com.alibaba.fastjson2.adapter.jackson.core.JsonParser;
 import com.alibaba.fastjson2.annotation.JSONField;
 
 public class DoubleNode
@@ -8,6 +9,17 @@ public class DoubleNode
 
     public DoubleNode(@JSONField(name = "value", value = true) double value) {
         this.value = value;
+    }
+
+    @Override
+    public JsonParser.NumberType numberType() {
+        return JsonParser.NumberType.DOUBLE;
+    }
+
+    @Override
+    @JSONField(serialize = false)
+    public final JsonNodeType getNodeType() {
+        return JsonNodeType.NUMBER;
     }
 
     @JSONField(name = "value", value = true)

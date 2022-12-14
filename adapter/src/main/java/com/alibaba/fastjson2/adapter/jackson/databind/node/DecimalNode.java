@@ -32,6 +32,11 @@ public class DecimalNode
     public JsonParser.NumberType numberType() { return JsonParser.NumberType.BIG_DECIMAL; }
 
     @Override
+    public final JsonNodeType getNodeType() {
+        return JsonNodeType.NUMBER;
+    }
+
+    @Override
     public long longValue() {
         return value.longValue();
     }
