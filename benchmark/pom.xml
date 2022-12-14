@@ -21,7 +21,7 @@
             https://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html#skip
         -->
         <maven.deploy.skip>true</maven.deploy.skip>
-
+        <maven.test.skip>true</maven.test.skip>
         <uberjar.name>fastjson2-benchmarks</uberjar.name>
     </properties>
 
