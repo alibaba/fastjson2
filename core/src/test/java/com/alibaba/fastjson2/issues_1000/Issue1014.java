@@ -17,7 +17,12 @@ public class Issue1014 {
         String str = "{\"callTime\": \"2022-12-02T03:33:52.000+0000\"}";
         BizDTO bizDTO = JSON.parseObject(str, BizDTO.class, JSONReader.Feature.SupportSmartMatch);
         assertNotNull(bizDTO.getCalltime());
-        assertEquals(2022, bizDTO.calltime.getYear());
+        LocalDateTime calltime = bizDTO.calltime;
+        assertEquals(2022, calltime.getYear());
+        assertEquals(12, calltime.getMonthValue());
+        assertEquals(2, calltime.getDayOfMonth());
+        assertEquals(11, calltime.getHour());
+        assertEquals(33, calltime.getMinute());
     }
 
     @Data

@@ -907,7 +907,13 @@ public abstract class JSONReader
                     }
                     ZonedDateTime zdt = readZonedDateTimeX(len);
                     if (zdt != null) {
-                        return zdt.toLocalDateTime();
+                        ZoneId contextZoneId = context.getZoneId();
+                        if (!zdt.getZone().equals(contextZoneId)) {
+                            ldt = zdt.toInstant().atZone(contextZoneId).toLocalDateTime();
+                        } else {
+                            ldt = zdt.toLocalDateTime();
+                        }
+                        return ldt;
                     }
                     break;
                 default:
