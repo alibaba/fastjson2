@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.adapter.jackson.databind.node;
 
+import com.alibaba.fastjson2.adapter.jackson.core.JsonParser;
 import com.alibaba.fastjson2.annotation.JSONField;
 
 public class FloatNode
@@ -8,6 +9,16 @@ public class FloatNode
 
     public FloatNode(@JSONField(name = "value", value = true) float value) {
         this.value = value;
+    }
+
+    @Override
+    public JsonParser.NumberType numberType() {
+        return JsonParser.NumberType.FLOAT;
+    }
+
+    @Override
+    public final JsonNodeType getNodeType() {
+        return JsonNodeType.NUMBER;
     }
 
     @JSONField(name = "value", value = true)

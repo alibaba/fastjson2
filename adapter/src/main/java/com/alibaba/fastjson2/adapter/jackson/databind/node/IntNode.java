@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.adapter.jackson.databind.node;
 
+import com.alibaba.fastjson2.adapter.jackson.core.JsonParser;
 import com.alibaba.fastjson2.annotation.JSONField;
 
 import java.math.BigInteger;
@@ -15,6 +16,11 @@ public class IntNode
     @JSONField(name = "value", value = true)
     public int getValue() {
         return value;
+    }
+
+    @Override
+    public JsonParser.NumberType numberType() {
+        return JsonParser.NumberType.INT;
     }
 
     public int asInt(int defaultValue) {
@@ -42,6 +48,16 @@ public class IntNode
 
     @Override
     public int intValue() {
+        return value;
+    }
+
+    @Override
+    public double doubleValue() {
+        return value;
+    }
+
+    @Override
+    public float floatValue() {
         return value;
     }
 
