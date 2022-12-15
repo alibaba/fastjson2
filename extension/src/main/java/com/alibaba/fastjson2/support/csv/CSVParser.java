@@ -83,15 +83,11 @@ public abstract class CSVParser
         JSONReader.Context context = JSONFactory.createReadContext();
         ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
 
-        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
+        if (JVM_VERSION > 8 && STRING_VALUE != null) {
             try {
-                int coder = STRING_CODER != null
-                        ? STRING_CODER.applyAsInt(str)
-                        : UnsafeUtils.getStringCoder(str);
+                int coder = STRING_CODER.applyAsInt(str);
                 if (coder == 0) {
-                    byte[] bytes = STRING_VALUE != null
-                            ? STRING_VALUE.apply(str)
-                            : UnsafeUtils.getStringValue(str);
+                    byte[] bytes = STRING_VALUE.apply(str);
                     return new CSVParserUTF8(bytes, 0, bytes.length, objectReader);
                 }
             } catch (Exception e) {
@@ -156,15 +152,11 @@ public abstract class CSVParser
     }
 
     public static CSVParser of(String str, Type... types) {
-        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
+        if (JVM_VERSION > 8 && STRING_VALUE != null) {
             try {
-                int coder = STRING_CODER != null
-                        ? STRING_CODER.applyAsInt(str)
-                        : UnsafeUtils.getStringCoder(str);
+                int coder = STRING_CODER.applyAsInt(str);
                 if (coder == 0) {
-                    byte[] bytes = STRING_VALUE != null
-                            ? STRING_VALUE.apply(str)
-                            : UnsafeUtils.getStringValue(str);
+                    byte[] bytes = STRING_VALUE.apply(str);
                     return new CSVParserUTF8(bytes, 0, bytes.length, types);
                 }
             } catch (Exception e) {

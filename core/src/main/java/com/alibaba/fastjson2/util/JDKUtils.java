@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.util;
 
 import java.lang.invoke.*;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.nio.ByteOrder;
 import java.util.List;
@@ -129,6 +128,7 @@ public class JDKUtils {
                         handle.type()
                 );
                 stringCreatorJDK8 = (BiFunction<char[], Boolean, String>) callSite.getTarget().invokeExact();
+                stringCoder = (str) -> 1;
             }
 
             boolean lookupLambda;
@@ -211,20 +211,6 @@ public class JDKUtils {
             // ignored
         }
 
-        if (stringCreatorJDK11 == null
-                && unsafeSupport
-                && (compact_strings == null || compact_strings.booleanValue())
-                && !openj9
-        ) {
-            stringCreatorJDK11 = ((Supplier<BiFunction<byte[], Byte, String>>) () -> {
-                try {
-                    return (BiFunction<byte[], Byte, String>) new UnsafeUtils.UnsafeStringCreator();
-                } catch (Throwable e) {
-                    return null;
-                }
-            }).get();
-        }
-
         STRING_CREATOR_JDK8 = stringCreatorJDK8;
         STRING_CREATOR_JDK11 = stringCreatorJDK11;
         STRING_CODER = stringCoder;
@@ -254,21 +240,9 @@ public class JDKUtils {
         // GraalVM not support
         // Android not support
         Class lookupClass = MethodHandles.Lookup.class;
-        if (JVM_VERSION >= 15) {
-            Field implLookup = lookupClass.getDeclaredField("IMPL_LOOKUP");
-            long fieldOffset = UnsafeUtils.UNSAFE.staticFieldOffset(implLookup);
-            MethodHandles.Lookup lookup = (MethodHandles.Lookup) UnsafeUtils.UNSAFE.getObject(lookupClass, fieldOffset);
-            return lookup.in(String.class);
-        }
-
-        Constructor constructor = lookupClass.getDeclaredConstructor(
-                Class.class,
-                int.class
-        );
-        constructor.setAccessible(true);
-        return (MethodHandles.Lookup) constructor.newInstance(
-                String.class,
-                -1 // Lookup.TRUSTED
-        );
+        Field implLookup = lookupClass.getDeclaredField("IMPL_LOOKUP");
+        long fieldOffset = UnsafeUtils.UNSAFE.staticFieldOffset(implLookup);
+        MethodHandles.Lookup lookup = (MethodHandles.Lookup) UnsafeUtils.UNSAFE.getObject(lookupClass, fieldOffset);
+        return lookup.in(String.class);
     }
 }
