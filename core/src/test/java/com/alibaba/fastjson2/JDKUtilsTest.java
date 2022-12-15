@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
