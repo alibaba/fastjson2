@@ -1,13 +1,10 @@
 package com.alibaba.fastjson2.benchmark;
 
-import org.junit.jupiter.api.Test;
-
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
 
 public class GenReport {
-    @Test
     public void gen() throws Exception {
         File file = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.21_raw.md");
 
@@ -238,5 +235,10 @@ public class GenReport {
             this.lib = lib;
             this.score = score;
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+        GenReport gen = new GenReport();
+        gen.gen();
     }
 }
