@@ -2325,6 +2325,36 @@ public abstract class BeanUtils {
         });
     }
 
+    public static void processJacksonJsonInclude(BeanInfo beanInfo, Annotation annotation) {
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                switch (name) {
+                    case "value": {
+                        String include = ((Enum) result).name();
+                        switch (include) {
+                            case "ALWAYS":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNulls.mask;
+                                break;
+                            case "NON_DEFAULT":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteDefaultValue.mask;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
+    }
+
     public static void processJacksonJsonTypeName(BeanInfo beanInfo, Annotation annotation) {
         Class<? extends Annotation> annotationClass = annotation.getClass();
         BeanUtils.annotationMethods(annotationClass, m -> {
