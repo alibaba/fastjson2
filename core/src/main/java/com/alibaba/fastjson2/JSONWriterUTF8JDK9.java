@@ -1,7 +1,5 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.UnsafeUtils;
-
 import java.util.Arrays;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
