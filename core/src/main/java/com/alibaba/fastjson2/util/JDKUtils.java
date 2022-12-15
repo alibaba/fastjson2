@@ -242,7 +242,6 @@ public class JDKUtils {
         Class lookupClass = MethodHandles.Lookup.class;
         Field implLookup = lookupClass.getDeclaredField("IMPL_LOOKUP");
         long fieldOffset = UnsafeUtils.UNSAFE.staticFieldOffset(implLookup);
-        MethodHandles.Lookup lookup = (MethodHandles.Lookup) UnsafeUtils.UNSAFE.getObject(lookupClass, fieldOffset);
-        return lookup.in(String.class);
+        return (MethodHandles.Lookup) UnsafeUtils.UNSAFE.getObject(lookupClass, fieldOffset);
     }
 }
