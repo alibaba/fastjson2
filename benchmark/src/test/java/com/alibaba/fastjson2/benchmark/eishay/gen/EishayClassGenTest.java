@@ -4,14 +4,12 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.benchmark.eishay.EishayFuryParse;
 import com.alibaba.fastjson2.util.DynamicClassLoader;
 import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class EishayClassGenTest {
-    @Test
     public void test() throws Exception {
         DynamicClassLoader classLoader = DynamicClassLoader.getInstance();
         EishayClassGen gen = new EishayClassGen();
@@ -30,5 +28,10 @@ public class EishayClassGenTest {
         Object o = JSON.parseObject(str, objectClass);
         String str1 = JSON.toJSONString(o);
         assertNotNull(str1);
+    }
+
+    public static void main(String[] args) throws Exception {
+        EishayClassGenTest gen = new EishayClassGenTest();
+        gen.test();
     }
 }
