@@ -261,6 +261,12 @@ public class ObjectReaderBaseModule
                             processJacksonJsonFormat(beanInfo, annotation);
                         }
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonInclude":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonInclude":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonInclude(beanInfo, annotation);
+                        }
+                        break;
                     case "com.fasterxml.jackson.annotation.JsonSubTypes":
                     case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonSubTypes":
                         if (useJacksonAnnotation) {

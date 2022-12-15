@@ -117,6 +117,12 @@ public class ObjectWriterBaseModule
                             processJacksonJsonFormat(beanInfo, annotation);
                         }
                         break;
+                    case "com.fasterxml.jackson.annotation.JsonInclude":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonInclude":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonInclude(beanInfo, annotation);
+                        }
+                        break;
                     case "com.fasterxml.jackson.annotation.JsonTypeInfo":
                     case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonTypeInfo":
                         if (useJacksonAnnotation) {
@@ -353,6 +359,12 @@ public class ObjectWriterBaseModule
                     case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonFormat":
                         if (useJacksonAnnotation) {
                             processJacksonJsonFormat(fieldInfo, annotation);
+                        }
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonInclude":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonInclude":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonInclude(beanInfo, annotation);
                         }
                         break;
                     case "com.alibaba.fastjson2.adapter.jackson.databind.annotation.JsonSerialize":
