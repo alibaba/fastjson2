@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.util;
 
 import java.lang.invoke.*;
 import java.lang.reflect.Field;
-import java.math.BigInteger;
 import java.nio.ByteOrder;
 import java.util.function.*;
 
@@ -32,10 +31,8 @@ public class JDKUtils {
     public static final ToIntFunction<String> STRING_CODER;
     public static final Function<String, byte[]> STRING_VALUE;
     public static final MethodHandles.Lookup TRUSTED_LOOKUP;
-    public static final BiFunction<Integer, int[], BigInteger> BIG_INTEGER_CREATOR;
 
     static {
-        boolean openj9 = false;
         int jvmVersion = -1;
         try {
             String property = System.getProperty("java.specification.version");
@@ -45,7 +42,7 @@ public class JDKUtils {
             jvmVersion = Integer.parseInt(property);
 
             String jmvName = System.getProperty("java.vm.name");
-            openj9 = jmvName.contains("OpenJ9");
+            boolean openj9 = jmvName.contains("OpenJ9");
             if (openj9) {
                 FIELD_STRING_ERROR = true;
             }
@@ -144,8 +141,8 @@ public class JDKUtils {
                 stringCoder = (str) -> 1;
             }
 
-            boolean lookupLambda;
-            if (JVM_VERSION > 8) {
+            boolean lookupLambda = false;
+            if (JVM_VERSION > 8 && TRUSTED_LOOKUP != null) {
                 try {
                     Field compact_strings_field = String.class.getDeclaredField("COMPACT_STRINGS");
                     if (compact_strings_field != null) {
@@ -160,13 +157,10 @@ public class JDKUtils {
                 } catch (Throwable ignored) {
                     // ignored
                 }
-
                 lookupLambda = compact_strings != null && compact_strings.booleanValue();
-            } else {
-                lookupLambda = false;
             }
 
-            if (lookupLambda && TRUSTED_LOOKUP != null) {
+            if (lookupLambda) {
                 MethodHandles.Lookup caller = TRUSTED_LOOKUP.in(String.class);
                 MethodHandle handle = caller.findConstructor(
                         String.class, MethodType.methodType(void.class, byte[].class, byte.class)
@@ -222,29 +216,6 @@ public class JDKUtils {
         STRING_CREATOR_JDK11 = stringCreatorJDK11;
         STRING_CODER = stringCoder;
         STRING_VALUE = stringValue;
-
-        // private BigInteger(int signum, int[] magnitude) {
-        BiFunction<Integer, int[], BigInteger> bigIntegerCreator = null;
-        if (TRUSTED_LOOKUP != null) {
-            try {
-                MethodHandles.Lookup caller = TRUSTED_LOOKUP.in(BigInteger.class);
-                MethodHandle handle = caller.findConstructor(
-                        BigInteger.class, MethodType.methodType(void.class, int.class, int[].class)
-                );
-                CallSite callSite = LambdaMetafactory.metafactory(
-                        caller,
-                        "apply",
-                        MethodType.methodType(BiFunction.class),
-                        handle.type().generic(),
-                        handle,
-                        MethodType.methodType(BigInteger.class, Integer.class, int[].class)
-                );
-                bigIntegerCreator = (BiFunction<Integer, int[], BigInteger>) callSite.getTarget().invokeExact();
-            } catch (Throwable ignored) {
-                // ignored
-            }
-        }
-        BIG_INTEGER_CREATOR = bigIntegerCreator;
     }
 
     public static boolean isSQLDataSourceOrRowSet(Class<?> type) {

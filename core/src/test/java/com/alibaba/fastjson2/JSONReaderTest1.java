@@ -1912,6 +1912,8 @@ public class JSONReaderTest1 {
         long signumOffSet = UnsafeUtils.UNSAFE.objectFieldOffset(signumField);
         long magOffSet = UnsafeUtils.UNSAFE.objectFieldOffset(magField);
 
+        JSONReader.BigIntegerCreator bigIntegerCreator = new JSONReader.BigIntegerCreator();
+
         {
             BigInteger[] values = new BigInteger[] {
                     BigInteger.ZERO,
@@ -1925,8 +1927,8 @@ public class JSONReaderTest1 {
             for (BigInteger value : values) {
                 int signum = UnsafeUtils.UNSAFE.getInt(value, signumOffSet);
                 int[] mage = (int[]) UnsafeUtils.UNSAFE.getObject(value, magOffSet);
-                BigInteger value1 = JDKUtils.BIG_INTEGER_CREATOR.apply(signum, mage);
-                BigInteger value2 = JSONReader.getBigInt(false, mage);
+                BigInteger value1 = JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR.apply(signum, mage);
+                BigInteger value2 = bigIntegerCreator.apply(signum, mage);
                 assertEquals(value, value1);
                 assertEquals(value, value2);
             }
@@ -1944,8 +1946,8 @@ public class JSONReaderTest1 {
             for (BigInteger value : values) {
                 int signum = UnsafeUtils.UNSAFE.getInt(value, signumOffSet);
                 int[] mage = (int[]) UnsafeUtils.UNSAFE.getObject(value, magOffSet);
-                BigInteger value1 = JDKUtils.BIG_INTEGER_CREATOR.apply(signum, mage);
-                BigInteger value2 = JSONReader.getBigInt(true, mage);
+                BigInteger value1 = JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR.apply(signum, mage);
+                BigInteger value2 = bigIntegerCreator.apply(signum, mage);
                 assertEquals(value, value1);
                 assertEquals(value, value2);
             }
