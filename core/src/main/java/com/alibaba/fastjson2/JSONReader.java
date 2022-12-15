@@ -10,6 +10,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.invoke.*;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -21,10 +22,12 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
@@ -635,13 +638,8 @@ public abstract class JSONReader
                     mag = new int[]{mag0, mag1, mag2, mag3};
                 }
 
-                BigInteger bigInt;
-                if (BIG_INTEGER_CREATOR != null) {
-                    int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
-                    bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
-                } else {
-                    bigInt = getBigInt(negative, mag);
-                }
+                int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
                 return bigInt.longValue();
             case JSON_TYPE_DEC:
                 return getNumber().longValue();
@@ -2129,13 +2127,8 @@ public abstract class JSONReader
                     mag = new int[]{mag0, mag1, mag2, mag3};
                 }
 
-                BigInteger bigInt;
-                if (BIG_INTEGER_CREATOR != null) {
-                    int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
-                    bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
-                } else {
-                    bigInt = getBigInt(negative, mag);
-                }
+                int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
                 return new BigDecimal(bigInt);
             }
             case JSON_TYPE_DEC: {
@@ -2165,7 +2158,9 @@ public abstract class JSONReader
                             : new int[]{mag2, mag3}
                             : new int[]{mag1, mag2, mag3}
                             : new int[]{mag0, mag1, mag2, mag3};
-                    BigInteger bigInt = getBigInt(negative, mag);
+
+                    int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                    BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
                     decimal = new BigDecimal(bigInt, scale);
                 }
 
@@ -2249,14 +2244,8 @@ public abstract class JSONReader
                     mag = new int[]{mag0, mag1, mag2, mag3};
                 }
 
-                BigInteger bigInt;
-                if (BIG_INTEGER_CREATOR != null) {
-                    int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
-                    bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
-                } else {
-                    bigInt = getBigInt(negative, mag);
-                }
-                return bigInt;
+                int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                return BIG_INTEGER_CREATOR.apply(signum, mag);
             }
             case JSON_TYPE_INT16: {
                 if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
@@ -2416,13 +2405,8 @@ public abstract class JSONReader
                             : new int[]{mag2, mag3}
                             : new int[]{mag1, mag2, mag3}
                             : new int[]{mag0, mag1, mag2, mag3};
-                    BigInteger bigInt;
-                    if (BIG_INTEGER_CREATOR != null) {
-                        int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
-                        bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
-                    } else {
-                        bigInt = getBigInt(negative, mag);
-                    }
+                    int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                    BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
 
                     int adjustedScale = scale - exponent;
                     decimal = new BigDecimal(bigInt, adjustedScale);
@@ -2465,13 +2449,8 @@ public abstract class JSONReader
                         : new int[]{mag2, mag3}
                         : new int[]{mag1, mag2, mag3}
                         : new int[]{mag0, mag1, mag2, mag3};
-                BigInteger bigInt;
-                if (BIG_INTEGER_CREATOR != null) {
-                    int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
-                    bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
-                } else {
-                    bigInt = getBigInt(negative, mag);
-                }
+                int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
                 BigDecimal decimal = new BigDecimal(bigInt, scale);
 
                 if (valueType == JSON_TYPE_FLOAT) {
@@ -2511,72 +2490,6 @@ public abstract class JSONReader
 
     @Override
     public abstract void close();
-
-    static BigInteger getBigInt(boolean negative, int[] mag) {
-        int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
-        final int bitLength;
-        if (mag.length == 0) {
-            bitLength = 0; // offset by one to initialize
-        } else {
-            // Calculate the bit length of the magnitude
-            int bitLengthForInt = 32 - Integer.numberOfLeadingZeros(mag[0]);
-            int magBitLength = ((mag.length - 1) << 5) + bitLengthForInt;
-            if (signum < 0) {
-                // Check if magnitude is a power of two
-                boolean pow2 = (Integer.bitCount(mag[0]) == 1);
-                for (int i = 1; i < mag.length && pow2; i++) {
-                    pow2 = (mag[i] == 0);
-                }
-                bitLength = (pow2 ? magBitLength - 1 : magBitLength);
-            } else {
-                bitLength = magBitLength;
-            }
-        }
-        int byteLen = bitLength / 8 + 1;
-
-        byte[] bytes = new byte[byteLen];
-        for (int i = byteLen - 1, bytesCopied = 4, nextInt = 0, intIndex = 0; i >= 0; i--) {
-            if (bytesCopied == 4) {
-                // nextInt = getInt(intIndex++
-                int n = intIndex++;
-                if (n < 0) {
-                    nextInt = 0;
-                } else if (n >= mag.length) {
-                    nextInt = signum < 0 ? -1 : 0;
-                } else {
-                    int magInt = mag[mag.length - n - 1];
-                    if (signum >= 0) {
-                        nextInt = magInt;
-                    } else {
-                        int firstNonzeroIntNum;
-                        {
-                            int j;
-                            int mlen = mag.length;
-                            for (j = mlen - 1; j >= 0 && mag[j] == 0; j--) {
-                                // empty
-                            }
-                            firstNonzeroIntNum = mlen - j - 1;
-                        }
-
-                        if (n <= firstNonzeroIntNum) {
-                            nextInt = -magInt;
-                        } else {
-                            nextInt = ~magInt;
-                        }
-                    }
-                }
-
-                bytesCopied = 1;
-            } else {
-                nextInt >>>= 8;
-                bytesCopied++;
-            }
-            bytes[i] = (byte) nextInt;
-        }
-
-        BigInteger bigInt = new BigInteger(bytes);
-        return bigInt;
-    }
 
     protected final int toInt32(String val) {
         if (IOUtils.isNumber(val)) {
@@ -3703,6 +3616,104 @@ public abstract class JSONReader
         protected SavePoint(int offset, int current) {
             this.offset = offset;
             this.current = current;
+        }
+    }
+
+    static final class BigIntegerCreator
+            implements BiFunction<Integer, int[], BigInteger> {
+        static final BiFunction<Integer, int[], BigInteger> BIG_INTEGER_CREATOR;
+
+        static {
+            BiFunction<Integer, int[], BigInteger> bigIntegerCreator = null;
+            if (TRUSTED_LOOKUP != null) {
+                try {
+                    MethodHandles.Lookup caller = TRUSTED_LOOKUP.in(BigInteger.class);
+                    MethodHandle handle = caller.findConstructor(
+                            BigInteger.class, MethodType.methodType(void.class, int.class, int[].class)
+                    );
+                    CallSite callSite = LambdaMetafactory.metafactory(
+                            caller,
+                            "apply",
+                            MethodType.methodType(BiFunction.class),
+                            handle.type().generic(),
+                            handle,
+                            MethodType.methodType(BigInteger.class, Integer.class, int[].class)
+                    );
+                    bigIntegerCreator = (BiFunction<Integer, int[], BigInteger>) callSite.getTarget().invokeExact();
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            }
+            if (bigIntegerCreator == null) {
+                bigIntegerCreator = new BigIntegerCreator();
+            }
+            BIG_INTEGER_CREATOR = bigIntegerCreator;
+        }
+
+        @Override
+        public BigInteger apply(Integer integer, int[] mag) {
+            int signum = integer.intValue();
+            final int bitLength;
+            if (mag.length == 0) {
+                bitLength = 0; // offset by one to initialize
+            } else {
+                // Calculate the bit length of the magnitude
+                int bitLengthForInt = 32 - Integer.numberOfLeadingZeros(mag[0]);
+                int magBitLength = ((mag.length - 1) << 5) + bitLengthForInt;
+                if (signum < 0) {
+                    // Check if magnitude is a power of two
+                    boolean pow2 = (Integer.bitCount(mag[0]) == 1);
+                    for (int i = 1; i < mag.length && pow2; i++) {
+                        pow2 = (mag[i] == 0);
+                    }
+                    bitLength = (pow2 ? magBitLength - 1 : magBitLength);
+                } else {
+                    bitLength = magBitLength;
+                }
+            }
+            int byteLen = bitLength / 8 + 1;
+
+            byte[] bytes = new byte[byteLen];
+            for (int i = byteLen - 1, bytesCopied = 4, nextInt = 0, intIndex = 0; i >= 0; i--) {
+                if (bytesCopied == 4) {
+                    // nextInt = getInt(intIndex++
+                    int n = intIndex++;
+                    if (n < 0) {
+                        nextInt = 0;
+                    } else if (n >= mag.length) {
+                        nextInt = signum < 0 ? -1 : 0;
+                    } else {
+                        int magInt = mag[mag.length - n - 1];
+                        if (signum >= 0) {
+                            nextInt = magInt;
+                        } else {
+                            int firstNonzeroIntNum;
+                            {
+                                int j;
+                                int mlen = mag.length;
+                                for (j = mlen - 1; j >= 0 && mag[j] == 0; j--) {
+                                    // empty
+                                }
+                                firstNonzeroIntNum = mlen - j - 1;
+                            }
+
+                            if (n <= firstNonzeroIntNum) {
+                                nextInt = -magInt;
+                            } else {
+                                nextInt = ~magInt;
+                            }
+                        }
+                    }
+
+                    bytesCopied = 1;
+                } else {
+                    nextInt >>>= 8;
+                    bytesCopied++;
+                }
+                bytes[i] = (byte) nextInt;
+            }
+
+            return new BigInteger(bytes);
         }
     }
 }

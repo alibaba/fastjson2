@@ -86,8 +86,8 @@ public class BigDecimal20TreeTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2_test();
-        fastjson2_jsonb_test();
+        fastjson2_test();
+//        fastjson2_jsonb_test();
 //        jackson_perf_test();
     }
 }
