@@ -1,11 +1,9 @@
 package com.alibaba.fastjson2.util;
 
 import java.lang.invoke.*;
-import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.nio.ByteOrder;
-import java.util.List;
 import java.util.function.*;
 
 public class JDKUtils {
@@ -147,7 +145,7 @@ public class JDKUtils {
             }
 
             boolean lookupLambda;
-            if (JVM_VERSION > 8 && !openj9) {
+            if (JVM_VERSION > 8) {
                 try {
                     Field compact_strings_field = String.class.getDeclaredField("COMPACT_STRINGS");
                     if (compact_strings_field != null) {
@@ -165,15 +163,7 @@ public class JDKUtils {
 
                 lookupLambda = compact_strings != null && compact_strings.booleanValue();
             } else {
-                List<String> inputArguments = ManagementFactory
-                        .getRuntimeMXBean()
-                        .getInputArguments();
-                lookupLambda = inputArguments.contains("--add-opens=java.base/java.lang.invoke=ALL-UNNAMED")
-                        || inputArguments.contains("--add-opens=java.base/java.lang.invoke=com.alibaba.fastjson2");
-                compact_strings = !inputArguments.contains("-XX:-CompactStrings");
-                if (lookupLambda && compact_strings != null && !compact_strings) {
-                    lookupLambda = false;
-                }
+                lookupLambda = false;
             }
 
             if (lookupLambda && TRUSTED_LOOKUP != null) {
@@ -251,7 +241,6 @@ public class JDKUtils {
                 );
                 bigIntegerCreator = (BiFunction<Integer, int[], BigInteger>) callSite.getTarget().invokeExact();
             } catch (Throwable ignored) {
-                ignored.printStackTrace();
                 // ignored
             }
         }
