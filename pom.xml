@@ -35,7 +35,7 @@
         <jackson.version>2.14.1</jackson.version>
         <jetty.version>11.0.12</jetty.version>
         <jersey.version>2.37</jersey.version>
-        <springframework.version>5.3.23</springframework.version>
+        <springframework.version>6.0.3</springframework.version>
 
         <kotlin.version>1.7.22</kotlin.version>
         <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
