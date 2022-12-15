@@ -2541,7 +2541,8 @@ public abstract class JSONReader
             bytes[i] = (byte) nextInt;
         }
 
-        return new BigInteger(bytes);
+        BigInteger bigInt = new BigInteger(bytes);
+        return bigInt;
     }
 
     protected final int toInt32(String val) {
