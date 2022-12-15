@@ -113,7 +113,7 @@ public class JDKUtils {
         Boolean compact_strings = null;
         try {
             if (JVM_VERSION == 8) {
-                MethodHandles.Lookup lookup = getLookup();
+                MethodHandles.Lookup lookup = trustedLookup();
                 MethodHandles.Lookup caller = lookup.in(String.class);
 
                 MethodHandle handle = caller.findConstructor(
@@ -154,8 +154,8 @@ public class JDKUtils {
             }
 
             if (lookupLambda) {
-                MethodHandles.Lookup lookup = getLookup();
-                MethodHandles.Lookup caller = lookup.in(String.class);
+                MethodHandles.Lookup trustedLookup = trustedLookup();
+                MethodHandles.Lookup caller = trustedLookup.in(String.class);
                 MethodHandle handle = caller.findConstructor(
                         String.class, MethodType.methodType(void.class, byte[].class, byte.class)
                 );
@@ -169,8 +169,7 @@ public class JDKUtils {
                 );
                 stringCreatorJDK11 = (BiFunction<byte[], Byte, String>) callSite.getTarget().invokeExact();
 
-                MethodHandles.Lookup stringCaller = lookup.in(String.class);
-
+                MethodHandles.Lookup stringCaller = trustedLookup.in(String.class);
                 MethodHandle coder = stringCaller.findSpecial(
                         String.class,
                         "coder",
@@ -245,46 +244,32 @@ public class JDKUtils {
 
         return str.toCharArray();
     }
-//
-//    public static BiFunction<byte[], java.nio.charset.Charset, String> getStringCreatorJDK17() throws Throwable {
-//        MethodHandles.Lookup lookup = getLookup();
-//
-//        MethodHandles.Lookup caller = lookup.in(String.class);
-//        MethodHandle handle = caller.findStatic(
-//                String.class, "newStringNoRepl1", MethodType.methodType(String.class, byte[].class, Charset.class)
-//        );
-//
-//        CallSite callSite = LambdaMetafactory.metafactory(
-//                caller,
-//                "apply",
-//                MethodType.methodType(BiFunction.class),
-//                handle.type().generic(),
-//                handle,
-//                handle.type()
-//        );
-//        return (BiFunction<byte[], java.nio.charset.Charset, String>) callSite.getTarget().invokeExact();
-//    }
 
-    static MethodHandles.Lookup getLookup() throws Exception {
+    static MethodHandles.Lookup trustedLookup() throws Exception {
         // GraalVM not support
         // Android not support
-        MethodHandles.Lookup lookup;
+        Class lookupClass = MethodHandles.Lookup.class;
         if (JVM_VERSION >= 15) {
-            Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, Class.class, int.class);
+            Constructor constructor = lookupClass.getDeclaredConstructor(
+                    Class.class,
+                    Class.class, int.class
+            );
             constructor.setAccessible(true);
-            lookup = constructor.newInstance(
+            return (MethodHandles.Lookup) constructor.newInstance(
                     String.class,
                     null,
                     -1 // Lookup.TRUSTED
             );
-        } else {
-            Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
-            constructor.setAccessible(true);
-            lookup = constructor.newInstance(
-                    String.class,
-                    -1 // Lookup.TRUSTED
-            );
         }
-        return lookup;
+
+        Constructor constructor = lookupClass.getDeclaredConstructor(
+                Class.class,
+                int.class
+        );
+        constructor.setAccessible(true);
+        return (MethodHandles.Lookup) constructor.newInstance(
+                String.class,
+                -1 // Lookup.TRUSTED
+        );
     }
 }
