@@ -12,7 +12,7 @@ public class UnsafeUtils {
     public static final Unsafe UNSAFE;
 
     static long STRING_CODER_OFFSET;
-    public static long STRING_VALUE_OFFSET;
+    static long STRING_VALUE_OFFSET;
 
     static {
         Unsafe unsafe = null;
