@@ -132,12 +132,17 @@ public class JDKUtils {
             }
 
             boolean lookupLambda;
-            if (JVM_VERSION > 8 && JVM_VERSION < 16 && !openj9) {
+            if (JVM_VERSION > 8 && !openj9) {
                 try {
                     Field compact_strings_field = String.class.getDeclaredField("COMPACT_STRINGS");
                     if (compact_strings_field != null) {
-                        compact_strings_field.setAccessible(true);
-                        compact_strings = (Boolean) compact_strings_field.get(null);
+                        if (UNSAFE_SUPPORT) {
+                            long fieldOffset = UnsafeUtils.UNSAFE.staticFieldOffset(compact_strings_field);
+                            compact_strings = UnsafeUtils.UNSAFE.getBoolean(String.class, fieldOffset);
+                        } else {
+                            compact_strings_field.setAccessible(true);
+                            compact_strings = (Boolean) compact_strings_field.get(null);
+                        }
                     }
                 } catch (Throwable ignored) {
                     // ignored
@@ -250,16 +255,10 @@ public class JDKUtils {
         // Android not support
         Class lookupClass = MethodHandles.Lookup.class;
         if (JVM_VERSION >= 15) {
-            Constructor constructor = lookupClass.getDeclaredConstructor(
-                    Class.class,
-                    Class.class, int.class
-            );
-            constructor.setAccessible(true);
-            return (MethodHandles.Lookup) constructor.newInstance(
-                    String.class,
-                    null,
-                    -1 // Lookup.TRUSTED
-            );
+            Field implLookup = lookupClass.getDeclaredField("IMPL_LOOKUP");
+            long fieldOffset = UnsafeUtils.UNSAFE.staticFieldOffset(implLookup);
+            MethodHandles.Lookup lookup = (MethodHandles.Lookup) UnsafeUtils.UNSAFE.getObject(lookupClass, fieldOffset);
+            return lookup.in(String.class);
         }
 
         Constructor constructor = lookupClass.getDeclaredConstructor(
