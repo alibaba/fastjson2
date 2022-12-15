@@ -2,13 +2,12 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.FieldReader;
-import com.alibaba.fastjson2.util.DateUtils;
-import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2_vo.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -1904,5 +1903,52 @@ public class JSONReaderTest1 {
 
         long millis = DateUtils.millis(zoneId, year, month, dom, hour, minute, 0, 0);
         assertEquals(epochMilli, millis, ldt.toString());
+    }
+
+    @Test
+    public void getBigInt() throws Exception {
+        Field signumField = BigInteger.class.getDeclaredField("signum");
+        Field magField = BigInteger.class.getDeclaredField("mag");
+        long signumOffSet = UnsafeUtils.UNSAFE.objectFieldOffset(signumField);
+        long magOffSet = UnsafeUtils.UNSAFE.objectFieldOffset(magField);
+
+        {
+            BigInteger[] values = new BigInteger[] {
+                    BigInteger.ZERO,
+                    BigInteger.ONE,
+                    BigInteger.TEN,
+                    new BigInteger("21474836481"),
+                    new BigInteger("12345678901234567890"),
+                    new BigInteger("1234567890123456789012345678901234567890"),
+                    new BigInteger("12345678901234567890123456789012345678901234567890123456789012345678901234567890")
+            };
+            for (BigInteger value : values) {
+                int signum = UnsafeUtils.UNSAFE.getInt(value, signumOffSet);
+                int[] mage = (int[]) UnsafeUtils.UNSAFE.getObject(value, magOffSet);
+                BigInteger value1 = JDKUtils.BIG_INTEGER_CREATOR.apply(signum, mage);
+                BigInteger value2 = JSONReader.getBigInt(false, mage);
+                assertEquals(value, value1);
+                assertEquals(value, value2);
+            }
+        }
+        {
+            BigInteger[] values = new BigInteger[] {
+                    new BigInteger("-1"),
+                    new BigInteger("-10"),
+                    new BigInteger("-100"),
+                    new BigInteger("-21474836481"),
+                    new BigInteger("-12345678901234567890"),
+                    new BigInteger("-1234567890123456789012345678901234567890"),
+                    new BigInteger("-12345678901234567890123456789012345678901234567890123456789012345678901234567890")
+            };
+            for (BigInteger value : values) {
+                int signum = UnsafeUtils.UNSAFE.getInt(value, signumOffSet);
+                int[] mage = (int[]) UnsafeUtils.UNSAFE.getObject(value, magOffSet);
+                BigInteger value1 = JDKUtils.BIG_INTEGER_CREATOR.apply(signum, mage);
+                BigInteger value2 = JSONReader.getBigInt(true, mage);
+                assertEquals(value, value1);
+                assertEquals(value, value2);
+            }
+        }
     }
 }

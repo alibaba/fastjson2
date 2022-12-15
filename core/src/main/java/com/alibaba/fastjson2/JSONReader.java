@@ -635,7 +635,14 @@ public abstract class JSONReader
                     mag = new int[]{mag0, mag1, mag2, mag3};
                 }
 
-                return getBigInt(negative, mag).longValue();
+                BigInteger bigInt;
+                if (BIG_INTEGER_CREATOR != null) {
+                    int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                    bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
+                } else {
+                    bigInt = getBigInt(negative, mag);
+                }
+                return bigInt.longValue();
             case JSON_TYPE_DEC:
                 return getNumber().longValue();
             case JSON_TYPE_BOOL:
@@ -2122,7 +2129,14 @@ public abstract class JSONReader
                     mag = new int[]{mag0, mag1, mag2, mag3};
                 }
 
-                return new BigDecimal(getBigInt(negative, mag));
+                BigInteger bigInt;
+                if (BIG_INTEGER_CREATOR != null) {
+                    int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                    bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
+                } else {
+                    bigInt = getBigInt(negative, mag);
+                }
+                return new BigDecimal(bigInt);
             }
             case JSON_TYPE_DEC: {
                 BigDecimal decimal = null;
@@ -2235,7 +2249,14 @@ public abstract class JSONReader
                     mag = new int[]{mag0, mag1, mag2, mag3};
                 }
 
-                return getBigInt(negative, mag);
+                BigInteger bigInt;
+                if (BIG_INTEGER_CREATOR != null) {
+                    int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                    bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
+                } else {
+                    bigInt = getBigInt(negative, mag);
+                }
+                return bigInt;
             }
             case JSON_TYPE_INT16: {
                 if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
@@ -2395,7 +2416,14 @@ public abstract class JSONReader
                             : new int[]{mag2, mag3}
                             : new int[]{mag1, mag2, mag3}
                             : new int[]{mag0, mag1, mag2, mag3};
-                    BigInteger bigInt = getBigInt(negative, mag);
+                    BigInteger bigInt;
+                    if (BIG_INTEGER_CREATOR != null) {
+                        int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                        bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
+                    } else {
+                        bigInt = getBigInt(negative, mag);
+                    }
+
                     int adjustedScale = scale - exponent;
                     decimal = new BigDecimal(bigInt, adjustedScale);
 
@@ -2437,7 +2465,13 @@ public abstract class JSONReader
                         : new int[]{mag2, mag3}
                         : new int[]{mag1, mag2, mag3}
                         : new int[]{mag0, mag1, mag2, mag3};
-                BigInteger bigInt = getBigInt(negative, mag);
+                BigInteger bigInt;
+                if (BIG_INTEGER_CREATOR != null) {
+                    int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                    bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
+                } else {
+                    bigInt = getBigInt(negative, mag);
+                }
                 BigDecimal decimal = new BigDecimal(bigInt, scale);
 
                 if (valueType == JSON_TYPE_FLOAT) {
@@ -2480,7 +2514,6 @@ public abstract class JSONReader
 
     static BigInteger getBigInt(boolean negative, int[] mag) {
         int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
-
         final int bitLength;
         if (mag.length == 0) {
             bitLength = 0; // offset by one to initialize
