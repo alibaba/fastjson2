@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.alibaba.fastjson2.util.JDKUtils.LATIN1;
 import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK11;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class JDKUtilsTest {
     @Test
@@ -14,6 +14,11 @@ public class JDKUtilsTest {
         }
 
         String str = "abc";
-        assertEquals(str, STRING_CREATOR_JDK11.apply(str.getBytes(), LATIN1));
+        byte[] value = JDKUtils.STRING_VALUE.apply(str);
+
+        String str1 = STRING_CREATOR_JDK11.apply(value, LATIN1);
+        byte[] value1 = JDKUtils.STRING_VALUE.apply(str1);
+
+        assertSame(value, value1);
     }
 }
