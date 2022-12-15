@@ -32,12 +32,8 @@ final class JSONWriterUTF8JDK9
 
         final boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
 
-        int coder = STRING_CODER != null
-                ? STRING_CODER.applyAsInt(str)
-                : UnsafeUtils.getStringCoder(str);
-        byte[] value = STRING_VALUE != null
-                ? STRING_VALUE.apply(str)
-                : UnsafeUtils.getStringValue(str);
+        int coder = STRING_CODER.applyAsInt(str);
+        byte[] value = STRING_VALUE.apply(str);
 
         if (coder == 0) {
             boolean escape = false;

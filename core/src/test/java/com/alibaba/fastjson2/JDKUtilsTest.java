@@ -37,14 +37,14 @@ public class JDKUtilsTest {
 
     @Test
     public void test_unsafe_isAscii() throws Throwable {
-        assertEquals(1, UnsafeUtils.getStringCoder("中国"));
+        assertEquals(1, STRING_CODER.applyAsInt("中国"));
 
         String str1 = "abc";
         if (JVM_VERSION == 8) {
-            assertEquals(1, UnsafeUtils.getStringCoder(str1));
-        } else if (!OPEN_J9) {
-            assertEquals(0, UnsafeUtils.getStringCoder(str1));
-            byte[] value = UnsafeUtils.getStringValue(str1);
+            assertEquals(1, STRING_CODER.applyAsInt(str1));
+        } else if (STRING_VALUE != null && !OPEN_J9) {
+            assertEquals(0, STRING_CODER.applyAsInt(str1));
+            byte[] value = STRING_VALUE.apply(str1);
             assertNotNull(value);
             assertArrayEquals(str1.getBytes(StandardCharsets.UTF_8), value);
         }

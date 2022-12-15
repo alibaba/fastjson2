@@ -2812,15 +2812,11 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
+        if (JVM_VERSION > 8 && STRING_VALUE != null) {
             try {
-                int coder = STRING_CODER != null
-                        ? STRING_CODER.applyAsInt(str)
-                        : UnsafeUtils.getStringCoder(str);
+                int coder = STRING_CODER.applyAsInt(str);
                 if (coder == 0) {
-                    byte[] bytes = STRING_VALUE != null
-                            ? STRING_VALUE.apply(str)
-                            : UnsafeUtils.getStringValue(str);
+                    byte[] bytes = STRING_VALUE.apply(str);
                     return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
                 }
             } catch (Exception e) {
@@ -2844,15 +2840,11 @@ public abstract class JSONReader
             throw new NullPointerException();
         }
 
-        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
+        if (JVM_VERSION > 8 && STRING_VALUE != null) {
             try {
-                int coder = STRING_CODER != null
-                        ? STRING_CODER.applyAsInt(str)
-                        : UnsafeUtils.getStringCoder(str);
+                int coder = STRING_CODER.applyAsInt(str);
                 if (coder == 0) {
-                    byte[] bytes = STRING_VALUE != null
-                            ? STRING_VALUE.apply(str)
-                            : UnsafeUtils.getStringValue(str);
+                    byte[] bytes = STRING_VALUE.apply(str);
                     return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
                 }
             } catch (Exception e) {
@@ -2877,15 +2869,11 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
+        if (JVM_VERSION > 8 && STRING_VALUE != null) {
             try {
-                int coder = STRING_CODER != null
-                        ? STRING_CODER.applyAsInt(str)
-                        : UnsafeUtils.getStringCoder(str);
+                int coder = STRING_CODER.applyAsInt(str);
                 if (coder == 0) {
-                    byte[] bytes = STRING_VALUE != null
-                            ? STRING_VALUE.apply(str)
-                            : UnsafeUtils.getStringValue(str);
+                    byte[] bytes = STRING_VALUE.apply(str);
                     return new JSONReaderASCII(context, str, bytes, offset, length);
                 }
             } catch (Exception e) {
@@ -2908,15 +2896,11 @@ public abstract class JSONReader
             throw new NullPointerException();
         }
 
-        if (JVM_VERSION > 8 && UNSAFE_SUPPORT) {
+        if (JVM_VERSION > 8 && STRING_VALUE != null) {
             try {
-                int coder = STRING_CODER != null
-                        ? STRING_CODER.applyAsInt(str)
-                        : UnsafeUtils.getStringCoder(str);
+                int coder = STRING_CODER.applyAsInt(str);
                 if (coder == 0) {
-                    byte[] bytes = STRING_VALUE != null
-                            ? STRING_VALUE.apply(str)
-                            : UnsafeUtils.getStringValue(str);
+                    byte[] bytes = STRING_VALUE.apply(str);
                     return new JSONReaderASCII(context, str, bytes, offset, length);
                 }
             } catch (Exception e) {

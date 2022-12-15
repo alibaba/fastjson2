@@ -19,6 +19,8 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.NotWriteDefaultValue;
 import static com.alibaba.fastjson2.util.IOUtils.*;
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_CODER;
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_VALUE;
 
 class JSONWriterUTF16
         extends JSONWriter {
@@ -209,10 +211,10 @@ class JSONWriterUTF16
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
         boolean escape = false;
 
-        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
-            byte coder = UnsafeUtils.getStringCoder(str);
+        if (JDKUtils.JVM_VERSION > 8 && STRING_VALUE != null) {
+            int coder = STRING_CODER.applyAsInt(str);
             if (coder == 0) {
-                byte[] value = UnsafeUtils.getStringValue(str);
+                byte[] value = STRING_VALUE.apply(str);
                 int minCapacity = off + value.length + 2;
                 if (minCapacity - chars.length > 0) {
                     int oldCapacity = chars.length;

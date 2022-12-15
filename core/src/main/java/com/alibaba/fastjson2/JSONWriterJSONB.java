@@ -530,7 +530,7 @@ final class JSONWriterJSONB
             final int LATIN = 0;
             boolean latinAll = true;
 
-            if (STRING_CODER != null && STRING_VALUE != null) {
+            if (STRING_VALUE != null) {
                 for (int i = 0; i < size; i++) {
                     String str = list.get(i);
                     if (str == null) {
@@ -560,36 +560,6 @@ final class JSONWriterJSONB
                 if (latinAll) {
                     return;
                 }
-            } else if (UNSAFE_SUPPORT) {
-                for (int i = 0; i < size; i++) {
-                    String str = list.get(i);
-                    if (str == null) {
-                        writeNull();
-                    }
-                    int coder = UnsafeUtils.getStringCoder(str);
-                    if (coder != LATIN) {
-                        latinAll = false;
-                        off = mark;
-                        break;
-                    }
-                    int strlen = str.length();
-                    if (strlen <= STR_ASCII_FIX_LEN) {
-                        bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
-                    } else if (strlen >= INT32_BYTE_MIN && strlen <= INT32_BYTE_MAX) {
-                        bytes[off++] = BC_STR_ASCII;
-                        bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (strlen >> 8));
-                        bytes[off++] = (byte) (strlen);
-                    } else {
-                        bytes[off++] = BC_STR_ASCII;
-                        writeInt32(strlen);
-                    }
-                    byte[] value = UnsafeUtils.getStringValue(str);
-                    System.arraycopy(value, 0, bytes, off, value.length);
-                    off += strlen;
-                }
-                if (latinAll) {
-                    return;
-                }
             }
         }
 
@@ -606,13 +576,9 @@ final class JSONWriterJSONB
             return;
         }
 
-        if (JVM_VERSION > 8 && (UNSAFE_SUPPORT || STRING_CODER != null)) {
-            int coder = STRING_CODER != null
-                    ? STRING_CODER.applyAsInt(str)
-                    : UnsafeUtils.getStringCoder(str);
-            byte[] value = STRING_VALUE != null
-                    ? STRING_VALUE.apply(str)
-                    : UnsafeUtils.getStringValue(str);
+        if (JVM_VERSION > 8 && STRING_VALUE != null) {
+            int coder = STRING_CODER.applyAsInt(str);
+            byte[] value = STRING_VALUE.apply(str);
 
             if (coder == 0) {
                 int strlen = str.length();

@@ -17,8 +17,7 @@ import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.CACHE_SIZE;
-import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 /**
  * x92          # type_char int
@@ -906,10 +905,10 @@ public interface JSONB {
                     return bytes;
                 }
             }
-        } else if (UNSAFE_SUPPORT) {
-            int coder = UnsafeUtils.getStringCoder(str);
+        } else if (STRING_VALUE != null) {
+            int coder = STRING_CODER.applyAsInt(str);
             if (coder == 0) {
-                byte[] value = UnsafeUtils.getStringValue(str);
+                byte[] value = STRING_VALUE.apply(str);
                 int strlen = value.length;
                 if (strlen <= STR_ASCII_FIX_LEN) {
                     byte[] bytes = new byte[value.length + 1];
