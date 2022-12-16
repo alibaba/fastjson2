@@ -26,7 +26,6 @@ public class ObjectReaderCreatorLambda
     private static final Map<Class, MethodType> methodTypeMapping = new HashMap<>();
     private static final MethodType METHODTYPE_BiFunction = MethodType.methodType(BiConsumer.class);
     private static final MethodType METHODTYPE_Function = MethodType.methodType(Function.class);
-    private static final MethodType METHODTYPE_VOID = MethodType.methodType(void.class);
 
     static {
         classFunctionMapping.put(boolean.class, ObjBoolConsumer.class);
@@ -85,7 +84,7 @@ public class ObjectReaderCreatorLambda
 
         final Supplier<T> supplier;
         try {
-            supplier = lambdaConstrunctor(objectClass);
+            supplier = lambdaConstructor(objectClass);
         } catch (IllegalAccessException | NoSuchMethodException ignored) {
             return super.createObjectReader(objectClass, objectType, fieldBased, provider);
         } catch (Throwable e) {
@@ -198,10 +197,8 @@ public class ObjectReaderCreatorLambda
         fieldReaders.values().toArray(fieldReaderArray);
         Arrays.sort(fieldReaderArray);
 
-        Supplier<T> creator = createInstanceSupplier(objectClass);
-
         if (beanInfo.seeAlso != null && beanInfo.seeAlso.length != 0) {
-            return createObjectReaderSeeAlso(objectClass, creator, beanInfo.typeKey, beanInfo.seeAlso, beanInfo.seeAlsoNames, fieldReaderArray);
+            return createObjectReaderSeeAlso(objectClass, beanInfo.typeKey, beanInfo.seeAlso, beanInfo.seeAlsoNames, fieldReaderArray);
         }
 
         return createObjectReader(objectClass, beanInfo.readerFeatures, supplier, null, fieldReaderArray);
@@ -377,7 +374,7 @@ public class ObjectReaderCreatorLambda
         }
     }
 
-    static <T> Supplier<T> lambdaConstrunctor(Class<T> objectType) throws Throwable {
+    static <T> Supplier<T> lambdaConstructor(Class<T> objectType) throws Throwable {
         if (objectType == List.class) {
             return () -> (T) new ArrayList();
         }

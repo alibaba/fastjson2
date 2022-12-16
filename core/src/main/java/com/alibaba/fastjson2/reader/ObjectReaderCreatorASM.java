@@ -26,8 +26,7 @@ import java.util.function.*;
 import static com.alibaba.fastjson2.internal.asm.Opcodes.ALOAD;
 import static com.alibaba.fastjson2.internal.asm.Opcodes.PUTFIELD;
 import static com.alibaba.fastjson2.reader.ObjectReader.HASH_TYPE;
-import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public class ObjectReaderCreatorASM
         extends ObjectReaderCreator {
@@ -394,7 +393,6 @@ public class ObjectReaderCreatorASM
             return super.createObjectReader(objectClass, objectType, fieldBased, provider);
         }
 
-        Supplier<T> supplier = null;
         Constructor defaultConstructor = null;
         if (!Modifier.isInterface(objectClassModifiers) && !Modifier.isAbstract(objectClassModifiers)) {
             Constructor constructor = BeanUtils.getDefaultConstructor(objectClass, true);
@@ -402,7 +400,6 @@ public class ObjectReaderCreatorASM
                 defaultConstructor = constructor;
                 try {
                     constructor.setAccessible(true);
-                    supplier = createInstanceSupplier(constructor);
                 } catch (SecurityException ignored) {
                     // ignored
                 }
@@ -410,11 +407,11 @@ public class ObjectReaderCreatorASM
         }
 
         if (beanInfo.seeAlso != null && beanInfo.seeAlso.length != 0) {
-            return createObjectReaderSeeAlso(objectClass, supplier, beanInfo.typeKey, beanInfo.seeAlso, beanInfo.seeAlsoNames, fieldReaderArray);
+            return createObjectReaderSeeAlso(objectClass, beanInfo.typeKey, beanInfo.seeAlso, beanInfo.seeAlsoNames, fieldReaderArray);
         }
 
         if (!fieldBased) {
-            if (supplier == null) {
+            if (defaultConstructor == null) {
                 return super.createObjectReader(objectClass, objectType, fieldBased, provider);
             }
         }
@@ -561,6 +558,13 @@ public class ObjectReaderCreatorASM
             }
         }
 
+        Supplier<T> supplier = null;
+        if (defaultConstructor != null) {
+            boolean publicObject = Modifier.isPublic(objectClassModifiers) && !classLoader.isExternalClass(objectClass);
+            boolean jit = !publicObject || !Modifier.isPublic(defaultConstructor.getModifiers());
+            supplier = createInstanceSupplier(defaultConstructor, jit);
+        }
+
         if (generatedFields) {
             long readerFeatures = beanInfo.readerFeatures;
             if (fieldBased) {
@@ -572,7 +576,7 @@ public class ObjectReaderCreatorASM
             genMethodReadJSONBObject(objectClass, defaultConstructor, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, classNameType, objectReaderAdapter);
             genMethodReadJSONBObjectArrayMapping(objectClass, defaultConstructor, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, classNameType, objectReaderAdapter);
 
-            genMethodReadObject(objectClass, defaultConstructor, readerFeatures, TYPE_OBJECT, supplier, fieldReaderArray, cw, classNameType, objectReaderAdapter);
+            genMethodReadObject(objectClass, defaultConstructor, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, classNameType, objectReaderAdapter);
 
             if (objectReaderSuper == TYPE_OBJECT_READER_ADAPTER) {
                 genMethodGetFieldReader(fieldReaderArray, cw, classNameType, objectReaderAdapter);
@@ -967,7 +971,7 @@ public class ObjectReaderCreatorASM
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "startArray", "()I", false);
             mw.visitVarInsn(Opcodes.ISTORE, ENTRY_CNT);
 
-            genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
+            genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
             mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
             Label fieldEnd_ = new Label();
@@ -1007,14 +1011,14 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(object_);
 
-        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
+        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfObjectStart", "()Z", false);
         mw.visitInsn(Opcodes.POP);
 
-        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
+        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
         // for (int i = 0; i < entry_cnt; ++i) {
@@ -1352,7 +1356,7 @@ public class ObjectReaderCreatorASM
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "startArray", "()I", false);
         mw.visitVarInsn(Opcodes.ISTORE, ENTRY_CNT);
 
-        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
+        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
         Label fieldEnd_ = new Label();
@@ -1433,7 +1437,6 @@ public class ObjectReaderCreatorASM
             Constructor defaultConstructor,
             long readerFeatures,
             String TYPE_OBJECT,
-            Supplier<T> supplier,
             FieldReader[] fieldReaderArray,
             ClassWriter cw,
             String classNameType,
@@ -1496,7 +1499,7 @@ public class ObjectReaderCreatorASM
         mw.visitIntInsn(Opcodes.BIPUSH, '[');
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
 
-        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
+        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
         for (int i = 0; i < fieldReaderArray.length; ++i) {
@@ -1563,7 +1566,7 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(notNull_);
 
-        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor);
+        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
         // for (int i = 0; i < entry_cnt; ++i) {
@@ -1863,7 +1866,8 @@ public class ObjectReaderCreatorASM
             String TYPE_OBJECT,
             int FEATURES,
             boolean fieldBased,
-            Constructor defaultConstructor
+            Constructor defaultConstructor,
+            Supplier creator
     ) {
         final int JSON_READER = 1;
 
@@ -1871,11 +1875,17 @@ public class ObjectReaderCreatorASM
         boolean publicObject = Modifier.isPublic(objectModifiers) && !classLoader.isExternalClass(objectType);
 
         if (defaultConstructor == null || !publicObject || !Modifier.isPublic(defaultConstructor.getModifiers())) {
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "features", "(J)J", false);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classNameType, "createInstance", "(J)Ljava/lang/Object;", false);
+            if (creator != null) {
+                mw.visitVarInsn(Opcodes.ALOAD, THIS);
+                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, "creator", "Ljava/util/function/Supplier;");
+                mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/function/Supplier", "get", "()Ljava/lang/Object;", true);
+            } else {
+                mw.visitVarInsn(Opcodes.ALOAD, THIS);
+                mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "features", "(J)J", false);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classNameType, "createInstance", "(J)Ljava/lang/Object;", false);
+            }
             if (publicObject) {
                 mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_OBJECT);
             }
@@ -2514,14 +2524,5 @@ public class ObjectReaderCreatorASM
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
         mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
         mw.visitFieldInsn(Opcodes.GETFIELD, TYPE_FIELD_READE, "fieldType", "Ljava/lang/reflect/Type;");
-    }
-
-    void genIsEnabled(MethodWriter mw, int var, long features, Label elseLabel) {
-        mw.visitVarInsn(Opcodes.LLOAD, var);
-        mw.visitLdcInsn(features);
-        mw.visitInsn(Opcodes.LAND);
-        mw.visitInsn(Opcodes.LCONST_0);
-        mw.visitInsn(Opcodes.LCMP);
-        mw.visitJumpInsn(Opcodes.IFEQ, elseLabel);
     }
 }
