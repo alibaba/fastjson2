@@ -39,6 +39,10 @@ public class ErrorOnNoneSerializableTest {
                 JSONException.class,
                 () -> JSONB.toBytes(bean, JSONWriter.Feature.ErrorOnNoneSerializable)
         );
+        assertThrows(
+                JSONException.class,
+                () -> JSONB.toBytes(bean, new JSONWriter.Context(JSONWriter.Feature.ErrorOnNoneSerializable))
+        );
     }
 
     private static class Bean1 {

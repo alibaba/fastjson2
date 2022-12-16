@@ -2,14 +2,12 @@ package com.alibaba.fastjson2.benchmark;
 
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
-import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 
 public class HessianTest {
-    @Test
     public void test0() throws Exception {
         Bean bean = new Bean();
         bean.f0 = "abc";
@@ -34,5 +32,10 @@ public class HessianTest {
             implements Serializable {
         public String f0;
         public String f1;
+    }
+
+    public static void main(String[] args) throws Exception {
+        HessianTest test = new HessianTest();
+        test.test0();
     }
 }

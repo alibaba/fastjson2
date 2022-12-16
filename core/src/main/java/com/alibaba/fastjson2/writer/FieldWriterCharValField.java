@@ -6,17 +6,9 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Field;
 
 final class FieldWriterCharValField<T>
-        extends FieldWriterImpl<T> {
-    final Field field;
-
+        extends FieldWriter<T> {
     FieldWriterCharValField(String name, int ordinal, String format, String label, Field field) {
-        super(name, ordinal, 0, format, label, char.class, char.class);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, 0, format, label, char.class, char.class, field, null);
     }
 
     @Override
@@ -24,7 +16,7 @@ final class FieldWriterCharValField<T>
         try {
             return field.getChar(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 

@@ -7,16 +7,8 @@ import java.lang.reflect.Field;
 
 final class FieldWriterInt64ValField<T>
         extends FieldWriterInt64<T> {
-    final Field field;
-
     FieldWriterInt64ValField(String name, int ordinal, long features, String format, String label, Field field) {
-        super(name, ordinal, features, format, label, long.class);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, features, format, label, long.class, field, null);
     }
 
     @Override
@@ -24,7 +16,7 @@ final class FieldWriterInt64ValField<T>
         try {
             return field.get(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 
@@ -34,7 +26,7 @@ final class FieldWriterInt64ValField<T>
         try {
             value = field.getLong(o);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
 
         if (value == 0L && jsonWriter.isEnabled(JSONWriter.Feature.NotWriteDefaultValue)) {
@@ -51,7 +43,7 @@ final class FieldWriterInt64ValField<T>
             long value = field.getLong(object);
             jsonWriter.writeInt64(value);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 }

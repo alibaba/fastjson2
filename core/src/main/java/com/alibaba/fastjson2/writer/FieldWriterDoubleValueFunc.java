@@ -6,19 +6,12 @@ import java.lang.reflect.Method;
 import java.util.function.ToDoubleFunction;
 
 final class FieldWriterDoubleValueFunc
-        extends FieldWriterImpl {
-    final Method method;
+        extends FieldWriter {
     final ToDoubleFunction function;
 
     protected FieldWriterDoubleValueFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToDoubleFunction function) {
-        super(fieldName, ordinal, features, format, label, double.class, double.class);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, double.class, double.class, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

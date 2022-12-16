@@ -7,18 +7,11 @@ import java.util.function.ToLongFunction;
 
 final class FieldWriterInt64ValFunc<T>
         extends FieldWriterInt64<T> {
-    final Method method;
     final ToLongFunction function;
 
     protected FieldWriterInt64ValFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToLongFunction function) {
-        super(fieldName, ordinal, features, format, label, long.class);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, long.class, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

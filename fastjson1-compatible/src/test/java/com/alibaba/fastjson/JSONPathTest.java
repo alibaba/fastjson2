@@ -15,4 +15,20 @@ public class JSONPathTest {
         assertFalse(object.isEmpty());
         assertEquals(234, object.get("id"));
     }
+
+    @Test
+    public void compile() {
+        JSONPath path = JSONPath.compile("$.id");
+        assertEquals("$.id", path.getPath());
+
+        JSONObject object = new JSONObject().fluentPut("id", 123);
+        assertEquals(123, path.eval(object));
+        path.set(object, 234);
+        assertEquals(234, object.getIntValue("id"));
+    }
+
+    @Test
+    public void error() {
+        assertThrows(Exception.class, () -> JSONPath.compile(null));
+    }
 }

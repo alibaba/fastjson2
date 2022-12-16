@@ -67,7 +67,7 @@ public class FormatTest {
             assertEquals(2022, localDateTime.getYear());
             assertEquals(6, localDateTime.getMonthValue());
             assertEquals(13, localDateTime.getDayOfMonth());
-            assertEquals(12, localDateTime.getHour());
+            assertEquals(20, localDateTime.getHour());
             assertEquals(13, localDateTime.getMinute());
             assertEquals(17, localDateTime.getSecond());
         }

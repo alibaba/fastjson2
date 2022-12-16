@@ -46,30 +46,21 @@ final class ObjectWriterImplListStr
             return;
         }
 
-        Type fieldItemType = null;
-        Class fieldItemClass = null;
         Class fieldClass = null;
-        if (fieldType instanceof Class) {
+        if (fieldType == TypeUtils.PARAM_TYPE_LIST_STR) {
+            fieldClass = List.class;
+        } else if (fieldType instanceof Class) {
             fieldClass = (Class) fieldType;
         } else if (fieldType instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) fieldType;
-            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-            if (actualTypeArguments.length == 1) {
-                fieldItemType = actualTypeArguments[0];
-            }
-
             Type rawType = parameterizedType.getRawType();
             if (rawType instanceof Class) {
                 fieldClass = (Class) rawType;
             }
         }
 
-        if (fieldItemType instanceof Class) {
-            fieldItemClass = (Class) fieldItemType;
-        }
-
         Class<?> objectClass = object.getClass();
-        if (jsonWriter.isWriteTypeInfo(object, fieldClass, features)) {
+        if (objectClass != ArrayList.class && jsonWriter.isWriteTypeInfo(object, fieldClass, features)) {
             jsonWriter.writeTypeName(
                     TypeUtils.getTypeName(
                             objectClass == CLASS_SUBLIST ? ArrayList.class : objectClass
@@ -77,18 +68,7 @@ final class ObjectWriterImplListStr
             );
         }
 
-        List list = (List) object;
-
-        final int size = list.size();
-        jsonWriter.startArray(size);
-        for (int i = 0; i < size; i++) {
-            String item = (String) list.get(i);
-            if (item == null) {
-                jsonWriter.writeNull();
-                continue;
-            }
-            jsonWriter.writeString(item);
-        }
-        jsonWriter.endArray();
+        List<String> list = (List) object;
+        jsonWriter.writeString(list);
     }
 }

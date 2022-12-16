@@ -8,16 +8,8 @@ import java.util.Date;
 
 final class FieldWriterDateField<T>
         extends FieldWriterDate<T> {
-    final Field field;
-
     protected FieldWriterDateField(String fieldName, int ordinal, long features, String format, String label, Field field) {
-        super(fieldName, ordinal, features, format, label, Date.class, Date.class);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(fieldName, ordinal, features, format, label, Date.class, Date.class, field, null);
     }
 
     @Override
@@ -25,7 +17,7 @@ final class FieldWriterDateField<T>
         try {
             return field.get(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 

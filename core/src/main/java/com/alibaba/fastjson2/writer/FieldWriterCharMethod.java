@@ -7,17 +7,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 final class FieldWriterCharMethod<T>
-        extends FieldWriterImpl<T> {
-    final Method method;
-
+        extends FieldWriter<T> {
     protected FieldWriterCharMethod(String fieldName, int ordinal, long features, String format, String label, Method method, Class fieldClass) {
-        super(fieldName, ordinal, features, format, label, fieldClass, fieldClass);
-        this.method = method;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
+        super(fieldName, ordinal, features, format, label, fieldClass, fieldClass, null, method);
     }
 
     @Override
@@ -25,7 +17,7 @@ final class FieldWriterCharMethod<T>
         try {
             return method.invoke(object);
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw new JSONException("invoke getter method error, " + name, e);
+            throw new JSONException("invoke getter method error, " + fieldName, e);
         }
     }
 

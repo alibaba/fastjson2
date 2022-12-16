@@ -9,23 +9,16 @@ import java.util.function.Function;
 
 final class FieldWriterObjectFunc<T>
         extends FieldWriterObject<T> {
-    final Method method;
     final Function function;
     final boolean isArray;
 
     protected FieldWriterObjectFunc(String name, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass, Method method, Function function) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass);
-        this.method = method;
+        super(name, ordinal, features, format, label, fieldType, fieldClass, null, method);
         this.function = function;
         isArray = fieldClass == AtomicIntegerArray.class
                 || fieldClass == AtomicLongArray.class
                 || fieldClass == AtomicReferenceArray.class
                 || fieldClass.isArray();
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

@@ -8,10 +8,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+
 final class FieldWriterListMethod<T>
         extends FieldWriterList<T> {
-    final Method method;
-
     protected FieldWriterListMethod(
             String fieldName,
             Type itemType,
@@ -23,13 +23,7 @@ final class FieldWriterListMethod<T>
             Type fieldType,
             Class fieldClass
     ) {
-        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass);
-        this.method = method;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
+        super(fieldName, itemType, ordinal, features, format, label, fieldType, fieldClass, null, method);
     }
 
     @Override
@@ -37,7 +31,7 @@ final class FieldWriterListMethod<T>
         try {
             return method.invoke(object);
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw new JSONException("invoke getter method error, " + name, e);
+            throw new JSONException("invoke getter method error, " + fieldName, e);
         }
     }
 
@@ -55,7 +49,7 @@ final class FieldWriterListMethod<T>
 
         long features = this.features | jsonWriter.getFeatures();
         if (value == null) {
-            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullListAsEmpty.mask)) != 0) {
+            if ((features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask)) != 0) {
                 writeFieldName(jsonWriter);
                 jsonWriter.writeArrayNull();
                 return true;
@@ -64,7 +58,7 @@ final class FieldWriterListMethod<T>
             }
         }
 
-        if ((features & JSONWriter.Feature.NotWriteEmptyArray.mask) != 0 && value.isEmpty()) {
+        if ((features & NotWriteEmptyArray.mask) != 0 && value.isEmpty()) {
             return false;
         }
 

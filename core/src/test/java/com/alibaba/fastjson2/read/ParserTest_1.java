@@ -53,8 +53,14 @@ public class ParserTest_1 {
     void lexerTest(JSONReader lexer) {
         assertEquals('{', lexer.current());
         lexer.next();
-        assertEquals(Fnv.hashCode64("ID"), lexer.readFieldNameHashCode());
-        assertEquals(Fnv.hashCode64LCase("id"), lexer.getNameHashCodeLCase());
+        assertEquals(
+                Fnv.hashCode64("ID"),
+                lexer.readFieldNameHashCode()
+        );
+        assertEquals(
+                Fnv.hashCode64LCase("id"),
+                lexer.getNameHashCodeLCase()
+        );
         assertEquals("ID", lexer.getFieldName());
         assertEquals(123, lexer.readInt32Value());
 

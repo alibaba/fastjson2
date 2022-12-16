@@ -17,7 +17,7 @@ public class FieldReaderDoubleValueFuncTest {
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
         assertEquals(123D, bean.value);
-        assertNotNull(fieldReader.getMethod());
+        assertNotNull(fieldReader.method);
 
         assertThrows(JSONException.class, () -> fieldReader.accept(bean, new Object()));
 

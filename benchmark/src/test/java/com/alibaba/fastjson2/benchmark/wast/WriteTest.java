@@ -62,7 +62,7 @@ public class WriteTest {
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2_test();
-//        wastjson_test();
+//        fastjson2_test();
+        wastjson_test();
     }
 }

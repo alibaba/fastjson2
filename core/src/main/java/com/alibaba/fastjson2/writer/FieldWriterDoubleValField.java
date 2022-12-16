@@ -6,17 +6,9 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Field;
 
 final class FieldWriterDoubleValField<T>
-        extends FieldWriterImpl<T> {
-    final Field field;
-
+        extends FieldWriter<T> {
     FieldWriterDoubleValField(String name, int ordinal, String format, String label, Field field) {
-        super(name, ordinal, 0, format, label, double.class, double.class);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, 0, format, label, double.class, double.class, field, null);
     }
 
     @Override
@@ -28,7 +20,7 @@ final class FieldWriterDoubleValField<T>
         try {
             return field.getDouble(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 

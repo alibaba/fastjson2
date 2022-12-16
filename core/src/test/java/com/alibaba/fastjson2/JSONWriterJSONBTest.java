@@ -59,7 +59,7 @@ public class JSONWriterJSONBTest {
         assertThrows(JSONException.class, () -> jsonWriter.writeRaw(""));
         assertThrows(JSONException.class, () -> jsonWriter.writeComma());
         assertThrows(JSONException.class, () -> jsonWriter.write0('A'));
-        assertThrows(JSONException.class, () -> jsonWriter.writeDateTimeISO8601(2001, 1, 1, 12, 13, 14, 0, 0));
+        assertThrows(JSONException.class, () -> jsonWriter.writeDateTimeISO8601(2001, 1, 1, 12, 13, 14, 0, 0, true));
         assertThrows(JSONException.class, () -> jsonWriter.writeDateYYYMMDD10(2001, 1, 1));
         assertThrows(JSONException.class, () -> jsonWriter.writeTimeHHMMSS8(12, 13, 14));
         assertThrows(JSONException.class, () -> jsonWriter.writeBase64(new byte[0]));
@@ -125,6 +125,17 @@ public class JSONWriterJSONBTest {
             JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
             bytes.set(jsonWriter, new byte[0]);
             jsonWriter.writeString((char[]) null);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[1]);
+            jsonWriter.writeString(new char[0]);
+        }
+        {
+            JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
+            bytes.set(jsonWriter, new byte[1]);
+            char[] chars = "01234567890".toCharArray();
+            jsonWriter.writeString(chars, 5, 0);
         }
         {
             JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();

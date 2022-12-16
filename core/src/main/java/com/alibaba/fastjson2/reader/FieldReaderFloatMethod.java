@@ -10,9 +10,9 @@ import java.lang.reflect.Type;
 import java.util.Locale;
 
 final class FieldReaderFloatMethod<T>
-        extends FieldReaderObjectMethod<T> {
+        extends FieldReaderObject<T> {
     FieldReaderFloatMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Float defaultValue, JSONSchema schema, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter, null, null);
     }
 
     @Override
@@ -32,9 +32,15 @@ final class FieldReaderFloatMethod<T>
 
     @Override
     public void accept(T object, Object value) {
+        Float floatValue = TypeUtils.toFloat(value);
+
+        if (schema != null) {
+            schema.assertValidate(floatValue);
+        }
+
         try {
             method.invoke(object,
-                    TypeUtils.toFloat(value));
+                    floatValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

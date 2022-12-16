@@ -858,7 +858,7 @@ public class JSONBTest4 {
 
     @Test
     public void test_3_path_8() {
-        JSONPath path = JSONPath.of("$.phoneNumbers.0.type");
+        JSONPath path = JSONPath.of("$.phoneNumbers[0]type");
         String expected = "\"iPhone\"";
 
         assertEquals(expected,

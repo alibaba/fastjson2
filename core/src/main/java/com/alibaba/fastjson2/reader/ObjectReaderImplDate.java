@@ -17,7 +17,7 @@ import java.util.Locale;
 public class ObjectReaderImplDate
         extends DateTimeCodec
         implements ObjectReader {
-    static final ObjectReaderImplDate INSTANCE = new ObjectReaderImplDate(null, null);
+    public static final ObjectReaderImplDate INSTANCE = new ObjectReaderImplDate(null, null);
 
     public static ObjectReaderImplDate of(String format, Locale locale) {
         if (format == null) {
@@ -80,7 +80,7 @@ public class ObjectReaderImplDate
             }
         }
 
-        if (jsonReader.nextIfEmptyString()) {
+        if (jsonReader.nextIfNullOrEmptyString()) {
             return null;
         }
 
@@ -92,7 +92,11 @@ public class ObjectReaderImplDate
         } else if (format != null) {
             ZonedDateTime zdt;
             if (yyyyMMddhhmmss19) {
-                millis = jsonReader.readMillis19();
+                if (jsonReader.isSupportSmartMatch()) {
+                    millis = jsonReader.readMillisFromString();
+                } else {
+                    millis = jsonReader.readMillis19();
+                }
                 if (millis != 0 || !jsonReader.wasNull()) {
                     return new Date(millis);
                 }
@@ -147,7 +151,15 @@ public class ObjectReaderImplDate
                 millis += nanos / 1000_000;
             }
         } else {
-            millis = jsonReader.readMillisFromString();
+            if (jsonReader.isTypeRedirect() && jsonReader.nextIfMatchIdent('"', 'v', 'a', 'l', '"')) {
+                jsonReader.nextIfMatch(':');
+                millis = jsonReader.readInt64Value();
+                jsonReader.nextIfMatch('}');
+                jsonReader.setTypeRedirect(false);
+            } else {
+                millis = jsonReader.readMillisFromString();
+            }
+
             if (millis == 0 && jsonReader.wasNull()) {
                 return null;
             }

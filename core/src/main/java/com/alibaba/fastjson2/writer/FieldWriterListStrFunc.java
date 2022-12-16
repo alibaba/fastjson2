@@ -7,9 +7,10 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+
 final class FieldWriterListStrFunc<T>
-        extends FieldWriterImpl<T> {
-    final Method method;
+        extends FieldWriter<T> {
     final Function<T, List> function;
 
     protected FieldWriterListStrFunc(
@@ -23,14 +24,8 @@ final class FieldWriterListStrFunc<T>
             Type fieldType,
             Class fieldClass
     ) {
-        super(fieldName, ordinal, features, format, label, fieldType, fieldClass);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, fieldType, fieldClass, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override
@@ -52,7 +47,7 @@ final class FieldWriterListStrFunc<T>
 
         long features = this.features | jsonWriter.getFeatures();
         if (list == null) {
-            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullListAsEmpty.mask)) != 0) {
+            if ((features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask)) != 0) {
                 writeFieldName(jsonWriter);
                 jsonWriter.writeArrayNull();
                 return true;
@@ -61,13 +56,13 @@ final class FieldWriterListStrFunc<T>
             }
         }
 
-        if ((features & JSONWriter.Feature.NotWriteEmptyArray.mask) != 0 && list.isEmpty()) {
+        if ((features & NotWriteEmptyArray.mask) != 0 && list.isEmpty()) {
             return false;
         }
 
         writeFieldName(jsonWriter);
 
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             int size = list.size();
             jsonWriter.startArray(size);
 
@@ -108,7 +103,7 @@ final class FieldWriterListStrFunc<T>
             return;
         }
 
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             int size = list.size();
             jsonWriter.startArray(size);
 

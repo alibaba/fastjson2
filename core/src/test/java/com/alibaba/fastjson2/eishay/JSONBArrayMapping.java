@@ -56,7 +56,7 @@ public class JSONBArrayMapping {
         field.setAccessible(true);
         IdentityHashMap refs = (IdentityHashMap) field.get(writer);
 
-        assertEquals(6, refs.size());
+        assertEquals(5, refs.size());
 
         byte[] bytes = writer.getBytes();
         Object object1 = JSONB.parseObject(bytes, Object.class, jsonbReaderFeaturesSupportBeanArray);
@@ -92,7 +92,7 @@ public class JSONBArrayMapping {
         field.setAccessible(true);
         IdentityHashMap refs = (IdentityHashMap) field.get(writer);
 
-        assertEquals(6, refs.size());
+        assertEquals(5, refs.size());
 
         byte[] bytes = writer.getBytes();
         Object object1 = JSONB.parseObject(bytes, Object.class, jsonbReaderFeaturesSupportBeanArray);

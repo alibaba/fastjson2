@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.benchmark.eishay;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.caucho.hessian.io.Hessian2Output;
 import org.apache.commons.io.IOUtils;
@@ -22,6 +19,21 @@ import java.util.concurrent.TimeUnit;
 
 public class EishayWriteBinaryAutoType {
     static MediaContent mc;
+    static SymbolTable symbolTable = JSONB.symbolTable(
+            "com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent",
+            "media",
+            "images",
+            "height",
+            "size",
+            "title",
+            "uri",
+            "width",
+            "bitrate",
+            "duration",
+            "format",
+            "persons",
+            "player"
+    );
 
     static {
         try {
@@ -41,7 +53,34 @@ public class EishayWriteBinaryAutoType {
 
     @Benchmark
     public void fastjson2JSONB(Blackhole bh) {
-        bh.consume(JSONB.toBytes(mc, JSONWriter.Feature.WriteClassName));
+        bh.consume(
+                JSONB.toBytes(
+                        mc,
+                        JSONWriter.Feature.WriteClassName,
+                        JSONWriter.Feature.IgnoreNoneSerializable,
+                        JSONWriter.Feature.FieldBased,
+                        JSONWriter.Feature.ReferenceDetection,
+                        JSONWriter.Feature.WriteNulls,
+                        JSONWriter.Feature.NotWriteDefaultValue,
+                        JSONWriter.Feature.NotWriteHashMapArrayListClassName,
+                        JSONWriter.Feature.WriteNameAsSymbol)
+        );
+    }
+
+    public void fastjson2JSONB_symbols(Blackhole bh) {
+        bh.consume(
+                JSONB.toBytes(
+                        mc,
+                        symbolTable,
+                        JSONWriter.Feature.WriteClassName,
+                        JSONWriter.Feature.IgnoreNoneSerializable,
+                        JSONWriter.Feature.FieldBased,
+                        JSONWriter.Feature.ReferenceDetection,
+                        JSONWriter.Feature.WriteNulls,
+                        JSONWriter.Feature.NotWriteDefaultValue,
+                        JSONWriter.Feature.NotWriteHashMapArrayListClassName,
+                        JSONWriter.Feature.WriteNameAsSymbol)
+        );
     }
 
     @Benchmark

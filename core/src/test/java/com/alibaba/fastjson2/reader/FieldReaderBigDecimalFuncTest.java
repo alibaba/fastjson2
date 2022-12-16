@@ -19,7 +19,7 @@ public class FieldReaderBigDecimalFuncTest {
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
         assertEquals(new BigDecimal("123"), bean.value);
-        assertNotNull(fieldReader.getMethod());
+        assertNotNull(fieldReader.method);
 
         assertThrows(JSONException.class, () -> fieldReader.accept(bean, new Object()));
 

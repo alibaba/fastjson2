@@ -3,20 +3,33 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
 
 abstract class FieldWriterList<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     final Type itemType;
     final Class itemClass;
     final boolean itemClassNotReferenceDetect;
     ObjectWriter listWriter;
     ObjectWriter itemObjectWriter;
 
-    FieldWriterList(String name, Type itemType, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass);
+    FieldWriterList(
+            String name,
+            Type itemType,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
+        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
 
         this.itemType = itemType == null ? Object.class : itemType;
         if (this.itemType instanceof Class) {
@@ -62,8 +75,9 @@ abstract class FieldWriterList<T>
             return itemObjectWriter = jsonWriter
                     .getObjectWriter(this.itemType, itemClass);
         }
+
         return jsonWriter
-                .getObjectWriter(itemType, null);
+                .getObjectWriter(itemType, TypeUtils.getClass(itemType));
     }
 
     @Override
@@ -85,18 +99,20 @@ abstract class FieldWriterList<T>
         ObjectWriter previousObjectWriter = null;
 
         long features = this.features | jsonWriter.getFeatures();
-        boolean refDetect = (features & JSONWriter.Feature.ReferenceDetection.mask) != 0;
         boolean beanToArray = (features & JSONWriter.Feature.BeanToArray.mask) != 0;
 
         if ((features & JSONWriter.Feature.NotWriteEmptyArray.mask) != 0 && list.isEmpty() && writeFieldName) {
             return;
         }
 
+        boolean refDetect = (features & JSONWriter.Feature.ReferenceDetection.mask) != 0;
+        boolean previousItemRefDetect = refDetect;
+
         if (writeFieldName) {
             writeFieldName(jsonWriter);
         }
 
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             int size = list.size();
 
             if (jsonWriter.isWriteTypeInfo(list, fieldClass)) {
@@ -166,16 +182,28 @@ abstract class FieldWriterList<T>
             }
 
             Class<?> itemClass = item.getClass();
+            if (itemClass == String.class) {
+                jsonWriter.writeString((String) item);
+                continue;
+            }
+
+            boolean itemRefDetect;
             ObjectWriter itemObjectWriter;
             if (itemClass == previousClass) {
                 itemObjectWriter = previousObjectWriter;
+                itemRefDetect = previousItemRefDetect;
             } else {
+                itemRefDetect = jsonWriter.isRefDetect();
                 itemObjectWriter = getItemWriter(jsonWriter, itemClass);
                 previousClass = itemClass;
                 previousObjectWriter = itemObjectWriter;
+                if (itemRefDetect) {
+                    itemRefDetect = !ObjectWriterProvider.isNotReferenceDetect(itemClass);
+                }
+                previousItemRefDetect = itemRefDetect;
             }
 
-            if (refDetect) {
+            if (itemRefDetect) {
                 String refPath = jsonWriter.setPath(i, item);
                 if (refPath != null) {
                     jsonWriter.writeReference(refPath);
@@ -199,25 +227,13 @@ abstract class FieldWriterList<T>
             writeFieldName(jsonWriter);
         }
 
-        if (jsonWriter.isJSONB()) {
-            final int listSize = list.size();
-            jsonWriter.startArray(listSize);
-            for (int i = 0, size = listSize; i < size; i++) {
-                String str = list.get(i);
-                jsonWriter.writeString(str);
+        if (jsonWriter.jsonb) {
+            if (jsonWriter.isWriteTypeInfo(list, fieldClass)) {
+                jsonWriter.writeTypeName(
+                        TypeUtils.getTypeName(list.getClass()));
             }
-            return;
         }
 
-        jsonWriter.startArray();
-        for (int i = 0, size = list.size(); i < size; i++) {
-            if (i != 0) {
-                jsonWriter.writeComma();
-            }
-
-            String str = list.get(i);
-            jsonWriter.writeString(str);
-        }
-        jsonWriter.endArray();
+        jsonWriter.writeString(list);
     }
 }

@@ -7,22 +7,14 @@ import java.lang.reflect.Field;
 
 final class FieldWriterMillisField<T>
         extends FieldWriterDate<T> {
-    final Field field;
-
     FieldWriterMillisField(String fieldName,
             int ordinal,
             long features,
             String dateTimeFormat,
             String label,
-            Field method
+            Field field
     ) {
-        super(fieldName, ordinal, features, dateTimeFormat, label, long.class, long.class);
-        this.field = method;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(fieldName, ordinal, features, dateTimeFormat, label, long.class, long.class, field, null);
     }
 
     @Override
@@ -34,7 +26,7 @@ final class FieldWriterMillisField<T>
         try {
             return field.getLong(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 

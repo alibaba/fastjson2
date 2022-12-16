@@ -4,8 +4,11 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,11 +17,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.Locale;
 
 abstract class FieldReaderImplDate<T>
-        extends FieldReaderImpl<T> {
+        extends FieldReader<T> {
     DateTimeFormatter formatter;
 
     ObjectReader dateReader;
@@ -28,6 +32,7 @@ abstract class FieldReaderImplDate<T>
     final boolean formatMillis;
     final boolean formatHasDay;
     final boolean formatHasHour;
+    final boolean yyyyMMddhhmmss19;
 
     public FieldReaderImplDate(
             String fieldName,
@@ -38,9 +43,13 @@ abstract class FieldReaderImplDate<T>
             String format,
             Locale locale,
             Object defaultValue,
-            JSONSchema schema) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema);
+            JSONSchema schema,
+            Method method,
+            Field field
+    ) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field);
         this.useSimpleFormatter = "yyyyMMddHHmmssSSSZ".equals(format);
+        this.yyyyMMddhhmmss19 = "yyyy-MM-dd HH:mm:ss".equals(format);
 
         boolean formatUnixTime = false, formatISO8601 = false, formatMillis = false, hasDay = false, hasHour = false;
         if (format != null) {
@@ -96,7 +105,13 @@ abstract class FieldReaderImplDate<T>
             fieldValue = new Date(millis);
         } else {
             long millis;
-            if (format != null) {
+            if (yyyyMMddhhmmss19) {
+                if ((jsonReader.features(features) & JSONReader.Feature.SupportSmartMatch.mask) != 0 && jsonReader.isString()) {
+                    millis = jsonReader.readMillisFromString();
+                } else {
+                    millis = jsonReader.readMillis19();
+                }
+            } else if (format != null) {
                 String str = jsonReader.readString();
                 if ((formatUnixTime || formatMillis) && IOUtils.isNumber(str)) {
                     millis = Long.parseLong(str);
@@ -152,6 +167,15 @@ abstract class FieldReaderImplDate<T>
         return dateReader;
     }
 
+    public ObjectReader getObjectReader(JSONReader.Context context) {
+        if (dateReader == null) {
+            dateReader = format == null
+                    ? ObjectReaderImplDate.INSTANCE
+                    : new ObjectReaderImplDate(format, locale);
+        }
+        return dateReader;
+    }
+
     public abstract void accept(T object, Date value);
 
     @Override
@@ -186,55 +210,72 @@ abstract class FieldReaderImplDate<T>
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         java.util.Date fieldValue;
-        if (jsonReader.isInt() && (format == null || formatUnixTime || formatMillis)) {
-            long millis = jsonReader.readInt64Value();
-            if (formatUnixTime) {
-                millis *= 1000L;
-            }
-            fieldValue = new java.util.Date(millis);
-        } else if (jsonReader.isNull()) {
-            jsonReader.readNull();
-            fieldValue = null;
-        } else if (useSimpleFormatter) {
-            String str = jsonReader.readString();
-            try {
-                fieldValue = new SimpleDateFormat(format).parse(str);
-            } catch (ParseException e) {
-                throw new JSONException(jsonReader.info("parse error : " + str), e);
-            }
-        } else {
-            if (format != null) {
+        try {
+            if (jsonReader.isInt() && (format == null || formatUnixTime || formatMillis)) {
+                long millis = jsonReader.readInt64Value();
+                if (formatUnixTime) {
+                    millis *= 1000L;
+                }
+                fieldValue = new java.util.Date(millis);
+            } else if (jsonReader.isNull()) {
+                jsonReader.readNull();
+                fieldValue = null;
+            } else if (useSimpleFormatter) {
                 String str = jsonReader.readString();
-                if (str.isEmpty() || "null".equals(str)) {
+                try {
+                    fieldValue = new SimpleDateFormat(format).parse(str);
+                } catch (ParseException e) {
+                    throw new JSONException(jsonReader.info("parse error : " + str), e);
+                }
+            } else {
+                if (format != null) {
+                    String str = jsonReader.readString();
+                    if (str.isEmpty() || "null".equals(str)) {
+                        fieldValue = null;
+                    } else {
+                        long millis;
+                        if ((formatUnixTime || formatMillis) && IOUtils.isNumber(str)) {
+                            millis = Long.parseLong(str);
+                            if (formatUnixTime) {
+                                millis *= 1000L;
+                            }
+                        } else {
+                            Locale locale = jsonReader.getContext().getLocale();
+                            DateTimeFormatter formatter = getFormatter(locale);
+
+                            LocalDateTime ldt;
+                            if (!formatHasHour) {
+                                ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
+                            } else {
+                                try {
+                                    ldt = LocalDateTime.parse(str, formatter);
+                                } catch (DateTimeParseException e) {
+                                    if (jsonReader.isSupportSmartMatch(features)) {
+                                        ldt = DateUtils.parseZonedDateTime(str)
+                                                .toLocalDateTime();
+                                    } else {
+                                        throw e;
+                                    }
+                                }
+                            }
+
+                            ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());
+                            millis = zdt.toInstant().toEpochMilli();
+                        }
+                        fieldValue = new java.util.Date(millis);
+                    }
+                } else if (jsonReader.nextIfNullOrEmptyString()) {
                     fieldValue = null;
                 } else {
-                    long millis;
-                    if ((formatUnixTime || formatMillis) && IOUtils.isNumber(str)) {
-                        millis = Long.parseLong(str);
-                        if (formatUnixTime) {
-                            millis *= 1000L;
-                        }
-                    } else {
-                        Locale locale = jsonReader.getContext().getLocale();
-                        DateTimeFormatter formatter = getFormatter(locale);
-
-                        LocalDateTime ldt;
-                        if (!formatHasHour) {
-                            ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
-                        } else {
-                            ldt = LocalDateTime.parse(str, formatter);
-                        }
-
-                        ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());
-                        millis = zdt.toInstant().toEpochMilli();
-                    }
+                    long millis = jsonReader.readMillisFromString();
                     fieldValue = new java.util.Date(millis);
                 }
-            } else if (jsonReader.nextIfEmptyString()) {
+            }
+        } catch (Exception e) {
+            if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
                 fieldValue = null;
             } else {
-                long millis = jsonReader.readMillisFromString();
-                fieldValue = new java.util.Date(millis);
+                throw e;
             }
         }
 

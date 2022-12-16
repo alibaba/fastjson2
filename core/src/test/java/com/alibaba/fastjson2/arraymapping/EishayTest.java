@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -43,6 +44,7 @@ public class EishayTest {
     @Test
     public void test() {
         byte[] bytes = JSONB.toBytes(object, writerFeatures);
+        JSONBDump.dump(bytes);
         Object object1 = JSONB.parseObject(bytes, Object.class, readerFeatures);
         assertEquals(object, object1);
     }

@@ -11,6 +11,7 @@ import javax.tools.*;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -24,10 +25,10 @@ public class ObjectReaderCreatorDynamicCompile
     public static final ObjectReaderCreatorDynamicCompile INSTANCE = new ObjectReaderCreatorDynamicCompile();
 
     @Override
-    public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, List<ObjectReaderModule> modules) {
+    public <T> ObjectReader<T> createObjectReader(Class<T> objectClass, Type objectType, boolean fieldBased, ObjectReaderProvider provider) {
         BeanInfo beanInfo = new BeanInfo();
 
-        for (ObjectReaderModule module : modules) {
+        for (ObjectReaderModule module : provider.modules) {
             ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor != null) {
                 annotationProcessor.getBeanInfo(beanInfo, objectClass);
@@ -36,8 +37,10 @@ public class ObjectReaderCreatorDynamicCompile
 
         if (beanInfo.deserializer != null && ObjectReader.class.isAssignableFrom(beanInfo.deserializer)) {
             try {
-                return (ObjectReader<T>) beanInfo.deserializer.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
+                Constructor constructor = beanInfo.deserializer.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                return (ObjectReader<T>) constructor.newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 throw new JSONException("create deserializer error", e);
             }
         }

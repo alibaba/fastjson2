@@ -10,13 +10,28 @@ import java.lang.reflect.Type;
 import java.util.Locale;
 
 final class FieldReaderInt8ValueMethod<T>
-        extends FieldReaderObjectMethod<T> {
+        extends FieldReaderObject<T> {
     FieldReaderInt8ValueMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Byte defaultValue, JSONSchema schema, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter, null, null);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
+        int fieldInt = jsonReader.readInt32Value();
+
+        if (schema != null) {
+            schema.assertValidate(fieldInt);
+        }
+
+        try {
+            method.invoke(object, (byte) fieldInt);
+        } catch (Exception e) {
+            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
+        }
+    }
+
+    @Override
+    public void readFieldValueJSONB(JSONReader jsonReader, T object) {
         int fieldInt = jsonReader.readInt32Value();
 
         if (schema != null) {

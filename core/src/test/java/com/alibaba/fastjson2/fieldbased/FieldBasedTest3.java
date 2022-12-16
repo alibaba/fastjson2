@@ -39,7 +39,7 @@ public class FieldBasedTest3 {
         bean.id = 101;
         String str = JSON.toJSONString(bean, JSONWriter.Feature.FieldBased);
         assertEquals("{\"id\":101}", str);
-        Bean1 bean1 = JSON.parseObject(str, Bean1.class);
+        Bean1 bean1 = JSON.parseObject(str, Bean1.class, JSONReader.Feature.FieldBased);
         assertEquals(bean.id, bean1.id);
     }
 
@@ -48,7 +48,7 @@ public class FieldBasedTest3 {
         Bean1 bean = new Bean1();
         bean.id = 101;
         byte[] jsonbBytes = JSONB.toBytes(bean, JSONWriter.Feature.FieldBased);
-        Bean1 bean1 = JSONB.parseObject(jsonbBytes, Bean1.class);
+        Bean1 bean1 = JSONB.parseObject(jsonbBytes, Bean1.class, JSONReader.Feature.FieldBased);
         assertEquals(bean.id, bean1.id);
     }
 

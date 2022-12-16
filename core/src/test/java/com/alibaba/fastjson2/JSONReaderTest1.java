@@ -2,12 +2,12 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.FieldReader;
-import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2_vo.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -221,15 +221,17 @@ public class JSONReaderTest1 {
 
     @Test
     public void testReadFieldNameHashCode() {
-        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"\\u0000\\u0001\\u0002\":")) {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\\u0000\\u0001\\u0002\":")) {
             assertEquals(Fnv.hashCode64("\0\1\2"), jsonReader.readFieldNameHashCode());
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders("'abc':123")) {
             assertEquals(Fnv.hashCode64("abc"), jsonReader.readFieldNameHashCode());
+            assertEquals("abc", jsonReader.getFieldName());
             assertEquals("abc", jsonReader.getString());
         }
-        for (JSONReader jsonReader : TestUtils.createJSONReaders("\"\\x00\\x01\\x02\":")) {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\\x00\\x01\\x02\":")) {
             assertEquals(Fnv.hashCode64("\0\1\2"), jsonReader.readFieldNameHashCode());
+            assertEquals("\0\1\2", jsonReader.getFieldName());
             assertEquals("\0\1\2", jsonReader.getString());
         }
     }
@@ -290,58 +292,58 @@ public class JSONReaderTest1 {
     @Test
     public void testNextIfEmptyString() {
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\'\',1")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\'\' , 1")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders("\'\' , 中")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals('中', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders("\'\' , ®")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals('®', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\"")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertFalse(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\",")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\" ,")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\" , ")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\"  ")) {
-            assertTrue(jsonReader.nextIfEmptyString());
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals(JSONReader.EOI, jsonReader.ch);
             assertFalse(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"")) {
-            assertFalse(jsonReader.nextIfEmptyString());
+            assertFalse(jsonReader.nextIfNullOrEmptyString());
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"a\"")) {
-            assertFalse(jsonReader.nextIfEmptyString());
+            assertFalse(jsonReader.nextIfNullOrEmptyString());
         }
     }
 
@@ -1096,7 +1098,10 @@ public class JSONReaderTest1 {
     @Test
     public void test_readValueHashCode() {
         for (JSONReader jsonReader : TestUtils.createJSONReaders("\"A中国\"")) {
-            assertEquals(Fnv.hashCode64("A中国"), jsonReader.readValueHashCode());
+            assertEquals(
+                    Fnv.hashCode64("A中国"),
+                    jsonReader.readValueHashCode()
+            );
             assertEquals("A中国", jsonReader.getString());
             assertFalse(jsonReader.comma);
         }
@@ -1113,7 +1118,10 @@ public class JSONReaderTest1 {
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"\\\\\\\"\"}")) {
-            assertEquals(Fnv.hashCode64("\\\""), jsonReader.readValueHashCode());
+            assertEquals(
+                    Fnv.hashCode64("\\\""),
+                    jsonReader.readValueHashCode()
+            );
             assertEquals("\\\"", jsonReader.getString());
             assertFalse(jsonReader.comma);
         }
@@ -1476,8 +1484,14 @@ public class JSONReaderTest1 {
     @Test
     public void testJSONB() {
         byte[] bytes = JSONB.toBytes("");
-        JSONReader jsonReader = JSONReader.ofJSONB(JSONFactory.createReadContext(), bytes);
-        assertThrows(JSONException.class, () -> jsonReader.readLocalDate11());
+        {
+            JSONReader jsonReader = JSONReader.ofJSONB(bytes, JSONFactory.createReadContext());
+            assertThrows(JSONException.class, () -> jsonReader.readLocalDate11());
+        }
+        {
+            JSONReader jsonReader = JSONReader.ofJSONB(JSONFactory.createReadContext(), bytes);
+            assertThrows(JSONException.class, () -> jsonReader.readLocalDate11());
+        }
     }
 
     @Test
@@ -1498,7 +1512,9 @@ public class JSONReaderTest1 {
 
     @Test
     public void testDates() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter
+                .ofPattern("yyyy-MM-dd HH:mm:ss", Locale.CHINA)
+                .withZone(IOUtils.SHANGHAI_ZONE_ID);
 
         char[] chars = "\"1900-01-01 00:00:00\"".toCharArray();
         for (int year = 1900; year < 2200; year++) {
@@ -1885,9 +1901,56 @@ public class JSONReaderTest1 {
         LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, 0, 0);
         long epochMilli = ldt.atZone(zoneId).toInstant().toEpochMilli();
 
-        JSONReader jsonReader = JSONReader.of("123");
-        jsonReader.context.setZoneId(zoneId);
-        long millis = jsonReader.millis(year, month, dom, hour, minute, 0, 0);
+        long millis = DateUtils.millis(zoneId, year, month, dom, hour, minute, 0, 0);
         assertEquals(epochMilli, millis, ldt.toString());
+    }
+
+    @Test
+    public void getBigInt() throws Exception {
+        Field signumField = BigInteger.class.getDeclaredField("signum");
+        Field magField = BigInteger.class.getDeclaredField("mag");
+        long signumOffSet = UnsafeUtils.UNSAFE.objectFieldOffset(signumField);
+        long magOffSet = UnsafeUtils.UNSAFE.objectFieldOffset(magField);
+
+        JSONReader.BigIntegerCreator bigIntegerCreator = new JSONReader.BigIntegerCreator();
+
+        {
+            BigInteger[] values = new BigInteger[] {
+                    BigInteger.ZERO,
+                    BigInteger.ONE,
+                    BigInteger.TEN,
+                    new BigInteger("21474836481"),
+                    new BigInteger("12345678901234567890"),
+                    new BigInteger("1234567890123456789012345678901234567890"),
+                    new BigInteger("12345678901234567890123456789012345678901234567890123456789012345678901234567890")
+            };
+            for (BigInteger value : values) {
+                int signum = UnsafeUtils.UNSAFE.getInt(value, signumOffSet);
+                int[] mage = (int[]) UnsafeUtils.UNSAFE.getObject(value, magOffSet);
+                BigInteger value1 = JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR.apply(signum, mage);
+                BigInteger value2 = bigIntegerCreator.apply(signum, mage);
+                assertEquals(value, value1);
+                assertEquals(value, value2);
+            }
+        }
+        {
+            BigInteger[] values = new BigInteger[] {
+                    new BigInteger("-1"),
+                    new BigInteger("-10"),
+                    new BigInteger("-100"),
+                    new BigInteger("-21474836481"),
+                    new BigInteger("-12345678901234567890"),
+                    new BigInteger("-1234567890123456789012345678901234567890"),
+                    new BigInteger("-12345678901234567890123456789012345678901234567890123456789012345678901234567890")
+            };
+            for (BigInteger value : values) {
+                int signum = UnsafeUtils.UNSAFE.getInt(value, signumOffSet);
+                int[] mage = (int[]) UnsafeUtils.UNSAFE.getObject(value, magOffSet);
+                BigInteger value1 = JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR.apply(signum, mage);
+                BigInteger value2 = bigIntegerCreator.apply(signum, mage);
+                assertEquals(value, value1);
+                assertEquals(value, value2);
+            }
+        }
     }
 }

@@ -10,6 +10,8 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
+
 public final class ObjectReaderImplList
         implements ObjectReader {
     static final Class CLASS_EMPTY_SET = Collections.emptySet().getClass();
@@ -50,6 +52,17 @@ public final class ObjectReaderImplList
             }
         } else {
             rawType = type;
+            if (listClass != null) {
+                Type superType = listClass.getGenericSuperclass();
+                if (superType instanceof ParameterizedType) {
+                    ParameterizedType parameterizedType = (ParameterizedType) superType;
+                    rawType = parameterizedType.getRawType();
+                    Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                    if (actualTypeArguments.length == 1) {
+                        itemType = actualTypeArguments[0];
+                    }
+                }
+            }
         }
 
         if (listClass == null) {
@@ -131,6 +144,14 @@ public final class ObjectReaderImplList
             return new ObjectReaderImplList(type, (Class) type, (Class) type, Object.class, null);
         }
 
+        if (itemType == String.class && builder == null) {
+            return new ObjectReaderImplListStr(listClass, instanceClass);
+        }
+
+        if (itemType == Long.class && builder == null) {
+            return new ObjectReaderImplListInt64(listClass, instanceClass);
+        }
+
         return new ObjectReaderImplList(type, listClass, instanceClass, itemType, builder);
     }
 
@@ -160,7 +181,7 @@ public final class ObjectReaderImplList
     public Object createInstance(Collection collection) {
         int size = collection.size();
 
-        if (size == 0) {
+        if (size == 0 && (listClass == List.class)) {
             Collection list = Collections.emptyList();
             if (builder != null) {
                 return builder.apply(list);
@@ -208,7 +229,7 @@ public final class ObjectReaderImplList
     @Override
     public Object createInstance(long features) {
         if (instanceType == ArrayList.class) {
-            return new ArrayList();
+            return JVM_VERSION == 8 ? new ArrayList(10) : new ArrayList();
         }
 
         if (instanceType == LinkedList.class) {
@@ -334,9 +355,9 @@ public final class ObjectReaderImplList
 
         Collection list;
         if (listType == ArrayList.class) {
-            list = new ArrayList();
+            list = entryCnt > 0 ? new ArrayList(entryCnt) : new ArrayList();
         } else if (listType == JSONArray.class) {
-            list = new JSONArray();
+            list = entryCnt > 0 ? new JSONArray(entryCnt) : new JSONArray();
         } else if (listType == HashSet.class) {
             list = new HashSet();
         } else if (listType == LinkedHashSet.class) {
@@ -444,6 +465,15 @@ public final class ObjectReaderImplList
         }
 
         if (!jsonReader.nextIfMatch('[')) {
+            if (itemClass != Object.class && itemObjectReader != null) {
+                Object item = itemObjectReader.readObject(jsonReader, itemType, 0, 0);
+                list.add(item);
+                if (builder != null) {
+                    list = (Collection) builder.apply(list);
+                }
+                return list;
+            }
+
             throw new JSONException(jsonReader.info());
         }
 
@@ -453,14 +483,22 @@ public final class ObjectReaderImplList
             }
 
             Object item;
-            if (itemObjectReader != null) {
-                item = itemObjectReader.readObject(jsonReader, itemType, i, 0);
-            } else {
-                if (itemType == String.class) {
-                    item = jsonReader.readString();
+            if (itemType == String.class) {
+                item = jsonReader.readString();
+            } else if (itemObjectReader != null) {
+                if (jsonReader.isReference()) {
+                    String reference = jsonReader.readReference();
+                    if ("..".equals(reference)) {
+                        item = this;
+                    } else {
+                        jsonReader.addResolveTask(list, i, JSONPath.of(reference));
+                        continue;
+                    }
                 } else {
-                    throw new JSONException(jsonReader.info("TODO : " + itemType));
+                    item = itemObjectReader.readObject(jsonReader, itemType, i, 0);
                 }
+            } else {
+                throw new JSONException(jsonReader.info("TODO : " + itemType));
             }
 
             list.add(item);

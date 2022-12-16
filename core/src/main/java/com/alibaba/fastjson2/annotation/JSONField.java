@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  * the conversion process may not meet expectations. {@link JSONField} can not only solve this problem but also implement custom requirements.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
 public @interface JSONField {
     /**
      * The order of the fields during
@@ -98,4 +98,17 @@ public @interface JSONField {
     String schema() default "";
 
     boolean jsonDirect() default false;
+
+    /**
+     * Property that indicates whether a value (which may be explicit
+     * null) is expected for property during deserialization or not.
+     * If expected, <code>ObjectReader</code> should indicate
+     * this as a validity problem (usually by throwing an exception,
+     * but this may be sent via problem handlers that can try to
+     * rectify the problem, for example, by supplying a default
+     * value).
+     *
+     * @since 2.0.20
+     */
+    boolean required() default false;
 }

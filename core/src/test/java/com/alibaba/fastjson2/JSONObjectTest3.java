@@ -81,10 +81,26 @@ public class JSONObjectTest3 {
     }
 
     @Test
+    public void of() {
+        assertEquals(0, JSONObject.of().size());
+        assertEquals(1, JSONObject.of("k0", 0).size());
+        assertEquals(2, JSONObject.of("k0", 0, "k1", 1).size());
+        assertEquals(3, JSONObject.of("k0", 0, "k1", 1, "k2", 2).size());
+        assertEquals(4, JSONObject.of("k0", 0, "k1", 1, "k2", 2, "k3", 3).size());
+        assertEquals(5, JSONObject.of("k0", 0, "k1", 1, "k2", 2, "k3", 3, "k4", 4).size());
+    }
+
+    @Test
     public void getBooleanValue() {
         JSONObject jsonObject = JSONObject
-                .of("v0", "true", "v1", 1, "v2", true, "v3", false)
-                .fluentPut("v4", "1");
+                .of(
+                        "v0", "true",
+                        "v1", 1,
+                        "v2", true,
+                        "v3", false,
+                        "v4", "1"
+                );
+        assertEquals(5, jsonObject.size());
         assertTrue(jsonObject.getBooleanValue("v0", false));
 
         assertTrue(jsonObject.getBooleanValue("v1", false));

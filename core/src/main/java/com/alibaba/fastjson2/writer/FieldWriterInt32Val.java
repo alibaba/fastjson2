@@ -7,16 +7,8 @@ import java.lang.reflect.Field;
 
 class FieldWriterInt32Val<T>
         extends FieldWriterInt32<T> {
-    final Field field;
-
     FieldWriterInt32Val(String name, int ordinal, long features, String format, String label, Field field) {
-        super(name, ordinal, features, format, label, int.class, int.class);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, features, format, label, int.class, int.class, field, null);
     }
 
     @Override
@@ -24,7 +16,7 @@ class FieldWriterInt32Val<T>
         try {
             return field.get(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 
@@ -34,7 +26,7 @@ class FieldWriterInt32Val<T>
         try {
             value = field.getInt(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
 
         if (value == 0 && jsonWriter.isEnabled(JSONWriter.Feature.NotWriteDefaultValue)) {
@@ -51,7 +43,7 @@ class FieldWriterInt32Val<T>
             int value = field.getInt(object);
             jsonWriter.writeInt32(value);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 }

@@ -115,23 +115,26 @@ public class FastJsonHttpMessageConverter
 
     @Override
     protected void writeInternal(Object object, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            HttpHeaders headers = outputMessage.getHeaders();
-            int contentLength;
+        HttpHeaders headers = outputMessage.getHeaders();
 
+        try {
+            int contentLength;
             if (object instanceof String && JSON.isValidObject((String) object)) {
                 byte[] strBytes = ((String) object).getBytes(config.getCharset());
                 contentLength = strBytes.length;
-                baos.write(strBytes, 0, strBytes.length);
+                outputMessage.getBody().write(strBytes, 0, strBytes.length);
             } else {
-                contentLength = JSON.writeTo(baos, object, config.getDateFormat(), config.getWriterFilters(), config.getWriterFeatures());
+                contentLength = JSON.writeTo(
+                        outputMessage.getBody(),
+                        object, config.getDateFormat(),
+                        config.getWriterFilters(),
+                        config.getWriterFeatures()
+                );
             }
 
             if (headers.getContentLength() < 0 && config.isWriteContentLength()) {
                 headers.setContentLength(contentLength);
             }
-
-            baos.writeTo(outputMessage.getBody());
         } catch (JSONException ex) {
             throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
         } catch (IOException ex) {

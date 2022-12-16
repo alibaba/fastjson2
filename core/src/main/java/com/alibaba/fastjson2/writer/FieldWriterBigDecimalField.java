@@ -7,17 +7,9 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 
 final class FieldWriterBigDecimalField<T>
-        extends FieldWriterImpl<T> {
-    final Field field;
-
+        extends FieldWriter<T> {
     protected FieldWriterBigDecimalField(String name, int ordinal, long features, String format, String label, Field field) {
-        super(name, ordinal, features, format, label, BigDecimal.class, BigDecimal.class);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, features, format, label, BigDecimal.class, BigDecimal.class, field, null);
     }
 
     @Override
@@ -25,7 +17,7 @@ final class FieldWriterBigDecimalField<T>
         try {
             return field.get(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 

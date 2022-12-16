@@ -2,28 +2,36 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.filter.ExtraProcessor;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
 
 public abstract class ObjectReaderBean<T>
         implements ObjectReader<T> {
     protected final Class objectClass;
+    protected final Supplier<T> creator;
+    protected final Function buildFunction;
+    protected final long features;
     protected final String typeName;
     protected final long typeNameHash;
 
     protected FieldReader extraFieldReader;
 
     protected boolean hasDefaultValue;
+    protected boolean serializable;
 
     protected final JSONSchema schema;
 
-    protected ObjectReaderBean(Class objectClass, String typeName, JSONSchema schema) {
+    protected ObjectReaderBean(Class objectClass, Supplier<T> creator, String typeName, long features, JSONSchema schema, Function buildFunction) {
         if (typeName == null) {
             if (objectClass != null) {
                 typeName = TypeUtils.getTypeName(objectClass);
@@ -31,10 +39,14 @@ public abstract class ObjectReaderBean<T>
         }
 
         this.objectClass = objectClass;
+        this.creator = creator;
+        this.buildFunction = buildFunction;
+        this.features = features;
         this.typeName = typeName;
         this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
 
         this.schema = schema;
+        this.serializable = objectClass != null && Serializable.class.isAssignableFrom(objectClass);
     }
 
     @Override
@@ -42,25 +54,86 @@ public abstract class ObjectReaderBean<T>
         return objectClass;
     }
 
+    protected T processObjectInputSingleItemArray(JSONReader jsonReader,
+                                                  Type fieldType,
+                                                  Object fieldName,
+                                                  long features) {
+        String message = "expect {, but [, class " + this.typeName;
+        if (fieldName != null) {
+            message += ", parent fieldName " + fieldName;
+        }
+        String info = jsonReader.info(message);
+
+        long featuresAll = jsonReader.features(features);
+        if ((featuresAll & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
+            Type itemType = fieldType == null ? this.objectClass : fieldType;
+            List list = jsonReader.readArray(itemType);
+            if (list.size() == 1) {
+                return (T) list.get(0);
+            }
+        }
+        throw new JSONException(info);
+    }
+
     protected void processExtra(JSONReader jsonReader, Object object) {
-        if (extraFieldReader == null || object == null) {
-            jsonReader.skipValue();
+        if (extraFieldReader != null && object != null) {
+            extraFieldReader.processExtra(jsonReader, object);
             return;
         }
 
-        extraFieldReader.processExtra(jsonReader, object);
+        if ((jsonReader.features(features) & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
+            String fieldName = jsonReader.getFieldName();
+            if (fieldName.startsWith("is")) {
+                String fieldName1 = fieldName.substring(2);
+                long hashCode64LCase = Fnv.hashCode64LCase(fieldName1);
+                FieldReader fieldReader = getFieldReaderLCase(hashCode64LCase);
+                if (fieldReader != null && fieldReader.fieldClass == Boolean.class) {
+                    fieldReader.readFieldValue(jsonReader, object);
+                    return;
+                }
+            }
+        }
+
+        ExtraProcessor extraProcessor = jsonReader.getContext().getExtraProcessor();
+        if (extraProcessor != null) {
+            String fieldName = jsonReader.getFieldName();
+            Type type = extraProcessor.getType(fieldName);
+            Object extraValue = jsonReader.read(type);
+            extraProcessor.processExtra(object, fieldName, extraValue);
+            return;
+        }
+
+        jsonReader.skipValue();
     }
 
-    public ObjectReader checkAutoType(JSONReader jsonReader, Class listClass, long features) {
-        ObjectReader autoTypeObjectReader = null;
+    public void acceptExtra(Object object, String fieldName, Object fieldValue) {
+        if (extraFieldReader == null || object == null) {
+            return;
+        }
+        extraFieldReader.acceptExtra(object, fieldName, fieldValue);
+    }
+
+    public ObjectReader checkAutoType(JSONReader jsonReader, Class expectClass, long features) {
         if (jsonReader.nextIfMatch(BC_TYPED_ANY)) {
             long typeHash = jsonReader.readTypeHashCode();
             JSONReader.Context context = jsonReader.getContext();
-            autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+            JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
+            if (autoTypeFilter != null) {
+                Class<?> filterClass = autoTypeFilter.apply(typeHash, expectClass, features);
+                if (filterClass == null) {
+                    String typeName = jsonReader.getString();
+                    filterClass = autoTypeFilter.apply(typeName, expectClass, features);
+                }
 
+                if (filterClass != null) {
+                    return context.getObjectReader(filterClass);
+                }
+            }
+
+            ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
             if (autoTypeObjectReader == null) {
                 String typeName = jsonReader.getString();
-                autoTypeObjectReader = context.getObjectReaderAutoType(typeName, listClass, features);
+                autoTypeObjectReader = context.getObjectReaderAutoType(typeName, expectClass, features);
             }
 
             if (autoTypeObjectReader == null) {
@@ -76,25 +149,19 @@ public abstract class ObjectReaderBean<T>
                 return null;
 //                throw new JSONException("autoType not support input " + jsonReader.getString());
             }
+
+            return autoTypeObjectReader;
         }
-        return autoTypeObjectReader;
+        return null;
     }
 
     protected void initDefaultValue(T object) {
     }
 
     public void readObject(JSONReader jsonReader, Object object, long features) {
-        if (jsonReader.isJSONB()) {
-//            return readJSONBObject(jsonReader, features);
-        }
-
         if (jsonReader.nextIfNull()) {
             jsonReader.nextIfMatch(',');
             return;
-        }
-
-        if (jsonReader.isArray() && jsonReader.isSupportBeanArray(getFeatures() | features)) {
-//            return readArrayMappingObject(jsonReader);
         }
 
         boolean objectStart = jsonReader.nextIfMatch('{');
@@ -115,11 +182,7 @@ public abstract class ObjectReaderBean<T>
             }
 
             if (fieldReader == null) {
-                if (this instanceof ObjectReaderBean) {
-                    processExtra(jsonReader, object);
-                } else {
-                    jsonReader.skipValue();
-                }
+                processExtra(jsonReader, object);
                 continue;
             }
 
@@ -139,13 +202,18 @@ public abstract class ObjectReaderBean<T>
             return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
-        if (jsonReader.nextIfNull()) {
+        if (jsonReader.nextIfNullOrEmptyString()) {
             jsonReader.nextIfMatch(',');
             return null;
         }
 
-        if (jsonReader.isArray() && jsonReader.isSupportBeanArray(getFeatures() | features)) {
-            return readArrayMappingObject(jsonReader, fieldType, fieldName, features);
+        long featuresAll = jsonReader.features(this.getFeatures() | features);
+        if (jsonReader.isArray()) {
+            if ((featuresAll & JSONReader.Feature.SupportArrayToBean.mask) != 0) {
+                return readArrayMappingObject(jsonReader, fieldType, fieldName, features);
+            }
+
+            return processObjectInputSingleItemArray(jsonReader, fieldType, fieldName, featuresAll);
         }
 
         T object = null;
@@ -173,19 +241,33 @@ public abstract class ObjectReaderBean<T>
 
             JSONReader.Context context = jsonReader.getContext();
             long features3, hash = jsonReader.readFieldNameHashCode();
+            JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
             if (i == 0
                     && hash == getTypeKeyHash()
-                    && ((((features3 = (features | getFeatures() | context.getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0) || context.getContextAutoTypeBeforeHandler() != null)
+                    && ((((features3 = (features | getFeatures() | context.getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0) || autoTypeFilter != null)
             ) {
-                long typeHash = jsonReader.readTypeHashCode();
+                ObjectReader reader = null;
 
-                ObjectReader reader = autoType(context, typeHash);
+                long typeHash = jsonReader.readTypeHashCode();
+                if (autoTypeFilter != null) {
+                    Class<?> filterClass = autoTypeFilter.apply(typeHash, objectClass, features3);
+                    if (filterClass == null) {
+                        filterClass = autoTypeFilter.apply(jsonReader.getString(), objectClass, features3);
+                        if (filterClass != null) {
+                            reader = context.getObjectReader(filterClass);
+                        }
+                    }
+                }
+
+                if (reader == null) {
+                    reader = autoType(context, typeHash);
+                }
 
                 String typeName = null;
                 if (reader == null) {
                     typeName = jsonReader.getString();
                     reader = context.getObjectReaderAutoType(
-                            typeName, getObjectClass(), features3
+                            typeName, objectClass, features3
                     );
 
                     if (reader == null) {
@@ -224,11 +306,7 @@ public abstract class ObjectReaderBean<T>
             }
 
             if (fieldReader == null) {
-                if (this instanceof ObjectReaderBean) {
-                    processExtra(jsonReader, object);
-                } else {
-                    jsonReader.skipValue();
-                }
+                processExtra(jsonReader, object);
                 continue;
             }
 

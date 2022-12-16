@@ -4,6 +4,9 @@ import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.util.Arrays;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
+import static com.alibaba.fastjson2.JSONWriter.Feature.EscapeNoneAscii;
+
 final class JSONWriterUTF16JDK8
         extends JSONWriterUTF16 {
     JSONWriterUTF16JDK8(Context ctx) {
@@ -22,7 +25,8 @@ final class JSONWriterUTF16JDK8
             return;
         }
 
-        boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+        boolean escapeNoneAscii = (context.features & EscapeNoneAscii.mask) != 0;
         char[] value = JDKUtils.getCharArray(str);
         final int strlen = value.length;
 
@@ -55,6 +59,17 @@ final class JSONWriterUTF16JDK8
                     break;
                 }
 
+                if (browserSecure) {
+                    if (c0 == '<' || c1 == '<' || c2 == '<' || c3 == '<' || c4 == '<' || c5 == '<' || c6 == '<' || c7 == '<'
+                            || c0 == '>' || c1 == '>' || c2 == '>' || c3 == '>' || c4 == '>' || c5 == '>' || c6 == '>' || c7 == '>'
+                            || c0 == '(' || c1 == '(' || c2 == '(' || c3 == '(' || c4 == '(' || c5 == '(' || c6 == '(' || c7 == '('
+                            || c0 == ')' || c1 == ')' || c2 == ')' || c3 == ')' || c4 == ')' || c5 == ')' || c6 == ')' || c7 == ')'
+                    ) {
+                        escape = true;
+                        break;
+                    }
+                }
+
                 if (escapeNoneAscii) {
                     if (c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F || c4 > 0x007F || c5 > 0x007F || c6 > 0x007F || c7 > 0x007F) {
                         escape = true;
@@ -85,6 +100,17 @@ final class JSONWriterUTF16JDK8
                         break;
                     }
 
+                    if (browserSecure) {
+                        if (c0 == '<' || c1 == '<' || c2 == '<' || c3 == '<'
+                                || c0 == '>' || c1 == '>' || c2 == '>' || c3 == '>'
+                                || c0 == '(' || c1 == '(' || c2 == '(' || c3 == '('
+                                || c0 == ')' || c1 == ')' || c2 == ')' || c3 == ')'
+                        ) {
+                            escape = true;
+                            break;
+                        }
+                    }
+
                     if (escapeNoneAscii) {
                         if (c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F) {
                             escape = true;
@@ -102,6 +128,12 @@ final class JSONWriterUTF16JDK8
                     escape = true;
                 } else if (escapeNoneAscii && (c0 > 0x007F || c1 > 0x007F)) {
                     escape = true;
+                } else if (browserSecure
+                        && (c0 == '<' || c1 == '<'
+                        || c0 == '>' || c1 == '>'
+                        || c0 == '(' || c1 == '(')
+                        || c0 == ')' || c1 == ')') {
+                    escape = true;
                 } else {
                     i += 2;
                 }
@@ -109,7 +141,11 @@ final class JSONWriterUTF16JDK8
 
             if (!escape && i + 1 == strlen) {
                 char c0 = value[i];
-                escape = c0 == quote || c0 == '\\' || c0 < ' ' || (escapeNoneAscii && c0 > 0x007F);
+                escape = c0 == quote
+                        || c0 == '\\'
+                        || c0 < ' '
+                        || (escapeNoneAscii && c0 > 0x007F)
+                        || (browserSecure && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'));
             }
         }
 
@@ -122,7 +158,7 @@ final class JSONWriterUTF16JDK8
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -231,6 +267,21 @@ final class JSONWriterUTF16JDK8
                     chars[off++] = '0';
                     chars[off++] = '1';
                     chars[off++] = (char) ('a' + (ch - 26));
+                    break;
+                case '<':
+                case '>':
+                case '(':
+                case ')':
+                    if (browserSecure && (ch == '<' || ch == '>' || ch == '(' || ch == ')')) {
+                        chars[off++] = '\\';
+                        chars[off++] = 'u';
+                        chars[off++] = DIGITS[(ch >>> 12) & 15];
+                        chars[off++] = DIGITS[(ch >>> 8) & 15];
+                        chars[off++] = DIGITS[(ch >>> 4) & 15];
+                        chars[off++] = DIGITS[ch & 15];
+                    } else {
+                        chars[off++] = ch;
+                    }
                     break;
                 default:
                     if (escapeNoneAscii && ch > 0x007F) {

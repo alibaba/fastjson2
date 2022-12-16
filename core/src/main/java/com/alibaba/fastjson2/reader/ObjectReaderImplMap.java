@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public final class ObjectReaderImplMap
         implements ObjectReader {
@@ -78,7 +79,7 @@ public final class ObjectReaderImplMap
                 Type keyType = actualTypeArguments[0];
                 Type valueType = actualTypeArguments[1];
 
-                if (valueType == String.class && builder == null) {
+                if (keyType == String.class && valueType == String.class && builder == null) {
                     return new ObjectReaderImplMapString(mapType, instanceType, features);
                 }
 
@@ -181,7 +182,7 @@ public final class ObjectReaderImplMap
             return Collections.emptyNavigableMap();
         }
 
-        if (JDKUtils.UNSAFE_SUPPORT) {
+        if (UNSAFE_SUPPORT) {
             String instanceTypeName = instanceType.getName();
             switch (instanceTypeName) {
                 case "com.ali.com.google.common.collect.EmptyImmutableBiMap":
@@ -214,7 +215,18 @@ public final class ObjectReaderImplMap
             return map;
         }
 
-        return map;
+        if (mapType == JSONObject.class) {
+            return new JSONObject(map);
+        }
+
+        Map instance = (Map) this.createInstance(features);
+        instance.putAll(map);
+
+        if (builder != null) {
+            return builder.apply(instance);
+        }
+
+        return instance;
     }
 
     @Override
@@ -325,6 +337,10 @@ public final class ObjectReaderImplMap
                         value = null;
                         jsonReader.addResolveTask(map, fieldName, JSONPath.of(reference));
                     }
+                } else if (type == BC_OBJECT) {
+                    value = jsonReader.readObject();
+                } else if (type >= BC_ARRAY_FIX_MIN && type <= BC_ARRAY) {
+                    value = jsonReader.readArray();
                 } else {
                     value = jsonReader.readAny();
                 }
@@ -365,7 +381,7 @@ public final class ObjectReaderImplMap
     }
 
     static Function createObjectSupplier(Class objectClass) {
-        if (JDKUtils.UNSAFE_SUPPORT) {
+        if (UNSAFE_SUPPORT) {
             if (UNSAFE_OBJECT_CREATOR != null) {
                 return UNSAFE_OBJECT_CREATOR;
             }

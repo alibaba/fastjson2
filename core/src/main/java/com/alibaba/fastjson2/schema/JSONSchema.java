@@ -129,7 +129,7 @@ public abstract class JSONSchema {
 
         JSONObject object = (JSONObject) not;
 
-        if (object != null && object.isEmpty()) {
+        if (object == null || object.isEmpty()) {
             return new Not(null, new Type[] {Type.Any}, null);
         }
 
@@ -359,7 +359,6 @@ public abstract class JSONSchema {
             if (input.size() == 1) {
                 Object propertyType = input.get("type");
                 if (propertyType instanceof JSONArray) {
-                    JSONObject empty = new JSONObject();
                     JSONArray array = (JSONArray) propertyType;
                     JSONSchema[] typeSchemas = new JSONSchema[array.size()];
                     for (int i = 0; i < array.size(); i++) {
@@ -626,7 +625,9 @@ public abstract class JSONSchema {
         Integer,
         Enum,
         Const,
+        OneOf,
         AllOf,
+        AnyOf,
         Any;
 
         public static Type of(String typeStr) {

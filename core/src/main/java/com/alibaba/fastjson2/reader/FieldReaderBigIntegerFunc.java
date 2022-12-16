@@ -10,14 +10,14 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderBigIntegerFunc<T, V>
-        extends FieldReaderImpl<T> {
-    final Method method;
+        extends FieldReader<T> {
     final BiConsumer<T, V> function;
 
     public FieldReaderBigIntegerFunc(
             String fieldName,
             Class<V> fieldClass,
             int ordinal,
+            long features,
             String format,
             Locale locale,
             Object defaultValue,
@@ -25,14 +25,8 @@ final class FieldReaderBigIntegerFunc<T, V>
             Method method,
             BiConsumer<T, V> function
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, locale, defaultValue, schema);
-        this.method = method;
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override
@@ -67,12 +61,26 @@ final class FieldReaderBigIntegerFunc<T, V>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        BigInteger fieldValue = jsonReader.readBigInteger();
+        BigInteger fieldValue;
+        try {
+            fieldValue = jsonReader.readBigInteger();
+        } catch (Exception e) {
+            if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
+                fieldValue = null;
+            } else {
+                throw e;
+            }
+        }
 
         if (schema != null) {
             schema.assertValidate(fieldValue);
         }
 
         function.accept(object, (V) fieldValue);
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return jsonReader.readBigInteger();
     }
 }

@@ -37,7 +37,7 @@ final class ObjectWriterImplCalendar
             return;
         }
 
-        JSONWriter.Context ctx = jsonWriter.getContext();
+        JSONWriter.Context ctx = jsonWriter.context;
 
         Calendar date = (Calendar) object;
         long millis = date.getTimeInMillis();
@@ -57,42 +57,50 @@ final class ObjectWriterImplCalendar
         ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, zoneId);
         int offsetSeconds = zdt.getOffset().getTotalSeconds();
 
-        if (format == null && ctx.isDateFormatISO8601()) {
-            int year = zdt.getYear();
-            int month = zdt.getMonthValue();
-            int dayOfMonth = zdt.getDayOfMonth();
-            int hour = zdt.getHour();
-            int minute = zdt.getMinute();
-            int second = zdt.getSecond();
-            int nano = zdt.getNano() / (1000 * 1000);
-            jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds);
+        final int year = zdt.getYear();
+        if (year >= 0 && year <= 9999) {
+            if (format == null && ctx.isDateFormatISO8601()) {
+                int month = zdt.getMonthValue();
+                int dayOfMonth = zdt.getDayOfMonth();
+                int hour = zdt.getHour();
+                int minute = zdt.getMinute();
+                int second = zdt.getSecond();
+                int nano = zdt.getNano() / (1000 * 1000);
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds, true);
+                return;
+            }
+
+            String dateFormat = format == null ? ctx.getDateFormat() : format;
+            if (dateFormat == null) {
+                int month = zdt.getMonthValue();
+                int dayOfMonth = zdt.getDayOfMonth();
+                int hour = zdt.getHour();
+                int minute = zdt.getMinute();
+                int second = zdt.getSecond();
+
+                int nano = zdt.getNano();
+                if (nano == 0) {
+                    jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
+                } else {
+                    jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano / 1000_000, offsetSeconds, false);
+                }
+                return;
+            }
+        }
+
+        DateTimeFormatter dateFormatter;
+        if (format != null) {
+            dateFormatter = getDateFormatter();
+        } else {
+            dateFormatter = ctx.getDateFormatter();
+        }
+
+        if (dateFormatter == null) {
+            jsonWriter.writeZonedDateTime(zdt);
             return;
         }
 
-        String dateFormat = format == null ? ctx.getDateFormat() : format;
-        if (dateFormat == null) {
-            int year = zdt.getYear();
-            int month = zdt.getMonthValue();
-            int dayOfMonth = zdt.getDayOfMonth();
-            int hour = zdt.getHour();
-            int minute = zdt.getMinute();
-            int second = zdt.getSecond();
-
-            int nano = zdt.getNano();
-            if (nano == 0) {
-                jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
-            } else {
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano / 1000_000, offsetSeconds);
-            }
-        } else {
-            DateTimeFormatter dateFormatter;
-            if (format != null) {
-                dateFormatter = getDateFormatter();
-            } else {
-                dateFormatter = ctx.getDateFormatter();
-            }
-            String str = dateFormatter.format(zdt);
-            jsonWriter.writeString(str);
-        }
+        String str = dateFormatter.format(zdt);
+        jsonWriter.writeString(str);
     }
 }

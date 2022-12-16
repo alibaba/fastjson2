@@ -16,7 +16,30 @@ public class FieldReaderCharValueFuncTest {
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "A");
         assertEquals('A', bean.value);
-        assertNotNull(fieldReader.getMethod());
+        assertNotNull(fieldReader.method);
+
+        fieldReader.accept(bean, 'B');
+        assertEquals('B', bean.value);
+
+        assertThrows(JSONException.class, () -> fieldReader.accept(bean, new Object()));
+
+        assertEquals(
+                'A',
+                objectReader.readObject(
+                        JSONReader.of("{\"value\":\"A\"}"),
+                        0
+                ).value
+        );
+    }
+
+    @Test
+    public void test1() {
+        Bean bean = new Bean();
+        ObjectReader<Bean> objectReader = ObjectReaderCreator.INSTANCE.createObjectReader(Bean.class);
+        FieldReader fieldReader = objectReader.getFieldReader("value");
+        fieldReader.accept(bean, "A");
+        assertEquals('A', bean.value);
+        assertNotNull(fieldReader.method);
 
         fieldReader.accept(bean, 'B');
         assertEquals('B', bean.value);

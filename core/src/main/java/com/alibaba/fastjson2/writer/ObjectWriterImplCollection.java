@@ -128,7 +128,7 @@ final class ObjectWriterImplCollection
 
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             writeJSONB(jsonWriter, object, fieldName, fieldType, features);
             return;
         }

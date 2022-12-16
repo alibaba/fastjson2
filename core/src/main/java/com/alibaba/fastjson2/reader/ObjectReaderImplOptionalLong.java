@@ -6,12 +6,11 @@ import java.lang.reflect.Type;
 import java.util.OptionalLong;
 
 class ObjectReaderImplOptionalLong
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplOptionalLong INSTANCE = new ObjectReaderImplOptionalLong();
 
-    @Override
-    public Class getObjectClass() {
-        return OptionalLong.class;
+    public ObjectReaderImplOptionalLong() {
+        super(OptionalLong.class);
     }
 
     @Override

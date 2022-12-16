@@ -37,6 +37,9 @@ public interface ObjectReader<T> {
         throw new UnsupportedOperationException(this.getClass().getName());
     }
 
+    default void acceptExtra(Object object, String fieldName, Object fieldValue) {
+    }
+
     default T createInstance(Map map, JSONReader.Feature... features) {
         long featuresValue = 0;
         for (JSONReader.Feature feature : features) {
@@ -44,6 +47,7 @@ public interface ObjectReader<T> {
         }
         return createInstance(map, featuresValue);
     }
+
     /**
      * @return {@link T}
      * @throws JSONException If a suitable ObjectReader is not found
@@ -78,20 +82,22 @@ public interface ObjectReader<T> {
         T object = createInstance(0L);
         for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             String entryKey = entry.getKey().toString();
+            Object fieldValue = entry.getValue();
+
             FieldReader fieldReader = getFieldReader(entryKey);
             if (fieldReader == null) {
+                acceptExtra(object, entryKey, entry.getValue());
                 continue;
             }
 
-            Object fieldValue = entry.getValue();
-            Class fieldClass = fieldReader.getFieldClass();
-            Type fieldType = fieldReader.getFieldType();
+            Class fieldClass = fieldReader.fieldClass;
+            Type fieldType = fieldReader.fieldType;
 
             if (fieldValue != null) {
                 Class<?> valueClass = fieldValue.getClass();
 
-                if (valueClass != fieldClass) {
-                    Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
+                if (valueClass != fieldReader.fieldClass) {
+                    Function typeConvert = provider.getTypeConvert(valueClass, fieldReader.fieldClass);
 
                     if (typeConvert != null) {
                         fieldValue = typeConvert.apply(fieldValue);
@@ -107,13 +113,13 @@ public interface ObjectReader<T> {
                     typedFieldValue = ((JSONObject) fieldValue).to(fieldType);
                 } else if (fieldValue instanceof JSONArray) {
                     typedFieldValue = ((JSONArray) fieldValue).to(fieldType);
-                } else if (!fieldClass.isInstance(fieldValue) && fieldReader.getFormat() == null) {
-                    typedFieldValue = TypeUtils.cast(fieldValue, fieldClass);
+                } else if (features == 0 && !fieldClass.isInstance(fieldValue) && fieldReader.format == null) {
+                    typedFieldValue = TypeUtils.cast(fieldValue, fieldClass, provider);
                 } else {
                     String fieldValueJSONString = JSON.toJSONString(fieldValue);
                     try (JSONReader jsonReader = JSONReader.of(fieldValueJSONString)) {
                         ObjectReader fieldObjectReader = fieldReader.getObjectReader(jsonReader);
-                        typedFieldValue = fieldObjectReader.readObject(jsonReader, null, entry.getKey(), 0);
+                        typedFieldValue = fieldObjectReader.readObject(jsonReader, null, entry.getKey(), features);
                     }
                 }
             }

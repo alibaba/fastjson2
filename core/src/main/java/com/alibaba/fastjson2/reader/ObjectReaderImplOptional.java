@@ -9,7 +9,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 class ObjectReaderImplOptional
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplOptional INSTANCE = new ObjectReaderImplOptional(null, null, null);
 
     final String format;
@@ -28,6 +28,8 @@ class ObjectReaderImplOptional
     }
 
     public ObjectReaderImplOptional(Type type, String format, Locale locale) {
+        super(Optional.class);
+
         Type itemType = null;
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
@@ -44,11 +46,6 @@ class ObjectReaderImplOptional
     }
 
     @Override
-    public Class getObjectClass() {
-        return Optional.class;
-    }
-
-    @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         Object value;
         if (itemType == null) {
@@ -57,7 +54,7 @@ class ObjectReaderImplOptional
             if (itemObjectReader == null) {
                 ObjectReader formattedObjectReader = null;
                 if (format != null) {
-                    formattedObjectReader = FieldReaderObject.createFormattedObjectReader(itemType, itemClass, format, locale);
+                    formattedObjectReader = FieldReader.createFormattedObjectReader(itemType, itemClass, format, locale);
                 }
                 if (formattedObjectReader == null) {
                     itemObjectReader = jsonReader.getObjectReader(itemType);
@@ -83,7 +80,7 @@ class ObjectReaderImplOptional
             if (itemObjectReader == null) {
                 ObjectReader formattedObjectReader = null;
                 if (format != null) {
-                    formattedObjectReader = FieldReaderObject.createFormattedObjectReader(itemType, itemClass, format, locale);
+                    formattedObjectReader = FieldReader.createFormattedObjectReader(itemType, itemClass, format, locale);
                 }
                 if (formattedObjectReader == null) {
                     itemObjectReader = jsonReader.getObjectReader(itemType);

@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.codec.DateTimeCodec;
 import java.lang.reflect.Type;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
 import java.util.Locale;
 
 final class ObjectWriterImplOffsetDateTime
@@ -24,12 +23,12 @@ final class ObjectWriterImplOffsetDateTime
             return;
         }
 
-        JSONWriter.Context ctx = jsonWriter.getContext();
+        JSONWriter.Context ctx = jsonWriter.context;
 
-        OffsetDateTime dateTime = (OffsetDateTime) object;
+        OffsetDateTime odt = (OffsetDateTime) object;
 
         if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
-            long millis = dateTime
+            long millis = odt
                     .toInstant()
                     .toEpochMilli();
             jsonWriter.writeInt64(millis / 1000);
@@ -37,11 +36,53 @@ final class ObjectWriterImplOffsetDateTime
         }
 
         if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
-            long millis = dateTime
+            long millis = odt
                     .toInstant()
                     .toEpochMilli();
             jsonWriter.writeInt64(millis);
             return;
+        }
+
+        final int year = odt.getYear();
+        if (year >= 0 && year <= 9999) {
+            if (formatISO8601 || ctx.isDateFormatISO8601()) {
+                jsonWriter.writeDateTimeISO8601(
+                        year,
+                        odt.getMonthValue(),
+                        odt.getDayOfMonth(),
+                        odt.getHour(),
+                        odt.getMinute(),
+                        odt.getSecond(),
+                        odt.getNano() / 1000_000,
+                        odt.getOffset().getTotalSeconds(),
+                        true
+                );
+                return;
+            }
+
+            if (yyyyMMddhhmmss19) {
+                jsonWriter.writeDateTime19(
+                        year,
+                        odt.getMonthValue(),
+                        odt.getDayOfMonth(),
+                        odt.getHour(),
+                        odt.getMinute(),
+                        odt.getSecond()
+                );
+                return;
+            }
+
+            if (yyyyMMddhhmmss14) {
+                jsonWriter.writeDateTime14(
+                        year,
+                        odt.getMonthValue(),
+                        odt.getDayOfMonth(),
+                        odt.getHour(),
+                        odt.getMinute(),
+                        odt.getSecond()
+                );
+                return;
+            }
         }
 
         DateTimeFormatter formatter = this.getDateFormatter();
@@ -50,16 +91,11 @@ final class ObjectWriterImplOffsetDateTime
         }
 
         if (formatter == null) {
-            int year = dateTime.get(ChronoField.YEAR);
-            int month = dateTime.get(ChronoField.MONTH_OF_YEAR);
-            int dayOfMonth = dateTime.get(ChronoField.DAY_OF_MONTH);
-            int hour = dateTime.get(ChronoField.HOUR_OF_DAY);
-            int minute = dateTime.get(ChronoField.MINUTE_OF_HOUR);
-            int second = dateTime.get(ChronoField.SECOND_OF_MINUTE);
-            jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
-        } else {
-            String str = formatter.format(dateTime);
-            jsonWriter.writeString(str);
+            jsonWriter.writeString(odt.toString());
+            return;
         }
+
+        String str = formatter.format(odt);
+        jsonWriter.writeString(str);
     }
 }

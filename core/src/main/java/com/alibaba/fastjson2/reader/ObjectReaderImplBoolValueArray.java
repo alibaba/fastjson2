@@ -9,13 +9,12 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 
 class ObjectReaderImplBoolValueArray
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplBoolValueArray INSTANCE = new ObjectReaderImplBoolValueArray();
     static final long TYPE_HASH = Fnv.hashCode64("[Z");
 
-    @Override
-    public Class getObjectClass() {
-        return boolean[].class;
+    ObjectReaderImplBoolValueArray() {
+        super(boolean[].class);
     }
 
     @Override

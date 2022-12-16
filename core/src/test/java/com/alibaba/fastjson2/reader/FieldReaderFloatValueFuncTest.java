@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONSchemaValidException;
-import com.alibaba.fastjson2.TestUtils;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +14,7 @@ public class FieldReaderFloatValueFuncTest {
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
         assertEquals(123F, bean.value);
-        assertNotNull(fieldReader.getMethod());
+        assertNotNull(fieldReader.method);
 
         assertThrows(JSONException.class, () -> fieldReader.accept(bean, new Object()));
 
@@ -111,5 +108,14 @@ public class FieldReaderFloatValueFuncTest {
         public void setValue(float value) {
             throw new UnsupportedOperationException();
         }
+    }
+
+    @Test
+    public void readFieldValue() {
+        Object fieldValue = ObjectReaders.fieldReaderFloat("value", Bean2::setValue)
+                .readFieldValue(JSONReader.of("12.34"));
+        assertEquals(
+                12.34F, ((Float) fieldValue).floatValue()
+        );
     }
 }

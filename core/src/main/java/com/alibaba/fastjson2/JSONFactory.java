@@ -5,20 +5,18 @@ import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
+
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 
 public final class JSONFactory {
     public static final String CREATOR;
@@ -30,6 +28,8 @@ public final class JSONFactory {
 
     public static final boolean MIXED_HASH_ALGORITHM;
 
+    protected static boolean useJacksonAnnotation;
+
     public static String getProperty(String key) {
         return DEFAULT_PROPERTIES.getProperty(key);
     }
@@ -37,14 +37,8 @@ public final class JSONFactory {
     static long defaultReaderFeatures;
     static long defaultWriterFeatures;
 
-    static final class Utils {
-        // GraalVM not support
-        // Android not support
-        static BiFunction<char[], Boolean, String> STRING_CREATOR_JDK8;
-        static Function<byte[], String> STRING_CREATOR_JDK11;
-        static BiFunction<byte[], Charset, String> STRING_CREATOR_JDK17;
-        static volatile boolean STRING_CREATOR_ERROR;
-    }
+    static Supplier<Map> defaultObjectSupplier;
+    static Supplier<List> defaultArraySupplier;
 
     static final NameCacheEntry[] NAME_CACHE = new NameCacheEntry[8192];
     static final NameCacheEntry2[] NAME_CACHE2 = new NameCacheEntry2[8192];
@@ -52,6 +46,7 @@ public final class JSONFactory {
     static final class NameCacheEntry {
         final String name;
         final long value;
+
         public NameCacheEntry(String name, long value) {
             this.name = name;
             this.value = value;
@@ -62,6 +57,7 @@ public final class JSONFactory {
         final String name;
         final long value0;
         final long value1;
+
         public NameCacheEntry2(String name, long value0, long value1) {
             this.name = name;
             this.value0 = value0;
@@ -75,38 +71,45 @@ public final class JSONFactory {
     static final BigInteger HIGH_BIGINT = BigInteger.valueOf(9007199254740991L);
 
     static final char[] CA = new char[]{
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-        'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-        'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-        'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-        'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-        'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-        'w', 'x', 'y', 'z', '0', '1', '2', '3',
-        '4', '5', '6', '7', '8', '9', '+', '/'
-    };
-
-    static final char[] DIGITS = {
-        '0', '1', '2', '3',
-        '4', '5', '6', '7',
-        '8', '9', 'a', 'b',
-        'c', 'd', 'e', 'f'
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+            'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+            'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+            'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+            'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+            'w', 'x', 'y', 'z', '0', '1', '2', '3',
+            '4', '5', '6', '7', '8', '9', '+', '/'
     };
 
     static final int[] DIGITS2 = new int[]{
-        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-        +0, +1, +2, +3, +4, +5, +6, +7, +8, +9, +0, +0, +0, +0, +0, +0,
-        +0, 10, 11, 12, 13, 14, 15, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-        +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-        +0, 10, 11, 12, 13, 14, 15
+            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, +1, +2, +3, +4, +5, +6, +7, +8, +9, +0, +0, +0, +0, +0, +0,
+            +0, 10, 11, 12, 13, 14, 15, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+            +0, 10, 11, 12, 13, 14, 15
     };
+
+    static final long INFLATED = Long.MIN_VALUE;
 
     static final double[] SMALL_10_POW = {
             1.0e0,
             1.0e1, 1.0e2, 1.0e3, 1.0e4, 1.0e5,
             1.0e6, 1.0e7, 1.0e8, 1.0e9, 1.0e10,
             1.0e11, 1.0e12, 1.0e13, 1.0e14, 1.0e15
+    };
+
+    static final float[] FLOAT_10_POW = {
+            1.0e0f, 1.0e1f, 1.0e2f, 1.0e3f, 1.0e4f, 1.0e5f,
+            1.0e6f, 1.0e7f, 1.0e8f, 1.0e9f, 1.0e10f
+    };
+
+    static final double[] DOUBLE_10_POW = {
+            1.0e0, 1.0e1, 1.0e2, 1.0e3, 1.0e4, 1.0e5,
+            1.0e6, 1.0e7, 1.0e8, 1.0e9, 1.0e10, 1.0e11,
+            1.0e12, 1.0e13, 1.0e14, 1.0e15, 1.0e16, 1.0e17,
+            1.0e18, 1.0e19, 1.0e20, 1.0e21, 1.0e22
     };
 
     static {
@@ -165,18 +168,39 @@ public final class JSONFactory {
             if (property != null && "mixed".equals(property)) {
                 MIXED_HASH_ALGORITHM = true;
             } else {
-                MIXED_HASH_ALGORITHM = JDKUtils.JVM_VERSION > 8;
+                MIXED_HASH_ALGORITHM = JVM_VERSION > 8;
             }
+        }
+
+        {
+            String property = System.getProperty("fastjson2.useJacksonAnnotation");
+            if (property != null) {
+                property = property.trim();
+            }
+
+            if (property == null || property.isEmpty()) {
+                property = properties.getProperty("fastjson2.useJacksonAnnotation");
+                if (property != null) {
+                    property = property.trim();
+                }
+            }
+
+            useJacksonAnnotation = property == null || !property.equals("false");
         }
     }
 
-    private static final int CACHE_THRESHOLD = 1024 * 1024;
-    private static final byte[][] BYTE_ARRAY_CACHE = new byte[4][];
-    private static final char[][] CHAR_ARRAY_CACHE = new char[4][];
-
-    static int cacheIndex() {
-        return System.identityHashCode(Thread.currentThread()) & 3;
+    public static boolean isUseJacksonAnnotation() {
+        return useJacksonAnnotation;
     }
+
+    public static void setUseJacksonAnnotation(boolean useJacksonAnnotation) {
+        JSONFactory.useJacksonAnnotation = useJacksonAnnotation;
+    }
+
+    static final int CACHE_SIZE = 4;
+    private static final int CACHE_THRESHOLD = 1024 * 1024;
+    private static final byte[][] BYTE_ARRAY_CACHE = new byte[CACHE_SIZE][];
+    private static final char[][] CHAR_ARRAY_CACHE = new char[CACHE_SIZE][];
 
     static char[] allocateCharArray(int cacheIndex) {
         char[] chars;
@@ -331,6 +355,7 @@ public final class JSONFactory {
     static ObjectReaderProvider defaultObjectReaderProvider = new ObjectReaderProvider();
 
     static final JSONPathCompiler defaultJSONPathCompiler;
+
     static {
         JSONPathCompilerReflect compiler = null;
         switch (JSONFactory.CREATOR) {
@@ -361,6 +386,30 @@ public final class JSONFactory {
     static final ObjectReader<JSONArray> ARRAY_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONArray.class);
     static final ObjectReader<JSONObject> OBJECT_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONObject.class);
 
+    /**
+     * @param objectSupplier
+     * @since 2.0.15
+     */
+    public static void setDefaultObjectSupplier(Supplier<Map> objectSupplier) {
+        defaultObjectSupplier = objectSupplier;
+    }
+
+    /**
+     * @param arraySupplier
+     * @since 2.0.15
+     */
+    public static void setDefaultArraySupplier(Supplier<List> arraySupplier) {
+        defaultArraySupplier = arraySupplier;
+    }
+
+    public static Supplier<Map> getDefaultObjectSupplier() {
+        return defaultObjectSupplier;
+    }
+
+    public static Supplier<List> getDefaultArraySupplier() {
+        return defaultArraySupplier;
+    }
+
     public static JSONWriter.Context createWriteContext() {
         return new JSONWriter.Context(defaultObjectWriterProvider);
     }
@@ -380,7 +429,19 @@ public final class JSONFactory {
         return new JSONReader.Context(provider);
     }
 
+    public static JSONReader.Context createReadContext(JSONReader.Feature... features) {
+        JSONReader.Context context = new JSONReader.Context(
+                JSONFactory.getDefaultObjectReaderProvider()
+        );
+        context.config(features);
+        return context;
+    }
+
     public static JSONReader.Context createReadContext(ObjectReaderProvider provider, JSONReader.Feature... features) {
+        if (provider == null) {
+            provider = getDefaultObjectReaderProvider();
+        }
+
         JSONReader.Context context = new JSONReader.Context(provider);
         context.config(features);
         return context;
@@ -389,6 +450,13 @@ public final class JSONFactory {
     public static JSONReader.Context createReadContext(SymbolTable symbolTable) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         return new JSONReader.Context(provider, symbolTable);
+    }
+
+    public static JSONReader.Context createReadContext(SymbolTable symbolTable, JSONReader.Feature... features) {
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        JSONReader.Context context = new JSONReader.Context(provider, symbolTable);
+        context.config(features);
+        return context;
     }
 
     public static JSONReader.Context createReadContext(Supplier<Map> objectSupplier, JSONReader.Feature... features) {

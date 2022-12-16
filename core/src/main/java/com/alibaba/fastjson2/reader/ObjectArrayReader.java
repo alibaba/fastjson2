@@ -11,13 +11,12 @@ import java.util.Collection;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
 public final class ObjectArrayReader
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     public static final ObjectArrayReader INSTANCE = new ObjectArrayReader();
     public static final long TYPE_HASH_CODE = Fnv.hashCode64("[O");
 
-    @Override
-    public Class getObjectClass() {
-        return Object[].class;
+    public ObjectArrayReader() {
+        super(Object[].class);
     }
 
     @Override
@@ -32,7 +31,7 @@ public final class ObjectArrayReader
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.readIfNull()) {
+        if (jsonReader.nextIfNullOrEmptyString()) {
             return null;
         }
 
@@ -98,15 +97,6 @@ public final class ObjectArrayReader
             jsonReader.nextIfMatch(',');
 
             return Arrays.copyOf(values, size);
-        }
-
-        if (jsonReader.isString()) {
-            String str = jsonReader.readString();
-            if (str.isEmpty()) {
-                return null;
-            }
-
-            throw new JSONException(jsonReader.info("not support input " + str));
         }
 
         throw new JSONException(jsonReader.info("TODO"));

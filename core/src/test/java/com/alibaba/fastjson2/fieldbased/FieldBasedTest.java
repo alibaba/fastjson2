@@ -18,7 +18,7 @@ public class FieldBasedTest {
         A a = new A();
         a.id = 101;
 
-        ObjectWriter<A> objectWriter = writerCreator.createObjectWriter(A.class, JSONWriter.Feature.FieldBased.mask, JSONFactory.getDefaultObjectWriterProvider().getModules());
+        ObjectWriter<A> objectWriter = writerCreator.createObjectWriter(A.class, JSONWriter.Feature.FieldBased.mask, JSONFactory.getDefaultObjectWriterProvider());
         JSONWriter jsonWriter = JSONWriter.of();
         objectWriter.write(jsonWriter, a);
 

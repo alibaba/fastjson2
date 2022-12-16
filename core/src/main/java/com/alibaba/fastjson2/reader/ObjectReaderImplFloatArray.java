@@ -10,12 +10,11 @@ import java.util.Collection;
 import java.util.function.Function;
 
 final class ObjectReaderImplFloatArray
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplFloatArray INSTANCE = new ObjectReaderImplFloatArray();
 
-    @Override
-    public Class getObjectClass() {
-        return Float[].class;
+    ObjectReaderImplFloatArray() {
+        super(Float[].class);
     }
 
     @Override

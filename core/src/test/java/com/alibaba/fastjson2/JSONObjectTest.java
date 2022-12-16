@@ -947,8 +947,8 @@ public class JSONObjectTest {
     public void test_getDate() {
         assertNull(JSONObject.of("id", null).getDate("id"));
         assertNull(JSONObject.of("id", "").getDate("id"));
-        assertNull(JSONObject.of("id", 0).getDate("id"));
-        assertNull(JSONObject.of("id", 0L).getDate("id"));
+        assertEquals(0, JSONObject.of("id", 0).getDate("id").getTime());
+        assertEquals(0L, JSONObject.of("id", 0L).getDate("id").getTime());
 
         long millis = System.currentTimeMillis();
         Date date = new Date(millis);
@@ -1352,5 +1352,27 @@ public class JSONObjectTest {
         assertEquals(101, JSONObject.parseObject("{\"ID\":101}", Bean.class, JSONReader.Feature.SupportSmartMatch).id);
         assertEquals(0, JSONArray.parseArray("[]").size());
         assertEquals(0, JSONArray.parse("[]").size());
+    }
+
+    @Test
+    public void test() {
+        JSONObject object = new JSONObject();
+        JSONArray array = object.putArray("values");
+        array.add(1);
+        assertEquals("{\"values\":[1]}", object.toString());
+    }
+
+    @Test
+    public void test1() {
+        JSONObject object = new JSONObject();
+        object.putObject("values").put("id", 123);
+        assertEquals("{\"values\":{\"id\":123}}", object.toString());
+    }
+
+    @Test
+    public void testGetByPath() {
+        JSONObject object = JSONObject.of("id", 101, "item", JSONObject.of("itemId", 1001));
+        assertEquals(101, object.getByPath("id"));
+        assertEquals(1001, object.getByPath("item.itemId"));
     }
 }

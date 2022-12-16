@@ -10,13 +10,28 @@ import java.lang.reflect.Type;
 import java.util.Locale;
 
 final class FieldReaderInt64ValueMethod<T>
-        extends FieldReaderObjectMethod<T> {
+        extends FieldReaderObject<T> {
     FieldReaderInt64ValueMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Long defaultValue, JSONSchema schema, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter, null, null);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
+        long fieldLong = jsonReader.readInt64Value();
+
+        if (schema != null) {
+            schema.assertValidate(fieldLong);
+        }
+
+        try {
+            method.invoke(object, fieldLong);
+        } catch (Exception e) {
+            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
+        }
+    }
+
+    @Override
+    public void readFieldValueJSONB(JSONReader jsonReader, T object) {
         long fieldLong = jsonReader.readInt64Value();
 
         if (schema != null) {

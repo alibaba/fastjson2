@@ -1,7 +1,14 @@
 package com.alibaba.fastjson2.benchmark.eishay;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.benchmark.eishay.mixin.ImageMixin;
+import com.alibaba.fastjson2.benchmark.eishay.mixin.MediaContentMixin;
+import com.alibaba.fastjson2.benchmark.eishay.mixin.MediaMixin;
+import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
+import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
@@ -20,12 +27,17 @@ public class EishayParseString {
     static String str;
     static final ObjectMapper mapper = new ObjectMapper();
     static final Gson gson = new Gson();
+    static final ObjectReaderProvider provider = new ObjectReaderProvider();
 
     static {
         try {
             InputStream is = EishayParseString.class.getClassLoader().getResourceAsStream("data/eishay_compact.json");
             str = IOUtils.toString(is, "UTF-8");
             JSON.parseObject(str, MediaContent.class);
+
+            provider.mixIn(MediaContent.class, MediaContentMixin.class);
+            provider.mixIn(Image.class, ImageMixin.class);
+            provider.mixIn(Media.class, MediaMixin.class);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -39,6 +51,11 @@ public class EishayParseString {
     @Benchmark
     public void fastjson2(Blackhole bh) {
         bh.consume(JSON.parseObject(str, MediaContent.class));
+    }
+
+//    @Benchmark
+    public void fastjson2Mixin(Blackhole bh) {
+        bh.consume(JSON.parseObject(str, MediaContent.class, JSONFactory.createReadContext(provider)));
     }
 
     @Benchmark
@@ -64,6 +81,7 @@ public class EishayParseString {
         Options options = new OptionsBuilder()
                 .include(EishayParseString.class.getName())
                 .exclude(EishayParseStringPretty.class.getName())
+                .exclude(EishayParseStringNoneCache.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)

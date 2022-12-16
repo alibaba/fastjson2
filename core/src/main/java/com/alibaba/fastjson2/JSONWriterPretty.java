@@ -8,6 +8,8 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 final class JSONWriterPretty
@@ -17,7 +19,7 @@ final class JSONWriterPretty
     int startObjectOff;
 
     protected JSONWriterPretty(JSONWriter jsonWriter) {
-        super(jsonWriter.context, jsonWriter.charset);
+        super(jsonWriter.context, null, false, jsonWriter.charset);
         this.jsonWriter = jsonWriter;
     }
 
@@ -86,6 +88,11 @@ final class JSONWriterPretty
     }
 
     @Override
+    public void writeDateTime14(int year, int month, int dayOfMonth, int hour, int minute, int second) {
+        jsonWriter.writeDateTime14(year, month, dayOfMonth, hour, minute, second);
+    }
+
+    @Override
     public void writeDateTime19(int year, int month, int dayOfMonth, int hour, int minute, int second) {
         jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
     }
@@ -99,8 +106,15 @@ final class JSONWriterPretty
             int minute,
             int second,
             int millis,
-            int offsetSeconds) {
-        jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds);
+            int offsetSeconds,
+            boolean timeZone
+    ) {
+        jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, timeZone);
+    }
+
+    @Override
+    public void writeDateYYYMMDD8(int year, int month, int dayOfMonth) {
+        jsonWriter.writeDateYYYMMDD8(year, month, dayOfMonth);
     }
 
     @Override
@@ -111,6 +125,16 @@ final class JSONWriterPretty
     @Override
     public void writeTimeHHMMSS8(int hour, int minute, int second) {
         jsonWriter.writeTimeHHMMSS8(hour, minute, second);
+    }
+
+    @Override
+    public void writeLocalTime(LocalTime time) {
+        jsonWriter.writeLocalTime(time);
+    }
+
+    @Override
+    public void writeZonedDateTime(ZonedDateTime dateTime) {
+        jsonWriter.writeZonedDateTime(dateTime);
     }
 
     @Override
@@ -170,8 +194,8 @@ final class JSONWriterPretty
     }
 
     @Override
-    public void writeRaw(char[] chars) {
-        jsonWriter.writeRaw(chars);
+    public void writeRaw(char[] chars, int off, int len) {
+        jsonWriter.writeRaw(chars, off, len);
     }
 
     @Override
@@ -182,7 +206,7 @@ final class JSONWriterPretty
             writeComma();
         }
 
-        jsonWriter.writeRaw(chars);
+        jsonWriter.writeRaw(chars, 0, chars.length);
     }
 
     @Override
@@ -259,6 +283,16 @@ final class JSONWriterPretty
     }
 
     @Override
+    public int size() {
+        return jsonWriter.size();
+    }
+
+    @Override
+    public byte[] getBytes(Charset charset) {
+        return jsonWriter.getBytes(charset);
+    }
+
+    @Override
     public void flushTo(Writer to) {
         jsonWriter.flushTo(to);
     }
@@ -276,6 +310,11 @@ final class JSONWriterPretty
     @Override
     public void writeBase64(byte[] bytes) {
         jsonWriter.writeBase64(bytes);
+    }
+
+    @Override
+    public void writeHex(byte[] bytes) {
+        jsonWriter.writeHex(bytes);
     }
 
     @Override

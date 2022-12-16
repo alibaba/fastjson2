@@ -7,17 +7,9 @@ import java.lang.reflect.Field;
 import java.math.BigInteger;
 
 final class FieldWriterBigIntField<T>
-        extends FieldWriterImpl<T> {
-    final Field field;
-
+        extends FieldWriter<T> {
     protected FieldWriterBigIntField(String name, int ordinal, long features, String format, String label, Field field) {
-        super(name, ordinal, features, format, label, BigInteger.class, BigInteger.class);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, features, format, label, BigInteger.class, BigInteger.class, field, null);
     }
 
     @Override
@@ -25,7 +17,7 @@ final class FieldWriterBigIntField<T>
         try {
             return field.get(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 

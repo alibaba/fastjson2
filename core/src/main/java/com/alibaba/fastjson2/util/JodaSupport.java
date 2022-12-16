@@ -508,7 +508,7 @@ public class JodaSupport {
 
                     DateTimeFormatter formatter = this.getDateFormatter();
                     if (formatter == null) {
-                        formatter = jsonWriter.getContext().getDateFormatter();
+                        formatter = jsonWriter.context.getDateFormatter();
                     }
 
                     if (formatter == null) {
@@ -786,7 +786,7 @@ public class JodaSupport {
 
                     DateTimeFormatter formatter = this.getDateFormatter();
                     if (formatter == null) {
-                        formatter = jsonWriter.getContext().getDateFormatter();
+                        formatter = jsonWriter.context.getDateFormatter();
                     }
 
                     if (formatter == null) {

@@ -8,18 +8,9 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class FieldReaderAtomicIntegerMethodReadOnly<T>
-        extends FieldReaderImpl<T>
-        implements FieldReaderReadOnly<T> {
-    final Method method;
-
+        extends FieldReader<T> {
     FieldReaderAtomicIntegerMethodReadOnly(String fieldName, Class fieldType, int ordinal, JSONSchema jsonSchema, Method method) {
-        super(fieldName, fieldType, fieldType, ordinal, 0, null, null, null, jsonSchema);
-        this.method = method;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
+        super(fieldName, fieldType, fieldType, ordinal, 0, null, null, null, jsonSchema, method, null);
     }
 
     @Override
@@ -56,10 +47,5 @@ class FieldReaderAtomicIntegerMethodReadOnly<T>
         }
 
         return new AtomicInteger(intValue);
-    }
-
-    @Override
-    public String toString() {
-        return method.getName();
     }
 }

@@ -7,8 +7,7 @@ import java.lang.reflect.Method;
 import java.util.function.Function;
 
 final class FieldWriterStringFunc<T>
-        extends FieldWriterImpl<T> {
-    final Method method;
+        extends FieldWriter<T> {
     Function<T, String> function;
     final boolean symbol;
     final boolean trim;
@@ -23,17 +22,11 @@ final class FieldWriterStringFunc<T>
             Method method,
             Function<T, String> function
     ) {
-        super(fieldName, ordinal, features, format, label, String.class, String.class);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, String.class, String.class, null, method);
         this.function = function;
         this.symbol = "symbol".equals(format);
         this.trim = "trim".equals(format);
         this.raw = (features & FieldInfo.RAW_VALUE_MASK) != 0;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override
@@ -70,7 +63,7 @@ final class FieldWriterStringFunc<T>
             value = value.trim();
         }
 
-        if (symbol && jsonWriter.isJSONB()) {
+        if (symbol && jsonWriter.jsonb) {
             jsonWriter.writeSymbol(value);
         } else {
             if (raw) {
@@ -90,7 +83,7 @@ final class FieldWriterStringFunc<T>
             value = value.trim();
         }
 
-        if (symbol && jsonWriter.isJSONB()) {
+        if (symbol && jsonWriter.jsonb) {
             jsonWriter.writeSymbol(value);
         } else {
             if (raw) {

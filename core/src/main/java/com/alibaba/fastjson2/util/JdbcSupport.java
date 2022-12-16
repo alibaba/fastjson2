@@ -68,6 +68,18 @@ public class JdbcSupport {
         final Method getCharacterStream;
 
         public ClobWriter(Class objectClass) {
+            if (CLASS_CLOB == null && !CLASS_CLOB_ERROR) {
+                try {
+                    CLASS_CLOB = Class.forName("java.sql.Clob");
+                } catch (Throwable e) {
+                    CLASS_CLOB_ERROR = true;
+                }
+            }
+
+            if (CLASS_CLOB == null) {
+                throw new JSONException("class java.sql.Clob not found");
+            }
+
             this.objectClass = objectClass;
             try {
                 getCharacterStream = CLASS_CLOB.getMethod("getCharacterStream");
@@ -209,7 +221,7 @@ public class JdbcSupport {
                 return;
             }
 
-            JSONWriter.Context context = jsonWriter.getContext();
+            JSONWriter.Context context = jsonWriter.context;
             if (formatUnixTime || context.isDateFormatUnixTime()) {
                 long millis = ((Date) object).getTime();
                 long seconds = millis / 1000;
@@ -237,7 +249,7 @@ public class JdbcSupport {
                 int minute = zdt.getMinute();
                 int second = zdt.getSecond();
                 int nano = 0;
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds);
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds, true);
                 return;
             }
 
@@ -326,7 +338,7 @@ public class JdbcSupport {
                 return;
             }
 
-            JSONWriter.Context ctx = jsonWriter.getContext();
+            JSONWriter.Context ctx = jsonWriter.context;
 
             Date date = (Date) object;
 
@@ -341,15 +353,16 @@ public class JdbcSupport {
             ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, zoneId);
             int offsetSeconds = zdt.getOffset().getTotalSeconds();
 
-            if (formatISO8601 || ctx.isDateFormatISO8601()) {
+            if ((formatISO8601 || ctx.isDateFormatISO8601()) && (zdt.getNano() % 1000_000 == 0)) {
                 int year = zdt.getYear();
                 int month = zdt.getMonthValue();
                 int dayOfMonth = zdt.getDayOfMonth();
                 int hour = zdt.getHour();
                 int minute = zdt.getMinute();
                 int second = zdt.getSecond();
-                int nano = zdt.getNano() / 1000_000;
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds);
+                int nano = zdt.getNano();
+                int millis = nano / 1000_000;
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, true);
                 return;
             }
 
@@ -381,7 +394,7 @@ public class JdbcSupport {
                 if (nanos == 0) {
                     jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
                 } else if (nanos % 1000_000 == 0) {
-                    jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nanos / 1000_000, offsetSeconds);
+                    jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nanos / 1000_000, offsetSeconds, false);
                 } else {
                     jsonWriter.writeLocalDateTime(zdt.toLocalDateTime());
                 }

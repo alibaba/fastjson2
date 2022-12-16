@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.BeanUtils;
+import com.alibaba.fastjson2.util.MultiType;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -8,7 +9,9 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a generic type {@code T}. Java doesn't yet provide a way to
@@ -137,7 +140,7 @@ public abstract class TypeReference<T> {
      * List<User> users = new TypeReference<User>(){}.parseArray(text);
      * }</pre>
      *
-     * @param text     the JSON {@link String} to be parsed
+     * @param text the JSON {@link String} to be parsed
      * @param features features to be enabled in parsing
      * @since 2.0.2
      */
@@ -154,7 +157,7 @@ public abstract class TypeReference<T> {
      * }</pre>
      *
      * @param utf8Bytes UTF8 encoded JSON byte array to parse
-     * @param features  features to be enabled in parsing
+     * @param features features to be enabled in parsing
      * @since 2.0.3
      */
     public List<T> parseArray(byte[] utf8Bytes, JSONReader.Feature... features) {
@@ -184,7 +187,7 @@ public abstract class TypeReference<T> {
      * Map<String, User> users = new TypeReference<HashMap<String, User>>(){}.to(object);
      * }</pre>
      *
-     * @param object   specify the {@link JSONObject} to convert
+     * @param object specify the {@link JSONObject} to convert
      * @param features features to be enabled in parsing
      * @since 2.0.4
      */
@@ -206,7 +209,7 @@ public abstract class TypeReference<T> {
     /**
      * See {@link JSONObject#to(Type, JSONReader.Feature...)} for details
      *
-     * @param object   specify the {@link JSONObject} to convert
+     * @param object specify the {@link JSONObject} to convert
      * @param features features to be enabled in parsing
      * @deprecated since 2.0.4, please use {@link #to(JSONObject, JSONReader.Feature...)}
      */
@@ -225,13 +228,16 @@ public abstract class TypeReference<T> {
     }
 
     /**
-     * @param thisClass           this class
-     * @param type                the parameterizedType
+     * @param thisClass this class
+     * @param type the parameterizedType
      * @param actualTypeArguments an array of Type objects representing the actual type arguments to this type
-     * @param actualIndex         the actual index
+     * @param actualIndex the actual index
      * @since 2.0.3
      */
-    private static Type canonicalize(Class<?> thisClass, ParameterizedType type, Type[] actualTypeArguments, int actualIndex) {
+    private static Type canonicalize(Class<?> thisClass,
+                                     ParameterizedType type,
+                                     Type[] actualTypeArguments,
+                                     int actualIndex) {
         Type rawType = type.getRawType();
         Type[] argTypes = type.getActualTypeArguments();
 
@@ -291,14 +297,44 @@ public abstract class TypeReference<T> {
             // iterate to find the real Type
             if (argTypes[i] instanceof ParameterizedType) {
                 argTypes[i] = canonicalize(
-                    thisClass, (ParameterizedType) argTypes[i],
-                    actualTypeArguments, actualIndex
+                        thisClass, (ParameterizedType) argTypes[i],
+                        actualTypeArguments, actualIndex
                 );
             }
         }
 
         return new ParameterizedTypeImpl(
-            argTypes, thisClass, rawType
+                argTypes, thisClass, rawType
         );
+    }
+
+    public static Type of(Type... types) {
+        return new MultiType(types);
+    }
+
+    public static Type collectionType(
+            Class<? extends Collection> collectionClass,
+            Class<?> elementClass
+    ) {
+        return new ParameterizedTypeImpl(collectionClass, elementClass);
+    }
+
+    public static Type arrayType(Class<?> elementType) {
+        return new BeanUtils.GenericArrayTypeImpl(elementType);
+    }
+
+    public static Type mapType(
+            Class<? extends Map> mapClass,
+            Class<?> keyClass, Class<?> valueClass
+    ) {
+        return new ParameterizedTypeImpl(mapClass, keyClass, valueClass);
+    }
+
+    public static Type parametricType(Class<?> parametrized, Class<?>... parameterClasses) {
+        return new ParameterizedTypeImpl(parametrized, parameterClasses);
+    }
+
+    public static Type parametricType(Class<?> parametrized, Type... parameterTypes) {
+        return new ParameterizedTypeImpl(parametrized, parameterTypes);
     }
 }

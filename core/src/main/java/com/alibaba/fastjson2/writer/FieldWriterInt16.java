@@ -4,16 +4,27 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.IOUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 abstract class FieldWriterInt16<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     byte[][] utf8ValueCache;
     char[][] utf16ValueCache;
     volatile byte[][] jsonbValueCache;
 
-    FieldWriterInt16(String name, int ordinal, long features, String format, String label, Class fieldClass) {
-        super(name, ordinal, features, format, label, fieldClass, fieldClass);
+    FieldWriterInt16(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
+        super(name, ordinal, features, format, label, fieldClass, fieldClass, field, method);
     }
 
     protected void writeInt16(JSONWriter jsonWriter, short value) {
@@ -24,7 +35,7 @@ abstract class FieldWriterInt16<T>
             return;
         }
 
-        if (jsonWriter.isUTF8()) {
+        if (jsonWriter.utf8) {
             if (value >= -1 && value < 1039) {
                 byte[] bytes = null;
                 if (utf8ValueCache == null) {
@@ -43,7 +54,7 @@ abstract class FieldWriterInt16<T>
                 jsonWriter.writeNameRaw(bytes);
                 return;
             }
-        } else if (jsonWriter.isUTF16()) {
+        } else if (jsonWriter.utf16) {
             if (value >= -1 && value < 1039) {
                 char[] chars = null;
                 if (utf16ValueCache == null) {
@@ -62,7 +73,7 @@ abstract class FieldWriterInt16<T>
                 jsonWriter.writeNameRaw(chars);
                 return;
             }
-        } else if (jsonWriter.isJSONB()) {
+        } else if (jsonWriter.jsonb) {
             if (value >= -1 && value < 1039) {
                 byte[] bytes = null;
                 if (jsonbValueCache == null) {
@@ -73,7 +84,7 @@ abstract class FieldWriterInt16<T>
 
                 if (bytes == null) {
                     if (nameJSONB == null) {
-                        nameJSONB = JSONB.toBytes(name);
+                        nameJSONB = JSONB.toBytes(fieldName);
                     }
                     byte[] valueBytes = JSONB.toBytes(value);
 

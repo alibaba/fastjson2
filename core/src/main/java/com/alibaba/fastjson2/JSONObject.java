@@ -7,9 +7,7 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.schema.JSONSchema;
-import com.alibaba.fastjson2.util.BeanUtils;
-import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
@@ -22,13 +20,19 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
+
 public class JSONObject
         extends LinkedHashMap<String, Object>
         implements InvocationHandler {
     private static final long serialVersionUID = 1L;
 
     static ObjectReader<JSONArray> arrayReader;
-    static ObjectWriter<JSONObject> objectWriter;
+    static final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
+            | PrettyFormat.mask
+            | NotWriteEmptyArray.mask
+            | NotWriteDefaultValue.mask;
 
     /**
      * default
@@ -104,6 +108,15 @@ public class JSONObject
         }
 
         return super.get(key);
+    }
+
+    public Object getByPath(String jsonPath) {
+        JSONPath path = JSONPath.of(jsonPath);
+        if (path instanceof JSONPathSingleName) {
+            String name = ((JSONPathSingleName) path).name;
+            return get(name);
+        }
+        return path.eval(this);
     }
 
     /**
@@ -287,6 +300,19 @@ public class JSONObject
 
         if (value instanceof String) {
             return (String) value;
+        }
+
+        if (value instanceof Date) {
+            long timeMillis = ((Date) value).getTime();
+            return DateUtils.toString(timeMillis, false, IOUtils.DEFAULT_ZONE_ID);
+        }
+
+        if (value instanceof Boolean
+                || value instanceof Character
+                || value instanceof Number
+                || value instanceof UUID
+                || value instanceof Enum) {
+            return value.toString();
         }
 
         return JSON.toJSONString(value);
@@ -991,11 +1017,12 @@ public class JSONObject
             return (Date) value;
         }
 
+        if (value instanceof String) {
+            return DateUtils.parseDate((String) value);
+        }
+
         if (value instanceof Number) {
             long millis = ((Number) value).longValue();
-            if (millis == 0) {
-                return null;
-            }
             return new Date(millis);
         }
 
@@ -1039,10 +1066,8 @@ public class JSONObject
     @SuppressWarnings("unchecked")
     public String toString() {
         try (JSONWriter writer = JSONWriter.of()) {
-            if (objectWriter == null) {
-                objectWriter = writer.getObjectWriter(JSONObject.class);
-            }
-            objectWriter.write(writer, this, null, null, 0);
+            writer.setRootObject(this);
+            writer.write(this);
             return writer.toString();
         }
     }
@@ -1056,10 +1081,8 @@ public class JSONObject
     @SuppressWarnings("unchecked")
     public String toString(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.of(features)) {
-            if (objectWriter == null) {
-                objectWriter = writer.getObjectWriter(JSONObject.class);
-            }
-            objectWriter.write(writer, this, null, null, 0);
+            writer.setRootObject(this);
+            writer.write(this);
             return writer.toString();
         }
     }
@@ -1094,10 +1117,8 @@ public class JSONObject
     @SuppressWarnings("unchecked")
     public byte[] toJSONBBytes(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
-            if (objectWriter == null) {
-                objectWriter = writer.getObjectWriter(JSONObject.class);
-            }
-            objectWriter.write(writer, this, null, null, 0);
+            writer.setRootObject(this);
+            writer.write(this);
             return writer.getBytes();
         }
     }
@@ -1194,9 +1215,7 @@ public class JSONObject
      *
      * @param clazz specify the {@code Class<T>} to be converted
      * @param features features to be enabled in parsing
-     * @deprecated since 2.0.4, please use {@link #to(Class, JSONReader.Feature...)}
      */
-    @Deprecated
     public <T> T toJavaObject(Class<T> clazz, JSONReader.Feature... features) {
         return to(clazz, features);
     }
@@ -1208,7 +1227,6 @@ public class JSONObject
      * @param features features to be enabled in parsing
      * @deprecated since 2.0.4, please use {@link #to(Type, JSONReader.Feature...)}
      */
-    @Deprecated
     public <T> T toJavaObject(Type type, JSONReader.Feature... features) {
         return to(type, features);
     }
@@ -1220,7 +1238,6 @@ public class JSONObject
      * @param features features to be enabled in parsing
      * @deprecated since 2.0.4, please use {@link #to(Type, JSONReader.Feature...)}
      */
-    @Deprecated
     public <T> T toJavaObject(TypeReference<?> typeReference, JSONReader.Feature... features) {
         return to(typeReference, features);
     }
@@ -1529,11 +1546,11 @@ public class JSONObject
      */
     private String getJSONFieldName(Method method) {
         String name = null;
-        Annotation[] annotations = method.getAnnotations();
+        Annotation[] annotations = getAnnotations(method);
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
-            if (annotationType == JSONField.class) {
-                JSONField jsonField = (JSONField) annotation;
+            JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+            if (Objects.nonNull(jsonField)) {
                 name = jsonField.name();
                 if (name.isEmpty()) {
                     name = null;
@@ -1547,6 +1564,18 @@ public class JSONObject
             }
         }
         return name;
+    }
+
+    public JSONArray putArray(String name) {
+        JSONArray array = new JSONArray();
+        put(name, array);
+        return array;
+    }
+
+    public JSONObject putObject(String name) {
+        JSONObject object = new JSONObject();
+        put(name, object);
+        return object;
     }
 
     /**
@@ -1735,7 +1764,7 @@ public class JSONObject
      * @param value the value of the element
      */
     public static JSONObject of(String key, Object value) {
-        JSONObject object = new JSONObject(2);
+        JSONObject object = new JSONObject(1);
         object.put(key, value);
         return object;
     }
@@ -1754,7 +1783,7 @@ public class JSONObject
      * @since 2.0.2
      */
     public static JSONObject of(String k1, Object v1, String k2, Object v2) {
-        JSONObject object = new JSONObject(3);
+        JSONObject object = new JSONObject(2);
         object.put(k1, v1);
         object.put(k2, v2);
         return object;
@@ -1776,7 +1805,7 @@ public class JSONObject
      * @since 2.0.2
      */
     public static JSONObject of(String k1, Object v1, String k2, Object v2, String k3, Object v3) {
-        JSONObject object = new JSONObject(5);
+        JSONObject object = new JSONObject(3);
         object.put(k1, v1);
         object.put(k2, v2);
         object.put(k3, v3);
@@ -1787,7 +1816,7 @@ public class JSONObject
      * Pack three key-value pairs as {@link JSONObject}
      *
      * <pre>
-     * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2", "key3", "value3");
+     * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2", "key3", "value3", "key4", "value4");
      * </pre>
      *
      * @param k1 first key
@@ -1796,23 +1825,65 @@ public class JSONObject
      * @param v2 second value
      * @param k3 third key
      * @param v3 third value
-     * @param k4 third key
-     * @param v4 third value
+     * @param k4 foud key
+     * @param v4 foud value
      * @since 2.0.8
      */
-    public static JSONObject of(String k1,
-                                Object v1,
-                                String k2,
-                                Object v2,
-                                String k3,
-                                Object v3,
-                                String k4,
-                                Object v4) {
+    public static JSONObject of(
+            String k1,
+            Object v1,
+            String k2,
+            Object v2,
+            String k3,
+            Object v3,
+            String k4,
+            Object v4) {
+        JSONObject object = new JSONObject(4);
+        object.put(k1, v1);
+        object.put(k2, v2);
+        object.put(k3, v3);
+        object.put(k4, v4);
+        return object;
+    }
+
+    /**
+     * Pack three key-value pairs as {@link JSONObject}
+     *
+     * <pre>
+     * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2", "key3", "value3", "key4", "value4", "key5", "value5");
+     * </pre>
+     *
+     * @param k1 first key
+     * @param v1 first value
+     * @param k2 second key
+     * @param v2 second value
+     * @param k3 third key
+     * @param v3 third value
+     * @param k4 foud key
+     * @param v4 foud value
+     * @param k5 five key
+     * @param v5 five value
+     * @since 2.0.21
+     */
+    public static JSONObject of(
+            String k1,
+            Object v1,
+            String k2,
+            Object v2,
+            String k3,
+            Object v3,
+            String k4,
+            Object v4,
+            String k5,
+            Object v5
+
+    ) {
         JSONObject object = new JSONObject(5);
         object.put(k1, v1);
         object.put(k2, v2);
         object.put(k3, v3);
         object.put(k4, v4);
+        object.put(k5, v5);
         return object;
     }
 
@@ -1853,6 +1924,7 @@ public class JSONObject
 
     /**
      * See {@link JSON#parse} for details
+     *
      * @since 2.0.13
      */
     public static JSONObject parse(String text, JSONReader.Feature... features) {

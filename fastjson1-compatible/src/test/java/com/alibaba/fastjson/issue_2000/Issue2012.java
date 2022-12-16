@@ -13,7 +13,7 @@ public class Issue2012 {
         Model foo = new Model();
         foo.bytes = new byte[0];
         String str = JSON.toJSONString(foo, SerializerFeature.WriteClassName);
-        assertEquals("{\"@type\":\"com.alibaba.fastjson.issue_2000.Issue2012$Model\",\"bytes\":[]}", str);
+        assertEquals("{\"@type\":\"com.alibaba.fastjson.issue_2000.Issue2012$Model\",\"bytes\":\"\"}", str);
 
         foo = (Model) JSON.parseObject(str, Object.class, Feature.SupportAutoType);
         assertEquals(0, foo.bytes.length);

@@ -3,11 +3,11 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
 
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
 
 class FieldReaderStringField<T>
@@ -18,7 +18,7 @@ class FieldReaderStringField<T>
     FieldReaderStringField(String fieldName, Class fieldType, int ordinal, long features, String format, String defaultValue, JSONSchema schema, Field field) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
         trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
-        fieldOffset = JDKUtils.UNSAFE_SUPPORT ? UnsafeUtils.objectFieldOffset(field) : 0;
+        fieldOffset = UNSAFE_SUPPORT ? UnsafeUtils.objectFieldOffset(field) : 0;
     }
 
     @Override
@@ -32,7 +32,7 @@ class FieldReaderStringField<T>
             schema.assertValidate(fieldValue);
         }
 
-        if (JDKUtils.UNSAFE_SUPPORT) {
+        if (UNSAFE_SUPPORT) {
             UNSAFE.putObject(object, fieldOffset, fieldValue);
         } else {
             try {
@@ -83,7 +83,7 @@ class FieldReaderStringField<T>
             schema.assertValidate(fieldValue);
         }
 
-        if (JDKUtils.UNSAFE_SUPPORT) {
+        if (UNSAFE_SUPPORT) {
             UNSAFE.putObject(object, fieldOffset, fieldValue);
         } else {
             try {

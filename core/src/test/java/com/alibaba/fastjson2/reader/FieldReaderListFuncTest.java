@@ -16,7 +16,7 @@ public class FieldReaderListFuncTest {
         Bean bean = new Bean();
         ObjectReader<Bean> objectReader = TestUtils.createObjectReaderLambda(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("values");
-        assertNotNull(fieldReader.getMethod());
+        assertNotNull(fieldReader.method);
         assertEquals(Long.class, fieldReader.getItemType());
 
         fieldReader.accept(
@@ -41,7 +41,7 @@ public class FieldReaderListFuncTest {
         Bean bean = new Bean();
         ObjectReader<Bean> objectReader = ObjectReaderCreator.INSTANCE.createObjectReader(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("values");
-        assertNotNull(fieldReader.getMethod());
+        assertNotNull(fieldReader.method);
         assertEquals(Long.class, fieldReader.getItemType());
 
         fieldReader.accept(
@@ -78,7 +78,7 @@ public class FieldReaderListFuncTest {
         Bean1 bean = new Bean1(123);
         ObjectReader<Bean1> objectReader = TestUtils.createObjectReaderLambda(Bean1.class);
         FieldReader fieldReader = objectReader.getFieldReader("values");
-        assertNotNull(fieldReader.getMethod());
+        assertNotNull(fieldReader.method);
         assertEquals(Long.class, fieldReader.getItemType());
 
         fieldReader.accept(

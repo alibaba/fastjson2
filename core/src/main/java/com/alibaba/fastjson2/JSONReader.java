@@ -1,15 +1,20 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
+import com.alibaba.fastjson2.filter.ExtraProcessor;
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
+import java.lang.invoke.*;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -17,11 +22,14 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR;
 import static com.alibaba.fastjson2.util.IOUtils.*;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public abstract class JSONReader
         implements Closeable {
@@ -47,7 +55,7 @@ public abstract class JSONReader
     static final char EOI = 0x1A;
     static final long SPACE = (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
 
-    final Context context;
+    protected final Context context;
     List<ResolveTask> resolveTasks;
 
     protected int offset;
@@ -74,6 +82,8 @@ public abstract class JSONReader
 
     protected boolean typeRedirect; // redirect for {"@type":"xxx"",...
 
+    protected char[] doubleChars;
+
     public final char current() {
         return ch;
     }
@@ -92,6 +102,10 @@ public abstract class JSONReader
 
     public abstract boolean isNull();
 
+    public boolean hasComma() {
+        return comma;
+    }
+
     public abstract Date readNullOrNewDate();
 
     public abstract boolean nextIfNull();
@@ -102,6 +116,13 @@ public abstract class JSONReader
 
     public Context getContext() {
         return context;
+    }
+
+    public void errorOnNoneSerializable(Class objectClass) {
+        if ((context.features & Feature.ErrorOnNoneSerializable.mask) != 0
+                && !Serializable.class.isAssignableFrom(objectClass)) {
+            throw new JSONException("not support none-Serializable, class " + objectClass.getName());
+        }
     }
 
     public boolean isEnabled(Feature feature) {
@@ -193,7 +214,11 @@ public abstract class JSONReader
                     if (resolvedObject instanceof List) {
                         int index = (Integer) resolvedName;
                         List list = (List) resolvedObject;
-                        list.set(index, fieldValue);
+                        if (index == list.size()) {
+                            list.add(fieldValue);
+                        } else {
+                            list.set(index, fieldValue);
+                        }
                         continue;
                     }
 
@@ -322,7 +347,7 @@ public abstract class JSONReader
         return true;
     }
 
-    public abstract boolean nextIfEmptyString();
+    public abstract boolean nextIfNullOrEmptyString();
 
     public boolean nextIfObjectEnd() {
         if (this.ch != '}') {
@@ -333,8 +358,10 @@ public abstract class JSONReader
     }
 
     public int startArray() {
-        next();
-        return 0;
+        if (!nextIfMatch('[')) {
+            throw new JSONException(info("illegal input, expect '[', but " + ch));
+        }
+        return Integer.MAX_VALUE;
     }
 
     public abstract boolean isReference();
@@ -345,7 +372,7 @@ public abstract class JSONReader
         if (resolveTasks == null) {
             resolveTasks = new ArrayList<>();
         }
-        resolveTasks.add(new ResolveTask(fieldReader, object, fieldReader.getFieldName(), path));
+        resolveTasks.add(new ResolveTask(fieldReader, object, fieldReader.fieldName, path));
     }
 
     public void addResolveTask(Map object, Object key, JSONPath reference) {
@@ -412,6 +439,10 @@ public abstract class JSONReader
 
     public abstract boolean nextIfSet();
 
+    public boolean nextIfInfinity() {
+        return false;
+    }
+
     public abstract String readPattern();
 
     public final int getOffset() {
@@ -457,7 +488,13 @@ public abstract class JSONReader
         return false;
     }
 
+    public abstract byte[] readHex();
+
     public byte[] readBinary() {
+        if (ch == 'x') {
+            return readHex();
+        }
+
         if (isString()) {
             String str = readString();
             if (str.isEmpty()) {
@@ -503,6 +540,8 @@ public abstract class JSONReader
 
     public abstract boolean nextIfMatchIdent(char c0, char c1, char c2, char c3);
 
+    public abstract boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4);
+
     public abstract boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5);
 
     public abstract Integer readInt32();
@@ -519,6 +558,9 @@ public abstract class JSONReader
             case JSON_TYPE_BOOL:
                 return boolValue ? 1 : 0;
             case JSON_TYPE_NULL:
+                if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                    throw new JSONException(info("int value not support input null"));
+                }
                 return 0;
             case JSON_TYPE_STRING: {
                 return toInt32(stringValue);
@@ -538,13 +580,21 @@ public abstract class JSONReader
         }
     }
 
-    protected long getInt64Value() {
+    public long getInt64Value() {
         switch (valueType) {
+            case JSON_TYPE_INT:
+                if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
+                    return negative ? -mag3 : mag3;
+                }
+                return getNumber().longValue();
             case JSON_TYPE_DEC:
                 return getNumber().longValue();
             case JSON_TYPE_BOOL:
                 return boolValue ? 1 : 0;
             case JSON_TYPE_NULL:
+                if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                    throw new JSONException(info("long value not support input null"));
+                }
                 return 0;
             case JSON_TYPE_STRING: {
                 return toInt64(stringValue);
@@ -588,7 +638,9 @@ public abstract class JSONReader
                     mag = new int[]{mag0, mag1, mag2, mag3};
                 }
 
-                return getBigInt(negative, mag).longValue();
+                int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
+                return bigInt.longValue();
             case JSON_TYPE_DEC:
                 return getNumber().longValue();
             case JSON_TYPE_BOOL:
@@ -617,6 +669,10 @@ public abstract class JSONReader
     public abstract float readFloatValue();
 
     public Float readFloat() {
+        if (nextIfNull()) {
+            return null;
+        }
+
         wasNull = false;
         float value = readFloatValue();
         if (wasNull) {
@@ -628,6 +684,10 @@ public abstract class JSONReader
     public abstract double readDoubleValue();
 
     public Double readDouble() {
+        if (nextIfNull()) {
+            return null;
+        }
+
         wasNull = false;
         double value = readDoubleValue();
         if (wasNull) {
@@ -830,9 +890,13 @@ public abstract class JSONReader
                     return readLocalDateTime18();
                 case 19:
                     return readLocalDateTime19();
-                case 20:
-                    return readZonedDateTimeX(len)
-                            .toLocalDateTime();
+                case 20: {
+                    ZonedDateTime zdt = readZonedDateTimeX(len);
+                    if (zdt != null) {
+                        return zdt.toLocalDateTime();
+                    }
+                    break;
+                }
                 case 21:
                 case 22:
                 case 23:
@@ -848,7 +912,13 @@ public abstract class JSONReader
                     }
                     ZonedDateTime zdt = readZonedDateTimeX(len);
                     if (zdt != null) {
-                        return zdt.toLocalDateTime();
+                        ZoneId contextZoneId = context.getZoneId();
+                        if (!zdt.getZone().equals(contextZoneId)) {
+                            ldt = zdt.toInstant().atZone(contextZoneId).toLocalDateTime();
+                        } else {
+                            ldt = zdt.toLocalDateTime();
+                        }
+                        return ldt;
                     }
                     break;
                 default:
@@ -884,6 +954,20 @@ public abstract class JSONReader
             return LocalDateTime.ofInstant(instant, context.getZoneId());
         }
 
+        if (str.startsWith("/Date(") && str.endsWith(")/")) {
+            String dotnetDateStr = str.substring(6, str.length() - 2);
+            int i = dotnetDateStr.indexOf('+');
+            if (i == -1) {
+                i = dotnetDateStr.indexOf('-');
+            }
+            if (i != -1) {
+                dotnetDateStr = dotnetDateStr.substring(0, i);
+            }
+            long millis = Long.parseLong(dotnetDateStr);
+            Instant instant = Instant.ofEpochMilli(millis);
+            return LocalDateTime.ofInstant(instant, context.getZoneId());
+        }
+
         throw new JSONException(info("read LocalDateTime error " + str));
     }
 
@@ -897,7 +981,7 @@ public abstract class JSONReader
             return instant.atZone(context.getZoneId());
         }
 
-        if (ch == '"' || ch == '\'') {
+        if (isString()) {
             if (context.dateFormat == null
                     || context.formatyyyyMMddhhmmss19
                     || context.formatyyyyMMddhhmmssT19
@@ -1236,128 +1320,6 @@ public abstract class JSONReader
 
     protected abstract ZonedDateTime readZonedDateTimeX(int len);
 
-    protected long millis(int year, final int month, int dom, int hour, int minute, int second, int nanoOfSecond) {
-        final ZoneId zoneId = context.getZoneId();
-        if (zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES) {
-            long SECONDS_1991_09_15_02 = 684900000; // utcMillis(1991, 9, 15, 2, 0, 0);
-            long SECONDS_1991_04_14_03 = 671598000; // utcMillis(1991, 4, 14, 3, 0, 0);
-            long SECONDS_1990_09_16_02 = 653450400; // utcMillis(1990, 9, 16, 2, 0, 0);
-            long SECONDS_1990_04_15_03 = 640148400; // utcMillis(1990, 4, 15, 3, 0, 0);
-            long SECONDS_1989_09_17_02 = 622000800; // utcMillis(1989, 9, 17, 2, 0, 0);
-            long SECONDS_1989_04_16_03 = 608698800; // utcMillis(1989, 4, 16, 3, 0, 0);
-            long SECONDS_1988_09_11_02 = 589946400; // utcMillis(1988, 9, 11, 2, 0, 0);
-            long SECONDS_1988_04_17_03 = 577249200; // utcMillis(1988, 4, 17, 3, 0, 0);
-            long SECONDS_1987_09_13_02 = 558496800; // utcMillis(1987, 9, 13, 2, 0, 0);
-            long SECONDS_1987_04_12_03 = 545194800; // utcMillis(1987, 4, 12, 3, 0, 0);
-            long SECONDS_1986_09_14_02 = 527047200; // utcMillis(1986, 9, 14, 2, 0, 0);
-            long SECONDS_1986_05_04_03 = 515559600; // utcMillis(1986, 5, 4, 3, 0, 0);
-            long SECONDS_1949_05_28_00 = -649987200; // utcMillis(1949, 5, 28, 0, 0, 0);
-            long SECONDS_1949_05_01_01 = -652316400; // utcMillis(1949, 5, 1, 1, 0, 0);
-            long SECONDS_1948_10_01_00 = -670636800; // utcMillis(1948, 10, 1, 0, 0, 0);
-            long SECONDS_1948_05_01_01 = -683852400; // utcMillis(1948, 5, 1, 1, 0, 0);
-            long SECONDS_1947_11_01_00 = -699580800; // utcMillis(1947, 11, 1, 0, 0, 0);
-            long SECONDS_1947_04_15_01 = -716857200; // utcMillis(1947, 4, 15, 1, 0, 0);
-            long SECONDS_1946_10_01_00 = -733795200; // utcMillis(1946, 10, 1, 0, 0, 0);
-            long SECONDS_1946_05_15_01 = -745801200; // utcMillis(1946, 5, 15, 1, 0, 0);
-            long SECONDS_1945_09_02_00 = -767836800; // utcMillis(1945, 9, 2, 0, 0, 0);
-            long SECONDS_1942_01_31_01 = -881017200; // utcMillis(1942, 1, 31, 1, 0, 0);
-            long SECONDS_1941_11_02_00 = -888796800; // utcMillis(1941, 11, 2, 0, 0, 0);
-            long SECONDS_1941_03_15_01 = -908838000; // utcMillis(1941, 3, 15, 1, 0, 0);
-            long SECONDS_1940_10_13_00 = -922060800; // utcMillis(1940, 10, 13, 0, 0, 0);
-            long SECONDS_1940_06_01_01 = -933634800L; //utcMillis(1940, 6, 1, 1, 0, 0);
-            long SECONDS_1919_10_01_00 = -1585872000L; // utcMillis(1919, 10, 1, 0, 0, 0);
-            long SECONDS_1919_04_13_01 = -1600642800L; // utcMillis(1919, 4, 13, 1, 0, 0);
-            long SECONDS_1901_01_01_00 = -2177452800L; // utcMillis(1901, 1, 1, 0, 0, 0);
-
-            final int OFFSET_0900_TOTAL_SECONDS = 32400;
-            final int OFFSET_0543_TOTAL_SECONDS = 29143;
-
-            long seconds = utcSeconds(year, month, dom, hour, minute, second);
-
-            int zoneOffsetTotalSeconds;
-            if (seconds >= SECONDS_1991_09_15_02) {
-                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1991_04_14_03) {
-                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1990_09_16_02) {
-                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1990_04_15_03) {
-                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1989_09_17_02) {
-                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1989_04_16_03) {
-                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1988_09_11_02) {
-                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1988_04_17_03) {
-                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1987_09_13_02) {
-                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1987_04_12_03) {
-                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1986_09_14_02) {
-                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1986_05_04_03) {
-                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1949_05_28_00) {
-                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1949_05_01_01) {
-                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1948_10_01_00) {
-                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1948_05_01_01) {
-                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1947_11_01_00) {
-                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1947_04_15_01) {
-                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1946_10_01_00) {
-                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1946_05_15_01) {
-                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1945_09_02_00) {
-                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1942_01_31_01) {
-                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1941_11_02_00) {
-                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1941_03_15_01) {
-                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1940_10_13_00) {
-                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1940_06_01_01) {
-                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1919_10_01_00) {
-                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1919_04_13_01) {
-                zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1901_01_01_00) {
-                zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else {
-                zoneOffsetTotalSeconds = OFFSET_0543_TOTAL_SECONDS;
-            }
-
-            seconds -= zoneOffsetTotalSeconds;
-
-            return seconds * 1000L + nanoOfSecond / 1000_000;
-        } else if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
-            long seconds = utcSeconds(year, month, dom, hour, minute, second);
-            return seconds * 1000L + nanoOfSecond / 1000_000;
-        }
-
-        LocalDate localDate = LocalDate.of(year, month, dom);
-        LocalTime localTime = LocalTime.of(hour, minute, second, nanoOfSecond);
-        LocalDateTime ldt = LocalDateTime.of(localDate, localTime);
-        ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, zoneId, null);
-        long seconds = zdt.toEpochSecond();
-        int nanos = nanoOfSecond;
-        if (seconds < 0 && nanos > 0) {
-            return (seconds + 1) * 1000 + nanos / 1000_000 - 1000;
-        } else {
-            return seconds * 1000L + nanos / 1000_000;
-        }
-    }
-
     public void readNumber(ValueConsumer consumer, boolean quoted) {
         readNumber0();
         Number number = getNumber();
@@ -1484,6 +1446,13 @@ public abstract class JSONReader
             }
         }
 
+        Map map;
+        if (object instanceof Wrapper) {
+            map = ((Wrapper) object).unwrap(Map.class);
+        } else {
+            map = object;
+        }
+
         for_:
         for (int i = 0; ; ++i) {
             if (ch == '/') {
@@ -1546,7 +1515,11 @@ public abstract class JSONReader
                     value = readArray();
                     break;
                 case '{':
-                    value = readObject();
+                    if (typeRedirect) {
+                        value = ObjectReaderImplObject.INSTANCE.readObject(this, null, name, features);
+                    } else {
+                        value = readObject();
+                    }
                     break;
                 case '"':
                 case '\'':
@@ -1574,9 +1547,68 @@ public abstract class JSONReader
                         throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
                     }
                     break;
+                case 'I':
+                    if (nextIfInfinity()) {
+                        value = Double.POSITIVE_INFINITY;
+                    } else {
+                        throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
+                    }
+                    break;
                 default:
                     throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
             }
+
+            Object origin = map.put(name, value);
+            if (origin != null) {
+                long contextFeatures = features | context.getFeatures();
+                if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
+                    if (origin instanceof Collection) {
+                        ((Collection) origin).add(value);
+                        object.put(name, value);
+                    } else {
+                        JSONArray array = JSONArray.of(origin, value);
+                        object.put(name, array);
+                    }
+                }
+            }
+        }
+
+        nextIfMatch(',');
+    }
+
+    public void read(Map object, Type keyType, Type valueType, long features) {
+        boolean match = nextIfMatch('{');
+        if (!match) {
+            throw new JSONException("illegal input， offset " + offset + ", char " + ch);
+        }
+
+        ObjectReader keyReader = context.getObjectReader(keyType);
+        ObjectReader valueReader = context.getObjectReader(valueType);
+
+        for_:
+        for (int i = 0; ; ++i) {
+            if (ch == '/') {
+                skipLineComment();
+            }
+
+            if (nextIfMatch('}')) {
+                break;
+            }
+
+            if (i != 0 && !comma) {
+                throw new JSONException(info());
+            }
+
+            Object name;
+
+            if (keyType == String.class) {
+                name = readFieldName();
+            } else {
+                name = keyReader.readObject(this, null, null, 0L);
+                nextIfMatch(':');
+            }
+
+            Object value = valueReader.readObject(this, null, null, 0L);
             Object origin = object.put(name, value);
             if (origin != null) {
                 long contextFeatures = features | context.getFeatures();
@@ -1591,6 +1623,8 @@ public abstract class JSONReader
                 }
             }
         }
+
+        nextIfMatch(',');
     }
 
     public <T> T read(Class<T> type) {
@@ -1674,14 +1708,20 @@ public abstract class JSONReader
                         skipLineComment();
                     }
                     continue for_;
+                case 'I':
+                    if (nextIfInfinity()) {
+                        val = Double.POSITIVE_INFINITY;
+                        break;
+                    } else {
+                        throw new JSONException(info("illegal input " + ch));
+                    }
                 default:
                     throw new JSONException(info("illegal input " + ch));
             }
             object.put(name, val);
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -1739,6 +1779,10 @@ public abstract class JSONReader
                     && mag2 == 0
                     && mag3 == 1;
         } else if (ch == 'n') {
+            if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                throw new JSONException(info("boolean value not support input null"));
+            }
+
             wasNull = true;
             readNull();
             return false;
@@ -1799,10 +1843,43 @@ public abstract class JSONReader
             throw new JSONException("syntax error : " + ch);
         }
 
+        boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
+        ObjectReader objectReader = context.provider.getObjectReader(itemType, fieldBased);
+
         for (; ; ) {
             if (nextIfMatch(']')) {
                 break;
             }
+            Object item = objectReader.readObject(this, null, null, 0);
+            list.add(item);
+
+            if (ch == '}' || ch == EOI) {
+                throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
+            }
+        }
+
+        if (comma = (ch == ',')) {
+            next();
+        }
+
+        return list;
+    }
+
+    public List readList(Type[] types) {
+        if (nextIfNull()) {
+            return null;
+        }
+
+        List list = new ArrayList(types.length);
+        if (!nextIfMatch('[')) {
+            throw new JSONException("syntax error : " + ch);
+        }
+
+        for (int i = 0; ; ++i) {
+            if (nextIfMatch(']')) {
+                break;
+            }
+            Type itemType = types[i];
             Object item = read(itemType);
             list.add(item);
 
@@ -1811,15 +1888,54 @@ public abstract class JSONReader
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
         return list;
     }
 
+    public Object[] readArray(Type[] types) {
+        if (nextIfNull()) {
+            return null;
+        }
+
+        if (!nextIfMatch('[')) {
+            throw new JSONException(info("syntax error"));
+        }
+
+        boolean arrayEnd = false;
+        Object[] list = new Object[types.length];
+        for (int i = 0; i < types.length; i++) {
+            if (i != 0) {
+                if (nextIfMatch(']')) {
+                    arrayEnd = true;
+                    break;
+                } else if (isEnd()) {
+                    break;
+                }
+            }
+
+            Type itemType = types[i];
+            Object item = read(itemType);
+            list[i] = item;
+
+            if (i == types.length - 1) {
+                arrayEnd = true;
+            }
+        }
+
+        if (!arrayEnd) {
+            throw new JSONException(info("syntax error"));
+        }
+        return list;
+    }
+
     public void readArray(List list, Type itemType) {
+        readArray((Collection) list, itemType);
+    }
+
+    public void readArray(Collection list, Type itemType) {
         if (nextIfMatch('[')) {
             for (; ; ) {
                 if (nextIfMatch(']')) {
@@ -1833,8 +1949,7 @@ public abstract class JSONReader
                 }
             }
 
-            if (ch == ',') {
-                this.comma = true;
+            if (comma = (ch == ',')) {
                 next();
             }
             return;
@@ -1865,8 +1980,7 @@ public abstract class JSONReader
             list.add(item);
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
     }
@@ -1965,8 +2079,7 @@ public abstract class JSONReader
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -2014,7 +2127,9 @@ public abstract class JSONReader
                     mag = new int[]{mag0, mag1, mag2, mag3};
                 }
 
-                return new BigDecimal(getBigInt(negative, mag));
+                int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
+                return new BigDecimal(bigInt);
             }
             case JSON_TYPE_DEC: {
                 BigDecimal decimal = null;
@@ -2043,7 +2158,9 @@ public abstract class JSONReader
                             : new int[]{mag2, mag3}
                             : new int[]{mag1, mag2, mag3}
                             : new int[]{mag0, mag1, mag2, mag3};
-                    BigInteger bigInt = getBigInt(negative, mag);
+
+                    int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                    BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
                     decimal = new BigDecimal(bigInt, scale);
                 }
 
@@ -2127,7 +2244,8 @@ public abstract class JSONReader
                     mag = new int[]{mag0, mag1, mag2, mag3};
                 }
 
-                return getBigInt(negative, mag);
+                int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                return BIG_INTEGER_CREATOR.apply(signum, mag);
             }
             case JSON_TYPE_INT16: {
                 if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
@@ -2201,47 +2319,77 @@ public abstract class JSONReader
 
                             if (exponent == 0) {
                                 if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
-                                    switch (scale) {
-                                        case 1:
-                                        case 2:
-                                        case 3:
-                                        case 4:
-                                        case 5:
-                                        case 6:
-                                        case 7:
-                                        case 8:
-                                        case 9:
-                                        case 10:
-                                            return (float) (unscaledVal / SMALL_10_POW[scale]);
-                                        default: {
-                                            boolean isNegative = unscaledVal < 0;
-                                            int len = isNegative ? IOUtils.stringSize(-unscaledVal) + 1 : IOUtils.stringSize(unscaledVal);
-                                            char[] chars = new char[len];
-                                            IOUtils.getChars(unscaledVal, len, chars);
-                                            return FloatingDecimal.floatValue(isNegative, scale, chars, len);
+                                    boolean isNegative;
+                                    long unsignedUnscaledVal;
+                                    if (unscaledVal < 0) {
+                                        isNegative = true;
+                                        unsignedUnscaledVal = -unscaledVal;
+                                    } else {
+                                        isNegative = false;
+                                        unsignedUnscaledVal = unscaledVal;
+                                    }
+
+                                    /*
+                                     * If both unscaledVal and the scale can be exactly
+                                     * represented as float values, perform a single float
+                                     * multiply or divide to compute the (properly
+                                     * rounded) result.
+                                     */
+                                    if (unscaledVal != INFLATED && unsignedUnscaledVal < 1L << 22) {
+                                        // Don't have too guard against
+                                        // Math.abs(MIN_VALUE) because of outer check
+                                        // against INFLATED.
+                                        if (scale > 0 && scale < FLOAT_10_POW.length) {
+                                            return (float) unscaledVal / FLOAT_10_POW[scale];
+                                        } else if (scale < 0 && scale > -FLOAT_10_POW.length) {
+                                            return (float) unscaledVal * FLOAT_10_POW[-scale];
                                         }
                                     }
+
+                                    int len = IOUtils.stringSize(unsignedUnscaledVal);
+                                    if (doubleChars == null) {
+                                        doubleChars = new char[20];
+                                    }
+                                    IOUtils.getChars(unsignedUnscaledVal, len, doubleChars);
+                                    return TypeUtils.floatValue(isNegative, len - scale, doubleChars, len);
                                 } else if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
-                                    switch (scale) {
-                                        case 1:
-                                        case 2:
-                                        case 3:
-                                        case 4:
-                                        case 5:
-                                        case 6:
-                                        case 7:
-                                        case 8:
-                                        case 9:
-                                        case 10:
-                                            return unscaledVal / SMALL_10_POW[scale];
-                                        default: {
-                                            boolean isNegative = unscaledVal < 0;
-                                            int len = isNegative ? IOUtils.stringSize(-unscaledVal) + 1 : IOUtils.stringSize(unscaledVal);
-                                            char[] chars = new char[len];
-                                            IOUtils.getChars(unscaledVal, len, chars);
-                                            return FloatingDecimal.doubleValue(isNegative, scale, chars, len);
+                                    boolean isNegative;
+                                    long unsignedUnscaledVal;
+                                    if (unscaledVal < 0) {
+                                        isNegative = true;
+                                        unsignedUnscaledVal = -unscaledVal;
+                                    } else {
+                                        isNegative = false;
+                                        unsignedUnscaledVal = unscaledVal;
+                                    }
+
+                                    /*
+                                     * If both unscaledVal and the scale can be exactly
+                                     * represented as double values, perform a single
+                                     * double multiply or divide to compute the (properly
+                                     * rounded) result.
+                                     */
+                                    if (unscaledVal != INFLATED && unsignedUnscaledVal < 1L << 52) {
+                                        // Don't have too guard against
+                                        // Math.abs(MIN_VALUE) because of outer check
+                                        // against INFLATED.
+                                        if (scale > 0 && scale < DOUBLE_10_POW.length) {
+                                            return (double) unscaledVal / DOUBLE_10_POW[scale];
+                                        } else if (scale < 0 && scale > -DOUBLE_10_POW.length) {
+                                            return (double) unscaledVal * DOUBLE_10_POW[-scale];
                                         }
                                     }
+
+                                    int len = unsignedUnscaledVal < 10000000000000000L
+                                            ? 16
+                                            : unsignedUnscaledVal < 100000000000000000L
+                                            ? 17
+                                            : unsignedUnscaledVal < 1000000000000000000L ? 18 : 19;
+                                    if (doubleChars == null) {
+                                        doubleChars = new char[20];
+                                    }
+                                    IOUtils.getChars(unsignedUnscaledVal, len, doubleChars);
+                                    return TypeUtils.doubleValue(isNegative, len - scale, doubleChars, len);
                                 }
                             }
                             decimal = BigDecimal.valueOf(unscaledVal, scale);
@@ -2257,14 +2405,21 @@ public abstract class JSONReader
                             : new int[]{mag2, mag3}
                             : new int[]{mag1, mag2, mag3}
                             : new int[]{mag0, mag1, mag2, mag3};
-                    BigInteger bigInt = getBigInt(negative, mag);
+                    int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                    BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
+
                     int adjustedScale = scale - exponent;
                     decimal = new BigDecimal(bigInt, adjustedScale);
+
+                    if (exponent != 0) {
+                        return decimal.doubleValue();
+                    }
                 }
 
                 if (exponent != 0) {
+                    String decimalStr = decimal.toPlainString();
                     double doubleValue = Double.parseDouble(
-                            decimal + "E" + exponent);
+                            decimalStr + "E" + exponent);
                     return Double.valueOf(doubleValue);
                 }
 
@@ -2294,7 +2449,8 @@ public abstract class JSONReader
                         : new int[]{mag2, mag3}
                         : new int[]{mag1, mag2, mag3}
                         : new int[]{mag0, mag1, mag2, mag3};
-                BigInteger bigInt = getBigInt(negative, mag);
+                int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
                 BigDecimal decimal = new BigDecimal(bigInt, scale);
 
                 if (valueType == JSON_TYPE_FLOAT) {
@@ -2334,72 +2490,6 @@ public abstract class JSONReader
 
     @Override
     public abstract void close();
-
-    static BigInteger getBigInt(boolean negative, int[] mag) {
-        int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
-
-        final int bitLength;
-        if (mag.length == 0) {
-            bitLength = 0; // offset by one to initialize
-        } else {
-            // Calculate the bit length of the magnitude
-            int bitLengthForInt = 32 - Integer.numberOfLeadingZeros(mag[0]);
-            int magBitLength = ((mag.length - 1) << 5) + bitLengthForInt;
-            if (signum < 0) {
-                // Check if magnitude is a power of two
-                boolean pow2 = (Integer.bitCount(mag[0]) == 1);
-                for (int i = 1; i < mag.length && pow2; i++) {
-                    pow2 = (mag[i] == 0);
-                }
-                bitLength = (pow2 ? magBitLength - 1 : magBitLength);
-            } else {
-                bitLength = magBitLength;
-            }
-        }
-        int byteLen = bitLength / 8 + 1;
-
-        byte[] bytes = new byte[byteLen];
-        for (int i = byteLen - 1, bytesCopied = 4, nextInt = 0, intIndex = 0; i >= 0; i--) {
-            if (bytesCopied == 4) {
-                // nextInt = getInt(intIndex++
-                int n = intIndex++;
-                if (n < 0) {
-                    nextInt = 0;
-                } else if (n >= mag.length) {
-                    nextInt = signum < 0 ? -1 : 0;
-                } else {
-                    int magInt = mag[mag.length - n - 1];
-                    if (signum >= 0) {
-                        nextInt = magInt;
-                    } else {
-                        int firstNonzeroIntNum;
-                        {
-                            int j;
-                            int mlen = mag.length;
-                            for (j = mlen - 1; j >= 0 && mag[j] == 0; j--) {
-                                // empty
-                            }
-                            firstNonzeroIntNum = mlen - j - 1;
-                        }
-
-                        if (n <= firstNonzeroIntNum) {
-                            nextInt = -magInt;
-                        } else {
-                            nextInt = ~magInt;
-                        }
-                    }
-                }
-
-                bytesCopied = 1;
-            } else {
-                nextInt >>>= 8;
-                bytesCopied++;
-            }
-            bytes[i] = (byte) nextInt;
-        }
-
-        return new BigInteger(bytes);
-    }
 
     protected final int toInt32(String val) {
         if (IOUtils.isNumber(val)) {
@@ -2476,7 +2566,12 @@ public abstract class JSONReader
         return new JSONReaderUTF8(context, utf8Bytes, 0, utf8Bytes.length);
     }
 
+    @Deprecated
     public static JSONReader of(JSONReader.Context context, byte[] utf8Bytes) {
+        return new JSONReaderUTF8(context, utf8Bytes, 0, utf8Bytes.length);
+    }
+
+    public static JSONReader of(byte[] utf8Bytes, JSONReader.Context context) {
         return new JSONReaderUTF8(context, utf8Bytes, 0, utf8Bytes.length);
     }
 
@@ -2489,7 +2584,18 @@ public abstract class JSONReader
                 chars.length);
     }
 
+    @Deprecated
     public static JSONReader of(Context context, char[] chars) {
+        return new JSONReaderUTF16(
+                context,
+                null,
+                chars,
+                0,
+                chars.length
+        );
+    }
+
+    public static JSONReader of(char[] chars, Context context) {
         return new JSONReaderUTF16(
                 context,
                 null,
@@ -2507,7 +2613,16 @@ public abstract class JSONReader
                 jsonbBytes.length);
     }
 
+    @Deprecated
     public static JSONReader ofJSONB(JSONReader.Context context, byte[] jsonbBytes) {
+        return new JSONReaderJSONB(
+                context,
+                jsonbBytes,
+                0,
+                jsonbBytes.length);
+    }
+
+    public static JSONReader ofJSONB(byte[] jsonbBytes, JSONReader.Context context) {
         return new JSONReaderJSONB(
                 context,
                 jsonbBytes,
@@ -2542,18 +2657,34 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(byte[] bytes, int offset, int length, Charset charset) {
-        Context ctx = JSONFactory.createReadContext();
+        Context context = JSONFactory.createReadContext();
 
         if (charset == StandardCharsets.UTF_8) {
-            return new JSONReaderUTF8(ctx, bytes, offset, length);
+            return new JSONReaderUTF8(context, bytes, offset, length);
         }
 
         if (charset == StandardCharsets.UTF_16) {
-            return new JSONReaderUTF16(ctx, bytes, offset, length);
+            return new JSONReaderUTF16(context, bytes, offset, length);
         }
 
-        if (charset == StandardCharsets.US_ASCII) {
-            return new JSONReaderASCII(ctx, null, bytes, offset, length);
+        if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
+            return new JSONReaderASCII(context, null, bytes, offset, length);
+        }
+
+        throw new JSONException("not support charset " + charset);
+    }
+
+    public static JSONReader of(byte[] bytes, int offset, int length, Charset charset, Context context) {
+        if (charset == StandardCharsets.UTF_8) {
+            return new JSONReaderUTF8(context, bytes, offset, length);
+        }
+
+        if (charset == StandardCharsets.UTF_16) {
+            return new JSONReaderUTF16(context, bytes, offset, length);
+        }
+
+        if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
+            return new JSONReaderASCII(context, null, bytes, offset, length);
         }
 
         throw new JSONException("not support charset " + charset);
@@ -2567,9 +2698,31 @@ public abstract class JSONReader
         return new JSONReaderUTF16(JSONFactory.createReadContext(), null, chars, offset, length);
     }
 
+    public static JSONReader of(char[] chars, int offset, int length, Context context) {
+        return new JSONReaderUTF16(context, null, chars, offset, length);
+    }
+
+    public static JSONReader of(URL url, Context context) throws IOException {
+        try (InputStream is = url.openStream()) {
+            return of(is, StandardCharsets.UTF_8, context);
+        }
+    }
+
     public static JSONReader of(InputStream is, Charset charset) {
         Context context = JSONFactory.createReadContext();
 
+        if (charset == StandardCharsets.UTF_8 || charset == null) {
+            return new JSONReaderUTF8(context, is);
+        }
+
+        if (charset == StandardCharsets.UTF_16) {
+            return new JSONReaderUTF16(context, is);
+        }
+
+        throw new JSONException("not support charset " + charset);
+    }
+
+    public static JSONReader of(InputStream is, Charset charset, Context context) {
         if (charset == StandardCharsets.UTF_8 || charset == null) {
             return new JSONReaderUTF8(context, is);
         }
@@ -2588,32 +2741,16 @@ public abstract class JSONReader
         );
     }
 
+    public static JSONReader of(java.io.Reader is, Context context) {
+        return new JSONReaderUTF16(
+                context,
+                is
+        );
+    }
+
+    @Deprecated
     public static JSONReader of(Context context, String str) {
-        if (str == null) {
-            throw new NullPointerException();
-        }
-
-        if (JDKUtils.JVM_VERSION == 8 && JDKUtils.UNSAFE_SUPPORT && str.length() > 1024 * 1024) {
-            try {
-                byte coder = UnsafeUtils.getStringCoder(str);
-                if (coder == 0) {
-                    byte[] bytes = UnsafeUtils.getStringValue(str);
-                    return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
-                }
-            } catch (Exception e) {
-                throw new JSONException("unsafe get String.coder error");
-            }
-        }
-
-        final int length = str.length();
-        char[] chars;
-        if (JDKUtils.JVM_VERSION == 8) {
-            chars = JDKUtils.getCharArray(str);
-        } else {
-            chars = str.toCharArray();
-        }
-
-        return new JSONReaderUTF16(context, str, chars, 0, length);
+        return of(str, context);
     }
 
     public static JSONReader of(String str) {
@@ -2622,11 +2759,11 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
+        if (JVM_VERSION > 8 && STRING_VALUE != null) {
             try {
-                byte coder = UnsafeUtils.getStringCoder(str);
+                int coder = STRING_CODER.applyAsInt(str);
                 if (coder == 0) {
-                    byte[] bytes = UnsafeUtils.getStringValue(str);
+                    byte[] bytes = STRING_VALUE.apply(str);
                     return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
                 }
             } catch (Exception e) {
@@ -2636,7 +2773,35 @@ public abstract class JSONReader
 
         final int length = str.length();
         char[] chars;
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (JVM_VERSION == 8) {
+            chars = JDKUtils.getCharArray(str);
+        } else {
+            chars = str.toCharArray();
+        }
+
+        return new JSONReaderUTF16(context, str, chars, 0, length);
+    }
+
+    public static JSONReader of(String str, Context context) {
+        if (str == null) {
+            throw new NullPointerException();
+        }
+
+        if (JVM_VERSION > 8 && STRING_VALUE != null) {
+            try {
+                int coder = STRING_CODER.applyAsInt(str);
+                if (coder == 0) {
+                    byte[] bytes = STRING_VALUE.apply(str);
+                    return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
+                }
+            } catch (Exception e) {
+                throw new JSONException("unsafe get String.coder error");
+            }
+        }
+
+        final int length = str.length();
+        char[] chars;
+        if (JVM_VERSION == 8) {
             chars = JDKUtils.getCharArray(str);
         } else {
             chars = str.toCharArray();
@@ -2651,11 +2816,11 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
+        if (JVM_VERSION > 8 && STRING_VALUE != null) {
             try {
-                byte coder = UnsafeUtils.getStringCoder(str);
+                int coder = STRING_CODER.applyAsInt(str);
                 if (coder == 0) {
-                    byte[] bytes = UnsafeUtils.getStringValue(str);
+                    byte[] bytes = STRING_VALUE.apply(str);
                     return new JSONReaderASCII(context, str, bytes, offset, length);
                 }
             } catch (Exception e) {
@@ -2664,7 +2829,7 @@ public abstract class JSONReader
         }
 
         char[] chars;
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (JVM_VERSION == 8) {
             chars = JDKUtils.getCharArray(str);
         } else {
             chars = str.toCharArray();
@@ -2678,11 +2843,11 @@ public abstract class JSONReader
             throw new NullPointerException();
         }
 
-        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
+        if (JVM_VERSION > 8 && STRING_VALUE != null) {
             try {
-                byte coder = UnsafeUtils.getStringCoder(str);
+                int coder = STRING_CODER.applyAsInt(str);
                 if (coder == 0) {
-                    byte[] bytes = UnsafeUtils.getStringValue(str);
+                    byte[] bytes = STRING_VALUE.apply(str);
                     return new JSONReaderASCII(context, str, bytes, offset, length);
                 }
             } catch (Exception e) {
@@ -2691,7 +2856,7 @@ public abstract class JSONReader
         }
 
         char[] chars;
-        if (JDKUtils.JVM_VERSION == 8) {
+        if (JVM_VERSION == 8) {
             chars = JDKUtils.getCharArray(str);
         } else {
             chars = str.toCharArray();
@@ -2976,11 +3141,27 @@ public abstract class JSONReader
 
     public interface AutoTypeBeforeHandler
             extends Filter {
+        default Class<?> apply(long typeNameHash, Class<?> expectClass, long features) {
+            return null;
+        }
+
         Class<?> apply(String typeName, Class<?> expectClass, long features);
     }
 
     public static AutoTypeBeforeHandler autoTypeFilter(String... names) {
         return new ContextAutoTypeBeforeHandler(names);
+    }
+
+    public static AutoTypeBeforeHandler autoTypeFilter(boolean includeBasic, String... names) {
+        return new ContextAutoTypeBeforeHandler(includeBasic, names);
+    }
+
+    public static AutoTypeBeforeHandler autoTypeFilter(Class... types) {
+        return new ContextAutoTypeBeforeHandler(types);
+    }
+
+    public static AutoTypeBeforeHandler autoTypeFilter(boolean includeBasic, Class... types) {
+        return new ContextAutoTypeBeforeHandler(includeBasic, types);
     }
 
     public static class Context {
@@ -3002,6 +3183,7 @@ public abstract class JSONReader
         Supplier<Map> objectSupplier;
         Supplier<List> arraySupplier;
         AutoTypeBeforeHandler autoTypeBeforeHandler;
+        ExtraProcessor extraProcessor;
 
         protected final ObjectReaderProvider provider;
         protected final SymbolTable symbolTable;
@@ -3009,13 +3191,89 @@ public abstract class JSONReader
         public Context(ObjectReaderProvider provider) {
             this.features = defaultReaderFeatures;
             this.provider = provider;
+            this.objectSupplier = JSONFactory.defaultObjectSupplier;
+            this.arraySupplier = JSONFactory.defaultArraySupplier;
             this.symbolTable = null;
+        }
+
+        public Context(Feature... features) {
+            this.features = defaultReaderFeatures;
+            this.provider = JSONFactory.getDefaultObjectReaderProvider();
+            this.objectSupplier = JSONFactory.defaultObjectSupplier;
+            this.arraySupplier = JSONFactory.defaultArraySupplier;
+            this.symbolTable = null;
+
+            for (Feature feature : features) {
+                this.features |= feature.mask;
+            }
+        }
+
+        public Context(String dateFormat, Feature... features) {
+            this.features = defaultReaderFeatures;
+            this.provider = JSONFactory.getDefaultObjectReaderProvider();
+            this.objectSupplier = JSONFactory.defaultObjectSupplier;
+            this.arraySupplier = JSONFactory.defaultArraySupplier;
+            this.symbolTable = null;
+
+            for (Feature feature : features) {
+                this.features |= feature.mask;
+            }
+            setDateFormat(dateFormat);
+        }
+
+        public Context(ObjectReaderProvider provider, Feature... features) {
+            this.features = defaultReaderFeatures;
+            this.provider = provider;
+            this.objectSupplier = JSONFactory.defaultObjectSupplier;
+            this.arraySupplier = JSONFactory.defaultArraySupplier;
+            this.symbolTable = null;
+
+            for (Feature feature : features) {
+                this.features |= feature.mask;
+            }
         }
 
         public Context(ObjectReaderProvider provider, SymbolTable symbolTable) {
             this.features = defaultReaderFeatures;
             this.provider = provider;
             this.symbolTable = symbolTable;
+        }
+
+        public Context(ObjectReaderProvider provider, SymbolTable symbolTable, Feature... features) {
+            this.features = defaultReaderFeatures;
+            this.provider = provider;
+            this.symbolTable = symbolTable;
+            for (Feature feature : features) {
+                this.features |= feature.mask;
+            }
+        }
+
+        public boolean isFormatUnixTime() {
+            return formatUnixTime;
+        }
+
+        public boolean isFormatyyyyMMddhhmmss19() {
+            return formatyyyyMMddhhmmss19;
+        }
+
+        public boolean isFormatyyyyMMddhhmmssT19() {
+            return formatyyyyMMddhhmmssT19;
+        }
+
+        public boolean isFormatyyyyMMdd8() {
+            return formatyyyyMMdd8;
+        }
+
+        public boolean isFormatMillis() {
+            return formatMillis;
+        }
+
+        public boolean isFormatISO8601() {
+            return formatISO8601;
+        }
+
+        public boolean isFormatHasHour() {
+            return formatHasHour;
         }
 
         public ObjectReader getObjectReader(Type type) {
@@ -3057,6 +3315,14 @@ public abstract class JSONReader
             }
 
             return provider.getObjectReader(typeName, expectClass, this.features | features);
+        }
+
+        public ExtraProcessor getExtraProcessor() {
+            return extraProcessor;
+        }
+
+        public void setExtraProcessor(ExtraProcessor extraProcessor) {
+            this.extraProcessor = extraProcessor;
         }
 
         public Supplier<Map> getObjectSupplier() {
@@ -3194,6 +3460,10 @@ public abstract class JSONReader
                 autoTypeBeforeHandler = (AutoTypeBeforeHandler) filter;
             }
 
+            if (filter instanceof ExtraProcessor) {
+                extraProcessor = (ExtraProcessor) filter;
+            }
+
             for (Feature feature : features) {
                 this.features |= feature.mask;
             }
@@ -3203,6 +3473,10 @@ public abstract class JSONReader
             for (Filter filter : filters) {
                 if (filter instanceof AutoTypeBeforeHandler) {
                     autoTypeBeforeHandler = (AutoTypeBeforeHandler) filter;
+                }
+
+                if (filter instanceof ExtraProcessor) {
+                    extraProcessor = (ExtraProcessor) filter;
                 }
             }
 
@@ -3227,31 +3501,68 @@ public abstract class JSONReader
     public enum Feature {
         FieldBased(1),
         IgnoreNoneSerializable(1 << 1),
-        SupportArrayToBean(1 << 2),
-        InitStringFieldAsEmpty(1 << 3),
-        SupportAutoType(1 << 4),
-        SupportSmartMatch(1 << 5),
-        UseNativeObject(1 << 6),
-        SupportClassForName(1 << 7),
-        IgnoreSetNullValue(1 << 8),
-        UseDefaultConstructorAsPossible(1 << 9),
-        UseBigDecimalForFloats(1 << 10),
-        UseBigDecimalForDoubles(1 << 11),
-        ErrorOnEnumNotMatch(1 << 12),
-        TrimString(1 << 13),
-        ErrorOnNotSupportAutoType(1 << 14),
-        DuplicateKeyValueAsArray(1 << 15),
-        AllowUnQuotedFieldNames(1 << 16),
-        NonStringKeyAsString(1 << 17),
+        /**
+         * @since 2.0.14
+         */
+        ErrorOnNoneSerializable(1 << 2),
+        SupportArrayToBean(1 << 3),
+        InitStringFieldAsEmpty(1 << 4),
+        SupportAutoType(1 << 5),
+        SupportSmartMatch(1 << 6),
+        UseNativeObject(1 << 7),
+        SupportClassForName(1 << 8),
+        IgnoreSetNullValue(1 << 9),
+        UseDefaultConstructorAsPossible(1 << 10),
+        UseBigDecimalForFloats(1 << 11),
+        UseBigDecimalForDoubles(1 << 12),
+        ErrorOnEnumNotMatch(1 << 13),
+        TrimString(1 << 14),
+        ErrorOnNotSupportAutoType(1 << 15),
+        DuplicateKeyValueAsArray(1 << 16),
+        AllowUnQuotedFieldNames(1 << 17),
+        NonStringKeyAsString(1 << 18),
         /**
          * @since 2.0.13
          */
-        Base64StringAsByteArray(1 << 18);
+        Base64StringAsByteArray(1 << 19),
+
+        /**
+         * @since 2.0.16
+         */
+        IgnoreCheckClose(1 << 20),
+        /**
+         * @since 2.0.20
+         */
+        ErrorOnNullForPrimitives(1 << 21),
+
+        /**
+         * @since 2.0.20
+         */
+        NullOnError(1 << 22),
+
+        /**
+         * @since 2.0.21
+         */
+        IgnoreAutoTypeNotMatch(1 << 23);
 
         public final long mask;
 
         Feature(long mask) {
             this.mask = mask;
+        }
+
+        public static long of(Feature[] features) {
+            if (features == null) {
+                return 0;
+            }
+
+            long value = 0;
+
+            for (Feature feature : features) {
+                value |= feature.mask;
+            }
+
+            return value;
         }
     }
 
@@ -3274,132 +3585,13 @@ public abstract class JSONReader
         }
     }
 
-    static LocalDateTime getLocalDateTime(
-            char y0,
-            char y1,
-            char y2,
-            char y3,
-            char m0,
-            char m1,
-            char d0,
-            char d1,
-            char h0,
-            char h1,
-            char i0,
-            char i1,
-            char s0,
-            char s1,
-            char S0,
-            char S1,
-            char S2,
-            char S3,
-            char S4,
-            char S5,
-            char S6,
-            char S7,
-            char S8) {
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int nanos;
-        if (S0 >= '0' && S0 <= '9'
-                && S1 >= '0' && S1 <= '9'
-                && S2 >= '0' && S2 <= '9'
-                && S3 >= '0' && S3 <= '9'
-                && S4 >= '0' && S4 <= '9'
-                && S5 >= '0' && S5 <= '9'
-                && S6 >= '0' && S6 <= '9'
-                && S7 >= '0' && S7 <= '9'
-                && S8 >= '0' && S8 <= '9'
-        ) {
-            nanos = (S0 - '0') * 1000_000_00
-                    + (S1 - '0') * 1000_000_0
-                    + (S2 - '0') * 1000_000
-                    + (S3 - '0') * 1000_00
-                    + (S4 - '0') * 1000_0
-                    + (S5 - '0') * 1000
-                    + (S6 - '0') * 100
-                    + (S7 - '0') * 10
-                    + (S8 - '0');
-        } else {
-            return null;
-        }
-
-        LocalDate date = LocalDate.of(year, month, dom);
-        LocalTime time = LocalTime.of(hour, minute, second, nanos);
-        return LocalDateTime.of(date, time);
+    public SavePoint mark() {
+        return new SavePoint(this.offset, this.ch);
     }
 
-    protected ZoneId getZoneId(LocalDateTime ldt, String zoneIdStr) {
-        ZoneId zoneId;
-
-        int p0, p1;
-        if (zoneIdStr != null) {
-            if ("000".equals(zoneIdStr)) {
-                zoneId = ZoneOffset.UTC;
-            } else if ((p0 = zoneIdStr.indexOf('[')) > 0 && (p1 = zoneIdStr.indexOf(']', p0)) > 0) {
-                String str = zoneIdStr.substring(p0 + 1, p1);
-                zoneId = ZoneId.of(str);
-            } else {
-                zoneId = ZoneId.of(zoneIdStr);
-            }
-        } else {
-            zoneId = context.getZoneId();
-        }
-        return zoneId;
+    public void reset(SavePoint savePoint) {
+        this.offset = savePoint.offset;
+        this.ch = (char) savePoint.current;
     }
 
     public String info() {
@@ -3415,5 +3607,113 @@ public abstract class JSONReader
 
     static boolean isFirstIdentifier(char ch) {
         return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '_' || ch == '$' || (ch >= '0' && ch <= '9') || ch > 0x7F;
+    }
+
+    public static class SavePoint {
+        protected final int offset;
+        protected final int current;
+
+        protected SavePoint(int offset, int current) {
+            this.offset = offset;
+            this.current = current;
+        }
+    }
+
+    static final class BigIntegerCreator
+            implements BiFunction<Integer, int[], BigInteger> {
+        static final BiFunction<Integer, int[], BigInteger> BIG_INTEGER_CREATOR;
+
+        static {
+            BiFunction<Integer, int[], BigInteger> bigIntegerCreator = null;
+            if (TRUSTED_LOOKUP != null) {
+                try {
+                    MethodHandles.Lookup caller = TRUSTED_LOOKUP.in(BigInteger.class);
+                    MethodHandle handle = caller.findConstructor(
+                            BigInteger.class, MethodType.methodType(void.class, int.class, int[].class)
+                    );
+                    CallSite callSite = LambdaMetafactory.metafactory(
+                            caller,
+                            "apply",
+                            MethodType.methodType(BiFunction.class),
+                            handle.type().generic(),
+                            handle,
+                            MethodType.methodType(BigInteger.class, Integer.class, int[].class)
+                    );
+                    bigIntegerCreator = (BiFunction<Integer, int[], BigInteger>) callSite.getTarget().invokeExact();
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            }
+            if (bigIntegerCreator == null) {
+                bigIntegerCreator = new BigIntegerCreator();
+            }
+            BIG_INTEGER_CREATOR = bigIntegerCreator;
+        }
+
+        @Override
+        public BigInteger apply(Integer integer, int[] mag) {
+            int signum = integer.intValue();
+            final int bitLength;
+            if (mag.length == 0) {
+                bitLength = 0; // offset by one to initialize
+            } else {
+                // Calculate the bit length of the magnitude
+                int bitLengthForInt = 32 - Integer.numberOfLeadingZeros(mag[0]);
+                int magBitLength = ((mag.length - 1) << 5) + bitLengthForInt;
+                if (signum < 0) {
+                    // Check if magnitude is a power of two
+                    boolean pow2 = (Integer.bitCount(mag[0]) == 1);
+                    for (int i = 1; i < mag.length && pow2; i++) {
+                        pow2 = (mag[i] == 0);
+                    }
+                    bitLength = (pow2 ? magBitLength - 1 : magBitLength);
+                } else {
+                    bitLength = magBitLength;
+                }
+            }
+            int byteLen = bitLength / 8 + 1;
+
+            byte[] bytes = new byte[byteLen];
+            for (int i = byteLen - 1, bytesCopied = 4, nextInt = 0, intIndex = 0; i >= 0; i--) {
+                if (bytesCopied == 4) {
+                    // nextInt = getInt(intIndex++
+                    int n = intIndex++;
+                    if (n < 0) {
+                        nextInt = 0;
+                    } else if (n >= mag.length) {
+                        nextInt = signum < 0 ? -1 : 0;
+                    } else {
+                        int magInt = mag[mag.length - n - 1];
+                        if (signum >= 0) {
+                            nextInt = magInt;
+                        } else {
+                            int firstNonzeroIntNum;
+                            {
+                                int j;
+                                int mlen = mag.length;
+                                for (j = mlen - 1; j >= 0 && mag[j] == 0; j--) {
+                                    // empty
+                                }
+                                firstNonzeroIntNum = mlen - j - 1;
+                            }
+
+                            if (n <= firstNonzeroIntNum) {
+                                nextInt = -magInt;
+                            } else {
+                                nextInt = ~magInt;
+                            }
+                        }
+                    }
+
+                    bytesCopied = 1;
+                } else {
+                    nextInt >>>= 8;
+                    bytesCopied++;
+                }
+                bytes[i] = (byte) nextInt;
+            }
+
+            return new BigInteger(bytes);
+        }
     }
 }

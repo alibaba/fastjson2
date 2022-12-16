@@ -12,14 +12,14 @@ import java.util.Collection;
 import java.util.function.Function;
 
 class ObjectReaderImplFloatValueArray
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplFloatValueArray INSTANCE = new ObjectReaderImplFloatValueArray();
     static final long TYPE_HASH = Fnv.hashCode64("[F");
 
-    @Override
-    public Class getObjectClass() {
-        return float[].class;
+    ObjectReaderImplFloatValueArray() {
+        super(float[].class);
     }
+
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.readIfNull()) {

@@ -1,13 +1,13 @@
 package com.alibaba.fastjson2.read;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.util.JDKUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RecordTest {
@@ -15,7 +15,7 @@ public class RecordTest {
 
     @Test
     public void test0() throws Exception {
-        if (JDKUtils.JVM_VERSION < 14) {
+        if (JVM_VERSION < 14) {
             return;
         }
 

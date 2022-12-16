@@ -21,7 +21,7 @@ final class IntegerSchema
 
     IntegerSchema(JSONObject input) {
         super(input);
-        this.typed = "integer".equalsIgnoreCase(input.getString("type"));
+        this.typed = "integer".equalsIgnoreCase(input.getString("type")) || input.getBooleanValue("required");
 
         Object exclusiveMinimum = input.get("exclusiveMinimum");
 

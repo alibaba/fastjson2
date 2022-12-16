@@ -3,18 +3,33 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.IOUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.UseSingleQuotes;
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
+
 abstract class FieldWriterInt32<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     volatile byte[][] utf8ValueCache;
     volatile char[][] utf16ValueCache;
     final boolean toString;
 
-    protected FieldWriterInt32(String name, int ordinal, long features, String format, String label, Type fieldType, Class fieldClass) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass);
-        toString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0
+    protected FieldWriterInt32(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
+        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
+        toString = (features & WriteNonStringValueAsString.mask) != 0
                 || "string".equals(format);
     }
 
@@ -26,9 +41,10 @@ abstract class FieldWriterInt32<T>
             return;
         }
 
-        boolean writeNonStringValueAsString = (jsonWriter.getFeatures() & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        long jsonWriterFeatures = jsonWriter.getFeatures();
+        boolean writeNonStringValueAsString = (jsonWriterFeatures & (WriteNonStringValueAsString.mask | UseSingleQuotes.mask)) != 0;
 
-        if (jsonWriter.isUTF8() && !writeNonStringValueAsString) {
+        if (jsonWriter.utf8 && !writeNonStringValueAsString) {
             if (value >= -1 && value < 1039) {
                 byte[] bytes = null;
                 if (utf8ValueCache == null) {
@@ -47,7 +63,7 @@ abstract class FieldWriterInt32<T>
                 jsonWriter.writeNameRaw(bytes);
                 return;
             }
-        } else if (jsonWriter.isUTF16() && !writeNonStringValueAsString) {
+        } else if (jsonWriter.utf16 && !writeNonStringValueAsString) {
             if (value >= -1 && value < 1039) {
                 char[] chars = null;
                 if (utf16ValueCache == null) {

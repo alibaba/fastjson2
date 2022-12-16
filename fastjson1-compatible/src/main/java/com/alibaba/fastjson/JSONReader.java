@@ -18,9 +18,9 @@ public class JSONReader
     }
 
     public JSONReader(Reader input, Feature... features) {
-        this.raw = com.alibaba.fastjson2.JSONReader.of(input);
+        com.alibaba.fastjson2.JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE, features);
+        this.raw = com.alibaba.fastjson2.JSONReader.of(input, context);
         this.input = input;
-        com.alibaba.fastjson2.JSONReader.Context context = raw.getContext();
         for (Feature feature : features) {
             if (feature == Feature.SupportArrayToBean) {
                 context.config(com.alibaba.fastjson2.JSONReader.Feature.SupportArrayToBean);
@@ -37,11 +37,74 @@ public class JSONReader
     }
 
     public <T> T readObject(Class<T> type) {
+        raw.nextIfMatch(':');
         try {
             return raw.read(type);
         } catch (com.alibaba.fastjson2.JSONException ex) {
             throw new JSONException(ex.getMessage(), ex.getCause());
         }
+    }
+
+    public Object readObject() {
+        raw.nextIfMatch(':');
+        return raw.readAny();
+    }
+
+    public void readObject(Object object) {
+        raw.nextIfMatch(':');
+        raw.readObject(object);
+    }
+
+    public Integer readInteger() {
+        raw.nextIfMatch(':');
+        return raw.readInt32();
+    }
+
+    public Long readLong() {
+        raw.nextIfMatch(':');
+        return raw.readInt64();
+    }
+
+    public String readString() {
+        raw.nextIfMatch(':');
+        return raw.readString();
+    }
+
+    public boolean hasNext() {
+        if (raw.isEnd()) {
+            return false;
+        }
+
+        char ch = raw.current();
+        return ch != ']' && ch != '}';
+    }
+
+    public void startArray() {
+        raw.nextIfMatch(':');
+        if (!raw.nextIfMatch('[')) {
+            throw new JSONException("not support operation");
+        }
+    }
+
+    public void endArray() {
+        if (!raw.nextIfMatch(']')) {
+            throw new JSONException("not support operation");
+        }
+        raw.nextIfMatch(',');
+    }
+
+    public void startObject() {
+        raw.nextIfMatch(':');
+        if (!raw.nextIfMatch('{')) {
+            throw new JSONException("not support operation");
+        }
+    }
+
+    public void endObject() {
+        if (!raw.nextIfMatch('}')) {
+            throw new JSONException(raw.info("not support operation"));
+        }
+        raw.nextIfMatch(',');
     }
 
     public Locale getLocal() {
@@ -50,6 +113,28 @@ public class JSONReader
 
     public TimeZone getTimeZone() {
         return raw.getContext().getTimeZone();
+    }
+
+    public void config(Feature feature, boolean state) {
+        com.alibaba.fastjson2.JSONReader.Feature rawFeature = null;
+        switch (feature) {
+            case SupportArrayToBean:
+                rawFeature = com.alibaba.fastjson2.JSONReader.Feature.SupportArrayToBean;
+                break;
+            case UseNativeJavaObject:
+                rawFeature = com.alibaba.fastjson2.JSONReader.Feature.UseNativeObject;
+                break;
+            case SupportAutoType:
+                rawFeature = com.alibaba.fastjson2.JSONReader.Feature.SupportAutoType;
+                break;
+            default:
+                break;
+        }
+
+        if (rawFeature == null) {
+            return;
+        }
+        raw.getContext().config(rawFeature, state);
     }
 
     @Override

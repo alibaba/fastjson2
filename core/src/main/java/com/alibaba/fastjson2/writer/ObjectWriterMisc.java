@@ -31,6 +31,9 @@ final class ObjectWriterMisc
             case "java.text.SimpleDateFormat":
                 str = ((java.text.SimpleDateFormat) object).toPattern();
                 break;
+            case "java.util.regex.Pattern":
+                str = ((java.util.regex.Pattern) object).pattern();
+                break;
             case "java.net.InetSocketAddress": {
                 java.net.InetSocketAddress address = (java.net.InetSocketAddress) object;
 

@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.internal.trove.map.hash.TLongIntHashMap;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
@@ -14,10 +13,12 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
-import java.util.Arrays;
-import java.util.UUID;
+import java.util.*;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.JSONFactory.CACHE_SIZE;
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNameAsSymbol;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONWriterJSONB
         extends JSONWriter {
@@ -25,43 +26,25 @@ final class JSONWriterJSONB
     static final BigInteger BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
 
     private final int cachedIndex;
-
     private byte[] bytes;
-    private SymbolTable symbolTable;
-
-    TLongIntHashMap symbols;
+    private TLongIntHashMap symbols;
     private int symbolIndex;
 
+    protected long rootTypeNameHash;
+
     JSONWriterJSONB(Context ctx, SymbolTable symbolTable) {
-        super(ctx, StandardCharsets.UTF_8);
-        cachedIndex = JSONFactory.cacheIndex();
-        bytes = JSONFactory.allocateByteArray(cachedIndex);
-        this.symbolTable = symbolTable;
+        super(ctx, symbolTable, true, StandardCharsets.UTF_8);
+        this.cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
+        this.bytes = JSONFactory.allocateByteArray(cachedIndex);
+    }
+
+    public void config(Feature... features) {
+        context.config(features);
     }
 
     @Override
     public void close() {
         JSONFactory.releaseByteArray(cachedIndex, bytes);
-    }
-
-    @Override
-    public boolean isUTF8() {
-        return false;
-    }
-
-    @Override
-    public boolean isUTF16() {
-        return false;
-    }
-
-    @Override
-    public boolean isJSONB() {
-        return true;
-    }
-
-    @Override
-    public SymbolTable getSymbolTable() {
-        return symbolTable;
     }
 
     @Override
@@ -93,7 +76,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -113,7 +96,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -142,7 +125,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -160,7 +143,6 @@ final class JSONWriterJSONB
 
     @Override
     public void startArray(int size) {
-        level++;
         if (off == bytes.length) {
             int minCapacity = off + 1;
             int oldCapacity = bytes.length;
@@ -168,7 +150,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -193,7 +175,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -212,7 +194,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -237,7 +219,26 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
+        bytes[off++] = BC_NULL;
+    }
+
+    @Override
+    public void writeStringNull() {
+        if (off == bytes.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -264,19 +265,44 @@ final class JSONWriterJSONB
 
     @Override
     public void writeString(char[] chars, int off, int len, boolean quote) {
-        throw new JSONException("unsupported operation");
+        if (chars == null) {
+            writeNull();
+            return;
+        }
+
+        boolean ascii = true;
+        for (int i = 0; i < len; ++i) {
+            if (chars[i + off] > 0x007F) {
+                ascii = false;
+                break;
+            }
+        }
+
+        if (ascii) {
+            if (len <= STR_ASCII_FIX_LEN) {
+                bytes[this.off++] = (byte) (len + BC_STR_ASCII_FIX_MIN);
+            } else {
+                bytes[this.off++] = BC_STR_ASCII;
+                writeInt32(len);
+            }
+            for (int i = 0; i < len; ++i) {
+                bytes[this.off++] = (byte) chars[off + i];
+            }
+            return;
+        }
+
+        writeString(new String(chars, off, len));
     }
 
     @Override
-    public void writeString(char[] str) {
+    public void writeString(char[] str, int stroff, int strlen) {
         if (str == null) {
             writeNull();
             return;
         }
 
-        final int strlen = str.length;
         boolean ascii = true;
-        for (int i = 0; i < strlen; ++i) {
+        for (int i = stroff; i < strlen; ++i) {
             if (str[i] > 0x007F) {
                 ascii = false;
                 break;
@@ -290,13 +316,13 @@ final class JSONWriterJSONB
                 bytes[off++] = BC_STR_ASCII;
                 writeInt32(strlen);
             }
-            for (int i = 0; i < strlen; ++i) {
+            for (int i = stroff; i < strlen; ++i) {
                 bytes[off++] = (byte) str[i];
             }
             return;
         }
 
-        writeString(new String(str));
+        writeString(new String(str, stroff, strlen));
     }
 
     @Override
@@ -327,7 +353,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -361,7 +387,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -389,7 +415,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -403,12 +429,29 @@ final class JSONWriterJSONB
             }
         }
 
-        int symbol = -1;
-        if (symbols != null) {
-            symbol = symbols.get(hash);
+        boolean symbolExists = false;
+        int symbol;
+        if (rootTypeNameHash == hash) {
+            symbolExists = true;
+            symbol = 0;
+        } else if (symbols != null) {
+            symbol = symbols.putIfAbsent(hash, symbolIndex);
+            if (symbol != symbolIndex) {
+                symbolExists = true;
+            } else {
+                symbolIndex++;
+            }
+        } else {
+            symbol = symbolIndex++;
+            if (symbol == 0) {
+                rootTypeNameHash = hash;
+            }
+            if (symbol != 0 || (context.features & WriteNameAsSymbol.mask) != 0) {
+                symbols = new TLongIntHashMap(hash, symbol);
+            }
         }
 
-        if (symbol != -1) {
+        if (symbolExists) {
             if (off == bytes.length) {
                 int minCapacity = off + 1;
                 int oldCapacity = bytes.length;
@@ -416,7 +459,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -429,19 +472,14 @@ final class JSONWriterJSONB
             return false;
         }
 
-        if (symbols == null) {
-            symbols = new TLongIntHashMap();
-        }
-        symbols.put(hash, symbol = symbolIndex++);
-
-        int minCapacity = off + 1 + typeName.length;
+        int minCapacity = off + 2 + typeName.length;
         if (minCapacity - bytes.length > 0) {
             int oldCapacity = bytes.length;
             int newCapacity = oldCapacity + (oldCapacity >> 1);
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -452,7 +490,11 @@ final class JSONWriterJSONB
         this.bytes[off++] = BC_TYPED_ANY;
         System.arraycopy(typeName, 0, this.bytes, off, typeName.length);
         off += typeName.length;
-        writeInt32(symbol);
+        if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
+            bytes[off++] = (byte) symbol;
+        } else {
+            writeInt32(symbol);
+        }
 
         return false;
     }
@@ -473,6 +515,59 @@ final class JSONWriterJSONB
         return 5;
     }
 
+    public void writeString(List<String> list) {
+        if (list == null) {
+            writeArrayNull();
+            return;
+        }
+
+        final int size = list.size();
+        startArray(size);
+
+        if (JVM_VERSION > 8) {
+            int mark = off;
+            final int LATIN = 0;
+            boolean latinAll = true;
+
+            if (STRING_VALUE != null) {
+                for (int i = 0; i < size; i++) {
+                    String str = list.get(i);
+                    if (str == null) {
+                        writeNull();
+                    }
+                    int coder = STRING_CODER.applyAsInt(str);
+                    if (coder != LATIN) {
+                        latinAll = false;
+                        off = mark;
+                        break;
+                    }
+                    int strlen = str.length();
+                    if (strlen <= STR_ASCII_FIX_LEN) {
+                        bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+                    } else if (strlen >= INT32_BYTE_MIN && strlen <= INT32_BYTE_MAX) {
+                        bytes[off++] = BC_STR_ASCII;
+                        bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (strlen >> 8));
+                        bytes[off++] = (byte) (strlen);
+                    } else {
+                        bytes[off++] = BC_STR_ASCII;
+                        writeInt32(strlen);
+                    }
+                    byte[] value = STRING_VALUE.apply(str);
+                    System.arraycopy(value, 0, bytes, off, value.length);
+                    off += strlen;
+                }
+                if (latinAll) {
+                    return;
+                }
+            }
+        }
+
+        for (int i = 0; i < size; i++) {
+            String str = list.get(i);
+            writeString(str);
+        }
+    }
+
     @Override
     public void writeString(String str) {
         if (str == null) {
@@ -480,12 +575,13 @@ final class JSONWriterJSONB
             return;
         }
 
-        if (JDKUtils.JVM_VERSION > 8 && JDKUtils.UNSAFE_SUPPORT) {
-            int coder = UnsafeUtils.getStringCoder(str);
-            byte[] value = UnsafeUtils.getStringValue(str);
+        if (JVM_VERSION > 8 && STRING_VALUE != null) {
+            int coder = STRING_CODER.applyAsInt(str);
+            byte[] value = STRING_VALUE.apply(str);
 
             if (coder == 0) {
-                int minCapacity = value.length
+                int strlen = str.length();
+                int minCapacity = str.length()
                         + off
                         + 5 /*max str len*/
                         + 1;
@@ -496,7 +592,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -504,14 +600,17 @@ final class JSONWriterJSONB
                     bytes = Arrays.copyOf(bytes, newCapacity);
                 }
 
-                int strlen = value.length;
                 if (strlen <= STR_ASCII_FIX_LEN) {
                     bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+                } else if (strlen >= INT32_BYTE_MIN && strlen <= INT32_BYTE_MAX) {
+                    bytes[off++] = BC_STR_ASCII;
+                    bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (strlen >> 8));
+                    bytes[off++] = (byte) (strlen);
                 } else {
                     bytes[off++] = BC_STR_ASCII;
                     writeInt32(strlen);
                 }
-                System.arraycopy(value, 0, bytes, off, strlen);
+                System.arraycopy(value, 0, bytes, off, value.length);
                 off += strlen;
                 return;
             } else {
@@ -532,7 +631,7 @@ final class JSONWriterJSONB
                     }
                 }
 
-                boolean utf16 = asciiCount == 0 || (check_cnt >> 1) / asciiCount >= 3; // utf16字符占比>=1/3
+                boolean utf16 = value.length != 0 && (asciiCount == 0 || (check_cnt >> 1) / asciiCount >= 3); // utf16字符占比>=1/3
 
                 if (!utf16) {
                     int maxSize = value.length * 3;
@@ -561,16 +660,31 @@ final class JSONWriterJSONB
                             System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
                         }
                         bytes[off++] = strtype;
-                        writeInt32(utf8len);
+
+                        if (utf8len <= BC_INT32_NUM_MAX) {
+                            bytes[off++] = (byte) utf8len;
+                        } else if (utf8len <= INT32_BYTE_MAX) {
+                            bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (utf8len >> 8));
+                            bytes[off++] = (byte) utf8len;
+                        } else {
+                            writeInt32(utf8len);
+                        }
                         off += utf8len;
                         return;
                     }
                 }
 
                 if (utf16) {
-                    ensureCapacity(off + 5 + value.length);
+                    ensureCapacity(off + 6 + value.length);
                     bytes[off++] = JDKUtils.BIG_ENDIAN ? BC_STR_UTF16BE : BC_STR_UTF16LE;
-                    writeInt32(value.length);
+                    if (value.length <= BC_INT32_NUM_MAX) {
+                        bytes[off++] = (byte) value.length;
+                    } else if (value.length <= INT32_BYTE_MAX) {
+                        bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (value.length >> 8));
+                        bytes[off++] = (byte) value.length;
+                    } else {
+                        writeInt32(value.length);
+                    }
                     System.arraycopy(value, 0, bytes, off, value.length);
                     off += value.length;
                     return;
@@ -579,11 +693,49 @@ final class JSONWriterJSONB
         }
 
         char[] chars = JDKUtils.getCharArray(str);
+        final int strlen = chars.length;
 
         boolean ascii = true;
+
+        if (chars.length < STR_ASCII_FIX_LEN) {
+            final int mark = off;
+
+            int minCapacity = off + 1 + strlen;
+            if (minCapacity - bytes.length > 0) {
+                int oldCapacity = bytes.length;
+                int newCapacity = oldCapacity + (oldCapacity >> 1);
+                if (newCapacity - minCapacity < 0) {
+                    newCapacity = minCapacity;
+                }
+                if (newCapacity - maxArraySize > 0) {
+                    throw new OutOfMemoryError();
+                }
+
+                // minCapacity is usually close to size, so this is a win:
+                bytes = Arrays.copyOf(bytes, newCapacity);
+            }
+
+            bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            for (int i = 0; i < chars.length; i++) {
+                char ch = chars[i];
+                if (ch > 0x007F) {
+                    ascii = false;
+                    break;
+                }
+                bytes[off++] = (byte) ch;
+            }
+
+            if (ascii) {
+                return;
+            }
+
+            off = mark;
+        }
+
         {
             int i = 0;
-            while (i + 4 <= chars.length) {
+            int upperBound = chars.length & ~3;
+            for (; i < upperBound; i += 4) {
                 char c0 = chars[i];
                 char c1 = chars[i + 1];
                 char c2 = chars[i + 2];
@@ -592,7 +744,6 @@ final class JSONWriterJSONB
                     ascii = false;
                     break;
                 }
-                i += 4;
             }
             if (ascii) {
                 for (; i < chars.length; ++i) {
@@ -604,7 +755,6 @@ final class JSONWriterJSONB
             }
         }
 
-        final int strlen = chars.length;
         int minCapacity = (ascii ? strlen : strlen * 3)
                 + off
                 + 5 /*max str len*/
@@ -616,7 +766,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -627,6 +777,10 @@ final class JSONWriterJSONB
         if (ascii) {
             if (strlen <= STR_ASCII_FIX_LEN) {
                 bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            } else if (strlen >= INT32_BYTE_MIN && strlen <= INT32_BYTE_MAX) {
+                bytes[off++] = BC_STR_ASCII;
+                bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (strlen >> 8));
+                bytes[off++] = (byte) (strlen);
             } else {
                 bytes[off++] = BC_STR_ASCII;
                 writeInt32(strlen);
@@ -646,7 +800,14 @@ final class JSONWriterJSONB
                 System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
             }
             bytes[off++] = BC_STR_UTF8;
-            writeInt32(utf8len);
+            if (utf8len >= BC_INT32_NUM_MIN && utf8len <= BC_INT32_NUM_MAX) {
+                bytes[off++] = (byte) utf8len;
+            } else if (utf8len >= INT32_BYTE_MIN && utf8len <= INT32_BYTE_MAX) {
+                bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (utf8len >> 8));
+                bytes[off++] = (byte) (utf8len);
+            } else {
+                writeInt32(utf8len);
+            }
             off += utf8len;
         }
     }
@@ -658,7 +819,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -681,7 +842,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -709,7 +870,7 @@ final class JSONWriterJSONB
                         if (newCapacity - minCapacity < 0) {
                             newCapacity = minCapacity;
                         }
-                        if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                        if (newCapacity - maxArraySize > 0) {
                             throw new OutOfMemoryError();
                         }
 
@@ -734,7 +895,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -765,7 +926,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -785,7 +946,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -806,7 +967,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -828,7 +989,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -851,7 +1012,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -886,7 +1047,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -913,7 +1074,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -933,7 +1094,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -954,7 +1115,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -975,7 +1136,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1111,7 +1272,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1138,7 +1299,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -1158,7 +1319,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -1179,7 +1340,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -1200,7 +1361,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1228,7 +1389,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1249,7 +1410,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1284,7 +1445,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -1299,6 +1460,22 @@ final class JSONWriterJSONB
         }
     }
 
+    static int size(int val) {
+        if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
+            return 1;
+        }
+
+        if (val >= INT32_BYTE_MIN && val <= INT32_BYTE_MAX) {
+            return 2;
+        }
+
+        if (val >= INT32_SHORT_MIN && val <= INT32_SHORT_MAX) {
+            return 3;
+        }
+
+        return 5;
+    }
+
     @Override
     public void writeInt32(int val) {
         if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
@@ -1310,7 +1487,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1330,7 +1507,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1351,7 +1528,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1372,7 +1549,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1396,7 +1573,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1425,7 +1602,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1434,6 +1611,38 @@ final class JSONWriterJSONB
         }
         System.arraycopy(bytes, 0, this.bytes, off, bytes.length);
         off += bytes.length;
+    }
+
+    public void writeSymbol(int symbol) {
+        int minCapacity = off + 3;
+        if (minCapacity - bytes.length > 0) {
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
+
+        this.bytes[off++] = BC_SYMBOL;
+
+        if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
+            bytes[off++] = (byte) symbol;
+            return;
+        }
+
+        if (symbol >= INT32_BYTE_MIN && symbol <= INT32_BYTE_MAX) {
+            bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (symbol >> 8));
+            bytes[off++] = (byte) (symbol);
+            return;
+        }
+
+        writeInt32(symbol);
     }
 
     @Override
@@ -1448,7 +1657,7 @@ final class JSONWriterJSONB
                     if (newCapacity - minCapacity < 0) {
                         newCapacity = minCapacity;
                     }
-                    if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                    if (newCapacity - maxArraySize > 0) {
                         throw new OutOfMemoryError();
                     }
 
@@ -1462,32 +1671,7 @@ final class JSONWriterJSONB
             }
         }
 
-        int symbol = -1;
-        if (symbols != null) {
-            symbol = symbols.get(nameHash);
-        }
-
-        if (symbol != -1) {
-            if (off == this.bytes.length) {
-                int minCapacity = off + 1;
-                int oldCapacity = this.bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                this.bytes = Arrays.copyOf(this.bytes, newCapacity);
-            }
-            this.bytes[off++] = BC_SYMBOL;
-            writeInt32(symbol);
-            return;
-        }
-
-        if ((context.features & Feature.WriteNameAsSymbol.mask) == 0) {
+        if ((context.features & WriteNameAsSymbol.mask) == 0) {
             int minCapacity = this.off + name.length;
             if (minCapacity - this.bytes.length > 0) {
                 int oldCapacity = this.bytes.length;
@@ -1495,7 +1679,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1508,19 +1692,52 @@ final class JSONWriterJSONB
             return;
         }
 
-        if (symbols == null) {
+        boolean symbolExists = false;
+        int symbol;
+        if (symbols != null) {
+            symbol = symbols.putIfAbsent(nameHash, symbolIndex);
+            if (symbol != symbolIndex) {
+                symbolExists = true;
+            } else {
+                symbolIndex++;
+            }
+        } else {
             symbols = new TLongIntHashMap();
+            symbols.put(nameHash, symbol = symbolIndex++);
         }
-        symbols.put(nameHash, symbol = symbolIndex++);
 
-        int minCapacity = this.off + 1 + name.length;
+        if (symbolExists) {
+            int minCapacity = this.off + 2;
+            if (minCapacity - this.bytes.length > 0) {
+                int oldCapacity = this.bytes.length;
+                int newCapacity = oldCapacity + (oldCapacity >> 1);
+                if (newCapacity - minCapacity < 0) {
+                    newCapacity = minCapacity;
+                }
+                if (newCapacity - maxArraySize > 0) {
+                    throw new OutOfMemoryError();
+                }
+
+                // minCapacity is usually close to size, so this is a win:
+                this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+            }
+            this.bytes[off++] = BC_SYMBOL;
+            if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
+                bytes[off++] = (byte) symbol;
+            } else {
+                writeInt32(symbol);
+            }
+            return;
+        }
+
+        int minCapacity = this.off + 2 + name.length;
         if (minCapacity - this.bytes.length > 0) {
             int oldCapacity = this.bytes.length;
             int newCapacity = oldCapacity + (oldCapacity >> 1);
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1530,7 +1747,12 @@ final class JSONWriterJSONB
         this.bytes[off++] = BC_SYMBOL;
         System.arraycopy(name, 0, this.bytes, off, name.length);
         off += name.length;
-        writeInt32(symbol);
+
+        if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
+            bytes[off++] = (byte) symbol;
+        } else {
+            writeInt32(symbol);
+        }
     }
 
     @Override
@@ -1680,7 +1902,7 @@ final class JSONWriterJSONB
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1758,7 +1980,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1791,7 +2013,7 @@ final class JSONWriterJSONB
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -1807,6 +2029,29 @@ final class JSONWriterJSONB
         }
 
         this.lastReference = path;
+    }
+
+    @Override
+    public void writeDateTime14(
+            int year,
+            int month,
+            int dayOfMonth,
+            int hour,
+            int minute,
+            int second) {
+        ensureCapacity(off + 8);
+
+        bytes[off++] = BC_LOCAL_DATETIME;
+        bytes[off++] = (byte) (year >>> 8);
+        bytes[off++] = (byte) year;
+        bytes[off++] = (byte) month;
+        bytes[off++] = (byte) dayOfMonth;
+        bytes[off++] = (byte) hour;
+        bytes[off++] = (byte) minute;
+        bytes[off++] = (byte) second;
+
+        int nano = 0;
+        writeInt32(nano);
     }
 
     @Override
@@ -1841,8 +2086,14 @@ final class JSONWriterJSONB
             int minute,
             int second,
             int millis,
-            int offsetSeconds
+            int offsetSeconds,
+            boolean timeZone
     ) {
+        throw new JSONException("unsupported operation");
+    }
+
+    @Override
+    public void writeDateYYYMMDD8(int year, int month, int dayOfMonth) {
         throw new JSONException("unsupported operation");
     }
 
@@ -1858,6 +2109,11 @@ final class JSONWriterJSONB
 
     @Override
     public void writeBase64(byte[] bytes) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
+    public void writeHex(byte[] bytes) {
         throw new JSONException("UnsupportedOperation");
     }
 
@@ -1887,8 +2143,65 @@ final class JSONWriterJSONB
     }
 
     @Override
+    public void write(List array) {
+        if (array == null) {
+            writeArrayNull();
+            return;
+        }
+
+        final int size = array.size();
+        startArray(size);
+        for (int i = 0; i < size; i++) {
+            Object item = array.get(i);
+            writeAny(item);
+        }
+    }
+
+    @Override
+    public void write(Map map) {
+        if (map == null) {
+            writeNull();
+            return;
+        }
+
+        startObject();
+        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = it.next();
+            writeAny(entry.getKey());
+            writeAny(entry.getValue());
+        }
+        endObject();
+    }
+
+    @Override
+    public void write(JSONObject object) {
+        if (object == null) {
+            writeNull();
+            return;
+        }
+
+        startObject();
+        for (Iterator<Map.Entry<String, Object>> it = object.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = it.next();
+            writeAny(entry.getKey());
+            writeAny(entry.getValue());
+        }
+        endObject();
+    }
+
+    @Override
     public byte[] getBytes() {
         return Arrays.copyOf(bytes, off);
+    }
+
+    @Override
+    public int size() {
+        return off;
+    }
+
+    @Override
+    public byte[] getBytes(Charset charset) {
+        throw new JSONException("not support operator");
     }
 
     @Override

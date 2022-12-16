@@ -7,9 +7,10 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+
 final class FieldWriterObjectArrayField<T>
-        extends FieldWriterImpl<T> {
-    final Field field;
+        extends FieldWriter<T> {
     final Type itemType;
     final Class itemClass;
     ObjectWriter itemObjectWriter;
@@ -25,8 +26,7 @@ final class FieldWriterObjectArrayField<T>
             Class fieldClass,
             Field field
     ) {
-        super(fieldName, ordinal, features, format, label, fieldType, fieldClass);
-        this.field = field;
+        super(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null);
         this.itemType = itemType;
         if (itemType instanceof Class) {
             itemClass = (Class) itemType;
@@ -36,16 +36,11 @@ final class FieldWriterObjectArrayField<T>
     }
 
     @Override
-    public Field getField() {
-        return field;
-    }
-
-    @Override
     public Object getFieldValue(Object object) {
         try {
             return field.get(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 
@@ -59,7 +54,7 @@ final class FieldWriterObjectArrayField<T>
                     .getObjectWriter(this.itemType, itemClass);
         }
         return jsonWriter
-                .getObjectWriter(itemType, null);
+                .getObjectWriter(itemType, TypeUtils.getClass(itemType));
     }
 
     @Override
@@ -68,7 +63,7 @@ final class FieldWriterObjectArrayField<T>
 
         if (value == null) {
             long features = this.features | jsonWriter.getFeatures();
-            if ((features & (JSONWriter.Feature.WriteNulls.mask | JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullListAsEmpty.mask)) != 0) {
+            if ((features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask)) != 0) {
                 writeFieldName(jsonWriter);
                 jsonWriter.writeArrayNull();
                 return true;
@@ -99,6 +94,7 @@ final class FieldWriterObjectArrayField<T>
 
         long features = jsonWriter.getFeatures();
         boolean refDetect = (features & JSONWriter.Feature.ReferenceDetection.mask) != 0;
+        boolean previousItemRefDetect = refDetect;
 
         if (writeFieldName) {
             if (array.length == 0 && (features & JSONWriter.Feature.NotWriteEmptyArray.mask) != 0) {
@@ -109,14 +105,14 @@ final class FieldWriterObjectArrayField<T>
         }
 
         if (refDetect) {
-            String path = jsonWriter.setPath(name, array);
+            String path = jsonWriter.setPath(fieldName, array);
             if (path != null) {
                 jsonWriter.writeReference(path);
                 return;
             }
         }
 
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             Class arrayClass = array.getClass();
             if (arrayClass != this.fieldClass) {
                 jsonWriter.writeTypeName(
@@ -132,7 +128,7 @@ final class FieldWriterObjectArrayField<T>
                     continue;
                 }
 
-                boolean itemRefDetect = refDetect;
+                boolean itemRefDetect;
                 Class<?> itemClass = item.getClass();
                 ObjectWriter itemObjectWriter;
                 if (itemClass != previousClass) {
@@ -142,7 +138,11 @@ final class FieldWriterObjectArrayField<T>
                     if (itemRefDetect) {
                         itemRefDetect = !ObjectWriterProvider.isNotReferenceDetect(itemClass);
                     }
+                    previousItemRefDetect = itemRefDetect;
+                } else {
+                    itemRefDetect = previousItemRefDetect;
                 }
+
                 itemObjectWriter = previousObjectWriter;
 
                 if (itemRefDetect) {

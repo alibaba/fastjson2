@@ -1,10 +1,10 @@
 package com.alibaba.fastjson2.util;
 
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.TypeReference;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.codec.BeanInfo;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 
 import java.io.Serializable;
@@ -15,6 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.*;
 import java.util.function.Consumer;
+
+import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 
 /**
  * @author Bob Lee
@@ -35,7 +38,7 @@ public abstract class BeanUtils {
     private static volatile Method RECORD_COMPONENT_GET_NAME;
 
     public static String[] getRecordFieldNames(Class<?> recordType) {
-        if (JDKUtils.JVM_VERSION < 14) {
+        if (JVM_VERSION < 14) {
             return new String[0];
         }
 
@@ -182,20 +185,43 @@ public abstract class BeanUtils {
     }
 
     public static void fields(Class objectClass, Consumer<Field> fieldReaders) {
+        if (TypeUtils.isProxy(objectClass)) {
+            Class superclass = objectClass.getSuperclass();
+            fields(superclass, fieldReaders);
+            return;
+        }
+
         Field[] fields = fieldCache.get(objectClass);
         if (fields == null) {
             fields = objectClass.getFields();
             fieldCache.putIfAbsent(objectClass, fields);
         }
 
+        boolean enumClass = Enum.class.isAssignableFrom(objectClass);
         for (Field field : fields) {
             int modifiers = field.getModifiers();
-            if (Modifier.isStatic(modifiers)) {
+            if (Modifier.isStatic(modifiers) && !enumClass) {
                 continue;
             }
 
             fieldReaders.accept(field);
         }
+    }
+
+    public static Method getMethod(Class objectClass, String methodName) {
+        Method[] methods = methodCache.get(objectClass);
+        if (methods == null) {
+            methods = objectClass.getMethods();
+            methodCache.putIfAbsent(objectClass, methods);
+        }
+
+        for (Method method : methods) {
+            if (method.getName().equals(methodName)) {
+                return method;
+            }
+        }
+
+        return null;
     }
 
     public static Field getDeclaredField(Class objectClass, String fieldName) {
@@ -211,10 +237,26 @@ public abstract class BeanUtils {
         return fieldMap.get(fieldName);
     }
 
+    /**
+     * ignore static fields
+     */
     public static void declaredFields(Class objectClass, Consumer<Field> fieldConsumer) {
-        Class superclass = objectClass.getSuperclass();
-        if (superclass != null && superclass != Object.class) {
+        if (TypeUtils.isProxy(objectClass)) {
+            Class superclass = objectClass.getSuperclass();
             declaredFields(superclass, fieldConsumer);
+            return;
+        }
+
+        Class superClass = objectClass.getSuperclass();
+
+        boolean protobufMessageV3 = false;
+        if (superClass != null
+                && superClass != Object.class
+        ) {
+            protobufMessageV3 = superClass.getName().equals("com.google.protobuf.GeneratedMessageV3");
+            if (!protobufMessageV3) {
+                declaredFields(superClass, fieldConsumer);
+            }
         }
 
         Field[] fields = declaredFieldCache.get(objectClass);
@@ -249,8 +291,17 @@ public abstract class BeanUtils {
 
         for (Field field : fields) {
             int modifiers = field.getModifiers();
-            if (Modifier.isStatic(modifiers)) {
+            if ((modifiers & Modifier.STATIC) != 0) {
                 continue;
+            }
+
+            if (protobufMessageV3) {
+                String fieldName = field.getName();
+                Class<?> fieldClass = field.getType();
+                if ("cardsmap_".equals(fieldName)
+                        && fieldClass.getName().equals("com.google.protobuf.MapField")) {
+                    return;
+                }
             }
 
             fieldConsumer.accept(field);
@@ -311,8 +362,18 @@ public abstract class BeanUtils {
         }
     }
 
-    public static Constructor getDefaultConstructor(Class objectClass) {
-        if (objectClass == StackTraceElement.class && JDKUtils.JVM_VERSION >= 9) {
+    public static Constructor[] getConstructor(Class objectClass) {
+        Constructor[] constructors = constructorCache.get(objectClass);
+        if (constructors == null) {
+            constructors = objectClass.getDeclaredConstructors();
+            constructorCache.putIfAbsent(objectClass, constructors);
+        }
+
+        return constructors;
+    }
+
+    public static Constructor getDefaultConstructor(Class objectClass, boolean includeNoneStaticMember) {
+        if (objectClass == StackTraceElement.class && JVM_VERSION >= 9) {
             return null;
         }
 
@@ -325,6 +386,22 @@ public abstract class BeanUtils {
         for (Constructor constructor : constructors) {
             if (constructor.getParameterCount() == 0) {
                 return constructor;
+            }
+        }
+
+        if (!includeNoneStaticMember) {
+            return null;
+        }
+
+        Class declaringClass = objectClass.getDeclaringClass();
+        if (declaringClass != null) {
+            for (Constructor constructor : constructors) {
+                if (constructor.getParameterCount() == 1) {
+                    Class firstParamType = constructor.getParameterTypes()[0];
+                    if (declaringClass.equals(firstParamType)) {
+                        return constructor;
+                    }
+                }
             }
         }
 
@@ -367,13 +444,14 @@ public abstract class BeanUtils {
                     && method.getReturnType() == Void.TYPE
                     && method.getParameterTypes()[0] == String.class
             ) {
-                Annotation[] annotations = method.getAnnotations();
+                Annotation[] annotations = getAnnotations(method);
 
                 boolean unwrapped = false;
                 for (Annotation annotation : annotations) {
                     Class<? extends Annotation> annotationType = annotation.annotationType();
-                    if (annotationType == JSONField.class) {
-                        if (((JSONField) annotation).unwrapped()) {
+                    JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                    if (Objects.nonNull(jsonField)) {
+                        if (jsonField.unwrapped()) {
                             unwrapped = true;
                             break;
                         }
@@ -382,7 +460,10 @@ public abstract class BeanUtils {
 
                     switch (annotationType.getName()) {
                         case "com.fasterxml.jackson.annotation.JsonAnySetter":
-                            unwrapped = true;
+                        case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonAnySetter":
+                            if (JSONFactory.isUseJacksonAnnotation()) {
+                                unwrapped = true;
+                            }
                             break;
                         default:
                             break;
@@ -493,18 +574,75 @@ public abstract class BeanUtils {
         }
     }
 
-    public static Member getEnumValueField(Class clazz, ObjectCodecProvider mixinProvider) {
-        if (clazz == null) {
+    public static boolean isWriteEnumAsJavaBean(Class clazz) {
+        Annotation[] annotations = getAnnotations(clazz);
+        for (Annotation annotation : annotations) {
+            JSONType jsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
+            if (jsonType != null) {
+                return jsonType.writeEnumAsJavaBean();
+            }
+
+            Class<? extends Annotation> annotationType = annotation.annotationType();
+            String name = annotationType.getName();
+            if ("com.alibaba.fastjson.annotation.JSONType".equals(name)) {
+                BeanInfo beanInfo = new BeanInfo();
+                BeanUtils.annotationMethods(annotationType, method -> BeanUtils.processJSONType1x(beanInfo, annotation, method));
+                if (beanInfo.writeEnumAsJavaBean) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public static String[] getEnumAnnotationNames(Class enumClass) {
+        Enum[] enumConstants = (Enum[]) enumClass.getEnumConstants();
+        String[] annotationNames = new String[enumConstants.length];
+        BeanUtils.fields(enumClass, field -> {
+            String fieldName = field.getName();
+            for (int i = 0; i < enumConstants.length; i++) {
+                Enum e = enumConstants[i];
+                String enumName = e.name();
+                if (fieldName.equals(enumName)) {
+                    JSONField annotation = field.getAnnotation(JSONField.class);
+                    if (annotation != null) {
+                        String annotationName = annotation.name();
+                        if (annotationName.length() != 0 && !annotationName.equals(enumName)) {
+                            annotationNames[i] = annotationName;
+                        }
+                    }
+                    break;
+                }
+            }
+        });
+
+        int nulls = 0;
+        for (int i = 0; i < annotationNames.length; i++) {
+            if (annotationNames[i] == null) {
+                nulls++;
+            }
+        }
+
+        if (nulls == annotationNames.length) {
             return null;
         }
 
-        Class[] interfaces = clazz.getInterfaces();
+        return annotationNames;
+    }
+
+    public static Member getEnumValueField(Class enumClass, ObjectCodecProvider mixinProvider) {
+        if (enumClass == null) {
+            return null;
+        }
+
+        Class[] interfaces = enumClass.getInterfaces();
 
         Member member = null;
-        Method[] methods = methodCache.get(clazz);
+        Method[] methods = methodCache.get(enumClass);
         if (methods == null) {
-            methods = clazz.getMethods();
-            methodCache.putIfAbsent(clazz, methods);
+            methods = enumClass.getMethods();
+            methodCache.putIfAbsent(enumClass, methods);
         }
 
         for (Method method : methods) {
@@ -516,7 +654,17 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            if (isJSONField(method.getAnnotations())) {
+            Class<?> declaringClass = method.getDeclaringClass();
+            if (declaringClass == Enum.class || declaringClass == Object.class) {
+                continue;
+            }
+
+            String methodName = method.getName();
+            if (methodName.equals("values")) {
+                continue;
+            }
+
+            if (isJSONField(getAnnotations(method))) {
                 return method;
             }
 
@@ -524,8 +672,8 @@ public abstract class BeanUtils {
                 AtomicReference<Member> memberRef = new AtomicReference<>();
                 for (Class enumInterface : interfaces) {
                     getters(enumInterface, e -> {
-                        if (e.getName().equals(method.getName())) {
-                            if (isJSONField(e.getAnnotations())) {
+                        if (e.getName().equals(methodName)) {
+                            if (isJSONField(getAnnotations(e))) {
                                 memberRef.set(method);
                             }
                         }
@@ -540,8 +688,8 @@ public abstract class BeanUtils {
 
                     if (mixIn != null) {
                         getters(mixIn, e -> {
-                            if (e.getName().equals(method.getName())) {
-                                if (isJSONField(e.getAnnotations())) {
+                            if (e.getName().equals(methodName)) {
+                                if (isJSONField(getAnnotations(e))) {
                                     memberRef.set(method);
                                 }
                             }
@@ -555,16 +703,31 @@ public abstract class BeanUtils {
             }
         }
 
-        Field[] fields = fieldCache.get(clazz);
+        Field[] fields = fieldCache.get(enumClass);
         if (fields == null) {
-            fields = clazz.getFields();
-            fieldCache.putIfAbsent(clazz, fields);
+            fields = enumClass.getFields();
+            fieldCache.putIfAbsent(enumClass, fields);
         }
 
+        Enum[] enumConstants = (Enum[]) enumClass.getEnumConstants();
         for (Field field : fields) {
-            if (isJSONField(field.getAnnotations())) {
-                member = field;
-                break;
+            boolean found = false;
+            if (enumConstants != null) {
+                String fieldName = field.getName();
+                for (Enum e : enumConstants) {
+                    if (fieldName.equals(e.name())) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            Annotation[] annotations = getAnnotations(field);
+            if (isJSONField(annotations)) {
+                if (!found) {
+                    member = field;
+                    break;
+                }
             }
         }
 
@@ -577,8 +740,10 @@ public abstract class BeanUtils {
             switch (annotationType.getName()) {
                 case "com.alibaba.fastjson.annotation.JSONField":
                 case "com.alibaba.fastjson2.annotation.JSONField":
-                case "com.fasterxml.jackson.annotation.JsonValue":
                     return true;
+                case "com.fasterxml.jackson.annotation.JsonValue":
+                case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonValue":
+                    return JSONFactory.isUseJacksonAnnotation();
                 default:
                     break;
             }
@@ -599,8 +764,9 @@ public abstract class BeanUtils {
             }
         }
 
+        Class superClass = objectClass.getSuperclass();
         if (TypeUtils.isProxy(objectClass)) {
-            Class superclass = objectClass.getSuperclass();
+            Class superclass = superClass;
             getters(superclass, methodConsumer);
             return;
         }
@@ -617,6 +783,8 @@ public abstract class BeanUtils {
             methods = objectClass.getMethods();
             methodCache.putIfAbsent(objectClass, methods);
         }
+
+        boolean protobufMessageV3 = superClass != null && superClass.getName().equals("com.google.protobuf.GeneratedMessageV3");
 
         for (Method method : methods) {
             int paramType = method.getParameterCount();
@@ -641,6 +809,34 @@ public abstract class BeanUtils {
 
             String methodName = method.getName();
 
+            boolean methodSkip = false;
+            switch (methodName) {
+                case "isInitialized":
+                case "getInitializationErrorString":
+                case "getSerializedSize":
+                    if (protobufMessageV3) {
+                        methodSkip = true;
+                    }
+                    break;
+                case "equals":
+                case "hashCode":
+                    methodSkip = true;
+                    break;
+                default:
+                    break;
+            }
+
+            if (methodSkip) {
+                continue;
+            }
+
+            if (protobufMessageV3) {
+                if ((methodName.endsWith("Type") || methodName.endsWith("Bytes"))
+                        && returnClass.getName().equals("com.google.protobuf.ByteString")) {
+                    continue;
+                }
+            }
+
             // skip thrift isSetXXX
             if (methodName.startsWith("isSet") && returnClass == boolean.class) {
                 boolean setterFound = false, unsetFound = false, getterFound = false;
@@ -663,7 +859,8 @@ public abstract class BeanUtils {
                     }
                 }
 
-                if (setterFound && unsetFound && getterFound && !method.isAnnotationPresent(JSONField.class)) {
+                if (setterFound && unsetFound && getterFound
+                        && AnnotationUtils.findAnnotation(method, JSONField.class) == null) {
                     continue;
                 }
             }
@@ -701,17 +898,23 @@ public abstract class BeanUtils {
             }
 
             if (!nameMatch) {
-                Annotation[] annotations = method.getAnnotations();
+                Annotation[] annotations = getAnnotations(method);
                 for (Annotation annotation : annotations) {
                     Class<? extends Annotation> annotationType = annotation.annotationType();
                     String annotationTypeName = annotationType.getName();
                     switch (annotationTypeName) {
                         case "com.alibaba.fastjson.annotation.JSONField":
                         case "com.alibaba.fastjson.annotation2.JSONField":
+                            nameMatch = true;
+                            break;
                         case "com.fasterxml.jackson.annotation.JsonValue":
+                        case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonValue":
                         case "com.fasterxml.jackson.annotation.JsonRawValue":
                         case "com.fasterxml.jackson.annotation.JsonProperty":
-                            nameMatch = true;
+                        case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
+                            if (JSONFactory.isUseJacksonAnnotation()) {
+                                nameMatch = true;
+                            }
                             break;
                         default:
                             break;
@@ -725,6 +928,29 @@ public abstract class BeanUtils {
 
             if (returnClass == Class.class && "getClass".equals(methodName)) {
                 continue;
+            }
+
+            if (protobufMessageV3) {
+                if (method.getDeclaringClass() == superClass) {
+                    continue;
+                }
+                Class<?> returnType = method.getReturnType();
+                boolean ignore = false;
+                switch (methodName) {
+                    case "getUnknownFields":
+                    case "getSerializedSize":
+                    case "getParserForType":
+                    case "getMessageBytes":
+                    case "getDefaultInstanceForType":
+                        ignore = returnType.getName().startsWith("com.google.protobuf.") || returnType == objectClass;
+                        break;
+                    default:
+                        break;
+                }
+
+                if (ignore) {
+                    continue;
+                }
             }
 
             methodConsumer.accept(method);
@@ -928,6 +1154,7 @@ public abstract class BeanUtils {
         }
 
         switch (namingStrategy) {
+            case "NoChange":
             case "NeverUseThisValueExceptDefaultValue":
             case "CamelCase": {
                 char c0 = methodName.charAt(0);
@@ -1216,6 +1443,17 @@ public abstract class BeanUtils {
     public static Type getFieldType(TypeReference type, Class<?> raw, Member field, Type fieldType) {
         Class<?> declaringClass = field.getDeclaringClass();
 
+        while (raw != Object.class) {
+            if (declaringClass == raw) {
+                return resolve(type.getType(), declaringClass, fieldType);
+            }
+            type = TypeReference.get(resolve(type.getType(), raw, raw.getGenericSuperclass()));
+            raw = type.getRawType();
+        }
+        return null;
+    }
+
+    public static Type getParamType(TypeReference type, Class<?> raw, Class declaringClass, Parameter field, Type fieldType) {
         while (raw != Object.class) {
             if (declaringClass == raw) {
                 return resolve(type.getType(), declaringClass, fieldType);
@@ -1750,5 +1988,419 @@ public abstract class BeanUtils {
             throw new NullPointerException();
         }
         return obj;
+    }
+
+    public static void processJacksonJsonIgnore(FieldInfo fieldInfo, Annotation annotation) {
+        fieldInfo.ignore = true;
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                switch (name) {
+                    case "value":
+                        boolean value = (Boolean) result;
+                        fieldInfo.ignore = value;
+                        break;
+                    default:
+                        break;
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
+    }
+
+    public static boolean isNoneStaticMemberClass(Class objectClass, Class memberClass) {
+        if (memberClass == null
+                || memberClass.isPrimitive()
+                || memberClass == String.class
+                || memberClass == List.class
+        ) {
+            return false;
+        }
+
+        Class enclosingClass = memberClass.getEnclosingClass();
+        if (enclosingClass == null) {
+            return false;
+        }
+
+        if (objectClass != null && !objectClass.equals(enclosingClass)) {
+            return false;
+        }
+
+        Constructor[] constructors = constructorCache.get(memberClass);
+        if (constructors == null) {
+            constructors = memberClass.getDeclaredConstructors();
+            constructorCache.putIfAbsent(memberClass, constructors);
+        }
+
+        if (constructors.length == 0) {
+            return false;
+        }
+
+        Constructor firstConstructor = constructors[0];
+        if (firstConstructor.getParameterCount() == 0) {
+            return false;
+        }
+
+        Class[] parameterTypes = firstConstructor.getParameterTypes();
+        return enclosingClass.equals(parameterTypes[0]);
+    }
+
+    public static void setNoneStaticMemberClassParent(Object object, Object parent) {
+        Class objectClass = object.getClass();
+        Field[] fields = declaredFieldCache.get(objectClass);
+        if (fields == null) {
+            Field[] declaredFields = objectClass.getDeclaredFields();
+
+            boolean allMatch = true;
+            for (Field field : declaredFields) {
+                int modifiers = field.getModifiers();
+                if (Modifier.isStatic(modifiers)) {
+                    allMatch = false;
+                    break;
+                }
+            }
+
+            if (allMatch) {
+                fields = declaredFields;
+            } else {
+                List<Field> list = new ArrayList<>(declaredFields.length);
+                for (Field field : declaredFields) {
+                    int modifiers = field.getModifiers();
+                    if (Modifier.isStatic(modifiers)) {
+                        continue;
+                    }
+                    list.add(field);
+                }
+                fields = list.toArray(new Field[list.size()]);
+            }
+
+            fieldCache.putIfAbsent(objectClass, fields);
+        }
+
+        Field this0 = null;
+        for (Field field : fields) {
+            if ("this$0".equals(field.getName())) {
+                this0 = field;
+            }
+        }
+
+        if (this0 != null) {
+            this0.setAccessible(true);
+            try {
+                this0.set(object, parent);
+            } catch (IllegalAccessException e) {
+                throw new JSONException("setNoneStaticMemberClassParent error, class " + objectClass);
+            }
+        }
+    }
+
+    public static void cleanupCache(Class objectClass) {
+        if (objectClass == null) {
+            return;
+        }
+
+        fieldCache.remove(objectClass);
+        fieldMapCache.remove(objectClass);
+        declaredFieldCache.remove(objectClass);
+        methodCache.remove(objectClass);
+        constructorCache.remove(objectClass);
+    }
+
+    public static void cleanupCache(ClassLoader classLoader) {
+        for (Iterator<Map.Entry<Class, Field[]>> it = fieldCache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Class, Field[]> entry = it.next();
+            Class entryKey = entry.getKey();
+            if (entryKey.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        for (Iterator<Map.Entry<Class, Map<String, Field>>> it = fieldMapCache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Class, Map<String, Field>> entry = it.next();
+            Class entryKey = entry.getKey();
+            if (entryKey.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        for (Iterator<Map.Entry<Class, Field[]>> it = declaredFieldCache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Class, Field[]> entry = it.next();
+            Class entryKey = entry.getKey();
+            if (entryKey.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        for (Iterator<Map.Entry<Class, Method[]>> it = methodCache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Class, Method[]> entry = it.next();
+            Class entryKey = entry.getKey();
+            if (entryKey.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+
+        for (Iterator<Map.Entry<Class, Constructor[]>> it = constructorCache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Class, Constructor[]> entry = it.next();
+            Class entryKey = entry.getKey();
+            if (entryKey.getClassLoader() == classLoader) {
+                it.remove();
+            }
+        }
+    }
+
+    public static void processJSONType1x(BeanInfo beanInfo, Annotation jsonType1x, Method method) {
+        try {
+            Object result = method.invoke(jsonType1x);
+            switch (method.getName()) {
+                case "seeAlso": {
+                    Class<?>[] classes = (Class[]) result;
+                    if (classes.length != 0) {
+                        beanInfo.seeAlso = classes;
+                    }
+                    break;
+                }
+                case "typeName": {
+                    String typeName = (String) result;
+                    if (!typeName.isEmpty()) {
+                        beanInfo.typeName = typeName;
+                    }
+                    break;
+                }
+                case "typeKey": {
+                    String typeKey = (String) result;
+                    if (!typeKey.isEmpty()) {
+                        beanInfo.typeKey = typeKey;
+                    }
+                    break;
+                }
+                case "alphabetic": {
+                    Boolean alphabetic = (Boolean) result;
+                    if (!alphabetic.booleanValue()) {
+                        beanInfo.alphabetic = false;
+                    }
+                    break;
+                }
+                case "serializeFeatures":
+                case "serialzeFeatures": {
+                    Enum[] serializeFeatures = (Enum[]) result;
+                    for (Enum feature : serializeFeatures) {
+                        switch (feature.name()) {
+                            case "WriteMapNullValue":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNulls.mask;
+                                break;
+                            case "WriteNullListAsEmpty":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullListAsEmpty.mask;
+                                break;
+                            case "WriteNullStringAsEmpty":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullStringAsEmpty.mask;
+                                break;
+                            case "WriteNullNumberAsZero":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullNumberAsZero.mask;
+                                break;
+                            case "WriteNullBooleanAsFalse":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullBooleanAsFalse.mask;
+                                break;
+                            case "BrowserCompatible":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.BrowserCompatible.mask;
+                                break;
+                            case "WriteClassName":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteClassName.mask;
+                                break;
+                            case "WriteNonStringValueAsString":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
+                                break;
+                            case "WriteEnumUsingToString":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteEnumUsingToString.mask;
+                                break;
+                            case "NotWriteRootClassName":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteRootClassName.mask;
+                                break;
+                            case "IgnoreErrorGetter":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.IgnoreErrorGetter.mask;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                }
+                case "serializeEnumAsJavaBean": {
+                    boolean serializeEnumAsJavaBean = (Boolean) result;
+                    if (serializeEnumAsJavaBean) {
+                        beanInfo.writeEnumAsJavaBean = true;
+                    }
+                    break;
+                }
+                case "naming": {
+                    Enum naming = (Enum) result;
+                    beanInfo.namingStrategy = naming.name();
+                    break;
+                }
+                case "ignores": {
+                    String[] fields = (String[]) result;
+                    if (fields.length != 0) {
+                        if (beanInfo.ignores == null) {
+                            beanInfo.ignores = fields;
+                        } else {
+                            LinkedHashSet<String> ignoresSet = new LinkedHashSet<>();
+                            for (String ignore : beanInfo.ignores) {
+                                ignoresSet.add(ignore);
+                            }
+                            for (String ignore : fields) {
+                                ignoresSet.add(ignore);
+                            }
+                            beanInfo.ignores = ignoresSet.toArray(new String[ignoresSet.size()]);
+                        }
+                    }
+                    break;
+                }
+                case "includes": {
+                    String[] fields = (String[]) result;
+                    if (fields.length != 0) {
+                        beanInfo.includes = fields;
+                    }
+                    break;
+                }
+                case "orders": {
+                    String[] fields = (String[]) result;
+                    if (fields.length != 0) {
+                        beanInfo.orders = fields;
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        } catch (Throwable ignored) {
+            ignored.printStackTrace();
+        }
+    }
+
+    public static void processJacksonJsonFormat(FieldInfo fieldInfo, Annotation annotation) {
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                switch (name) {
+                    case "pattern": {
+                        String pattern = (String) result;
+                        if (pattern.length() != 0) {
+                            fieldInfo.format = pattern;
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
+    }
+
+    public static void processJacksonJsonFormat(BeanInfo beanInfo, Annotation annotation) {
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                switch (name) {
+                    case "pattern": {
+                        String pattern = (String) result;
+                        if (pattern.length() != 0) {
+                            beanInfo.format = pattern;
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
+    }
+
+    public static void processJacksonJsonInclude(BeanInfo beanInfo, Annotation annotation) {
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                switch (name) {
+                    case "value": {
+                        String include = ((Enum) result).name();
+                        switch (include) {
+                            case "ALWAYS":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNulls.mask;
+                                break;
+                            case "NON_DEFAULT":
+                                beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteDefaultValue.mask;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
+    }
+
+    public static void processJacksonJsonTypeName(BeanInfo beanInfo, Annotation annotation) {
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                switch (name) {
+                    case "value": {
+                        String value = (String) result;
+                        if (!value.isEmpty()) {
+                            beanInfo.typeName = value;
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
+    }
+
+    public static void processJacksonJsonSubTypesType(BeanInfo beanInfo, int index, Annotation annotation) {
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                switch (name) {
+                    case "value": {
+                        Class value = (Class) result;
+                        beanInfo.seeAlso[index] = value;
+                        break;
+                    }
+                    case "name": {
+                        String value = (String) result;
+                        beanInfo.seeAlsoNames[index] = value;
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
     }
 }

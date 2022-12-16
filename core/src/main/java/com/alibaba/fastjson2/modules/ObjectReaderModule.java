@@ -18,6 +18,10 @@ public interface ObjectReaderModule {
     }
 
     default ObjectReader getObjectReader(ObjectReaderProvider provider, Type type) {
+        return getObjectReader(type);
+    }
+
+    default ObjectReader getObjectReader(Type type) {
         return null;
     }
 }

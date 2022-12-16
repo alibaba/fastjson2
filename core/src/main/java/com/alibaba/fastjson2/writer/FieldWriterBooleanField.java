@@ -6,16 +6,8 @@ import java.lang.reflect.Field;
 
 final class FieldWriterBooleanField
         extends FieldWriterBoolean {
-    final Field field;
-
     protected FieldWriterBooleanField(String fieldName, int ordinal, long features, String format, String label, Field field, Class fieldClass) {
-        super(fieldName, ordinal, features, format, label, fieldClass, fieldClass);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(fieldName, ordinal, features, format, label, fieldClass, fieldClass, field, null);
     }
 
     @Override
@@ -23,7 +15,7 @@ final class FieldWriterBooleanField
         try {
             return field.get(object);
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 

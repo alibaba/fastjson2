@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONSchemaValidException;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +14,7 @@ public class FieldReaderInt32ValueMethodTest {
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
         assertEquals(123, bean.value);
-        assertNotNull(fieldReader.getMethod());
+        assertNotNull(fieldReader.method);
 
         fieldReader.accept(bean, (short) 101);
         assertEquals(101, bean.value);
@@ -34,6 +31,18 @@ public class FieldReaderInt32ValueMethodTest {
                         0
                 ).value
         );
+    }
+
+    @Test
+    public void testJSONB() {
+        Bean bean = new Bean();
+        bean.value = 101;
+        ObjectReader<Bean> objectReader = ObjectReaderCreator.INSTANCE.createObjectReader(Bean.class);
+
+        byte[] jsonbBytes = JSONB.toBytes(bean);
+        JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
+        Bean bean1 = objectReader.readObject(jsonReader);
+        assertEquals(bean.value, bean1.value);
     }
 
     public static class Bean {
@@ -67,6 +76,18 @@ public class FieldReaderInt32ValueMethodTest {
                         0
                 ).value
         );
+    }
+
+    @Test
+    public void test1JSONB() {
+        Bean1 bean = new Bean1();
+        bean.value = 101;
+        ObjectReader<Bean1> objectReader = ObjectReaderCreator.INSTANCE.createObjectReader(Bean1.class);
+
+        byte[] jsonbBytes = JSONB.toBytes(bean);
+        JSONReader jsonReader = JSONReader.ofJSONB(jsonbBytes);
+        Bean1 bean1 = objectReader.readObject(jsonReader);
+        assertEquals(bean.value, bean1.value);
     }
 
     public static class Bean1 {

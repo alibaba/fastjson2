@@ -8,7 +8,6 @@ import java.util.function.Function;
 
 final class FieldWriterDateFunc<T>
         extends FieldWriterDate<T> {
-    final Method method;
     Function<T, Date> function;
 
     protected FieldWriterDateFunc(
@@ -20,14 +19,8 @@ final class FieldWriterDateFunc<T>
             Method method,
             Function<T, Date> function
     ) {
-        super(fieldName, ordinal, features, dateTimeFormat, label, Date.class, Date.class);
-        this.method = method;
+        super(fieldName, ordinal, features, dateTimeFormat, label, Date.class, Date.class, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

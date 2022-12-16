@@ -10,17 +10,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 final class FieldReaderAtomicIntegerArrayReadOnly<T>
-        extends FieldReaderImpl<T> {
-    final Method method;
-
+        extends FieldReader<T> {
     FieldReaderAtomicIntegerArrayReadOnly(String fieldName, Class fieldType, int ordinal, JSONSchema jsonSchema, Method method) {
-        super(fieldName, fieldType, fieldType, ordinal, 0, null, null, null, jsonSchema);
-        this.method = method;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
+        super(fieldName, fieldType, fieldType, ordinal, 0, null, null, null, jsonSchema, method, null);
     }
 
     @Override
@@ -86,10 +78,5 @@ final class FieldReaderAtomicIntegerArrayReadOnly<T>
             return null;
         }
         return jsonReader.readArray(Integer.class);
-    }
-
-    @Override
-    public String toString() {
-        return method.getName();
     }
 }

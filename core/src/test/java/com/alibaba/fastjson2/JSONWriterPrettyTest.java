@@ -20,7 +20,7 @@ public class JSONWriterPrettyTest {
     @Test
     public void writeDateTimeISO8601() {
         JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.PrettyFormat);
-        jsonWriter.writeDateTimeISO8601(2018, 7, 5, 12, 13, 14, 0, 0);
+        jsonWriter.writeDateTimeISO8601(2018, 7, 5, 12, 13, 14, 0, 0, true);
         assertEquals("\"2018-07-05T12:13:14Z\"", jsonWriter.toString());
     }
 

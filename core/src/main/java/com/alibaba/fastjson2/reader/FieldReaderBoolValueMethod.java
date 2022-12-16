@@ -9,13 +9,23 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 final class FieldReaderBoolValueMethod<T>
-        extends FieldReaderObjectMethod<T> {
+        extends FieldReaderObject<T> {
     FieldReaderBoolValueMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Boolean defaultValue, JSONSchema schema, Method method) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, method);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, method, null, null);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
+        boolean fieldValue = jsonReader.readBoolValue();
+        try {
+            method.invoke(object, fieldValue);
+        } catch (Exception e) {
+            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
+        }
+    }
+
+    @Override
+    public void readFieldValueJSONB(JSONReader jsonReader, T object) {
         boolean fieldValue = jsonReader.readBoolValue();
         try {
             method.invoke(object, fieldValue);

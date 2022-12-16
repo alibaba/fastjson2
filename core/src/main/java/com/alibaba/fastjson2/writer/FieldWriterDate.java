@@ -3,14 +3,15 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.IOUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 abstract class FieldWriterDate<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     volatile byte[] cacheFormat19UTF8;
     static AtomicReferenceFieldUpdater<FieldWriterDate, byte[]> CACHE_UTF8_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(FieldWriterDate.class, byte[].class, "cacheFormat19UTF8");
@@ -22,21 +23,27 @@ abstract class FieldWriterDate<T>
     protected DateTimeFormatter formatter;
     final boolean formatMillis;
     final boolean formatISO8601;
+    final boolean formatyyyyMMddhhmmss14;
     final boolean formatyyyyMMddhhmmss19;
     final boolean formatUnixTime;
 
     protected ObjectWriter dateWriter;
 
-    protected FieldWriterDate(String fieldName,
-                              int ordinal,
-                              long features,
-                              String format,
-                              String label,
-                              Type fieldType,
-                              Class fieldClass) {
-        super(fieldName, ordinal, features, format, label, fieldType, fieldClass);
+    protected FieldWriterDate(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Type fieldType,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
+        super(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method);
 
-        boolean formatMillis = false, formatISO8601 = false, formatUnixTime = false, formatyyyyMMddhhmmss19 = false;
+        boolean formatMillis = false, formatISO8601 = false, formatUnixTime = false;
+        boolean formatyyyyMMddhhmmss14 = false, formatyyyyMMddhhmmss19 = false;
         if (format != null) {
             switch (format) {
                 case "millis":
@@ -48,8 +55,11 @@ abstract class FieldWriterDate<T>
                 case "unixtime":
                     formatUnixTime = true;
                     break;
-                case "yyyy-MM-ddTHH:mm:ss":
+                case "yyyy-MM-dd HH:mm:ss":
                     formatyyyyMMddhhmmss19 = true;
+                    break;
+                case "yyyyMMddHHmmss":
+                    formatyyyyMMddhhmmss14 = true;
                     break;
                 default:
                     break;
@@ -59,6 +69,7 @@ abstract class FieldWriterDate<T>
         this.formatMillis = formatMillis;
         this.formatISO8601 = formatISO8601;
         this.formatUnixTime = formatUnixTime;
+        this.formatyyyyMMddhhmmss14 = formatyyyyMMddhhmmss14;
         this.formatyyyyMMddhhmmss19 = formatyyyyMMddhhmmss19;
     }
 
@@ -88,11 +99,16 @@ abstract class FieldWriterDate<T>
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (valueClass == fieldClass) {
+            ObjectWriterProvider provider = jsonWriter.context.provider;
             if (dateWriter == null) {
-                if (format == null) {
-                    return dateWriter = ObjectWriterImplDate.INSTANCE;
+                if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DATE_MASK) != 0) {
+                    dateWriter = provider.getObjectWriter(valueClass, valueClass, false);
+                } else {
+                    if (format == null) {
+                        return dateWriter = ObjectWriterImplDate.INSTANCE;
+                    }
+                    return dateWriter = new ObjectWriterImplDate(format, null);
                 }
-                return dateWriter = new ObjectWriterImplDate(format, null);
             }
 
             return dateWriter;
@@ -103,7 +119,7 @@ abstract class FieldWriterDate<T>
 
     @Override
     public void writeDate(JSONWriter jsonWriter, long timeMillis) {
-        if (jsonWriter.isJSONB()) {
+        if (jsonWriter.jsonb) {
             writeFieldName(jsonWriter);
             jsonWriter.writeMillis(timeMillis);
             return;
@@ -111,7 +127,7 @@ abstract class FieldWriterDate<T>
 
         final int SECONDS_PER_DAY = 60 * 60 * 24;
 
-        JSONWriter.Context ctx = jsonWriter.getContext();
+        JSONWriter.Context ctx = jsonWriter.context;
 
         if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
             writeFieldName(jsonWriter);
@@ -130,7 +146,8 @@ abstract class FieldWriterDate<T>
         String dateFormat = this.format != null
                 ? this.format
                 : ctx.getDateFormat();
-        if (dateFormat == null) {
+        boolean formatyyyyMMddhhmmss19 = this.formatyyyyMMddhhmmss19 || (ctx.isFormatyyyyMMddhhmmss19() && this.format == null);
+        if (dateFormat == null || formatyyyyMMddhhmmss14 || formatyyyyMMddhhmmss19) {
             long epochSecond = Math.floorDiv(timeMillis, 1000L);
             int offsetTotalSeconds;
             if (zoneId == IOUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == IOUtils.SHANGHAI_ZONE_RULES) {
@@ -202,115 +219,59 @@ abstract class FieldWriterDate<T>
                 second = (int) secondOfDay;
             }
 
-            int millis = (int) Math.floorMod(timeMillis, 1000L);
-            if (millis != 0) {
-                Instant instant = Instant.ofEpochMilli(timeMillis);
-                int offsetSeconds = ctx
-                        .getZoneId()
-                        .getRules()
-                        .getOffset(instant)
-                        .getTotalSeconds();
+            if (year >= 0 && year <= 9999) {
+                if (formatyyyyMMddhhmmss14) {
+                    writeFieldName(jsonWriter);
+                    jsonWriter.writeDateTime14(
+                            year,
+                            month,
+                            dayOfMonth,
+                            hour,
+                            minute,
+                            second
+                    );
+                    return;
+                }
+
+                if (formatyyyyMMddhhmmss19) {
+                    writeFieldName(jsonWriter);
+                    jsonWriter.writeDateTime19(
+                            year,
+                            month,
+                            dayOfMonth,
+                            hour,
+                            minute,
+                            second
+                    );
+                    return;
+                }
+
+                int millis = (int) Math.floorMod(timeMillis, 1000L);
+                if (millis != 0) {
+                    Instant instant = Instant.ofEpochMilli(timeMillis);
+                    int offsetSeconds = ctx
+                            .getZoneId()
+                            .getRules()
+                            .getOffset(instant)
+                            .getTotalSeconds();
+                    writeFieldName(jsonWriter);
+                    jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, false);
+                    return;
+                }
                 writeFieldName(jsonWriter);
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds);
+                jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
                 return;
             }
+        }
 
-            if (jsonWriter.isUTF8()) {
-                byte[] bytes = CACHE_UTF8_UPDATER.getAndSet(this, null);
-                if (bytes == null) {
-                    bytes = Arrays.copyOfRange(nameWithColonUTF8, 0, nameWithColonUTF8.length + 21);
-                    int off = nameWithColonUTF8.length;
-                    bytes[off++] = '"';
-                    off += 4;
-                    bytes[off] = '-';
-                    off += 3;
-                    bytes[off] = '-';
-                    off += 3;
-                    bytes[off] = ' ';
-                    off += 3;
-                    bytes[off] = ':';
-                    off += 3;
-                    bytes[off] = ':';
-                    off += 3;
-                    bytes[off] = '"';
-                }
-                int off = nameWithColonUTF8.length + 1;
-                bytes[off] = (byte) (year / 1000 + '0');
-                bytes[off + 1] = (byte) ((year / 100) % 10 + '0');
-                bytes[off + 2] = (byte) ((year / 10) % 10 + '0');
-                bytes[off + 3] = (byte) (year % 10 + '0');
-                bytes[off + 5] = (byte) (month / 10 + '0');
-                bytes[off + 6] = (byte) (month % 10 + '0');
-                bytes[off + 8] = (byte) (dayOfMonth / 10 + '0');
-                bytes[off + 9] = (byte) (dayOfMonth % 10 + '0');
-                bytes[off + 11] = (byte) (hour / 10 + '0');
-                bytes[off + 12] = (byte) (hour % 10 + '0');
-                bytes[off + 14] = (byte) (minute / 10 + '0');
-                bytes[off + 15] = (byte) (minute % 10 + '0');
-                bytes[off + 17] = (byte) (second / 10 + '0');
-                bytes[off + 18] = (byte) (second % 10 + '0');
+        writeFieldName(jsonWriter);
+        ZonedDateTime zdt = ZonedDateTime
+                .ofInstant(
+                        Instant.ofEpochMilli(timeMillis), zoneId);
 
-                try {
-                    jsonWriter.writeNameRaw(bytes);
-                } finally {
-                    CACHE_UTF8_UPDATER.set(this, bytes);
-                }
-                return;
-            }
-            if (jsonWriter.isUTF16()) {
-                char[] chars = CACHE_UTF16_UPDATER.getAndSet(this, null);
-                if (chars == null) {
-                    chars = Arrays.copyOfRange(nameWithColonUTF16, 0, nameWithColonUTF16.length + 21);
-                    int off = nameWithColonUTF16.length;
-                    chars[off++] = '"';
-                    off += 4;
-                    chars[off] = '-';
-                    off += 3;
-                    chars[off] = '-';
-                    off += 3;
-                    chars[off] = ' ';
-                    off += 3;
-                    chars[off] = ':';
-                    off += 3;
-                    chars[off] = ':';
-                    off += 3;
-                    chars[off] = '"';
-                }
-                int off = nameWithColonUTF16.length + 1;
-                chars[off] = (char) (year / 1000 + '0');
-                chars[off + 1] = (char) ((year / 100) % 10 + '0');
-                chars[off + 2] = (char) ((year / 10) % 10 + '0');
-                chars[off + 3] = (char) (year % 10 + '0');
-                chars[off + 5] = (char) (month / 10 + '0');
-                chars[off + 6] = (char) (month % 10 + '0');
-                chars[off + 8] = (char) (dayOfMonth / 10 + '0');
-                chars[off + 9] = (char) (dayOfMonth % 10 + '0');
-                chars[off + 11] = (char) (hour / 10 + '0');
-                chars[off + 12] = (char) (hour % 10 + '0');
-                chars[off + 14] = (char) (minute / 10 + '0');
-                chars[off + 15] = (char) (minute % 10 + '0');
-                chars[off + 17] = (char) (second / 10 + '0');
-                chars[off + 18] = (char) (second % 10 + '0');
-
-                try {
-                    jsonWriter.writeNameRaw(chars);
-                } finally {
-                    CACHE_UTF16_UPDATER.set(this, chars);
-                }
-                return;
-            }
-
-            writeFieldName(jsonWriter);
-            jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
-        } else {
-            writeFieldName(jsonWriter);
-
-            ZonedDateTime zdt = ZonedDateTime
-                    .ofInstant(
-                            Instant.ofEpochMilli(timeMillis), zoneId);
-
-            if (formatISO8601 || (ctx.isDateFormatISO8601() && this.format == null)) {
-                int year = zdt.getYear();
+        if (formatISO8601 || (ctx.isDateFormatISO8601() && this.format == null)) {
+            int year = zdt.getYear();
+            if (year >= 0 && year <= 9999) {
                 int month = zdt.getMonthValue();
                 int dayOfMonth = zdt.getDayOfMonth();
                 int hour = zdt.getHour();
@@ -318,29 +279,18 @@ abstract class FieldWriterDate<T>
                 int second = zdt.getSecond();
                 int millis = zdt.getNano() / 1000_000;
                 int offsetSeconds = zdt.getOffset().getTotalSeconds();
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds);
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, true);
                 return;
             }
-
-            if (formatyyyyMMddhhmmss19 || (ctx.isFormatyyyyMMddhhmmss19() && this.format == null)) {
-                int year = zdt.getYear();
-                int month = zdt.getMonthValue();
-                int dayOfMonth = zdt.getDayOfMonth();
-                int hour = zdt.getHour();
-                int minute = zdt.getMinute();
-                int second = zdt.getSecond();
-                jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
-                return;
-            }
-
-            DateTimeFormatter formatter = this.getFormatter();
-            if (formatter == null) {
-                formatter = ctx.getDateFormatter();
-            }
-
-            String str = formatter.format(zdt);
-
-            jsonWriter.writeString(str);
         }
+
+        DateTimeFormatter formatter = this.getFormatter();
+        if (formatter == null) {
+            formatter = ctx.getDateFormatter();
+        }
+
+        String str = formatter.format(zdt);
+
+        jsonWriter.writeString(str);
     }
 }

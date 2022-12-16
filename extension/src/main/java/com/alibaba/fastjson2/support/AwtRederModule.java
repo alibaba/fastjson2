@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.support;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.reader.ObjectReaders;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.awt.*;
@@ -10,7 +11,6 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.function.Function;
 
-import static com.alibaba.fastjson2.reader.ObjectReaders.createObjectReader;
 import static com.alibaba.fastjson2.reader.ObjectReaders.fieldReader;
 
 public class AwtRederModule
@@ -26,7 +26,7 @@ public class AwtRederModule
     @Override
     public ObjectReader getObjectReader(ObjectReaderProvider provider, Type type) {
         if (type == Color.class) {
-            return createObjectReader(
+            return ObjectReaders.objectReader(
                     new ColorCreator(),
                     fieldReader("rgb", int.class),
                     fieldReader("r", int.class),
@@ -36,7 +36,7 @@ public class AwtRederModule
         }
 
         if (type == Point.class) {
-            return createObjectReader(
+            return ObjectReaders.objectReader(
                     (values) -> new Point(
                             (Integer) values.get(HASH_X),
                             (Integer) values.get(HASH_Y)
@@ -47,7 +47,7 @@ public class AwtRederModule
         }
 
         if (type == Font.class) {
-            return createObjectReader(
+            return ObjectReaders.objectReader(
                     (values) -> new Font(
                             (String) values.get(HASH_NAME),
                             (Integer) values.get(HASH_STYLE),

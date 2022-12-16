@@ -8,19 +8,12 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Method;
 
 final class FieldReaderFloatValueFunc<T>
-        extends FieldReaderImpl<T> {
-    final Method method;
+        extends FieldReader<T> {
     final ObjFloatConsumer<T> function;
 
     public FieldReaderFloatValueFunc(String fieldName, int ordinal, Float defaultValue, JSONSchema schema, Method method, ObjFloatConsumer<T> function) {
-        super(fieldName, float.class, float.class, ordinal, 0, null, null, defaultValue, schema);
-        this.method = method;
+        super(fieldName, float.class, float.class, ordinal, 0, null, null, defaultValue, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override
@@ -52,5 +45,10 @@ final class FieldReaderFloatValueFunc<T>
         }
 
         function.accept(object, fieldValue);
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return jsonReader.readFloatValue();
     }
 }

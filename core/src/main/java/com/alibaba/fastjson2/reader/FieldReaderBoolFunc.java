@@ -9,30 +9,53 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderBoolFunc<T, V>
-        extends FieldReaderImpl<T> {
-    final Method method;
+        extends FieldReader<T> {
     final BiConsumer<T, V> function;
 
-    FieldReaderBoolFunc(String fieldName, Class<V> fieldClass, int ordinal, String format, Locale locale, Object defaultValue, JSONSchema schema, Method method, BiConsumer<T, V> function) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, locale, defaultValue, schema);
-        this.method = method;
+    FieldReaderBoolFunc(
+            String fieldName,
+            Class<V> fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            JSONSchema schema,
+            Method method,
+            BiConsumer<T, V> function
+    ) {
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override
     public void accept(T object, Object value) {
         Boolean booleanValue = TypeUtils.toBoolean(value);
+
+        if (schema != null) {
+            schema.validate(booleanValue);
+        }
+
         function.accept(object, (V) booleanValue);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        Boolean fieldValue = jsonReader.readBool();
+        Boolean fieldValue;
+        try {
+            fieldValue = jsonReader.readBool();
+        } catch (Exception e) {
+            if ((jsonReader.features(this.features) & JSONReader.Feature.NullOnError.mask) != 0) {
+                fieldValue = null;
+            } else {
+                throw e;
+            }
+        }
+
+        if (schema != null) {
+            schema.validate(fieldValue);
+        }
+
         function.accept(object, (V) fieldValue);
     }
 

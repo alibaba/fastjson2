@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.filter;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -66,7 +67,7 @@ public class ContextValueFilterTest {
         assertEquals("userId", context.getAnnotation(JSONField.class).name());
         assertEquals(null, context.getFormat());
         assertEquals(null, context.getLabel());
-        assertEquals(0, context.getFeatures());
+        assertEquals(FieldInfo.FIELD_MASK, context.getFeatures());
         assertEquals("userId", context.getName());
         assertFalse(context.isJsonDirect());
     }

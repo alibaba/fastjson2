@@ -43,13 +43,13 @@ public class ByteVector {
      * The actual number of bytes in this vector.
      */
     int length;
-
-    /**
-     * Constructs a new {@link ByteVector} with a default initial capacity.
-     */
-    public ByteVector() {
-        data = new byte[64];
-    }
+//
+//    /**
+//     * Constructs a new {@link ByteVector} with a default initial capacity.
+//     */
+//    public ByteVector() {
+//        data = new byte[64];
+//    }
 
     /**
      * Constructs a new {@link ByteVector} with the given initial capacity.

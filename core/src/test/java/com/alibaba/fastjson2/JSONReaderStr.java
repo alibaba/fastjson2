@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.DateUtils;
+import com.alibaba.fastjson2.util.FloatingDecimalStr;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.math.BigInteger;
@@ -75,12 +77,19 @@ public final class JSONReaderStr
 
     @Override
     public boolean nextIfMatch(char ch) {
+        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+            if (offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = str.charAt(offset++);
+            }
+        }
+
         if (this.ch != ch) {
             return false;
         }
-        if (ch == ',') {
-            this.comma = true;
-        }
+
+        comma = ch == ',';
 
         if (offset >= end) {
             this.ch = EOI;
@@ -88,7 +97,7 @@ public final class JSONReaderStr
         }
 
         this.ch = str.charAt(offset);
-        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+        while (this.ch == '\0' || (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
                 this.ch = EOI;
@@ -101,8 +110,12 @@ public final class JSONReaderStr
     }
 
     @Override
-    public boolean nextIfEmptyString() {
+    public boolean nextIfNullOrEmptyString() {
         final char first = this.ch;
+        if (first == 'n' && offset + 2 < end && str.charAt(offset) == 'u') {
+            this.readNull();
+            return true;
+        }
         if ((first != '"' && first != '\'') || offset >= end || str.charAt(offset) != first) {
             return false;
         }
@@ -118,8 +131,7 @@ public final class JSONReaderStr
             this.ch = str.charAt(offset);
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             ch = str.charAt(offset++);
 
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -227,6 +239,47 @@ public final class JSONReaderStr
     }
 
     @Override
+    public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4) {
+        if (ch != c0) {
+            return false;
+        }
+
+        int offset4 = offset + 4;
+        if (offset4 > end
+                || str.charAt(offset) != c1
+                || str.charAt(offset + 1) != c2
+                || str.charAt(offset + 2) != c3
+                || str.charAt(offset + 3) != c4) {
+            return false;
+        }
+
+        if (offset4 == end) {
+            offset = offset4;
+            this.ch = EOI;
+            return true;
+        }
+
+        int offset = offset4;
+        char ch = str.charAt(offset);
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            offset++;
+            if (offset == end) {
+                ch = EOI;
+                break;
+            }
+            ch = str.charAt(offset);
+        }
+        if (offset == offset4 && ch != '(' && ch != ':') {
+            return false;
+        }
+
+        this.offset = offset + 1;
+        this.ch = ch;
+        return true;
+    }
+
+    @Override
     public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5) {
         if (ch != c0) {
             return false;
@@ -293,6 +346,36 @@ public final class JSONReaderStr
     }
 
     @Override
+    public boolean nextIfInfinity() {
+        if (ch == 'I'
+                && offset + 1 < end
+                && str.charAt(offset) == 'n'
+                && str.charAt(offset + 1) == 'f'
+                && str.charAt(offset + 2) == 'i'
+                && str.charAt(offset + 3) == 'n'
+                && str.charAt(offset + 4) == 'i'
+                && str.charAt(offset + 5) == 't'
+                && str.charAt(offset + 6) == 'y'
+        ) {
+            offset += 7;
+            if (offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = str.charAt(offset++);
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset == end) {
+                        ch = EOI;
+                        break;
+                    }
+                    ch = str.charAt(offset++);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public void next() {
         if (offset >= end) {
             ch = EOI;
@@ -300,7 +383,7 @@ public final class JSONReaderStr
         }
 
         ch = str.charAt(offset);
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
                 ch = EOI;
@@ -404,11 +487,34 @@ public final class JSONReaderStr
                     break;
                 }
 
-                if (i == 0) {
-                    nameValue = (byte) ch;
-                } else {
-                    nameValue <<= 8;
-                    nameValue += ch;
+                byte c = (byte) ch;
+                switch (i) {
+                    case 0:
+                        nameValue = c;
+                        break;
+                    case 1:
+                        nameValue = (c << 8) + (nameValue & 0xFFL);
+                        break;
+                    case 2:
+                        nameValue = (c << 16) + (nameValue & 0xFFFFL);
+                        break;
+                    case 3:
+                        nameValue = (c << 24) + (nameValue & 0xFFFFFFL);
+                        break;
+                    case 4:
+                        nameValue = (((long) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                        break;
+                    case 5:
+                        nameValue = (((long) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                        break;
+                    case 6:
+                        nameValue = (((long) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                        break;
+                    case 7:
+                        nameValue = (((long) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                        break;
+                    default:
+                        break;
                 }
 
                 ch = offset >= end
@@ -601,11 +707,33 @@ public final class JSONReaderStr
                     break;
                 }
 
-                if (i == 0) {
-                    nameValue = (byte) c;
-                } else {
-                    nameValue <<= 8;
-                    nameValue += c;
+                switch (i) {
+                    case 0:
+                        nameValue = (byte) c;
+                        break;
+                    case 1:
+                        nameValue = (((byte) c) << 8) + (nameValue & 0xFFL);
+                        break;
+                    case 2:
+                        nameValue = (((byte) c) << 16) + (nameValue & 0xFFFFL);
+                        break;
+                    case 3:
+                        nameValue = (((byte) c) << 24) + (nameValue & 0xFFFFFFL);
+                        break;
+                    case 4:
+                        nameValue = (((long) (byte) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                        break;
+                    case 5:
+                        nameValue = (((long) (byte) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                        break;
+                    case 6:
+                        nameValue = (((long) (byte) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                        break;
+                    case 7:
+                        nameValue = (((long) (byte) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -749,11 +877,33 @@ public final class JSONReaderStr
                     break;
                 }
 
-                if (i == 0) {
-                    nameValue = (byte) c;
-                } else {
-                    nameValue <<= 8;
-                    nameValue += c;
+                switch (i) {
+                    case 0:
+                        nameValue = (byte) c;
+                        break;
+                    case 1:
+                        nameValue = (((byte) c) << 8) + (nameValue & 0xFFL);
+                        break;
+                    case 2:
+                        nameValue = (((byte) c) << 16) + (nameValue & 0xFFFFL);
+                        break;
+                    case 3:
+                        nameValue = (((byte) c) << 24) + (nameValue & 0xFFFFFFL);
+                        break;
+                    case 4:
+                        nameValue = (((long) (byte) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                        break;
+                    case 5:
+                        nameValue = (((long) (byte) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                        break;
+                    case 6:
+                        nameValue = (((long) (byte) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                        break;
+                    case 7:
+                        nameValue = (((long) (byte) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -763,6 +913,7 @@ public final class JSONReaderStr
             hashCode = nameValue;
         } else {
             hashCode = Fnv.MAGIC_HASH_CODE;
+
             for (int i = 0; ; ++i) {
                 char c = str.charAt(offset);
                 if (c == '\\') {
@@ -795,7 +946,7 @@ public final class JSONReaderStr
                     continue;
                 }
 
-                if (c == '"') {
+                if (c == quote) {
                     this.nameLength = i;
                     this.nameEnd = offset;
                     this.stringValue = null;
@@ -821,8 +972,7 @@ public final class JSONReaderStr
             c = str.charAt(offset);
         }
 
-        if (c == ',') {
-            this.comma = true;
+        if (comma = (c == ',')) {
             offset++;
             if (offset == end) {
                 c = EOI;
@@ -897,11 +1047,33 @@ public final class JSONReaderStr
                     c = (char) (c + 32);
                 }
 
-                if (i == 0) {
-                    nameValue = (byte) c;
-                } else {
-                    nameValue <<= 8;
-                    nameValue += c;
+                switch (i) {
+                    case 0:
+                        nameValue = (byte) c;
+                        break;
+                    case 1:
+                        nameValue = (((byte) c) << 8) + (nameValue & 0xFFL);
+                        break;
+                    case 2:
+                        nameValue = (((byte) c) << 16) + (nameValue & 0xFFFFL);
+                        break;
+                    case 3:
+                        nameValue = (((byte) c) << 24) + (nameValue & 0xFFFFFFL);
+                        break;
+                    case 4:
+                        nameValue = (((long) (byte) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                        break;
+                    case 5:
+                        nameValue = (((long) (byte) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                        break;
+                    case 6:
+                        nameValue = (((long) (byte) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                        break;
+                    case 7:
+                        nameValue = (((long) (byte) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                        break;
+                    default:
+                        break;
                 }
                 ++i;
             }
@@ -1098,8 +1270,8 @@ public final class JSONReaderStr
                     c1 = str.charAt(nameBegin + 1);
                     if ((c0 & 0xFF) == c0 && (c1 & 0xFF) == c1) {
                         nameValue0
-                                = (c0 << 8)
-                                + c1;
+                                = (c1 << 8)
+                                + c0;
                     }
                     break;
                 case 3:
@@ -1110,9 +1282,9 @@ public final class JSONReaderStr
                             && (c1 & 0xFF) == c1
                             && (c2 & 0xFF) == c2) {
                         nameValue0
-                                = (c0 << 16)
+                                = (c2 << 16)
                                 + (c1 << 8)
-                                + c2;
+                                + c0;
                     }
                     break;
                 case 4:
@@ -1125,10 +1297,10 @@ public final class JSONReaderStr
                             && (c2 & 0xFF) == c2
                             && (c3 & 0xFF) == c3) {
                         nameValue0
-                                = (c0 << 24)
-                                + (c1 << 16)
-                                + (c2 << 8)
-                                + c3;
+                                = (c3 << 24)
+                                + (c2 << 16)
+                                + (c1 << 8)
+                                + c0;
                     }
                     break;
                 case 5:
@@ -1143,11 +1315,11 @@ public final class JSONReaderStr
                             && (c3 & 0xFF) == c3
                             && (c4 & 0xFF) == c4) {
                         nameValue0
-                                = (((long) c0) << 32)
-                                + (((long) c1) << 24)
+                                = (((long) c4) << 32)
+                                + (((long) c3) << 24)
                                 + (((long) c2) << 16)
-                                + (((long) c3) << 8)
-                                + ((long) c4);
+                                + (((long) c1) << 8)
+                                + ((long) c0);
                     }
                     break;
                 case 6:
@@ -1164,12 +1336,12 @@ public final class JSONReaderStr
                             && (c4 & 0xFF) == c4
                             && (c5 & 0xFF) == c5) {
                         nameValue0
-                                = (((long) c0) << 40)
-                                + (((long) c1) << 32)
-                                + (((long) c2) << 24)
-                                + (((long) c3) << 16)
-                                + (((long) c4) << 8)
-                                + ((long) c5);
+                                = (((long) c5) << 40)
+                                + (((long) c4) << 32)
+                                + (((long) c3) << 24)
+                                + (((long) c2) << 16)
+                                + (((long) c1) << 8)
+                                + ((long) c0);
                     }
                     break;
                 case 7:
@@ -1188,13 +1360,13 @@ public final class JSONReaderStr
                             && (c5 & 0xFF) == c5
                             && (c6 & 0xFF) == c6) {
                         nameValue0
-                                = (((long) c0) << 48)
-                                + (((long) c1) << 40)
-                                + (((long) c2) << 32)
+                                = (((long) c6) << 48)
+                                + (((long) c5) << 40)
+                                + (((long) c4) << 32)
                                 + (((long) c3) << 24)
-                                + (((long) c4) << 16)
-                                + (((long) c5) << 8)
-                                + ((long) c6);
+                                + (((long) c2) << 16)
+                                + (((long) c1) << 8)
+                                + ((long) c0);
                     }
                     break;
                 case 8:
@@ -1215,14 +1387,14 @@ public final class JSONReaderStr
                             && (c6 & 0xFF) == c6
                             && (c7 & 0xFF) == c7) {
                         nameValue0
-                                = (((long) c0) << 56)
-                                + (((long) c1) << 48)
-                                + (((long) c2) << 40)
-                                + (((long) c3) << 32)
-                                + (((long) c4) << 24)
-                                + (((long) c5) << 16)
-                                + (((long) c6) << 8)
-                                + ((long) c7);
+                                = (((long) c7) << 56)
+                                + (((long) c6) << 48)
+                                + (((long) c5) << 40)
+                                + (((long) c4) << 32)
+                                + (((long) c3) << 24)
+                                + (((long) c2) << 16)
+                                + (((long) c1) << 8)
+                                + ((long) c0);
                     }
                     break;
                 case 9:
@@ -1246,14 +1418,14 @@ public final class JSONReaderStr
                             && (c8 & 0xFF) == c8) {
                         nameValue0 = c0;
                         nameValue1
-                                = (((long) c1) << 56)
-                                + (((long) c2) << 48)
-                                + (((long) c3) << 40)
-                                + (((long) c4) << 32)
-                                + (((long) c5) << 24)
-                                + (((long) c6) << 16)
-                                + (((long) c7) << 8)
-                                + ((long) c8);
+                                = (((long) c8) << 56)
+                                + (((long) c7) << 48)
+                                + (((long) c6) << 40)
+                                + (((long) c5) << 32)
+                                + (((long) c4) << 24)
+                                + (((long) c3) << 16)
+                                + (((long) c2) << 8)
+                                + ((long) c1);
                     }
                     break;
                 case 10:
@@ -1277,17 +1449,17 @@ public final class JSONReaderStr
                             && (c7 & 0xFF) == c7
                             && (c8 & 0xFF) == c8
                             && (c9 & 0xFF) == c9) {
-                        nameValue0 = c0 << 8
-                                + c1;
+                        nameValue0 = c1 << 8
+                                + c0;
                         nameValue1
-                                = (((long) c2) << 56)
-                                + (((long) c3) << 48)
-                                + (((long) c4) << 40)
-                                + (((long) c5) << 32)
-                                + (((long) c6) << 24)
-                                + (((long) c7) << 16)
-                                + (((long) c8) << 8)
-                                + ((long) c9);
+                                = (((long) c9) << 56)
+                                + (((long) c8) << 48)
+                                + (((long) c7) << 40)
+                                + (((long) c6) << 32)
+                                + (((long) c5) << 24)
+                                + (((long) c4) << 16)
+                                + (((long) c3) << 8)
+                                + ((long) c2);
                     }
                     break;
                 case 11:
@@ -1314,18 +1486,18 @@ public final class JSONReaderStr
                             && (c9 & 0xFF) == c9
                             && (c10 & 0xFF) == c10) {
                         nameValue0
-                                = c0 << 16
-                                + (c1 << 8)
-                                + c2;
+                                = c3 << 16
+                                + (c2 << 8)
+                                + c1;
                         nameValue1
-                                = (((long) c3) << 56)
-                                + (((long) c4) << 48)
-                                + (((long) c5) << 40)
-                                + (((long) c6) << 32)
-                                + (((long) c7) << 24)
-                                + (((long) c8) << 16)
-                                + (((long) c9) << 8)
-                                + ((long) c10);
+                                = (((long) c10) << 56)
+                                + (((long) c9) << 48)
+                                + (((long) c8) << 40)
+                                + (((long) c7) << 32)
+                                + (((long) c6) << 24)
+                                + (((long) c5) << 16)
+                                + (((long) c4) << 8)
+                                + ((long) c3);
                     }
                     break;
                 case 12:
@@ -1354,19 +1526,19 @@ public final class JSONReaderStr
                             && (c10 & 0xFF) == c10
                             && (c11 & 0xFF) == c11) {
                         nameValue0
-                                = c0 << 24
-                                + (c1 << 16)
-                                + (c2 << 8)
-                                + c3;
+                                = c3 << 24
+                                + (c2 << 16)
+                                + (c1 << 8)
+                                + c0;
                         nameValue1
-                                = (((long) c4) << 56)
-                                + (((long) c5) << 48)
-                                + (((long) c6) << 40)
-                                + (((long) c7) << 32)
-                                + (((long) c8) << 24)
-                                + (((long) c9) << 16)
-                                + (((long) c10) << 8)
-                                + ((long) c11);
+                                = (((long) c11) << 56)
+                                + (((long) c10) << 48)
+                                + (((long) c9) << 40)
+                                + (((long) c8) << 32)
+                                + (((long) c7) << 24)
+                                + (((long) c6) << 16)
+                                + (((long) c5) << 8)
+                                + ((long) c4);
                     }
                     break;
                 case 13:
@@ -1397,20 +1569,20 @@ public final class JSONReaderStr
                             && (c11 & 0xFF) == c11
                             && (c12 & 0xFF) == c12) {
                         nameValue0
-                                = (((long) c0) << 32)
-                                + (((long) c1) << 24)
+                                = (((long) c4) << 32)
+                                + (((long) c3) << 24)
                                 + (((long) c2) << 16)
-                                + (((long) c3) << 8)
-                                + ((long) c4);
+                                + (((long) c1) << 8)
+                                + ((long) c0);
                         nameValue1
-                                = (((long) c5) << 56)
-                                + (((long) c6) << 48)
-                                + (((long) c7) << 40)
-                                + (((long) c8) << 32)
-                                + (((long) c9) << 24)
-                                + (((long) c10) << 16)
-                                + (((long) c11) << 8)
-                                + ((long) c12);
+                                = (((long) c12) << 56)
+                                + (((long) c11) << 48)
+                                + (((long) c10) << 40)
+                                + (((long) c9) << 32)
+                                + (((long) c8) << 24)
+                                + (((long) c7) << 16)
+                                + (((long) c6) << 8)
+                                + ((long) c5);
                     }
                     break;
                 case 14:
@@ -1443,21 +1615,21 @@ public final class JSONReaderStr
                             && (c12 & 0xFF) == c12
                             && (c13 & 0xFF) == c13) {
                         nameValue0
-                                = (((long) c0) << 40)
-                                + (((long) c1) << 32)
-                                + (((long) c2) << 24)
-                                + (((long) c3) << 16)
-                                + (((long) c4) << 8)
-                                + ((long) c5);
+                                = (((long) c5) << 40)
+                                + (((long) c4) << 32)
+                                + (((long) c3) << 24)
+                                + (((long) c2) << 16)
+                                + (((long) c1) << 8)
+                                + ((long) c0);
                         nameValue1
-                                = (((long) c6) << 56)
-                                + (((long) c7) << 48)
-                                + (((long) c8) << 40)
-                                + (((long) c9) << 32)
-                                + (((long) c10) << 24)
-                                + (((long) c11) << 16)
-                                + (((long) c12) << 8)
-                                + ((long) c13);
+                                = (((long) c13) << 56)
+                                + (((long) c12) << 48)
+                                + (((long) c11) << 40)
+                                + (((long) c10) << 32)
+                                + (((long) c9) << 24)
+                                + (((long) c8) << 16)
+                                + (((long) c7) << 8)
+                                + ((long) c6);
                     }
                     break;
                 case 15:
@@ -1492,22 +1664,22 @@ public final class JSONReaderStr
                             && (c13 & 0xFF) == c13
                             && (c14 & 0xFF) == c14) {
                         nameValue0
-                                = (((long) c0) << 48)
-                                + (((long) c1) << 40)
-                                + (((long) c2) << 32)
+                                = (((long) c6) << 48)
+                                + (((long) c5) << 40)
+                                + (((long) c4) << 32)
                                 + (((long) c3) << 24)
-                                + (((long) c4) << 16)
-                                + (((long) c5) << 8)
-                                + ((long) c6);
+                                + (((long) c2) << 16)
+                                + (((long) c1) << 8)
+                                + ((long) c0);
                         nameValue1
-                                = (((long) c7) << 56)
-                                + (((long) c8) << 48)
-                                + (((long) c9) << 40)
-                                + (((long) c10) << 32)
-                                + (((long) c11) << 24)
-                                + (((long) c12) << 16)
-                                + (((long) c13) << 8)
-                                + ((long) c14);
+                                = (((long) c14) << 56)
+                                + (((long) c13) << 48)
+                                + (((long) c12) << 40)
+                                + (((long) c11) << 32)
+                                + (((long) c10) << 24)
+                                + (((long) c9) << 16)
+                                + (((long) c8) << 8)
+                                + ((long) c7);
                     }
                     break;
                 case 16:
@@ -1544,23 +1716,23 @@ public final class JSONReaderStr
                             && (c14 & 0xFF) == c14
                             && (c15 & 0xFF) == c15) {
                         nameValue0
-                                = (((long) c0) << 56)
-                                + (((long) c1) << 48)
-                                + (((long) c2) << 40)
-                                + (((long) c3) << 32)
-                                + (((long) c4) << 24)
-                                + (((long) c5) << 16)
-                                + (((long) c6) << 8)
-                                + ((long) c7);
+                                = (((long) c7) << 56)
+                                + (((long) c6) << 48)
+                                + (((long) c5) << 40)
+                                + (((long) c4) << 32)
+                                + (((long) c3) << 24)
+                                + (((long) c2) << 16)
+                                + (((long) c1) << 8)
+                                + ((long) c0);
                         nameValue1
-                                = (((long) c8) << 56)
-                                + (((long) c9) << 48)
-                                + (((long) c10) << 40)
-                                + (((long) c11) << 32)
-                                + (((long) c12) << 24)
-                                + (((long) c13) << 16)
-                                + (((long) c14) << 8)
-                                + ((long) c15);
+                                = (((long) c15) << 56)
+                                + (((long) c14) << 48)
+                                + (((long) c13) << 40)
+                                + (((long) c12) << 32)
+                                + (((long) c11) << 24)
+                                + (((long) c10) << 16)
+                                + (((long) c9) << 8)
+                                + ((long) c8);
                     }
                     break;
                 default:
@@ -1769,8 +1941,7 @@ public final class JSONReaderStr
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             this.ch = offset == end ? EOI : str.charAt(this.offset++);
             // next inline
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -1903,8 +2074,7 @@ public final class JSONReaderStr
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
@@ -2034,8 +2204,7 @@ public final class JSONReaderStr
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             this.ch = offset == end ? EOI : str.charAt(this.offset++);
             // next inline
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -2165,8 +2334,7 @@ public final class JSONReaderStr
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
@@ -2284,6 +2452,10 @@ public final class JSONReaderStr
                         && str.charAt(offset++) == 'l'
                         && str.charAt(offset++) == 'l'
                 ) {
+                    if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                        throw new JSONException(info("long value not support input null"));
+                    }
+
                     wasNull = true;
                     value = true;
                     if (offset == end) {
@@ -2390,7 +2562,7 @@ public final class JSONReaderStr
                 if (offset >= end) {
                     ch = EOI;
                 } else {
-                    ch = str.charAt(offset++);
+                    ch = this.str.charAt(offset++);
                 }
             }
         }
@@ -2399,22 +2571,21 @@ public final class JSONReaderStr
             if (offset >= end) {
                 ch = EOI;
             } else {
-                ch = str.charAt(offset++);
+                ch = this.str.charAt(offset++);
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
-                this.ch = str.charAt(offset++);
+                this.ch = this.str.charAt(offset++);
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
                     } else {
-                        ch = str.charAt(offset++);
+                        ch = this.str.charAt(offset++);
                     }
                 }
             }
@@ -2522,6 +2693,10 @@ public final class JSONReaderStr
                         && str.charAt(offset++) == 'l'
                         && str.charAt(offset++) == 'l'
                 ) {
+                    if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                        throw new JSONException(info("long value not support input null"));
+                    }
+
                     wasNull = true;
                     value = true;
                     if (offset == end) {
@@ -2628,7 +2803,7 @@ public final class JSONReaderStr
                 if (offset >= end) {
                     ch = EOI;
                 } else {
-                    ch = str.charAt(offset++);
+                    ch = this.str.charAt(offset++);
                 }
             }
         }
@@ -2637,22 +2812,21 @@ public final class JSONReaderStr
             if (offset >= end) {
                 ch = EOI;
             } else {
-                ch = str.charAt(offset++);
+                ch = this.str.charAt(offset++);
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
             } else {
-                this.ch = str.charAt(offset++);
+                this.ch = this.str.charAt(offset++);
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset >= end) {
                         ch = EOI;
                     } else {
-                        ch = str.charAt(offset++);
+                        ch = this.str.charAt(offset++);
                     }
                 }
             }
@@ -2704,9 +2878,7 @@ public final class JSONReaderStr
             ch = str.charAt(offset++);
         }
 
-        if (ch == ',') {
-            comma = true;
-
+        if (comma = (ch == ',')) {
             if (offset >= end) {
                 ch = EOI;
                 return;
@@ -2902,8 +3074,7 @@ public final class JSONReaderStr
             b = this.str.charAt(++offset);
         }
 
-        if (b == ',') {
-            this.comma = true;
+        if (comma = (b == ',')) {
             this.offset = offset + 1;
 
             // inline next
@@ -3015,6 +3186,7 @@ public final class JSONReaderStr
             }
 
             if (offset + 1 == end) {
+                this.comma = false;
                 this.offset = end;
                 this.ch = EOI;
                 return str;
@@ -3025,8 +3197,7 @@ public final class JSONReaderStr
                 b = this.str.charAt(++offset);
             }
 
-            if (b == ',') {
-                this.comma = true;
+            if (comma = (b == ',')) {
                 this.offset = offset + 1;
 
                 // inline next
@@ -3115,7 +3286,7 @@ public final class JSONReaderStr
             }
             case '"': {
                 skipString();
-                break;
+                return;
             }
             case '-':
             case '+':
@@ -3170,7 +3341,6 @@ public final class JSONReaderStr
 
         if (ch == ',') {
             comma = true;
-
             if (offset >= end) {
                 ch = EOI;
                 return;
@@ -3439,8 +3609,7 @@ public final class JSONReaderStr
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;
@@ -3480,8 +3649,7 @@ public final class JSONReaderStr
                 ch = str.charAt(offset++);
             }
         }
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             ch = offset == end ? EOI : str.charAt(offset++);
 
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -3591,8 +3759,7 @@ public final class JSONReaderStr
                 ch = str.charAt(offset++);
             }
         }
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             ch = offset == end ? EOI : str.charAt(offset++);
 
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -3639,8 +3806,7 @@ public final class JSONReaderStr
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             if (offset >= end) {
                 ch = EOI;
             } else {
@@ -3694,8 +3860,7 @@ public final class JSONReaderStr
                     }
                 }
 
-                if (ch == ',') {
-                    this.comma = true;
+                if (comma = (ch == ',')) {
                     next();
                 }
 
@@ -3772,122 +3937,11 @@ public final class JSONReaderStr
             throw new JSONException("date only support string input");
         }
 
-        char c0 = str.charAt(offset + 0);
-        char c1 = str.charAt(offset + 1);
-        char c2 = str.charAt(offset + 2);
-        char c3 = str.charAt(offset + 3);
-        char c4 = str.charAt(offset + 4);
-        char c5 = str.charAt(offset + 5);
-        char c6 = str.charAt(offset + 6);
-        char c7 = str.charAt(offset + 7);
-        char c8 = str.charAt(offset + 8);
-        char c9 = str.charAt(offset + 9);
-        char c10 = str.charAt(offset + 10);
-        char c11 = str.charAt(offset + 11);
-        char c12 = str.charAt(offset + 12);
-        char c13 = str.charAt(offset + 13);
-        char c14 = str.charAt(offset + 14);
-        char c15 = str.charAt(offset + 15);
-
-        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0 = '0', s1 = '0';
-        if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-        } else if (c8 == 'T' && c15 == 'Z') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-            m0 = c4;
-            m1 = c5;
-            d0 = c6;
-            d1 = c7;
-            h0 = c9;
-            h1 = c10;
-            i0 = c11;
-            i1 = c12;
-            s0 = c13;
-            s1 = c14;
-        } else {
-            return null;
-        }
-
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, second);
+        LocalDateTime ldt = DateUtils.parseLocalDateTime16(str, offset);
 
         offset += 17;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -3899,131 +3953,11 @@ public final class JSONReaderStr
             throw new JSONException("date only support string input");
         }
 
-        char c0 = str.charAt(offset + 0);
-        char c1 = str.charAt(offset + 1);
-        char c2 = str.charAt(offset + 2);
-        char c3 = str.charAt(offset + 3);
-        char c4 = str.charAt(offset + 4);
-        char c5 = str.charAt(offset + 5);
-        char c6 = str.charAt(offset + 6);
-        char c7 = str.charAt(offset + 7);
-        char c8 = str.charAt(offset + 8);
-        char c9 = str.charAt(offset + 9);
-        char c10 = str.charAt(offset + 10);
-        char c11 = str.charAt(offset + 11);
-        char c12 = str.charAt(offset + 12);
-        char c13 = str.charAt(offset + 13);
-        char c14 = str.charAt(offset + 14);
-        char c15 = str.charAt(offset + 15);
-        char c16 = str.charAt(offset + 16);
-
-        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
-        if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':' && c16 == 'Z') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = '0';
-            s1 = '0';
-        } else if (c4 == '-' && c6 == '-' && (c8 == ' ' || c8 == 'T') && c11 == ':' && c14 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = '0';
-            d1 = c7;
-
-            h0 = c9;
-            h1 = c10;
-
-            i0 = c12;
-            i1 = c13;
-
-            s0 = c15;
-            s1 = c16;
-        } else {
-            return null;
-        }
-
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, second);
+        LocalDateTime ldt = DateUtils.parseLocalDateTime17(str, offset);
 
         offset += 18;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -4035,192 +3969,11 @@ public final class JSONReaderStr
             throw new JSONException("date only support string input");
         }
 
-        char c0 = str.charAt(offset + 0);
-        char c1 = str.charAt(offset + 1);
-        char c2 = str.charAt(offset + 2);
-        char c3 = str.charAt(offset + 3);
-        char c4 = str.charAt(offset + 4);
-        char c5 = str.charAt(offset + 5);
-        char c6 = str.charAt(offset + 6);
-        char c7 = str.charAt(offset + 7);
-        char c8 = str.charAt(offset + 8);
-        char c9 = str.charAt(offset + 9);
-        char c10 = str.charAt(offset + 10);
-        char c11 = str.charAt(offset + 11);
-        char c12 = str.charAt(offset + 12);
-        char c13 = str.charAt(offset + 13);
-        char c14 = str.charAt(offset + 14);
-        char c15 = str.charAt(offset + 15);
-        char c16 = str.charAt(offset + 16);
-        char c17 = str.charAt(offset + 17);
-
-        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
-        if (c4 == '-' && c6 == '-' && (c9 == ' ' || c9 == 'T') && c12 == ':' && c15 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = c7;
-            d1 = c8;
-
-            h0 = c10;
-            h1 = c11;
-
-            i0 = c13;
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
-        } else if (c4 == '-' && c7 == '-' && (c9 == ' ' || c9 == 'T') && c12 == ':' && c15 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = '0';
-            d1 = c8;
-
-            h0 = c10;
-            h1 = c11;
-
-            i0 = c13;
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
-        } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c12 == ':' && c15 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = '0';
-            h1 = c11;
-
-            i0 = c13;
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
-        } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c15 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = '0';
-            i1 = c14;
-
-            s0 = c16;
-            s1 = c17;
-        } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = '0';
-            s1 = c17;
-        } else {
-            return null;
-        }
-
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, second);
+        LocalDateTime ldt = DateUtils.parseLocalDateTime18(str, offset);
 
         offset += 19;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -4268,8 +4021,7 @@ public final class JSONReaderStr
 
         offset += 6;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -4332,8 +4084,7 @@ public final class JSONReaderStr
 
         offset += 9;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -4418,8 +4169,7 @@ public final class JSONReaderStr
 
         offset += 9;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -4528,8 +4278,7 @@ public final class JSONReaderStr
 
         offset += 10;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -4687,8 +4436,7 @@ public final class JSONReaderStr
 
         offset += 11;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -4772,8 +4520,7 @@ public final class JSONReaderStr
 
         offset += 12;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -5323,7 +5070,7 @@ public final class JSONReaderStr
                         zoneIdStr = null;
                     }
                 }
-                zoneId = getZoneId(ldt, zoneIdStr);
+                zoneId = DateUtils.getZoneId(zoneIdStr, context.zoneId);
             }
         }
 
@@ -5331,8 +5078,7 @@ public final class JSONReaderStr
 
         offset += (len + 1);
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return zdt;
@@ -5344,160 +5090,11 @@ public final class JSONReaderStr
             throw new JSONException("date only support string input");
         }
 
-        char c0 = str.charAt(offset + 0);
-        char c1 = str.charAt(offset + 1);
-        char c2 = str.charAt(offset + 2);
-        char c3 = str.charAt(offset + 3);
-        char c4 = str.charAt(offset + 4);
-        char c5 = str.charAt(offset + 5);
-        char c6 = str.charAt(offset + 6);
-        char c7 = str.charAt(offset + 7);
-        char c8 = str.charAt(offset + 8);
-        char c9 = str.charAt(offset + 9);
-        char c10 = str.charAt(offset + 10);
-        char c11 = str.charAt(offset + 11);
-        char c12 = str.charAt(offset + 12);
-        char c13 = str.charAt(offset + 13);
-        char c14 = str.charAt(offset + 14);
-        char c15 = str.charAt(offset + 15);
-        char c16 = str.charAt(offset + 16);
-        char c17 = str.charAt(offset + 17);
-        char c18 = str.charAt(offset + 18);
-
-        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2;
-        if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = c17;
-            s1 = c18;
-
-            S0 = '0';
-            S1 = '0';
-            S2 = '0';
-        } else if (c4 == '/' && c7 == '/' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = c17;
-            s1 = c18;
-
-            S0 = '0';
-            S1 = '0';
-            S2 = '0';
-        } else {
-            return null;
-        }
-
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int millis;
-        if (S0 >= '0' && S0 <= '9'
-                && S1 >= '0' && S1 <= '9'
-                && S2 >= '0' && S2 <= '9'
-        ) {
-            millis = (S0 - '0') * 100
-                    + (S1 - '0') * 10
-                    + (S2 - '0');
-            millis *= 1000_000;
-        } else {
-            return null;
-        }
-
-        if (year == 0 && month == 0 && dom == 0) {
-            year = 1970;
-            month = 1;
-            dom = 1;
-        }
-
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, second, millis);
+        LocalDateTime ldt = DateUtils.parseLocalDateTime19(str, offset);
 
         offset += 20;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -5672,12 +5269,11 @@ public final class JSONReaderStr
 
         offset += 20;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
-        return millis(year, month, dom, hour, minute, second, nanoOfSecond);
+        return DateUtils.millis(context.getZoneId(), year, month, dom, hour, minute, second, nanoOfSecond);
     }
 
     @Override
@@ -5819,8 +5415,7 @@ public final class JSONReaderStr
 
         offset += (len + 1);
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
         return ldt;
@@ -6006,8 +5601,7 @@ public final class JSONReaderStr
 
         offset += 11;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -6087,8 +5681,7 @@ public final class JSONReaderStr
 
         offset += 12;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -6169,8 +5762,7 @@ public final class JSONReaderStr
 
         offset += 13;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -6276,8 +5868,7 @@ public final class JSONReaderStr
 
         offset += 19;
         next();
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             next();
         }
 
@@ -6314,9 +5905,8 @@ public final class JSONReaderStr
             b = this.str.charAt(++offset);
         }
 
-        if (b == ',') {
+        if (comma = (b == ',')) {
             this.offset = offset + 1;
-            comma = true;
 
             // inline next
             ch = this.str.charAt(this.offset++);
@@ -6473,6 +6063,50 @@ public final class JSONReaderStr
         }
     }
 
+    public byte[] readHex() {
+        next();
+        if (ch != '\'') {
+            throw new JSONException("illegal state. " + ch);
+        }
+        int start = offset;
+        offset++;
+
+        for (; ; ) {
+            ch = str.charAt(offset++);
+            if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F')) {
+                // continue;
+            } else if (ch == '\'') {
+                ch = str.charAt(offset++);
+                break;
+            } else {
+                throw new JSONException("illegal state. " + ch);
+            }
+        }
+
+        int len = offset - start - 2;
+        if (len == 0) {
+            return new byte[0];
+        }
+
+        if (len % 2 != 0) {
+            throw new JSONException("illegal state. " + len);
+        }
+
+        byte[] bytes = new byte[len / 2];
+        for (int i = 0; i < bytes.length; ++i) {
+            char c0 = str.charAt(start + i * 2);
+            char c1 = str.charAt(start + i * 2 + 1);
+
+            int b0 = c0 - (c0 <= 57 ? 48 : 55);
+            int b1 = c1 - (c1 <= 57 ? 48 : 55);
+            bytes[i] = (byte) ((b0 << 4) | b1);
+        }
+
+        nextIfMatch(',');
+
+        return bytes;
+    }
+
     @Override
     public boolean isReference() {
         if (ch != '{') {
@@ -6592,8 +6226,7 @@ public final class JSONReaderStr
             }
         }
 
-        if (ch == ',') {
-            this.comma = true;
+        if (comma = (ch == ',')) {
             ch = str.charAt(this.offset++);
             // next inline
             if (this.offset >= end) {

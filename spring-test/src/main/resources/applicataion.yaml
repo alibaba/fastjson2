@@ -1,0 +1,62 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    # 如果需要数据本地化，则改成 file 方式
+    # jdbc:h2:file:D:/program/sqlite3/db/testDB;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:testDB;DB_CLOSE_DELAY=-1
+    username: test
+    password: 123456
+    # 初始化表
+    schema: classpath:schema.sql
+    # 初始化数据
+    data: classpath:data.sql
+    initialization-mode: always
+    continue-on-error: true
+    # 开启这个配置就可以通过 web 页面访问了，例如：http://localhost:8080/springboot-h2/h2-console
+    h2:
+      console:
+        enabled: true
+        settings:
+          # 开启h2 console 跟踪 方便调试  默认 false
+          trace: true
+          # 允许console 远程访问 默认false
+          web-allow-others: true
+          # h2 访问路径上下文
+          path: /h2-console
+
+# mybatis-plus 配置
+mybatis-plus:
+  mapperLocations: classpath*:mapper/**/*Mapper.xml
+  #实体扫描，多个package用逗号或者分号分隔
+  typeAliasesPackage: com.example.spring6test.entity
+  global-config:
+    #数据库相关配置
+    db-config:
+      #主键类型  AUTO:"数据库ID自增", INPUT:"用户输入ID", ID_WORKER:"全局唯一ID (数字类型唯一ID)", UUID:"全局唯一ID UUID";
+      id-type: AUTO
+      #字段策略 IGNORED:"忽略判断",NOT_NULL:"非 NULL 判断"),NOT_EMPTY:"非空判断"
+      field-strategy: NOT_NULL
+      #驼峰下划线转换
+      column-underline: true
+      logic-delete-value: -1
+      logic-not-delete-value: 0
+    banner: false
+  #原生配置
+  configuration:
+    # 打印sql
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    call-setters-on-nulls: true
+    jdbc-type-for-null: 'null'
+
+# 日志输出配置
+logging:
+  level:
+    root: INFO
+    org:
+      springframework:
+        security: WARN
+        web: ERROR

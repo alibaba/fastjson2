@@ -11,12 +11,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 class ObjectReaderImplAtomicIntegerArray
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplAtomicIntegerArray INSTANCE = new ObjectReaderImplAtomicIntegerArray();
 
-    @Override
-    public Class getObjectClass() {
-        return AtomicIntegerArray.class;
+    public ObjectReaderImplAtomicIntegerArray() {
+        super(AtomicIntegerArray.class);
     }
 
     @Override

@@ -1,10 +1,10 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.function.*;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.*;
@@ -17,6 +17,34 @@ public class ObjectReaders {
         return ObjectReaderCreator.INSTANCE.createObjectReader(null, defaultCreator, fieldReaders);
     }
 
+    public static <T> ObjectReader<T> of(
+            Class<T> objectClass,
+            Supplier<T> defaultCreator,
+            FieldReader... fieldReaders
+    ) {
+        return ObjectReaderCreator.INSTANCE.createObjectReader(objectClass, defaultCreator, fieldReaders);
+    }
+
+    public static <T> ObjectReader<T> ofString(Function<String, T> function) {
+        return new ObjectReaderImplFromString<>(null, function);
+    }
+
+    public static <T> ObjectReader<T> ofInt(IntFunction<T> function) {
+        return new ObjectReaderImplFromInt<>(null, function);
+    }
+
+    public static <T> ObjectReader<T> ofLong(LongFunction<T> function) {
+        return new ObjectReaderImplFromLong<>(null, function);
+    }
+
+    public static <T> ObjectReader<T> objectReader(
+            Class<T> objectClass,
+            Supplier<T> defaultCreator,
+            FieldReader... fieldReaders
+    ) {
+        return ObjectReaderCreator.INSTANCE.createObjectReader(objectClass, defaultCreator, fieldReaders);
+    }
+
     public static <T> ObjectReader<T> ofReflect(Class<T> objectType) {
         return ObjectReaderCreator.INSTANCE.createObjectReader(objectType);
     }
@@ -25,18 +53,18 @@ public class ObjectReaders {
         return ObjectReaderCreatorLambda.INSTANCE.createObjectReader(objectType);
     }
 
-    public static <T> ObjectReader<T> createObjectReader(
+    public static <T> ObjectReader<T> objectReader(
             Function<Map<Long, Object>, T> creator,
             FieldReader... fieldReaders) {
-        return ObjectReaderCreator.INSTANCE.createObjectReaderNoneDefaultConstrutor(null, creator, fieldReaders);
+        return ObjectReaderCreator.INSTANCE.createObjectReaderNoneDefaultConstructor(null, creator, fieldReaders);
     }
 
-    public static <T, U, R> ObjectReader<T> createObjectReader(BiFunction<T, U, R> function, FieldReader first, FieldReader second) {
-        throw new JSONException("TODO");
+    public static FieldReader fieldReader(String fieldName, Class fieldClass) {
+        return ObjectReaderCreator.INSTANCE.createFieldReader(null, fieldName, fieldClass, fieldClass, (Method) null);
     }
 
-    public static FieldReader fieldReader(String fieldName, Class fieldType) {
-        return ObjectReaderCreator.INSTANCE.createFieldReader(null, fieldName, fieldType, fieldType, (Method) null);
+    public static FieldReader fieldReader(String fieldName, Type fieldType, Class fieldClass) {
+        return ObjectReaderCreator.INSTANCE.createFieldReader(null, fieldName, fieldType, fieldClass, (Method) null);
     }
 
     public static <T> FieldReader fieldReaderBool(String fieldName, ObjBoolConsumer<T> function) {
@@ -71,12 +99,28 @@ public class ObjectReaders {
         return new FieldReaderDoubleValueFunc<>(fieldName, 0, null, null, null, function);
     }
 
+    public static <T> FieldReader fieldReaderString(
+            String fieldName,
+            BiConsumer<T, String> function
+    ) {
+        return ObjectReaderCreator.INSTANCE.createFieldReader(fieldName, String.class, String.class, null, function);
+    }
+
     public static <T, V> FieldReader fieldReader(
             String fieldName,
             Class<V> fieldClass,
             BiConsumer<T, V> function
     ) {
         return ObjectReaderCreator.INSTANCE.createFieldReader(fieldName, fieldClass, fieldClass, null, function);
+    }
+
+    public static <T, V> FieldReader fieldReader(
+            String fieldName,
+            Type fieldType,
+            Class<V> fieldClass,
+            BiConsumer<T, V> function
+    ) {
+        return ObjectReaderCreator.INSTANCE.createFieldReader(fieldName, fieldType, fieldClass, null, function);
     }
 
     public static <T, U> FieldReader fieldReader(
@@ -96,5 +140,22 @@ public class ObjectReaders {
             ObjectReader<V> itemObjectReader
     ) {
         return new FieldReaderListFuncImpl<>(listCreator, itemObjectReader, function, itemType, fieldName);
+    }
+
+    public static <T, V> FieldReader fieldReaderList(
+            String fieldName,
+            Type itemType,
+            Supplier<List<V>> listCreator,
+            BiConsumer<T, List<V>> function
+    ) {
+        return new FieldReaderListFuncImpl<>(listCreator, null, function, itemType, fieldName);
+    }
+
+    public static <T, V> FieldReader fieldReaderList(
+            String fieldName,
+            Type itemType,
+            BiConsumer<T, List<V>> function
+    ) {
+        return fieldReaderList(fieldName, itemType, ArrayList::new, function);
     }
 }

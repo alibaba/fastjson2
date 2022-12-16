@@ -239,11 +239,12 @@ class ObjectReaderImplMapTyped
 
         JSONReader.Context context = jsonReader.getContext();
         long contextFeatures = context.getFeatures() | features;
-        Map object;
+        Map object, innerMap = null;
         if (instanceType == HashMap.class) {
             Supplier<Map> objectSupplier = context.getObjectSupplier();
             if (mapType == Map.class && objectSupplier != null) {
                 object = objectSupplier.get();
+                innerMap = TypeUtils.getInnerMap(object);
             } else {
                 object = new HashMap<>();
             }
@@ -252,15 +253,50 @@ class ObjectReaderImplMapTyped
         }
 
         for (int i = 0; ; ++i) {
-            if (jsonReader.nextIfMatch('}')) {
+            if (jsonReader.nextIfMatch('}') || jsonReader.isEnd()) {
                 break;
             }
 
             Object name;
-            if (keyType == String.class) {
+            if (jsonReader.nextIfNull()) {
+                if (!jsonReader.nextIfMatch(':')) {
+                    throw new JSONException(jsonReader.info("illegal json"));
+                }
+                name = null;
+            } else if (keyType == String.class) {
                 name = jsonReader.readFieldName();
+                if (i == 0
+                        && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                        && name.equals(getTypeKey())
+                ) {
+                    long typeHashCode = jsonReader.readTypeHashCode();
+                    ObjectReader objectReaderAutoType = context.getObjectReaderAutoType(typeHashCode);
+                    if (objectReaderAutoType == null) {
+                        String typeName = jsonReader.getString();
+                        objectReaderAutoType = context.getObjectReaderAutoType(typeName, mapType, features);
+                    }
+                    if (objectReaderAutoType != null) {
+                        if (objectReaderAutoType instanceof ObjectReaderImplMap) {
+                            if (!object.getClass().equals(((ObjectReaderImplMap) objectReaderAutoType).instanceType)) {
+                                object = (Map) objectReaderAutoType.createInstance(features);
+                            }
+                        }
+                    }
+                    continue;
+                }
+
+                if (name == null) {
+                    name = jsonReader.readString();
+                    if (!jsonReader.nextIfMatch(':')) {
+                        throw new JSONException(jsonReader.info("illegal json"));
+                    }
+                }
             } else {
-                name = jsonReader.read(keyType);
+                if (keyObjectReader != null) {
+                    name = keyObjectReader.readObject(jsonReader, null, null, 0);
+                } else {
+                    name = jsonReader.read(keyType);
+                }
                 if (i == 0
                         && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
                         && name.equals(getTypeKey())) {
@@ -272,7 +308,13 @@ class ObjectReaderImplMapTyped
                 valueObjectReader = jsonReader.getObjectReader(valueType);
             }
             Object value = valueObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
-            Object origin = object.put(name, value);
+            Object origin;
+            if (innerMap != null) {
+                origin = innerMap.put(name, value);
+            } else {
+                origin = object.put(name, value);
+            }
+
             if (origin != null) {
                 if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {

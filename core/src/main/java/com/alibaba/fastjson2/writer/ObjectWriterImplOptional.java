@@ -29,6 +29,12 @@ final class ObjectWriterImplOptional
         this.locale = locale;
     }
 
+    public ObjectWriterImplOptional(Type valueType, String format, Locale locale) {
+        this.valueType = valueType;
+        this.format = format;
+        this.locale = locale;
+    }
+
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {

@@ -15,7 +15,7 @@ public class JSONExtract2
         Object result = null;
         try {
             result = JSONPath.of(path).extract(JSONReader.of(json));
-        } catch (Exception ignored) {
+        } catch (Throwable ignored) {
             // ignored
         }
 

@@ -19,6 +19,9 @@ final class ObjectWriterImplDate
     static final char[] PREFIX_CHARS = "new Date(".toCharArray();
     static final byte[] PREFIX_BYTES = "new Date(".getBytes(StandardCharsets.UTF_8);
 
+    static final char[] PREFIX_CHARS_SQL = "{\"@type\":\"java.sql.Date\",\"val\":".toCharArray();
+    static final byte[] PREFIX_BYTES_SQL = "{\"@type\":\"java.sql.Date\",\"val\":".getBytes(StandardCharsets.UTF_8);
+
     public ObjectWriterImplDate(String format, Locale locale) {
         super(format, locale);
     }
@@ -41,19 +44,34 @@ final class ObjectWriterImplDate
             return;
         }
 
-        JSONWriter.Context ctx = jsonWriter.getContext();
+        JSONWriter.Context ctx = jsonWriter.context;
 
         Date date = (Date) object;
         long millis = date.getTime();
 
         if (jsonWriter.isWriteTypeInfo(object, fieldType)) {
-            if (jsonWriter.isUTF16()) {
-                jsonWriter.writeRaw(PREFIX_CHARS);
+            char end = ')';
+            if (jsonWriter.utf16) {
+                char[] prefix;
+                if ("java.sql.Date".equals(date.getClass().getName())) {
+                    prefix = PREFIX_CHARS_SQL;
+                    end = '}';
+                } else {
+                    prefix = PREFIX_CHARS;
+                }
+                jsonWriter.writeRaw(prefix, 0, prefix.length);
             } else {
-                jsonWriter.writeRaw(PREFIX_BYTES);
+                byte[] prefix;
+                if ("java.sql.Date".equals(date.getClass().getName())) {
+                    prefix = PREFIX_BYTES_SQL;
+                    end = '}';
+                } else {
+                    prefix = PREFIX_BYTES;
+                }
+                jsonWriter.writeRaw(prefix);
             }
             jsonWriter.writeInt64(millis);
-            jsonWriter.writeRaw(')');
+            jsonWriter.writeRaw(end);
             return;
         }
 
@@ -166,17 +184,19 @@ final class ObjectWriterImplDate
                 second = (int) secondOfDay;
             }
 
-            int mos = (int) Math.floorMod(millis, 1000L);
-            if (mos == 0 && !formatISO8601) {
-                if (hour == 0 && minute == 0 && second == 0 && "java.sql.Date".equals(date.getClass().getName())) {
-                    jsonWriter.writeDateYYYMMDD10(year, month, dayOfMonth);
+            if (year >= 0 && year <= 9999) {
+                int mos = (int) Math.floorMod(millis, 1000L);
+                if (mos == 0 && !formatISO8601) {
+                    if (hour == 0 && minute == 0 && second == 0 && "java.sql.Date".equals(date.getClass().getName())) {
+                        jsonWriter.writeDateYYYMMDD10(year, month, dayOfMonth);
+                    } else {
+                        jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
+                    }
                 } else {
-                    jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
+                    jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, mos, offsetSeconds, formatISO8601);
                 }
-            } else {
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, mos, offsetSeconds);
+                return;
             }
-            return;
         }
 
         DateTimeFormatter formatter;

@@ -10,9 +10,14 @@ import java.util.List;
 public class JSONSerializer {
     public final SerializeWriter out;
     final JSONWriter raw;
+    SerialContext context;
 
     public JSONSerializer() {
         this(new SerializeWriter());
+    }
+
+    public JSONSerializer(SerializeConfig config) {
+        this(new SerializeWriter(config));
     }
 
     public JSONSerializer(JSONWriter raw) {
@@ -57,6 +62,9 @@ public class JSONSerializer {
                 break;
             case BrowserCompatible:
                 ctx.config(JSONWriter.Feature.BrowserCompatible);
+                break;
+            case BrowserSecure:
+                ctx.config(JSONWriter.Feature.BrowserSecure);
                 break;
             case WriteClassName:
                 ctx.config(JSONWriter.Feature.WriteClassName);
@@ -138,5 +146,29 @@ public class JSONSerializer {
 
     public List<AfterFilter> getAfterFilters() {
         return this.out.getAfterFilters();
+    }
+
+    public SerializeConfig getMapping() {
+        return out.config;
+    }
+
+    public SerializeWriter getWriter() {
+        return out;
+    }
+
+    public ObjectSerializer getObjectWriter(Class<?> clazz) {
+        return out.config.getObjectWriter(clazz);
+    }
+
+    public static void write(SerializeWriter out, Object object) {
+        out.raw.writeAny(object);
+    }
+
+    public SerialContext getContext() {
+        return context;
+    }
+
+    public void setContext(SerialContext context) {
+        this.context = context;
     }
 }

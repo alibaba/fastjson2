@@ -1,9 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -15,12 +13,51 @@ import java.util.function.Supplier;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
 public final class ObjectReaderImplObject
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     public static final ObjectReaderImplObject INSTANCE = new ObjectReaderImplObject();
+
+    public ObjectReaderImplObject() {
+        super(Object.class);
+    }
 
     @Override
     public Object createInstance(long features) {
         return new JSONObject();
+    }
+
+    public Object createInstance(Collection collection) {
+        return collection;
+    }
+
+    @Override
+    public Object createInstance(Map map, long features) {
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        Object typeKey = map.get(getTypeKey());
+
+        if (typeKey instanceof String) {
+            String typeName = (String) typeKey;
+            long typeHash = Fnv.hashCode64(typeName);
+            ObjectReader reader = null;
+            if ((features & JSONReader.Feature.SupportAutoType.mask) != 0) {
+                reader = autoType(provider, typeHash);
+            }
+
+            if (reader == null) {
+                reader = provider.getObjectReader(
+                        typeName, getObjectClass(), features | getFeatures()
+                );
+
+                if (reader == null) {
+                    throw new JSONException("No suitable ObjectReader found for" + typeName);
+                }
+            }
+
+            if (reader != this) {
+                return reader.createInstance(map, features);
+            }
+        }
+
+        return map;
     }
 
     @Override

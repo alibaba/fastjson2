@@ -1,11 +1,8 @@
 package com.alibaba.fastjson2.benchmark;
 
-import org.junit.jupiter.api.Test;
-
 import java.util.Random;
 
 public class DoubleGen {
-    @Test
     public void gen() {
         Random r = new Random();
         StringBuffer buf = new StringBuffer();
@@ -19,5 +16,10 @@ public class DoubleGen {
         }
         buf.append(']');
         System.out.println(buf);
+    }
+
+    public static void main(String[] args) throws Exception {
+        DoubleGen gen = new DoubleGen();
+        gen.gen();
     }
 }
