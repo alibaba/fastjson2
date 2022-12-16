@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 
 import java.nio.charset.StandardCharsets;
 
@@ -16,7 +15,6 @@ public class TestUtils {
     public static ObjectReaderCreator[] readerCreators() {
         return new ObjectReaderCreator[]{
                 ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
                 ObjectReaderCreatorASM.INSTANCE,
         };
     }
@@ -24,7 +22,6 @@ public class TestUtils {
     public static ObjectWriterCreator[] writerCreators() {
         return new ObjectWriterCreator[]{
                 ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
                 ObjectWriterCreatorASM.INSTANCE,
         };
     }
@@ -32,7 +29,6 @@ public class TestUtils {
     public static ObjectReaderCreator[] readerCreators2() {
         return new ObjectReaderCreator[]{
                 ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
                 ObjectReaderCreatorASM.INSTANCE,
         };
     }
@@ -50,11 +46,12 @@ public class TestUtils {
     public static ObjectWriterCreator WRITER_CREATOR = ObjectWriterCreatorASM.INSTANCE;
 
     public static <T> ObjectReader<T> createObjectReaderLambda(Class<T> objectClass) {
-        return ObjectReaderCreatorLambda.INSTANCE.createObjectReader(objectClass);
+        return ObjectReaderCreator.INSTANCE.createObjectReader(objectClass);
     }
 
     public static <T> ObjectWriter<T> createObjectWriterLambda(Class<T> objectClass) {
-        return ObjectWriterCreatorLambda.INSTANCE.createObjectWriter(objectClass);
+        // TODO
+        return ObjectWriterCreator.INSTANCE.createObjectWriter(objectClass);
     }
 
     public static ObjectReaderCreator readerCreator(ClassLoader classLoader) {

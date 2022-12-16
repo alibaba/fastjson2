@@ -10,12 +10,13 @@ final class ConstructorSupplier
         implements Supplier {
     final Constructor constructor;
     final Class objectClass;
-    final boolean useClassNewIntance;
+    final boolean useClassNewInstance;
 
     public ConstructorSupplier(Constructor constructor) {
+        constructor.setAccessible(true);
         this.constructor = constructor;
         this.objectClass = this.constructor.getDeclaringClass();
-        this.useClassNewIntance = constructor.getParameterCount() == 0
+        this.useClassNewInstance = constructor.getParameterCount() == 0
                 && Modifier.isPublic(constructor.getModifiers())
                 && Modifier.isPublic(objectClass.getModifiers());
     }
@@ -23,10 +24,14 @@ final class ConstructorSupplier
     @Override
     public Object get() {
         try {
-            if (useClassNewIntance) {
+            if (useClassNewInstance) {
                 return objectClass.newInstance();
             } else {
-                return constructor.newInstance();
+                if (constructor.getParameterCount() == 1) {
+                    return constructor.newInstance(new Object[1]);
+                } else {
+                    return constructor.newInstance();
+                }
             }
         } catch (Throwable e) {
             throw new JSONException("create instance error", e);

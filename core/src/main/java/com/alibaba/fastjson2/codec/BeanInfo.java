@@ -43,6 +43,7 @@ public class BeanInfo {
     public boolean alphabetic = true;
     public String objectWriterFieldName;
     public String objectReaderFieldName;
+    public boolean jitFieldReaderMethod;
 
     public void required(String fieldName) {
         if (schema == null) {

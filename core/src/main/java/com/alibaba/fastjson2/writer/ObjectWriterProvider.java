@@ -42,10 +42,8 @@ public class ObjectWriterProvider
         ObjectWriterCreator creator = null;
         switch (JSONFactory.CREATOR) {
             case "reflect":
-                creator = ObjectWriterCreator.INSTANCE;
-                break;
             case "lambda":
-                creator = ObjectWriterCreatorLambda.INSTANCE;
+                creator = ObjectWriterCreator.INSTANCE;
                 break;
             case "asm":
             default:
@@ -55,7 +53,7 @@ public class ObjectWriterProvider
                     // ignored
                 }
                 if (creator == null) {
-                    creator = ObjectWriterCreatorLambda.INSTANCE;
+                    creator = ObjectWriterCreator.INSTANCE;
                 }
                 break;
         }

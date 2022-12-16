@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_VALUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONWriterUTF8JDK9Test {
@@ -17,6 +18,10 @@ public class JSONWriterUTF8JDK9Test {
 
     @Test
     public void test_writeString_1() {
+        if (STRING_VALUE == null) {
+            return;
+        }
+
         JSONWriterUTF8JDK9 jsonWriter = new JSONWriterUTF8JDK9(JSONFactory.createWriteContext());
         jsonWriter.writeString("a");
         assertEquals("\"a\"", jsonWriter.toString());
@@ -24,6 +29,10 @@ public class JSONWriterUTF8JDK9Test {
 
     @Test
     public void test_writeString_2() {
+        if (STRING_VALUE == null) {
+            return;
+        }
+
         JSONWriterUTF8JDK9 jsonWriter = new JSONWriterUTF8JDK9(JSONFactory.createWriteContext());
         jsonWriter.writeString("\"\"");
         assertEquals("\"\\\"\\\"\"", jsonWriter.toString());
@@ -31,6 +40,10 @@ public class JSONWriterUTF8JDK9Test {
 
     @Test
     public void test_writeString_3() {
+        if (STRING_VALUE == null) {
+            return;
+        }
+
         JSONWriterUTF8JDK9 jsonWriter = new JSONWriterUTF8JDK9(JSONFactory.createWriteContext());
         jsonWriter.writeString("abc");
         assertEquals("\"abc\"", jsonWriter.toString());
@@ -38,6 +51,10 @@ public class JSONWriterUTF8JDK9Test {
 
     @Test
     public void test_writeString_4() {
+        if (STRING_VALUE == null) {
+            return;
+        }
+
         JSONWriterUTF8JDK9 jsonWriter = new JSONWriterUTF8JDK9(JSONFactory.createWriteContext());
         jsonWriter.writeString("abcdefghijklmn01234567890");
         assertEquals("\"abcdefghijklmn01234567890\"", jsonWriter.toString());
@@ -45,6 +62,10 @@ public class JSONWriterUTF8JDK9Test {
 
     @Test
     public void test_writeString_utf8() {
+        if (STRING_VALUE == null) {
+            return;
+        }
+
         JSONWriterUTF8JDK9 jsonWriter = new JSONWriterUTF8JDK9(JSONFactory.createWriteContext());
         jsonWriter.writeString("中国");
         assertEquals("\"中国\"", jsonWriter.toString());
@@ -52,6 +73,10 @@ public class JSONWriterUTF8JDK9Test {
 
     @Test
     public void test_writeString_utf8_1() {
+        if (STRING_VALUE == null) {
+            return;
+        }
+
         JSONWriterUTF8JDK9 jsonWriter = new JSONWriterUTF8JDK9(JSONFactory.createWriteContext());
         jsonWriter.writeString("^á");
         assertEquals("\"^á\"", jsonWriter.toString());
@@ -59,6 +84,10 @@ public class JSONWriterUTF8JDK9Test {
 
     @Test
     public void test_writeString_utf82() {
+        if (STRING_VALUE == null) {
+            return;
+        }
+
         StringBuffer buf = new StringBuffer();
         for (int i = 0; i < 512; i++) {
             char ch = (char) i;
@@ -80,6 +109,10 @@ public class JSONWriterUTF8JDK9Test {
 
     @Test
     public void test_writeString_utf8_3() {
+        if (STRING_VALUE == null) {
+            return;
+        }
+
         JSONWriterUTF8JDK9 jsonWriter = new JSONWriterUTF8JDK9(JSONFactory.createWriteContext());
 
         JSONObject map = new JSONObject();
@@ -93,6 +126,10 @@ public class JSONWriterUTF8JDK9Test {
 
     @Test
     public void test_writeString_special() {
+        if (STRING_VALUE == null) {
+            return;
+        }
+
         JSONWriterUTF8JDK9 jsonWriter = new JSONWriterUTF8JDK9(JSONFactory.createWriteContext());
         jsonWriter.writeString("\r\n\t\f\b\"");
         assertEquals("\"\\r\\n\\t\\f\\b\\\"\"", jsonWriter.toString());
@@ -100,6 +137,10 @@ public class JSONWriterUTF8JDK9Test {
 
     @Test
     public void test_writeString_large() {
+        if (STRING_VALUE == null) {
+            return;
+        }
+
         char[] chars = new char[2048];
         Arrays.fill(chars, 'a');
         JSONWriterUTF8JDK9 jsonWriter = new JSONWriterUTF8JDK9(JSONFactory.createWriteContext());

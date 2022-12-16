@@ -1,7 +1,9 @@
 package com.alibaba.fastjson2.util;
 
 import java.lang.invoke.*;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.ByteOrder;
 import java.util.function.*;
 
@@ -30,10 +32,16 @@ public class JDKUtils {
     public static final BiFunction<byte[], Byte, String> STRING_CREATOR_JDK11;
     public static final ToIntFunction<String> STRING_CODER;
     public static final Function<String, byte[]> STRING_VALUE;
-    public static final MethodHandles.Lookup TRUSTED_LOOKUP;
+
+    static final MethodHandles.Lookup IMPL_LOOKUP;
+    static final boolean OPEN_J9;
+    static volatile Constructor CONSTRUCTOR_LOOKUP;
+    static volatile boolean CONSTRUCTOR_LOOKUP_ERROR;
+    static volatile Throwable initErrorLast;
 
     static {
         int jvmVersion = -1;
+        boolean openj9 = false;
         try {
             String property = System.getProperty("java.specification.version");
             if (property.startsWith("1.")) {
@@ -42,12 +50,14 @@ public class JDKUtils {
             jvmVersion = Integer.parseInt(property);
 
             String jmvName = System.getProperty("java.vm.name");
-            boolean openj9 = jmvName.contains("OpenJ9");
+            openj9 = jmvName.contains("OpenJ9");
             if (openj9) {
                 FIELD_STRING_ERROR = true;
             }
         } catch (Throwable ignored) {
         }
+
+        OPEN_J9 = openj9;
 
         boolean hasJavaSql = true;
         Class dataSourceClass = null;
@@ -117,13 +127,13 @@ public class JDKUtils {
             } catch (Throwable ignored) {
                 // ignored
             }
-            TRUSTED_LOOKUP = trustedLookup;
+            IMPL_LOOKUP = trustedLookup;
         }
 
         Boolean compact_strings = null;
         try {
             if (JVM_VERSION == 8 && trustedLookup != null) {
-                MethodHandles.Lookup caller = trustedLookup.in(String.class);
+                MethodHandles.Lookup caller = trustedLookup(String.class);
 
                 MethodHandle handle = caller.findConstructor(
                         String.class, MethodType.methodType(void.class, char[].class, boolean.class)
@@ -154,7 +164,8 @@ public class JDKUtils {
                             compact_strings = (Boolean) compact_strings_field.get(null);
                         }
                     }
-                } catch (Throwable ignored) {
+                } catch (Throwable e) {
+                    initErrorLast = e;
                     // ignored
                 }
                 lookupLambda = compact_strings != null && compact_strings.booleanValue();
@@ -208,7 +219,9 @@ public class JDKUtils {
                 );
                 stringValue = (Function<String, byte[]>) apply.getTarget().invokeExact();
             }
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            initErrorLast = e;
+            e.printStackTrace();
             // ignored
         }
 
@@ -235,5 +248,31 @@ public class JDKUtils {
         }
 
         return str.toCharArray();
+    }
+
+    public static MethodHandles.Lookup trustedLookup(Class objectClass) {
+        if (OPEN_J9 && JVM_VERSION < 17 && !CONSTRUCTOR_LOOKUP_ERROR) {
+            Constructor constructor = CONSTRUCTOR_LOOKUP;
+            try {
+                if (constructor == null) {
+                    constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
+                    constructor.setAccessible(true);
+                    CONSTRUCTOR_LOOKUP = constructor;
+                }
+                final int FULL_ACCESS_MASK = Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC | 0x8 | 0x10;
+                return (MethodHandles.Lookup) constructor.newInstance(objectClass, FULL_ACCESS_MASK);
+            } catch (Throwable ignored) {
+                CONSTRUCTOR_LOOKUP_ERROR = true;
+            }
+        }
+
+        MethodHandles.Lookup implLookup = IMPL_LOOKUP;
+        MethodHandles.Lookup lookup;
+        if (implLookup != null) {
+            lookup = implLookup.in(objectClass);
+        } else {
+            lookup = MethodHandles.lookup();
+        }
+        return lookup;
     }
 }

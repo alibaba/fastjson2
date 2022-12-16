@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import org.junit.jupiter.api.Test;
 
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_VALUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EscapeNoneAsciiTest {
@@ -44,6 +45,10 @@ public class EscapeNoneAsciiTest {
 
     @Test
     public void testJSONWriterUTF8JDK9() {
+        if (STRING_VALUE == null) {
+            return;
+        }
+
         for (int i = 0; i < STRINGS.length; i++) {
             String STR = STRINGS[i];
             String JSON_STR = JSON_STRINGS[i];
