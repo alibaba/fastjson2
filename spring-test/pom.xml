@@ -17,6 +17,7 @@
         <java.version>8</java.version>
         <maven.deploy.skip>true</maven.deploy.skip>
         <spring.boot.version>2.7.5</spring.boot.version>
+        <maven.test.skip>true</maven.test.skip>
     </properties>
 
     <!-- 使用 aliyun 的 Maven 源，提升下载速度 -->
@@ -65,7 +66,7 @@
         </dependency>
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
-            <artifactId>fastjson2-extension</artifactId>
+            <artifactId>fastjson2-extension-spring5</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
