@@ -567,10 +567,8 @@ public class ObjectReaderProvider
         ObjectReaderCreator creator = null;
         switch (JSONFactory.CREATOR) {
             case "reflect":
-                creator = ObjectReaderCreator.INSTANCE;
-                break;
             case "lambda":
-                creator = ObjectReaderCreatorLambda.INSTANCE;
+                creator = ObjectReaderCreator.INSTANCE;
                 break;
             case "asm":
             default:
@@ -580,7 +578,7 @@ public class ObjectReaderProvider
                     // ignored
                 }
                 if (creator == null) {
-                    creator = ObjectReaderCreatorLambda.INSTANCE;
+                    creator = ObjectReaderCreator.INSTANCE;
                 }
                 break;
         }

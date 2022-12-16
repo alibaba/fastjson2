@@ -3625,25 +3625,24 @@ public abstract class JSONReader
 
         static {
             BiFunction<Integer, int[], BigInteger> bigIntegerCreator = null;
-            if (TRUSTED_LOOKUP != null) {
-                try {
-                    MethodHandles.Lookup caller = TRUSTED_LOOKUP.in(BigInteger.class);
-                    MethodHandle handle = caller.findConstructor(
-                            BigInteger.class, MethodType.methodType(void.class, int.class, int[].class)
-                    );
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            caller,
-                            "apply",
-                            MethodType.methodType(BiFunction.class),
-                            handle.type().generic(),
-                            handle,
-                            MethodType.methodType(BigInteger.class, Integer.class, int[].class)
-                    );
-                    bigIntegerCreator = (BiFunction<Integer, int[], BigInteger>) callSite.getTarget().invokeExact();
-                } catch (Throwable ignored) {
-                    // ignored
-                }
+            try {
+                MethodHandles.Lookup caller = JDKUtils.trustedLookup(BigInteger.class);
+                MethodHandle handle = caller.findConstructor(
+                        BigInteger.class, MethodType.methodType(void.class, int.class, int[].class)
+                );
+                CallSite callSite = LambdaMetafactory.metafactory(
+                        caller,
+                        "apply",
+                        MethodType.methodType(BiFunction.class),
+                        handle.type().generic(),
+                        handle,
+                        MethodType.methodType(BigInteger.class, Integer.class, int[].class)
+                );
+                bigIntegerCreator = (BiFunction<Integer, int[], BigInteger>) callSite.getTarget().invokeExact();
+            } catch (Throwable ignored) {
+                // ignored
             }
+
             if (bigIntegerCreator == null) {
                 bigIntegerCreator = new BigIntegerCreator();
             }

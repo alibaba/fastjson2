@@ -506,7 +506,7 @@ public abstract class JSONWriter
         }
 
         if ((defaultWriterFeatures & Feature.OptimizedForAscii.mask) != 0) {
-            return new JSONWriterUTF8JDK9(writeContext);
+            return STRING_VALUE != null ? new JSONWriterUTF8JDK9(writeContext) : new JSONWriterUTF8(writeContext);
         }
 
         return new JSONWriterUTF16(writeContext);
@@ -527,7 +527,7 @@ public abstract class JSONWriter
         if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+            jsonWriter = STRING_VALUE != null ? new JSONWriterUTF8JDK9(writeContext) : new JSONWriterUTF8(writeContext);
         } else {
             jsonWriter = new JSONWriterUTF16(writeContext);
         }
@@ -544,7 +544,9 @@ public abstract class JSONWriter
         if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+            jsonWriter = STRING_VALUE != null
+                    ? new JSONWriterUTF8JDK9(writeContext)
+                    : new JSONWriterUTF8(writeContext);
         } else {
             jsonWriter = new JSONWriterUTF16(writeContext);
         }
@@ -610,17 +612,16 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter ofUTF8() {
-        if (JVM_VERSION >= 9) {
-            return new JSONWriterUTF8JDK9(
-                    JSONFactory.createWriteContext());
+        Context context = createWriteContext();
+        if (JVM_VERSION >= 9 && STRING_CODER != null) {
+            return new JSONWriterUTF8JDK9(context);
         } else {
-            return new JSONWriterUTF8(
-                    JSONFactory.createWriteContext());
+            return new JSONWriterUTF8(context);
         }
     }
 
     public static JSONWriter ofUTF8(JSONWriter.Context context) {
-        if (JVM_VERSION >= 9) {
+        if (JVM_VERSION >= 9 && STRING_CODER != null) {
             return new JSONWriterUTF8JDK9(context);
         } else {
             return new JSONWriterUTF8(context);
@@ -631,7 +632,7 @@ public abstract class JSONWriter
         Context writeContext = createWriteContext(features);
 
         JSONWriter jsonWriter;
-        if (JVM_VERSION >= 9) {
+        if (JVM_VERSION >= 9 && STRING_VALUE != null) {
             jsonWriter = new JSONWriterUTF8JDK9(writeContext);
         } else {
             jsonWriter = new JSONWriterUTF8(writeContext);

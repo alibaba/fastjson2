@@ -49,7 +49,7 @@ public class FieldReaderObject<T>
             return reader;
         }
 
-        ObjectReader formattedObjectReader = createFormattedObjectReader(fieldType, fieldClass, format, null);
+        ObjectReader formattedObjectReader = createFormattedObjectReader(fieldType, fieldClass, format, locale);
         if (formattedObjectReader != null) {
             return reader = formattedObjectReader;
         }
@@ -68,7 +68,7 @@ public class FieldReaderObject<T>
             return reader;
         }
 
-        ObjectReader formattedObjectReader = createFormattedObjectReader(fieldType, fieldClass, format, null);
+        ObjectReader formattedObjectReader = createFormattedObjectReader(fieldType, fieldClass, format, locale);
         if (formattedObjectReader != null) {
             return reader = formattedObjectReader;
         }
@@ -255,7 +255,11 @@ public class FieldReaderObject<T>
         }
 
         if (function != null) {
-            function.accept(object, value);
+            try {
+                function.accept(object, value);
+            } catch (Exception e) {
+                throw new JSONException("set " + super.toString() + " error", e);
+            }
             return;
         }
 

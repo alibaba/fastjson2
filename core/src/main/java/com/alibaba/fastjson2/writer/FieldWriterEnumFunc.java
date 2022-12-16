@@ -20,7 +20,8 @@ final class FieldWriterEnumFunc
             Type fieldType,
             Class fieldClass,
             Method method,
-            Function function) {
+            Function function
+    ) {
         super(name, ordinal, features, format, label, fieldClass, null, method);
         this.fieldType = fieldType;
         this.function = function;

@@ -54,7 +54,7 @@ final class FieldWriterBigDecimalFunc<T>
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeDecimal(value);
+        jsonWriter.writeDecimal(value, features);
         return true;
     }
 }
