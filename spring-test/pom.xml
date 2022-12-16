@@ -16,7 +16,7 @@
     <properties>
         <java.version>8</java.version>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <spring.boot.version>2.7.5</spring.boot.version>
+        <spring.boot.version>3.0.0</spring.boot.version>
         <maven.test.skip>true</maven.test.skip>
     </properties>
 
