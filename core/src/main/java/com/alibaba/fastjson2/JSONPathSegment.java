@@ -832,6 +832,11 @@ abstract class JSONPathSegment {
                 return;
             }
 
+            if (jsonReader.isEnd()) {
+                context.eval = true;
+                return;
+            }
+
             if (jsonReader.isJSONB()) {
                 List<Object> values = new JSONArray();
                 if (jsonReader.nextIfMatch(BC_OBJECT)) {

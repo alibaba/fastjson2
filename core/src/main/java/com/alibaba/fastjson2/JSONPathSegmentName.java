@@ -450,6 +450,9 @@ class JSONPathSegmentName
         if (jsonReader.nextIfObjectStart()) {
             if (jsonReader.ch == '}') {
                 jsonReader.next();
+                if (jsonReader.isEnd()) {
+                    return;
+                }
                 // return object;
             }
 
