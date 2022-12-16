@@ -196,6 +196,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
+            <version>${springframework5.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
