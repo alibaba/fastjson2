@@ -1106,7 +1106,7 @@ public class ObjectWriterCreator {
         }
     }
 
-    Object lambdaSetter(Class objectClass, Class fieldClass, Method method) {
+    Object lambdaGetter(Class objectClass, Class fieldClass, Method method) {
         MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
 
         LambdaInfo buildInfo = fieldReaderMapping.get(fieldClass);
@@ -1192,7 +1192,7 @@ public class ObjectWriterCreator {
             return null;
         }
 
-        Object lambda = lambdaSetter(objectClass, fieldClass, method);
+        Object lambda = lambdaGetter(objectClass, fieldClass, method);
 
         if (fieldClass == int.class) {
             return new FieldWriterInt32ValFunc(fieldName, ordinal, features, format, label, method, (ToIntFunction<T>) lambda);
