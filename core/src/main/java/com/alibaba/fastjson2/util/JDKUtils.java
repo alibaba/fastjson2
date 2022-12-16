@@ -107,8 +107,8 @@ public class JDKUtils {
         ToIntFunction<String> stringCoder = null;
         Function<String, byte[]> stringValue = null;
 
+        MethodHandles.Lookup trustedLookup = null;
         {
-            MethodHandles.Lookup trustedLookup = null;
             try {
                 Class lookupClass = MethodHandles.Lookup.class;
                 Field implLookup = lookupClass.getDeclaredField("IMPL_LOOKUP");
@@ -122,8 +122,8 @@ public class JDKUtils {
 
         Boolean compact_strings = null;
         try {
-            if (JVM_VERSION == 8 && TRUSTED_LOOKUP != null) {
-                MethodHandles.Lookup caller = TRUSTED_LOOKUP.in(String.class);
+            if (JVM_VERSION == 8 && trustedLookup != null) {
+                MethodHandles.Lookup caller = trustedLookup.in(String.class);
 
                 MethodHandle handle = caller.findConstructor(
                         String.class, MethodType.methodType(void.class, char[].class, boolean.class)
@@ -142,7 +142,7 @@ public class JDKUtils {
             }
 
             boolean lookupLambda = false;
-            if (JVM_VERSION > 8 && TRUSTED_LOOKUP != null) {
+            if (JVM_VERSION > 8 && trustedLookup != null) {
                 try {
                     Field compact_strings_field = String.class.getDeclaredField("COMPACT_STRINGS");
                     if (compact_strings_field != null) {
@@ -161,7 +161,7 @@ public class JDKUtils {
             }
 
             if (lookupLambda) {
-                MethodHandles.Lookup caller = TRUSTED_LOOKUP.in(String.class);
+                MethodHandles.Lookup caller = trustedLookup.in(String.class);
                 MethodHandle handle = caller.findConstructor(
                         String.class, MethodType.methodType(void.class, byte[].class, byte.class)
                 );
@@ -175,7 +175,7 @@ public class JDKUtils {
                 );
                 stringCreatorJDK11 = (BiFunction<byte[], Byte, String>) callSite.getTarget().invokeExact();
 
-                MethodHandles.Lookup stringCaller = TRUSTED_LOOKUP.in(String.class);
+                MethodHandles.Lookup stringCaller = trustedLookup.in(String.class);
                 MethodHandle coder = stringCaller.findSpecial(
                         String.class,
                         "coder",

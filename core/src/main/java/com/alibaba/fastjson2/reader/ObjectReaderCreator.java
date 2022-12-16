@@ -11,6 +11,7 @@ import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.invoke.*;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -21,9 +22,14 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
+import static com.alibaba.fastjson2.util.JDKUtils.TRUSTED_LOOKUP;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectReaderCreator {
+    static final MethodType METHODTYPE_VOID = MethodType.methodType(void.class);
+    static final MethodType METHODTYPE_SUPPLIER = MethodType.methodType(Supplier.class);
+    static final MethodType METHODTYPE_OBJECT = MethodType.methodType(Object.class);
+
     public static final ObjectReaderCreator INSTANCE = new ObjectReaderCreator();
 
     public <T> ObjectReader<T> createObjectReaderNoneDefaultConstructor(Constructor constructor, String... paramNames) {
@@ -219,6 +225,17 @@ public class ObjectReaderCreator {
     ) {
         Supplier<T> instanceSupplier = createInstanceSupplier(objectType);
         return new ObjectReaderSeeAlso(objectType, instanceSupplier, "@type", seeAlso, null, fieldReaders);
+    }
+
+    public <T> ObjectReader<T> createObjectReaderSeeAlso(
+            Class<T> objectClass,
+            String typeKey,
+            Class[] seeAlso,
+            String[] seeAlsoNames,
+            FieldReader... fieldReaders
+    ) {
+        Supplier<T> creator = createInstanceSupplier(objectClass);
+        return new ObjectReaderSeeAlso(objectClass, creator, typeKey, seeAlso, seeAlsoNames, fieldReaders);
     }
 
     public <T> ObjectReader<T> createObjectReaderSeeAlso(
@@ -987,10 +1004,8 @@ public class ObjectReaderCreator {
             }
         }
 
-        Supplier<T> creator = createInstanceSupplier(objectClass);
-
         if (beanInfo.seeAlso != null && beanInfo.seeAlso.length != 0) {
-            return createObjectReaderSeeAlso(objectClass, creator, beanInfo.typeKey, beanInfo.seeAlso, beanInfo.seeAlsoNames, fieldReaderArray);
+            return createObjectReaderSeeAlso(objectClass, beanInfo.typeKey, beanInfo.seeAlso, beanInfo.seeAlsoNames, fieldReaderArray);
         }
 
         if (objectClass.isInterface()) {
@@ -1005,6 +1020,7 @@ public class ObjectReaderCreator {
             );
         }
 
+        Supplier<T> creator = createInstanceSupplier(objectClass);
         JSONSchema jsonSchema = JSONSchema.of(JSON.parseObject(beanInfo.schema), objectClass);
         return createObjectReader(
                 objectClass,
@@ -1377,10 +1393,32 @@ public class ObjectReaderCreator {
             throw new JSONException("get constructor error, class " + objectClass.getName(), e);
         }
 
-        return new ConstructorSupplier(constructor);
+        return createInstanceSupplier(constructor, true);
     }
 
-    public <T> Supplier<T> createInstanceSupplier(Constructor constructor) {
+    public <T> Supplier<T> createInstanceSupplier(Constructor constructor, boolean jit) {
+        if (jit) {
+            MethodHandles.Lookup trustedLookup = TRUSTED_LOOKUP;
+            try {
+                Class objectClass = constructor.getDeclaringClass();
+                if (trustedLookup != null && constructor.getParameterCount() == 0) {
+                    MethodHandles.Lookup caller = trustedLookup.in(objectClass);
+                    MethodHandle handle = caller.findConstructor(objectClass, METHODTYPE_VOID);
+                    CallSite callSite = LambdaMetafactory.metafactory(
+                            caller,
+                            "get",
+                            METHODTYPE_SUPPLIER,
+                            METHODTYPE_OBJECT,
+                            handle,
+                            METHODTYPE_OBJECT
+                    );
+                    return (Supplier) callSite.getTarget().invokeExact();
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        }
+
         return new ConstructorSupplier(constructor);
     }
 
