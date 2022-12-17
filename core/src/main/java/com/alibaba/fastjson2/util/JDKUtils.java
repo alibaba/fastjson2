@@ -36,6 +36,7 @@ public class JDKUtils {
 
     static final MethodHandles.Lookup IMPL_LOOKUP;
     static final boolean OPEN_J9;
+    static volatile MethodHandle CONSTRUCTOR_LOOKUP;
     static volatile boolean CONSTRUCTOR_LOOKUP_ERROR;
     static volatile Throwable initErrorLast;
 
@@ -255,11 +256,16 @@ public class JDKUtils {
         if (!CONSTRUCTOR_LOOKUP_ERROR) {
             try {
                 int TRUSTED = -1;
+
+                MethodHandle constructor = CONSTRUCTOR_LOOKUP;
                 if (JVM_VERSION < 15) {
-                    MethodHandle constructor = IMPL_LOOKUP.findConstructor(
-                            MethodHandles.Lookup.class,
-                            methodType(void.class, Class.class, int.class)
-                    );
+                    if (constructor == null) {
+                        constructor = IMPL_LOOKUP.findConstructor(
+                                MethodHandles.Lookup.class,
+                                methodType(void.class, Class.class, int.class)
+                        );
+                        CONSTRUCTOR_LOOKUP = constructor;
+                    }
                     int allowedModes;
                     if (OPEN_J9) {
                         // int INTERNAL_PRIVILEGED = 0x80;
@@ -273,10 +279,13 @@ public class JDKUtils {
                     }
                     return (MethodHandles.Lookup) constructor.invoke(objectClass, allowedModes);
                 } else {
-                    MethodHandle constructor = IMPL_LOOKUP.findConstructor(
-                            MethodHandles.Lookup.class,
-                            methodType(void.class, Class.class, Class.class, int.class)
-                    );
+                    if (constructor == null) {
+                        constructor = IMPL_LOOKUP.findConstructor(
+                                MethodHandles.Lookup.class,
+                                methodType(void.class, Class.class, Class.class, int.class)
+                        );
+                        CONSTRUCTOR_LOOKUP = constructor;
+                    }
                     return (MethodHandles.Lookup) constructor.invoke(objectClass, null, TRUSTED);
                 }
             } catch (Throwable ignored) {
