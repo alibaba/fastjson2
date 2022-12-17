@@ -108,7 +108,7 @@ public class DoubleTest3_random {
     public void test_ran_1() {
         Random rand = new Random();
         char[] chars = new char[64];
-        for (int i = 0; i < 1000 * 1000 * 10; ++i) {
+        for (int i = 0; i < loopCount; ++i) {
             double val = rand.nextDouble();
             int len = RyuDouble.toString(val, chars, 0);
             JSONReader jsonReader = JSONReader.of(chars, 0, len);

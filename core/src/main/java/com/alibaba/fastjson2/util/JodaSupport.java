@@ -205,8 +205,8 @@ public class JodaSupport {
                 try {
                     Object datetimeZone = forID.invoke(null, zoneId);
                     return getInstance.invoke(null, datetimeZone);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
+                } catch (IllegalAccessException | InvocationTargetException ignored) {
+                    // ignored
                 }
             }
 
