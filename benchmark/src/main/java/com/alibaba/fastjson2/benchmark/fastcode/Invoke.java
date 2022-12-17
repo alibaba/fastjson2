@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 import java.util.function.ObjIntConsumer;
 
-public class InvokeBenchmark {
+public class Invoke {
     static final Method METHOD_SET_ID;
     static final ObjIntConsumer FUNC_SET_ID;
 
@@ -103,7 +103,8 @@ public class InvokeBenchmark {
 
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
-                .include(InvokeBenchmark.class.getName())
+                .include(Invoke.class.getName())
+                .include(InvokeFirst.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(1)

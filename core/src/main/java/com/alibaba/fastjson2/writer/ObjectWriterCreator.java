@@ -29,21 +29,19 @@ import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 public class ObjectWriterCreator {
     public static final ObjectWriterCreator INSTANCE = new ObjectWriterCreator();
 
-    static Map<Class, LambdaInfo> fieldReaderMapping = new HashMap<>();
-    static Map<Class, MethodType> methodTypeMapping = new HashMap<>();
+    static Map<Class, LambdaInfo> lambdaMapping = new HashMap<>();
     static MethodType METHODTYPE_FUNCTION = MethodType.methodType(Function.class);
+    static MethodType METHODTYPE_OO = MethodType.methodType(Object.class, Object.class);
 
     static {
-        fieldReaderMapping.put(boolean.class, new LambdaInfo(Predicate.class, "test"));
-        fieldReaderMapping.put(char.class, new LambdaInfo(ToCharFunction.class, "applyAsChar"));
-        fieldReaderMapping.put(byte.class, new LambdaInfo(ToByteFunction.class, "applyAsByte"));
-        fieldReaderMapping.put(short.class, new LambdaInfo(ToShortFunction.class, "applyAsShort"));
-        fieldReaderMapping.put(int.class, new LambdaInfo(ToIntFunction.class, "applyAsInt"));
-        fieldReaderMapping.put(long.class, new LambdaInfo(ToLongFunction.class, "applyAsLong"));
-        fieldReaderMapping.put(float.class, new LambdaInfo(ToFloatFunction.class, "applyAsFloat"));
-        fieldReaderMapping.put(double.class, new LambdaInfo(ToDoubleFunction.class, "applyAsDouble"));
-
-        fieldReaderMapping.forEach((k, v) -> methodTypeMapping.put(k, MethodType.methodType(v.supplierClass)));
+        lambdaMapping.put(boolean.class, new LambdaInfo(boolean.class, Predicate.class, "test"));
+        lambdaMapping.put(char.class, new LambdaInfo(char.class, ToCharFunction.class, "applyAsChar"));
+        lambdaMapping.put(byte.class, new LambdaInfo(byte.class, ToByteFunction.class, "applyAsByte"));
+        lambdaMapping.put(short.class, new LambdaInfo(short.class, ToShortFunction.class, "applyAsShort"));
+        lambdaMapping.put(int.class, new LambdaInfo(int.class, ToIntFunction.class, "applyAsInt"));
+        lambdaMapping.put(long.class, new LambdaInfo(long.class, ToLongFunction.class, "applyAsLong"));
+        lambdaMapping.put(float.class, new LambdaInfo(float.class, ToFloatFunction.class, "applyAsFloat"));
+        lambdaMapping.put(double.class, new LambdaInfo(double.class, ToDoubleFunction.class, "applyAsDouble"));
     }
 
     protected AtomicInteger jitErrorCount = new AtomicInteger();
@@ -1097,38 +1095,55 @@ public class ObjectWriterCreator {
     }
 
     static class LambdaInfo {
+        final Class fieldClass;
         final Class supplierClass;
         final String methodName;
+        final MethodType methodType;
+        final MethodType invokedType;
+        final MethodType samMethodType;
 
-        LambdaInfo(Class supplierClass, String methodName) {
+        LambdaInfo(Class fieldClass, Class supplierClass, String methodName) {
+            this.fieldClass = fieldClass;
             this.supplierClass = supplierClass;
             this.methodName = methodName;
+            this.methodType = MethodType.methodType(fieldClass);
+            this.invokedType = MethodType.methodType(supplierClass);
+            this.samMethodType = MethodType.methodType(fieldClass, Object.class);
         }
     }
 
     Object lambdaGetter(Class objectClass, Class fieldClass, Method method) {
         MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
 
-        LambdaInfo buildInfo = fieldReaderMapping.get(fieldClass);
-        if (buildInfo == null) {
-            buildInfo = new LambdaInfo(Function.class, "apply");
+        LambdaInfo buildInfo = lambdaMapping.get(fieldClass);
+
+        MethodType methodType;
+        MethodType invokedType;
+        String methodName;
+        MethodType samMethodType;
+        if (buildInfo != null) {
+            methodType = buildInfo.methodType;
+            invokedType = buildInfo.invokedType;
+            methodName = buildInfo.methodName;
+            samMethodType = buildInfo.samMethodType;
+        } else {
+            methodType = MethodType.methodType(fieldClass);
+            invokedType = METHODTYPE_FUNCTION;
+            methodName = "apply";
+            samMethodType = METHODTYPE_OO;
         }
 
-        MethodType invokedType = methodTypeMapping.getOrDefault(fieldClass, METHODTYPE_FUNCTION);
         try {
-            MethodHandle target = lookup.findVirtual(objectClass,
-                    method.getName(),
-                    MethodType.methodType(fieldClass)
-            );
-            MethodType func = target.type();
+            MethodHandle target = lookup.findVirtual(objectClass, method.getName(), methodType);
+            MethodType instantiatedMethodType = target.type();
 
             CallSite callSite = LambdaMetafactory.metafactory(
                     lookup,
-                    buildInfo.methodName,
+                    methodName,
                     invokedType,
-                    func.erase(),
+                    samMethodType,
                     target,
-                    func
+                    instantiatedMethodType
             );
 
             return callSite

@@ -562,7 +562,7 @@ public class ObjectReaderCreatorASM
         if (defaultConstructor != null) {
             boolean publicObject = Modifier.isPublic(objectClassModifiers) && !classLoader.isExternalClass(objectClass);
             boolean jit = !publicObject || !Modifier.isPublic(defaultConstructor.getModifiers());
-            supplier = createInstanceSupplier(defaultConstructor, jit);
+            supplier = createSupplier(defaultConstructor, jit);
         }
 
         if (generatedFields) {

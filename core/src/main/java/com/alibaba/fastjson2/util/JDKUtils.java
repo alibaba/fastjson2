@@ -127,6 +127,9 @@ public class JDKUtils {
             } catch (Throwable ignored) {
                 // ignored
             }
+            if (trustedLookup == null) {
+                trustedLookup = MethodHandles.lookup();
+            }
             IMPL_LOOKUP = trustedLookup;
         }
 
@@ -266,13 +269,6 @@ public class JDKUtils {
             }
         }
 
-        MethodHandles.Lookup implLookup = IMPL_LOOKUP;
-        MethodHandles.Lookup lookup;
-        if (implLookup != null) {
-            lookup = implLookup.in(objectClass);
-        } else {
-            lookup = MethodHandles.lookup();
-        }
-        return lookup;
+        return IMPL_LOOKUP.in(objectClass);
     }
 }
