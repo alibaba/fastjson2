@@ -1,11 +1,12 @@
 package com.alibaba.fastjson2.util;
 
 import java.lang.invoke.*;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.ByteOrder;
 import java.util.function.*;
+
+import static java.lang.invoke.MethodType.methodType;
 
 public class JDKUtils {
     public static final int JVM_VERSION;
@@ -35,7 +36,6 @@ public class JDKUtils {
 
     static final MethodHandles.Lookup IMPL_LOOKUP;
     static final boolean OPEN_J9;
-    static volatile Constructor CONSTRUCTOR_LOOKUP;
     static volatile boolean CONSTRUCTOR_LOOKUP_ERROR;
     static volatile Throwable initErrorLast;
 
@@ -139,16 +139,16 @@ public class JDKUtils {
                 MethodHandles.Lookup lookup = trustedLookup(String.class);
 
                 MethodHandle handle = lookup.findConstructor(
-                        String.class, MethodType.methodType(void.class, char[].class, boolean.class)
+                        String.class, methodType(void.class, char[].class, boolean.class)
                 );
 
                 CallSite callSite = LambdaMetafactory.metafactory(
                         lookup,
                         "apply",
-                        MethodType.methodType(BiFunction.class),
-                        MethodType.methodType(Object.class, Object.class, Object.class),
+                        methodType(BiFunction.class),
+                        methodType(Object.class, Object.class, Object.class),
                         handle,
-                        MethodType.methodType(String.class, char[].class, boolean.class)
+                        methodType(String.class, char[].class, boolean.class)
                 );
                 stringCreatorJDK8 = (BiFunction<char[], Boolean, String>) callSite.getTarget().invokeExact();
                 stringCoder = (str) -> 1;
@@ -177,29 +177,29 @@ public class JDKUtils {
             if (lookupLambda) {
                 MethodHandles.Lookup lookup = trustedLookup.in(String.class);
                 MethodHandle handle = lookup.findConstructor(
-                        String.class, MethodType.methodType(void.class, byte[].class, byte.class)
+                        String.class, methodType(void.class, byte[].class, byte.class)
                 );
                 CallSite callSite = LambdaMetafactory.metafactory(
                         lookup,
                         "apply",
-                        MethodType.methodType(BiFunction.class),
-                        MethodType.methodType(Object.class, Object.class, Object.class),
+                        methodType(BiFunction.class),
+                        methodType(Object.class, Object.class, Object.class),
                         handle,
-                        MethodType.methodType(String.class, byte[].class, Byte.class)
+                        methodType(String.class, byte[].class, Byte.class)
                 );
                 stringCreatorJDK11 = (BiFunction<byte[], Byte, String>) callSite.getTarget().invokeExact();
 
                 MethodHandle coder = lookup.findSpecial(
                         String.class,
                         "coder",
-                        MethodType.methodType(byte.class),
+                        methodType(byte.class),
                         String.class
                 );
                 CallSite applyAsInt = LambdaMetafactory.metafactory(
                         lookup,
                         "applyAsInt",
-                        MethodType.methodType(ToIntFunction.class),
-                        MethodType.methodType(int.class, Object.class),
+                        methodType(ToIntFunction.class),
+                        methodType(int.class, Object.class),
                         coder,
                         coder.type()
                 );
@@ -208,13 +208,13 @@ public class JDKUtils {
                 MethodHandle value = lookup.findSpecial(
                         String.class,
                         "value",
-                        MethodType.methodType(byte[].class),
+                        methodType(byte[].class),
                         String.class
                 );
                 CallSite apply = LambdaMetafactory.metafactory(
                         lookup,
                         "apply",
-                        MethodType.methodType(Function.class),
+                        methodType(Function.class),
                         value.type().generic(),
                         value,
                         value.type()
@@ -252,16 +252,35 @@ public class JDKUtils {
     }
 
     public static MethodHandles.Lookup trustedLookup(Class objectClass) {
-        if (OPEN_J9 && JVM_VERSION < 17 && !CONSTRUCTOR_LOOKUP_ERROR) {
-            Constructor constructor = CONSTRUCTOR_LOOKUP;
+        if (!CONSTRUCTOR_LOOKUP_ERROR) {
             try {
-                if (constructor == null) {
-                    constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
-                    constructor.setAccessible(true);
-                    CONSTRUCTOR_LOOKUP = constructor;
+                int TRUSTED = -1;
+                if (JVM_VERSION < 15) {
+                    MethodHandle constructor = IMPL_LOOKUP.findConstructor(
+                            MethodHandles.Lookup.class,
+                            methodType(void.class, Class.class, int.class)
+                    );
+                    int allowedModes;
+                    if (OPEN_J9) {
+                        // int INTERNAL_PRIVILEGED = 0x80;
+                        final int PACKAGE = 0x8;
+                        final int MODULE = 0x10;
+                        int FULL_ACCESS_MASK = Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED
+                                | PACKAGE | MODULE;
+                        allowedModes = FULL_ACCESS_MASK;
+                    } else {
+                        allowedModes = TRUSTED;
+                    }
+                    Object o = constructor.invoke(objectClass, allowedModes);
+                    return (MethodHandles.Lookup) o;
+                } else {
+                    MethodHandle constructor = IMPL_LOOKUP.findConstructor(
+                            MethodHandles.Lookup.class,
+                            methodType(void.class, Class.class, Class.class, int.class)
+                    );
+                    Object o = constructor.invoke(objectClass, null, TRUSTED);
+                    return (MethodHandles.Lookup) o;
                 }
-                final int FULL_ACCESS_MASK = Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC | 0x8 | 0x10;
-                return (MethodHandles.Lookup) constructor.newInstance(objectClass, FULL_ACCESS_MASK);
             } catch (Throwable ignored) {
                 CONSTRUCTOR_LOOKUP_ERROR = true;
             }
