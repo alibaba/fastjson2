@@ -271,15 +271,13 @@ public class JDKUtils {
                     } else {
                         allowedModes = TRUSTED;
                     }
-                    Object o = constructor.invoke(objectClass, allowedModes);
-                    return (MethodHandles.Lookup) o;
+                    return (MethodHandles.Lookup) constructor.invoke(objectClass, allowedModes);
                 } else {
                     MethodHandle constructor = IMPL_LOOKUP.findConstructor(
                             MethodHandles.Lookup.class,
                             methodType(void.class, Class.class, Class.class, int.class)
                     );
-                    Object o = constructor.invoke(objectClass, null, TRUSTED);
-                    return (MethodHandles.Lookup) o;
+                    return (MethodHandles.Lookup) constructor.invoke(objectClass, null, TRUSTED);
                 }
             } catch (Throwable ignored) {
                 CONSTRUCTOR_LOOKUP_ERROR = true;
