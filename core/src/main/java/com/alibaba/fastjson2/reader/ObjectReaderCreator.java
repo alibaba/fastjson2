@@ -31,8 +31,13 @@ public class ObjectReaderCreator {
     protected volatile Throwable jitErrorLast;
 
     static final MethodType METHODTYPE_VOID = MethodType.methodType(void.class);
+    static final MethodType METHODTYPE_VOID_INT = MethodType.methodType(void.class, int.class);
+    static final MethodType METHODTYPE_VOID_STRING = MethodType.methodType(void.class, String.class);
     static final MethodType METHODTYPE_SUPPLIER = MethodType.methodType(Supplier.class);
+    static final MethodType METHODTYPE_INT_FUNCTION = MethodType.methodType(IntFunction.class);
     static final MethodType METHODTYPE_OBJECT = MethodType.methodType(Object.class);
+    static final MethodType METHODTYPE_OBJECT_INT = MethodType.methodType(Object.class, int.class);
+    static final MethodType METHODTYPE_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class);
 
     protected static final Map<Class, LambdaSetterInfo> methodTypeMapping = new HashMap<>();
 
@@ -194,9 +199,11 @@ public class ObjectReaderCreator {
         return new ConstructorFunction(null, constructor, null, paramNames);
     }
 
-    public <T> Function<Map<Long, Object>, T> createFunction(Constructor constructor,
-                                                             Constructor markerConstructor,
-                                                             String... paramNames) {
+    public <T> Function<Map<Long, Object>, T> createFunction(
+            Constructor constructor,
+            Constructor markerConstructor,
+            String... paramNames
+    ) {
         if (markerConstructor == null) {
             constructor.setAccessible(true);
         } else {
@@ -541,6 +548,40 @@ public class ObjectReaderCreator {
                 }
             }
 
+            Function function = null;
+            if (defaultValue == null) {
+                if (valueClass == int.class) {
+                    IntFunction intFunction = null;
+                    if (beanInfo.creatorConstructor != null) {
+                        intFunction = createIntFunction(beanInfo.creatorConstructor);
+                    } else if (beanInfo.createMethod != null) {
+                        intFunction = createIntFunction(beanInfo.createMethod);
+                    }
+
+                    if (intFunction != null) {
+                        return ObjectReaderImplValueInt.of(objectClass, fieldInfo.features, jsonSchema, intFunction);
+                    }
+                } else if (valueClass == String.class) {
+                    if (beanInfo.creatorConstructor != null) {
+                        function = createStringFunction(beanInfo.creatorConstructor);
+                    } else if (beanInfo.createMethod != null) {
+                        function = createStringFunction(beanInfo.createMethod);
+                    }
+
+                    if (function != null) {
+                        return ObjectReaderImplValueString.of(objectClass, fieldInfo.features, jsonSchema, function);
+                    }
+                }
+            }
+
+            if (!valueClass.isPrimitive()) {
+                if (beanInfo.creatorConstructor != null) {
+                    function = createValueFunction(beanInfo.creatorConstructor, valueClass);
+                } else if (beanInfo.createMethod != null) {
+                    function = createValueFunction(beanInfo.createMethod, valueClass);
+                }
+            }
+
             return new ObjectReaderImplValue(
                     objectClass,
                     valueType,
@@ -551,7 +592,7 @@ public class ObjectReaderCreator {
                     jsonSchema,
                     beanInfo.creatorConstructor,
                     beanInfo.createMethod,
-                    null
+                    function
             );
         }
 
@@ -1458,6 +1499,148 @@ public class ObjectReaderCreator {
         }
 
         return new ConstructorSupplier(constructor);
+    }
+
+    protected <T> IntFunction<T> createIntFunction(Constructor constructor) {
+        Class declaringClass = constructor.getDeclaringClass();
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+        try {
+            MethodHandle handle = lookup.findConstructor(declaringClass, METHODTYPE_VOID_INT);
+            MethodType instantiatedMethodType = MethodType.methodType(declaringClass, int.class);
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHODTYPE_INT_FUNCTION,
+                    METHODTYPE_OBJECT_INT,
+                    handle,
+                    instantiatedMethodType
+            );
+            return (IntFunction) callSite.getTarget().invokeExact();
+        } catch (Throwable e) {
+            jitErrorCount.incrementAndGet();
+            jitErrorLast = e;
+        }
+
+        return null;
+    }
+
+    protected <T> IntFunction<T> createIntFunction(Method factoryMethod) {
+        Class declaringClass = factoryMethod.getDeclaringClass();
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+        try {
+            MethodType methodType = MethodType.methodType(factoryMethod.getReturnType(), int.class);
+            MethodHandle handle = lookup.findStatic(declaringClass, factoryMethod.getName(), methodType);
+            MethodType instantiatedMethodType = methodType;
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHODTYPE_INT_FUNCTION,
+                    METHODTYPE_OBJECT_INT,
+                    handle,
+                    instantiatedMethodType
+            );
+            return (IntFunction) callSite.getTarget().invokeExact();
+        } catch (Throwable e) {
+            jitErrorCount.incrementAndGet();
+            jitErrorLast = e;
+        }
+
+        return null;
+    }
+
+    protected <T> Function<String, T> createStringFunction(Constructor constructor) {
+        Class declaringClass = constructor.getDeclaringClass();
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+        try {
+            MethodHandle handle = lookup.findConstructor(declaringClass, METHODTYPE_VOID_STRING);
+            MethodType instantiatedMethodType = MethodType.methodType(declaringClass, String.class);
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHODTYPE_FUNCTION,
+                    METHODTYPE_OBJECT_OBJECT,
+                    handle,
+                    instantiatedMethodType
+            );
+            return (Function<String, T>) callSite.getTarget().invokeExact();
+        } catch (Throwable e) {
+            jitErrorCount.incrementAndGet();
+            jitErrorLast = e;
+        }
+
+        return null;
+    }
+
+    protected <T> Function<String, T> createStringFunction(Method factoryMethod) {
+        Class declaringClass = factoryMethod.getDeclaringClass();
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+        try {
+            MethodType methodType = MethodType.methodType(factoryMethod.getReturnType(), String.class);
+            MethodHandle handle = lookup.findStatic(declaringClass, factoryMethod.getName(), methodType);
+            MethodType instantiatedMethodType = methodType;
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHODTYPE_FUNCTION,
+                    METHODTYPE_OBJECT_OBJECT,
+                    handle,
+                    instantiatedMethodType
+            );
+            return (Function<String, T>) callSite.getTarget().invokeExact();
+        } catch (Throwable e) {
+            jitErrorCount.incrementAndGet();
+            jitErrorLast = e;
+        }
+
+        return null;
+    }
+
+    protected <I, T> Function<I, T> createValueFunction(Constructor<T> constructor, Class<I> valueClass) {
+        Class declaringClass = constructor.getDeclaringClass();
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+        try {
+            MethodType methodType = MethodType.methodType(void.class, valueClass);
+            MethodHandle handle = lookup.findConstructor(declaringClass, methodType);
+            MethodType instantiatedMethodType = MethodType.methodType(declaringClass, valueClass);
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHODTYPE_FUNCTION,
+                    METHODTYPE_OBJECT_OBJECT,
+                    handle,
+                    instantiatedMethodType
+            );
+            return (Function<I, T>) callSite.getTarget().invokeExact();
+        } catch (Throwable e) {
+            jitErrorCount.incrementAndGet();
+            jitErrorLast = e;
+        }
+
+        return null;
+    }
+
+    protected <I, T> Function<I, T> createValueFunction(Method factoryMethod, Class valueClass) {
+        Class declaringClass = factoryMethod.getDeclaringClass();
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+        try {
+            MethodType methodType = MethodType.methodType(factoryMethod.getReturnType(), valueClass);
+            MethodHandle handle = lookup.findStatic(declaringClass, factoryMethod.getName(), methodType);
+            MethodType instantiatedMethodType = methodType;
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHODTYPE_FUNCTION,
+                    METHODTYPE_OBJECT_OBJECT,
+                    handle,
+                    instantiatedMethodType
+            );
+            return (Function<I, T>) callSite.getTarget().invokeExact();
+        } catch (Throwable e) {
+            jitErrorCount.incrementAndGet();
+            jitErrorLast = e;
+        }
+
+        return null;
     }
 
     public <T, R> Function<T, R> createBuildFunction(Method builderMethod) {
