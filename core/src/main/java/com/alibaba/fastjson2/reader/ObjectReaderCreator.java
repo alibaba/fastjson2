@@ -1319,7 +1319,6 @@ public class ObjectReaderCreator {
                         initReader
                 );
             } catch (Throwable ignored) {
-                ignored.printStackTrace();
                 jitErrorCount.incrementAndGet();
                 jitErrorLast = ignored;
             }

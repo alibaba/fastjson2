@@ -177,8 +177,7 @@ public abstract class BeanUtils {
                 names[i] = (String) kotlinKParameterGetName.invoke(param);
             }
             return names;
-        } catch (Throwable e) {
-            e.printStackTrace();
+        } catch (Throwable ignored) {
             kotlinError = true;
         }
         return null;
@@ -2275,7 +2274,7 @@ public abstract class BeanUtils {
                     break;
             }
         } catch (Throwable ignored) {
-            ignored.printStackTrace();
+            // ignored
         }
     }
 

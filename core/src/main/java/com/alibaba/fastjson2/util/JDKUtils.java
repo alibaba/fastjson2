@@ -136,19 +136,19 @@ public class JDKUtils {
         Boolean compact_strings = null;
         try {
             if (JVM_VERSION == 8 && trustedLookup != null) {
-                MethodHandles.Lookup caller = trustedLookup(String.class);
+                MethodHandles.Lookup lookup = trustedLookup(String.class);
 
-                MethodHandle handle = caller.findConstructor(
+                MethodHandle handle = lookup.findConstructor(
                         String.class, MethodType.methodType(void.class, char[].class, boolean.class)
                 );
 
                 CallSite callSite = LambdaMetafactory.metafactory(
-                        caller,
+                        lookup,
                         "apply",
                         MethodType.methodType(BiFunction.class),
-                        handle.type().generic(),
+                        MethodType.methodType(Object.class, Object.class, Object.class),
                         handle,
-                        handle.type()
+                        MethodType.methodType(String.class, char[].class, boolean.class)
                 );
                 stringCreatorJDK8 = (BiFunction<char[], Boolean, String>) callSite.getTarget().invokeExact();
                 stringCoder = (str) -> 1;
@@ -175,29 +175,28 @@ public class JDKUtils {
             }
 
             if (lookupLambda) {
-                MethodHandles.Lookup caller = trustedLookup.in(String.class);
-                MethodHandle handle = caller.findConstructor(
+                MethodHandles.Lookup lookup = trustedLookup.in(String.class);
+                MethodHandle handle = lookup.findConstructor(
                         String.class, MethodType.methodType(void.class, byte[].class, byte.class)
                 );
                 CallSite callSite = LambdaMetafactory.metafactory(
-                        caller,
+                        lookup,
                         "apply",
                         MethodType.methodType(BiFunction.class),
-                        handle.type().generic(),
+                        MethodType.methodType(Object.class, Object.class, Object.class),
                         handle,
                         MethodType.methodType(String.class, byte[].class, Byte.class)
                 );
                 stringCreatorJDK11 = (BiFunction<byte[], Byte, String>) callSite.getTarget().invokeExact();
 
-                MethodHandles.Lookup stringCaller = trustedLookup.in(String.class);
-                MethodHandle coder = stringCaller.findSpecial(
+                MethodHandle coder = lookup.findSpecial(
                         String.class,
                         "coder",
                         MethodType.methodType(byte.class),
                         String.class
                 );
                 CallSite applyAsInt = LambdaMetafactory.metafactory(
-                        stringCaller,
+                        lookup,
                         "applyAsInt",
                         MethodType.methodType(ToIntFunction.class),
                         MethodType.methodType(int.class, Object.class),
@@ -206,14 +205,14 @@ public class JDKUtils {
                 );
                 stringCoder = (ToIntFunction<String>) applyAsInt.getTarget().invokeExact();
 
-                MethodHandle value = stringCaller.findSpecial(
+                MethodHandle value = lookup.findSpecial(
                         String.class,
                         "value",
                         MethodType.methodType(byte[].class),
                         String.class
                 );
                 CallSite apply = LambdaMetafactory.metafactory(
-                        stringCaller,
+                        lookup,
                         "apply",
                         MethodType.methodType(Function.class),
                         value.type().generic(),
@@ -224,7 +223,6 @@ public class JDKUtils {
             }
         } catch (Throwable e) {
             initErrorLast = e;
-            e.printStackTrace();
             // ignored
         }
 
