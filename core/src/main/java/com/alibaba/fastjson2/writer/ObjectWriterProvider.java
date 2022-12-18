@@ -49,7 +49,7 @@ public class ObjectWriterProvider
             case "asm":
             default:
                 try {
-                    if (!JDKUtils.ANDROID) {
+                    if (!JDKUtils.ANDROID && !JDKUtils.GRAAL) {
                         creator = ObjectWriterCreatorASM.INSTANCE;
                     }
                 } catch (Throwable ignored) {

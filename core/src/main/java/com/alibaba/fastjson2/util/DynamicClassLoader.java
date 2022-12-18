@@ -190,6 +190,10 @@ public class DynamicClassLoader
         return true;
     }
 
+    public void register(Class objectClass) {
+        classMapping.put(objectClass.getName(), objectClass);
+    }
+
     public static DynamicClassLoader getInstance() {
         return instance;
     }

@@ -21,6 +21,7 @@ public class JDKUtils {
     static final Class<?> CLASS_SQL_ROW_SET;
     public static final boolean HAS_SQL;
     public static final boolean ANDROID;
+    public static final boolean GRAAL;
 
     // Android not support
     public static final Class CLASS_TRANSIENT;
@@ -43,12 +44,13 @@ public class JDKUtils {
 
     static {
         int jvmVersion = -1;
-        boolean openj9 = false, android = false;
+        boolean openj9 = false, android = false, graal = false;
         try {
             String jmvName = System.getProperty("java.vm.name");
             openj9 = jmvName.contains("OpenJ9");
             android = jmvName.equals("Dalvik");
-            if (openj9 || android) {
+            graal = jmvName.equals("Substrate VM");
+            if (openj9 || android || graal) {
                 FIELD_STRING_ERROR = true;
             }
 
@@ -66,6 +68,7 @@ public class JDKUtils {
 
         OPEN_J9 = openj9;
         ANDROID = android;
+        GRAAL = graal;
 
         boolean hasJavaSql = true;
         Class dataSourceClass = null;
