@@ -56,6 +56,9 @@
         <module>adapter</module>
         <module>benchmark</module>
         <module>core</module>
+        <!--
+            <module>example-graalvm-native</module>
+        -->
         <module>example-spring-test</module>
         <!--
             <module>example-spring6-test</module>
