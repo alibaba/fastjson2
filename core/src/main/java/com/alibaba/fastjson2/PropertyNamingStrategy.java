@@ -7,6 +7,10 @@ package com.alibaba.fastjson2;
 public enum PropertyNamingStrategy {
     CamelCase,
     /**
+     * for fastjson 1.x compatible
+     */
+    CamelCase1x,
+    /**
      * Using this naming policy with FASTJSON will ensure that the first "letter" of the Java field name is capitalized when serialized to its JSON form.
      * Here are a few examples of the form "Java Field Name" ---&gt; "JSON Field Name":
      * someFieldName ---&gt; SomeFieldName

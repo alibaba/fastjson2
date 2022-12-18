@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue3436 {
     @Test
     public void test_for_issue() throws Exception {
-        com.alibaba.fastjson2.JSON.mixIn(FileSystemResource.class, FileSystemResourceMixedIn.class);
+        com.alibaba.fastjson.JSON.addMixInAnnotations(FileSystemResource.class, FileSystemResourceMixedIn.class);
 
         FileSystemResource fileSystemResource = new FileSystemResource("E:\\my-code\\test\\test-fastjson.txt");
 

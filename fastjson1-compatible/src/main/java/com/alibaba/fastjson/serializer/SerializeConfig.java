@@ -2,7 +2,6 @@ package com.alibaba.fastjson.serializer;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.PropertyNamingStrategy;
-import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -14,6 +13,7 @@ import java.lang.reflect.Type;
 public class SerializeConfig {
     public static final SerializeConfig global = new SerializeConfig(null);
     public static final SerializeConfig globalInstance = global;
+    public static final ObjectWriterProvider DEFAULT_PROVIDER = new ObjectWriterProvider(com.alibaba.fastjson2.PropertyNamingStrategy.CamelCase1x);
 
     public final boolean fieldBased;
     public PropertyNamingStrategy propertyNamingStrategy;
@@ -40,7 +40,7 @@ public class SerializeConfig {
     public ObjectWriterProvider getProvider() {
         ObjectWriterProvider provider = this.provider;
         if (provider == null) {
-            provider = JSONFactory.getDefaultObjectWriterProvider();
+            provider = DEFAULT_PROVIDER;
         }
         return provider;
     }
@@ -48,7 +48,7 @@ public class SerializeConfig {
     public boolean put(Type type, ObjectSerializer value) {
         ObjectWriterProvider provider = this.provider;
         if (provider == null) {
-            provider = JSONFactory.getDefaultObjectWriterProvider();
+            provider = DEFAULT_PROVIDER;
         }
         return provider.register(type, new ObjectSerializerAdapter(value), fieldBased) == null;
     }

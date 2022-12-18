@@ -6,7 +6,6 @@ import com.alibaba.fastjson.parser.deserializer.ParseProcess;
 import com.alibaba.fastjson.serializer.*;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -86,14 +85,14 @@ public class JSONTest {
         assertEquals("123", JSON.toJSONString(bean));
 
         {
-            ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(BeanAware.class);
+            ObjectWriter objectWriter = SerializeConfig.DEFAULT_PROVIDER.getObjectWriter(BeanAware.class);
             JSONWriter jsonWriter = JSONWriter.of();
             objectWriter.write(jsonWriter, null, null, null, 0);
             assertEquals("null", jsonWriter.toString());
         }
 
         {
-            ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(BeanAware.class);
+            ObjectWriter objectWriter = SerializeConfig.DEFAULT_PROVIDER.getObjectWriter(BeanAware.class);
             JSONWriter jsonWriter = JSONWriter.ofJSONB();
             objectWriter.writeJSONB(jsonWriter, null, null, null, 0);
             byte[] bytes = jsonWriter.getBytes();
