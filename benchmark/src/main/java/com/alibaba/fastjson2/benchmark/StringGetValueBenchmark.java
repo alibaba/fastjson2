@@ -22,7 +22,7 @@ public class StringGetValueBenchmark {
         try {
             valueField = String.class.getDeclaredField("value");
             valueField.setAccessible(true);
-            valueFieldOffset = UnsafeUtils.UNSAFE.objectFieldOffset(valueField);
+            valueFieldOffset = UnsafeUtils.objectFieldOffset(valueField);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
@@ -55,7 +55,7 @@ public class StringGetValueBenchmark {
 
     @Benchmark
     public char[] unsafe() throws Exception {
-        return (char[]) UnsafeUtils.UNSAFE.getObject(STR, valueFieldOffset);
+        return (char[]) UnsafeUtils.getObject(STR, valueFieldOffset);
 //        for (int i = 0; i < chars.length; i++) {
 //            char ch = chars[i];
 //        }

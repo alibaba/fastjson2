@@ -22,7 +22,7 @@ public class StringCreateBenchmark {
         try {
             Field field = String.class.getDeclaredField("value");
             field.setAccessible(true);
-            valueOffset = UnsafeUtils.UNSAFE.objectFieldOffset(field);
+            valueOffset = UnsafeUtils.objectFieldOffset(field);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
@@ -66,8 +66,8 @@ public class StringCreateBenchmark {
 
     @Benchmark
     public String unsafe() throws Exception {
-        String str = (String) UnsafeUtils.UNSAFE.allocateInstance(String.class);
-        UnsafeUtils.UNSAFE.putObject(str, valueOffset, chars);
+        String str = (String) UnsafeUtils.allocateInstance(String.class);
+        UnsafeUtils.putObject(str, valueOffset, chars);
         return str;
     }
 

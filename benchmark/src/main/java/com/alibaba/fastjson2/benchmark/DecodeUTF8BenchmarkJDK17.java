@@ -29,7 +29,7 @@ public class DecodeUTF8BenchmarkJDK17 {
     static {
         try {
             Field valueField = String.class.getDeclaredField("value");
-            valueFieldOffset = UnsafeUtils.UNSAFE.objectFieldOffset(valueField);
+            valueFieldOffset = UnsafeUtils.objectFieldOffset(valueField);
             stringCreator = getStringCreatorJDK17();
         } catch (Throwable e) {
             e.printStackTrace();
