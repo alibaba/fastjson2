@@ -56,17 +56,17 @@
         <module>adapter</module>
         <module>benchmark</module>
         <module>core</module>
-        <module>extension</module>
-        <module>extension-spring5</module>
+        <module>example-spring-test</module>
         <!--
-        <module>extension-spring6</module>
+            <module>example-spring6-test</module>
         -->
+        <module>extension</module>
+        <!--
+            <module>extension-spring6</module>
+        -->
+        <module>extension-spring5</module>
         <module>fastjson1-compatible</module>
         <module>kotlin</module>
-        <module>spring-test</module>
-        <!--
-        <module>spring6-test</module>
-        -->
     </modules>
 
     <organization>

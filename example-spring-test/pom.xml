@@ -10,9 +10,9 @@
     </parent>
 
     <groupId>com.com.alibaba.fastjson2</groupId>
-    <artifactId>exsample-springtest</artifactId>
-    <name>spring-test</name>
-    <description>spring-test</description>
+    <artifactId>example-spring-test</artifactId>
+    <name>example-spring-test</name>
+    <description>example-spring-test</description>
     <properties>
         <java.version>8</java.version>
         <maven.deploy.skip>true</maven.deploy.skip>
