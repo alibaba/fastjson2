@@ -573,7 +573,7 @@ public class ObjectReaderProvider
             case "asm":
             default:
                 try {
-                    if (!JDKUtils.ANDROID) {
+                    if (!JDKUtils.ANDROID && !JDKUtils.GRAAL) {
                         creator = ObjectReaderCreatorASM.INSTANCE;
                     }
                 } catch (Throwable ignored) {

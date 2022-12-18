@@ -25,7 +25,7 @@ import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectReaderCreator {
-    public static final boolean JIT = JDKUtils.ANDROID;
+    public static final boolean JIT = !JDKUtils.ANDROID && !JDKUtils.GRAAL;
     public static final ObjectReaderCreator INSTANCE = new ObjectReaderCreator();
 
     protected AtomicInteger jitErrorCount = new AtomicInteger();

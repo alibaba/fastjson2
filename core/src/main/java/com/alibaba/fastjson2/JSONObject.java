@@ -1439,12 +1439,19 @@ public class JSONObject
         final String methodName = method.getName();
         int parameterCount = method.getParameterCount();
 
+        Class<?> returnType = method.getReturnType();
         if (parameterCount == 1) {
             if ("equals".equals(methodName)) {
                 return this.equals(args[0]);
             }
 
-            if (method.getReturnType() != void.class) {
+            Class proxyInterface = null;
+            Class<?>[] interfaces = proxy.getClass().getInterfaces();
+            if (interfaces.length == 1) {
+                proxyInterface = interfaces[0];
+            }
+
+            if (returnType != void.class && returnType != proxyInterface) {
                 throw new JSONException("This method '" + methodName + "' is not a setter");
             }
 
@@ -1465,11 +1472,16 @@ public class JSONObject
             }
 
             put(name, args[0]);
+
+            if (returnType != void.class) {
+                return proxy;
+            }
+
             return null;
         }
 
         if (parameterCount == 0) {
-            if (method.getReturnType() == void.class) {
+            if (returnType == void.class) {
                 throw new JSONException("This method '" + methodName + "' is not a getter");
             }
 

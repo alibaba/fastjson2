@@ -366,7 +366,7 @@ public final class JSONFactory {
                 break;
             default:
                 try {
-                    if (!JDKUtils.ANDROID) {
+                    if (!JDKUtils.ANDROID && !JDKUtils.GRAAL) {
                         compiler = JSONPathCompilerReflectASM.INSTANCE;
                     }
                 } catch (Throwable ignored) {
