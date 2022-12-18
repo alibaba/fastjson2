@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
@@ -34,10 +35,15 @@ public class ObjectWriterProvider
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
     final ObjectWriterCreator creator;
     final List<ObjectWriterModule> modules = new ArrayList<>();
+    PropertyNamingStrategy namingStrategy;
 
     volatile long userDefineMask;
 
     public ObjectWriterProvider() {
+        this((PropertyNamingStrategy) null);
+    }
+
+    public ObjectWriterProvider(PropertyNamingStrategy namingStrategy) {
         init();
 
         ObjectWriterCreator creator = null;
@@ -61,6 +67,7 @@ public class ObjectWriterProvider
                 break;
         }
         this.creator = creator;
+        this.namingStrategy = namingStrategy;
     }
 
     public ObjectWriterProvider(ObjectWriterCreator creator) {
@@ -203,6 +210,10 @@ public class ObjectWriterProvider
     }
 
     public void getBeanInfo(BeanInfo beanInfo, Class objectClass) {
+        if (namingStrategy != null && namingStrategy != PropertyNamingStrategy.NeverUseThisValueExceptDefaultValue) {
+            beanInfo.namingStrategy = namingStrategy.name();
+        }
+
         for (ObjectWriterModule module : modules) {
             ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor == null) {

@@ -83,10 +83,11 @@ public abstract class JSON {
         }
         readerProvider.register(new Fastjson1xReaderModule(readerProvider));
 
-        ObjectWriterProvider writerProvider = JSONFactory.getDefaultObjectWriterProvider();
+        ObjectWriterProvider writerProvider = SerializeConfig.DEFAULT_PROVIDER;
         if (!android) {
             writerProvider.register(AwtWriterModule.INSTANCE);
         }
+
         writerProvider.register(new Fastjson1xWriterModule(writerProvider));
     }
 
@@ -1072,7 +1073,9 @@ public abstract class JSON {
         }
 
         if (config.propertyNamingStrategy != null
-                && config.propertyNamingStrategy != PropertyNamingStrategy.NeverUseThisValueExceptDefaultValue) {
+                && config.propertyNamingStrategy != PropertyNamingStrategy.NeverUseThisValueExceptDefaultValue
+                && config.propertyNamingStrategy != PropertyNamingStrategy.CamelCase1x
+        ) {
             NameFilter nameFilter = NameFilter.of(config.propertyNamingStrategy);
             configFilter(context, nameFilter);
         }
@@ -2135,7 +2138,7 @@ public abstract class JSON {
             ObjectReaderProvider readerProvider = JSONFactory.getDefaultObjectReaderProvider();
             readerProvider.mixIn((Class) target, (Class) mixinSource);
 
-            ObjectWriterProvider writerProvider = JSONFactory.getDefaultObjectWriterProvider();
+            ObjectWriterProvider writerProvider = SerializeConfig.DEFAULT_PROVIDER;
             writerProvider.mixIn((Class) target, (Class) mixinSource);
         }
     }

@@ -1097,6 +1097,15 @@ public abstract class BeanUtils {
                 }
                 return new String(chars);
             }
+            case "CamelCase1x": {
+                char[] chars = new char[methodNameLength - prefixLength];
+                methodName.getChars(prefixLength, methodNameLength, chars, 0);
+                char c0 = chars[0];
+                if (c0 >= 'A' && c0 <= 'Z') {
+                    chars[0] = (char) (c0 + 32);
+                }
+                return new String(chars);
+            }
             case "PascalCase": {
                 return pascal(methodName, methodNameLength, prefixLength);
             }
@@ -1163,6 +1172,9 @@ public abstract class BeanUtils {
         if (namingStrategy == null) {
             namingStrategy = "CamelCase";
         }
+        if (methodName == null || methodName.isEmpty()) {
+            return methodName;
+        }
 
         switch (namingStrategy) {
             case "NoChange":
@@ -1173,6 +1185,15 @@ public abstract class BeanUtils {
                 if (c0 >= 'A' && c0 <= 'Z'
                         && methodName.length() > 1
                         && (c1 < 'A' || c1 > 'Z')) {
+                    char[] chars = methodName.toCharArray();
+                    chars[0] = (char) (c0 + 32);
+                    return new String(chars);
+                }
+                return methodName;
+            }
+            case "CamelCase1x": {
+                char c0 = methodName.charAt(0);
+                if (c0 >= 'A' && c0 <= 'Z' && methodName.length() > 1) {
                     char[] chars = methodName.toCharArray();
                     chars[0] = (char) (c0 + 32);
                     return new String(chars);
