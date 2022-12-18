@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.benchmark.fastcode;
 
+import com.alibaba.fastjson2.benchmark.LambdaGenerator;
 import com.alibaba.fastjson2.util.JDKUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -33,6 +34,14 @@ public class InvokeFirst {
         );
         ObjIntConsumer function = (ObjIntConsumer) callSite.getTarget().invoke();
 
+        Bean bean = new Bean();
+        function.accept(bean, 123);
+        bh.consume(bean);
+    }
+
+    @Benchmark
+    public void genLambdaASM(Blackhole bh) throws Throwable {
+        ObjIntConsumer<Bean> function = LambdaGenerator.createSetterInt(Bean.class, "setId");
         Bean bean = new Bean();
         function.accept(bean, 123);
         bh.consume(bean);

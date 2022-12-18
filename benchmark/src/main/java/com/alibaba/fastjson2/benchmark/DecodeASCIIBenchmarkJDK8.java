@@ -22,7 +22,7 @@ public class DecodeASCIIBenchmarkJDK8 {
     static {
         try {
             Field valueField = String.class.getDeclaredField("value");
-            valueFieldOffset = UnsafeUtils.UNSAFE.objectFieldOffset(valueField);
+            valueFieldOffset = UnsafeUtils.objectFieldOffset(valueField);
         } catch (Throwable e) {
             e.printStackTrace();
         }
