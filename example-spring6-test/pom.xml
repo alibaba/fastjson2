@@ -12,8 +12,8 @@
     <groupId>com.example</groupId>
     <artifactId>spring6test</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>exsample-spring6test</name>
-    <description>spring6test</description>
+    <name>example-spring6-test</name>
+    <description>example-spring6-test</description>
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
