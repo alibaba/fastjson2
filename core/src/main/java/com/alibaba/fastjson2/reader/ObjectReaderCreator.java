@@ -25,6 +25,7 @@ import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectReaderCreator {
+    public static final boolean JIT = JDKUtils.ANDROID;
     public static final ObjectReaderCreator INSTANCE = new ObjectReaderCreator();
 
     protected AtomicInteger jitErrorCount = new AtomicInteger();
@@ -548,8 +549,9 @@ public class ObjectReaderCreator {
                 }
             }
 
+            boolean jit = JIT;
             Function function = null;
-            if (defaultValue == null) {
+            if (defaultValue == null && jit) {
                 if (valueClass == int.class) {
                     IntFunction intFunction = null;
                     if (beanInfo.creatorConstructor != null) {
@@ -574,7 +576,7 @@ public class ObjectReaderCreator {
                 }
             }
 
-            if (!valueClass.isPrimitive()) {
+            if (jit && !valueClass.isPrimitive()) {
                 if (beanInfo.creatorConstructor != null) {
                     function = createValueFunction(beanInfo.creatorConstructor, valueClass);
                 } else if (beanInfo.createMethod != null) {
@@ -1475,6 +1477,8 @@ public class ObjectReaderCreator {
     }
 
     public <T> Supplier<T> createSupplier(Constructor constructor, boolean jit) {
+        jit &= JIT;
+
         if (jit) {
             Class declaringClass = constructor.getDeclaringClass();
             MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);

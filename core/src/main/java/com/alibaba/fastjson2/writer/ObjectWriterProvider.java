@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.GuavaSupport;
+import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
@@ -48,7 +49,9 @@ public class ObjectWriterProvider
             case "asm":
             default:
                 try {
-                    creator = ObjectWriterCreatorASM.INSTANCE;
+                    if (!JDKUtils.ANDROID) {
+                        creator = ObjectWriterCreatorASM.INSTANCE;
+                    }
                 } catch (Throwable ignored) {
                     // ignored
                 }

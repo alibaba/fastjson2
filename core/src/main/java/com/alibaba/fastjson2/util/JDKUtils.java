@@ -20,6 +20,7 @@ public class JDKUtils {
     static final Class<?> CLASS_SQL_DATASOURCE;
     static final Class<?> CLASS_SQL_ROW_SET;
     public static final boolean HAS_SQL;
+    public static final boolean ANDROID;
 
     // Android not support
     public static final Class CLASS_TRANSIENT;
@@ -42,23 +43,29 @@ public class JDKUtils {
 
     static {
         int jvmVersion = -1;
-        boolean openj9 = false;
+        boolean openj9 = false, android = false;
         try {
-            String property = System.getProperty("java.specification.version");
-            if (property.startsWith("1.")) {
-                property = property.substring(2);
-            }
-            jvmVersion = Integer.parseInt(property);
-
             String jmvName = System.getProperty("java.vm.name");
             openj9 = jmvName.contains("OpenJ9");
-            if (openj9) {
+            android = jmvName.equals("Dalvik");
+            if (openj9 || android) {
                 FIELD_STRING_ERROR = true;
             }
+
+            String javaSpecVer = System.getProperty("java.specification.version");
+            // android is 0.9
+            if (javaSpecVer.startsWith("1.")) {
+                javaSpecVer = javaSpecVer.substring(2);
+            }
+            if (javaSpecVer.indexOf('.') == -1) {
+                jvmVersion = Integer.parseInt(javaSpecVer);
+            }
         } catch (Throwable ignored) {
+            initErrorLast = ignored;
         }
 
         OPEN_J9 = openj9;
+        ANDROID = android;
 
         boolean hasJavaSql = true;
         Class dataSourceClass = null;
@@ -66,7 +73,7 @@ public class JDKUtils {
         try {
             dataSourceClass = Class.forName("javax.sql.DataSource");
             rowSetClass = Class.forName("javax.sql.RowSet");
-        } catch (Throwable e) {
+        } catch (Throwable ignored) {
             hasJavaSql = false;
         }
         CLASS_SQL_DATASOURCE = dataSourceClass;
@@ -74,9 +81,11 @@ public class JDKUtils {
         HAS_SQL = hasJavaSql;
 
         Class transientClass = null;
-        try {
-            transientClass = Class.forName("java.beans.Transient");
-        } catch (Throwable ignored) {
+        if (!android) {
+            try {
+                transientClass = Class.forName("java.beans.Transient");
+            } catch (Throwable ignored) {
+            }
         }
         CLASS_TRANSIENT = transientClass;
 
@@ -156,7 +165,7 @@ public class JDKUtils {
             }
 
             boolean lookupLambda = false;
-            if (JVM_VERSION > 8 && trustedLookup != null) {
+            if (JVM_VERSION > 8 && trustedLookup != null && !android) {
                 try {
                     Field compact_strings_field = String.class.getDeclaredField("COMPACT_STRINGS");
                     if (compact_strings_field != null) {
@@ -168,9 +177,8 @@ public class JDKUtils {
                             compact_strings = (Boolean) compact_strings_field.get(null);
                         }
                     }
-                } catch (Throwable e) {
-                    initErrorLast = e;
-                    // ignored
+                } catch (Throwable ignored) {
+                    initErrorLast = ignored;
                 }
                 lookupLambda = compact_strings != null && compact_strings.booleanValue();
             }
@@ -222,9 +230,8 @@ public class JDKUtils {
                 );
                 stringValue = (Function<String, byte[]>) apply.getTarget().invokeExact();
             }
-        } catch (Throwable e) {
-            initErrorLast = e;
-            // ignored
+        } catch (Throwable ignored) {
+            initErrorLast = ignored;
         }
 
         STRING_CREATOR_JDK8 = stringCreatorJDK8;
