@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderBean;
 import com.alibaba.fastjson2.reader.ObjectReaderNoneDefaultConstructor;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.MultiType;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
@@ -3178,7 +3179,7 @@ public interface JSON {
             }
         }
 
-        ObjectWriter objectWriter = defaultObjectWriterProvider.getObjectWriter(objectClass, targetClass, fieldBased);
+        ObjectWriter objectWriter = defaultObjectWriterProvider.getObjectWriter(objectClass, objectClass, fieldBased);
         ObjectReader objectReader = defaultObjectReaderProvider.getObjectReader(targetClass, fieldBased);
 
         if (objectWriter instanceof ObjectWriterAdapter && objectReader instanceof ObjectReaderBean) {
@@ -3202,7 +3203,15 @@ public interface JSON {
                 }
 
                 Object fieldValue = fieldWriter.getFieldValue(object);
-                Object fieldValueCopied = copy(fieldValue);
+
+                Object fieldValueCopied;
+                if (fieldWriter.fieldClass == Date.class
+                        && fieldReader.fieldClass == String.class) {
+                    fieldValueCopied = DateUtils.format((Date) fieldValue, fieldWriter.format);
+                } else {
+                    fieldValueCopied = copy(fieldValue);
+                }
+
                 fieldReader.accept(instance, fieldValueCopied);
             }
 

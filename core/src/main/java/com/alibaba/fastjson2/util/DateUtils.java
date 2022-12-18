@@ -5,10 +5,12 @@ import com.alibaba.fastjson2.reader.ObjectReaderImplDate;
 
 import java.nio.charset.StandardCharsets;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.TimeZone;
 
+import static com.alibaba.fastjson2.util.DateUtils.DateTimeFormatPattern.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.IOUtils.OFFSET_0800_TOTAL_SECONDS;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
@@ -3120,6 +3122,348 @@ public class DateUtils {
                 + second;
     }
 
+    public static String format(Date date, String format) {
+        if (date == null) {
+            return null;
+        }
+
+        switch (format) {
+            case "yyyy-MM-dd HH:mm:ss": {
+                return format(date.getTime(), DATE_TIME_FORMAT_19);
+            }
+            case "yyyy-MM-ddTHH:mm:ss":
+            case "yyyy-MM-dd'T'HH:mm:ss": {
+                return format(date.getTime(), DATE_TIME_FORMAT_19_T);
+            }
+            case "yyyy-MM-dd":
+                return format(date.getTime(), DATE_FORMAT_10_DASH);
+            case "yyyy/MM/dd":
+                return format(date.getTime(), DATE_FORMAT_10_SLASH);
+            case "dd.MM.yyyy":
+                return format(date.getTime(), DATE_FORMAT_10_DOT);
+            default:
+                break;
+        }
+
+        if (date == null) {
+            return null;
+        }
+
+        long epochMilli = date.getTime();
+        if (format == null) {
+            toString(epochMilli, false, DEFAULT_ZONE_ID);
+        }
+
+        Instant instant = Instant.ofEpochMilli(epochMilli);
+        ZoneId zoneId = DEFAULT_ZONE_ID;
+        ZonedDateTime zdt = instant.atZone(zoneId);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+        return formatter.format(zdt);
+    }
+
+    public static String format(ZonedDateTime zdt, String format) {
+        if (zdt == null) {
+            return null;
+        }
+
+        int year = zdt.getYear();
+        int month = zdt.getMonthValue();
+        int dayOfMonth = zdt.getDayOfMonth();
+
+        switch (format) {
+            case "yyyy-MM-dd HH:mm:ss": {
+                int hour = zdt.getHour();
+                int minute = zdt.getMinute();
+                int second = zdt.getSecond();
+                return format(year, month, dayOfMonth, hour, minute, second, DATE_TIME_FORMAT_19);
+            }
+            case "yyyy-MM-ddTHH:mm:ss":
+            case "yyyy-MM-dd'T'HH:mm:ss": {
+                int hour = zdt.getHour();
+                int minute = zdt.getMinute();
+                int second = zdt.getSecond();
+                return format(year, month, dayOfMonth, hour, minute, second, DATE_TIME_FORMAT_19_T);
+            }
+            case "yyyy-MM-dd":
+                return format(year, month, dayOfMonth, DATE_FORMAT_10_DASH);
+            case "yyyy/MM/dd":
+                return format(year, month, dayOfMonth, DATE_FORMAT_10_SLASH);
+            case "dd.MM.yyyy":
+                return format(year, month, dayOfMonth, DATE_FORMAT_10_DOT);
+            default:
+                break;
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+        return formatter.format(zdt);
+    }
+
+    public static String format(int year, int month, int dayOfMonth) {
+        return format(year, month, dayOfMonth, DATE_FORMAT_10_DASH);
+    }
+
+    public static String format(
+            int year,
+            int month,
+            int dayOfMonth,
+            DateTimeFormatPattern pattern
+    ) {
+        int y0 = year / 1000 + '0';
+        int y1 = (year / 100) % 10 + '0';
+        int y2 = (year / 10) % 10 + '0';
+        int y3 = year % 10 + '0';
+        int m0 = month / 10 + '0';
+        int m1 = month % 10 + '0';
+        int d0 = dayOfMonth / 10 + '0';
+        int d1 = dayOfMonth % 10 + '0';
+
+        if (STRING_CREATOR_JDK11 != null) {
+            byte[] bytes = new byte[10];
+            if (pattern == DATE_FORMAT_10_DOT) {
+                bytes[0] = (byte) d0;
+                bytes[1] = (byte) d1;
+                bytes[2] = '.';
+                bytes[3] = (byte) m0;
+                bytes[4] = (byte) m1;
+                bytes[5] = '.';
+                bytes[6] = (byte) y0;
+                bytes[7] = (byte) y1;
+                bytes[8] = (byte) y2;
+                bytes[9] = (byte) y3;
+            } else {
+                byte separator = (byte) (pattern == DATE_FORMAT_10_DASH ? '-' : '/');
+                bytes[0] = (byte) y0;
+                bytes[1] = (byte) y1;
+                bytes[2] = (byte) y2;
+                bytes[3] = (byte) y3;
+                bytes[4] = separator;
+                bytes[5] = (byte) m0;
+                bytes[6] = (byte) m1;
+                bytes[7] = separator;
+                bytes[8] = (byte) d0;
+                bytes[9] = (byte) d1;
+            }
+
+            return STRING_CREATOR_JDK11.apply(bytes, LATIN1);
+        }
+
+        char[] chars = new char[10];
+        if (pattern == DATE_FORMAT_10_DOT) {
+            chars[0] = (char) d0;
+            chars[1] = (char) d1;
+            chars[2] = '.';
+            chars[3] = (char) m0;
+            chars[4] = (char) m1;
+            chars[5] = '.';
+            chars[6] = (char) y0;
+            chars[7] = (char) y1;
+            chars[8] = (char) y2;
+            chars[9] = (char) y3;
+        } else {
+            char separator = (pattern == DATE_FORMAT_10_DASH ? '-' : '/');
+            chars[0] = (char) y0;
+            chars[1] = (char) y1;
+            chars[2] = (char) y2;
+            chars[3] = (char) y3;
+            chars[4] = separator;
+            chars[5] = (char) m0;
+            chars[6] = (char) m1;
+            chars[7] = separator;
+            chars[8] = (char) d0;
+            chars[9] = (char) d1;
+        }
+
+        if (STRING_CREATOR_JDK8 != null) {
+            return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+        }
+
+        return new String(chars);
+    }
+
+    public static String format(long timeMillis) {
+        return format(timeMillis, DateTimeFormatPattern.DATE_TIME_FORMAT_19);
+    }
+
+    public static String format(Date date) {
+        if (date == null) {
+            return null;
+        }
+        return format(date.getTime(), DateTimeFormatPattern.DATE_TIME_FORMAT_19);
+    }
+
+    public static String format(long timeMillis, DateTimeFormatPattern pattern) {
+        ZoneId zoneId = DEFAULT_ZONE_ID;
+        final int SECONDS_PER_DAY = 60 * 60 * 24;
+
+        long epochSecond = Math.floorDiv(timeMillis, 1000L);
+        int offsetTotalSeconds;
+        if (zoneId == IOUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == IOUtils.SHANGHAI_ZONE_RULES) {
+            offsetTotalSeconds = IOUtils.getShanghaiZoneOffsetTotalSeconds(epochSecond);
+        } else {
+            Instant instant = Instant.ofEpochMilli(timeMillis);
+            offsetTotalSeconds = zoneId.getRules().getOffset(instant).getTotalSeconds();
+        }
+
+        long localSecond = epochSecond + offsetTotalSeconds;
+        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+        int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+        int year, month, dayOfMonth;
+        {
+            final int DAYS_PER_CYCLE = 146097;
+            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
+
+            long zeroDay = localEpochDay + DAYS_0000_TO_1970;
+            // find the march-based year
+            zeroDay -= 60;  // adjust to 0000-03-01 so leap day is at end of four year cycle
+            long adjust = 0;
+            if (zeroDay < 0) {
+                // adjust negative years to positive for calculation
+                long adjustCycles = (zeroDay + 1) / DAYS_PER_CYCLE - 1;
+                adjust = adjustCycles * 400;
+                zeroDay += -adjustCycles * DAYS_PER_CYCLE;
+            }
+            long yearEst = (400 * zeroDay + 591) / DAYS_PER_CYCLE;
+            long doyEst = zeroDay - (365 * yearEst + yearEst / 4 - yearEst / 100 + yearEst / 400);
+            if (doyEst < 0) {
+                // fix estimate
+                yearEst--;
+                doyEst = zeroDay - (365 * yearEst + yearEst / 4 - yearEst / 100 + yearEst / 400);
+            }
+            yearEst += adjust;  // reset any negative year
+            int marchDoy0 = (int) doyEst;
+
+            // convert march-based values back to january-based
+            int marchMonth0 = (marchDoy0 * 5 + 2) / 153;
+            month = (marchMonth0 + 2) % 12 + 1;
+            dayOfMonth = marchDoy0 - (marchMonth0 * 306 + 5) / 10 + 1;
+            yearEst += marchMonth0 / 10;
+
+            // check year now we are certain it is correct
+            if (yearEst < Year.MIN_VALUE || yearEst > Year.MAX_VALUE) {
+                throw new DateTimeException("Invalid year " + yearEst);
+            }
+
+            year = (int) yearEst;
+        }
+
+        if (pattern == DATE_FORMAT_10_DASH || pattern == DATE_FORMAT_10_SLASH || pattern == DATE_FORMAT_10_DOT) {
+            return format(year, month, dayOfMonth, pattern);
+        }
+
+        int hour, minute, second;
+        {
+            final int MINUTES_PER_HOUR = 60;
+            final int SECONDS_PER_MINUTE = 60;
+            final int SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
+
+            long secondOfDay = secsOfDay;
+            if (secondOfDay < 0 || secondOfDay > 86399) {
+                throw new DateTimeException("Invalid secondOfDay " + secondOfDay);
+            }
+            int hours = (int) (secondOfDay / SECONDS_PER_HOUR);
+            secondOfDay -= hours * SECONDS_PER_HOUR;
+            int minutes = (int) (secondOfDay / SECONDS_PER_MINUTE);
+            secondOfDay -= minutes * SECONDS_PER_MINUTE;
+
+            hour = hours;
+            minute = minutes;
+            second = (int) secondOfDay;
+        }
+
+        return format(year, month, dayOfMonth, hour, minute, second, pattern);
+    }
+
+    public static String format(
+            int year,
+            int month,
+            int dayOfMonth,
+            int hour,
+            int minute,
+            int second
+    ) {
+        return format(year, month, dayOfMonth, hour, minute, second, DATE_TIME_FORMAT_19);
+    }
+
+    static String format(
+            int year,
+            int month,
+            int dayOfMonth,
+            int hour,
+            int minute,
+            int second,
+            DateTimeFormatPattern pattern
+    ) {
+        int y0 = year / 1000 + '0';
+        int y1 = (year / 100) % 10 + '0';
+        int y2 = (year / 10) % 10 + '0';
+        int y3 = year % 10 + '0';
+        int m0 = month / 10 + '0';
+        int m1 = month % 10 + '0';
+        int d0 = dayOfMonth / 10 + '0';
+        int d1 = dayOfMonth % 10 + '0';
+        int h0 = hour / 10 + '0';
+        int h1 = hour % 10 + '0';
+        int i0 = minute / 10 + '0';
+        int i1 = minute % 10 + '0';
+        int s0 = second / 10 + '0';
+        int s1 = second % 10 + '0';
+
+        char separator = pattern == DateTimeFormatPattern.DATE_TIME_FORMAT_19 ? ' ' : 'T';
+
+        if (STRING_CREATOR_JDK11 != null) {
+            byte[] bytes = new byte[19];
+            bytes[0] = (byte) y0;
+            bytes[1] = (byte) y1;
+            bytes[2] = (byte) y2;
+            bytes[3] = (byte) y3;
+            bytes[4] = '-';
+            bytes[5] = (byte) m0;
+            bytes[6] = (byte) m1;
+            bytes[7] = '-';
+            bytes[8] = (byte) d0;
+            bytes[9] = (byte) d1;
+            bytes[10] = (byte) separator;
+            bytes[11] = (byte) h0;
+            bytes[12] = (byte) h1;
+            bytes[13] = ':';
+            bytes[14] = (byte) i0;
+            bytes[15] = (byte) i1;
+            bytes[16] = ':';
+            bytes[17] = (byte) s0;
+            bytes[18] = (byte) s1;
+
+            return STRING_CREATOR_JDK11.apply(bytes, LATIN1);
+        }
+
+        char[] chars = new char[19];
+        chars[0] = (char) y0;
+        chars[1] = (char) y1;
+        chars[2] = (char) y2;
+        chars[3] = (char) y3;
+        chars[4] = '-';
+        chars[5] = (char) m0;
+        chars[6] = (char) m1;
+        chars[7] = '-';
+        chars[8] = (char) d0;
+        chars[9] = (char) d1;
+        chars[10] = separator;
+        chars[11] = (char) h0;
+        chars[12] = (char) h1;
+        chars[13] = ':';
+        chars[14] = (char) i0;
+        chars[15] = (char) i1;
+        chars[16] = ':';
+        chars[17] = (char) s0;
+        chars[18] = (char) s1;
+
+        if (STRING_CREATOR_JDK8 != null) {
+            return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+        }
+
+        return new String(chars);
+    }
+
     public static String toString(Date date) {
         return toString(date.getTime(), false, DEFAULT_ZONE_ID);
     }
@@ -3503,5 +3847,21 @@ public class DateUtils {
         }
 
         return h0 << 16 | h1;
+    }
+
+    public enum DateTimeFormatPattern {
+        DATE_FORMAT_10_DASH("yyyy-MM-dd", 10),
+        DATE_FORMAT_10_SLASH("yyyy/MM/dd", 10),
+        DATE_FORMAT_10_DOT("dd.MM.yyyy", 10),
+        DATE_TIME_FORMAT_19("yyyy-MM-dd HH:mm:ss", 19),
+        DATE_TIME_FORMAT_19_T("yyyy-MM-dd'T'HH:mm:ss", 19);
+
+        public final String pattern;
+        public final int length;
+
+        DateTimeFormatPattern(String pattern, int length) {
+            this.pattern = pattern;
+            this.length = length;
+        }
     }
 }
