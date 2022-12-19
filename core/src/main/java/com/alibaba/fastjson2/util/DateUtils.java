@@ -2754,7 +2754,7 @@ public class DateUtils {
     }
 
     public static long parseMillisYMDHMS19(String str, ZoneId zoneId) {
-        if (str == null || "null".equals(str)) {
+        if (str == null) {
             return 0;
         }
 
@@ -2764,6 +2764,7 @@ public class DateUtils {
             if (chars.length != 19) {
                 throw new DateTimeParseException("illegal input " + str, str, 0);
             }
+
             c0 = chars[0];
             c1 = chars[1];
             c2 = chars[2];
@@ -2783,7 +2784,10 @@ public class DateUtils {
             c16 = chars[16];
             c17 = chars[17];
             c18 = chars[18];
-        } else if (STRING_CODER != null && STRING_VALUE != null && STRING_CODER.applyAsInt(str) == 0) {
+        } else if (STRING_CODER != null
+                && STRING_CODER.applyAsInt(str) == 0
+                && STRING_VALUE != null
+        ) {
             byte[] bytes = JDKUtils.STRING_VALUE.apply(str);
             if (bytes.length != 19) {
                 throw new DateTimeParseException("illegal input " + str, str, 0);
@@ -2942,7 +2946,52 @@ public class DateUtils {
             dom = 1;
         }
 
-        return millis(zoneId, year, month, dom, hour, minute, second, 0);
+        long utcSeconds;
+        {
+            final int DAYS_PER_CYCLE = 146097;
+            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
+
+            long total = (365 * year)
+                    + ((year + 3) / 4 - (year + 99) / 100 + (year + 399) / 400)
+                    + ((367 * month - 362) / 12)
+                    + (dom - 1);
+
+            if (month > 2) {
+                total--;
+                boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
+                if (!leapYear) {
+                    total--;
+                }
+            }
+
+            long epochDay = total - DAYS_0000_TO_1970;
+            utcSeconds = epochDay * 86400
+                    + hour * 3600
+                    + minute * 60
+                    + second;
+        }
+
+        int zoneOffsetTotalSeconds;
+
+        if (zoneId == null) {
+            zoneId = DEFAULT_ZONE_ID;
+        }
+        boolean shanghai = zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES;
+        long SECONDS_1991_09_15_02 = 684900000; // utcMillis(1991, 9, 15, 2, 0, 0);
+        if (shanghai && utcSeconds >= SECONDS_1991_09_15_02) {
+            final int OFFSET_0800_TOTAL_SECONDS = 28800;
+            zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+        } else if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
+            zoneOffsetTotalSeconds = 0;
+        } else {
+            LocalDate localDate = LocalDate.of(year, month, dom);
+            LocalTime localTime = LocalTime.of(hour, minute, second, 0);
+            LocalDateTime ldt = LocalDateTime.of(localDate, localTime);
+            ZoneOffset offset = zoneId.getRules().getOffset(ldt);
+            zoneOffsetTotalSeconds = offset.getTotalSeconds();
+        }
+
+        return (utcSeconds - zoneOffsetTotalSeconds) * 1000L;
     }
 
     static long parseMillis19(
