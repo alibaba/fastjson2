@@ -29,6 +29,13 @@
         <url>https://github.com/alibaba/fastjson2</url>
         <connection>scm:git:https://git@github.com/alibaba/fastjson2.git</connection>
     </scm>
+
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
+    </properties>
+
     <organization>
         <name>Alibaba Group</name>
         <url>https://github.com/alibaba</url>
@@ -77,12 +84,6 @@
             <url>https://github.com/kraity</url>
         </developer>
     </developers>
-
-    <properties>
-        <java.version>17</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
-    </properties>
 
     <dependencyManagement>
         <dependencies>
