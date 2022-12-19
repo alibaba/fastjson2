@@ -3386,6 +3386,32 @@ public class DateUtils {
         return ldt;
     }
 
+    public static long millis(LocalDateTime ldt) {
+        return millis(
+                null,
+                ldt.getYear(),
+                ldt.getMonthValue(),
+                ldt.getDayOfMonth(),
+                ldt.getHour(),
+                ldt.getMinute(),
+                ldt.getSecond(),
+                ldt.getNano()
+        );
+    }
+
+    public static long millis(LocalDateTime ldt, ZoneId zoneId) {
+        return millis(
+                zoneId,
+                ldt.getYear(),
+                ldt.getMonthValue(),
+                ldt.getDayOfMonth(),
+                ldt.getHour(),
+                ldt.getMinute(),
+                ldt.getSecond(),
+                ldt.getNano()
+        );
+    }
+
     public static long millis(
             ZoneId zoneId,
             int year,

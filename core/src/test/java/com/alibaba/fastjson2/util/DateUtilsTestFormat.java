@@ -7,18 +7,19 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static com.alibaba.fastjson2.util.IOUtils.DEFAULT_ZONE_ID;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DateUtilsTestFormat {
     @Test
     public void autoCase() {
         Bean bean = JSONObject.of("date", "23/06/2012 12:13:14").to(Bean.class);
-        ZonedDateTime zdt = bean.date.toInstant().atZone(IOUtils.DEFAULT_ZONE_ID);
+        ZonedDateTime zdt = bean.date.toInstant().atZone(DEFAULT_ZONE_ID);
         assertEquals(23, zdt.getDayOfMonth());
         assertEquals(6, zdt.getMonthValue());
         assertEquals(2012, zdt.getYear());
@@ -32,7 +33,7 @@ public class DateUtilsTestFormat {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         String str = "23/06/2012 12:13:14";
         LocalDateTime ldt = LocalDateTime.parse(str, formatter);
-        long epochMilli = ldt.atZone(IOUtils.DEFAULT_ZONE_ID).toInstant().toEpochMilli();
+        long epochMilli = ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli();
 
         Bean bean = new Bean();
         bean.date = new Date(epochMilli);
@@ -52,12 +53,20 @@ public class DateUtilsTestFormat {
 
     @Test
     public void format1() {
+        assertSame(
+                ZoneId.of("Asia/Shanghai").getRules(),
+                ZoneId.of("Asia/Shanghai").getRules()
+        );
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         String str = "23/06/2012 12:13:14";
         LocalDateTime ldt = LocalDateTime.parse(str, formatter);
-        long epochMilli = ldt.atZone(IOUtils.DEFAULT_ZONE_ID).toInstant().toEpochMilli();
+        long epochMilli = ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli();
 
         Date date = new Date(epochMilli);
+
+        assertEquals(epochMilli, DateUtils.millis(ldt));
+        assertEquals(epochMilli, DateUtils.millis(ldt, DEFAULT_ZONE_ID));
 
         assertNull(DateUtils.format((Date) null));
         assertNull(DateUtils.formatYMDHMS19((Date) null));
@@ -85,7 +94,7 @@ public class DateUtilsTestFormat {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         String str = "23/06/2012 12:13:14";
         LocalDateTime ldt = LocalDateTime.parse(str, formatter);
-        ZonedDateTime zdt = ldt.atZone(IOUtils.DEFAULT_ZONE_ID);
+        ZonedDateTime zdt = ldt.atZone(DEFAULT_ZONE_ID);
 
         assertNull(DateUtils.formatYMDHMS19((Date) null));
         assertNull(DateUtils.format((ZonedDateTime) null, "yyyy-MM-dd HH:mm:ss"));
