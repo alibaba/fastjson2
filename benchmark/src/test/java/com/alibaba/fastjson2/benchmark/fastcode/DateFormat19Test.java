@@ -5,7 +5,7 @@ import org.openjdk.jmh.infra.Blackhole;
 public class DateFormat19Test {
     static final Blackhole BH = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
     static final DateFormat19 benchmark = new DateFormat19();
-    static final int COUNT = 10_000_000;
+    static final int COUNT = 100_000_000;
 
     public static void fastjsonFormat() throws Throwable {
         for (int j = 0; j < 5; j++) {
@@ -15,7 +15,21 @@ public class DateFormat19Test {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("DateFormat19-fastjsonFormat millis : " + millis);
-            // zulu8.58.0.13 : 4065
+            // zulu8.58.0.13 : 3112
+            // zulu11.52.13 :
+            // zulu17.38.21 :
+        }
+    }
+
+    public static void formatYMDHMS19() throws Throwable {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < COUNT; ++i) {
+                benchmark.formatYMDHMS19(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("DateFormat19-formatYMDHMS19 millis : " + millis);
+            // zulu8.58.0.13 : 3161
             // zulu11.52.13 :
             // zulu17.38.21 :
         }
@@ -29,7 +43,7 @@ public class DateFormat19Test {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("DateFormat19-fastjsonFormat2 millis : " + millis);
-            // zulu8.58.0.13 : 359
+            // zulu8.58.0.13 :
             // zulu11.52.13 :
             // zulu17.38.21 :
         }
@@ -43,14 +57,15 @@ public class DateFormat19Test {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("DateFormat19-javaTimeDateFormatter millis : " + millis);
-            // zulu8.58.0.13 : 2178
+            // zulu8.58.0.13 :
             // zulu11.52.13 :
             // zulu17.38.21 :
         }
     }
 
     public static void main(String[] args) throws Throwable {
-        fastjsonFormat();
+//        fastjsonFormat();
+        formatYMDHMS19();
 //        fastjsonFormat2();
 //        javaTimeDateFormatter();
     }

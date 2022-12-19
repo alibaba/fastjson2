@@ -33,6 +33,11 @@ public class DateFormat19 {
     }
 
     @Benchmark
+    public void formatYMDHMS19(Blackhole bh) throws Throwable {
+        bh.consume(DateUtils.formatYMDHMS19(DATE));
+    }
+
+    @Benchmark
     public void fastjsonFormat2(Blackhole bh) throws Throwable {
         bh.consume(DateUtils.format(DATE.getTime()));
     }
