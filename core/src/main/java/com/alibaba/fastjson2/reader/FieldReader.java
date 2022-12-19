@@ -265,6 +265,10 @@ public abstract class FieldReader<T>
         accept(object, Boolean.valueOf(value));
     }
 
+    public boolean supportAcceptType(Class valueClass) {
+        return fieldClass == valueClass;
+    }
+
     public void accept(T object, byte value) {
         accept(object, Byte.valueOf(value));
     }

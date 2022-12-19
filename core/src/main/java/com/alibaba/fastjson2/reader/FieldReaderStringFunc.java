@@ -87,4 +87,8 @@ final class FieldReaderStringFunc<T, V>
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readString();
     }
+
+    public boolean supportAcceptType(Class valueClass) {
+        return true;
+    }
 }

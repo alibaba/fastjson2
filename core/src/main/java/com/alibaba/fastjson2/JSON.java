@@ -3205,9 +3205,10 @@ public interface JSON {
                 Object fieldValue = fieldWriter.getFieldValue(object);
 
                 Object fieldValueCopied;
-                if (fieldWriter.fieldClass == Date.class
-                        && fieldReader.fieldClass == String.class) {
+                if (fieldWriter.fieldClass == Date.class && fieldReader.fieldClass == String.class) {
                     fieldValueCopied = DateUtils.format((Date) fieldValue, fieldWriter.format);
+                } else if (fieldValue == null || fieldReader.supportAcceptType(fieldValue.getClass())) {
+                    fieldValueCopied = fieldValue;
                 } else {
                     fieldValueCopied = copy(fieldValue);
                 }

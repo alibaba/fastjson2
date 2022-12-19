@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -37,6 +38,18 @@ public class DateUtilsTestFormat {
 
         BeanTo beanTo = JSON.copyTo(bean, BeanTo.class);
         assertEquals(str, beanTo.date);
+
+        Bean bean1 = JSON.copyTo(beanTo, Bean.class);
+        assertEquals(bean.date, bean1.date);
+
+        JSONPath path = JSONPath.of("$.date");
+
+        Bean bean2 = new Bean();
+        path.set(bean2, str);
+        assertEquals(bean.date, bean2.date);
+
+        Bean bean3 = JSONObject.of("date", str).toJavaObject(Bean.class);
+        assertEquals(bean.date, bean3.date);
     }
 
     public static class Bean {

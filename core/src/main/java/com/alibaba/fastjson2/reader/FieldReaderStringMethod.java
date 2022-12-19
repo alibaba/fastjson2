@@ -78,4 +78,8 @@ final class FieldReaderStringMethod<T>
             throw new JSONException("set " + fieldName + " error", e);
         }
     }
+
+    public boolean supportAcceptType(Class valueClass) {
+        return true;
+    }
 }

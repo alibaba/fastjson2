@@ -15,25 +15,25 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class DateFormat10 {
-    static final String PATTERN = "yyy-MM-dd";
-    static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(PATTERN);
-    static Date DATE = new Date(1340424794000L);
+    static final String pattern = "yyy-MM-dd";
+    static DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+    static Date date = new Date(1340424794000L);
 
     @Benchmark
     public void javaTimeDateFormatter(Blackhole bh) throws Throwable {
-        LocalDateTime ldt = DATE.toInstant().atZone(DateUtils.DEFAULT_ZONE_ID).toLocalDateTime();
-        String str = FORMATTER.format(ldt);
+        LocalDateTime ldt = date.toInstant().atZone(DateUtils.DEFAULT_ZONE_ID).toLocalDateTime();
+        String str = formatter.format(ldt);
         bh.consume(str);
     }
 
     @Benchmark
     public void fastjsonFormat(Blackhole bh) throws Throwable {
-        bh.consume(DateUtils.format(DATE, PATTERN));
+        bh.consume(DateUtils.format(date, pattern));
     }
 
     @Benchmark
     public void fastjsonFormat2(Blackhole bh) throws Throwable {
-        bh.consume(DateUtils.format(DATE.getTime()));
+        bh.consume(DateUtils.format(date.getTime()));
     }
 
     public static void main(String[] args) throws RunnerException {

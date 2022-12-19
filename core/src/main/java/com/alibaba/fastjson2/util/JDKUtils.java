@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.util;
 
 import java.lang.invoke.*;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.nio.ByteOrder;
 import java.util.function.*;
 
@@ -15,7 +14,7 @@ public class JDKUtils {
 
     static final Field FIELD_STRING_VALUE;
     static final long FIELD_STRING_VALUE_OFFSET;
-    public static volatile boolean FIELD_VALUE_STRING_ERROR;
+    static volatile boolean FIELD_VALUE_STRING_ERROR;
 
     static final Class<?> CLASS_SQL_DATASOURCE;
     static final Class<?> CLASS_SQL_ROW_SET;
@@ -164,7 +163,6 @@ public class JDKUtils {
                         methodType(String.class, char[].class, boolean.class)
                 );
                 stringCreatorJDK8 = (BiFunction<char[], Boolean, String>) callSite.getTarget().invokeExact();
-                stringCoder = (str) -> 1;
             }
 
             boolean lookupLambda = false;
@@ -237,6 +235,10 @@ public class JDKUtils {
             initErrorLast = ignored;
         }
 
+        if (stringCoder == null) {
+            stringCoder = (str) -> 1;
+        }
+
         STRING_CREATOR_JDK8 = stringCreatorJDK8;
         STRING_CREATOR_JDK11 = stringCreatorJDK11;
         STRING_CODER = stringCoder;
@@ -276,18 +278,11 @@ public class JDKUtils {
                         );
                         CONSTRUCTOR_LOOKUP = constructor;
                     }
-                    int allowedModes;
-                    if (OPEN_J9) {
-                        // int INTERNAL_PRIVILEGED = 0x80;
-                        final int PACKAGE = 0x8;
-                        final int MODULE = 0x10;
-                        int FULL_ACCESS_MASK = Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED
-                                | PACKAGE | MODULE;
-                        allowedModes = FULL_ACCESS_MASK;
-                    } else {
-                        allowedModes = TRUSTED;
-                    }
-                    return (MethodHandles.Lookup) constructor.invoke(objectClass, allowedModes);
+                    int FULL_ACCESS_MASK = 31; // for IBM Open J9 JDK
+                    return (MethodHandles.Lookup) constructor.invoke(
+                            objectClass,
+                            OPEN_J9 ? FULL_ACCESS_MASK : TRUSTED
+                    );
                 } else {
                     if (constructor == null) {
                         constructor = IMPL_LOOKUP.findConstructor(

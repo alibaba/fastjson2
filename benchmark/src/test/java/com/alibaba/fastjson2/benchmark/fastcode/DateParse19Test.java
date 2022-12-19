@@ -15,9 +15,9 @@ public class DateParse19Test {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("DateParse19-parseDateYMDHMS19 millis : " + millis);
-            // zulu8.58.0.13 : 3306 1701 1661 1644 1714 1689
-            // zulu11.52.13 : 2069 1971 1915 1643
-            // zulu17.38.21 : 2891 2611 1948 1919 1669
+            // zulu8.58.0.13 : 3306 1701 1661 1644 1714 1689 1644
+            // zulu11.52.13 : 2069 1971 1915 1643 1652
+            // zulu17.38.21 : 2891 2611 1948 1919 1669 1642
         }
     }
 
@@ -43,9 +43,9 @@ public class DateParse19Test {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("DateParse19-parseDate millis : " + millis);
-            // zulu8.58.0.13 : 3843 1798
-            // zulu11.52.13 : 2564 2137
-            // zulu17.38.21 : 1868 1880
+            // zulu8.58.0.13 : 3843 1798 1741
+            // zulu11.52.13 : 2564 2137 1706
+            // zulu17.38.21 : 1868 1880 1708
         }
     }
 
@@ -53,7 +53,7 @@ public class DateParse19Test {
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < COUNT / 10; ++i) {
-                benchmark.javaTimeDateTimeFormatter(BH);
+                benchmark.javaTimeFormatter(BH);
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("DateParse19-javaTimeDateTimeFormatter millis : " + millis);
