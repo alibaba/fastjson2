@@ -15,8 +15,8 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.util.DateUtils.SHANGHAI_ZONE_ID;
 import static com.alibaba.fastjson2.util.DateUtils.localDateTime;
-import static com.alibaba.fastjson2.util.IOUtils.SHANGHAI_ZONE_ID;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 

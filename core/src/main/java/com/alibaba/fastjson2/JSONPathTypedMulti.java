@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import java.time.ZoneId;
 import java.util.function.BiFunction;
 
-import static com.alibaba.fastjson2.util.IOUtils.DEFAULT_ZONE_ID;
+import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 
 class JSONPathTypedMulti
         extends JSONPath {

@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.time;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.util.DateUtils;
-import com.alibaba.fastjson2.util.IOUtils;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -19,7 +18,7 @@ public class EnglishDateTest {
         String str = "\"3 Jun 2008 11:05\"";
         {
             Date date = JSON.parseObject(str, Date.class);
-            ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
             assertEquals(3, zdt.getDayOfMonth());
@@ -29,7 +28,7 @@ public class EnglishDateTest {
         }
         {
             Date date = JSON.parseObject(str.toCharArray(), Date.class);
-            ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
             assertEquals(3, zdt.getDayOfMonth());
@@ -39,7 +38,7 @@ public class EnglishDateTest {
         }
         {
             Date date = JSON.parseObject(str.getBytes(), Date.class);
-            ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
             assertEquals(3, zdt.getDayOfMonth());
@@ -62,7 +61,7 @@ public class EnglishDateTest {
         String str = "\"3 Jun 2008 11:05:30\"";
         {
             Date date = JSON.parseObject(str, Date.class);
-            ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
             assertEquals(3, zdt.getDayOfMonth());
@@ -72,7 +71,7 @@ public class EnglishDateTest {
         }
         {
             Date date = JSON.parseObject(str.toCharArray(), Date.class);
-            ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
             assertEquals(3, zdt.getDayOfMonth());
@@ -82,7 +81,7 @@ public class EnglishDateTest {
         }
         {
             Date date = JSON.parseObject(str.getBytes(), Date.class);
-            ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
             assertEquals(3, zdt.getDayOfMonth());
@@ -113,7 +112,7 @@ public class EnglishDateTest {
         String str = "\"13 Jun 2008 11:05:30\"";
         {
             Date date = JSON.parseObject(str, Date.class);
-            ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
             assertEquals(13, zdt.getDayOfMonth());
@@ -123,7 +122,7 @@ public class EnglishDateTest {
         }
         {
             Date date = JSON.parseObject(str.toCharArray(), Date.class);
-            ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
             assertEquals(13, zdt.getDayOfMonth());
@@ -133,7 +132,7 @@ public class EnglishDateTest {
         }
         {
             Date date = JSON.parseObject(str.getBytes(), Date.class);
-            ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
             assertEquals(13, zdt.getDayOfMonth());
@@ -156,7 +155,7 @@ public class EnglishDateTest {
         String str = "\"13 Jun 2008 11:05\"";
         {
             Date date = JSON.parseObject(str, Date.class);
-            ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
             assertEquals(13, zdt.getDayOfMonth());
@@ -166,7 +165,7 @@ public class EnglishDateTest {
         }
         {
             Date date = JSON.parseObject(str.toCharArray(), Date.class);
-            ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
             assertEquals(13, zdt.getDayOfMonth());
@@ -176,7 +175,7 @@ public class EnglishDateTest {
         }
         {
             Date date = JSON.parseObject(str.getBytes(), Date.class);
-            ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
             assertEquals(13, zdt.getDayOfMonth());
@@ -191,7 +190,7 @@ public class EnglishDateTest {
         {
             String str = "3 Jun 2008 11:05:30";
             Date date = DateUtils.parseDate(str);
-            ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
             assertEquals(3, zdt.getDayOfMonth());
@@ -203,7 +202,7 @@ public class EnglishDateTest {
         {
             String str = "13 Jun 2008 11:05:30";
             Date date = DateUtils.parseDate(str);
-            ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
             assertEquals(13, zdt.getDayOfMonth());
@@ -215,7 +214,7 @@ public class EnglishDateTest {
         {
             String str = "3 Jun 2008 11:05";
             Date date = DateUtils.parseDate(str);
-            ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
             assertEquals(3, zdt.getDayOfMonth());
@@ -226,7 +225,7 @@ public class EnglishDateTest {
         {
             String str = "13 Jun 2008 11:05";
             Date date = DateUtils.parseDate(str);
-            ZonedDateTime zdt = date.toInstant().atZone(IOUtils.SHANGHAI_ZONE_ID);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
             assertEquals(13, zdt.getDayOfMonth());

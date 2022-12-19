@@ -28,7 +28,6 @@ import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR;
-import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public abstract class JSONReader
@@ -3420,7 +3419,7 @@ public abstract class JSONReader
 
         public ZoneId getZoneId() {
             if (zoneId == null) {
-                zoneId = DEFAULT_ZONE_ID;
+                zoneId = DateUtils.DEFAULT_ZONE_ID;
             }
             return zoneId;
         }

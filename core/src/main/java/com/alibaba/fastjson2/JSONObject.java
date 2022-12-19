@@ -304,7 +304,7 @@ public class JSONObject
 
         if (value instanceof Date) {
             long timeMillis = ((Date) value).getTime();
-            return DateUtils.toString(timeMillis, false, IOUtils.DEFAULT_ZONE_ID);
+            return DateUtils.toString(timeMillis, false, DateUtils.DEFAULT_ZONE_ID);
         }
 
         if (value instanceof Boolean

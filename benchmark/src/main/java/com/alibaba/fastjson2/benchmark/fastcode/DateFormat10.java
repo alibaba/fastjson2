@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.benchmark.fastcode;
 
 import com.alibaba.fastjson2.util.DateUtils;
-import com.alibaba.fastjson2.util.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -22,7 +21,7 @@ public class DateFormat10 {
 
     @Benchmark
     public void javaTimeDateFormatter(Blackhole bh) throws Throwable {
-        LocalDateTime ldt = DATE.toInstant().atZone(IOUtils.DEFAULT_ZONE_ID).toLocalDateTime();
+        LocalDateTime ldt = DATE.toInstant().atZone(DateUtils.DEFAULT_ZONE_ID).toLocalDateTime();
         String str = FORMATTER.format(ldt);
         bh.consume(str);
     }

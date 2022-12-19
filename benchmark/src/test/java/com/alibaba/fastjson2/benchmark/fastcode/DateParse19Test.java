@@ -15,7 +15,7 @@ public class DateParse19Test {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("DateParse19-parseDateYMDHMS19 millis : " + millis);
-            // zulu8.58.0.13 : 3306 1701 1661 1644
+            // zulu8.58.0.13 : 3306 1701 1661 1644 1714
             // zulu11.52.13 : 2069 1971 1915
             // zulu17.38.21 : 2891 2611 1948 1919
         }
@@ -78,10 +78,10 @@ public class DateParse19Test {
     }
 
     public static void main(String[] args) throws Throwable {
-//        parseDateYMDHMS19();
+        parseDateYMDHMS19();
 //        parseDate();
 //        parseDateSmart();
 //        javaTimeDateTimeFormatter();
-        javaTimeDateTimeFormatter1();
+//        javaTimeDateTimeFormatter1();
     }
 }

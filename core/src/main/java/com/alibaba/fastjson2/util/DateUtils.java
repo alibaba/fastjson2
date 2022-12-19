@@ -7,18 +7,29 @@ import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.zone.ZoneRules;
 import java.util.Date;
 import java.util.TimeZone;
 
 import static com.alibaba.fastjson2.util.DateUtils.DateTimeFormatPattern.*;
-import static com.alibaba.fastjson2.util.IOUtils.*;
-import static com.alibaba.fastjson2.util.IOUtils.OFFSET_0800_TOTAL_SECONDS;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.time.ZoneOffset.UTC;
 
 public class DateUtils {
+    public static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
+    public static final String SHANGHAI_ZONE_ID_NAME = "Asia/Shanghai";
+    public static final ZoneId SHANGHAI_ZONE_ID
+            = SHANGHAI_ZONE_ID_NAME.equals(DEFAULT_ZONE_ID.getId())
+            ? DEFAULT_ZONE_ID
+            : ZoneId.of(SHANGHAI_ZONE_ID_NAME);
+    public static final ZoneRules SHANGHAI_ZONE_RULES = SHANGHAI_ZONE_ID.getRules();
+
     public static Date parseDateYMDHMS19(String str) {
-        long millis = parseMillis19(str, DEFAULT_ZONE_ID, DATE_TIME_FORMAT_19_DASH);
+        if (str == null || str.isEmpty()) {
+            return null;
+        }
+
+        long millis = parseMillisYMDHMS19(str, DEFAULT_ZONE_ID);
         return new Date(millis);
     }
 
@@ -41,7 +52,7 @@ public class DateUtils {
                 return new Date(millis);
             }
             case "yyyy-MM-dd HH:mm:ss": {
-                long millis = parseMillis19(str, zoneId, DATE_TIME_FORMAT_19_DASH);
+                long millis = parseMillisYMDHMS19(str, zoneId);
                 return new Date(millis);
             }
             case "yyyy/MM/dd HH:mm:ss": {
@@ -50,6 +61,14 @@ public class DateUtils {
             }
             case "dd.MM.yyyy HH:mm:ss": {
                 long millis = parseMillis19(str, zoneId, DATE_TIME_FORMAT_19_DOT);
+                return new Date(millis);
+            }
+            case "yyyy-MM-dd": {
+                long millis = parseMillis10(str, zoneId, DATE_FORMAT_10_DASH);
+                return new Date(millis);
+            }
+            case "yyyy/MM/dd": {
+                long millis = parseMillis10(str, zoneId, DATE_FORMAT_10_SLASH);
                 return new Date(millis);
             }
             default:
@@ -62,8 +81,8 @@ public class DateUtils {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
         LocalDateTime ldt = LocalDateTime.parse(str, formatter);
-        Instant instant = ldt.atZone(zoneId).toInstant();
-        return Date.from(instant);
+        long millis = millis(ldt, zoneId);
+        return new Date(millis);
     }
 
     public static Date parseDate(String str) {
@@ -2734,6 +2753,198 @@ public class DateUtils {
         return zoneId;
     }
 
+    public static long parseMillisYMDHMS19(String str, ZoneId zoneId) {
+        if (str == null || "null".equals(str)) {
+            return 0;
+        }
+
+        char c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18;
+        if (!FIELD_VALUE_STRING_ERROR) {
+            char[] chars = JDKUtils.getCharArray(str);
+            if (chars.length != 19) {
+                throw new DateTimeParseException("illegal input " + str, str, 0);
+            }
+            c0 = chars[0];
+            c1 = chars[1];
+            c2 = chars[2];
+            c3 = chars[3];
+            c4 = chars[4];
+            c5 = chars[5];
+            c6 = chars[6];
+            c7 = chars[7];
+            c8 = chars[8];
+            c9 = chars[9];
+            c10 = chars[10];
+            c11 = chars[11];
+            c12 = chars[12];
+            c13 = chars[13];
+            c14 = chars[14];
+            c15 = chars[15];
+            c16 = chars[16];
+            c17 = chars[17];
+            c18 = chars[18];
+        } else if (STRING_CODER != null && STRING_VALUE != null && STRING_CODER.applyAsInt(str) == 0) {
+            byte[] bytes = JDKUtils.STRING_VALUE.apply(str);
+            if (bytes.length != 19) {
+                throw new DateTimeParseException("illegal input " + str, str, 0);
+            }
+
+            c0 = (char) bytes[0];
+            c1 = (char) bytes[1];
+            c2 = (char) bytes[2];
+            c3 = (char) bytes[3];
+            c4 = (char) bytes[4];
+            c5 = (char) bytes[5];
+            c6 = (char) bytes[6];
+            c7 = (char) bytes[7];
+            c8 = (char) bytes[8];
+            c9 = (char) bytes[9];
+            c10 = (char) bytes[10];
+            c11 = (char) bytes[11];
+            c12 = (char) bytes[12];
+            c13 = (char) bytes[13];
+            c14 = (char) bytes[14];
+            c15 = (char) bytes[15];
+            c16 = (char) bytes[16];
+            c17 = (char) bytes[17];
+            c18 = (char) bytes[18];
+        } else {
+            if (str.length() != 19) {
+                throw new DateTimeParseException("illegal input " + str, str, 0);
+            }
+
+            c0 = str.charAt(0);
+            c1 = str.charAt(1);
+            c2 = str.charAt(2);
+            c3 = str.charAt(3);
+            c4 = str.charAt(4);
+            c5 = str.charAt(5);
+            c6 = str.charAt(6);
+            c7 = str.charAt(7);
+            c8 = str.charAt(8);
+            c9 = str.charAt(9);
+            c10 = str.charAt(10);
+            c11 = str.charAt(11);
+            c12 = str.charAt(12);
+            c13 = str.charAt(13);
+            c14 = str.charAt(14);
+            c15 = str.charAt(15);
+            c16 = str.charAt(16);
+            c17 = str.charAt(17);
+            c18 = str.charAt(18);
+        }
+
+        if (c4 != '-' || c7 != '-' || c10 != ' ' || c13 != ':' || c16 != ':') {
+            throw new DateTimeParseException("illegal input", str, 0);
+        }
+
+        char y0 = c0;
+        char y1 = c1;
+        char y2 = c2;
+        char y3 = c3;
+
+        char m0 = c5;
+        char m1 = c6;
+
+        char d0 = c8;
+        char d1 = c9;
+
+        char h0 = c11;
+        char h1 = c12;
+
+        char i0 = c14;
+        char i1 = c15;
+
+        char s0 = c17;
+        char s1 = c18;
+
+        int year;
+        if (y0 >= '0' && y0 <= '9'
+                && y1 >= '0' && y1 <= '9'
+                && y2 >= '0' && y2 <= '9'
+                && y3 >= '0' && y3 <= '9'
+        ) {
+            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+        } else {
+            throw new DateTimeParseException("illegal input", str, 0);
+        }
+
+        int month;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+        ) {
+            month = (m0 - '0') * 10 + (m1 - '0');
+
+            if ((month == 0 && year != 0) || month > 12) {
+                throw new DateTimeParseException("illegal input", str, 0);
+            }
+        } else {
+            throw new DateTimeParseException("illegal input", str, 0);
+        }
+
+        int dom;
+        if (d0 >= '0' && d0 <= '9'
+                && d1 >= '0' && d1 <= '9'
+        ) {
+            dom = (d0 - '0') * 10 + (d1 - '0');
+
+            int max = 31;
+            switch (month) {
+                case 2:
+                    boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
+                    max = leapYear ? 29 : 28;
+                    break;
+                case 4:
+                case 6:
+                case 9:
+                case 11:
+                    max = 30;
+                    break;
+            }
+
+            if ((dom == 0 && year != 0) || dom > max) {
+                throw new DateTimeParseException("illegal input", str, 0);
+            }
+        } else {
+            throw new DateTimeParseException("illegal input", str, 0);
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            throw new DateTimeParseException("illegal input", str, 0);
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            throw new DateTimeParseException("illegal input", str, 0);
+        }
+
+        int second;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            second = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            throw new DateTimeParseException("illegal input", str, 0);
+        }
+
+        if (year == 0 && month == 0 && dom == 0) {
+            year = 1970;
+            month = 1;
+            dom = 1;
+        }
+
+        return millis(zoneId, year, month, dom, hour, minute, second, 0);
+    }
+
     static long parseMillis19(
             String str,
             ZoneId zoneId,
@@ -2748,7 +2959,7 @@ public class DateUtils {
         }
 
         char c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18;
-        if (STRING_CREATOR_JDK8 != null) {
+        if (!FIELD_VALUE_STRING_ERROR) {
             char[] chars = JDKUtils.getCharArray(str);
             if (chars.length != 19) {
                 throw new DateTimeParseException("illegal input " + str, str, 0);
@@ -3012,13 +3223,171 @@ public class DateUtils {
         return millis(zoneId, year, month, dom, hour, minute, second, 0);
     }
 
+    static long parseMillis10(
+            String str,
+            ZoneId zoneId,
+            DateTimeFormatPattern pattern
+    ) {
+        if (str == null || "null".equals(str)) {
+            return 0;
+        }
+
+        if (pattern.length != 10) {
+            throw new UnsupportedOperationException();
+        }
+
+        char c0, c1, c2, c3, c4, c5, c6, c7, c8, c9;
+        if (!FIELD_VALUE_STRING_ERROR) {
+            char[] chars = JDKUtils.getCharArray(str);
+            if (chars.length != 10) {
+                throw new DateTimeParseException("illegal input " + str, str, 0);
+            }
+            c0 = chars[0];
+            c1 = chars[1];
+            c2 = chars[2];
+            c3 = chars[3];
+            c4 = chars[4];
+            c5 = chars[5];
+            c6 = chars[6];
+            c7 = chars[7];
+            c8 = chars[8];
+            c9 = chars[9];
+        } else if (STRING_CODER != null && STRING_VALUE != null && STRING_CODER.applyAsInt(str) == 0) {
+            byte[] bytes = JDKUtils.STRING_VALUE.apply(str);
+            if (bytes.length != 10) {
+                throw new DateTimeParseException("illegal input " + str, str, 0);
+            }
+
+            c0 = (char) bytes[0];
+            c1 = (char) bytes[1];
+            c2 = (char) bytes[2];
+            c3 = (char) bytes[3];
+            c4 = (char) bytes[4];
+            c5 = (char) bytes[5];
+            c6 = (char) bytes[6];
+            c7 = (char) bytes[7];
+            c8 = (char) bytes[8];
+            c9 = (char) bytes[9];
+        } else {
+            if (str.length() != 19) {
+                throw new DateTimeParseException("illegal input " + str, str, 0);
+            }
+
+            c0 = str.charAt(0);
+            c1 = str.charAt(1);
+            c2 = str.charAt(2);
+            c3 = str.charAt(3);
+            c4 = str.charAt(4);
+            c5 = str.charAt(5);
+            c6 = str.charAt(6);
+            c7 = str.charAt(7);
+            c8 = str.charAt(8);
+            c9 = str.charAt(9);
+        }
+
+        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
+        switch (pattern) {
+            case DATE_FORMAT_10_DASH:
+                if (c4 != '-' || c7 != '-') {
+                    throw new DateTimeParseException("illegal input", str, 0);
+                }
+                y0 = c0;
+                y1 = c1;
+                y2 = c2;
+                y3 = c3;
+
+                m0 = c5;
+                m1 = c6;
+
+                d0 = c8;
+                d1 = c9;
+                break;
+            case DATE_FORMAT_10_SLASH:
+                if (c4 != '/' || c7 != '/') {
+                    throw new DateTimeParseException("illegal input", str, 0);
+                }
+                y0 = c0;
+                y1 = c1;
+                y2 = c2;
+                y3 = c3;
+
+                m0 = c5;
+                m1 = c6;
+
+                d0 = c8;
+                d1 = c9;
+                break;
+            default:
+                throw new DateTimeParseException("illegal input", str, 0);
+        }
+
+        int year;
+        if (y0 >= '0' && y0 <= '9'
+                && y1 >= '0' && y1 <= '9'
+                && y2 >= '0' && y2 <= '9'
+                && y3 >= '0' && y3 <= '9'
+        ) {
+            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+        } else {
+            throw new DateTimeParseException("illegal input", str, 0);
+        }
+
+        int month;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+        ) {
+            month = (m0 - '0') * 10 + (m1 - '0');
+
+            if ((month == 0 && year != 0) || month > 12) {
+                throw new DateTimeParseException("illegal input", str, 0);
+            }
+        } else {
+            throw new DateTimeParseException("illegal input", str, 0);
+        }
+
+        int dom;
+        if (d0 >= '0' && d0 <= '9'
+                && d1 >= '0' && d1 <= '9'
+        ) {
+            dom = (d0 - '0') * 10 + (d1 - '0');
+
+            int max = 31;
+            switch (month) {
+                case 2:
+                    boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
+                    max = leapYear ? 29 : 28;
+                    break;
+                case 4:
+                case 6:
+                case 9:
+                case 11:
+                    max = 30;
+                    break;
+            }
+
+            if ((dom == 0 && year != 0) || dom > max) {
+                throw new DateTimeParseException("illegal input", str, 0);
+            }
+        } else {
+            throw new DateTimeParseException("illegal input", str, 0);
+        }
+
+        if (year == 0 && month == 0 && dom == 0) {
+            year = 1970;
+            month = 1;
+            dom = 1;
+        }
+
+        return millis(zoneId, year, month, dom, 0, 0, 0, 0);
+    }
+
     public static long parseMillis19(String str, ZoneId zoneId) {
         if (str == null) {
             throw new NullPointerException();
         }
 
         char c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18;
-        if (STRING_CREATOR_JDK8 != null) {
+        if (!FIELD_VALUE_STRING_ERROR) {
             char[] chars = JDKUtils.getCharArray(str);
             if (chars.length != 19) {
                 throw new DateTimeParseException("illegal input " + str, str, 0);
@@ -3426,6 +3795,33 @@ public class DateUtils {
             zoneId = DEFAULT_ZONE_ID;
         }
 
+        long utcSeconds;
+        {
+            final int DAYS_PER_CYCLE = 146097;
+            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
+
+            long total = (365 * year)
+                    + ((year + 3) / 4 - (year + 99) / 100 + (year + 399) / 400)
+                    + ((367 * month - 362) / 12)
+                    + (dom - 1);
+
+            if (month > 2) {
+                total--;
+                boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
+                if (!leapYear) {
+                    total--;
+                }
+            }
+
+            long epochDay = total - DAYS_0000_TO_1970;
+            utcSeconds = epochDay * 86400
+                    + hour * 3600
+                    + minute * 60
+                    + second;
+        }
+
+        int zoneOffsetTotalSeconds;
+
         if (zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES) {
             long SECONDS_1991_09_15_02 = 684900000; // utcMillis(1991, 9, 15, 2, 0, 0);
             long SECONDS_1991_04_14_03 = 671598000; // utcMillis(1991, 4, 14, 3, 0, 0);
@@ -3457,99 +3853,86 @@ public class DateUtils {
             long SECONDS_1919_04_13_01 = -1600642800L; // utcMillis(1919, 4, 13, 1, 0, 0);
             long SECONDS_1901_01_01_00 = -2177452800L; // utcMillis(1901, 1, 1, 0, 0, 0);
 
+            final int OFFSET_0800_TOTAL_SECONDS = 28800;
             final int OFFSET_0900_TOTAL_SECONDS = 32400;
             final int OFFSET_0543_TOTAL_SECONDS = 29143;
 
-            long seconds = utcSeconds(year, month, dom, hour, minute, second);
-
-            int zoneOffsetTotalSeconds;
-            if (seconds >= SECONDS_1991_09_15_02) {
+            if (utcSeconds >= SECONDS_1991_09_15_02) {
                 zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1991_04_14_03) {
+            } else if (utcSeconds >= SECONDS_1991_04_14_03) {
                 zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1990_09_16_02) {
+            } else if (utcSeconds >= SECONDS_1990_09_16_02) {
                 zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1990_04_15_03) {
+            } else if (utcSeconds >= SECONDS_1990_04_15_03) {
                 zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1989_09_17_02) {
+            } else if (utcSeconds >= SECONDS_1989_09_17_02) {
                 zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1989_04_16_03) {
+            } else if (utcSeconds >= SECONDS_1989_04_16_03) {
                 zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1988_09_11_02) {
+            } else if (utcSeconds >= SECONDS_1988_09_11_02) {
                 zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1988_04_17_03) {
+            } else if (utcSeconds >= SECONDS_1988_04_17_03) {
                 zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1987_09_13_02) {
+            } else if (utcSeconds >= SECONDS_1987_09_13_02) {
                 zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1987_04_12_03) {
+            } else if (utcSeconds >= SECONDS_1987_04_12_03) {
                 zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1986_09_14_02) {
+            } else if (utcSeconds >= SECONDS_1986_09_14_02) {
                 zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1986_05_04_03) {
+            } else if (utcSeconds >= SECONDS_1986_05_04_03) {
                 zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1949_05_28_00) {
+            } else if (utcSeconds >= SECONDS_1949_05_28_00) {
                 zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1949_05_01_01) {
+            } else if (utcSeconds >= SECONDS_1949_05_01_01) {
                 zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1948_10_01_00) {
+            } else if (utcSeconds >= SECONDS_1948_10_01_00) {
                 zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1948_05_01_01) {
+            } else if (utcSeconds >= SECONDS_1948_05_01_01) {
                 zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1947_11_01_00) {
+            } else if (utcSeconds >= SECONDS_1947_11_01_00) {
                 zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1947_04_15_01) {
+            } else if (utcSeconds >= SECONDS_1947_04_15_01) {
                 zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1946_10_01_00) {
+            } else if (utcSeconds >= SECONDS_1946_10_01_00) {
                 zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1946_05_15_01) {
+            } else if (utcSeconds >= SECONDS_1946_05_15_01) {
                 zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1945_09_02_00) {
+            } else if (utcSeconds >= SECONDS_1945_09_02_00) {
                 zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1942_01_31_01) {
+            } else if (utcSeconds >= SECONDS_1942_01_31_01) {
                 zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1941_11_02_00) {
+            } else if (utcSeconds >= SECONDS_1941_11_02_00) {
                 zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1941_03_15_01) {
+            } else if (utcSeconds >= SECONDS_1941_03_15_01) {
                 zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1940_10_13_00) {
+            } else if (utcSeconds >= SECONDS_1940_10_13_00) {
                 zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1940_06_01_01) {
+            } else if (utcSeconds >= SECONDS_1940_06_01_01) {
                 zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1919_10_01_00) {
+            } else if (utcSeconds >= SECONDS_1919_10_01_00) {
                 zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1919_04_13_01) {
+            } else if (utcSeconds >= SECONDS_1919_04_13_01) {
                 zoneOffsetTotalSeconds = OFFSET_0900_TOTAL_SECONDS;
-            } else if (seconds >= SECONDS_1901_01_01_00) {
+            } else if (utcSeconds >= SECONDS_1901_01_01_00) {
                 zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
             } else {
                 zoneOffsetTotalSeconds = OFFSET_0543_TOTAL_SECONDS;
             }
-
-            seconds -= zoneOffsetTotalSeconds;
-
-            long millis = seconds * 1000L;
-            if (nanoOfSecond != 0) {
-                millis += nanoOfSecond / 1000_000;
-            }
-            return millis;
-        }
-
-        if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
-            long seconds = utcSeconds(year, month, dom, hour, minute, second);
-            return seconds * 1000L + nanoOfSecond / 1000_000;
-        }
-
-        LocalDate localDate = LocalDate.of(year, month, dom);
-        LocalTime localTime = LocalTime.of(hour, minute, second, nanoOfSecond);
-        LocalDateTime ldt = LocalDateTime.of(localDate, localTime);
-        ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, zoneId, null);
-        long seconds = zdt.toEpochSecond();
-        int nanos = nanoOfSecond;
-        if (seconds < 0 && nanos > 0) {
-            return (seconds + 1) * 1000 + nanos / 1000_000 - 1000;
+        } else if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
+            zoneOffsetTotalSeconds = 0;
         } else {
-            return seconds * 1000L + nanos / 1000_000;
+            LocalDate localDate = LocalDate.of(year, month, dom);
+            LocalTime localTime = LocalTime.of(hour, minute, second, nanoOfSecond);
+            LocalDateTime ldt = LocalDateTime.of(localDate, localTime);
+            ZoneOffset offset = zoneId.getRules().getOffset(ldt);
+            zoneOffsetTotalSeconds = offset.getTotalSeconds();
         }
+
+        long millis = (utcSeconds - zoneOffsetTotalSeconds) * 1000L;
+        if (nanoOfSecond != 0) {
+            millis += nanoOfSecond / 1_000_000;
+        }
+        return millis;
     }
 
     public static long utcSeconds(
@@ -3584,10 +3967,163 @@ public class DateUtils {
     }
 
     public static String formatYMDHMS19(Date date) {
+        return formatYMDHMS19(date, DEFAULT_ZONE_ID);
+    }
+
+    public static String formatYMDHMS19(Date date, ZoneId zoneId) {
         if (date == null) {
             return null;
         }
-        return format(date.getTime(), DATE_TIME_FORMAT_19_DASH);
+
+        long timeMillis = date.getTime();
+
+        if (zoneId == null) {
+            zoneId = DEFAULT_ZONE_ID;
+        }
+
+        final int SECONDS_PER_DAY = 60 * 60 * 24;
+
+        long epochSecond = Math.floorDiv(timeMillis, 1000L);
+        int offsetTotalSeconds;
+
+        final long SECONDS_1991_09_15_02 = 684900000;
+        boolean shanghai = zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES;
+        if (shanghai && epochSecond > SECONDS_1991_09_15_02) {
+            final int OFFSET_0800_TOTAL_SECONDS = 28800;
+            offsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+        } else {
+            Instant instant = Instant.ofEpochMilli(timeMillis);
+            offsetTotalSeconds = zoneId.getRules().getOffset(instant).getTotalSeconds();
+        }
+
+        long localSecond = epochSecond + offsetTotalSeconds;
+        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+        int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+        int year, month, dayOfMonth;
+        {
+            final int DAYS_PER_CYCLE = 146097;
+            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
+
+            long zeroDay = localEpochDay + DAYS_0000_TO_1970;
+            // find the march-based year
+            zeroDay -= 60;  // adjust to 0000-03-01 so leap day is at end of four year cycle
+            long adjust = 0;
+            if (zeroDay < 0) {
+                // adjust negative years to positive for calculation
+                long adjustCycles = (zeroDay + 1) / DAYS_PER_CYCLE - 1;
+                adjust = adjustCycles * 400;
+                zeroDay += -adjustCycles * DAYS_PER_CYCLE;
+            }
+            long yearEst = (400 * zeroDay + 591) / DAYS_PER_CYCLE;
+            long doyEst = zeroDay - (365 * yearEst + yearEst / 4 - yearEst / 100 + yearEst / 400);
+            if (doyEst < 0) {
+                // fix estimate
+                yearEst--;
+                doyEst = zeroDay - (365 * yearEst + yearEst / 4 - yearEst / 100 + yearEst / 400);
+            }
+            yearEst += adjust;  // reset any negative year
+            int marchDoy0 = (int) doyEst;
+
+            // convert march-based values back to january-based
+            int marchMonth0 = (marchDoy0 * 5 + 2) / 153;
+            month = (marchMonth0 + 2) % 12 + 1;
+            dayOfMonth = marchDoy0 - (marchMonth0 * 306 + 5) / 10 + 1;
+            yearEst += marchMonth0 / 10;
+
+            // check year now we are certain it is correct
+            if (yearEst < Year.MIN_VALUE || yearEst > Year.MAX_VALUE) {
+                throw new DateTimeException("Invalid year " + yearEst);
+            }
+
+            year = (int) yearEst;
+        }
+
+        int hour, minute, second;
+        {
+            final int MINUTES_PER_HOUR = 60;
+            final int SECONDS_PER_MINUTE = 60;
+            final int SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
+
+            long secondOfDay = secsOfDay;
+            if (secondOfDay < 0 || secondOfDay > 86399) {
+                throw new DateTimeException("Invalid secondOfDay " + secondOfDay);
+            }
+            int hours = (int) (secondOfDay / SECONDS_PER_HOUR);
+            secondOfDay -= hours * SECONDS_PER_HOUR;
+            int minutes = (int) (secondOfDay / SECONDS_PER_MINUTE);
+            secondOfDay -= minutes * SECONDS_PER_MINUTE;
+
+            hour = hours;
+            minute = minutes;
+            second = (int) secondOfDay;
+        }
+
+        int y0 = year / 1000 + '0';
+        int y1 = (year / 100) % 10 + '0';
+        int y2 = (year / 10) % 10 + '0';
+        int y3 = year % 10 + '0';
+        int m0 = month / 10 + '0';
+        int m1 = month % 10 + '0';
+        int d0 = dayOfMonth / 10 + '0';
+        int d1 = dayOfMonth % 10 + '0';
+        int h0 = hour / 10 + '0';
+        int h1 = hour % 10 + '0';
+        int i0 = minute / 10 + '0';
+        int i1 = minute % 10 + '0';
+        int s0 = second / 10 + '0';
+        int s1 = second % 10 + '0';
+
+        if (STRING_CREATOR_JDK11 != null) {
+            byte[] bytes = new byte[19];
+            bytes[0] = (byte) y0;
+            bytes[1] = (byte) y1;
+            bytes[2] = (byte) y2;
+            bytes[3] = (byte) y3;
+            bytes[4] = '-';
+            bytes[5] = (byte) m0;
+            bytes[6] = (byte) m1;
+            bytes[7] = '-';
+            bytes[8] = (byte) d0;
+            bytes[9] = (byte) d1;
+            bytes[10] = ' ';
+            bytes[11] = (byte) h0;
+            bytes[12] = (byte) h1;
+            bytes[13] = ':';
+            bytes[14] = (byte) i0;
+            bytes[15] = (byte) i1;
+            bytes[16] = ':';
+            bytes[17] = (byte) s0;
+            bytes[18] = (byte) s1;
+
+            return STRING_CREATOR_JDK11.apply(bytes, LATIN1);
+        }
+
+        char[] chars = new char[19];
+        chars[0] = (char) y0;
+        chars[1] = (char) y1;
+        chars[2] = (char) y2;
+        chars[3] = (char) y3;
+        chars[4] = '-';
+        chars[5] = (char) m0;
+        chars[6] = (char) m1;
+        chars[7] = '-';
+        chars[8] = (char) d0;
+        chars[9] = (char) d1;
+        chars[10] = ' ';
+        chars[11] = (char) h0;
+        chars[12] = (char) h1;
+        chars[13] = ':';
+        chars[14] = (char) i0;
+        chars[15] = (char) i1;
+        chars[16] = ':';
+        chars[17] = (char) s0;
+        chars[18] = (char) s1;
+
+        if (STRING_CREATOR_JDK8 != null) {
+            return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+        }
+
+        return new String(chars);
     }
 
     public static String format(Date date, String format) {
@@ -3606,6 +4142,9 @@ public class DateUtils {
             case "yyyy-MM-ddTHH:mm:ss":
             case "yyyy-MM-dd'T'HH:mm:ss": {
                 return format(date.getTime(), DATE_TIME_FORMAT_19_DASH_T);
+            }
+            case "dd.MM.yyyy HH:mm:ss": {
+                return format(date.getTime(), DATE_TIME_FORMAT_19_DOT);
             }
             case "yyyy-MM-dd":
                 return format(date.getTime(), DATE_FORMAT_10_DASH);
@@ -3873,7 +4412,7 @@ public class DateUtils {
 
         long epochSecond = Math.floorDiv(timeMillis, 1000L);
         int offsetTotalSeconds;
-        if (zoneId == IOUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == IOUtils.SHANGHAI_ZONE_RULES) {
+        if (zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES) {
             offsetTotalSeconds = getShanghaiZoneOffsetTotalSeconds(epochSecond);
         } else {
             Instant instant = Instant.ofEpochMilli(timeMillis);
@@ -3987,16 +4526,16 @@ public class DateUtils {
         if (STRING_CREATOR_JDK11 != null) {
             byte[] bytes = new byte[19];
             if (pattern == DATE_TIME_FORMAT_19_DOT) {
-                bytes[8] = (byte) d0;
-                bytes[9] = (byte) d1;
-                bytes[4] = '.';
-                bytes[5] = (byte) m0;
-                bytes[6] = (byte) m1;
-                bytes[7] = '.';
-                bytes[0] = (byte) y0;
-                bytes[1] = (byte) y1;
-                bytes[2] = (byte) y2;
-                bytes[3] = (byte) y3;
+                bytes[0] = (byte) d0;
+                bytes[1] = (byte) d1;
+                bytes[2] = '.';
+                bytes[3] = (byte) m0;
+                bytes[4] = (byte) m1;
+                bytes[5] = '.';
+                bytes[6] = (byte) y0;
+                bytes[7] = (byte) y1;
+                bytes[8] = (byte) y2;
+                bytes[9] = (byte) y3;
                 bytes[10] = (byte) ' ';
             } else {
                 char separator = pattern == DATE_TIME_FORMAT_19_DASH ? ' ' : 'T';
@@ -4027,16 +4566,16 @@ public class DateUtils {
 
         char[] chars = new char[19];
         if (pattern == DATE_TIME_FORMAT_19_DOT) {
-            chars[8] = (char) d0;
-            chars[9] = (char) d1;
-            chars[4] = '.';
-            chars[5] = (char) m0;
-            chars[6] = (char) m1;
-            chars[7] = '.';
-            chars[0] = (char) y0;
-            chars[1] = (char) y1;
-            chars[2] = (char) y2;
-            chars[3] = (char) y3;
+            chars[0] = (char) d0;
+            chars[1] = (char) d1;
+            chars[2] = '.';
+            chars[3] = (char) m0;
+            chars[4] = (char) m1;
+            chars[5] = '.';
+            chars[6] = (char) y0;
+            chars[7] = (char) y1;
+            chars[8] = (char) y2;
+            chars[9] = (char) y3;
             chars[10] = ' ';
         } else {
             char separator = pattern == DATE_TIME_FORMAT_19_DASH ? ' ' : 'T';
@@ -4078,7 +4617,7 @@ public class DateUtils {
 
         long epochSecond = Math.floorDiv(timeMillis, 1000L);
         int offsetTotalSeconds;
-        if (zoneId == IOUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == IOUtils.SHANGHAI_ZONE_RULES) {
+        if (zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES) {
             offsetTotalSeconds = getShanghaiZoneOffsetTotalSeconds(epochSecond);
         } else {
             Instant instant = Instant.ofEpochMilli(timeMillis);

@@ -5,14 +5,11 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-import static com.alibaba.fastjson2.util.IOUtils.DEFAULT_ZONE_ID;
+import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DateUtilsTestFormat {
@@ -79,6 +76,7 @@ public class DateUtilsTestFormat {
         assertEquals("2012-06-23 12:13:14", DateUtils.format(date, "yyyy-MM-dd HH:mm:ss"));
         assertEquals("2012-06-23T12:13:14", DateUtils.format(date, "yyyy-MM-ddTHH:mm:ss"));
         assertEquals("2012-06-23T12:13:14", DateUtils.format(date, "yyyy-MM-dd'T'HH:mm:ss"));
+        assertEquals("23.06.2012 12:13:14", DateUtils.format(date, "dd.MM.yyyy HH:mm:ss"));
         assertEquals("2012-06-23", DateUtils.format(date, "yyyy-MM-dd"));
         assertEquals("2012/06/23", DateUtils.format(date, "yyyy/MM/dd"));
         assertEquals("23.06.2012", DateUtils.format(date, "dd.MM.yyyy"));
@@ -149,5 +147,23 @@ public class DateUtilsTestFormat {
         assertEquals("23.06.2012", DateUtils.format(localDate, "dd.MM.yyyy"));
         assertEquals("2012-6-23", DateUtils.format(localDate, "yyyy-M-dd"));
         assertEquals("2012-Jun-23", DateUtils.format(localDate, "yyyy-MMM-dd"));
+    }
+
+    @Test
+    public void utcSeconds() {
+        LocalDateTime ldt = LocalDateTime.of(2012, 6, 23, 12, 13, 14);
+        long utcSeconds = DateUtils.utcSeconds(
+                ldt.getYear(),
+                ldt.getMonthValue(),
+                ldt.getDayOfMonth(),
+                ldt.getHour(),
+                ldt.getMinute(),
+                ldt.getSecond()
+        );
+        long utcMillis = utcSeconds * 1000;
+        assertEquals(
+                ldt.atZone(ZoneOffset.UTC).toInstant().toEpochMilli(),
+                utcMillis
+        );
     }
 }
