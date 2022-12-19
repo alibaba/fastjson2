@@ -49,9 +49,39 @@ public class DateParse19Test {
         }
     }
 
+    public static void javaTimeDateTimeFormatter() throws Throwable {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < COUNT / 10; ++i) {
+                benchmark.javaTimeDateTimeFormatter(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("DateParse19-javaTimeDateTimeFormatter millis : " + millis);
+            // zulu8.58.0.13 : 3018
+            // zulu11.52.13 :
+            // zulu17.38.21 :
+        }
+    }
+
+    public static void javaTimeDateTimeFormatter1() throws Throwable {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < COUNT / 10; ++i) {
+                benchmark.javaTimeDateTimeFormatter1(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("DateParse19-javaTimeDateTimeFormatter1 millis : " + millis);
+            // zulu8.58.0.13 : 2785
+            // zulu11.52.13 :
+            // zulu17.38.21 :
+        }
+    }
+
     public static void main(String[] args) throws Throwable {
-        parseDateYMDHMS19();
+//        parseDateYMDHMS19();
 //        parseDate();
 //        parseDateSmart();
+//        javaTimeDateTimeFormatter();
+        javaTimeDateTimeFormatter1();
     }
 }

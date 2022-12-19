@@ -39,6 +39,15 @@ public class DateParse19 {
         bh.consume(date);
     }
 
+//    @Benchmark
+    public void javaTimeDateTimeFormatter1(Blackhole bh) throws Throwable {
+        LocalDateTime ldt = LocalDateTime.parse(INPUT, FORMATTER);
+        ZoneId zoneId = IOUtils.DEFAULT_ZONE_ID;
+        long millis = DateUtils.millis(ldt, zoneId);
+        Date date = new Date(millis);
+        bh.consume(date);
+    }
+
     @Benchmark
     public void parseDateSmart(Blackhole bh) throws Throwable {
         Date date = DateUtils.parseDate(INPUT);
