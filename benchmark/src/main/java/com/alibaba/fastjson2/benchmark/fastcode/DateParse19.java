@@ -45,7 +45,7 @@ public class DateParse19 {
         bh.consume(date);
     }
 
-    @Benchmark
+//    @Benchmark
     public void parseDateSmart(Blackhole bh) throws Throwable {
         Date date = DateUtils.parseDate(INPUT);
         bh.consume(date);
@@ -57,7 +57,7 @@ public class DateParse19 {
         bh.consume(date);
     }
 
-    @Benchmark
+//    @Benchmark
     public void parseDate(Blackhole bh) throws Throwable {
         Date date = DateUtils.parseDate(INPUT, PATTERN);
         bh.consume(date);
