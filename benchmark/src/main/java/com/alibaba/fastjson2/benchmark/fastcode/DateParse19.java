@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.benchmark.fastcode;
 
 import com.alibaba.fastjson2.util.DateUtils;
-import com.alibaba.fastjson2.util.IOUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -30,9 +29,7 @@ public class DateParse19 {
     @Benchmark
     public void javaTimeDateTimeFormatter(Blackhole bh) throws Throwable {
         LocalDateTime ldt = LocalDateTime.parse(INPUT, FORMATTER);
-        ZoneId zoneId = IOUtils.DEFAULT_ZONE_ID;
-        zoneId.getRules().getOffset(ldt);
-
+        ZoneId zoneId = DateUtils.DEFAULT_ZONE_ID;
         ZonedDateTime zdt = ldt.atZone(zoneId);
         Instant instant = zdt.toInstant();
         Date date = Date.from(instant);
@@ -42,7 +39,7 @@ public class DateParse19 {
 //    @Benchmark
     public void javaTimeDateTimeFormatter1(Blackhole bh) throws Throwable {
         LocalDateTime ldt = LocalDateTime.parse(INPUT, FORMATTER);
-        ZoneId zoneId = IOUtils.DEFAULT_ZONE_ID;
+        ZoneId zoneId = DateUtils.DEFAULT_ZONE_ID;
         long millis = DateUtils.millis(ldt, zoneId);
         Date date = new Date(millis);
         bh.consume(date);

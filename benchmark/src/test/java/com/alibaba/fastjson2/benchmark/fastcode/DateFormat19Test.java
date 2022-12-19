@@ -29,8 +29,8 @@ public class DateFormat19Test {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("DateFormat19-formatYMDHMS19 millis : " + millis);
-            // zulu8.58.0.13 : 3161
-            // zulu11.52.13 :
+            // zulu8.58.0.13 : 3161 3589
+            // zulu11.52.13 : 3410
             // zulu17.38.21 :
         }
     }
@@ -53,7 +53,7 @@ public class DateFormat19Test {
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < COUNT; ++i) {
-                benchmark.javaTimeDateFormatter(BH);
+                benchmark.javaTimeFormatter(BH);
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("DateFormat19-javaTimeDateFormatter millis : " + millis);

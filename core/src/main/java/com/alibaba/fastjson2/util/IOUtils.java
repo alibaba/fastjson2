@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.util;
 
 import java.io.Closeable;
-import java.time.ZoneId;
-import java.time.zone.ZoneRules;
 
 public class IOUtils {
     public static final byte[] digits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
@@ -541,10 +539,4 @@ public class IOUtils {
         }
         return dp;
     }
-
-    public static final int OFFSET_0800_TOTAL_SECONDS = 28800;
-    public static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
-    public static final String SHANGHAI_ZONE_ID_NAME = "Asia/Shanghai";
-    public static final ZoneId SHANGHAI_ZONE_ID = SHANGHAI_ZONE_ID_NAME.equals(DEFAULT_ZONE_ID.getId()) ? DEFAULT_ZONE_ID : ZoneId.of(SHANGHAI_ZONE_ID_NAME);
-    public static final ZoneRules SHANGHAI_ZONE_RULES = SHANGHAI_ZONE_ID.getRules();
 }

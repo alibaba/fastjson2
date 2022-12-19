@@ -15,7 +15,7 @@ public class JDKUtils {
 
     static final Field FIELD_STRING_VALUE;
     static final long FIELD_STRING_VALUE_OFFSET;
-    static volatile boolean FIELD_STRING_ERROR;
+    public static volatile boolean FIELD_VALUE_STRING_ERROR;
 
     static final Class<?> CLASS_SQL_DATASOURCE;
     static final Class<?> CLASS_SQL_ROW_SET;
@@ -51,7 +51,7 @@ public class JDKUtils {
             android = jmvName.equals("Dalvik");
             graal = jmvName.equals("Substrate VM");
             if (openj9 || android || graal) {
-                FIELD_STRING_ERROR = true;
+                FIELD_VALUE_STRING_ERROR = true;
             }
 
             String javaSpecVer = System.getProperty("java.specification.version");
@@ -102,13 +102,13 @@ public class JDKUtils {
                 field.setAccessible(true);
                 fieldOffset = UnsafeUtils.objectFieldOffset(field);
             } catch (Exception ignored) {
-                FIELD_STRING_ERROR = true;
+                FIELD_VALUE_STRING_ERROR = true;
             }
 
             FIELD_STRING_VALUE = field;
             FIELD_STRING_VALUE_OFFSET = fieldOffset;
         } else {
-            FIELD_STRING_ERROR = true;
+            FIELD_VALUE_STRING_ERROR = true;
             FIELD_STRING_VALUE = null;
             FIELD_STRING_VALUE_OFFSET = -1;
         }
@@ -251,11 +251,11 @@ public class JDKUtils {
     public static char[] getCharArray(String str) {
         // GraalVM not support
         // Android not support
-        if (!FIELD_STRING_ERROR) {
+        if (!FIELD_VALUE_STRING_ERROR) {
             try {
                 return (char[]) UnsafeUtils.UNSAFE.getObject(str, FIELD_STRING_VALUE_OFFSET);
             } catch (Exception ignored) {
-                FIELD_STRING_ERROR = true;
+                FIELD_VALUE_STRING_ERROR = true;
             }
         }
 

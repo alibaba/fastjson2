@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.support.csv;
 
-import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.DateUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -20,7 +20,7 @@ public class CSVTest3 {
     @Test
     public void test() throws Exception {
         LocalDateTime ldt = LocalDateTime.of(2017, 5, 4, 12, 13, 14);
-        ZonedDateTime zdt = ldt.atZone(IOUtils.DEFAULT_ZONE_ID);
+        ZonedDateTime zdt = ldt.atZone(DateUtils.DEFAULT_ZONE_ID);
         Instant instant = zdt.toInstant();
         Date date = new Date(instant.toEpochMilli());
 
