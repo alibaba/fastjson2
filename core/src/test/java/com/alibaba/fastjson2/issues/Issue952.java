@@ -12,7 +12,7 @@ public class Issue952 {
     public void test() {
         assertEquals(
                 1672502399000L,
-                DateUtils.toMillis19("2022-12-31 23:59:59", 0, ZoneId.of("Asia/Shanghai"))
+                DateUtils.parseMillis19("2022-12-31 23:59:59", ZoneId.of("Asia/Shanghai"))
         );
     }
 }

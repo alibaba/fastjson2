@@ -17,18 +17,204 @@ public class DateUtilsTest {
     @Test
     public void parseDateNullOrEmpty() {
         assertNull(DateUtils.parseDate(null));
+        assertNull(DateUtils.parseDate(null, DEFAULT_ZONE_ID));
+        assertNull(DateUtils.parseDate(null, "yyyy-MM-dd HH:mm:ss"));
+        assertNull(DateUtils.parseDate(null, "yyyy-MM-dd HH:mm:ss", DEFAULT_ZONE_ID));
         assertNull(DateUtils.parseDate(""));
+        assertNull(DateUtils.parseDate("", DEFAULT_ZONE_ID));
+        assertNull(DateUtils.parseDate("", "yyyy-MM-dd HH:mm:ss"));
+        assertNull(DateUtils.parseDate("", "yyyy-MM-dd HH:mm:ss", DEFAULT_ZONE_ID));
         assertNull(DateUtils.parseDate("null"));
+        assertNull(DateUtils.parseDate("null", DEFAULT_ZONE_ID));
+        assertNull(DateUtils.parseDate("null", "yyyy-MM-dd HH:mm:ss"));
+        assertNull(DateUtils.parseDate("null", "yyyy-MM-dd HH:mm:ss", DEFAULT_ZONE_ID));
+        assertEquals(0, DateUtils.parseMillis("null"));
+        assertEquals(0, DateUtils.parseMillis("null", DEFAULT_ZONE_ID));
+        assertEquals(0, DateUtils.parseMillis("", DEFAULT_ZONE_ID));
+        assertEquals(0, DateUtils.parseMillis(null, DEFAULT_ZONE_ID));
     }
 
     @Test
     public void parseDate0() {
         String str = "2022-04-29 12:13:14";
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String pattern = "yyyy-MM-dd HH:mm:ss";
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(pattern);
         LocalDateTime ldt = LocalDateTime.parse(str, fmt);
         assertEquals(
                 ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
                 DateUtils.parseDate(str).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, DEFAULT_ZONE_ID).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, null, DEFAULT_ZONE_ID).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, "", DEFAULT_ZONE_ID).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, pattern).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, pattern, DEFAULT_ZONE_ID).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, pattern, null).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDateYMDHMS19(str).getTime()
+        );
+    }
+
+    @Test
+    public void parseDate0_11() {
+        String str = "2022-11-29 12:13:14";
+        String pattern = "yyyy-MM-dd HH:mm:ss";
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(pattern);
+        LocalDateTime ldt = LocalDateTime.parse(str, fmt);
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, DEFAULT_ZONE_ID).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, null, DEFAULT_ZONE_ID).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, "", DEFAULT_ZONE_ID).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, pattern).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, pattern, DEFAULT_ZONE_ID).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, pattern, null).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDateYMDHMS19(str).getTime()
+        );
+    }
+
+    @Test
+    public void parseDate0_t() {
+        String str = "2022-04-29T12:13:14";
+        String pattern = "yyyy-MM-dd'T'HH:mm:ss";
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(pattern);
+        LocalDateTime ldt = LocalDateTime.parse(str, fmt);
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, DEFAULT_ZONE_ID).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, pattern).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, pattern, DEFAULT_ZONE_ID).getTime()
+        );
+    }
+
+    @Test
+    public void parseDate0_slash() {
+        String str = "2022/02/28 12:13:14";
+        String pattern = "yyyy/MM/dd HH:mm:ss";
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(pattern);
+        LocalDateTime ldt = LocalDateTime.parse(str, fmt);
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, DEFAULT_ZONE_ID).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, pattern).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, pattern, DEFAULT_ZONE_ID).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, pattern, null).getTime()
+        );
+    }
+
+    @Test
+    public void parseDate0_dot() {
+        String str = "29.11.2022 12:13:14";
+        String pattern = "dd.MM.yyyy HH:mm:ss";
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(pattern);
+        LocalDateTime ldt = LocalDateTime.parse(str, fmt);
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, DEFAULT_ZONE_ID).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, pattern).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, pattern, DEFAULT_ZONE_ID).getTime()
+        );
+    }
+
+    @Test
+    public void parseDate0_x() {
+        String str = "4 Dec 2022 12:13:14";
+        String pattern = "d MMM yyyy HH:mm:ss";
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(pattern);
+        LocalDateTime ldt = LocalDateTime.of(2022, 12, 4, 12, 13, 14);
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, DEFAULT_ZONE_ID).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, pattern).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, pattern, DEFAULT_ZONE_ID).getTime()
+        );
+        assertEquals(
+                ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
+                DateUtils.parseDate(str, pattern, null).getTime()
         );
     }
 
@@ -1589,7 +1775,7 @@ public class DateUtilsTest {
         LocalDateTime ldt = LocalDateTime.parse(str, fmt);
         assertEquals(
                 ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
-                DateUtils.toMillis19(str, 0, null)
+                DateUtils.parseMillis19(str, null)
         );
 
         String str1 = "1970-01-01 00:00:00";
@@ -1597,48 +1783,48 @@ public class DateUtilsTest {
         LocalDateTime ldt1 = LocalDateTime.parse(str1, fmt1);
         assertEquals(
                 ldt1.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),
-                DateUtils.toMillis19("0000-00-00 00:00:00", 0, null)
+                DateUtils.parseMillis19("0000-00-00 00:00:00", null)
         );
 
-        assertThrows(NullPointerException.class, () -> DateUtils.toMillis19(null, 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("xxx", 0, null));
+        assertThrows(NullPointerException.class, () -> DateUtils.parseMillis19(null, null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("xxx", null));
 
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("A000-01-02 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2A00-01-02 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("20A0-01-02 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("200A-01-02 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-A1-02 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-0A-02 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-A2 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-0A 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02 A3:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02 0A:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02 03:A4:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02 03:0A:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02 03:04:A5", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02 03:04:0A", 0, null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("A000-01-02 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2A00-01-02 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("20A0-01-02 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("200A-01-02 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-A1-02 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-0A-02 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-A2 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-0A 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-02 A3:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-02 0A:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-02 03:A4:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-02 03:0A:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-02 03:04:A5", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-02 03:04:0A", null));
 
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("$000-01-02 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2$00-01-02 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("20$0-01-02 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("200$-01-02 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-$1-02 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-0$-02 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-$2 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-0$ 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02 $3:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02 0$:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02 03:$4:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02 03:0$:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02 03:04:$5", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02 03:04:0$", 0, null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("$000-01-02 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2$00-01-02 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("20$0-01-02 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("200$-01-02 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-$1-02 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-0$-02 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-$2 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-0$ 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-02 $3:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-02 0$:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-02 03:$4:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-02 03:0$:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-02 03:04:$5", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-02 03:04:0$", null));
 
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000X01-02 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01X02 03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02X03:04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02 03X04:05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02 03:04X05", 0, null));
-        assertThrows(DateTimeParseException.class, () -> DateUtils.toMillis19("2000-01-02T03:04:0A", 0, null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000X01-02 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01X02 03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-02X03:04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-02 03X04:05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-02 03:04X05", null));
+        assertThrows(DateTimeParseException.class, () -> DateUtils.parseMillis19("2000-01-02T03:04:0A", null));
     }
 
     @Test
