@@ -27,7 +27,7 @@ public class DateParse19 {
     );
 
     @Benchmark
-    public void javaTimeDateTimeFormatter(Blackhole bh) throws Throwable {
+    public void javaTimeFormatter(Blackhole bh) throws Throwable {
         LocalDateTime ldt = LocalDateTime.parse(INPUT, FORMATTER);
         ZoneId zoneId = DateUtils.DEFAULT_ZONE_ID;
         ZonedDateTime zdt = ldt.atZone(zoneId);

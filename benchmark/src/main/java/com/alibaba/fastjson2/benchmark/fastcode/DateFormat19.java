@@ -19,12 +19,13 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class DateFormat19 {
-    static final String PATTERN = "yyyy-MM-dd HH:mm:ss";
-    static DateTimeFormatter formatter = DateTimeFormatter.ofPattern(PATTERN);
+    static final String pattern = "yyyy-MM-dd HH:mm:ss";
+    static DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
     static Date date = new Date(1340424794000L);
-    static FastDateFormat fastDateFormat = FastDateFormat.getInstance(PATTERN);
+    static FastDateFormat fastDateFormat = FastDateFormat.getInstance(pattern);
+
     static ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT_LOCAL = ThreadLocal.withInitial(
-            () -> new SimpleDateFormat(PATTERN)
+            () -> new SimpleDateFormat(pattern)
     );
 
     @Benchmark
@@ -44,7 +45,7 @@ public class DateFormat19 {
 
     @Benchmark
     public void simpleDateFormat(Blackhole bh) throws Throwable {
-        SimpleDateFormat format = new SimpleDateFormat(PATTERN);
+        SimpleDateFormat format = new SimpleDateFormat(pattern);
         String str = format.format(date);
         bh.consume(str);
     }
@@ -58,7 +59,7 @@ public class DateFormat19 {
 
 //    @Benchmark
     public void fastjsonFormat(Blackhole bh) throws Throwable {
-        bh.consume(DateUtils.format(date, PATTERN));
+        bh.consume(DateUtils.format(date, pattern));
     }
 
     @Benchmark

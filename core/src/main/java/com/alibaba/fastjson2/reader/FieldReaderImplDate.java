@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
@@ -199,8 +198,7 @@ abstract class FieldReaderImplDate<T>
                 }
                 value = new java.util.Date(millis);
             } else {
-                String jsonStr = JSON.toJSONString(str);
-                value = JSON.parseObject(jsonStr, Date.class, format);
+                value = DateUtils.parseDate(str, format);
             }
         }
 
@@ -280,5 +278,10 @@ abstract class FieldReaderImplDate<T>
         }
 
         accept(object, fieldValue);
+    }
+
+    public boolean supportAcceptType(Class valueClass) {
+        return valueClass == Date.class
+                || valueClass == String.class;
     }
 }

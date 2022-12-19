@@ -66,6 +66,10 @@ class FieldReaderStringField<T>
         return fieldValue;
     }
 
+    public boolean supportAcceptType(Class valueClass) {
+        return true;
+    }
+
     @Override
     public void accept(T object, Object value) {
         String fieldValue;
