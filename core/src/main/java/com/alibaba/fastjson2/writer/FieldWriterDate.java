@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 
 import java.lang.reflect.Field;
@@ -151,7 +152,7 @@ abstract class FieldWriterDate<T>
             long epochSecond = Math.floorDiv(timeMillis, 1000L);
             int offsetTotalSeconds;
             if (zoneId == IOUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == IOUtils.SHANGHAI_ZONE_RULES) {
-                offsetTotalSeconds = IOUtils.getShanghaiZoneOffsetTotalSeconds(epochSecond);
+                offsetTotalSeconds = DateUtils.getShanghaiZoneOffsetTotalSeconds(epochSecond);
             } else {
                 Instant instant = Instant.ofEpochMilli(timeMillis);
                 offsetTotalSeconds = zoneId.getRules().getOffset(instant).getTotalSeconds();

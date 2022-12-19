@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.benchmark;
 
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -83,7 +84,7 @@ public class DateWrite {
         long epochSecond = Math.floorDiv(millis, 1000L);
         int offsetTotalSeconds;
         if (zoneId == IOUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == IOUtils.SHANGHAI_ZONE_RULES) {
-            offsetTotalSeconds = IOUtils.getShanghaiZoneOffsetTotalSeconds(epochSecond);
+            offsetTotalSeconds = DateUtils.getShanghaiZoneOffsetTotalSeconds(epochSecond);
         } else {
             Instant instant = Instant.ofEpochMilli(millis);
             offsetTotalSeconds = zoneId.getRules().getOffset(instant).getTotalSeconds();
