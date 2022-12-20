@@ -3116,7 +3116,7 @@ public class DateUtils {
             S8 = c28;
             zoneIdBegin = 29;
             isTimeZone = c29 == '|';
-        } else if (len == 22 && (c1 == '+' || c17 == '-')) {
+        } else if (len == 22 && (c17 == '+' || c17 == '-')) {
             // yyyyMMddHHmmssSSSZ
             y0 = c0;
             y1 = c1;
@@ -3147,8 +3147,8 @@ public class DateUtils {
             S6 = '0';
             S7 = '0';
             S8 = '0';
-            zoneIdBegin = 18;
-            isTimeZone = true;
+            zoneIdBegin = 17;
+            isTimeZone = false;
         } else {
             throw new DateTimeParseException("illegal input " + str, str, 0);
         }
