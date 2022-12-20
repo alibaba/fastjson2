@@ -211,7 +211,7 @@ public class JDKUtils {
                         methodType(ToIntFunction.class),
                         methodType(int.class, Object.class),
                         coder,
-                        coder.type()
+                        methodType(byte.class, String.class)
                 );
                 stringCoder = (ToIntFunction<String>) applyAsInt.getTarget().invokeExact();
 

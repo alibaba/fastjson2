@@ -71,6 +71,10 @@ public class DateUtils {
                 long millis = parseMillis10(str, zoneId, DATE_FORMAT_10_SLASH);
                 return new Date(millis);
             }
+            case "yyyyMMddHHmmssSSSZ": {
+                long millis = parseMillis(str, DEFAULT_ZONE_ID);
+                return new Date(millis);
+            }
             default:
                 break;
         }
@@ -3112,6 +3116,39 @@ public class DateUtils {
             S8 = c28;
             zoneIdBegin = 29;
             isTimeZone = c29 == '|';
+        } else if (len == 22 && (c1 == '+' || c17 == '-')) {
+            // yyyyMMddHHmmssSSSZ
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c4;
+            m1 = c5;
+
+            d0 = c6;
+            d1 = c7;
+
+            h0 = c8;
+            h1 = c9;
+
+            i0 = c10;
+            i1 = c11;
+
+            s0 = c12;
+            s1 = c13;
+
+            S0 = c14;
+            S1 = c15;
+            S2 = c16;
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 18;
+            isTimeZone = true;
         } else {
             throw new DateTimeParseException("illegal input " + str, str, 0);
         }
