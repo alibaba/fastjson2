@@ -17,18 +17,18 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class DateParse19 {
-    static final String PATTERN = "yyyy-MM-dd HH:mm:ss";
-    static String INPUT = "2012-06-23 12:13:14";
-    static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(PATTERN);
-    static final FastDateFormat FAST_DATE_FORMAT = FastDateFormat.getInstance(PATTERN);
+    static final String pattern = "yyyy-MM-dd HH:mm:ss";
+    static String input = "2012-06-23 12:13:14";
+    static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+    static final FastDateFormat FAST_DATE_FORMAT = FastDateFormat.getInstance(pattern);
 
     static ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT_LOCAL = ThreadLocal.withInitial(
-            () -> new SimpleDateFormat(PATTERN)
+            () -> new SimpleDateFormat(pattern)
     );
 
     @Benchmark
     public void javaTimeFormatter(Blackhole bh) throws Throwable {
-        LocalDateTime ldt = LocalDateTime.parse(INPUT, FORMATTER);
+        LocalDateTime ldt = LocalDateTime.parse(input, formatter);
         ZoneId zoneId = DateUtils.DEFAULT_ZONE_ID;
         ZonedDateTime zdt = ldt.atZone(zoneId);
         Instant instant = zdt.toInstant();
@@ -38,7 +38,7 @@ public class DateParse19 {
 
 //    @Benchmark
     public void javaTimeDateTimeFormatter1(Blackhole bh) throws Throwable {
-        LocalDateTime ldt = LocalDateTime.parse(INPUT, FORMATTER);
+        LocalDateTime ldt = LocalDateTime.parse(input, formatter);
         ZoneId zoneId = DateUtils.DEFAULT_ZONE_ID;
         long millis = DateUtils.millis(ldt, zoneId);
         Date date = new Date(millis);
@@ -47,40 +47,39 @@ public class DateParse19 {
 
 //    @Benchmark
     public void parseDateSmart(Blackhole bh) throws Throwable {
-        Date date = DateUtils.parseDate(INPUT);
+        Date date = DateUtils.parseDate(input);
         bh.consume(date);
     }
 
     @Benchmark
     public void parseDateYMDHMS19(Blackhole bh) throws Throwable {
-//        long millis = DateUtils.parseMillisYMDHMS19(INPUT, DateUtils.DEFAULT_ZONE_ID);
-        Date date = DateUtils.parseDateYMDHMS19(INPUT);
+        Date date = DateUtils.parseDateYMDHMS19(input);
         bh.consume(date);
     }
 
 //    @Benchmark
     public void parseDate(Blackhole bh) throws Throwable {
-        Date date = DateUtils.parseDate(INPUT, PATTERN);
+        Date date = DateUtils.parseDate(input, pattern);
         bh.consume(date);
     }
 
     @Benchmark
     public void simpleDateFormat(Blackhole bh) throws Throwable {
-        SimpleDateFormat format = new SimpleDateFormat(PATTERN);
-        Date date = format.parse(INPUT);
+        SimpleDateFormat format = new SimpleDateFormat(pattern);
+        Date date = format.parse(input);
         bh.consume(date);
     }
 
     @Benchmark
     public void simpleDateFormatThreadLocal(Blackhole bh) throws Throwable {
         SimpleDateFormat format = SIMPLE_DATE_FORMAT_LOCAL.get();
-        Date date = format.parse(INPUT);
+        Date date = format.parse(input);
         bh.consume(date);
     }
 
     @Benchmark
     public void commonLangFastDateFormat(Blackhole bh) throws Throwable {
-        Date date = FAST_DATE_FORMAT.parse(INPUT);
+        Date date = FAST_DATE_FORMAT.parse(input);
         bh.consume(date);
     }
 
