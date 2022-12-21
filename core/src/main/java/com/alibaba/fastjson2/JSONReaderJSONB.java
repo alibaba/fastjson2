@@ -582,6 +582,47 @@ class JSONReaderJSONB
                 offset += 4;
                 return new Date(seconds * 1000);
             }
+            case BC_LOCAL_DATE: {
+                int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
+                byte month = bytes[offset++];
+                byte dayOfMonth = bytes[offset++];
+                return LocalDate.of(year, month, dayOfMonth);
+            }
+            case BC_LOCAL_TIME: {
+                byte hour = bytes[offset++];
+                byte minute = bytes[offset++];
+                byte second = bytes[offset++];
+                int nano = readInt32Value();
+                return LocalTime.of(hour, minute, second, nano);
+            }
+            case BC_LOCAL_DATETIME: {
+                int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
+                byte month = bytes[offset++];
+                byte dayOfMonth = bytes[offset++];
+                byte hour = bytes[offset++];
+                byte minute = bytes[offset++];
+                byte second = bytes[offset++];
+                int nano = readInt32Value();
+                return LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
+            }
+            case BC_TIMESTAMP_WITH_TIMEZONE: {
+                int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
+                byte month = bytes[offset++];
+                byte dayOfMonth = bytes[offset++];
+                byte hour = bytes[offset++];
+                byte minute = bytes[offset++];
+                byte second = bytes[offset++];
+                int nano = readInt32Value();
+                String zoneIdStr = readString();
+                ZoneId zoneId = ZoneId.of(zoneIdStr);
+                LocalDateTime ldt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
+                return ZonedDateTime.of(ldt, zoneId);
+            }
+            case BC_TIMESTAMP : {
+                long epochSeconds = readInt64Value();
+                int nano = readInt32Value();
+                return Instant.ofEpochSecond(epochSeconds, nano);
+            }
             case BC_TIMESTAMP_MILLIS: {
                 long millis =
                         ((bytes[offset + 7] & 0xFFL)) +
