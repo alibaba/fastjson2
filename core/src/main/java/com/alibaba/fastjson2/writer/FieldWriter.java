@@ -27,6 +27,7 @@ public abstract class FieldWriter<T>
     public final String label;
     public final Field field;
     public final Method method;
+    protected long fieldOffset;
 
     final long hashCode;
     final byte[] nameWithColonUTF8;
@@ -65,6 +66,12 @@ public abstract class FieldWriter<T>
         this.fieldClassSerializable = fieldClass != null && (Serializable.class.isAssignableFrom(fieldClass) || !Modifier.isFinal(fieldClass.getModifiers()));
         this.field = field;
         this.method = method;
+
+        long fieldOffset = -1L;
+        if (field != null && JDKUtils.UNSAFE_SUPPORT) {
+            fieldOffset = UnsafeUtils.objectFieldOffset(field);
+        }
+        this.fieldOffset = fieldOffset;
 
         this.symbol = "symbol".equals(format);
         this.trim = "trim".equals(format);
@@ -216,7 +223,27 @@ public abstract class FieldWriter<T>
         return fieldName;
     }
 
-    public abstract Object getFieldValue(T object);
+    public Object getFieldValue(T object) {
+        if (object == null) {
+            throw new JSONException("field.get error, " + fieldName);
+        }
+
+        if (field != null) {
+            try {
+                Object value;
+                if (fieldOffset != -1 && !fieldClass.isPrimitive()) {
+                    value = UnsafeUtils.getObject(object, fieldOffset);
+                } else {
+                    value = field.get(object);
+                }
+                return value;
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                throw new JSONException("field.get error, " + fieldName, e);
+            }
+        }
+
+        throw new UnsupportedOperationException();
+    }
 
     @Override
     public int compareTo(Object o) {

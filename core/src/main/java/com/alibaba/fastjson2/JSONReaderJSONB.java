@@ -685,6 +685,10 @@ class JSONReaderJSONB
                         return readObject();
                     }
 
+                    if (isArray()) {
+                        return readArray();
+                    }
+
                     throw new JSONException("auoType not support , offset " + offset + "/" + bytes.length);
                 }
 

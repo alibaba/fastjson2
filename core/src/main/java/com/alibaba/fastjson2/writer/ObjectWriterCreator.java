@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
 
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
-import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 
 public class ObjectWriterCreator {
     public static final ObjectWriterCreator INSTANCE = new ObjectWriterCreator();
@@ -652,7 +651,9 @@ public class ObjectWriterCreator {
         Class<?> declaringClass = field.getDeclaringClass();
         Method method = null;
 
-        if (declaringClass == Throwable.class) {
+        boolean unsafeFieldWriter = JDKUtils.UNSAFE_SUPPORT;
+        if (declaringClass == Throwable.class && !unsafeFieldWriter) {
+            unsafeFieldWriter = JDKUtils.UNSAFE_SUPPORT;
             switch (field.getName()) {
                 case "detailMessage":
                     method = BeanUtils.getMethod(Throwable.class, "getMessage");
@@ -661,20 +662,13 @@ public class ObjectWriterCreator {
                 case "cause":
                     method = BeanUtils.getMethod(Throwable.class, "getCause");
                     break;
-                case "stackTrace": {
-                    if (JVM_VERSION > 11) {
-                        method = BeanUtils.getMethod(Throwable.class, "getStackTrace");
-                    }
-                    break;
-                }
                 case "suppressedExceptions": {
-                    method = BeanUtils.getMethod(Throwable.class, "getSuppressed");
                     fieldName = "suppressed";
                 }
                 default:
                     break;
             }
-        } else if (declaringClass == DateTimeParseException.class) {
+        } else if (declaringClass == DateTimeParseException.class && !unsafeFieldWriter) {
             switch (field.getName()) {
                 case "errorIndex":
                     method = BeanUtils.getMethod(DateTimeParseException.class, "getErrorIndex");
@@ -691,7 +685,9 @@ public class ObjectWriterCreator {
             return createFieldWriter(provider, (Class<T>) Throwable.class, fieldName, ordinal, features, format, label, method, initObjectWriter);
         }
 
-        field.setAccessible(true);
+        if (!unsafeFieldWriter) {
+            field.setAccessible(true);
+        }
 
         Class<?> fieldClass = field.getType();
         Type fieldType = field.getGenericType();
@@ -713,7 +709,7 @@ public class ObjectWriterCreator {
                 fieldType = fieldClass = Boolean.class;
             }
 
-            FieldWriterObjectField objImp = new FieldWriterObjectField(fieldName, ordinal, features, format, label, fieldType, fieldClass, field);
+            FieldWriterObject objImp = new FieldWriterObject(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null);
             objImp.initValueClass = fieldClass;
             if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
                 objImp.initObjectWriter = initObjectWriter;
@@ -723,10 +719,6 @@ public class ObjectWriterCreator {
 
         if (fieldClass == boolean.class) {
             return new FieldWriterBoolValField(fieldName, ordinal, features, format, label, field, fieldClass);
-        }
-
-        if (fieldClass == boolean.class || fieldClass == Boolean.class) {
-            return new FieldWriterBooleanField(fieldName, ordinal, features, format, label, field, fieldClass);
         }
 
         if (fieldClass == byte.class) {
@@ -758,22 +750,6 @@ public class ObjectWriterCreator {
 
         if (fieldClass == char.class) {
             return new FieldWriterCharValField(fieldName, ordinal, format, label, field);
-        }
-
-        if (fieldClass == Integer.class) {
-            return new FieldWriterInt32Field(fieldName, ordinal, features, format, label, field);
-        }
-
-        if (fieldClass == Long.class) {
-            return new FieldWriterInt64Field(fieldName, ordinal, features, format, label, field);
-        }
-
-        if (fieldClass == Short.class) {
-            return new FieldWriterInt16Field(fieldName, ordinal, features, format, label, field, fieldClass);
-        }
-
-        if (fieldClass == Byte.class) {
-            return new FieldWriterInt8Field(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass == BigInteger.class) {
@@ -808,7 +784,7 @@ public class ObjectWriterCreator {
             if (enumValueField == null && !writeEnumAsJavaBean) {
                 String[] enumAnnotationNames = BeanUtils.getEnumAnnotationNames(fieldClass);
                 if (enumAnnotationNames == null) {
-                    return new FIeldWriterEnumField(fieldName, ordinal, features, format, label, fieldClass, field);
+                    return new FieldWriterEnum(fieldName, ordinal, features, format, label, fieldType, (Class<? extends Enum>) fieldClass, field, null);
                 }
             }
         }
@@ -826,7 +802,7 @@ public class ObjectWriterCreator {
             return new FieldWriterObjectArrayField(fieldName, itemClass, ordinal, features, format, label, itemClass, fieldClass, field);
         }
 
-        return new FieldWriterObjectField(fieldName, ordinal, features, format, label, field.getGenericType(), fieldClass, field);
+        return new FieldWriterObject(fieldName, ordinal, features, format, label, field.getGenericType(), fieldClass, field, null);
     }
 
     public <T> FieldWriter<T> createFieldWriter(Class<T> objectType,
