@@ -119,6 +119,10 @@ public abstract class JSONWriter
             return null;
         }
 
+        if (object == Collections.EMPTY_LIST || object == Collections.EMPTY_SET) {
+            return null;
+        }
+
         this.path = new Path(this.path, name);
 
         Path previous;
@@ -181,6 +185,10 @@ public abstract class JSONWriter
             return null;
         }
 
+        if (object == Collections.EMPTY_LIST || object == Collections.EMPTY_SET) {
+            return null;
+        }
+
         if (index == 0) {
             if (path.child0 != null) {
                 this.path = path.child0;
@@ -223,6 +231,10 @@ public abstract class JSONWriter
         }
 
         if ((context.features & Feature.ReferenceDetection.mask) == 0) {
+            return;
+        }
+
+        if (object == Collections.EMPTY_LIST || object == Collections.EMPTY_SET) {
             return;
         }
 
@@ -613,7 +625,7 @@ public abstract class JSONWriter
 
     public static JSONWriter ofUTF8() {
         Context context = createWriteContext();
-        if (JVM_VERSION >= 9 && STRING_CODER != null) {
+        if (STRING_VALUE != null) {
             return new JSONWriterUTF8JDK9(context);
         } else {
             return new JSONWriterUTF8(context);
@@ -621,7 +633,7 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter ofUTF8(JSONWriter.Context context) {
-        if (JVM_VERSION >= 9 && STRING_CODER != null) {
+        if (STRING_VALUE != null) {
             return new JSONWriterUTF8JDK9(context);
         } else {
             return new JSONWriterUTF8(context);
@@ -632,7 +644,7 @@ public abstract class JSONWriter
         Context writeContext = createWriteContext(features);
 
         JSONWriter jsonWriter;
-        if (JVM_VERSION >= 9 && STRING_VALUE != null) {
+        if (STRING_VALUE != null) {
             jsonWriter = new JSONWriterUTF8JDK9(writeContext);
         } else {
             jsonWriter = new JSONWriterUTF8(writeContext);

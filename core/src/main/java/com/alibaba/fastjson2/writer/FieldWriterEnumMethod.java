@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 final class FieldWriterEnumMethod
         extends FieldWriterEnum {
     protected FieldWriterEnumMethod(String name, int ordinal, long features, String format, String label, Class fieldType, Method method) {
-        super(name, ordinal, features, format, label, fieldType, null, method);
+        super(name, ordinal, features, format, label, fieldType, fieldType, null, method);
     }
 
     @Override
@@ -19,12 +19,6 @@ final class FieldWriterEnumMethod
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             throw new JSONException("invoke getter method error, " + fieldName, e);
         }
-    }
-
-    @Override
-    public void writeValue(JSONWriter jsonWriter, Object object) {
-        Enum value = (Enum) getFieldValue(object);
-        jsonWriter.writeEnum(value);
     }
 
     @Override

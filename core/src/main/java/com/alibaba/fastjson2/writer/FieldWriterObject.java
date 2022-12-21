@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-abstract class FieldWriterObject<T>
+public class FieldWriterObject<T>
         extends FieldWriter<T> {
     volatile Class initValueClass;
     volatile ObjectWriter initObjectWriter;
@@ -179,6 +179,15 @@ abstract class FieldWriterObject<T>
                 }
                 return true;
             } else {
+                return false;
+            }
+        }
+
+        if (value == object) {
+            if (fieldClass == Throwable.class
+                    && field != null
+                    && field.getDeclaringClass() == Throwable.class
+            ) {
                 return false;
             }
         }

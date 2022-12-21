@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Field;
@@ -15,15 +14,6 @@ final class FieldWriterStringField<T>
             String label,
             Field field) {
         super(fieldName, ordinal, features, format, label, String.class, String.class, field, null);
-    }
-
-    @Override
-    public Object getFieldValue(Object object) {
-        try {
-            return field.get(object);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + fieldName, e);
-        }
     }
 
     @Override
@@ -63,7 +53,7 @@ final class FieldWriterStringField<T>
     }
 
     @Override
-    public void writeValue(JSONWriter jsonWriter, Object object) {
+    public void writeValue(JSONWriter jsonWriter, T object) {
         String value = (String) getFieldValue(object);
         if (value == null) {
             jsonWriter.writeNull();

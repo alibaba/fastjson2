@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -14,7 +13,6 @@ final class FieldWriterObjectArrayField<T>
     final Type itemType;
     final Class itemClass;
     ObjectWriter itemObjectWriter;
-
     protected FieldWriterObjectArrayField(
             String fieldName,
             Type itemType,
@@ -32,15 +30,6 @@ final class FieldWriterObjectArrayField<T>
             itemClass = (Class) itemType;
         } else {
             itemClass = TypeUtils.getMapping(itemType);
-        }
-    }
-
-    @Override
-    public Object getFieldValue(Object object) {
-        try {
-            return field.get(object);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 

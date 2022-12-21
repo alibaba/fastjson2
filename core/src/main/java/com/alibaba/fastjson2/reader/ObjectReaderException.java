@@ -10,6 +10,7 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 final class ObjectReaderException<T>
@@ -238,6 +239,14 @@ final class ObjectReaderException<T>
                         case "message":
                         case "cause":
                             break;
+                        case "errorIndex":
+                            if (objectClass == DateTimeParseException.class) {
+                                break;
+                            }
+                            if (!fieldValues.containsKey(paramName)) {
+                                matchAll = false;
+                            }
+                            break;
                         default:
                             if (!fieldValues.containsKey(paramName)) {
                                 matchAll = false;
@@ -260,6 +269,12 @@ final class ObjectReaderException<T>
                             break;
                         case "cause":
                             fieldValue = cause;
+                            break;
+                        case "errorIndex":
+                            fieldValue = fieldValues.get(paramName);
+                            if (fieldValue == null && objectClass == DateTimeParseException.class) {
+                                fieldValue = 0;
+                            }
                             break;
                         default:
                             fieldValue = fieldValues.get(paramName);

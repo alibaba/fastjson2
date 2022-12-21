@@ -2938,10 +2938,6 @@ public class ObjectWriterCreatorASM
                 fieldType = fieldClass = Byte.class;
             } else if (fieldClass == short.class) {
                 fieldType = fieldClass = Short.class;
-            } else if (fieldClass == int.class) {
-                fieldType = fieldClass = Integer.class;
-            } else if (fieldClass == long.class) {
-                fieldType = fieldClass = Long.class;
             } else if (fieldClass == float.class) {
                 fieldType = fieldClass = Float.class;
             } else if (fieldClass == double.class) {
@@ -2950,7 +2946,7 @@ public class ObjectWriterCreatorASM
                 fieldType = fieldClass = Boolean.class;
             }
 
-            FieldWriterObjectField objImp = new FieldWriterObjectField(
+            FieldWriterObject objImp = new FieldWriterObject(
                     fieldName,
                     ordinal,
                     features,
@@ -2958,7 +2954,8 @@ public class ObjectWriterCreatorASM
                     label,
                     fieldType,
                     fieldClass,
-                    field
+                    field,
+                    null
             );
             objImp.initValueClass = fieldClass;
             if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
@@ -2967,8 +2964,8 @@ public class ObjectWriterCreatorASM
             return objImp;
         }
 
-        if (fieldClass == boolean.class || fieldClass == Boolean.class) {
-            return new FieldWriterBooleanField(fieldName, ordinal, features, format, label, field, fieldClass);
+        if (fieldClass == boolean.class) {
+            return new FieldWriterBoolValField(fieldName, ordinal, features, format, label, field, fieldClass);
         }
 
         if (fieldClass == byte.class) {
@@ -2980,11 +2977,7 @@ public class ObjectWriterCreatorASM
         }
 
         if (fieldClass == int.class) {
-            if (UNSAFE_SUPPORT) {
-                return new FieldWriterInt32ValUF<>(fieldName, ordinal, features, format, label, field);
-            } else {
-                return new FieldWriterInt32Val(fieldName, ordinal, features, format, label, field);
-            }
+            return new FieldWriterInt32Val(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass == long.class) {
@@ -3004,22 +2997,6 @@ public class ObjectWriterCreatorASM
 
         if (fieldClass == char.class) {
             return new FieldWriterCharValField(fieldName, ordinal, format, label, field);
-        }
-
-        if (fieldClass == Integer.class) {
-            return new FieldWriterInt32Field(fieldName, ordinal, features, format, label, field);
-        }
-
-        if (fieldClass == Long.class) {
-            return new FieldWriterInt64Field(fieldName, ordinal, features, format, label, field);
-        }
-
-        if (fieldClass == Short.class) {
-            return new FieldWriterInt16Field(fieldName, ordinal, features, format, label, field, fieldClass);
-        }
-
-        if (fieldClass == Byte.class) {
-            return new FieldWriterInt8Field(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass == BigInteger.class) {
@@ -3063,7 +3040,7 @@ public class ObjectWriterCreatorASM
             if (enumValueField == null && !writeEnumAsJavaBean) {
                 String[] enumAnnotationNames = BeanUtils.getEnumAnnotationNames(fieldClass);
                 if (enumAnnotationNames == null) {
-                    return new FIeldWriterEnumField(fieldName, ordinal, features, format, label, fieldClass, field);
+                    return new FieldWriterEnum(fieldName, ordinal, features, format, label, fieldType, (Class<? extends Enum>) fieldClass, field, null);
                 }
             }
         }
@@ -3093,7 +3070,7 @@ public class ObjectWriterCreatorASM
 //            }
         }
 
-        return new FieldWriterObjectFieldUF(fieldName, ordinal, features, format, label, field.getGenericType(), fieldClass, field);
+        return new FieldWriterObject(fieldName, ordinal, features, format, label, field.getGenericType(), fieldClass, field, null);
     }
 
     void genGetObject(MethodWriterContext mwc, FieldWriter fieldWriter, int OBJECT) {

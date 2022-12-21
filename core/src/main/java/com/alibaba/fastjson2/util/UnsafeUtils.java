@@ -22,6 +22,38 @@ public class UnsafeUtils {
         return UNSAFE.getObject(o, offset);
     }
 
+    public static long getLong(Object o, long offset) {
+        return UNSAFE.getLong(o, offset);
+    }
+
+    public static int getInt(Object o, long offset) {
+        return UNSAFE.getInt(o, offset);
+    }
+
+    public static short getShort(Object o, long offset) {
+        return UNSAFE.getShort(o, offset);
+    }
+
+    public static byte getByte(Object o, long offset) {
+        return UNSAFE.getByte(o, offset);
+    }
+
+    public static float getFloat(Object o, long offset) {
+        return UNSAFE.getFloat(o, offset);
+    }
+
+    public static double getDouble(Object o, long offset) {
+        return UNSAFE.getDouble(o, offset);
+    }
+
+    public static boolean getBoolean(Object o, long offset) {
+        return UNSAFE.getBoolean(o, offset);
+    }
+
+    public static char getChar(Object o, long offset) {
+        return UNSAFE.getChar(o, offset);
+    }
+
     public static void putObject(Object o, long offset, Object x) {
         UNSAFE.putObject(o, offset, x);
     }

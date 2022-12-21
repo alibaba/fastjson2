@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
 
@@ -23,8 +24,18 @@ final class FieldWriterMillisField<T>
     }
 
     public long getFieldLong(T object) {
+        if (object == null) {
+            throw new JSONException("field.get error, " + fieldName);
+        }
+
         try {
-            return field.getLong(object);
+            long value;
+            if (fieldOffset != -1) {
+                value = UnsafeUtils.getLong(object, fieldOffset);
+            } else {
+                value = field.getLong(object);
+            }
+            return value;
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw new JSONException("field.get error, " + fieldName, e);
         }

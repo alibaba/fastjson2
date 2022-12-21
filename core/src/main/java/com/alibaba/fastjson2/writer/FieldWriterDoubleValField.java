@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
 
@@ -12,13 +13,23 @@ final class FieldWriterDoubleValField<T>
     }
 
     @Override
-    public Object getFieldValue(T object) {
+    public Object getFieldValue(Object object) {
         return getFieldValueDouble(object);
     }
 
-    public double getFieldValueDouble(T object) {
+    public double getFieldValueDouble(Object object) {
+        if (object == null) {
+            throw new JSONException("field.get error, " + fieldName);
+        }
+
         try {
-            return field.getDouble(object);
+            double value;
+            if (fieldOffset != -1) {
+                value = UnsafeUtils.getDouble(object, fieldOffset);
+            } else {
+                value = field.getDouble(object);
+            }
+            return value;
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw new JSONException("field.get error, " + fieldName, e);
         }

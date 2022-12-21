@@ -2758,10 +2758,11 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (JVM_VERSION > 8 && STRING_VALUE != null) {
+        if (STRING_VALUE != null && STRING_CODER != null) {
             try {
+                final int LATIN1 = 0;
                 int coder = STRING_CODER.applyAsInt(str);
-                if (coder == 0) {
+                if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
                     return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
                 }
@@ -2786,10 +2787,11 @@ public abstract class JSONReader
             throw new NullPointerException();
         }
 
-        if (JVM_VERSION > 8 && STRING_VALUE != null) {
+        if (STRING_VALUE != null && STRING_CODER != null) {
             try {
+                final int LATIN1 = 0;
                 int coder = STRING_CODER.applyAsInt(str);
-                if (coder == 0) {
+                if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
                     return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
                 }
@@ -2815,10 +2817,11 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (JVM_VERSION > 8 && STRING_VALUE != null) {
+        if (STRING_VALUE != null && STRING_VALUE != null) {
             try {
+                final int LATIN1 = 0;
                 int coder = STRING_CODER.applyAsInt(str);
-                if (coder == 0) {
+                if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
                     return new JSONReaderASCII(context, str, bytes, offset, length);
                 }
@@ -2842,10 +2845,11 @@ public abstract class JSONReader
             throw new NullPointerException();
         }
 
-        if (JVM_VERSION > 8 && STRING_VALUE != null) {
+        if (STRING_VALUE != null && STRING_CODER != null) {
             try {
+                final int LATIN1 = 0;
                 int coder = STRING_CODER.applyAsInt(str);
-                if (coder == 0) {
+                if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
                     return new JSONReaderASCII(context, str, bytes, offset, length);
                 }
