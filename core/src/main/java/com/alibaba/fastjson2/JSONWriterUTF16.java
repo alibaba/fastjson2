@@ -384,11 +384,7 @@ class JSONWriterUTF16
             return;
         }
 
-        if (escapeNoneAscii || browserSecure) {
-            ensureCapacity(off + strlen * 6 + 2);
-        } else {
-            ensureCapacity(off + strlen * 2 + 2);
-        }
+        ensureCapacity(off + strlen * 6 + 2);
 
         chars[off++] = quote;
         for (int i = 0; i < strlen; ++i) {
