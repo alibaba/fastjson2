@@ -15,13 +15,13 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.util.DateUtils.SHANGHAI_ZONE_ID;
-import static com.alibaba.fastjson2.util.DateUtils.localDateTime;
+import static com.alibaba.fastjson2.util.DateUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 class JSONReaderJSONB
         extends JSONReader {
+    static final byte[] SHANGHAI_ZONE_ID_NAME_BYTES = JSONB.toBytes(SHANGHAI_ZONE_ID_NAME);
     static Charset GB18030;
 
     protected final byte[] bytes;
@@ -613,8 +613,29 @@ class JSONReaderJSONB
                 byte minute = bytes[offset++];
                 byte second = bytes[offset++];
                 int nano = readInt32Value();
-                String zoneIdStr = readString();
-                ZoneId zoneId = ZoneId.of(zoneIdStr);
+                // SHANGHAI_ZONE_ID_NAME_BYTES
+                ZoneId zoneId;
+                {
+                    boolean shanghai;
+                    byte[] shanghaiZoneIdNameBytes = SHANGHAI_ZONE_ID_NAME_BYTES;
+                    if (offset + shanghaiZoneIdNameBytes.length < bytes.length) {
+                        shanghai = true;
+                        for (int i = 0; i < shanghaiZoneIdNameBytes.length; ++i) {
+                            if (bytes[offset + i] != shanghaiZoneIdNameBytes[i]) {
+                                shanghai = false;
+                            }
+                        }
+                    } else {
+                        shanghai = false;
+                    }
+                    if (shanghai) {
+                        offset += shanghaiZoneIdNameBytes.length;
+                        zoneId = SHANGHAI_ZONE_ID;
+                    } else {
+                        String zoneIdStr = readString();
+                        zoneId = ZoneId.of(zoneIdStr);
+                    }
+                }
                 LocalDateTime ldt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
                 return ZonedDateTime.of(ldt, zoneId);
             }

@@ -18,12 +18,16 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.CACHE_SIZE;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNameAsSymbol;
+import static com.alibaba.fastjson2.util.DateUtils.SHANGHAI_ZONE_ID_NAME;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONWriterJSONB
         extends JSONWriter {
     static final BigInteger BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE);
     static final BigInteger BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
+
+    // optimize for write ZonedDateTime
+    static final byte[] SHANGHAI_ZONE_ID_NAME_BYTES = JSONB.toBytes(SHANGHAI_ZONE_ID_NAME);
 
     private final int cachedIndex;
     private byte[] bytes;
@@ -1835,8 +1839,16 @@ final class JSONWriterJSONB
         int nano = dateTime.getNano();
         writeInt32(nano);
 
-        String zoneId = dateTime.getZone().getId();
-        writeString(zoneId);
+        ZoneId zoneId = dateTime.getZone();
+        String zoneIdStr = zoneId.getId();
+        switch (zoneIdStr) {
+            case SHANGHAI_ZONE_ID_NAME:
+                writeRaw(SHANGHAI_ZONE_ID_NAME_BYTES);
+                break;
+            default:
+                writeString(zoneIdStr);
+                break;
+        }
     }
 
     @Override
