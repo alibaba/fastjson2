@@ -383,6 +383,13 @@ public class ObjectReaderBaseModule
                     }
                 }
 
+                if (annotationType == JSONCompiler.class) {
+                    JSONCompiler compiler = (JSONCompiler) annotation;
+                    if (compiler.value() == JSONCompiler.CompilerOption.LAMBDA) {
+                        beanInfo.readerFeatures |= FieldInfo.JIT;
+                    }
+                }
+
                 if (annotationType == JSONAutowired.class) {
                     beanInfo.readerFeatures |= FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
                     JSONAutowired autowired = (JSONAutowired) annotation;
@@ -657,6 +664,13 @@ public class ObjectReaderBaseModule
                     }
                 }
 
+                if (annotationType == JSONCompiler.class) {
+                    JSONCompiler compiler = (JSONCompiler) annotation;
+                    if (compiler.value() == JSONCompiler.CompilerOption.LAMBDA) {
+                        fieldInfo.features |= FieldInfo.JIT;
+                    }
+                }
+
                 boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
                 String annotationTypeName = annotationType.getName();
                 switch (annotationTypeName) {
@@ -763,6 +777,13 @@ public class ObjectReaderBaseModule
                     getFieldInfo(fieldInfo, jsonField);
                     if (jsonField == annotation) {
                         continue;
+                    }
+                }
+
+                if (annotationType == JSONCompiler.class) {
+                    JSONCompiler compiler = (JSONCompiler) annotation;
+                    if (compiler.value() == JSONCompiler.CompilerOption.LAMBDA) {
+                        fieldInfo.features |= FieldInfo.JIT;
                     }
                 }
 

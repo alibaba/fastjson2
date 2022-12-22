@@ -11,16 +11,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.Locale;
 
-abstract class FieldReaderImplDate<T>
+abstract class FieldReaderDateTimeCodec<T>
         extends FieldReader<T> {
     DateTimeFormatter formatter;
 
@@ -33,7 +30,7 @@ abstract class FieldReaderImplDate<T>
     final boolean formatHasHour;
     final boolean yyyyMMddhhmmss19;
 
-    public FieldReaderImplDate(
+    public FieldReaderDateTimeCodec(
             String fieldName,
             Type fieldType,
             Class fieldClass,
@@ -81,27 +78,27 @@ abstract class FieldReaderImplDate<T>
 
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
-        Date fieldValue;
+        Object fieldValue;
         if (jsonReader.isInt()) {
             long millis = jsonReader.readInt64Value();
             if (formatUnixTime) {
                 millis *= 1000L;
             }
-            fieldValue = new Date(millis);
+            fieldValue = apply(millis);
         } else if (jsonReader.isNull()) {
             jsonReader.readNull();
-            fieldValue = null;
+            return null;
         } else if (useSimpleFormatter) {
             String str = jsonReader.readString();
             try {
-                fieldValue = new SimpleDateFormat(format).parse(str);
+                Date date = new SimpleDateFormat(format).parse(str);
+                fieldValue = apply(date);
             } catch (ParseException e) {
                 throw new JSONException(jsonReader.info("parse error : " + str), e);
             }
         } else if (formatISO8601) {
             ZonedDateTime zdt = jsonReader.readZonedDateTime();
-            long millis = zdt.toInstant().toEpochMilli();
-            fieldValue = new Date(millis);
+            fieldValue = apply(zdt);
         } else {
             long millis;
             if (yyyyMMddhhmmss19) {
@@ -110,6 +107,7 @@ abstract class FieldReaderImplDate<T>
                 } else {
                     millis = jsonReader.readMillis19();
                 }
+                return apply(millis);
             } else if (format != null) {
                 String str = jsonReader.readString();
                 if ((formatUnixTime || formatMillis) && IOUtils.isNumber(str)) {
@@ -117,6 +115,7 @@ abstract class FieldReaderImplDate<T>
                     if (formatUnixTime) {
                         millis *= 1000L;
                     }
+                    return apply(millis);
                 } else {
                     DateTimeFormatter formatter = getFormatter(jsonReader.getLocale());
                     LocalDateTime ldt;
@@ -127,12 +126,12 @@ abstract class FieldReaderImplDate<T>
                     }
 
                     ZonedDateTime zdt = ldt.atZone(jsonReader.getContext().getZoneId());
-                    millis = zdt.toInstant().toEpochMilli();
+                    fieldValue = apply(zdt);
                 }
             } else {
                 millis = jsonReader.readMillisFromString();
+                fieldValue = apply(millis);
             }
-            fieldValue = new Date(millis);
         }
 
         return fieldValue;
@@ -157,37 +156,41 @@ abstract class FieldReaderImplDate<T>
     }
 
     @Override
-    public ObjectReader getObjectReader(JSONReader jsonReader) {
-        if (dateReader == null) {
-            dateReader = format == null
-                    ? ObjectReaderImplDate.INSTANCE
-                    : new ObjectReaderImplDate(format, locale);
-        }
-        return dateReader;
-    }
+    public abstract ObjectReader getObjectReader(JSONReader jsonReader);
 
-    public ObjectReader getObjectReader(JSONReader.Context context) {
-        if (dateReader == null) {
-            dateReader = format == null
-                    ? ObjectReaderImplDate.INSTANCE
-                    : new ObjectReaderImplDate(format, locale);
-        }
-        return dateReader;
-    }
+    public abstract ObjectReader getObjectReader(JSONReader.Context context);
 
-    public abstract void accept(T object, Date value);
+    protected abstract void accept(T object, Date value);
 
-    @Override
-    public void accept(T object, long value) {
-        accept(object, new Date(value));
-    }
+    protected abstract void acceptNull(T object);
+
+    protected abstract void accept(T object, Instant value);
+
+    protected abstract void accept(T object, LocalDateTime ldt);
+
+    protected abstract void accept(T object, ZonedDateTime zdt);
+
+    protected abstract Object apply(Date value);
+
+    protected abstract Object apply(Instant value);
+
+    protected abstract Object apply(ZonedDateTime zdt);
+
+    protected abstract Object apply(LocalDateTime zdt);
+
+    protected abstract Object apply(long millis);
 
     @Override
     public void accept(T object, Object value) {
+        if (value == null) {
+            acceptNull(object);
+            return;
+        }
+
         if (value instanceof String) {
             String str = (String) value;
             if (str.isEmpty() || "null".equals(str)) {
-                accept(object, null);
+                acceptNull(object);
                 return;
             }
 
@@ -196,13 +199,24 @@ abstract class FieldReaderImplDate<T>
                 if (formatUnixTime) {
                     millis *= 1000L;
                 }
-                value = new java.util.Date(millis);
+                accept(object, millis);
+                return;
             } else {
                 value = DateUtils.parseDate(str, format);
             }
         }
 
-        accept(object, (Date) value);
+        if (value instanceof Date) {
+            accept(object, (Date) value);
+        } else if (value instanceof Instant) {
+            accept(object, (Instant) value);
+        } else if (value instanceof Long) {
+            accept(object, ((Long) value).longValue());
+        } else if (value instanceof LocalDateTime) {
+            accept(object, (LocalDateTime) value);
+        } else {
+            throw new JSONException("not support value " + value.getClass());
+        }
     }
 
     @Override
@@ -214,7 +228,8 @@ abstract class FieldReaderImplDate<T>
                 if (formatUnixTime) {
                     millis *= 1000L;
                 }
-                fieldValue = new java.util.Date(millis);
+                accept(object, millis);
+                return;
             } else if (jsonReader.isNull()) {
                 jsonReader.readNull();
                 fieldValue = null;

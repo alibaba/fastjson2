@@ -338,17 +338,39 @@ public class ObjectWriterCreatorASM
                         writeUsingWriter = ObjectWriterBaseModule.VoidObjectWriter.INSTANCE;
                     }
 
-                    FieldWriter fieldWriter = createFieldWriter(
-                            provider,
-                            objectClass,
-                            fieldName,
-                            fieldInfo.ordinal,
-                            fieldInfo.features,
-                            fieldInfo.format,
-                            fieldInfo.label,
-                            method,
-                            writeUsingWriter
-                    );
+                    FieldWriter fieldWriter = null;
+                    boolean jit = (fieldInfo.features & FieldInfo.JIT) != 0;
+                    if (jit) {
+                        try {
+                            fieldWriter = createFieldWriterLambda(
+                                    provider,
+                                    objectClass,
+                                    fieldName,
+                                    fieldInfo.ordinal,
+                                    fieldInfo.features,
+                                    fieldInfo.format,
+                                    fieldInfo.label,
+                                    method,
+                                    writeUsingWriter
+                            );
+                        } catch (Throwable ignored) {
+                            jitErrorCount.incrementAndGet();
+                            jitErrorLast = ignored;
+                        }
+                    }
+                    if (fieldWriter == null) {
+                        fieldWriter = createFieldWriter(
+                                provider,
+                                objectClass,
+                                fieldName,
+                                fieldInfo.ordinal,
+                                fieldInfo.features,
+                                fieldInfo.format,
+                                fieldInfo.label,
+                                method,
+                                writeUsingWriter
+                        );
+                    }
 
                     FieldWriter origin = fieldWriterMap.putIfAbsent(fieldName, fieldWriter);
 

@@ -75,6 +75,8 @@ public class DateUtils {
                 long millis = parseMillis(str, DEFAULT_ZONE_ID);
                 return new Date(millis);
             }
+            case "iso8601":
+                return parseDate(str);
             default:
                 break;
         }

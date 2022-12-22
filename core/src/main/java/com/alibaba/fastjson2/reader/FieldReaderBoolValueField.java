@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
 
@@ -31,6 +32,43 @@ final class FieldReaderBoolValueField<T>
     @Override
     public void accept(T object, int value) {
         accept(object, TypeUtils.toBooleanValue(value));
+    }
+
+    @Override
+    public void accept(T object, Object value) {
+        if (value == null) {
+            if ((features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
+                return;
+            }
+
+            accept(object, false);
+            return;
+        }
+
+        if (value instanceof Boolean) {
+            accept(object, ((Boolean) value).booleanValue());
+            return;
+        }
+
+        throw new JSONException("set " + fieldName + " error, type not support " + value.getClass());
+    }
+
+    @Override
+    public void accept(T object, boolean value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
+        if (fieldOffset != -1) {
+            UnsafeUtils.putBoolean(object, fieldOffset, value);
+            return;
+        }
+
+        try {
+            field.setBoolean(object, value);
+        } catch (Exception e) {
+            throw new JSONException("set " + fieldName + " error", e);
+        }
     }
 
     @Override

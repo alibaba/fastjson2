@@ -307,7 +307,7 @@ public class ObjectWriterCreator {
             final ObjectWriterProvider provider
     ) {
         BeanInfo beanInfo = new BeanInfo();
-        beanInfo.jitFieldReaderMethod = true; // this.getClass() != ObjectWriterCreator.class;
+        beanInfo.readerFeatures |= FieldInfo.JIT;
 
         provider.getBeanInfo(beanInfo, objectClass);
 
@@ -463,7 +463,7 @@ public class ObjectWriterCreator {
                     }
 
                     FieldWriter fieldWriter = null;
-                    if (beanInfo.jitFieldReaderMethod) {
+                    if ((beanInfo.readerFeatures & FieldInfo.JIT) != 0) {
                         try {
                             fieldWriter = createFieldWriterLambda(
                                     provider,
@@ -1064,10 +1064,10 @@ public class ObjectWriterCreator {
         }
 
         if (Modifier.isFinal(fieldClass.getModifiers())) {
-            return new FieldWriterObjectFuncFinal(fieldName, ordinal, features, format, label, fieldType, fieldClass, null, function);
+            return new FieldWriterObjectFuncFinal(fieldName, ordinal, features, format, label, fieldType, fieldClass, method, function);
         }
 
-        return new FieldWriterObjectFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, null, function);
+        return new FieldWriterObjectFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, method, function);
     }
 
     static class LambdaInfo {

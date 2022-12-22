@@ -39,7 +39,7 @@ public class FieldReaderDateFuncTest {
         fieldReader.accept(bean, 1499055194000L);
         assertEquals(1499055194000L, bean.value.getTime());
 
-        assertThrows(ClassCastException.class, () -> fieldReader.accept(bean, new Object()));
+        assertThrows(Exception.class, () -> fieldReader.accept(bean, new Object()));
 
         assertEquals(
                 1499055194000L,

@@ -83,6 +83,13 @@ public class ObjectWriterBaseModule
                     continue;
                 }
 
+                if (annotationType == JSONCompiler.class) {
+                    JSONCompiler compiler = (JSONCompiler) annotation;
+                    if (compiler.value() == JSONCompiler.CompilerOption.LAMBDA) {
+                        beanInfo.writerFeatures |= FieldInfo.JIT;
+                    }
+                }
+
                 if (annotationType == JSONAutowired.class) {
                     beanInfo.writerFeatures |= JSON_AUTO_WIRED_ANNOTATED;
 
@@ -813,6 +820,13 @@ public class ObjectWriterBaseModule
                 if (Objects.nonNull(jsonField)) {
                     loadFieldInfo(fieldInfo, jsonField);
                     continue;
+                }
+
+                if (annotationType == JSONCompiler.class) {
+                    JSONCompiler compiler = (JSONCompiler) annotation;
+                    if (compiler.value() == JSONCompiler.CompilerOption.LAMBDA) {
+                        fieldInfo.features |= FieldInfo.JIT;
+                    }
                 }
 
                 boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();

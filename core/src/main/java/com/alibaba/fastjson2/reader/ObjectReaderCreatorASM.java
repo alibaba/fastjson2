@@ -303,7 +303,7 @@ public class ObjectReaderCreatorASM
             }
         }
         if (externalClass || !Modifier.isPublic(objectClassModifiers)) {
-            beanInfo.jitFieldReaderMethod = true;
+            beanInfo.readerFeatures |= FieldInfo.JIT;
         }
 
         if (beanInfo.deserializer != null && ObjectReader.class.isAssignableFrom(beanInfo.deserializer)) {
