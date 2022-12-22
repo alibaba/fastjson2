@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.util;
 import java.lang.invoke.*;
 import java.lang.reflect.Field;
 import java.nio.ByteOrder;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
 
 import static java.lang.invoke.MethodType.methodType;
@@ -40,6 +41,8 @@ public class JDKUtils {
     static volatile MethodHandle CONSTRUCTOR_LOOKUP;
     static volatile boolean CONSTRUCTOR_LOOKUP_ERROR;
     static volatile Throwable initErrorLast;
+    static volatile Throwable reflectErrorLast;
+    static final AtomicInteger reflectErrorCount = new AtomicInteger();
 
     static {
         int jvmVersion = -1;
@@ -248,6 +251,11 @@ public class JDKUtils {
     public static boolean isSQLDataSourceOrRowSet(Class<?> type) {
         return (CLASS_SQL_DATASOURCE != null && CLASS_SQL_DATASOURCE.isAssignableFrom(type))
                 || (CLASS_SQL_ROW_SET != null && CLASS_SQL_ROW_SET.isAssignableFrom(type));
+    }
+
+    public static void setReflectErrorLast(Throwable error) {
+        reflectErrorCount.incrementAndGet();
+        reflectErrorLast = error;
     }
 
     public static char[] getCharArray(String str) {

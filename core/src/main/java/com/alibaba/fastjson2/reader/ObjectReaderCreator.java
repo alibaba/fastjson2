@@ -17,6 +17,9 @@ import java.lang.invoke.*;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
@@ -549,7 +552,7 @@ public class ObjectReaderCreator {
                 }
             }
 
-            boolean jit = JIT;
+            boolean jit = JIT || (fieldInfo.features & FieldInfo.JIT) != 0 || (beanInfo.readerFeatures & FieldInfo.JIT) != 0;
             Function function = null;
             if (defaultValue == null && jit) {
                 if (valueClass == int.class) {
@@ -1303,7 +1306,8 @@ public class ObjectReaderCreator {
 
         ObjectReader initReader = getInitReader(provider, fieldType, fieldClass, fieldInfo);
         FieldReader fieldReader = null;
-        if (beanInfo.jitFieldReaderMethod) {
+        boolean jit = (fieldInfo.features & FieldInfo.JIT) != 0;
+        if (jit) {
             try {
                 fieldReader = createFieldReaderLambda(
                         objectClass,
@@ -2042,7 +2046,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == Date.class) {
-            return new FieldReaderDateMethod(fieldName, fieldClass, ordinal, features, format, locale, jsonSchema, method);
+            return new FieldReaderDate(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, null, method, null);
         }
 
         if (fieldClass == StackTraceElement[].class && method != null && method.getDeclaringClass() == Throwable.class) {
@@ -2229,7 +2233,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == Date.class) {
-            return new FieldReaderDateField(fieldName, fieldClass, ordinal, features, format, locale, (Date) defaultValue, jsonSchema, field);
+            return new FieldReaderDate(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field, null, null);
         }
 
         if (fieldClass == AtomicBoolean.class) {
@@ -2364,34 +2368,30 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClassResolved != null) {
-            if (UNSAFE_SUPPORT) {
-                return new FieldReaderObjectFieldUF(
-                        fieldName,
-                        fieldTypeResolved,
-                        fieldClass,
-                        ordinal,
-                        features,
-                        format,
-                        defaultValue,
-                        jsonSchema,
-                        field);
-            } else {
-                return new FieldReaderObjectField(
-                        fieldName,
-                        fieldTypeResolved,
-                        fieldClass,
-                        ordinal,
-                        features,
-                        format,
-                        defaultValue,
-                        jsonSchema,
-                        field);
-            }
+            return new FieldReaderObjectField(
+                    fieldName,
+                    fieldTypeResolved,
+                    fieldClass,
+                    ordinal,
+                    features,
+                    format,
+                    defaultValue,
+                    jsonSchema,
+                    field);
         }
 
-        if (UNSAFE_SUPPORT) {
-            return new FieldReaderObjectFieldUF(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, field);
+        if (fieldClass == LocalDateTime.class) {
+            return new FieldReaderLocalDateTime(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field, null, null);
         }
+
+        if (fieldClass == ZonedDateTime.class) {
+            return new FieldReaderZonedDateTime(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field, null, null);
+        }
+
+        if (fieldClass == Instant.class) {
+            return new FieldReaderInstant(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field, null, null);
+        }
+
         return new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, field);
     }
 
@@ -2485,7 +2485,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == Date.class) {
-            return new FieldReaderDateFunc(fieldName, fieldClass, ordinal, features, format, locale, (Date) defaultValue, schema, method, function);
+            return new FieldReaderDate(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Date) defaultValue, schema, null, method, function);
         }
 
         Type fieldTypeResolved = null;
