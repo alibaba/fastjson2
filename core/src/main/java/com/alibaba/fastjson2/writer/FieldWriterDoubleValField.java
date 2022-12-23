@@ -45,6 +45,11 @@ final class FieldWriterDoubleValField<T>
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         double value = getFieldValueDouble(object);
-        jsonWriter.writeDouble(value);
+        if (decimalFormat != null) {
+            String formattedValue = decimalFormat.format(value);
+            jsonWriter.writeRaw(formattedValue);
+        } else {
+            jsonWriter.writeDouble(value);
+        }
     }
 }

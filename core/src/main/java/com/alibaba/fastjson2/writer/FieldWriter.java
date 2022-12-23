@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.*;
+import java.text.DecimalFormat;
 import java.time.*;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
@@ -24,6 +25,7 @@ public abstract class FieldWriter<T>
     public final long features;
     public final int ordinal;
     public final String format;
+    public final DecimalFormat decimalFormat;
     public final String label;
     public final Field field;
     public final Method method;
@@ -66,6 +68,17 @@ public abstract class FieldWriter<T>
         this.fieldClassSerializable = fieldClass != null && (Serializable.class.isAssignableFrom(fieldClass) || !Modifier.isFinal(fieldClass.getModifiers()));
         this.field = field;
         this.method = method;
+
+        DecimalFormat decimalFormat = null;
+        if (format != null
+                && (fieldClass == float.class
+                || fieldClass == Float.class
+                || fieldClass == double.class
+                || fieldClass == Double.class)
+        ) {
+            decimalFormat = new DecimalFormat(format);
+        }
+        this.decimalFormat = decimalFormat;
 
         long fieldOffset = -1L;
         if (field != null && JDKUtils.UNSAFE_SUPPORT) {
@@ -408,12 +421,22 @@ public abstract class FieldWriter<T>
 
     public void writeFloat(JSONWriter jsonWriter, float value) {
         writeFieldName(jsonWriter);
-        jsonWriter.writeFloat(value);
+        if (decimalFormat != null) {
+            String formattedValue = decimalFormat.format(value);
+            jsonWriter.writeRaw(formattedValue);
+        } else {
+            jsonWriter.writeFloat(value);
+        }
     }
 
     public void writeDouble(JSONWriter jsonWriter, double value) {
         writeFieldName(jsonWriter);
-        jsonWriter.writeDouble(value);
+        if (decimalFormat != null) {
+            String formattedValue = decimalFormat.format(value);
+            jsonWriter.writeRaw(formattedValue);
+        } else {
+            jsonWriter.writeDouble(value);
+        }
     }
 
     public void writeBool(JSONWriter jsonWriter, boolean value) {
@@ -445,6 +468,22 @@ public abstract class FieldWriter<T>
 
         writeFieldName(jsonWriter);
         jsonWriter.writeDouble(value);
+    }
+
+    public void writeDouble(JSONWriter jsonWriter, Double value) {
+        if (value == null) {
+            long features = jsonWriter.getFeatures(this.features);
+            if ((features & JSONWriter.Feature.WriteNulls.mask) != 0
+                    && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) == 0
+            ) {
+                writeFieldName(jsonWriter);
+                jsonWriter.writeNumberNull();
+            }
+            return;
+        }
+
+        writeFieldName(jsonWriter);
+        jsonWriter.writeDouble(value.doubleValue());
     }
 
     public void writeDate(JSONWriter jsonWriter, boolean writeFieldName, Date value) {
