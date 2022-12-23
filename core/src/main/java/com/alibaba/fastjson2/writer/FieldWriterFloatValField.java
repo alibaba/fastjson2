@@ -45,6 +45,11 @@ final class FieldWriterFloatValField<T>
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         float value = getFieldValueFloat(object);
-        jsonWriter.writeFloat(value);
+        if (decimalFormat != null) {
+            String formattedValue = decimalFormat.format(value);
+            jsonWriter.writeRaw(formattedValue);
+        } else {
+            jsonWriter.writeFloat(value);
+        }
     }
 }

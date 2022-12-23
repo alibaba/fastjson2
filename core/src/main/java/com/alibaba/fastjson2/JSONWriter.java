@@ -870,6 +870,22 @@ public abstract class JSONWriter
         endArray();
     }
 
+    public final void writeFloat(Float value) {
+        if (value == null) {
+            writeNumberNull();
+        } else {
+            writeDouble(value.floatValue());
+        }
+    }
+
+    public final void writeDouble(Double value) {
+        if (value == null) {
+            writeNumberNull();
+        } else {
+            writeDouble(value.doubleValue());
+        }
+    }
+
     public abstract void writeDouble(double value);
 
     public void writeDoubleArray(double value0, double value1) {

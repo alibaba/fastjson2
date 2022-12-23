@@ -744,8 +744,16 @@ public class ObjectWriterCreator {
             return new FieldWriterFloatValField(fieldName, ordinal, format, label, field);
         }
 
+        if (fieldClass == Float.class) {
+            return new FieldWriterFloatField(fieldName, ordinal, features, format, label, field);
+        }
+
         if (fieldClass == double.class) {
             return new FieldWriterDoubleValField(fieldName, ordinal, format, label, field);
+        }
+
+        if (fieldClass == Double.class) {
+            return new FieldWriterDoubleField(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass == char.class) {
@@ -860,6 +868,14 @@ public class ObjectWriterCreator {
 
         if (fieldClass == int.class || fieldClass == Integer.class) {
             return new FieldWriterInt32Method(fieldName, ordinal, features, format, label, method, fieldClass);
+        }
+
+        if (fieldClass == float.class || fieldClass == Float.class) {
+            return new FieldWriterFloatMethod<>(fieldName, ordinal, features, format, label, fieldClass, fieldClass, method);
+        }
+
+        if (fieldClass == double.class || fieldClass == Double.class) {
+            return new FieldWriterDoubleMethod<>(fieldName, ordinal, features, format, label, fieldClass, fieldClass, method);
         }
 
         if (fieldClass == long.class || fieldClass == Long.class) {
@@ -1217,8 +1233,16 @@ public class ObjectWriterCreator {
             return new FieldWriterFloatValueFunc(fieldName, ordinal, features, format, label, method, (ToFloatFunction) lambda);
         }
 
+        if (fieldClass == Float.class) {
+            return new FieldWriterFloatFunc(fieldName, ordinal, features, format, label, method, (Function) lambda);
+        }
+
         if (fieldClass == double.class) {
             return new FieldWriterDoubleValueFunc(fieldName, ordinal, features, format, label, method, (ToDoubleFunction) lambda);
+        }
+
+        if (fieldClass == Double.class) {
+            return new FieldWriterDoubleFunc(fieldName, ordinal, features, format, label, method, (Function) lambda);
         }
 
         if (fieldClass == char.class) {
