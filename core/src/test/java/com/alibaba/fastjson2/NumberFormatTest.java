@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.annotation.JSONCompiler;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NumberFormatTest {
@@ -229,5 +231,168 @@ public class NumberFormatTest {
         public void setValue(Float value) {
             this.value = value;
         }
+    }
+
+    @Test
+    public void test12() {
+        Bean12 bean = new Bean12();
+        bean.value = new BigDecimal("12.3423789");
+        assertEquals("{\"value\":12.34}", JSON.toJSONString(bean));
+        assertEquals("[12.34]", JSON.toJSONString(bean, JSONWriter.Feature.BeanToArray));
+    }
+
+    public static class Bean12 {
+        @JSONField(format = "#.00")
+        public BigDecimal value;
+    }
+
+    @Test
+    public void test13() {
+        Bean13 bean = new Bean13();
+        bean.value = new BigDecimal("12.3423789");
+        assertEquals("{\"value\":12.34}", JSON.toJSONString(bean));
+        assertEquals("[12.34]", JSON.toJSONString(bean, JSONWriter.Feature.BeanToArray));
+    }
+
+    public static class Bean13 {
+        @JSONField(format = "#.00")
+        private BigDecimal value;
+
+        public BigDecimal getValue() {
+            return value;
+        }
+
+        public void setValue(BigDecimal value) {
+            this.value = value;
+        }
+    }
+
+    @Test
+    public void test14() {
+        Bean14 bean = new Bean14();
+        bean.value = new BigDecimal("12.3423789");
+        assertEquals("{\"value\":12.34}", JSON.toJSONString(bean));
+        assertEquals("[12.34]", JSON.toJSONString(bean, JSONWriter.Feature.BeanToArray));
+    }
+
+    public static class Bean14 {
+        @JSONField(format = "#.00")
+        private BigDecimal value;
+
+        public BigDecimal getValue() {
+            return value;
+        }
+
+        public void setValue(BigDecimal value) {
+            this.value = value;
+        }
+    }
+
+    @Test
+    public void test15() {
+        Bean15 bean = new Bean15();
+        bean.value = new BigDecimal("12.3423789");
+        assertEquals("{\"value\":12.34}", JSON.toJSONString(bean));
+        assertEquals("[12.34]", JSON.toJSONString(bean, JSONWriter.Feature.BeanToArray));
+    }
+
+    private static class Bean15 {
+        @JSONField(format = "#.00")
+        private BigDecimal value;
+
+        public BigDecimal getValue() {
+            return value;
+        }
+
+        public void setValue(BigDecimal value) {
+            this.value = value;
+        }
+    }
+
+    @Test
+    public void test16() {
+        Bean16 bean = new Bean16();
+        bean.value = new BigDecimal("12.3423789");
+        assertEquals("{\"value\":12.34}", JSON.toJSONString(bean));
+        assertEquals("[12.34]", JSON.toJSONString(bean, JSONWriter.Feature.BeanToArray));
+    }
+
+    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
+    private static class Bean16 {
+        @JSONField(format = "#.00")
+        private BigDecimal value;
+
+        public BigDecimal getValue() {
+            return value;
+        }
+
+        public void setValue(BigDecimal value) {
+            this.value = value;
+        }
+    }
+
+    @Test
+    public void test17() {
+        Bean17 bean = new Bean17();
+        bean.value = new BigDecimal("12.3423789");
+        assertEquals("{\"value\":12.34}", JSON.toJSONString(bean, JSONWriter.Feature.FieldBased));
+        assertEquals("[12.34]", JSON.toJSONString(bean, JSONWriter.Feature.FieldBased, JSONWriter.Feature.BeanToArray));
+    }
+
+    private static class Bean17 {
+        @JSONField(format = "#.00")
+        private BigDecimal value;
+    }
+
+    @Test
+    public void test18() {
+        Bean18 bean = new Bean18();
+        bean.value = 12.3423789F;
+        assertEquals("{\"value\":12.34}", JSON.toJSONString(bean, JSONWriter.Feature.FieldBased));
+        assertEquals("[12.34]", JSON.toJSONString(bean, JSONWriter.Feature.FieldBased, JSONWriter.Feature.BeanToArray));
+    }
+
+    private static class Bean18 {
+        @JSONField(format = "#.00")
+        private Float value;
+    }
+
+    @Test
+    public void test19() {
+        Bean19 bean = new Bean19();
+        bean.value = 12.3423789F;
+        assertEquals("{\"value\":12.34}", JSON.toJSONString(bean, JSONWriter.Feature.FieldBased));
+        assertEquals("[12.34]", JSON.toJSONString(bean, JSONWriter.Feature.FieldBased, JSONWriter.Feature.BeanToArray));
+    }
+
+    private static class Bean19 {
+        @JSONField(format = "#.00")
+        private float value;
+    }
+
+    @Test
+    public void test20() {
+        Bean20 bean = new Bean20();
+        bean.value = 12.3423789D;
+        assertEquals("{\"value\":12.34}", JSON.toJSONString(bean, JSONWriter.Feature.FieldBased));
+        assertEquals("[12.34]", JSON.toJSONString(bean, JSONWriter.Feature.FieldBased, JSONWriter.Feature.BeanToArray));
+    }
+
+    private static class Bean20 {
+        @JSONField(format = "#.00")
+        private Double value;
+    }
+
+    @Test
+    public void test21() {
+        Bean21 bean = new Bean21();
+        bean.value = 12.3423789D;
+        assertEquals("{\"value\":12.34}", JSON.toJSONString(bean, JSONWriter.Feature.FieldBased));
+        assertEquals("[12.34]", JSON.toJSONString(bean, JSONWriter.Feature.FieldBased, JSONWriter.Feature.BeanToArray));
+    }
+
+    private static class Bean21 {
+        @JSONField(format = "#.00")
+        private Double value;
     }
 }

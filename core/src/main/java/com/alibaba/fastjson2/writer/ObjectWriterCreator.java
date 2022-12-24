@@ -897,6 +897,10 @@ public class ObjectWriterCreator {
             return new FieldWriterCharMethod(fieldName, ordinal, features, format, label, method, fieldClass);
         }
 
+        if (fieldClass == BigDecimal.class) {
+            return new FieldWriterBigDecimalMethod<>(fieldName, ordinal, features, format, label, method);
+        }
+
         if (fieldClass.isEnum()
                 && (BeanUtils.getEnumValueField(fieldClass, provider) == null && initObjectWriter == null)
                 && !BeanUtils.isWriteEnumAsJavaBean(fieldClass)

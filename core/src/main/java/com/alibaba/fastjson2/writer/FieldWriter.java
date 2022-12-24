@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.*;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.*;
 import java.util.*;
@@ -74,7 +75,8 @@ public abstract class FieldWriter<T>
                 && (fieldClass == float.class
                 || fieldClass == Float.class
                 || fieldClass == double.class
-                || fieldClass == Double.class)
+                || fieldClass == Double.class
+                || fieldClass == BigDecimal.class)
         ) {
             decimalFormat = new DecimalFormat(format);
         }
