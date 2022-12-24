@@ -1,36 +1,37 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.util.function.Function;
 
-final class FieldWriterBigDecimalFunc<T>
+final class FieldWriterBigDecimalMethod<T>
         extends FieldWriter<T> {
-    final Function<T, BigDecimal> function;
-
-    protected FieldWriterBigDecimalFunc(
+    protected FieldWriterBigDecimalMethod(
             String fieldName,
             int ordinal,
             long features,
             String format,
             String label,
-            Method method,
-            Function<T, BigDecimal> function
+            Method method
     ) {
         super(fieldName, ordinal, features, format, label, BigDecimal.class, BigDecimal.class, null, method);
-        this.function = function;
     }
 
     @Override
     public Object getFieldValue(T object) {
-        return function.apply(object);
+        try {
+            return method.invoke(object);
+        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+            throw new JSONException("invoke getter method error, " + fieldName, e);
+        }
     }
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        BigDecimal value = function.apply(object);
+        BigDecimal value = (BigDecimal) getFieldValue(object);
         if (features != 0 || decimalFormat != null) {
             jsonWriter.writeDecimal(value, features, decimalFormat);
         } else {
@@ -42,7 +43,7 @@ final class FieldWriterBigDecimalFunc<T>
     public boolean write(JSONWriter jsonWriter, T object) {
         BigDecimal value;
         try {
-            value = function.apply(object);
+            value = (BigDecimal) getFieldValue(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;

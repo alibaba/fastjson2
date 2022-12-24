@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -878,14 +879,6 @@ public abstract class JSONWriter
         }
     }
 
-    public final void writeDouble(Double value) {
-        if (value == null) {
-            writeNumberNull();
-        } else {
-            writeDouble(value.doubleValue());
-        }
-    }
-
     public abstract void writeDouble(double value);
 
     public void writeDoubleArray(double value0, double value1) {
@@ -978,6 +971,21 @@ public abstract class JSONWriter
     }
 
     public abstract void writeDecimal(BigDecimal value);
+
+    public void writeDecimal(BigDecimal value, long features, DecimalFormat format) {
+        if (value == null) {
+            writeNumberNull();
+            return;
+        }
+
+        if (format != null) {
+            String str = format.format(value);
+            writeRaw(str);
+            return;
+        }
+
+        writeDecimal(value, features);
+    }
 
     public void writeDecimal(BigDecimal value, long features) {
         if (value == null) {

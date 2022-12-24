@@ -22,8 +22,8 @@ final class FieldWriterBigDecimalField<T>
         }
 
         writeFieldName(jsonWriter);
-        if (features != 0) {
-            jsonWriter.writeDecimal(value, features);
+        if (features != 0 || decimalFormat != null) {
+            jsonWriter.writeDecimal(value, features, decimalFormat);
         } else {
             jsonWriter.writeDecimal(value);
         }
@@ -34,6 +34,10 @@ final class FieldWriterBigDecimalField<T>
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         BigDecimal value = (BigDecimal) getFieldValue(object);
-        jsonWriter.writeDecimal(value);
+        if (features != 0 || decimalFormat != null) {
+            jsonWriter.writeDecimal(value, features, decimalFormat);
+        } else {
+            jsonWriter.writeDecimal(value);
+        }
     }
 }
