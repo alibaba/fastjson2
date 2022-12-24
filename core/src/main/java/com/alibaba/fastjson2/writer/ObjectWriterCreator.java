@@ -937,6 +937,18 @@ public class ObjectWriterCreator {
             return new FieldWriterListMethod(fieldName, itemType, ordinal, features, format, label, method, fieldType, fieldClass);
         }
 
+        if (fieldClass == Float[].class) {
+            return new FieldWriterObjectArrayMethod(fieldName, Float.class, ordinal, features, format, label, fieldType, fieldClass, method);
+        }
+
+        if (fieldClass == Double[].class) {
+            return new FieldWriterObjectArrayMethod(fieldName, Double.class, ordinal, features, format, label, fieldType, fieldClass, method);
+        }
+
+        if (fieldClass == BigDecimal[].class) {
+            return new FieldWriterObjectArrayMethod(fieldName, BigDecimal.class, ordinal, features, format, label, fieldType, fieldClass, method);
+        }
+
         return new FieldWriterObjectMethod(fieldName, ordinal, features, format, label, fieldType, fieldClass, method);
     }
 

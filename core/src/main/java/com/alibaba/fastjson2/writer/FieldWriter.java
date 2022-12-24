@@ -73,10 +73,15 @@ public abstract class FieldWriter<T>
         DecimalFormat decimalFormat = null;
         if (format != null
                 && (fieldClass == float.class
+                || fieldClass == float[].class
                 || fieldClass == Float.class
+                || fieldClass == Float[].class
                 || fieldClass == double.class
+                || fieldClass == double[].class
                 || fieldClass == Double.class
-                || fieldClass == BigDecimal.class)
+                || fieldClass == Double[].class
+                || fieldClass == BigDecimal.class
+                || fieldClass == BigDecimal[].class)
         ) {
             decimalFormat = new DecimalFormat(format);
         }
@@ -424,8 +429,7 @@ public abstract class FieldWriter<T>
     public void writeFloat(JSONWriter jsonWriter, float value) {
         writeFieldName(jsonWriter);
         if (decimalFormat != null) {
-            String formattedValue = decimalFormat.format(value);
-            jsonWriter.writeRaw(formattedValue);
+            jsonWriter.writeFloat(value, decimalFormat);
         } else {
             jsonWriter.writeFloat(value);
         }
@@ -434,8 +438,7 @@ public abstract class FieldWriter<T>
     public void writeDouble(JSONWriter jsonWriter, double value) {
         writeFieldName(jsonWriter);
         if (decimalFormat != null) {
-            String formattedValue = decimalFormat.format(value);
-            jsonWriter.writeRaw(formattedValue);
+            jsonWriter.writeDouble(value, decimalFormat);
         } else {
             jsonWriter.writeDouble(value);
         }
@@ -629,6 +632,30 @@ public abstract class FieldWriter<T>
     public abstract boolean write(JSONWriter jsonWriter, T o);
 
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
+        if (valueClass == Float[].class) {
+            if (decimalFormat != null) {
+                return new ObjectWriterArrayFinal(Float.class, decimalFormat);
+            } else {
+                return ObjectWriterArrayFinal.FLOAT_ARRAY;
+            }
+        }
+
+        if (valueClass == Double[].class) {
+            if (decimalFormat != null) {
+                return new ObjectWriterArrayFinal(Double.class, decimalFormat);
+            } else {
+                return ObjectWriterArrayFinal.DOUBLE_ARRAY;
+            }
+        }
+
+        if (valueClass == BigDecimal[].class) {
+            if (decimalFormat != null) {
+                return new ObjectWriterArrayFinal(BigDecimal.class, decimalFormat);
+            } else {
+                return ObjectWriterArrayFinal.DECIMAL_ARRAY;
+            }
+        }
+
         return jsonWriter.getObjectWriter(valueClass);
     }
 

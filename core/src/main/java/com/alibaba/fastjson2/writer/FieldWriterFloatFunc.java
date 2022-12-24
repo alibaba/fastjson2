@@ -24,11 +24,13 @@ final class FieldWriterFloatFunc<T>
         Float value = function.apply(object);
         if (value == null) {
             jsonWriter.writeNumberNull();
-        } else if (decimalFormat != null) {
-            String formattedValue = decimalFormat.format(value);
-            jsonWriter.writeRaw(formattedValue);
         } else {
-            jsonWriter.writeFloat(value.floatValue());
+            float floatValue = value.floatValue();
+            if (decimalFormat != null) {
+                jsonWriter.writeFloat(floatValue, decimalFormat);
+            } else {
+                jsonWriter.writeFloat(floatValue);
+            }
         }
     }
 
@@ -57,11 +59,11 @@ final class FieldWriterFloatFunc<T>
         }
 
         writeFieldName(jsonWriter);
+        float floatValue = value.floatValue();
         if (decimalFormat != null) {
-            String formattedValue = decimalFormat.format(value);
-            jsonWriter.writeRaw(formattedValue);
+            jsonWriter.writeFloat(floatValue, decimalFormat);
         } else {
-            jsonWriter.writeFloat(value.floatValue());
+            jsonWriter.writeFloat(floatValue);
         }
         return true;
     }

@@ -23,8 +23,7 @@ final class FieldWriterFloatValueFunc
     public void writeValue(JSONWriter jsonWriter, Object object) {
         float fieldValue = function.applyAsFloat(object);
         if (decimalFormat != null) {
-            String formattedValue = decimalFormat.format(fieldValue);
-            jsonWriter.writeRaw(formattedValue);
+            jsonWriter.writeDouble(fieldValue, decimalFormat);
         } else {
             jsonWriter.writeDouble(fieldValue);
         }
@@ -44,8 +43,7 @@ final class FieldWriterFloatValueFunc
 
         writeFieldName(jsonWriter);
         if (decimalFormat != null) {
-            String formattedValue = decimalFormat.format(value);
-            jsonWriter.writeRaw(formattedValue);
+            jsonWriter.writeDouble(value, decimalFormat);
         } else {
             jsonWriter.writeDouble(value);
         }

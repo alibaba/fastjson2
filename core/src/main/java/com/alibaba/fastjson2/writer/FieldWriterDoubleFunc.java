@@ -32,11 +32,13 @@ final class FieldWriterDoubleFunc<T>
         Double value = function.apply(object);
         if (value == null) {
             jsonWriter.writeNumberNull();
-        } else if (decimalFormat != null) {
-            String formattedValue = decimalFormat.format(value);
-            jsonWriter.writeRaw(formattedValue);
         } else {
-            jsonWriter.writeDouble(value.doubleValue());
+            double doubleValue = value.doubleValue();
+            if (decimalFormat != null) {
+                jsonWriter.writeDouble(doubleValue, decimalFormat);
+            } else {
+                jsonWriter.writeDouble(doubleValue);
+            }
         }
     }
 
@@ -65,11 +67,12 @@ final class FieldWriterDoubleFunc<T>
         }
 
         writeFieldName(jsonWriter);
+
+        double doubleValue = value.doubleValue();
         if (decimalFormat != null) {
-            String formattedValue = decimalFormat.format(value);
-            jsonWriter.writeRaw(formattedValue);
+            jsonWriter.writeDouble(doubleValue, decimalFormat);
         } else {
-            jsonWriter.writeDouble(value.doubleValue());
+            jsonWriter.writeDouble(doubleValue);
         }
         return true;
     }
