@@ -23,8 +23,7 @@ final class FieldWriterDoubleValueFunc
     public void writeValue(JSONWriter jsonWriter, Object object) {
         double value = function.applyAsDouble(object);
         if (decimalFormat != null) {
-            String formattedValue = decimalFormat.format(value);
-            jsonWriter.writeRaw(formattedValue);
+            jsonWriter.writeDouble(value, decimalFormat);
         } else {
             jsonWriter.writeDouble(value);
         }
@@ -44,8 +43,7 @@ final class FieldWriterDoubleValueFunc
 
         writeFieldName(jsonWriter);
         if (decimalFormat != null) {
-            String formattedValue = decimalFormat.format(value);
-            jsonWriter.writeRaw(formattedValue);
+            jsonWriter.writeDouble(value, decimalFormat);
         } else {
             jsonWriter.writeDouble(value);
         }

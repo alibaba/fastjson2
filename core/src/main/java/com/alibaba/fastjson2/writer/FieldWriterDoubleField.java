@@ -56,11 +56,11 @@ class FieldWriterDoubleField<T>
 
         writeFieldName(jsonWriter);
 
+        double doubleValue = value.doubleValue();
         if (decimalFormat != null) {
-            String formattedValue = decimalFormat.format(value);
-            jsonWriter.writeRaw(formattedValue);
+            jsonWriter.writeDouble(doubleValue, decimalFormat);
         } else {
-            jsonWriter.writeDouble(value.doubleValue());
+            jsonWriter.writeDouble(doubleValue);
         }
 
         return true;
@@ -72,11 +72,13 @@ class FieldWriterDoubleField<T>
 
         if (value == null) {
             jsonWriter.writeNumberNull();
-        } else if (decimalFormat != null) {
-            String formattedValue = decimalFormat.format(value);
-            jsonWriter.writeRaw(formattedValue);
         } else {
-            jsonWriter.writeDouble(value.doubleValue());
+            double doubleValue = value.doubleValue();
+            if (decimalFormat != null) {
+                jsonWriter.writeDouble(doubleValue, decimalFormat);
+            } else {
+                jsonWriter.writeDouble(doubleValue);
+            }
         }
     }
 }

@@ -46,8 +46,7 @@ final class FieldWriterDoubleValField<T>
     public void writeValue(JSONWriter jsonWriter, T object) {
         double value = getFieldValueDouble(object);
         if (decimalFormat != null) {
-            String formattedValue = decimalFormat.format(value);
-            jsonWriter.writeRaw(formattedValue);
+            jsonWriter.writeDouble(value, decimalFormat);
         } else {
             jsonWriter.writeDouble(value);
         }

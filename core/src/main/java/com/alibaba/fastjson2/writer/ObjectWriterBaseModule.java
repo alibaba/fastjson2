@@ -1242,7 +1242,12 @@ public class ObjectWriterBaseModule
                 if (clazz == Object[].class) {
                     return ObjectWriterArray.INSTANCE;
                 } else {
-                    return new ObjectWriterArray(clazz.getComponentType());
+                    Class componentType = clazz.getComponentType();
+                    if (Modifier.isFinal(componentType.getModifiers())) {
+                        return new ObjectWriterArrayFinal(componentType, null);
+                    } else {
+                        return new ObjectWriterArray(componentType);
+                    }
                 }
             }
 

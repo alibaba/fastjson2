@@ -855,6 +855,16 @@ public abstract class JSONWriter
 
     public abstract void writeFloat(float value);
 
+    public final void writeFloat(float value, DecimalFormat format) {
+        if (format == null || jsonb) {
+            writeFloat(value);
+            return;
+        }
+
+        String str = format.format(value);
+        writeRaw(str);
+    }
+
     public void writeFloat(float[] value) {
         if (value == null) {
             writeNull();
@@ -871,6 +881,27 @@ public abstract class JSONWriter
         endArray();
     }
 
+    public final void writeFloat(float[] value, DecimalFormat format) {
+        if (format == null || jsonb) {
+            writeFloat(value);
+        }
+
+        if (value == null) {
+            writeNull();
+            return;
+        }
+
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            String str = format.format(value[i]);
+            writeRaw(str);
+        }
+        endArray();
+    }
+
     public final void writeFloat(Float value) {
         if (value == null) {
             writeNumberNull();
@@ -881,11 +912,44 @@ public abstract class JSONWriter
 
     public abstract void writeDouble(double value);
 
+    public final void writeDouble(double value, DecimalFormat format) {
+        if (format == null || jsonb) {
+            writeDouble(value);
+            return;
+        }
+
+        String str = format.format(value);
+        writeRaw(str);
+    }
+
     public void writeDoubleArray(double value0, double value1) {
         startArray();
         writeDouble(value0);
         writeComma();
         writeDouble(value1);
+        endArray();
+    }
+
+    public final void writeDouble(double[] value, DecimalFormat format) {
+        if (format == null || jsonb) {
+            writeDouble(value);
+            return;
+        }
+
+        if (value == null) {
+            writeNull();
+            return;
+        }
+
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+
+            String str = format.format(value[i]);
+            writeRaw(str);
+        }
         endArray();
     }
 
