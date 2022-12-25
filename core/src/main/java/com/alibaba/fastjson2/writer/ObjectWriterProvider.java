@@ -250,6 +250,12 @@ public class ObjectWriterProvider
                     && superclass.getName().equals("com.google.protobuf.GeneratedMessageV3")) {
                 fieldBased = false;
             }
+            switch (objectClass.getName()) {
+                case "springfox.documentation.spring.web.json.Json":
+                    fieldBased = false;
+                default:
+                    break;
+            }
         }
 
         ObjectWriter objectWriter = fieldBased
