@@ -228,9 +228,9 @@ public class JDKUtils {
                         lookup,
                         "apply",
                         methodType(Function.class),
-                        value.type().generic(),
+                        methodType(Object.class, Object.class),
                         value,
-                        value.type()
+                        methodType(byte[].class, String.class)
                 );
                 stringValue = (Function<String, byte[]>) apply.getTarget().invokeExact();
             }
