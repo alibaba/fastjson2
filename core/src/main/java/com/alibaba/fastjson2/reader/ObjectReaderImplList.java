@@ -193,6 +193,11 @@ public final class ObjectReaderImplList
 
         Collection list = (Collection) createInstance(0L);
         for (Object item : collection) {
+            if (item == null) {
+                list.add(null);
+                continue;
+            }
+
             Object value = item;
             Class<?> valueClass = value.getClass();
             if (valueClass != itemType) {
