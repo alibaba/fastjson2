@@ -6,10 +6,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 
 final class ObjectWriterImplEnum<E extends Enum<E>>
         extends ObjectWriterBaseModule.PrimitiveImpl {
@@ -40,6 +37,14 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
         this.enumType = enumType;
         this.features = features;
         this.valueField = valueField;
+
+        if (valueField instanceof AccessibleObject) {
+            try {
+                ((AccessibleObject) valueField).setAccessible(true);
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        }
 
         this.enumConstants = (Enum[]) enumType.getEnumConstants();
         this.names = new String[enumConstants.length];

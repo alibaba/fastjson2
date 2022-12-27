@@ -120,7 +120,13 @@ public interface ObjectReader<T> {
                 } else if (fieldValue instanceof JSONArray) {
                     typedFieldValue = ((JSONArray) fieldValue).to(fieldType);
                 } else if (features == 0 && !fieldClass.isInstance(fieldValue) && fieldReader.format == null) {
-                    typedFieldValue = TypeUtils.cast(fieldValue, fieldClass, provider);
+                    ObjectReader initReader = fieldReader.getInitReader();
+                    if (initReader != null) {
+                        String fieldValueJson = JSON.toJSONString(fieldValue);
+                        typedFieldValue = initReader.readObject(JSONReader.of(fieldValueJson), null, null, 0L);
+                    } else {
+                        typedFieldValue = TypeUtils.cast(fieldValue, fieldClass, provider);
+                    }
                 } else {
                     if (autoCast) {
                         String fieldValueJSONString = JSON.toJSONString(fieldValue);

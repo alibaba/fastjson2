@@ -1262,10 +1262,10 @@ public class TypeUtils {
 
         if (targetClass.isEnum()) {
             if (obj instanceof Integer) {
-                int ordinal = ((Integer) obj).intValue();
+                int intValue = ((Integer) obj).intValue();
                 ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(targetClass);
                 if (objectReader instanceof ObjectReaderImplEnum) {
-                    Enum e = ((ObjectReaderImplEnum) objectReader).getEnumByOrdinal(ordinal);
+                    Enum e = ((ObjectReaderImplEnum) objectReader).of(intValue);
                     return (T) e;
                 }
             }
