@@ -1,4 +1,4 @@
-# 使用Mixin注入Anntation定制序列化和反序列化
+# 使用Mixin注入Annotation定制序列化和反序列化
 
 当你需要定制化序列化一些LIB里面的类，你无法修改这些类的代码，你可以使用FASTJSON2的Minxin功能注入Annotation。
 

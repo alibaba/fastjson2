@@ -83,7 +83,7 @@ FASTJSON v2中有比较完善的扩展机制，如下：
 * Annotation介绍 [https://alibaba.github.io/fastjson2/annotations_cn](https://alibaba.github.io/fastjson2/annotations_cn)
 * Annotation注入介绍 [https://alibaba.github.io/fastjson2/mixin_cn](https://alibaba.github.io/fastjson2/mixin_cn)
 * Feature介绍 [https://alibaba.github.io/fastjson2/features_cn](https://alibaba.github.io/fastjson2/features_cn)
-* 使用Mixin注入Anntation定制序列化和反序列化 [https://alibaba.github.io/fastjson2/mixin_cn](https://alibaba.github.io/fastjson2/mixin_cn)
+* 使用Mixin注入Annotation定制序列化和反序列化 [https://alibaba.github.io/fastjson2/mixin_cn](https://alibaba.github.io/fastjson2/mixin_cn)
 * 实现ObjectWriter和ObjectReader实现定制序列化和反序列化 [https://alibaba.github.io/fastjson2/register_custom_reader_writer_cn](https://alibaba.github.io/fastjson2/register_custom_reader_writer_cn)
 
 ## 4.3. 常见的类扩展升级映射
