@@ -1393,6 +1393,18 @@ public class JSONArray
     }
 
     /**
+     * Returns an {@link JSONArray} containing the elements of the given Collection, in its iteration order.
+     *
+     * <pre>
+     * JSONArray array = JSONArray.copyOf(List.of("fastjson"));
+     * </pre>
+     * @since 2.0.22
+     */
+    public static JSONArray copyOf(Collection collection) {
+        return new JSONArray(collection);
+    }
+
+    /**
      * Pack two elements as {@link JSONArray}
      *
      * <pre>
