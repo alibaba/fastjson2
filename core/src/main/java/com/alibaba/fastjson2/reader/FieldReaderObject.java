@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONSchemaValidException;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.BeanUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -252,6 +253,10 @@ public class FieldReaderObject<T>
                     value = '\0';
                 }
             }
+        }
+
+        if (value != null && !fieldClass.isInstance(value)) {
+            value = TypeUtils.cast(value, fieldType);
         }
 
         if (function != null) {
