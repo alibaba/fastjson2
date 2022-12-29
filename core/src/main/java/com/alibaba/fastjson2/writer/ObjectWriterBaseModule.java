@@ -1080,6 +1080,10 @@ public class ObjectWriterBaseModule
             }
         }
 
+        if (java.nio.file.Path.class.isAssignableFrom(objectClass)) {
+            return ObjectWriterImplToString.INSTANCE;
+        }
+
         if (objectType == Integer.class) {
             return ObjectWriterImplInt32.INSTANCE;
         }
