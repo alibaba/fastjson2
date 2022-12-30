@@ -335,7 +335,12 @@ public abstract class FieldWriter<T>
     }
 
     public void writeBinary(JSONWriter jsonWriter, byte[] value) {
-        if (value == null && !jsonWriter.isWriteNulls()) {
+        if (value == null) {
+            if (!jsonWriter.isWriteNulls()) {
+                return;
+            }
+            writeFieldName(jsonWriter);
+            jsonWriter.writeArrayNull();
             return;
         }
 
