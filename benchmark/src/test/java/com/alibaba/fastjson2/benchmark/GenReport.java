@@ -6,7 +6,7 @@ import java.util.*;
 
 public class GenReport {
     public void gen() throws Exception {
-        File file = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.21_raw.md");
+        File file = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.22_raw.md");
 
         Map<String, BenchmarkResult> benchResults = new LinkedHashMap<>();
 
