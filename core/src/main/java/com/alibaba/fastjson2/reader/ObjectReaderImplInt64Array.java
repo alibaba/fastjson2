@@ -53,6 +53,10 @@ final class ObjectReaderImplInt64Array
                     break;
                 }
 
+                if (jsonReader.isEnd()) {
+                    throw new JSONException(jsonReader.info("input end"));
+                }
+
                 int minCapacity = size + 1;
                 if (minCapacity - values.length > 0) {
                     int oldCapacity = values.length;
