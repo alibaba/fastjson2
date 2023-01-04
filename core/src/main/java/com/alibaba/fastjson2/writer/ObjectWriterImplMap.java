@@ -564,6 +564,13 @@ public final class ObjectWriterImplMap
         jsonWriter.startObject();
         Map map = (Map) object;
 
+        features |= jsonWriter.getFeatures();
+        if ((features & JSONWriter.Feature.MapSortField.mask) != 0) {
+            if (!(map instanceof SortedMap) && map.getClass() != LinkedHashMap.class) {
+                map = new TreeMap<>(map);
+            }
+        }
+
         JSONWriter.Context context = jsonWriter.context;
 
         BeforeFilter beforeFilter = context.getBeforeFilter();
