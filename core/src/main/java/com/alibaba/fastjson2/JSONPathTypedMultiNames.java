@@ -65,6 +65,7 @@ class JSONPathTypedMultiNames
                     null,
                     null,
                     null,
+                    null,
                     null
             );
         }

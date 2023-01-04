@@ -3,7 +3,10 @@ package com.alibaba.fastjson2.util;
 import java.lang.invoke.*;
 import java.lang.reflect.Field;
 import java.nio.ByteOrder;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
+
+import static java.lang.invoke.MethodType.methodType;
 
 public class JDKUtils {
     public static final int JVM_VERSION;
@@ -12,11 +15,13 @@ public class JDKUtils {
 
     static final Field FIELD_STRING_VALUE;
     static final long FIELD_STRING_VALUE_OFFSET;
-    static volatile boolean FIELD_STRING_ERROR;
+    static volatile boolean FIELD_VALUE_STRING_ERROR;
 
     static final Class<?> CLASS_SQL_DATASOURCE;
     static final Class<?> CLASS_SQL_ROW_SET;
     public static final boolean HAS_SQL;
+    public static final boolean ANDROID;
+    public static final boolean GRAAL;
 
     // Android not support
     public static final Class CLASS_TRANSIENT;
@@ -30,24 +35,42 @@ public class JDKUtils {
     public static final BiFunction<byte[], Byte, String> STRING_CREATOR_JDK11;
     public static final ToIntFunction<String> STRING_CODER;
     public static final Function<String, byte[]> STRING_VALUE;
-    public static final MethodHandles.Lookup TRUSTED_LOOKUP;
+
+    static final MethodHandles.Lookup IMPL_LOOKUP;
+    static final boolean OPEN_J9;
+    static volatile MethodHandle CONSTRUCTOR_LOOKUP;
+    static volatile boolean CONSTRUCTOR_LOOKUP_ERROR;
+    static volatile Throwable initErrorLast;
+    static volatile Throwable reflectErrorLast;
+    static final AtomicInteger reflectErrorCount = new AtomicInteger();
 
     static {
         int jvmVersion = -1;
+        boolean openj9 = false, android = false, graal = false;
         try {
-            String property = System.getProperty("java.specification.version");
-            if (property.startsWith("1.")) {
-                property = property.substring(2);
-            }
-            jvmVersion = Integer.parseInt(property);
-
             String jmvName = System.getProperty("java.vm.name");
-            boolean openj9 = jmvName.contains("OpenJ9");
-            if (openj9) {
-                FIELD_STRING_ERROR = true;
+            openj9 = jmvName.contains("OpenJ9");
+            android = jmvName.equals("Dalvik");
+            graal = jmvName.equals("Substrate VM");
+            if (openj9 || android || graal) {
+                FIELD_VALUE_STRING_ERROR = true;
+            }
+
+            String javaSpecVer = System.getProperty("java.specification.version");
+            // android is 0.9
+            if (javaSpecVer.startsWith("1.")) {
+                javaSpecVer = javaSpecVer.substring(2);
+            }
+            if (javaSpecVer.indexOf('.') == -1) {
+                jvmVersion = Integer.parseInt(javaSpecVer);
             }
         } catch (Throwable ignored) {
+            initErrorLast = ignored;
         }
+
+        OPEN_J9 = openj9;
+        ANDROID = android;
+        GRAAL = graal;
 
         boolean hasJavaSql = true;
         Class dataSourceClass = null;
@@ -55,7 +78,7 @@ public class JDKUtils {
         try {
             dataSourceClass = Class.forName("javax.sql.DataSource");
             rowSetClass = Class.forName("javax.sql.RowSet");
-        } catch (Throwable e) {
+        } catch (Throwable ignored) {
             hasJavaSql = false;
         }
         CLASS_SQL_DATASOURCE = dataSourceClass;
@@ -63,9 +86,11 @@ public class JDKUtils {
         HAS_SQL = hasJavaSql;
 
         Class transientClass = null;
-        try {
-            transientClass = Class.forName("java.beans.Transient");
-        } catch (Throwable ignored) {
+        if (!android) {
+            try {
+                transientClass = Class.forName("java.beans.Transient");
+            } catch (Throwable ignored) {
+            }
         }
         CLASS_TRANSIENT = transientClass;
 
@@ -79,13 +104,13 @@ public class JDKUtils {
                 field.setAccessible(true);
                 fieldOffset = UnsafeUtils.objectFieldOffset(field);
             } catch (Exception ignored) {
-                FIELD_STRING_ERROR = true;
+                FIELD_VALUE_STRING_ERROR = true;
             }
 
             FIELD_STRING_VALUE = field;
             FIELD_STRING_VALUE_OFFSET = fieldOffset;
         } else {
-            FIELD_STRING_ERROR = true;
+            FIELD_VALUE_STRING_ERROR = true;
             FIELD_STRING_VALUE = null;
             FIELD_STRING_VALUE_OFFSET = -1;
         }
@@ -117,32 +142,34 @@ public class JDKUtils {
             } catch (Throwable ignored) {
                 // ignored
             }
-            TRUSTED_LOOKUP = trustedLookup;
+            if (trustedLookup == null) {
+                trustedLookup = MethodHandles.lookup();
+            }
+            IMPL_LOOKUP = trustedLookup;
         }
 
         Boolean compact_strings = null;
         try {
             if (JVM_VERSION == 8 && trustedLookup != null) {
-                MethodHandles.Lookup caller = trustedLookup.in(String.class);
+                MethodHandles.Lookup lookup = trustedLookup(String.class);
 
-                MethodHandle handle = caller.findConstructor(
-                        String.class, MethodType.methodType(void.class, char[].class, boolean.class)
+                MethodHandle handle = lookup.findConstructor(
+                        String.class, methodType(void.class, char[].class, boolean.class)
                 );
 
                 CallSite callSite = LambdaMetafactory.metafactory(
-                        caller,
+                        lookup,
                         "apply",
-                        MethodType.methodType(BiFunction.class),
-                        handle.type().generic(),
+                        methodType(BiFunction.class),
+                        methodType(Object.class, Object.class, Object.class),
                         handle,
-                        handle.type()
+                        methodType(String.class, char[].class, boolean.class)
                 );
                 stringCreatorJDK8 = (BiFunction<char[], Boolean, String>) callSite.getTarget().invokeExact();
-                stringCoder = (str) -> 1;
             }
 
             boolean lookupLambda = false;
-            if (JVM_VERSION > 8 && trustedLookup != null) {
+            if (JVM_VERSION > 8 && trustedLookup != null && !android) {
                 try {
                     Field compact_strings_field = String.class.getDeclaredField("COMPACT_STRINGS");
                     if (compact_strings_field != null) {
@@ -155,61 +182,64 @@ public class JDKUtils {
                         }
                     }
                 } catch (Throwable ignored) {
-                    // ignored
+                    initErrorLast = ignored;
                 }
                 lookupLambda = compact_strings != null && compact_strings.booleanValue();
             }
 
             if (lookupLambda) {
-                MethodHandles.Lookup caller = trustedLookup.in(String.class);
-                MethodHandle handle = caller.findConstructor(
-                        String.class, MethodType.methodType(void.class, byte[].class, byte.class)
+                MethodHandles.Lookup lookup = trustedLookup.in(String.class);
+                MethodHandle handle = lookup.findConstructor(
+                        String.class, methodType(void.class, byte[].class, byte.class)
                 );
                 CallSite callSite = LambdaMetafactory.metafactory(
-                        caller,
+                        lookup,
                         "apply",
-                        MethodType.methodType(BiFunction.class),
-                        handle.type().generic(),
+                        methodType(BiFunction.class),
+                        methodType(Object.class, Object.class, Object.class),
                         handle,
-                        MethodType.methodType(String.class, byte[].class, Byte.class)
+                        methodType(String.class, byte[].class, Byte.class)
                 );
                 stringCreatorJDK11 = (BiFunction<byte[], Byte, String>) callSite.getTarget().invokeExact();
 
-                MethodHandles.Lookup stringCaller = trustedLookup.in(String.class);
-                MethodHandle coder = stringCaller.findSpecial(
+                MethodHandle coder = lookup.findSpecial(
                         String.class,
                         "coder",
-                        MethodType.methodType(byte.class),
+                        methodType(byte.class),
                         String.class
                 );
                 CallSite applyAsInt = LambdaMetafactory.metafactory(
-                        stringCaller,
+                        lookup,
                         "applyAsInt",
-                        MethodType.methodType(ToIntFunction.class),
-                        MethodType.methodType(int.class, Object.class),
+                        methodType(ToIntFunction.class),
+                        methodType(int.class, Object.class),
                         coder,
-                        coder.type()
+                        methodType(byte.class, String.class)
                 );
                 stringCoder = (ToIntFunction<String>) applyAsInt.getTarget().invokeExact();
 
-                MethodHandle value = stringCaller.findSpecial(
+                MethodHandle value = lookup.findSpecial(
                         String.class,
                         "value",
-                        MethodType.methodType(byte[].class),
+                        methodType(byte[].class),
                         String.class
                 );
                 CallSite apply = LambdaMetafactory.metafactory(
-                        stringCaller,
+                        lookup,
                         "apply",
-                        MethodType.methodType(Function.class),
-                        value.type().generic(),
+                        methodType(Function.class),
+                        methodType(Object.class, Object.class),
                         value,
-                        value.type()
+                        methodType(byte[].class, String.class)
                 );
                 stringValue = (Function<String, byte[]>) apply.getTarget().invokeExact();
             }
         } catch (Throwable ignored) {
-            // ignored
+            initErrorLast = ignored;
+        }
+
+        if (stringCoder == null) {
+            stringCoder = (str) -> 1;
         }
 
         STRING_CREATOR_JDK8 = stringCreatorJDK8;
@@ -223,17 +253,59 @@ public class JDKUtils {
                 || (CLASS_SQL_ROW_SET != null && CLASS_SQL_ROW_SET.isAssignableFrom(type));
     }
 
+    public static void setReflectErrorLast(Throwable error) {
+        reflectErrorCount.incrementAndGet();
+        reflectErrorLast = error;
+    }
+
     public static char[] getCharArray(String str) {
         // GraalVM not support
         // Android not support
-        if (!FIELD_STRING_ERROR) {
+        if (!FIELD_VALUE_STRING_ERROR) {
             try {
                 return (char[]) UnsafeUtils.UNSAFE.getObject(str, FIELD_STRING_VALUE_OFFSET);
             } catch (Exception ignored) {
-                FIELD_STRING_ERROR = true;
+                FIELD_VALUE_STRING_ERROR = true;
             }
         }
 
         return str.toCharArray();
+    }
+
+    public static MethodHandles.Lookup trustedLookup(Class objectClass) {
+        if (!CONSTRUCTOR_LOOKUP_ERROR) {
+            try {
+                int TRUSTED = -1;
+
+                MethodHandle constructor = CONSTRUCTOR_LOOKUP;
+                if (JVM_VERSION < 15) {
+                    if (constructor == null) {
+                        constructor = IMPL_LOOKUP.findConstructor(
+                                MethodHandles.Lookup.class,
+                                methodType(void.class, Class.class, int.class)
+                        );
+                        CONSTRUCTOR_LOOKUP = constructor;
+                    }
+                    int FULL_ACCESS_MASK = 31; // for IBM Open J9 JDK
+                    return (MethodHandles.Lookup) constructor.invoke(
+                            objectClass,
+                            OPEN_J9 ? FULL_ACCESS_MASK : TRUSTED
+                    );
+                } else {
+                    if (constructor == null) {
+                        constructor = IMPL_LOOKUP.findConstructor(
+                                MethodHandles.Lookup.class,
+                                methodType(void.class, Class.class, Class.class, int.class)
+                        );
+                        CONSTRUCTOR_LOOKUP = constructor;
+                    }
+                    return (MethodHandles.Lookup) constructor.invoke(objectClass, null, TRUSTED);
+                }
+            } catch (Throwable ignored) {
+                CONSTRUCTOR_LOOKUP_ERROR = true;
+            }
+        }
+
+        return IMPL_LOOKUP.in(objectClass);
     }
 }

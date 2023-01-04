@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.support.springfox;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 import springfox.documentation.spring.web.json.Json;
 
@@ -15,5 +16,6 @@ public class JsonTest {
 
         Json json = new Json(jsonStr);
         assertEquals(jsonStr, JSON.toJSONString(json));
+        assertEquals(jsonStr, JSON.toJSONString(json, JSONWriter.Feature.FieldBased));
     }
 }

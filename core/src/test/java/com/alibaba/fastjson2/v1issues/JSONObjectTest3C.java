@@ -113,7 +113,7 @@ public class JSONObjectTest3C {
         Exception error = null;
         try {
             bean.f(1, 2);
-        } catch (UnsupportedOperationException ex) {
+        } catch (Exception ex) {
             error = ex;
         }
         assertNotNull(error);

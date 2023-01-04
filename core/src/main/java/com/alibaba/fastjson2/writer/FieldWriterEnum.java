@@ -8,9 +8,10 @@ import com.alibaba.fastjson2.util.IOUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 
-abstract class FieldWriterEnum
+class FieldWriterEnum
         extends FieldWriter {
     final byte[][] valueNameCacheUTF8;
     final char[][] valueNameCacheUTF16;
@@ -29,14 +30,15 @@ abstract class FieldWriterEnum
             long features,
             String format,
             String label,
-            Class<? extends Enum> enumType,
+            Type fieldType,
+            Class<? extends Enum> enumClass,
             Field field,
             Method method
     ) {
-        super(name, ordinal, features, format, label, enumType, enumType, field, method);
+        super(name, ordinal, features, format, label, fieldType, enumClass, field, method);
 
-        this.enumType = enumType;
-        this.enumConstants = enumType.getEnumConstants();
+        this.enumType = enumClass;
+        this.enumConstants = enumClass.getEnumConstants();
         this.hashCodes = new long[enumConstants.length];
         this.hashCodesSymbolCache = new long[enumConstants.length];
         for (int i = 0; i < enumConstants.length; i++) {
@@ -267,5 +269,34 @@ abstract class FieldWriterEnum
 
         writeFieldName(jsonWriter);
         jsonWriter.writeString(e.name());
+    }
+
+    @Override
+    public final void writeValue(JSONWriter jsonWriter, Object object) {
+        Enum value = (Enum) getFieldValue(object);
+        jsonWriter.writeEnum(value);
+    }
+
+    @Override
+    public boolean write(JSONWriter jsonWriter, Object object) {
+        Enum value = (Enum) getFieldValue(object);
+
+        if (value == null) {
+            long features = this.features | jsonWriter.getFeatures();
+            if ((features & JSONWriter.Feature.WriteNulls.mask) != 0) {
+                writeFieldName(jsonWriter);
+                jsonWriter.writeNull();
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        if (jsonWriter.jsonb) {
+            writeEnumJSONB(jsonWriter, value);
+        } else {
+            writeEnum(jsonWriter, value);
+        }
+        return true;
     }
 }

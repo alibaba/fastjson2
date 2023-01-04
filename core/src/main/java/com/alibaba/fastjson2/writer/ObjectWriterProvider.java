@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
@@ -9,6 +10,7 @@ import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.GuavaSupport;
+import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
@@ -33,33 +35,39 @@ public class ObjectWriterProvider
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
     final ObjectWriterCreator creator;
     final List<ObjectWriterModule> modules = new ArrayList<>();
+    PropertyNamingStrategy namingStrategy;
 
     volatile long userDefineMask;
 
     public ObjectWriterProvider() {
+        this((PropertyNamingStrategy) null);
+    }
+
+    public ObjectWriterProvider(PropertyNamingStrategy namingStrategy) {
         init();
 
         ObjectWriterCreator creator = null;
         switch (JSONFactory.CREATOR) {
             case "reflect":
-                creator = ObjectWriterCreator.INSTANCE;
-                break;
             case "lambda":
-                creator = ObjectWriterCreatorLambda.INSTANCE;
+                creator = ObjectWriterCreator.INSTANCE;
                 break;
             case "asm":
             default:
                 try {
-                    creator = ObjectWriterCreatorASM.INSTANCE;
+                    if (!JDKUtils.ANDROID && !JDKUtils.GRAAL) {
+                        creator = ObjectWriterCreatorASM.INSTANCE;
+                    }
                 } catch (Throwable ignored) {
                     // ignored
                 }
                 if (creator == null) {
-                    creator = ObjectWriterCreatorLambda.INSTANCE;
+                    creator = ObjectWriterCreator.INSTANCE;
                 }
                 break;
         }
         this.creator = creator;
+        this.namingStrategy = namingStrategy;
     }
 
     public ObjectWriterProvider(ObjectWriterCreator creator) {
@@ -202,6 +210,10 @@ public class ObjectWriterProvider
     }
 
     public void getBeanInfo(BeanInfo beanInfo, Class objectClass) {
+        if (namingStrategy != null && namingStrategy != PropertyNamingStrategy.NeverUseThisValueExceptDefaultValue) {
+            beanInfo.namingStrategy = namingStrategy.name();
+        }
+
         for (ObjectWriterModule module : modules) {
             ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor == null) {
@@ -237,6 +249,12 @@ public class ObjectWriterProvider
                     && superclass != Object.class
                     && superclass.getName().equals("com.google.protobuf.GeneratedMessageV3")) {
                 fieldBased = false;
+            }
+            switch (objectClass.getName()) {
+                case "springfox.documentation.spring.web.json.Json":
+                    fieldBased = false;
+                default:
+                    break;
             }
         }
 

@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
 
@@ -12,18 +13,24 @@ final class FieldWriterBoolValField
 
     @Override
     public Object getFieldValue(Object object) {
-        try {
-            return field.getBoolean(object);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + fieldName, e);
-        }
+        return getFieldValueBoolean(object);
     }
 
-    protected Boolean getValue(Object object) {
+    public boolean getFieldValueBoolean(Object object) {
+        if (object == null) {
+            throw new JSONException("field.get error, " + fieldName);
+        }
+
         try {
-            return field.getBoolean(object);
-        } catch (IllegalAccessException e) {
-            throw new JSONException("get field error", e);
+            boolean value;
+            if (fieldOffset != -1) {
+                value = UnsafeUtils.getBoolean(object, fieldOffset);
+            } else {
+                value = field.getBoolean(object);
+            }
+            return value;
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 }

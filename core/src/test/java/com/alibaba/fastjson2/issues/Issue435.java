@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_VALUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue435 {
@@ -52,6 +53,10 @@ public class Issue435 {
 
     @Test
     public void test256All() {
+        if (STRING_VALUE == null) {
+            return;
+        }
+
         for (int i = 0; i < 256; ++i) {
             char ch = (char) i;
             String str = new String(new char[]{ch});

@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
@@ -365,7 +366,9 @@ public final class JSONFactory {
                 break;
             default:
                 try {
-                    compiler = JSONPathCompilerReflectASM.INSTANCE;
+                    if (!JDKUtils.ANDROID && !JDKUtils.GRAAL) {
+                        compiler = JSONPathCompilerReflectASM.INSTANCE;
+                    }
                 } catch (Throwable ignored) {
                     // ignored
                 }

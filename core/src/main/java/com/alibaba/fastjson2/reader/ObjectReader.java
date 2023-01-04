@@ -92,11 +92,17 @@ public interface ObjectReader<T> {
 
             Class fieldClass = fieldReader.fieldClass;
             Type fieldType = fieldReader.fieldType;
+            boolean autoCast = true;
 
             if (fieldValue != null) {
                 Class<?> valueClass = fieldValue.getClass();
+                if (valueClass == String.class) {
+                    if (fieldReader.fieldClass == java.util.Date.class) {
+                        autoCast = false;
+                    }
+                }
 
-                if (valueClass != fieldReader.fieldClass) {
+                if (valueClass != fieldReader.fieldClass && autoCast) {
                     Function typeConvert = provider.getTypeConvert(valueClass, fieldReader.fieldClass);
 
                     if (typeConvert != null) {
@@ -114,12 +120,22 @@ public interface ObjectReader<T> {
                 } else if (fieldValue instanceof JSONArray) {
                     typedFieldValue = ((JSONArray) fieldValue).to(fieldType);
                 } else if (features == 0 && !fieldClass.isInstance(fieldValue) && fieldReader.format == null) {
-                    typedFieldValue = TypeUtils.cast(fieldValue, fieldClass, provider);
+                    ObjectReader initReader = fieldReader.getInitReader();
+                    if (initReader != null) {
+                        String fieldValueJson = JSON.toJSONString(fieldValue);
+                        typedFieldValue = initReader.readObject(JSONReader.of(fieldValueJson), null, null, 0L);
+                    } else {
+                        typedFieldValue = TypeUtils.cast(fieldValue, fieldClass, provider);
+                    }
                 } else {
-                    String fieldValueJSONString = JSON.toJSONString(fieldValue);
-                    try (JSONReader jsonReader = JSONReader.of(fieldValueJSONString)) {
-                        ObjectReader fieldObjectReader = fieldReader.getObjectReader(jsonReader);
-                        typedFieldValue = fieldObjectReader.readObject(jsonReader, null, entry.getKey(), features);
+                    if (autoCast) {
+                        String fieldValueJSONString = JSON.toJSONString(fieldValue);
+                        try (JSONReader jsonReader = JSONReader.of(fieldValueJSONString)) {
+                            ObjectReader fieldObjectReader = fieldReader.getObjectReader(jsonReader);
+                            typedFieldValue = fieldObjectReader.readObject(jsonReader, null, entry.getKey(), features);
+                        }
+                    } else {
+                        typedFieldValue = fieldValue;
                     }
                 }
             }

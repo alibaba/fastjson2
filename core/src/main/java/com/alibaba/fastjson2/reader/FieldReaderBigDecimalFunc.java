@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -36,7 +37,11 @@ final class FieldReaderBigDecimalFunc<T, V>
             schema.assertValidate(decimalValue);
         }
 
-        function.accept(object, (V) decimalValue);
+        try {
+            function.accept(object, (V) decimalValue);
+        } catch (Exception e) {
+            throw new JSONException("set " + super.toString() + " error", e);
+        }
     }
 
     @Override
@@ -45,7 +50,11 @@ final class FieldReaderBigDecimalFunc<T, V>
             schema.assertValidate(value);
         }
 
-        function.accept(object, (V) BigDecimal.valueOf(value));
+        try {
+            function.accept(object, (V) BigDecimal.valueOf(value));
+        } catch (Exception e) {
+            throw new JSONException("set " + super.toString() + " error", e);
+        }
     }
 
     @Override
@@ -54,7 +63,11 @@ final class FieldReaderBigDecimalFunc<T, V>
             schema.assertValidate(value);
         }
 
-        function.accept(object, (V) BigDecimal.valueOf(value));
+        try {
+            function.accept(object, (V) BigDecimal.valueOf(value));
+        } catch (Exception e) {
+            throw new JSONException("set " + super.toString() + " error", e);
+        }
     }
 
     @Override

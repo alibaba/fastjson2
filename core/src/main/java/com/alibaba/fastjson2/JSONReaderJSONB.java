@@ -15,13 +15,13 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.JSONFactory.*;
-import static com.alibaba.fastjson2.util.DateUtils.localDateTime;
-import static com.alibaba.fastjson2.util.IOUtils.SHANGHAI_ZONE_ID;
+import static com.alibaba.fastjson2.util.DateUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 class JSONReaderJSONB
         extends JSONReader {
+    static final byte[] SHANGHAI_ZONE_ID_NAME_BYTES = JSONB.toBytes(SHANGHAI_ZONE_ID_NAME);
     static Charset GB18030;
 
     protected final byte[] bytes;
@@ -157,7 +157,7 @@ class JSONReaderJSONB
     @Override
     public boolean isNumber() {
         byte type = bytes[offset];
-        return type >= BC_DOUBLE_LONG && type <= BC_INT32;
+        return type >= BC_DOUBLE_NUM_0 && type <= BC_INT32;
     }
 
     @Override
@@ -582,6 +582,68 @@ class JSONReaderJSONB
                 offset += 4;
                 return new Date(seconds * 1000);
             }
+            case BC_LOCAL_DATE: {
+                int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
+                byte month = bytes[offset++];
+                byte dayOfMonth = bytes[offset++];
+                return LocalDate.of(year, month, dayOfMonth);
+            }
+            case BC_LOCAL_TIME: {
+                byte hour = bytes[offset++];
+                byte minute = bytes[offset++];
+                byte second = bytes[offset++];
+                int nano = readInt32Value();
+                return LocalTime.of(hour, minute, second, nano);
+            }
+            case BC_LOCAL_DATETIME: {
+                int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
+                byte month = bytes[offset++];
+                byte dayOfMonth = bytes[offset++];
+                byte hour = bytes[offset++];
+                byte minute = bytes[offset++];
+                byte second = bytes[offset++];
+                int nano = readInt32Value();
+                return LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
+            }
+            case BC_TIMESTAMP_WITH_TIMEZONE: {
+                int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
+                byte month = bytes[offset++];
+                byte dayOfMonth = bytes[offset++];
+                byte hour = bytes[offset++];
+                byte minute = bytes[offset++];
+                byte second = bytes[offset++];
+                int nano = readInt32Value();
+                // SHANGHAI_ZONE_ID_NAME_BYTES
+                ZoneId zoneId;
+                {
+                    boolean shanghai;
+                    byte[] shanghaiZoneIdNameBytes = SHANGHAI_ZONE_ID_NAME_BYTES;
+                    if (offset + shanghaiZoneIdNameBytes.length < bytes.length) {
+                        shanghai = true;
+                        for (int i = 0; i < shanghaiZoneIdNameBytes.length; ++i) {
+                            if (bytes[offset + i] != shanghaiZoneIdNameBytes[i]) {
+                                shanghai = false;
+                            }
+                        }
+                    } else {
+                        shanghai = false;
+                    }
+                    if (shanghai) {
+                        offset += shanghaiZoneIdNameBytes.length;
+                        zoneId = SHANGHAI_ZONE_ID;
+                    } else {
+                        String zoneIdStr = readString();
+                        zoneId = ZoneId.of(zoneIdStr);
+                    }
+                }
+                LocalDateTime ldt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
+                return ZonedDateTime.of(ldt, zoneId);
+            }
+            case BC_TIMESTAMP : {
+                long epochSeconds = readInt64Value();
+                int nano = readInt32Value();
+                return Instant.ofEpochSecond(epochSeconds, nano);
+            }
             case BC_TIMESTAMP_MILLIS: {
                 long millis =
                         ((bytes[offset + 7] & 0xFFL)) +
@@ -621,6 +683,10 @@ class JSONReaderJSONB
                 if (!supportAutoType) {
                     if (isObject()) {
                         return readObject();
+                    }
+
+                    if (isArray()) {
+                        return readArray();
                     }
 
                     throw new JSONException("auoType not support , offset " + offset + "/" + bytes.length);

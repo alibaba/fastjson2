@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.alibaba.fastjson2</groupId>
         <artifactId>fastjson2-parent</artifactId>
-        <version>2.0.22-SNAPSHOT</version>
+        <version>2.0.23-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -79,6 +79,33 @@
             <url>https://github.com/kraity</url>
         </developer>
     </developers>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- spring libs -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <type>pom</type>
+                <version>${springframework5.version}</version>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-bom</artifactId>
+                <type>pom</type>
+                <version>2021.2.5</version>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-bom</artifactId>
+                <type>pom</type>
+                <version>5.7.5</version>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>

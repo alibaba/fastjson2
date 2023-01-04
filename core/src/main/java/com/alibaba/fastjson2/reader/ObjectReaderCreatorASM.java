@@ -280,17 +280,17 @@ public class ObjectReaderCreatorASM
             Class<T> objectClass,
             Type objectType,
             boolean fieldBased,
-            ObjectReaderProvider provider) {
+            ObjectReaderProvider provider
+    ) {
         boolean externalClass = classLoader.isExternalClass(objectClass);
         int objectClassModifiers = objectClass.getModifiers();
-        boolean publicClass = Modifier.isPublic(objectClassModifiers);
 
         if (Modifier.isAbstract(objectClassModifiers) || Modifier.isInterface(objectClassModifiers)) {
             return super.createObjectReader(objectClass, objectType, fieldBased, provider);
         }
 
-        if (externalClass || !publicClass) {
-            if (!fieldBased || !UNSAFE_SUPPORT) {
+        if (externalClass) {
+            if (!UNSAFE_SUPPORT) {
                 return super.createObjectReader(objectClass, objectType, fieldBased, provider);
             }
         }
@@ -301,6 +301,9 @@ public class ObjectReaderCreatorASM
             if (annotationProcessor != null) {
                 annotationProcessor.getBeanInfo(beanInfo, objectClass);
             }
+        }
+        if (externalClass || !Modifier.isPublic(objectClassModifiers)) {
+            beanInfo.readerFeatures |= FieldInfo.JIT;
         }
 
         if (beanInfo.deserializer != null && ObjectReader.class.isAssignableFrom(beanInfo.deserializer)) {
@@ -353,11 +356,6 @@ public class ObjectReaderCreatorASM
 
             for (FieldReader fieldReader : fieldReaderArray) {
                 Method method = fieldReader.method;
-                if (method != null && method.getReturnType() != void.class) {
-                    match = false;
-                    break;
-                }
-
                 if (fieldReader.isReadOnly()
                         || fieldReader.isUnwrapped()
                 ) {
@@ -419,6 +417,8 @@ public class ObjectReaderCreatorASM
         ClassWriter cw = new ClassWriter(
                 (e) -> objectClass.getName().equals(e) ? objectClass : null
         );
+
+        ObjectWriteContext context = new ObjectWriteContext(objectClass, cw, externalClass);
 
         String className = "ORG_" + seed.incrementAndGet() + "_" + fieldReaderArray.length + "_" + objectClass.getSimpleName();
         String classNameType;
@@ -562,7 +562,7 @@ public class ObjectReaderCreatorASM
         if (defaultConstructor != null) {
             boolean publicObject = Modifier.isPublic(objectClassModifiers) && !classLoader.isExternalClass(objectClass);
             boolean jit = !publicObject || !Modifier.isPublic(defaultConstructor.getModifiers());
-            supplier = createInstanceSupplier(defaultConstructor, jit);
+            supplier = createSupplier(defaultConstructor, jit);
         }
 
         if (generatedFields) {
@@ -573,10 +573,10 @@ public class ObjectReaderCreatorASM
 
             ObjectReaderAdapter objectReaderAdapter = new ObjectReaderAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, readerFeatures, null, supplier, null, fieldReaderArray);
 
-            genMethodReadJSONBObject(objectClass, defaultConstructor, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, classNameType, objectReaderAdapter);
-            genMethodReadJSONBObjectArrayMapping(objectClass, defaultConstructor, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, classNameType, objectReaderAdapter);
+            genMethodReadJSONBObject(context, defaultConstructor, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, classNameType, objectReaderAdapter);
+            genMethodReadJSONBObjectArrayMapping(context, defaultConstructor, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, classNameType, objectReaderAdapter);
 
-            genMethodReadObject(objectClass, defaultConstructor, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, classNameType, objectReaderAdapter);
+            genMethodReadObject(context, defaultConstructor, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, classNameType, objectReaderAdapter);
 
             if (objectReaderSuper == TYPE_OBJECT_READER_ADAPTER) {
                 genMethodGetFieldReader(fieldReaderArray, cw, classNameType, objectReaderAdapter);
@@ -900,7 +900,7 @@ public class ObjectReaderCreatorASM
     }
 
     private <T> void genMethodReadJSONBObject(
-            Class<T> objectType,
+            ObjectWriteContext context,
             Constructor defaultConstructor,
             long readerFeatures,
             String TYPE_OBJECT,
@@ -909,6 +909,7 @@ public class ObjectReaderCreatorASM
             String classNameType,
             ObjectReaderAdapter objectReaderAdapter
     ) {
+        Class objectClass = context.objectClass;
         boolean fieldBased = (readerFeatures & JSONReader.Feature.FieldBased.mask) != 0;
 
         MethodWriter mw = cw.visitMethod(Opcodes.ACC_PUBLIC,
@@ -946,7 +947,7 @@ public class ObjectReaderCreatorASM
             mw.visitLabel(notNull_);
         }
 
-        if (!Serializable.class.isAssignableFrom(objectType)) {
+        if (!Serializable.class.isAssignableFrom(objectClass)) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, "objectClass", "Ljava/lang/Class;");
@@ -971,7 +972,7 @@ public class ObjectReaderCreatorASM
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "startArray", "()I", false);
             mw.visitVarInsn(Opcodes.ISTORE, ENTRY_CNT);
 
-            genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
+            genCreateObject(mw, context, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
             mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
             Label fieldEnd_ = new Label();
@@ -981,7 +982,8 @@ public class ObjectReaderCreatorASM
                 mw.visitJumpInsn(Opcodes.IF_ICMPLT, fieldEnd_);
 
                 FieldReader fieldReader = fieldReaderArray[i];
-                varIndex = genReadFieldValue(objectType,
+                varIndex = genReadFieldValue(
+                        context,
                         fieldReader,
                         fieldBased,
                         classNameType,
@@ -1011,14 +1013,14 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(object_);
 
-        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
+        genCreateObject(mw, context, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfObjectStart", "()Z", false);
         mw.visitInsn(Opcodes.POP);
 
-        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
+        genCreateObject(mw, context, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
         // for (int i = 0; i < entry_cnt; ++i) {
@@ -1074,7 +1076,8 @@ public class ObjectReaderCreatorASM
                 mw.visitInsn(Opcodes.LCMP);
                 mw.visitJumpInsn(Opcodes.IFNE, next_);
 
-                varIndex = genReadFieldValue(objectType,
+                varIndex = genReadFieldValue(
+                        context,
                         fieldReader,
                         fieldBased,
                         classNameType,
@@ -1124,7 +1127,8 @@ public class ObjectReaderCreatorASM
                 mw.visitInsn(Opcodes.LCMP);
                 mw.visitJumpInsn(Opcodes.IFNE, next_);
 
-                varIndex = genReadFieldValue(objectType,
+                varIndex = genReadFieldValue(
+                        context,
                         fieldReader,
                         fieldBased,
                         classNameType,
@@ -1211,7 +1215,8 @@ public class ObjectReaderCreatorASM
 
                     FieldReader fieldReader = fieldReaderArray[index];
 
-                    varIndex = genReadFieldValue(objectType,
+                    varIndex = genReadFieldValue(
+                            context,
                             fieldReader,
                             fieldBased,
                             classNameType,
@@ -1310,7 +1315,7 @@ public class ObjectReaderCreatorASM
     }
 
     private <T> void genMethodReadJSONBObjectArrayMapping(
-            Class<T> objectType,
+            ObjectWriteContext context,
             Constructor defaultConstructor,
             long readerFeatures,
             String TYPE_OBJECT,
@@ -1356,7 +1361,7 @@ public class ObjectReaderCreatorASM
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "startArray", "()I", false);
         mw.visitVarInsn(Opcodes.ISTORE, ENTRY_CNT);
 
-        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
+        genCreateObject(mw, context, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
         Label fieldEnd_ = new Label();
@@ -1366,7 +1371,8 @@ public class ObjectReaderCreatorASM
             mw.visitJumpInsn(Opcodes.IF_ICMPLT, fieldEnd_);
 
             FieldReader fieldReader = fieldReaderArray[i];
-            varIndex = genReadFieldValue(objectType,
+            varIndex = genReadFieldValue(
+                    context,
                     fieldReader,
                     fieldBased,
                     classNameType,
@@ -1433,7 +1439,7 @@ public class ObjectReaderCreatorASM
     }
 
     private <T> void genMethodReadObject(
-            Class<T> objectType,
+            ObjectWriteContext context,
             Constructor defaultConstructor,
             long readerFeatures,
             String TYPE_OBJECT,
@@ -1499,14 +1505,14 @@ public class ObjectReaderCreatorASM
         mw.visitIntInsn(Opcodes.BIPUSH, '[');
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
 
-        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
+        genCreateObject(mw, context, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
         for (int i = 0; i < fieldReaderArray.length; ++i) {
             FieldReader fieldReader = fieldReaderArray[i];
 
             varIndex = genReadFieldValue(
-                    objectType,
+                    context,
                     fieldReader,
                     fieldBased,
                     classNameType,
@@ -1566,7 +1572,7 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(notNull_);
 
-        genCreateObject(mw, objectType, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
+        genCreateObject(mw, context, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
 
         // for (int i = 0; i < entry_cnt; ++i) {
@@ -1633,7 +1639,8 @@ public class ObjectReaderCreatorASM
                 mw.visitJumpInsn(Opcodes.IFNE, next_);
 
                 mw.visitLabel(get_);
-                varIndex = genReadFieldValue(objectType,
+                varIndex = genReadFieldValue(
+                        context,
                         fieldReader,
                         fieldBased,
                         classNameType,
@@ -1696,7 +1703,8 @@ public class ObjectReaderCreatorASM
                 }
 
                 mw.visitLabel(get_);
-                varIndex = genReadFieldValue(objectType,
+                varIndex = genReadFieldValue(
+                        context,
                         fieldReader,
                         fieldBased,
                         classNameType,
@@ -1783,7 +1791,8 @@ public class ObjectReaderCreatorASM
 
                     FieldReader fieldReader = fieldReaderArray[index];
 
-                    varIndex = genReadFieldValue(objectType,
+                    varIndex = genReadFieldValue(
+                            context,
                             fieldReader,
                             fieldBased,
                             classNameType,
@@ -1861,7 +1870,7 @@ public class ObjectReaderCreatorASM
 
     private <T> void genCreateObject(
             MethodWriter mw,
-            Class<T> objectType,
+            ObjectWriteContext context,
             String classNameType,
             String TYPE_OBJECT,
             int FEATURES,
@@ -1869,10 +1878,11 @@ public class ObjectReaderCreatorASM
             Constructor defaultConstructor,
             Supplier creator
     ) {
+        Class objectClass = context.objectClass;
         final int JSON_READER = 1;
 
-        int objectModifiers = objectType.getModifiers();
-        boolean publicObject = Modifier.isPublic(objectModifiers) && !classLoader.isExternalClass(objectType);
+        int objectModifiers = objectClass.getModifiers();
+        boolean publicObject = Modifier.isPublic(objectModifiers) && !classLoader.isExternalClass(objectClass);
 
         if (defaultConstructor == null || !publicObject || !Modifier.isPublic(defaultConstructor.getModifiers())) {
             if (creator != null) {
@@ -1895,7 +1905,7 @@ public class ObjectReaderCreatorASM
     }
 
     private <T> int genReadFieldValue(
-            Class<T> objectType,
+            ObjectWriteContext context,
             FieldReader fieldReader,
             boolean fieldBased,
             String classNameType,
@@ -1912,6 +1922,7 @@ public class ObjectReaderCreatorASM
             boolean jsonb,
             String TYPE_OBJECT
     ) {
+        Class objectClass = context.objectClass;
         Class fieldClass = fieldReader.fieldClass;
         Type fieldType = fieldReader.fieldType;
         long fieldFeatures = fieldReader.features;
@@ -1929,10 +1940,10 @@ public class ObjectReaderCreatorASM
         mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
         int fieldModifers = fieldBased || (method == null && field != null) ? field.getModifiers() : 0;
         if (fieldBased
-                && Modifier.isPublic(objectType.getModifiers())
+                && Modifier.isPublic(objectClass.getModifiers())
                 && Modifier.isPublic(fieldModifers)
                 && !Modifier.isFinal(fieldModifers)
-                && !classLoader.isExternalClass(objectType)
+                && !classLoader.isExternalClass(objectClass)
         ) {
             mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_OBJECT);
         }
@@ -2018,7 +2029,7 @@ public class ObjectReaderCreatorASM
                 mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", false);
                 mw.visitJumpInsn(Opcodes.IFEQ, addResolveTask_);
 
-                if (fieldClass.isAssignableFrom(objectType)) {
+                if (fieldClass.isAssignableFrom(objectClass)) {
                     mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
 //                    mw.visitTypeInsn(CHECKCAST, TYPE_FIELD_CLASS); // cast
                     mw.visitJumpInsn(Opcodes.GOTO, endObject_);
@@ -2262,7 +2273,7 @@ public class ObjectReaderCreatorASM
                     mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", false);
                     mw.visitJumpInsn(Opcodes.IFEQ, addResolveTask_);
 
-                    if (fieldClass.isAssignableFrom(objectType)) {
+                    if (fieldClass.isAssignableFrom(objectClass)) {
                         mw.visitVarInsn(Opcodes.ALOAD, LIST);
                         mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
                         mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true);
@@ -2379,10 +2390,10 @@ public class ObjectReaderCreatorASM
                         METHOD_DESC_READ_OBJECT,
                         true);
 
-                if (method != null || (Modifier.isPublic(objectType.getModifiers())
+                if (method != null || (Modifier.isPublic(objectClass.getModifiers())
                         && Modifier.isPublic(fieldModifers)
                         && !Modifier.isFinal(fieldModifers)
-                        && !classLoader.isExternalClass(objectType))
+                        && !classLoader.isExternalClass(objectClass))
                 ) {
                     mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_FIELD_CLASS); // cast
                 }
@@ -2415,19 +2426,126 @@ public class ObjectReaderCreatorASM
         }
 
         if (method != null) {
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-                    TYPE_OBJECT,
-                    method.getName(),
-                    "(" + DESC_FIELD_CLASS + ")V", false);
+            boolean invokeFieldReaderAccept = method != null && (!context.publicClass || context.externalClass);
+
+            if (invokeFieldReaderAccept) {
+                Integer FIELD_VALUE = variants.get(fieldClass);
+                if (FIELD_VALUE == null) {
+                    variants.put(fieldClass, FIELD_VALUE = varIndex);
+                    if (fieldClass == long.class || fieldClass == double.class) {
+                        varIndex += 2;
+                    } else {
+                        varIndex++;
+                    }
+                }
+
+                String acceptMethodDesc;
+                int LOAD;
+                if (fieldClass == boolean.class) {
+                    acceptMethodDesc = "(Ljava/lang/Object;Z)V";
+                    mw.visitVarInsn(Opcodes.ISTORE, FIELD_VALUE);
+                    LOAD = Opcodes.ILOAD;
+                } else if (fieldClass == byte.class) {
+                    acceptMethodDesc = "(Ljava/lang/Object;B)V";
+                    mw.visitVarInsn(Opcodes.ISTORE, FIELD_VALUE);
+                    LOAD = Opcodes.ILOAD;
+                } else if (fieldClass == short.class) {
+                    acceptMethodDesc = "(Ljava/lang/Object;S)V";
+                    mw.visitVarInsn(Opcodes.ISTORE, FIELD_VALUE);
+                    LOAD = Opcodes.ILOAD;
+                } else if (fieldClass == int.class) {
+                    acceptMethodDesc = "(Ljava/lang/Object;I)V";
+                    mw.visitVarInsn(Opcodes.ISTORE, FIELD_VALUE);
+                    LOAD = Opcodes.ILOAD;
+                } else if (fieldClass == long.class) {
+                    acceptMethodDesc = "(Ljava/lang/Object;J)V";
+                    mw.visitVarInsn(Opcodes.LSTORE, FIELD_VALUE);
+                    LOAD = Opcodes.LLOAD;
+                } else if (fieldClass == char.class) {
+                    acceptMethodDesc = "(Ljava/lang/Object;C)V";
+                    mw.visitVarInsn(Opcodes.ISTORE, FIELD_VALUE);
+                    LOAD = Opcodes.ILOAD;
+                } else if (fieldClass == float.class) {
+                    acceptMethodDesc = "(Ljava/lang/Object;F)V";
+                    mw.visitVarInsn(Opcodes.FSTORE, FIELD_VALUE);
+                    LOAD = Opcodes.FLOAD;
+                } else if (fieldClass == double.class) {
+                    acceptMethodDesc = "(Ljava/lang/Object;D)V";
+                    mw.visitVarInsn(Opcodes.DSTORE, FIELD_VALUE);
+                    LOAD = Opcodes.DLOAD;
+                } else {
+                    acceptMethodDesc = "(Ljava/lang/Object;Ljava/lang/Object;)V";
+                    mw.visitVarInsn(Opcodes.ASTORE, FIELD_VALUE);
+                    LOAD = Opcodes.ALOAD;
+                }
+
+                mw.visitVarInsn(Opcodes.ALOAD, THIS);
+                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
+                mw.visitInsn(Opcodes.SWAP);
+                mw.visitVarInsn(LOAD, FIELD_VALUE);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_READE, "accept", acceptMethodDesc, false);
+            } else {
+                Class<?> returnType = method.getReturnType();
+                String methodName = method.getName();
+
+                String methodDesc = null;
+                if (returnType == Void.TYPE) {
+                    if (fieldClass == boolean.class) {
+                        methodDesc = "(Z)V";
+                    } else if (fieldClass == byte.class) {
+                        methodDesc = "(B)V";
+                    } else if (fieldClass == short.class) {
+                        methodDesc = "(S)V";
+                    } else if (fieldClass == int.class) {
+                        methodDesc = "(I)V";
+                    } else if (fieldClass == long.class) {
+                        methodDesc = "(J)V";
+                    } else if (fieldClass == char.class) {
+                        methodDesc = "(C)V";
+                    } else if (fieldClass == float.class) {
+                        methodDesc = "(F)V";
+                    } else if (fieldClass == double.class) {
+                        methodDesc = "(D)V";
+                    } else if (fieldClass == Boolean.class) {
+                        methodDesc = "(Ljava/lang/Boolean;)V";
+                    } else if (fieldClass == Integer.class) {
+                        methodDesc = "(Ljava/lang/Integer;)V";
+                    } else if (fieldClass == Long.class) {
+                        methodDesc = "(Ljava/lang/Long;)V";
+                    } else if (fieldClass == Float.class) {
+                        methodDesc = "(Ljava/lang/Float;)V";
+                    } else if (fieldClass == Double.class) {
+                        methodDesc = "(Ljava/lang/Double;)V";
+                    } else if (fieldClass == BigDecimal.class) {
+                        methodDesc = "(Ljava/math/BigDecimal;)V";
+                    } else if (fieldClass == String.class) {
+                        methodDesc = "(Ljava/lang/String;)V";
+                    } else if (fieldClass == UUID.class) {
+                        methodDesc = "(Ljava/util/UUID;)V";
+                    } else if (fieldClass == List.class) {
+                        methodDesc = "(Ljava/util/List;)V";
+                    } else if (fieldClass == Map.class) {
+                        methodDesc = "(Ljava/util/Map;)V";
+                    }
+                }
+
+                if (methodDesc == null) {
+                    methodDesc = "(" + DESC_FIELD_CLASS + ")" + ASMUtils.desc(returnType);
+                }
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT, methodName, methodDesc, false);
+                if (returnType != void.class) {
+                    mw.visitInsn(Opcodes.POP);
+                }
+            }
             // TODO BUILD METHOD
         } else if (field != null) {
             String fieldClassName = fieldClass.getName();
-            boolean setDirect = (objectType.getModifiers() & Modifier.PUBLIC) != 0
+            boolean setDirect = (objectClass.getModifiers() & Modifier.PUBLIC) != 0
                     && (fieldModifers & Modifier.PUBLIC) != 0
                     && (fieldModifers & Modifier.FINAL) == 0
                     && (ObjectWriterProvider.isPrimitiveOrEnum(fieldClass) || fieldClassName.startsWith("java.") || fieldClass.getClassLoader() == ObjectReaderProvider.FASTJSON2_CLASS_LOADER)
-                    && !classLoader.isExternalClass(objectType)
-                    && field.getDeclaringClass() == objectType;
+                    && !classLoader.isExternalClass(objectClass)
+                    && field.getDeclaringClass() == objectClass;
             if (setDirect) {
                 mw.visitFieldInsn(PUTFIELD, TYPE_OBJECT, field.getName(), DESC_FIELD_CLASS);
             } else {
@@ -2524,5 +2642,19 @@ public class ObjectReaderCreatorASM
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
         mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
         mw.visitFieldInsn(Opcodes.GETFIELD, TYPE_FIELD_READE, "fieldType", "Ljava/lang/reflect/Type;");
+    }
+
+    static class ObjectWriteContext {
+        final Class objectClass;
+        final ClassWriter cw;
+        final boolean publicClass;
+        final boolean externalClass;
+
+        public ObjectWriteContext(Class objectClass, ClassWriter cw, boolean externalClass) {
+            this.objectClass = objectClass;
+            this.cw = cw;
+            this.publicClass = Modifier.isPublic(objectClass.getModifiers());
+            this.externalClass = externalClass;
+        }
     }
 }

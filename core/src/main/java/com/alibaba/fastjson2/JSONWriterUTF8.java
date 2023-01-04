@@ -435,6 +435,22 @@ class JSONWriterUTF8
             }
         }
 
+        int rest = chars.length - i;
+        minCapacity = off + rest * 6 + 2;
+        if (minCapacity - this.bytes.length > 0) {
+            int oldCapacity = this.bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+        }
+
         for (; i < chars.length; ++i) { // ascii none special fast write
             char ch = chars[i];
             if ((ch >= 0x0000) && (ch <= 0x007F)) {

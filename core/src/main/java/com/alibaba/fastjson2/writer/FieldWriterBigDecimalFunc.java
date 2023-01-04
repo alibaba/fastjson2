@@ -31,7 +31,11 @@ final class FieldWriterBigDecimalFunc<T>
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         BigDecimal value = function.apply(object);
-        jsonWriter.writeDecimal(value);
+        if (features != 0 || decimalFormat != null) {
+            jsonWriter.writeDecimal(value, features, decimalFormat);
+        } else {
+            jsonWriter.writeDecimal(value);
+        }
     }
 
     @Override
@@ -54,7 +58,11 @@ final class FieldWriterBigDecimalFunc<T>
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeDecimal(value);
+        if (features != 0 || decimalFormat != null) {
+            jsonWriter.writeDecimal(value, features, decimalFormat);
+        } else {
+            jsonWriter.writeDecimal(value);
+        }
         return true;
     }
 }

@@ -567,20 +567,20 @@ public class ObjectReaderProvider
         ObjectReaderCreator creator = null;
         switch (JSONFactory.CREATOR) {
             case "reflect":
-                creator = ObjectReaderCreator.INSTANCE;
-                break;
             case "lambda":
-                creator = ObjectReaderCreatorLambda.INSTANCE;
+                creator = ObjectReaderCreator.INSTANCE;
                 break;
             case "asm":
             default:
                 try {
-                    creator = ObjectReaderCreatorASM.INSTANCE;
+                    if (!JDKUtils.ANDROID && !JDKUtils.GRAAL) {
+                        creator = ObjectReaderCreatorASM.INSTANCE;
+                    }
                 } catch (Throwable ignored) {
                     // ignored
                 }
                 if (creator == null) {
-                    creator = ObjectReaderCreatorLambda.INSTANCE;
+                    creator = ObjectReaderCreator.INSTANCE;
                 }
                 break;
         }

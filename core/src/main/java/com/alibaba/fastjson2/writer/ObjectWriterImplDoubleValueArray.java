@@ -5,12 +5,19 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
+import java.text.DecimalFormat;
 
 final class ObjectWriterImplDoubleValueArray
         extends ObjectWriterBaseModule.PrimitiveImpl {
-    static final ObjectWriterImplDoubleValueArray INSTANCE = new ObjectWriterImplDoubleValueArray();
+    static final ObjectWriterImplDoubleValueArray INSTANCE = new ObjectWriterImplDoubleValueArray(null);
     static final byte[] JSONB_TYPE_NAME_BYTES = JSONB.toBytes("[D");
     static final long JSONB_TYPE_HASH = Fnv.hashCode64("[D");
+
+    final DecimalFormat format;
+
+    public ObjectWriterImplDoubleValueArray(DecimalFormat format) {
+        this.format = format;
+    }
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
@@ -23,6 +30,10 @@ final class ObjectWriterImplDoubleValueArray
 
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        jsonWriter.writeDouble((double[]) object);
+        if (format == null) {
+            jsonWriter.writeDouble((double[]) object);
+        } else {
+            jsonWriter.writeDouble((double[]) object, format);
+        }
     }
 }

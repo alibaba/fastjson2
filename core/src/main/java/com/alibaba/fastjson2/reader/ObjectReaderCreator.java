@@ -3,34 +3,76 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.internal.asm.ASMUtils;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.invoke.*;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.*;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
-import static com.alibaba.fastjson2.util.JDKUtils.TRUSTED_LOOKUP;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectReaderCreator {
-    static final MethodType METHODTYPE_VOID = MethodType.methodType(void.class);
-    static final MethodType METHODTYPE_SUPPLIER = MethodType.methodType(Supplier.class);
-    static final MethodType METHODTYPE_OBJECT = MethodType.methodType(Object.class);
-
+    public static final boolean JIT = !JDKUtils.ANDROID && !JDKUtils.GRAAL;
     public static final ObjectReaderCreator INSTANCE = new ObjectReaderCreator();
+
+    protected AtomicInteger jitErrorCount = new AtomicInteger();
+    protected volatile Throwable jitErrorLast;
+
+    static final MethodType METHODTYPE_VOID = MethodType.methodType(void.class);
+    static final MethodType METHODTYPE_VOID_INT = MethodType.methodType(void.class, int.class);
+    static final MethodType METHODTYPE_VOID_STRING = MethodType.methodType(void.class, String.class);
+    static final MethodType METHODTYPE_SUPPLIER = MethodType.methodType(Supplier.class);
+    static final MethodType METHODTYPE_INT_FUNCTION = MethodType.methodType(IntFunction.class);
+    static final MethodType METHODTYPE_OBJECT = MethodType.methodType(Object.class);
+    static final MethodType METHODTYPE_OBJECT_INT = MethodType.methodType(Object.class, int.class);
+    static final MethodType METHODTYPE_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class);
+
+    protected static final Map<Class, LambdaSetterInfo> methodTypeMapping = new HashMap<>();
+
+    protected static final MethodType METHODTYPE_BI_CONSUMER = MethodType.methodType(BiConsumer.class);
+    protected static final MethodType METHODTYPE_FUNCTION = MethodType.methodType(Function.class);
+    protected static final MethodType METHODTYPE_VOO = MethodType.methodType(void.class, Object.class, Object.class);
+
+    static class LambdaSetterInfo {
+        final Class fieldClass;
+        final MethodType sameMethodMethod;
+        final MethodType methodType;
+        final MethodType invokedType;
+
+        LambdaSetterInfo(Class fieldClass, Class functionClass) {
+            this.fieldClass = fieldClass;
+            this.sameMethodMethod = MethodType.methodType(void.class, Object.class, fieldClass);
+            this.methodType = MethodType.methodType(void.class, fieldClass);
+            this.invokedType = MethodType.methodType(functionClass);
+        }
+    }
+
+    static {
+        methodTypeMapping.put(boolean.class, new LambdaSetterInfo(boolean.class, ObjBoolConsumer.class));
+        methodTypeMapping.put(byte.class, new LambdaSetterInfo(byte.class, ObjByteConsumer.class));
+        methodTypeMapping.put(short.class, new LambdaSetterInfo(short.class, ObjShortConsumer.class));
+        methodTypeMapping.put(int.class, new LambdaSetterInfo(int.class, ObjIntConsumer.class));
+        methodTypeMapping.put(long.class, new LambdaSetterInfo(long.class, ObjLongConsumer.class));
+        methodTypeMapping.put(char.class, new LambdaSetterInfo(char.class, ObjCharConsumer.class));
+        methodTypeMapping.put(float.class, new LambdaSetterInfo(float.class, ObjFloatConsumer.class));
+        methodTypeMapping.put(double.class, new LambdaSetterInfo(double.class, ObjDoubleConsumer.class));
+    }
 
     public <T> ObjectReader<T> createObjectReaderNoneDefaultConstructor(Constructor constructor, String... paramNames) {
         Function<Map<Long, Object>, T> function = createFunction(constructor, paramNames);
@@ -44,29 +86,6 @@ public class ObjectReaderCreator {
                 paramNames
         );
         return createObjectReaderNoneDefaultConstructor(declaringClass, function, fieldReaders);
-    }
-
-    public <T> ObjectReader<T> createObjectReaderNoneDefaultConstructor(
-            Class objectClass,
-            Constructor constructor,
-            String[] paramNames,
-            FieldReader[] paramFieldReaders,
-            FieldReader[] setterFieldReaders
-    ) {
-        Function<Map<Long, Object>, T> function = createFunction(constructor, paramNames);
-        return new ObjectReaderNoneDefaultConstructor(
-                objectClass,
-                null,
-                null,
-                0,
-                function,
-                null,
-                paramNames,
-                paramFieldReaders,
-                setterFieldReaders,
-                null,
-                null
-        );
     }
 
     public <T> ObjectReader<T> createObjectReaderNoneDefaultConstructor(
@@ -184,9 +203,11 @@ public class ObjectReaderCreator {
         return new ConstructorFunction(null, constructor, null, paramNames);
     }
 
-    public <T> Function<Map<Long, Object>, T> createFunction(Constructor constructor,
-                                                             Constructor markerConstructor,
-                                                             String... paramNames) {
+    public <T> Function<Map<Long, Object>, T> createFunction(
+            Constructor constructor,
+            Constructor markerConstructor,
+            String... paramNames
+    ) {
         if (markerConstructor == null) {
             constructor.setAccessible(true);
         } else {
@@ -204,7 +225,7 @@ public class ObjectReaderCreator {
                 null,
                 0,
                 null,
-                createInstanceSupplier(objectClass),
+                createSupplier(objectClass),
                 null,
                 fieldReaders
         );
@@ -223,7 +244,7 @@ public class ObjectReaderCreator {
             Class[] seeAlso,
             FieldReader... fieldReaders
     ) {
-        Supplier<T> instanceSupplier = createInstanceSupplier(objectType);
+        Supplier<T> instanceSupplier = createSupplier(objectType);
         return new ObjectReaderSeeAlso(objectType, instanceSupplier, "@type", seeAlso, null, fieldReaders);
     }
 
@@ -234,7 +255,7 @@ public class ObjectReaderCreator {
             String[] seeAlsoNames,
             FieldReader... fieldReaders
     ) {
-        Supplier<T> creator = createInstanceSupplier(objectClass);
+        Supplier<T> creator = createSupplier(objectClass);
         return new ObjectReaderSeeAlso(objectClass, creator, typeKey, seeAlso, seeAlsoNames, fieldReaders);
     }
 
@@ -378,7 +399,7 @@ public class ObjectReaderCreator {
         fieldReaders.values().toArray(fieldReaderArray);
         Arrays.sort(fieldReaderArray);
 
-        Supplier instanceSupplier = createInstanceSupplier(builderClass);
+        Supplier instanceSupplier = createSupplier(builderClass);
         return createObjectReader(builderClass, 0, instanceSupplier, builderFunction, fieldReaderArray);
     }
 
@@ -531,6 +552,41 @@ public class ObjectReaderCreator {
                 }
             }
 
+            boolean jit = JIT || (fieldInfo.features & FieldInfo.JIT) != 0 || (beanInfo.readerFeatures & FieldInfo.JIT) != 0;
+            Function function = null;
+            if (defaultValue == null && jit) {
+                if (valueClass == int.class) {
+                    IntFunction intFunction = null;
+                    if (beanInfo.creatorConstructor != null) {
+                        intFunction = createIntFunction(beanInfo.creatorConstructor);
+                    } else if (beanInfo.createMethod != null) {
+                        intFunction = createIntFunction(beanInfo.createMethod);
+                    }
+
+                    if (intFunction != null) {
+                        return ObjectReaderImplValueInt.of(objectClass, fieldInfo.features, jsonSchema, intFunction);
+                    }
+                } else if (valueClass == String.class) {
+                    if (beanInfo.creatorConstructor != null) {
+                        function = createStringFunction(beanInfo.creatorConstructor);
+                    } else if (beanInfo.createMethod != null) {
+                        function = createStringFunction(beanInfo.createMethod);
+                    }
+
+                    if (function != null) {
+                        return ObjectReaderImplValueString.of(objectClass, fieldInfo.features, jsonSchema, function);
+                    }
+                }
+            }
+
+            if (jit && !valueClass.isPrimitive()) {
+                if (beanInfo.creatorConstructor != null) {
+                    function = createValueFunction(beanInfo.creatorConstructor, valueClass);
+                } else if (beanInfo.createMethod != null) {
+                    function = createValueFunction(beanInfo.createMethod, valueClass);
+                }
+            }
+
             return new ObjectReaderImplValue(
                     objectClass,
                     valueType,
@@ -541,7 +597,7 @@ public class ObjectReaderCreator {
                     jsonSchema,
                     beanInfo.creatorConstructor,
                     beanInfo.createMethod,
-                    null
+                    function
             );
         }
 
@@ -706,7 +762,7 @@ public class ObjectReaderCreator {
         FieldReader[] fieldReaderArray = createFieldReaders(objectClass, objectType);
         return createObjectReader(
                 objectClass,
-                createInstanceSupplier(objectClass),
+                createSupplier(objectClass),
                 fieldReaderArray);
     }
 
@@ -1020,7 +1076,7 @@ public class ObjectReaderCreator {
             );
         }
 
-        Supplier<T> creator = createInstanceSupplier(objectClass);
+        Supplier<T> creator = createSupplier(objectClass);
         JSONSchema jsonSchema = JSONSchema.of(JSON.parseObject(beanInfo.schema), objectClass);
         return createObjectReader(
                 objectClass,
@@ -1143,6 +1199,7 @@ public class ObjectReaderCreator {
             Type objectType,
             String namingStrategy,
             String[] orders,
+            BeanInfo beanInfo,
             FieldInfo fieldInfo,
             Method method,
             Map<String, FieldReader> fieldReaders,
@@ -1248,21 +1305,48 @@ public class ObjectReaderCreator {
         Class fieldClass = method.getParameterTypes()[0];
 
         ObjectReader initReader = getInitReader(provider, fieldType, fieldClass, fieldInfo);
-        FieldReader fieldReader = createFieldReaderMethod(
-                objectClass,
-                objectType,
-                fieldName,
-                fieldInfo.ordinal,
-                fieldInfo.features,
-                fieldInfo.format,
-                fieldInfo.locale,
-                fieldInfo.defaultValue,
-                fieldInfo.schema,
-                fieldType,
-                fieldClass,
-                method,
-                initReader
-        );
+        FieldReader fieldReader = null;
+        boolean jit = (fieldInfo.features & FieldInfo.JIT) != 0;
+        if (jit) {
+            try {
+                fieldReader = createFieldReaderLambda(
+                        objectClass,
+                        objectType,
+                        fieldName,
+                        fieldInfo.ordinal,
+                        fieldInfo.features,
+                        fieldInfo.format,
+                        fieldInfo.locale,
+                        fieldInfo.defaultValue,
+                        fieldInfo.schema,
+                        fieldType,
+                        fieldClass,
+                        method,
+                        initReader
+                );
+            } catch (Throwable ignored) {
+                jitErrorCount.incrementAndGet();
+                jitErrorLast = ignored;
+            }
+        }
+
+        if (fieldReader == null) {
+            fieldReader = createFieldReaderMethod(
+                    objectClass,
+                    objectType,
+                    fieldName,
+                    fieldInfo.ordinal,
+                    fieldInfo.features,
+                    fieldInfo.format,
+                    fieldInfo.locale,
+                    fieldInfo.defaultValue,
+                    fieldInfo.schema,
+                    fieldType,
+                    fieldClass,
+                    method,
+                    initReader
+            );
+        }
 
         FieldReader origin = fieldReaders.putIfAbsent(fieldName, fieldReader);
         if (origin != null && origin.compareTo(fieldReader) > 0) {
@@ -1355,14 +1439,14 @@ public class ObjectReaderCreator {
                 fieldInfo.init();
                 fieldInfo.features |= beanFeatures;
                 fieldInfo.format = beanFormat;
-                createFieldReader(objectClass, objectType, namingStrategy, orders, fieldInfo, method, fieldReaders, provider);
+                createFieldReader(objectClass, objectType, namingStrategy, orders, finalBeanInfo, fieldInfo, method, fieldReaders, provider);
             });
 
             if (objectClass.isInterface()) {
                 BeanUtils.getters(objectClass, method -> {
                     fieldInfo.init();
                     fieldInfo.features |= beanFeatures;
-                    createFieldReader(objectClass, objectType, namingStrategy, orders, fieldInfo, method, fieldReaders, provider);
+                    createFieldReader(objectClass, objectType, namingStrategy, orders, finalBeanInfo, fieldInfo, method, fieldReaders, provider);
                 });
             }
         }
@@ -1373,7 +1457,7 @@ public class ObjectReaderCreator {
         return fieldReaderArray;
     }
 
-    public <T> Supplier<T> createInstanceSupplier(Class<T> objectClass) {
+    public <T> Supplier<T> createSupplier(Class<T> objectClass) {
         if (objectClass.isInterface()) {
             return null;
         }
@@ -1393,19 +1477,20 @@ public class ObjectReaderCreator {
             throw new JSONException("get constructor error, class " + objectClass.getName(), e);
         }
 
-        return createInstanceSupplier(constructor, true);
+        return createSupplier(constructor, true);
     }
 
-    public <T> Supplier<T> createInstanceSupplier(Constructor constructor, boolean jit) {
+    public <T> Supplier<T> createSupplier(Constructor constructor, boolean jit) {
+        jit &= JIT;
+
         if (jit) {
-            MethodHandles.Lookup trustedLookup = TRUSTED_LOOKUP;
+            Class declaringClass = constructor.getDeclaringClass();
+            MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
             try {
-                Class objectClass = constructor.getDeclaringClass();
-                if (trustedLookup != null && constructor.getParameterCount() == 0) {
-                    MethodHandles.Lookup caller = trustedLookup.in(objectClass);
-                    MethodHandle handle = caller.findConstructor(objectClass, METHODTYPE_VOID);
+                if (constructor.getParameterCount() == 0) {
+                    MethodHandle handle = lookup.findConstructor(declaringClass, METHODTYPE_VOID);
                     CallSite callSite = LambdaMetafactory.metafactory(
-                            caller,
+                            lookup,
                             "get",
                             METHODTYPE_SUPPLIER,
                             METHODTYPE_OBJECT,
@@ -1414,15 +1499,165 @@ public class ObjectReaderCreator {
                     );
                     return (Supplier) callSite.getTarget().invokeExact();
                 }
-            } catch (Throwable ignored) {
-                // ignored
+            } catch (Throwable e) {
+                jitErrorCount.incrementAndGet();
+                jitErrorLast = e;
             }
         }
 
         return new ConstructorSupplier(constructor);
     }
 
+    protected <T> IntFunction<T> createIntFunction(Constructor constructor) {
+        Class declaringClass = constructor.getDeclaringClass();
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+        try {
+            MethodHandle handle = lookup.findConstructor(declaringClass, METHODTYPE_VOID_INT);
+            MethodType instantiatedMethodType = MethodType.methodType(declaringClass, int.class);
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHODTYPE_INT_FUNCTION,
+                    METHODTYPE_OBJECT_INT,
+                    handle,
+                    instantiatedMethodType
+            );
+            return (IntFunction) callSite.getTarget().invokeExact();
+        } catch (Throwable e) {
+            jitErrorCount.incrementAndGet();
+            jitErrorLast = e;
+        }
+
+        return null;
+    }
+
+    protected <T> IntFunction<T> createIntFunction(Method factoryMethod) {
+        Class declaringClass = factoryMethod.getDeclaringClass();
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+        try {
+            MethodType methodType = MethodType.methodType(factoryMethod.getReturnType(), int.class);
+            MethodHandle handle = lookup.findStatic(declaringClass, factoryMethod.getName(), methodType);
+            MethodType instantiatedMethodType = methodType;
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHODTYPE_INT_FUNCTION,
+                    METHODTYPE_OBJECT_INT,
+                    handle,
+                    instantiatedMethodType
+            );
+            return (IntFunction) callSite.getTarget().invokeExact();
+        } catch (Throwable e) {
+            jitErrorCount.incrementAndGet();
+            jitErrorLast = e;
+        }
+
+        return null;
+    }
+
+    protected <T> Function<String, T> createStringFunction(Constructor constructor) {
+        Class declaringClass = constructor.getDeclaringClass();
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+        try {
+            MethodHandle handle = lookup.findConstructor(declaringClass, METHODTYPE_VOID_STRING);
+            MethodType instantiatedMethodType = MethodType.methodType(declaringClass, String.class);
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHODTYPE_FUNCTION,
+                    METHODTYPE_OBJECT_OBJECT,
+                    handle,
+                    instantiatedMethodType
+            );
+            return (Function<String, T>) callSite.getTarget().invokeExact();
+        } catch (Throwable e) {
+            jitErrorCount.incrementAndGet();
+            jitErrorLast = e;
+        }
+
+        return null;
+    }
+
+    protected <T> Function<String, T> createStringFunction(Method factoryMethod) {
+        Class declaringClass = factoryMethod.getDeclaringClass();
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+        try {
+            MethodType methodType = MethodType.methodType(factoryMethod.getReturnType(), String.class);
+            MethodHandle handle = lookup.findStatic(declaringClass, factoryMethod.getName(), methodType);
+            MethodType instantiatedMethodType = methodType;
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHODTYPE_FUNCTION,
+                    METHODTYPE_OBJECT_OBJECT,
+                    handle,
+                    instantiatedMethodType
+            );
+            return (Function<String, T>) callSite.getTarget().invokeExact();
+        } catch (Throwable e) {
+            jitErrorCount.incrementAndGet();
+            jitErrorLast = e;
+        }
+
+        return null;
+    }
+
+    protected <I, T> Function<I, T> createValueFunction(Constructor<T> constructor, Class<I> valueClass) {
+        Class declaringClass = constructor.getDeclaringClass();
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+        try {
+            MethodType methodType = MethodType.methodType(void.class, valueClass);
+            MethodHandle handle = lookup.findConstructor(declaringClass, methodType);
+            MethodType instantiatedMethodType = MethodType.methodType(declaringClass, valueClass);
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHODTYPE_FUNCTION,
+                    METHODTYPE_OBJECT_OBJECT,
+                    handle,
+                    instantiatedMethodType
+            );
+            return (Function<I, T>) callSite.getTarget().invokeExact();
+        } catch (Throwable e) {
+            jitErrorCount.incrementAndGet();
+            jitErrorLast = e;
+        }
+
+        return null;
+    }
+
+    protected <I, T> Function<I, T> createValueFunction(Method factoryMethod, Class valueClass) {
+        Class declaringClass = factoryMethod.getDeclaringClass();
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+        try {
+            MethodType methodType = MethodType.methodType(factoryMethod.getReturnType(), valueClass);
+            MethodHandle handle = lookup.findStatic(declaringClass, factoryMethod.getName(), methodType);
+            MethodType instantiatedMethodType = methodType;
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHODTYPE_FUNCTION,
+                    METHODTYPE_OBJECT_OBJECT,
+                    handle,
+                    instantiatedMethodType
+            );
+            return (Function<I, T>) callSite.getTarget().invokeExact();
+        } catch (Throwable e) {
+            jitErrorCount.incrementAndGet();
+            jitErrorLast = e;
+        }
+
+        return null;
+    }
+
     public <T, R> Function<T, R> createBuildFunction(Method builderMethod) {
+        try {
+            return createBuildFunctionLambda(builderMethod);
+        } catch (Throwable e) {
+            jitErrorCount.incrementAndGet();
+            jitErrorLast = e;
+        }
+
         builderMethod.setAccessible(true);
 
         return (T o) -> {
@@ -1432,6 +1667,34 @@ public class ObjectReaderCreator {
                 throw new JSONException("create instance error", e);
             }
         };
+    }
+
+    <T, R> Function<T, R> createBuildFunctionLambda(Method builderMethod) {
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(builderMethod.getDeclaringClass());
+        MethodType invokedType = METHODTYPE_FUNCTION;
+        try {
+            MethodHandle target = lookup.findVirtual(builderMethod.getDeclaringClass(),
+                    builderMethod.getName(),
+                    MethodType.methodType(builderMethod.getReturnType())
+            );
+            MethodType func = target.type();
+
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    invokedType,
+                    func.erase(),
+                    target,
+                    func
+            );
+
+            Object object = callSite
+                    .getTarget()
+                    .invoke();
+            return (Function<T, R>) object;
+        } catch (Throwable e) {
+            throw new JSONException("create fieldReader error", e);
+        }
     }
 
     public <T> FieldReader createFieldReader(
@@ -1783,7 +2046,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == Date.class) {
-            return new FieldReaderDateMethod(fieldName, fieldClass, ordinal, features, format, locale, jsonSchema, method);
+            return new FieldReaderDate(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, null, method, null);
         }
 
         if (fieldClass == StackTraceElement[].class && method != null && method.getDeclaringClass() == Throwable.class) {
@@ -1970,7 +2233,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == Date.class) {
-            return new FieldReaderDateField(fieldName, fieldClass, ordinal, features, format, locale, (Date) defaultValue, jsonSchema, field);
+            return new FieldReaderDate(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field, null, null);
         }
 
         if (fieldClass == AtomicBoolean.class) {
@@ -2105,34 +2368,30 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClassResolved != null) {
-            if (UNSAFE_SUPPORT) {
-                return new FieldReaderObjectFieldUF(
-                        fieldName,
-                        fieldTypeResolved,
-                        fieldClass,
-                        ordinal,
-                        features,
-                        format,
-                        defaultValue,
-                        jsonSchema,
-                        field);
-            } else {
-                return new FieldReaderObjectField(
-                        fieldName,
-                        fieldTypeResolved,
-                        fieldClass,
-                        ordinal,
-                        features,
-                        format,
-                        defaultValue,
-                        jsonSchema,
-                        field);
-            }
+            return new FieldReaderObjectField(
+                    fieldName,
+                    fieldTypeResolved,
+                    fieldClass,
+                    ordinal,
+                    features,
+                    format,
+                    defaultValue,
+                    jsonSchema,
+                    field);
         }
 
-        if (UNSAFE_SUPPORT) {
-            return new FieldReaderObjectFieldUF(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, field);
+        if (fieldClass == LocalDateTime.class) {
+            return new FieldReaderLocalDateTime(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field, null, null);
         }
+
+        if (fieldClass == ZonedDateTime.class) {
+            return new FieldReaderZonedDateTime(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field, null, null);
+        }
+
+        if (fieldClass == Instant.class) {
+            return new FieldReaderInstant(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field, null, null);
+        }
+
         return new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, field);
     }
 
@@ -2143,7 +2402,7 @@ public class ObjectReaderCreator {
             Method method,
             BiConsumer<T, V> function
     ) {
-        return createFieldReader(null, null, fieldName, fieldType, fieldClass, 0, 0, null, null, null, method, function, null);
+        return createFieldReader(null, null, fieldName, fieldType, fieldClass, 0, 0, null, null, null, null, method, function, null);
     }
 
     public <T, V> FieldReader createFieldReader(
@@ -2155,58 +2414,78 @@ public class ObjectReaderCreator {
             int ordinal,
             long features,
             String format,
+            Locale locale,
             Object defaultValue,
             JSONSchema schema,
             Method method,
             BiConsumer<T, V> function,
             ObjectReader initReader
     ) {
+        if (initReader != null) {
+            FieldReaderObject fieldReaderObjectMethod = new FieldReaderObject(
+                    fieldName,
+                    fieldType,
+                    fieldClass,
+                    ordinal,
+                    features | FieldInfo.READ_USING_MASK,
+                    format,
+                    locale,
+                    defaultValue,
+                    schema,
+                    method,
+                    null,
+                    function
+            );
+            fieldReaderObjectMethod.initReader = initReader;
+            return fieldReaderObjectMethod;
+        }
+
         if (fieldClass == Integer.class) {
-            return new FieldReaderInt32Func<>(fieldName, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
+            return new FieldReaderInt32Func<>(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
         }
 
         if (fieldClass == Long.class) {
-            return new FieldReaderInt64Func<>(fieldName, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
+            return new FieldReaderInt64Func<>(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
         }
 
         if (fieldClass == String.class) {
-            return new FieldReaderStringFunc<>(fieldName, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
+            return new FieldReaderStringFunc<>(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
         }
 
         if (fieldClass == Boolean.class) {
-            return new FieldReaderBoolFunc<>(fieldName, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
+            return new FieldReaderBoolFunc<>(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
         }
 
         if (fieldClass == Short.class) {
-            return new FieldReaderInt16Func(fieldName, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
+            return new FieldReaderInt16Func(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
         }
 
         if (fieldClass == Byte.class) {
-            return new FieldReaderInt8Func(fieldName, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
+            return new FieldReaderInt8Func(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldReaderBigDecimalFunc(fieldName, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
+            return new FieldReaderBigDecimalFunc(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldReaderBigIntegerFunc(fieldName, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function);
+            return new FieldReaderBigIntegerFunc(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
         }
 
         if (fieldClass == Float.class) {
-            return new FieldReaderFloatFunc(fieldName, fieldClass, ordinal, features, format, null, (Float) defaultValue, schema, method, function);
+            return new FieldReaderFloatFunc(fieldName, fieldClass, ordinal, features, format, locale, (Float) defaultValue, schema, method, function);
         }
 
         if (fieldClass == Double.class) {
-            return new FieldReaderDoubleFunc(fieldName, fieldClass, ordinal, features, format, null, (Double) defaultValue, schema, method, function);
+            return new FieldReaderDoubleFunc(fieldName, fieldClass, ordinal, features, format, locale, (Double) defaultValue, schema, method, function);
         }
 
         if (fieldClass == Number.class) {
-            return new FieldReaderNumberFunc(fieldName, fieldClass, ordinal, features, format, null, (Number) defaultValue, schema, method, function);
+            return new FieldReaderNumberFunc(fieldName, fieldClass, ordinal, features, format, locale, (Number) defaultValue, schema, method, function);
         }
 
         if (fieldClass == Date.class) {
-            return new FieldReaderDateFunc(fieldName, fieldClass, ordinal, features, format, null, (Date) defaultValue, schema, method, function);
+            return new FieldReaderDate(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Date) defaultValue, schema, null, method, function);
         }
 
         Type fieldTypeResolved = null;
@@ -2228,19 +2507,19 @@ public class ObjectReaderCreator {
                     itemType = actualTypeArguments[0];
                     itemClass = TypeUtils.getMapping(itemType);
                     if (itemClass == String.class) {
-                        return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, null, defaultValue, schema, method, null, function);
+                        return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, defaultValue, schema, method, null, function);
                     }
                 }
             }
 
-            return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, itemType, itemClass, ordinal, features, format, null, defaultValue, schema, method, null, function);
+            return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, itemType, itemClass, ordinal, features, format, locale, defaultValue, schema, method, null, function);
         }
 
         if (fieldTypeResolved != null) {
-            return new FieldReaderObjectFunc<>(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function, initReader);
+            return new FieldReaderObjectFunc<>(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function, initReader);
         }
 
-        return new FieldReaderObjectFunc<>(fieldName, fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, method, function, initReader);
+        return new FieldReaderObjectFunc<>(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function, initReader);
     }
 
     protected ObjectReader createEnumReader(
@@ -2412,5 +2691,132 @@ public class ObjectReaderCreator {
             }
         }
         return initReader;
+    }
+
+    protected <T> FieldReader createFieldReaderLambda(
+            Class<T> objectClass,
+            Type objectType,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Object defaultValue,
+            String schema,
+            Type fieldType,
+            Class fieldClass,
+            Method method,
+            ObjectReader initReader
+    ) {
+        if (defaultValue != null && defaultValue.getClass() != fieldClass) {
+            Function typeConvert = JSONFactory
+                    .getDefaultObjectReaderProvider()
+                    .getTypeConvert(defaultValue.getClass(), fieldType);
+            if (typeConvert != null) {
+                defaultValue = typeConvert.apply(defaultValue);
+            } else {
+                throw new JSONException("illegal defaultValue : " + defaultValue + ", class " + fieldClass.getName());
+            }
+        }
+
+        JSONSchema jsonSchema = null;
+        if (schema != null && !schema.isEmpty()) {
+            JSONObject object = JSON.parseObject(schema);
+            if (!object.isEmpty()) {
+                jsonSchema = JSONSchema.of(object, fieldClass);
+            }
+        }
+
+        if (initReader != null) {
+            BiConsumer function = (BiConsumer) lambdaSetter(objectClass, fieldClass, method);
+            return createFieldReader(objectClass, objectType, fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, method, function, initReader);
+        }
+
+        if (fieldType == boolean.class) {
+            ObjBoolConsumer function = (ObjBoolConsumer) lambdaSetter(objectClass, fieldClass, method);
+            return new FieldReaderBoolValFunc<>(fieldName, ordinal, jsonSchema, method, function);
+        }
+
+        if (fieldType == byte.class) {
+            ObjByteConsumer function = (ObjByteConsumer) lambdaSetter(objectClass, fieldClass, method);
+            return new FieldReaderInt8ValueFunc<>(fieldName, ordinal, jsonSchema, method, function);
+        }
+
+        if (fieldType == short.class) {
+            ObjShortConsumer function = (ObjShortConsumer) lambdaSetter(objectClass, fieldClass, method);
+            return new FieldReaderInt16ValueFunc<>(fieldName, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, method, function);
+        }
+
+        if (fieldType == int.class) {
+            ObjIntConsumer function = (ObjIntConsumer) lambdaSetter(objectClass, fieldClass, method);
+            return new FieldReaderInt32ValueFunc<>(fieldName, ordinal, (Integer) defaultValue, jsonSchema, method, function);
+        }
+
+        if (fieldType == long.class) {
+            ObjLongConsumer function = (ObjLongConsumer) lambdaSetter(objectClass, fieldClass, method);
+            return new FieldReaderInt64ValueFunc<>(fieldName, ordinal, (Long) defaultValue, jsonSchema, method, function);
+        }
+
+        if (fieldType == char.class) {
+            ObjCharConsumer function = (ObjCharConsumer) lambdaSetter(objectClass, fieldClass, method);
+            return new FieldReaderCharValueFunc<>(fieldName, ordinal, format, (Character) defaultValue, jsonSchema, method, function);
+        }
+
+        if (fieldType == float.class) {
+            ObjFloatConsumer function = (ObjFloatConsumer) lambdaSetter(objectClass, fieldClass, method);
+            return new FieldReaderFloatValueFunc<>(fieldName, ordinal, (Float) defaultValue, jsonSchema, method, function);
+        }
+
+        if (fieldType == double.class) {
+            ObjDoubleConsumer function = (ObjDoubleConsumer) lambdaSetter(objectClass, fieldClass, method);
+            return new FieldReaderDoubleValueFunc<>(fieldName, ordinal, (Double) defaultValue, jsonSchema, method, function);
+        }
+
+        BiConsumer consumer = (BiConsumer) lambdaSetter(objectClass, fieldClass, method);
+        return createFieldReader(objectClass, objectType, fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, method, consumer, initReader);
+    }
+
+    protected Object lambdaSetter(Class objectClass, Class fieldClass, Method method) {
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
+
+        Class<?> returnType = method.getReturnType();
+        LambdaSetterInfo lambdaInfo = methodTypeMapping.get(fieldClass);
+
+        MethodType samMethodType;
+        MethodType invokedType;
+        MethodType methodType = null;
+        if (lambdaInfo != null) {
+            samMethodType = lambdaInfo.sameMethodMethod;
+            invokedType = lambdaInfo.invokedType;
+            if (returnType == void.class) {
+                methodType = lambdaInfo.methodType;
+            }
+        } else {
+            samMethodType = METHODTYPE_VOO;
+            invokedType = METHODTYPE_BI_CONSUMER;
+        }
+
+        if (methodType == null) {
+            methodType = MethodType.methodType(returnType, fieldClass);
+        }
+
+        try {
+            MethodHandle target = lookup.findVirtual(objectClass, method.getName(), methodType);
+            MethodType instantiatedMethodType = MethodType.methodType(void.class, objectClass, fieldClass);
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "accept",
+                    invokedType,
+                    samMethodType,
+                    target,
+                    instantiatedMethodType
+            );
+
+            return callSite
+                    .getTarget()
+                    .invoke();
+        } catch (Throwable e) {
+            throw new JSONException("create fieldReader error", e);
+        }
     }
 }

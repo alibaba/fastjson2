@@ -585,7 +585,13 @@ public final class ObjectWriterImplMap
                 continue;
             }
 
-            String key = entry.getKey().toString();
+            Object enryKey = entry.getKey();
+            String key;
+            if (enryKey == null) {
+                key = null;
+            } else {
+                key = enryKey.toString();
+            }
 
             if (propertyPreFilter != null) {
                 if (!propertyPreFilter.process(jsonWriter, object, key)) {

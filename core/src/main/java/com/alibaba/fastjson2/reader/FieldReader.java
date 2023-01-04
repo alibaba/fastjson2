@@ -4,10 +4,7 @@ import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.schema.JSONSchema;
-import com.alibaba.fastjson2.util.BeanUtils;
-import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.JdbcSupport;
-import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.util.*;
 
 import java.io.Serializable;
 import java.lang.reflect.*;
@@ -24,6 +21,7 @@ public abstract class FieldReader<T>
     public final String format;
     public final Method method;
     public final Field field;
+    protected final long fieldOffset;
     public final Object defaultValue;
     public final Locale locale;
     public final JSONSchema schema;
@@ -42,7 +40,19 @@ public abstract class FieldReader<T>
     volatile ObjectReader itemReader;
 
     public FieldReader(String fieldName, Type fieldType) {
-        this (fieldName, fieldType, TypeUtils.getClass(fieldType), 0, 0L, null, null, null, null, null, null);
+        this(
+                fieldName,
+                fieldType,
+                TypeUtils.getClass(fieldType),
+                0,
+                0L,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
     }
 
     public FieldReader(
@@ -73,6 +83,20 @@ public abstract class FieldReader<T>
         this.schema = schema;
         this.method = method;
         this.field = field;
+
+        long fieldOffset = -1L;
+        if (field != null && JDKUtils.UNSAFE_SUPPORT && (features & FieldInfo.DISABLE_UNSAFE) == 0) {
+            fieldOffset = UnsafeUtils.objectFieldOffset(field);
+        }
+        this.fieldOffset = fieldOffset;
+
+        if (fieldOffset == -1 && field != null && method == null) {
+            try {
+                field.setAccessible(true);
+            } catch (Throwable ignored) {
+                JDKUtils.setReflectErrorLast(ignored);
+            }
+        }
 
         Class declaringClass = null;
         if (method != null) {
@@ -263,6 +287,10 @@ public abstract class FieldReader<T>
 
     public void accept(T object, boolean value) {
         accept(object, Boolean.valueOf(value));
+    }
+
+    public boolean supportAcceptType(Class valueClass) {
+        return fieldClass == valueClass;
     }
 
     public void accept(T object, byte value) {
