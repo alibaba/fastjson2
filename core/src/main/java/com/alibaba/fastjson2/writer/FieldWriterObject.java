@@ -92,7 +92,7 @@ public class FieldWriterObject<T>
                 } else {
                     formattedWriter = ObjectWriterArrayFinal.DOUBLE_ARRAY;
                 }
-            } else if (valueClass == BigDecimal.class) {
+            } else if (valueClass == BigDecimal[].class) {
                 if (decimalFormat != null) {
                     formattedWriter = new ObjectWriterArrayFinal(BigDecimal.class, decimalFormat);
                 } else {
