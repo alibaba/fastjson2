@@ -4,16 +4,32 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.annotation.JSONField;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Locale;
 
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DateUtilsTestFormat {
+    Locale locale;
+    @BeforeEach
+    public void setUp() throws Exception {
+        locale = Locale.getDefault();
+        Locale.setDefault(Locale.ENGLISH);
+    }
+
+    @AfterEach
+    public void tearDown() throws Exception {
+        Locale.setDefault(locale);
+    }
+
     @Test
     public void autoCase() {
         Bean bean = JSONObject.of("date", "23/06/2012 12:13:14").to(Bean.class);
