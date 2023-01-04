@@ -157,7 +157,7 @@ class JSONReaderJSONB
     @Override
     public boolean isNumber() {
         byte type = bytes[offset];
-        return type >= BC_DOUBLE_LONG && type <= BC_INT32;
+        return type >= BC_DOUBLE_NUM_0 && type <= BC_INT32;
     }
 
     @Override
