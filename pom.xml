@@ -209,6 +209,11 @@
                 <version>1.0.73</version>
             </dependency>
             <dependency>
+                <groupId>com.opencsv</groupId>
+                <artifactId>opencsv</artifactId>
+                <version>5.7.1</version>
+            </dependency>
+            <dependency>
                 <groupId>com.oracle.ojdbc</groupId>
                 <artifactId>ojdbc8</artifactId>
                 <version>19.3.0.0</version>
