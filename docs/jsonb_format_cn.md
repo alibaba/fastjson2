@@ -12,7 +12,7 @@ JSONB存储格式设计
 
 # 2. JSON支持格式定义
 
-![jsonb_protocol.png](jsonb_protocol.png)
+![jsonb_protocol.jpg](jsonb_protocol.jpg)
 
 ```
 x90          # char
