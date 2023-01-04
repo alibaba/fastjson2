@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.eishay;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.eishay.vo.Image;
 import com.alibaba.fastjson2.eishay.vo.Media;
 import com.alibaba.fastjson2.eishay.vo.MediaContent;
@@ -229,7 +226,7 @@ public class ParserTest {
         JSONReader jr = JSONReader.of(utf8Bytes);
         MediaContent o = jr.read(MediaContent.class);
 
-        JSONB.SymbolTable symbolTable = JSONB.symbolTable(
+        SymbolTable symbolTable = JSONB.symbolTable(
                 "images",
                 "height",
                 "size",
@@ -269,7 +266,7 @@ public class ParserTest {
 //        js.wr
     }
 
-    final String str = "{\"images\":\n" +
+    static final String str = "{\"images\":\n" +
             "\t[\n" +
             "\t\t{\n" +
             "\t\t\t\"height\":768,\n" +

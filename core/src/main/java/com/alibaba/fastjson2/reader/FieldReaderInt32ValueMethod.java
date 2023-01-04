@@ -9,9 +9,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 final class FieldReaderInt32ValueMethod<T>
-        extends FieldReaderObjectMethod<T> {
+        extends FieldReaderObject<T> {
     FieldReaderInt32ValueMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Integer defaultValue, JSONSchema schema, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, setter);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, setter, null, null);
     }
 
     @Override
@@ -30,18 +30,30 @@ final class FieldReaderInt32ValueMethod<T>
     }
 
     @Override
-    public void accept(T object, Object value) {
-        if (value == null) {
-            value = 0;
-        }
+    public void readFieldValueJSONB(JSONReader jsonReader, T object) {
+        int fieldInt = jsonReader.readInt32Value();
 
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(fieldInt);
         }
 
         try {
-            method.invoke(object,
-                    TypeUtils.toIntValue(value));
+            method.invoke(object, fieldInt);
+        } catch (Exception e) {
+            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
+        }
+    }
+
+    @Override
+    public void accept(T object, Object value) {
+        int intValue = TypeUtils.toIntValue(value);
+
+        if (schema != null) {
+            schema.assertValidate(intValue);
+        }
+
+        try {
+            method.invoke(object, intValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

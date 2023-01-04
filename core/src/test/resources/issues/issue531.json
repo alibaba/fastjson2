@@ -1,0 +1,137 @@
+{
+	"msgType": "test",
+	"fileDesp": "test",
+	"fileFun": "test",
+	"senderCode": "test",
+	"recipientCode": "test",
+	"fileCreateTime": "test",
+	"declrCode": "test",
+	"receiverCode": "test",
+	"sendCode": "test",
+	"vesselVoyageInformation": {
+		"vslNameCn": "test",
+		"vslName": "test",
+		"voyage": "test",
+		"vslCallSign": "test",
+		"vslImoNo": "test",
+		"primaryRegNo": "test",
+		"vslTypeCode": "test",
+		"shipBuildDate": "test",
+		"vslDeadwtTon": "test",
+		"chemicalTankTypeCode": "test",
+		"gasTankTypeCode": "test",
+		"oilTankStrucCode": "test",
+		"deptDate": "test",
+		"arrivalDate": "test",
+		"msaOperPlaceCode": "test",
+		"adMarkCode": "test",
+		"lineType": "test",
+		"carrierName": "test",
+		"carrierCntctInfo": "test"
+	},
+	"messageAndDischargeList": [
+		{
+			"dgrgdDeclMsgNo": "test",
+			"msaDeclAudtNo": "test",
+			"blNo": "test",
+			"spmtMeans": "test",
+			"tradeFlagCode": "test",
+			"cargoWhereaboutCode": "test",
+			"shipperInfoEn": "test",
+			"shipperInfoCn": "test",
+			"cneeInfoEn": "test",
+			"cneeInfoCn": "test",
+			"loadPortCode": "test",
+			"loadPort": "test",
+			"dischargePortCode": "test",
+			"dischargePort": "test",
+			"deliveryPlaceCode": "test",
+			"deliveryPlace": "test",
+			"bookingParty": "test",
+			"dangerousCargo": {
+				"cargoDesp": "危险品货申报数据",
+				"cargoDespEn": "test",
+				"dgrgdUnNo": "test",
+				"domDgrgdGoodsNo": "test",
+				"dgrgdClass": "test",
+				"subDgrgdClass": "test",
+				"ttlGrossWt": "test",
+				"dgrgdFlashPoint": "test",
+				"emgCntctNo": "test"
+			},
+			"cargoAppendixList": [
+				{
+					"attachType": "危险品货申报单证",
+					"appNo": "test",
+					"remark": "test",
+					"certUniqueId": "test"
+				}
+			],
+			"packagesList": [
+				{
+					"pkgSeqNo": "危险品货申报包装表",
+					"pkgMark": "test",
+					"pkgTypeCode": "test",
+					"pkgType": "test",
+					"pkgQty": "test",
+					"cargoNetWt": "test",
+					"dgrsPkgLimepQtyTypeCode": "test",
+					"cargoNetWtInCtnr": "test",
+					"pkgNetWt": "test",
+					"contTemp": "test",
+					"emgTemp": "test",
+					"maritimePollutionFlag": "test",
+					"rejectamentaFlag": "test",
+					"emptyUncleanPkgFlag": "test",
+					"emsNo": "test",
+					"mfagNo": "test",
+					"packagesAppendix": [
+						{
+							"attachType": "test",
+							"attachNo": "test",
+							"attachQty": "test",
+							"remark": "test",
+							"certUniqueId": "test"
+						}
+					]
+				}
+			],
+			"unit": [
+				{
+					"unitTypeCode": "test",
+					"unitIdNo": "test",
+					"unitOpenCode": "test",
+					"ctnrSizeType": "test",
+					"ctnrztnTankFillEntCode": "test",
+					"containerDeclarationOrCertificateList": {
+						"certCtnrztnNo": "test",
+						"ctnrztnInspectorNo": "test",
+						"estPackDate": "test",
+						"estLoadDate": "test",
+						"certVehicleDgrgdGoodsNo": "test"
+					},
+					"vehicleCertificate": {
+						"certVehicleDgrgdGoodsNo": "test"
+					},
+					"tankCertificate": {
+						"certTankVslInspecNo": "test",
+						"firstInspecDate": "test",
+						"annualInspecDate": "test",
+						"perdclInspecDate": "test",
+						"specialInspecDate": "test"
+					}
+				}
+			],
+			"additiveInformation": {
+				"additiveName": "test",
+				"additiveQtyAdded": "test",
+				"additiveDateAdded": "test",
+				"additiveEffPerid": "test",
+				"addtiveTempRange": "test",
+				"remendialActionOnExp": "test",
+				"mnufctrRegName": "test",
+				"produceDate": "test"
+			}
+		}
+	]
+}

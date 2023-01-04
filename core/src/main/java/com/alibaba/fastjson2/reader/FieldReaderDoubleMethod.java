@@ -9,9 +9,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 final class FieldReaderDoubleMethod<T>
-        extends FieldReaderObjectMethod<T> {
+        extends FieldReaderObject<T> {
     FieldReaderDoubleMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Double defaultValue, JSONSchema schema, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, setter);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, setter, null, null);
     }
 
     @Override
@@ -31,13 +31,14 @@ final class FieldReaderDoubleMethod<T>
 
     @Override
     public void accept(T object, Object value) {
+        Double doubleValue = TypeUtils.toDouble(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(doubleValue);
         }
 
         try {
-            method.invoke(object,
-                    TypeUtils.toDouble(value));
+            method.invoke(object, doubleValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

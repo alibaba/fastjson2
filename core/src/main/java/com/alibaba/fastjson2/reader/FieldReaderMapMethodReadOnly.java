@@ -4,18 +4,26 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Map;
 
 class FieldReaderMapMethodReadOnly<T>
-        extends FieldReaderObjectMethod<T>
-        implements FieldReaderReadOnly<T> {
-    volatile ObjectReader itemReader;
-
-    FieldReaderMapMethodReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Method method) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, method);
+        extends FieldReaderObject<T> {
+    FieldReaderMapMethodReadOnly(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            JSONSchema schema,
+            Method method,
+            Field field
+    ) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, method, field, null);
     }
 
     @Override
@@ -78,7 +86,18 @@ class FieldReaderMapMethodReadOnly<T>
         String name = jsonReader.getFieldName();
 
         ObjectReader itemObjectReader = getItemObjectReader(jsonReader);
-        Object value = itemObjectReader.readObject(jsonReader, 0);
+        Object value = itemObjectReader.readObject(jsonReader, getItemType(), fieldName, 0);
+        map.put(name, value);
+    }
+
+    public void acceptExtra(Object object, String name, Object value) {
+        Map map;
+        try {
+            map = (Map) method.invoke(object);
+        } catch (Exception e) {
+            throw new JSONException("set " + fieldName + " error");
+        }
+
         map.put(name, value);
     }
 
@@ -89,17 +108,17 @@ class FieldReaderMapMethodReadOnly<T>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        if (fieldObjectReader == null) {
-            fieldObjectReader = jsonReader
+        if (initReader == null) {
+            initReader = jsonReader
                     .getContext()
                     .getObjectReader(fieldType);
         }
 
         Object value;
         if (jsonReader.isJSONB()) {
-            value = fieldObjectReader.readJSONBObject(jsonReader, features);
+            value = initReader.readJSONBObject(jsonReader, getItemType(), fieldName, features);
         } else {
-            value = fieldObjectReader.readObject(jsonReader, features);
+            value = initReader.readObject(jsonReader, getItemType(), fieldName, features);
         }
 
         accept(object, value);

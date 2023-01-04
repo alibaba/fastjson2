@@ -43,6 +43,10 @@ public class TrinoSupportTest {
                 "[\"abc\",\"abb\"]",
                 JSONPath.extract("['abc','aaa','abb']", "$[?(@ starts with 'ab')]").toString()
         );
+        assertEquals(
+                "[\"abc\"]",
+                JSONPath.extract("['abc','aaa','abb']", "$[?(@ ends with 'bc')]").toString()
+        );
     }
 
     @Test

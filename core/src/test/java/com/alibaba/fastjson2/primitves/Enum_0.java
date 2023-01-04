@@ -444,7 +444,7 @@ public class Enum_0 {
 
     @Test
     public void test_jsonb_symbol_table() {
-        JSONB.SymbolTable symbolTable = JSONB.symbolTable(
+        SymbolTable symbolTable = JSONB.symbolTable(
                 "value"
         );
 
@@ -480,6 +480,33 @@ public class Enum_0 {
     public void test_jsonb_value2() {
         for (Type id : types) {
             byte[] jsonbBytes = JSONB.toBytes(id.name(), StandardCharsets.UTF_16);
+            Type id2 = JSONB.parseObject(jsonbBytes, 0, jsonbBytes.length, Type.class);
+            assertEquals(id, id2);
+        }
+    }
+
+    @Test
+    public void test_jsonb_value_utf8() {
+        for (Type id : types) {
+            byte[] jsonbBytes = JSONB.toBytes(id.name(), StandardCharsets.UTF_8);
+            Type id2 = JSONB.parseObject(jsonbBytes, 0, jsonbBytes.length, Type.class);
+            assertEquals(id, id2);
+        }
+    }
+
+    @Test
+    public void test_jsonb_value_utf16BE() {
+        for (Type id : types) {
+            byte[] jsonbBytes = JSONB.toBytes(id.name(), StandardCharsets.UTF_16BE);
+            Type id2 = JSONB.parseObject(jsonbBytes, 0, jsonbBytes.length, Type.class);
+            assertEquals(id, id2);
+        }
+    }
+
+    @Test
+    public void test_jsonb_value_utf16LE() {
+        for (Type id : types) {
+            byte[] jsonbBytes = JSONB.toBytes(id.name(), StandardCharsets.UTF_16LE);
             Type id2 = JSONB.parseObject(jsonbBytes, 0, jsonbBytes.length, Type.class);
             assertEquals(id, id2);
         }

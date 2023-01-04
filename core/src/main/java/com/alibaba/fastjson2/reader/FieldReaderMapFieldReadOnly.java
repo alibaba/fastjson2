@@ -10,10 +10,7 @@ import java.util.Collections;
 import java.util.Map;
 
 class FieldReaderMapFieldReadOnly<T>
-        extends FieldReaderObjectField<T>
-        implements FieldReaderReadOnly<T> {
-    volatile ObjectReader itemReader;
-
+        extends FieldReaderObjectField<T> {
     FieldReaderMapFieldReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Field field) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, null, schema, field);
     }
@@ -50,7 +47,7 @@ class FieldReaderMapFieldReadOnly<T>
             throw new JSONException("set " + fieldName + " error", e);
         }
 
-        if (map == Collections.EMPTY_MAP) {
+        if (map == Collections.EMPTY_MAP || map == null) {
             return;
         }
 
@@ -74,7 +71,19 @@ class FieldReaderMapFieldReadOnly<T>
         String name = jsonReader.getFieldName();
 
         ObjectReader itemObjectReader = getItemObjectReader(jsonReader);
-        Object value = itemObjectReader.readObject(jsonReader, 0);
+        Object value = itemObjectReader.readObject(jsonReader, null, name, 0);
+        map.put(name, value);
+    }
+
+    @Override
+    public void acceptExtra(Object object, String name, Object value) {
+        Map map;
+        try {
+            map = (Map) field.get(object);
+        } catch (Exception e) {
+            throw new JSONException("set " + fieldName + " error");
+        }
+
         map.put(name, value);
     }
 
@@ -85,17 +94,17 @@ class FieldReaderMapFieldReadOnly<T>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        if (fieldObjectReader == null) {
-            fieldObjectReader = jsonReader
+        if (initReader == null) {
+            initReader = jsonReader
                     .getContext()
                     .getObjectReader(fieldType);
         }
 
         Object value;
         if (jsonReader.isJSONB()) {
-            value = fieldObjectReader.readJSONBObject(jsonReader, features);
+            value = initReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         } else {
-            value = fieldObjectReader.readObject(jsonReader, features);
+            value = initReader.readObject(jsonReader, fieldType, fieldName, features);
         }
 
         accept(object, value);

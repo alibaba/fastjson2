@@ -8,23 +8,14 @@ import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 final class FieldReaderAtomicBooleanFieldReadOnly<T>
-        extends FieldReaderImpl<T>
-        implements FieldReaderReadOnly<T> {
-    final Field field;
-
+        extends FieldReader<T> {
     FieldReaderAtomicBooleanFieldReadOnly(String fieldName, Class fieldClass, int ordinal, String format, AtomicBoolean defaultValue, JSONSchema schema, Field field) {
-        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, null, defaultValue, schema);
-        this.field = field;
+        super(fieldName, fieldClass, fieldClass, ordinal, 0, format, null, defaultValue, schema, null, field);
     }
 
     @Override
     public boolean isReadOnly() {
         return true;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
     }
 
     @Override
@@ -35,6 +26,9 @@ final class FieldReaderAtomicBooleanFieldReadOnly<T>
 
         try {
             AtomicBoolean atomic = (AtomicBoolean) field.get(object);
+            if (value instanceof AtomicBoolean) {
+                value = ((AtomicBoolean) value).get();
+            }
             atomic.set((Boolean) value);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
@@ -50,10 +44,5 @@ final class FieldReaderAtomicBooleanFieldReadOnly<T>
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readBool();
-    }
-
-    @Override
-    public String toString() {
-        return field.getName();
     }
 }

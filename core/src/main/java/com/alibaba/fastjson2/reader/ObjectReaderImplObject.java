@@ -1,9 +1,9 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.util.Fnv;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,11 +13,55 @@ import java.util.function.Supplier;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
 public final class ObjectReaderImplObject
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     public static final ObjectReaderImplObject INSTANCE = new ObjectReaderImplObject();
 
+    public ObjectReaderImplObject() {
+        super(Object.class);
+    }
+
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object createInstance(long features) {
+        return new JSONObject();
+    }
+
+    public Object createInstance(Collection collection) {
+        return collection;
+    }
+
+    @Override
+    public Object createInstance(Map map, long features) {
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        Object typeKey = map.get(getTypeKey());
+
+        if (typeKey instanceof String) {
+            String typeName = (String) typeKey;
+            long typeHash = Fnv.hashCode64(typeName);
+            ObjectReader reader = null;
+            if ((features & JSONReader.Feature.SupportAutoType.mask) != 0) {
+                reader = autoType(provider, typeHash);
+            }
+
+            if (reader == null) {
+                reader = provider.getObjectReader(
+                        typeName, getObjectClass(), features | getFeatures()
+                );
+
+                if (reader == null) {
+                    throw new JSONException("No suitable ObjectReader found for" + typeName);
+                }
+            }
+
+            if (reader != this) {
+                return reader.createInstance(map, features);
+            }
+        }
+
+        return map;
+    }
+
+    @Override
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isJSONB()) {
             return jsonReader.readAny();
         }
@@ -28,55 +72,58 @@ public final class ObjectReaderImplObject
         if (jsonReader.isObject()) {
             jsonReader.nextIfObjectStart();
 
-            long hash = jsonReader.readFieldNameHashCode();
+            long hash = 0;
+            if (jsonReader.isString()) {
+                hash = jsonReader.readFieldNameHashCode();
 
-            if (hash == HASH_TYPE) {
-                boolean supportAutoType = context.isEnabled(JSONReader.Feature.SupportAutoType);
+                if (hash == HASH_TYPE) {
+                    boolean supportAutoType = context.isEnabled(JSONReader.Feature.SupportAutoType);
 
-                ObjectReader autoTypeObjectReader;
+                    ObjectReader autoTypeObjectReader;
 
-                if (supportAutoType) {
-                    long typeHash = jsonReader.readTypeHashCode();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+                    if (supportAutoType) {
+                        long typeHash = jsonReader.readTypeHashCode();
+                        autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
 
-                    if (autoTypeObjectReader != null) {
-                        Class objectClass = autoTypeObjectReader.getObjectClass();
-                        if (objectClass != null) {
-                            ClassLoader objectClassLoader = objectClass.getClassLoader();
-                            ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-                            if (objectClassLoader != contextClassLoader) {
-                                Class contextClass = null;
+                        if (autoTypeObjectReader != null) {
+                            Class objectClass = autoTypeObjectReader.getObjectClass();
+                            if (objectClass != null) {
+                                ClassLoader objectClassLoader = objectClass.getClassLoader();
+                                ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+                                if (objectClassLoader != contextClassLoader) {
+                                    Class contextClass = null;
 
-                                typeName = jsonReader.getString();
-                                try {
-                                    contextClass = contextClassLoader.loadClass(typeName);
-                                } catch (ClassNotFoundException ignored) {
-                                }
+                                    typeName = jsonReader.getString();
+                                    try {
+                                        contextClass = contextClassLoader.loadClass(typeName);
+                                    } catch (ClassNotFoundException ignored) {
+                                    }
 
-                                if (!objectClass.equals(contextClass)) {
-                                    autoTypeObjectReader = context.getObjectReader(contextClass);
+                                    if (!objectClass.equals(contextClass)) {
+                                        autoTypeObjectReader = context.getObjectReader(contextClass);
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    if (autoTypeObjectReader == null) {
-                        typeName = jsonReader.getString();
+                        if (autoTypeObjectReader == null) {
+                            typeName = jsonReader.getString();
+                            autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
+                        }
+                    } else {
+                        typeName = jsonReader.readString();
                         autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
+
+                        if (autoTypeObjectReader == null && jsonReader.getContext().isEnabled(JSONReader.Feature.ErrorOnNotSupportAutoType)) {
+                            throw new JSONException(jsonReader.info("autoType not support : " + typeName));
+                        }
                     }
-                } else {
-                    typeName = jsonReader.readString();
-                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
-                    if (autoTypeObjectReader == null && jsonReader.getContext().isEnabled(JSONReader.Feature.ErrorOnNotSupportAutoType)) {
-                        throw new JSONException(jsonReader.info("autoType not support : " + typeName));
+                    if (autoTypeObjectReader != null) {
+                        jsonReader.setTypeRedirect(true);
+
+                        return autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, features);
                     }
-                }
-
-                if (autoTypeObjectReader != null) {
-                    jsonReader.setTypeRedirect(true);
-
-                    return autoTypeObjectReader.readObject(jsonReader, features);
                 }
             }
 
@@ -93,7 +140,15 @@ public final class ObjectReaderImplObject
             }
 
             if (typeName != null) {
-                object.put("@type", typeName);
+                switch (typeName) {
+                    case "java.util.ImmutableCollections$Map1":
+                    case "java.util.ImmutableCollections$MapN":
+                        break;
+                    default:
+                        object.put("@type", typeName);
+                        break;
+                }
+                hash = 0;
             }
 
             for (int i = 0; ; ++i) {
@@ -101,9 +156,12 @@ public final class ObjectReaderImplObject
                     break;
                 }
 
-                String name;
-                if (i == 0 && typeName == null) {
+                Object name;
+                if (i == 0 && typeName == null && hash != 0) {
                     name = jsonReader.getFieldName();
+                } else if (jsonReader.isNumber()) {
+                    name = jsonReader.readNumber();
+                    jsonReader.nextIfMatch(':');
                 } else {
                     name = jsonReader.readFieldName();
                 }
@@ -211,6 +269,15 @@ public final class ObjectReaderImplObject
             case 'n':
                 value = jsonReader.readNullOrNewDate();
                 break;
+            case 'S':
+                if (jsonReader.nextIfSet()) {
+                    HashSet<Object> set = new HashSet<>();
+                    jsonReader.read(set);
+                    value = set;
+                } else {
+                    throw new JSONException(jsonReader.info());
+                }
+                break;
             default:
                 throw new JSONException(jsonReader.info());
         }
@@ -219,7 +286,7 @@ public final class ObjectReaderImplObject
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         byte type = jsonReader.getType();
         if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_UTF16BE) {
             return jsonReader.readString();
@@ -227,7 +294,7 @@ public final class ObjectReaderImplObject
 
         if (type == BC_TYPED_ANY) {
             ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, features);
-            return autoTypeObjectReader.readJSONBObject(jsonReader, features);
+            return autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         if (type == BC_NULL) {

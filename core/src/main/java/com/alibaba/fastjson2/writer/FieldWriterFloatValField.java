@@ -2,21 +2,14 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
 
 final class FieldWriterFloatValField<T>
-        extends FieldWriterImpl<T> {
-    final Field field;
-
+        extends FieldWriter<T> {
     FieldWriterFloatValField(String name, int ordinal, String format, String label, Field field) {
-        super(name, ordinal, 0, format, label, float.class, float.class);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, 0, format, label, float.class, float.class, field, null);
     }
 
     @Override
@@ -25,10 +18,20 @@ final class FieldWriterFloatValField<T>
     }
 
     public float getFieldValueFloat(T object) {
+        if (object == null) {
+            throw new JSONException("field.get error, " + fieldName);
+        }
+
         try {
-            return field.getFloat(object);
+            float value;
+            if (fieldOffset != -1) {
+                value = UnsafeUtils.getFloat(object, fieldOffset);
+            } else {
+                value = field.getFloat(object);
+            }
+            return value;
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 
@@ -42,6 +45,10 @@ final class FieldWriterFloatValField<T>
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         float value = getFieldValueFloat(object);
-        jsonWriter.writeFloat(value);
+        if (decimalFormat != null) {
+            jsonWriter.writeFloat(value, decimalFormat);
+        } else {
+            jsonWriter.writeFloat(value);
+        }
     }
 }

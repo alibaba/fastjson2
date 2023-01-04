@@ -10,9 +10,9 @@ import java.lang.reflect.Type;
 import java.util.Locale;
 
 final class FieldReaderInt16ValueMethod<T>
-        extends FieldReaderObjectMethod<T> {
+        extends FieldReaderObject<T> {
     FieldReaderInt16ValueMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Short defaultValue, JSONSchema schema, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter, null, null);
     }
 
     @Override
@@ -31,27 +31,30 @@ final class FieldReaderInt16ValueMethod<T>
     }
 
     @Override
-    public void accept(T object, Object value) {
-        if (value == null) {
-            value = 0;
-        }
+    public void readFieldValueJSONB(JSONReader jsonReader, T object) {
+        int fieldInt = jsonReader.readInt32Value();
 
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(fieldInt);
         }
 
         try {
-            method.invoke(object,
-                    TypeUtils.toShortValue(value));
+            method.invoke(object, (short) fieldInt);
         } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
+            throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }
     }
 
     @Override
-    public void accept(T object, long value) {
+    public void accept(T object, Object value) {
+        short shortValue = TypeUtils.toShortValue(value);
+
+        if (schema != null) {
+            schema.assertValidate(shortValue);
+        }
+
         try {
-            method.invoke(object, (short) value);
+            method.invoke(object, shortValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

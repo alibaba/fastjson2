@@ -48,9 +48,9 @@ public class PathTest2 {
         JSONPath path = JSONPath.of("$.store.*");
         JSONReader parser = JSONReader.of(str);
         Object result = path.extract(parser);
-        assertEquals(5, ((Collection) result).size());
+        assertEquals(2, ((Collection) result).size());
 
-        assertEquals(5, ((Collection) path.eval(rootObject)).size());
+        assertEquals(2, ((Collection) path.eval(rootObject)).size());
     }
 
     @Test

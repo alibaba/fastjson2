@@ -27,4 +27,63 @@ public class JSONToken {
     public static final int SEMI = 24;
     public static final int DOT = 25;
     public static final int HEX = 26;
+
+    public static String name(int value) {
+        switch (value) {
+            case ERROR:
+                return "error";
+            case LITERAL_INT:
+                return "int";
+            case LITERAL_FLOAT:
+                return "float";
+            case LITERAL_STRING:
+                return "string";
+            case LITERAL_ISO8601_DATE:
+                return "iso8601";
+            case TRUE:
+                return "true";
+            case FALSE:
+                return "false";
+            case NULL:
+                return "null";
+            case NEW:
+                return "new";
+            case LPAREN:
+                return "(";
+            case RPAREN:
+                return ")";
+            case LBRACE:
+                return "{";
+            case RBRACE:
+                return "}";
+            case LBRACKET:
+                return "[";
+            case RBRACKET:
+                return "]";
+            case COMMA:
+                return ",";
+            case COLON:
+                return ":";
+            case SEMI:
+                return ";";
+            case DOT:
+                return ".";
+            case IDENTIFIER:
+                return "ident";
+            case FIELD_NAME:
+                return "fieldName";
+            case EOF:
+                return "EOF";
+            case SET:
+                return "Set";
+            case TREE_SET:
+                return "TreeSet";
+            case UNDEFINED:
+                return "undefined";
+            case HEX:
+                return "hex";
+            default:
+                return "Unknown";
+        }
+    }
 }

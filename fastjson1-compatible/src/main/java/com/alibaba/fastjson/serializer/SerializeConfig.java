@@ -2,35 +2,55 @@ package com.alibaba.fastjson.serializer;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.PropertyNamingStrategy;
-import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 
 public class SerializeConfig {
-    public static SerializeConfig global = new SerializeConfig();
+    public static final SerializeConfig global = new SerializeConfig(null);
+    public static final SerializeConfig globalInstance = global;
+    public static final ObjectWriterProvider DEFAULT_PROVIDER = new ObjectWriterProvider(com.alibaba.fastjson2.PropertyNamingStrategy.CamelCase1x);
 
     public final boolean fieldBased;
     public PropertyNamingStrategy propertyNamingStrategy;
+
+    private ObjectWriterProvider provider;
 
     public static SerializeConfig getGlobalInstance() {
         return global;
     }
 
     public SerializeConfig() {
+        this(new ObjectWriterProvider());
+    }
+
+    public SerializeConfig(ObjectWriterProvider provider) {
         this.fieldBased = false;
+        this.provider = provider;
     }
 
     public SerializeConfig(boolean fieldBased) {
         this.fieldBased = fieldBased;
     }
 
+    public ObjectWriterProvider getProvider() {
+        ObjectWriterProvider provider = this.provider;
+        if (provider == null) {
+            provider = DEFAULT_PROVIDER;
+        }
+        return provider;
+    }
+
     public boolean put(Type type, ObjectSerializer value) {
-        return JSONFactory
-                .getDefaultObjectWriterProvider()
-                .register(type, new ObjectSerializerAdapter(value)) == null;
+        ObjectWriterProvider provider = this.provider;
+        if (provider == null) {
+            provider = DEFAULT_PROVIDER;
+        }
+        return provider.register(type, new ObjectSerializerAdapter(value), fieldBased) == null;
     }
 
     public void setAsmEnable(boolean value) {
@@ -54,6 +74,45 @@ public class SerializeConfig {
             } catch (IOException e) {
                 throw new JSONException("serializer write error", e);
             }
+        }
+    }
+
+    public void addFilter(Class<?> clazz, SerializeFilter filter) {
+        ObjectWriter objectWriter = getProvider().getObjectWriter(clazz);
+        objectWriter.setFilter(filter);
+    }
+
+    @Deprecated
+    public boolean put(Object type, Object value) {
+        return put((Type) type, (ObjectSerializer) value);
+    }
+
+    public ObjectSerializer getObjectWriter(Class<?> clazz) {
+        ObjectWriter objectWriter = getProvider().getObjectWriter(clazz);
+        if (objectWriter instanceof ObjectSerializer) {
+            return (ObjectSerializer) objectWriter;
+        }
+
+        return new JavaBeanSerializer(objectWriter);
+    }
+
+    public final ObjectSerializer get(Type type) {
+        ObjectWriter objectWriter = getProvider().getObjectWriter(type, TypeUtils.getClass(type));
+        if (objectWriter instanceof ObjectSerializer) {
+            return (ObjectSerializer) objectWriter;
+        }
+
+        return new JavaBeanSerializer(objectWriter);
+    }
+
+    public final ObjectSerializer createJavaBeanSerializer(Class<?> clazz) {
+        ObjectWriter objectWriter = getProvider().getCreator().createObjectWriter(clazz);
+        return new JavaBeanSerializer(objectWriter);
+    }
+
+    public void configEnumAsJavaBean(Class<? extends Enum>... enumClasses) {
+        for (Class<? extends Enum> enumClass : enumClasses) {
+            put(enumClass, createJavaBeanSerializer(enumClass));
         }
     }
 }

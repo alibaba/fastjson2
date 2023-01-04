@@ -4,9 +4,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
 
 import java.lang.reflect.Type;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
@@ -31,9 +29,31 @@ final class ObjectWriterImplLocalTime
             return;
         }
 
-        JSONWriter.Context ctx = jsonWriter.getContext();
+        JSONWriter.Context ctx = jsonWriter.context;
 
         LocalTime time = (LocalTime) object;
+
+        if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
+            LocalDateTime dateTime = LocalDateTime.of(
+                    LocalDate.of(1970, 1, 1),
+                    time
+            );
+            Instant instant = dateTime.atZone(ctx.getZoneId()).toInstant();
+            long millis = instant.toEpochMilli();
+            jsonWriter.writeInt64(millis);
+            return;
+        }
+
+        if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
+            LocalDateTime dateTime = LocalDateTime.of(
+                    LocalDate.of(1970, 1, 1),
+                    time
+            );
+            Instant instant = dateTime.atZone(ctx.getZoneId()).toInstant();
+            int seconds = (int) (instant.toEpochMilli() / 1000);
+            jsonWriter.writeInt32(seconds);
+            return;
+        }
 
         DateTimeFormatter formatter = this.getDateFormatter();
         if (formatter == null) {

@@ -1,19 +1,20 @@
 package com.alibaba.fastjson.serializer;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.LabelFilter;
 import com.alibaba.fastjson2.filter.PropertyPreFilter;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SerializeWriter
         implements Cloneable {
+    SerializeConfig config;
     final JSONWriter raw;
-
-    public JSONWriter getRaw() {
-        return raw;
-    }
 
     final ListWrapper<PropertyFilter> propertyFilters;
     final ListWrapper<ValueFilter> valueFilters;
@@ -23,6 +24,31 @@ public class SerializeWriter
 
     public SerializeWriter() {
         this(JSONWriter.of());
+    }
+
+    public SerializeWriter(SerializerFeature... features) {
+        this(
+                JSONWriter.of(
+                        JSON.createWriteContext(
+                                SerializeConfig.global,
+                                JSON.DEFAULT_PARSER_FEATURE,
+                                features
+                        )
+                )
+        );
+    }
+
+    public SerializeWriter(SerializeConfig config, SerializerFeature... features) {
+        this(
+                JSONWriter.of(
+                        JSON.createWriteContext(
+                                config,
+                                JSON.DEFAULT_PARSER_FEATURE,
+                                features
+                        )
+                )
+        );
+        this.config = config;
     }
 
     public SerializeWriter(JSONWriter raw) {
@@ -38,16 +64,16 @@ public class SerializeWriter
         this.raw.writeNull();
     }
 
-    public void writeString(String text) {
-        this.raw.writeString(text);
-    }
-
     public void writeNull(SerializerFeature feature) {
         this.raw.writeNull();
     }
 
-    public void write(String text) {
+    public void writeString(String text) {
         this.raw.writeString(text);
+    }
+
+    public void write(String text) {
+        this.raw.writeRaw(text);
     }
 
     public List<PropertyFilter> getPropertyFilters() {
@@ -112,6 +138,18 @@ public class SerializeWriter
         raw.writeRaw((char) c);
     }
 
+    public void write(char c) {
+        raw.writeRaw(c);
+    }
+
+    public void writeInt(int i) {
+        raw.writeInt32(i);
+    }
+
+    public void writeLong(long i) {
+        raw.writeInt64(i);
+    }
+
     public void writeFieldName(String key) {
         raw.writeName(key);
     }
@@ -121,7 +159,92 @@ public class SerializeWriter
         return raw.toString();
     }
 
+    public byte[] toBytes(Charset charset) {
+        return raw.getBytes(charset);
+    }
+
+    public byte[] toBytes(String charsetName) {
+        return raw.getBytes(Charset.forName(charsetName));
+    }
+
     public void close() {
         raw.close();
+    }
+
+    public void writeTo(Writer out) throws IOException {
+        raw.flushTo(out);
+    }
+
+    public boolean isEnabled(SerializerFeature feature) {
+        JSONWriter.Feature rawFeature = null;
+        switch (feature) {
+            case BeanToArray:
+                rawFeature = JSONWriter.Feature.BeanToArray;
+                break;
+            case WriteMapNullValue:
+                rawFeature = JSONWriter.Feature.WriteMapNullValue;
+                break;
+            case WriteEnumUsingToString:
+                rawFeature = JSONWriter.Feature.WriteEnumUsingToString;
+                break;
+            case WriteEnumUsingName:
+                rawFeature = JSONWriter.Feature.WriteEnumsUsingName;
+                break;
+            case WriteNullListAsEmpty:
+                rawFeature = JSONWriter.Feature.WriteNullListAsEmpty;
+                break;
+            case WriteNullStringAsEmpty:
+                rawFeature = JSONWriter.Feature.WriteNullStringAsEmpty;
+                break;
+            case WriteNullNumberAsZero:
+                rawFeature = JSONWriter.Feature.WriteNullNumberAsZero;
+                break;
+            case WriteNullBooleanAsFalse:
+                rawFeature = JSONWriter.Feature.WriteNullBooleanAsFalse;
+                break;
+            case WriteClassName:
+                rawFeature = JSONWriter.Feature.WriteClassName;
+                break;
+            case NotWriteRootClassName:
+                rawFeature = JSONWriter.Feature.NotWriteRootClassName;
+                break;
+            case WriteNonStringKeyAsString:
+                rawFeature = JSONWriter.Feature.WriteNonStringKeyAsString;
+                break;
+            case NotWriteDefaultValue:
+                rawFeature = JSONWriter.Feature.NotWriteDefaultValue;
+                break;
+            case BrowserCompatible:
+                rawFeature = JSONWriter.Feature.BrowserCompatible;
+                break;
+            case BrowserSecure:
+                rawFeature = JSONWriter.Feature.BrowserSecure;
+                break;
+            case IgnoreNonFieldGetter:
+                rawFeature = JSONWriter.Feature.IgnoreNonFieldGetter;
+                break;
+            case WriteNonStringValueAsString:
+                rawFeature = JSONWriter.Feature.WriteNonStringValueAsString;
+                break;
+            case IgnoreErrorGetter:
+                rawFeature = JSONWriter.Feature.IgnoreErrorGetter;
+                break;
+            case WriteBigDecimalAsPlain:
+                rawFeature = JSONWriter.Feature.WriteBigDecimalAsPlain;
+                break;
+            default:
+                break;
+        }
+
+        if (rawFeature != null) {
+            return raw.isEnabled(rawFeature);
+        }
+
+        return false;
+    }
+
+    public SerializeWriter append(char c) {
+        raw.writeRaw(c);
+        return this;
     }
 }

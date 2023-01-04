@@ -1,8 +1,9 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.annotation.JSONField;
-import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.annotation.*;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.Filter;
@@ -24,7 +25,11 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
 
-class ObjectWriterBaseModule
+import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
+import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
+import static com.alibaba.fastjson2.util.BeanUtils.*;
+
+public class ObjectWriterBaseModule
         implements ObjectWriterModule {
     static ObjectWriterAdapter STACK_TRACE_ELEMENT_WRITER;
 
@@ -37,44 +42,120 @@ class ObjectWriterBaseModule
     }
 
     @Override
+    public ObjectWriterProvider getProvider() {
+        return provider;
+    }
+
+    @Override
     public ObjectWriterAnnotationProcessor getAnnotationProcessor() {
         return annotationProcessor;
     }
 
-    class WriterAnnotationProcessor
+    public class WriterAnnotationProcessor
             implements ObjectWriterAnnotationProcessor {
         @Override
         public void getBeanInfo(BeanInfo beanInfo, Class objectClass) {
             Class superclass = objectClass.getSuperclass();
-            if (superclass != Object.class && superclass != null) {
+            if (superclass != Object.class && superclass != null && superclass != Enum.class) {
                 getBeanInfo(beanInfo, superclass);
+
+                if (beanInfo.seeAlso != null && beanInfo.seeAlsoNames != null) {
+                    for (int i = 0; i < beanInfo.seeAlso.length; i++) {
+                        Class seeAlso = beanInfo.seeAlso[i];
+                        if (seeAlso == objectClass && i < beanInfo.seeAlsoNames.length) {
+                            String seeAlsoName = beanInfo.seeAlsoNames[i];
+                            if (seeAlsoName != null && seeAlsoName.length() != 0) {
+                                beanInfo.typeName = seeAlsoName;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
 
             Annotation jsonType1x = null;
             JSONType jsonType = null;
-            Annotation[] annotations = objectClass.getAnnotations();
+            Annotation[] annotations = getAnnotations(objectClass);
             for (Annotation annotation : annotations) {
                 Class annotationType = annotation.annotationType();
-                if (annotationType == JSONType.class) {
-                    jsonType = (JSONType) annotation;
+                jsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
+                if (jsonType == annotation) {
                     continue;
                 }
 
+                if (annotationType == JSONCompiler.class) {
+                    JSONCompiler compiler = (JSONCompiler) annotation;
+                    if (compiler.value() == JSONCompiler.CompilerOption.LAMBDA) {
+                        beanInfo.writerFeatures |= FieldInfo.JIT;
+                    }
+                }
+
+                if (annotationType == JSONAutowired.class) {
+                    beanInfo.writerFeatures |= JSON_AUTO_WIRED_ANNOTATED;
+
+                    JSONAutowired autowired = (JSONAutowired) annotation;
+                    String fieldName = autowired.writer();
+                    if (!fieldName.isEmpty()) {
+                        beanInfo.objectWriterFieldName = fieldName;
+                    }
+                    continue;
+                }
+
+                boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
                 switch (annotationType.getName()) {
                     case "com.alibaba.fastjson.annotation.JSONType":
                         jsonType1x = annotation;
                         break;
                     case "com.fasterxml.jackson.annotation.JsonIgnoreProperties":
-                        processJacksonJsonIgnoreProperties(beanInfo, annotation);
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonIgnoreProperties":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonIgnoreProperties(beanInfo, annotation);
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonPropertyOrder":
-                        processJacksonJsonPropertyOrder(beanInfo, annotation);
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonPropertyOrder":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonPropertyOrder(beanInfo, annotation);
+                        }
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonFormat":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonFormat":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonFormat(beanInfo, annotation);
+                        }
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonInclude":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonInclude":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonInclude(beanInfo, annotation);
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonTypeInfo":
-                        processJacksonJsonTypeInfo(beanInfo, annotation);
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonTypeInfo":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonTypeInfo(beanInfo, annotation);
+                        }
+                        break;
+                    case "com.fasterxml.jackson.databind.annotation.JsonSerialize":
+                    case "com.alibaba.fastjson2.adapter.jackson.databind.annotation.JsonSerialize":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonSerialize(beanInfo, annotation);
+                            if (beanInfo.serializer != null && Enum.class.isAssignableFrom(objectClass)) {
+                                beanInfo.writeEnumAsJavaBean = true;
+                            }
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonTypeName":
-                        processJacksonJsonTypeName(beanInfo, annotation);
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonTypeName":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonTypeName(beanInfo, annotation);
+                        }
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonSubTypes":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonSubTypes":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonSubTypes(beanInfo, annotation);
+                        }
                         break;
                     case "kotlin.Metadata":
                         beanInfo.kotlin = true;
@@ -88,30 +169,29 @@ class ObjectWriterBaseModule
 
             if (jsonType == null) {
                 Class mixInSource = provider.mixInCache.get(objectClass);
-                if (mixInSource == null) {
-                    String typeName = objectClass.getName();
-                    switch (typeName) {
-                        case "org.apache.commons.lang3.tuple.ImmutablePair":
-                            provider.mixIn(objectClass, mixInSource = ApacheLang3Support.PairMixIn.class);
-                            break;
-                        case "org.apache.commons.lang3.tuple.MutablePair":
-                            provider.mixIn(objectClass, mixInSource = ApacheLang3Support.MutablePairMixIn.class);
-                            break;
-                        default:
-                            break;
-                    }
-                }
 
                 if (mixInSource != null) {
                     beanInfo.mixIn = true;
 
-                    Annotation[] mixInAnnotations = mixInSource.getAnnotations();
+                    Annotation[] mixInAnnotations = getAnnotations(mixInSource);
                     for (Annotation annotation : mixInAnnotations) {
                         Class<? extends Annotation> annotationType = annotation.annotationType();
-                        if (annotationType == JSONType.class) {
-                            jsonType = (JSONType) annotation;
+                        jsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
+                        if (jsonType == annotation) {
                             continue;
                         }
+
+                        if (annotationType == JSONAutowired.class) {
+                            beanInfo.writerFeatures |= JSON_AUTO_WIRED_ANNOTATED;
+
+                            JSONAutowired autowired = (JSONAutowired) annotation;
+                            String fieldName = autowired.writer();
+                            if (!fieldName.isEmpty()) {
+                                beanInfo.objectWriterFieldName = fieldName;
+                            }
+                            continue;
+                        }
+
                         String annotationTypeName = annotationType.getName();
                         switch (annotationTypeName) {
                             case "com.alibaba.fastjson.annotation.JSONType":
@@ -184,15 +264,25 @@ class ObjectWriterBaseModule
                         beanInfo.locale = new Locale(parts[0], parts[1]);
                     }
                 }
+
+                if (!jsonType.alphabetic()) {
+                    beanInfo.alphabetic = false;
+                }
+
+                if (jsonType.writeEnumAsJavaBean()) {
+                    beanInfo.writeEnumAsJavaBean = true;
+                }
             } else if (jsonType1x != null) {
                 final Annotation annotation = jsonType1x;
-                BeanUtils.annotationMethods(jsonType1x.annotationType(), method -> processJSONType1x(beanInfo, annotation, method));
+                BeanUtils.annotationMethods(jsonType1x.annotationType(), method -> BeanUtils.processJSONType1x(beanInfo, annotation, method));
             }
 
-            if (beanInfo.seeAlso != null && beanInfo.seeAlso.length != 0) {
+            if (beanInfo.seeAlso != null && beanInfo.seeAlso.length != 0
+                    && (beanInfo.typeName == null || beanInfo.typeName.length() == 0)) {
                 for (Class seeAlsoClass : beanInfo.seeAlso) {
                     if (seeAlsoClass == objectClass) {
                         beanInfo.typeName = objectClass.getSimpleName();
+                        break;
                     }
                 }
             }
@@ -201,16 +291,6 @@ class ObjectWriterBaseModule
         @Override
         public void getFieldInfo(BeanInfo beanInfo, FieldInfo fieldInfo, Class objectType, Field field) {
             Class mixInSource = provider.mixInCache.get(objectType);
-            if (objectType != null) {
-                String typeName = objectType.getName();
-                switch (typeName) {
-                    case "org.apache.commons.lang3.tuple.ImmutablePair":
-                        provider.mixIn(objectType, mixInSource = ApacheLang3Support.PairMixIn.class);
-                        break;
-                    default:
-                        break;
-                }
-            }
 
             if (mixInSource != null && mixInSource != objectType) {
                 Field mixInField = null;
@@ -236,31 +316,69 @@ class ObjectWriterBaseModule
             }
 
             JSONField jsonField = null;
-            Annotation[] annotations = field.getAnnotations();
+            Annotation[] annotations = getAnnotations(field);
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                if (annotationType == JSONField.class) {
-                    jsonField = (JSONField) annotation;
+                if (jsonField == null) {
+                    jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                    if (jsonField == annotation) {
+                        continue;
+                    }
                 }
+
                 String annotationTypeName = annotationType.getName();
+                boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
-                        fieldInfo.ignore = true;
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonIgnore":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonIgnore(fieldInfo, annotation);
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAnyGetter":
-                        fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonAnyGetter":
+                        if (useJacksonAnnotation) {
+                            fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonValue":
-                        fieldInfo.features |= FieldInfo.VALUE_MASK;
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonValue":
+                        if (useJacksonAnnotation) {
+                            fieldInfo.features |= FieldInfo.VALUE_MASK;
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonRawValue":
-                        fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonRawValue":
+                        if (useJacksonAnnotation) {
+                            fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
+                        }
                         break;
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
                         break;
                     case "com.fasterxml.jackson.annotation.JsonProperty":
-                        processJacksonJsonProperty(fieldInfo, annotation);
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonProperty(fieldInfo, annotation);
+                        }
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonFormat":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonFormat":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonFormat(fieldInfo, annotation);
+                        }
+                        break;
+                    case "com.fasterxml.jackson.annotation.JsonInclude":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonInclude":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonInclude(beanInfo, annotation);
+                        }
+                        break;
+                    case "com.alibaba.fastjson2.adapter.jackson.databind.annotation.JsonSerialize":
+                    case "com.fasterxml.jackson.databind.annotation.JsonSerialize":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonSerialize(fieldInfo, annotation);
+                        }
                         break;
                     default:
                         break;
@@ -288,7 +406,7 @@ class ObjectWriterBaseModule
             }
         }
 
-        private void processJacksonJsonTypeName(BeanInfo beanInfo, Annotation annotation) {
+        private void processJacksonJsonSubTypes(BeanInfo beanInfo, Annotation annotation) {
             Class<? extends Annotation> annotationClass = annotation.getClass();
             BeanUtils.annotationMethods(annotationClass, m -> {
                 String name = m.getName();
@@ -296,9 +414,14 @@ class ObjectWriterBaseModule
                     Object result = m.invoke(annotation);
                     switch (name) {
                         case "value": {
-                            String value = (String) result;
-                            if (!value.isEmpty()) {
-                                beanInfo.typeName = value;
+                            Annotation[] value = (Annotation[]) result;
+                            if (value.length != 0) {
+                                beanInfo.seeAlso = new Class[value.length];
+                                beanInfo.seeAlsoNames = new String[value.length];
+                                for (int i = 0; i < value.length; i++) {
+                                    Annotation item = value[i];
+                                    processJacksonJsonSubTypesType(beanInfo, i, item);
+                                }
                             }
                             break;
                         }
@@ -309,6 +432,49 @@ class ObjectWriterBaseModule
                     // ignored
                 }
             });
+        }
+
+        private void processJacksonJsonSerialize(BeanInfo beanInfo, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "using": {
+                            Class using = processUsing((Class) result);
+                            if (using != null) {
+                                beanInfo.serializer = using;
+                            }
+                            break;
+                        }
+                        case "keyUsing":
+                            Class keyUsing = processUsing((Class) result);
+                            if (keyUsing != null) {
+                                beanInfo.serializer = keyUsing;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            });
+        }
+
+        private Class processUsing(Class result) {
+            Class writeUsing = result;
+            String usingName = writeUsing.getName();
+            String noneClassName0 = "com.alibaba.fastjson2.adapter.jackson.databind.JsonSerializer$None";
+            String noneClassName1 = "com.fasterxml.jackson.databind.JsonSerializer$None";
+            if (!noneClassName0.equals(usingName)
+                    && !noneClassName1.equals(usingName)
+                    && ObjectWriter.class.isAssignableFrom(writeUsing)
+            ) {
+                return writeUsing;
+            }
+            return null;
         }
 
         private void processJacksonJsonTypeInfo(BeanInfo beanInfo, Annotation annotation) {
@@ -358,6 +524,40 @@ class ObjectWriterBaseModule
             });
         }
 
+        private void processJacksonJsonSerialize(FieldInfo fieldInfo, Annotation annotation) {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            BeanUtils.annotationMethods(annotationClass, m -> {
+                String name = m.getName();
+                try {
+                    Object result = m.invoke(annotation);
+                    switch (name) {
+                        case "using":
+                            Class using = processUsing((Class) result);
+                            if (using != null) {
+                                fieldInfo.writeUsing = using;
+                            }
+                            break;
+                        case "keyUsing":
+                            Class keyUsing = processUsing((Class) result);
+                            if (keyUsing != null) {
+                                fieldInfo.keyUsing = keyUsing;
+                            }
+                            break;
+                        case "valueUsing":
+                            Class valueUsing = processUsing((Class) result);
+                            if (valueUsing != null) {
+                                fieldInfo.valueUsing = valueUsing;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            });
+        }
+
         private void processJacksonJsonProperty(FieldInfo fieldInfo, Annotation annotation) {
             Class<? extends Annotation> annotationClass = annotation.getClass();
             BeanUtils.annotationMethods(annotationClass, m -> {
@@ -374,10 +574,11 @@ class ObjectWriterBaseModule
                         case "access": {
                             String access = ((Enum) result).name();
                             switch (access) {
-                                case "READ_ONLY":
+                                case "WRITE_ONLY":
                                     fieldInfo.ignore = true;
                                     break;
                                 default:
+                                    fieldInfo.ignore = false;
                                     break;
                             }
                             break;
@@ -569,24 +770,39 @@ class ObjectWriterBaseModule
                 fieldInfo.ignore = true;
             }
 
-            Annotation[] annotations = method.getAnnotations();
+            Annotation[] annotations = getAnnotations(method);
             processAnnotations(fieldInfo, annotations);
 
             if (!objectClass.getName().startsWith("java.lang") && !BeanUtils.isRecord(objectClass)) {
-                String fieldName = BeanUtils.getterName(methodName, null);
+                String fieldName = BeanUtils.getterName(method, null);
 
+                char firstChar = fieldName.charAt(0);
+                final String fieldName0;
+                if (firstChar >= 'A' && firstChar <= 'Z') {
+                    char[] chars = fieldName.toCharArray();
+                    chars[0] = (char) (firstChar + 32);
+                    fieldName0 = new String(chars);
+                } else if (firstChar >= 'a' && firstChar <= 'z' && fieldName.length() > 2 && fieldName.charAt(1) == '_') {
+                    char[] chars = fieldName.toCharArray();
+                    chars[0] = (char) (firstChar - 32);
+                    fieldName0 = new String(chars);
+                } else {
+                    fieldName0 = null;
+                }
                 BeanUtils.declaredFields(objectClass, field -> {
-                    if (field.getName().equals(fieldName)) {
-                        int modifiers = field.getModifiers();
-                        if ((!Modifier.isPublic(modifiers)) && !Modifier.isStatic(modifiers)) {
-                            getFieldInfo(beanInfo, fieldInfo, objectClass, field);
-                        }
+                    String name = field.getName();
+                    if (name.equals(fieldName)
+                            || (name.equals(methodName) && field.getType() == boolean.class)
+                            || (fieldName0 != null && name.equals(fieldName0))
+                    ) {
+                        fieldInfo.features |= FieldInfo.FIELD_MASK;
+                        getFieldInfo(beanInfo, fieldInfo, objectClass, field);
                     }
                 });
             }
 
-            if (beanInfo.kotlin && beanInfo.createParameterNames != null) {
-                String fieldName = BeanUtils.getterName(methodName, null);
+            if (beanInfo.kotlin && beanInfo.creatorConstructor != null && beanInfo.createParameterNames != null) {
+                String fieldName = BeanUtils.getterName(method, null);
                 for (int i = 0; i < beanInfo.createParameterNames.length; i++) {
                     if (fieldName.equals(beanInfo.createParameterNames[i])) {
                         Annotation[] parameterAnnotations = beanInfo.creatorConstructor.getParameterAnnotations()[i];
@@ -600,34 +816,71 @@ class ObjectWriterBaseModule
         private void processAnnotations(FieldInfo fieldInfo, Annotation[] annotations) {
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                if (annotationType == JSONField.class) {
-                    loadFieldInfo(fieldInfo, (JSONField) annotation);
+                JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                if (Objects.nonNull(jsonField)) {
+                    loadFieldInfo(fieldInfo, jsonField);
                     continue;
                 }
 
+                if (annotationType == JSONCompiler.class) {
+                    JSONCompiler compiler = (JSONCompiler) annotation;
+                    if (compiler.value() == JSONCompiler.CompilerOption.LAMBDA) {
+                        fieldInfo.features |= FieldInfo.JIT;
+                    }
+                }
+
+                boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
                 String annotationTypeName = annotationType.getName();
                 switch (annotationTypeName) {
                     case "com.fasterxml.jackson.annotation.JsonIgnore":
-                        fieldInfo.ignore = true;
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonIgnore":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonIgnore(fieldInfo, annotation);
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonAnyGetter":
-                        fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonAnyGetter":
+                        if (useJacksonAnnotation) {
+                            fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+                        }
                         break;
                     case "com.alibaba.fastjson.annotation.JSONField":
                         processJSONField1x(fieldInfo, annotation);
                         break;
                     case "java.beans.Transient":
+                        fieldInfo.ignore = true;
                         fieldInfo.isTransient = true;
                         break;
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
                     case "com.fasterxml.jackson.annotation.JsonProperty": {
-                        processJacksonJsonProperty(fieldInfo, annotation);
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonProperty(fieldInfo, annotation);
+                        }
                         break;
                     }
+                    case "com.fasterxml.jackson.annotation.JsonFormat":
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonFormat":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonFormat(fieldInfo, annotation);
+                        }
+                        break;
                     case "com.fasterxml.jackson.annotation.JsonValue":
-                        fieldInfo.features |= FieldInfo.VALUE_MASK;
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonValue":
+                        if (useJacksonAnnotation) {
+                            fieldInfo.features |= FieldInfo.VALUE_MASK;
+                        }
                         break;
                     case "com.fasterxml.jackson.annotation.JsonRawValue":
-                        fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
+                    case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonRawValue":
+                        if (useJacksonAnnotation) {
+                            fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
+                        }
+                        break;
+                    case "com.alibaba.fastjson2.adapter.jackson.databind.annotation.JsonSerialize":
+                    case "com.fasterxml.jackson.databind.annotation.JsonSerialize":
+                        if (useJacksonAnnotation) {
+                            processJacksonJsonSerialize(fieldInfo, annotation);
+                        }
                         break;
                     default:
                         break;
@@ -688,7 +941,7 @@ class ObjectWriterBaseModule
         /**
          * load {@link JSONField} format params into FieldInfo
          *
-         * @param fieldInfo       Java Field Info
+         * @param fieldInfo Java Field Info
          * @param jsonFieldFormat {@link JSONField} format params
          */
         private void loadJsonFieldFormat(FieldInfo fieldInfo, String jsonFieldFormat) {
@@ -706,116 +959,6 @@ class ObjectWriterBaseModule
         }
     }
 
-    private void processJSONType1x(BeanInfo beanInfo, Annotation jsonType1x, Method method) {
-        try {
-            Object result = method.invoke(jsonType1x);
-            switch (method.getName()) {
-                case "seeAlso": {
-                    Class<?>[] classes = (Class[]) result;
-                    if (classes.length != 0) {
-                        beanInfo.seeAlso = classes;
-                    }
-                    break;
-                }
-                case "typeName": {
-                    String typeName = (String) result;
-                    if (!typeName.isEmpty()) {
-                        beanInfo.typeName = typeName;
-                    }
-                    break;
-                }
-                case "typeKey": {
-                    String typeKey = (String) result;
-                    if (!typeKey.isEmpty()) {
-                        beanInfo.typeKey = typeKey;
-                    }
-                    break;
-                }
-                case "serializeFeatures":
-                case "serialzeFeatures": {
-                    Enum[] serializeFeatures = (Enum[]) result;
-                    for (Enum feature : serializeFeatures) {
-                        switch (feature.name()) {
-                            case "WriteMapNullValue":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNulls.mask;
-                                break;
-                            case "WriteNullListAsEmpty":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullListAsEmpty.mask;
-                                break;
-                            case "WriteNullStringAsEmpty":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullStringAsEmpty.mask;
-                                break;
-                            case "WriteNullNumberAsZero":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullNumberAsZero.mask;
-                                break;
-                            case "WriteNullBooleanAsFalse":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNullBooleanAsFalse.mask;
-                                break;
-                            case "BrowserCompatible":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.BrowserCompatible.mask;
-                                break;
-                            case "WriteClassName":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteClassName.mask;
-                                break;
-                            case "WriteNonStringValueAsString":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
-                                break;
-                            case "WriteEnumUsingToString":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteEnumUsingToString.mask;
-                                break;
-                            case "NotWriteRootClassName":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteRootClassName.mask;
-                                break;
-                            case "IgnoreErrorGetter":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.IgnoreErrorGetter.mask;
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    break;
-                }
-                case "serializeEnumAsJavaBean": {
-                    boolean serializeEnumAsJavaBean = (Boolean) result;
-                    if (serializeEnumAsJavaBean) {
-                        beanInfo.writeEnumAsJavaBean = true;
-                    }
-                    break;
-                }
-                case "naming": {
-                    Enum naming = (Enum) result;
-                    beanInfo.namingStrategy = naming.name();
-                    break;
-                }
-                case "ignores": {
-                    String[] fields = (String[]) result;
-                    if (fields.length != 0) {
-                        beanInfo.ignores = fields;
-                    }
-                    break;
-                }
-                case "includes": {
-                    String[] fields = (String[]) result;
-                    if (fields.length != 0) {
-                        beanInfo.includes = fields;
-                    }
-                    break;
-                }
-                case "orders": {
-                    String[] fields = (String[]) result;
-                    if (fields.length != 0) {
-                        beanInfo.orders = fields;
-                    }
-                    break;
-                }
-                default:
-                    break;
-            }
-        } catch (Throwable ignored) {
-            ignored.printStackTrace();
-        }
-    }
-
     ObjectWriter getExternalObjectWriter(String className, Class objectClass) {
         switch (className) {
             case "java.sql.Time":
@@ -830,9 +973,10 @@ class ObjectWriterBaseModule
                 return JodaSupport.createLocalDateWriter(objectClass, null);
             case "org.joda.time.LocalDateTime":
                 return JodaSupport.createLocalDateTimeWriter(objectClass, null);
-//            case "com.alibaba.fastjson.JSONObject":
-//                return Fastjson1xSupport.createObjectReader();
             default:
+                if (JdbcSupport.isClob(objectClass)) {
+                    return JdbcSupport.createClobWriter(objectClass);
+                }
                 return null;
         }
     }
@@ -863,6 +1007,8 @@ class ObjectWriterBaseModule
                 return null;
             case "org.javamoney.moneta.internal.JDKCurrencyAdapter":
                 return ObjectWriterImplToString.INSTANCE;
+            case "com.fasterxml.jackson.databind.node.ObjectNode":
+                return ObjectWriterImplToString.DIRECT;
             case "org.javamoney.moneta.Money":
                 return MoneySupport.createMonetaryAmountWriter();
             case "org.javamoney.moneta.spi.DefaultNumberValue":
@@ -872,7 +1018,12 @@ class ObjectWriterBaseModule
             case "java.net.Inet6Address":
             case "java.net.InetSocketAddress":
             case "java.text.SimpleDateFormat":
+            case "java.util.regex.Pattern":
                 return ObjectWriterMisc.INSTANCE;
+            case "org.apache.commons.lang3.tuple.Pair":
+            case "org.apache.commons.lang3.tuple.MutablePair":
+            case "org.apache.commons.lang3.tuple.ImmutablePair":
+                return new ApacheLang3Support.PairWriter(objectClass);
             default:
                 break;
         }
@@ -890,6 +1041,16 @@ class ObjectWriterBaseModule
 
                 objectType = rawType;
             }
+
+            if (Map.class.isAssignableFrom(objectClass)) {
+                return ObjectWriterImplMap.of(objectType, objectClass);
+            }
+
+            if (objectClass == Optional.class) {
+                if (actualTypeArguments.length == 1) {
+                    return new ObjectWriterImplOptional(actualTypeArguments[0], null, null);
+                }
+            }
         }
 
         if (objectType == LinkedList.class) {
@@ -906,20 +1067,21 @@ class ObjectWriterBaseModule
             return ObjectWriterImplCollection.INSTANCE;
         }
 
-        if (Iterable.class.isAssignableFrom(objectClass)) {
-            return ObjectWriterImplIterable.INSTANCE;
-        }
-
         if (Map.class.isAssignableFrom(objectClass)) {
             return ObjectWriterImplMap.of(objectClass);
         }
 
         if (Map.Entry.class.isAssignableFrom(objectClass)) {
             String objectClassName = objectClass.getName();
-            if (!"org.apache.commons.lang3.tuple.ImmutablePair".equals(objectClassName) && !"org.apache.commons.lang3.tuple.MutablePair".equals(objectClassName)
+            if (!"org.apache.commons.lang3.tuple.ImmutablePair".equals(objectClassName)
+                    && !"org.apache.commons.lang3.tuple.MutablePair".equals(objectClassName)
             ) {
                 return ObjectWriterImplMapEntry.INSTANCE;
             }
+        }
+
+        if (java.nio.file.Path.class.isAssignableFrom(objectClass)) {
+            return ObjectWriterImplToString.INSTANCE;
         }
 
         if (objectType == Integer.class) {
@@ -1009,29 +1171,19 @@ class ObjectWriterBaseModule
         if (objectType instanceof Class) {
             Class clazz = (Class) objectType;
 
-            if (clazz.isEnum()) {
-                Member valueField = BeanUtils.getEnumValueField(clazz);
-                if (valueField == null) {
-                    Class mixInSource = provider.mixInCache.get(objectClass);
-                    Member mixedValueField = BeanUtils.getEnumValueField(mixInSource);
-                    if (mixedValueField instanceof Field) {
-                        try {
-                            valueField = clazz.getField(mixedValueField.getName());
-                        } catch (NoSuchFieldException ignored) {
-                        }
-                    } else if (mixedValueField instanceof Method) {
-                        try {
-                            valueField = clazz.getMethod(mixedValueField.getName());
-                        } catch (NoSuchMethodException ignored) {
-                        }
-                    }
-                }
-
-                return new ObjectWriterImplEnum(null, clazz, valueField, 0);
+            if (TimeUnit.class.isAssignableFrom(clazz)) {
+                return new ObjectWriterImplEnum(null, TimeUnit.class, null, null, 0);
             }
 
-            if (TimeUnit.class.isAssignableFrom(clazz)) {
-                return new ObjectWriterImplEnum(null, TimeUnit.class, null, 0);
+            if (Enum.class.isAssignableFrom(clazz)) {
+                ObjectWriter enumWriter = createEnumWriter(clazz);
+                if (enumWriter != null) {
+                    return enumWriter;
+                }
+            }
+
+            if (JSONPath.class.isAssignableFrom(clazz)) {
+                return ObjectWriterImplToString.INSTANCE;
             }
 
             if (clazz == boolean[].class) {
@@ -1040,6 +1192,10 @@ class ObjectWriterBaseModule
 
             if (clazz == char[].class) {
                 return ObjectWriterImplCharValueArray.INSTANCE;
+            }
+
+            if (clazz == StringBuffer.class || clazz == StringBuilder.class) {
+                return ObjectWriterImplToString.INSTANCE;
             }
 
             if (clazz == byte[].class) {
@@ -1090,7 +1246,12 @@ class ObjectWriterBaseModule
                 if (clazz == Object[].class) {
                     return ObjectWriterArray.INSTANCE;
                 } else {
-                    return new ObjectWriterArray(clazz.getComponentType());
+                    Class componentType = clazz.getComponentType();
+                    if (Modifier.isFinal(componentType.getModifiers())) {
+                        return new ObjectWriterArrayFinal(componentType, null);
+                    } else {
+                        return new ObjectWriterArray(componentType);
+                    }
                 }
             }
 
@@ -1126,7 +1287,7 @@ class ObjectWriterBaseModule
             BeanInfo beanInfo = new BeanInfo();
             Class mixIn = provider.getMixIn(clazz);
             if (mixIn != null) {
-                getAnnotationProcessor().getBeanInfo(beanInfo, mixIn);
+                annotationProcessor.getBeanInfo(beanInfo, mixIn);
             }
 
             if (Date.class.isAssignableFrom(clazz)) {
@@ -1219,6 +1380,27 @@ class ObjectWriterBaseModule
                 return ObjectWriterImplClass.INSTANCE;
             }
 
+            if (Method.class == clazz) {
+                return new ObjectWriterAdapter<>(
+                        Method.class,
+                        Arrays.asList(
+                                ObjectWriters.fieldWriter("declaringClass", Class.class, Method::getDeclaringClass),
+                                ObjectWriters.fieldWriter("name", String.class, Method::getName),
+                                ObjectWriters.fieldWriter("parameterTypes", Class[].class, Method::getParameterTypes)
+                        )
+                );
+            }
+
+            if (Field.class == clazz) {
+                return new ObjectWriterAdapter<>(
+                        Method.class,
+                        Arrays.asList(
+                                ObjectWriters.fieldWriter("declaringClass", Class.class, Field::getDeclaringClass),
+                                ObjectWriters.fieldWriter("name", String.class, Field::getName)
+                        )
+                );
+            }
+
             if (ParameterizedType.class.isAssignableFrom(clazz)) {
                 return ObjectWriters.objectWriter(
                         ParameterizedType.class,
@@ -1232,15 +1414,58 @@ class ObjectWriterBaseModule
         return null;
     }
 
+    private ObjectWriter createEnumWriter(Class enumClass) {
+        if (!enumClass.isEnum()) {
+            Class superclass = enumClass.getSuperclass();
+            if (superclass.isEnum()) {
+                enumClass = superclass;
+            }
+        }
+
+        Member valueField = BeanUtils.getEnumValueField(enumClass, provider);
+        if (valueField == null) {
+            Class mixInSource = provider.mixInCache.get(enumClass);
+            Member mixedValueField = BeanUtils.getEnumValueField(mixInSource, provider);
+            if (mixedValueField instanceof Field) {
+                try {
+                    valueField = enumClass.getField(mixedValueField.getName());
+                } catch (NoSuchFieldException ignored) {
+                }
+            } else if (mixedValueField instanceof Method) {
+                try {
+                    valueField = enumClass.getMethod(mixedValueField.getName());
+                } catch (NoSuchMethodException ignored) {
+                }
+            }
+        }
+
+        BeanInfo beanInfo = new BeanInfo();
+        annotationProcessor.getBeanInfo(beanInfo, enumClass);
+        if (beanInfo.writeEnumAsJavaBean) {
+            return null;
+        }
+
+        String[] annotationNames = BeanUtils.getEnumAnnotationNames(enumClass);
+        return new ObjectWriterImplEnum(null, enumClass, valueField, annotationNames, 0);
+    }
+
     abstract static class PrimitiveImpl<T>
             implements ObjectWriter<T> {
         @Override
-        public void writeArrayMappingJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        public void writeArrayMappingJSONB(JSONWriter jsonWriter,
+                                           Object object,
+                                           Object fieldName,
+                                           Type fieldType,
+                                           long features) {
             writeJSONB(jsonWriter, object, null, null, 0);
         }
 
         @Override
-        public void writeArrayMapping(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        public void writeArrayMapping(JSONWriter jsonWriter,
+                                      Object object,
+                                      Object fieldName,
+                                      Type fieldType,
+                                      long features) {
             write(jsonWriter, object, null, null, 0);
         }
     }

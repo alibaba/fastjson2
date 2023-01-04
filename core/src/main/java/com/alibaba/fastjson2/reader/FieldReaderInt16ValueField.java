@@ -29,9 +29,25 @@ final class FieldReaderInt16ValueField<T>
     }
 
     @Override
+    public void accept(T object, float value) {
+        accept(object, Short.valueOf((short) value));
+    }
+
+    @Override
+    public void accept(T object, double value) {
+        accept(object, Short.valueOf((short) value));
+    }
+
+    @Override
     public void accept(T object, Object value) {
+        short shortValue = TypeUtils.toShortValue(value);
+
+        if (schema != null) {
+            schema.assertValidate(shortValue);
+        }
+
         try {
-            field.setShort(object, TypeUtils.toShortValue(value));
+            field.setShort(object, shortValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }
@@ -39,6 +55,10 @@ final class FieldReaderInt16ValueField<T>
 
     @Override
     public void accept(T object, int value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.setShort(object, (short) value);
         } catch (Exception e) {
@@ -48,6 +68,10 @@ final class FieldReaderInt16ValueField<T>
 
     @Override
     public void accept(T object, long value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             field.setShort(object, (short) value);
         } catch (Exception e) {

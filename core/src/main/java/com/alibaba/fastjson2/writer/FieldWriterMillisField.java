@@ -2,27 +2,20 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
 
 final class FieldWriterMillisField<T>
         extends FieldWriterDate<T> {
-    final Field field;
-
     FieldWriterMillisField(String fieldName,
             int ordinal,
             long features,
             String dateTimeFormat,
             String label,
-            Field method
+            Field field
     ) {
-        super(fieldName, ordinal, features, dateTimeFormat, label, long.class, long.class);
-        this.field = method;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(fieldName, ordinal, features, dateTimeFormat, label, long.class, long.class, field, null);
     }
 
     @Override
@@ -31,10 +24,20 @@ final class FieldWriterMillisField<T>
     }
 
     public long getFieldLong(T object) {
+        if (object == null) {
+            throw new JSONException("field.get error, " + fieldName);
+        }
+
         try {
-            return field.getLong(object);
+            long value;
+            if (fieldOffset != -1) {
+                value = UnsafeUtils.getLong(object, fieldOffset);
+            } else {
+                value = field.getLong(object);
+            }
+            return value;
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 

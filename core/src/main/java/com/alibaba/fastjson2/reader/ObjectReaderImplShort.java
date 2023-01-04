@@ -1,32 +1,22 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 
-import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
+import java.lang.reflect.Type;
 
 public final class ObjectReaderImplShort
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplShort INSTANCE = new ObjectReaderImplShort();
 
     public static final long HASH_TYPE = Fnv.hashCode64("S");
 
-    @Override
-    public Class getObjectClass() {
-        return Short.class;
+    public ObjectReaderImplShort() {
+        super(Short.class);
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
-        if (jsonReader.nextIfMatch(BC_TYPED_ANY)) {
-            long typeHash = jsonReader.readTypeHashCode();
-            if (typeHash != HASH_TYPE) {
-                String typeName = jsonReader.getString();
-                throw new JSONException(jsonReader.info(typeName));
-            }
-        }
-
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         Integer i = jsonReader.readInt32();
         if (i == null) {
             return null;
@@ -35,7 +25,7 @@ public final class ObjectReaderImplShort
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         Integer i = jsonReader.readInt32();
         if (i == null) {
             return null;

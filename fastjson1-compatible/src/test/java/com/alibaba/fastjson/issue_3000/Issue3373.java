@@ -20,7 +20,7 @@ public class Issue3373 {
         items.add(new Item("item2", category));
 
         assertEquals(
-                "[{\"afterFilterCategory\":{\"name\":\"afterFilterCategory\"},\"afterFilterTwo\":\"two\",\"category\":{\"name\":\"category\"},\"name\":\"item1\"},{\"afterFilterCategory\":{\"name\":\"afterFilterCategory\"},\"afterFilterTwo\":\"two\",\"category\":{\"$ref\":\"[0].category\"},\"name\":\"item2\"}]",
+                "[{\"afterFilterCategory\":{\"name\":\"afterFilterCategory\"},\"afterFilterTwo\":\"two\",\"category\":{\"name\":\"category\"},\"name\":\"item1\"},{\"afterFilterCategory\":{\"name\":\"afterFilterCategory\"},\"afterFilterTwo\":\"two\",\"category\":{\"$ref\":\"$[0].category\"},\"name\":\"item2\"}]",
                 JSON.toJSONString(items, refAfterFilterTest)
         );
     }

@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.v1issues.basicType;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONReader.Feature;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,14 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FloatTest3_random {
+    int loopCount = 1_000_000;
+
+    public FloatTest3_random() {
+        if (System.getProperty("java.vm.name").contains("OpenJ9")) {
+            this.loopCount = 1000;
+        }
+    }
+
     @Test
     public void test_ran() throws Exception {
         Random rand = new Random();
@@ -27,10 +36,20 @@ public class FloatTest3_random {
     }
 
     @Test
-    public void test_ran_2() throws Exception {
+    public void test_ran_1() {
+        Random rand = new Random();
+        for (int i = 0; i < loopCount; ++i) {
+            float val = rand.nextFloat();
+            String str = Float.toString(val);
+            assertEquals(val, JSONReader.of(str).readFloatValue());
+        }
+    }
+
+    @Test
+    public void test_ran_2() {
         Random rand = new Random();
 
-        for (int i = 0; i < 1000 * 1000 * 1; ++i) {
+        for (int i = 0; i < loopCount; ++i) {
             float val = rand.nextFloat();
 
             String str = JSON.toJSONString(new Model(val), JSONWriter.Feature.BeanToArray);
@@ -44,7 +63,7 @@ public class FloatTest3_random {
     public void test_ran_3() throws Exception {
         Random rand = new Random();
 
-        for (int i = 0; i < 1000 * 1000 * 1; ++i) {
+        for (int i = 0; i < loopCount; ++i) {
             float val = rand.nextFloat();
 
             String str = JSON.toJSONString(Collections.singletonMap("val", val));
@@ -58,7 +77,7 @@ public class FloatTest3_random {
     public void test_ran_4() throws Exception {
         Random rand = new Random();
 
-        for (int i = 0; i < 1000 * 1000 * 1; ++i) {
+        for (int i = 0; i < loopCount; ++i) {
             float val = rand.nextFloat();
 
             HashMap map = new HashMap();

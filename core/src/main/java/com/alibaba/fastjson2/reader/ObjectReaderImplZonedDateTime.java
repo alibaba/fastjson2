@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
 
+import java.lang.reflect.Type;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -24,12 +25,17 @@ class ObjectReaderImplZonedDateTime
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Class getObjectClass() {
+        return ZonedDateTime.class;
+    }
+
+    @Override
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         return jsonReader.readZonedDateTime();
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         JSONReader.Context context = jsonReader.getContext();
 
         if (jsonReader.isInt()) {

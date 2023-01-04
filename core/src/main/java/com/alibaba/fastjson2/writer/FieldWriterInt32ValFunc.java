@@ -7,18 +7,11 @@ import java.util.function.ToIntFunction;
 
 final class FieldWriterInt32ValFunc
         extends FieldWriterInt32 {
-    final Method method;
     final ToIntFunction function;
 
     protected FieldWriterInt32ValFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToIntFunction function) {
-        super(fieldName, ordinal, features, format, label, int.class, int.class);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, int.class, int.class, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override

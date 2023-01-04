@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.codec;
 
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.filter.Filter;
 
 import java.lang.reflect.Constructor;
@@ -38,4 +40,18 @@ public class BeanInfo {
     public String schema;
     public String format;
     public Locale locale;
+    public boolean alphabetic = true;
+    public String objectWriterFieldName;
+    public String objectReaderFieldName;
+
+    public void required(String fieldName) {
+        if (schema == null) {
+            schema = JSONObject.of("required", JSONArray.of(fieldName)).toString();
+        } else {
+            JSONObject object = JSONObject.parseObject(schema);
+            JSONArray array = object.getJSONArray("required");
+            array.add(fieldName);
+            schema = object.toString();
+        }
+    }
 }

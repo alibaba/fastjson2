@@ -6,19 +6,12 @@ import com.alibaba.fastjson2.function.ToFloatFunction;
 import java.lang.reflect.Method;
 
 final class FieldWriterFloatValueFunc
-        extends FieldWriterImpl {
-    final Method method;
+        extends FieldWriter {
     final ToFloatFunction function;
 
     protected FieldWriterFloatValueFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToFloatFunction function) {
-        super(fieldName, ordinal, features, format, label, float.class, float.class);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, float.class, float.class, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override
@@ -29,7 +22,11 @@ final class FieldWriterFloatValueFunc
     @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
         float fieldValue = function.applyAsFloat(object);
-        jsonWriter.writeFloat(fieldValue);
+        if (decimalFormat != null) {
+            jsonWriter.writeDouble(fieldValue, decimalFormat);
+        } else {
+            jsonWriter.writeDouble(fieldValue);
+        }
     }
 
     @Override
@@ -45,7 +42,11 @@ final class FieldWriterFloatValueFunc
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeFloat(value);
+        if (decimalFormat != null) {
+            jsonWriter.writeDouble(value, decimalFormat);
+        } else {
+            jsonWriter.writeDouble(value);
+        }
         return true;
     }
 }

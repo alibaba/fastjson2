@@ -947,8 +947,8 @@ public class JSONObjectTest {
     public void test_getDate() {
         assertNull(JSONObject.of("id", null).getDate("id"));
         assertNull(JSONObject.of("id", "").getDate("id"));
-        assertNull(JSONObject.of("id", 0).getDate("id"));
-        assertNull(JSONObject.of("id", 0L).getDate("id"));
+        assertEquals(0, JSONObject.of("id", 0).getDate("id").getTime());
+        assertEquals(0L, JSONObject.of("id", 0L).getDate("id").getTime());
 
         long millis = System.currentTimeMillis();
         Date date = new Date(millis);
@@ -1085,6 +1085,23 @@ public class JSONObjectTest {
         JSONObject object = new JSONObject().fluentPut("values", new HashMap<>());
         HashMap map = object.getJSONObject("values");
         assertEquals(0, map.size());
+    }
+
+    @Test
+    public void test_getJSONObject3() {
+        JSONObject object = new JSONObject();
+        JSONObject j1 = new JSONObject();
+        j1.put("a", "b");
+        HashMap<String, Object> j2 = new HashMap<>();
+        j2.put("k", "v");
+
+        object.put("k0", null);
+        object.put("k1", j1);
+        object.put("k2", j2);
+
+        assertNull(object.getJSONObject("k0"));
+        assertSame(j1, object.getJSONObject("k1"));
+        assertNotSame(j2, object.getJSONObject("k2"));
     }
 
     @Test
@@ -1250,6 +1267,41 @@ public class JSONObjectTest {
         assertEquals(object.hashCode(), proxy.hashCode());
     }
 
+    @Test
+    public void test_invoke3() {
+        JSONObject object = new JSONObject();
+        Meta proxy = (Meta) Proxy.newProxyInstance(
+                Meta.class.getClassLoader(),
+                new Class<?>[]{Meta.class, Map.class}, object
+        );
+
+        object.put("mask", "ok");
+
+        // parameterCount = 0
+        assertEquals("ok", proxy.getMask());
+
+        // parameterCount = 1
+        proxy.setMask("okk");
+        assertEquals("okk", proxy.getMask());
+
+        // parameterCount = 2
+        boolean error = false;
+        try {
+            proxy.setHead("a", "b");
+        } catch (Exception e) {
+            error = true;
+        }
+        assertTrue(error);
+    }
+
+    interface Meta {
+        String getMask();
+
+        void setMask(String val);
+
+        void setHead(String a, String b);
+    }
+
     public interface InvokeInterface {
         void f(int p);
 
@@ -1295,7 +1347,32 @@ public class JSONObjectTest {
     @Test
     public void testCompatible() {
         assertEquals(0, JSONObject.parseObject("{}").size());
+        assertEquals(0, ((JSONObject) JSONObject.parse("{}")).size());
         assertEquals(101, JSONObject.parseObject("{\"id\":101}", Bean.class).id);
+        assertEquals(101, JSONObject.parseObject("{\"ID\":101}", Bean.class, JSONReader.Feature.SupportSmartMatch).id);
         assertEquals(0, JSONArray.parseArray("[]").size());
+        assertEquals(0, JSONArray.parse("[]").size());
+    }
+
+    @Test
+    public void test() {
+        JSONObject object = new JSONObject();
+        JSONArray array = object.putArray("values");
+        array.add(1);
+        assertEquals("{\"values\":[1]}", object.toString());
+    }
+
+    @Test
+    public void test1() {
+        JSONObject object = new JSONObject();
+        object.putObject("values").put("id", 123);
+        assertEquals("{\"values\":{\"id\":123}}", object.toString());
+    }
+
+    @Test
+    public void testGetByPath() {
+        JSONObject object = JSONObject.of("id", 101, "item", JSONObject.of("itemId", 1001));
+        assertEquals(101, object.getByPath("id"));
+        assertEquals(1001, object.getByPath("item.itemId"));
     }
 }

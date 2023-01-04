@@ -1,17 +1,11 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.codec.FieldInfo;
 
 import java.lang.reflect.Field;
 
 final class FieldWriterStringField<T>
-        extends FieldWriterImpl<T> {
-    final Field field;
-    final boolean symbol;
-    final boolean trim;
-    final boolean raw;
+        extends FieldWriter<T> {
     protected FieldWriterStringField(
             String fieldName,
             int ordinal,
@@ -19,25 +13,7 @@ final class FieldWriterStringField<T>
             String format,
             String label,
             Field field) {
-        super(fieldName, ordinal, features, format, label, String.class, String.class);
-        this.field = field;
-        this.symbol = "symbol".equals(format);
-        this.trim = "trim".equals(format);
-        this.raw = (features & FieldInfo.RAW_VALUE_MASK) != 0;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
-    }
-
-    @Override
-    public Object getFieldValue(Object object) {
-        try {
-            return field.get(object);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
-        }
+        super(fieldName, ordinal, features, format, label, String.class, String.class, field, null);
     }
 
     @Override
@@ -62,19 +38,9 @@ final class FieldWriterStringField<T>
             value = value.trim();
         }
 
-        writeString(jsonWriter, value);
-        return true;
-    }
-
-    @Override
-    public void writeString(JSONWriter jsonWriter, String value) {
         writeFieldName(jsonWriter);
 
-        if (trim) {
-            value = value.trim();
-        }
-
-        if (symbol && jsonWriter.isJSONB()) {
+        if (symbol && jsonWriter.jsonb) {
             jsonWriter.writeSymbol(value);
         } else {
             if (raw) {
@@ -83,10 +49,11 @@ final class FieldWriterStringField<T>
                 jsonWriter.writeString(value);
             }
         }
+        return true;
     }
 
     @Override
-    public void writeValue(JSONWriter jsonWriter, Object object) {
+    public void writeValue(JSONWriter jsonWriter, T object) {
         String value = (String) getFieldValue(object);
         if (value == null) {
             jsonWriter.writeNull();

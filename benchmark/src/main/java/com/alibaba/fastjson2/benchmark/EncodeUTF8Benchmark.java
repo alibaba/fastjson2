@@ -23,7 +23,7 @@ public class EncodeUTF8Benchmark {
         out = new byte[STR.length() * 3];
         try {
             Field valueField = String.class.getDeclaredField("value");
-            valueFieldOffset = UnsafeUtils.UNSAFE.objectFieldOffset(valueField);
+            valueFieldOffset = UnsafeUtils.objectFieldOffset(valueField);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
@@ -31,7 +31,7 @@ public class EncodeUTF8Benchmark {
 
     @Benchmark
     public int unsafeEncodeUTF8() throws Exception {
-        char[] chars = (char[]) UnsafeUtils.UNSAFE.getObject(STR, valueFieldOffset);
+        char[] chars = (char[]) UnsafeUtils.getObject(STR, valueFieldOffset);
         return IOUtils.encodeUTF8(chars, 0, chars.length, out, 0);
     }
 

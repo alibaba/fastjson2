@@ -85,8 +85,6 @@ final class DateTimeValidator
                 if (dd > dom) {
                     return false;
                 }
-            } else if (dd > 31) {
-                return false;
             }
 
             if (hh > 24) {
@@ -110,7 +108,7 @@ final class DateTimeValidator
             str.getChars(0, str.length(), chars, 1);
             chars[chars.length - 1] = '"';
 
-            return JSONReader.of(JSONSchema.CONTEXT, chars).isLocalDateTime();
+            return JSONReader.of(chars, JSONSchema.CONTEXT).isLocalDateTime();
         } catch (DateTimeException | JSONException ignored) {
             return false;
         }

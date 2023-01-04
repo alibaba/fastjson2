@@ -32,8 +32,33 @@ public class TLongIntHashMapTest {
         Random random = new Random();
         for (int i = 0; i < 1000_000; ++i) {
             long value = random.nextInt(1000 * 100);
+            if (value == 0) {
+                continue;
+            }
             map.put(value, 0);
             assertEquals(0, map.get(value));
         }
+    }
+
+    @Test
+    public void test_3() {
+        TLongIntHashMap map = new TLongIntHashMap();
+
+        Random random = new Random();
+        for (int i = 0; i < 1000_000; ++i) {
+            long value = random.nextInt(1000 * 100);
+            if (value == 0) {
+                continue;
+            }
+            map.putIfAbsent(value, 0);
+            assertEquals(0, map.get(value));
+        }
+    }
+
+    @Test
+    public void test_2() {
+        TLongIntHashMap map = new TLongIntHashMap();
+        assertEquals(102, map.putIfAbsent(101, 102));
+        assertEquals(102, map.putIfAbsent(101, 103));
     }
 }

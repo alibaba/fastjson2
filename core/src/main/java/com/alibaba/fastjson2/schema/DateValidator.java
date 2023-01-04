@@ -61,13 +61,17 @@ final class DateValidator
             return true;
         }
 
+        if (str.length() < 9 || str.length() > 40) {
+            return false;
+        }
+
         try {
             char[] chars = new char[str.length() + 2];
             chars[0] = '"';
             str.getChars(0, str.length(), chars, 1);
             chars[chars.length - 1] = '"';
 
-            return JSONReader.of(JSONSchema.CONTEXT, chars)
+            return JSONReader.of(chars, JSONSchema.CONTEXT)
                     .isLocalDate();
         } catch (DateTimeException | JSONException ignored) {
             return false;

@@ -6,10 +6,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 
 final class ObjectWriterImplEnum<E extends Enum<E>>
         extends ObjectWriterBaseModule.PrimitiveImpl {
@@ -27,12 +24,27 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
     final long[] hashCodes;
 
     byte[][] jsonbNames;
+    String[] annotationNames;
 
-    public ObjectWriterImplEnum(Class defineClass, Class enumType, Member valueField, long features) {
+    public ObjectWriterImplEnum(
+            Class defineClass,
+            Class enumType,
+            Member valueField,
+            String[] annotationNames,
+            long features
+    ) {
         this.defineClass = defineClass;
         this.enumType = enumType;
         this.features = features;
         this.valueField = valueField;
+
+        if (valueField instanceof AccessibleObject) {
+            try {
+                ((AccessibleObject) valueField).setAccessible(true);
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        }
 
         this.enumConstants = (Enum[]) enumType.getEnumConstants();
         this.names = new String[enumConstants.length];
@@ -42,6 +54,7 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
             this.names[i] = name;
             hashCodes[i] = Fnv.hashCode64(name);
         }
+        this.annotationNames = annotationNames;
     }
 
     @Override
@@ -78,6 +91,10 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         Enum e = (Enum) object;
+        if (e == null) {
+            jsonWriter.writeNull();
+            return;
+        }
 
         if (valueField != null) {
             Object fieldValue;
@@ -87,19 +104,30 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
                 } else {
                     fieldValue = ((Method) valueField).invoke(object);
                 }
-                jsonWriter.writeAny(fieldValue);
-                return;
+                if (fieldValue != object) {
+                    jsonWriter.writeAny(fieldValue);
+                    return;
+                }
             } catch (Exception error) {
                 throw new JSONException("getEnumValue error", error);
             }
         }
 
-        String str;
         if (jsonWriter.isEnabled(JSONWriter.Feature.WriteEnumUsingToString)) {
-            str = e.toString();
-        } else {
-            str = e.name();
+            jsonWriter.writeString(e.toString());
+            return;
         }
-        jsonWriter.writeString(str);
+
+        String enumName = null;
+        if (annotationNames != null) {
+            int ordinal = e.ordinal();
+            if (ordinal < annotationNames.length) {
+                enumName = annotationNames[ordinal];
+            }
+        }
+        if (enumName == null) {
+            enumName = e.name();
+        }
+        jsonWriter.writeString(enumName);
     }
 }

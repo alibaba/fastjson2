@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.benchmark.eishay;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -17,7 +18,8 @@ import java.util.concurrent.TimeUnit;
 
 public class EishayParseStringPretty {
     static String str;
-    static ObjectMapper mapper = new ObjectMapper();
+    static final ObjectMapper mapper = new ObjectMapper();
+    static final Gson gson = new Gson();
 
     static {
         try {
@@ -43,31 +45,19 @@ public class EishayParseStringPretty {
         bh.consume(mapper.readValue(str, MediaContent.class));
     }
 
-    //    @Test
-    public void fastjson2_perf_test() {
-        for (int i = 0; i < 10; i++) {
-            fastjson2_perf();
-        }
-    }
-
-    public static void fastjson2_perf() {
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000 * 1000; ++i) {
-            JSON.parseObject(str, MediaContent.class);
-        }
-        long millis = System.currentTimeMillis() - start;
-        System.out.println("millis : " + millis);
-        // zulu17.32.13 : 663 761 757 649
-        // zulu11.52.13 : 567 551
-        // zulu8.58.0.13 : 649 624 638
+    @Benchmark
+    public void gson(Blackhole bh) throws Exception {
+        bh.consume(
+                gson.fromJson(str, MediaContent.class)
+        );
     }
 
     public static void main(String[] args) throws RunnerException {
-//        new EishayParseStringPretty().fastjson2_perf_test();
         Options options = new OptionsBuilder()
                 .include(EishayParseStringPretty.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
+                .warmupIterations(3)
                 .forks(1)
                 .build();
         new Runner(options).run();

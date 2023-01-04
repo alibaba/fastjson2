@@ -8,8 +8,6 @@ import java.lang.reflect.Type;
 
 class FieldWriterObjectMethod<T>
         extends FieldWriterObject<T> {
-    final Method method;
-
     protected FieldWriterObjectMethod(
             String name,
             int ordinal,
@@ -20,13 +18,7 @@ class FieldWriterObjectMethod<T>
             Class fieldClass,
             Method method
     ) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass);
-        this.method = method;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
+        super(name, ordinal, features, format, label, fieldType, fieldClass, null, method);
     }
 
     @Override
@@ -34,7 +26,7 @@ class FieldWriterObjectMethod<T>
         try {
             return method.invoke(object);
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw new JSONException("invoke getter method error, " + name, e);
+            throw new JSONException("invoke getter method error, " + fieldName, e);
         }
     }
 }

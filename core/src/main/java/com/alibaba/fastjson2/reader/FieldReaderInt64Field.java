@@ -9,7 +9,16 @@ import java.lang.reflect.Field;
 
 final class FieldReaderInt64Field<T>
         extends FieldReaderObjectField<T> {
-    FieldReaderInt64Field(String fieldName, Class fieldType, int ordinal, long features, String format, Long defaultValue, JSONSchema schema, Field field) {
+    FieldReaderInt64Field(
+            String fieldName,
+            Class fieldType,
+            int ordinal,
+            long features,
+            String format,
+            Long defaultValue,
+            JSONSchema schema,
+            Field field
+    ) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
     }
 
@@ -34,13 +43,25 @@ final class FieldReaderInt64Field<T>
     }
 
     @Override
+    public void accept(T object, float value) {
+        accept(object, Long.valueOf((long) value));
+    }
+
+    @Override
+    public void accept(T object, double value) {
+        accept(object, Long.valueOf((long) value));
+    }
+
+    @Override
     public void accept(T object, Object value) {
+        Long longValue = TypeUtils.toLong(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(longValue);
         }
 
         try {
-            field.set(object, TypeUtils.toLong(value));
+            field.set(object, longValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

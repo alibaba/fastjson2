@@ -1,22 +1,25 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JDKUtilsTest {
+    static boolean OPEN_J9 = System.getProperty("java.vm.name").contains("OpenJ9");
+
     @Test
     public void test_0() throws Throwable {
-        if (JDKUtils.JVM_VERSION == 8) {
-            BiFunction<char[], Boolean, String> stringCreator = JDKUtils.getStringCreatorJDK8();
+        if (JVM_VERSION == 8) {
+            BiFunction<char[], Boolean, String> stringCreator = JDKUtils.STRING_CREATOR_JDK8;
+            if (stringCreator == null) {
+                return;
+            }
 
             char[] chars = new char[]{'a', 'b', 'c'};
             String apply = stringCreator.apply(chars, Boolean.TRUE);
@@ -26,34 +29,32 @@ public class JDKUtilsTest {
 
     @Test
     public void test_11() throws Throwable {
-        System.out.println("JVM_VERSION : " + JDKUtils.JVM_VERSION);
-        if (JDKUtils.JVM_VERSION == 11) {
-            Function<byte[], String> stringCreator = JDKUtils.getStringCreatorJDK11();
-
+        System.out.println("JVM_VERSION : " + JVM_VERSION);
+        if (JVM_VERSION == 11 && STRING_CREATOR_JDK11 != null) {
             byte[] bytes = new byte[]{'a', 'b', 'c'};
-            String apply = stringCreator.apply(bytes);
+            String apply = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
             assertEquals("abc", apply);
         }
     }
 
     @Test
     public void test_unsafe_isAscii() throws Throwable {
-        assertEquals(1, UnsafeUtils.getStringCoder("中国"));
+        if (STRING_VALUE == null) {
+            return;
+        }
+
+        assertEquals(1, STRING_CODER.applyAsInt("中国"));
 
         String str1 = "abc";
-        if (JDKUtils.JVM_VERSION == 8) {
-            assertEquals(1, UnsafeUtils.getStringCoder(str1));
-        } else {
-            assertEquals(0, UnsafeUtils.getStringCoder(str1));
-            byte[] value = UnsafeUtils.getStringValue(str1);
+        if (JVM_VERSION == 8) {
+            assertEquals(1, STRING_CODER.applyAsInt(str1));
+        } else if (STRING_VALUE != null && !OPEN_J9) {
+            assertEquals(0, STRING_CODER.applyAsInt(str1));
+            byte[] value = STRING_VALUE.apply(str1);
             assertNotNull(value);
             assertArrayEquals(str1.getBytes(StandardCharsets.UTF_8), value);
         }
     }
-
-    static BiFunction<byte[], Charset, String> stringCreatorJDK17;
-    static Function<byte[], String> stringCreatorJDK11;
-    static BiFunction<char[], Boolean, String> stringCreatorJDK8;
 
     public String formatYYYYMMDD(Calendar calendar) throws Throwable {
         int year = calendar.get(Calendar.YEAR);
@@ -69,18 +70,11 @@ public class JDKUtilsTest {
         byte d0 = (byte) (dayOfMonth / 10 + '0');
         byte d1 = (byte) (dayOfMonth % 10 + '0');
 
-        if (JDKUtils.JVM_VERSION >= 9) {
+        if (JVM_VERSION >= 9) {
             byte[] bytes = new byte[]{y0, y1, y2, y3, m0, m1, d0, d1};
 
-            if (JDKUtils.JVM_VERSION == 17 && JDKUtils.UNSAFE_SUPPORT) {
-                return JDKUtils.UNSAFE_ASCII_CREATOR.apply(bytes);
-            }
-
-            if (JDKUtils.JVM_VERSION <= 11) {
-                if (stringCreatorJDK11 == null) {
-                    stringCreatorJDK11 = JDKUtils.getStringCreatorJDK11();
-                }
-                return stringCreatorJDK11.apply(bytes);
+            if (STRING_CREATOR_JDK11 != null) {
+                return STRING_CREATOR_JDK11.apply(bytes, LATIN1);
             }
 
             return new String(bytes, StandardCharsets.US_ASCII);
@@ -97,11 +91,8 @@ public class JDKUtilsTest {
                 (char) d1
         };
 
-        if (JDKUtils.JVM_VERSION == 8) {
-            if (stringCreatorJDK8 == null) {
-                stringCreatorJDK8 = JDKUtils.getStringCreatorJDK8();
-            }
-            return stringCreatorJDK8.apply(chars, true);
+        if (JDKUtils.STRING_CREATOR_JDK8 != null) {
+            return JDKUtils.STRING_CREATOR_JDK8.apply(chars, true);
         }
 
         return new String(chars);

@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.benchmark;
 
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -12,19 +11,18 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
+
+import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK8;
 
 public class DecodeASCIIBenchmarkJDK8 {
     static byte[] utf8Bytes = new byte[128];
     static int utf8BytesLength;
     static long valueFieldOffset;
-    static BiFunction<char[], Boolean, String> stringCreator;
 
     static {
         try {
             Field valueField = String.class.getDeclaredField("value");
-            valueFieldOffset = UnsafeUtils.UNSAFE.objectFieldOffset(valueField);
-            stringCreator = JDKUtils.getStringCreatorJDK8();
+            valueFieldOffset = UnsafeUtils.objectFieldOffset(valueField);
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -40,7 +38,7 @@ public class DecodeASCIIBenchmarkJDK8 {
         for (int i = 0; i < utf8BytesLength; i++) {
             chars[i] = (char) utf8Bytes[i];
         }
-        return stringCreator.apply(chars, Boolean.TRUE);
+        return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
     }
 
     @Benchmark

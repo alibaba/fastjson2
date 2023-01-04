@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteMapNullValue;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class WriterFeatureTest {
@@ -44,6 +45,19 @@ public class WriterFeatureTest {
             assertNotNull(map.get("v0000"));
             assertNull(map.get("v0001"));
             assertNotNull(map.get("v0002"));
+        }
+    }
+
+    @Test
+    public void test_1() {
+        JSONWriter.Feature[] values = JSONWriter.Feature.values();
+        int bits = 0;
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] == WriteMapNullValue) {
+                continue;
+            }
+            assertEquals(1L << bits, values[i].mask);
+            bits++;
         }
     }
 }

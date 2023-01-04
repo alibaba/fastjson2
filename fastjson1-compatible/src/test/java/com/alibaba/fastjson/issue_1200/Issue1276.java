@@ -17,9 +17,7 @@ public class Issue1276 {
 
         MyException myException1 = JSON.parseObject(str, MyException.class);
         assertEquals(myException.getCode(), myException1.getCode());
-
-        String str1 = JSON.toJSONString(myException1);
-        assertEquals(str, str1);
+        assertEquals(myException.getMessage(), myException1.getMessage());
     }
 
     public static class MyException

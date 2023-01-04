@@ -1,4 +1,4 @@
-[![Java CI](https://img.shields.io/github/workflow/status/alibaba/fastjson2/Java%20CI/main?logo=github&logoColor=white)](https://github.com/alibaba/fastjson2/actions/workflows/ci.yaml)
+[![Java CI](https://img.shields.io/github/actions/workflow/status/alibaba/fastjson2/ci.yaml?branch=main&logo=github&logoColor=white)](https://github.com/alibaba/fastjson2/actions/workflows/ci.yaml)
 [![Codecov](https://img.shields.io/codecov/c/github/alibaba/fastjson2/main?logo=codecov&logoColor=white)](https://codecov.io/gh/alibaba/fastjson2/branch/main)
 [![Maven Central](https://img.shields.io/maven-central/v/com.alibaba.fastjson2/fastjson2?logo=apache-maven&logoColor=white)](https://search.maven.org/artifact/com.alibaba.fastjson2/fastjson2)
 [![GitHub release](https://img.shields.io/github/release/alibaba/fastjson2)](https://github.com/alibaba/fastjson2/releases)
@@ -22,8 +22,9 @@
 - 支持`Java`服务端、客户端`Android`、大数据场景。
 - 支持`Kotlin` [https://alibaba.github.io/fastjson2/kotlin_cn](https://alibaba.github.io/fastjson2/kotlin_cn)
 - 支持`JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
-- 支持`Android 8+` [(2.0.7.android)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.7.android/)
-- 支持`Graal Native-Image` [(2.0.7.graal)](https://repo1.maven.org/maven2/com/alibaba/fastjson2/fastjson2/2.0.7.graal/)
+- 支持`Android 8+`
+- 支持`Graal Native-Image`
+- 支持 `JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
 
 ![fastjson](docs/logo.jpg "fastjson")
 
@@ -32,7 +33,8 @@
 - `JSONB`格式文档：
   [https://alibaba.github.io/fastjson2/jsonb_format_cn](https://alibaba.github.io/fastjson2/jsonb_format_cn)
 - `FASTJSON v2`性能有了很大提升，具体性能数据看这里：  
-  [https://alibaba.github.io/fastjson2/benchmark_cn](https://alibaba.github.io/fastjson2/benchmark_cn)
+  [https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark](https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark)
+- `FASTJSON`用户升级指南看这里 [https://github.com/alibaba/fastjson2/wiki/fastjson_1_upgrade_cn](https://github.com/alibaba/fastjson2/wiki/fastjson_1_upgrade_cn)
 
 # 1. 使用准备
 
@@ -46,7 +48,7 @@
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2</artifactId>
-    <version>2.0.7</version>
+    <version>2.0.22</version>
 </dependency>
 ```
 
@@ -54,7 +56,7 @@
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2:2.0.7'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.22'
 }
 ```
 
@@ -72,7 +74,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
-    <version>2.0.7</version>
+    <version>2.0.22</version>
 </dependency>
 ```
 
@@ -80,7 +82,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba:fastjson:2.0.7'
+    implementation 'com.alibaba:fastjson:2.0.22'
 }
 ```
 
@@ -94,7 +96,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-kotlin</artifactId>
-    <version>2.0.7</version>
+    <version>2.0.22</version>
 </dependency>
 ```
 
@@ -102,7 +104,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.7")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.22")
 }
 ```
 
@@ -116,7 +118,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension</artifactId>
-    <version>2.0.7</version>
+    <version>2.0.22</version>
 </dependency>
 ```
 
@@ -124,7 +126,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.7'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.22'
 }
 ```
 

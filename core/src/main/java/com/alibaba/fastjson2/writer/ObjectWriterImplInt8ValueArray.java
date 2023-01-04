@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.zip.GZIPOutputStream;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteByteArrayAsBase64;
+
 final class ObjectWriterImplInt8ValueArray
         extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplInt8ValueArray INSTANCE = new ObjectWriterImplInt8ValueArray();
@@ -36,7 +38,10 @@ final class ObjectWriterImplInt8ValueArray
 
         byte[] array = (byte[]) object;
 
-        String format = jsonWriter.getContext().getDateFormat();
+        String format = jsonWriter.context.getDateFormat();
+        if ("millis".equals(format)) {
+            format = null;
+        }
 
         if ("gzip".equals(format) || "gzip,base64".equals(format)) {
             GZIPOutputStream gzipOut = null;
@@ -57,7 +62,9 @@ final class ObjectWriterImplInt8ValueArray
             }
         }
 
-        if ("base64".equals(format) || "gzip,base64".equals(format)) {
+        if ("base64".equals(format)
+                || "gzip,base64".equals(format)
+                || (format == null && (jsonWriter.getFeatures(features) & WriteByteArrayAsBase64.mask) != 0)) {
             jsonWriter.writeBase64(array);
             return;
         }

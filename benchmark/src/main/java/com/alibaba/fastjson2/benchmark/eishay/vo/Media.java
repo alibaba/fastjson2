@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.benchmark.eishay.vo;
 import com.alibaba.fastjson2.annotation.JSONField;
 
 import java.util.List;
+import java.util.Objects;
 
 @SuppressWarnings("serial")
 public class Media
@@ -133,5 +134,22 @@ public class Media
 
     public void setCopyright(String copyright) {
         this.copyright = copyright;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Media media = (Media) o;
+        return bitrate == media.bitrate && hasBitrate == media.hasBitrate && duration == media.duration && height == media.height && size == media.size && width == media.width && Objects.equals(format, media.format) && Objects.equals(persons, media.persons) && player == media.player && Objects.equals(title, media.title) && Objects.equals(uri, media.uri) && Objects.equals(copyright, media.copyright);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(bitrate, hasBitrate, duration, format, height, persons, player, size, title, uri, width, copyright);
     }
 }

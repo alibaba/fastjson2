@@ -6,34 +6,51 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Type;
+
 final class ObjectReaderImplClass
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplClass INSTANCE = new ObjectReaderImplClass();
     static final long TYPE_HASH = Fnv.hashCode64("java.lang.Class");
 
-    @Override
-    public Class getObjectClass() {
-        return Class.class;
+    ObjectReaderImplClass() {
+        super(Class.class);
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
             long valueHashCode = jsonReader.readTypeHashCode();
             if (valueHashCode != TYPE_HASH) {
                 throw new JSONException(jsonReader.info("not support autoType : " + jsonReader.getString()));
             }
         }
-        return readObject(jsonReader, features);
+        return readObject(jsonReader, fieldType, fieldName, features);
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
-        String className = jsonReader.readString();
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        long classNameHash = jsonReader.readValueHashCode();
 
         JSONReader.Context context = jsonReader.getContext();
-        if (!context.isEnabled(JSONReader.Feature.SupportClassForName)) {
-            throw new JSONException(jsonReader.info("not support ClassForName : " + className + ", you can config 'JSONReader.Feature.SupportClassForName'"));
+        JSONReader.AutoTypeBeforeHandler typeFilter = context.getContextAutoTypeBeforeHandler();
+        if (typeFilter != null) {
+            Class<?> filterClass = typeFilter.apply(classNameHash, Class.class, features);
+            if (filterClass == null) {
+                String className = jsonReader.getString();
+                filterClass = typeFilter.apply(className, Class.class, features);
+            }
+
+            if (filterClass != null) {
+                return filterClass;
+            }
+        }
+
+        String className = jsonReader.getString();
+        boolean classForName = ((context.getFeatures() | features) & JSONReader.Feature.SupportClassForName.mask) != 0;
+        if (!classForName) {
+            String msg = jsonReader.info("not support ClassForName : " + className + ", you can config 'JSONReader.Feature.SupportClassForName'");
+            throw new JSONException(msg);
         }
 
         Class mappingClass = TypeUtils.getMapping(className);

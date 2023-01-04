@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.primitves;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.TestUtils;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -170,5 +167,16 @@ public class StringTest {
         int utf16_len = IOUtils.decodeUTF8(bytes, 2, bytes.length - 2, valueBytes);
         String str_utf16be = new String(valueBytes, 0, utf16_len, StandardCharsets.UTF_16LE);
         assertEquals(str, str_utf16be);
+    }
+
+    @Test
+    public void getObjectClass() {
+        assertEquals(
+                String.class,
+                JSONFactory
+                        .getDefaultObjectReaderProvider()
+                        .getObjectReader(String.class)
+                        .getObjectClass()
+        );
     }
 }

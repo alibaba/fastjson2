@@ -11,9 +11,9 @@ import java.math.BigInteger;
 import java.util.Locale;
 
 final class FieldReaderBigIntegerMethod<T>
-        extends FieldReaderObjectMethod<T> {
+        extends FieldReaderObject<T> {
     FieldReaderBigIntegerMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, BigInteger defaultValue, JSONSchema schema, Method method) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null, null);
     }
 
     @Override
@@ -33,9 +33,14 @@ final class FieldReaderBigIntegerMethod<T>
 
     @Override
     public void accept(T object, Object value) {
+        BigInteger bigInteger = TypeUtils.toBigInteger(value);
+
+        if (schema != null) {
+            schema.assertValidate(bigInteger);
+        }
+
         try {
-            method.invoke(object,
-                    TypeUtils.toBigInteger(value));
+            method.invoke(object, bigInteger);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

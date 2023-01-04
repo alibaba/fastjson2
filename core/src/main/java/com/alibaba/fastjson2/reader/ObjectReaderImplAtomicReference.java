@@ -6,22 +6,18 @@ import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicReference;
 
 final class ObjectReaderImplAtomicReference
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplAtomicReference INSTANCE = new ObjectReaderImplAtomicReference(Object.class);
 
     final Type referenceType;
 
     public ObjectReaderImplAtomicReference(Type referenceType) {
+        super(AtomicReference.class);
         this.referenceType = referenceType;
     }
 
     @Override
-    public Class getObjectClass() {
-        return AtomicReference.class;
-    }
-
-    @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfNull()) {
             return null;
         }
@@ -31,7 +27,7 @@ final class ObjectReaderImplAtomicReference
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfNull()) {
             return null;
         }

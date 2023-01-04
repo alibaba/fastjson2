@@ -7,6 +7,10 @@ package com.alibaba.fastjson2;
 public enum PropertyNamingStrategy {
     CamelCase,
     /**
+     * for fastjson 1.x compatible
+     */
+    CamelCase1x,
+    /**
      * Using this naming policy with FASTJSON will ensure that the first "letter" of the Java field name is capitalized when serialized to its JSON form.
      * Here are a few examples of the form "Java Field Name" ---&gt; "JSON Field Name":
      * someFieldName ---&gt; SomeFieldName
@@ -67,6 +71,27 @@ public enum PropertyNamingStrategy {
      * @since 2.0.7
      */
     UpperCaseWithUnderScores,
+    /**
+     * Using this naming policy with FASTJSON will modify the Java Field name from its camel cased form to an upper case field name where each word is separated by a dash (-).
+     * Here are a few examples of the form "Java Field Name" ---&gt; "JSON Field Name":
+     * someFieldName ---&gt; SOME-FIELD-NAME
+     * _someFieldName ---&gt; _SOME-FIELD-NAME
+     * aStringField ---&gt; A-STRING-FIELD
+     * aURL ---&gt; A-U-R-L
+     * @since 2.0.8
+     */
+    UpperCaseWithDashes,
+    /**
+     * Using this naming policy with FASTJSON will modify the Java Field name from its camel cased form to an upper case field name where each word is separated by a dot (.).
+     * Here are a few examples of the form "Java Field Name" ---&gt; "JSON Field Name":
+     * someFieldName ---&gt; SOME.FIELD.NAME
+     * _someFieldName ---&gt; _SOME.FIELD.NAME
+     * aStringField ---&gt; A.STRING.FIELD
+     * aURL ---&gt; A.U.R.L
+     * @since 2.0.8
+     */
+    UpperCaseWithDots,
+    LowerCase,
     /**
      * Using this naming policy with FASTJSON will modify the Java Field name from its camel cased form to a lower case field name where each word is separated by an underscore (_).
      * Here are a few examples of the form "Java Field Name" ---&gt; "JSON Field Name":

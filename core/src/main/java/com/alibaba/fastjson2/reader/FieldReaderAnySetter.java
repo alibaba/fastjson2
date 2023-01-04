@@ -8,10 +8,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 class FieldReaderAnySetter<T>
-        extends FieldReaderObjectMethod<T>
-        implements FieldReaderReadOnly<T> {
-    volatile ObjectReader itemReader;
-
+        extends FieldReaderObject<T> {
     FieldReaderAnySetter(
             Type fieldType,
             Class fieldClass,
@@ -20,7 +17,7 @@ class FieldReaderAnySetter<T>
             String format,
             JSONSchema schema,
             Method method) {
-        super("$$any$$", fieldType, fieldClass, ordinal, features, format, null, null, schema, method);
+        super("$$any$$", fieldType, fieldClass, ordinal, features, format, null, null, schema, method, null, null);
     }
 
     @Override
@@ -41,12 +38,21 @@ class FieldReaderAnySetter<T>
         String name = jsonReader.getFieldName();
 
         ObjectReader itemObjectReader = getItemObjectReader(jsonReader);
-        Object value = itemObjectReader.readObject(jsonReader, 0);
+        Object value = itemObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
 
         try {
             method.invoke(object, name, value);
         } catch (Exception e) {
             throw new JSONException(jsonReader.info("any set error"), e);
+        }
+    }
+
+    @Override
+    public void acceptExtra(Object object, String name, Object value) {
+        try {
+            method.invoke(object, name, value);
+        } catch (Exception e) {
+            throw new JSONException("any set error");
         }
     }
 
@@ -57,19 +63,6 @@ class FieldReaderAnySetter<T>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        if (fieldObjectReader == null) {
-            fieldObjectReader = jsonReader
-                    .getContext()
-                    .getObjectReader(fieldType);
-        }
-
-        Object value;
-        if (jsonReader.isJSONB()) {
-            value = fieldObjectReader.readJSONBObject(jsonReader, features);
-        } else {
-            value = fieldObjectReader.readObject(jsonReader, features);
-        }
-
-        accept(object, value);
+        throw new UnsupportedOperationException();
     }
 }

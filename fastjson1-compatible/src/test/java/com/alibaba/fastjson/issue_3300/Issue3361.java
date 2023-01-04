@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 @Slf4j
 public class Issue3361 {
     private static String ORIGIN_JSON_DEFAULT_DATE_FORMAT;
@@ -26,23 +28,28 @@ public class Issue3361 {
     @Test
     public void test_for_issue() throws Exception {
         Model model = new Model();
-        model.setOldDate(new Date());
-        log.info("{}", model);
+        model.setOldDate(new Date(1667920430928L));
+        assertEquals("{\"oldDate\":1667920430928}", JSON.toJSONString(model));
 
         FastJsonConfig config = new FastJsonConfig();
         config.setSerializerFeatures(SerializerFeature.WriteMapNullValue);
         config.setWriteContentLength(false);
         JSON.DEFFAULT_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS";
         config.setDateFormat(JSON.DEFFAULT_DATE_FORMAT);
-        String string = JSON.toJSONString(model);
-        log.info("{}", string);
+        String string = JSON.toJSONString(model,
+                config.getSerializeConfig(),
+                config.getSerializeFilters(),
+                config.getDateFormat(),
+                JSON.DEFAULT_GENERATE_FEATURE,
+                config.getSerializerFeatures());
+        assertEquals("{\"oldDate\":\"2022-11-08T23:13:50.928000000\"}", string);
 
         Model model2 = JSON.parseObject(string, Model.class);
-        log.info("{}", model2);
+        assertEquals("{\"oldDate\":1668848430000}", JSON.toJSONString(model2));
 
         Model model3 = JSON.parseObject(string, new TypeReference<Model>() {
         }.getType());
-        log.info("{}", model3);
+        assertEquals("{\"oldDate\":1668848430000}", JSON.toJSONString(model3));
     }
 
     @AfterEach

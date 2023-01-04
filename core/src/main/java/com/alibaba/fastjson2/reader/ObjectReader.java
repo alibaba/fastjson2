@@ -37,6 +37,9 @@ public interface ObjectReader<T> {
         throw new UnsupportedOperationException(this.getClass().getName());
     }
 
+    default void acceptExtra(Object object, String fieldName, Object fieldValue) {
+    }
+
     default T createInstance(Map map, JSONReader.Feature... features) {
         long featuresValue = 0;
         for (JSONReader.Feature feature : features) {
@@ -44,6 +47,7 @@ public interface ObjectReader<T> {
         }
         return createInstance(map, featuresValue);
     }
+
     /**
      * @return {@link T}
      * @throws JSONException If a suitable ObjectReader is not found
@@ -78,20 +82,28 @@ public interface ObjectReader<T> {
         T object = createInstance(0L);
         for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             String entryKey = entry.getKey().toString();
+            Object fieldValue = entry.getValue();
+
             FieldReader fieldReader = getFieldReader(entryKey);
             if (fieldReader == null) {
+                acceptExtra(object, entryKey, entry.getValue());
                 continue;
             }
 
-            Object fieldValue = entry.getValue();
-            Class fieldClass = fieldReader.getFieldClass();
-            Type fieldType = fieldReader.getFieldType();
+            Class fieldClass = fieldReader.fieldClass;
+            Type fieldType = fieldReader.fieldType;
+            boolean autoCast = true;
 
             if (fieldValue != null) {
                 Class<?> valueClass = fieldValue.getClass();
+                if (valueClass == String.class) {
+                    if (fieldReader.fieldClass == java.util.Date.class) {
+                        autoCast = false;
+                    }
+                }
 
-                if (valueClass != fieldClass) {
-                    Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
+                if (valueClass != fieldReader.fieldClass && autoCast) {
+                    Function typeConvert = provider.getTypeConvert(valueClass, fieldReader.fieldClass);
 
                     if (typeConvert != null) {
                         fieldValue = typeConvert.apply(fieldValue);
@@ -107,13 +119,23 @@ public interface ObjectReader<T> {
                     typedFieldValue = ((JSONObject) fieldValue).to(fieldType);
                 } else if (fieldValue instanceof JSONArray) {
                     typedFieldValue = ((JSONArray) fieldValue).to(fieldType);
-                } else if (!fieldClass.isInstance(fieldValue) && fieldReader.getFormat() == null) {
-                    typedFieldValue = TypeUtils.cast(fieldValue, fieldClass);
+                } else if (features == 0 && !fieldClass.isInstance(fieldValue) && fieldReader.format == null) {
+                    ObjectReader initReader = fieldReader.getInitReader();
+                    if (initReader != null) {
+                        String fieldValueJson = JSON.toJSONString(fieldValue);
+                        typedFieldValue = initReader.readObject(JSONReader.of(fieldValueJson), null, null, 0L);
+                    } else {
+                        typedFieldValue = TypeUtils.cast(fieldValue, fieldClass, provider);
+                    }
                 } else {
-                    String fieldValueJSONString = JSON.toJSONString(fieldValue);
-                    try (JSONReader jsonReader = JSONReader.of(fieldValueJSONString)) {
-                        ObjectReader fieldObjectReader = fieldReader.getObjectReader(jsonReader);
-                        typedFieldValue = fieldObjectReader.readObject(jsonReader, 0);
+                    if (autoCast) {
+                        String fieldValueJSONString = JSON.toJSONString(fieldValue);
+                        try (JSONReader jsonReader = JSONReader.of(fieldValueJSONString)) {
+                            ObjectReader fieldObjectReader = fieldReader.getObjectReader(jsonReader);
+                            typedFieldValue = fieldObjectReader.readObject(jsonReader, null, entry.getKey(), features);
+                        }
+                    } else {
+                        typedFieldValue = fieldValue;
                     }
                 }
             }
@@ -210,10 +232,10 @@ public interface ObjectReader<T> {
      * @return {@link T}
      * @throws JSONException If a suitable ObjectReader is not found
      */
-    default T readJSONBObject(JSONReader jsonReader, long features) {
+    default T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isArray() &&
                 jsonReader.isSupportBeanArray()) {
-            return readArrayMappingJSONBObject(jsonReader);
+            return readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         T object = null;
@@ -243,7 +265,7 @@ public interface ObjectReader<T> {
                     continue;
                 }
 
-                return (T) reader.readJSONBObject(jsonReader, features);
+                return (T) reader.readJSONBObject(jsonReader, fieldType, fieldName, features);
             }
 
             if (hash == 0) {
@@ -282,7 +304,7 @@ public interface ObjectReader<T> {
      * @return {@link T}
      * @throws UnsupportedOperationException If the method is not overloaded or otherwise
      */
-    default T readArrayMappingJSONBObject(JSONReader jsonReader) {
+    default T readArrayMappingJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         throw new UnsupportedOperationException();
     }
 
@@ -290,7 +312,7 @@ public interface ObjectReader<T> {
      * @return {@link T}
      * @throws UnsupportedOperationException If the method is not overloaded or otherwise
      */
-    default T readArrayMappingObject(JSONReader jsonReader) {
+    default T readArrayMappingObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         throw new UnsupportedOperationException();
     }
 
@@ -298,12 +320,16 @@ public interface ObjectReader<T> {
      * @return {@link T}
      */
     default T readObject(JSONReader jsonReader) {
-        return readObject(jsonReader, getFeatures());
+        return readObject(jsonReader, null, null, getFeatures());
+    }
+
+    default T readObject(JSONReader jsonReader, long features) {
+        return readObject(jsonReader, null, null, features);
     }
 
     /**
      * @return {@link T}
      * @throws JSONException If a suitable ObjectReader is not found
      */
-    T readObject(JSONReader jsonReader, long features);
+    T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features);
 }

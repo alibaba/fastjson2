@@ -1,9 +1,17 @@
 package com.alibaba.fastjson2.benchmark.eishay;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.benchmark.eishay.mixin.ImageMixin;
+import com.alibaba.fastjson2.benchmark.eishay.mixin.MediaContentMixin;
+import com.alibaba.fastjson2.benchmark.eishay.mixin.MediaMixin;
+import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
+import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -18,14 +26,20 @@ import java.util.concurrent.TimeUnit;
 
 public class EishayWriteString {
     static MediaContent mc;
-    static ObjectMapper mapper = new ObjectMapper();
+    static final ObjectMapper mapper = new ObjectMapper();
+    static final Gson gson = new Gson();
 
+    static ObjectWriterProvider provider = new ObjectWriterProvider();
     static {
         try {
             InputStream is = EishayWriteString.class.getClassLoader().getResourceAsStream("data/eishay.json");
             String str = IOUtils.toString(is, "UTF-8");
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
+
+            provider.mixIn(MediaContent.class, MediaContentMixin.class);
+            provider.mixIn(Media.class, MediaMixin.class);
+            provider.mixIn(Image.class, ImageMixin.class);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -41,36 +55,41 @@ public class EishayWriteString {
         bh.consume(JSON.toJSONString(mc));
     }
 
+    public void fastjson2Mixin(Blackhole bh) {
+        bh.consume(
+                JSON.toJSONString(mc, JSONFactory.createWriteContext(provider))
+        );
+    }
+
     @Benchmark
     public void jackson(Blackhole bh) throws Exception {
         bh.consume(mapper.writeValueAsString(mc));
     }
 
-    public static void fastjson2_perf(Blackhole bh) {
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000 * 1000; ++i) {
-            bh.consume(JSON.toJSONString(mc));
-        }
-        long millis = System.currentTimeMillis() - start;
-        System.out.println("EishayParseUTF8Bytes : " + millis);
-        // zulu17.32.13 :
-        // zulu11.52.13 : 361 354
-        // zulu8.58.0.13 : 353
+    //    @Benchmark
+    public void wastjson(Blackhole bh) throws Exception {
+        bh.consume(
+                io.github.wycst.wast.json.JSON.toJsonString(mc)
+        );
     }
 
-    public void fastjson2_perf_test() {
-        for (int i = 0; i < 10; i++) {
-            Blackhole bh = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
-            fastjson2_perf(bh);
-        }
+    @Benchmark
+    public void gson(Blackhole bh) throws Exception {
+        bh.consume(
+                gson.toJson(mc)
+        );
     }
 
     public static void main(String[] args) throws RunnerException {
-//        new EishayWriteString().fastjson2_perf_test();
         Options options = new OptionsBuilder()
                 .include(EishayWriteString.class.getName())
+                .exclude(EishayWriteStringNoneCache.class.getName())
+                .exclude(EishayWriteStringTree.class.getName())
+                .exclude(EishayWriteStringTree1x.class.getName())
                 .mode(Mode.Throughput)
+                .warmupIterations(3)
                 .timeUnit(TimeUnit.MILLISECONDS)
+                .warmupIterations(3)
                 .forks(1)
                 .build();
         new Runner(options).run();

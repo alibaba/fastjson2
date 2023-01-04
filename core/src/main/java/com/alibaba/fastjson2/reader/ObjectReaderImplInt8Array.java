@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.JSONReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
@@ -14,17 +15,18 @@ import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
 class ObjectReaderImplInt8Array
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplInt8Array INSTANCE = new ObjectReaderImplInt8Array(null);
 
     final String format;
 
     public ObjectReaderImplInt8Array(String format) {
+        super(Byte[].class);
         this.format = format;
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.readIfNull()) {
             return null;
         }
@@ -35,6 +37,10 @@ class ObjectReaderImplInt8Array
             for (; ; ) {
                 if (jsonReader.nextIfMatch(']')) {
                     break;
+                }
+
+                if (jsonReader.isEnd()) {
+                    throw new JSONException(jsonReader.info("input end"));
                 }
 
                 int minCapacity = size + 1;
@@ -56,6 +62,10 @@ class ObjectReaderImplInt8Array
             return Arrays.copyOf(values, size);
         }
 
+        if (jsonReader.current() == 'x') {
+            return jsonReader.readBinary();
+        }
+
         if (jsonReader.isString()) {
             String strVal = jsonReader.readString();
             if (strVal.isEmpty()) {
@@ -66,7 +76,7 @@ class ObjectReaderImplInt8Array
                 return Base64.getDecoder().decode(strVal);
             }
 
-            if ("gzip,base64".equals(format)) {
+            if ("gzip,base64".equals(format) || "gzip".equals(format)) {
                 byte[] bytes = Base64.getDecoder().decode(strVal);
 
                 GZIPInputStream gzipIn = null;
@@ -95,7 +105,7 @@ class ObjectReaderImplInt8Array
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         int entryCnt = jsonReader.startArray();
         if (entryCnt == -1) {
             return null;

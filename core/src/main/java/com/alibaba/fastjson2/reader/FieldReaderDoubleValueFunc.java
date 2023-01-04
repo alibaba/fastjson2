@@ -8,19 +8,12 @@ import java.lang.reflect.Method;
 import java.util.function.ObjDoubleConsumer;
 
 final class FieldReaderDoubleValueFunc<T>
-        extends FieldReaderImpl<T> {
-    final Method method;
+        extends FieldReader<T> {
     final ObjDoubleConsumer<T> function;
 
     public FieldReaderDoubleValueFunc(String fieldName, int ordinal, Double defaultValue, JSONSchema schema, Method method, ObjDoubleConsumer<T> function) {
-        super(fieldName, double.class, double.class, ordinal, 0, null, null, defaultValue, schema);
-        this.method = method;
+        super(fieldName, double.class, double.class, ordinal, 0, null, null, defaultValue, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override
@@ -34,12 +27,14 @@ final class FieldReaderDoubleValueFunc<T>
 
     @Override
     public void accept(T object, Object value) {
+        double doubleValue = TypeUtils.toDoubleValue(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(doubleValue);
         }
 
         function.accept(object,
-                TypeUtils.toDoubleValue(value));
+                doubleValue);
     }
 
     @Override
@@ -51,5 +46,10 @@ final class FieldReaderDoubleValueFunc<T>
         }
 
         function.accept(object, value);
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return jsonReader.readDoubleValue();
     }
 }

@@ -2,136 +2,49 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONSchemaValidException;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-import java.util.*;
-import java.util.function.Function;
 
 class FieldReaderObjectField<T>
-        extends FieldReaderImpl<T> {
-    protected final Field field;
-    protected ObjectReader fieldObjectReader;
-
-    FieldReaderObjectField(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Object defaultValue, JSONSchema schema, Field field) {
-        super(fieldName, fieldType == null ? field.getType() : fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema);
-        this.field = field;
-    }
-
-    @Override
-    public ObjectReader getInitReader() {
-        return fieldObjectReader;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
-    }
-
-    @Override
-    public ObjectReader getObjectReader(JSONReader jsonReader) {
-        if (reader != null) {
-            return reader;
-        }
-
-        ObjectReader formattedObjectReader = FieldReaderObject.createFormattedObjectReader(fieldType, fieldClass, format, null);
-        if (formattedObjectReader != null) {
-            return reader = formattedObjectReader;
-        }
-
-        if (Map.class.isAssignableFrom(fieldClass)) {
-            return reader = ObjectReaderImplMap.of(fieldType, fieldClass, features);
-        } else if (Collection.class.isAssignableFrom(fieldClass)) {
-            return reader = ObjectReaderImplList.of(fieldType, fieldClass, features);
-        }
-
-        return reader = jsonReader.getObjectReader(fieldType);
-    }
-
-    @Override
-    public void readFieldValue(JSONReader jsonReader, T object) {
-        if (!fieldClassSerializable && (jsonReader.getContext().getFeatures() & JSONReader.Feature.IgnoreNoneSerializable.mask) != 0) {
-            jsonReader.skipValue();
-            return;
-        }
-
-        if (fieldObjectReader == null) {
-            fieldObjectReader = getObjectReader(jsonReader);
-        }
-
-        if (jsonReader.isReference()) {
-            String reference = jsonReader.readReference();
-            if ("..".equals(reference)) {
-                accept(object, object);
-            } else {
-                addResolveTask(jsonReader, object, reference);
-            }
-            return;
-        }
-
-        int offset = jsonReader.getOffset();
-        try {
-            Object value;
-            if (jsonReader.nextIfNull()) {
-                if (fieldClass == OptionalInt.class) {
-                    value = OptionalInt.empty();
-                } else if (fieldClass == OptionalLong.class) {
-                    value = OptionalLong.empty();
-                } else if (fieldClass == OptionalDouble.class) {
-                    value = OptionalDouble.empty();
-                } else if (fieldClass == Optional.class) {
-                    value = Optional.empty();
-                } else {
-                    value = null;
-                }
-            } else if (jsonReader.isJSONB()) {
-                if (fieldClass == Object.class) {
-                    ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, features);
-                    if (autoTypeObjectReader != null) {
-                        value = autoTypeObjectReader.readJSONBObject(jsonReader, features);
-                    } else {
-                        value = jsonReader.readAny();
-                    }
-                } else {
-                    value = fieldObjectReader.readJSONBObject(jsonReader, features);
-                }
-            } else {
-                value = fieldObjectReader.readObject(jsonReader, features);
-            }
-            accept(object, value);
-        } catch (JSONSchemaValidException ex) {
-            throw ex;
-        } catch (Exception | IllegalAccessError ex) {
-            throw new JSONException(jsonReader.info("read field '" + field.getDeclaringClass().getName() + "." + field.getName()), ex);
-        }
-    }
-
-    @Override
-    public void readFieldValueJSONB(JSONReader jsonReader, T object) {
-        if (fieldObjectReader == null) {
-            fieldObjectReader = jsonReader.getContext().getObjectReader(fieldType);
-        }
-
-        if (jsonReader.isReference()) {
-            String reference = jsonReader.readReference();
-            if ("..".equals(reference)) {
-                accept(object, object);
-            } else {
-                addResolveTask(jsonReader, object, reference);
-            }
-            return;
-        }
-
-        Object value = fieldObjectReader.readJSONBObject(jsonReader, features);
-        accept(object, value);
+        extends FieldReaderObject<T> {
+    FieldReaderObjectField(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Object defaultValue,
+            JSONSchema schema,
+            Field field
+    ) {
+        super(
+                fieldName, fieldType == null ? field.getType() : fieldType,
+                fieldClass,
+                ordinal,
+                features,
+                format,
+                null,
+                defaultValue,
+                schema,
+                null,
+                field,
+                null
+        );
     }
 
     @Override
     public void accept(T object, boolean value) {
         if (schema != null) {
             schema.assertValidate(value);
+        }
+
+        if (fieldOffset != -1 && fieldClass == boolean.class) {
+            UnsafeUtils.putBoolean(object, fieldOffset, value);
+            return;
         }
 
         try {
@@ -147,6 +60,11 @@ class FieldReaderObjectField<T>
             schema.assertValidate(value);
         }
 
+        if (fieldOffset != -1 && fieldClass == byte.class) {
+            UnsafeUtils.putByte(object, fieldOffset, value);
+            return;
+        }
+
         try {
             field.setByte(object, value);
         } catch (Exception e) {
@@ -158,6 +76,11 @@ class FieldReaderObjectField<T>
     public void accept(T object, short value) {
         if (schema != null) {
             schema.assertValidate(value);
+        }
+
+        if (fieldOffset != -1 && fieldClass == short.class) {
+            UnsafeUtils.putShort(object, fieldOffset, value);
+            return;
         }
 
         try {
@@ -173,6 +96,11 @@ class FieldReaderObjectField<T>
             schema.assertValidate(value);
         }
 
+        if (fieldOffset != -1 && fieldClass == int.class) {
+            UnsafeUtils.putInt(object, fieldOffset, value);
+            return;
+        }
+
         try {
             field.setInt(object, value);
         } catch (Exception e) {
@@ -184,6 +112,11 @@ class FieldReaderObjectField<T>
     public void accept(T object, long value) {
         if (schema != null) {
             schema.assertValidate(value);
+        }
+
+        if (fieldOffset != -1 && fieldClass == long.class) {
+            UnsafeUtils.putLong(object, fieldOffset, value);
+            return;
         }
 
         try {
@@ -199,6 +132,11 @@ class FieldReaderObjectField<T>
             schema.assertValidate(value);
         }
 
+        if (fieldOffset != -1 && fieldClass == float.class) {
+            UnsafeUtils.putFloat(object, fieldOffset, value);
+            return;
+        }
+
         try {
             field.setFloat(object, value);
         } catch (Exception e) {
@@ -210,6 +148,11 @@ class FieldReaderObjectField<T>
     public void accept(T object, double value) {
         if (schema != null) {
             schema.assertValidate(value);
+        }
+
+        if (fieldOffset != -1 && fieldClass == double.class) {
+            UnsafeUtils.putDouble(object, fieldOffset, value);
+            return;
         }
 
         try {
@@ -225,6 +168,11 @@ class FieldReaderObjectField<T>
             schema.assertValidate(value);
         }
 
+        if (fieldOffset != -1 && fieldClass == char.class) {
+            UnsafeUtils.putChar(object, fieldOffset, value);
+            return;
+        }
+
         try {
             field.setChar(object, value);
         } catch (Exception e) {
@@ -238,7 +186,23 @@ class FieldReaderObjectField<T>
             schema.assertValidate(value);
         }
 
-        if (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
+        if (value == null) {
+            if ((features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
+                return;
+            }
+        } else {
+            if (fieldClass.isPrimitive()) {
+                acceptPrimitive(object, value);
+                return;
+            }
+
+            if (!fieldClass.isInstance(value)) {
+                throw new JSONException("set " + fieldName + " error, not support type " + value.getClass());
+            }
+        }
+
+        if (fieldOffset != -1) {
+            UnsafeUtils.putObject(object, fieldOffset, value);
             return;
         }
 
@@ -249,23 +213,56 @@ class FieldReaderObjectField<T>
         }
     }
 
-    @Override
-    public Object readFieldValue(JSONReader jsonReader) {
-        if (fieldObjectReader == null) {
-            fieldObjectReader = jsonReader
-                    .getContext()
-                    .getObjectReader(fieldType);
+    final void acceptPrimitive(T object, Object value) {
+        if (fieldClass == int.class) {
+            if (value instanceof Number) {
+                int intValue = ((Number) value).intValue();
+                accept(object, intValue);
+                return;
+            }
+        } else if (fieldClass == long.class) {
+            if (value instanceof Number) {
+                long longValue = ((Number) value).longValue();
+                accept(object, longValue);
+                return;
+            }
+        } else if (fieldClass == float.class) {
+            if (value instanceof Number) {
+                float floatValue = ((Number) value).floatValue();
+                accept(object, floatValue);
+                return;
+            }
+        } else if (fieldClass == double.class) {
+            if (value instanceof Number) {
+                double doubleValue = ((Number) value).doubleValue();
+                accept(object, doubleValue);
+                return;
+            }
+        } else if (fieldClass == short.class) {
+            if (value instanceof Number) {
+                short shortValue = ((Number) value).shortValue();
+                accept(object, shortValue);
+                return;
+            }
+        } else if (fieldClass == byte.class) {
+            if (value instanceof Number) {
+                byte byteValue = ((Number) value).byteValue();
+                accept(object, byteValue);
+                return;
+            }
+        } else if (fieldClass == char.class) {
+            if (value instanceof Character) {
+                char charValue = ((Character) value).charValue();
+                accept(object, charValue);
+                return;
+            }
+        } else if (fieldClass == boolean.class) {
+            if (value instanceof Boolean) {
+                boolean booleanValue = ((Boolean) value).booleanValue();
+                accept(object, booleanValue);
+                return;
+            }
         }
-
-        Object object = jsonReader.isJSONB()
-                ? fieldObjectReader.readJSONBObject(jsonReader, features)
-                : fieldObjectReader.readObject(jsonReader, features);
-
-        Function builder = fieldObjectReader.getBuildFunction();
-        if (builder != null) {
-            object = builder.apply(object);
-        }
-
-        return object;
+        throw new JSONException("set " + fieldName + " error, type not support " + value.getClass());
     }
 }

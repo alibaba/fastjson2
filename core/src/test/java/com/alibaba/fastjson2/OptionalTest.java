@@ -4,10 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-import java.util.OptionalLong;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -572,26 +569,78 @@ public class OptionalTest {
 
     @Test
     public void testOptional_Integer_Field_utf8() {
-        assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":\"123\"}}".getBytes(StandardCharsets.UTF_8), Bean_Integer.class).value.get());
-        assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":'123'}}".getBytes(StandardCharsets.UTF_8), Bean_Integer.class).value.get());
-        assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":123}}".getBytes(StandardCharsets.UTF_8), Bean_Integer.class).value.get());
-        assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":123.}}".getBytes(StandardCharsets.UTF_8), Bean_Integer.class).value.get());
-        assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":123.0}}".getBytes(StandardCharsets.UTF_8), Bean_Integer.class).value.get());
-        assertFalse(JSON.parseObject("{\"value\":\"\"}}".getBytes(StandardCharsets.UTF_8), Bean_Integer.class).value.isPresent());
-        assertFalse(JSON.parseObject("{\"value\":''}}".getBytes(StandardCharsets.UTF_8), Bean_Integer.class).value.isPresent());
-        assertFalse(JSON.parseObject("{\"value\":null}}".getBytes(StandardCharsets.UTF_8), Bean_Integer.class).value.isPresent());
+        assertEquals(
+                Integer.valueOf(123),
+                JSON.parseObject(
+                        "{\"value\":\"123\"}}".getBytes(StandardCharsets.UTF_8),
+                        Bean_Integer.class,
+                        JSONReader.Feature.IgnoreCheckClose
+                ).value.get());
+        assertEquals(
+                Integer.valueOf(123),
+                JSON.parseObject(
+                        "{\"value\":'123'}}".getBytes(StandardCharsets.UTF_8),
+                        Bean_Integer.class,
+                        JSONReader.Feature.IgnoreCheckClose
+                ).value.get()
+        );
+        assertEquals(
+                Integer.valueOf(123),
+                JSON.parseObject(
+                        "{\"value\":123}}".getBytes(StandardCharsets.UTF_8),
+                        Bean_Integer.class,
+                        JSONReader.Feature.IgnoreCheckClose
+                ).value.get()
+        );
+        assertEquals(
+                Integer.valueOf(123),
+                JSON.parseObject(
+                        "{\"value\":123.}}".getBytes(StandardCharsets.UTF_8),
+                        Bean_Integer.class,
+                        JSONReader.Feature.IgnoreCheckClose
+                ).value.get()
+        );
+        assertEquals(
+                Integer.valueOf(123),
+                JSON.parseObject(
+                        "{\"value\":123.0}}".getBytes(StandardCharsets.UTF_8),
+                        Bean_Integer.class,
+                        JSONReader.Feature.IgnoreCheckClose
+                ).value.get()
+        );
+        assertFalse(
+                JSON.parseObject(
+                        "{\"value\":\"\"}}".getBytes(StandardCharsets.UTF_8),
+                        Bean_Integer.class,
+                        JSONReader.Feature.IgnoreCheckClose
+                ).value.isPresent()
+        );
+        assertFalse(
+                JSON.parseObject(
+                        "{\"value\":''}}".getBytes(StandardCharsets.UTF_8),
+                        Bean_Integer.class,
+                        JSONReader.Feature.IgnoreCheckClose
+                ).value.isPresent()
+        );
+        assertFalse(
+                JSON.parseObject(
+                        "{\"value\":null}}".getBytes(StandardCharsets.UTF_8),
+                        Bean_Integer.class,
+                        JSONReader.Feature.IgnoreCheckClose
+                ).value.isPresent()
+        );
     }
 
     @Test
     public void testOptional_Integer_Field() {
-        assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":\"123\"}}", Bean_Integer.class).value.get());
-        assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":'123'}}", Bean_Integer.class).value.get());
-        assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":123}}", Bean_Integer.class).value.get());
-        assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":123.}}", Bean_Integer.class).value.get());
-        assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":123.0}}", Bean_Integer.class).value.get());
-        assertFalse(JSON.parseObject("{\"value\":\"\"}}", Bean_Integer.class).value.isPresent());
-        assertFalse(JSON.parseObject("{\"value\":''}}", Bean_Integer.class).value.isPresent());
-        assertFalse(JSON.parseObject("{\"value\":null}}", Bean_Integer.class).value.isPresent());
+        assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":\"123\"}", Bean_Integer.class).value.get());
+        assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":'123'}", Bean_Integer.class).value.get());
+        assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":123}", Bean_Integer.class).value.get());
+        assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":123.}", Bean_Integer.class).value.get());
+        assertEquals(Integer.valueOf(123), JSON.parseObject("{\"value\":123.0}", Bean_Integer.class).value.get());
+        assertFalse(JSON.parseObject("{\"value\":\"\"}", Bean_Integer.class).value.isPresent());
+        assertFalse(JSON.parseObject("{\"value\":''}", Bean_Integer.class).value.isPresent());
+        assertFalse(JSON.parseObject("{\"value\":null}", Bean_Integer.class).value.isPresent());
     }
 
     public static class Bean_Integer {
@@ -600,29 +649,40 @@ public class OptionalTest {
 
     @Test
     public void testOptional_Long_Field_utf8() {
-        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":\"123\"}}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.get());
-        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":'123'}}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.get());
-        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":123}}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.get());
-        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":123.}}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.get());
-        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":123.0}}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.get());
-        assertFalse(JSON.parseObject("{\"value\":\"\"}}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.isPresent());
-        assertFalse(JSON.parseObject("{\"value\":''}}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.isPresent());
-        assertFalse(JSON.parseObject("{\"value\":null}}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.isPresent());
+        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":\"123\"}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.get());
+        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":'123'}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.get());
+        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":123}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.get());
+        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":123.}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.get());
+        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":123.0}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.get());
+        assertFalse(JSON.parseObject("{\"value\":\"\"}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.isPresent());
+        assertFalse(JSON.parseObject("{\"value\":''}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.isPresent());
+        assertFalse(JSON.parseObject("{\"value\":null}".getBytes(StandardCharsets.UTF_8), Bean_Long.class).value.isPresent());
     }
 
     @Test
     public void testOptional_Long_Field() {
-        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":\"123\"}}", Bean_Long.class).value.get());
-        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":'123'}}", Bean_Long.class).value.get());
-        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":123}}", Bean_Long.class).value.get());
-        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":123.}}", Bean_Long.class).value.get());
-        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":123.0}}", Bean_Long.class).value.get());
-        assertFalse(JSON.parseObject("{\"value\":\"\"}}", Bean_Long.class).value.isPresent());
-        assertFalse(JSON.parseObject("{\"value\":''}}", Bean_Long.class).value.isPresent());
-        assertFalse(JSON.parseObject("{\"value\":null}}", Bean_Long.class).value.isPresent());
+        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":\"123\"}", Bean_Long.class).value.get());
+        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":'123'}", Bean_Long.class).value.get());
+        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":123}", Bean_Long.class).value.get());
+        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":123.}", Bean_Long.class).value.get());
+        assertEquals(Long.valueOf(123), JSON.parseObject("{\"value\":123.0}", Bean_Long.class).value.get());
+        assertFalse(JSON.parseObject("{\"value\":\"\"}", Bean_Long.class).value.isPresent());
+        assertFalse(JSON.parseObject("{\"value\":''}", Bean_Long.class).value.isPresent());
+        assertFalse(JSON.parseObject("{\"value\":null}", Bean_Long.class).value.isPresent());
     }
 
     public static class Bean_Long {
         public Optional<Long> value;
+    }
+
+    @Test
+    public void getObjectClass() {
+        assertEquals(
+                Optional.class,
+                JSONFactory
+                        .getDefaultObjectReaderProvider()
+                        .getObjectReader(Optional.class)
+                        .getObjectClass()
+        );
     }
 }

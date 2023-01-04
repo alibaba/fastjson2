@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.support.odps;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.ValueConsumer;
@@ -18,10 +19,10 @@ public class JSONExtractScalar
     static final byte[] BYTES_FALSE = "false".getBytes(StandardCharsets.UTF_8);
     static final byte[] BYTES_NULL = "null".getBytes(StandardCharsets.UTF_8);
 
-    private final JSONPath path;
-    private JSONWritable text = new JSONWritable();
+    final JSONPath path;
+    JSONWritable text = new JSONWritable();
 
-    private ExtractValueConsumer valueConsumer = new ExtractValueConsumer();
+    ExtractValueConsumer valueConsumer = new ExtractValueConsumer();
 
     public JSONExtractScalar(String path) {
         this.path = JSONPath.of(path);
@@ -97,12 +98,12 @@ public class JSONExtractScalar
 
         @Override
         public void accept(Map object) {
-            throw new UnsupportedOperationException();
+            text.set(JSON.toJSONBytes(object));
         }
 
         @Override
         public void accept(List array) {
-            throw new UnsupportedOperationException();
+            text.set(JSON.toJSONBytes(array));
         }
     }
 }

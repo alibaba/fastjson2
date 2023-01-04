@@ -6,10 +6,19 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CVE_2020_36518 {
-    private static final int TOO_DEEP_NESTING = 2000;
+    private static final int TOO_DEEP_NESTING;
+
+    static {
+        if (JVM_VERSION <= 11) {
+            TOO_DEEP_NESTING = 1000;
+        } else {
+            TOO_DEEP_NESTING = 2000;
+        }
+    }
 
     @Test
     public void testWithArray() throws Exception {

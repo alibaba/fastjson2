@@ -53,7 +53,10 @@ public class ParserTest_4 {
         assertEquals("ab®cd", lexer.getFieldName());
         assertEquals(123, lexer.readInt32Value());
 
-        assertEquals(Fnv.hashCode64("¼½¾"), lexer.readFieldNameHashCode());
+        assertEquals(
+                Fnv.hashCode64("¼½¾"),
+                lexer.readFieldNameHashCode()
+        );
         assertEquals(Fnv.hashCode64LCase("¼½¾"),
                 lexer.getNameHashCodeLCase());
         assertEquals("¼½¾", lexer.getFieldName());

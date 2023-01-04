@@ -7,9 +7,7 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.schema.JSONSchema;
-import com.alibaba.fastjson2.util.BeanUtils;
-import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
@@ -22,13 +20,19 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
+
 public class JSONObject
         extends LinkedHashMap<String, Object>
         implements InvocationHandler {
     private static final long serialVersionUID = 1L;
 
     static ObjectReader<JSONArray> arrayReader;
-    static ObjectWriter<JSONObject> objectWriter;
+    static final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
+            | PrettyFormat.mask
+            | NotWriteEmptyArray.mask
+            | NotWriteDefaultValue.mask;
 
     /**
      * default
@@ -47,7 +51,7 @@ public class JSONObject
 
     /**
      * @param initialCapacity the initial capacity = (number of elements to store / load factor) + 1
-     * @param loadFactor      the load factor
+     * @param loadFactor the load factor
      * @throws IllegalArgumentException If the initial capacity is negative or the load factor is negative
      * @since 2.0.2
      */
@@ -57,8 +61,8 @@ public class JSONObject
 
     /**
      * @param initialCapacity the initial capacity = (number of elements to store / load factor) + 1
-     * @param loadFactor      the load factor
-     * @param accessOrder     the ordering mode - true for access-order, false for insertion-order
+     * @param loadFactor the load factor
+     * @param accessOrder the ordering mode - true for access-order, false for insertion-order
      * @throws IllegalArgumentException If the initial capacity is negative or the load factor is negative
      * @since 2.0.2
      */
@@ -97,12 +101,22 @@ public class JSONObject
                 || key instanceof Boolean
                 || key instanceof UUID
         ) {
-            return super.get(
-                    key.toString()
-            );
+            Object value = super.get(key.toString());
+            if (value != null) {
+                return value;
+            }
         }
 
         return super.get(key);
+    }
+
+    public Object getByPath(String jsonPath) {
+        JSONPath path = JSONPath.of(jsonPath);
+        if (path instanceof JSONPathSingleName) {
+            String name = ((JSONPathSingleName) path).name;
+            return get(name);
+        }
+        return path.eval(this);
     }
 
     /**
@@ -126,28 +140,26 @@ public class JSONObject
                 || key instanceof Boolean
                 || key instanceof UUID
         ) {
-            return super.containsKey(key.toString());
+            return super.containsKey(key) || super.containsKey(key.toString());
         }
 
         return super.containsKey(key);
     }
 
     /**
-     * @param key          the key whose associated value is to be returned
+     * @param key the key whose associated value is to be returned
      * @param defaultValue the default mapping of the key
      */
-    @SuppressWarnings("unchecked")
     public Object getOrDefault(String key, Object defaultValue) {
         return super.getOrDefault(key, defaultValue);
     }
 
     /**
-     * @param key          the key whose associated value is to be returned
+     * @param key the key whose associated value is to be returned
      * @param defaultValue the default mapping of the key
      * @since 2.0.2
      */
     @Override
-    @SuppressWarnings("unchecked")
     public Object getOrDefault(Object key, Object defaultValue) {
         if (key instanceof Number
                 || key instanceof Character
@@ -174,6 +186,10 @@ public class JSONObject
     public JSONArray getJSONArray(String key) {
         Object value = super.get(key);
 
+        if (value == null) {
+            return null;
+        }
+
         if (value instanceof JSONArray) {
             return (JSONArray) value;
         }
@@ -193,7 +209,7 @@ public class JSONObject
             if (arrayReader == null) {
                 arrayReader = reader.getObjectReader(JSONArray.class);
             }
-            return arrayReader.readObject(reader, 0);
+            return arrayReader.readObject(reader, null, null, 0);
         }
 
         if (value instanceof Collection) {
@@ -202,10 +218,6 @@ public class JSONObject
 
         if (value instanceof Object[]) {
             return JSONArray.of((Object[]) value);
-        }
-
-        if (value == null) {
-            return null;
         }
 
         Class<?> valueClass = value.getClass();
@@ -240,6 +252,10 @@ public class JSONObject
     public JSONObject getJSONObject(String key) {
         Object value = super.get(key);
 
+        if (value == null) {
+            return null;
+        }
+
         if (value instanceof JSONObject) {
             return (JSONObject) value;
         }
@@ -252,15 +268,11 @@ public class JSONObject
             }
 
             JSONReader reader = JSONReader.of(str);
-            return JSONFactory.OBJECT_READER.readObject(reader, 0);
+            return JSONFactory.OBJECT_READER.readObject(reader, null, null, 0);
         }
 
         if (value instanceof Map) {
             return new JSONObject((Map) value);
-        }
-
-        if (value == null) {
-            return null;
         }
 
         Class valueClass = value.getClass();
@@ -290,6 +302,19 @@ public class JSONObject
             return (String) value;
         }
 
+        if (value instanceof Date) {
+            long timeMillis = ((Date) value).getTime();
+            return DateUtils.toString(timeMillis, false, DateUtils.DEFAULT_ZONE_ID);
+        }
+
+        if (value instanceof Boolean
+                || value instanceof Character
+                || value instanceof Number
+                || value instanceof UUID
+                || value instanceof Enum) {
+            return value.toString();
+        }
+
         return JSON.toJSONString(value);
     }
 
@@ -299,7 +324,7 @@ public class JSONObject
      * @param key the key whose associated value is to be returned
      * @return {@link Double} or null
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable double
-     * @throws JSONException         Unsupported type conversion to {@link Double}
+     * @throws JSONException Unsupported type conversion to {@link Double}
      */
     public Double getDouble(String key) {
         Object value = super.get(key);
@@ -335,7 +360,7 @@ public class JSONObject
      * @param key the key whose associated value is to be returned
      * @return double
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable double
-     * @throws JSONException         Unsupported type conversion to double value
+     * @throws JSONException Unsupported type conversion to double value
      */
     public double getDoubleValue(String key) {
         Object value = super.get(key);
@@ -367,7 +392,7 @@ public class JSONObject
      * @param key the key whose associated value is to be returned
      * @return {@link Float} or null
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable float
-     * @throws JSONException         Unsupported type conversion to {@link Float}
+     * @throws JSONException Unsupported type conversion to {@link Float}
      */
     public Float getFloat(String key) {
         Object value = super.get(key);
@@ -403,7 +428,7 @@ public class JSONObject
      * @param key the key whose associated value is to be returned
      * @return float
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable float
-     * @throws JSONException         Unsupported type conversion to float value
+     * @throws JSONException Unsupported type conversion to float value
      */
     public float getFloatValue(String key) {
         Object value = super.get(key);
@@ -435,7 +460,7 @@ public class JSONObject
      * @param key the key whose associated value is to be returned
      * @return {@link Long} or null
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable long
-     * @throws JSONException         Unsupported type conversion to {@link Long}
+     * @throws JSONException Unsupported type conversion to {@link Long}
      */
     public Long getLong(String key) {
         Object value = super.get(key);
@@ -475,7 +500,7 @@ public class JSONObject
      * @param key the key whose associated value is to be returned
      * @return long
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable long
-     * @throws JSONException         Unsupported type conversion to long value
+     * @throws JSONException Unsupported type conversion to long value
      */
     public long getLongValue(String key) {
         Object value = super.get(key);
@@ -512,7 +537,7 @@ public class JSONObject
      * @param defaultValue the default mapping of the key
      * @return long
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable long
-     * @throws JSONException         Unsupported type conversion to long value
+     * @throws JSONException Unsupported type conversion to long value
      */
     public long getLongValue(String key, long defaultValue) {
         Object value = super.get(key);
@@ -548,7 +573,7 @@ public class JSONObject
      * @param key the key whose associated value is to be returned
      * @return {@link Integer} or null
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable int
-     * @throws JSONException         Unsupported type conversion to {@link Integer}
+     * @throws JSONException Unsupported type conversion to {@link Integer}
      */
     public Integer getInteger(String key) {
         Object value = super.get(key);
@@ -588,7 +613,7 @@ public class JSONObject
      * @param key the key whose associated value is to be returned
      * @return int
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable int
-     * @throws JSONException         Unsupported type conversion to int value
+     * @throws JSONException Unsupported type conversion to int value
      */
     public int getIntValue(String key) {
         Object value = super.get(key);
@@ -625,7 +650,7 @@ public class JSONObject
      * @param defaultValue the default mapping of the key
      * @return int
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable int
-     * @throws JSONException         Unsupported type conversion to int value
+     * @throws JSONException Unsupported type conversion to int value
      */
     public int getIntValue(String key, int defaultValue) {
         Object value = super.get(key);
@@ -661,7 +686,7 @@ public class JSONObject
      * @param key the key whose associated value is to be returned
      * @return {@link Short} or null
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable short
-     * @throws JSONException         Unsupported type conversion to {@link Short}
+     * @throws JSONException Unsupported type conversion to {@link Short}
      */
     public Short getShort(String key) {
         Object value = super.get(key);
@@ -697,7 +722,7 @@ public class JSONObject
      * @param key the key whose associated value is to be returned
      * @return short
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable short
-     * @throws JSONException         Unsupported type conversion to short value
+     * @throws JSONException Unsupported type conversion to short value
      */
     public short getShortValue(String key) {
         Object value = super.get(key);
@@ -729,7 +754,7 @@ public class JSONObject
      * @param key the key whose associated value is to be returned
      * @return {@link Byte} or null
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable byte
-     * @throws JSONException         Unsupported type conversion to {@link Byte}
+     * @throws JSONException Unsupported type conversion to {@link Byte}
      */
     public Byte getByte(String key) {
         Object value = super.get(key);
@@ -761,7 +786,7 @@ public class JSONObject
      * @param key the key whose associated value is to be returned
      * @return byte
      * @throws NumberFormatException If the value of get is {@link String} and it contains no parsable byte
-     * @throws JSONException         Unsupported type conversion to byte value
+     * @throws JSONException Unsupported type conversion to byte value
      */
     public byte getByteValue(String key) {
         Object value = super.get(key);
@@ -888,7 +913,7 @@ public class JSONObject
      *
      * @param key the key whose associated value is to be returned
      * @return {@link BigInteger} or null
-     * @throws JSONException         Unsupported type conversion to {@link BigInteger}
+     * @throws JSONException Unsupported type conversion to {@link BigInteger}
      * @throws NumberFormatException If the value of get is {@link String} and it is not a valid representation of {@link BigInteger}
      */
     public BigInteger getBigInteger(String key) {
@@ -929,7 +954,7 @@ public class JSONObject
      *
      * @param key the key whose associated value is to be returned
      * @return {@link BigDecimal} or null
-     * @throws JSONException         Unsupported type conversion to {@link BigDecimal}
+     * @throws JSONException Unsupported type conversion to {@link BigDecimal}
      * @throws NumberFormatException If the value of get is {@link String} and it is not a valid representation of {@link BigDecimal}
      */
     public BigDecimal getBigDecimal(String key) {
@@ -992,11 +1017,12 @@ public class JSONObject
             return (Date) value;
         }
 
+        if (value instanceof String) {
+            return DateUtils.parseDate((String) value);
+        }
+
         if (value instanceof Number) {
             long millis = ((Number) value).longValue();
-            if (millis == 0) {
-                return null;
-            }
             return new Date(millis);
         }
 
@@ -1040,10 +1066,8 @@ public class JSONObject
     @SuppressWarnings("unchecked")
     public String toString() {
         try (JSONWriter writer = JSONWriter.of()) {
-            if (objectWriter == null) {
-                objectWriter = writer.getObjectWriter(JSONObject.class);
-            }
-            objectWriter.write(writer, this, null, null, 0);
+            writer.setRootObject(this);
+            writer.write(this);
             return writer.toString();
         }
     }
@@ -1057,10 +1081,8 @@ public class JSONObject
     @SuppressWarnings("unchecked")
     public String toString(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.of(features)) {
-            if (objectWriter == null) {
-                objectWriter = writer.getObjectWriter(JSONObject.class);
-            }
-            objectWriter.write(writer, this, null, null, 0);
+            writer.setRootObject(this);
+            writer.write(this);
             return writer.toString();
         }
     }
@@ -1078,9 +1100,8 @@ public class JSONObject
     /**
      * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
      *
-     * @param object   Java Object to be serialized into JSON {@link String}
+     * @param object Java Object to be serialized into JSON {@link String}
      * @param features features to be enabled in serialization
-     *
      * @since 2.0.6
      */
     public static String toJSONString(Object object, JSONWriter.Feature... features) {
@@ -1089,16 +1110,15 @@ public class JSONObject
 
     /**
      * Serialize to JSONB bytes
+     *
      * @param features features to be enabled in serialization
      * @return JSONB bytes
      */
     @SuppressWarnings("unchecked")
     public byte[] toJSONBBytes(JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.ofJSONB(features)) {
-            if (objectWriter == null) {
-                objectWriter = writer.getObjectWriter(JSONObject.class);
-            }
-            objectWriter.write(writer, this, null, null, 0);
+            writer.setRootObject(this);
+            writer.write(this);
             return writer.getBytes();
         }
     }
@@ -1154,7 +1174,7 @@ public class JSONObject
      * @param features features to be enabled in parsing
      * @since 2.0.7
      */
-    public <T> T to(TypeReference typeReference, JSONReader.Feature... features) {
+    public <T> T to(TypeReference<?> typeReference, JSONReader.Feature... features) {
         return to(typeReference.getType(), features);
     }
 
@@ -1195,9 +1215,7 @@ public class JSONObject
      *
      * @param clazz specify the {@code Class<T>} to be converted
      * @param features features to be enabled in parsing
-     * @deprecated since 2.0.4, please use {@link #to(Class, JSONReader.Feature...)}
      */
-    @Deprecated
     public <T> T toJavaObject(Class<T> clazz, JSONReader.Feature... features) {
         return to(clazz, features);
     }
@@ -1209,7 +1227,6 @@ public class JSONObject
      * @param features features to be enabled in parsing
      * @deprecated since 2.0.4, please use {@link #to(Type, JSONReader.Feature...)}
      */
-    @Deprecated
     public <T> T toJavaObject(Type type, JSONReader.Feature... features) {
         return to(type, features);
     }
@@ -1221,17 +1238,16 @@ public class JSONObject
      * @param features features to be enabled in parsing
      * @deprecated since 2.0.4, please use {@link #to(Type, JSONReader.Feature...)}
      */
-    @Deprecated
-    public <T> T toJavaObject(TypeReference typeReference, JSONReader.Feature... features) {
+    public <T> T toJavaObject(TypeReference<?> typeReference, JSONReader.Feature... features) {
         return to(typeReference, features);
     }
 
     /**
      * Returns the result of the {@link Type} converter conversion of the associated value in this {@link JSONObject}.
-     *
+     * <p>
      * {@code User user = jsonObject.getObject("user", User.class);}
      *
-     * @param key  the key whose associated value is to be returned
+     * @param key the key whose associated value is to be returned
      * @param type specify the {@link Class} to be converted
      * @return {@code <T>} or null
      * @throws JSONException If no suitable conversion method is found
@@ -1304,7 +1320,7 @@ public class JSONObject
             objectReader = provider.getObjectReader(clazz, fieldBased);
         }
 
-        T object = (T) objectReader.readObject(jsonReader, 0L);
+        T object = (T) objectReader.readObject(jsonReader, null, null, 0L);
         if (!jsonReader.isEnd()) {
             throw new JSONException("not support input " + json);
         }
@@ -1313,10 +1329,10 @@ public class JSONObject
 
     /**
      * Returns the result of the {@link Type} converter conversion of the associated value in this {@link JSONObject}.
-     *
+     * <p>
      * {@code User user = jsonObject.getObject("user", User.class);}
      *
-     * @param key  the key whose associated value is to be returned
+     * @param key the key whose associated value is to be returned
      * @param type specify the {@link Type} to be converted
      * @param features features to be enabled in parsing
      * @return {@code <T>} or {@code null}
@@ -1378,15 +1394,15 @@ public class JSONObject
         jsonReader.context.config(features);
 
         ObjectReader objectReader = provider.getObjectReader(type, fieldBased);
-        return (T) objectReader.readObject(jsonReader);
+        return (T) objectReader.readObject(jsonReader, null, null, 0);
     }
 
     /**
      * Returns the result of the {@link Type} converter conversion of the associated value in this {@link JSONObject}.
-     *
+     * <p>
      * {@code User user = jsonObject.getObject("user", User.class);}
      *
-     * @param key  the key whose associated value is to be returned
+     * @param key the key whose associated value is to be returned
      * @param typeReference specify the {@link TypeReference} to be converted
      * @param features features to be enabled in parsing
      * @return {@code <T>} or {@code null}
@@ -1411,24 +1427,31 @@ public class JSONObject
     }
 
     /**
-     * @param proxy  proxy object, currently useless
+     * @param proxy proxy object, currently useless
      * @param method methods that need reflection
-     * @param args   parameters of invoke
-     * @throws UnsupportedOperationException  If reflection for this method is not supported
+     * @param args parameters of invoke
+     * @throws UnsupportedOperationException If reflection for this method is not supported
      * @throws ArrayIndexOutOfBoundsException If the length of args does not match the length of the method parameter
      */
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         final String methodName = method.getName();
-        Class<?>[] parameterTypes = method.getParameterTypes();
+        int parameterCount = method.getParameterCount();
 
-        if (parameterTypes.length == 1) {
+        Class<?> returnType = method.getReturnType();
+        if (parameterCount == 1) {
             if ("equals".equals(methodName)) {
                 return this.equals(args[0]);
             }
 
-            if (method.getReturnType() != void.class) {
+            Class proxyInterface = null;
+            Class<?>[] interfaces = proxy.getClass().getInterfaces();
+            if (interfaces.length == 1) {
+                proxyInterface = interfaces[0];
+            }
+
+            if (returnType != void.class && returnType != proxyInterface) {
                 throw new JSONException("This method '" + methodName + "' is not a setter");
             }
 
@@ -1449,11 +1472,16 @@ public class JSONObject
             }
 
             put(name, args[0]);
+
+            if (returnType != void.class) {
+                return proxy;
+            }
+
             return null;
         }
 
-        if (parameterTypes.length == 0) {
-            if (method.getReturnType() == void.class) {
+        if (parameterCount == 0) {
+            if (returnType == void.class) {
                 throw new JSONException("This method '" + methodName + "' is not a getter");
             }
 
@@ -1530,11 +1558,11 @@ public class JSONObject
      */
     private String getJSONFieldName(Method method) {
         String name = null;
-        Annotation[] annotations = method.getAnnotations();
+        Annotation[] annotations = getAnnotations(method);
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
-            if (annotationType == JSONField.class) {
-                JSONField jsonField = (JSONField) annotation;
+            JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+            if (Objects.nonNull(jsonField)) {
                 name = jsonField.name();
                 if (name.isEmpty()) {
                     name = null;
@@ -1548,6 +1576,18 @@ public class JSONObject
             }
         }
         return name;
+    }
+
+    public JSONArray putArray(String name) {
+        JSONArray array = new JSONArray();
+        put(name, array);
+        return array;
+    }
+
+    public JSONObject putObject(String name) {
+        JSONObject object = new JSONObject();
+        put(name, object);
+        return object;
     }
 
     /**
@@ -1585,7 +1625,7 @@ public class JSONObject
      * JSONObject object = new JSONObject().fluentPut("a", 1).fluentPut("b", 2).fluentPut("c", 3);
      * </pre>
      *
-     * @param key   key with which the specified value is to be associated
+     * @param key key with which the specified value is to be associated
      * @param value value to be associated with the specified key
      */
     public JSONObject fluentPut(String key, Object value) {
@@ -1603,13 +1643,12 @@ public class JSONObject
     /**
      * @since 2.0.3
      */
-    static void nameFilter(Iterable iterable, NameFilter nameFilter) {
-        for (Iterator it = iterable.iterator(); it.hasNext();) {
-            Object item = it.next();
+    static void nameFilter(Iterable<?> iterable, NameFilter nameFilter) {
+        for (Object item : iterable) {
             if (item instanceof JSONObject) {
                 ((JSONObject) item).nameFilter(nameFilter);
             } else if (item instanceof Iterable) {
-                nameFilter((Iterable) item, nameFilter);
+                nameFilter((Iterable<?>) item, nameFilter);
             }
         }
     }
@@ -1617,9 +1656,10 @@ public class JSONObject
     /**
      * @since 2.0.3
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     static void nameFilter(Map map, NameFilter nameFilter) {
         JSONObject changed = null;
-        for (Iterator it = map.entrySet().iterator(); it.hasNext(); ) {
+        for (Iterator<?> it = map.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
             Object entryKey = entry.getKey();
             Object entryValue = entry.getValue();
@@ -1627,13 +1667,13 @@ public class JSONObject
             if (entryValue instanceof JSONObject) {
                 ((JSONObject) entryValue).nameFilter(nameFilter);
             } else if (entryValue instanceof Iterable) {
-                nameFilter((Iterable) entryValue, nameFilter);
+                nameFilter((Iterable<?>) entryValue, nameFilter);
             }
 
             if (entryKey instanceof String) {
                 String key = (String) entryKey;
                 String processName = nameFilter.process(map, key, entryValue);
-                if (processName != null && processName != key && !processName.equals(key)) {
+                if (processName != null && !processName.equals(key)) {
                     if (changed == null) {
                         changed = new JSONObject();
                     }
@@ -1650,13 +1690,13 @@ public class JSONObject
     /**
      * @since 2.0.3
      */
-    static void valueFilter(Iterable iterable, ValueFilter valueFilter) {
-        for (Iterator it = iterable.iterator(); it.hasNext();) {
-            Object item = it.next();
+    @SuppressWarnings("rawtypes")
+    static void valueFilter(Iterable<?> iterable, ValueFilter valueFilter) {
+        for (Object item : iterable) {
             if (item instanceof Map) {
                 valueFilter((Map) item, valueFilter);
             } else if (item instanceof Iterable) {
-                valueFilter((Iterable) item, valueFilter);
+                valueFilter((Iterable<?>) item, valueFilter);
             }
         }
     }
@@ -1664,16 +1704,17 @@ public class JSONObject
     /**
      * @since 2.0.3
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     static void valueFilter(Map map, ValueFilter valueFilter) {
-        for (Iterator it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry) it.next();
+        for (Object o : map.entrySet()) {
+            Map.Entry entry = (Map.Entry) o;
             Object entryKey = entry.getKey();
             Object entryValue = entry.getValue();
 
             if (entryValue instanceof Map) {
                 valueFilter((Map) entryValue, valueFilter);
             } else if (entryValue instanceof Iterable) {
-                valueFilter((Iterable) entryValue, valueFilter);
+                valueFilter((Iterable<?>) entryValue, valueFilter);
             }
 
             if (entryKey instanceof String) {
@@ -1700,21 +1741,25 @@ public class JSONObject
         nameFilter(this, nameFilter);
     }
 
+    /**
+     * @see JSONObject#JSONObject(Map)
+     */
     @Override
     public JSONObject clone() {
         return new JSONObject(this);
     }
 
+    /**
+     * @see JSONPath#paths(Object)
+     */
     public Object eval(JSONPath path) {
         return path.eval(this);
     }
 
     /**
-     *
      * <pre>
      * JSONObject jsonObject = JSONObject.of();
      * </pre>
-     *
      */
     public static JSONObject of() {
         return new JSONObject();
@@ -1727,11 +1772,11 @@ public class JSONObject
      * JSONObject jsonObject = JSONObject.of("name", "fastjson2");
      * </pre>
      *
-     * @param key   the key of the element
+     * @param key the key of the element
      * @param value the value of the element
      */
     public static JSONObject of(String key, Object value) {
-        JSONObject object = new JSONObject(2);
+        JSONObject object = new JSONObject(1);
         object.put(key, value);
         return object;
     }
@@ -1750,7 +1795,7 @@ public class JSONObject
      * @since 2.0.2
      */
     public static JSONObject of(String k1, Object v1, String k2, Object v2) {
-        JSONObject object = new JSONObject(3);
+        JSONObject object = new JSONObject(2);
         object.put(k1, v1);
         object.put(k2, v2);
         return object;
@@ -1772,7 +1817,7 @@ public class JSONObject
      * @since 2.0.2
      */
     public static JSONObject of(String k1, Object v1, String k2, Object v2, String k3, Object v3) {
-        JSONObject object = new JSONObject(5);
+        JSONObject object = new JSONObject(3);
         object.put(k1, v1);
         object.put(k2, v2);
         object.put(k3, v3);
@@ -1780,10 +1825,106 @@ public class JSONObject
     }
 
     /**
+     * Pack three key-value pairs as {@link JSONObject}
+     *
+     * <pre>
+     * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2", "key3", "value3", "key4", "value4");
+     * </pre>
+     *
+     * @param k1 first key
+     * @param v1 first value
+     * @param k2 second key
+     * @param v2 second value
+     * @param k3 third key
+     * @param v3 third value
+     * @param k4 foud key
+     * @param v4 foud value
+     * @since 2.0.8
+     */
+    public static JSONObject of(
+            String k1,
+            Object v1,
+            String k2,
+            Object v2,
+            String k3,
+            Object v3,
+            String k4,
+            Object v4) {
+        JSONObject object = new JSONObject(4);
+        object.put(k1, v1);
+        object.put(k2, v2);
+        object.put(k3, v3);
+        object.put(k4, v4);
+        return object;
+    }
+
+    /**
+     * Pack three key-value pairs as {@link JSONObject}
+     *
+     * <pre>
+     * JSONObject jsonObject = JSONObject.of("key1", "value1", "key2", "value2", "key3", "value3", "key4", "value4", "key5", "value5");
+     * </pre>
+     *
+     * @param k1 first key
+     * @param v1 first value
+     * @param k2 second key
+     * @param v2 second value
+     * @param k3 third key
+     * @param v3 third value
+     * @param k4 foud key
+     * @param v4 foud value
+     * @param k5 five key
+     * @param v5 five value
+     * @since 2.0.21
+     */
+    public static JSONObject of(
+            String k1,
+            Object v1,
+            String k2,
+            Object v2,
+            String k3,
+            Object v3,
+            String k4,
+            Object v4,
+            String k5,
+            Object v5
+
+    ) {
+        JSONObject object = new JSONObject(5);
+        object.put(k1, v1);
+        object.put(k2, v2);
+        object.put(k3, v3);
+        object.put(k4, v4);
+        object.put(k5, v5);
+        return object;
+    }
+
+    /**
      * See {@link JSON#parseObject} for details
      */
-    public static <T> T parseObject(String text, Class<T> clazz) {
-        return JSON.parseObject(text, clazz);
+    public static <T> T parseObject(String text, Class<T> objectClass) {
+        return JSON.parseObject(text, objectClass);
+    }
+
+    /**
+     * See {@link JSON#parseObject} for details
+     */
+    public static <T> T parseObject(String text, Class<T> objectClass, JSONReader.Feature... features) {
+        return JSON.parseObject(text, objectClass, features);
+    }
+
+    /**
+     * See {@link JSON#parseObject} for details
+     */
+    public static <T> T parseObject(String text, Type objectType, JSONReader.Feature... features) {
+        return JSON.parseObject(text, objectType, features);
+    }
+
+    /**
+     * See {@link JSON#parseObject} for details
+     */
+    public static <T> T parseObject(String text, TypeReference<?> typeReference, JSONReader.Feature... features) {
+        return JSON.parseObject(text, typeReference, features);
     }
 
     /**
@@ -1791,5 +1932,14 @@ public class JSONObject
      */
     public static JSONObject parseObject(String text) {
         return JSON.parseObject(text);
+    }
+
+    /**
+     * See {@link JSON#parse} for details
+     *
+     * @since 2.0.13
+     */
+    public static JSONObject parse(String text, JSONReader.Feature... features) {
+        return JSON.parseObject(text, features);
     }
 }

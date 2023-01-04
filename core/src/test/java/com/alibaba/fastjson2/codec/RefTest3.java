@@ -39,7 +39,7 @@ public class RefTest3 {
             assertSame(obj, obj.get("ref"));
 
             ObjectReader<B> objectReader = creator.createObjectReader(B.class);
-            B b = objectReader.readJSONBObject(JSONReader.ofJSONB(bytes), 0);
+            B b = objectReader.readJSONBObject(JSONReader.ofJSONB(bytes), null, null, 0);
 
             assertSame(b, b.ref);
 

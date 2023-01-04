@@ -3,9 +3,11 @@ package com.alibaba.fastjson2.codec;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
+import java.time.format.DateTimeParseException;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,7 +17,6 @@ public class ExceptionTest {
     public void test_exception() throws Exception {
         IllegalStateException ex = new IllegalStateException();
         String str = JSON.toJSONString(ex);
-        System.out.println(str);
 
         Object jsonObject = JSON.parseObject(str, Object.class);
         assertTrue(jsonObject instanceof Map);
@@ -50,6 +51,36 @@ public class ExceptionTest {
         assertTrue(jsonObject instanceof Map);
 
         IllegalStateException error = (IllegalStateException)
+                JSONB.parseObject(jsonbBytes, Throwable.class, JSONReader.Feature.SupportAutoType);
+        assertNotNull(error);
+    }
+
+    @Test
+    public void test_exception_jsonb_fieldBased() throws Exception {
+        IllegalStateException ex = new IllegalStateException();
+        byte[] jsonbBytes = JSONB.toBytes(ex, JSONWriter.Feature.FieldBased, JSONWriter.Feature.WriteClassName);
+
+        JSONBDump.dump(jsonbBytes);
+
+        Object jsonObject = JSONB.parseObject(jsonbBytes, Object.class);
+        assertTrue(jsonObject instanceof Map);
+
+        IllegalStateException error = (IllegalStateException)
+                JSONB.parseObject(jsonbBytes, Throwable.class, JSONReader.Feature.SupportAutoType);
+        assertNotNull(error);
+    }
+
+    @Test
+    public void test_exception_jsonb_fieldBased_1() throws Exception {
+        DateTimeParseException ex = new DateTimeParseException("aaa", "bbb", 1);
+        byte[] jsonbBytes = JSONB.toBytes(ex, JSONWriter.Feature.FieldBased, JSONWriter.Feature.WriteClassName);
+
+        JSONBDump.dump(jsonbBytes);
+
+        Object jsonObject = JSONB.parseObject(jsonbBytes, Object.class);
+        assertTrue(jsonObject instanceof Map);
+
+        DateTimeParseException error = (DateTimeParseException)
                 JSONB.parseObject(jsonbBytes, Throwable.class, JSONReader.Feature.SupportAutoType);
         assertNotNull(error);
     }

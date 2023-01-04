@@ -4,16 +4,21 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
 final class ObjectReaderImplDoubleArray
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplDoubleArray INSTANCE = new ObjectReaderImplDoubleArray();
 
+    ObjectReaderImplDoubleArray() {
+        super(Double[].class);
+    }
+
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.readIfNull()) {
             return null;
         }
@@ -24,6 +29,10 @@ final class ObjectReaderImplDoubleArray
             for (; ; ) {
                 if (jsonReader.nextIfMatch(']')) {
                     break;
+                }
+
+                if (jsonReader.isEnd()) {
+                    throw new JSONException(jsonReader.info("input end"));
                 }
 
                 int minCapacity = size + 1;
@@ -57,7 +66,7 @@ final class ObjectReaderImplDoubleArray
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         int entryCnt = jsonReader.startArray();
         if (entryCnt == -1) {
             return null;

@@ -9,21 +9,20 @@ import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicReference;
 
 final class FieldReaderAtomicReferenceField<T>
-        extends FieldReaderAtomicReference<T>
-        implements FieldReaderReadOnly<T> {
-    final Field field;
+        extends FieldReaderAtomicReference<T> {
     final boolean readOnly;
 
-    FieldReaderAtomicReferenceField(String fieldName, Type fieldType, Class fieldClass, int ordinal, String format, JSONSchema schema, Field field) {
-        super(fieldName, fieldType, fieldClass, ordinal, 0, format, schema);
-        this.field = field;
+    FieldReaderAtomicReferenceField(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            String format,
+            JSONSchema schema,
+            Field field) {
+        super(fieldName, fieldType, fieldClass, ordinal, 0, format, schema, null, field);
 
         readOnly = Modifier.isFinal(field.getModifiers());
-    }
-
-    @Override
-    public Field getField() {
-        return field;
     }
 
     @Override

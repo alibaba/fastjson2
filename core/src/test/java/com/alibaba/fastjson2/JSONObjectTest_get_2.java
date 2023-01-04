@@ -18,8 +18,10 @@ public class JSONObjectTest_get_2 {
 
     @Test
     public void test_get_obj() {
-        // GraalVM not support
-        // Android not support
+        if (TestUtils.GRAALVM || TestUtils.ANDROID) {
+            return;
+        }
+
         JSONObject obj = new JSONObject();
         {
             Map<String, Object> value = new LinkedHashMap<>();

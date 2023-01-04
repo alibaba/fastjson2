@@ -4,19 +4,19 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
 public final class ObjectArrayReader
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     public static final ObjectArrayReader INSTANCE = new ObjectArrayReader();
     public static final long TYPE_HASH_CODE = Fnv.hashCode64("[O");
 
-    @Override
-    public Class getObjectClass() {
-        return Object[].class;
+    public ObjectArrayReader() {
+        super(Object[].class);
     }
 
     @Override
@@ -30,8 +30,8 @@ public final class ObjectArrayReader
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
-        if (jsonReader.readIfNull()) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.nextIfNullOrEmptyString()) {
             return null;
         }
 
@@ -99,24 +99,15 @@ public final class ObjectArrayReader
             return Arrays.copyOf(values, size);
         }
 
-        if (jsonReader.isString()) {
-            String str = jsonReader.readString();
-            if (str.isEmpty()) {
-                return null;
-            }
-
-            throw new JSONException(jsonReader.info("not support input " + str));
-        }
-
         throw new JSONException(jsonReader.info("TODO"));
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.getType() == BC_TYPED_ANY) {
             ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(Object[].class, TYPE_HASH_CODE, features);
             if (autoTypeObjectReader != this) {
-                return autoTypeObjectReader.readJSONBObject(jsonReader, features);
+                return autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
             }
         }
 
@@ -134,7 +125,7 @@ public final class ObjectArrayReader
                 value = jsonReader.readString();
             } else if (type == BC_TYPED_ANY) {
                 autoTypeValueReader = jsonReader.checkAutoType(Object.class, 0, features);
-                value = autoTypeValueReader.readJSONBObject(jsonReader, features);
+                value = autoTypeValueReader.readJSONBObject(jsonReader, null, null, features);
             } else if (type == BC_NULL) {
                 jsonReader.next();
                 value = null;

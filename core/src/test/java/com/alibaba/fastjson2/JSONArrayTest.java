@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -1033,6 +1034,33 @@ public class JSONArrayTest {
     }
 
     @Test
+    public void test_getJSONArray3() {
+        JSONArray array = new JSONArray();
+        JSONArray a1 = new JSONArray();
+        ArrayList<?> a2 = new ArrayList<>();
+
+        array.add(1);
+        array.add(null);
+        array.add(a1);
+        array.add(a2);
+        array.add(new Object[]{a1, a2, array});
+        array.add(new long[]{123, 456});
+
+        assertNull(array.getJSONArray(1));
+        assertSame(a1, array.getJSONArray(2));
+        assertNotSame(a2, array.getJSONArray(3));
+
+        JSONArray t1 = array.getJSONArray(4);
+        assertSame(a1, t1.get(0));
+        assertSame(a2, t1.get(1));
+        assertSame(array, t1.get(2));
+
+        JSONArray t2 = array.getJSONArray(5);
+        assertEquals(123L, t2.get(0));
+        assertEquals(456L, t2.get(1));
+    }
+
+    @Test
     public void test_toJavaList() {
         assertThrows(JSONException.class,
                 () -> JSONArray.of(1, 2).toJavaList(Bean.class)
@@ -1362,5 +1390,64 @@ public class JSONArrayTest {
     }
 
     public static class Bean {
+    }
+
+    @Test
+    public void getString() {
+        assertEquals(
+                "2022-09-24 17:14:03.321",
+                JSONArray
+                        .of(new Date(1664010843321L))
+                        .getString(0)
+        );
+
+        assertEquals(
+                "2022-09-24 17:14:03.32",
+                JSONArray
+                        .of(new Date(1664010843320L))
+                        .getString(0)
+        );
+
+        assertEquals(
+                "2022-09-24 17:14:03.3",
+                JSONArray
+                        .of(new Date(1664010843300L))
+                        .getString(0)
+        );
+
+        assertEquals(
+                "2022-09-24 17:14:03",
+                JSONArray
+                        .of(new Date(1664010843000L))
+                        .getString(0)
+        );
+
+        Object[] values = new Object[] {
+                Boolean.TRUE,
+                'A',
+                UUID.randomUUID(),
+                1,
+                2L,
+                TimeUnit.DAYS
+        };
+        JSONArray array = JSONArray.of(values);
+        for (int i = 0; i < values.length; i++) {
+            assertEquals(values[i].toString(), array.getString(i));
+        }
+    }
+
+    @Test
+    public void test() {
+        JSONArray root = new JSONArray();
+        JSONArray array = root.addArray();
+        array.add(1);
+        assertEquals("[[1]]", root.toString());
+    }
+
+    @Test
+    public void test1() {
+        JSONArray root = new JSONArray();
+        root.addObject().put("id", 123);
+        assertEquals("[{\"id\":123}]", root.toString());
     }
 }

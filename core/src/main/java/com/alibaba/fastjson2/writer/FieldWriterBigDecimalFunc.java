@@ -7,8 +7,7 @@ import java.math.BigDecimal;
 import java.util.function.Function;
 
 final class FieldWriterBigDecimalFunc<T>
-        extends FieldWriterImpl<T> {
-    final Method method;
+        extends FieldWriter<T> {
     final Function<T, BigDecimal> function;
 
     protected FieldWriterBigDecimalFunc(
@@ -20,14 +19,8 @@ final class FieldWriterBigDecimalFunc<T>
             Method method,
             Function<T, BigDecimal> function
     ) {
-        super(fieldName, ordinal, features, format, label, BigDecimal.class, BigDecimal.class);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, BigDecimal.class, BigDecimal.class, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override
@@ -38,7 +31,11 @@ final class FieldWriterBigDecimalFunc<T>
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         BigDecimal value = function.apply(object);
-        jsonWriter.writeDecimal(value);
+        if (features != 0 || decimalFormat != null) {
+            jsonWriter.writeDecimal(value, features, decimalFormat);
+        } else {
+            jsonWriter.writeDecimal(value);
+        }
     }
 
     @Override
@@ -61,7 +58,11 @@ final class FieldWriterBigDecimalFunc<T>
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeDecimal(value);
+        if (features != 0 || decimalFormat != null) {
+            jsonWriter.writeDecimal(value, features, decimalFormat);
+        } else {
+            jsonWriter.writeDecimal(value);
+        }
         return true;
     }
 }

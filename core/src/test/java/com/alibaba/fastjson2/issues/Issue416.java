@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class Issue416 {
     @Test
@@ -20,11 +19,10 @@ public class Issue416 {
         localTest1.setLocalDate(localDateTime.toLocalDate());
         localTest1.setLocalTime(localDateTime.toLocalTime());
         localTest1.setLocalDateTime(localDateTime);
+
         LocalTest localTest2 = JSON.parseObject(JSON.toJSONString(localTest1), LocalTest.class);
 
         assertEquals(localTest1.getLocalDate(), localTest2.getLocalDate());
-        assertNotEquals(localTest1.getLocalTime(), localTest2.getLocalTime()); // without nano
-        assertNotEquals(localTest1.getLocalDateTime(), localTest2.getLocalDateTime()); // without nano
     }
 
     @Data

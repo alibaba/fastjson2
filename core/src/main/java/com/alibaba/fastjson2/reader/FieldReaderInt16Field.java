@@ -15,54 +15,55 @@ final class FieldReaderInt16Field<T>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        Integer fieldInt = jsonReader.readInt32();
+        int intValue = jsonReader.readInt32Value();
+        Short fieldValue;
+        if (jsonReader.wasNull()) {
+            fieldValue = null;
+        } else {
+            fieldValue = (short) intValue;
+        }
 
         if (schema != null) {
-            schema.assertValidate(fieldInt);
+            schema.assertValidate(fieldValue);
         }
 
         try {
-            field.set(object, fieldInt == null ? null : fieldInt.shortValue());
+            field.set(object, fieldValue);
         } catch (Exception e) {
             throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }
     }
 
     @Override
-    public void accept(T object, int value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
+    public void accept(T object, float value) {
+        accept(object, Short.valueOf((short) value));
+    }
 
-        try {
-            field.set(object, (short) value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+    @Override
+    public void accept(T object, double value) {
+        accept(object, Short.valueOf((short) value));
+    }
+
+    @Override
+    public void accept(T object, int value) {
+        accept(object, Short.valueOf((short) value));
     }
 
     @Override
     public void accept(T object, long value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
-        try {
-            field.set(object, (short) value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
+        accept(object, Short.valueOf((short) value));
     }
 
     @Override
     public void accept(T object, Object value) {
+        Short shortValue = TypeUtils.toShort(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(shortValue);
         }
 
         try {
-            field.set(object,
-                    TypeUtils.toShort(value));
+            field.set(object, shortValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }
@@ -70,6 +71,6 @@ final class FieldReaderInt16Field<T>
 
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
-        return (byte) jsonReader.readInt32Value();
+        return (short) jsonReader.readInt32Value();
     }
 }

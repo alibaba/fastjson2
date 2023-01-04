@@ -2,33 +2,36 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
 
 final class FieldWriterDoubleValField<T>
-        extends FieldWriterImpl<T> {
-    final Field field;
-
+        extends FieldWriter<T> {
     FieldWriterDoubleValField(String name, int ordinal, String format, String label, Field field) {
-        super(name, ordinal, 0, format, label, double.class, double.class);
-        this.field = field;
+        super(name, ordinal, 0, format, label, double.class, double.class, field, null);
     }
 
     @Override
-    public Field getField() {
-        return field;
-    }
-
-    @Override
-    public Object getFieldValue(T object) {
+    public Object getFieldValue(Object object) {
         return getFieldValueDouble(object);
     }
 
-    public double getFieldValueDouble(T object) {
+    public double getFieldValueDouble(Object object) {
+        if (object == null) {
+            throw new JSONException("field.get error, " + fieldName);
+        }
+
         try {
-            return field.getDouble(object);
+            double value;
+            if (fieldOffset != -1) {
+                value = UnsafeUtils.getDouble(object, fieldOffset);
+            } else {
+                value = field.getDouble(object);
+            }
+            return value;
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 
@@ -42,6 +45,10 @@ final class FieldWriterDoubleValField<T>
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         double value = getFieldValueDouble(object);
-        jsonWriter.writeDouble(value);
+        if (decimalFormat != null) {
+            jsonWriter.writeDouble(value, decimalFormat);
+        } else {
+            jsonWriter.writeDouble(value);
+        }
     }
 }

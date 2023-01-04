@@ -11,7 +11,7 @@ import java.util.Locale;
 import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
 
 final class FieldReaderListFieldUF<T>
-        extends FieldReaderListField<T> {
+        extends FieldReaderList<T, Object> {
     final long fieldOffset;
 
     FieldReaderListFieldUF(
@@ -19,6 +19,7 @@ final class FieldReaderListFieldUF<T>
             Type fieldType,
             Class fieldClass,
             Type itemType,
+            Class itemClass,
             int ordinal,
             long features,
             String format,
@@ -26,7 +27,22 @@ final class FieldReaderListFieldUF<T>
             Collection defaultValue,
             JSONSchema schema,
             Field field) {
-        super(fieldName, fieldType, fieldClass, itemType, ordinal, features, format, locale, defaultValue, schema, field);
+        super(
+                fieldName,
+                fieldType,
+                fieldClass,
+                itemType,
+                itemClass,
+                ordinal,
+                features,
+                format,
+                locale,
+                defaultValue,
+                schema,
+                null,
+                field,
+                null
+        );
         fieldOffset = UnsafeUtils.objectFieldOffset(field);
     }
 

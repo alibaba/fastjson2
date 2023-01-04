@@ -2,8 +2,8 @@ package com.alibaba.fastjson2.annotation;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 import com.alibaba.fastjson2_vo.Integer1;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +24,7 @@ public class IgnoreErrorGetterTest {
     @Test
     public void test_feature_lambda() {
         Model model = new Model();
-        ObjectWriter objectWriter = ObjectWriterCreatorLambda.INSTANCE.createObjectWriter(Model.class);
+        ObjectWriter objectWriter = TestUtils.createObjectWriterLambda(Model.class);
         JSONWriter jsonWriter = JSONWriter.of(JSONWriter.Feature.IgnoreErrorGetter);
         objectWriter.write(jsonWriter, model, null, null, 0);
         assertEquals("{}", jsonWriter.toString());

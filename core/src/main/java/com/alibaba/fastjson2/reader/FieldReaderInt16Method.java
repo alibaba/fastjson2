@@ -10,9 +10,9 @@ import java.lang.reflect.Type;
 import java.util.Locale;
 
 final class FieldReaderInt16Method<T>
-        extends FieldReaderObjectMethod<T> {
+        extends FieldReaderObject<T> {
     FieldReaderInt16Method(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Short defaultValue, JSONSchema schema, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter, null, null);
     }
 
     @Override
@@ -32,13 +32,14 @@ final class FieldReaderInt16Method<T>
 
     @Override
     public void accept(T object, Object value) {
+        Short shortValue = TypeUtils.toShort(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(shortValue);
         }
 
         try {
-            method.invoke(object,
-                    TypeUtils.toShort(value));
+            method.invoke(object, shortValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

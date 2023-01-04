@@ -64,10 +64,6 @@ public final class ObjectReaderImplEnum
         return enums[enumIndex];
     }
 
-    public Enum<?> valueOf(int ordinal) {
-        return ordinalEnums[ordinal];
-    }
-
     public Enum getEnumByOrdinal(int ordinal) {
         if (ordinal < 0 || ordinal >= ordinalEnums.length) {
             throw new JSONException("No enum ordinal " + enumClass.getCanonicalName() + "." + ordinal);
@@ -75,12 +71,49 @@ public final class ObjectReaderImplEnum
         return ordinalEnums[ordinal];
     }
 
+    public Enum of(int intValue) {
+        Enum enumValue = null;
+        if (valueField == null) {
+            enumValue = getEnumByOrdinal(intValue);
+        } else {
+            try {
+                if (valueField instanceof Field) {
+                    for (Enum e : enums) {
+                        if (((Field) valueField).getInt(e) == intValue) {
+                            enumValue = e;
+                            break;
+                        }
+                    }
+                } else {
+                    Method valueMethod = (Method) valueField;
+                    for (Enum e : enums) {
+                        if (((Number) valueMethod.invoke(e)).intValue() == intValue) {
+                            enumValue = e;
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception error) {
+                throw new JSONException("parse enum error, class " + enumClass.getName() + ", value " + intValue, error);
+            }
+        }
+
+        if (enumValue == null) {
+            throw new JSONException("None enum ordinal or value " + intValue);
+        }
+        return enumValue;
+    }
+
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         byte type = jsonReader.getType();
-        if (jsonReader.nextIfMatch(BC_TYPED_ANY)) {
-            long typeNameHash = jsonReader.readTypeHashCode();
-            if (typeNameHash != this.typeNameHash) {
+        if (type == BC_TYPED_ANY) {
+            ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(enumClass, 0L, features);
+            if (autoTypeObjectReader != null) {
+                if (autoTypeObjectReader != this) {
+                    return autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+                }
+            } else {
                 throw new JSONException(jsonReader.info("not support enumType : " + jsonReader.getString()));
             }
         }
@@ -88,7 +121,14 @@ public final class ObjectReaderImplEnum
         Enum fieldValue;
         boolean isInt = (type >= BC_INT32_NUM_MIN && type <= BC_INT32);
         if (isInt) {
-            int ordinal = jsonReader.readInt32Value();
+            int ordinal;
+            if (type <= BC_INT32_NUM_MAX) {
+                ordinal = type;
+                jsonReader.next();
+            } else {
+                ordinal = jsonReader.readInt32Value();
+            }
+
             fieldValue = getEnumByOrdinal(ordinal);
         } else {
             fieldValue = getEnumByHashCode(
@@ -103,7 +143,7 @@ public final class ObjectReaderImplEnum
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (createMethodParamType != null) {
             Object paramValue = jsonReader.read(createMethodParamType);
             try {

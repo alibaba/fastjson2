@@ -162,6 +162,20 @@ public class BigDecimalTest {
     }
 
     @Test
+    public void test_jsonb_value_cast_str_1() {
+        byte[] jsonbBytes = {124, 2, 48, 0};
+        BigDecimal decimal = JSONB.parseObject(jsonbBytes, BigDecimal.class);
+        assertEquals(BigDecimal.ZERO, decimal);
+    }
+
+    @Test
+    public void test_jsonb_value_cast_str_2() {
+        byte[] jsonbBytes = {122, 8, 45, 56, 51, 56, 56, 54, 48, 56};
+        BigDecimal decimal = JSONB.parseObject(jsonbBytes, BigDecimal.class);
+        assertEquals(BigDecimal.valueOf(-8388608), decimal);
+    }
+
+    @Test
     public void test_utf8() {
         for (BigDecimal id : values) {
             BigDecimal1 vo = new BigDecimal1();
@@ -276,5 +290,12 @@ public class BigDecimalTest {
         byte[] jsonbBytes = JSONB.toBytes(Collections.singletonMap("id", new BigDecimal("638860.1")));
         BigDecimal1 vo = JSONB.parseObject(jsonbBytes, BigDecimal1.class);
         assertEquals(new BigDecimal("638860.1"), vo.getId());
+    }
+
+    @Test
+    public void test_decimal_5() {
+        JSON.parse("{\"doubleval\": 12345.123E256}");
+        JSON.parse("{\"doubleval\": 1.123E300}");
+        JSON.parse("{\"doubleval\": 123.123E256}");
     }
 }

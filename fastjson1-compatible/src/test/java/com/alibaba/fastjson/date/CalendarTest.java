@@ -2,6 +2,7 @@ package com.alibaba.fastjson.date;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson2.JSONFactory;
 import org.junit.jupiter.api.Test;
 
 import java.util.Calendar;
@@ -52,6 +53,17 @@ public class CalendarTest {
 
         VO vo2 = JSON.parseObject(text, VO.class);
         assertEquals(vo.getCalendar().getTimeInMillis(), vo2.getCalendar().getTimeInMillis());
+    }
+
+    @Test
+    public void getObjectClass() {
+        assertEquals(
+                Calendar.class,
+                JSONFactory
+                        .getDefaultObjectReaderProvider()
+                        .getObjectReader(Calendar.class)
+                        .getObjectClass()
+        );
     }
 
     public static class VO {

@@ -11,6 +11,7 @@ import static com.alibaba.fastjson2.writer.ObjectWriters.objectWriter;
 
 public class AwtWriterModule
         implements ObjectWriterModule {
+    // Android not support
     public static AwtWriterModule INSTANCE = new AwtWriterModule();
 
     @Override

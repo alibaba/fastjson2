@@ -1,26 +1,29 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.util.Fnv;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
 final class ObjectReaderImplInt32ValueArray
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplInt32ValueArray INSTANCE = new ObjectReaderImplInt32ValueArray();
+    static final long TYPE_HASH = Fnv.hashCode64("[I");
 
-    @Override
-    public Class getObjectClass() {
-        return int[].class;
+    ObjectReaderImplInt32ValueArray() {
+        super(int[].class);
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isJSONB()) {
-            return readJSONBObject(jsonReader, features);
+            return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         if (jsonReader.readIfNull()) {
@@ -33,6 +36,10 @@ final class ObjectReaderImplInt32ValueArray
             for (; ; ) {
                 if (jsonReader.nextIfMatch(']')) {
                     break;
+                }
+
+                if (jsonReader.isEnd()) {
+                    throw new JSONException(jsonReader.info("input end"));
                 }
 
                 int minCapacity = size + 1;
@@ -66,7 +73,14 @@ final class ObjectReaderImplInt32ValueArray
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
+            long typeHashCode = jsonReader.readTypeHashCode();
+            if (typeHashCode != TYPE_HASH) {
+                throw new JSONException("not support autoType : " + jsonReader.getString());
+            }
+        }
+
         int entryCnt = jsonReader.startArray();
         if (entryCnt == -1) {
             return null;

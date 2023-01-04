@@ -5,14 +5,14 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 
 final class ObjectArrayTypedReader
-        extends ObjectReaderBaseModule.PrimitiveImpl {
-    final Class objectClass;
+        extends ObjectReaderPrimitive {
     final Class componentType;
     final Class componentClass;
     final long componentClassHash;
@@ -20,7 +20,7 @@ final class ObjectArrayTypedReader
     final long typeNameHashCode;
 
     ObjectArrayTypedReader(Class objectClass) {
-        this.objectClass = objectClass;
+        super(objectClass);
         this.componentType = objectClass.getComponentType();
         String componentTypeName = TypeUtils.getTypeName(componentType);
         this.componentClassHash = Fnv.hashCode64(componentTypeName);
@@ -31,9 +31,9 @@ final class ObjectArrayTypedReader
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isJSONB()) {
-            return readJSONBObject(jsonReader, 0);
+            return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
         if (jsonReader.readIfNull()) {
@@ -80,7 +80,7 @@ final class ObjectArrayTypedReader
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY) {
             jsonReader.next();
             long typeHash = jsonReader.readTypeHashCode();
@@ -99,7 +99,7 @@ final class ObjectArrayTypedReader
                         throw new JSONException(jsonReader.info("auotype not support : " + jsonReader.getString()));
                     }
 
-                    return autoTypeObjectReader.readObject(jsonReader, features);
+                    return autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, features);
                 }
 
                 throw new JSONException(jsonReader.info("not support autotype : " + jsonReader.getString()));
@@ -126,7 +126,7 @@ final class ObjectArrayTypedReader
             } else {
                 ObjectReader autoTypeReader = jsonReader.checkAutoType(componentClass, componentClassHash, features);
                 if (autoTypeReader != null) {
-                    value = autoTypeReader.readJSONBObject(jsonReader, features);
+                    value = autoTypeReader.readJSONBObject(jsonReader, null, null, features);
                 } else {
                     value = jsonReader.read(componentType);
                 }

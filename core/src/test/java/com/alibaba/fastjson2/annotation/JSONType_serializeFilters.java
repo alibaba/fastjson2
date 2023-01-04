@@ -11,14 +11,14 @@ public class JSONType_serializeFilters {
     public void test_for_jsonField() {
         Model m = new Model();
         String json = JSON.toJSONString(m);
-        assertEquals("{\"id\":0}", json);
+        assertEquals("{\"id\":123}", json);
     }
 
     public static class MyValueFilter
             implements ValueFilter {
         @Override
         public Object apply(Object object, String name, Object value) {
-            if (name.equals("id") && value == null) {
+            if (name.equals("id") && ((Number) value).intValue() == 0) {
                 return 123;
             }
 

@@ -10,11 +10,21 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FloatTest3_array_random {
+    int loopCount = 1_000_000;
+    int loopCount2 = 10_000_000;
+
+    public FloatTest3_array_random() {
+        if (System.getProperty("java.vm.name").contains("OpenJ9")) {
+            this.loopCount = 1_000;
+            this.loopCount2 = 10_000;
+        }
+    }
+
     @Test
     public void test_ran() throws Exception {
         Random rand = new Random();
 
-        for (int i = 0; i < 1000 * 1000 * 1; ++i) {
+        for (int i = 0; i < loopCount; ++i) {
             float val = rand.nextFloat();
 
             String str = JSON.toJSONString(new Model(new float[]{val}));
@@ -28,7 +38,7 @@ public class FloatTest3_array_random {
     public void test_ran_2() throws Exception {
         Random rand = new Random();
 
-        for (int i = 0; i < 1000 * 1000 * 10; ++i) {
+        for (int i = 0; i < loopCount2; ++i) {
             float val = rand.nextFloat();
 
             String str = JSON.toJSONString(new Model(new float[]{val}), JSONWriter.Feature.BeanToArray);

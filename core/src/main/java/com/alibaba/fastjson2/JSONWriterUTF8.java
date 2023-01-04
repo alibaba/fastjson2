@@ -4,20 +4,23 @@ import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.RyuDouble;
 import com.alibaba.fastjson2.util.RyuFloat;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.UUID;
+import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.JSONWriter.Feature.NotWriteDefaultValue;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 
 class JSONWriterUTF8
@@ -28,16 +31,9 @@ class JSONWriterUTF8
     protected byte[] bytes;
 
     JSONWriterUTF8(Context ctx) {
-        super(ctx, StandardCharsets.UTF_8);
-
-        int identityHashCode = System.identityHashCode(Thread.currentThread());
-        bytes = JSONFactory.CACHE_BYTES.getAndSet(
-                cachedIndex = identityHashCode & 3, null
-        );
-
-        if (bytes == null) {
-            bytes = new byte[1024];
-        }
+        super(ctx, null, false, StandardCharsets.UTF_8);
+        cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
+        bytes = JSONFactory.allocateByteArray(cachedIndex);
     }
 
     @Override
@@ -47,13 +43,9 @@ class JSONWriterUTF8
         writeRaw(REF_PREF);
         writeString(path);
         if (off == bytes.length) {
-            int minCapacity = off + 1;
             int oldCapacity = bytes.length;
             int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -68,7 +60,7 @@ class JSONWriterUTF8
         int charsLen = ((bytes.length - 1) / 3 + 1) << 2; // base64 character count
 
         ensureCapacity(off + charsLen + 2);
-        this.bytes[off++] = '"';
+        this.bytes[off++] = (byte) quote;
 
         int eLen = (bytes.length / 3) * 3; // Length of even 24-bits.
 
@@ -96,20 +88,58 @@ class JSONWriterUTF8
             this.bytes[off++] = '=';
         }
 
-        this.bytes[off++] = '"';
+        this.bytes[off++] = (byte) quote;
+    }
+
+    @Override
+    public void writeHex(byte[] bytes) {
+        if (bytes == null) {
+            writeNull();
+            return;
+        }
+
+        int charsLen = bytes.length * 2 + 3;
+
+        ensureCapacity(off + charsLen + 2);
+        bytes[off++] = 'x';
+        bytes[off++] = '\'';
+
+        for (int i = 0; i < bytes.length; ++i) {
+            byte b = bytes[i];
+
+            int a = b & 0xFF;
+            int b0 = a >> 4;
+            int b1 = a & 0xf;
+
+            bytes[off++] = (byte) (b0 + (b0 < 10 ? 48 : 55));
+            bytes[off++] = (byte) (b1 + (b1 < 10 ? 48 : 55));
+        }
+
+        bytes[off++] = '\'';
     }
 
     @Override
     public void close() {
-        if (bytes.length > CACHE_THREAD) {
-            return;
-        }
-        JSONFactory.CACHE_BYTES.set(cachedIndex, bytes);
+        JSONFactory.releaseByteArray(cachedIndex, bytes);
+    }
+
+    public int size() {
+        return off;
     }
 
     @Override
     public byte[] getBytes() {
         return Arrays.copyOf(bytes, off);
+    }
+
+    @Override
+    public byte[] getBytes(Charset charset) {
+        if (charset == StandardCharsets.UTF_8) {
+            return Arrays.copyOf(bytes, off);
+        }
+
+        String str = toString();
+        return str.getBytes(charset);
     }
 
     @Override
@@ -129,7 +159,7 @@ class JSONWriterUTF8
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -148,7 +178,7 @@ class JSONWriterUTF8
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -169,7 +199,7 @@ class JSONWriterUTF8
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -189,7 +219,7 @@ class JSONWriterUTF8
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -210,7 +240,7 @@ class JSONWriterUTF8
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -230,7 +260,7 @@ class JSONWriterUTF8
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -250,7 +280,7 @@ class JSONWriterUTF8
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -274,10 +304,17 @@ class JSONWriterUTF8
 
         char[] chars = JDKUtils.getCharArray(str);
 
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+        boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
+
         // ensureCapacity
         int minCapacity = off
                 + chars.length * 3 // utf8 3 bytes
                 + 2;
+
+        if (escapeNoneAscii || browserSecure) {
+            minCapacity += chars.length * 3;
+        }
 
         if (minCapacity - this.bytes.length > 0) {
             int oldCapacity = this.bytes.length;
@@ -285,7 +322,7 @@ class JSONWriterUTF8
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -295,25 +332,70 @@ class JSONWriterUTF8
 
         bytes[off++] = (byte) quote;
 
-        // vector optimize
         int i = 0;
+
+        // vector optimize 8
+        while (i + 8 <= chars.length) {
+            char c0 = chars[i];
+            char c1 = chars[i + 1];
+            char c2 = chars[i + 2];
+            char c3 = chars[i + 3];
+            char c4 = chars[i + 4];
+            char c5 = chars[i + 5];
+            char c6 = chars[i + 6];
+            char c7 = chars[i + 7];
+            if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
+                    || c4 == quote || c5 == quote || c6 == quote || c7 == quote
+                    || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
+                    || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\'
+                    || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
+                    || c4 < ' ' || c5 < ' ' || c6 < ' ' || c7 < ' '
+                    || c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F
+                    || c4 > 0x007F || c5 > 0x007F || c6 > 0x007F || c7 > 0x007F
+                    || (browserSecure
+                    && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'
+                    || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'
+                    || c2 == '<' || c2 == '>' || c2 == '(' || c2 == ')'
+                    || c3 == '<' || c3 == '>' || c3 == '(' || c3 == ')'
+                    || c4 == '<' || c4 == '>' || c4 == '(' || c4 == ')'
+                    || c5 == '<' || c5 == '>' || c5 == '(' || c5 == ')'
+                    || c6 == '<' || c6 == '>' || c6 == '(' || c6 == ')'
+                    || c7 == '<' || c7 == '>' || c7 == '(' || c7 == ')'))
+            ) {
+                break;
+            }
+
+            bytes[off] = (byte) c0;
+            bytes[off + 1] = (byte) c1;
+            bytes[off + 2] = (byte) c2;
+            bytes[off + 3] = (byte) c3;
+            bytes[off + 4] = (byte) c4;
+            bytes[off + 5] = (byte) c5;
+            bytes[off + 6] = (byte) c6;
+            bytes[off + 7] = (byte) c7;
+            off += 8;
+            i += 8;
+        }
+
+        // vector optimize 4
         while (i + 4 <= chars.length) {
             char c0 = chars[i];
             char c1 = chars[i + 1];
             char c2 = chars[i + 2];
             char c3 = chars[i + 3];
-            if (c0 == quote || c1 == quote || c2 == quote || c3 == quote) {
+            if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
+                    || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
+                    || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
+                    || c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F
+                    || (browserSecure
+                    && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'
+                    || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'
+                    || c2 == '<' || c2 == '>' || c2 == '(' || c2 == ')'
+                    || c3 == '<' || c3 == '>' || c3 == '(' || c3 == ')'))
+            ) {
                 break;
             }
-            if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\') {
-                break;
-            }
-            if (c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' ') {
-                break;
-            }
-            if (c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F) {
-                break;
-            }
+
             bytes[off] = (byte) c0;
             bytes[off + 1] = (byte) c1;
             bytes[off + 2] = (byte) c2;
@@ -321,7 +403,301 @@ class JSONWriterUTF8
             off += 4;
             i += 4;
         }
+
         if (i + 2 <= chars.length) {
+            char c0 = chars[i];
+            char c1 = chars[i + 1];
+
+            if (!(c0 == quote || c1 == quote
+                    || c0 == '\\' || c1 == '\\'
+                    || c0 < ' ' || c1 < ' '
+                    || c0 > 0x007F || c1 > 0x007F)
+                    && !(browserSecure && (c0 == '<' || c0 == '>' || c0 == '('
+                    || c0 == ')' || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'))
+            ) {
+                bytes[off] = (byte) c0;
+                bytes[off + 1] = (byte) c1;
+                off += 2;
+                i += 2;
+            }
+        }
+        if (i + 1 == chars.length) {
+            char c0 = chars[i];
+            if (c0 != quote
+                    && c0 != '\\'
+                    && c0 >= ' '
+                    && c0 <= 0x007F
+                    && !(browserSecure && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'))
+            ) {
+                bytes[off++] = (byte) c0;
+                bytes[off++] = (byte) quote;
+                return;
+            }
+        }
+
+        int rest = chars.length - i;
+        minCapacity = off + rest * 6 + 2;
+        if (minCapacity - this.bytes.length > 0) {
+            int oldCapacity = this.bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+        }
+
+        for (; i < chars.length; ++i) { // ascii none special fast write
+            char ch = chars[i];
+            if ((ch >= 0x0000) && (ch <= 0x007F)) {
+                switch (ch) {
+                    case '\\':
+                        bytes[off++] = (byte) '\\';
+                        bytes[off++] = (byte) '\\';
+                        break;
+                    case '\n':
+                        bytes[off++] = (byte) '\\';
+                        bytes[off++] = (byte) 'n';
+                        break;
+                    case '\r':
+                        bytes[off++] = (byte) '\\';
+                        bytes[off++] = (byte) 'r';
+                        break;
+                    case '\f':
+                        bytes[off++] = (byte) '\\';
+                        bytes[off++] = (byte) 'f';
+                        break;
+                    case '\b':
+                        bytes[off++] = (byte) '\\';
+                        bytes[off++] = (byte) 'b';
+                        break;
+                    case '\t':
+                        bytes[off++] = (byte) '\\';
+                        bytes[off++] = (byte) 't';
+                        break;
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                        bytes[off++] = '\\';
+                        bytes[off++] = 'u';
+                        bytes[off++] = '0';
+                        bytes[off++] = '0';
+                        bytes[off++] = '0';
+                        bytes[off++] = (byte) ('0' + (int) ch);
+                        break;
+                    case 11:
+                    case 14:
+                    case 15:
+                        bytes[off++] = '\\';
+                        bytes[off++] = 'u';
+                        bytes[off++] = '0';
+                        bytes[off++] = '0';
+                        bytes[off++] = '0';
+                        bytes[off++] = (byte) ('a' + (ch - 10));
+                        break;
+                    case 16:
+                    case 17:
+                    case 18:
+                    case 19:
+                    case 20:
+                    case 21:
+                    case 22:
+                    case 23:
+                    case 24:
+                    case 25:
+                        bytes[off++] = '\\';
+                        bytes[off++] = 'u';
+                        bytes[off++] = '0';
+                        bytes[off++] = '0';
+                        bytes[off++] = '1';
+                        bytes[off++] = (byte) ('0' + (ch - 16));
+                        break;
+                    case 26:
+                    case 27:
+                    case 28:
+                    case 29:
+                    case 30:
+                    case 31:
+                        bytes[off++] = '\\';
+                        bytes[off++] = 'u';
+                        bytes[off++] = '0';
+                        bytes[off++] = '0';
+                        bytes[off++] = '1';
+                        bytes[off++] = (byte) ('a' + (ch - 26));
+                        break;
+                    case '<':
+                    case '>':
+                    case '(':
+                    case ')':
+                        if (browserSecure) {
+                            bytes[off++] = '\\';
+                            bytes[off++] = 'u';
+                            bytes[off++] = (byte) DIGITS[(ch >>> 12) & 15];
+                            bytes[off++] = (byte) DIGITS[(ch >>> 8) & 15];
+                            bytes[off++] = (byte) DIGITS[(ch >>> 4) & 15];
+                            bytes[off++] = (byte) DIGITS[ch & 15];
+                        } else {
+                            bytes[off++] = (byte) ch;
+                        }
+                        break;
+                    default:
+                        if (ch == quote) {
+                            bytes[off++] = (byte) '\\';
+                            bytes[off++] = (byte) quote;
+                        } else {
+                            bytes[off++] = (byte) ch;
+                        }
+                        break;
+                }
+            } else if (escapeNoneAscii) {
+                bytes[off++] = '\\';
+                bytes[off++] = 'u';
+                bytes[off++] = (byte) DIGITS[(ch >>> 12) & 15];
+                bytes[off++] = (byte) DIGITS[(ch >>> 8) & 15];
+                bytes[off++] = (byte) DIGITS[(ch >>> 4) & 15];
+                bytes[off++] = (byte) DIGITS[ch & 15];
+            } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
+                final int uc;
+                if (ch >= '\uD800' && ch < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
+                    if (chars.length - i < 2) {
+                        uc = -1;
+                    } else {
+                        char d = chars[i + 1];
+                        // d >= '\uDC00' && d < ('\uDFFF' + 1)
+                        if (d >= '\uDC00' && d < ('\uDFFF' + 1)) { // Character.isLowSurrogate(d)
+                            uc = ((ch << 10) + d) + (0x010000 - ('\uD800' << 10) - '\uDC00'); // Character.toCodePoint(c, d)
+                        } else {
+//                            throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
+                            bytes[off++] = (byte) '?';
+                            continue;
+                        }
+                    }
+                } else {
+                    //
+                    if (ch >= '\uDC00' && ch < ('\uDFFF' + 1)) { // Character.isLowSurrogate(c)
+                        bytes[off++] = (byte) '?';
+                        continue;
+//                        throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
+                    } else {
+                        uc = ch;
+                    }
+                }
+
+                if (uc < 0) {
+                    bytes[off++] = (byte) '?';
+                } else {
+                    bytes[off++] = (byte) (0xf0 | ((uc >> 18)));
+                    bytes[off++] = (byte) (0x80 | ((uc >> 12) & 0x3f));
+                    bytes[off++] = (byte) (0x80 | ((uc >> 6) & 0x3f));
+                    bytes[off++] = (byte) (0x80 | (uc & 0x3f));
+                    i++; // 2 chars
+                }
+            } else if (ch > 0x07FF) {
+                bytes[off++] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
+                bytes[off++] = (byte) (0x80 | ((ch >> 6) & 0x3F));
+                bytes[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+            } else {
+                bytes[off++] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
+                bytes[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+            }
+        }
+
+        bytes[off++] = (byte) quote;
+    }
+
+    @Override
+    public void writeString(char[] chars, int offset, int len, boolean quoted) {
+        boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
+
+        // ensureCapacity
+        int minCapacity = off
+                + chars.length * 3 // utf8 3 bytes
+                + 2;
+
+        if (escapeNoneAscii) {
+            minCapacity += len * 3;
+        }
+
+        if (minCapacity - this.bytes.length > 0) {
+            int oldCapacity = this.bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+        }
+
+        if (quoted) {
+            bytes[off++] = (byte) quote;
+        }
+
+        int i = 0;
+
+        // vector optimize 8
+        while (i + 8 <= len) {
+            char c0 = chars[i];
+            char c1 = chars[i + 1];
+            char c2 = chars[i + 2];
+            char c3 = chars[i + 3];
+            char c4 = chars[i + 4];
+            char c5 = chars[i + 5];
+            char c6 = chars[i + 6];
+            char c7 = chars[i + 7];
+            if (c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote
+                    || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\' || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\'
+                    || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' ' || c4 < ' ' || c5 < ' ' || c6 < ' ' || c7 < ' '
+                    || c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F || c4 > 0x007F || c5 > 0x007F || c6 > 0x007F || c7 > 0x007F) {
+                break;
+            }
+
+            bytes[off] = (byte) c0;
+            bytes[off + 1] = (byte) c1;
+            bytes[off + 2] = (byte) c2;
+            bytes[off + 3] = (byte) c3;
+            bytes[off + 4] = (byte) c4;
+            bytes[off + 5] = (byte) c5;
+            bytes[off + 6] = (byte) c6;
+            bytes[off + 7] = (byte) c7;
+            off += 8;
+            i += 8;
+        }
+
+        // vector optimize 4
+        while (i + 4 <= len) {
+            char c0 = chars[i];
+            char c1 = chars[i + 1];
+            char c2 = chars[i + 2];
+            char c3 = chars[i + 3];
+            if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
+                    || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
+                    || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
+                    || c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F) {
+                break;
+            }
+
+            bytes[off] = (byte) c0;
+            bytes[off + 1] = (byte) c1;
+            bytes[off + 2] = (byte) c2;
+            bytes[off + 3] = (byte) c3;
+            off += 4;
+            i += 4;
+        }
+
+        if (i + 2 <= len) {
             char c0 = chars[i];
             char c1 = chars[i + 1];
 
@@ -336,7 +712,7 @@ class JSONWriterUTF8
                 i += 2;
             }
         }
-        if (i + 1 == chars.length) {
+        if (i + 1 == len) {
             char c0 = chars[i];
             if (c0 != quote
                     && c0 != '\\'
@@ -344,11 +720,14 @@ class JSONWriterUTF8
                     && c0 <= 0x007F
             ) {
                 bytes[off++] = (byte) c0;
-                bytes[off++] = (byte) quote;
+                if (quoted) {
+                    bytes[off++] = (byte) quote;
+                }
                 return;
             }
         }
-        for (; i < chars.length; ++i) { // ascii none special fast write
+
+        for (; i < len; ++i) { // ascii none special fast write
             char ch = chars[i];
             if ((ch >= 0x0000) && (ch <= 0x007F)) {
                 switch (ch) {
@@ -440,6 +819,13 @@ class JSONWriterUTF8
                         }
                         break;
                 }
+            } else if (escapeNoneAscii) {
+                bytes[off++] = '\\';
+                bytes[off++] = 'u';
+                bytes[off++] = (byte) DIGITS[(ch >>> 12) & 15];
+                bytes[off++] = (byte) DIGITS[(ch >>> 8) & 15];
+                bytes[off++] = (byte) DIGITS[(ch >>> 4) & 15];
+                bytes[off++] = (byte) DIGITS[ch & 15];
             } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
                 final int uc;
                 if (ch >= '\uD800' && ch < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
@@ -486,6 +872,130 @@ class JSONWriterUTF8
             }
         }
 
+        if (quoted) {
+            bytes[off++] = (byte) quote;
+        }
+    }
+
+    @Override
+    public void writeChar(char ch) {
+        int minCapacity = bytes.length + 8;
+        if (minCapacity - bytes.length > 0) {
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
+
+        bytes[off++] = (byte) quote;
+        if ((ch >= 0x0000) && (ch <= 0x007F)) {
+            switch (ch) {
+                case '\\':
+                    bytes[off++] = (byte) '\\';
+                    bytes[off++] = (byte) '\\';
+                    break;
+                case '\n':
+                    bytes[off++] = (byte) '\\';
+                    bytes[off++] = (byte) 'n';
+                    break;
+                case '\r':
+                    bytes[off++] = (byte) '\\';
+                    bytes[off++] = (byte) 'r';
+                    break;
+                case '\f':
+                    bytes[off++] = (byte) '\\';
+                    bytes[off++] = (byte) 'f';
+                    break;
+                case '\b':
+                    bytes[off++] = (byte) '\\';
+                    bytes[off++] = (byte) 'b';
+                    break;
+                case '\t':
+                    bytes[off++] = (byte) '\\';
+                    bytes[off++] = (byte) 't';
+                    break;
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                    bytes[off++] = '\\';
+                    bytes[off++] = 'u';
+                    bytes[off++] = '0';
+                    bytes[off++] = '0';
+                    bytes[off++] = '0';
+                    bytes[off++] = (byte) ('0' + (int) ch);
+                    break;
+                case 11:
+                case 14:
+                case 15:
+                    bytes[off++] = '\\';
+                    bytes[off++] = 'u';
+                    bytes[off++] = '0';
+                    bytes[off++] = '0';
+                    bytes[off++] = '0';
+                    bytes[off++] = (byte) ('a' + (ch - 10));
+                    break;
+                case 16:
+                case 17:
+                case 18:
+                case 19:
+                case 20:
+                case 21:
+                case 22:
+                case 23:
+                case 24:
+                case 25:
+                    bytes[off++] = '\\';
+                    bytes[off++] = 'u';
+                    bytes[off++] = '0';
+                    bytes[off++] = '0';
+                    bytes[off++] = '1';
+                    bytes[off++] = (byte) ('0' + (ch - 16));
+                    break;
+                case 26:
+                case 27:
+                case 28:
+                case 29:
+                case 30:
+                case 31:
+                    bytes[off++] = '\\';
+                    bytes[off++] = 'u';
+                    bytes[off++] = '0';
+                    bytes[off++] = '0';
+                    bytes[off++] = '1';
+                    bytes[off++] = (byte) ('a' + (ch - 26));
+                    break;
+                default:
+                    if (ch == quote) {
+                        bytes[off++] = (byte) '\\';
+                        bytes[off++] = (byte) quote;
+                    } else {
+                        bytes[off++] = (byte) ch;
+                    }
+                    break;
+            }
+        } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
+            throw new JSONException("illegal char " + ch);
+        } else if (ch > 0x07FF) {
+            bytes[off++] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
+            bytes[off++] = (byte) (0x80 | ((ch >> 6) & 0x3F));
+            bytes[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+        } else {
+            bytes[off++] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
+            bytes[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+        }
+
         bytes[off++] = (byte) quote;
     }
 
@@ -528,7 +1038,7 @@ class JSONWriterUTF8
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -562,7 +1072,7 @@ class JSONWriterUTF8
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -585,7 +1095,7 @@ class JSONWriterUTF8
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -615,7 +1125,7 @@ class JSONWriterUTF8
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -623,6 +1133,33 @@ class JSONWriterUTF8
             bytes = Arrays.copyOf(bytes, newCapacity);
         }
         bytes[off++] = (byte) ch;
+    }
+
+    @Override
+    public void writeRaw(char c0, char c1) {
+        if (c0 < 0 || c0 > 128) {
+            throw new JSONException("not support " + c0);
+        }
+        if (c1 < 0 || c1 > 128) {
+            throw new JSONException("not support " + c1);
+        }
+
+        if (off + 1 >= bytes.length) {
+            int minCapacity = off + 2;
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
+        bytes[off++] = (byte) c0;
+        bytes[off++] = (byte) c1;
     }
 
     @Override
@@ -636,7 +1173,7 @@ class JSONWriterUTF8
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -661,7 +1198,7 @@ class JSONWriterUTF8
             if (newCapacity - minCapacity < 0) {
                 newCapacity = minCapacity;
             }
-            if (newCapacity - MAX_ARRAY_SIZE > 0) {
+            if (newCapacity - maxArraySize > 0) {
                 throw new OutOfMemoryError();
             }
 
@@ -721,7 +1258,7 @@ class JSONWriterUTF8
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -769,12 +1306,12 @@ class JSONWriterUTF8
 
     @Override
     public void writeInt64(long i) {
-        if ((context.features & Feature.WriteNonStringValueAsString.mask) != 0
-                || ((context.features & Feature.BrowserCompatible.mask) != 0
-                && (i > 9007199254740991L || i < -9007199254740991L))) {
-            String str = Long.toString(i);
-            writeString(str);
-            return;
+        boolean writeAsString = false;
+        if ((context.features & (Feature.WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0) {
+            writeAsString = true;
+        } else if ((context.features & Feature.BrowserCompatible.mask) != 0
+                && (i > 9007199254740991L || i < -9007199254740991L)) {
+            writeAsString = true;
         }
 
         if (i == Long.MIN_VALUE) {
@@ -832,13 +1369,16 @@ class JSONWriterUTF8
         {
             // inline ensureCapacity
             int minCapacity = off + size;
+            if (writeAsString) {
+                minCapacity += 2;
+            }
             if (minCapacity - this.bytes.length > 0) {
                 int oldCapacity = this.bytes.length;
                 int newCapacity = oldCapacity + (oldCapacity >> 1);
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -846,7 +1386,11 @@ class JSONWriterUTF8
                 this.bytes = Arrays.copyOf(this.bytes, newCapacity);
             }
         }
-//        IOUtils.getChars(i, off + size, bytes);
+
+        if (writeAsString) {
+            bytes[off++] = '"';
+        }
+
         {
             int index = off + size;
             long q;
@@ -897,6 +1441,10 @@ class JSONWriterUTF8
             }
         }
         off += size;
+
+        if (writeAsString) {
+            bytes[off++] = '"';
+        }
     }
 
     @Override
@@ -906,9 +1454,25 @@ class JSONWriterUTF8
             return;
         }
 
-        ensureCapacity(off + 15);
+        boolean writeNonStringValueAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
+        int minCapacity = off + 15;
+        if (writeNonStringValueAsString) {
+            minCapacity += 2;
+        }
+
+        ensureCapacity(minCapacity);
+
+        if (writeNonStringValueAsString) {
+            bytes[off++] = '"';
+        }
+
         int len = RyuFloat.toString(value, bytes, off);
         off += len;
+
+        if (writeNonStringValueAsString) {
+            bytes[off++] = '"';
+        }
     }
 
     @Override
@@ -918,9 +1482,55 @@ class JSONWriterUTF8
             return;
         }
 
-        ensureCapacity(off + 24);
+        boolean writeNonStringValueAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
+        int minCapacity = off + 24;
+        if (writeNonStringValueAsString) {
+            minCapacity += 2;
+        }
+
+        ensureCapacity(minCapacity);
+
+        if (writeNonStringValueAsString) {
+            bytes[off++] = '"';
+        }
+
         int len = RyuDouble.toString(value, bytes, off);
         off += len;
+
+        if (writeNonStringValueAsString) {
+            bytes[off++] = '"';
+        }
+    }
+
+    @Override
+    public void writeDateTime14(
+            int year,
+            int month,
+            int dayOfMonth,
+            int hour,
+            int minute,
+            int second) {
+        ensureCapacity(off + 16);
+
+        bytes[off++] = (byte) quote;
+
+        bytes[off++] = (byte) (year / 1000 + '0');
+        bytes[off++] = (byte) ((year / 100) % 10 + '0');
+        bytes[off++] = (byte) ((year / 10) % 10 + '0');
+        bytes[off++] = (byte) (year % 10 + '0');
+        bytes[off++] = (byte) (month / 10 + '0');
+        bytes[off++] = (byte) (month % 10 + '0');
+        bytes[off++] = (byte) (dayOfMonth / 10 + '0');
+        bytes[off++] = (byte) (dayOfMonth % 10 + '0');
+        bytes[off++] = (byte) (hour / 10 + '0');
+        bytes[off++] = (byte) (hour % 10 + '0');
+        bytes[off++] = (byte) (minute / 10 + '0');
+        bytes[off++] = (byte) (minute % 10 + '0');
+        bytes[off++] = (byte) (second / 10 + '0');
+        bytes[off++] = (byte) (second % 10 + '0');
+
+        bytes[off++] = (byte) quote;
     }
 
     @Override
@@ -933,7 +1543,7 @@ class JSONWriterUTF8
             int second) {
         ensureCapacity(off + 21);
 
-        bytes[off++] = '"';
+        bytes[off++] = (byte) quote;
 
         bytes[off++] = (byte) (year / 1000 + '0');
         bytes[off++] = (byte) ((year / 100) % 10 + '0');
@@ -955,9 +1565,10 @@ class JSONWriterUTF8
         bytes[off++] = (byte) (second / 10 + '0');
         bytes[off++] = (byte) (second % 10 + '0');
 
-        bytes[off++] = '"';
+        bytes[off++] = (byte) quote;
     }
 
+    @Override
     public void writeLocalDate(LocalDate date) {
         int year = date.getYear();
         int month = date.getMonthValue();
@@ -965,16 +1576,16 @@ class JSONWriterUTF8
 
         int yearSize = IOUtils.stringSize(year);
         int len = 8 + yearSize;
-        byte[] chars = new byte[len];
-        chars[0] = '"';
-        Arrays.fill(chars, 1, len - 1, (byte) '0');
-        IOUtils.getChars(year, yearSize + 1, chars);
-        chars[yearSize + 1] = '-';
-        IOUtils.getChars(month, yearSize + 4, chars);
-        chars[yearSize + 4] = '-';
-        IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
-        chars[len - 1] = '"';
-        writeRaw(chars);
+        ensureCapacity(off + len);
+        bytes[off] = (byte) quote;
+        Arrays.fill(bytes, off + 1, off + len - 1, (byte) '0');
+        IOUtils.getChars(year, off + yearSize + 1, bytes);
+        bytes[off + yearSize + 1] = '-';
+        IOUtils.getChars(month, off + yearSize + 4, bytes);
+        bytes[off + yearSize + 4] = '-';
+        IOUtils.getChars(dayOfMonth, off + yearSize + 7, bytes);
+        bytes[off + len - 1] = (byte) quote;
+        off += len;
     }
 
     @Override
@@ -1021,65 +1632,82 @@ class JSONWriterUTF8
             small = nano;
         }
 
-        byte[] chars = new byte[len];
-        chars[0] = '"';
-        Arrays.fill(chars, 1, len - 1, (byte) '0');
-        IOUtils.getChars(year, yearSize + 1, chars);
-        chars[yearSize + 1] = '-';
-        IOUtils.getChars(month, yearSize + 4, chars);
-        chars[yearSize + 4] = '-';
-        IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
-        chars[yearSize + 7] = ' ';
-        IOUtils.getChars(hour, yearSize + 10, chars);
-        chars[yearSize + 10] = ':';
-        IOUtils.getChars(minute, yearSize + 13, chars);
-        chars[yearSize + 13] = ':';
-        IOUtils.getChars(second, yearSize + 16, chars);
-        if (small != 0) {
-            chars[yearSize + 16] = '.';
-            IOUtils.getChars(small, len - 1, chars);
-        }
-        chars[len - 1] = '"';
+        ensureCapacity(off + len);
 
-        writeRaw(chars);
+        bytes[off] = (byte) quote;
+        Arrays.fill(bytes, off + 1, off + len - 1, (byte) '0');
+        IOUtils.getChars(year, off + yearSize + 1, bytes);
+        bytes[off + yearSize + 1] = '-';
+        IOUtils.getChars(month, off + yearSize + 4, bytes);
+        bytes[off + yearSize + 4] = '-';
+        IOUtils.getChars(dayOfMonth, off + yearSize + 7, bytes);
+        bytes[off + yearSize + 7] = ' ';
+        IOUtils.getChars(hour, off + yearSize + 10, bytes);
+        bytes[off + yearSize + 10] = ':';
+        IOUtils.getChars(minute, off + yearSize + 13, bytes);
+        bytes[off + yearSize + 13] = ':';
+        IOUtils.getChars(second, off + yearSize + 16, bytes);
+        if (small != 0) {
+            bytes[off + yearSize + 16] = '.';
+            IOUtils.getChars(small, off + len - 1, bytes);
+        }
+        bytes[off + len - 1] = (byte) quote;
+
+        off += len;
+    }
+
+    @Override
+    public void writeDateYYYMMDD8(int year, int month, int dayOfMonth) {
+        ensureCapacity(off + 10);
+
+        bytes[off] = (byte) quote;
+        bytes[off + 1] = (byte) (year / 1000 + '0');
+        bytes[off + 2] = (byte) ((year / 100) % 10 + '0');
+        bytes[off + 3] = (byte) ((year / 10) % 10 + '0');
+        bytes[off + 4] = (byte) (year % 10 + '0');
+        bytes[off + 5] = (byte) (month / 10 + '0');
+        bytes[off + 6] = (byte) (month % 10 + '0');
+        bytes[off + 7] = (byte) (dayOfMonth / 10 + '0');
+        bytes[off + 8] = (byte) (dayOfMonth % 10 + '0');
+        bytes[off + 9] = (byte) quote;
+        off += 10;
     }
 
     @Override
     public void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
-        byte[] chars = new byte[12];
+        ensureCapacity(off + 12);
 
-        chars[0] = '"';
-        chars[1] = (byte) (year / 1000 + '0');
-        chars[2] = (byte) ((year / 100) % 10 + '0');
-        chars[3] = (byte) ((year / 10) % 10 + '0');
-        chars[4] = (byte) (year % 10 + '0');
-        chars[5] = '-';
-        chars[6] = (byte) (month / 10 + '0');
-        chars[7] = (byte) (month % 10 + '0');
-        chars[8] = '-';
-        chars[9] = (byte) (dayOfMonth / 10 + '0');
-        chars[10] = (byte) (dayOfMonth % 10 + '0');
-        chars[11] = '"';
-
-        writeRaw(chars);
+        bytes[off] = (byte) quote;
+        bytes[off + 1] = (byte) (year / 1000 + '0');
+        bytes[off + 2] = (byte) ((year / 100) % 10 + '0');
+        bytes[off + 3] = (byte) ((year / 10) % 10 + '0');
+        bytes[off + 4] = (byte) (year % 10 + '0');
+        bytes[off + 5] = '-';
+        bytes[off + 6] = (byte) (month / 10 + '0');
+        bytes[off + 7] = (byte) (month % 10 + '0');
+        bytes[off + 8] = '-';
+        bytes[off + 9] = (byte) (dayOfMonth / 10 + '0');
+        bytes[off + 10] = (byte) (dayOfMonth % 10 + '0');
+        bytes[off + 11] = (byte) quote;
+        off += 12;
     }
 
     @Override
     public void writeTimeHHMMSS8(int hour, int minute, int second) {
-        byte[] chars = new byte[10];
+        ensureCapacity(off + 10);
 
-        chars[0] = '"';
-        chars[1] = (byte) (hour / 10 + '0');
-        chars[2] = (byte) (hour % 10 + '0');
-        chars[3] = ':';
-        chars[4] = (byte) (minute / 10 + '0');
-        chars[5] = (byte) (minute % 10 + '0');
-        chars[6] = ':';
-        chars[7] = (byte) (second / 10 + '0');
-        chars[8] = (byte) (second % 10 + '0');
-        chars[9] = '"';
+        bytes[off] = (byte) quote;
+        bytes[off + 1] = (byte) (hour / 10 + '0');
+        bytes[off + 2] = (byte) (hour % 10 + '0');
+        bytes[off + 3] = ':';
+        bytes[off + 4] = (byte) (minute / 10 + '0');
+        bytes[off + 5] = (byte) (minute % 10 + '0');
+        bytes[off + 6] = ':';
+        bytes[off + 7] = (byte) (second / 10 + '0');
+        bytes[off + 8] = (byte) (second % 10 + '0');
+        bytes[off + 9] = (byte) quote;
 
-        writeRaw(chars);
+        off += 10;
     }
 
     @Override
@@ -1122,21 +1750,21 @@ class JSONWriterUTF8
             small = nano;
         }
 
-        byte[] chars = new byte[len];
-        chars[0] = '"';
-        Arrays.fill(chars, 1, chars.length - 1, (byte) '0');
-        IOUtils.getChars(hour, 3, chars);
-        chars[3] = ':';
-        IOUtils.getChars(minute, 6, chars);
-        chars[6] = ':';
-        IOUtils.getChars(second, 9, chars);
+        ensureCapacity(off + len);
+        bytes[off] = (byte) quote;
+        Arrays.fill(bytes, off + 1, off + len - 1, (byte) '0');
+        IOUtils.getChars(hour, off + 3, bytes);
+        bytes[off + 3] = ':';
+        IOUtils.getChars(minute, off + 6, bytes);
+        bytes[off + 6] = ':';
+        IOUtils.getChars(second, off + 9, bytes);
         if (small != 0) {
-            chars[9] = '.';
-            IOUtils.getChars(small, len - 1, chars);
+            bytes[off + 9] = '.';
+            IOUtils.getChars(small, off + len - 1, bytes);
         }
-        chars[len - 1] = '"';
+        bytes[off + len - 1] = (byte) quote;
 
-        writeRaw(chars);
+        off += len;
     }
 
     @Override
@@ -1157,10 +1785,13 @@ class JSONWriterUTF8
 
         int len = 17;
 
+        char firstZoneChar = '\0';
         int zoneSize;
         if ("UTC".equals(zoneId)) {
             zoneId = "Z";
             zoneSize = 1;
+        } else if (zoneId.length() != 0 && ((firstZoneChar = zoneId.charAt(0)) == '+' || firstZoneChar == '-')) {
+            zoneSize = zoneId.length();
         } else {
             zoneSize = 2 + zoneId.length();
         }
@@ -1200,34 +1831,35 @@ class JSONWriterUTF8
             small = nano;
         }
 
-        byte[] chars = new byte[len];
-        chars[0] = '"';
-        Arrays.fill(chars, 1, chars.length - 1, (byte) '0');
-        IOUtils.getChars(year, yearSize + 1, chars);
-        chars[yearSize + 1] = '-';
-        IOUtils.getChars(month, yearSize + 4, chars);
-        chars[yearSize + 4] = '-';
-        IOUtils.getChars(dayOfMonth, yearSize + 7, chars);
-        chars[yearSize + 7] = 'T';
-        IOUtils.getChars(hour, yearSize + 10, chars);
-        chars[yearSize + 10] = ':';
-        IOUtils.getChars(minute, yearSize + 13, chars);
-        chars[yearSize + 13] = ':';
-        IOUtils.getChars(second, yearSize + 16, chars);
+        ensureCapacity(off + len);
+        bytes[off] = (byte) quote;
+        Arrays.fill(bytes, off + 1, off + len - 1, (byte) '0');
+        IOUtils.getChars(year, off + yearSize + 1, bytes);
+        bytes[off + yearSize + 1] = '-';
+        IOUtils.getChars(month, off + yearSize + 4, bytes);
+        bytes[off + yearSize + 4] = '-';
+        IOUtils.getChars(dayOfMonth, off + yearSize + 7, bytes);
+        bytes[off + yearSize + 7] = 'T';
+        IOUtils.getChars(hour, off + yearSize + 10, bytes);
+        bytes[off + yearSize + 10] = ':';
+        IOUtils.getChars(minute, off + yearSize + 13, bytes);
+        bytes[off + yearSize + 13] = ':';
+        IOUtils.getChars(second, off + yearSize + 16, bytes);
         if (small != 0) {
-            chars[yearSize + 16] = '.';
-            IOUtils.getChars(small, len - 1 - zoneSize, chars);
+            bytes[off + yearSize + 16] = '.';
+            IOUtils.getChars(small, off + len - 1 - zoneSize, bytes);
         }
         if (zoneSize == 1) {
-            chars[len - 2] = 'Z';
+            bytes[off + len - 2] = 'Z';
+        } else if (firstZoneChar == '+' || firstZoneChar == '-') {
+            zoneId.getBytes(0, zoneId.length(), bytes, off + len - zoneSize - 1);
         } else {
-            chars[len - zoneSize - 1] = '[';
-            zoneId.getBytes(0, zoneId.length(), chars, len - zoneSize);
-            chars[len - 2] = ']';
+            bytes[off + len - zoneSize - 1] = '[';
+            zoneId.getBytes(0, zoneId.length(), bytes, off + len - zoneSize);
+            bytes[off + len - 2] = ']';
         }
-        chars[len - 1] = '"';
-
-        writeRaw(chars);
+        bytes[off + len - 1] = (byte) quote;
+        off += len;
     }
 
     @Override
@@ -1255,7 +1887,7 @@ class JSONWriterUTF8
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
                 }
-                if (newCapacity - MAX_ARRAY_SIZE > 0) {
+                if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
 
@@ -1276,7 +1908,8 @@ class JSONWriterUTF8
             int minute,
             int second,
             int millis,
-            int offsetSeconds
+            int offsetSeconds,
+            boolean timeZone
     ) {
         int millislen = millis == 0 ? 0 : IOUtils.stringSize(millis) + 1;
         if (millis == 0) {
@@ -1292,69 +1925,76 @@ class JSONWriterUTF8
                 millislen = 4;
             }
         }
-        int zonelen = offsetSeconds == 0 ? 1 : 6;
+        int zonelen;
+        if (timeZone) {
+            zonelen = offsetSeconds == 0 ? 1 : 6;
+        } else {
+            zonelen = 0;
+        }
         int offset = offsetSeconds / 3600;
         int len = 21 + millislen + zonelen;
-        byte[] chars = new byte[len];
+        ensureCapacity(off + len);
 
-        chars[0] = '"';
-        chars[1] = (byte) (year / 1000 + '0');
-        chars[2] = (byte) ((year / 100) % 10 + '0');
-        chars[3] = (byte) ((year / 10) % 10 + '0');
-        chars[4] = (byte) (year % 10 + '0');
-        chars[5] = '-';
-        chars[6] = (byte) (month / 10 + '0');
-        chars[7] = (byte) (month % 10 + '0');
-        chars[8] = '-';
-        chars[9] = (byte) (dayOfMonth / 10 + '0');
-        chars[10] = (byte) (dayOfMonth % 10 + '0');
-        chars[11] = 'T';
-        chars[12] = (byte) (hour / 10 + '0');
-        chars[13] = (byte) (hour % 10 + '0');
-        chars[14] = ':';
-        chars[15] = (byte) (minute / 10 + '0');
-        chars[16] = (byte) (minute % 10 + '0');
-        chars[17] = ':';
-        chars[18] = (byte) (second / 10 + '0');
-        chars[19] = (byte) (second % 10 + '0');
+        bytes[off] = '"';
+        bytes[off + 1] = (byte) (year / 1000 + '0');
+        bytes[off + 2] = (byte) ((year / 100) % 10 + '0');
+        bytes[off + 3] = (byte) ((year / 10) % 10 + '0');
+        bytes[off + 4] = (byte) (year % 10 + '0');
+        bytes[off + 5] = '-';
+        bytes[off + 6] = (byte) (month / 10 + '0');
+        bytes[off + 7] = (byte) (month % 10 + '0');
+        bytes[off + 8] = '-';
+        bytes[off + 9] = (byte) (dayOfMonth / 10 + '0');
+        bytes[off + 10] = (byte) (dayOfMonth % 10 + '0');
+        bytes[off + 11] = timeZone ? (byte) 'T' : (byte) ' ';
+        bytes[off + 12] = (byte) (hour / 10 + '0');
+        bytes[off + 13] = (byte) (hour % 10 + '0');
+        bytes[off + 14] = ':';
+        bytes[off + 15] = (byte) (minute / 10 + '0');
+        bytes[off + 16] = (byte) (minute % 10 + '0');
+        bytes[off + 17] = ':';
+        bytes[off + 18] = (byte) (second / 10 + '0');
+        bytes[off + 19] = (byte) (second % 10 + '0');
         if (millislen > 0) {
-            chars[20] = '.';
-            Arrays.fill(chars, 21, 20 + millislen, (byte) '0');
+            bytes[off + 20] = '.';
+            Arrays.fill(bytes, off + 21, off + 20 + millislen, (byte) '0');
             if (millis < 10) {
-                IOUtils.getChars(millis, 20 + millislen, chars);
+                IOUtils.getChars(millis, off + 20 + millislen, bytes);
             } else {
                 if (millis % 100 == 0) {
-                    IOUtils.getChars(millis / 100, 20 + millislen, chars);
+                    IOUtils.getChars(millis / 100, off + 20 + millislen, bytes);
                 } else if (millis % 10 == 0) {
-                    IOUtils.getChars(millis / 10, 20 + millislen, chars);
+                    IOUtils.getChars(millis / 10, off + 20 + millislen, bytes);
                 } else {
-                    IOUtils.getChars(millis, 20 + millislen, chars);
+                    IOUtils.getChars(millis, off + 20 + millislen, bytes);
                 }
             }
         }
-        if (offsetSeconds == 0) {
-            chars[20 + millislen] = 'Z';
-        } else {
-            int offsetAbs = Math.abs(offset);
 
-            if (offset >= 0) {
-                chars[20 + millislen] = '+';
+        if (timeZone) {
+            if (offsetSeconds == 0) {
+                bytes[off + 20 + millislen] = 'Z';
             } else {
-                chars[20 + millislen] = '-';
-            }
-            chars[20 + millislen + 1] = '0';
-            IOUtils.getChars(offsetAbs, 20 + millislen + 3, chars);
-            chars[20 + millislen + 3] = ':';
-            chars[20 + millislen + 4] = '0';
-            int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
-            if (offsetMinutes < 0) {
-                offsetMinutes = -offsetMinutes;
-            }
-            IOUtils.getChars(offsetMinutes, 20 + millislen + zonelen, chars);
-        }
-        chars[chars.length - 1] = '"';
+                int offsetAbs = Math.abs(offset);
 
-        writeRaw(chars);
+                if (offset >= 0) {
+                    bytes[off + 20 + millislen] = '+';
+                } else {
+                    bytes[off + 20 + millislen] = '-';
+                }
+                bytes[off + 20 + millislen + 1] = '0';
+                IOUtils.getChars(offsetAbs, off + 20 + millislen + 3, bytes);
+                bytes[off + 20 + millislen + 3] = ':';
+                bytes[off + 20 + millislen + 4] = '0';
+                int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
+                if (offsetMinutes < 0) {
+                    offsetMinutes = -offsetMinutes;
+                }
+                IOUtils.getChars(offsetMinutes, off + 20 + millislen + zonelen, bytes);
+            }
+        }
+        bytes[off + len - 1] = '"';
+        off += len;
     }
 
     @Override
@@ -1382,12 +2022,272 @@ class JSONWriterUTF8
         }
     }
 
+    @Override
     public void writeNameRaw(char[] chars) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
     }
 
+    @Override
     public void writeNameRaw(char[] bytes, int offset, int len) {
-        throw new UnsupportedOperationException();
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
+    public final void write(JSONObject map) {
+        if (map == null) {
+            this.writeNull();
+            return;
+        }
+
+        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
+                | PrettyFormat.mask
+                | NotWriteEmptyArray.mask
+                | NotWriteDefaultValue.mask;
+
+        if ((context.features & NONE_DIRECT_FEATURES) != 0) {
+            ObjectWriter objectWriter = context.getObjectWriter(map.getClass());
+            objectWriter.write(this, map, null, null, 0);
+            return;
+        }
+
+        if (off == bytes.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
+        bytes[off++] = '{';
+
+        boolean first = true;
+        for (Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator(); it.hasNext(); ) {
+            if (!first) {
+                if (off == bytes.length) {
+                    int minCapacity = off + 1;
+                    int oldCapacity = bytes.length;
+                    int newCapacity = oldCapacity + (oldCapacity >> 1);
+                    if (newCapacity - minCapacity < 0) {
+                        newCapacity = minCapacity;
+                    }
+                    if (newCapacity - maxArraySize > 0) {
+                        throw new OutOfMemoryError();
+                    }
+
+                    // minCapacity is usually close to size, so this is a win:
+                    bytes = Arrays.copyOf(bytes, newCapacity);
+                }
+                bytes[off++] = ',';
+            }
+
+            Map.Entry<String, Object> next = it.next();
+            Object value = next.getValue();
+            if (value == null && (context.features & Feature.WriteMapNullValue.mask) == 0) {
+                continue;
+            }
+
+            first = false;
+            writeString(next.getKey());
+
+            if (off == bytes.length) {
+                int minCapacity = off + 1;
+                int oldCapacity = bytes.length;
+                int newCapacity = oldCapacity + (oldCapacity >> 1);
+                if (newCapacity - minCapacity < 0) {
+                    newCapacity = minCapacity;
+                }
+                if (newCapacity - maxArraySize > 0) {
+                    throw new OutOfMemoryError();
+                }
+
+                // minCapacity is usually close to size, so this is a win:
+                bytes = Arrays.copyOf(bytes, newCapacity);
+            }
+            bytes[off++] = ':';
+
+            if (value == null) {
+                writeNull();
+                continue;
+            }
+
+            Class<?> valueClass = value.getClass();
+            if (valueClass == String.class) {
+                writeString((String) value);
+                continue;
+            }
+
+            if (valueClass == Integer.class) {
+                writeInt32((Integer) value);
+                continue;
+            }
+
+            if (valueClass == Long.class) {
+                writeInt64((Long) value);
+                continue;
+            }
+
+            if (valueClass == Boolean.class) {
+                writeBool((Boolean) value);
+                continue;
+            }
+
+            if (valueClass == BigDecimal.class) {
+                writeDecimal((BigDecimal) value);
+                continue;
+            }
+
+            if (valueClass == JSONArray.class) {
+                write((JSONArray) value);
+                continue;
+            }
+
+            if (valueClass == JSONObject.class) {
+                write((JSONObject) value);
+                continue;
+            }
+
+            ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
+            objectWriter.write(this, value, null, null, 0);
+        }
+
+        if (off == bytes.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
+        bytes[off++] = '}';
+    }
+
+    @Override
+    public final void write(List array) {
+        if (array == null) {
+            this.writeArrayNull();
+            return;
+        }
+
+        final long NONE_DIRECT_FEATURES = ReferenceDetection.mask
+                | PrettyFormat.mask
+                | NotWriteEmptyArray.mask
+                | NotWriteDefaultValue.mask;
+
+        if ((context.features & NONE_DIRECT_FEATURES) != 0) {
+            ObjectWriter objectWriter = context.getObjectWriter(array.getClass());
+            objectWriter.write(this, array, null, null, 0);
+            return;
+        }
+
+        if (off == bytes.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
+        bytes[off++] = '[';
+
+        boolean first = true;
+        for (int i = 0, size = array.size(); i < size; i++) {
+            if (!first) {
+                if (off == bytes.length) {
+                    int minCapacity = off + 1;
+                    int oldCapacity = bytes.length;
+                    int newCapacity = oldCapacity + (oldCapacity >> 1);
+                    if (newCapacity - minCapacity < 0) {
+                        newCapacity = minCapacity;
+                    }
+                    if (newCapacity - maxArraySize > 0) {
+                        throw new OutOfMemoryError();
+                    }
+
+                    // minCapacity is usually close to size, so this is a win:
+                    bytes = Arrays.copyOf(bytes, newCapacity);
+                }
+                bytes[off++] = ',';
+            }
+            first = false;
+            Object value = array.get(i);
+
+            if (value == null) {
+                writeNull();
+                continue;
+            }
+
+            Class<?> valueClass = value.getClass();
+            if (valueClass == String.class) {
+                writeString((String) value);
+                continue;
+            }
+
+            if (valueClass == Integer.class) {
+                writeInt32((Integer) value);
+                continue;
+            }
+
+            if (valueClass == Long.class) {
+                writeInt64((Long) value);
+                continue;
+            }
+
+            if (valueClass == Boolean.class) {
+                writeBool((Boolean) value);
+                continue;
+            }
+
+            if (valueClass == BigDecimal.class) {
+                writeDecimal((BigDecimal) value);
+                continue;
+            }
+
+            if (valueClass == JSONArray.class) {
+                write((JSONArray) value);
+                continue;
+            }
+
+            if (valueClass == JSONObject.class) {
+                write((JSONObject) value);
+                continue;
+            }
+
+            ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
+            objectWriter.write(this, value, null, null, 0);
+        }
+        if (off == bytes.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
+        bytes[off++] = ']';
     }
 
     @Override
@@ -1403,5 +2303,20 @@ class JSONWriterUTF8
             buf[--charPos] = (byte) DIGITS[((int) val) & mask];
             val >>>= 4;
         } while (charPos > offset);
+    }
+
+    @Override
+    public int flushTo(OutputStream out, Charset charset) throws IOException {
+        if (charset != null && charset != StandardCharsets.UTF_8) {
+            throw new JSONException("UnsupportedOperation");
+        }
+        if (off == 0) {
+            return 0;
+        }
+
+        int len = off;
+        out.write(bytes, 0, off);
+        off = 0;
+        return len;
     }
 }

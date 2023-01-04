@@ -10,7 +10,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 final class ObjectWriterImplCollection
-        extends ObjectWriterImplIterable {
+        extends ObjectWriterBaseModule.PrimitiveImpl {
     static final ObjectWriterImplCollection INSTANCE = new ObjectWriterImplCollection();
 
     static final byte[] LINKED_HASH_SET_JSONB_TYPE_NAME_BYTES = JSONB.toBytes(TypeUtils.getTypeName(LinkedHashSet.class));
@@ -18,6 +18,9 @@ final class ObjectWriterImplCollection
 
     static final byte[] TREE_SET_JSONB_TYPE_NAME_BYTES = JSONB.toBytes(TypeUtils.getTypeName(TreeSet.class));
     static final long TREE_SET_JSONB_TYPE_HASH = Fnv.hashCode64(TypeUtils.getTypeName(TreeSet.class));
+
+    Type itemType;
+    long features;
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
@@ -121,5 +124,54 @@ final class ObjectWriterImplCollection
                 jsonWriter.popPath(item);
             }
         }
+    }
+
+    @Override
+    public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        if (jsonWriter.jsonb) {
+            writeJSONB(jsonWriter, object, fieldName, fieldType, features);
+            return;
+        }
+
+        if (object == null) {
+            jsonWriter.writeNull();
+            return;
+        }
+
+        if (object instanceof Set && jsonWriter.isWriteTypeInfo(object, features | this.features)) {
+            jsonWriter.writeRaw("Set");
+        }
+
+        Iterable iterable = (Iterable) object;
+
+        Class previousClass = null;
+        ObjectWriter previousObjectWriter = null;
+        jsonWriter.startArray();
+        int i = 0;
+        for (Iterator it = iterable.iterator(); it.hasNext(); ) {
+            if (i != 0) {
+                jsonWriter.writeComma();
+            }
+
+            Object item = it.next();
+            if (item == null) {
+                jsonWriter.writeNull();
+                continue;
+            }
+            Class<?> itemClass = item.getClass();
+            ObjectWriter itemObjectWriter;
+            if (itemClass == previousClass) {
+                itemObjectWriter = previousObjectWriter;
+            } else {
+                itemObjectWriter = jsonWriter.getObjectWriter(itemClass);
+                previousClass = itemClass;
+                previousObjectWriter = itemObjectWriter;
+            }
+
+            itemObjectWriter.write(jsonWriter, item, i, this.itemType, this.features);
+
+            ++i;
+        }
+        jsonWriter.endArray();
     }
 }

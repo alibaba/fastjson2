@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderImplDate;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
+import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,6 +19,9 @@ import java.util.Date;
 import java.util.Locale;
 
 public class JdbcSupport {
+    static Class CLASS_CLOB;
+    static volatile boolean CLASS_CLOB_ERROR;
+
     public static ObjectReader createTimeReader(Class objectClass, String format, Locale locale) {
         return new TimeReader(objectClass, format, locale);
     }
@@ -38,8 +42,63 @@ public class JdbcSupport {
         return new TimeWriter(format);
     }
 
+    public static ObjectWriter createClobWriter(Class objectClass) {
+        return new ClobWriter(objectClass);
+    }
+
     public static ObjectWriter createTimestampWriter(Class objectClass, String format) {
         return new TimestampWriter(objectClass, format);
+    }
+
+    public static boolean isClob(Class objectClass) {
+        if (CLASS_CLOB == null && !CLASS_CLOB_ERROR) {
+            try {
+                CLASS_CLOB = Class.forName("java.sql.Clob");
+            } catch (Throwable e) {
+                CLASS_CLOB_ERROR = true;
+            }
+        }
+
+        return CLASS_CLOB != null && CLASS_CLOB.isAssignableFrom(objectClass);
+    }
+
+    static class ClobWriter
+            implements ObjectWriter {
+        final Class objectClass;
+        final Method getCharacterStream;
+
+        public ClobWriter(Class objectClass) {
+            if (CLASS_CLOB == null && !CLASS_CLOB_ERROR) {
+                try {
+                    CLASS_CLOB = Class.forName("java.sql.Clob");
+                } catch (Throwable e) {
+                    CLASS_CLOB_ERROR = true;
+                }
+            }
+
+            if (CLASS_CLOB == null) {
+                throw new JSONException("class java.sql.Clob not found");
+            }
+
+            this.objectClass = objectClass;
+            try {
+                getCharacterStream = CLASS_CLOB.getMethod("getCharacterStream");
+            } catch (Throwable e) {
+                throw new JSONException("getMethod getCharacterStream error", e);
+            }
+        }
+
+        @Override
+        public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+            Reader reader;
+            try {
+                reader = (Reader) getCharacterStream.invoke(object);
+            } catch (Throwable e) {
+                throw new JSONException("invoke method getCharacterStream error", e);
+            }
+
+            jsonWriter.writeString(reader);
+        }
     }
 
     static class TimeReader
@@ -66,12 +125,12 @@ public class JdbcSupport {
         }
 
         @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            return readObject(jsonReader, features);
+        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+            return readObject(jsonReader, fieldType, fieldName, features);
         }
 
         @Override
-        public Object readObject(JSONReader jsonReader, long features) {
+        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
 
@@ -162,7 +221,7 @@ public class JdbcSupport {
                 return;
             }
 
-            JSONWriter.Context context = jsonWriter.getContext();
+            JSONWriter.Context context = jsonWriter.context;
             if (formatUnixTime || context.isDateFormatUnixTime()) {
                 long millis = ((Date) object).getTime();
                 long seconds = millis / 1000;
@@ -190,7 +249,7 @@ public class JdbcSupport {
                 int minute = zdt.getMinute();
                 int second = zdt.getSecond();
                 int nano = 0;
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds);
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds, true);
                 return;
             }
 
@@ -279,7 +338,7 @@ public class JdbcSupport {
                 return;
             }
 
-            JSONWriter.Context ctx = jsonWriter.getContext();
+            JSONWriter.Context ctx = jsonWriter.context;
 
             Date date = (Date) object;
 
@@ -294,15 +353,16 @@ public class JdbcSupport {
             ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, zoneId);
             int offsetSeconds = zdt.getOffset().getTotalSeconds();
 
-            if (formatISO8601 || ctx.isDateFormatISO8601()) {
+            if ((formatISO8601 || ctx.isDateFormatISO8601()) && (zdt.getNano() % 1000_000 == 0)) {
                 int year = zdt.getYear();
                 int month = zdt.getMonthValue();
                 int dayOfMonth = zdt.getDayOfMonth();
                 int hour = zdt.getHour();
                 int minute = zdt.getMinute();
                 int second = zdt.getSecond();
-                int nano = zdt.getNano() / 1000_000;
-                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds);
+                int nano = zdt.getNano();
+                int millis = nano / 1000_000;
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, true);
                 return;
             }
 
@@ -334,7 +394,7 @@ public class JdbcSupport {
                 if (nanos == 0) {
                     jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
                 } else if (nanos % 1000_000 == 0) {
-                    jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nanos / 1000_000, offsetSeconds);
+                    jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nanos / 1000_000, offsetSeconds, false);
                 } else {
                     jsonWriter.writeLocalDateTime(zdt.toLocalDateTime());
                 }
@@ -363,7 +423,7 @@ public class JdbcSupport {
         }
 
         @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
+        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
 
@@ -378,7 +438,7 @@ public class JdbcSupport {
                 return null;
             }
 
-            return readObject(jsonReader, features);
+            return readObject(jsonReader, fieldType, fieldName, features);
         }
 
         Object createTimestamp(long millis, int nanos) {
@@ -394,7 +454,7 @@ public class JdbcSupport {
         }
 
         @Override
-        public Object readObject(JSONReader jsonReader, long features) {
+        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
 
@@ -475,12 +535,12 @@ public class JdbcSupport {
         }
 
         @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            return readObject(jsonReader, features);
+        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+            return readObject(jsonReader, fieldType, fieldName, features);
         }
 
         @Override
-        public Object readObject(JSONReader jsonReader, long features) {
+        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             if (jsonReader.isInt()) {
                 long millis = jsonReader.readInt64Value();
 

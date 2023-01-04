@@ -10,7 +10,15 @@ import java.math.BigDecimal;
 
 final class FieldReaderBigDecimalField<T>
         extends FieldReaderObjectField<T> {
-    FieldReaderBigDecimalField(String fieldName, Class fieldType, int ordinal, long features, String format, BigDecimal defaultValue, JSONSchema schema, Field field) {
+    FieldReaderBigDecimalField(
+            String fieldName,
+            Class fieldType,
+            int ordinal,
+            long features,
+            String format,
+            BigDecimal defaultValue,
+            JSONSchema schema, Field field
+    ) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
     }
 
@@ -57,13 +65,14 @@ final class FieldReaderBigDecimalField<T>
 
     @Override
     public void accept(T object, Object value) {
+        BigDecimal decimalValue = TypeUtils.toBigDecimal(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(decimalValue);
         }
 
         try {
-            field.set(object,
-                    TypeUtils.toBigDecimal(value));
+            field.set(object, decimalValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }

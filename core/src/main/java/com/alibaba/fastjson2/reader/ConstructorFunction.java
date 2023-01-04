@@ -12,7 +12,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
 
-class ConstructorFunction<T>
+final class ConstructorFunction<T>
         implements Function<Map<Long, Object>, T> {
     final Constructor constructor;
     final Parameter[] parameters;
@@ -25,19 +25,12 @@ class ConstructorFunction<T>
     Map<Set<Long>, long[]> alternateConstructorNameHashCodes;
     Map<Set<Long>, Type[]> alternateConstructorArgTypes;
 
-    ConstructorFunction(Constructor constructor, String... paramNames) {
-        this(null, constructor, null, paramNames);
-    }
-
-    ConstructorFunction(Constructor constructor, Constructor markerConstructor, String... paramNames) {
-        this(null, constructor, markerConstructor, paramNames);
-    }
-
-    ConstructorFunction(List<Constructor> alternateConstructors, Constructor constructor, String... paramNames) {
-        this(alternateConstructors, constructor, null, paramNames);
-    }
-
-    ConstructorFunction(List<Constructor> alternateConstructors, Constructor constructor, Constructor markerConstructor, String... paramNames) {
+    ConstructorFunction(
+            List<Constructor> alternateConstructors,
+            Constructor constructor,
+            Constructor markerConstructor,
+            String... paramNames
+    ) {
         this.kotlinMaker = markerConstructor != null;
         this.constructor = kotlinMaker ? markerConstructor : constructor;
         this.parameters = constructor.getParameters();
@@ -123,6 +116,10 @@ class ConstructorFunction<T>
                     args[i] = arg;
                 } else {
                     flag |= (1 << i);
+                    Class<?> paramType = parameters[i].getType();
+                    if (paramType.isPrimitive()) {
+                        args[i] = TypeUtils.getDefaultValue(paramType);
+                    }
                 }
             }
             args[i] = flag;

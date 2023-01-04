@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.alibaba.fastjson2</groupId>
         <artifactId>fastjson2-parent</artifactId>
-        <version>2.0.8-SNAPSHOT</version>
+        <version>2.0.23-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -118,13 +118,38 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java-util</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.oracle.ojdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-spring-web</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -171,12 +196,27 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
+            <version>${springframework5.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+            </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
@@ -197,19 +237,20 @@
                         <configuration>
                             <module>
                                 <moduleInfoSource>
-                                    module com.alibaba.fastjson2 {
+                                    open module com.alibaba.fastjson2 {
+                                    requires transitive jdk.unsupported;
 
                                     exports com.alibaba.fastjson2;
                                     exports com.alibaba.fastjson2.annotation;
                                     exports com.alibaba.fastjson2.codec;
-                                    exports com.alibaba.fastjson2.codegen;
                                     exports com.alibaba.fastjson2.filter;
                                     exports com.alibaba.fastjson2.function;
-                                    exports com.alibaba.fastjson2.support.money;
+                                    exports com.alibaba.fastjson2.modules;
                                     exports com.alibaba.fastjson2.reader;
+                                    exports com.alibaba.fastjson2.schema;
+                                    exports com.alibaba.fastjson2.support.money;
                                     exports com.alibaba.fastjson2.writer;
                                     exports com.alibaba.fastjson2.util;
-
                                     }
                                 </moduleInfoSource>
                             </module>

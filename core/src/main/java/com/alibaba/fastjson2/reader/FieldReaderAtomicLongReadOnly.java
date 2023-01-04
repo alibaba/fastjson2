@@ -8,18 +8,9 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicLong;
 
 final class FieldReaderAtomicLongReadOnly<T>
-        extends FieldReaderImpl<T>
-        implements FieldReaderReadOnly<T> {
-    protected final Method method;
-
+        extends FieldReader<T> {
     FieldReaderAtomicLongReadOnly(String fieldName, Class fieldType, int ordinal, JSONSchema schema, Method method) {
-        super(fieldName, fieldType, fieldType, ordinal, 0, null, null, null, schema);
-        this.method = method;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
+        super(fieldName, fieldType, fieldType, ordinal, 0, null, null, null, schema, method, null);
     }
 
     @Override
@@ -35,7 +26,8 @@ final class FieldReaderAtomicLongReadOnly<T>
 
         try {
             AtomicLong atomic = (AtomicLong) method.invoke(object);
-            atomic.set((Long) value);
+            long longValue = ((Number) value).longValue();
+            atomic.set(longValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }
@@ -55,10 +47,5 @@ final class FieldReaderAtomicLongReadOnly<T>
         }
 
         return new AtomicLong(longValue);
-    }
-
-    @Override
-    public String toString() {
-        return method.getName();
     }
 }

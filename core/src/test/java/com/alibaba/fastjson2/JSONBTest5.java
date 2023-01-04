@@ -1,12 +1,13 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2_vo.Int1;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONBTest5 {
     @Test
@@ -161,5 +162,66 @@ public class JSONBTest5 {
     public static class A {
         private A() {
         }
+    }
+
+    @Test
+    public void parseObjectNull() {
+        assertNull(JSONB.parseObject(null, A.class, null, new Filter[0]));
+        assertNull(JSONB.parseObject(new byte[0], A.class, null, new Filter[0]));
+    }
+
+    @Test
+    public void parseObject() {
+        Int1 bean = new Int1();
+        bean.setV0000(100);
+
+        SymbolTable symbolTable = JSONB.symbolTable("v0000");
+        assertEquals(1, symbolTable.size());
+
+        byte[] bytes = JSONB.toBytes(bean, symbolTable, new Filter[0]);
+
+        Int1 bean1 = JSONB.parseObject(bytes, Int1.class, symbolTable, new Filter[0]);
+        assertEquals(bean.getV0000(), bean1.getV0000());
+    }
+
+    @Test
+    public void parseObject1() {
+        Int1 bean = new Int1();
+        bean.setV0000(100);
+
+        SymbolTable symbolTable = JSONB.symbolTable("v0000");
+
+        byte[] bytes = JSONB.toBytes(bean, symbolTable, new Filter[0], JSONWriter.Feature.WriteClassName);
+
+        Int1 bean1 = JSONB.parseObject(bytes, Object.class, symbolTable, new Filter[0], JSONReader.Feature.SupportAutoType);
+        assertEquals(bean.getV0000(), bean1.getV0000());
+    }
+
+    @Test
+    public void symbolTable() {
+        SymbolTable symbolTable = JSONB.symbolTable("id", "name");
+        assertEquals(2, symbolTable.size());
+        assertEquals(hash("id", "name"), symbolTable.hashCode64());
+    }
+
+    static long hash(String... items) {
+        long hashCode64 = Fnv.MAGIC_HASH_CODE;
+        for (String item : items) {
+            long hashCode = Fnv.hashCode64(item);
+            hashCode64 ^= hashCode;
+            hashCode64 *= Fnv.MAGIC_PRIME;
+        }
+        return hashCode64;
+    }
+
+    @Test
+    public void nextIfEmptyString() {
+        assertTrue(
+                JSONReader.ofJSONB(
+                            JSONB.toBytes("")
+                        )
+                        .nextIfNullOrEmptyString()
+        );
+        assertFalse(JSONReader.ofJSONB(JSONB.toBytes("1")).nextIfNullOrEmptyString());
     }
 }

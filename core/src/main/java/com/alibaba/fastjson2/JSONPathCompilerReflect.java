@@ -7,7 +7,7 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.util.function.BiFunction;
 
-class JSONPathCompilerReflect
+public class JSONPathCompilerReflect
         implements JSONFactory.JSONPathCompiler {
     static final JSONPathCompilerReflect INSTANCE = new JSONPathCompilerReflect();
 
@@ -15,28 +15,28 @@ class JSONPathCompilerReflect
     public JSONPath compile(
             Class objectClass, JSONPath path
     ) {
-        if (path instanceof JSONPath.SingleNamePath) {
-            return compileSingleNamePath(objectClass, (JSONPath.SingleNamePath) path);
+        if (path instanceof JSONPathSingleName) {
+            return compileSingleNamePath(objectClass, (JSONPathSingleName) path);
         }
 
-        if (path instanceof JSONPath.TwoSegmentPath) {
-            JSONPath.TwoSegmentPath twoSegmentPath = (JSONPath.TwoSegmentPath) path;
+        if (path instanceof JSONPathTwoSegment) {
+            JSONPathTwoSegment twoSegmentPath = (JSONPathTwoSegment) path;
 
-            JSONPath.Segment first = compile(objectClass, path, twoSegmentPath.first, null);
-            JSONPath.Segment segment = compile(objectClass, path, twoSegmentPath.second, first);
+            JSONPathSegment first = compile(objectClass, path, twoSegmentPath.first, null);
+            JSONPathSegment segment = compile(objectClass, path, twoSegmentPath.second, first);
 
             if (first != twoSegmentPath.first || segment != twoSegmentPath.second) {
                 if (first instanceof NameSegmentTyped && segment instanceof NameSegmentTyped) {
                     return new TwoNameSegmentTypedPath(twoSegmentPath.path, (NameSegmentTyped) first, (NameSegmentTyped) segment);
                 }
-                return new JSONPath.TwoSegmentPath(twoSegmentPath.path, first, segment);
+                return new JSONPathTwoSegment(twoSegmentPath.path, first, segment);
             }
         }
 
         return path;
     }
 
-    protected JSONPath compileSingleNamePath(Class objectClass, JSONPath.SingleNamePath path) {
+    protected JSONPath compileSingleNamePath(Class objectClass, JSONPathSingleName path) {
         String fieldName = path.name;
 
         ObjectReader objectReader = path.getReaderContext().getObjectReader(objectClass);
@@ -48,9 +48,9 @@ class JSONPathCompilerReflect
         return new SingleNamePathTyped(path.path, objectClass, objectReader, fieldReader, objectWriter, fieldWriter);
     }
 
-    protected JSONPath.Segment compile(Class objectClass, JSONPath path, JSONPath.Segment segment, JSONPath.Segment parent) {
-        if (segment instanceof JSONPath.NameSegment) {
-            JSONPath.NameSegment nameSegment = (JSONPath.NameSegment) segment;
+    protected JSONPathSegment compile(Class objectClass, JSONPath path, JSONPathSegment segment, JSONPathSegment parent) {
+        if (segment instanceof JSONPathSegmentName) {
+            JSONPathSegmentName nameSegment = (JSONPathSegmentName) segment;
             String fieldName = nameSegment.name;
 
             JSONReader.Context readerContext = path.getReaderContext();
@@ -63,7 +63,7 @@ class JSONPathCompilerReflect
             } else if (parent instanceof NameSegmentTyped) {
                 NameSegmentTyped nameSegmentTyped = (NameSegmentTyped) parent;
                 if (nameSegmentTyped.fieldReader != null) {
-                    objectReader = readerContext.getObjectReader(nameSegmentTyped.fieldReader.getFieldType());
+                    objectReader = readerContext.getObjectReader(nameSegmentTyped.fieldReader.fieldType);
                 }
             }
             if (objectReader != null) {
@@ -77,7 +77,7 @@ class JSONPathCompilerReflect
             } else if (parent instanceof NameSegmentTyped) {
                 NameSegmentTyped nameSegmentTyped = (NameSegmentTyped) parent;
                 if (nameSegmentTyped.fieldWriter != null) {
-                    objectWriter = writerContext.getObjectWriter(nameSegmentTyped.fieldWriter.getFieldClass());
+                    objectWriter = writerContext.getObjectWriter(nameSegmentTyped.fieldWriter.fieldClass);
                 }
             }
 
@@ -92,7 +92,7 @@ class JSONPathCompilerReflect
     }
 
     public static class TwoNameSegmentTypedPath
-            extends JSONPath.TwoSegmentPath {
+            extends JSONPathTwoSegment {
         final NameSegmentTyped first;
         final NameSegmentTyped second;
         public TwoNameSegmentTypedPath(String path, NameSegmentTyped first, NameSegmentTyped second) {
@@ -161,7 +161,7 @@ class JSONPathCompilerReflect
     }
 
     public static class NameSegmentTyped
-            extends JSONPath.NameSegment {
+            extends JSONPathSegmentName {
         final Class objectClass;
         final FieldReader fieldReader;
         final FieldWriter fieldWriter;
@@ -195,61 +195,6 @@ class JSONPathCompilerReflect
             }
 
             context.value = fieldWriter.getFieldValue(object);
-        }
-
-        @Override
-        public void set(JSONPath.Context context, Object value) {
-            if (fieldReader == null) {
-                throw new UnsupportedOperationException();
-            }
-
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-            fieldReader.accept(object, value);
-        }
-
-        @Override
-        public void setInt(JSONPath.Context context, int value) {
-            if (fieldReader == null) {
-                throw new UnsupportedOperationException();
-            }
-
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-            fieldReader.accept(object, value);
-        }
-
-        @Override
-        public void setLong(JSONPath.Context context, long value) {
-            if (fieldReader == null) {
-                throw new UnsupportedOperationException();
-            }
-
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-            fieldReader.accept(object, value);
-        }
-
-        @Override
-        public void setCallback(JSONPath.Context context, BiFunction callback) {
-            if (fieldReader == null || fieldWriter == null) {
-                throw new UnsupportedOperationException();
-            }
-
-            Object object = context.parent == null
-                    ? context.root
-                    : context.parent.value;
-
-            Object fieldValue = fieldWriter.getFieldValue(object);
-            Object fieldValueApply = callback.apply(object, fieldValue);
-            if (fieldValueApply == fieldValue) {
-                return;
-            }
-
-            fieldReader.accept(object, fieldValueApply);
         }
     }
 
@@ -293,7 +238,8 @@ class JSONPathCompilerReflect
                 throw new UnsupportedOperationException();
             }
 
-            return fieldWriter.getFieldValue(object);
+            Object fieldValue = fieldWriter.getFieldValue(object);
+            return fieldValue;
         }
 
         @Override

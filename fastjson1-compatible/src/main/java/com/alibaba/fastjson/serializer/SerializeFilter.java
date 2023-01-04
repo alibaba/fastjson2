@@ -1,4 +1,7 @@
 package com.alibaba.fastjson.serializer;
 
-public interface SerializeFilter {
+import com.alibaba.fastjson2.filter.Filter;
+
+public interface SerializeFilter
+        extends Filter {
 }

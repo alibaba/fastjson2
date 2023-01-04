@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 
@@ -8,8 +9,7 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderStringFunc<T, V>
-        extends FieldReaderImpl<T> {
-    final Method method;
+        extends FieldReader<T> {
     final BiConsumer<T, V> function;
 
     final String format;
@@ -27,22 +27,32 @@ final class FieldReaderStringFunc<T, V>
             Method method,
             BiConsumer<T, V> function
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema);
-        this.method = method;
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
         this.function = function;
 
         this.format = format;
-        trim = "trim".equals(format);
+        trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
     }
 
     @Override
-    public Method getMethod() {
-        return method;
+    public void accept(T object, int value) {
+        accept(object, Integer.toString(value));
+    }
+
+    @Override
+    public void accept(T object, long value) {
+        accept(object, Long.toString(value));
     }
 
     @Override
     public void accept(T object, Object value) {
-        String fieldValue = (String) value;
+        String fieldValue;
+        if (value instanceof String || value == null) {
+            fieldValue = (String) value;
+        } else {
+            fieldValue = value.toString();
+        }
+
         if (trim && fieldValue != null) {
             fieldValue = fieldValue.trim();
         }
@@ -51,7 +61,11 @@ final class FieldReaderStringFunc<T, V>
             schema.assertValidate(fieldValue);
         }
 
-        function.accept(object, (V) fieldValue);
+        try {
+            function.accept(object, (V) fieldValue);
+        } catch (Exception e) {
+            throw new JSONException("set " + super.toString() + " error", e);
+        }
     }
 
     @Override
@@ -72,5 +86,9 @@ final class FieldReaderStringFunc<T, V>
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readString();
+    }
+
+    public boolean supportAcceptType(Class valueClass) {
+        return true;
     }
 }

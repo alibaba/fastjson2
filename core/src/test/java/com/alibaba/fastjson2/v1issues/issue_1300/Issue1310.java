@@ -2,9 +2,9 @@ package com.alibaba.fastjson2.v1issues.issue_1300;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorLambda;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,7 +31,7 @@ public class Issue1310 {
 
         assertEquals("{\"value\":\"a\"}", JSON.toJSONString(model));
 
-        ObjectReader<Model2> objectReader = ObjectReaderCreatorLambda.INSTANCE.createObjectReader(Model2.class);
+        ObjectReader<Model2> objectReader = TestUtils.createObjectReaderLambda(Model2.class);
         JSONReader jsonReader = JSONReader.of("{\"value\":\" a \"}");
         Model2 model2 = objectReader.readObject(jsonReader);
         assertEquals("a", model2.value);

@@ -7,21 +7,44 @@ import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.function.ToByteFunction;
+import com.alibaba.fastjson2.function.ToCharFunction;
 import com.alibaba.fastjson2.function.ToFloatFunction;
 import com.alibaba.fastjson2.function.ToShortFunction;
-import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 
+import java.lang.invoke.*;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
+
+import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 
 public class ObjectWriterCreator {
     public static final ObjectWriterCreator INSTANCE = new ObjectWriterCreator();
+
+    static Map<Class, LambdaInfo> lambdaMapping = new HashMap<>();
+    static MethodType METHODTYPE_FUNCTION = MethodType.methodType(Function.class);
+    static MethodType METHODTYPE_OO = MethodType.methodType(Object.class, Object.class);
+
+    static {
+        lambdaMapping.put(boolean.class, new LambdaInfo(boolean.class, Predicate.class, "test"));
+        lambdaMapping.put(char.class, new LambdaInfo(char.class, ToCharFunction.class, "applyAsChar"));
+        lambdaMapping.put(byte.class, new LambdaInfo(byte.class, ToByteFunction.class, "applyAsByte"));
+        lambdaMapping.put(short.class, new LambdaInfo(short.class, ToShortFunction.class, "applyAsShort"));
+        lambdaMapping.put(int.class, new LambdaInfo(int.class, ToIntFunction.class, "applyAsInt"));
+        lambdaMapping.put(long.class, new LambdaInfo(long.class, ToLongFunction.class, "applyAsLong"));
+        lambdaMapping.put(float.class, new LambdaInfo(float.class, ToFloatFunction.class, "applyAsFloat"));
+        lambdaMapping.put(double.class, new LambdaInfo(double.class, ToDoubleFunction.class, "applyAsDouble"));
+    }
+
+    protected AtomicInteger jitErrorCount = new AtomicInteger();
+    protected volatile Throwable jitErrorLast;
 
     public ObjectWriterCreator() {
     }
@@ -38,45 +61,79 @@ public class ObjectWriterCreator {
         return createObjectWriter(
                 objectType,
                 0,
-                JSONFactory
-                        .getDefaultObjectWriterProvider()
-                        .getModules()
+                JSONFactory.getDefaultObjectWriterProvider()
         );
     }
 
     public ObjectWriter createObjectWriter(Class objectType,
-            FieldWriter... fieldWriters) {
+                                           FieldWriter... fieldWriters) {
         return createObjectWriter(objectType, 0, fieldWriters);
     }
 
     public ObjectWriter createObjectWriter(
-            Class objectType,
+            Class objectClass,
             long features,
             FieldWriter... fieldWriters
     ) {
         if (fieldWriters.length == 0) {
-            return createObjectWriter(objectType, features, Collections.emptyList());
-        } else {
-            return new ObjectWriterAdapter(objectType, features, fieldWriters);
+            return createObjectWriter(objectClass, features, JSONFactory.getDefaultObjectWriterProvider());
         }
+
+        boolean googleCollection = false;
+        if (objectClass != null) {
+            String typeName = objectClass.getName();
+            googleCollection =
+                    "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList".equals(typeName)
+                            || "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet".equals(typeName);
+        }
+
+        if (!googleCollection) {
+            switch (fieldWriters.length) {
+                case 1:
+                    if ((fieldWriters[0].features & FieldInfo.VALUE_MASK) == 0) {
+                        return new ObjectWriter1(objectClass, features, fieldWriters);
+                    }
+                    return new ObjectWriterAdapter(objectClass, features, fieldWriters);
+                case 2:
+                    return new ObjectWriter2(objectClass, features, fieldWriters);
+                case 3:
+                    return new ObjectWriter3(objectClass, features, fieldWriters);
+                case 4:
+                    return new ObjectWriter4(objectClass, features, fieldWriters);
+                case 5:
+                    return new ObjectWriter5(objectClass, features, fieldWriters);
+                case 6:
+                    return new ObjectWriter6(objectClass, features, fieldWriters);
+                case 7:
+                    return new ObjectWriter7(objectClass, features, fieldWriters);
+                case 8:
+                    return new ObjectWriter8(objectClass, features, fieldWriters);
+                case 9:
+                    return new ObjectWriter9(objectClass, features, fieldWriters);
+                case 10:
+                    return new ObjectWriter10(objectClass, features, fieldWriters);
+                case 11:
+                    return new ObjectWriter11(objectClass, features, fieldWriters);
+                case 12:
+                    return new ObjectWriter12(objectClass, features, fieldWriters);
+                default:
+                    return new ObjectWriterAdapter(objectClass, features, fieldWriters);
+            }
+        }
+
+        return new ObjectWriterAdapter(objectClass, features, fieldWriters);
     }
 
     protected FieldWriter creteFieldWriter(
             Class objectClass,
             long writerFeatures,
-            List<ObjectWriterModule> modules,
+            ObjectWriterProvider provider,
             BeanInfo beanInfo,
             FieldInfo fieldInfo,
             Field field
     ) {
         fieldInfo.features = writerFeatures;
-        for (ObjectWriterModule module : modules) {
-            ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor == null) {
-                continue;
-            }
-            annotationProcessor.getFieldInfo(beanInfo, fieldInfo, objectClass, field);
-        }
+        provider.getFieldInfo(beanInfo, fieldInfo, objectClass, field);
 
         if (fieldInfo.ignore) {
             return null;
@@ -86,7 +143,9 @@ public class ObjectWriterCreator {
         if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
             fieldName = field.getName();
 
-            fieldName = BeanUtils.fieldName(fieldName, beanInfo.namingStrategy);
+            if (beanInfo.namingStrategy != null) {
+                fieldName = BeanUtils.fieldName(fieldName, beanInfo.namingStrategy);
+            }
         } else {
             fieldName = fieldInfo.fieldName;
         }
@@ -122,8 +181,11 @@ public class ObjectWriterCreator {
         ObjectWriter writeUsingWriter = null;
         if (fieldInfo.writeUsing != null) {
             try {
-                writeUsingWriter = (ObjectWriter) fieldInfo.writeUsing.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
+                Constructor<?> constructor = fieldInfo.writeUsing.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                writeUsingWriter = (ObjectWriter) constructor.newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                     NoSuchMethodException e) {
                 throw new JSONException("create writeUsing Writer error", e);
             }
         }
@@ -138,7 +200,91 @@ public class ObjectWriterCreator {
             writeUsingWriter = ObjectWriterBaseModule.VoidObjectWriter.INSTANCE;
         }
 
-        return createFieldWriter(fieldName, fieldInfo.ordinal, fieldInfo.features, fieldInfo.format, fieldInfo.label, field, writeUsingWriter);
+        if (writeUsingWriter == null) {
+            Class<?> fieldClass = field.getType();
+            if (fieldClass == Date.class && provider != null) {
+                ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                if (objectWriter != ObjectWriterImplDate.INSTANCE) {
+                    writeUsingWriter = objectWriter;
+                }
+            } else if (Map.class.isAssignableFrom(fieldClass)
+                    && (fieldInfo.keyUsing != null || fieldInfo.valueUsing != null)) {
+                ObjectWriter keyWriter = null;
+                ObjectWriter valueWriter = null;
+                if (fieldInfo.keyUsing != null) {
+                    try {
+                        Constructor<?> constructor = fieldInfo.keyUsing.getDeclaredConstructor();
+                        constructor.setAccessible(true);
+                        keyWriter = (ObjectWriter) constructor.newInstance();
+                    } catch (Exception ignored) {
+                        // ignored
+                    }
+                }
+                if (fieldInfo.valueUsing != null) {
+                    try {
+                        Constructor<?> constructor = fieldInfo.valueUsing.getDeclaredConstructor();
+                        constructor.setAccessible(true);
+                        valueWriter = (ObjectWriter) constructor.newInstance();
+                    } catch (Exception ignored) {
+                        // ignored
+                    }
+                }
+
+                if (keyWriter != null || valueWriter != null) {
+                    ObjectWriterImplMap mapWriter = ObjectWriterImplMap.of(field.getType(), fieldClass);
+                    mapWriter.keyWriter = keyWriter;
+                    mapWriter.valueWriter = valueWriter;
+                    writeUsingWriter = mapWriter;
+                }
+            }
+        }
+
+        String format = fieldInfo.format;
+        if (format == null && beanInfo.format != null) {
+            format = beanInfo.format;
+        }
+
+        return createFieldWriter(provider, fieldName, fieldInfo.ordinal, fieldInfo.features, format, fieldInfo.label, field, writeUsingWriter);
+    }
+
+    protected ObjectWriter getAnnotatedObjectWriter(ObjectWriterProvider provider,
+                                                    Class objectClass,
+                                                    BeanInfo beanInfo) {
+        if ((beanInfo.writerFeatures & JSON_AUTO_WIRED_ANNOTATED) == 0) {
+            return null;
+        }
+
+        String fieldName = beanInfo.objectWriterFieldName;
+        if (fieldName == null) {
+            fieldName = "objectWriter";
+        }
+        try {
+            Field field = null;
+            if (beanInfo.mixIn) {
+                Class mixinClass = provider.mixInCache.get(objectClass);
+                if (mixinClass != null) {
+                    try {
+                        field = mixinClass.getDeclaredField(fieldName);
+                    } catch (NoSuchFieldException | SecurityException igored) {
+                        // ignored
+                    }
+                }
+            }
+
+            if (field == null) {
+                field = objectClass.getDeclaredField(fieldName);
+            }
+
+            if (field != null
+                    && ObjectWriter.class.isAssignableFrom(field.getType())
+                    && Modifier.isStatic(field.getModifiers())) {
+                field.setAccessible(true);
+                return (ObjectWriter) field.get(null);
+            }
+        } catch (Throwable ignored) {
+            // ignored
+        }
+        return null;
     }
 
     public ObjectWriter createObjectWriter(
@@ -146,14 +292,24 @@ public class ObjectWriterCreator {
             long features,
             final List<ObjectWriterModule> modules
     ) {
-        BeanInfo beanInfo = new BeanInfo();
+        ObjectWriterProvider provider = null;
         for (ObjectWriterModule module : modules) {
-            ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor == null) {
-                continue;
+            if (provider == null) {
+                provider = module.getProvider();
             }
-            annotationProcessor.getBeanInfo(beanInfo, objectClass);
         }
+        return createObjectWriter(objectClass, features, provider);
+    }
+
+    public ObjectWriter createObjectWriter(
+            final Class objectClass,
+            final long features,
+            final ObjectWriterProvider provider
+    ) {
+        BeanInfo beanInfo = new BeanInfo();
+        beanInfo.readerFeatures |= FieldInfo.JIT;
+
+        provider.getBeanInfo(beanInfo, objectClass);
 
         if (beanInfo.serializer != null && ObjectWriter.class.isAssignableFrom(beanInfo.serializer)) {
             try {
@@ -163,16 +319,22 @@ public class ObjectWriterCreator {
             }
         }
 
-        long writerFeatures = features | beanInfo.writerFeatures;
-
-        boolean fieldBased = (writerFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
-
-        if (fieldBased && (objectClass.isInterface() || objectClass.isInterface())) {
-            fieldBased = false;
+        ObjectWriter annotatedObjectWriter = getAnnotatedObjectWriter(provider, objectClass, beanInfo);
+        if (annotatedObjectWriter != null) {
+            return annotatedObjectWriter;
         }
 
-        if (fieldBased && JDKUtils.JVM_VERSION >= 11
-                && Throwable.class.isAssignableFrom(objectClass)) {
+        boolean record = BeanUtils.isRecord(objectClass);
+
+        long beanFeatures = beanInfo.writerFeatures;
+        if (beanInfo.seeAlso != null) {
+            beanFeatures &= ~JSONWriter.Feature.WriteClassName.mask;
+        }
+
+        long writerFieldFeatures = features | beanFeatures;
+        boolean fieldBased = (writerFieldFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
+
+        if (fieldBased && (record || objectClass.isInterface() || objectClass.isInterface())) {
             fieldBased = false;
         }
 
@@ -182,21 +344,17 @@ public class ObjectWriterCreator {
         if (fieldBased) {
             Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
             BeanUtils.declaredFields(objectClass, field -> {
-                if (Modifier.isTransient(field.getModifiers())) {
-                    return;
-                }
-
                 fieldInfo.init();
-                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
+                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
                 if (fieldWriter != null) {
-                    fieldWriterMap.put(fieldWriter.getFieldName(), fieldWriter);
+                    fieldWriterMap.put(fieldWriter.fieldName, fieldWriter);
                 }
             });
             fieldWriters = new ArrayList<>(fieldWriterMap.values());
         } else {
             boolean fieldWritersCreated = false;
             fieldWriters = new ArrayList<>();
-            for (ObjectWriterModule module : modules) {
+            for (ObjectWriterModule module : provider.modules) {
                 if (module.createFieldWriters(this, objectClass, fieldWriters)) {
                     fieldWritersCreated = true;
                     break;
@@ -206,35 +364,56 @@ public class ObjectWriterCreator {
             if (!fieldWritersCreated) {
                 Map<String, FieldWriter> fieldWriterMap = new TreeMap<>();
 
-                BeanUtils.fields(objectClass, field -> {
-                    if (!Modifier.isPublic(field.getModifiers())) {
-                        return;
-                    }
+                if (!record) {
+                    BeanUtils.declaredFields(objectClass, field -> {
+                        fieldInfo.init();
+                        fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
+                        FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
+                        if (fieldWriter != null) {
+                            FieldWriter origin = fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
 
-                    fieldInfo.init();
-                    FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFeatures, modules, beanInfo, fieldInfo, field);
-                    if (fieldWriter != null) {
-                        fieldWriterMap.putIfAbsent(fieldWriter.getFieldName(), fieldWriter);
-                    }
-                });
+                            if (origin != null && origin.compareTo(fieldWriter) > 0) {
+                                fieldWriterMap.put(fieldWriter.fieldName, fieldWriter);
+                            }
+                        }
+                    });
+                }
 
                 BeanUtils.getters(objectClass, method -> {
                     fieldInfo.init();
-                    fieldInfo.features = writerFeatures;
-                    for (ObjectWriterModule module : modules) {
-                        ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-                        if (annotationProcessor == null) {
-                            continue;
-                        }
-                        annotationProcessor.getFieldInfo(beanInfo, fieldInfo, objectClass, method);
-                    }
+                    fieldInfo.features = writerFieldFeatures;
+                    fieldInfo.format = beanInfo.format;
+                    provider.getFieldInfo(beanInfo, fieldInfo, objectClass, method);
                     if (fieldInfo.ignore) {
                         return;
                     }
 
                     String fieldName;
                     if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
-                        fieldName = BeanUtils.getterName(method.getName(), beanInfo.namingStrategy);
+                        fieldName = BeanUtils.getterName(method, beanInfo.namingStrategy);
+
+                        char c0 = '\0', c1;
+                        int len = fieldName.length();
+                        if (len > 0) {
+                            c0 = fieldName.charAt(0);
+                        }
+
+                        if ((len == 1 && c0 >= 'a' && c0 <= 'z')
+                                || (len > 2 && c0 >= 'A' && c0 <= 'Z' && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z')
+                        ) {
+                            char[] chars = fieldName.toCharArray();
+                            if (c0 >= 'a' && c0 <= 'z') {
+                                chars[0] = (char) (chars[0] - 32);
+                            } else {
+                                chars[0] = (char) (chars[0] + 32);
+                            }
+                            String fieldName1 = new String(chars);
+                            Field field = BeanUtils.getDeclaredField(objectClass, fieldName1);
+
+                            if (field != null && (len == 1 || Modifier.isPublic(field.getModifiers()))) {
+                                fieldName = field.getName();
+                            }
+                        }
                     } else {
                         fieldName = fieldInfo.fieldName;
                     }
@@ -270,8 +449,11 @@ public class ObjectWriterCreator {
                     ObjectWriter writeUsingWriter = null;
                     if (fieldInfo.writeUsing != null) {
                         try {
-                            writeUsingWriter = (ObjectWriter) fieldInfo.writeUsing.newInstance();
-                        } catch (InstantiationException | IllegalAccessException e) {
+                            Constructor<?> constructor = fieldInfo.writeUsing.getDeclaredConstructor();
+                            constructor.setAccessible(true);
+                            writeUsingWriter = (ObjectWriter) constructor.newInstance();
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                                 NoSuchMethodException e) {
                             throw new JSONException("create writeUsing Writer error", e);
                         }
                     }
@@ -280,18 +462,40 @@ public class ObjectWriterCreator {
                         writeUsingWriter = ObjectWriterBaseModule.VoidObjectWriter.INSTANCE;
                     }
 
-                    FieldWriter fieldWriter
-                            = createFieldWriter(objectClass,
-                            fieldName,
-                            fieldInfo.ordinal,
-                            fieldInfo.features,
-                            fieldInfo.format,
-                            fieldInfo.label,
-                            method,
-                            writeUsingWriter
-                    );
+                    FieldWriter fieldWriter = null;
+                    if ((beanInfo.readerFeatures & FieldInfo.JIT) != 0) {
+                        try {
+                            fieldWriter = createFieldWriterLambda(
+                                    provider,
+                                    objectClass,
+                                    fieldName,
+                                    fieldInfo.ordinal,
+                                    fieldInfo.features,
+                                    fieldInfo.format,
+                                    fieldInfo.label,
+                                    method,
+                                    writeUsingWriter
+                            );
+                        } catch (Throwable ignored) {
+                            jitErrorCount.incrementAndGet();
+                            jitErrorLast = ignored;
+                        }
+                    }
+                    if (fieldWriter == null) {
+                        fieldWriter = createFieldWriter(
+                                provider,
+                                objectClass,
+                                fieldName,
+                                fieldInfo.ordinal,
+                                fieldInfo.features,
+                                fieldInfo.format,
+                                fieldInfo.label,
+                                method,
+                                writeUsingWriter
+                        );
+                    }
 
-                    FieldWriter origin = fieldWriterMap.putIfAbsent(fieldWriter.getFieldName(), fieldWriter);
+                    FieldWriter origin = fieldWriterMap.putIfAbsent(fieldWriter.fieldName, fieldWriter);
 
                     if (origin != null && origin.compareTo(fieldWriter) > 0) {
                         fieldWriterMap.put(fieldName, fieldWriter);
@@ -302,63 +506,114 @@ public class ObjectWriterCreator {
             }
         }
 
+        long writerFeatures = features | beanInfo.writerFeatures;
         if ((!fieldBased) && Throwable.class.isAssignableFrom(objectClass)) {
             return new ObjectWriterException(objectClass, writerFeatures, fieldWriters);
         }
 
         handleIgnores(beanInfo, fieldWriters);
 
-        Collections.sort(fieldWriters);
+        if (beanInfo.alphabetic) {
+            Collections.sort(fieldWriters);
+        }
 
-        ObjectWriterAdapter writerAdapter = new ObjectWriterAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+        ObjectWriterAdapter writerAdapter = null;
+
+        boolean googleCollection = false;
+        if (objectClass != null) {
+            String typeName = objectClass.getName();
+            googleCollection =
+                    "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList".equals(typeName)
+                            || "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet".equals(typeName);
+        }
+        if (!googleCollection) {
+            switch (fieldWriters.size()) {
+                case 1:
+                    if ((fieldWriters.get(0).features & FieldInfo.VALUE_MASK) == 0) {
+                        writerAdapter = new ObjectWriter1(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    }
+                    break;
+                case 2:
+                    writerAdapter = new ObjectWriter2(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 3:
+                    writerAdapter = new ObjectWriter3(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 4:
+                    writerAdapter = new ObjectWriter4(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 5:
+                    writerAdapter = new ObjectWriter5(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 6:
+                    writerAdapter = new ObjectWriter6(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 7:
+                    writerAdapter = new ObjectWriter7(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 8:
+                    writerAdapter = new ObjectWriter8(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 9:
+                    writerAdapter = new ObjectWriter9(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 10:
+                    writerAdapter = new ObjectWriter10(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 11:
+                    writerAdapter = new ObjectWriter11(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                case 12:
+                    writerAdapter = new ObjectWriter12(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (writerAdapter == null) {
+            writerAdapter = new ObjectWriterAdapter(objectClass, beanInfo.typeKey, beanInfo.typeName, writerFeatures, fieldWriters);
+        }
 
         if (beanInfo.serializeFilters != null) {
-            for (Class<? extends Filter> filterClass : beanInfo.serializeFilters) {
-                if (!Filter.class.isAssignableFrom(filterClass)) {
-                    continue;
-                }
-
-                try {
-                    Filter filter = filterClass.newInstance();
-                    if (filter instanceof PropertyFilter) {
-                        writerAdapter.setPropertyFilter((PropertyFilter) filter);
-                    }
-
-                    if (filter instanceof ValueFilter) {
-                        writerAdapter.setValueFilter((ValueFilter) filter);
-                    }
-
-                    if (filter instanceof NameFilter) {
-                        writerAdapter.setNameFilter((NameFilter) filter);
-                    }
-                    if (filter instanceof PropertyPreFilter) {
-                        writerAdapter.setPropertyPreFilter((PropertyPreFilter) filter);
-                    }
-                } catch (InstantiationException | IllegalAccessException ignored) {
-                }
-            }
-            // return super.createObjectWriter(objectClass, features, modules);
+            configSerializeFilters(beanInfo, writerAdapter);
         }
 
         return writerAdapter;
     }
 
+    protected static void configSerializeFilters(BeanInfo beanInfo, ObjectWriterAdapter writerAdapter) {
+        for (Class<? extends Filter> filterClass : beanInfo.serializeFilters) {
+            if (!Filter.class.isAssignableFrom(filterClass)) {
+                continue;
+            }
+
+            try {
+                Filter filter = filterClass.newInstance();
+                writerAdapter.setFilter(filter);
+            } catch (InstantiationException | IllegalAccessException ignored) {
+                //ignored
+            }
+        }
+    }
+
     protected void handleIgnores(BeanInfo beanInfo, List<FieldWriter> fieldWriters) {
-        if (beanInfo.ignores != null && beanInfo.ignores.length > 0) {
-            for (int i = fieldWriters.size() - 1; i >= 0; i--) {
-                FieldWriter fieldWriter = fieldWriters.get(i);
-                for (String ignore : beanInfo.ignores) {
-                    if (ignore.equals(fieldWriter.getFieldName())) {
-                        fieldWriters.remove(i);
-                        break;
-                    }
+        if (beanInfo.ignores == null || beanInfo.ignores.length == 0) {
+            return;
+        }
+
+        for (int i = fieldWriters.size() - 1; i >= 0; i--) {
+            FieldWriter fieldWriter = fieldWriters.get(i);
+            for (String ignore : beanInfo.ignores) {
+                if (ignore.equals(fieldWriter.fieldName)) {
+                    fieldWriters.remove(i);
+                    break;
                 }
             }
         }
     }
 
     public <T> FieldWriter<T> createFieldWriter(String fieldName, String format, Field field) {
-        return createFieldWriter(fieldName, 0, 0L, format, null, field, null);
+        return createFieldWriter(JSONFactory.getDefaultObjectWriterProvider(), fieldName, 0, 0L, format, null, field, null);
     }
 
     public <T> FieldWriter<T> createFieldWriter(
@@ -368,7 +623,7 @@ public class ObjectWriterCreator {
             String format,
             Field field
     ) {
-        return createFieldWriter(fieldName, ordinal, features, format, null, field, null);
+        return createFieldWriter(JSONFactory.getDefaultObjectWriterProvider(), fieldName, ordinal, features, format, null, field, null);
     }
 
     public <T> FieldWriter<T> createFieldWriter(
@@ -380,7 +635,59 @@ public class ObjectWriterCreator {
             Field field,
             ObjectWriter initObjectWriter
     ) {
-        field.setAccessible(true);
+        return createFieldWriter(JSONFactory.getDefaultObjectWriterProvider(), fieldName, ordinal, features, format, label, field, initObjectWriter);
+    }
+
+    public <T> FieldWriter<T> createFieldWriter(
+            ObjectWriterProvider provider,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Field field,
+            ObjectWriter initObjectWriter
+    ) {
+        Class<?> declaringClass = field.getDeclaringClass();
+        Method method = null;
+
+        boolean unsafeFieldWriter = JDKUtils.UNSAFE_SUPPORT;
+        if (declaringClass == Throwable.class && !unsafeFieldWriter) {
+            unsafeFieldWriter = JDKUtils.UNSAFE_SUPPORT;
+            switch (field.getName()) {
+                case "detailMessage":
+                    method = BeanUtils.getMethod(Throwable.class, "getMessage");
+                    fieldName = "message";
+                    break;
+                case "cause":
+                    method = BeanUtils.getMethod(Throwable.class, "getCause");
+                    break;
+                case "suppressedExceptions": {
+                    fieldName = "suppressed";
+                }
+                default:
+                    break;
+            }
+        } else if (declaringClass == DateTimeParseException.class && !unsafeFieldWriter) {
+            switch (field.getName()) {
+                case "errorIndex":
+                    method = BeanUtils.getMethod(DateTimeParseException.class, "getErrorIndex");
+                    break;
+                case "parsedString":
+                    method = BeanUtils.getMethod(DateTimeParseException.class, "getParsedString");
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (method != null) {
+            return createFieldWriter(provider, (Class<T>) Throwable.class, fieldName, ordinal, features, format, label, method, initObjectWriter);
+        }
+
+        if (!unsafeFieldWriter) {
+            field.setAccessible(true);
+        }
 
         Class<?> fieldClass = field.getType();
         Type fieldType = field.getGenericType();
@@ -402,7 +709,7 @@ public class ObjectWriterCreator {
                 fieldType = fieldClass = Boolean.class;
             }
 
-            FieldWriterObjectField objImp = new FieldWriterObjectField(fieldName, ordinal, features, format, label, fieldType, fieldClass, field);
+            FieldWriterObject objImp = new FieldWriterObject(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null);
             objImp.initValueClass = fieldClass;
             if (initObjectWriter != ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
                 objImp.initObjectWriter = initObjectWriter;
@@ -412,10 +719,6 @@ public class ObjectWriterCreator {
 
         if (fieldClass == boolean.class) {
             return new FieldWriterBoolValField(fieldName, ordinal, features, format, label, field, fieldClass);
-        }
-
-        if (fieldClass == boolean.class || fieldClass == Boolean.class) {
-            return new FieldWriterBooleanField(fieldName, ordinal, features, format, label, field, fieldClass);
         }
 
         if (fieldClass == byte.class) {
@@ -441,28 +744,20 @@ public class ObjectWriterCreator {
             return new FieldWriterFloatValField(fieldName, ordinal, format, label, field);
         }
 
+        if (fieldClass == Float.class) {
+            return new FieldWriterFloatField(fieldName, ordinal, features, format, label, field);
+        }
+
         if (fieldClass == double.class) {
             return new FieldWriterDoubleValField(fieldName, ordinal, format, label, field);
         }
 
+        if (fieldClass == Double.class) {
+            return new FieldWriterDoubleField(fieldName, ordinal, features, format, label, field);
+        }
+
         if (fieldClass == char.class) {
             return new FieldWriterCharValField(fieldName, ordinal, format, label, field);
-        }
-
-        if (fieldClass == Integer.class) {
-            return new FieldWriterInt32Field(fieldName, ordinal, features, format, label, field);
-        }
-
-        if (fieldClass == Long.class) {
-            return new FieldWriterInt64Field(fieldName, ordinal, features, format, label, field);
-        }
-
-        if (fieldClass == Short.class) {
-            return new FieldWriterInt16Field(fieldName, ordinal, features, format, label, field, fieldClass);
-        }
-
-        if (fieldClass == Byte.class) {
-            return new FieldWriterInt8Field(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass == BigInteger.class) {
@@ -481,8 +776,25 @@ public class ObjectWriterCreator {
             return new FieldWriterStringField(fieldName, ordinal, features, format, label, field);
         }
 
-        if (fieldClass.isEnum() && BeanUtils.getEnumValueField(fieldClass) == null) {
-            return new FIeldWriterEnumField(fieldName, ordinal, features, format, label, fieldClass, field);
+        if (fieldClass.isEnum()) {
+            BeanInfo beanInfo = new BeanInfo();
+            provider.getBeanInfo(beanInfo, fieldClass);
+
+            boolean writeEnumAsJavaBean = beanInfo.writeEnumAsJavaBean;
+            if (!writeEnumAsJavaBean) {
+                ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                if (objectWriter != null && !(objectWriter instanceof ObjectWriterImplEnum)) {
+                    writeEnumAsJavaBean = true;
+                }
+            }
+
+            Member enumValueField = BeanUtils.getEnumValueField(fieldClass, provider);
+            if (enumValueField == null && !writeEnumAsJavaBean) {
+                String[] enumAnnotationNames = BeanUtils.getEnumAnnotationNames(fieldClass);
+                if (enumAnnotationNames == null) {
+                    return new FieldWriterEnum(fieldName, ordinal, features, format, label, fieldType, (Class<? extends Enum>) fieldClass, field, null);
+                }
+            }
         }
 
         if (fieldClass == List.class || fieldClass == ArrayList.class) {
@@ -495,25 +807,16 @@ public class ObjectWriterCreator {
 
         if (fieldClass.isArray() && !fieldClass.getComponentType().isPrimitive()) {
             Class<?> itemClass = fieldClass.getComponentType();
-
-            if (field.getDeclaringClass() == Throwable.class && "stackTrace".equals(fieldName)) {
-                try {
-                    Method method = Throwable.class.getMethod("getStackTrace");
-                    return new FieldWriterObjectArrayMethod(fieldName, itemClass, ordinal, features, format, label, field.getGenericType(), fieldClass, method);
-                } catch (NoSuchMethodException ignored) {
-                }
-            }
-
             return new FieldWriterObjectArrayField(fieldName, itemClass, ordinal, features, format, label, itemClass, fieldClass, field);
         }
 
-        return new FieldWriterObjectField(fieldName, ordinal, features, format, label, field.getGenericType(), fieldClass, field);
+        return new FieldWriterObject(fieldName, ordinal, features, format, label, field.getGenericType(), fieldClass, field, null);
     }
 
     public <T> FieldWriter<T> createFieldWriter(Class<T> objectType,
-            String fieldName,
-            String dateFormat,
-            Method method) {
+                                                String fieldName,
+                                                String dateFormat,
+                                                Method method) {
         return createFieldWriter(objectType, fieldName, 0, 0, dateFormat, method);
     }
 
@@ -524,10 +827,11 @@ public class ObjectWriterCreator {
             long features,
             String format,
             Method method) {
-        return createFieldWriter(objectType, fieldName, ordinal, features, format, null, method, null);
+        return createFieldWriter(null, objectType, fieldName, ordinal, features, format, null, method, null);
     }
 
     public <T> FieldWriter<T> createFieldWriter(
+            ObjectWriterProvider provider,
             Class<T> objectType,
             String fieldName,
             int ordinal,
@@ -541,6 +845,10 @@ public class ObjectWriterCreator {
         Class<?> fieldClass = method.getReturnType();
         Type fieldType = method.getGenericReturnType();
 
+        if (initObjectWriter == null && provider != null) {
+            initObjectWriter = getInitWriter(provider, fieldClass);
+        }
+
         if (initObjectWriter != null) {
             FieldWriterObjectMethod objMethod = new FieldWriterObjectMethod(fieldName, ordinal, features, format, label, fieldType, fieldClass, method);
             objMethod.initValueClass = fieldClass;
@@ -551,7 +859,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldName == null) {
-            fieldName = BeanUtils.getterName(method.getName(), null);
+            fieldName = BeanUtils.getterName(method, null);
         }
 
         if (fieldClass == boolean.class || fieldClass == Boolean.class) {
@@ -562,11 +870,19 @@ public class ObjectWriterCreator {
             return new FieldWriterInt32Method(fieldName, ordinal, features, format, label, method, fieldClass);
         }
 
+        if (fieldClass == float.class || fieldClass == Float.class) {
+            return new FieldWriterFloatMethod<>(fieldName, ordinal, features, format, label, fieldClass, fieldClass, method);
+        }
+
+        if (fieldClass == double.class || fieldClass == Double.class) {
+            return new FieldWriterDoubleMethod<>(fieldName, ordinal, features, format, label, fieldClass, fieldClass, method);
+        }
+
         if (fieldClass == long.class || fieldClass == Long.class) {
             if (format == null || format.isEmpty()) {
                 return new FieldWriterInt64Method(fieldName, ordinal, features, format, label, method, fieldClass);
             }
-            return new FieldWriterMillisMethod(fieldName, ordinal, features, format, label, method, fieldClass);
+            return new FieldWriterMillisMethod(fieldName, ordinal, features, format, label, fieldClass, method);
         }
 
         if (fieldClass == short.class || fieldClass == Short.class) {
@@ -581,8 +897,18 @@ public class ObjectWriterCreator {
             return new FieldWriterCharMethod(fieldName, ordinal, features, format, label, method, fieldClass);
         }
 
-        if (fieldClass.isEnum() && (BeanUtils.getEnumValueField(fieldClass) == null && initObjectWriter == null)) {
-            return new FieldWriterEnumMethod(fieldName, ordinal, features, format, label, fieldClass, method);
+        if (fieldClass == BigDecimal.class) {
+            return new FieldWriterBigDecimalMethod<>(fieldName, ordinal, features, format, label, method);
+        }
+
+        if (fieldClass.isEnum()
+                && (BeanUtils.getEnumValueField(fieldClass, provider) == null && initObjectWriter == null)
+                && !BeanUtils.isWriteEnumAsJavaBean(fieldClass)
+        ) {
+            String[] enumAnnotationNames = BeanUtils.getEnumAnnotationNames(fieldClass);
+            if (enumAnnotationNames == null) {
+                return new FieldWriterEnumMethod(fieldName, ordinal, features, format, label, fieldClass, method);
+            }
         }
 
         if (fieldClass == Date.class) {
@@ -609,6 +935,18 @@ public class ObjectWriterCreator {
                 itemType = Object.class;
             }
             return new FieldWriterListMethod(fieldName, itemType, ordinal, features, format, label, method, fieldType, fieldClass);
+        }
+
+        if (fieldClass == Float[].class) {
+            return new FieldWriterObjectArrayMethod(fieldName, Float.class, ordinal, features, format, label, fieldType, fieldClass, method);
+        }
+
+        if (fieldClass == Double[].class) {
+            return new FieldWriterObjectArrayMethod(fieldName, Double.class, ordinal, features, format, label, fieldType, fieldClass, method);
+        }
+
+        if (fieldClass == BigDecimal[].class) {
+            return new FieldWriterObjectArrayMethod(fieldName, BigDecimal.class, ordinal, features, format, label, fieldType, fieldClass, method);
         }
 
         return new FieldWriterObjectMethod(fieldName, ordinal, features, format, label, fieldType, fieldClass, method);
@@ -647,7 +985,16 @@ public class ObjectWriterCreator {
             Class fieldClass,
             Function<T, V> function
     ) {
-        return createFieldWriter(null, fieldName, 0, 0, null, null, fieldClass, fieldClass, null, function);
+        return createFieldWriter(null, null, fieldName, 0, 0, null, null, fieldClass, fieldClass, null, function);
+    }
+
+    public <T, V> FieldWriter createFieldWriter(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            Function<T, V> function
+    ) {
+        return createFieldWriter(null, null, fieldName, 0, 0, null, null, fieldType, fieldClass, null, function);
     }
 
     public <T, V> FieldWriter createFieldWriter(
@@ -657,11 +1004,12 @@ public class ObjectWriterCreator {
             Class fieldClass,
             Function<T, V> function
     ) {
-        return createFieldWriter(null, fieldName, 0, features, format, null, fieldClass, fieldClass, null, function);
+        return createFieldWriter(null, null, fieldName, 0, features, format, null, fieldClass, fieldClass, null, function);
     }
 
     public <T, V> FieldWriter<T> createFieldWriter(
-            Class<T> objectType,
+            ObjectWriterProvider provider,
+            Class<T> objectClass,
             String fieldName,
             int ordinal,
             long features,
@@ -708,8 +1056,27 @@ public class ObjectWriterCreator {
             return new FieldWriterCalendarFunc(fieldName, ordinal, features, format, label, method, function);
         }
 
-        if (fieldClass.isEnum() && BeanUtils.getEnumValueField(fieldClass) == null) {
-            return new FieldWriterEnumFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, method, function);
+        if (fieldClass.isEnum()) {
+            BeanInfo beanInfo = new BeanInfo();
+            if (provider == null) {
+                provider = JSONFactory.getDefaultObjectWriterProvider();
+            }
+            provider.getBeanInfo(beanInfo, fieldClass);
+
+            boolean writeEnumAsJavaBean = beanInfo.writeEnumAsJavaBean;
+            if (!writeEnumAsJavaBean) {
+                ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                if (objectWriter != null && !(objectWriter instanceof ObjectWriterImplEnum)) {
+                    writeEnumAsJavaBean = true;
+                }
+            }
+
+            if (!writeEnumAsJavaBean && BeanUtils.getEnumValueField(fieldClass, provider) == null) {
+                String[] enumAnnotationNames = BeanUtils.getEnumAnnotationNames(fieldClass);
+                if (enumAnnotationNames == null) {
+                    return new FieldWriterEnumFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, method, function);
+                }
+            }
         }
 
         if (fieldType instanceof ParameterizedType) {
@@ -729,9 +1096,176 @@ public class ObjectWriterCreator {
         }
 
         if (Modifier.isFinal(fieldClass.getModifiers())) {
-            return new FieldWriterObjectFuncFinal(fieldName, ordinal, features, format, label, fieldType, fieldClass, null, function);
+            return new FieldWriterObjectFuncFinal(fieldName, ordinal, features, format, label, fieldType, fieldClass, method, function);
         }
 
-        return new FieldWriterObjectFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, null, function);
+        return new FieldWriterObjectFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, method, function);
+    }
+
+    static class LambdaInfo {
+        final Class fieldClass;
+        final Class supplierClass;
+        final String methodName;
+        final MethodType methodType;
+        final MethodType invokedType;
+        final MethodType samMethodType;
+
+        LambdaInfo(Class fieldClass, Class supplierClass, String methodName) {
+            this.fieldClass = fieldClass;
+            this.supplierClass = supplierClass;
+            this.methodName = methodName;
+            this.methodType = MethodType.methodType(fieldClass);
+            this.invokedType = MethodType.methodType(supplierClass);
+            this.samMethodType = MethodType.methodType(fieldClass, Object.class);
+        }
+    }
+
+    Object lambdaGetter(Class objectClass, Class fieldClass, Method method) {
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
+
+        LambdaInfo buildInfo = lambdaMapping.get(fieldClass);
+
+        MethodType methodType;
+        MethodType invokedType;
+        String methodName;
+        MethodType samMethodType;
+        if (buildInfo != null) {
+            methodType = buildInfo.methodType;
+            invokedType = buildInfo.invokedType;
+            methodName = buildInfo.methodName;
+            samMethodType = buildInfo.samMethodType;
+        } else {
+            methodType = MethodType.methodType(fieldClass);
+            invokedType = METHODTYPE_FUNCTION;
+            methodName = "apply";
+            samMethodType = METHODTYPE_OO;
+        }
+
+        try {
+            MethodHandle target = lookup.findVirtual(objectClass, method.getName(), methodType);
+            MethodType instantiatedMethodType = target.type();
+
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    methodName,
+                    invokedType,
+                    samMethodType,
+                    target,
+                    instantiatedMethodType
+            );
+
+            return callSite
+                    .getTarget()
+                    .invoke();
+        } catch (Throwable e) {
+            throw new JSONException("create fieldLambdaGetter error, method : " + method, e);
+        }
+    }
+
+    protected ObjectWriter getInitWriter(ObjectWriterProvider provider, Class fieldClass) {
+        if (fieldClass == Date.class) {
+            if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DATE_MASK) != 0) {
+                ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                if (objectWriter != ObjectWriterImplDate.INSTANCE) {
+                    return objectWriter;
+                }
+            }
+        } else if (fieldClass == long.class || fieldClass == Long.class) {
+            if ((provider.userDefineMask & ObjectWriterProvider.TYPE_INT64_MASK) != 0) {
+                ObjectWriter objectWriter = provider.cache.get(Long.class);
+                if (objectWriter != ObjectWriterImplInt64.INSTANCE) {
+                    return objectWriter;
+                }
+            }
+        } else if (fieldClass == BigDecimal.class) {
+            if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DECIMAL_MASK) != 0) {
+                ObjectWriter objectWriter = provider.cache.get(fieldClass);
+                if (objectWriter != ObjectWriterImplBigDecimal.INSTANCE) {
+                    return objectWriter;
+                }
+            }
+        } else if (Enum.class.isAssignableFrom(fieldClass)) {
+            ObjectWriter objectWriter = provider.cache.get(fieldClass);
+            if (!(objectWriter instanceof ObjectWriterImplEnum)) {
+                return objectWriter;
+            }
+        }
+        return null;
+    }
+
+    <T> FieldWriter<T> createFieldWriterLambda(
+            ObjectWriterProvider provider,
+            Class<T> objectClass,
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Method method,
+            ObjectWriter initObjectWriter
+    ) {
+        Class<?> fieldClass = method.getReturnType();
+        Type fieldType = method.getGenericReturnType();
+
+        if (initObjectWriter == null && provider != null) {
+            initObjectWriter = getInitWriter(provider, fieldClass);
+        }
+
+        if (initObjectWriter != null) {
+            return null;
+        }
+
+        Object lambda = lambdaGetter(objectClass, fieldClass, method);
+
+        if (fieldClass == int.class) {
+            return new FieldWriterInt32ValFunc(fieldName, ordinal, features, format, label, method, (ToIntFunction<T>) lambda);
+        }
+
+        if (fieldClass == long.class) {
+            if (format == null || format.isEmpty()) {
+                return new FieldWriterInt64ValFunc(fieldName, ordinal, features, format, label, method, (ToLongFunction) lambda);
+            }
+
+            return new FieldWriterMillisFunc(fieldName, ordinal, features, format, label, method, (ToLongFunction) lambda);
+        }
+
+        if (fieldClass == boolean.class) {
+            return new FieldWriterBoolValFunc(fieldName, ordinal, features, format, label, method, (Predicate<T>) lambda);
+        }
+
+        if (fieldClass == Boolean.class) {
+            return new FieldWriterBooleanFunc(fieldName, ordinal, features, format, label, method, (Function) lambda);
+        }
+
+        if (fieldClass == short.class) {
+            return new FieldWriterInt16ValFunc(fieldName, ordinal, features, format, label, method, (ToShortFunction) lambda);
+        }
+
+        if (fieldClass == byte.class) {
+            return new FieldWriterInt8ValFunc(fieldName, ordinal, features, format, label, method, (ToByteFunction) lambda);
+        }
+
+        if (fieldClass == float.class) {
+            return new FieldWriterFloatValueFunc(fieldName, ordinal, features, format, label, method, (ToFloatFunction) lambda);
+        }
+
+        if (fieldClass == Float.class) {
+            return new FieldWriterFloatFunc(fieldName, ordinal, features, format, label, method, (Function) lambda);
+        }
+
+        if (fieldClass == double.class) {
+            return new FieldWriterDoubleValueFunc(fieldName, ordinal, features, format, label, method, (ToDoubleFunction) lambda);
+        }
+
+        if (fieldClass == Double.class) {
+            return new FieldWriterDoubleFunc(fieldName, ordinal, features, format, label, method, (Function) lambda);
+        }
+
+        if (fieldClass == char.class) {
+            return new FieldWriterCharValFunc(fieldName, ordinal, features, format, label, method, (ToCharFunction) lambda);
+        }
+
+        Function function = (Function) lambda;
+        return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, label, fieldType, fieldClass, method, function);
     }
 }

@@ -2,17 +2,19 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson.util.IOUtils;
 import com.alibaba.fastjson2.reader.*;
+import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorLambda;
 
 import java.nio.charset.StandardCharsets;
 
 public class TestUtils {
+    public static final boolean GRAALVM = false;
+    public static final boolean ANDROID = false;
+
     public static ObjectReaderCreator[] readerCreators() {
         return new ObjectReaderCreator[]{
                 ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
                 ObjectReaderCreatorASM.INSTANCE,
         };
     }
@@ -20,7 +22,6 @@ public class TestUtils {
     public static ObjectWriterCreator[] writerCreators() {
         return new ObjectWriterCreator[]{
                 ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorLambda.INSTANCE,
                 ObjectWriterCreatorASM.INSTANCE,
         };
     }
@@ -28,7 +29,6 @@ public class TestUtils {
     public static ObjectReaderCreator[] readerCreators2() {
         return new ObjectReaderCreator[]{
                 ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorLambda.INSTANCE,
                 ObjectReaderCreatorASM.INSTANCE,
         };
     }
@@ -44,6 +44,15 @@ public class TestUtils {
 
     public static ObjectReaderCreator READER_CREATOR = ObjectReaderCreatorASM.INSTANCE;
     public static ObjectWriterCreator WRITER_CREATOR = ObjectWriterCreatorASM.INSTANCE;
+
+    public static <T> ObjectReader<T> createObjectReaderLambda(Class<T> objectClass) {
+        return ObjectReaderCreator.INSTANCE.createObjectReader(objectClass);
+    }
+
+    public static <T> ObjectWriter<T> createObjectWriterLambda(Class<T> objectClass) {
+        // TODO
+        return ObjectWriterCreator.INSTANCE.createObjectWriter(objectClass);
+    }
 
     public static ObjectReaderCreator readerCreator(ClassLoader classLoader) {
         return new ObjectReaderCreatorASM(classLoader);
@@ -123,6 +132,25 @@ public class TestUtils {
                 new JSONReaderStr(JSONFactory.createReadContext(), str),
                 new JSONReaderUTF8(JSONFactory.createReadContext(), utf8Bytes, 0, utf8Bytes.length),
                 new JSONReaderUTF16(JSONFactory.createReadContext(), utf16Bytes, 0, utf16Bytes.length)
+        };
+    }
+
+    public static JSONReader[] createJSONReaders4(String str) {
+        byte[] utf8Bytes = str.getBytes(StandardCharsets.UTF_8);
+        byte[] utf16Bytes = str.getBytes(StandardCharsets.UTF_16);
+        return new JSONReader[]{
+                new JSONReaderStr(JSONFactory.createReadContext(), str),
+                new JSONReaderUTF8(JSONFactory.createReadContext(), utf8Bytes, 0, utf8Bytes.length),
+                new JSONReaderUTF16(JSONFactory.createReadContext(), utf16Bytes, 0, utf16Bytes.length),
+                new JSONReaderASCII(JSONFactory.createReadContext(), null, utf8Bytes, 0, utf8Bytes.length)
+        };
+    }
+
+    public static JSONReader[] createJSONReaders2(String str) {
+        byte[] utf16Bytes = str.getBytes(StandardCharsets.UTF_16);
+        return new JSONReader[]{
+                new JSONReaderStr(JSONFactory.createReadContext(), str),
+                new JSONReaderUTF16(JSONFactory.createReadContext(), utf16Bytes, 0, utf16Bytes.length),
         };
     }
 }

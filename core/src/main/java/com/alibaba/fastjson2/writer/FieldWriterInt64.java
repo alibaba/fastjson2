@@ -3,24 +3,38 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.IOUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteLongAsString;
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringValueAsString;
+
 abstract class FieldWriterInt64<T>
-        extends FieldWriterImpl<T> {
+        extends FieldWriter<T> {
     volatile byte[][] utf8ValueCache;
     volatile char[][] utf16ValueCache;
     final boolean browserCompatible;
 
-    FieldWriterInt64(String name, int ordinal, long features, String format, String label, Class fieldClass) {
-        super(name, ordinal, features, format, label, fieldClass, fieldClass);
+    FieldWriterInt64(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Class fieldClass,
+            Field field,
+            Method method
+    ) {
+        super(name, ordinal, features, format, label, fieldClass, fieldClass, field, method);
         browserCompatible = (features & JSONWriter.Feature.BrowserCompatible.mask) != 0;
     }
 
-    @Override
     public void writeInt64(JSONWriter jsonWriter, long value) {
-        boolean writeNonStringValueAsString = (jsonWriter.getFeatures() & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        long features = jsonWriter.getFeatures() | this.features;
+        boolean noneString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
 
-        if (jsonWriter.isUTF8() && !writeNonStringValueAsString) {
+        if (jsonWriter.utf8 && !noneString) {
             if (value >= -1 && value < 1039) {
                 byte[] bytes = null;
                 if (utf8ValueCache == null) {
@@ -39,7 +53,7 @@ abstract class FieldWriterInt64<T>
                 jsonWriter.writeNameRaw(bytes);
                 return;
             }
-        } else if (jsonWriter.isUTF16() && !writeNonStringValueAsString) {
+        } else if (jsonWriter.utf16 && !noneString) {
             if (value >= -1 && value < 1039) {
                 char[] chars = null;
                 if (utf16ValueCache == null) {
@@ -62,7 +76,7 @@ abstract class FieldWriterInt64<T>
 
         writeFieldName(jsonWriter);
         if (browserCompatible
-                && !jsonWriter.isJSONB()
+                && !jsonWriter.jsonb
                 && (value > 9007199254740991L || value < -9007199254740991L)) {
             jsonWriter.writeString(Long.toString(value));
         } else {

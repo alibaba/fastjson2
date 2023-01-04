@@ -9,8 +9,7 @@ import java.lang.reflect.Method;
 import java.util.Locale;
 
 final class FieldReaderInt16ValueFunc<T>
-        extends FieldReaderImpl<T> {
-    final Method method;
+        extends FieldReader<T> {
     final ObjShortConsumer<T> function;
 
     public FieldReaderInt16ValueFunc(
@@ -24,29 +23,28 @@ final class FieldReaderInt16ValueFunc<T>
             Method method,
             ObjShortConsumer<T> function
     ) {
-        super(fieldName, short.class, short.class, ordinal, features, format, locale, defaultValue, schema);
-        this.method = method;
+        super(fieldName, short.class, short.class, ordinal, features, format, locale, defaultValue, schema, method, null);
         this.function = function;
     }
 
     @Override
-    public Method getMethod() {
-        return method;
-    }
-
-    @Override
     public void accept(T object, short value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         function.accept(object, value);
     }
 
     @Override
     public void accept(T object, Object value) {
+        short shortValue = TypeUtils.toShortValue(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(shortValue);
         }
 
-        function.accept(object,
-                TypeUtils.toShortValue(value));
+        function.accept(object, shortValue);
     }
 
     @Override
@@ -58,5 +56,10 @@ final class FieldReaderInt16ValueFunc<T>
         }
 
         function.accept(object, fieldInt);
+    }
+
+    @Override
+    public Object readFieldValue(JSONReader jsonReader) {
+        return (short) jsonReader.readInt32Value();
     }
 }

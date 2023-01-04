@@ -53,7 +53,7 @@ public class JSONTest_register {
 
     public static class VOReader
             implements ObjectReader<VO> {
-        public VO readObject(JSONReader jsonReader, long features) {
+        public VO readObject(JSONReader jsonReader, Type fieldType, Object fieldName1, long features) {
             jsonReader.nextIfObjectStart();
 
             int id = 0;

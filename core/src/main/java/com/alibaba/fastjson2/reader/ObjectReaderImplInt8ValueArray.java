@@ -4,22 +4,25 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.function.Function;
 
 class ObjectReaderImplInt8ValueArray
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplInt8ValueArray INSTANCE = new ObjectReaderImplInt8ValueArray(null);
 
     final String format;
 
     ObjectReaderImplInt8ValueArray(String format) {
+        super(byte[].class);
         this.format = format;
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.readIfNull()) {
             return null;
         }
@@ -30,6 +33,10 @@ class ObjectReaderImplInt8ValueArray
             for (; ; ) {
                 if (jsonReader.nextIfMatch(']')) {
                     break;
+                }
+
+                if (jsonReader.isEnd()) {
+                    throw new JSONException(jsonReader.info("input end"));
                 }
 
                 int minCapacity = size + 1;
@@ -51,6 +58,11 @@ class ObjectReaderImplInt8ValueArray
         }
 
         if (jsonReader.isString()) {
+            if ((jsonReader.features(features) & JSONReader.Feature.Base64StringAsByteArray.mask) != 0) {
+                String str = jsonReader.readString();
+                return Base64.getDecoder().decode(str);
+            }
+
             return jsonReader.readBinary();
         }
 
@@ -58,7 +70,7 @@ class ObjectReaderImplInt8ValueArray
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isBinary()) {
             return jsonReader.readBinary();
         }

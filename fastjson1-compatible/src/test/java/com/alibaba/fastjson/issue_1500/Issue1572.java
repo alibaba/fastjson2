@@ -22,9 +22,9 @@ public class Issue1572 {
         Set<String> paths = pathValues.keySet();
 
         assertEquals(3, paths.size());
-        assertEquals("1001", pathValues.get("/id"));
-        assertEquals("1001", pathValues.get("/name"));
-        assertSame(person, pathValues.get("/"));
+        assertEquals("1001", pathValues.get("$.id"));
+        assertEquals("1001", pathValues.get("$.name"));
+        assertSame(person, pathValues.get("$"));
     }
 
     public static class Person {

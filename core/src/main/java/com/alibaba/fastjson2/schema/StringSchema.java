@@ -50,10 +50,10 @@ final class StringSchema
                     formatValidator = EmailValidator.INSTANCE;
                     break;
                 case "ipv4":
-                    formatValidator = IPV4AddressValidator.INSTANCE;
+                    formatValidator = IPAddressValidator.IPV4;
                     break;
                 case "ipv6":
-                    formatValidator = IPV6AddressValidator.INSTANCE;
+                    formatValidator = IPAddressValidator.IPV6;
                     break;
                 case "uri":
                     formatValidator = URIValidator.INSTANCE;
@@ -110,13 +110,13 @@ final class StringSchema
 
             if (pattern != null) {
                 if (!pattern.matcher(str).find()) {
-                    return new ValidateResult(false, "pattern not match, expect %, but %s", patternFormat, str);
+                    return new ValidateResult(false, "pattern not match, expect %s, but %s", patternFormat, str);
                 }
             }
 
             if (formatValidator != null) {
                 if (!formatValidator.isValid(str)) {
-                    return new ValidateResult(false, "format not match, expect %, but %s", format, str);
+                    return new ValidateResult(false, "format not match, expect %s, but %s", format, str);
                 }
             }
 

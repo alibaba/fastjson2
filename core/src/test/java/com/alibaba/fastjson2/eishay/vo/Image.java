@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.eishay.vo;
 
+import java.util.Objects;
+
 public class Image
         implements java.io.Serializable {
     private static final long serialVersionUID = 1L;
@@ -63,5 +65,22 @@ public class Image
 
     public Size getSize() {
         return size;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Image image = (Image) o;
+        return height == image.height && width == image.width && size == image.size && Objects.equals(title, image.title) && Objects.equals(uri, image.uri);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(height, size, title, uri, width);
     }
 }

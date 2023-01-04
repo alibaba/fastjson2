@@ -99,12 +99,4 @@ public class TypeCollector {
         }
         return collector.getResult().split(",");
     }
-
-    public boolean matched() {
-        return collector != null;
-    }
-
-    public boolean hasJsonType() {
-        return jsonType;
-    }
 }

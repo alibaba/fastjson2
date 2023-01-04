@@ -107,7 +107,7 @@ public class JodaSupport {
         }
 
         @Override
-        public Object readObject(JSONReader jsonReader, long features) {
+        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             if (jsonReader.nextIfNull()) {
                 return null;
             }
@@ -136,8 +136,8 @@ public class JodaSupport {
         }
 
         @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
-            return readObject(jsonReader, features);
+        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+            return readObject(jsonReader, fieldType, fieldName, features);
         }
     }
 
@@ -174,12 +174,12 @@ public class JodaSupport {
         }
 
         @Override
-        public Object readObject(JSONReader jsonReader, long features) {
+        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             throw new JSONException(jsonReader.info("not support"));
         }
 
         @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
+        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             Integer minimumDaysInFirstWeek = null;
             String zoneId = null;
             jsonReader.nextIfObjectStart();
@@ -205,8 +205,8 @@ public class JodaSupport {
                 try {
                     Object datetimeZone = forID.invoke(null, zoneId);
                     return getInstance.invoke(null, datetimeZone);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
+                } catch (IllegalAccessException | InvocationTargetException ignored) {
+                    // ignored
                 }
             }
 
@@ -360,7 +360,7 @@ public class JodaSupport {
         }
 
         @Override
-        public Object readObject(JSONReader jsonReader, long features) {
+        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             if (jsonReader.nextIfNull()) {
                 return null;
             }
@@ -378,7 +378,7 @@ public class JodaSupport {
         }
 
         @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
+        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             byte type = jsonReader.getType();
 
             if (type == BC_LOCAL_DATE) {
@@ -508,7 +508,7 @@ public class JodaSupport {
 
                     DateTimeFormatter formatter = this.getDateFormatter();
                     if (formatter == null) {
-                        formatter = jsonWriter.getContext().getDateFormatter();
+                        formatter = jsonWriter.context.getDateFormatter();
                     }
 
                     if (formatter == null) {
@@ -578,7 +578,7 @@ public class JodaSupport {
         }
 
         @Override
-        public Object readObject(JSONReader jsonReader, long features) {
+        public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             if (jsonReader.isString() || jsonReader.isInt()) {
                 LocalDateTime ldt = jsonReader.readLocalDateTime();
                 if (ldt == null) {
@@ -596,7 +596,7 @@ public class JodaSupport {
         }
 
         @Override
-        public Object readJSONBObject(JSONReader jsonReader, long features) {
+        public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
             byte type = jsonReader.getType();
 
             if (type == BC_LOCAL_DATE) {
@@ -786,7 +786,7 @@ public class JodaSupport {
 
                     DateTimeFormatter formatter = this.getDateFormatter();
                     if (formatter == null) {
-                        formatter = jsonWriter.getContext().getDateFormatter();
+                        formatter = jsonWriter.context.getDateFormatter();
                     }
 
                     if (formatter == null) {

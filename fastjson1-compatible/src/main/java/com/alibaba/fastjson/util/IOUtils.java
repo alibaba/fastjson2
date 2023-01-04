@@ -17,6 +17,7 @@ package com.alibaba.fastjson.util;
 
 import com.alibaba.fastjson.JSONException;
 
+import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.*;
@@ -219,5 +220,39 @@ public class IOUtils {
         }
 
         return dArr;
+    }
+
+    public static void close(Closeable x) {
+        if (x != null) {
+            try {
+                x.close();
+            } catch (Exception ignored) {
+                // ignored
+            }
+        }
+    }
+
+    public static void getChars(byte b, int index, char[] buf) {
+        com.alibaba.fastjson2.util.IOUtils.getChars(b, index, buf);
+    }
+
+    public static void getChars(int i, int index, char[] buf) {
+        com.alibaba.fastjson2.util.IOUtils.getChars(i, index, buf);
+    }
+
+    public static void getChars(long i, int index, char[] buf) {
+        com.alibaba.fastjson2.util.IOUtils.getChars(i, index, buf);
+    }
+
+    public static int stringSize(int x) {
+        return com.alibaba.fastjson2.util.IOUtils.stringSize(x);
+    }
+
+    public static int stringSize(long x) {
+        return com.alibaba.fastjson2.util.IOUtils.stringSize(x);
+    }
+
+    public static int decodeUTF8(byte[] sa, int sp, int len, char[] da) {
+        return com.alibaba.fastjson2.util.IOUtils.decodeUTF8(sa, sp, len, da);
     }
 }

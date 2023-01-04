@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.ReferenceKey;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,6 +27,8 @@ class ObjectReaderImplMapTyped
     final long features;
     final Function builder;
 
+    final Constructor defaultConstructor;
+
     ObjectReader valueObjectReader;
     ObjectReader keyObjectReader;
 
@@ -40,6 +44,18 @@ class ObjectReaderImplMapTyped
         this.valueClass = TypeUtils.getClass(valueType);
         this.features = features;
         this.builder = builder;
+
+        Constructor defaultConstructor = null;
+        Constructor[] constructors = this.instanceType.getDeclaredConstructors();
+        for (Constructor constructor : constructors) {
+            if (constructor.getParameterCount() == 0
+                    && !Modifier.isPublic(constructor.getModifiers())) {
+                constructor.setAccessible(true);
+                defaultConstructor = constructor;
+                break;
+            }
+        }
+        this.defaultConstructor = defaultConstructor;
     }
 
     @Override
@@ -92,21 +108,19 @@ class ObjectReaderImplMapTyped
     public Object createInstance(long features) {
         if (instanceType != null && !instanceType.isInterface()) {
             try {
+                if (defaultConstructor != null) {
+                    return defaultConstructor.newInstance();
+                }
                 return instanceType.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new JSONException("create map error");
+            } catch (Exception e) {
+                throw new JSONException("create map error", e);
             }
         }
         return new HashMap();
     }
 
     @Override
-    public FieldReader getFieldReader(long hashCode) {
-        return null;
-    }
-
-    @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         ObjectReader objectReader = null;
         Function builder = this.builder;
         if (jsonReader.getType() == BC_TYPED_ANY) {
@@ -115,7 +129,7 @@ class ObjectReaderImplMapTyped
             if (objectReader != null && objectReader != this) {
                 builder = objectReader.getBuildFunction();
                 if (!(objectReader instanceof ObjectReaderImplMap) && !(objectReader instanceof ObjectReaderImplMapTyped)) {
-                    return objectReader.readJSONBObject(jsonReader, features);
+                    return objectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
                 }
             }
         }
@@ -165,7 +179,7 @@ class ObjectReaderImplMapTyped
                     if (keyObjectReader == null) {
                         name = jsonReader.readAny();
                     } else {
-                        name = keyObjectReader.readJSONBObject(jsonReader, features);
+                        name = keyObjectReader.readJSONBObject(jsonReader, null, null, features);
                     }
                 }
             }
@@ -194,12 +208,12 @@ class ObjectReaderImplMapTyped
             } else {
                 ObjectReader autoTypeValueReader = jsonReader.checkAutoType(valueClass, 0, features);
                 if (autoTypeValueReader != null) {
-                    value = autoTypeValueReader.readJSONBObject(jsonReader, features);
+                    value = autoTypeValueReader.readJSONBObject(jsonReader, valueType, name, features);
                 } else {
                     if (valueObjectReader == null) {
                         valueObjectReader = jsonReader.getObjectReader(valueType);
                     }
-                    value = valueObjectReader.readJSONBObject(jsonReader, features);
+                    value = valueObjectReader.readJSONBObject(jsonReader, valueType, name, features);
                 }
             }
             object.put(name, value);
@@ -213,19 +227,24 @@ class ObjectReaderImplMapTyped
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         boolean match = jsonReader.nextIfMatch('{');
         if (!match) {
+            if (jsonReader.nextIfNull()) {
+                return null;
+            }
+
             throw new JSONException(jsonReader.info("expect '{', but '['"));
         }
 
         JSONReader.Context context = jsonReader.getContext();
         long contextFeatures = context.getFeatures() | features;
-        Map object;
+        Map object, innerMap = null;
         if (instanceType == HashMap.class) {
             Supplier<Map> objectSupplier = context.getObjectSupplier();
             if (mapType == Map.class && objectSupplier != null) {
                 object = objectSupplier.get();
+                innerMap = TypeUtils.getInnerMap(object);
             } else {
                 object = new HashMap<>();
             }
@@ -233,23 +252,69 @@ class ObjectReaderImplMapTyped
             object = (Map) createInstance(contextFeatures);
         }
 
-        for (; ; ) {
-            if (jsonReader.nextIfMatch('}')) {
+        for (int i = 0; ; ++i) {
+            if (jsonReader.nextIfMatch('}') || jsonReader.isEnd()) {
                 break;
             }
 
             Object name;
-            if (keyType == String.class) {
+            if (jsonReader.nextIfNull()) {
+                if (!jsonReader.nextIfMatch(':')) {
+                    throw new JSONException(jsonReader.info("illegal json"));
+                }
+                name = null;
+            } else if (keyType == String.class) {
                 name = jsonReader.readFieldName();
+                if (i == 0
+                        && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                        && name.equals(getTypeKey())
+                ) {
+                    long typeHashCode = jsonReader.readTypeHashCode();
+                    ObjectReader objectReaderAutoType = context.getObjectReaderAutoType(typeHashCode);
+                    if (objectReaderAutoType == null) {
+                        String typeName = jsonReader.getString();
+                        objectReaderAutoType = context.getObjectReaderAutoType(typeName, mapType, features);
+                    }
+                    if (objectReaderAutoType != null) {
+                        if (objectReaderAutoType instanceof ObjectReaderImplMap) {
+                            if (!object.getClass().equals(((ObjectReaderImplMap) objectReaderAutoType).instanceType)) {
+                                object = (Map) objectReaderAutoType.createInstance(features);
+                            }
+                        }
+                    }
+                    continue;
+                }
+
+                if (name == null) {
+                    name = jsonReader.readString();
+                    if (!jsonReader.nextIfMatch(':')) {
+                        throw new JSONException(jsonReader.info("illegal json"));
+                    }
+                }
             } else {
-                name = jsonReader.read(keyType);
+                if (keyObjectReader != null) {
+                    name = keyObjectReader.readObject(jsonReader, null, null, 0);
+                } else {
+                    name = jsonReader.read(keyType);
+                }
+                if (i == 0
+                        && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                        && name.equals(getTypeKey())) {
+                    continue;
+                }
                 jsonReader.nextIfMatch(':');
             }
             if (valueObjectReader == null) {
                 valueObjectReader = jsonReader.getObjectReader(valueType);
             }
-            Object value = valueObjectReader.readObject(jsonReader, 0);
-            Object origin = object.put(name, value);
+            Object value = valueObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
+            Object origin;
+            if (innerMap != null) {
+                origin = innerMap.put(name, value);
+            } else {
+                origin = object.put(name, value);
+            }
+
             if (origin != null) {
                 if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {

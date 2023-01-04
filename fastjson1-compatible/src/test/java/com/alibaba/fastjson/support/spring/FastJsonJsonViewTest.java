@@ -3,6 +3,7 @@ package com.alibaba.fastjson.support.spring;
 import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.alibaba.fastjson.serializer.ValueFilter;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
+import com.alibaba.fastjson.support.spring.annotation.FastJsonView;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -16,7 +17,7 @@ import java.util.Map;
 public class FastJsonJsonViewTest {
     @Test
     public void test_0() throws Exception {
-        FastJsonJsonView view = new FastJsonJsonView();
+        FastJsonView view = new FastJsonView();
 
         Map<String, Object> model = new HashMap<String, Object>();
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -42,7 +43,7 @@ public class FastJsonJsonViewTest {
 
     @Test
     public void test_1() throws Exception {
-        FastJsonJsonView view = new FastJsonJsonView();
+        FastJsonView view = new FastJsonView();
 
         Assertions.assertNotNull(view.getFastJsonConfig());
         view.setFastJsonConfig(new FastJsonConfig());
@@ -67,7 +68,7 @@ public class FastJsonJsonViewTest {
 
     @Test
     public void test_jsonp() throws Exception {
-        FastJsonJsonView view = new FastJsonJsonView();
+        FastJsonView view = new FastJsonView();
 
         Assertions.assertNotNull(view.getFastJsonConfig());
         view.setFastJsonConfig(new FastJsonConfig());
@@ -89,7 +90,7 @@ public class FastJsonJsonViewTest {
 
     @Test
     public void test_jsonp_invalidParam() throws Exception {
-        FastJsonJsonView view = new FastJsonJsonView();
+        FastJsonView view = new FastJsonView();
 
         Assertions.assertNotNull(view.getFastJsonConfig());
         view.setFastJsonConfig(new FastJsonConfig());

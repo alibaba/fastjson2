@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.benchmark;
 
 import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -19,6 +18,8 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
+import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
+
 public class DecodeUTF8BenchmarkJDK17 {
     static byte[] utf8Bytes = "01234567890ABCDEFGHIJKLMNOPQRSTUVWZYZabcdefghijklmnopqrstuvwzyz"
             .getBytes(StandardCharsets.UTF_8);
@@ -28,7 +29,7 @@ public class DecodeUTF8BenchmarkJDK17 {
     static {
         try {
             Field valueField = String.class.getDeclaredField("value");
-            valueFieldOffset = UnsafeUtils.UNSAFE.objectFieldOffset(valueField);
+            valueFieldOffset = UnsafeUtils.objectFieldOffset(valueField);
             stringCreator = getStringCreatorJDK17();
         } catch (Throwable e) {
             e.printStackTrace();
@@ -60,7 +61,7 @@ public class DecodeUTF8BenchmarkJDK17 {
         // GraalVM not support
         // Android not support
         MethodHandles.Lookup lookup;
-        if (JDKUtils.JVM_VERSION >= 17) {
+        if (JVM_VERSION >= 17) {
             Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, Class.class, int.class);
             constructor.setAccessible(true);
             lookup = constructor.newInstance(

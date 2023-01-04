@@ -5,21 +5,21 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 
+import java.lang.reflect.Type;
 import java.util.BitSet;
 
 public final class ObjectReaderImplBitSet
-        extends ObjectReaderBaseModule.PrimitiveImpl<BitSet> {
+        extends ObjectReaderPrimitive<BitSet> {
     static final ObjectReaderImplBitSet INSTANCE = new ObjectReaderImplBitSet();
 
     public static final long HASH_TYPE = Fnv.hashCode64("BitSet");
 
-    @Override
-    public Class getObjectClass() {
-        return BitSet.class;
+    public ObjectReaderImplBitSet() {
+        super(BitSet.class);
     }
 
     @Override
-    public BitSet readJSONBObject(JSONReader jsonReader, long features) {
+    public BitSet readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfNull()) {
             return null;
         }
@@ -36,7 +36,7 @@ public final class ObjectReaderImplBitSet
     }
 
     @Override
-    public BitSet readObject(JSONReader jsonReader, long features) {
+    public BitSet readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfNull()) {
             return null;
         }

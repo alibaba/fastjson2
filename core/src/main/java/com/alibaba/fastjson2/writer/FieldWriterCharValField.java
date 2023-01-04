@@ -2,44 +2,51 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
 
 final class FieldWriterCharValField<T>
-        extends FieldWriterImpl<T> {
-    final Field field;
-
+        extends FieldWriter<T> {
     FieldWriterCharValField(String name, int ordinal, String format, String label, Field field) {
-        super(name, ordinal, 0, format, label, char.class, char.class);
-        this.field = field;
-    }
-
-    @Override
-    public Field getField() {
-        return field;
+        super(name, ordinal, 0, format, label, char.class, char.class, field, null);
     }
 
     @Override
     public Object getFieldValue(Object object) {
+        return getFieldValueChar(object);
+    }
+
+    public char getFieldValueChar(Object object) {
+        if (object == null) {
+            throw new JSONException("field.get error, " + fieldName);
+        }
+
         try {
-            return field.getChar(object);
+            char value;
+            if (fieldOffset != -1) {
+                value = UnsafeUtils.getChar(object, fieldOffset);
+            } else {
+                value = field.getChar(object);
+            }
+            return value;
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + name, e);
+            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
-        char value = (char) getFieldValue(object);
+        char value = getFieldValueChar(object);
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeString(value);
+        jsonWriter.writeChar(value);
         return true;
     }
 
     @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
-        char value = (char) getFieldValue(object);
-        jsonWriter.writeString(value);
+        char value = getFieldValueChar(object);
+        jsonWriter.writeChar(value);
     }
 }

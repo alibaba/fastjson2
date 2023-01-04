@@ -6,19 +6,12 @@ import java.lang.reflect.Method;
 import java.util.function.ToDoubleFunction;
 
 final class FieldWriterDoubleValueFunc
-        extends FieldWriterImpl {
-    final Method method;
+        extends FieldWriter {
     final ToDoubleFunction function;
 
     protected FieldWriterDoubleValueFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToDoubleFunction function) {
-        super(fieldName, ordinal, features, format, label, double.class, double.class);
-        this.method = method;
+        super(fieldName, ordinal, features, format, label, double.class, double.class, null, method);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override
@@ -28,8 +21,12 @@ final class FieldWriterDoubleValueFunc
 
     @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
-        double fieldValue = function.applyAsDouble(object);
-        jsonWriter.writeDouble(fieldValue);
+        double value = function.applyAsDouble(object);
+        if (decimalFormat != null) {
+            jsonWriter.writeDouble(value, decimalFormat);
+        } else {
+            jsonWriter.writeDouble(value);
+        }
     }
 
     @Override
@@ -45,7 +42,11 @@ final class FieldWriterDoubleValueFunc
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeDouble(value);
+        if (decimalFormat != null) {
+            jsonWriter.writeDouble(value, decimalFormat);
+        } else {
+            jsonWriter.writeDouble(value);
+        }
         return true;
     }
 }

@@ -15,11 +15,8 @@ final class ObjectWriterImplLocalDate
         implements ObjectWriter {
     static final ObjectWriterImplLocalDate INSTANCE = new ObjectWriterImplLocalDate(null, null);
 
-    final boolean yyyyMMdd10;
-
     public ObjectWriterImplLocalDate(String format, Locale locale) {
         super(format, locale);
-        yyyyMMdd10 = "yyyy-MM-dd".equals(format);
     }
 
     @Override
@@ -34,11 +31,11 @@ final class ObjectWriterImplLocalDate
             return;
         }
 
-        JSONWriter.Context ctx = jsonWriter.getContext();
+        JSONWriter.Context ctx = jsonWriter.context;
 
         LocalDate date = (LocalDate) object;
 
-        if (formatUnixTime || ctx.isDateFormatUnixTime()) {
+        if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
             LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
             long millis = dateTime.atZone(ctx.getZoneId())
                     .toInstant()
@@ -47,12 +44,20 @@ final class ObjectWriterImplLocalDate
             return;
         }
 
-        if (formatMillis || ctx.isDateFormatMillis()) {
+        if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
             LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
             long millis = dateTime.atZone(ctx.getZoneId())
                     .toInstant()
                     .toEpochMilli();
             jsonWriter.writeInt64(millis);
+            return;
+        }
+
+        if (yyyyMMdd8) {
+            jsonWriter.writeDateYYYMMDD8(
+                    date.getYear(),
+                    date.getMonthValue(),
+                    date.getDayOfMonth());
             return;
         }
 
@@ -81,7 +86,8 @@ final class ObjectWriterImplLocalDate
             jsonWriter.writeDateYYYMMDD10(
                     date.getYear(),
                     date.getMonthValue(),
-                    date.getDayOfMonth());
+                    date.getDayOfMonth()
+            );
             return;
         }
 

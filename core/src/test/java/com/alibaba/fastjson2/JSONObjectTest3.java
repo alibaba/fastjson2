@@ -6,12 +6,9 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONObjectTest3 {
-    // GraalVM not support
-    // Android not support
     @Test
     public void test0() {
         assertEquals(
@@ -81,5 +78,53 @@ public class JSONObjectTest3 {
     @Test
     public void test5() {
         assertEquals("{}", JSONObject.toJSONString(JSONObject.of()));
+    }
+
+    @Test
+    public void of() {
+        assertEquals(0, JSONObject.of().size());
+        assertEquals(1, JSONObject.of("k0", 0).size());
+        assertEquals(2, JSONObject.of("k0", 0, "k1", 1).size());
+        assertEquals(3, JSONObject.of("k0", 0, "k1", 1, "k2", 2).size());
+        assertEquals(4, JSONObject.of("k0", 0, "k1", 1, "k2", 2, "k3", 3).size());
+        assertEquals(5, JSONObject.of("k0", 0, "k1", 1, "k2", 2, "k3", 3, "k4", 4).size());
+    }
+
+    @Test
+    public void getBooleanValue() {
+        JSONObject jsonObject = JSONObject
+                .of(
+                        "v0", "true",
+                        "v1", 1,
+                        "v2", true,
+                        "v3", false,
+                        "v4", "1"
+                );
+        assertEquals(5, jsonObject.size());
+        assertTrue(jsonObject.getBooleanValue("v0", false));
+
+        assertTrue(jsonObject.getBooleanValue("v1", false));
+        assertTrue(jsonObject.getBooleanValue("v1", true));
+
+        assertTrue(jsonObject.getBooleanValue("v2", false));
+        assertTrue(jsonObject.getBooleanValue("v2", true));
+
+        assertFalse(jsonObject.getBooleanValue("v3", false));
+        assertFalse(jsonObject.getBooleanValue("v3", true));
+
+        assertTrue(jsonObject.getBooleanValue("v4", false));
+        assertTrue(jsonObject.getBooleanValue("v4", true));
+
+        assertFalse(jsonObject.getBooleanValue("v100", false));
+        assertTrue(jsonObject.getBooleanValue("v100", true));
+    }
+
+    @Test
+    public void getIntValue() {
+        JSONObject jsonObject = JSONObject.of("v0", "1", "v1", "null", "v2", "1.0");
+        assertEquals(1, jsonObject.getIntValue("v0", 2));
+        assertEquals(999, jsonObject.getIntValue("v1", 999));
+        assertEquals(1, jsonObject.getIntValue("v2", 999));
+        assertEquals(999, jsonObject.getIntValue("v100", 999));
     }
 }

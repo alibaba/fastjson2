@@ -51,12 +51,21 @@ public class ObjectReaderImplValue<I, T>
     }
 
     @Override
-    public T readObject(JSONReader jsonReader, long features) {
+    public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        return readObject(jsonReader, fieldType, fieldName, features);
+    }
+
+    @Override
+    public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (valueReader == null) {
             valueReader = jsonReader.getObjectReader(valueType);
         }
 
-        I value = (I) valueReader.readObject(jsonReader, features | this.features);
+        I value = (I) valueReader.readObject(jsonReader, fieldType, fieldName, features | this.features);
+
+        if (value == null) {
+            return null;
+        }
 
         if (schema != null) {
             schema.validate(value);

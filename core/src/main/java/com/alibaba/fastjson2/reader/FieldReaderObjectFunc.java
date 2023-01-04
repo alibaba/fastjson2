@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -10,12 +9,7 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 
 final class FieldReaderObjectFunc<T, V>
-        extends FieldReaderImpl<T>
-        implements FieldReaderObject<T, V> {
-    final Method method;
-    final BiConsumer<T, V> function;
-    protected ObjectReader fieldObjectReader;
-
+        extends FieldReaderObject<T> {
     FieldReaderObjectFunc(
             String fieldName,
             Type fieldType,
@@ -30,20 +24,8 @@ final class FieldReaderObjectFunc<T, V>
             BiConsumer<T, V> function,
             ObjectReader fieldObjectReader
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema);
-        this.method = method;
-        this.function = function;
-        this.fieldObjectReader = fieldObjectReader;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
-    }
-
-    @Override
-    public ObjectReader getInitReader() {
-        return fieldObjectReader;
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null, function);
+        this.initReader = fieldObjectReader;
     }
 
     @Override
@@ -65,53 +47,5 @@ final class FieldReaderObjectFunc<T, V>
         }
 
         function.accept(object, (V) value);
-    }
-
-    @Override
-    public void readFieldValue(JSONReader jsonReader, T object) {
-        ObjectReader objectReader;
-        if (this.fieldObjectReader != null) {
-            objectReader = this.fieldObjectReader;
-        } else {
-            objectReader = this.fieldObjectReader = jsonReader.getContext().getObjectReader(fieldType);
-        }
-
-        if (jsonReader.isReference()) {
-            String reference = jsonReader.readReference();
-            if ("..".equals(reference)) {
-                accept(object, object);
-            } else {
-                addResolveTask(jsonReader, object, reference);
-            }
-            return;
-        }
-
-        Object value = jsonReader.isJSONB()
-                ? objectReader.readJSONBObject(jsonReader, features)
-                : objectReader.readObject(jsonReader, features);
-        accept(object, value);
-    }
-
-    @Override
-    public ObjectReader getFieldObjectReader(JSONReader.Context context) {
-        if (fieldObjectReader == null) {
-            fieldObjectReader = context
-                    .getObjectReader(fieldType);
-        }
-        return fieldObjectReader;
-    }
-
-    @Override
-    public Object readFieldValue(JSONReader jsonReader) {
-        ObjectReader objectReader;
-        if (this.fieldObjectReader != null) {
-            objectReader = this.fieldObjectReader;
-        } else {
-            objectReader = this.fieldObjectReader = jsonReader.getContext().getObjectReader(fieldType);
-        }
-
-        return jsonReader.isJSONB()
-                ? objectReader.readJSONBObject(jsonReader, features)
-                : objectReader.readObject(jsonReader, features);
     }
 }

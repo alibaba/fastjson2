@@ -6,25 +6,25 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
 final class ObjectReaderImplInt64ValueArray
-        extends ObjectReaderBaseModule.PrimitiveImpl {
+        extends ObjectReaderPrimitive {
     static final ObjectReaderImplInt64ValueArray INSTANCE = new ObjectReaderImplInt64ValueArray();
 
     static final long HASH_TYPE = Fnv.hashCode64("[J");
 
-    @Override
-    public Class getObjectClass() {
-        return long[].class;
+    ObjectReaderImplInt64ValueArray() {
+        super(long[].class);
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isJSONB()) {
-            return readJSONBObject(jsonReader, features);
+            return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         if (jsonReader.readIfNull()) {
@@ -37,6 +37,10 @@ final class ObjectReaderImplInt64ValueArray
             for (; ; ) {
                 if (jsonReader.nextIfMatch(']')) {
                     break;
+                }
+
+                if (jsonReader.isEnd()) {
+                    throw new JSONException(jsonReader.info("input end"));
                 }
 
                 int minCapacity = size + 1;
@@ -70,7 +74,7 @@ final class ObjectReaderImplInt64ValueArray
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
             long typeHash = jsonReader.readTypeHashCode();
             if (typeHash != HASH_TYPE) {

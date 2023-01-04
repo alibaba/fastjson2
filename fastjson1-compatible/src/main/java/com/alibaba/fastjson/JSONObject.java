@@ -18,7 +18,6 @@ package com.alibaba.fastjson;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.parser.ParserConfig;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.util.IOUtils;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.alibaba.fastjson2.JSONException;
@@ -27,6 +26,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.util.Wrapper;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
@@ -45,7 +45,7 @@ import java.util.function.Function;
  */
 public class JSONObject
         extends JSON
-        implements Map<String, Object>, Cloneable, Serializable, InvocationHandler {
+        implements Map<String, Object>, Cloneable, Serializable, InvocationHandler, Wrapper {
     static ObjectReader<JSONArray> arrayReader;
     static ObjectReader<JSONObject> objectReader;
 
@@ -82,7 +82,7 @@ public class JSONObject
     }
 
     public static <T> T toJavaObject(JSON json, Class<T> clazz) {
-        return com.alibaba.fastjson2.util.TypeUtils.cast(json, clazz);
+        return com.alibaba.fastjson2.util.TypeUtils.cast(json, clazz, JSONFactory.getDefaultObjectReaderProvider());
     }
 
     @Override
@@ -145,7 +145,7 @@ public class JSONObject
             if (objectReader == null) {
                 objectReader = reader.getObjectReader(JSONObject.class);
             }
-            return objectReader.readObject(reader, 0);
+            return objectReader.readObject(reader, null, null, 0);
         }
 
         if (value instanceof Map) {
@@ -169,7 +169,7 @@ public class JSONObject
     public JSONArray getJSONArray(String key) {
         Object value = map.get(key);
 
-        if (value instanceof JSONArray) {
+        if (value == null || value instanceof JSONArray) {
             return (JSONArray) value;
         }
 
@@ -184,7 +184,7 @@ public class JSONObject
             if (arrayReader == null) {
                 arrayReader = reader.getObjectReader(JSONArray.class);
             }
-            return arrayReader.readObject(reader, 0);
+            return arrayReader.readObject(reader, null, null, 0);
         }
 
         if (value instanceof List) {
@@ -227,8 +227,13 @@ public class JSONObject
         }
 
         String json = JSON.toJSONString(obj);
-        JSONReader jsonReader = JSONReader.of(json);
-        config(jsonReader.getContext(), features);
+        JSONReader jsonReader = JSONReader.of(
+                json,
+                JSON.createReadContext(
+                        JSONFactory.getDefaultObjectReaderProvider(),
+                        JSON.DEFAULT_PARSER_FEATURE, features
+                )
+        );
 
         boolean fieldBased = jsonReader.getContext().isEnabled(JSONReader.Feature.FieldBased);
         ObjectReader objectReader = provider.getObjectReader(clazz, fieldBased);
@@ -240,7 +245,7 @@ public class JSONObject
                     .setDateFormat(defaultDateFormat);
         }
 
-        return (T) objectReader.readObject(jsonReader);
+        return (T) objectReader.readObject(jsonReader, null, null, 0);
     }
 
     public <T> T getObject(String key, TypeReference typeReference) {
@@ -282,7 +287,7 @@ public class JSONObject
                     .setDateFormat(defaultDateFormat);
         }
 
-        return (T) objectReader.readObject(jsonReader);
+        return (T) objectReader.readObject(jsonReader, null, null, 0);
     }
 
     public Boolean getBoolean(String key) {
@@ -381,8 +386,14 @@ public class JSONObject
         }
 
         String json = JSON.toJSONString(obj);
-        JSONReader jsonReader = JSONReader.of(json);
-        config(jsonReader.getContext(), features);
+        JSONReader jsonReader = JSONReader.of(
+                json,
+                JSON.createReadContext(
+                        JSONFactory.getDefaultObjectReaderProvider(),
+                        DEFAULT_PARSER_FEATURE,
+                        features
+                )
+        );
 
         boolean fieldBased = jsonReader.getContext().isEnabled(JSONReader.Feature.FieldBased);
         ObjectReader objectReader = provider.getObjectReader(type, fieldBased);
@@ -394,12 +405,12 @@ public class JSONObject
                     .setDateFormat(defaultDateFormat);
         }
 
-        return (T) objectReader.readObject(jsonReader);
+        return (T) objectReader.readObject(jsonReader, null, null, 0);
     }
 
     public boolean getBooleanValue(String key) {
         Object value = get(key);
-        Boolean booleanVal = com.alibaba.fastjson2.util.TypeUtils.cast(value, Boolean.class);
+        Boolean booleanVal = com.alibaba.fastjson2.util.TypeUtils.toBoolean(value);
         if (booleanVal == null) {
             return false;
         }
@@ -793,17 +804,25 @@ public class JSONObject
 
     public Date getDate(String key) {
         Object value = get(key);
-        return com.alibaba.fastjson2.util.TypeUtils.cast(value, java.util.Date.class);
+        return com.alibaba.fastjson2.util.TypeUtils.toDate(value);
     }
 
     public java.sql.Date getSqlDate(String key) {
         Object value = get(key);
-        return com.alibaba.fastjson2.util.TypeUtils.cast(value, java.sql.Date.class);
+        return com.alibaba.fastjson2.util.TypeUtils.cast(
+                value,
+                java.sql.Date.class,
+                JSONFactory.getDefaultObjectReaderProvider()
+        );
     }
 
     public java.sql.Timestamp getTimestamp(String key) {
         Object value = get(key);
-        return com.alibaba.fastjson2.util.TypeUtils.cast(value, Timestamp.class);
+        return com.alibaba.fastjson2.util.TypeUtils.cast(
+                value,
+                Timestamp.class,
+                JSONFactory.getDefaultObjectReaderProvider()
+        );
     }
 
     @Override
@@ -974,10 +993,6 @@ public class JSONObject
         return com.alibaba.fastjson2.JSON.parseObject(str, type);
     }
 
-    public <T> T toJavaObject(TypeReference typeReference) {
-        return toJavaObject(typeReference.getType());
-    }
-
     public <T> T toJavaObject(Class<T> clazz) {
         if (clazz == Map.class) {
             return (T) this;
@@ -1008,16 +1023,16 @@ public class JSONObject
         return TypeUtils.castToJavaBean(this, clazz, config);
     }
 
-    public String toJSONString() {
-        return com.alibaba.fastjson2.JSON.toJSONString(this, JSONWriter.Feature.ReferenceDetection);
-    }
-
     @Override
     public String toString() {
         return com.alibaba.fastjson2.JSON.toJSONString(this, JSONWriter.Feature.ReferenceDetection);
     }
 
-    public String toString(SerializerFeature... features) {
-        return JSON.toJSONString(this, features);
+    @Override
+    public <T> T unwrap(Class<T> iface) {
+        if (iface == Map.class) {
+            return (T) map;
+        }
+        return (T) this;
     }
 }

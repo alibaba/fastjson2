@@ -8,19 +8,12 @@ import java.lang.reflect.Method;
 import java.util.function.ObjLongConsumer;
 
 final class FieldReaderInt64ValueFunc<T>
-        extends FieldReaderImpl<T> {
-    final Method method;
+        extends FieldReader<T> {
     final ObjLongConsumer<T> function;
 
     public FieldReaderInt64ValueFunc(String fieldName, int ordinal, Long defaultValue, JSONSchema schema, Method method, ObjLongConsumer<T> function) {
-        super(fieldName, long.class, long.class, ordinal, 0, null, null, defaultValue, schema);
-        this.method = method;
+        super(fieldName, long.class, long.class, ordinal, 0, null, null, defaultValue, schema, method, null);
         this.function = function;
-    }
-
-    @Override
-    public Method getMethod() {
-        return method;
     }
 
     @Override
@@ -34,12 +27,13 @@ final class FieldReaderInt64ValueFunc<T>
 
     @Override
     public void accept(T object, Object value) {
+        long longValue = TypeUtils.toLongValue(value);
+
         if (schema != null) {
-            schema.assertValidate(value);
+            schema.assertValidate(longValue);
         }
 
-        function.accept(object,
-                TypeUtils.toLongValue(value));
+        function.accept(object, longValue);
     }
 
     @Override

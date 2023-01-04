@@ -18,7 +18,7 @@ public interface ObjectReaderAnnotationProcessor {
     default void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Constructor constructor, int paramIndex, Parameter parameter) {
     }
 
-    default void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Method method, int paremIndex, Parameter parameter) {
+    default void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Method method, int paramIndex, Parameter parameter) {
     }
 
     default void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Method method) {

@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
 
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -32,7 +33,7 @@ final class ObjectReaderImplCalendar
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isInt()) {
             long millis = jsonReader.readInt64Value();
 
@@ -60,8 +61,8 @@ final class ObjectReaderImplCalendar
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
-        if (jsonReader.current() == '"') {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.isString()) {
             if (format != null) {
                 DateTimeFormatter formatter = getDateFormatter();
                 if (formatter != null) {

@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Type;
+
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
 final class ObjectReaderImplEnum2X4
@@ -63,9 +65,10 @@ final class ObjectReaderImplEnum2X4
     }
 
     @Override
-    public Object readJSONBObject(JSONReader jsonReader, long features) {
+    public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         byte type = jsonReader.getType();
-        if (jsonReader.nextIfMatch(BC_TYPED_ANY)) {
+        if (type == BC_TYPED_ANY) {
+            jsonReader.next();
             long typeNameHash = jsonReader.readTypeHashCode();
             if (typeNameHash != this.typeNameHash) {
                 throw new JSONException(jsonReader.info("not support enumType : " + jsonReader.getString()));
@@ -75,7 +78,13 @@ final class ObjectReaderImplEnum2X4
         Enum fieldValue;
         boolean isInt = (type >= BC_INT32_NUM_MIN && type <= BC_INT32);
         if (isInt) {
-            int ordinal = jsonReader.readInt32Value();
+            int ordinal;
+            if (type <= BC_INT32_NUM_MAX) {
+                ordinal = type;
+                jsonReader.next();
+            } else {
+                ordinal = jsonReader.readInt32Value();
+            }
             if (ordinal == 0) {
                 fieldValue = enum0;
             } else if (ordinal == 1) {
@@ -104,7 +113,7 @@ final class ObjectReaderImplEnum2X4
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         Enum fieldValue;
         if (jsonReader.isInt()) {
             int ordinal = jsonReader.readInt32Value();

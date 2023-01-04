@@ -29,37 +29,79 @@ final class ObjectWriterImplLocalDateTime
             return;
         }
 
-        JSONWriter.Context ctx = jsonWriter.getContext();
+        JSONWriter.Context ctx = jsonWriter.context;
 
-        LocalDateTime dateTime = (LocalDateTime) object;
+        LocalDateTime ldt = (LocalDateTime) object;
 
-        if (formatUnixTime || ctx.isDateFormatUnixTime()) {
-            long millis = dateTime.atZone(ctx.getZoneId())
+        if (formatUnixTime || (format == null && ctx.isDateFormatUnixTime())) {
+            long millis = ldt.atZone(ctx.getZoneId())
                     .toInstant()
                     .toEpochMilli();
             jsonWriter.writeInt64(millis / 1000);
             return;
         }
 
-        if (formatMillis || ctx.isDateFormatMillis()) {
-            long millis = dateTime.atZone(ctx.getZoneId())
+        if (formatMillis || (format == null && ctx.isDateFormatMillis())) {
+            long millis = ldt.atZone(ctx.getZoneId())
                     .toInstant()
                     .toEpochMilli();
             jsonWriter.writeInt64(millis);
             return;
         }
 
-        if (formatISO8601 || ctx.isDateFormatISO8601()) {
-            int year = dateTime.getYear();
-            int month = dateTime.getMonthValue();
-            int dayOfMonth = dateTime.getDayOfMonth();
-            int hour = dateTime.getHour();
-            int minute = dateTime.getMinute();
-            int second = dateTime.getSecond();
-            int nano = dateTime.getNano() / 1000_000;
-            int offsetSeconds = ctx.getZoneId().getRules().getOffset(dateTime).getTotalSeconds();
-            jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds);
-            return;
+        int year = ldt.getYear();
+        if (year >= 0 && year <= 9999) {
+            if (formatISO8601 || (format == null && ctx.isDateFormatISO8601())) {
+                int month = ldt.getMonthValue();
+                int dayOfMonth = ldt.getDayOfMonth();
+                int hour = ldt.getHour();
+                int minute = ldt.getMinute();
+                int second = ldt.getSecond();
+                int nano = ldt.getNano() / 1000_000;
+                int offsetSeconds = ctx.getZoneId().getRules().getOffset(ldt).getTotalSeconds();
+                jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds, true);
+                return;
+            }
+
+            if (yyyyMMddhhmmss19) {
+                jsonWriter.writeDateTime19(
+                        year,
+                        ldt.getMonthValue(),
+                        ldt.getDayOfMonth(),
+                        ldt.getHour(),
+                        ldt.getMinute(),
+                        ldt.getSecond()
+                );
+                return;
+            }
+
+            if (yyyyMMddhhmmss14) {
+                jsonWriter.writeDateTime14(
+                        year,
+                        ldt.getMonthValue(),
+                        ldt.getDayOfMonth(),
+                        ldt.getHour(),
+                        ldt.getMinute(),
+                        ldt.getSecond()
+                );
+                return;
+            }
+
+            if (yyyyMMdd8) {
+                jsonWriter.writeDateYYYMMDD8(
+                        year,
+                        ldt.getMonthValue(),
+                        ldt.getDayOfMonth());
+                return;
+            }
+
+            if (yyyyMMdd10) {
+                jsonWriter.writeDateYYYMMDD10(
+                        year,
+                        ldt.getMonthValue(),
+                        ldt.getDayOfMonth());
+                return;
+            }
         }
 
         DateTimeFormatter formatter = this.getDateFormatter();
@@ -68,11 +110,11 @@ final class ObjectWriterImplLocalDateTime
         }
 
         if (formatter == null) {
-            jsonWriter.writeLocalDateTime(dateTime);
+            jsonWriter.writeLocalDateTime(ldt);
             return;
         }
 
-        String str = formatter.format(dateTime);
+        String str = formatter.format(ldt);
         jsonWriter.writeString(str);
     }
 }

@@ -21,6 +21,13 @@ public @interface JSONType {
     Class<?>[] seeAlso() default{};
 
     /**
+     * Property that defines what to do regarding ordering of properties not explicitly included in annotation instance.
+     * If set to true, they will be alphabetically ordered (default setting); if false, order is undefined
+     * @return
+     */
+    boolean alphabetic() default true;
+
+    /**
      * Specify {@link JSONReader.Feature}s to use features when deserializing
      */
     JSONReader.Feature[] deserializeFeatures() default {};

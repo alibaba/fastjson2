@@ -1011,4 +1011,21 @@ public class JSONArrayTest {
                         .fluentAdd("12")
                         .getByte(0));
     }
+
+    @Test
+    public void test() {
+        JSONArray array = new JSONArray();
+        ArrayList arrayList = array.toJavaObject(new TypeReference<ArrayList<Integer>>(){}.getType());
+        assertEquals(array.size(), arrayList.size());
+
+        assertNull(array.getComponentType());
+        array.setComponentType(Integer.class);
+        assertEquals(Integer.class, array.getComponentType());
+
+        assertNull(array.getRelatedArray());
+
+        Object[] javaArray = new Object[0];
+        array.setRelatedArray(javaArray);
+        assertSame(javaArray, array.getRelatedArray());
+    }
 }

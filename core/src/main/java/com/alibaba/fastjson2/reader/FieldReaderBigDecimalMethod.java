@@ -11,9 +11,20 @@ import java.math.BigDecimal;
 import java.util.Locale;
 
 final class FieldReaderBigDecimalMethod<T>
-        extends FieldReaderObjectMethod<T> {
-    FieldReaderBigDecimalMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, BigDecimal defaultValue, JSONSchema schema, Method method) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method);
+        extends FieldReaderObject<T> {
+    FieldReaderBigDecimalMethod(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            BigDecimal defaultValue,
+            JSONSchema schema,
+            Method method
+    ) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null, null);
     }
 
     @Override
@@ -33,9 +44,14 @@ final class FieldReaderBigDecimalMethod<T>
 
     @Override
     public void accept(T object, Object value) {
+        BigDecimal decimalValue = TypeUtils.toBigDecimal(value);
+
+        if (schema != null) {
+            schema.assertValidate(decimalValue);
+        }
+
         try {
-            method.invoke(object,
-                    TypeUtils.toBigDecimal(value));
+            method.invoke(object, decimalValue);
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }
@@ -43,6 +59,10 @@ final class FieldReaderBigDecimalMethod<T>
 
     @Override
     public void accept(T object, int value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             method.invoke(object, BigDecimal.valueOf(value));
         } catch (Exception e) {
@@ -52,6 +72,10 @@ final class FieldReaderBigDecimalMethod<T>
 
     @Override
     public void accept(T object, long value) {
+        if (schema != null) {
+            schema.assertValidate(value);
+        }
+
         try {
             method.invoke(object, BigDecimal.valueOf(value));
         } catch (Exception e) {

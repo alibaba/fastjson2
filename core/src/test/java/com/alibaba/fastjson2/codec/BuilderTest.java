@@ -22,7 +22,7 @@ public class BuilderTest {
     @Test
     public void test_build() throws Exception {
         ObjectReaderCreator creator = TestUtils.READER_CREATOR;
-        Supplier instanceSupplier = creator.createInstanceSupplier(VOBuilder.class);
+        Supplier instanceSupplier = creator.createSupplier(VOBuilder.class);
         FieldReader fieldReader = ObjectReaders.fieldReaderInt("id", VOBuilder::withId);
         Function<Object, Object> buildFunction = creator.createBuildFunction(VOBuilder.class.getMethod("build"));
         ObjectReader objectReader = creator.createObjectReader(VOBuilder.class, 0, instanceSupplier, buildFunction, fieldReader);
@@ -33,12 +33,12 @@ public class BuilderTest {
         }
         {
             byte[] jsonbBytes = JSONB.toBytes(Collections.singletonMap("id", 123));
-            VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+            VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
             assertEquals(123, o.id);
         }
         {
             byte[] jsonbBytes = JSONB.toBytes(Collections.singletonMap("id", 123));
-            VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+            VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
             assertEquals(123, o.id);
         }
     }
@@ -46,7 +46,7 @@ public class BuilderTest {
     @Test
     public void test_build_2() throws Exception {
         ObjectReaderCreator creator = TestUtils.READER_CREATOR;
-        Supplier instanceSupplier = creator.createInstanceSupplier(VOBuilder.class);
+        Supplier instanceSupplier = creator.createSupplier(VOBuilder.class);
 
         FieldReader fieldReader1 = ObjectReaders.fieldReaderInt("id", VOBuilder::withId);
         FieldReader fieldReader2 = ObjectReaders.fieldReader("name", String.class, VOBuilder::withName);
@@ -65,12 +65,12 @@ public class BuilderTest {
         map.put("name", "bill");
         byte[] jsonbBytes = JSONB.toBytes(map);
         {
-            VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+            VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
             assertEquals(123, o.id);
             assertEquals("bill", o.name);
         }
         {
-            VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+            VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
             assertEquals(123, o.id);
             assertEquals("bill", o.name);
         }
@@ -79,7 +79,7 @@ public class BuilderTest {
     @Test
     public void test_build_3() throws Exception {
         ObjectReaderCreator creator = ObjectReaderCreator.INSTANCE;
-        Supplier instanceSupplier = creator.createInstanceSupplier(VOBuilder.class);
+        Supplier instanceSupplier = creator.createSupplier(VOBuilder.class);
 
         FieldReader fieldReader1 = ObjectReaders.fieldReaderInt("id", VOBuilder::withId);
         FieldReader fieldReader2 = ObjectReaders.fieldReader("name", String.class, VOBuilder::withName);
@@ -108,13 +108,13 @@ public class BuilderTest {
             map.put("age", 56);
             byte[] jsonbBytes = JSONB.toBytes(map);
             {
-                VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+                VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
                 assertEquals(123, o.id);
                 assertEquals("bill", o.name);
                 assertEquals(56, o.age);
             }
             {
-                VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+                VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
                 assertEquals(123, o.id);
                 assertEquals("bill", o.name);
                 assertEquals(56, o.age);
@@ -125,7 +125,7 @@ public class BuilderTest {
     @Test
     public void test_build_4() throws Exception {
         ObjectReaderCreator creator = ObjectReaderCreator.INSTANCE;
-        Supplier instanceSupplier = creator.createInstanceSupplier(VOBuilder.class);
+        Supplier instanceSupplier = creator.createSupplier(VOBuilder.class);
 
         FieldReader fieldReader1 = ObjectReaders.fieldReaderInt("id", VOBuilder::withId);
         FieldReader fieldReader2 = ObjectReaders.fieldReader("name", String.class, VOBuilder::withName);
@@ -159,14 +159,14 @@ public class BuilderTest {
         map.put("tag1", 987654321);
         byte[] jsonbBytes = JSONB.toBytes(map);
         {
-            VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+            VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
             assertEquals(123, o.id);
             assertEquals("bill", o.name);
             assertEquals(56, o.age);
             assertEquals(987654321, o.tag1);
         }
         {
-            VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+            VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
             assertEquals(123, o.id);
             assertEquals("bill", o.name);
             assertEquals(56, o.age);
@@ -177,7 +177,7 @@ public class BuilderTest {
     @Test
     public void test_build_5() throws Exception {
         ObjectReaderCreator creator = ObjectReaderCreator.INSTANCE;
-        Supplier instanceSupplier = creator.createInstanceSupplier(VOBuilder.class);
+        Supplier instanceSupplier = creator.createSupplier(VOBuilder.class);
 
         FieldReader fieldReader1 = ObjectReaders.fieldReaderInt("id", VOBuilder::withId);
         FieldReader fieldReader2 = ObjectReaders.fieldReader("name", String.class, VOBuilder::withName);
@@ -218,7 +218,7 @@ public class BuilderTest {
         map.put("tag3", 101);
         byte[] jsonbBytes = JSONB.toBytes(map);
         {
-            VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+            VO o = (VO) objectReader.readJSONBObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
             assertEquals(123, o.id);
             assertEquals("bill", o.name);
             assertEquals(56, o.age);
@@ -227,7 +227,7 @@ public class BuilderTest {
             assertEquals(101L, o.tag3.longValue());
         }
         {
-            VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), 0);
+            VO o = (VO) objectReader.readObject(JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length), null, null, 0);
             assertEquals(123, o.id);
             assertEquals("bill", o.name);
             assertEquals(56, o.age);

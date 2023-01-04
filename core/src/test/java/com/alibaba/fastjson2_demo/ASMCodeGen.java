@@ -17,7 +17,7 @@ public class ASMCodeGen {
         List<String> propertyNames = new ArrayList<>();
         methods.forEach(
                 e -> propertyNames.add(
-                        BeanUtils.setterName(e.getName())));
+                        BeanUtils.setterName(e.getName(), null)));
 
         long[] hashCodes = new long[propertyNames.size()];
         for (int i = 0; i < propertyNames.size(); i++) {
@@ -33,7 +33,7 @@ public class ASMCodeGen {
         }
         Map<Integer, List<Long>> map = new HashMap<>();
         BeanUtils.setters(Int1000.class, e -> {
-            String propertyName = BeanUtils.setterName(e.getName());
+            String propertyName = BeanUtils.setterName(e.getName(), null);
             long hashCode64 = Fnv.hashCode64(propertyName);
             int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
             List<Long> relatedHashCodes = map.get(hashCode32);

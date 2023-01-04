@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,9 +16,9 @@ final class ObjectReaderImplMapString
     }
 
     @Override
-    public Object readObject(JSONReader jsonReader, long features) {
+    public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.isJSONB()) {
-            return this.readJSONBObject(jsonReader, features);
+            return this.readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         boolean match = jsonReader.nextIfMatch('{');
@@ -25,13 +26,17 @@ final class ObjectReaderImplMapString
             if (jsonReader.current() == '[') {
                 jsonReader.next();
                 if (jsonReader.current() == '{') {
-                    Object arrayItem = readObject(jsonReader, features);
+                    Object arrayItem = readObject(jsonReader, String.class, fieldName, features);
                     if (jsonReader.nextIfMatch(']')) {
                         jsonReader.nextIfMatch(',');
                         return arrayItem;
                     }
                 }
                 throw new JSONException(jsonReader.info("expect '{', but '['"));
+            }
+
+            if (jsonReader.nextIfNull()) {
+                return null;
             }
         }
 
@@ -40,17 +45,23 @@ final class ObjectReaderImplMapString
                 = instanceType == HashMap.class
                 ? new HashMap<>()
                 : (Map) createInstance(context.getFeatures() | features);
+        long contextFeatures = features | context.getFeatures();
 
-        for (; ; ) {
+        for (int i = 0; ; ++i) {
             if (jsonReader.nextIfMatch('}')) {
                 break;
             }
 
             String name = jsonReader.readFieldName();
             String value = jsonReader.readString();
+            if (i == 0
+                    && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                    && name.equals(getTypeKey())) {
+                continue;
+            }
+
             Object origin = object.put(name, value);
             if (origin != null) {
-                long contextFeatures = features | context.getFeatures();
                 if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {
                         ((Collection) origin).add(value);
