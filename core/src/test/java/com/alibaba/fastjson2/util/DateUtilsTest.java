@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.util;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.*;
@@ -7,6 +9,7 @@ import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
+import java.util.Locale;
 
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 import static com.alibaba.fastjson2.util.DateUtils.SHANGHAI_ZONE_ID;
@@ -14,6 +17,18 @@ import static java.time.ZoneOffset.UTC;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DateUtilsTest {
+    Locale locale;
+    @BeforeEach
+    public void setUp() throws Exception {
+        locale = Locale.getDefault();
+        Locale.setDefault(Locale.ENGLISH);
+    }
+
+    @AfterEach
+    public void tearDown() throws Exception {
+        Locale.setDefault(locale);
+    }
+
     @Test
     public void parseDateNullOrEmpty() {
         assertNull(DateUtils.parseDate(null));
@@ -203,7 +218,6 @@ public class DateUtilsTest {
     public void parseDate0_x() {
         String str = "4 Dec 2022 12:13:14";
         String pattern = "d MMM yyyy HH:mm:ss";
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(pattern);
         LocalDateTime ldt = LocalDateTime.of(2022, 12, 4, 12, 13, 14);
         assertEquals(
                 ldt.atZone(DEFAULT_ZONE_ID).toInstant().toEpochMilli(),

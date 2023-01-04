@@ -85,7 +85,8 @@ public class DateUtils {
             zoneId = DEFAULT_ZONE_ID;
         }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+        DateTimeFormatter formatter;
+        formatter = DateTimeFormatter.ofPattern(format);
         LocalDateTime ldt = LocalDateTime.parse(str, formatter);
         long millis = millis(ldt, zoneId);
         return new Date(millis);
@@ -4868,6 +4869,10 @@ public class DateUtils {
         }
 
         return new String(chars);
+    }
+
+    public static String formatYMD10(Date date) {
+        return format(date.getTime(), DATE_FORMAT_10_DASH);
     }
 
     public static String format(Date date, String format) {

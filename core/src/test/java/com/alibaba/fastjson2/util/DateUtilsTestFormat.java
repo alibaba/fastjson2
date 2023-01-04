@@ -110,6 +110,8 @@ public class DateUtilsTestFormat {
         assertEquals("23.06.2012", DateUtils.format(date, "dd.MM.yyyy"));
         assertEquals("2012-6-23", DateUtils.format(date, "yyyy-M-dd"));
         assertEquals("2012-Jun-23", DateUtils.format(date, "yyyy-MMM-dd"));
+        assertEquals("2012-06-23", DateUtils.format(date, "yyyy-MM-dd"));
+        assertEquals("2012-06-23", DateUtils.formatYMD10(date));
 
         assertEquals("2012-06-23", DateUtils.format(2012, 6, 23));
         assertEquals("2012-06-23 12:13:14", DateUtils.format(2012, 6, 23, 12, 13, 14));
