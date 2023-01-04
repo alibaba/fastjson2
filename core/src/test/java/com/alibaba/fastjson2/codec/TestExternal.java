@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 public class TestExternal {
     @Test
     public void test_0() throws Exception {
@@ -20,8 +22,8 @@ public class TestExternal {
         method.invoke(obj, "jobs");
 
         String text = JSON.toJSONString(obj);
-        System.out.println(text);
-        JSON.parseObject(text, clazz);
+        Object object = JSON.parseObject(text, clazz);
+        assertNotNull(object);
     }
 
     @Test

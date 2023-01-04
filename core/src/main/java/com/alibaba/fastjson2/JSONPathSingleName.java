@@ -145,7 +145,7 @@ final class JSONPathSingleName
             if (value != null) {
                 Class<?> valueClass = value.getClass();
                 Class fieldClass = fieldReader.fieldClass;
-                if (valueClass != fieldClass) {
+                if (!fieldReader.supportAcceptType(valueClass)) {
                     java.util.function.Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
                     if (typeConvert != null) {
                         value = typeConvert.apply(value);

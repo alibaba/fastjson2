@@ -8,12 +8,13 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-abstract class FieldWriterObject<T>
+public class FieldWriterObject<T>
         extends FieldWriter<T> {
     volatile Class initValueClass;
     volatile ObjectWriter initObjectWriter;
@@ -77,6 +78,38 @@ abstract class FieldWriterObject<T>
                 JSONWriter.Context context = jsonWriter.context;
                 boolean fieldBased = ((features | context.getFeatures()) & JSONWriter.Feature.FieldBased.mask) != 0;
                 formattedWriter = context.provider.getObjectWriterFromCache(valueClass, valueClass, fieldBased);
+            }
+
+            if (valueClass == Float[].class) {
+                if (decimalFormat != null) {
+                    formattedWriter = new ObjectWriterArrayFinal(Float.class, decimalFormat);
+                } else {
+                    formattedWriter = ObjectWriterArrayFinal.FLOAT_ARRAY;
+                }
+            } else if (valueClass == Double[].class) {
+                if (decimalFormat != null) {
+                    formattedWriter = new ObjectWriterArrayFinal(Double.class, decimalFormat);
+                } else {
+                    formattedWriter = ObjectWriterArrayFinal.DOUBLE_ARRAY;
+                }
+            } else if (valueClass == BigDecimal[].class) {
+                if (decimalFormat != null) {
+                    formattedWriter = new ObjectWriterArrayFinal(BigDecimal.class, decimalFormat);
+                } else {
+                    formattedWriter = ObjectWriterArrayFinal.DECIMAL_ARRAY;
+                }
+            } else if (valueClass == float[].class) {
+                if (decimalFormat != null) {
+                    formattedWriter = new ObjectWriterImplFloatValueArray(decimalFormat);
+                } else {
+                    formattedWriter = ObjectWriterImplFloatValueArray.INSTANCE;
+                }
+            } else if (valueClass == double[].class) {
+                if (decimalFormat != null) {
+                    formattedWriter = new ObjectWriterImplDoubleValueArray(decimalFormat);
+                } else {
+                    formattedWriter = ObjectWriterImplDoubleValueArray.INSTANCE;
+                }
             }
 
             if (formattedWriter == null) {
@@ -179,6 +212,15 @@ abstract class FieldWriterObject<T>
                 }
                 return true;
             } else {
+                return false;
+            }
+        }
+
+        if (value == object) {
+            if (fieldClass == Throwable.class
+                    && field != null
+                    && field.getDeclaringClass() == Throwable.class
+            ) {
                 return false;
             }
         }

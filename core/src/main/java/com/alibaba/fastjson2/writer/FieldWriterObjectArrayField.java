@@ -1,11 +1,11 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
@@ -14,7 +14,6 @@ final class FieldWriterObjectArrayField<T>
     final Type itemType;
     final Class itemClass;
     ObjectWriter itemObjectWriter;
-
     protected FieldWriterObjectArrayField(
             String fieldName,
             Type itemType,
@@ -32,15 +31,6 @@ final class FieldWriterObjectArrayField<T>
             itemClass = (Class) itemType;
         } else {
             itemClass = TypeUtils.getMapping(itemType);
-        }
-    }
-
-    @Override
-    public Object getFieldValue(Object object) {
-        try {
-            return field.get(object);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new JSONException("field.get error, " + fieldName, e);
         }
     }
 
@@ -198,6 +188,26 @@ final class FieldWriterObjectArrayField<T>
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (valueClass == String[].class) {
             return ObjectWriterImplStringArray.INSTANCE;
+        }
+
+        if (valueClass == Float[].class) {
+            if (decimalFormat != null) {
+                return new ObjectWriterArrayFinal(Float.class, decimalFormat);
+            } else {
+                return ObjectWriterArrayFinal.FLOAT_ARRAY;
+            }
+        } else if (valueClass == Double[].class) {
+            if (decimalFormat != null) {
+                return new ObjectWriterArrayFinal(Double.class, decimalFormat);
+            } else {
+                return ObjectWriterArrayFinal.DOUBLE_ARRAY;
+            }
+        } else if (valueClass == BigDecimal[].class) {
+            if (decimalFormat != null) {
+                return new ObjectWriterArrayFinal(BigDecimal.class, decimalFormat);
+            } else {
+                return ObjectWriterArrayFinal.DECIMAL_ARRAY;
+            }
         }
 
         return jsonWriter.getObjectWriter(valueClass);

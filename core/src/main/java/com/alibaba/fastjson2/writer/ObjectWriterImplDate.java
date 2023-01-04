@@ -2,7 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
-import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.DateUtils;
 
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -88,8 +88,8 @@ final class ObjectWriterImplDate
         ZoneId zoneId = ctx.getZoneId();
         int offsetSeconds;
 
-        if (zoneId == IOUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == IOUtils.SHANGHAI_ZONE_RULES) {
-            offsetSeconds = IOUtils.getShanghaiZoneOffsetTotalSeconds(
+        if (zoneId == DateUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == DateUtils.SHANGHAI_ZONE_RULES) {
+            offsetSeconds = DateUtils.getShanghaiZoneOffsetTotalSeconds(
                     Math.floorDiv(millis, 1000L)
             );
         } else if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
@@ -115,8 +115,8 @@ final class ObjectWriterImplDate
 
             long epochSecond = Math.floorDiv(millis, 1000L);
             int offsetTotalSeconds;
-            if (zoneId == IOUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == IOUtils.SHANGHAI_ZONE_RULES) {
-                offsetTotalSeconds = IOUtils.getShanghaiZoneOffsetTotalSeconds(epochSecond);
+            if (zoneId == DateUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == DateUtils.SHANGHAI_ZONE_RULES) {
+                offsetTotalSeconds = DateUtils.getShanghaiZoneOffsetTotalSeconds(epochSecond);
             } else {
                 Instant instant = Instant.ofEpochMilli(millis);
                 offsetTotalSeconds = zoneId.getRules().getOffset(instant).getTotalSeconds();

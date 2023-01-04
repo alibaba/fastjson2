@@ -4,8 +4,8 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.util.ProxyFactory;
 
-import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.function.Function;
@@ -94,8 +94,7 @@ public final class ObjectReaderInterface<T>
             }
         }
 
-        // GraalVM not support
-        object = (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, jsonObject);
+        object = (T) ProxyFactory.newProxyInstance(objectClass, jsonObject);
         if (schema != null) {
             schema.assertValidate(object);
         }
@@ -211,8 +210,7 @@ public final class ObjectReaderInterface<T>
 
         jsonReader.nextIfMatch(',');
 
-        // GraalVM not support
-        object = (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, jsonObject);
+        object = (T) ProxyFactory.newProxyInstance(objectClass, jsonObject);
         Function buildFunction = getBuildFunction();
         if (buildFunction != null) {
             object = (T) buildFunction.apply(object);
@@ -228,8 +226,7 @@ public final class ObjectReaderInterface<T>
     @Override
     public T createInstance(long features) {
         JSONObject object = new JSONObject();
-        // GraalVM not support
-        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+        return (T) ProxyFactory.newProxyInstance(objectClass, object);
     }
 
     @Override
@@ -240,7 +237,6 @@ public final class ObjectReaderInterface<T>
         } else {
             object = new JSONObject(map);
         }
-        // GraalVM not support
-        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
+        return (T) ProxyFactory.newProxyInstance(objectClass, object);
     }
 }

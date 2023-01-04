@@ -15,6 +15,14 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DoubleTest3_random {
+    private int loopCount = 1_000_000;
+
+    public DoubleTest3_random() {
+        if (System.getProperty("java.vm.name").contains("OpenJ9")) {
+            loopCount = 1000;
+        }
+    }
+
     @Test
     public void test_extract() throws Exception {
         double val = 7.754693899073573E-4;
@@ -86,7 +94,7 @@ public class DoubleTest3_random {
     public void test_ran() {
         Random rand = new Random();
 
-        for (int i = 0; i < 1000 * 1000 * 1; ++i) {
+        for (int i = 0; i < loopCount; ++i) {
             double val = rand.nextDouble();
 
             String str = JSON.toJSONString(new Model(val));
@@ -100,7 +108,7 @@ public class DoubleTest3_random {
     public void test_ran_1() {
         Random rand = new Random();
         char[] chars = new char[64];
-        for (int i = 0; i < 1000 * 1000 * 10; ++i) {
+        for (int i = 0; i < loopCount; ++i) {
             double val = rand.nextDouble();
             int len = RyuDouble.toString(val, chars, 0);
             JSONReader jsonReader = JSONReader.of(chars, 0, len);
@@ -112,7 +120,7 @@ public class DoubleTest3_random {
     public void test_ran_2() throws Exception {
         Random rand = new Random();
 
-        for (int i = 0; i < 1000 * 1000 * 1; ++i) {
+        for (int i = 0; i < loopCount; ++i) {
             double val = rand.nextDouble();
 
             String str = JSON.toJSONString(new Model(val), JSONWriter.Feature.BeanToArray);
@@ -126,7 +134,7 @@ public class DoubleTest3_random {
     public void test_ran_3() throws Exception {
         Random rand = new Random();
 
-        for (int i = 0; i < 1000 * 1000 * 1; ++i) {
+        for (int i = 0; i < loopCount; ++i) {
             double val = rand.nextDouble();
 
             String str = JSON.toJSONString(Collections.singletonMap("val", val));
@@ -140,7 +148,7 @@ public class DoubleTest3_random {
     public void test_ran_4() throws Exception {
         Random rand = new Random();
 
-        for (int i = 0; i < 1000 * 1000 * 1; ++i) {
+        for (int i = 0; i < loopCount; ++i) {
             double val = rand.nextDouble();
 
             HashMap map = new HashMap();

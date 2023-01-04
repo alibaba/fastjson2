@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 
@@ -60,7 +61,11 @@ final class FieldReaderStringFunc<T, V>
             schema.assertValidate(fieldValue);
         }
 
-        function.accept(object, (V) fieldValue);
+        try {
+            function.accept(object, (V) fieldValue);
+        } catch (Exception e) {
+            throw new JSONException("set " + super.toString() + " error", e);
+        }
     }
 
     @Override
@@ -81,5 +86,9 @@ final class FieldReaderStringFunc<T, V>
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readString();
+    }
+
+    public boolean supportAcceptType(Class valueClass) {
+        return true;
     }
 }

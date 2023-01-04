@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.internal.asm;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONPathCompilerReflect;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.IOUtils;
@@ -291,5 +288,16 @@ public class ASMUtils {
         } finally {
             IOUtils.close(is);
         }
+    }
+
+    public static String desc(Method method) {
+        Class returnType = method.getReturnType();
+        Class[] parameterTypes = method.getParameterTypes();
+        StringBuilder buf = new StringBuilder().append('(');
+        for (Class parameterType : parameterTypes) {
+            buf.append(desc(parameterType));
+        }
+        buf.append(')').append(desc(returnType));
+        return buf.toString();
     }
 }

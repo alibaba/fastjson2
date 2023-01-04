@@ -71,6 +71,39 @@ public final class ObjectReaderImplEnum
         return ordinalEnums[ordinal];
     }
 
+    public Enum of(int intValue) {
+        Enum enumValue = null;
+        if (valueField == null) {
+            enumValue = getEnumByOrdinal(intValue);
+        } else {
+            try {
+                if (valueField instanceof Field) {
+                    for (Enum e : enums) {
+                        if (((Field) valueField).getInt(e) == intValue) {
+                            enumValue = e;
+                            break;
+                        }
+                    }
+                } else {
+                    Method valueMethod = (Method) valueField;
+                    for (Enum e : enums) {
+                        if (((Number) valueMethod.invoke(e)).intValue() == intValue) {
+                            enumValue = e;
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception error) {
+                throw new JSONException("parse enum error, class " + enumClass.getName() + ", value " + intValue, error);
+            }
+        }
+
+        if (enumValue == null) {
+            throw new JSONException("None enum ordinal or value " + intValue);
+        }
+        return enumValue;
+    }
+
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         byte type = jsonReader.getType();

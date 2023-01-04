@@ -13,13 +13,16 @@ public class ExceptionTest {
     @Test
     public void test_exception() {
         Object[] objects = new Object[]{new RuntimeException(), new IOException()};
-        byte[] bytes = JSONB.toBytes(objects, JSONWriter.Feature.WriteClassName,
+        JSONWriter.Feature[] features = {
+                JSONWriter.Feature.WriteClassName,
                 JSONWriter.Feature.FieldBased,
                 JSONWriter.Feature.ReferenceDetection,
                 JSONWriter.Feature.WriteNulls,
                 JSONWriter.Feature.NotWriteDefaultValue,
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName,
-                JSONWriter.Feature.WriteNameAsSymbol);
+                JSONWriter.Feature.WriteNameAsSymbol
+        };
+        byte[] bytes = JSONB.toBytes(objects, features);
 
         System.out.println(JSONB.toJSONString(bytes));
 

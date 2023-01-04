@@ -13,7 +13,7 @@ final class JSONWriterUTF8JDK9
 
     @Override
     public void writeString(String str) {
-        if (!UNSAFE_SUPPORT || JVM_VERSION == 8) {
+        if (STRING_VALUE == null) {
             super.writeString(str);
             return;
         }

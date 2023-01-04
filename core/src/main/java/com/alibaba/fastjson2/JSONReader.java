@@ -28,7 +28,6 @@ import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR;
-import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public abstract class JSONReader
@@ -2759,10 +2758,11 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (JVM_VERSION > 8 && STRING_VALUE != null) {
+        if (STRING_VALUE != null && STRING_CODER != null) {
             try {
+                final int LATIN1 = 0;
                 int coder = STRING_CODER.applyAsInt(str);
-                if (coder == 0) {
+                if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
                     return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
                 }
@@ -2787,10 +2787,11 @@ public abstract class JSONReader
             throw new NullPointerException();
         }
 
-        if (JVM_VERSION > 8 && STRING_VALUE != null) {
+        if (STRING_VALUE != null && STRING_CODER != null) {
             try {
+                final int LATIN1 = 0;
                 int coder = STRING_CODER.applyAsInt(str);
-                if (coder == 0) {
+                if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
                     return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
                 }
@@ -2816,10 +2817,11 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (JVM_VERSION > 8 && STRING_VALUE != null) {
+        if (STRING_VALUE != null && STRING_VALUE != null) {
             try {
+                final int LATIN1 = 0;
                 int coder = STRING_CODER.applyAsInt(str);
-                if (coder == 0) {
+                if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
                     return new JSONReaderASCII(context, str, bytes, offset, length);
                 }
@@ -2843,10 +2845,11 @@ public abstract class JSONReader
             throw new NullPointerException();
         }
 
-        if (JVM_VERSION > 8 && STRING_VALUE != null) {
+        if (STRING_VALUE != null && STRING_CODER != null) {
             try {
+                final int LATIN1 = 0;
                 int coder = STRING_CODER.applyAsInt(str);
-                if (coder == 0) {
+                if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
                     return new JSONReaderASCII(context, str, bytes, offset, length);
                 }
@@ -3420,7 +3423,7 @@ public abstract class JSONReader
 
         public ZoneId getZoneId() {
             if (zoneId == null) {
-                zoneId = DEFAULT_ZONE_ID;
+                zoneId = DateUtils.DEFAULT_ZONE_ID;
             }
             return zoneId;
         }
@@ -3625,25 +3628,24 @@ public abstract class JSONReader
 
         static {
             BiFunction<Integer, int[], BigInteger> bigIntegerCreator = null;
-            if (TRUSTED_LOOKUP != null) {
-                try {
-                    MethodHandles.Lookup caller = TRUSTED_LOOKUP.in(BigInteger.class);
-                    MethodHandle handle = caller.findConstructor(
-                            BigInteger.class, MethodType.methodType(void.class, int.class, int[].class)
-                    );
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            caller,
-                            "apply",
-                            MethodType.methodType(BiFunction.class),
-                            handle.type().generic(),
-                            handle,
-                            MethodType.methodType(BigInteger.class, Integer.class, int[].class)
-                    );
-                    bigIntegerCreator = (BiFunction<Integer, int[], BigInteger>) callSite.getTarget().invokeExact();
-                } catch (Throwable ignored) {
-                    // ignored
-                }
+            try {
+                MethodHandles.Lookup caller = JDKUtils.trustedLookup(BigInteger.class);
+                MethodHandle handle = caller.findConstructor(
+                        BigInteger.class, MethodType.methodType(void.class, int.class, int[].class)
+                );
+                CallSite callSite = LambdaMetafactory.metafactory(
+                        caller,
+                        "apply",
+                        MethodType.methodType(BiFunction.class),
+                        handle.type().generic(),
+                        handle,
+                        MethodType.methodType(BigInteger.class, Integer.class, int[].class)
+                );
+                bigIntegerCreator = (BiFunction<Integer, int[], BigInteger>) callSite.getTarget().invokeExact();
+            } catch (Throwable ignored) {
+                // ignored
             }
+
             if (bigIntegerCreator == null) {
                 bigIntegerCreator = new BigIntegerCreator();
             }

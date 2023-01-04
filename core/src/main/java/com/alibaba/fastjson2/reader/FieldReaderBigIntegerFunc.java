@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -37,7 +38,11 @@ final class FieldReaderBigIntegerFunc<T, V>
             schema.assertValidate(bigInteger);
         }
 
-        function.accept(object, (V) bigInteger);
+        try {
+            function.accept(object, (V) bigInteger);
+        } catch (Exception e) {
+            throw new JSONException("set " + super.toString() + " error", e);
+        }
     }
 
     @Override
@@ -46,8 +51,12 @@ final class FieldReaderBigIntegerFunc<T, V>
             schema.assertValidate(value);
         }
 
-        function.accept(object,
-                (V) BigInteger.valueOf(value));
+        try {
+            function.accept(object,
+                    (V) BigInteger.valueOf(value));
+        } catch (Exception e) {
+            throw new JSONException("set " + super.toString() + " error", e);
+        }
     }
 
     @Override
@@ -56,7 +65,11 @@ final class FieldReaderBigIntegerFunc<T, V>
             schema.assertValidate(value);
         }
 
-        function.accept(object, (V) BigInteger.valueOf(value));
+        try {
+            function.accept(object, (V) BigInteger.valueOf(value));
+        } catch (Exception e) {
+            throw new JSONException("set " + super.toString() + " error", e);
+        }
     }
 
     @Override

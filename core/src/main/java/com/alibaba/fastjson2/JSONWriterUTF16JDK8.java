@@ -173,11 +173,7 @@ final class JSONWriterUTF16JDK8
             return;
         }
 
-        if (escapeNoneAscii) {
-            ensureCapacity(off + strlen * 6 + 2);
-        } else {
-            ensureCapacity(off + strlen * 2 + 2);
-        }
+        ensureCapacity(off + strlen * 6 + 2);
         chars[off++] = quote;
         for (int i = 0; i < strlen; ++i) {
             char ch = value[i];

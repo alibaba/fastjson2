@@ -6,7 +6,7 @@
 
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-parent</artifactId>
-    <version>2.0.22-SNAPSHOT</version>
+    <version>2.0.23-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
     <packaging>pom</packaging>
@@ -33,9 +33,10 @@
 
         <fastjson1x.version>1.2.83</fastjson1x.version>
         <jackson.version>2.14.1</jackson.version>
-        <jetty.version>11.0.12</jetty.version>
+        <jetty.version>11.0.13</jetty.version>
         <jersey.version>2.37</jersey.version>
-        <springframework.version>5.3.23</springframework.version>
+        <springframework5.version>5.3.23</springframework5.version>
+        <springframework6.version>6.0.3</springframework6.version>
 
         <kotlin.version>1.7.22</kotlin.version>
         <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
@@ -55,10 +56,20 @@
         <module>adapter</module>
         <module>benchmark</module>
         <module>core</module>
+        <!--
+            <module>example-graalvm-native</module>
+        -->
+        <module>example-spring-test</module>
+        <!--
+            <module>example-spring6-test</module>
+        -->
         <module>extension</module>
+        <module>extension-spring5</module>
+        <!--
+        <module>extension-spring6</module>
+        -->
         <module>fastjson1-compatible</module>
         <module>kotlin</module>
-        <module>spring-test</module>
     </modules>
 
     <organization>
@@ -405,30 +416,6 @@
                 <version>1.18.24</version>
                 <scope>test</scope>
             </dependency>
-
-            <!-- spring libs -->
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-framework-bom</artifactId>
-                <type>pom</type>
-                <version>${springframework.version}</version>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.data</groupId>
-                <artifactId>spring-data-bom</artifactId>
-                <type>pom</type>
-                <version>2021.2.5</version>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-bom</artifactId>
-                <type>pom</type>
-                <version>5.7.5</version>
-                <scope>import</scope>
-            </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -934,6 +921,8 @@
                         <configuration>
                             <excludes>
                                 <exclude>com/alibaba/fastjson2/benchmark</exclude>
+                                <exclude>com/alibaba/example/springtest</exclude>
+                                <exclude>com/alibaba/example/spring6test</exclude>
                             </excludes>
                         </configuration>
                         <executions>

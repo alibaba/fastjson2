@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -119,6 +120,10 @@ public abstract class JSONWriter
             return null;
         }
 
+        if (object == Collections.EMPTY_LIST || object == Collections.EMPTY_SET) {
+            return null;
+        }
+
         this.path = new Path(this.path, name);
 
         Path previous;
@@ -181,6 +186,10 @@ public abstract class JSONWriter
             return null;
         }
 
+        if (object == Collections.EMPTY_LIST || object == Collections.EMPTY_SET) {
+            return null;
+        }
+
         if (index == 0) {
             if (path.child0 != null) {
                 this.path = path.child0;
@@ -223,6 +232,10 @@ public abstract class JSONWriter
         }
 
         if ((context.features & Feature.ReferenceDetection.mask) == 0) {
+            return;
+        }
+
+        if (object == Collections.EMPTY_LIST || object == Collections.EMPTY_SET) {
             return;
         }
 
@@ -506,7 +519,7 @@ public abstract class JSONWriter
         }
 
         if ((defaultWriterFeatures & Feature.OptimizedForAscii.mask) != 0) {
-            return new JSONWriterUTF8JDK9(writeContext);
+            return STRING_VALUE != null ? new JSONWriterUTF8JDK9(writeContext) : new JSONWriterUTF8(writeContext);
         }
 
         return new JSONWriterUTF16(writeContext);
@@ -527,7 +540,7 @@ public abstract class JSONWriter
         if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+            jsonWriter = STRING_VALUE != null ? new JSONWriterUTF8JDK9(writeContext) : new JSONWriterUTF8(writeContext);
         } else {
             jsonWriter = new JSONWriterUTF16(writeContext);
         }
@@ -544,7 +557,9 @@ public abstract class JSONWriter
         if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+            jsonWriter = STRING_VALUE != null
+                    ? new JSONWriterUTF8JDK9(writeContext)
+                    : new JSONWriterUTF8(writeContext);
         } else {
             jsonWriter = new JSONWriterUTF16(writeContext);
         }
@@ -610,17 +625,16 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter ofUTF8() {
-        if (JVM_VERSION >= 9) {
-            return new JSONWriterUTF8JDK9(
-                    JSONFactory.createWriteContext());
+        Context context = createWriteContext();
+        if (STRING_VALUE != null) {
+            return new JSONWriterUTF8JDK9(context);
         } else {
-            return new JSONWriterUTF8(
-                    JSONFactory.createWriteContext());
+            return new JSONWriterUTF8(context);
         }
     }
 
     public static JSONWriter ofUTF8(JSONWriter.Context context) {
-        if (JVM_VERSION >= 9) {
+        if (STRING_VALUE != null) {
             return new JSONWriterUTF8JDK9(context);
         } else {
             return new JSONWriterUTF8(context);
@@ -631,7 +645,7 @@ public abstract class JSONWriter
         Context writeContext = createWriteContext(features);
 
         JSONWriter jsonWriter;
-        if (JVM_VERSION >= 9) {
+        if (STRING_VALUE != null) {
             jsonWriter = new JSONWriterUTF8JDK9(writeContext);
         } else {
             jsonWriter = new JSONWriterUTF8(writeContext);
@@ -841,6 +855,16 @@ public abstract class JSONWriter
 
     public abstract void writeFloat(float value);
 
+    public final void writeFloat(float value, DecimalFormat format) {
+        if (format == null || jsonb) {
+            writeFloat(value);
+            return;
+        }
+
+        String str = format.format(value);
+        writeRaw(str);
+    }
+
     public void writeFloat(float[] value) {
         if (value == null) {
             writeNull();
@@ -857,13 +881,75 @@ public abstract class JSONWriter
         endArray();
     }
 
+    public final void writeFloat(float[] value, DecimalFormat format) {
+        if (format == null || jsonb) {
+            writeFloat(value);
+        }
+
+        if (value == null) {
+            writeNull();
+            return;
+        }
+
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+            String str = format.format(value[i]);
+            writeRaw(str);
+        }
+        endArray();
+    }
+
+    public final void writeFloat(Float value) {
+        if (value == null) {
+            writeNumberNull();
+        } else {
+            writeDouble(value.floatValue());
+        }
+    }
+
     public abstract void writeDouble(double value);
+
+    public final void writeDouble(double value, DecimalFormat format) {
+        if (format == null || jsonb) {
+            writeDouble(value);
+            return;
+        }
+
+        String str = format.format(value);
+        writeRaw(str);
+    }
 
     public void writeDoubleArray(double value0, double value1) {
         startArray();
         writeDouble(value0);
         writeComma();
         writeDouble(value1);
+        endArray();
+    }
+
+    public final void writeDouble(double[] value, DecimalFormat format) {
+        if (format == null || jsonb) {
+            writeDouble(value);
+            return;
+        }
+
+        if (value == null) {
+            writeNull();
+            return;
+        }
+
+        startArray();
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+
+            String str = format.format(value[i]);
+            writeRaw(str);
+        }
         endArray();
     }
 
@@ -949,6 +1035,21 @@ public abstract class JSONWriter
     }
 
     public abstract void writeDecimal(BigDecimal value);
+
+    public void writeDecimal(BigDecimal value, long features, DecimalFormat format) {
+        if (value == null) {
+            writeNumberNull();
+            return;
+        }
+
+        if (format != null) {
+            String str = format.format(value);
+            writeRaw(str);
+            return;
+        }
+
+        writeDecimal(value, features);
+    }
 
     public void writeDecimal(BigDecimal value, long features) {
         if (value == null) {

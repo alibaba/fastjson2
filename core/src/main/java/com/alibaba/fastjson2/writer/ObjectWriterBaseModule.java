@@ -83,6 +83,13 @@ public class ObjectWriterBaseModule
                     continue;
                 }
 
+                if (annotationType == JSONCompiler.class) {
+                    JSONCompiler compiler = (JSONCompiler) annotation;
+                    if (compiler.value() == JSONCompiler.CompilerOption.LAMBDA) {
+                        beanInfo.writerFeatures |= FieldInfo.JIT;
+                    }
+                }
+
                 if (annotationType == JSONAutowired.class) {
                     beanInfo.writerFeatures |= JSON_AUTO_WIRED_ANNOTATED;
 
@@ -815,6 +822,13 @@ public class ObjectWriterBaseModule
                     continue;
                 }
 
+                if (annotationType == JSONCompiler.class) {
+                    JSONCompiler compiler = (JSONCompiler) annotation;
+                    if (compiler.value() == JSONCompiler.CompilerOption.LAMBDA) {
+                        fieldInfo.features |= FieldInfo.JIT;
+                    }
+                }
+
                 boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
                 String annotationTypeName = annotationType.getName();
                 switch (annotationTypeName) {
@@ -1066,6 +1080,10 @@ public class ObjectWriterBaseModule
             }
         }
 
+        if (java.nio.file.Path.class.isAssignableFrom(objectClass)) {
+            return ObjectWriterImplToString.INSTANCE;
+        }
+
         if (objectType == Integer.class) {
             return ObjectWriterImplInt32.INSTANCE;
         }
@@ -1228,7 +1246,12 @@ public class ObjectWriterBaseModule
                 if (clazz == Object[].class) {
                     return ObjectWriterArray.INSTANCE;
                 } else {
-                    return new ObjectWriterArray(clazz.getComponentType());
+                    Class componentType = clazz.getComponentType();
+                    if (Modifier.isFinal(componentType.getModifiers())) {
+                        return new ObjectWriterArrayFinal(componentType, null);
+                    } else {
+                        return new ObjectWriterArray(componentType);
+                    }
                 }
             }
 

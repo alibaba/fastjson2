@@ -21,8 +21,12 @@ final class FieldWriterDoubleValueFunc
 
     @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
-        double fieldValue = function.applyAsDouble(object);
-        jsonWriter.writeDouble(fieldValue);
+        double value = function.applyAsDouble(object);
+        if (decimalFormat != null) {
+            jsonWriter.writeDouble(value, decimalFormat);
+        } else {
+            jsonWriter.writeDouble(value);
+        }
     }
 
     @Override
@@ -38,7 +42,11 @@ final class FieldWriterDoubleValueFunc
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeDouble(value);
+        if (decimalFormat != null) {
+            jsonWriter.writeDouble(value, decimalFormat);
+        } else {
+            jsonWriter.writeDouble(value);
+        }
         return true;
     }
 }

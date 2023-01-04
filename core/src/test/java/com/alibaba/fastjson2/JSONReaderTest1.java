@@ -1514,7 +1514,7 @@ public class JSONReaderTest1 {
     public void testDates() {
         DateTimeFormatter formatter = DateTimeFormatter
                 .ofPattern("yyyy-MM-dd HH:mm:ss", Locale.CHINA)
-                .withZone(IOUtils.SHANGHAI_ZONE_ID);
+                .withZone(DateUtils.SHANGHAI_ZONE_ID);
 
         char[] chars = "\"1900-01-01 00:00:00\"".toCharArray();
         for (int year = 1900; year < 2200; year++) {
@@ -1548,11 +1548,11 @@ public class JSONReaderTest1 {
 
                         {
                             JSONReader jsonReader = JSONReader.of(chars, 0, chars.length);
-                            jsonReader.getContext().setZoneId(IOUtils.SHANGHAI_ZONE_ID);
+                            jsonReader.getContext().setZoneId(DateUtils.SHANGHAI_ZONE_ID);
                             long millis19 = jsonReader.readMillis19();
 
                             LocalDateTime ldt = LocalDateTime.parse(str, formatter);
-                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, IOUtils.SHANGHAI_ZONE_ID, null);
+                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, DateUtils.SHANGHAI_ZONE_ID, null);
                             assertEquals(zdt.toInstant().toEpochMilli(), millis19);
                         }
 
@@ -1824,7 +1824,7 @@ public class JSONReaderTest1 {
 
     @Test
     public void testMillis_shanghai() {
-        ZoneId zoneId = IOUtils.SHANGHAI_ZONE_ID;
+        ZoneId zoneId = DateUtils.SHANGHAI_ZONE_ID;
         int[] years = {
                 1992, 1991, 1990, 1989, 1988, 1987, 1986, 1985,
                 1950, 1949, 1948, 1947, 1946, 1945, 1944, 1943, 1942, 1941, 1941, 1940,

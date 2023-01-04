@@ -211,7 +211,7 @@ class JSONWriterUTF16
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
         boolean escape = false;
 
-        if (JDKUtils.JVM_VERSION > 8 && STRING_VALUE != null) {
+        if (STRING_VALUE != null) {
             int coder = STRING_CODER.applyAsInt(str);
             if (coder == 0) {
                 byte[] value = STRING_VALUE.apply(str);
@@ -384,11 +384,7 @@ class JSONWriterUTF16
             return;
         }
 
-        if (escapeNoneAscii || browserSecure) {
-            ensureCapacity(off + strlen * 6 + 2);
-        } else {
-            ensureCapacity(off + strlen * 2 + 2);
-        }
+        ensureCapacity(off + strlen * 6 + 2);
 
         chars[off++] = quote;
         for (int i = 0; i < strlen; ++i) {

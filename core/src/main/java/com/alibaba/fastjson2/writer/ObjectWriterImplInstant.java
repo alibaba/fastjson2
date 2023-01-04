@@ -2,7 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
-import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.DateUtils;
 
 import java.lang.reflect.Type;
 import java.time.*;
@@ -47,8 +47,8 @@ final class ObjectWriterImplInstant
             ZoneId zoneId = context.getZoneId();
             long epochSecond = instant.getEpochSecond();
             int offsetTotalSeconds;
-            if (zoneId == IOUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == IOUtils.SHANGHAI_ZONE_RULES) {
-                offsetTotalSeconds = IOUtils.getShanghaiZoneOffsetTotalSeconds(epochSecond);
+            if (zoneId == DateUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == DateUtils.SHANGHAI_ZONE_RULES) {
+                offsetTotalSeconds = DateUtils.getShanghaiZoneOffsetTotalSeconds(epochSecond);
             } else {
                 offsetTotalSeconds = zoneId.getRules().getOffset(instant).getTotalSeconds();
             }

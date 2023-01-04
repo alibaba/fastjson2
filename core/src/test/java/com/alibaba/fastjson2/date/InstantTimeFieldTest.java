@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.date;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -9,6 +10,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class InstantTimeFieldTest {
     static final ZoneId zoneId = ZoneId.of("Asia/Shanghai");
@@ -35,6 +37,10 @@ public class InstantTimeFieldTest {
 
         Bean bean1 = JSON.parseObject(str, Bean.class, "yyyy-MM-dd HH:mm:ss");
         assertEquals(1654686106000L, millis(bean1.value));
+
+        Bean bean2 = new Bean();
+        JSONPath.of("$.value").set(bean2, "2022-06-08 19:01:46");
+        assertEquals(1654686106000L, millis(bean2.value));
     }
 
     @Test
@@ -71,6 +77,11 @@ public class InstantTimeFieldTest {
 
         Bean bean1 = JSON.parseObject(str, Bean.class, "millis");
         assertEquals(1654686106602L, millis(bean1.value));
+
+        Bean bean2 = new Bean();
+        JSONPath.of("$.value").set(bean2, 1654686106602L);
+        assertNotNull(bean2.value);
+        assertEquals(1654686106602L, millis(bean2.value));
     }
 
     @Test
@@ -179,6 +190,18 @@ public class InstantTimeFieldTest {
 
         Bean20 bean1 = JSON.parseObject(str, Bean20.class);
         assertEquals(1654686106000L, millis(bean1.value));
+
+        JSONPath jsonPath = JSONPath.of("$.value");
+
+        Bean20 bean2 = new Bean20();
+        jsonPath.set(bean2, "20220608 19:01:46");
+        assertNotNull(bean2.value);
+        assertEquals(1654686106000L, millis(bean2.value));
+
+        Bean20 bean3 = new Bean20();
+        jsonPath.set(bean3, 1654686106000L);
+        assertNotNull(bean3.value);
+        assertEquals(1654686106000L, millis(bean3.value));
     }
 
     public static class Bean20 {

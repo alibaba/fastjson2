@@ -195,7 +195,9 @@ public class JSONWriterJSONBTest {
             bytes.set(jsonWriter, new byte[0]);
             jsonWriter.writeInt64(new long[1]);
             jsonWriter.writeInt64(null);
-            jsonWriter.writeDouble(null);
+            jsonWriter.writeFloat((Float) null);
+            jsonWriter.writeFloat((float[]) null);
+            jsonWriter.writeDouble((double[]) null);
             jsonWriter.writeInt32(null);
             jsonWriter.writeLocalDate(null);
             jsonWriter.writeLocalTime(null);

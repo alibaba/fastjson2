@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue3266_mixedin {
     @Test
     public void test_for_issue() throws Exception {
-        com.alibaba.fastjson2.JSON.mixIn(Color.class, ColorMixedIn.class);
+        com.alibaba.fastjson.JSON.addMixInAnnotations(Color.class, ColorMixedIn.class);
 
         VO vo = new VO();
         vo.type = Color.Black;

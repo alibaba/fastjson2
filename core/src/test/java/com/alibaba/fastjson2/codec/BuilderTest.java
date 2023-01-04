@@ -22,7 +22,7 @@ public class BuilderTest {
     @Test
     public void test_build() throws Exception {
         ObjectReaderCreator creator = TestUtils.READER_CREATOR;
-        Supplier instanceSupplier = creator.createInstanceSupplier(VOBuilder.class);
+        Supplier instanceSupplier = creator.createSupplier(VOBuilder.class);
         FieldReader fieldReader = ObjectReaders.fieldReaderInt("id", VOBuilder::withId);
         Function<Object, Object> buildFunction = creator.createBuildFunction(VOBuilder.class.getMethod("build"));
         ObjectReader objectReader = creator.createObjectReader(VOBuilder.class, 0, instanceSupplier, buildFunction, fieldReader);
@@ -46,7 +46,7 @@ public class BuilderTest {
     @Test
     public void test_build_2() throws Exception {
         ObjectReaderCreator creator = TestUtils.READER_CREATOR;
-        Supplier instanceSupplier = creator.createInstanceSupplier(VOBuilder.class);
+        Supplier instanceSupplier = creator.createSupplier(VOBuilder.class);
 
         FieldReader fieldReader1 = ObjectReaders.fieldReaderInt("id", VOBuilder::withId);
         FieldReader fieldReader2 = ObjectReaders.fieldReader("name", String.class, VOBuilder::withName);
@@ -79,7 +79,7 @@ public class BuilderTest {
     @Test
     public void test_build_3() throws Exception {
         ObjectReaderCreator creator = ObjectReaderCreator.INSTANCE;
-        Supplier instanceSupplier = creator.createInstanceSupplier(VOBuilder.class);
+        Supplier instanceSupplier = creator.createSupplier(VOBuilder.class);
 
         FieldReader fieldReader1 = ObjectReaders.fieldReaderInt("id", VOBuilder::withId);
         FieldReader fieldReader2 = ObjectReaders.fieldReader("name", String.class, VOBuilder::withName);
@@ -125,7 +125,7 @@ public class BuilderTest {
     @Test
     public void test_build_4() throws Exception {
         ObjectReaderCreator creator = ObjectReaderCreator.INSTANCE;
-        Supplier instanceSupplier = creator.createInstanceSupplier(VOBuilder.class);
+        Supplier instanceSupplier = creator.createSupplier(VOBuilder.class);
 
         FieldReader fieldReader1 = ObjectReaders.fieldReaderInt("id", VOBuilder::withId);
         FieldReader fieldReader2 = ObjectReaders.fieldReader("name", String.class, VOBuilder::withName);
@@ -177,7 +177,7 @@ public class BuilderTest {
     @Test
     public void test_build_5() throws Exception {
         ObjectReaderCreator creator = ObjectReaderCreator.INSTANCE;
-        Supplier instanceSupplier = creator.createInstanceSupplier(VOBuilder.class);
+        Supplier instanceSupplier = creator.createSupplier(VOBuilder.class);
 
         FieldReader fieldReader1 = ObjectReaders.fieldReaderInt("id", VOBuilder::withId);
         FieldReader fieldReader2 = ObjectReaders.fieldReader("name", String.class, VOBuilder::withName);

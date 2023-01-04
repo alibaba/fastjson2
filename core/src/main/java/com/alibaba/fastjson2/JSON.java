@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderBean;
 import com.alibaba.fastjson2.reader.ObjectReaderNoneDefaultConstructor;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.MultiType;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
@@ -29,13 +30,13 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReader.EOI;
 import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreCheckClose;
-import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public interface JSON {
     /**
      * FASTJSON2 version name
      */
-    String VERSION = "2.0.22";
+    String VERSION = "2.0.23";
 
     /**
      * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject}
@@ -2236,7 +2237,7 @@ public interface JSON {
         if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+            jsonWriter = STRING_VALUE != null ? new JSONWriterUTF8JDK9(writeContext) : new JSONWriterUTF8(writeContext);
         } else {
             jsonWriter = new JSONWriterUTF16(writeContext);
         }
@@ -2304,7 +2305,7 @@ public interface JSON {
         if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+            jsonWriter = STRING_VALUE != null ? new JSONWriterUTF8JDK9(writeContext) : new JSONWriterUTF8(writeContext);
         } else {
             jsonWriter = new JSONWriterUTF16(writeContext);
         }
@@ -3178,7 +3179,7 @@ public interface JSON {
             }
         }
 
-        ObjectWriter objectWriter = defaultObjectWriterProvider.getObjectWriter(objectClass, targetClass, fieldBased);
+        ObjectWriter objectWriter = defaultObjectWriterProvider.getObjectWriter(objectClass, objectClass, fieldBased);
         ObjectReader objectReader = defaultObjectReaderProvider.getObjectReader(targetClass, fieldBased);
 
         if (objectWriter instanceof ObjectWriterAdapter && objectReader instanceof ObjectReaderBean) {
@@ -3202,7 +3203,16 @@ public interface JSON {
                 }
 
                 Object fieldValue = fieldWriter.getFieldValue(object);
-                Object fieldValueCopied = copy(fieldValue);
+
+                Object fieldValueCopied;
+                if (fieldWriter.fieldClass == Date.class && fieldReader.fieldClass == String.class) {
+                    fieldValueCopied = DateUtils.format((Date) fieldValue, fieldWriter.format);
+                } else if (fieldValue == null || fieldReader.supportAcceptType(fieldValue.getClass())) {
+                    fieldValueCopied = fieldValue;
+                } else {
+                    fieldValueCopied = copy(fieldValue);
+                }
+
                 fieldReader.accept(instance, fieldValueCopied);
             }
 

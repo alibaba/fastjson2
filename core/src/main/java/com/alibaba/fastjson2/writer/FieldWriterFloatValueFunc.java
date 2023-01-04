@@ -22,7 +22,11 @@ final class FieldWriterFloatValueFunc
     @Override
     public void writeValue(JSONWriter jsonWriter, Object object) {
         float fieldValue = function.applyAsFloat(object);
-        jsonWriter.writeFloat(fieldValue);
+        if (decimalFormat != null) {
+            jsonWriter.writeDouble(fieldValue, decimalFormat);
+        } else {
+            jsonWriter.writeDouble(fieldValue);
+        }
     }
 
     @Override
@@ -38,7 +42,11 @@ final class FieldWriterFloatValueFunc
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeFloat(value);
+        if (decimalFormat != null) {
+            jsonWriter.writeDouble(value, decimalFormat);
+        } else {
+            jsonWriter.writeDouble(value);
+        }
         return true;
     }
 }

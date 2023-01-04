@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
@@ -226,7 +225,7 @@ public class JSONArray
 
         if (value instanceof Date) {
             long timeMillis = ((Date) value).getTime();
-            return DateUtils.toString(timeMillis, false, IOUtils.DEFAULT_ZONE_ID);
+            return DateUtils.toString(timeMillis, false, DateUtils.DEFAULT_ZONE_ID);
         }
 
         if (value instanceof Boolean
@@ -1391,6 +1390,18 @@ public class JSONArray
         JSONArray array = new JSONArray(1);
         array.add(item);
         return array;
+    }
+
+    /**
+     * Returns an {@link JSONArray} containing the elements of the given Collection, in its iteration order.
+     *
+     * <pre>
+     * JSONArray array = JSONArray.copyOf(List.of("fastjson"));
+     * </pre>
+     * @since 2.0.22
+     */
+    public static JSONArray copyOf(Collection collection) {
+        return new JSONArray(collection);
     }
 
     /**

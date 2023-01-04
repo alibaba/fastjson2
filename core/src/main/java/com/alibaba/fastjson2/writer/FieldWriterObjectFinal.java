@@ -6,6 +6,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.BeanToArray;
+
 abstract class FieldWriterObjectFinal<T>
         extends FieldWriterObject<T> {
     final Type fieldType;
@@ -108,10 +110,20 @@ abstract class FieldWriterObjectFinal<T>
         }
 
         ObjectWriter valueWriter = getObjectWriter(jsonWriter, fieldClass);
+
+        boolean beanToArray = (jsonWriter.getFeatures(features) & BeanToArray.mask) != 0;
         if (jsonWriter.jsonb) {
-            valueWriter.writeJSONB(jsonWriter, value, fieldName, fieldType, features);
+            if (beanToArray) {
+                valueWriter.writeArrayMappingJSONB(jsonWriter, value, fieldName, fieldType, features);
+            } else {
+                valueWriter.writeJSONB(jsonWriter, value, fieldName, fieldType, features);
+            }
         } else {
-            valueWriter.write(jsonWriter, value, fieldName, fieldType, features);
+            if (beanToArray) {
+                valueWriter.writeArrayMapping(jsonWriter, value, fieldName, fieldType, features);
+            } else {
+                valueWriter.write(jsonWriter, value, fieldName, fieldType, features);
+            }
         }
 
         if (refDetect) {

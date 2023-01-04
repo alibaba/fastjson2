@@ -17,6 +17,9 @@ public class JDKUtilsTest {
     public void test_0() throws Throwable {
         if (JVM_VERSION == 8) {
             BiFunction<char[], Boolean, String> stringCreator = JDKUtils.STRING_CREATOR_JDK8;
+            if (stringCreator == null) {
+                return;
+            }
 
             char[] chars = new char[]{'a', 'b', 'c'};
             String apply = stringCreator.apply(chars, Boolean.TRUE);
@@ -36,6 +39,10 @@ public class JDKUtilsTest {
 
     @Test
     public void test_unsafe_isAscii() throws Throwable {
+        if (STRING_VALUE == null) {
+            return;
+        }
+
         assertEquals(1, STRING_CODER.applyAsInt("中国"));
 
         String str1 = "abc";
