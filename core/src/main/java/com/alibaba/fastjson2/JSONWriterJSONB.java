@@ -859,7 +859,7 @@ final class JSONWriterJSONB
                 return;
             }
 
-            if (seconds % 60000 == 0) {
+            if (seconds % 60 == 0) {
                 long minutes = seconds / 60;
                 if (minutes >= Integer.MIN_VALUE && minutes <= Integer.MAX_VALUE) {
                     int minutesInt = (int) minutes;
@@ -1968,9 +1968,12 @@ final class JSONWriterJSONB
                 && unscaledValue.compareTo(BIGINT_INT64_MAX) <= 0) {
             ensureCapacity(off + 1);
             this.bytes[off++] = BC_DECIMAL_LONG;
-            writeInt64(
-                    unscaledValue.longValue()
-            );
+            long longValue = unscaledValue.longValue();
+            if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
+                writeInt32((int) longValue);
+            } else {
+                writeInt64(longValue);
+            }
             return;
         }
 
