@@ -7,16 +7,17 @@ Fastjson2采用多module的结构设计，对SpringFramework等框架的支持�
 `Maven`:
 
 ```xml
-
-<dependency>
-    <groupId>com.alibaba.fastjson2</groupId>
-    <artifactId>fastjson2-extension</artifactId>
-    <version>2.0.22</version>
-</dependency>
-
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension-spring5</artifactId>
+    <version>2.0.22</version>
+</dependency>
+
+or
+
+<dependency>
+    <groupId>com.alibaba.fastjson2</groupId>
+    <artifactId>fastjson2-extension-spring6</artifactId>
     <version>2.0.22</version>
 </dependency>
 ```
@@ -25,10 +26,36 @@ Fastjson2采用多module的结构设计，对SpringFramework等框架的支持�
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.22'
     implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.22'
 }
+
+or
+
+dependencies {
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.22'
+}
 ```
+> 2.0.22版本之后为了兼容Spring 5.x / 6.x，将不同版本独立开不同的依赖包。
+> 如使用2.0.22之前的版本，请参考：
+
+`Maven`:
+
+```xml
+<dependency>
+    <groupId>com.alibaba.fastjson2</groupId>
+    <artifactId>fastjson2-extension</artifactId>
+    <version>2.0.x</version>
+</dependency>
+```
+
+`Gradle`:
+
+```groovy
+dependencies {
+    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.x'
+}
+```
+
 
 # 1. 参数配置
 
