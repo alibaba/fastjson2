@@ -84,7 +84,7 @@
         <dependency>
             <groupId>io.github.wycst</groupId>
             <artifactId>wast</artifactId>
-            <version>0.0.9</version>
+            <version>0.0.10.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
