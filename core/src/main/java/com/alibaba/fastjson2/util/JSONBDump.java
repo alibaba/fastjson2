@@ -654,6 +654,17 @@ public class JSONBDump {
             return type;
         }
 
+        if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
+            return ((type - BC_INT32_BYTE_ZERO) << 8)
+                    + (bytes[offset++] & 0xFF);
+        }
+
+        if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
+            return ((type - BC_INT32_SHORT_ZERO) << 16)
+                    + ((bytes[offset++] & 0xFF) << 8)
+                    + (bytes[offset++] & 0xFF);
+        }
+
         if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
             return (long) INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
         }
