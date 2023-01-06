@@ -4554,7 +4554,7 @@ class JSONReaderJSONB
                         zoneId = ZoneId.of(zoneIdStr);
                     }
                 }
-                return ZonedDateTime.of(ldt, zoneId);
+                return ZonedDateTime.ofLocal(ldt, zoneId, null);
             default:
                 break;
         }
