@@ -742,6 +742,22 @@ public abstract class FieldWriter<T>
                 }
             }
 
+            if (BigDecimal.class == valueClass) {
+                if (format == null || format.isEmpty()) {
+                    return ObjectWriterImplBigDecimal.INSTANCE;
+                } else {
+                    return new ObjectWriterImplBigDecimal(new DecimalFormat(format));
+                }
+            }
+
+            if (BigDecimal[].class == valueClass) {
+                if (format == null || format.isEmpty()) {
+                    return new ObjectWriterArrayFinal(BigDecimal.class, null);
+                } else {
+                    return new ObjectWriterArrayFinal(BigDecimal.class, new DecimalFormat(format));
+                }
+            }
+
             if (Optional.class == valueClass) {
                 return ObjectWriterImplOptional.of(format, locale);
             }
