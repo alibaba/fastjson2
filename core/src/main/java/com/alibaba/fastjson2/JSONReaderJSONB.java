@@ -721,7 +721,7 @@ class JSONReaderJSONB
                     }
 
                     Object name;
-                    if (supportAutoType && i == 0 && type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_GB18030) {
+                    if (supportAutoType && i == 0 && type >= BC_STR_ASCII_FIX_MIN && type <= BC_SYMBOL) {
                         long hash = readFieldNameHashCode();
 
                         if (hash == ObjectReader.HASH_TYPE && supportAutoType) {
@@ -908,6 +908,16 @@ class JSONReaderJSONB
                         str = str.trim();
                     }
                     return str;
+                }
+
+                if (type == BC_SYMBOL) {
+                    strlen = readLength();
+
+                    if (strlen >= 0) {
+                        throw new JSONException("not support symbol : " + strlen);
+                    }
+
+                    return symbolTable.getName(-strlen);
                 }
 
                 throw new JSONException("not support type : " + error(type));
@@ -1683,6 +1693,9 @@ class JSONReaderJSONB
                 || strtype == BC_STR_UTF16LE
                 || strtype == BC_STR_UTF16BE
         ) {
+            strlen = readLength();
+            strBegin = offset;
+        } else if (strtype == BC_SYMBOL) {
             strlen = readLength();
             strBegin = offset;
         } else {
