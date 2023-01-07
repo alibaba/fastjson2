@@ -197,6 +197,20 @@ public interface JSONB {
         }
     }
 
+    static byte[] toBytes(byte i) {
+        try (JSONWriter jsonWriter = JSONWriter.ofJSONB()) {
+            jsonWriter.writeInt8(i);
+            return jsonWriter.getBytes();
+        }
+    }
+
+    static byte[] toBytes(short i) {
+        try (JSONWriter jsonWriter = JSONWriter.ofJSONB()) {
+            jsonWriter.writeInt16(i);
+            return jsonWriter.getBytes();
+        }
+    }
+
     static byte[] toBytes(long i) {
         if (i >= INT64_NUM_LOW_VALUE && i <= INT64_NUM_HIGH_VALUE) {
             return new byte[]{
@@ -239,6 +253,18 @@ public interface JSONB {
 
     static Object parse(byte[] jsonbBytes, JSONReader.Feature... features) {
         JSONReader reader = JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length);
+        reader.getContext().config(features);
+        ObjectReader objectReader = reader.getObjectReader(Object.class);
+
+        Object object = objectReader.readJSONBObject(reader, null, null, 0);
+        if (reader.resolveTasks != null) {
+            reader.handleResolveTasks(object);
+        }
+        return object;
+    }
+
+    static Object parse(byte[] jsonbBytes, SymbolTable symbolTable, JSONReader.Feature... features) {
+        JSONReader reader = JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length, symbolTable);
         reader.getContext().config(features);
         ObjectReader objectReader = reader.getObjectReader(Object.class);
 
