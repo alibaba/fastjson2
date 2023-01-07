@@ -68,6 +68,42 @@ public class JSONTest {
     }
 
     @Test
+    public void test_parseArray_1() {
+        String str = "null";
+        assertNull(JSON.parseArray(str));
+        assertNull(JSON.parseArray(str, JSONReader.Feature.SupportAutoType));
+        assertNull(JSON.parseArray(str.toCharArray()));
+
+        byte[] strBytes = str.getBytes();
+        assertNull(JSON.parseArray(strBytes));
+        assertNull(JSON.parseArray(strBytes, 0, strBytes.length, StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void test_parseArray_2() {
+        String str = "[{},{\"$ref\":\"$[0]\"}]";
+
+        JSONArray jsonArray = JSON.parseArray(str);
+        assertEquals(2, jsonArray.size());
+        assertNotSame(jsonArray.get(0), jsonArray.get(1));
+
+        JSONArray jsonArray1 = JSON.parseArray(str.getBytes());
+        assertEquals(2, jsonArray1.size());
+        assertNotSame(jsonArray1.get(0), jsonArray1.get(1));
+    }
+
+    @Test
+    public void test_parseArray_error() {
+        String str = "[1]{";
+        assertThrows(JSONException.class, () -> JSON.parseArray(str));
+        assertThrows(JSONException.class, () -> JSON.parseArray(str, JSONReader.Feature.ErrorOnNotSupportAutoType));
+        assertThrows(JSONException.class, () -> JSON.parseArray(str.toCharArray()));
+
+        byte[] strBytes = str.getBytes();
+        assertThrows(JSONException.class, () -> JSON.parseArray(strBytes, 0, strBytes.length, StandardCharsets.UTF_8));
+    }
+
+    @Test
     public void test_parseObject_0() {
         IntField1 intField1 = JSON.parseObject("{\"v0000\":101}",
                 (Type) IntField1.class, JSONReader.Feature.SupportSmartMatch);
