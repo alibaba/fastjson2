@@ -1372,7 +1372,8 @@ public abstract class JSONReader
             if (nextIfMatch(']')) {
                 break;
             }
-            Object item = readAny();
+
+            Object item = ObjectReaderImplObject.INSTANCE.readObject(this, null, null, 0);
             list.add(item);
 
             if (nextIfMatch(',')) {

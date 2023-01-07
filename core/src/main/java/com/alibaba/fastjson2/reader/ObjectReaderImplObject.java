@@ -166,9 +166,17 @@ public final class ObjectReaderImplObject
                     name = jsonReader.readFieldName();
                 }
                 if (name == null) {
-                    name = jsonReader.readFieldNameUnquote();
-                    if (jsonReader.current() == ':') {
-                        jsonReader.next();
+                    char current = jsonReader.current();
+                    if (current == '{' || current == '[') {
+                        name = jsonReader.readAny();
+                        if (!jsonReader.nextIfMatch(':')) {
+                            throw new JSONException(jsonReader.info("illegal input"));
+                        }
+                    } else {
+                        name = jsonReader.readFieldNameUnquote();
+                        if (jsonReader.current() == ':') {
+                            jsonReader.next();
+                        }
                     }
                 }
 
