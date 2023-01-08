@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONSchemaValidException;
 import com.alibaba.fastjson2.TestUtils;
+import com.alibaba.fastjson2.annotation.JSONCompiler;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,7 @@ public class FieldReaderFloatFuncTest {
         );
     }
 
+    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean {
         private Float value;
 
@@ -63,7 +65,7 @@ public class FieldReaderFloatFuncTest {
     }
 
     @Test
-    public void test1_refelct() {
+    public void test1_reflect() {
         Bean1 bean = new Bean1();
         ObjectReader<Bean1> objectReader = ObjectReaderCreator.INSTANCE.createObjectReader(Bean1.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
@@ -82,6 +84,7 @@ public class FieldReaderFloatFuncTest {
         );
     }
 
+    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean1 {
         @JSONField(schema = "{'minimum':128}")
         private Float value;
@@ -107,6 +110,7 @@ public class FieldReaderFloatFuncTest {
         assertThrows(Exception.class, () -> fieldReader.accept(bean, 123D));
     }
 
+    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean2 {
         public void setValue(Float value) {
             throw new UnsupportedOperationException();
