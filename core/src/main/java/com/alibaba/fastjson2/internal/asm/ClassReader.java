@@ -13,10 +13,10 @@ public class ClassReader {
     private final String[] strings;
     private final int maxStringLength;
     public final int header;
-    private boolean readAnnotations;
+//    private boolean readAnnotations;
 
-    public ClassReader(InputStream is, boolean readAnnotations) throws IOException {
-        this.readAnnotations = readAnnotations;
+    public ClassReader(InputStream is) throws IOException {
+//        this.readAnnotations = readAnnotations;
 
         {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -88,17 +88,17 @@ public class ClassReader {
         int anns = 0;
 
         //read annotations
-        if (readAnnotations) {
-            u = getAttributes();
-            for (i = readUnsignedShort(u); i > 0; --i) {
-                String attrName = readUTF8(u + 2, c);
-                if ("RuntimeVisibleAnnotations".equals(attrName)) {
-                    anns = u + 8;
-                    break;
-                }
-                u += 6 + readInt(u + 4);
-            }
-        }
+//        if (readAnnotations) {
+//            u = getAttributes();
+//            for (i = readUnsignedShort(u); i > 0; --i) {
+//                String attrName = readUTF8(u + 2, c);
+//                if ("RuntimeVisibleAnnotations".equals(attrName)) {
+//                    anns = u + 8;
+//                    break;
+//                }
+//                u += 6 + readInt(u + 4);
+//            }
+//        }
 
         // visits the header
         u = header;
@@ -136,7 +136,7 @@ public class ClassReader {
         if (anns != 0) {
             for (i = readUnsignedShort(anns), v = anns + 2; i > 0; --i) {
                 String name = readUTF8(v, c);
-                classVisitor.visitAnnotation(name);
+//                classVisitor.visitAnnotation(name);
             }
         }
 
@@ -159,27 +159,27 @@ public class ClassReader {
             u = readMethod(classVisitor, c, u);
         }
     }
-
-    private int getAttributes() {
-        // skips the header
-        int u = header + 8 + readUnsignedShort(header + 6) * 2;
-        // skips fields and methods
-        for (int i = readUnsignedShort(u); i > 0; --i) {
-            for (int j = readUnsignedShort(u + 8); j > 0; --j) {
-                u += 6 + readInt(u + 12);
-            }
-            u += 8;
-        }
-        u += 2;
-        for (int i = readUnsignedShort(u); i > 0; --i) {
-            for (int j = readUnsignedShort(u + 8); j > 0; --j) {
-                u += 6 + readInt(u + 12);
-            }
-            u += 8;
-        }
-        // the attribute_info structure starts just after the methods
-        return u + 2;
-    }
+//
+//    private int getAttributes() {
+//        // skips the header
+//        int u = header + 8 + readUnsignedShort(header + 6) * 2;
+//        // skips fields and methods
+//        for (int i = readUnsignedShort(u); i > 0; --i) {
+//            for (int j = readUnsignedShort(u + 8); j > 0; --j) {
+//                u += 6 + readInt(u + 12);
+//            }
+//            u += 8;
+//        }
+//        u += 2;
+//        for (int i = readUnsignedShort(u); i > 0; --i) {
+//            for (int j = readUnsignedShort(u + 8); j > 0; --j) {
+//                u += 6 + readInt(u + 12);
+//            }
+//            u += 8;
+//        }
+//        // the attribute_info structure starts just after the methods
+//        return u + 2;
+//    }
 
     private int readMethod(TypeCollector classVisitor, char[] c, int u) {
         int v;

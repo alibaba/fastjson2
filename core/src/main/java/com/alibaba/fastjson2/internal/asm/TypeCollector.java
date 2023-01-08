@@ -1,13 +1,11 @@
 package com.alibaba.fastjson2.internal.asm;
 
-import com.alibaba.fastjson2.annotation.JSONType;
-
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
 public class TypeCollector {
-    static final String JSON_TYPE = ASMUtils.desc(JSONType.class);
+//    static final String JSON_TYPE = ASMUtils.desc(JSONType.class);
     static final Map<String, String> PRIMITIVES;
 
     static {
@@ -29,7 +27,7 @@ public class TypeCollector {
 
     protected MethodCollector collector;
 
-    protected boolean jsonType;
+//    protected boolean jsonType;
 
     public TypeCollector(String methodName, Class<?>[] parameterTypes) {
         this.methodName = methodName;
@@ -68,12 +66,12 @@ public class TypeCollector {
                 Modifier.isStatic(access) ? 0 : 1,
                 argTypes.length + longOrDoubleQuantity);
     }
-
-    public void visitAnnotation(String desc) {
-        if (JSON_TYPE.equals(desc)) {
-            jsonType = true;
-        }
-    }
+//
+//    public void visitAnnotation(String desc) {
+//        if (JSON_TYPE.equals(desc)) {
+//            jsonType = true;
+//        }
+//    }
 
     private boolean correctTypeName(Type type, String paramTypeName) {
         String s = type.getClassName();
