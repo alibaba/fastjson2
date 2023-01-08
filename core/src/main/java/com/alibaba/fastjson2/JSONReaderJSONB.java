@@ -2687,7 +2687,8 @@ class JSONReaderJSONB
                 symbol0Length = strlen;
                 symbol0StrType = strtype;
             } else {
-                int minCapacity = symbol * 2 + 2;
+                int symbolIndex = symbol * 2 + 2;
+                int minCapacity = symbolIndex;
                 if (symbols == null) {
                     symbols = new long[minCapacity < 32 ? 32 : minCapacity];
                 } else if (symbols.length < minCapacity) {
