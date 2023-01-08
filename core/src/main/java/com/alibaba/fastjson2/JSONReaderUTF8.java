@@ -32,7 +32,6 @@ class JSONReaderUTF8
     protected final InputStream in;
 
     protected int cacheIndex = -1;
-    protected boolean csv;
 
     JSONReaderUTF8(Context ctx, InputStream is) {
         super(ctx);
@@ -1864,24 +1863,22 @@ class JSONReaderUTF8
             }
         }
 
-        if (!csv) {
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
+            }
+        }
+
+        if (comma = (ch == ',')) {
+            this.ch = offset == end ? EOI : (char) bytes[this.offset++];
+            // next inline
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 if (offset >= end) {
                     ch = EOI;
                 } else {
                     ch = (char) bytes[offset++];
-                }
-            }
-
-            if (comma = (ch == ',')) {
-                this.ch = offset == end ? EOI : (char) bytes[this.offset++];
-                // next inline
-                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                    if (offset >= end) {
-                        ch = EOI;
-                    } else {
-                        ch = (char) bytes[offset++];
-                    }
                 }
             }
         }
@@ -1911,7 +1908,7 @@ class JSONReaderUTF8
                 }
                 return null;
             }
-        } else if (csv && (ch == ',' || ch == '\r' || ch == '\n')) {
+        } else if (ch == ',' || ch == '\r' || ch == '\n') {
             return null;
         }
 
@@ -2001,27 +1998,25 @@ class JSONReaderUTF8
             }
         }
 
-        if (!csv) {
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                if (offset >= end) {
-                    ch = EOI;
-                } else {
-                    ch = (char) bytes[offset++];
-                }
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
             }
+        }
 
-            if (comma = (ch == ',')) {
-                // next inline
-                if (this.offset >= end) {
-                    this.ch = EOI;
-                } else {
-                    this.ch = (char) bytes[this.offset++];
-                    while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                        if (offset >= end) {
-                            ch = EOI;
-                        } else {
-                            ch = (char) bytes[offset++];
-                        }
+        if (comma = (ch == ',')) {
+            // next inline
+            if (this.offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = (char) bytes[this.offset++];
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset >= end) {
+                        ch = EOI;
+                    } else {
+                        ch = (char) bytes[offset++];
                     }
                 }
             }
@@ -2132,24 +2127,22 @@ class JSONReaderUTF8
             }
         }
 
-        if (!csv) {
-            while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+            if (offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = (char) bytes[offset++];
+            }
+        }
+
+        if (comma = (this.ch == ',')) {
+            this.ch = offset == end ? EOI : (char) bytes[this.offset++];
+            // next inline
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 if (offset >= end) {
                     this.ch = EOI;
                 } else {
                     this.ch = (char) bytes[offset++];
-                }
-            }
-
-            if (comma = (this.ch == ',')) {
-                this.ch = offset == end ? EOI : (char) bytes[this.offset++];
-                // next inline
-                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                    if (offset >= end) {
-                        this.ch = EOI;
-                    } else {
-                        this.ch = (char) bytes[offset++];
-                    }
                 }
             }
         }
@@ -2179,7 +2172,7 @@ class JSONReaderUTF8
                 nextIfMatch(',');
                 return null;
             }
-        } else if (csv && (ch == ',' || ch == '\r' || ch == '\n')) {
+        } else if (ch == ',' || ch == '\r' || ch == '\n') {
             return null;
         }
 
@@ -2277,27 +2270,25 @@ class JSONReaderUTF8
             }
         }
 
-        if (!csv) {
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                if (offset >= end) {
-                    ch = EOI;
-                } else {
-                    ch = (char) bytes[offset++];
-                }
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
             }
+        }
 
-            if (comma = (ch == ',')) {
-                // next inline
-                if (this.offset >= end) {
-                    this.ch = EOI;
-                } else {
-                    this.ch = (char) bytes[this.offset++];
-                    while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                        if (offset >= end) {
-                            ch = EOI;
-                        } else {
-                            ch = (char) bytes[offset++];
-                        }
+        if (comma = (ch == ',')) {
+            // next inline
+            if (this.offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = (char) bytes[this.offset++];
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset >= end) {
+                        ch = EOI;
+                    } else {
+                        ch = (char) bytes[offset++];
                     }
                 }
             }
@@ -2520,27 +2511,25 @@ class JSONReaderUTF8
             }
         }
 
-        if (!csv) {
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                if (offset >= end) {
-                    ch = EOI;
-                } else {
-                    ch = (char) bytes[offset++];
-                }
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
             }
+        }
 
-            if (comma = (ch == ',')) {
-                // next inline
-                if (this.offset >= end) {
-                    this.ch = EOI;
-                } else {
-                    this.ch = (char) bytes[this.offset++];
-                    while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                        if (offset >= end) {
-                            ch = EOI;
-                        } else {
-                            ch = (char) bytes[offset++];
-                        }
+        if (comma = (ch == ',')) {
+            // next inline
+            if (this.offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = (char) bytes[this.offset++];
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset >= end) {
+                        ch = EOI;
+                    } else {
+                        ch = (char) bytes[offset++];
                     }
                 }
             }
@@ -2762,27 +2751,25 @@ class JSONReaderUTF8
             }
         }
 
-        if (!csv) {
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                if (offset >= end) {
-                    ch = EOI;
-                } else {
-                    ch = (char) bytes[offset++];
-                }
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
             }
+        }
 
-            if (this.comma = ch == ',') {
-                // next inline
-                if (this.offset >= end) {
-                    this.ch = EOI;
-                } else {
-                    this.ch = (char) bytes[this.offset++];
-                    while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                        if (offset >= end) {
-                            ch = EOI;
-                        } else {
-                            ch = (char) bytes[offset++];
-                        }
+        if (this.comma = ch == ',') {
+            // next inline
+            if (this.offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = (char) bytes[this.offset++];
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset >= end) {
+                        ch = EOI;
+                    } else {
+                        ch = (char) bytes[offset++];
                     }
                 }
             }
@@ -3834,7 +3821,7 @@ class JSONReaderUTF8
                 wasNull = true;
                 return;
             }
-        } else if (csv && (ch == ',' || ch == '\r' || ch == '\n')) {
+        } else if (ch == ',' || ch == '\r' || ch == '\n') {
             wasNull = true;
             valueType = JSON_TYPE_NULL;
             return;
@@ -4054,26 +4041,24 @@ class JSONReaderUTF8
             }
         }
 
-        if (!csv) {
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                if (offset >= end) {
-                    ch = EOI;
-                } else {
-                    ch = (char) bytes[offset++];
-                }
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
             }
+        }
 
-            if (comma = (ch == ',')) {
-                if (this.offset >= end) {
-                    this.ch = EOI;
-                } else {
-                    this.ch = (char) bytes[this.offset++];
-                    while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                        if (offset >= end) {
-                            ch = EOI;
-                        } else {
-                            ch = (char) bytes[offset++];
-                        }
+        if (comma = (ch == ',')) {
+            if (this.offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = (char) bytes[this.offset++];
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset >= end) {
+                        ch = EOI;
+                    } else {
+                        ch = (char) bytes[offset++];
                     }
                 }
             }
