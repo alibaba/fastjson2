@@ -13,12 +13,6 @@ class JSONPathSingle
         this.ref = segment instanceof JSONPathSegmentIndex || segment instanceof JSONPathSegmentName;
     }
 
-    JSONPathSingle(JSONPathSegment segment, String path, long features) {
-        super(path, features);
-        this.segment = segment;
-        this.ref = segment instanceof JSONPathSegmentIndex || segment instanceof JSONPathSegmentName;
-    }
-
     @Override
     public boolean remove(Object root) {
         Context context = new Context(this, null, segment, null, 0);
