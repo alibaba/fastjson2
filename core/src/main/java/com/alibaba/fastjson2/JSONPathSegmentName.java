@@ -34,7 +34,46 @@ class JSONPathSegmentName
 
     @Override
     public boolean remove(JSONPath.Context context) {
-        set(context, null);
+        Object object = context.parent == null
+                ? context.root
+                : context.parent.value;
+
+        if (object instanceof Map) {
+            Map map = (Map) object;
+            map.remove(name);
+            return context.eval = true;
+        }
+
+        if (object instanceof Collection) {
+            Collection collection = (Collection) object;
+            for (Object item : collection) {
+                if (item == null) {
+                    continue;
+                }
+
+                if (item instanceof Map) {
+                    Map map = (Map) item;
+                    map.remove(name);
+                    continue;
+                }
+
+                ObjectReaderProvider provider = context.path.getReaderContext().getProvider();
+                ObjectReader objectReader = provider.getObjectReader(item.getClass());
+                FieldReader fieldReader = objectReader.getFieldReader(nameHashCode);
+                if (fieldReader != null) {
+                    fieldReader.accept(item, null);
+                }
+            }
+            return context.eval = true;
+        }
+
+        ObjectReaderProvider provider = context.path.getReaderContext().getProvider();
+        ObjectReader objectReader = provider.getObjectReader(object.getClass());
+        FieldReader fieldReader = objectReader.getFieldReader(nameHashCode);
+        if (fieldReader != null) {
+            fieldReader.accept(object, null);
+        }
+
         return context.eval = true;
     }
 
@@ -307,6 +346,40 @@ class JSONPathSegmentName
                         JSONArray array = JSONArray.of(origin, value);
                         map.put(name, array);
                     }
+                }
+            }
+            return;
+        }
+
+        if (object instanceof Collection) {
+            Collection collection = (Collection) object;
+            for (Object item : collection) {
+                if (item == null) {
+                    continue;
+                }
+
+                if (item instanceof Map) {
+                    Map map = (Map) item;
+                    Object origin = map.put(name, value);
+                    if (origin != null) {
+                        if ((context.readerFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
+                            if (origin instanceof Collection) {
+                                ((Collection) origin).add(value);
+                                map.put(name, value);
+                            } else {
+                                JSONArray array = JSONArray.of(origin, value);
+                                map.put(name, array);
+                            }
+                        }
+                    }
+                    continue;
+                }
+
+                ObjectReaderProvider provider = context.path.getReaderContext().getProvider();
+                ObjectReader objectReader = provider.getObjectReader(item.getClass());
+                FieldReader fieldReader = objectReader.getFieldReader(nameHashCode);
+                if (fieldReader != null) {
+                    fieldReader.accept(item, null);
                 }
             }
             return;
