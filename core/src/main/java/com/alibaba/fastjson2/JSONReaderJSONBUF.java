@@ -455,15 +455,16 @@ final class JSONReaderJSONBUF
 
             long strInfo = ((long) strBegin << 32) + ((long) strlen << 8) + strtype;
 
-            int minCapacity = symbol * 2 + 2;
+            int symbolIndex = symbol * 2;
+            int minCapacity = symbolIndex + 2;
             if (symbols == null) {
                 symbols = new long[minCapacity < 32 ? 32 : minCapacity];
             } else if (symbols.length < minCapacity) {
                 symbols = Arrays.copyOf(symbols, minCapacity + 16);
             }
 
-            symbols[symbol * 2] = hashCode;
-            symbols[symbol * 2 + 1] = strInfo;
+            symbols[symbolIndex] = hashCode;
+            symbols[symbolIndex + 1] = strInfo;
         }
 
         return hashCode;
