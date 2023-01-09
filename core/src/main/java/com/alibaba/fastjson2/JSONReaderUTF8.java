@@ -31,7 +31,7 @@ class JSONReaderUTF8
 
     protected final InputStream in;
 
-    protected int cacheIndex = -1;
+    protected final int cacheIndex;
 
     JSONReaderUTF8(Context ctx, InputStream is) {
         super(ctx);
@@ -85,6 +85,7 @@ class JSONReaderUTF8
         this.in = null;
         this.start = offset;
         this.end = offset + length;
+        this.cacheIndex = -1;
         next();
 
         while (ch == '/') {
@@ -3805,6 +3806,7 @@ class JSONReaderUTF8
         this.negative = false;
         this.exponent = 0;
         this.scale = 0;
+        int firstOffset = offset;
 
         char quote = '\0';
         if (ch == '"' || ch == '\'') {
@@ -4000,7 +4002,7 @@ class JSONReaderUTF8
 
         if (quote != 0) {
             if (ch != quote) {
-                this.offset -= 1;
+                this.offset = firstOffset;
                 this.ch = quote;
                 readString0();
                 valueType = JSON_TYPE_STRING;

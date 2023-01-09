@@ -2502,6 +2502,11 @@ public abstract class JSONReader
         if (IOUtils.isNumber(val)) {
             return Long.parseLong(val);
         }
+
+        if (val.length() == 19) {
+            return DateUtils.parseMillis(val, context.zoneId);
+        }
+
         throw new JSONException("parseLong error, value : " + val);
     }
 
