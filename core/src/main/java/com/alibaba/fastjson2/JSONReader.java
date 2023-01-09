@@ -2556,12 +2556,14 @@ public abstract class JSONReader
 
     protected final String toString(List array) {
         JSONWriter writer = JSONWriter.of();
+        writer.setRootObject(array);
         writer.write(array);
         return writer.toString();
     }
 
     protected final String toString(Map object) {
         JSONWriter writer = JSONWriter.of();
+        writer.setRootObject(object);
         writer.write(object);
         return writer.toString();
     }
