@@ -3977,6 +3977,7 @@ class JSONReaderUTF16
         this.negative = false;
         this.exponent = 0;
         this.scale = 0;
+        int firstOffset = offset;
 
         char quote = '\0';
         if (ch == '"' || ch == '\'') {
@@ -4172,7 +4173,7 @@ class JSONReaderUTF16
 
         if (quote != 0) {
             if (ch != quote) {
-                this.offset -= 1;
+                this.offset = firstOffset;
                 this.ch = quote;
                 readString0();
                 valueType = JSON_TYPE_STRING;
