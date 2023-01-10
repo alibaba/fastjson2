@@ -26,7 +26,7 @@ import java.lang.reflect.TypeVariable;
  * @author Victor.Zxy
  * @see AbstractHttpMessageConverter
  * @see GenericHttpMessageConverter
- * @since 2.0.2
+ * @since 2.0.22
  */
 public class FastJsonHttpMessageConverter
         extends AbstractHttpMessageConverter<Object>
