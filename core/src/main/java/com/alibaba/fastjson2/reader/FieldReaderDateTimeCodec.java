@@ -202,7 +202,7 @@ abstract class FieldReaderDateTimeCodec<T>
                 accept(object, millis);
                 return;
             } else {
-                value = DateUtils.parseDate(str, format);
+                value = DateUtils.parseDate(str, format, DateUtils.DEFAULT_ZONE_ID);
             }
         }
 
