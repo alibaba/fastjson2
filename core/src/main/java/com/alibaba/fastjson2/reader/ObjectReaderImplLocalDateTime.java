@@ -54,10 +54,7 @@ class ObjectReaderImplLocalDateTime
         }
 
         if (format == null || yyyyMMddhhmmss19 || formatISO8601) {
-            LocalDateTime ldt = jsonReader.readLocalDateTime();
-            if (ldt != null) {
-                return ldt;
-            }
+            return jsonReader.readLocalDateTime();
         }
 
         String str = jsonReader.readString();

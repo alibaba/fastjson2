@@ -23,6 +23,7 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -3205,8 +3206,12 @@ public interface JSON {
                 Object fieldValue = fieldWriter.getFieldValue(object);
 
                 Object fieldValueCopied;
-                if (fieldWriter.fieldClass == Date.class && fieldReader.fieldClass == String.class) {
+                if (fieldWriter.fieldClass == Date.class
+                        && fieldReader.fieldClass == String.class) {
                     fieldValueCopied = DateUtils.format((Date) fieldValue, fieldWriter.format);
+                } else if (fieldWriter.fieldClass == LocalDate.class
+                        && fieldReader.fieldClass == String.class) {
+                    fieldValueCopied = DateUtils.format((LocalDate) fieldValue, fieldWriter.format);
                 } else if (fieldValue == null || fieldReader.supportAcceptType(fieldValue.getClass())) {
                     fieldValueCopied = fieldValue;
                 } else {
