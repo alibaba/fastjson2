@@ -5676,6 +5676,7 @@ class JSONReaderUTF8
         byte c16 = bytes[offset + 16];
 
         char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
+        int nanoOfSecond = 0;
         if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':' && c16 == 'Z') {
             y0 = (char) c0;
             y1 = (char) c1;
@@ -5765,7 +5766,34 @@ class JSONReaderUTF8
             s0 = '0';
             s1 = '0';
         } else {
-            return null;
+            y0 = (char) c0;
+            y1 = (char) c1;
+            y2 = (char) c2;
+            y3 = (char) c3;
+
+            m0 = (char) c4;
+            m1 = (char) c5;
+
+            d0 = (char) c6;
+            d1 = (char) c7;
+
+            h0 = (char) c8;
+            h1 = (char) c9;
+
+            i0 = (char) c10;
+            i1 = (char) c11;
+
+            s0 = (char) c12;
+            s1 = (char) c13;
+
+            if (c14 >= '0' && c14 <= '9'
+                    && c15 >= '0' && c15 <= '9'
+                    && c16 >= '0' && c16 <= '9'
+            ) {
+                nanoOfSecond = ((c14 - '0') * 100 + (c15 - '0') * 10 + (c16 - '0')) * 1_000_000;
+            } else {
+                return null;
+            }
         }
 
         int year;
@@ -5824,7 +5852,7 @@ class JSONReaderUTF8
             return null;
         }
 
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, second);
+        LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, second, nanoOfSecond);
 
         offset += 18;
         next();
