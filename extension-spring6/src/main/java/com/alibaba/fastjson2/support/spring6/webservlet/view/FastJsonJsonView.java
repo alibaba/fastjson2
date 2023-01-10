@@ -19,7 +19,7 @@ import java.util.Set;
  *
  * @author Victor.Zxy
  * @see AbstractView
- * @since 2.0.2
+ * @since 2.0.22
  */
 public class FastJsonJsonView
         extends AbstractView {
