@@ -292,6 +292,28 @@ class ObjectReaderImplMapTyped
                     }
                 }
             } else {
+                if (i == 0 && jsonReader.isEnabled(JSONReader.Feature.SupportAutoType) && jsonReader.current() == '"') {
+                    name = jsonReader.readFieldName();
+                    if (name.equals(getTypeKey())) {
+                        long typeHashCode = jsonReader.readTypeHashCode();
+                        ObjectReader objectReaderAutoType = context.getObjectReaderAutoType(typeHashCode);
+                        if (objectReaderAutoType == null) {
+                            String typeName = jsonReader.getString();
+                            objectReaderAutoType = context.getObjectReaderAutoType(typeName, mapType, features);
+                        }
+                        if (objectReaderAutoType != null) {
+                            if (objectReaderAutoType instanceof ObjectReaderImplMap) {
+                                if (!object.getClass().equals(((ObjectReaderImplMap) objectReaderAutoType).instanceType)) {
+                                    object = (Map) objectReaderAutoType.createInstance(features);
+                                }
+                            }
+                        }
+                        continue;
+                    } else {
+                        throw new JSONException("not support name " + name);
+                    }
+                }
+
                 if (keyObjectReader != null) {
                     name = keyObjectReader.readObject(jsonReader, null, null, 0);
                 } else {
