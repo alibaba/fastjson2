@@ -3520,7 +3520,7 @@ class JSONReaderUTF8
             if (ch == '\n') {
                 offset++;
 
-                if (offset >= length) {
+                if (offset >= end) {
                     ch = EOI;
                     return;
                 }
@@ -3529,7 +3529,7 @@ class JSONReaderUTF8
 
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     offset++;
-                    if (offset >= length) {
+                    if (offset >= end) {
                         ch = EOI;
                         return;
                     }
@@ -3541,7 +3541,7 @@ class JSONReaderUTF8
             }
 
             offset++;
-            if (offset >= length) {
+            if (offset >= end) {
                 ch = EOI;
                 return;
             }
