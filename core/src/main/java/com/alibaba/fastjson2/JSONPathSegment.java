@@ -771,10 +771,13 @@ abstract class JSONPathSegment {
             if (object instanceof JSONPath.Sequence) {
                 List list = ((JSONPath.Sequence) object).values;
                 JSONArray values = new JSONArray(list.size());
-                if (context.next == null && !array) {
+                if (context.next == null) {
                     for (Object item : list) {
-                        if (item instanceof Map) {
+                        if (item instanceof Map && !array) {
                             values.addAll(((Map<?, ?>) item).values());
+                        } else if (item instanceof Collection) {
+                            Collection collection = (Collection) item;
+                            values.addAll(collection);
                         } else {
                             values.add(item);
                         }
@@ -945,11 +948,7 @@ abstract class JSONPathSegment {
                         break;
                     }
                     Object value = jsonReader.readAny();
-                    if (context.next == null && value instanceof Map) {
-                        values.addAll(((Map<?, ?>) value).values());
-                    } else {
-                        values.add(value);
-                    }
+                    values.add(value);
                     if (jsonReader.ch == ',') {
                         jsonReader.next();
                     }
