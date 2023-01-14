@@ -68,10 +68,9 @@ public class JSONPath {
     }
 
     public static Object extract(String json, String path) {
-        return com.alibaba.fastjson2.JSONPath
-                .of(path)
-                .extract(
-                        JSONReader.of(json));
+        com.alibaba.fastjson2.JSONPath jsonPath = com.alibaba.fastjson2.JSONPath.of(path);
+        JSONReader jsonReader = JSONReader.of(json);
+        return jsonPath.extract(jsonReader);
     }
 
     public static boolean remove(Object root, String path) {
