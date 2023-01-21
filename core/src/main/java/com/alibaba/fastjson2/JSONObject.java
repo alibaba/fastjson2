@@ -1943,7 +1943,6 @@ public class JSONObject
         return JSON.parseObject(text, features);
     }
 
-
     /**
      * Convert Java Object to JSONObject.
      *
@@ -2035,5 +2034,4 @@ public class JSONObject
     private static JSONObject fromJavaObject(Object obj, List<JSONReader.Feature> readFeatures, List<JSONWriter.Feature> writeFeatures) {
         return from(obj, readFeatures, writeFeatures);
     }
-
 }
