@@ -24,6 +24,33 @@ public class DateUtils {
             : ZoneId.of(SHANGHAI_ZONE_ID_NAME);
     public static final ZoneRules SHANGHAI_ZONE_RULES = SHANGHAI_ZONE_ID.getRules();
 
+    static final int LOCAL_EPOCH_DAY;
+    static {
+        final long timeMillis = System.currentTimeMillis();
+        ZoneId zoneId = DEFAULT_ZONE_ID;
+        final int SECONDS_PER_DAY = 60 * 60 * 24;
+
+        long epochSecond = Math.floorDiv(timeMillis, 1000L);
+        int offsetTotalSeconds;
+        if (zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES) {
+            offsetTotalSeconds = getShanghaiZoneOffsetTotalSeconds(epochSecond);
+        } else {
+            Instant instant = Instant.ofEpochMilli(timeMillis);
+            offsetTotalSeconds = zoneId.getRules().getOffset(instant).getTotalSeconds();
+        }
+
+        long localSecond = epochSecond + offsetTotalSeconds;
+        LOCAL_EPOCH_DAY = (int) Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+    }
+
+    static class CacheDate8 {
+        static final String[] CACHE = new String[1024];
+    }
+
+    static class CacheDate10 {
+        static final String[] CACHE = new String[1024];
+    }
+
     public static Date parseDateYMDHMS19(String str) {
         if (str == null || str.isEmpty()) {
             return null;
@@ -71,6 +98,22 @@ public class DateUtils {
                 long millis = parseMillis10(str, zoneId, DATE_FORMAT_10_SLASH);
                 return new Date(millis);
             }
+            case "yyyyMMdd": {
+                DateTimeFormatter formatter;
+                formatter = DateTimeFormatter.ofPattern(format);
+                LocalDate ldt = LocalDate.parse(str, formatter);
+                long millis = millis(
+                        zoneId,
+                        ldt.getYear(),
+                        ldt.getMonthValue(),
+                        ldt.getDayOfMonth(),
+                        0,
+                        0,
+                        0,
+                        0
+                );
+                return new Date(millis);
+            }
             case "yyyyMMddHHmmssSSSZ": {
                 long millis = parseMillis(str, DEFAULT_ZONE_ID);
                 return new Date(millis);
@@ -85,7 +128,8 @@ public class DateUtils {
             zoneId = DEFAULT_ZONE_ID;
         }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+        DateTimeFormatter formatter;
+        formatter = DateTimeFormatter.ofPattern(format);
         LocalDateTime ldt = LocalDateTime.parse(str, formatter);
         long millis = millis(ldt, zoneId);
         return new Date(millis);
@@ -4870,6 +4914,365 @@ public class DateUtils {
         return new String(chars);
     }
 
+    public static String formatYMD8(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        return formatYMD8(date.getTime(), DEFAULT_ZONE_ID);
+    }
+
+    public static String formatYMD8(long timeMillis, ZoneId zoneId) {
+        final int SECONDS_PER_DAY = 60 * 60 * 24;
+
+        long epochSecond = Math.floorDiv(timeMillis, 1000L);
+        int offsetTotalSeconds;
+
+        if (zoneId == null) {
+            zoneId = DEFAULT_ZONE_ID;
+        }
+        if (zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES) {
+            offsetTotalSeconds = getShanghaiZoneOffsetTotalSeconds(epochSecond);
+        } else {
+            Instant instant = Instant.ofEpochMilli(timeMillis);
+            offsetTotalSeconds = zoneId.getRules().getOffset(instant).getTotalSeconds();
+        }
+
+        long localSecond = epochSecond + offsetTotalSeconds;
+        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+
+        int off = (int) (localEpochDay - LOCAL_EPOCH_DAY + 128);
+
+        final String[] cache = CacheDate8.CACHE;
+        if (off >= 0 && off < cache.length) {
+            String str = cache[off];
+            if (str != null) {
+                return str;
+            }
+        }
+
+        int year, month, dayOfMonth;
+        {
+            final int DAYS_PER_CYCLE = 146097;
+            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
+
+            long zeroDay = localEpochDay + DAYS_0000_TO_1970;
+            // find the march-based year
+            zeroDay -= 60;  // adjust to 0000-03-01 so leap day is at end of four year cycle
+            long adjust = 0;
+            if (zeroDay < 0) {
+                // adjust negative years to positive for calculation
+                long adjustCycles = (zeroDay + 1) / DAYS_PER_CYCLE - 1;
+                adjust = adjustCycles * 400;
+                zeroDay += -adjustCycles * DAYS_PER_CYCLE;
+            }
+            long yearEst = (400 * zeroDay + 591) / DAYS_PER_CYCLE;
+            long doyEst = zeroDay - (365 * yearEst + yearEst / 4 - yearEst / 100 + yearEst / 400);
+            if (doyEst < 0) {
+                // fix estimate
+                yearEst--;
+                doyEst = zeroDay - (365 * yearEst + yearEst / 4 - yearEst / 100 + yearEst / 400);
+            }
+            yearEst += adjust;  // reset any negative year
+            int marchDoy0 = (int) doyEst;
+
+            // convert march-based values back to january-based
+            int marchMonth0 = (marchDoy0 * 5 + 2) / 153;
+            month = (marchMonth0 + 2) % 12 + 1;
+            dayOfMonth = marchDoy0 - (marchMonth0 * 306 + 5) / 10 + 1;
+            yearEst += marchMonth0 / 10;
+
+            // check year now we are certain it is correct
+            if (yearEst < Year.MIN_VALUE || yearEst > Year.MAX_VALUE) {
+                throw new DateTimeException("Invalid year " + yearEst);
+            }
+
+            year = (int) yearEst;
+        }
+        int y0 = year / 1000 + '0';
+        int y1 = (year / 100) % 10 + '0';
+        int y2 = (year / 10) % 10 + '0';
+        int y3 = year % 10 + '0';
+        int m0 = month / 10 + '0';
+        int m1 = month % 10 + '0';
+        int d0 = dayOfMonth / 10 + '0';
+        int d1 = dayOfMonth % 10 + '0';
+
+        String str;
+        if (STRING_CREATOR_JDK11 != null) {
+            byte[] bytes = new byte[8];
+            bytes[0] = (byte) y0;
+            bytes[1] = (byte) y1;
+            bytes[2] = (byte) y2;
+            bytes[3] = (byte) y3;
+            bytes[4] = (byte) m0;
+            bytes[5] = (byte) m1;
+            bytes[6] = (byte) d0;
+            bytes[7] = (byte) d1;
+
+            str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
+        } else {
+            char[] chars = new char[8];
+            chars[0] = (char) y0;
+            chars[1] = (char) y1;
+            chars[2] = (char) y2;
+            chars[3] = (char) y3;
+            chars[4] = (char) m0;
+            chars[5] = (char) m1;
+            chars[6] = (char) d0;
+            chars[7] = (char) d1;
+
+            if (STRING_CREATOR_JDK8 != null) {
+                str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+            } else {
+                str = new String(chars);
+            }
+        }
+
+        if (off >= 0 && off < cache.length) {
+            cache[off] = str;
+        }
+
+        return str;
+    }
+
+    public static String formatYMD10(LocalDate date) {
+        if (date == null) {
+            return null;
+        }
+
+        int year = date.getYear();
+        int month = date.getMonthValue();
+        int dayOfMonth = date.getDayOfMonth();
+
+        int y0 = year / 1000 + '0';
+        int y1 = (year / 100) % 10 + '0';
+        int y2 = (year / 10) % 10 + '0';
+        int y3 = year % 10 + '0';
+        int m0 = month / 10 + '0';
+        int m1 = month % 10 + '0';
+        int d0 = dayOfMonth / 10 + '0';
+        int d1 = dayOfMonth % 10 + '0';
+
+        final char separator = '-';
+
+        String str;
+        if (STRING_CREATOR_JDK11 != null) {
+            byte[] bytes = new byte[10];
+            bytes[0] = (byte) y0;
+            bytes[1] = (byte) y1;
+            bytes[2] = (byte) y2;
+            bytes[3] = (byte) y3;
+            bytes[4] = separator;
+            bytes[5] = (byte) m0;
+            bytes[6] = (byte) m1;
+            bytes[7] = separator;
+            bytes[8] = (byte) d0;
+            bytes[9] = (byte) d1;
+
+            str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
+        } else {
+            char[] chars = new char[10];
+            chars[0] = (char) y0;
+            chars[1] = (char) y1;
+            chars[2] = (char) y2;
+            chars[3] = (char) y3;
+            chars[4] = separator;
+            chars[5] = (char) m0;
+            chars[6] = (char) m1;
+            chars[7] = separator;
+            chars[8] = (char) d0;
+            chars[9] = (char) d1;
+
+            if (STRING_CREATOR_JDK8 != null) {
+                str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+            } else {
+                str = new String(chars);
+            }
+        }
+
+        return str;
+    }
+
+    public static String formatYMD10(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        return formatYMD10(date.getTime(), DEFAULT_ZONE_ID);
+    }
+
+    public static String formatYMD8(LocalDate date) {
+        if (date == null) {
+            return null;
+        }
+
+        int year = date.getYear();
+        int month = date.getMonthValue();
+        int dayOfMonth = date.getDayOfMonth();
+
+        int y0 = year / 1000 + '0';
+        int y1 = (year / 100) % 10 + '0';
+        int y2 = (year / 10) % 10 + '0';
+        int y3 = year % 10 + '0';
+        int m0 = month / 10 + '0';
+        int m1 = month % 10 + '0';
+        int d0 = dayOfMonth / 10 + '0';
+        int d1 = dayOfMonth % 10 + '0';
+
+        String str;
+        if (STRING_CREATOR_JDK11 != null) {
+            byte[] bytes = new byte[8];
+            bytes[0] = (byte) y0;
+            bytes[1] = (byte) y1;
+            bytes[2] = (byte) y2;
+            bytes[3] = (byte) y3;
+            bytes[4] = (byte) m0;
+            bytes[5] = (byte) m1;
+            bytes[6] = (byte) d0;
+            bytes[7] = (byte) d1;
+
+            str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
+        } else {
+            char[] chars = new char[8];
+            chars[0] = (char) y0;
+            chars[1] = (char) y1;
+            chars[2] = (char) y2;
+            chars[3] = (char) y3;
+            chars[4] = (char) m0;
+            chars[5] = (char) m1;
+            chars[6] = (char) d0;
+            chars[7] = (char) d1;
+
+            if (STRING_CREATOR_JDK8 != null) {
+                str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+            } else {
+                str = new String(chars);
+            }
+        }
+
+        return str;
+    }
+
+    public static String formatYMD10(long timeMillis, ZoneId zoneId) {
+        if (zoneId == null) {
+            zoneId = DEFAULT_ZONE_ID;
+        }
+
+        final int SECONDS_PER_DAY = 60 * 60 * 24;
+
+        long epochSecond = Math.floorDiv(timeMillis, 1000L);
+        int offsetTotalSeconds;
+        if (zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES) {
+            offsetTotalSeconds = getShanghaiZoneOffsetTotalSeconds(epochSecond);
+        } else {
+            Instant instant = Instant.ofEpochMilli(timeMillis);
+            offsetTotalSeconds = zoneId.getRules().getOffset(instant).getTotalSeconds();
+        }
+
+        long localSecond = epochSecond + offsetTotalSeconds;
+        long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+
+        int off = (int) (localEpochDay - LOCAL_EPOCH_DAY + 128);
+        final String[] cache = CacheDate10.CACHE;
+        if (off >= 0 && off < cache.length) {
+            String str = cache[off];
+            if (str != null) {
+                return str;
+            }
+        }
+
+        int year, month, dayOfMonth;
+        {
+            final int DAYS_PER_CYCLE = 146097;
+            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
+
+            long zeroDay = localEpochDay + DAYS_0000_TO_1970;
+            // find the march-based year
+            zeroDay -= 60;  // adjust to 0000-03-01 so leap day is at end of four year cycle
+            long adjust = 0;
+            if (zeroDay < 0) {
+                // adjust negative years to positive for calculation
+                long adjustCycles = (zeroDay + 1) / DAYS_PER_CYCLE - 1;
+                adjust = adjustCycles * 400;
+                zeroDay += -adjustCycles * DAYS_PER_CYCLE;
+            }
+            long yearEst = (400 * zeroDay + 591) / DAYS_PER_CYCLE;
+            long doyEst = zeroDay - (365 * yearEst + yearEst / 4 - yearEst / 100 + yearEst / 400);
+            if (doyEst < 0) {
+                // fix estimate
+                yearEst--;
+                doyEst = zeroDay - (365 * yearEst + yearEst / 4 - yearEst / 100 + yearEst / 400);
+            }
+            yearEst += adjust;  // reset any negative year
+            int marchDoy0 = (int) doyEst;
+
+            // convert march-based values back to january-based
+            int marchMonth0 = (marchDoy0 * 5 + 2) / 153;
+            month = (marchMonth0 + 2) % 12 + 1;
+            dayOfMonth = marchDoy0 - (marchMonth0 * 306 + 5) / 10 + 1;
+            yearEst += marchMonth0 / 10;
+
+            // check year now we are certain it is correct
+            if (yearEst < Year.MIN_VALUE || yearEst > Year.MAX_VALUE) {
+                throw new DateTimeException("Invalid year " + yearEst);
+            }
+
+            year = (int) yearEst;
+        }
+        int y0 = year / 1000 + '0';
+        int y1 = (year / 100) % 10 + '0';
+        int y2 = (year / 10) % 10 + '0';
+        int y3 = year % 10 + '0';
+        int m0 = month / 10 + '0';
+        int m1 = month % 10 + '0';
+        int d0 = dayOfMonth / 10 + '0';
+        int d1 = dayOfMonth % 10 + '0';
+
+        final char separator = '-';
+
+        String str;
+        if (STRING_CREATOR_JDK11 != null) {
+            byte[] bytes = new byte[10];
+            bytes[0] = (byte) y0;
+            bytes[1] = (byte) y1;
+            bytes[2] = (byte) y2;
+            bytes[3] = (byte) y3;
+            bytes[4] = separator;
+            bytes[5] = (byte) m0;
+            bytes[6] = (byte) m1;
+            bytes[7] = separator;
+            bytes[8] = (byte) d0;
+            bytes[9] = (byte) d1;
+
+            str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
+        } else {
+            char[] chars = new char[10];
+            chars[0] = (char) y0;
+            chars[1] = (char) y1;
+            chars[2] = (char) y2;
+            chars[3] = (char) y3;
+            chars[4] = separator;
+            chars[5] = (char) m0;
+            chars[6] = (char) m1;
+            chars[7] = separator;
+            chars[8] = (char) d0;
+            chars[9] = (char) d1;
+
+            if (STRING_CREATOR_JDK8 != null) {
+                str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+            } else {
+                str = new String(chars);
+            }
+        }
+
+        if (off >= 0 && off < cache.length) {
+            cache[off] = str;
+        }
+
+        return str;
+    }
+
     public static String format(Date date, String format) {
         if (date == null) {
             return null;
@@ -4890,8 +5293,10 @@ public class DateUtils {
             case "dd.MM.yyyy HH:mm:ss": {
                 return format(date.getTime(), DATE_TIME_FORMAT_19_DOT);
             }
+            case "yyyyMMdd":
+                return formatYMD8(date.getTime(), DEFAULT_ZONE_ID);
             case "yyyy-MM-dd":
-                return format(date.getTime(), DATE_FORMAT_10_DASH);
+                return formatYMD10(date.getTime(), DEFAULT_ZONE_ID);
             case "yyyy/MM/dd":
                 return format(date.getTime(), DATE_FORMAT_10_SLASH);
             case "dd.MM.yyyy":

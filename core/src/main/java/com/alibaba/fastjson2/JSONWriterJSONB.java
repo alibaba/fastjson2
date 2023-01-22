@@ -26,6 +26,9 @@ final class JSONWriterJSONB
     static final BigInteger BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE);
     static final BigInteger BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
 
+    static final BigInteger BIGINT_INT32_MIN = BigInteger.valueOf(Integer.MIN_VALUE);
+    static final BigInteger BIGINT_INT32_MAX = BigInteger.valueOf(Integer.MAX_VALUE);
+
     // optimize for write ZonedDateTime
     static final byte[] SHANGHAI_ZONE_ID_NAME_BYTES = JSONB.toBytes(SHANGHAI_ZONE_ID_NAME);
 
@@ -339,7 +342,7 @@ final class JSONWriterJSONB
         if (symbolTable != null) {
             int ordinal = symbolTable.getOrdinal(str);
             if (ordinal >= 0) {
-                writeRaw(BC_STR_ASCII);
+                writeRaw(BC_SYMBOL);
                 writeInt32(-ordinal);
                 return;
             }
@@ -859,7 +862,7 @@ final class JSONWriterJSONB
                 return;
             }
 
-            if (seconds % 60000 == 0) {
+            if (seconds % 60 == 0) {
                 long minutes = seconds / 60;
                 if (minutes >= Integer.MIN_VALUE && minutes <= Integer.MAX_VALUE) {
                     int minutesInt = (int) minutes;
@@ -1968,16 +1971,24 @@ final class JSONWriterJSONB
                 && unscaledValue.compareTo(BIGINT_INT64_MAX) <= 0) {
             ensureCapacity(off + 1);
             this.bytes[off++] = BC_DECIMAL_LONG;
-            writeInt64(
-                    unscaledValue.longValue()
-            );
+            long longValue = unscaledValue.longValue();
+            writeInt64(longValue);
             return;
         }
 
         ensureCapacity(off + 1);
         this.bytes[off++] = BC_DECIMAL;
         writeInt32(scale);
-        writeBigInt(unscaledValue);
+
+        if (unscaledValue.compareTo(BIGINT_INT32_MIN) >= 0 && unscaledValue.compareTo(BIGINT_INT32_MAX) <= 0) {
+            int intValue = unscaledValue.intValue();
+            writeInt32(intValue);
+        } else if (unscaledValue.compareTo(BIGINT_INT64_MIN) >= 0 && unscaledValue.compareTo(BIGINT_INT64_MAX) <= 0) {
+            long longValue = unscaledValue.longValue();
+            writeInt64(longValue);
+        } else {
+            writeBigInt(unscaledValue, 0);
+        }
     }
 
     @Override

@@ -8,7 +8,6 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLongArray;
@@ -92,12 +91,6 @@ public class FieldWriterObject<T>
                 } else {
                     formattedWriter = ObjectWriterArrayFinal.DOUBLE_ARRAY;
                 }
-            } else if (valueClass == BigDecimal.class) {
-                if (decimalFormat != null) {
-                    formattedWriter = new ObjectWriterArrayFinal(BigDecimal.class, decimalFormat);
-                } else {
-                    formattedWriter = ObjectWriterArrayFinal.DECIMAL_ARRAY;
-                }
             } else if (valueClass == float[].class) {
                 if (decimalFormat != null) {
                     formattedWriter = new ObjectWriterImplFloatValueArray(decimalFormat);
@@ -170,7 +163,14 @@ public class FieldWriterObject<T>
                         return ObjectWriterImplMap.of(valueClass);
                     }
                 } else {
-                    return jsonWriter.getObjectWriter(valueClass);
+                    ObjectWriter objectWriter = null;
+                    if (format != null) {
+                        objectWriter = FieldWriter.getObjectWriter(fieldType, fieldClass, format, null, valueClass);
+                    }
+                    if (objectWriter == null) {
+                        objectWriter = jsonWriter.getObjectWriter(valueClass);
+                    }
+                    return objectWriter;
                 }
             }
         }

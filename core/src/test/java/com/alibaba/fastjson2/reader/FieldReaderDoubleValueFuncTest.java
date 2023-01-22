@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONSchemaValidException;
 import com.alibaba.fastjson2.TestUtils;
+import com.alibaba.fastjson2.annotation.JSONCompiler;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,7 @@ public class FieldReaderDoubleValueFuncTest {
         );
     }
 
+    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean {
         private double value;
 
@@ -82,6 +84,7 @@ public class FieldReaderDoubleValueFuncTest {
         );
     }
 
+    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean1 {
         @JSONField(schema = "{'minimum':128}")
         private double value;
@@ -107,6 +110,7 @@ public class FieldReaderDoubleValueFuncTest {
         assertThrows(Exception.class, () -> fieldReader.accept(bean, 123D));
     }
 
+    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean2 {
         public void setValue(double value) {
             throw new UnsupportedOperationException();

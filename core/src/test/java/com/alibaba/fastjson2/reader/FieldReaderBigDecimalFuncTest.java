@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONSchemaValidException;
 import com.alibaba.fastjson2.TestUtils;
+import com.alibaba.fastjson2.annotation.JSONCompiler;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -32,6 +33,7 @@ public class FieldReaderBigDecimalFuncTest {
         );
     }
 
+    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean {
         private BigDecimal value;
 
@@ -62,6 +64,7 @@ public class FieldReaderBigDecimalFuncTest {
         );
     }
 
+    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean1 {
         @JSONField(schema = "{'minimum':128}")
         private BigDecimal value;
@@ -85,6 +88,7 @@ public class FieldReaderBigDecimalFuncTest {
         assertThrows(Exception.class, () -> fieldReader.accept(bean, 123L));
     }
 
+    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean2 {
         public void setValue(BigDecimal value) {
             throw new UnsupportedOperationException();

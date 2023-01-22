@@ -8,11 +8,18 @@ independent in the `extension` dependency.
 `Maven`:
 
 ```xml
+<dependency>
+    <groupId>com.alibaba.fastjson2</groupId>
+    <artifactId>fastjson2-extension-spring5</artifactId>
+    <version>2.0.23</version>
+</dependency>
+
+or
 
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
-    <artifactId>fastjson2-extension</artifactId>
-    <version>2.0.21</version>
+    <artifactId>fastjson2-extension-spring6</artifactId>
+    <version>2.0.23</version>
 </dependency>
 ```
 
@@ -20,7 +27,33 @@ independent in the `extension` dependency.
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.21'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.23'
+}
+
+or
+
+dependencies {
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.23'
+}
+```
+> After version 2.0.23, in order to be compatible with Spring 5.x / 6.x, different versions are independently opened with different dependency packages.
+> If using a version earlier than 2.0.23, please refer to:
+
+`Maven`:
+
+```xml
+<dependency>
+    <groupId>com.alibaba.fastjson2</groupId>
+    <artifactId>fastjson2-extension</artifactId>
+    <version>2.0.x</version>
+</dependency>
+```
+
+`Gradle`:
+
+```groovy
+dependencies {
+    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.x'
 }
 ```
 

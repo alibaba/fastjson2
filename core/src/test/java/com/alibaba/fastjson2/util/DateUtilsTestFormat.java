@@ -4,16 +4,31 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.annotation.JSONField;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Locale;
 
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DateUtilsTestFormat {
+    Locale locale;
+    @BeforeEach
+    public void setUp() throws Exception {
+        locale = Locale.getDefault();
+        Locale.setDefault(Locale.ENGLISH);
+    }
+
+    @AfterEach
+    public void tearDown() throws Exception {
+        Locale.setDefault(locale);
+    }
+
     @Test
     public void autoCase() {
         Bean bean = JSONObject.of("date", "23/06/2012 12:13:14").to(Bean.class);
@@ -95,6 +110,9 @@ public class DateUtilsTestFormat {
         assertEquals("23.06.2012", DateUtils.format(date, "dd.MM.yyyy"));
         assertEquals("2012-6-23", DateUtils.format(date, "yyyy-M-dd"));
         assertEquals("2012-Jun-23", DateUtils.format(date, "yyyy-MMM-dd"));
+        assertEquals("2012-06-23", DateUtils.format(date, "yyyy-MM-dd"));
+        assertEquals("2012-06-23", DateUtils.formatYMD10(date));
+        assertEquals("20120623", DateUtils.formatYMD8(date));
 
         assertEquals("2012-06-23", DateUtils.format(2012, 6, 23));
         assertEquals("2012-06-23 12:13:14", DateUtils.format(2012, 6, 23, 12, 13, 14));
@@ -178,5 +196,87 @@ public class DateUtilsTestFormat {
                 ldt.atZone(ZoneOffset.UTC).toInstant().toEpochMilli(),
                 utcMillis
         );
+    }
+
+    @Test
+    public void formatYMD8() {
+        assertNull(DateUtils.formatYMD8((Date) null));
+        assertNull(DateUtils.formatYMD8((LocalDate) null));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        long epochDay = LocalDate.now().toEpochDay();
+        long start = epochDay - 1000;
+        long end = epochDay + 1000;
+        for (long i = start; i <= end; i++) {
+            LocalDate localDate = LocalDate.ofEpochDay(i);
+            long epochMilli = localDate.atStartOfDay(DEFAULT_ZONE_ID).toInstant().toEpochMilli();
+            Date date = new Date(epochMilli);
+
+            String result = localDate.format(formatter);
+            assertEquals(result, DateUtils.formatYMD8(date));
+            assertEquals(result, DateUtils.formatYMD8(localDate));
+            assertEquals(result, DateUtils.formatYMD8(date.getTime(), DEFAULT_ZONE_ID));
+        }
+    }
+
+    @Test
+    public void formatYMD8_1() {
+        assertNull(DateUtils.formatYMD8((Date) null));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        long epochDay = LocalDate.of(1900, 1, 1).toEpochDay();
+        long start = epochDay - 1000;
+        long end = epochDay + 1000;
+        for (long i = start; i <= end; i++) {
+            LocalDate localDate = LocalDate.ofEpochDay(i);
+            long epochMilli = localDate.atStartOfDay(DEFAULT_ZONE_ID).toInstant().toEpochMilli();
+            Date date = new Date(epochMilli);
+
+            String result = localDate.format(formatter);
+            assertEquals(result, DateUtils.formatYMD8(date));
+            assertEquals(result, DateUtils.formatYMD8(localDate));
+            assertEquals(result, DateUtils.formatYMD8(date.getTime(), DEFAULT_ZONE_ID));
+        }
+    }
+
+    @Test
+    public void formatYMD10() {
+        assertNull(DateUtils.formatYMD10((Date) null));
+        assertNull(DateUtils.formatYMD10((LocalDate) null));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        long epochDay = LocalDate.now().toEpochDay();
+        long start = epochDay - 1000;
+        long end = epochDay + 1000;
+        for (long i = start; i <= end; i++) {
+            LocalDate localDate = LocalDate.ofEpochDay(i);
+            long epochMilli = localDate.atStartOfDay(DEFAULT_ZONE_ID).toInstant().toEpochMilli();
+            Date date = new Date(epochMilli);
+
+            String result = localDate.format(formatter);
+            assertEquals(result, DateUtils.formatYMD10(localDate));
+            assertEquals(result, DateUtils.formatYMD10(date));
+            assertEquals(result, DateUtils.formatYMD10(date.getTime(), DEFAULT_ZONE_ID));
+        }
+    }
+
+    @Test
+    public void formatYMD10_1() {
+        assertNull(DateUtils.formatYMD10((Date) null));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        long epochDay = LocalDate.of(1100, 1, 1).toEpochDay();
+        long start = epochDay - 1000;
+        long end = epochDay + 1000;
+        for (long i = start; i <= end; i++) {
+            LocalDate localDate = LocalDate.ofEpochDay(i);
+            long epochMilli = localDate.atStartOfDay(DEFAULT_ZONE_ID).toInstant().toEpochMilli();
+            Date date = new Date(epochMilli);
+
+            String result = localDate.format(formatter);
+            assertEquals(result, DateUtils.formatYMD10(localDate));
+            assertEquals(result, DateUtils.formatYMD10(date));
+            assertEquals(result, DateUtils.formatYMD10(date.getTime(), DEFAULT_ZONE_ID));
+        }
     }
 }

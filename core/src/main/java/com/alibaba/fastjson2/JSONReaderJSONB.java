@@ -157,7 +157,7 @@ class JSONReaderJSONB
     @Override
     public boolean isNumber() {
         byte type = bytes[offset];
-        return type >= BC_DOUBLE_LONG && type <= BC_INT32;
+        return type >= BC_DOUBLE_NUM_0 && type <= BC_INT32;
     }
 
     @Override
@@ -721,7 +721,7 @@ class JSONReaderJSONB
                     }
 
                     Object name;
-                    if (supportAutoType && i == 0 && type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_GB18030) {
+                    if (supportAutoType && i == 0 && type >= BC_STR_ASCII_FIX_MIN && type <= BC_SYMBOL) {
                         long hash = readFieldNameHashCode();
 
                         if (hash == ObjectReader.HASH_TYPE && supportAutoType) {
@@ -908,6 +908,16 @@ class JSONReaderJSONB
                         str = str.trim();
                     }
                     return str;
+                }
+
+                if (type == BC_SYMBOL) {
+                    strlen = readLength();
+
+                    if (strlen >= 0) {
+                        throw new JSONException("not support symbol : " + strlen);
+                    }
+
+                    return symbolTable.getName(-strlen);
                 }
 
                 throw new JSONException("not support type : " + error(type));
@@ -1683,6 +1693,9 @@ class JSONReaderJSONB
                 || strtype == BC_STR_UTF16LE
                 || strtype == BC_STR_UTF16BE
         ) {
+            strlen = readLength();
+            strBegin = offset;
+        } else if (strtype == BC_SYMBOL) {
             strlen = readLength();
             strBegin = offset;
         } else {
@@ -2674,7 +2687,8 @@ class JSONReaderJSONB
                 symbol0Length = strlen;
                 symbol0StrType = strtype;
             } else {
-                int minCapacity = symbol * 2 + 2;
+                int symbolIndex = symbol * 2 + 2;
+                int minCapacity = symbolIndex;
                 if (symbols == null) {
                     symbols = new long[minCapacity < 32 ? 32 : minCapacity];
                 } else if (symbols.length < minCapacity) {
@@ -4554,7 +4568,7 @@ class JSONReaderJSONB
                         zoneId = ZoneId.of(zoneIdStr);
                     }
                 }
-                return ZonedDateTime.of(ldt, zoneId);
+                return ZonedDateTime.ofLocal(ldt, zoneId, null);
             default:
                 break;
         }

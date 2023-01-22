@@ -268,7 +268,7 @@ public class ASMUtils {
         }
 
         try {
-            ClassReader reader = new ClassReader(is, false);
+            ClassReader reader = new ClassReader(is);
             TypeCollector visitor = new TypeCollector(name, types);
             reader.accept(visitor);
 
@@ -288,16 +288,5 @@ public class ASMUtils {
         } finally {
             IOUtils.close(is);
         }
-    }
-
-    public static String desc(Method method) {
-        Class returnType = method.getReturnType();
-        Class[] parameterTypes = method.getParameterTypes();
-        StringBuilder buf = new StringBuilder().append('(');
-        for (Class parameterType : parameterTypes) {
-            buf.append(desc(parameterType));
-        }
-        buf.append(')').append(desc(returnType));
-        return buf.toString();
     }
 }

@@ -26,4 +26,25 @@ public class JsonPropertyTest2 {
             return jobId;
         }
     }
+
+    @Test
+    public void test1() {
+        Bean1 bean = new Bean1();
+        bean.id = "001";
+        bean.name = "DataWorks";
+
+        String str = JSON.toJSONString(bean);
+        assertEquals("{\"id\":\"001\",\"name\":\"DataWorks\"}", str);
+
+        Bean1 bean1 = JSON.parseObject(str, Bean1.class);
+        assertEquals(bean.id, bean1.id);
+        assertEquals(bean.name, bean1.name);
+    }
+
+    public static class Bean1 {
+        @JsonProperty(required = true)
+        public String id;
+        @JsonProperty(required = true)
+        public String name;
+    }
 }

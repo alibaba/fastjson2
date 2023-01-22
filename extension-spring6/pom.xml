@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.alibaba.fastjson2</groupId>
         <artifactId>fastjson2-parent</artifactId>
-        <version>2.0.22-SNAPSHOT</version>
+        <version>2.0.24-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -99,14 +99,14 @@
                 <groupId>org.springframework.data</groupId>
                 <artifactId>spring-data-bom</artifactId>
                 <type>pom</type>
-                <version>2021.2.5</version>
+                <version>2022.0.0</version>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-bom</artifactId>
                 <type>pom</type>
-                <version>5.7.5</version>
+                <version>6.0.1</version>
                 <scope>import</scope>
             </dependency>
         </dependencies>
@@ -206,7 +206,6 @@
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.7.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -222,19 +221,19 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot</artifactId>
-            <version>2.7.5</version>
+            <version>3.0.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>2.7.5</version>
+            <version>3.0.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test</artifactId>
-            <version>2.7.5</version>
+            <version>3.0.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>

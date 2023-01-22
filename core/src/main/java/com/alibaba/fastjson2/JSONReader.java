@@ -1372,7 +1372,8 @@ public abstract class JSONReader
             if (nextIfMatch(']')) {
                 break;
             }
-            Object item = readAny();
+
+            Object item = ObjectReaderImplObject.INSTANCE.readObject(this, null, null, 0);
             list.add(item);
 
             if (nextIfMatch(',')) {
@@ -2501,6 +2502,11 @@ public abstract class JSONReader
         if (IOUtils.isNumber(val)) {
             return Long.parseLong(val);
         }
+
+        if (val.length() == 19) {
+            return DateUtils.parseMillis(val, context.zoneId);
+        }
+
         throw new JSONException("parseLong error, value : " + val);
     }
 
@@ -2550,12 +2556,14 @@ public abstract class JSONReader
 
     protected final String toString(List array) {
         JSONWriter writer = JSONWriter.of();
+        writer.setRootObject(array);
         writer.write(array);
         return writer.toString();
     }
 
     protected final String toString(Map object) {
         JSONWriter writer = JSONWriter.of();
+        writer.setRootObject(object);
         writer.write(object);
         return writer.toString();
     }

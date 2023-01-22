@@ -2,12 +2,12 @@ package com.alibaba.fastjson.issue_1200;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -15,10 +15,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * Created by wenshao on 16/05/2017.
  */
 public class Issue1202 {
+    Locale locale;
     @BeforeEach
-    protected void setUp() throws Exception {
-        JSON.defaultTimeZone = TimeZone.getTimeZone("Asia/Shanghai");
-        JSON.defaultLocale = Locale.US;
+    public void setUp() throws Exception {
+        locale = Locale.getDefault();
+        Locale.setDefault(Locale.ENGLISH);
+    }
+
+    @AfterEach
+    public void tearDown() throws Exception {
+        Locale.setDefault(locale);
     }
 
     @Test

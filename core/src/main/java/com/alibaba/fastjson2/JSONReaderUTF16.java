@@ -3938,7 +3938,7 @@ class JSONReaderUTF16
             if (ch == '\n') {
                 offset++;
 
-                if (offset >= length) {
+                if (offset >= end) {
                     ch = EOI;
                     return;
                 }
@@ -3947,7 +3947,7 @@ class JSONReaderUTF16
 
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     offset++;
-                    if (offset >= length) {
+                    if (offset >= end) {
                         ch = EOI;
                         return;
                     }
@@ -3959,7 +3959,7 @@ class JSONReaderUTF16
             }
 
             offset++;
-            if (offset >= length) {
+            if (offset >= end) {
                 ch = EOI;
                 return;
             }
@@ -3977,6 +3977,7 @@ class JSONReaderUTF16
         this.negative = false;
         this.exponent = 0;
         this.scale = 0;
+        int firstOffset = offset;
 
         char quote = '\0';
         if (ch == '"' || ch == '\'') {
@@ -4172,7 +4173,7 @@ class JSONReaderUTF16
 
         if (quote != 0) {
             if (ch != quote) {
-                this.offset -= 1;
+                this.offset = firstOffset;
                 this.ch = quote;
                 readString0();
                 valueType = JSON_TYPE_STRING;
@@ -4719,6 +4720,7 @@ class JSONReaderUTF16
         char c16 = chars[offset + 16];
 
         char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
+        int nanoOfSecond = 0;
         if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':' && c16 == 'Z') {
             y0 = c0;
             y1 = c1;
@@ -4785,7 +4787,34 @@ class JSONReaderUTF16
             s0 = '0';
             s1 = '0';
         } else {
-            return null;
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c4;
+            m1 = c5;
+
+            d0 = c6;
+            d1 = c7;
+
+            h0 = c8;
+            h1 = c9;
+
+            i0 = c10;
+            i1 = c11;
+
+            s0 = c12;
+            s1 = c13;
+
+            if (c14 >= '0' && c14 <= '9'
+                    && c15 >= '0' && c15 <= '9'
+                    && c16 >= '0' && c16 <= '9'
+            ) {
+                nanoOfSecond = ((c14 - '0') * 100 + (c15 - '0') * 10 + (c16 - '0')) * 1_000_000;
+            } else {
+                return null;
+            }
         }
 
         int year;
@@ -4844,7 +4873,7 @@ class JSONReaderUTF16
             return null;
         }
 
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, second);
+        LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, second, nanoOfSecond);
 
         offset += 18;
         next();

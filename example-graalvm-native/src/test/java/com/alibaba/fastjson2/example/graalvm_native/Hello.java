@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Hello {
@@ -13,7 +14,9 @@ public class Hello {
         System.out.println("java.vm.name : " + jmvName);
 
         User user = new User(1, "雷卷");
-        String jsonText = JSON.toJSONString(List.of(user));
+        List list = new ArrayList();
+        list.add(user);
+        String jsonText = JSON.toJSONString(list);
         List<User> user2 = JSON.parseArray(jsonText, User.class);
         System.out.println(jsonText);
         System.out.println("Fastjson: " + user2.get(0).getNick());

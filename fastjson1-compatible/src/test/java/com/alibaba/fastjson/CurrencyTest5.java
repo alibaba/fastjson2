@@ -1,14 +1,29 @@
 package com.alibaba.fastjson;
 
 import com.alibaba.fastjson.serializer.SerializeConfig;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Currency;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CurrencyTest5 {
+    Locale locale;
+    @BeforeEach
+    public void setUp() throws Exception {
+        locale = Locale.getDefault();
+        Locale.setDefault(Locale.ENGLISH);
+    }
+
+    @AfterEach
+    public void tearDown() throws Exception {
+        Locale.setDefault(locale);
+    }
+
     @Test
     public void test_0() throws Exception {
         SerializeConfig config = new SerializeConfig();

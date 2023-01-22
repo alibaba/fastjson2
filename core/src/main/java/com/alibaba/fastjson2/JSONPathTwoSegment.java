@@ -198,6 +198,10 @@ class JSONPathTwoSegment
             }
         }
 
+        if (contextValue instanceof Sequence) {
+            contextValue = ((Sequence) contextValue).values;
+        }
+
         return contextValue;
     }
 

@@ -3,10 +3,15 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 
 class FieldReaderObjectField<T>
         extends FieldReaderObject<T> {
@@ -197,7 +202,26 @@ class FieldReaderObjectField<T>
             }
 
             if (!fieldClass.isInstance(value)) {
-                throw new JSONException("set " + fieldName + " error, not support type " + value.getClass());
+                if (value instanceof String) {
+                    String str = (String) value;
+                    if (fieldClass == LocalDate.class) {
+                        if (format != null) {
+                            value = LocalDate.parse(str, DateTimeFormatter.ofPattern(format));
+                        } else {
+                            value = DateUtils.parseLocalDate(str);
+                        }
+                    } else if (fieldClass == java.util.Date.class) {
+                        if (format != null) {
+                            value = DateUtils.parseDate(str, format, DEFAULT_ZONE_ID);
+                        } else {
+                            value = DateUtils.parseDate(str);
+                        }
+                    }
+                }
+
+                if (!fieldClass.isInstance(value)) {
+                    throw new JSONException("set " + fieldName + " error, not support type " + value.getClass());
+                }
             }
         }
 

@@ -335,7 +335,12 @@ public abstract class FieldWriter<T>
     }
 
     public void writeBinary(JSONWriter jsonWriter, byte[] value) {
-        if (value == null && !jsonWriter.isWriteNulls()) {
+        if (value == null) {
+            if (!jsonWriter.isWriteNulls()) {
+                return;
+            }
+            writeFieldName(jsonWriter);
+            jsonWriter.writeArrayNull();
             return;
         }
 
@@ -734,6 +739,22 @@ public abstract class FieldWriter<T>
                     return ObjectWriterImplInstant.INSTANCE;
                 } else {
                     return new ObjectWriterImplInstant(format, locale);
+                }
+            }
+
+            if (BigDecimal.class == valueClass) {
+                if (format == null || format.isEmpty()) {
+                    return ObjectWriterImplBigDecimal.INSTANCE;
+                } else {
+                    return new ObjectWriterImplBigDecimal(new DecimalFormat(format));
+                }
+            }
+
+            if (BigDecimal[].class == valueClass) {
+                if (format == null || format.isEmpty()) {
+                    return new ObjectWriterArrayFinal(BigDecimal.class, null);
+                } else {
+                    return new ObjectWriterArrayFinal(BigDecimal.class, new DecimalFormat(format));
                 }
             }
 

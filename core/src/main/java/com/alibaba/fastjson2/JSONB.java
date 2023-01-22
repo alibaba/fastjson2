@@ -20,7 +20,7 @@ import static com.alibaba.fastjson2.JSONFactory.CACHE_SIZE;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 /**
- * x92          # type_char int
+ * x90          # type_char int
  * x91          # binary len_int32 bytes
  * x92          # type [str] symbol_int32 jsonb
  * x93          # reference
@@ -78,7 +78,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
  */
 public interface JSONB {
     interface Constants {
-        byte BC_CHAR = -112;                    // 0x92
+        byte BC_CHAR = -112;                    // 0x90
         byte BC_BINARY = -111;                  // 0x91
         byte BC_TYPED_ANY = -110;               // 0x92
         byte BC_REFERENCE = -109;               // 0x93
@@ -125,7 +125,7 @@ public interface JSONB {
         int INT64_BYTE_MIN = -0x800;    // -2048
         int INT64_BYTE_MAX = 0x7ff;     // 2047
 
-        byte BC_INT64_SHORT_MIN = -64;
+        byte BC_INT64_SHORT_MIN = -64;  // 0xc0
         byte BC_INT64_SHORT_ZERO = -60; //
         byte BC_INT64_SHORT_MAX = -57;  // 0xc7
 
@@ -150,10 +150,10 @@ public interface JSONB {
         byte BC_INT32_BYTE_ZERO = 56;
         byte BC_INT32_BYTE_MAX = 63;
 
-        byte BC_INT32_SHORT_MIN = 64;
+        byte BC_INT32_SHORT_MIN = 64; // 0x40
         byte BC_INT32_SHORT_ZERO = 68;
-        byte BC_INT32_SHORT_MAX = 71;
-        byte BC_INT32 = 72;
+        byte BC_INT32_SHORT_MAX = 71; // 0x47
+        byte BC_INT32 = 72; // 0x48
 
         int INT32_BYTE_MIN = -0x800; // -2048
         int INT32_BYTE_MAX = 0x7ff;  // 2047
@@ -193,6 +193,20 @@ public interface JSONB {
 
         try (JSONWriter jsonWriter = JSONWriter.ofJSONB()) {
             jsonWriter.writeInt32(i);
+            return jsonWriter.getBytes();
+        }
+    }
+
+    static byte[] toBytes(byte i) {
+        try (JSONWriter jsonWriter = JSONWriter.ofJSONB()) {
+            jsonWriter.writeInt8(i);
+            return jsonWriter.getBytes();
+        }
+    }
+
+    static byte[] toBytes(short i) {
+        try (JSONWriter jsonWriter = JSONWriter.ofJSONB()) {
+            jsonWriter.writeInt16(i);
             return jsonWriter.getBytes();
         }
     }
@@ -239,6 +253,18 @@ public interface JSONB {
 
     static Object parse(byte[] jsonbBytes, JSONReader.Feature... features) {
         JSONReader reader = JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length);
+        reader.getContext().config(features);
+        ObjectReader objectReader = reader.getObjectReader(Object.class);
+
+        Object object = objectReader.readJSONBObject(reader, null, null, 0);
+        if (reader.resolveTasks != null) {
+            reader.handleResolveTasks(object);
+        }
+        return object;
+    }
+
+    static Object parse(byte[] jsonbBytes, SymbolTable symbolTable, JSONReader.Feature... features) {
+        JSONReader reader = JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length, symbolTable);
         reader.getContext().config(features);
         ObjectReader objectReader = reader.getObjectReader(Object.class);
 

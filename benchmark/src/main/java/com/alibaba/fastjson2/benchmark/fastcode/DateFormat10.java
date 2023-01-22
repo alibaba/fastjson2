@@ -15,9 +15,9 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class DateFormat10 {
-    static final String pattern = "yyy-MM-dd";
+    static final String pattern = "yyyy-MM-dd";
     static DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-    static Date date = new Date(1340424794000L);
+    static Date date = new Date(1673323068000L);
 
     @Benchmark
     public void javaTimeDateFormatter(Blackhole bh) throws Throwable {
@@ -27,13 +27,13 @@ public class DateFormat10 {
     }
 
     @Benchmark
-    public void fastjsonFormat(Blackhole bh) throws Throwable {
+    public void fastjson_format(Blackhole bh) throws Throwable {
         bh.consume(DateUtils.format(date, pattern));
     }
 
     @Benchmark
-    public void fastjsonFormat2(Blackhole bh) throws Throwable {
-        bh.consume(DateUtils.format(date.getTime()));
+    public void fastjson_formatYMD10(Blackhole bh) throws Throwable {
+        bh.consume(DateUtils.formatYMD10(date.getTime(), DateUtils.DEFAULT_ZONE_ID));
     }
 
     public static void main(String[] args) throws RunnerException {
