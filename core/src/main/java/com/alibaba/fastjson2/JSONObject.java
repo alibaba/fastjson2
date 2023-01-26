@@ -1944,94 +1944,30 @@ public class JSONObject
     }
 
     /**
-     * Convert Java Object to JSONObject.
-     *
-     * @param obj Java Object
-     * @return JSONObject
+     * See {@link JSON#toJSON} for details
      */
     public static JSONObject from(Object obj) {
-        return JSONObject.parseObject(JSONObject.toJSONString(obj));
+        return (JSONObject) JSON.toJSON(obj);
     }
 
     /**
-     * Convert Java Object to JSONObject with readFeatures.
-     *
-     * @param obj Java Object
-     * @param readFeatures JSONReader.Feature...
-     * @return JSONObject
-     */
-    public static JSONObject from(Object obj, JSONReader.Feature... readFeatures) {
-        return JSONObject.parse(JSONObject.toJSONString(obj), readFeatures);
-    }
-
-    /**
-     * Convert Java Object to JSONObject with writeFeatures.
-     *
-     * @param obj Java Object
-     * @param writeFeatures JSONWriter.Feature...
-     * @return JSONObject
+     * See {@link JSON#toJSON} for details
      */
     public static JSONObject from(Object obj, JSONWriter.Feature... writeFeatures) {
-        return JSONObject.parseObject(JSONObject.toJSONString(obj, writeFeatures));
+        return (JSONObject) JSON.toJSON(obj, writeFeatures);
     }
 
     /**
-     * Convert Java Object to JSONObject with readFeatures and writeFeatures. (jdk8+ required)
-     *
-     * @param obj Java Object
-     * @param readFeatures List of JSONReader.Feature
-     * @param writeFeatures List of JSONWriter.Feature
-     * @return JSONObject
-     */
-    public static JSONObject from(Object obj, List<JSONReader.Feature> readFeatures, List<JSONWriter.Feature> writeFeatures) {
-        if (readFeatures.size() > 0) {
-            return JSONObject.parse(JSONObject.toJSONString(obj, writeFeatures.stream().toArray(JSONWriter.Feature[]::new)), readFeatures.stream().toArray(JSONReader.Feature[]::new));
-        } else {
-            return from(obj, writeFeatures.stream().toArray(JSONWriter.Feature[]::new));
-        }
-    }
-
-    /**
-     * A synonym of from(Object obj).
-     *
-     * @param obj Java Object
-     * @return JSONObject
+     * See {@link JSON#toJSON} for details
      */
     public static JSONObject fromJavaObject(Object obj) {
         return from(obj);
     }
 
     /**
-     * A synonym of from(Object obj, JSONReader.Feature... readFeatures).
-     *
-     * @param obj Java Object
-     * @param readFeatures List of JSONReader.Feature
-     * @return JSONObject
-     */
-    public static JSONObject fromJavaObject(Object obj, JSONReader.Feature... readFeatures) {
-        return from(obj, readFeatures);
-    }
-
-    /**
-     * A synonym of from(Object obj, JSONWriter.Feature... writeFeatures)
-     *
-     * @param obj Java Object
-     * @param writeFeatures List of JSONWriter.Feature
-     * @return JSONObject
+     * See {@link JSON#toJSON} for details
      */
     public static JSONObject fromJavaObject(Object obj, JSONWriter.Feature... writeFeatures) {
         return from(obj, writeFeatures);
-    }
-
-    /**
-     * A synonym of method from with same parameters
-     *
-     * @param obj Java Object
-     * @param readFeatures List of JSONReader.Feature
-     * @param writeFeatures List of JSONWriter.Feature
-     * @return JSONObject
-     */
-    public static JSONObject fromJavaObject(Object obj, List<JSONReader.Feature> readFeatures, List<JSONWriter.Feature> writeFeatures) {
-        return from(obj, readFeatures, writeFeatures);
     }
 }
