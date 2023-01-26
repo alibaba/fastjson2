@@ -1949,7 +1949,7 @@ public class JSONObject
      * @param obj Java Object
      * @return JSONObject
      */
-    private static JSONObject from(Object obj) {
+    public static JSONObject from(Object obj) {
         return JSONObject.parseObject(JSONObject.toJSONString(obj));
     }
 
@@ -1960,7 +1960,7 @@ public class JSONObject
      * @param readFeatures JSONReader.Feature...
      * @return JSONObject
      */
-    private static JSONObject from(Object obj, JSONReader.Feature... readFeatures) {
+    public static JSONObject from(Object obj, JSONReader.Feature... readFeatures) {
         return JSONObject.parse(JSONObject.toJSONString(obj), readFeatures);
     }
 
@@ -1971,7 +1971,7 @@ public class JSONObject
      * @param writeFeatures JSONWriter.Feature...
      * @return JSONObject
      */
-    private static JSONObject from(Object obj, JSONWriter.Feature... writeFeatures) {
+    public static JSONObject from(Object obj, JSONWriter.Feature... writeFeatures) {
         return JSONObject.parseObject(JSONObject.toJSONString(obj, writeFeatures));
     }
 
@@ -1983,7 +1983,7 @@ public class JSONObject
      * @param writeFeatures List<JSONWriter.Feature>
      * @return JSONObject
      */
-    private static JSONObject from(Object obj, List<JSONReader.Feature> readFeatures, List<JSONWriter.Feature> writeFeatures) {
+    public static JSONObject from(Object obj, List<JSONReader.Feature> readFeatures, List<JSONWriter.Feature> writeFeatures) {
         if (readFeatures.size() > 0) {
             return JSONObject.parse(JSONObject.toJSONString(obj, writeFeatures.stream().toArray(JSONWriter.Feature[]::new)), readFeatures.stream().toArray(JSONReader.Feature[]::new));
         } else {
@@ -1997,7 +1997,7 @@ public class JSONObject
      * @param obj Java Object
      * @return JSONObject
      */
-    private static JSONObject fromJavaObject(Object obj) {
+    public static JSONObject fromJavaObject(Object obj) {
         return from(obj);
     }
 
@@ -2008,7 +2008,7 @@ public class JSONObject
      * @param readFeatures List<JSONReader.Feature>
      * @return JSONObject
      */
-    private static JSONObject fromJavaObject(Object obj, JSONReader.Feature... readFeatures) {
+    public static JSONObject fromJavaObject(Object obj, JSONReader.Feature... readFeatures) {
         return from(obj, readFeatures);
     }
 
@@ -2019,7 +2019,7 @@ public class JSONObject
      * @param writeFeatures List<JSONWriter.Feature>
      * @return JSONObject
      */
-    private static JSONObject fromJavaObject(Object obj, JSONWriter.Feature... writeFeatures) {
+    public static JSONObject fromJavaObject(Object obj, JSONWriter.Feature... writeFeatures) {
         return from(obj, writeFeatures);
     }
 
@@ -2031,7 +2031,7 @@ public class JSONObject
      * @param writeFeatures List<JSONWriter.Feature>
      * @return JSONObject
      */
-    private static JSONObject fromJavaObject(Object obj, List<JSONReader.Feature> readFeatures, List<JSONWriter.Feature> writeFeatures) {
+    public static JSONObject fromJavaObject(Object obj, List<JSONReader.Feature> readFeatures, List<JSONWriter.Feature> writeFeatures) {
         return from(obj, readFeatures, writeFeatures);
     }
 }
