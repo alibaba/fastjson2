@@ -2024,7 +2024,7 @@ public class JSONObject
     }
 
     /**
-     * A synonym of from(Object obj, List<JSONReader.Feature> readFeatures, List<JSONWriter.Feature> writeFeatures).
+     * A synonym of method from with same parameters
      *
      * @param obj Java Object
      * @param readFeatures List of JSONReader.Feature
