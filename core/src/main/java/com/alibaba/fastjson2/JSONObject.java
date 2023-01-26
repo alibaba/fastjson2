@@ -1956,7 +1956,7 @@ public class JSONObject
     /**
      * Convert Java Object to JSONObject with readFeatures.
      *
-     * @param obj          Java Object
+     * @param obj Java Object
      * @param readFeatures JSONReader.Feature...
      * @return JSONObject
      */
@@ -1967,7 +1967,7 @@ public class JSONObject
     /**
      * Convert Java Object to JSONObject with writeFeatures.
      *
-     * @param obj           Java Object
+     * @param obj Java Object
      * @param writeFeatures JSONWriter.Feature...
      * @return JSONObject
      */
@@ -1976,11 +1976,11 @@ public class JSONObject
     }
 
     /**
-     * Convert Java Object to JSONObject with readFeatures & writeFeatures. (jdk8+ required)
+     * Convert Java Object to JSONObject with readFeatures and writeFeatures. (jdk8+ required)
      *
-     * @param obj           Java Object
-     * @param readFeatures  List<JSONReader.Feature>
-     * @param writeFeatures List<JSONWriter.Feature>
+     * @param obj Java Object
+     * @param readFeatures List of JSONReader.Feature
+     * @param writeFeatures List of JSONWriter.Feature
      * @return JSONObject
      */
     public static JSONObject from(Object obj, List<JSONReader.Feature> readFeatures, List<JSONWriter.Feature> writeFeatures) {
@@ -2004,8 +2004,8 @@ public class JSONObject
     /**
      * A synonym of from(Object obj, JSONReader.Feature... readFeatures).
      *
-     * @param obj          Java Object
-     * @param readFeatures List<JSONReader.Feature>
+     * @param obj Java Object
+     * @param readFeatures List of JSONReader.Feature
      * @return JSONObject
      */
     public static JSONObject fromJavaObject(Object obj, JSONReader.Feature... readFeatures) {
@@ -2015,8 +2015,8 @@ public class JSONObject
     /**
      * A synonym of from(Object obj, JSONWriter.Feature... writeFeatures)
      *
-     * @param obj           Java Object
-     * @param writeFeatures List<JSONWriter.Feature>
+     * @param obj Java Object
+     * @param writeFeatures List of JSONWriter.Feature
      * @return JSONObject
      */
     public static JSONObject fromJavaObject(Object obj, JSONWriter.Feature... writeFeatures) {
@@ -2026,9 +2026,9 @@ public class JSONObject
     /**
      * A synonym of from(Object obj, List<JSONReader.Feature> readFeatures, List<JSONWriter.Feature> writeFeatures).
      *
-     * @param obj           Java Object
-     * @param readFeatures  List<JSONReader.Feature>
-     * @param writeFeatures List<JSONWriter.Feature>
+     * @param obj Java Object
+     * @param readFeatures List of JSONReader.Feature
+     * @param writeFeatures List of JSONWriter.Feature
      * @return JSONObject
      */
     public static JSONObject fromJavaObject(Object obj, List<JSONReader.Feature> readFeatures, List<JSONWriter.Feature> writeFeatures) {
