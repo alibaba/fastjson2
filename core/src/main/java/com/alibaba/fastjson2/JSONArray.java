@@ -1473,7 +1473,6 @@ public class JSONArray
         return JSON.parseArray(input, type);
     }
 
-
     /**
      * See {@link JSON#toJSON} for details
      */
