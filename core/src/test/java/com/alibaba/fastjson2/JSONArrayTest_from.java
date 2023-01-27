@@ -2,7 +2,7 @@ package com.alibaba.fastjson2;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -10,7 +10,7 @@ public class JSONArrayTest_from {
     @Test
     public void test_0() {
         assertEquals(0,
-                JSONArray.from(new Integer[]{0,1,2,3,4,5}).get(0));
+                JSONArray.from(new Integer[]{0, 1, 2, 3, 4, 5}).get(0));
     }
 
     @Test

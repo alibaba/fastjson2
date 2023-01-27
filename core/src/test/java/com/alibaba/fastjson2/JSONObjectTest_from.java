@@ -2,7 +2,10 @@ package com.alibaba.fastjson2;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -32,7 +35,6 @@ public class JSONObjectTest_from {
         assertEquals(bean.items.get("101").itemId,
                 JSONObject.from(bean).to(Bean1.class).items.get("101").itemId);
     }
-
 
     public static class Bean {
         private List<Item> items;
