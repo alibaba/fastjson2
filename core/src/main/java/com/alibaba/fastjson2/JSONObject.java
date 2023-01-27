@@ -1956,18 +1956,4 @@ public class JSONObject
     public static JSONObject from(Object obj, JSONWriter.Feature... writeFeatures) {
         return (JSONObject) JSON.toJSON(obj, writeFeatures);
     }
-
-    /**
-     * See {@link JSON#toJSON} for details
-     */
-    public static JSONObject fromJavaObject(Object obj) {
-        return from(obj);
-    }
-
-    /**
-     * See {@link JSON#toJSON} for details
-     */
-    public static JSONObject fromJavaObject(Object obj, JSONWriter.Feature... writeFeatures) {
-        return from(obj, writeFeatures);
-    }
 }
