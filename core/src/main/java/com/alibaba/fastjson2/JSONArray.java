@@ -1486,18 +1486,4 @@ public class JSONArray
     public static JSONArray from(Object obj, JSONWriter.Feature... writeFeatures) {
         return (JSONArray) JSON.toJSON(obj, writeFeatures);
     }
-
-    /**
-     * See {@link JSON#toJSON} for details
-     */
-    public static JSONArray fromJavaObject(Object obj) {
-        return from(obj);
-    }
-
-    /**
-     * See {@link JSON#toJSON} for details
-     */
-    public static JSONArray fromJavaObject(Object obj, JSONWriter.Feature... writeFeatures) {
-        return from(obj, writeFeatures);
-    }
 }
