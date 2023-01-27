@@ -14,7 +14,7 @@ public class JsonComparedOption {
 
     /**
      * The key is actual
-     *V alue is an expect map
+     * V alue is an expect map
      */
     private Map<String, String> mapping;
 
@@ -37,29 +37,13 @@ public class JsonComparedOption {
     public JsonComparedOption() {
     }
 
+    public boolean isIgnoreOrder() {
+        return ignoreOrder;
+    }
+
     public JsonComparedOption setIgnoreOrder(boolean ignoreOrder) {
         this.ignoreOrder = ignoreOrder;
         return this;
-    }
-
-
-    public JsonComparedOption setMapping(Map<String, String> mapping) {
-        this.mapping = mapping;
-        return this;
-    }
-
-    public JsonComparedOption setIgnorePath(List<String> ignorePath) {
-        this.ignorePath = ignorePath;
-        return this;
-    }
-
-    public JsonComparedOption setIgnoreKey(List<String> ignoreKey) {
-        this.ignoreKey = ignoreKey;
-        return this;
-    }
-
-    public boolean isIgnoreOrder() {
-        return ignoreOrder;
     }
 
     public Map<String, String> getMapping() {
@@ -69,11 +53,21 @@ public class JsonComparedOption {
         return mapping;
     }
 
+    public JsonComparedOption setMapping(Map<String, String> mapping) {
+        this.mapping = mapping;
+        return this;
+    }
+
     public List<String> getIgnorePath() {
         if (ignorePath == null) {
             ignorePath = new ArrayList<>();
         }
         return ignorePath;
+    }
+
+    public JsonComparedOption setIgnorePath(List<String> ignorePath) {
+        this.ignorePath = ignorePath;
+        return this;
     }
 
     public List<String> getIgnoreKey() {
@@ -82,6 +76,12 @@ public class JsonComparedOption {
         }
         return ignoreKey;
     }
+
+    public JsonComparedOption setIgnoreKey(List<String> ignoreKey) {
+        this.ignoreKey = ignoreKey;
+        return this;
+    }
+
     public Function<String, Stack<String>> getKeyFunction() {
         return keyFunction;
     }

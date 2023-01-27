@@ -20,8 +20,8 @@ public class SimpleObjectTest extends MockJson {
         JsonComparedOption jsonComparedOption = new JsonComparedOption().setIgnoreOrder(false);
         DefaultJSONDiff defaultJsonDifference = new DefaultJSONDiff();
         JsonCompareResult jsonCompareResult = defaultJsonDifference
-                .option(jsonComparedOption)
-                .detectDiff((JSONObject) metaData.getExpect(), (JSONObject) metaData.getActual());
+            .option(jsonComparedOption)
+            .detectDiff((JSONObject) metaData.getExpect(), (JSONObject) metaData.getActual());
         System.out.println(JSON.toJSONString(jsonCompareResult));
     }
 
@@ -29,15 +29,15 @@ public class SimpleObjectTest extends MockJson {
     public void diffIgnoreOrder() {
         MetaData metaData = load(expectPath, actualPath);
         JsonComparedOption jsonComparedOption = new JsonComparedOption()
-                .setIgnoreOrder(true)
-                .setKeyFunction(path -> {
-                    System.out.println(path);
-                    return null;
-                });
+            .setIgnoreOrder(true)
+            .setKeyFunction(path -> {
+                System.out.println(path);
+                return null;
+            });
         DefaultJSONDiff defaultJsonDifference = new DefaultJSONDiff();
         JsonCompareResult jsonCompareResult = defaultJsonDifference
-                .option(jsonComparedOption)
-                .detectDiff((JSONObject) metaData.getExpect(), (JSONObject) metaData.getActual());
+            .option(jsonComparedOption)
+            .detectDiff((JSONObject) metaData.getExpect(), (JSONObject) metaData.getActual());
         System.out.println(JSON.toJSONString(jsonCompareResult));
     }
 

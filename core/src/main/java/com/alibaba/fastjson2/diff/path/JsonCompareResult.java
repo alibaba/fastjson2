@@ -12,19 +12,20 @@ public class JsonCompareResult {
     private List<Defects> defectsList;
 
 
-    public boolean isMatch(){
-        if(match == null){
-            return  false;
+    public boolean isMatch() {
+        if (match == null) {
+            return false;
         }
         return match;
     }
 
     /**
      * Add comparison information
+     *
      * @param defects
      */
     public void addDefects(Defects defects) {
-        if(defectsList == null) {
+        if (defectsList == null) {
             defectsList = new ArrayList<>();
         }
 
@@ -34,7 +35,7 @@ public class JsonCompareResult {
                 match = false;
             }
             defectsList.add(defects);
-        }else {
+        } else {
             RunTimeDataFactory.getTempDataInstance().addDefects(defects);
         }
     }

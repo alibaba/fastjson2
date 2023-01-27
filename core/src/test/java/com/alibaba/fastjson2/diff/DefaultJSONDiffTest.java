@@ -19,7 +19,6 @@ public class DefaultJSONDiffTest {
     }
 
 
-
     @Test
     void test2() throws IllegalAccessException {
         String array1 = "[1, 2, 3, 4, 5]";
@@ -127,6 +126,7 @@ public class DefaultJSONDiffTest {
             .detectDiff(JSON.parseObject(object1), JSON.parseObject(object2));
         System.out.println(JSON.toJSONString(jsonCompareResult));
     }
+
     @Test
     void test5() throws IllegalAccessException {
         String object1 = "{\n" +

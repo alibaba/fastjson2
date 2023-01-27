@@ -10,14 +10,12 @@ import java.util.Stack;
 public class TempData {
 
 
-
     /**
      * Temporary defects not recorded in the result
      */
     private List<Defects> defectsList;
 
     /**
-     *
      * @param ignoreOrder
      * @return
      */
@@ -34,9 +32,9 @@ public class TempData {
 
     public void setAddDiff(boolean addDiff) {
         if (addDiff) {
-            this.addDiffCount --;
-        }else {
-            this.addDiffCount ++;
+            this.addDiffCount--;
+        } else {
+            this.addDiffCount++;
         }
     }
 
@@ -54,7 +52,7 @@ public class TempData {
     }
 
     public void addDefects(Defects defects) {
-        if(defectsList == null) {
+        if (defectsList == null) {
             defectsList = new ArrayList<>();
         }
         defectsList.add(defects);
@@ -71,7 +69,7 @@ public class TempData {
     public void pop() {
         try {
             tempPath.pop();
-        }catch (Exception ignored) {
+        } catch (Exception ignored) {
 
         }
     }

@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.diff.handle;
 
 
-
 import com.alibaba.fastjson2.diff.JsonDiffException;
 import com.alibaba.fastjson2.diff.factory.RunTimeDataFactory;
 import com.alibaba.fastjson2.diff.path.Defects;
@@ -16,25 +15,26 @@ public class SimpleArrayHandle extends AbstractArrayHandle {
 
     /**
      * Don't ignore order
+     *
      * @param expect
      * @param actual
      */
     @Override
     protected void compareKeepOrder(Object[] expect, Object[] actual) {
         for (int i = 0; i < expect.length; i++) {
-            if(actual[i] == null && expect[i] == null) {
+            if (actual[i] == null && expect[i] == null) {
                 continue;
             }
-            try{
+            try {
                 if (actual[i] == null || !actual[i].equals(expect[i])) {
                     throw new JsonDiffException("diff");
                 }
-            }catch (Exception e) {
+            } catch (Exception e) {
                 Defects defects = new Defects()
-                        .setActual(actual[i])
-                        .setExpect(expect[i])
-                        .setIllustrate(String.format("The %d element is inconsistent", i))
-                        .setIndexPath(String.format("%s[%d]", getCurrentPath(), i));
+                    .setActual(actual[i])
+                    .setExpect(expect[i])
+                    .setIllustrate(String.format("The %d element is inconsistent", i))
+                    .setIndexPath(String.format("%s[%d]", getCurrentPath(), i));
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
         }
@@ -43,6 +43,7 @@ public class SimpleArrayHandle extends AbstractArrayHandle {
 
     /**
      * Ignore Order
+     *
      * @param expect
      * @param actual
      */
@@ -64,7 +65,7 @@ public class SimpleArrayHandle extends AbstractArrayHandle {
 
 
         // Traverse unmatched elements
-        int i,j = 0;
+        int i, j = 0;
         for (i = 0; i < expectSign.length; i++) {
             RunTimeDataFactory.getCurrentPathInstance().push(String.format("[%d]", i));
             if (expectSign[i]) {
@@ -77,10 +78,10 @@ public class SimpleArrayHandle extends AbstractArrayHandle {
                 }
             }
             Defects defects = new Defects()
-                    .setActual(actual[j])
-                    .setExpect(expect[i])
-                    .setIllustrate(String.format("The %d element is inconsistent", i))
-                    .setIndexPath(getCurrentPath());
+                .setActual(actual[j])
+                .setExpect(expect[i])
+                .setIllustrate(String.format("The %d element is inconsistent", i))
+                .setIndexPath(getCurrentPath());
             RunTimeDataFactory.getResultInstance().addDefects(defects);
             RunTimeDataFactory.getCurrentPathInstance().pop();
         }

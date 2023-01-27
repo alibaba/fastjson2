@@ -20,8 +20,8 @@ public class IncricacyArrayTest extends MockJson {
         JsonComparedOption jsonComparedOption = new JsonComparedOption().setIgnoreOrder(false);
         DefaultJSONDiff defaultJsonDifference = new DefaultJSONDiff();
         JsonCompareResult jsonCompareResult = defaultJsonDifference
-                .option(jsonComparedOption)
-                .detectDiff((JSONArray) metaData.getExpect(), (JSONArray) metaData.getActual());
+            .option(jsonComparedOption)
+            .detectDiff((JSONArray) metaData.getExpect(), (JSONArray) metaData.getActual());
         System.out.println(JSON.toJSONString(jsonCompareResult));
     }
 
@@ -31,11 +31,10 @@ public class IncricacyArrayTest extends MockJson {
         JsonComparedOption jsonComparedOption = new JsonComparedOption().setIgnoreOrder(true);
         DefaultJSONDiff defaultJsonDifference = new DefaultJSONDiff();
         JsonCompareResult jsonCompareResult = defaultJsonDifference
-                .option(jsonComparedOption)
-                .detectDiff((JSONArray) metaData.getExpect(), (JSONArray) metaData.getActual());
+            .option(jsonComparedOption)
+            .detectDiff((JSONArray) metaData.getExpect(), (JSONArray) metaData.getActual());
         System.out.println(JSON.toJSONString(jsonCompareResult));
     }
-
 
 
 }

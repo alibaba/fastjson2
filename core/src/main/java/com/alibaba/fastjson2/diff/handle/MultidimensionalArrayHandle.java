@@ -17,20 +17,20 @@ public class MultidimensionalArrayHandle extends AbstractArrayHandle {
     @Override
     protected void compareKeepOrder(Object[] expect, Object[] actual) {
         for (int i = 0; i < expect.length; i++) {
-            JSONArray expectItem = (JSONArray)expect[i];
-            JSONArray actualItem = (JSONArray)actual[i];
+            JSONArray expectItem = (JSONArray) expect[i];
+            JSONArray actualItem = (JSONArray) actual[i];
             try {
                 RunTimeDataFactory.getCurrentPathInstance().push(String.format("[%d]", i));
                 AbstractArrayHandle handle = (AbstractArrayHandle) HandleExampleFactory.getHandle(JsonDiffUtil.getArrayHandleClass(expectItem, actualItem));
-                handle.handle(expectItem , actualItem);
-            }catch (Exception e) {
+                handle.handle(expectItem, actualItem);
+            } catch (Exception e) {
                 Defects defects = new Defects()
-                        .setActual(actualItem)
-                        .setExpect(expectItem)
-                        .setIllustrate(String.format("The %d element is inconsistent", i))
-                        .setIndexPath(String.format("%s[%d]", getCurrentPath(), i));
+                    .setActual(actualItem)
+                    .setExpect(expectItem)
+                    .setIllustrate(String.format("The %d element is inconsistent", i))
+                    .setIndexPath(String.format("%s[%d]", getCurrentPath(), i));
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
-            }finally {
+            } finally {
                 RunTimeDataFactory.getCurrentPathInstance().pop();
             }
         }
@@ -41,6 +41,7 @@ public class MultidimensionalArrayHandle extends AbstractArrayHandle {
      * Ignore Order
      * 1.  It can be matched according to the fields specified by the user
      * 2.  When the sorting field is not specified, the time complexity is 2n. Need n * n comparison
+     *
      * @param expect
      * @param actual
      */
@@ -68,7 +69,7 @@ public class MultidimensionalArrayHandle extends AbstractArrayHandle {
 
 
         // Traverse unmatched elements
-        int i,j = 0;
+        int i, j = 0;
         for (i = 0; i < expectSign.length; i++) {
             RunTimeDataFactory.getCurrentPathInstance().push(String.format("[%d]", i));
             if (expectSign[i]) {
@@ -86,12 +87,12 @@ public class MultidimensionalArrayHandle extends AbstractArrayHandle {
                 expectSign[i] = true;
                 AbstractArrayHandle handle = (AbstractArrayHandle) HandleExampleFactory.getHandle(JsonDiffUtil.getArrayHandleClass((JSONArray) expect[i], (JSONArray) actual[j]));
                 handle.handle((JSONArray) expect[i], (JSONArray) actual[j]);
-            }catch (Exception ignored) {
+            } catch (Exception ignored) {
                 Defects defects = new Defects()
-                        .setActual(actual[j])
-                        .setExpect(expect[i])
-                        .setIllustrate(String.format("The %d element is inconsistent", i))
-                        .setIndexPath(getCurrentPath());
+                    .setActual(actual[j])
+                    .setExpect(expect[i])
+                    .setIllustrate(String.format("The %d element is inconsistent", i))
+                    .setIndexPath(getCurrentPath());
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
             RunTimeDataFactory.getCurrentPathInstance().pop();
@@ -101,6 +102,7 @@ public class MultidimensionalArrayHandle extends AbstractArrayHandle {
 
     /**
      * Find the matches in actual according to expect.
+     *
      * @param expect
      * @param actuals
      * @return not matched to return - 1
@@ -120,9 +122,9 @@ public class MultidimensionalArrayHandle extends AbstractArrayHandle {
                     index = i;
                     break;
                 }
-            }catch (Exception ignored) {
+            } catch (Exception ignored) {
 
-            }finally {
+            } finally {
                 RunTimeDataFactory.getTempDataInstance().clear();
             }
         }

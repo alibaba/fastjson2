@@ -22,8 +22,8 @@ public class ObjectArrayTest extends MockJson {
         JsonComparedOption jsonComparedOption = new JsonComparedOption().setIgnoreOrder(false);
         DefaultJSONDiff defaultJsonDifference = new DefaultJSONDiff();
         JsonCompareResult jsonCompareResult = defaultJsonDifference
-                .option(jsonComparedOption)
-                .detectDiff((JSONArray) metaData.getExpect(), (JSONArray) metaData.getActual());
+            .option(jsonComparedOption)
+            .detectDiff((JSONArray) metaData.getExpect(), (JSONArray) metaData.getActual());
         System.out.println(JSON.toJSONString(jsonCompareResult));
     }
 
@@ -36,8 +36,8 @@ public class ObjectArrayTest extends MockJson {
         });
         DefaultJSONDiff defaultJsonDifference = new DefaultJSONDiff();
         JsonCompareResult jsonCompareResult = defaultJsonDifference
-                .option(jsonComparedOption)
-                .detectDiff((JSONArray) metaData.getExpect(), (JSONArray) metaData.getActual());
+            .option(jsonComparedOption)
+            .detectDiff((JSONArray) metaData.getExpect(), (JSONArray) metaData.getActual());
         System.out.println(JSON.toJSONString(jsonCompareResult));
     }
 
@@ -45,16 +45,16 @@ public class ObjectArrayTest extends MockJson {
     public void diffIgnoreOrderAndKeyFUnction() {
         MetaData metaData = load(expectPath, actualPath);
         JsonComparedOption jsonComparedOption = new JsonComparedOption()
-                .setIgnoreOrder(true)
-                .setKeyFunction(path -> {
-                    Stack<String> keys = new Stack<>();
-                    keys.push("date");
-                    return keys;
-                });
+            .setIgnoreOrder(true)
+            .setKeyFunction(path -> {
+                Stack<String> keys = new Stack<>();
+                keys.push("date");
+                return keys;
+            });
         DefaultJSONDiff defaultJsonDifference = new DefaultJSONDiff();
         JsonCompareResult jsonCompareResult = defaultJsonDifference
-                .option(jsonComparedOption)
-                .detectDiff((JSONArray) metaData.getExpect(), (JSONArray) metaData.getActual());
+            .option(jsonComparedOption)
+            .detectDiff((JSONArray) metaData.getExpect(), (JSONArray) metaData.getActual());
         System.out.println(JSON.toJSONString(jsonCompareResult));
     }
 

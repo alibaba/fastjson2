@@ -15,10 +15,10 @@ public abstract class AbstractArrayHandle extends AbstractDiffHandle implements 
 
         if (actualLen != expectLen) {
             Defects defects = new Defects()
-                    .setExpect(expectLen)
-                    .setActual(actualLen)
-                    .setIllustrate("Array length is inconsistent")
-                    .setIndexPath(getCurrentPath());
+                .setExpect(expectLen)
+                .setActual(actualLen)
+                .setIllustrate("Array length is inconsistent")
+                .setIndexPath(getCurrentPath());
             RunTimeDataFactory.getResultInstance().addDefects(defects);
             return RunTimeDataFactory.getResultInstance();
         }
@@ -31,7 +31,7 @@ public abstract class AbstractArrayHandle extends AbstractDiffHandle implements 
 
         if (RunTimeDataFactory.getOptionInstance().isIgnoreOrder()) {
             compareIgnoreOrder(expect, actual);
-        }else {
+        } else {
             compareKeepOrder(expect, actual);
         }
 

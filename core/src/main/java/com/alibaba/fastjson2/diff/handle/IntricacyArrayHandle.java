@@ -1,9 +1,9 @@
 package com.alibaba.fastjson2.diff.handle;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.diff.function.Function;
 import com.alibaba.fastjson2.diff.JsonDiffException;
 import com.alibaba.fastjson2.diff.factory.RunTimeDataFactory;
+import com.alibaba.fastjson2.diff.function.Function;
 import com.alibaba.fastjson2.diff.path.Defects;
 import com.alibaba.fastjson2.diff.utils.ComparedUtil;
 import com.alibaba.fastjson2.diff.utils.JsonDiffUtil;
@@ -19,6 +19,7 @@ public class IntricacyArrayHandle extends AbstractArrayHandle {
 
     /**
      * Don't ignore order
+     *
      * @param expect
      * @param actual
      */
@@ -33,14 +34,14 @@ public class IntricacyArrayHandle extends AbstractArrayHandle {
                     throw new JsonDiffException("diff");
                 }
                 ComparedUtil.notSureAboutComparison(expect[i], actual[i]);
-            }catch (Exception e) {
+            } catch (Exception e) {
                 Defects defects = new Defects()
-                        .setActual(actual[i])
-                        .setExpect(expect[i])
-                        .setIllustrate(String.format("The %d element is inconsistent", i))
-                        .setIndexPath(String.format("%s[%d]", getCurrentPath(), i));
+                    .setActual(actual[i])
+                    .setExpect(expect[i])
+                    .setIllustrate(String.format("The %d element is inconsistent", i))
+                    .setIndexPath(String.format("%s[%d]", getCurrentPath(), i));
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
-            }finally {
+            } finally {
                 RunTimeDataFactory.getCurrentPathInstance().pop();
             }
         }
@@ -51,6 +52,7 @@ public class IntricacyArrayHandle extends AbstractArrayHandle {
      * Ignore Order
      * 1.  It can be matched according to the fields specified by the user
      * 2.  When the sorting field is not specified, the time complexity is 2n. Need n * n comparison
+     *
      * @param expect
      * @param actual
      */
@@ -85,7 +87,7 @@ public class IntricacyArrayHandle extends AbstractArrayHandle {
         }
 
         // Compare data of the same type
-        int i,j = 0;
+        int i, j = 0;
         for (i = 0; i < expectSign.length; i++) {
             if (expectSign[i]) {
                 continue;
@@ -109,12 +111,12 @@ public class IntricacyArrayHandle extends AbstractArrayHandle {
                 actualSign[j] = true;
                 expectSign[i] = true;
                 ComparedUtil.notSureAboutComparison(expect[i], actual[j]);
-            }catch (Exception ignored) {
+            } catch (Exception ignored) {
                 Defects defects = new Defects()
-                        .setActual(actual[j])
-                        .setExpect(expect[i])
-                        .setIllustrate(String.format("The %d element is inconsistent", i))
-                        .setIndexPath(getCurrentPath());
+                    .setActual(actual[j])
+                    .setExpect(expect[i])
+                    .setIllustrate(String.format("The %d element is inconsistent", i))
+                    .setIndexPath(getCurrentPath());
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
             RunTimeDataFactory.getCurrentPathInstance().pop();
@@ -136,10 +138,10 @@ public class IntricacyArrayHandle extends AbstractArrayHandle {
                 break;
             }
             Defects defects = new Defects()
-                    .setActual(actual[j])
-                    .setExpect(expect[i])
-                    .setIllustrate("Inconsistent comparison object types")
-                    .setIndexPath(getCurrentPath());
+                .setActual(actual[j])
+                .setExpect(expect[i])
+                .setIllustrate("Inconsistent comparison object types")
+                .setIndexPath(getCurrentPath());
             RunTimeDataFactory.getResultInstance().addDefects(defects);
         }
     }
@@ -147,6 +149,7 @@ public class IntricacyArrayHandle extends AbstractArrayHandle {
 
     /**
      * Find the matches in actual according to expect.
+     *
      * @param expect
      * @param actuals
      * @return
@@ -165,9 +168,9 @@ public class IntricacyArrayHandle extends AbstractArrayHandle {
                     index = i;
                     break;
                 }
-            }catch (Exception ignored) {
+            } catch (Exception ignored) {
 
-            }finally {
+            } finally {
                 RunTimeDataFactory.getTempDataInstance().clear();
             }
         }
@@ -177,6 +180,7 @@ public class IntricacyArrayHandle extends AbstractArrayHandle {
 
     /**
      * Judge whether two objects meet the comparison conditions
+     *
      * @param expect
      * @param actual
      * @return
