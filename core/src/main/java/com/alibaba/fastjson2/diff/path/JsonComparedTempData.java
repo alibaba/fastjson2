@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.diff.path;
 
 
-
 import com.alibaba.fastjson2.diff.factory.RunTimeDataFactory;
 import com.alibaba.fastjson2.diff.utils.JsonDiffUtil;
 
@@ -37,6 +36,7 @@ public class JsonComparedTempData {
 
     /**
      * Add comparison information
+     *
      * @param defects
      */
     public void addDefects(Defects defects) {
@@ -46,6 +46,7 @@ public class JsonComparedTempData {
 
     /**
      * Get TempData of the current node
+     *
      * @return
      */
     private TempData getTempData() {
@@ -67,6 +68,7 @@ public class JsonComparedTempData {
 
     /**
      * temp path
+     *
      * @param key
      */
 

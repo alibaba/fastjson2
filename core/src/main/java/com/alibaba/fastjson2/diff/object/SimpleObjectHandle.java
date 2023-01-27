@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.diff.factory.RunTimeDataFactory;
 import com.alibaba.fastjson2.diff.path.Defects;
 import com.alibaba.fastjson2.diff.utils.ComparedUtil;
 
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,16 +25,16 @@ public class SimpleObjectHandle extends AbstractObjectHandle {
         Set<String> intersect = intersect(expectKeys, actualKeys);
 
         // Ergodic intersection
-        for (String key: intersect) {
+        for (String key : intersect) {
             RunTimeDataFactory.getCurrentPathInstance().push(key);
             try {
                 compared(expectObject.get(key), actualObject.get(key));
             } catch (Exception e) {
                 Defects defects = new Defects()
-                        .setActual(key)
-                        .setExpect(key)
-                        .setIndexPath(getCurrentPath())
-                        .setIllustrate("field parsing error");
+                    .setActual(key)
+                    .setExpect(key)
+                    .setIndexPath(getCurrentPath())
+                    .setIllustrate("field parsing error");
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
             RunTimeDataFactory.getCurrentPathInstance().pop();
@@ -43,16 +42,16 @@ public class SimpleObjectHandle extends AbstractObjectHandle {
 
         // Traverse the mapped set
         Map<String, String> mapping = RunTimeDataFactory.getOptionInstance().getMapping();
-        for (Map.Entry<String, String> entry: mapping.entrySet()) {
+        for (Map.Entry<String, String> entry : mapping.entrySet()) {
             RunTimeDataFactory.getCurrentPathInstance().push(entry.getKey());
             try {
                 compared(expectObject.get(entry.getValue()), actualObject.get(entry.getKey()));
             } catch (Exception e) {
                 Defects defects = new Defects()
-                        .setActual(entry.getKey())
-                        .setExpect(entry.getValue())
-                        .setIndexPath(getCurrentPath())
-                        .setIllustrate("field parsing error");
+                    .setActual(entry.getKey())
+                    .setExpect(entry.getValue())
+                    .setIndexPath(getCurrentPath())
+                    .setIllustrate("field parsing error");
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
             RunTimeDataFactory.getCurrentPathInstance().pop();
@@ -62,6 +61,7 @@ public class SimpleObjectHandle extends AbstractObjectHandle {
     /**
      * ActualKeys have but expectKeys do not
      * First, match the field information that actually exists but is not expected to exist. And these fields are not mapped and ignored
+     *
      * @param expectKeys
      * @param actualKeys
      */
@@ -70,12 +70,12 @@ public class SimpleObjectHandle extends AbstractObjectHandle {
         conditions.removeAll(expectKeys);
         Map<String, String> mapping = RunTimeDataFactory.getOptionInstance().getMapping();
         List<String> ignoreKey = RunTimeDataFactory.getOptionInstance().getIgnoreKey();
-        for (String key: conditions) {
+        for (String key : conditions) {
             if (mapping.get(key) == null && !ignoreKey.contains(key)) {
                 Defects defects = new Defects()
-                        .setActual(key)
-                        .setIndexPath(getCurrentPath())
-                        .setIllustrate(String.format("extra field '%s'", key));
+                    .setActual(key)
+                    .setIndexPath(getCurrentPath())
+                    .setIllustrate(String.format("extra field '%s'", key));
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
         }
@@ -85,6 +85,7 @@ public class SimpleObjectHandle extends AbstractObjectHandle {
     /**
      * ExpectKeys but actualKeys do not
      * The expected field has field information, but the actual information does not. And these field information is not ignored
+     *
      * @param expectKeys
      * @param actualKeys
      */
@@ -92,12 +93,12 @@ public class SimpleObjectHandle extends AbstractObjectHandle {
         Set<String> conditions = new HashSet<>(expectKeys);
         conditions.removeAll(actualKeys);
         List<String> ignoreKey = RunTimeDataFactory.getOptionInstance().getIgnoreKey();
-        for (String key: conditions) {
+        for (String key : conditions) {
             if (!ignoreKey.contains(key)) {
                 Defects defects = new Defects()
-                        .setActual(key)
-                        .setIndexPath(getCurrentPath())
-                        .setIllustrate(String.format("missing field '%s'", key));
+                    .setActual(key)
+                    .setIndexPath(getCurrentPath())
+                    .setIllustrate(String.format("missing field '%s'", key));
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
         }
@@ -106,6 +107,7 @@ public class SimpleObjectHandle extends AbstractObjectHandle {
 
     /**
      * Intersection
+     *
      * @param expectKeys
      * @param actualKeys
      * @return

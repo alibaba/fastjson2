@@ -1,9 +1,9 @@
 package com.alibaba.fastjson2.diff.handle;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.diff.function.Function;
 import com.alibaba.fastjson2.diff.factory.HandleExampleFactory;
 import com.alibaba.fastjson2.diff.factory.RunTimeDataFactory;
+import com.alibaba.fastjson2.diff.function.Function;
 import com.alibaba.fastjson2.diff.object.AbstractObjectHandle;
 import com.alibaba.fastjson2.diff.path.Defects;
 import com.alibaba.fastjson2.diff.utils.ComparedUtil;
@@ -17,26 +17,27 @@ public class ObjectArrayHandle extends AbstractArrayHandle {
 
     /**
      * ignore order
+     *
      * @param expect
      * @param actual
      */
     @Override
     public void compareKeepOrder(Object[] expect, Object[] actual) {
         for (int i = 0; i < expect.length; i++) {
-            JSONObject expectItem = (JSONObject)expect[i];
-            JSONObject actualItem = (JSONObject)actual[i];
+            JSONObject expectItem = (JSONObject) expect[i];
+            JSONObject actualItem = (JSONObject) actual[i];
             try {
                 RunTimeDataFactory.getCurrentPathInstance().push(String.format("[%d]", i));
                 AbstractObjectHandle handle = (AbstractObjectHandle) HandleExampleFactory.getHandle(JsonDiffUtil.getObjectHandleClass(expectItem, actualItem));
-                handle.handle(expectItem , actualItem);
-            }catch (Exception e) {
+                handle.handle(expectItem, actualItem);
+            } catch (Exception e) {
                 Defects defects = new Defects()
-                        .setActual(actualItem)
-                        .setExpect(expectItem)
-                        .setIllustrate(String.format("The %d element is inconsistent", i))
-                        .setIndexPath(String.format("%s[%d]", getCurrentPath(), i));
+                    .setActual(actualItem)
+                    .setExpect(expectItem)
+                    .setIllustrate(String.format("The %d element is inconsistent", i))
+                    .setIndexPath(String.format("%s[%d]", getCurrentPath(), i));
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
-            }finally {
+            } finally {
                 RunTimeDataFactory.getCurrentPathInstance().pop();
             }
         }
@@ -64,7 +65,7 @@ public class ObjectArrayHandle extends AbstractArrayHandle {
             RunTimeDataFactory.getCurrentPathInstance().pop();
         }
 
-        int i,j = 0;
+        int i, j = 0;
         for (i = 0; i < expectSign.length; i++) {
             if (expectSign[i]) {
                 continue;
@@ -83,12 +84,12 @@ public class ObjectArrayHandle extends AbstractArrayHandle {
                 expectSign[i] = true;
                 AbstractObjectHandle handle = (AbstractObjectHandle) HandleExampleFactory.getHandle(JsonDiffUtil.getObjectHandleClass((JSONObject) expect[i], (JSONObject) actual[j]));
                 handle.handle((JSONObject) expect[i], (JSONObject) actual[j]);
-            }catch (Exception ignored) {
+            } catch (Exception ignored) {
                 Defects defects = new Defects()
-                        .setActual(actual[j])
-                        .setExpect(expect[i])
-                        .setIllustrate(String.format("The %d element is inconsistent", i))
-                        .setIndexPath(getCurrentPath());
+                    .setActual(actual[j])
+                    .setExpect(expect[i])
+                    .setIllustrate(String.format("The %d element is inconsistent", i))
+                    .setIndexPath(getCurrentPath());
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
             RunTimeDataFactory.getCurrentPathInstance().pop();
@@ -110,9 +111,9 @@ public class ObjectArrayHandle extends AbstractArrayHandle {
                     index = i;
                     break;
                 }
-            }catch (Exception ignored) {
+            } catch (Exception ignored) {
 
-            }finally {
+            } finally {
                 RunTimeDataFactory.getTempDataInstance().clear();
             }
         }
@@ -122,6 +123,7 @@ public class ObjectArrayHandle extends AbstractArrayHandle {
 
     /**
      * Judge whether two objects meet the comparison conditions
+     *
      * @param expect
      * @param actual
      * @return

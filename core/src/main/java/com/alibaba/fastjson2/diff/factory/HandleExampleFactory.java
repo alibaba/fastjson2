@@ -23,7 +23,7 @@ public class HandleExampleFactory {
     }
 
     public static Handle getHandle(Class<?> handle) {
-        if (!AbstractArrayHandle.class.isAssignableFrom(handle) && !AbstractObjectHandle.class.isAssignableFrom(handle) ) {
+        if (!AbstractArrayHandle.class.isAssignableFrom(handle) && !AbstractObjectHandle.class.isAssignableFrom(handle)) {
             return bucket.get(AbstractObjectHandle.class);
         }
         return bucket.get(handle);

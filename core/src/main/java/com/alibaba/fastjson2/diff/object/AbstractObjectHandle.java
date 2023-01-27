@@ -1,8 +1,8 @@
 package com.alibaba.fastjson2.diff.object;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.diff.handle.AbstractDiffHandle;
 import com.alibaba.fastjson2.diff.factory.RunTimeDataFactory;
+import com.alibaba.fastjson2.diff.handle.AbstractDiffHandle;
 import com.alibaba.fastjson2.diff.path.JsonCompareResult;
 
 import java.util.Set;
