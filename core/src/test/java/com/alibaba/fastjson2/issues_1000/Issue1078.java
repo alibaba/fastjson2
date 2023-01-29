@@ -35,14 +35,16 @@ public class Issue1078 {
         );
     }
 
-    public static class TestValueFilter1 implements ValueFilter {
+    public static class TestValueFilter1
+            implements ValueFilter {
         @Override
         public Object apply(Object o, String s, Object o1) {
             return o1.toString() + "1";
         }
     }
 
-    public static class TestValueFilter2 implements ValueFilter {
+    public static class TestValueFilter2
+            implements ValueFilter {
         @Override
         public Object apply(Object o, String s, Object o1) {
             return o1.toString() + "2";
