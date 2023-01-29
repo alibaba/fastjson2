@@ -1475,7 +1475,11 @@ public abstract class JSONWriter
                 }
 
                 if (filter instanceof ValueFilter) {
-                    this.valueFilter = (ValueFilter) filter;
+                    if (this.valueFilter == null) {
+                        this.valueFilter = (ValueFilter) filter;
+                    } else {
+                        this.valueFilter = ValueFilter.compose(this.valueFilter, (ValueFilter) filter);
+                    }
                 }
 
                 if (filter instanceof PropertyFilter) {
