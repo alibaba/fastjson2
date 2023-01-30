@@ -601,6 +601,7 @@
                                 com/alibaba/fastjson2/issues/Issue485.java,
                                 com/alibaba/fastjson2/issues/Issue765.java,
                                 com/alibaba/fastjson2/issues/Issue924.java,
+                                com/alibaba/fastjson2/issues_1000/Issue1084.java,
                                 com/alibaba/fastjson/issue_1300/Issue1367_jaxrs.java,
                                 com/fasterxml/jackson/core/*.java,
                                 com/fasterxml/jackson/databind/*.java,
