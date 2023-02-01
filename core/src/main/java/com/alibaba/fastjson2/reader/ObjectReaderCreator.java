@@ -1120,7 +1120,10 @@ public class ObjectReaderCreator {
         provider.getFieldInfo(fieldInfo, objectClass, field);
 
         if (fieldInfo.ignore) {
-            return;
+            boolean unwrap = (fieldInfo.features & FieldInfo.UNWRAPPED_MASK) != 0 && Map.class.isAssignableFrom(field.getType());
+            if (!unwrap) {
+                return;
+            }
         }
 
         String fieldName;
@@ -2368,6 +2371,19 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClassResolved != null) {
+            if ((features & FieldInfo.UNWRAPPED_MASK) != 0
+                    && Map.class.isAssignableFrom(fieldClassResolved)
+            ) {
+                return new FieldReaderMapFieldReadOnly(fieldName,
+                        fieldTypeResolved,
+                        fieldClass,
+                        ordinal,
+                        features,
+                        format,
+                        jsonSchema,
+                        field);
+            }
+
             return new FieldReaderObjectField(
                     fieldName,
                     fieldTypeResolved,
