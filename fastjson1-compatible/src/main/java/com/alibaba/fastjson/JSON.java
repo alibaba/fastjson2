@@ -1197,7 +1197,6 @@ public abstract class JSON {
         }
 
         try (JSONWriter writer = JSONWriter.of(context)) {
-            writer.setRootObject(object);
             for (SerializeFilter filter : filters) {
                 configFilter(context, filter);
             }
@@ -1205,6 +1204,7 @@ public abstract class JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -1232,7 +1232,6 @@ public abstract class JSON {
         JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
 
         try (JSONWriter writer = JSONWriter.of(context)) {
-            writer.setRootObject(object);
             for (SerializeFilter filter : filters) {
                 configFilter(context, filter);
             }
@@ -1240,6 +1239,7 @@ public abstract class JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -1297,7 +1297,6 @@ public abstract class JSON {
     ) {
         JSONWriter.Context context = createWriteContext(config, defaultFeatures, features);
         try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
-            writer.setRootObject(object);
             for (SerializeFilter filter : filters) {
                 configFilter(context, filter);
             }
@@ -1305,6 +1304,7 @@ public abstract class JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -1327,12 +1327,12 @@ public abstract class JSON {
     ) {
         JSONWriter.Context context = createWriteContext(config, DEFAULT_GENERATE_FEATURE, features);
         try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
-            writer.setRootObject(object);
             configFilter(context, filter);
 
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -1362,7 +1362,6 @@ public abstract class JSON {
         }
 
         try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
-            writer.setRootObject(object);
             for (SerializeFilter filter : filters) {
                 configFilter(context, filter);
             }
@@ -1370,6 +1369,7 @@ public abstract class JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -1387,7 +1387,6 @@ public abstract class JSON {
     public static byte[] toJSONBytes(Object object, SerializeFilter[] filters, SerializerFeature... features) {
         JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
         try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
-            writer.setRootObject(object);
             for (SerializeFilter filter : filters) {
                 configFilter(context, filter);
             }
@@ -1395,6 +1394,7 @@ public abstract class JSON {
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -1412,11 +1412,10 @@ public abstract class JSON {
     public static byte[] toJSONBytes(Object object, SerializeConfig config, SerializerFeature... features) {
         JSONWriter.Context context = createWriteContext(config, DEFAULT_GENERATE_FEATURE, features);
         try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
-            writer.setRootObject(object);
-
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -1439,11 +1438,10 @@ public abstract class JSON {
                 createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
 
         try (JSONWriter writer = JSONWriter.of(context)) {
-            writer.setRootObject(object);
-
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -1461,13 +1459,10 @@ public abstract class JSON {
     public static String toJSONString(Object object) {
         JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE);
         try (JSONWriter writer = JSONWriter.of(context)) {
-            writer.setRootObject(object);
-
             if (object == null) {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
-
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -1494,11 +1489,10 @@ public abstract class JSON {
         }
 
         try (JSONWriter writer = JSONWriter.of(context)) {
-            writer.setRootObject(object);
-
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -1517,11 +1511,10 @@ public abstract class JSON {
         JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
 
         try (JSONWriter writer = JSONWriter.of(context)) {
-            writer.setRootObject(object);
-
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -1539,11 +1532,10 @@ public abstract class JSON {
     public static byte[] toJSONBytes(Object object) {
         JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE);
         try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
-            writer.setRootObject(object);
-
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -1566,11 +1558,10 @@ public abstract class JSON {
         JSONWriter.Context context = createWriteContext(SerializeConfig.global, defaultFeatures, features);
 
         try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
-            writer.setRootObject(object);
-
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -1618,11 +1609,10 @@ public abstract class JSON {
         }
 
         try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
-            writer.setRootObject(object);
-
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -1641,11 +1631,10 @@ public abstract class JSON {
         JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
 
         try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
-            writer.setRootObject(object);
-
             if (object == null) {
                 writer.writeNull();
             } else {
+                writer.setRootObject(object);
                 Class<?> valueClass = object.getClass();
                 ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.write(writer, object, null, null, 0);
@@ -1669,9 +1658,14 @@ public abstract class JSON {
         return toJSONBytes(object, config, new SerializeFilter[0], defaultFeatures, features);
     }
 
-    public static String toJSONString(Object object, SerializeConfig config, SerializerFeature... features) {
+    public static String toJSONString(
+            Object object,
+            SerializeConfig config,
+            SerializerFeature... features
+    ) {
         JSONWriter.Context context = createWriteContext(config, DEFAULT_GENERATE_FEATURE, features);
         try (JSONWriter writer = JSONWriter.of(context)) {
+            writer.setRootObject(object);
             writer.writeAny(object);
             return writer.toString();
         }
@@ -1746,7 +1740,8 @@ public abstract class JSON {
     }
 
     public static String toJSONStringWithDateFormat(
-            Object object, String dateFormat,
+            Object object,
+            String dateFormat,
             SerializerFeature... features
     ) {
         JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
@@ -1756,6 +1751,7 @@ public abstract class JSON {
             if (object == null) {
                 jsonWriter.writeNull();
             } else {
+                jsonWriter.setRootObject(object);
                 ObjectWriter<?> objectWriter = context.getObjectWriter(object.getClass());
                 objectWriter.write(jsonWriter, object, null, null, 0);
             }
@@ -1786,11 +1782,10 @@ public abstract class JSON {
         JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
 
         try (JSONWriter jsonWriter = JSONWriter.ofUTF8(context)) {
-            jsonWriter.setRootObject(object);
-
             if (object == null) {
                 jsonWriter.writeNull();
             } else {
+                jsonWriter.setRootObject(object);
                 ObjectWriter<?> objectWriter = context.getObjectWriter(object.getClass());
                 objectWriter.write(jsonWriter, object, null, null, 0);
             }
@@ -1823,6 +1818,7 @@ public abstract class JSON {
             if (object == null) {
                 jsonWriter.writeNull();
             } else {
+                jsonWriter.setRootObject(object);
                 ObjectWriter<?> objectWriter = context.getObjectWriter(object.getClass());
                 objectWriter.write(jsonWriter, object, null, null, 0);
             }
@@ -1850,6 +1846,7 @@ public abstract class JSON {
             if (object == null) {
                 jsonWriter.writeNull();
             } else {
+                jsonWriter.setRootObject(object);
                 ObjectWriter<?> objectWriter = context.getObjectWriter(object.getClass());
                 objectWriter.write(jsonWriter, object, null, null, 0);
             }
@@ -1880,7 +1877,6 @@ public abstract class JSON {
         }
 
         try (JSONWriter jsonWriter = JSONWriter.ofUTF8(context)) {
-            jsonWriter.setRootObject(object);
             for (SerializeFilter filter : filters) {
                 configFilter(context, filter);
             }
@@ -1888,6 +1884,7 @@ public abstract class JSON {
             if (object == null) {
                 jsonWriter.writeNull();
             } else {
+                jsonWriter.setRootObject(object);
                 ObjectWriter<?> objectWriter = context.getObjectWriter(object.getClass());
                 objectWriter.write(jsonWriter, object, null, null, 0);
             }
@@ -1910,7 +1907,6 @@ public abstract class JSON {
     ) throws IOException {
         JSONWriter.Context context = createWriteContext(SerializeConfig.global, DEFAULT_GENERATE_FEATURE, features);
         try (JSONWriter jsonWriter = JSONWriter.ofUTF8(context)) {
-            jsonWriter.setRootObject(object);
             for (SerializeFilter filter : filters) {
                 configFilter(context, filter);
             }
@@ -1918,6 +1914,7 @@ public abstract class JSON {
             if (object == null) {
                 jsonWriter.writeNull();
             } else {
+                jsonWriter.setRootObject(object);
                 ObjectWriter<?> objectWriter = context.getObjectWriter(object.getClass());
                 objectWriter.write(jsonWriter, object, null, null, 0);
             }
