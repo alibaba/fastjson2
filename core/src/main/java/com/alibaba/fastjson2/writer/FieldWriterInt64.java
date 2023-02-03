@@ -30,7 +30,7 @@ abstract class FieldWriterInt64<T>
         browserCompatible = (features & JSONWriter.Feature.BrowserCompatible.mask) != 0;
     }
 
-    public void writeInt64(JSONWriter jsonWriter, long value) {
+    public final void writeInt64(JSONWriter jsonWriter, long value) {
         long features = jsonWriter.getFeatures() | this.features;
         boolean noneString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
 
