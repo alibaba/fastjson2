@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 
 final class ObjectWriterMisc
         implements ObjectWriter {
@@ -50,6 +51,14 @@ final class ObjectWriterMisc
                 jsonWriter.endObject();
                 return;
             }
+            case "com.fasterxml.jackson.databind.node.ArrayNode":
+                str = object.toString();
+                if (jsonWriter.isUTF8()) {
+                    jsonWriter.writeRaw(str.getBytes(StandardCharsets.UTF_8));
+                } else {
+                    jsonWriter.writeRaw(str);
+                }
+                return;
             default:
                 throw new JSONException("not support class : " + objectClassName);
         }
