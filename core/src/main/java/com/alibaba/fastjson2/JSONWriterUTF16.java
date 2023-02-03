@@ -52,7 +52,7 @@ class JSONWriterUTF16
     }
 
     @Override
-    public void close() {
+    public final void close() {
         JSONFactory.releaseCharArray(cachedIndex, chars);
     }
 
@@ -76,7 +76,7 @@ class JSONWriterUTF16
     }
 
     @Override
-    public void writeColon() {
+    public final void writeColon() {
         if (off == chars.length) {
             int minCapacity = off + 1;
             int oldCapacity = chars.length;
@@ -233,19 +233,86 @@ class JSONWriterUTF16
                 final int mark = off;
                 chars[off++] = quote;
 
-                for (int i = 0; i < value.length; i++) {
-                    byte c = value[i];
-                    if (c == '\\' || c == quote || c < ' ') {
+                int i = 0;
+                for (; i + 8 <= value.length; i += 8) {
+                    byte c0 = value[i];
+                    byte c1 = value[i + 1];
+                    byte c2 = value[i + 2];
+                    byte c3 = value[i + 3];
+                    byte c4 = value[i + 4];
+                    byte c5 = value[i + 5];
+                    byte c6 = value[i + 6];
+                    byte c7 = value[i + 7];
+
+                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote
+                            || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\' || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\'
+                            || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' ' || c4 < ' ' || c5 < ' ' || c6 < ' ' || c7 < ' '
+                            || (browserSecure
+                            && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'
+                            || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'
+                            || c2 == '<' || c2 == '>' || c2 == '(' || c2 == ')'
+                            || c3 == '<' || c3 == '>' || c3 == '(' || c3 == ')'
+                            || c4 == '<' || c4 == '>' || c4 == '(' || c4 == ')'
+                            || c5 == '<' || c5 == '>' || c5 == '(' || c5 == ')'
+                            || c6 == '<' || c6 == '>' || c6 == '(' || c6 == ')'
+                            || c7 == '<' || c7 == '>' || c7 == '(' || c7 == ')'))
+                    ) {
                         escape = true;
                         break;
                     }
+                    chars[off] = (char) c0;
+                    chars[off + 1] = (char) c1;
+                    chars[off + 2] = (char) c2;
+                    chars[off + 3] = (char) c3;
+                    chars[off + 4] = (char) c4;
+                    chars[off + 5] = (char) c5;
+                    chars[off + 6] = (char) c6;
+                    chars[off + 7] = (char) c7;
+                    off += 8;
+                }
 
-                    if (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')')) {
-                        escape = true;
-                        break;
+                if (!escape) {
+                    for (; i + 4 <= value.length; i += 4) {
+                        byte c0 = value[i];
+                        byte c1 = value[i + 1];
+                        byte c2 = value[i + 2];
+                        byte c3 = value[i + 3];
+
+                        if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
+                                || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
+                                || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
+                                || (browserSecure
+                                && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'
+                                || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'
+                                || c2 == '<' || c2 == '>' || c2 == '(' || c2 == ')'
+                                || c3 == '<' || c3 == '>' || c3 == '(' || c3 == ')'))
+                        ) {
+                            escape = true;
+                            break;
+                        }
+                        chars[off] = (char) c0;
+                        chars[off + 1] = (char) c1;
+                        chars[off + 2] = (char) c2;
+                        chars[off + 3] = (char) c3;
+                        off += 4;
                     }
+                }
 
-                    chars[off++] = (char) c;
+                if (!escape) {
+                    for (; i < value.length; i++) {
+                        byte c = value[i];
+                        if (c == '\\' || c == quote || c < ' ') {
+                            escape = true;
+                            break;
+                        }
+
+                        if (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')')) {
+                            escape = true;
+                            break;
+                        }
+
+                        chars[off++] = (char) c;
+                    }
                 }
 
                 if (!escape) {
@@ -991,7 +1058,7 @@ class JSONWriterUTF16
     }
 
     @Override
-    public void writeNameRaw(char[] chars) {
+    public final void writeNameRaw(char[] chars) {
         {
             // inline ensureCapacity
             int minCapacity = off + chars.length + (startObject ? 0 : 1);
@@ -1065,7 +1132,7 @@ class JSONWriterUTF16
     }
 
     @Override
-    public void writeInt32(int i) {
+    public final void writeInt32(int i) {
         if ((context.features & Feature.WriteNonStringValueAsString.mask) != 0) {
             writeString(Integer.toString(i));
             return;
@@ -1162,7 +1229,7 @@ class JSONWriterUTF16
     }
 
     @Override
-    public void writeInt64(long i) {
+    public final void writeInt64(long i) {
         boolean writeAsString = false;
         if ((context.features & (Feature.WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0) {
             writeAsString = true;

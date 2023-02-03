@@ -34,7 +34,7 @@ abstract class FieldWriterInt32<T>
     }
 
     @Override
-    public void writeInt32(JSONWriter jsonWriter, int value) {
+    public final void writeInt32(JSONWriter jsonWriter, int value) {
         if (toString) {
             writeFieldName(jsonWriter);
             jsonWriter.writeString(Integer.toString(value));
