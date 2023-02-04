@@ -1471,7 +1471,11 @@ public abstract class JSONWriter
         protected void configFilter(Filter... filters) {
             for (Filter filter : filters) {
                 if (filter instanceof NameFilter) {
-                    this.nameFilter = (NameFilter) filter;
+                    if (this.nameFilter == null) {
+                        this.nameFilter = (NameFilter) filter;
+                    } else {
+                        this.nameFilter = NameFilter.compose(this.nameFilter, (NameFilter) filter);
+                    }
                 }
 
                 if (filter instanceof ValueFilter) {
