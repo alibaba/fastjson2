@@ -195,6 +195,64 @@ class JSONWriterUTF16
         chars[off++] = ']';
     }
 
+    public final void writeString(List<String> list) {
+        // startArray();
+        if (off == chars.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = chars.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            chars = Arrays.copyOf(chars, newCapacity);
+        }
+        chars[off++] = '[';
+
+        for (int i = 0, size = list.size(); i < size; i++) {
+            if (i != 0) {
+                if (off == chars.length) {
+                    int minCapacity = off + 1;
+                    int oldCapacity = chars.length;
+                    int newCapacity = oldCapacity + (oldCapacity >> 1);
+                    if (newCapacity - minCapacity < 0) {
+                        newCapacity = minCapacity;
+                    }
+                    if (newCapacity - maxArraySize > 0) {
+                        throw new OutOfMemoryError();
+                    }
+
+                    // minCapacity is usually close to size, so this is a win:
+                    chars = Arrays.copyOf(chars, newCapacity);
+                }
+                chars[off++] = ',';
+            }
+
+            String str = list.get(i);
+            writeString(str);
+        }
+
+        if (off == chars.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = chars.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            chars = Arrays.copyOf(chars, newCapacity);
+        }
+        chars[off++] = ']';
+    }
+
     @Override
     public void writeString(String str) {
         if (str == null) {
