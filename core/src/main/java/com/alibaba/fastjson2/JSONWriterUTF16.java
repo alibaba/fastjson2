@@ -291,86 +291,19 @@ class JSONWriterUTF16
                 final int mark = off;
                 chars[off++] = quote;
 
-                int i = 0;
-                for (; i + 8 <= value.length; i += 8) {
-                    byte c0 = value[i];
-                    byte c1 = value[i + 1];
-                    byte c2 = value[i + 2];
-                    byte c3 = value[i + 3];
-                    byte c4 = value[i + 4];
-                    byte c5 = value[i + 5];
-                    byte c6 = value[i + 6];
-                    byte c7 = value[i + 7];
-
-                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote
-                            || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\' || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\'
-                            || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' ' || c4 < ' ' || c5 < ' ' || c6 < ' ' || c7 < ' '
-                            || (browserSecure
-                            && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'
-                            || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'
-                            || c2 == '<' || c2 == '>' || c2 == '(' || c2 == ')'
-                            || c3 == '<' || c3 == '>' || c3 == '(' || c3 == ')'
-                            || c4 == '<' || c4 == '>' || c4 == '(' || c4 == ')'
-                            || c5 == '<' || c5 == '>' || c5 == '(' || c5 == ')'
-                            || c6 == '<' || c6 == '>' || c6 == '(' || c6 == ')'
-                            || c7 == '<' || c7 == '>' || c7 == '(' || c7 == ')'))
-                    ) {
+                for (int i = 0; i < value.length; i++) {
+                    byte c = value[i];
+                    if (c == '\\' || c == quote || c < ' ') {
                         escape = true;
                         break;
                     }
-                    chars[off] = (char) c0;
-                    chars[off + 1] = (char) c1;
-                    chars[off + 2] = (char) c2;
-                    chars[off + 3] = (char) c3;
-                    chars[off + 4] = (char) c4;
-                    chars[off + 5] = (char) c5;
-                    chars[off + 6] = (char) c6;
-                    chars[off + 7] = (char) c7;
-                    off += 8;
-                }
 
-                if (!escape) {
-                    for (; i + 4 <= value.length; i += 4) {
-                        byte c0 = value[i];
-                        byte c1 = value[i + 1];
-                        byte c2 = value[i + 2];
-                        byte c3 = value[i + 3];
-
-                        if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
-                                || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
-                                || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
-                                || (browserSecure
-                                && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'
-                                || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'
-                                || c2 == '<' || c2 == '>' || c2 == '(' || c2 == ')'
-                                || c3 == '<' || c3 == '>' || c3 == '(' || c3 == ')'))
-                        ) {
-                            escape = true;
-                            break;
-                        }
-                        chars[off] = (char) c0;
-                        chars[off + 1] = (char) c1;
-                        chars[off + 2] = (char) c2;
-                        chars[off + 3] = (char) c3;
-                        off += 4;
+                    if (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')')) {
+                        escape = true;
+                        break;
                     }
-                }
 
-                if (!escape) {
-                    for (; i < value.length; i++) {
-                        byte c = value[i];
-                        if (c == '\\' || c == quote || c < ' ') {
-                            escape = true;
-                            break;
-                        }
-
-                        if (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')')) {
-                            escape = true;
-                            break;
-                        }
-
-                        chars[off++] = (char) c;
-                    }
+                    chars[off++] = (char) c;
                 }
 
                 if (!escape) {
