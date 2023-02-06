@@ -442,6 +442,14 @@ class JSONWriterUTF16
             return;
         }
 
+        writeStringEscape(str);
+    }
+
+    protected final void writeStringEscape(String str) {
+        final int strlen = str.length();
+        boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+
         ensureCapacity(off + strlen * 6 + 2);
 
         chars[off++] = quote;
