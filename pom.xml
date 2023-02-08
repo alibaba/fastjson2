@@ -1018,9 +1018,7 @@
                 <module>extension-spring5</module>
                 <module>extension-spring6</module>
                 <module>fastjson1-compatible</module>
-                <!--
                 <module>incubator-vector</module>
-                -->
                 <module>kotlin</module>
             </modules>
         </profile>
