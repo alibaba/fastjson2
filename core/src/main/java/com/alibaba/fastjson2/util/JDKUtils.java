@@ -2,7 +2,9 @@ package com.alibaba.fastjson2.util;
 
 import java.lang.invoke.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.ByteOrder;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
 
@@ -28,6 +30,7 @@ public class JDKUtils {
     public static final boolean BIG_ENDIAN;
 
     public static final boolean UNSAFE_SUPPORT;
+    public static final boolean VECTOR_SUPPORT;
 
     // GraalVM not support
     // Android not support
@@ -114,6 +117,22 @@ public class JDKUtils {
             FIELD_STRING_VALUE = null;
             FIELD_STRING_VALUE_OFFSET = -1;
         }
+
+        boolean vector_support = false;
+        try {
+            if (JVM_VERSION >= 17) {
+                Class<?> factorClass = Class.forName("java.lang.management.ManagementFactory");
+                Class<?> runtimeMXBeanClass = Class.forName("java.lang.management.RuntimeMXBean");
+                Method getRuntimeMXBean = factorClass.getMethod("getRuntimeMXBean");
+                Object runtimeMXBean = getRuntimeMXBean.invoke(null);
+                Method getInputArguments = runtimeMXBeanClass.getMethod("getInputArguments");
+                List<String> inputArguments = (List<String>) getInputArguments.invoke(runtimeMXBean);
+                vector_support = inputArguments.contains("--add-modules=jdk.incubator.vector");
+            }
+        } catch (Throwable ignored) {
+            initErrorLast = ignored;
+        }
+        VECTOR_SUPPORT = vector_support;
 
         boolean unsafeSupport;
         unsafeSupport = ((Predicate) o -> {

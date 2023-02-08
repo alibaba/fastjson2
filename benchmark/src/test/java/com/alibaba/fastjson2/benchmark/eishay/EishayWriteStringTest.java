@@ -17,10 +17,7 @@ public class EishayWriteStringTest {
             // zulu8.58.0.13 : 325 344 342
             // zulu11.52.13 : 347 369 344 353
             // zulu17.32.13 : 335 342 353 327
-
-            // reflect-zulu8.58.0.13 : 498 465
-            // reflect-zulu11.52.13 : 532 504
-            // reflect-zulu17.32.13 : 508 486
+            // zulu17.40.91_vec : 272
         }
     }
 

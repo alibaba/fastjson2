@@ -37,7 +37,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeReference(String path) {
+    public final void writeReference(String path) {
         this.lastReference = path;
 
         writeRaw(REF_PREF);
@@ -56,7 +56,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeBase64(byte[] bytes) {
+    public final void writeBase64(byte[] bytes) {
         int charsLen = ((bytes.length - 1) / 3 + 1) << 2; // base64 character count
 
         ensureCapacity(off + charsLen + 2);
@@ -92,7 +92,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeHex(byte[] bytes) {
+    public final void writeHex(byte[] bytes) {
         if (bytes == null) {
             writeNull();
             return;
@@ -119,21 +119,21 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void close() {
+    public final void close() {
         JSONFactory.releaseByteArray(cachedIndex, bytes);
     }
 
-    public int size() {
+    public final int size() {
         return off;
     }
 
     @Override
-    public byte[] getBytes() {
+    public final byte[] getBytes() {
         return Arrays.copyOf(bytes, off);
     }
 
     @Override
-    public byte[] getBytes(Charset charset) {
+    public final byte[] getBytes(Charset charset) {
         if (charset == StandardCharsets.UTF_8) {
             return Arrays.copyOf(bytes, off);
         }
@@ -143,7 +143,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public int flushTo(OutputStream to) throws IOException {
+    public final int flushTo(OutputStream to) throws IOException {
         int len = off;
         to.write(bytes, 0, off);
         off = 0;
@@ -151,7 +151,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    protected void write0(char c) {
+    protected final void write0(char c) {
         if (off == bytes.length) {
             int minCapacity = off + 1;
             int oldCapacity = bytes.length;
@@ -170,7 +170,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeColon() {
+    public final void writeColon() {
         if (off == bytes.length) {
             int minCapacity = off + 1;
             int oldCapacity = bytes.length;
@@ -189,7 +189,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void startObject() {
+    public final void startObject() {
         level++;
         startObject = true;
         if (off == bytes.length) {
@@ -210,7 +210,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void endObject() {
+    public final void endObject() {
         level--;
         if (off == bytes.length) {
             int minCapacity = off + 1;
@@ -231,7 +231,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeComma() {
+    public final void writeComma() {
         startObject = false;
         if (off == bytes.length) {
             int minCapacity = off + 1;
@@ -251,7 +251,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void startArray() {
+    public final void startArray() {
         level++;
         if (off == bytes.length) {
             int minCapacity = off + 1;
@@ -271,7 +271,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void endArray() {
+    public final void endArray() {
         level--;
         if (off == bytes.length) {
             int minCapacity = off + 1;
@@ -615,7 +615,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeString(char[] chars, int offset, int len, boolean quoted) {
+    public final void writeString(char[] chars, int offset, int len, boolean quoted) {
         boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
 
         // ensureCapacity
@@ -878,7 +878,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeChar(char ch) {
+    public final void writeChar(char ch) {
         int minCapacity = bytes.length + 8;
         if (minCapacity - bytes.length > 0) {
             int oldCapacity = bytes.length;
@@ -1000,7 +1000,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeUUID(UUID value) {
+    public final void writeUUID(UUID value) {
         if (value == null) {
             writeNull();
             return;
@@ -1026,7 +1026,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeRaw(String str) {
+    public final void writeRaw(String str) {
         char[] chars = JDKUtils.getCharArray(str);
         {
             int minCapacity = off
@@ -1062,7 +1062,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeRaw(byte[] bytes) {
+    public final void writeRaw(byte[] bytes) {
         {
             // inline ensureCapacity
             int minCapacity = off + bytes.length;
@@ -1085,7 +1085,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeNameRaw(byte[] bytes) {
+    public final void writeNameRaw(byte[] bytes) {
         {
             // inline ensureCapacity
             int minCapacity = off + bytes.length + (startObject ? 0 : 1);
@@ -1113,7 +1113,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeRaw(char ch) {
+    public final void writeRaw(char ch) {
         if (ch < 0 || ch > 128) {
             throw new JSONException("not support " + ch);
         }
@@ -1136,7 +1136,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeRaw(char c0, char c1) {
+    public final void writeRaw(char c0, char c1) {
         if (c0 < 0 || c0 > 128) {
             throw new JSONException("not support " + c0);
         }
@@ -1163,7 +1163,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeNameRaw(byte[] bytes, int off, int len) {
+    public final void writeNameRaw(byte[] bytes, int off, int len) {
         {
             // inline ensureCapacity
             int minCapacity = this.off + len + (startObject ? 0 : 1);
@@ -1191,7 +1191,7 @@ class JSONWriterUTF8
         this.off += len;
     }
 
-    void ensureCapacity(int minCapacity) {
+    final void ensureCapacity(int minCapacity) {
         if (minCapacity - bytes.length > 0) {
             int oldCapacity = bytes.length;
             int newCapacity = oldCapacity + (oldCapacity >> 1);
@@ -1448,7 +1448,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeFloat(float value) {
+    public final void writeFloat(float value) {
         if (Float.isNaN(value) || Float.isInfinite(value)) {
             writeNull();
             return;
@@ -1476,7 +1476,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeDouble(double value) {
+    public final void writeDouble(double value) {
         if (Double.isNaN(value) || Double.isInfinite(value)) {
             writeNull();
             return;
@@ -1504,7 +1504,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeDateTime14(
+    public final void writeDateTime14(
             int year,
             int month,
             int dayOfMonth,
@@ -1534,7 +1534,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeDateTime19(
+    public final void writeDateTime19(
             int year,
             int month,
             int dayOfMonth,
@@ -1569,7 +1569,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeLocalDate(LocalDate date) {
+    public final void writeLocalDate(LocalDate date) {
         int year = date.getYear();
         int month = date.getMonthValue();
         int dayOfMonth = date.getDayOfMonth();
@@ -1589,7 +1589,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeLocalDateTime(LocalDateTime dateTime) {
+    public final void writeLocalDateTime(LocalDateTime dateTime) {
         int year = dateTime.getYear();
         int month = dateTime.getMonthValue();
         int dayOfMonth = dateTime.getDayOfMonth();
@@ -1657,7 +1657,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeDateYYYMMDD8(int year, int month, int dayOfMonth) {
+    public final void writeDateYYYMMDD8(int year, int month, int dayOfMonth) {
         ensureCapacity(off + 10);
 
         bytes[off] = (byte) quote;
@@ -1674,7 +1674,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
+    public final void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
         ensureCapacity(off + 12);
 
         bytes[off] = (byte) quote;
@@ -1693,7 +1693,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeTimeHHMMSS8(int hour, int minute, int second) {
+    public final void writeTimeHHMMSS8(int hour, int minute, int second) {
         ensureCapacity(off + 10);
 
         bytes[off] = (byte) quote;
@@ -1711,7 +1711,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeLocalTime(LocalTime time) {
+    public final void writeLocalTime(LocalTime time) {
         int hour = time.getHour();
         int minute = time.getMinute();
         int second = time.getSecond();
@@ -1768,7 +1768,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeZonedDateTime(ZonedDateTime dateTime) {
+    public final void writeZonedDateTime(ZonedDateTime dateTime) {
         if (dateTime == null) {
             writeNull();
             return;
@@ -1863,7 +1863,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeBigInt(BigInteger value, long features) {
+    public final void writeBigInt(BigInteger value, long features) {
         if (value == null) {
             writeNumberNull();
             return;
@@ -1900,7 +1900,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeDateTimeISO8601(
+    public final void writeDateTimeISO8601(
             int year,
             int month,
             int dayOfMonth,
@@ -1998,7 +1998,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeDecimal(BigDecimal value) {
+    public final void writeDecimal(BigDecimal value) {
         if (value == null) {
             writeNull();
             return;
@@ -2023,12 +2023,12 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeNameRaw(char[] chars) {
+    public final void writeNameRaw(char[] chars) {
         throw new JSONException("UnsupportedOperation");
     }
 
     @Override
-    public void writeNameRaw(char[] bytes, int offset, int len) {
+    public final void writeNameRaw(char[] bytes, int offset, int len) {
         throw new JSONException("UnsupportedOperation");
     }
 
@@ -2291,7 +2291,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return new String(bytes, 0, off, StandardCharsets.UTF_8);
     }
 
@@ -2306,7 +2306,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public int flushTo(OutputStream out, Charset charset) throws IOException {
+    public final int flushTo(OutputStream out, Charset charset) throws IOException {
         if (charset != null && charset != StandardCharsets.UTF_8) {
             throw new JSONException("UnsupportedOperation");
         }
