@@ -1208,7 +1208,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeInt32(int i) {
+    public final void writeInt32(int i) {
         if ((context.features & Feature.WriteNonStringValueAsString.mask) != 0) {
             writeString(Integer.toString(i));
             return;
@@ -1305,7 +1305,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeInt64(long i) {
+    public final void writeInt64(long i) {
         boolean writeAsString = false;
         if ((context.features & (Feature.WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0) {
             writeAsString = true;

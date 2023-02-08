@@ -1472,4 +1472,18 @@ public class JSONArray
     static <T> List<T> parseArray(String input, Class<T> type) {
         return JSON.parseArray(input, type);
     }
+
+    /**
+     * See {@link JSON#toJSON} for details
+     */
+    public static JSONArray from(Object obj) {
+        return (JSONArray) JSON.toJSON(obj);
+    }
+
+    /**
+     * See {@link JSON#toJSON} for details
+     */
+    public static JSONArray from(Object obj, JSONWriter.Feature... writeFeatures) {
+        return (JSONArray) JSON.toJSON(obj, writeFeatures);
+    }
 }

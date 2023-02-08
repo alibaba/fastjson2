@@ -1942,4 +1942,18 @@ public class JSONObject
     public static JSONObject parse(String text, JSONReader.Feature... features) {
         return JSON.parseObject(text, features);
     }
+
+    /**
+     * See {@link JSON#toJSON} for details
+     */
+    public static JSONObject from(Object obj) {
+        return (JSONObject) JSON.toJSON(obj);
+    }
+
+    /**
+     * See {@link JSON#toJSON} for details
+     */
+    public static JSONObject from(Object obj, JSONWriter.Feature... writeFeatures) {
+        return (JSONObject) JSON.toJSON(obj, writeFeatures);
+    }
 }

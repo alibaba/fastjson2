@@ -52,7 +52,7 @@ class JSONWriterUTF16
     }
 
     @Override
-    public void close() {
+    public final void close() {
         JSONFactory.releaseCharArray(cachedIndex, chars);
     }
 
@@ -76,7 +76,7 @@ class JSONWriterUTF16
     }
 
     @Override
-    public void writeColon() {
+    public final void writeColon() {
         if (off == chars.length) {
             int minCapacity = off + 1;
             int oldCapacity = chars.length;
@@ -178,6 +178,64 @@ class JSONWriterUTF16
     @Override
     public void endArray() {
         level--;
+        if (off == chars.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = chars.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            chars = Arrays.copyOf(chars, newCapacity);
+        }
+        chars[off++] = ']';
+    }
+
+    public final void writeString(List<String> list) {
+        // startArray();
+        if (off == chars.length) {
+            int minCapacity = off + 1;
+            int oldCapacity = chars.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            chars = Arrays.copyOf(chars, newCapacity);
+        }
+        chars[off++] = '[';
+
+        for (int i = 0, size = list.size(); i < size; i++) {
+            if (i != 0) {
+                if (off == chars.length) {
+                    int minCapacity = off + 1;
+                    int oldCapacity = chars.length;
+                    int newCapacity = oldCapacity + (oldCapacity >> 1);
+                    if (newCapacity - minCapacity < 0) {
+                        newCapacity = minCapacity;
+                    }
+                    if (newCapacity - maxArraySize > 0) {
+                        throw new OutOfMemoryError();
+                    }
+
+                    // minCapacity is usually close to size, so this is a win:
+                    chars = Arrays.copyOf(chars, newCapacity);
+                }
+                chars[off++] = ',';
+            }
+
+            String str = list.get(i);
+            writeString(str);
+        }
+
         if (off == chars.length) {
             int minCapacity = off + 1;
             int oldCapacity = chars.length;
@@ -383,6 +441,14 @@ class JSONWriterUTF16
             chars[off++] = quote;
             return;
         }
+
+        writeStringEscape(str);
+    }
+
+    protected final void writeStringEscape(String str) {
+        final int strlen = str.length();
+        boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
 
         ensureCapacity(off + strlen * 6 + 2);
 
@@ -991,7 +1057,7 @@ class JSONWriterUTF16
     }
 
     @Override
-    public void writeNameRaw(char[] chars) {
+    public final void writeNameRaw(char[] chars) {
         {
             // inline ensureCapacity
             int minCapacity = off + chars.length + (startObject ? 0 : 1);
@@ -1065,7 +1131,7 @@ class JSONWriterUTF16
     }
 
     @Override
-    public void writeInt32(int i) {
+    public final void writeInt32(int i) {
         if ((context.features & Feature.WriteNonStringValueAsString.mask) != 0) {
             writeString(Integer.toString(i));
             return;
@@ -1162,7 +1228,7 @@ class JSONWriterUTF16
     }
 
     @Override
-    public void writeInt64(long i) {
+    public final void writeInt64(long i) {
         boolean writeAsString = false;
         if ((context.features & (Feature.WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0) {
             writeAsString = true;

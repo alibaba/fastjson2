@@ -7665,7 +7665,7 @@ class JSONReaderUTF8
     }
 
     @Override
-    public boolean isReference() {
+    public final boolean isReference() {
         if (ch != '{') {
             return false;
         }

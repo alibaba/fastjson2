@@ -2005,7 +2005,7 @@ public interface JSON {
      *
      * @param text the JSON {@link String} to be parsed
      * @param type specify the {@link Class} to be converted
-     * @since 2.0.20
+     * @since 2.0.21
      */
     static <T> List<T> parseArray(String text, Class<T> type) {
         if (text == null || text.isEmpty()) {

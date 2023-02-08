@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.*;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -486,6 +487,7 @@ public class ObjectWriterAdapter<T>
             FieldWriter fieldWriter = fieldWriters.get(i);
 
             Field field = fieldWriter.field;
+
             if (ignoreNonFieldGetter
                     && fieldWriter.method != null
                     && (fieldWriter.features & FieldInfo.FIELD_MASK) == 0) {
@@ -571,6 +573,10 @@ public class ObjectWriterAdapter<T>
             }
             if (contextValueFilter != null) {
                 if (beanContext == null) {
+                    if (field == null && fieldWriter.method != null) {
+                        field = BeanUtils.getDeclaredField(objectClass, fieldWriter.fieldName);
+                    }
+
                     beanContext = new BeanContext(
                             objectClass,
                             fieldWriter.method,
