@@ -953,16 +953,12 @@
             <id>enable-incubators-for-jdk17+</id>
             <activation>
                 <jdk>[17,)</jdk>
-                <property>
-                    <name>performRelease</name>
-                    <value>!true</value>
-                </property>
             </activation>
             <modules>
                 <!--
                 <module>example-graalvm-native</module>
-                <module>extension-spring6</module>
                 -->
+                <module>extension-spring6</module>
                 <module>incubator-vector</module>
             </modules>
         </profile>
