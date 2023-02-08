@@ -174,4 +174,23 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>enable-incubators-for-jdk17+</id>
+            <activation>
+                <jdk>[17,)</jdk>
+                <property>
+                    <name>performRelease</name>
+                    <value>!true</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.alibaba.fastjson2</groupId>
+                    <artifactId>fastjson2-incubator-vector</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>
