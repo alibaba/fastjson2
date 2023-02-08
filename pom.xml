@@ -950,6 +950,23 @@
             </build>
         </profile>
         <profile>
+            <id>enable-incubators-for-jdk17+</id>
+            <activation>
+                <jdk>[17,)</jdk>
+                <property>
+                    <name>performRelease</name>
+                    <value>!true</value>
+                </property>
+            </activation>
+            <modules>
+                <!--
+                <module>example-graalvm-native</module>
+                <module>extension-spring6</module>
+                -->
+                <module>incubator-vector</module>
+            </modules>
+        </profile>
+        <profile>
             <id>deploy-settings</id>
             <activation>
                 <property>
@@ -997,30 +1014,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-        <profile>
-            <id>jdk17</id>
-            <activation>
-                <jdk>[17,18,19,20)</jdk>
-            </activation>
-            <modules>
-                <module>adapter</module>
-                <module>benchmark</module>
-                <module>core</module>
-                <!--
-                    <module>example-graalvm-native</module>
-                -->
-                <module>example-spring-test</module>
-                <!--
-                    <module>example-spring6-test</module>
-                -->
-                <module>extension</module>
-                <module>extension-spring5</module>
-                <module>extension-spring6</module>
-                <module>fastjson1-compatible</module>
-                <module>incubator-vector</module>
-                <module>kotlin</module>
-            </modules>
         </profile>
     </profiles>
 </project>
