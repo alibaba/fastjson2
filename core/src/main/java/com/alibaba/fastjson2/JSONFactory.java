@@ -52,9 +52,14 @@ public final class JSONFactory {
     static final Function<JSONWriter.Context, JSONWriter> INCUBATOR_VECTOR_WRITER_CREATOR_UTF16;
     static final JSONReaderUTF8Creator INCUBATOR_VECTOR_READER_CREATOR_ASCII;
     static final JSONReaderUTF8Creator INCUBATOR_VECTOR_READER_CREATOR_UTF8;
+    static final JSONReaderUTF16Creator INCUBATOR_VECTOR_READER_CREATOR_UTF16;
 
     interface JSONReaderUTF8Creator {
         JSONReader create(JSONReader.Context ctx, String str, byte[] bytes, int offset, int length);
+    }
+
+    interface JSONReaderUTF16Creator {
+        JSONReader create(JSONReader.Context ctx, String str, char[] chars, int offset, int length);
     }
 
     static final class NameCacheEntry {
@@ -206,6 +211,7 @@ public final class JSONFactory {
         Function<JSONWriter.Context, JSONWriter> incubatorVectorCreatorUTF16 = null;
         JSONReaderUTF8Creator readerCreatorASCII = null;
         JSONReaderUTF8Creator readerCreatorUTF8 = null;
+        JSONReaderUTF16Creator readerCreatorUTF16 = null;
         if (JDKUtils.VECTOR_SUPPORT) {
             try {
                 Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONWriterUTF8Vector$Factory");
@@ -238,11 +244,20 @@ public final class JSONFactory {
                 // skip
                 initErrorLast = ignored;
             }
+
+            try {
+                Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderUTF16Vector$Factory");
+                readerCreatorUTF16 = (JSONReaderUTF16Creator) factoryClass.newInstance();
+            } catch (Throwable ignored) {
+                // skip
+                initErrorLast = ignored;
+            }
         }
         INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 = incubatorVectorCreatorUTF8;
         INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 = incubatorVectorCreatorUTF16;
         INCUBATOR_VECTOR_READER_CREATOR_ASCII = readerCreatorASCII;
         INCUBATOR_VECTOR_READER_CREATOR_UTF8 = readerCreatorUTF8;
+        INCUBATOR_VECTOR_READER_CREATOR_UTF16 = readerCreatorUTF16;
     }
 
     public static boolean isUseJacksonAnnotation() {

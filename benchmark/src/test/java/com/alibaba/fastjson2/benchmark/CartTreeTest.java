@@ -103,8 +103,8 @@ public class CartTreeTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2();
-        fastjson2_jsonb();
+        fastjson2();
+//        fastjson2_jsonb();
 //        jackson_perf_test();
 //        wastjson_test();
     }
