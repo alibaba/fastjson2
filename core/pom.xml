@@ -239,6 +239,7 @@
                                 <moduleInfoSource>
                                     open module com.alibaba.fastjson2 {
                                     requires transitive jdk.unsupported;
+                                    requires java.management;
 
                                     exports com.alibaba.fastjson2;
                                     exports com.alibaba.fastjson2.annotation;

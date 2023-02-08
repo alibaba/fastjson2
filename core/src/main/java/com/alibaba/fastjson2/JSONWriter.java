@@ -68,7 +68,7 @@ public abstract class JSONWriter
         maxArraySize = (context.features & LargeObject.mask) != 0 ? 1073741824 : 67108864;
     }
 
-    public Charset getCharset() {
+    public final Charset getCharset() {
         return charset;
     }
 
@@ -80,11 +80,11 @@ public abstract class JSONWriter
         return utf16;
     }
 
-    public boolean isIgnoreNoneSerializable() {
+    public final boolean isIgnoreNoneSerializable() {
         return (context.features & Feature.IgnoreNoneSerializable.mask) != 0;
     }
 
-    public boolean isIgnoreNoneSerializable(Object object) {
+    public final boolean isIgnoreNoneSerializable(Object object) {
         return (context.features & Feature.IgnoreNoneSerializable.mask) != 0
                 && object != null
                 && !Serializable.class.isAssignableFrom(object.getClass());
@@ -98,24 +98,24 @@ public abstract class JSONWriter
         context.config(features);
     }
 
-    public void config(Feature feature, boolean state) {
+    public final void config(Feature feature, boolean state) {
         context.config(feature, state);
     }
 
-    public Context getContext() {
+    public final Context getContext() {
         return context;
     }
 
-    public int level() {
+    public final int level() {
         return level;
     }
 
-    public void setRootObject(Object rootObject) {
+    public final void setRootObject(Object rootObject) {
         this.rootObject = rootObject;
         this.path = JSONWriter.Path.ROOT;
     }
 
-    public String setPath(String name, Object object) {
+    public final String setPath(String name, Object object) {
         if ((context.features & Feature.ReferenceDetection.mask) == 0) {
             return null;
         }
@@ -146,7 +146,7 @@ public abstract class JSONWriter
         return previous.toString();
     }
 
-    public String setPath(FieldWriter fieldWriter, Object object) {
+    public final String setPath(FieldWriter fieldWriter, Object object) {
         if ((context.features & Feature.ReferenceDetection.mask) == 0) {
             return null;
         }
@@ -181,7 +181,7 @@ public abstract class JSONWriter
         return previous.toString();
     }
 
-    public String setPath(int index, Object object) {
+    public final String setPath(int index, Object object) {
         if ((context.features & Feature.ReferenceDetection.mask) == 0) {
             return null;
         }
@@ -226,7 +226,7 @@ public abstract class JSONWriter
         return previous.toString();
     }
 
-    public void popPath(Object object) {
+    public final void popPath(Object object) {
         if (this.path == null) {
             return;
         }
@@ -250,57 +250,57 @@ public abstract class JSONWriter
         return context.hasFilter || (context.features & feature) != 0;
     }
 
-    public boolean isWriteNulls() {
+    public final boolean isWriteNulls() {
         return (context.features & Feature.WriteNulls.mask) != 0;
     }
 
-    public boolean isRefDetect() {
+    public final boolean isRefDetect() {
         return (context.features & Feature.ReferenceDetection.mask) != 0;
     }
 
-    public boolean isUseSingleQuotes() {
+    public final boolean isUseSingleQuotes() {
         return useSingleQuote;
     }
 
-    public boolean isRefDetect(Object object) {
+    public final boolean isRefDetect(Object object) {
         return (context.features & Feature.ReferenceDetection.mask) != 0
                 && object != null
                 && !ObjectWriterProvider.isNotReferenceDetect(object.getClass());
     }
 
-    public boolean containsReference(Object value) {
+    public final boolean containsReference(Object value) {
         return refs != null && refs.containsKey(value);
     }
 
-    public boolean removeReference(Object value) {
+    public final boolean removeReference(Object value) {
         return this.refs != null && this.refs.remove(value) != null;
     }
 
-    public boolean isBeanToArray() {
+    public final boolean isBeanToArray() {
         return (context.features & Feature.BeanToArray.mask) != 0;
     }
 
-    public boolean isEnabled(Feature feature) {
+    public final boolean isEnabled(Feature feature) {
         return (context.features & feature.mask) != 0;
     }
 
-    public boolean isEnabled(long feature) {
+    public final boolean isEnabled(long feature) {
         return (context.features & feature) != 0;
     }
 
-    public long getFeatures() {
+    public final long getFeatures() {
         return context.features;
     }
 
-    public long getFeatures(long features) {
+    public final long getFeatures(long features) {
         return context.features | features;
     }
 
-    public boolean isIgnoreErrorGetter() {
+    public final boolean isIgnoreErrorGetter() {
         return (context.features & Feature.IgnoreErrorGetter.mask) != 0;
     }
 
-    public boolean isWriteTypeInfo(Object object, Class fieldClass) {
+    public final boolean isWriteTypeInfo(Object object, Class fieldClass) {
         long features = context.features;
         if ((features & Feature.WriteClassName.mask) == 0) {
             return false;
@@ -325,7 +325,7 @@ public abstract class JSONWriter
                 || object != this.rootObject;
     }
 
-    public boolean isWriteTypeInfo(Object object, Type fieldType) {
+    public final boolean isWriteTypeInfo(Object object, Type fieldType) {
         long features = context.features;
         if ((features & Feature.WriteClassName.mask) == 0) {
             return false;
@@ -370,7 +370,7 @@ public abstract class JSONWriter
                 || object != this.rootObject;
     }
 
-    public boolean isWriteTypeInfo(Object object) {
+    public final boolean isWriteTypeInfo(Object object) {
         long features = context.features;
         if ((features & Feature.WriteClassName.mask) == 0) {
             return false;
@@ -388,7 +388,7 @@ public abstract class JSONWriter
                 || object != this.rootObject;
     }
 
-    public boolean isWriteTypeInfo(Object object, Type fieldType, long features) {
+    public final boolean isWriteTypeInfo(Object object, Type fieldType, long features) {
         features |= context.features;
 
         if ((features & Feature.WriteClassName.mask) == 0) {
@@ -427,7 +427,7 @@ public abstract class JSONWriter
                 || object != this.rootObject;
     }
 
-    public boolean isWriteTypeInfo(Object object, Class fieldClass, long features) {
+    public final boolean isWriteTypeInfo(Object object, Class fieldClass, long features) {
         if (object == null) {
             return false;
         }
@@ -457,7 +457,7 @@ public abstract class JSONWriter
                 || object != this.rootObject;
     }
 
-    public boolean isWriteMapTypeInfo(Object object, Class fieldClass, long features) {
+    public final boolean isWriteMapTypeInfo(Object object, Class fieldClass, long features) {
         if (object == null) {
             return false;
         }
@@ -482,7 +482,7 @@ public abstract class JSONWriter
         return (features & Feature.NotWriteRootClassName.mask) == 0 || object != this.rootObject;
     }
 
-    public boolean isWriteTypeInfo(Object object, long features) {
+    public final boolean isWriteTypeInfo(Object object, long features) {
         features |= context.features;
 
         if ((features & Feature.WriteClassName.mask) == 0) {
@@ -502,27 +502,40 @@ public abstract class JSONWriter
                 || object != this.rootObject;
     }
 
-    public ObjectWriter getObjectWriter(Class objectClass) {
+    public final ObjectWriter getObjectWriter(Class objectClass) {
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         return context.provider.getObjectWriter(objectClass, objectClass, fieldBased);
     }
 
-    public ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
+    public final ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         return context.provider.getObjectWriter(objectType, objectClass, fieldBased);
     }
 
     public static JSONWriter of() {
         Context writeContext = createWriteContext();
+
+        JSONWriter jsonWriter;
         if (JVM_VERSION == 8) {
-            return new JSONWriterUTF16JDK8(writeContext);
+            jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+        } else if ((defaultWriterFeatures & Feature.OptimizedForAscii.mask) != 0) {
+            if (STRING_VALUE != null) {
+                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
+                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
+                } else {
+                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+                }
+            } else {
+                jsonWriter = new JSONWriterUTF8(writeContext);
+            }
+        } else {
+            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
+                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
+            } else {
+                jsonWriter = new JSONWriterUTF16(writeContext);
+            }
         }
-
-        if ((defaultWriterFeatures & Feature.OptimizedForAscii.mask) != 0) {
-            return STRING_VALUE != null ? new JSONWriterUTF8JDK9(writeContext) : new JSONWriterUTF8(writeContext);
-        }
-
-        return new JSONWriterUTF16(writeContext);
+        return jsonWriter;
     }
 
     public static JSONWriter of(ObjectWriterProvider provider, Feature... features) {
@@ -540,9 +553,21 @@ public abstract class JSONWriter
         if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = STRING_VALUE != null ? new JSONWriterUTF8JDK9(writeContext) : new JSONWriterUTF8(writeContext);
+            if (STRING_VALUE != null) {
+                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
+                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
+                } else {
+                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+                }
+            } else {
+                jsonWriter = new JSONWriterUTF8(writeContext);
+            }
         } else {
-            jsonWriter = new JSONWriterUTF16(writeContext);
+            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
+                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
+            } else {
+                jsonWriter = new JSONWriterUTF16(writeContext);
+            }
         }
 
         if (writeContext.isEnabled(Feature.PrettyFormat)) {
@@ -557,11 +582,21 @@ public abstract class JSONWriter
         if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = STRING_VALUE != null
-                    ? new JSONWriterUTF8JDK9(writeContext)
-                    : new JSONWriterUTF8(writeContext);
+            if (STRING_VALUE != null) {
+                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
+                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
+                } else {
+                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+                }
+            } else {
+                jsonWriter = new JSONWriterUTF8(writeContext);
+            }
         } else {
-            jsonWriter = new JSONWriterUTF16(writeContext);
+            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
+                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
+            } else {
+                jsonWriter = new JSONWriterUTF16(writeContext);
+            }
         }
 
         for (int i = 0; i < features.length; i++) {
@@ -574,9 +609,16 @@ public abstract class JSONWriter
 
     public static JSONWriter ofUTF16(Feature... features) {
         Context writeContext = JSONFactory.createWriteContext(features);
-        JSONWriter jsonWriter = JVM_VERSION == 8
-                ? new JSONWriterUTF16JDK8(writeContext)
-                : new JSONWriterUTF16(writeContext);
+        JSONWriter jsonWriter;
+        if (JVM_VERSION == 8) {
+            jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+        } else {
+            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
+                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
+            } else {
+                jsonWriter = new JSONWriterUTF16(writeContext);
+            }
+        }
 
         for (int i = 0; i < features.length; i++) {
             if (features[i] == Feature.PrettyFormat) {
@@ -626,33 +668,58 @@ public abstract class JSONWriter
 
     public static JSONWriter ofUTF8() {
         Context context = createWriteContext();
+        JSONWriter jsonWriter;
         if (STRING_VALUE != null) {
-            return new JSONWriterUTF8JDK9(context);
+            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
+                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(context);
+            } else {
+                jsonWriter = new JSONWriterUTF8JDK9(context);
+            }
         } else {
-            return new JSONWriterUTF8(context);
+            jsonWriter = new JSONWriterUTF8(context);
         }
+
+        if ((context.features & JSONWriter.Feature.PrettyFormat.mask) != 0) {
+            jsonWriter = new JSONWriterPretty(jsonWriter);
+        }
+
+        return jsonWriter;
     }
 
     public static JSONWriter ofUTF8(JSONWriter.Context context) {
+        JSONWriter jsonWriter;
         if (STRING_VALUE != null) {
-            return new JSONWriterUTF8JDK9(context);
+            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
+                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(context);
+            } else {
+                jsonWriter = new JSONWriterUTF8JDK9(context);
+            }
         } else {
-            return new JSONWriterUTF8(context);
+            jsonWriter = new JSONWriterUTF8(context);
         }
+
+        if ((context.features & JSONWriter.Feature.PrettyFormat.mask) != 0) {
+            jsonWriter = new JSONWriterPretty(jsonWriter);
+        }
+
+        return jsonWriter;
     }
 
     public static JSONWriter ofUTF8(Feature... features) {
-        Context writeContext = createWriteContext(features);
+        Context context = createWriteContext(features);
 
         JSONWriter jsonWriter;
         if (STRING_VALUE != null) {
-            jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
+                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(context);
+            } else {
+                jsonWriter = new JSONWriterUTF8JDK9(context);
+            }
         } else {
-            jsonWriter = new JSONWriterUTF8(writeContext);
+            jsonWriter = new JSONWriterUTF8(context);
         }
 
-        boolean pretty = (writeContext.features & JSONWriter.Feature.PrettyFormat.mask) != 0;
-        if (pretty) {
+        if ((context.features & JSONWriter.Feature.PrettyFormat.mask) != 0) {
             jsonWriter = new JSONWriterPretty(jsonWriter);
         }
         return jsonWriter;
