@@ -179,10 +179,6 @@
             <id>enable-incubators-for-jdk17+</id>
             <activation>
                 <jdk>[17,)</jdk>
-                <property>
-                    <name>performRelease</name>
-                    <value>!true</value>
-                </property>
             </activation>
             <dependencies>
                 <dependency>

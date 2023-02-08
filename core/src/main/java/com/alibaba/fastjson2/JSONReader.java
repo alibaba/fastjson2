@@ -2591,8 +2591,19 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(char[] chars) {
+        Context context = createReadContext();
+
+        if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
+            return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
+                    context,
+                    null,
+                    chars,
+                    0,
+                    chars.length);
+        }
+
         return new JSONReaderUTF16(
-                JSONFactory.createReadContext(),
+                context,
                 null,
                 chars,
                 0,
@@ -2601,6 +2612,15 @@ public abstract class JSONReader
 
     @Deprecated
     public static JSONReader of(Context context, char[] chars) {
+        if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
+            return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
+                    context,
+                    null,
+                    chars,
+                    0,
+                    chars.length);
+        }
+
         return new JSONReaderUTF16(
                 context,
                 null,
@@ -2731,10 +2751,30 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(char[] chars, int offset, int length) {
-        return new JSONReaderUTF16(JSONFactory.createReadContext(), null, chars, offset, length);
+        Context context = createReadContext();
+
+        if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
+            return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
+                    context,
+                    null,
+                    chars,
+                    offset,
+                    length);
+        }
+
+        return new JSONReaderUTF16(context, null, chars, offset, length);
     }
 
     public static JSONReader of(char[] chars, int offset, int length, Context context) {
+        if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
+            return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
+                    context,
+                    null,
+                    chars,
+                    offset,
+                    length);
+        }
+
         return new JSONReaderUTF16(context, null, chars, offset, length);
     }
 
@@ -2820,6 +2860,15 @@ public abstract class JSONReader
             chars = str.toCharArray();
         }
 
+        if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
+            return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
+                    context,
+                    str,
+                    chars,
+                    0,
+                    length);
+        }
+
         return new JSONReaderUTF16(context, str, chars, 0, length);
     }
 
@@ -2851,6 +2900,15 @@ public abstract class JSONReader
             chars = JDKUtils.getCharArray(str);
         } else {
             chars = str.toCharArray();
+        }
+
+        if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
+            return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
+                    context,
+                    str,
+                    chars,
+                    0,
+                    length);
         }
 
         return new JSONReaderUTF16(context, str, chars, 0, length);
@@ -2886,6 +2944,15 @@ public abstract class JSONReader
             chars = str.toCharArray();
         }
 
+        if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
+            return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
+                    context,
+                    str,
+                    chars,
+                    offset,
+                    length);
+        }
+
         return new JSONReaderUTF16(context, str, chars, offset, length);
     }
 
@@ -2916,6 +2983,15 @@ public abstract class JSONReader
             chars = JDKUtils.getCharArray(str);
         } else {
             chars = str.toCharArray();
+        }
+
+        if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
+            return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
+                    context,
+                    str,
+                    chars,
+                    offset,
+                    length);
         }
 
         return new JSONReaderUTF16(context, str, chars, offset, length);
