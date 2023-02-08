@@ -736,11 +736,7 @@ public abstract class JSONReader
                 return false;
         }
 
-        if (localDate == null) {
-            return false;
-        }
-
-        return true;
+        return localDate != null;
     }
 
     public LocalDate readLocalDate() {
@@ -2127,7 +2123,7 @@ public abstract class JSONReader
                     mag = new int[]{mag0, mag1, mag2, mag3};
                 }
 
-                int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                int signum = negative ? -1 : 1;
                 BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
                 return new BigDecimal(bigInt);
             }
@@ -2405,7 +2401,7 @@ public abstract class JSONReader
                             : new int[]{mag2, mag3}
                             : new int[]{mag1, mag2, mag3}
                             : new int[]{mag0, mag1, mag2, mag3};
-                    int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                    int signum = negative ? -1 : 1;
                     BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
 
                     int adjustedScale = scale - exponent;
@@ -2449,7 +2445,7 @@ public abstract class JSONReader
                         : new int[]{mag2, mag3}
                         : new int[]{mag1, mag2, mag3}
                         : new int[]{mag0, mag1, mag2, mag3};
-                int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                int signum = negative ? -1 : 1;
                 BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
                 BigDecimal decimal = new BigDecimal(bigInt, scale);
 
@@ -2825,7 +2821,7 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (STRING_VALUE != null && STRING_VALUE != null) {
+        if (STRING_VALUE != null) {
             try {
                 final int LATIN1 = 0;
                 int coder = STRING_CODER.applyAsInt(str);
