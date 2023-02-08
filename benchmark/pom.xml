@@ -31,6 +31,13 @@
             <artifactId>fastjson2-extension</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--
+        <dependency>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2-incubator-vector</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
@@ -167,4 +174,19 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>enable-incubators-for-jdk17+</id>
+            <activation>
+                <jdk>[17,)</jdk>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.alibaba.fastjson2</groupId>
+                    <artifactId>fastjson2-incubator-vector</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

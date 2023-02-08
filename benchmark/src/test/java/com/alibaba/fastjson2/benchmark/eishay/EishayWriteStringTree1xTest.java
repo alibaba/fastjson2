@@ -16,7 +16,6 @@ public class EishayWriteStringTree1xTest {
             System.out.println("fastjson1 millis : " + millis);
             // zulu8.62.0.19 : 816
             // zulu11.52.13 :
-            // zulu17.32.13 :
         }
     }
 
@@ -30,7 +29,7 @@ public class EishayWriteStringTree1xTest {
             System.out.println("fastjson2 millis : " + millis);
             // zulu8.62.0.19 : 579
             // zulu11.52.13 :
-            // zulu17.32.13 :
+            // zulu17.40.19 : 678
         }
     }
 
@@ -105,9 +104,9 @@ public class EishayWriteStringTree1xTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2();
+        fastjson2();
 //        fastjson2_ReferenceDetection();
-        fastjson2_jsonb();
+//        fastjson2_jsonb();
 //        fastjson1();
 //        jackson();
 //        wastjson();

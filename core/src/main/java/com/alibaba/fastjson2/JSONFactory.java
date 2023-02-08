@@ -10,16 +10,20 @@ import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.InputStream;
+import java.lang.invoke.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 
 public final class JSONFactory {
+    static volatile Throwable initErrorLast;
+
     public static final String CREATOR;
 
     public static final String PROPERTY_DENY_PROPERTY = "fastjson2.parser.deny";
@@ -43,6 +47,20 @@ public final class JSONFactory {
 
     static final NameCacheEntry[] NAME_CACHE = new NameCacheEntry[8192];
     static final NameCacheEntry2[] NAME_CACHE2 = new NameCacheEntry2[8192];
+
+    static final Function<JSONWriter.Context, JSONWriter> INCUBATOR_VECTOR_WRITER_CREATOR_UTF8;
+    static final Function<JSONWriter.Context, JSONWriter> INCUBATOR_VECTOR_WRITER_CREATOR_UTF16;
+    static final JSONReaderUTF8Creator INCUBATOR_VECTOR_READER_CREATOR_ASCII;
+    static final JSONReaderUTF8Creator INCUBATOR_VECTOR_READER_CREATOR_UTF8;
+    static final JSONReaderUTF16Creator INCUBATOR_VECTOR_READER_CREATOR_UTF16;
+
+    interface JSONReaderUTF8Creator {
+        JSONReader create(JSONReader.Context ctx, String str, byte[] bytes, int offset, int length);
+    }
+
+    interface JSONReaderUTF16Creator {
+        JSONReader create(JSONReader.Context ctx, String str, char[] chars, int offset, int length);
+    }
 
     static final class NameCacheEntry {
         final String name;
@@ -188,6 +206,58 @@ public final class JSONFactory {
 
             useJacksonAnnotation = property == null || !property.equals("false");
         }
+
+        Function<JSONWriter.Context, JSONWriter> incubatorVectorCreatorUTF8 = null;
+        Function<JSONWriter.Context, JSONWriter> incubatorVectorCreatorUTF16 = null;
+        JSONReaderUTF8Creator readerCreatorASCII = null;
+        JSONReaderUTF8Creator readerCreatorUTF8 = null;
+        JSONReaderUTF16Creator readerCreatorUTF16 = null;
+        if (JDKUtils.VECTOR_SUPPORT) {
+            try {
+                Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONWriterUTF8Vector$Factory");
+                incubatorVectorCreatorUTF8 = (Function<JSONWriter.Context, JSONWriter>) factoryClass.newInstance();
+            } catch (Throwable ignored) {
+                // skip
+                initErrorLast = ignored;
+            }
+
+            try {
+                Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONWriterUTF16Vector$Factory");
+                incubatorVectorCreatorUTF16 = (Function<JSONWriter.Context, JSONWriter>) factoryClass.newInstance();
+            } catch (Throwable ignored) {
+                // skip
+                initErrorLast = ignored;
+            }
+
+            try {
+                Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderASCIIVector$Factory");
+                readerCreatorASCII = (JSONReaderUTF8Creator) factoryClass.newInstance();
+            } catch (Throwable ignored) {
+                // skip
+                initErrorLast = ignored;
+            }
+
+            try {
+                Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderUTF8Vector$Factory");
+                readerCreatorUTF8 = (JSONReaderUTF8Creator) factoryClass.newInstance();
+            } catch (Throwable ignored) {
+                // skip
+                initErrorLast = ignored;
+            }
+
+            try {
+                Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderUTF16Vector$Factory");
+                readerCreatorUTF16 = (JSONReaderUTF16Creator) factoryClass.newInstance();
+            } catch (Throwable ignored) {
+                // skip
+                initErrorLast = ignored;
+            }
+        }
+        INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 = incubatorVectorCreatorUTF8;
+        INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 = incubatorVectorCreatorUTF16;
+        INCUBATOR_VECTOR_READER_CREATOR_ASCII = readerCreatorASCII;
+        INCUBATOR_VECTOR_READER_CREATOR_UTF8 = readerCreatorUTF8;
+        INCUBATOR_VECTOR_READER_CREATOR_UTF16 = readerCreatorUTF16;
     }
 
     public static boolean isUseJacksonAnnotation() {

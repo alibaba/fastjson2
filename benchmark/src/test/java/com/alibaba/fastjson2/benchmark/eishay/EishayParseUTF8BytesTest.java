@@ -15,7 +15,7 @@ public class EishayParseUTF8BytesTest {
             System.out.println("fastjson2 millis : " + millis);
             // zulu8.62.0.19 : 703 746 710 706 700 682
             // zulu11.52.13 : 579 565 552 541 554
-            // zulu17.32.13 : 563 545 531 551
+            // zulu17.40.19 : 600
         }
     }
 
@@ -48,8 +48,8 @@ public class EishayParseUTF8BytesTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2();
-        dsljson();
+        fastjson2();
+//        dsljson();
 //        jackson();
     }
 }

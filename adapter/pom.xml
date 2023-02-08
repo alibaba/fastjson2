@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>fastjson2-adapter</artifactId>
-    <name>adapter</name>
+    <name>fastjson2-adapter</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

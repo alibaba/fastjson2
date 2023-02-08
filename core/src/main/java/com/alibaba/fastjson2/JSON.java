@@ -2238,9 +2238,21 @@ public interface JSON {
         if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = STRING_VALUE != null ? new JSONWriterUTF8JDK9(writeContext) : new JSONWriterUTF8(writeContext);
+            if (STRING_VALUE != null) {
+                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
+                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
+                } else {
+                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+                }
+            } else {
+                jsonWriter = new JSONWriterUTF8(writeContext);
+            }
         } else {
-            jsonWriter = new JSONWriterUTF16(writeContext);
+            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
+                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
+            } else {
+                jsonWriter = new JSONWriterUTF16(writeContext);
+            }
         }
 
         try (JSONWriter writer = pretty ?
@@ -2306,9 +2318,21 @@ public interface JSON {
         if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = STRING_VALUE != null ? new JSONWriterUTF8JDK9(writeContext) : new JSONWriterUTF8(writeContext);
+            if (STRING_VALUE != null) {
+                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
+                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
+                } else {
+                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+                }
+            } else {
+                jsonWriter = new JSONWriterUTF8(writeContext);
+            }
         } else {
-            jsonWriter = new JSONWriterUTF16(writeContext);
+            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
+                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
+            } else {
+                jsonWriter = new JSONWriterUTF16(writeContext);
+            }
         }
 
         try (JSONWriter writer = pretty ?
