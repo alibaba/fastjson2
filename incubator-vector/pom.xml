@@ -32,6 +32,7 @@
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
+        <add.modules.option>--add-modules=jdk.incubator.vector</add.modules.option>
     </properties>
 
     <organization>
@@ -76,7 +77,7 @@
                     <source>17</source>
                     <target>17</target>
                     <compilerArgs combine.children="append">
-                        <arg>--add-modules=jdk.incubator.vector</arg>
+                        <arg>${add.modules.option}</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
@@ -89,7 +90,7 @@
                     <systemPropertyVariables>
                         <user.timezone>Asia/Shanghai</user.timezone>
                     </systemPropertyVariables>
-                    <argLine>--add-modules=jdk.incubator.vector</argLine>
+                    <argLine>${add.modules.option}</argLine>
                 </configuration>
             </plugin>
         </plugins>
@@ -109,7 +110,10 @@
                     <plugin>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
-                            <doclint>all,-missing,accessibility</doclint>
+                            <show>package</show>
+                            <additionalOptions>
+                                <additionalOption>${add.modules.option}</additionalOption>
+                            </additionalOptions>
                         </configuration>
                     </plugin>
                 </plugins>
