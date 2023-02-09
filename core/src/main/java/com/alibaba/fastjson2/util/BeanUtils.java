@@ -667,6 +667,14 @@ public abstract class BeanUtils {
                 return method;
             }
 
+            if (methodName.startsWith("get")) {
+                String fieldName = BeanUtils.getterName(methodName, null);
+                Field field = BeanUtils.getDeclaredField(enumClass, fieldName);
+                if (field != null && isJSONField(getAnnotations(field))) {
+                    return method;
+                }
+            }
+
             if (member == null) {
                 AtomicReference<Member> memberRef = new AtomicReference<>();
                 for (Class enumInterface : interfaces) {
