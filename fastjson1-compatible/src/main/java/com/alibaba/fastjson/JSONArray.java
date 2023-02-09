@@ -19,7 +19,7 @@ import java.util.function.Function;
 
 public class JSONArray
         extends JSON
-        implements List, Serializable, Cloneable {
+        implements List<Object>, Serializable, Cloneable {
     static ObjectReader<JSONArray> arrayReader;
     static ObjectReader<JSONObject> objectReader;
 
