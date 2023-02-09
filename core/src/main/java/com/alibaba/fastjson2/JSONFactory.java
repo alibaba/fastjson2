@@ -10,7 +10,6 @@ import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.InputStream;
-import java.lang.invoke.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.AccessController;
@@ -184,7 +183,7 @@ public final class JSONFactory {
                 }
             }
 
-            if (property != null && "mixed".equals(property)) {
+            if ("mixed".equals(property)) {
                 MIXED_HASH_ALGORITHM = true;
             } else {
                 MIXED_HASH_ALGORITHM = JVM_VERSION > 8;
@@ -204,7 +203,7 @@ public final class JSONFactory {
                 }
             }
 
-            useJacksonAnnotation = property == null || !property.equals("false");
+            useJacksonAnnotation = !"false".equals(property);
         }
 
         Function<JSONWriter.Context, JSONWriter> incubatorVectorCreatorUTF8 = null;
