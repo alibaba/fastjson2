@@ -623,7 +623,7 @@ public abstract class JSONPath {
                             );
                         }
                     }
-                } else if (allTwoIndexPositive) {
+                } else {
                     JSONPathSingleIndex[] indexes = new JSONPathSingleIndex[jsonPaths.length];
                     for (int i = 0; i < jsonPaths.length; i++) {
                         JSONPathTwoSegment two = (JSONPathTwoSegment) jsonPaths[i];
