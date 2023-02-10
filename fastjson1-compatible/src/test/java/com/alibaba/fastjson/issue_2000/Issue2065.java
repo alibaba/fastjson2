@@ -19,7 +19,6 @@ public class Issue2065 {
             error = e;
         }
         assertNotNull(error);
-        error.printStackTrace();
     }
 
     @Test
@@ -32,7 +31,6 @@ public class Issue2065 {
             error = e;
         }
         assertNotNull(error);
-        error.printStackTrace();
     }
 
     @Test
