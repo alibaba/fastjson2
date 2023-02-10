@@ -255,13 +255,12 @@ class JSONPathParser {
             case 'r': {
                 String fieldName = jsonReader.readFieldNameUnquote();
                 if ("randomIndex".equals(fieldName)) {
-                    if (!jsonReader.nextIfMatch('(')
-                            || !jsonReader.nextIfMatch(')')
-                            || !(jsonReader.ch == (']'))) {
-                        throw new JSONException("not support : " + fieldName);
+                    if (jsonReader.nextIfMatch('(')
+                            && jsonReader.nextIfMatch(')')
+                            && jsonReader.ch == (']')) {
+                        segment = JSONPathSegment.RandomIndexSegment.INSTANCE;
+                        break;
                     }
-                    segment = JSONPathSegment.RandomIndexSegment.INSTANCE;
-                    break;
                 }
                 throw new JSONException("not support : " + fieldName);
             }
@@ -459,8 +458,7 @@ class JSONPathParser {
                                 throw new JSONException(jsonReader.info("jsonpath syntax error"));
                             }
                         }
-                        JSONPathFilter.NameExistsFilter segment = new JSONPathFilter.NameExistsFilter(fieldName, hashCode);
-                        return segment;
+                        return new JSONPathFilter.NameExistsFilter(fieldName, hashCode);
                     }
                 }
             }
@@ -533,8 +531,7 @@ class JSONPathParser {
 
         if (parentheses) {
             if (jsonReader.nextIfMatch(')')) {
-                JSONPathFilter.NameExistsFilter segment = new JSONPathFilter.NameExistsFilter(fieldName, hashCode);
-                return segment;
+                return new JSONPathFilter.NameExistsFilter(fieldName, hashCode);
             }
         }
 
@@ -689,7 +686,7 @@ class JSONPathParser {
                             fieldName2,
                             hashCode2,
                             strArray,
-                            operator == JSONPathFilter.Operator.NOT_CONTAINS
+                            false
                     );
                 } else if (jsonReader.isNumber()) {
                     List<Number> list = new ArrayList<>();
@@ -706,7 +703,7 @@ class JSONPathParser {
                             fieldName2,
                             hashCode2,
                             values,
-                            operator == JSONPathFilter.Operator.NOT_CONTAINS
+                            false
                     );
                 } else {
                     throw new JSONException(jsonReader.info("jsonpath syntax error"));
