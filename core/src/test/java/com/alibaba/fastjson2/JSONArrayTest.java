@@ -1450,4 +1450,13 @@ public class JSONArrayTest {
         root.addObject().put("id", 123);
         assertEquals("[{\"id\":123}]", root.toString());
     }
+
+    @Test
+    public void test2() {
+        List<String> strings = JSONArray.parseArray("[1,2,3]", String.class);
+        assertEquals(3, strings.size());
+        assertEquals("1", strings.get(0));
+        assertEquals("2", strings.get(1));
+        assertEquals("3", strings.get(2));
+    }
 }

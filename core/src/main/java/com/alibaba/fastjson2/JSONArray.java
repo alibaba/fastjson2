@@ -1467,9 +1467,9 @@ public class JSONArray
      *
      * @param input the JSON {@link String} to be parsed
      * @param type specify the {@link Class} to be converted
-     * @since 2.0.21
+     * @since 2.0.24
      */
-    static <T> List<T> parseArray(String input, Class<T> type) {
+    public static <T> List<T> parseArray(String input, Class<T> type) {
         return JSON.parseArray(input, type);
     }
 
