@@ -9,7 +9,7 @@ import java.lang.reflect.Type;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
-final class ObjectReaderImplEnum2X4
+public final class ObjectReaderImplEnum2X4
         implements ObjectReader {
     final Class enumClass;
     final long typeNameHash;
@@ -62,6 +62,17 @@ final class ObjectReaderImplEnum2X4
         }
 
         return null;
+    }
+
+    public Enum getEnumByOrdinal(int ordinal) {
+        switch (ordinal) {
+            case 0:
+                return enum0;
+            case 1:
+                return enum1;
+            default:
+                return null;
+        }
     }
 
     @Override
