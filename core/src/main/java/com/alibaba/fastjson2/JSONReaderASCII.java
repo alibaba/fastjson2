@@ -1311,7 +1311,7 @@ class JSONReaderASCII
                     } else if (c2 == quote) {
                         offset += 2;
                         i += 2;
-                    } else if (c3 == quote) {
+                    } else {
                         offset += 3;
                         i += 3;
                     }

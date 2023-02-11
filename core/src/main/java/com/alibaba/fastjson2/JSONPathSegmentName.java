@@ -260,8 +260,7 @@ class JSONPathSegmentName
             List sequence = ((JSONPath.Sequence) object).values;
             JSONArray values = new JSONArray(sequence.size());
             for (int i = 0; i < sequence.size(); i++) {
-                Object item = sequence.get(i);
-                context.value = item;
+                context.value = sequence.get(i);
                 JSONPath.Context itemContext = new JSONPath.Context(context.path, context, context.current, context.next, context.readerFeatures);
                 eval(itemContext);
                 Object val = itemContext.value;
