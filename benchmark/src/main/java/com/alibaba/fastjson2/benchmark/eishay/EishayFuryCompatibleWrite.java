@@ -50,10 +50,9 @@ public class EishayFuryCompatibleWrite {
     }
 
     @Benchmark
-    public void fastjson2JSONB(Blackhole bh) {
-        bh.consume(
-                JSONB.toBytes(mc, context)
-        );
+    public void jsonb(Blackhole bh) {
+        byte[] bytes = JSONB.toBytes(mc, context);
+        bh.consume(bytes);
     }
 
 //    @Benchmark

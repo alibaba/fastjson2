@@ -29,7 +29,7 @@ public class EishayFuryCompatibleParse {
             JSONFactory.getDefaultObjectReaderProvider(), features
     );
 
-    static byte[] fastjson2JSONBBytes;
+    static byte[] jsonbBytes;
     static byte[] furyCompatibleBytes;
 //
 //    static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
@@ -46,8 +46,7 @@ public class EishayFuryCompatibleParse {
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
 
-            fastjson2JSONBBytes = JSONB.toBytes(mc, EishayFuryCompatibleWrite.features);
-
+            jsonbBytes = JSONB.toBytes(mc, EishayFuryCompatibleWrite.features);
 //            furyCompatibleBytes = furyCompatible.serialize(mc);
         } catch (Throwable ex) {
             ex.printStackTrace();
@@ -55,15 +54,15 @@ public class EishayFuryCompatibleParse {
     }
 
     @Benchmark
-    public void fastjson2JSONB(Blackhole bh) {
-        bh.consume(
-                JSONB.parseObject(fastjson2JSONBBytes, Object.class, context)
-        );
+    public void jsonb(Blackhole bh) {
+        Object object = JSONB.parseObject(jsonbBytes, Object.class, context);
+        bh.consume(object);
     }
 
 //    @Benchmark
     public void fury(Blackhole bh) {
-//        bh.consume(furyCompatible.deserialize(furyCompatibleBytes));
+//        Object object = furyCompatible.deserialize(furyCompatibleBytes);
+//        bh.consume(object);
     }
 
     public static void main(String[] args) throws Exception {
