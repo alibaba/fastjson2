@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.util.Objects;
 
 public class ResourceUtils {
-
     public static String loadResourceLine(String resourcePath) {
         InputStream inputStream = ClassLoader.getSystemResourceAsStream(resourcePath);
         Objects.requireNonNull(inputStream);
@@ -22,6 +21,4 @@ public class ResourceUtils {
         }
         return content.toString();
     }
-
-
 }

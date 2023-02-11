@@ -5,9 +5,8 @@ import com.alibaba.fastjson2.diff.factory.RunTimeDataFactory;
 import com.alibaba.fastjson2.diff.path.Defects;
 import com.alibaba.fastjson2.diff.path.JsonCompareResult;
 
-public abstract class AbstractArrayHandle extends AbstractDiffHandle implements ArrayHandle {
-
-
+public abstract class AbstractArrayHandle
+    extends AbstractDiffHandle implements ArrayHandle {
     @Override
     public JsonCompareResult handle(JSONArray expectArray, JSONArray actualArray) {
         int expectLen = expectArray.size();
@@ -41,5 +40,4 @@ public abstract class AbstractArrayHandle extends AbstractDiffHandle implements 
     protected abstract void compareKeepOrder(Object[] expect, Object[] actual);
 
     protected abstract void compareIgnoreOrder(Object[] expect, Object[] actual);
-
 }

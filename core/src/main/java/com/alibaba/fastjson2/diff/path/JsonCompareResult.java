@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JsonCompareResult {
-
     private Boolean match = true;
 
     private List<Defects> defectsList;

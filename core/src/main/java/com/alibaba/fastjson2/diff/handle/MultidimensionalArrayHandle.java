@@ -11,9 +11,8 @@ import java.util.Arrays;
 /**
  * Processor of multidimensional array.
  */
-public class MultidimensionalArrayHandle extends AbstractArrayHandle {
-
-
+public class MultidimensionalArrayHandle
+    extends AbstractArrayHandle {
     @Override
     protected void compareKeepOrder(Object[] expect, Object[] actual) {
         for (int i = 0; i < expect.length; i++) {

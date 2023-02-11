@@ -11,8 +11,6 @@ import com.alibaba.fastjson2.diff.path.Defects;
 import java.util.Stack;
 
 public class ComparedUtil {
-
-
     /**
      * When the element is of indeterminate type
      *
@@ -62,5 +60,4 @@ public class ComparedUtil {
         }
         return true;
     }
-
 }

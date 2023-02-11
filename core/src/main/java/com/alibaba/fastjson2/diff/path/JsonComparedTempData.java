@@ -12,7 +12,6 @@ import java.util.Stack;
  * Temporary configurations used in comparison
  */
 public class JsonComparedTempData {
-
     /**
      * Isolate data according to currentPath
      */
@@ -83,5 +82,4 @@ public class JsonComparedTempData {
     public Stack<String> getPath() {
         return getTempData().getPath();
     }
-
 }

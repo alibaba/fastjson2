@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.diff.path;
 
-
 public class Defects {
-
     private Object expect;
 
     private Object actual;

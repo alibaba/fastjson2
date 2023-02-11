@@ -8,8 +8,6 @@ import java.util.Stack;
  * temp data
  */
 public class TempData {
-
-
     /**
      * Temporary defects not recorded in the result
      */
@@ -80,6 +78,4 @@ public class TempData {
         }
         return this.tempPath;
     }
-
-
 }

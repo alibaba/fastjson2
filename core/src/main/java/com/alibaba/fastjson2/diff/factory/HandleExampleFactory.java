@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HandleExampleFactory {
-
     /**
      * Handle the instance bucket of an object
      */
@@ -28,5 +27,4 @@ public class HandleExampleFactory {
         }
         return bucket.get(handle);
     }
-
 }

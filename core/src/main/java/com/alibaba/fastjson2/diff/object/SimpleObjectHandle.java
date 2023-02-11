@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
-public class SimpleObjectHandle extends AbstractObjectHandle {
+public class SimpleObjectHandle
+    extends AbstractObjectHandle {
     @Override
     protected void doHandle(JSONObject expectObject, JSONObject actualObject) {
         Set<String> expectKeys = expectObject.keySet();
@@ -121,5 +121,4 @@ public class SimpleObjectHandle extends AbstractObjectHandle {
     private void compared(Object expect, Object actual) throws IllegalAccessException {
         ComparedUtil.notSureAboutComparison(expect, actual);
     }
-
 }
