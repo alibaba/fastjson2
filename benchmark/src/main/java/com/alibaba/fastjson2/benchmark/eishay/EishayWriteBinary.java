@@ -38,8 +38,12 @@ public class EishayWriteBinary {
         bh.consume(JSON.toJSONBytes(mc));
     }
 
+    public int jsonbSize() {
+        return JSONB.toBytes(mc).length;
+    }
+
     @Benchmark
-    public void fastjson2JSONB(Blackhole bh) {
+    public void jsonb(Blackhole bh) {
         bh.consume(JSONB.toBytes(mc));
     }
 

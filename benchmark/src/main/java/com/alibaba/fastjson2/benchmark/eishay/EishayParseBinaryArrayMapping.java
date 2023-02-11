@@ -8,6 +8,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.benchmark.protobuf.MediaContentHolder;
+import com.alibaba.fastjson2.benchmark.protobuf.MediaContentTransform;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -30,6 +32,8 @@ public class EishayParseBinaryArrayMapping {
     static Kryo kryo;
     static byte[] kryoBytes;
 
+    static byte[] protobufBytes;
+
     static {
         try {
             InputStream is = EishayParseBinaryArrayMapping.class.getClassLoader().getResourceAsStream("data/eishay.json");
@@ -51,6 +55,8 @@ public class EishayParseBinaryArrayMapping {
             Output output = new Output(1024, -1);
             kryo.writeObject(output, mc);
             kryoBytes = output.toBytes();
+
+            protobufBytes = MediaContentTransform.forward(mc).toByteArray();
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -67,8 +73,15 @@ public class EishayParseBinaryArrayMapping {
     }
 
     @Benchmark
-    public void fastjson2JSONB(Blackhole bh) {
+    public void jsonb(Blackhole bh) {
         bh.consume(JSONB.parseObject(fastjson2JSONBBytes, MediaContent.class, JSONReader.Feature.SupportArrayToBean));
+    }
+
+    @Benchmark
+    public void protobuf(Blackhole bh) throws Exception {
+        MediaContentHolder.MediaContent protobufObject = MediaContentHolder.MediaContent.parseFrom(protobufBytes);
+        MediaContent object = MediaContentTransform.reverse(protobufObject);
+        bh.consume(object);
     }
 
     @Benchmark
