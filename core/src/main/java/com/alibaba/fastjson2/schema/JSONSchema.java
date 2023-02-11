@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.schema;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONCreator;
+import com.alibaba.fastjson2.reader.ObjectReader;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -150,16 +151,19 @@ public abstract class JSONSchema {
     }
 
     public static JSONSchema parseSchema(String schema) {
-        Object input = JSON.parse(schema);
-        if (input instanceof JSONObject) {
-            return of((JSONObject) input);
+        if ("true".equals(schema)) {
+            return Any.INSTANCE;
         }
 
-        if (input instanceof Boolean) {
-            return ((Boolean) input).booleanValue() ? Any.INSTANCE : Any.NOT_ANY;
+        if ("false".equals(schema)) {
+            return Any.NOT_ANY;
         }
 
-        return null;
+        try (JSONReader reader = JSONReader.of(schema)) {
+            ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
+            JSONObject object = (JSONObject) objectReader.readObject(reader, null, null, 0);
+            return of(object);
+        }
     }
 
     @JSONCreator

@@ -31,6 +31,7 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReader.EOI;
 import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreCheckClose;
+import static com.alibaba.fastjson2.JSONReader.Feature.UseNativeObject;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public interface JSON {
@@ -51,8 +52,29 @@ public interface JSON {
         }
 
         try (JSONReader reader = JSONReader.of(text)) {
-            ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
-            Object object = objectReader.readObject(reader, null, null, 0);
+            Object object;
+            int ch = reader.current();
+
+            if (reader.context.objectSupplier == null
+                    && (reader.context.features & UseNativeObject.mask) == 0
+                    && (ch == '{' || ch == '[')
+            ) {
+                if (ch == '{') {
+                    JSONObject jsonObject = new JSONObject();
+                    reader.read(jsonObject, 0);
+                    object = jsonObject;
+                } else {
+                    JSONArray array = new JSONArray();
+                    reader.read(array);
+                    object = array;
+                }
+                if (reader.resolveTasks != null) {
+                    reader.handleResolveTasks(object);
+                }
+            } else {
+                ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
+                object = objectReader.readObject(reader, null, null, 0);
+            }
             if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2997,6 +3019,7 @@ public interface JSON {
 
     /**
      * Register ObjectWriterFilter
+     *
      * @param type
      * @param filter
      * @since 2.0.19
