@@ -14,8 +14,7 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.DateUtils.localDateTime;
-import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK8;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 import static java.time.ZoneOffset.UTC;
 
@@ -3734,7 +3733,7 @@ class JSONReaderUTF16
                     str = new String(chars);
                 }
             } else {
-                if (this.str != null && JVM_VERSION > 8) {
+                if (this.str != null && (JVM_VERSION > 8 || ANDROID)) {
                     str = this.str.substring(this.offset, offset);
                 } else {
                     str = new String(chars, this.offset, offset - this.offset);
