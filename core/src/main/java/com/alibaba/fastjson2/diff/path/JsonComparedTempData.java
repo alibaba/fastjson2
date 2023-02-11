@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.diff.path;
 
-
 import com.alibaba.fastjson2.diff.factory.RunTimeDataFactory;
 import com.alibaba.fastjson2.diff.utils.JsonDiffUtil;
 
@@ -17,7 +16,6 @@ public class JsonComparedTempData {
      */
     private Map<String, TempData> nodeDataMap = new HashMap<>();
 
-
     /**
      * clear
      */
@@ -32,7 +30,6 @@ public class JsonComparedTempData {
         return getTempData().isDefectsEmpty();
     }
 
-
     /**
      * Add comparison information
      *
@@ -41,7 +38,6 @@ public class JsonComparedTempData {
     public void addDefects(Defects defects) {
         getTempData().addDefects(defects);
     }
-
 
     /**
      * Get TempData of the current node
@@ -64,13 +60,11 @@ public class JsonComparedTempData {
         getTempData().setAddDiff(addDiff);
     }
 
-
     /**
      * temp path
      *
      * @param key
      */
-
     public void push(String key) {
         getTempData().push(key);
     }

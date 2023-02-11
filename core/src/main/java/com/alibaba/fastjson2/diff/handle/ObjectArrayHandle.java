@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.Stack;
 
 public class ObjectArrayHandle
-    extends AbstractArrayHandle {
+        extends AbstractArrayHandle {
     /**
      * ignore order
      *
@@ -31,10 +31,10 @@ public class ObjectArrayHandle
                 handle.handle(expectItem, actualItem);
             } catch (Exception e) {
                 Defects defects = new Defects()
-                    .setActual(actualItem)
-                    .setExpect(expectItem)
-                    .setIllustrate(String.format("The %d element is inconsistent", i))
-                    .setIndexPath(String.format("%s[%d]", getCurrentPath(), i));
+                        .setActual(actualItem)
+                        .setExpect(expectItem)
+                        .setIllustrate(String.format("The %d element is inconsistent", i))
+                        .setIndexPath(String.format("%s[%d]", getCurrentPath(), i));
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             } finally {
                 RunTimeDataFactory.getCurrentPathInstance().pop();
@@ -44,7 +44,6 @@ public class ObjectArrayHandle
 
     @Override
     public void compareIgnoreOrder(Object[] expect, Object[] actual) {
-
         boolean[] actualSign = new boolean[actual.length];
         boolean[] expectSign = new boolean[expect.length];
 
@@ -85,10 +84,10 @@ public class ObjectArrayHandle
                 handle.handle((JSONObject) expect[i], (JSONObject) actual[j]);
             } catch (Exception ignored) {
                 Defects defects = new Defects()
-                    .setActual(actual[j])
-                    .setExpect(expect[i])
-                    .setIllustrate(String.format("The %d element is inconsistent", i))
-                    .setIndexPath(getCurrentPath());
+                        .setActual(actual[j])
+                        .setExpect(expect[i])
+                        .setIllustrate(String.format("The %d element is inconsistent", i))
+                        .setIndexPath(getCurrentPath());
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
             RunTimeDataFactory.getCurrentPathInstance().pop();
@@ -111,7 +110,7 @@ public class ObjectArrayHandle
                     break;
                 }
             } catch (Exception ignored) {
-
+                // ignored
             } finally {
                 RunTimeDataFactory.getTempDataInstance().clear();
             }

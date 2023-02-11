@@ -11,7 +11,7 @@ import java.util.Set;
  * Abstract array processor
  */
 public abstract class AbstractObjectHandle
-    extends AbstractDiffHandle implements ObjectHandle {
+        extends AbstractDiffHandle implements ObjectHandle {
     @Override
     public JsonCompareResult handle(JSONObject expectObject, JSONObject actualObject) {
         if (expectObject == null && actualObject == null) {

@@ -1,9 +1,7 @@
 package com.alibaba.fastjson2.diff.mock;
 
 public class MetaData {
-
     private Object expect;
-
 
     private Object actual;
 

@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.diff.path.Defects;
 import com.alibaba.fastjson2.diff.path.JsonCompareResult;
 
 public abstract class AbstractArrayHandle
-    extends AbstractDiffHandle implements ArrayHandle {
+        extends AbstractDiffHandle implements ArrayHandle {
     @Override
     public JsonCompareResult handle(JSONArray expectArray, JSONArray actualArray) {
         int expectLen = expectArray.size();
@@ -14,10 +14,10 @@ public abstract class AbstractArrayHandle
 
         if (actualLen != expectLen) {
             Defects defects = new Defects()
-                .setExpect(expectLen)
-                .setActual(actualLen)
-                .setIllustrate("Array length is inconsistent")
-                .setIndexPath(getCurrentPath());
+                    .setExpect(expectLen)
+                    .setActual(actualLen)
+                    .setIllustrate("Array length is inconsistent")
+                    .setIndexPath(getCurrentPath());
             RunTimeDataFactory.getResultInstance().addDefects(defects);
             return RunTimeDataFactory.getResultInstance();
         }

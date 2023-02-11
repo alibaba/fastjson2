@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.diff.handle;
 
-
 import com.alibaba.fastjson2.diff.JsonDiffException;
 import com.alibaba.fastjson2.diff.factory.RunTimeDataFactory;
 import com.alibaba.fastjson2.diff.path.Defects;
@@ -11,7 +10,7 @@ import java.util.Arrays;
  * Processor of simple type, array element is the basic type
  */
 public class SimpleArrayHandle
-    extends AbstractArrayHandle {
+        extends AbstractArrayHandle {
     /**
      * Don't ignore order
      *
@@ -30,15 +29,14 @@ public class SimpleArrayHandle
                 }
             } catch (Exception e) {
                 Defects defects = new Defects()
-                    .setActual(actual[i])
-                    .setExpect(expect[i])
-                    .setIllustrate(String.format("The %d element is inconsistent", i))
-                    .setIndexPath(String.format("%s[%d]", getCurrentPath(), i));
+                        .setActual(actual[i])
+                        .setExpect(expect[i])
+                        .setIllustrate(String.format("The %d element is inconsistent", i))
+                        .setIndexPath(String.format("%s[%d]", getCurrentPath(), i));
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
         }
     }
-
 
     /**
      * Ignore Order
@@ -48,7 +46,6 @@ public class SimpleArrayHandle
      */
     @Override
     protected void compareIgnoreOrder(Object[] expect, Object[] actual) {
-
         boolean[] actualSign = new boolean[actual.length];
         boolean[] expectSign = new boolean[expect.length];
 
@@ -61,7 +58,6 @@ public class SimpleArrayHandle
             }
             RunTimeDataFactory.getCurrentPathInstance().pop();
         }
-
 
         // Traverse unmatched elements
         int i, j = 0;
@@ -77,14 +73,13 @@ public class SimpleArrayHandle
                 }
             }
             Defects defects = new Defects()
-                .setActual(actual[j])
-                .setExpect(expect[i])
-                .setIllustrate(String.format("The %d element is inconsistent", i))
-                .setIndexPath(getCurrentPath());
+                    .setActual(actual[j])
+                    .setExpect(expect[i])
+                    .setIllustrate(String.format("The %d element is inconsistent", i))
+                    .setIndexPath(getCurrentPath());
             RunTimeDataFactory.getResultInstance().addDefects(defects);
             RunTimeDataFactory.getCurrentPathInstance().pop();
         }
-
     }
 
     private int getCompareItem(Object expect, Object[] actuals, boolean[] actualSign) {

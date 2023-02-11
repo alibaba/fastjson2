@@ -22,7 +22,6 @@ public class JsonDiffUtil {
      * @return
      */
     public static boolean isPrimitiveType(Object obj) {
-
         if (obj == null) {
             return true;
         }
@@ -49,7 +48,6 @@ public class JsonDiffUtil {
      * @return
      */
     public static Class<?> getArrayHandleClass(JSONArray expect, JSONArray actual) {
-
         Set<Class<?>> typeSet = new HashSet<>();
         for (Object item : expect) {
             typeSet.add(parseItemClass(item));

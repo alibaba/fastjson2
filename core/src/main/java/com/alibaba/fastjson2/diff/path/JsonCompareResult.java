@@ -10,7 +10,6 @@ public class JsonCompareResult {
 
     private List<Defects> defectsList;
 
-
     public boolean isMatch() {
         if (match == null) {
             return false;

@@ -22,10 +22,10 @@ public class ComparedUtil {
         if (JsonDiffUtil.isPrimitiveType(expect)) {
             if (!expect.equals(actual)) {
                 Defects defects = new Defects()
-                    .setActual(actual)
-                    .setExpect(expect)
-                    .setIndexPath(JsonDiffUtil.getCurrentPath(RunTimeDataFactory.getCurrentPathInstance().getPath()))
-                    .setIllustrate("properties are different");
+                        .setActual(actual)
+                        .setExpect(expect)
+                        .setIndexPath(JsonDiffUtil.getCurrentPath(RunTimeDataFactory.getCurrentPathInstance().getPath()))
+                        .setIllustrate("properties are different");
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
         } else if (expect instanceof JSONArray) {
@@ -36,7 +36,6 @@ public class ComparedUtil {
             handle.handle((JSONObject) expect, (JSONObject) actual);
         }
     }
-
 
     /**
      * Compare whether two objects are worth comparing

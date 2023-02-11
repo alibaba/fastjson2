@@ -11,7 +11,7 @@ import com.alibaba.fastjson2.diff.path.JsonComparedOption;
 import com.alibaba.fastjson2.diff.utils.JsonDiffUtil;
 
 public class DefaultJSONDiff
-    implements JSONDiff {
+        implements JSONDiff {
     @Override
     public JsonCompareResult detectDiff(JSONObject expect, JSONObject actual) {
         AbstractObjectHandle handle = (AbstractObjectHandle) HandleExampleFactory.getHandle(JsonDiffUtil.getObjectHandleClass(expect, actual));

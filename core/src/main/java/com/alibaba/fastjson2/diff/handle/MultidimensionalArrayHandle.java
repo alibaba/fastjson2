@@ -12,7 +12,7 @@ import java.util.Arrays;
  * Processor of multidimensional array.
  */
 public class MultidimensionalArrayHandle
-    extends AbstractArrayHandle {
+        extends AbstractArrayHandle {
     @Override
     protected void compareKeepOrder(Object[] expect, Object[] actual) {
         for (int i = 0; i < expect.length; i++) {
@@ -24,17 +24,16 @@ public class MultidimensionalArrayHandle
                 handle.handle(expectItem, actualItem);
             } catch (Exception e) {
                 Defects defects = new Defects()
-                    .setActual(actualItem)
-                    .setExpect(expectItem)
-                    .setIllustrate(String.format("The %d element is inconsistent", i))
-                    .setIndexPath(String.format("%s[%d]", getCurrentPath(), i));
+                        .setActual(actualItem)
+                        .setExpect(expectItem)
+                        .setIllustrate(String.format("The %d element is inconsistent", i))
+                        .setIndexPath(String.format("%s[%d]", getCurrentPath(), i));
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             } finally {
                 RunTimeDataFactory.getCurrentPathInstance().pop();
             }
         }
     }
-
 
     /**
      * Ignore Order
@@ -46,7 +45,6 @@ public class MultidimensionalArrayHandle
      */
     @Override
     public void compareIgnoreOrder(Object[] expect, Object[] actual) {
-
         /**
          * 1. Traverse the expected array. Find in the actual array.
          * If found. Label the element; Subsequent array matching is not allowed
@@ -65,7 +63,6 @@ public class MultidimensionalArrayHandle
             }
             RunTimeDataFactory.getCurrentPathInstance().pop();
         }
-
 
         // Traverse unmatched elements
         int i, j = 0;
@@ -88,16 +85,15 @@ public class MultidimensionalArrayHandle
                 handle.handle((JSONArray) expect[i], (JSONArray) actual[j]);
             } catch (Exception ignored) {
                 Defects defects = new Defects()
-                    .setActual(actual[j])
-                    .setExpect(expect[i])
-                    .setIllustrate(String.format("The %d element is inconsistent", i))
-                    .setIndexPath(getCurrentPath());
+                        .setActual(actual[j])
+                        .setExpect(expect[i])
+                        .setIllustrate(String.format("The %d element is inconsistent", i))
+                        .setIndexPath(getCurrentPath());
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
             RunTimeDataFactory.getCurrentPathInstance().pop();
         }
     }
-
 
     /**
      * Find the matches in actual according to expect.
@@ -122,7 +118,7 @@ public class MultidimensionalArrayHandle
                     break;
                 }
             } catch (Exception ignored) {
-
+                // ignored
             } finally {
                 RunTimeDataFactory.getTempDataInstance().clear();
             }

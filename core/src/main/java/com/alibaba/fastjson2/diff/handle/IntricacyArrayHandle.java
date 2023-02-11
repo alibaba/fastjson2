@@ -15,7 +15,7 @@ import java.util.Stack;
  * Complex type processor, with different types of elements,
  */
 public class IntricacyArrayHandle
-    extends AbstractArrayHandle {
+        extends AbstractArrayHandle {
     /**
      * Don't ignore order
      *
@@ -35,17 +35,16 @@ public class IntricacyArrayHandle
                 ComparedUtil.notSureAboutComparison(expect[i], actual[i]);
             } catch (Exception e) {
                 Defects defects = new Defects()
-                    .setActual(actual[i])
-                    .setExpect(expect[i])
-                    .setIllustrate(String.format("The %d element is inconsistent", i))
-                    .setIndexPath(String.format("%s[%d]", getCurrentPath(), i));
+                        .setActual(actual[i])
+                        .setExpect(expect[i])
+                        .setIllustrate(String.format("The %d element is inconsistent", i))
+                        .setIndexPath(String.format("%s[%d]", getCurrentPath(), i));
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             } finally {
                 RunTimeDataFactory.getCurrentPathInstance().pop();
             }
         }
     }
-
 
     /**
      * Ignore Order
@@ -57,7 +56,6 @@ public class IntricacyArrayHandle
      */
     @Override
     public void compareIgnoreOrder(Object[] expect, Object[] actual) {
-
         /**
          * 1. Traverse the expected array. Find in the actual array.
          * If found. Label the element; Subsequent array matching is not allowed
@@ -112,10 +110,10 @@ public class IntricacyArrayHandle
                 ComparedUtil.notSureAboutComparison(expect[i], actual[j]);
             } catch (Exception ignored) {
                 Defects defects = new Defects()
-                    .setActual(actual[j])
-                    .setExpect(expect[i])
-                    .setIllustrate(String.format("The %d element is inconsistent", i))
-                    .setIndexPath(getCurrentPath());
+                        .setActual(actual[j])
+                        .setExpect(expect[i])
+                        .setIllustrate(String.format("The %d element is inconsistent", i))
+                        .setIndexPath(getCurrentPath());
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
             RunTimeDataFactory.getCurrentPathInstance().pop();
@@ -137,14 +135,13 @@ public class IntricacyArrayHandle
                 break;
             }
             Defects defects = new Defects()
-                .setActual(actual[j])
-                .setExpect(expect[i])
-                .setIllustrate("Inconsistent comparison object types")
-                .setIndexPath(getCurrentPath());
+                    .setActual(actual[j])
+                    .setExpect(expect[i])
+                    .setIllustrate("Inconsistent comparison object types")
+                    .setIndexPath(getCurrentPath());
             RunTimeDataFactory.getResultInstance().addDefects(defects);
         }
     }
-
 
     /**
      * Find the matches in actual according to expect.
@@ -168,7 +165,7 @@ public class IntricacyArrayHandle
                     break;
                 }
             } catch (Exception ignored) {
-
+                // ignored
             } finally {
                 RunTimeDataFactory.getTempDataInstance().clear();
             }

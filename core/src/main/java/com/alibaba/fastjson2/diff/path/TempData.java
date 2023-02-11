@@ -17,7 +17,7 @@ public class TempData {
      * @param ignoreOrder
      * @return
      */
-    private int addDiffCount = 0;
+    private int addDiffCount;
 
     /**
      * Temporary Path not recorded in the result
@@ -56,7 +56,6 @@ public class TempData {
         defectsList.add(defects);
     }
 
-
     public void push(String key) {
         if (tempPath == null) {
             tempPath = new Stack<>();
@@ -68,7 +67,7 @@ public class TempData {
         try {
             tempPath.pop();
         } catch (Exception ignored) {
-
+            // ignored
         }
     }
 

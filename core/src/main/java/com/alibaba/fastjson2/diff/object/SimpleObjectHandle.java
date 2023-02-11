@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class SimpleObjectHandle
-    extends AbstractObjectHandle {
+        extends AbstractObjectHandle {
     @Override
     protected void doHandle(JSONObject expectObject, JSONObject actualObject) {
         Set<String> expectKeys = expectObject.keySet();
@@ -31,10 +31,10 @@ public class SimpleObjectHandle
                 compared(expectObject.get(key), actualObject.get(key));
             } catch (Exception e) {
                 Defects defects = new Defects()
-                    .setActual(key)
-                    .setExpect(key)
-                    .setIndexPath(getCurrentPath())
-                    .setIllustrate("field parsing error");
+                        .setActual(key)
+                        .setExpect(key)
+                        .setIndexPath(getCurrentPath())
+                        .setIllustrate("field parsing error");
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
             RunTimeDataFactory.getCurrentPathInstance().pop();
@@ -48,10 +48,10 @@ public class SimpleObjectHandle
                 compared(expectObject.get(entry.getValue()), actualObject.get(entry.getKey()));
             } catch (Exception e) {
                 Defects defects = new Defects()
-                    .setActual(entry.getKey())
-                    .setExpect(entry.getValue())
-                    .setIndexPath(getCurrentPath())
-                    .setIllustrate("field parsing error");
+                        .setActual(entry.getKey())
+                        .setExpect(entry.getValue())
+                        .setIndexPath(getCurrentPath())
+                        .setIllustrate("field parsing error");
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
             RunTimeDataFactory.getCurrentPathInstance().pop();
@@ -73,9 +73,9 @@ public class SimpleObjectHandle
         for (String key : conditions) {
             if (mapping.get(key) == null && !ignoreKey.contains(key)) {
                 Defects defects = new Defects()
-                    .setActual(key)
-                    .setIndexPath(getCurrentPath())
-                    .setIllustrate(String.format("extra field '%s'", key));
+                        .setActual(key)
+                        .setIndexPath(getCurrentPath())
+                        .setIllustrate(String.format("extra field '%s'", key));
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
         }
@@ -96,9 +96,9 @@ public class SimpleObjectHandle
         for (String key : conditions) {
             if (!ignoreKey.contains(key)) {
                 Defects defects = new Defects()
-                    .setActual(key)
-                    .setIndexPath(getCurrentPath())
-                    .setIllustrate(String.format("missing field '%s'", key));
+                        .setActual(key)
+                        .setIndexPath(getCurrentPath())
+                        .setIllustrate(String.format("missing field '%s'", key));
                 RunTimeDataFactory.getResultInstance().addDefects(defects);
             }
         }

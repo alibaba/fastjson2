@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.diff.path;
 
-
 import com.alibaba.fastjson2.diff.function.Function;
 
 import java.util.*;
@@ -31,7 +30,6 @@ public class JsonComparedOption {
      * When ignoreOrder=true, when the array is an element object, specify which keys to contact the object according to
      */
     private Function<String, Stack<String>> keyFunction;
-
 
     public JsonComparedOption() {
     }

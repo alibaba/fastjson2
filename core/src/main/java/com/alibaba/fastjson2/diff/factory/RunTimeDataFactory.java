@@ -11,8 +11,7 @@ import static com.alibaba.fastjson2.diff.JsonDiffConstants.ROOT_PATH;
  * Runtime Data Factory
  */
 public class RunTimeDataFactory {
-    private final static ThreadLocal<JsonComparedOption> optionThreadLocal = new ThreadLocal<>();
-
+    private static final ThreadLocal<JsonComparedOption> optionThreadLocal = new ThreadLocal<>();
     private static final ThreadLocal<JsonCompareResult> resultThreadLocal = new ThreadLocal<>();
 
     /**
@@ -38,7 +37,7 @@ public class RunTimeDataFactory {
     }
 
     public static JsonCompareResult getResultInstance() {
-        if(resultThreadLocal.get() == null) {
+        if (resultThreadLocal.get() == null) {
             JsonCompareResult jsonCompareResult = new JsonCompareResult();
             resultThreadLocal.set(jsonCompareResult);
         }
@@ -46,7 +45,7 @@ public class RunTimeDataFactory {
     }
 
     public static JsonComparedTempData getTempDataInstance() {
-        if(jsonComparedTempDataThreadLocal.get() == null) {
+        if (jsonComparedTempDataThreadLocal.get() == null) {
             JsonComparedTempData jsonComparedTempData = new JsonComparedTempData();
             jsonComparedTempDataThreadLocal.set(jsonComparedTempData);
         }
@@ -54,7 +53,7 @@ public class RunTimeDataFactory {
     }
 
     public static CurrentPath getCurrentPathInstance() {
-        if(currentPathThreadLocal.get() == null) {
+        if (currentPathThreadLocal.get() == null) {
             currentPathThreadLocal.set(new CurrentPath());
             currentPathThreadLocal.get().push(ROOT_PATH);
         }

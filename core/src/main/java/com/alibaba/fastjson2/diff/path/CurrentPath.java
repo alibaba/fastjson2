@@ -26,7 +26,7 @@ public class CurrentPath {
         try {
             path.pop();
         } catch (Exception ignored) {
-
+            // ignored
         }
     }
 

@@ -11,7 +11,7 @@ public class HandleExampleFactory {
     /**
      * Handle the instance bucket of an object
      */
-    private final static Map<Class<?>, Handle> bucket = new HashMap<>();
+    private static final Map<Class<?>, Handle> bucket = new HashMap<>();
 
     static {
         bucket.put(SimpleArrayHandle.class, new SimpleArrayHandle());
