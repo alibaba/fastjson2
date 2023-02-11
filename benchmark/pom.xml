@@ -50,7 +50,7 @@
         <dependency>
             <groupId>com.dslplatform</groupId>
             <artifactId>dsl-json-java8</artifactId>
-            <version>1.9.9</version>
+            <version>1.10.0</version>
         </dependency>
         <dependency>
             <groupId>com.esotericsoftware</groupId>
