@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.benchmark.protobuf.MediaContentTransform;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
 import org.apache.commons.io.IOUtils;
@@ -57,9 +58,19 @@ public class EishayWriteBinaryArrayMapping {
         bh.consume(JSON.toJSONBytes(mc, JSONWriter.Feature.BeanToArray));
     }
 
+    public int jsonbSize() {
+        return JSONB.toBytes(mc, JSONWriter.Feature.BeanToArray).length;
+    }
+
     @Benchmark
-    public void fastjson2JSONB(Blackhole bh) {
+    public void jsonb(Blackhole bh) {
         bh.consume(JSONB.toBytes(mc, JSONWriter.Feature.BeanToArray));
+    }
+
+    public int kryoSize() {
+        output.reset();
+        kryo.writeObject(output, mc);
+        return output.toBytes().length;
     }
 
     @Benchmark
@@ -67,6 +78,16 @@ public class EishayWriteBinaryArrayMapping {
         output.reset();
         kryo.writeObject(output, mc);
         bh.consume(output.toBytes());
+    }
+
+    public int protobufSize() {
+        return MediaContentTransform.forward(mc).toByteArray().length;
+    }
+
+    @Benchmark
+    public void protobuf(Blackhole bh) throws Exception {
+        byte[] bytes = MediaContentTransform.forward(mc).toByteArray();
+        bh.consume(bytes);
     }
 
     public static void main(String[] args) throws RunnerException {
