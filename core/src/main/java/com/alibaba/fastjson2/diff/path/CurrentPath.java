@@ -5,9 +5,7 @@ import com.alibaba.fastjson2.diff.factory.RunTimeDataFactory;
 import java.util.Stack;
 
 public class CurrentPath {
-
     private Stack<String> path;
-
 
     public void push(String key) {
         if (path == null) {

@@ -10,9 +10,8 @@ import java.util.Arrays;
 /**
  * Processor of simple type, array element is the basic type
  */
-public class SimpleArrayHandle extends AbstractArrayHandle {
-
-
+public class SimpleArrayHandle
+    extends AbstractArrayHandle {
     /**
      * Don't ignore order
      *
@@ -100,5 +99,4 @@ public class SimpleArrayHandle extends AbstractArrayHandle {
         }
         return index;
     }
-
 }

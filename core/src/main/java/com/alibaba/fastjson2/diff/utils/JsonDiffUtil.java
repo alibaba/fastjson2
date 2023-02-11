@@ -14,9 +14,7 @@ import java.util.Stack;
 
 import static com.alibaba.fastjson2.diff.JsonDiffConstants.SIGN;
 
-
 public class JsonDiffUtil {
-
     /**
      * Judge whether the current object is a basic type in the json data format
      *
@@ -94,7 +92,6 @@ public class JsonDiffUtil {
         return SimpleArrayHandle.class;
     }
 
-
     public static String getCurrentPath(Stack<String> strings) {
         String[] paths = strings.toArray(new String[0]);
         StringBuilder stringBuilder = new StringBuilder();
@@ -119,6 +116,4 @@ public class JsonDiffUtil {
         }
         return String.format("%s.%s", root, JsonDiffUtil.getCurrentPath(tempPath));
     }
-
-
 }

@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.diff.function.Function;
 import java.util.*;
 
 public class JsonComparedOption {
-
     /**
      * Ignore array order
      */

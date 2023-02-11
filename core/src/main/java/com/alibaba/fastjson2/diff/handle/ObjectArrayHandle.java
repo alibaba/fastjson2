@@ -12,9 +12,8 @@ import com.alibaba.fastjson2.diff.utils.JsonDiffUtil;
 import java.util.Arrays;
 import java.util.Stack;
 
-public class ObjectArrayHandle extends AbstractArrayHandle {
-
-
+public class ObjectArrayHandle
+    extends AbstractArrayHandle {
     /**
      * ignore order
      *
@@ -134,5 +133,4 @@ public class ObjectArrayHandle extends AbstractArrayHandle {
         }
         return ComparedUtil.isItWorthComparing(expect, actual, keys);
     }
-
 }

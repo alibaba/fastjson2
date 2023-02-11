@@ -14,9 +14,8 @@ import java.util.Stack;
 /**
  * Complex type processor, with different types of elements,
  */
-public class IntricacyArrayHandle extends AbstractArrayHandle {
-
-
+public class IntricacyArrayHandle
+    extends AbstractArrayHandle {
     /**
      * Don't ignore order
      *
@@ -208,6 +207,4 @@ public class IntricacyArrayHandle extends AbstractArrayHandle {
         }
         return ComparedUtil.isItWorthComparing(expectObject, actualObject, keys);
     }
-
-
 }
