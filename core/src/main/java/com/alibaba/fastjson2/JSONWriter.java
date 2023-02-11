@@ -1595,8 +1595,7 @@ public abstract class JSONWriter
 
         public <T> ObjectWriter<T> getObjectWriter(Class<T> objectType) {
             boolean fieldBased = (features & Feature.FieldBased.mask) != 0;
-            ObjectWriter objectWriter = provider.getObjectWriter(objectType, objectType, fieldBased);
-            return objectWriter;
+            return provider.getObjectWriter(objectType, objectType, fieldBased);
         }
 
         public <T> ObjectWriter<T> getObjectWriter(Type objectType, Class<T> objectClass) {
@@ -1687,8 +1686,8 @@ public abstract class JSONWriter
                         break;
                     default:
                         dateFormatMillis = false;
-                        formatHasDay = dateFormat.indexOf("d") != -1;
-                        formatHasHour = dateFormat.indexOf("H") != -1;
+                        formatHasDay = dateFormat.contains("d");
+                        formatHasHour = dateFormat.contains("H");
                         break;
                 }
                 this.dateFormatMillis = dateFormatMillis;
@@ -2030,7 +2029,7 @@ public abstract class JSONWriter
                                     } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
                                         ascii = false;
                                         final int uc;
-                                        if (ch >= '\uD800' && ch < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
+                                        if (ch < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
                                             if (name.length() - i < 2) {
                                                 uc = -1;
                                             } else {
@@ -2046,13 +2045,10 @@ public abstract class JSONWriter
                                             }
                                         } else {
                                             //
-                                            if (ch >= '\uDC00' && ch < ('\uDFFF' + 1)) { // Character.isLowSurrogate(c)
-                                                buf[off++] = (byte) '?';
-                                                continue;
+                                            // Character.isLowSurrogate(c)
+                                            buf[off++] = (byte) '?';
+                                            continue;
 //                        throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
-                                            } else {
-                                                uc = ch;
-                                            }
                                         }
 
                                         if (uc < 0) {
@@ -2142,7 +2138,7 @@ public abstract class JSONWriter
                                     } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
                                         ascii = false;
                                         final int uc;
-                                        if (ch >= '\uD800' && ch < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
+                                        if (ch < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
                                             if (name.length() - i < 2) {
                                                 uc = -1;
                                             } else {
@@ -2158,13 +2154,10 @@ public abstract class JSONWriter
                                             }
                                         } else {
                                             //
-                                            if (ch >= '\uDC00' && ch < ('\uDFFF' + 1)) { // Character.isLowSurrogate(c)
-                                                buf[off++] = (byte) '?';
-                                                continue;
+                                            // Character.isLowSurrogate(c)
+                                            buf[off++] = (byte) '?';
+                                            continue;
 //                        throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
-                                            } else {
-                                                uc = ch;
-                                            }
                                         }
 
                                         if (uc < 0) {
