@@ -21,14 +21,14 @@ public class EishayParseBinaryArrayMappingTest {
         }
     }
 
-    public static void fastjson2JSONB() throws Exception {
-        System.out.println("EishayParseBinaryArrayMapping-fastjson2_jsonb size " + EishayParseBinaryArrayMapping.fastjson2JSONBBytes.length); // 348
+    public static void jsonb() throws Exception {
+        System.out.println("EishayParseBinaryArrayMapping-jsonb size " + EishayParseBinaryArrayMapping.fastjson2JSONBBytes.length); // 223
         System.out.println();
 
         for (int j = 0; j < 10; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 1000 * 1000; ++i) {
-                benchmark.fastjson2JSONB(BH);
+                benchmark.jsonb(BH);
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayParseBinaryArrayMapping-fastjson2_jsonb millis : " + millis);
@@ -38,9 +38,26 @@ public class EishayParseBinaryArrayMappingTest {
         }
     }
 
+    public static void protobuf() throws Exception {
+        System.out.println("protobuf size " + EishayParseBinaryArrayMapping.protobufBytes.length); // 235
+        System.out.println();
+
+        for (int j = 0; j < 10; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.protobuf(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("EishayParseBinaryArrayMapping-protobuf millis : " + millis);
+            // zulu8.58.0.13 : 531
+            // zulu11.52.13 :
+            // zulu17.32.13 :
+        }
+    }
+
     public static void main(String[] args) throws Exception {
-        fastjson2JSONB();
+//        jsonb();
 //        kryo();
-//        fury();
+        protobuf();
     }
 }

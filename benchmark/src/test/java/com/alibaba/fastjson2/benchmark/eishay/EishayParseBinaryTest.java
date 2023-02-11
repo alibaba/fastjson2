@@ -5,17 +5,17 @@ import static com.alibaba.fastjson2.benchmark.JMH.BH;
 public class EishayParseBinaryTest {
     static final EishayParseBinary benchmark = new EishayParseBinary();
 
-    public static void fastjson2JSONB() throws Exception {
-        System.out.println("fastjson2_jsonb size " + EishayParseBinaryArrayMapping.fastjson2JSONBBytes.length); // 348
+    public static void jsonb() throws Exception {
+        System.out.println("jsonb size " + EishayParseBinary.fastjson2JSONBBytes.length); // 348
         System.out.println();
 
         for (int j = 0; j < 10; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 1000 * 1000; ++i) {
-                benchmark.fastjson2JSONB(BH);
+                benchmark.jsonb(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("EishayParseBinary-fastjson2JSONB millis : " + millis);
+            System.out.println("EishayParseBinary-jsonb millis : " + millis);
             // zulu8.58.0.13 : 305
             // zulu11.52.13 : 249
             // zulu17.32.13 : 245
@@ -27,7 +27,7 @@ public class EishayParseBinaryTest {
     }
 
     public static void kryo() throws Exception {
-        System.out.println("fastjson2_jsonb size " + EishayParseBinaryArrayMapping.fastjson2JSONBBytes.length); // 348
+        System.out.println("kryo size " + EishayParseBinary.kryoBytes.length); //
         System.out.println();
 
         for (int j = 0; j < 10; j++) {
@@ -44,7 +44,7 @@ public class EishayParseBinaryTest {
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2JSONB();
+        jsonb();
 //        kryo();
     }
 }
