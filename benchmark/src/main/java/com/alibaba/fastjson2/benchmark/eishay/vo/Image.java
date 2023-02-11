@@ -10,11 +10,11 @@ public class Image
         SMALL, LARGE
     }
 
-    public int height;
-    public Size size;
-    public String title; // Can be null
-    public String uri;
-    public int width;
+    private int height;
+    private Size size;
+    private String title; // Can be null
+    private String uri;
+    private int width;
 
     public Image() {
     }

@@ -5,8 +5,8 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class MediaContent
         implements java.io.Serializable {
-    public Media media;
-    public List<Image> images;
+    private Media media;
+    private List<Image> images;
 
     public MediaContent() {
     }
