@@ -18,13 +18,13 @@ import static com.alibaba.fastjson2.reader.ObjectReaders.*;
 public class MediaContentMixin {
     public static final ObjectWriter<MediaContent> objectWriter = ObjectWriters.objectWriter(
             MediaContent.class,
-            ObjectWriters.fieldWriter("media", Media.class, (MediaContent e) -> e.media),
-            ObjectWriters.fieldWriterList("images", Image.class, (MediaContent e) -> e.images)
+            ObjectWriters.fieldWriter("media", Media.class, (MediaContent e) -> e.getMedia()),
+            ObjectWriters.fieldWriterList("images", Image.class, (MediaContent e) -> e.getImages())
     );
 
     public static final ObjectReader<MediaContent> objectReader = ObjectReaders.of(
             MediaContent::new,
-            fieldReader("media", Media.class, (MediaContent o, Media v) -> o.media = v),
-            fieldReaderList("images", Image.class, ArrayList::new, (MediaContent o, List<Image> v) -> o.images = v)
+            fieldReader("media", Media.class, (MediaContent o, Media v) -> o.setMedia(v)),
+            fieldReaderList("images", Image.class, ArrayList::new, (MediaContent o, List<Image> v) -> o.setImages(v))
     );
 }
