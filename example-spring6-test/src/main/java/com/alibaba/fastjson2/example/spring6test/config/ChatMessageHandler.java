@@ -1,4 +1,4 @@
-package com.alibaba.example.spring6test.config;
+package com.alibaba.fastjson2.example.spring6test.config;
 
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
