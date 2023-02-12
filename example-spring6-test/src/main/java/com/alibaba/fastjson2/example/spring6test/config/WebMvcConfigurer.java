@@ -1,4 +1,4 @@
-package com.alibaba.example.spring6test.config;
+package com.alibaba.fastjson2.example.spring6test.config;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;

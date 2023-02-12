@@ -1,4 +1,4 @@
-package com.alibaba.example.spring6test;
+package com.alibaba.fastjson2.example.spring6test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
