@@ -622,7 +622,7 @@
                 <version>2.5.0</version>
                 <configuration>
                     <violationsFiles>
-                        <violationsFile>${project.parent.basedir}/.mvn/modernizer/violations.xml</violationsFile>
+                        <violationsFile>${maven.multiModuleProjectDirectory}/src/violations.xml</violationsFile>
                     </violationsFiles>
                 </configuration>
             </plugin>
