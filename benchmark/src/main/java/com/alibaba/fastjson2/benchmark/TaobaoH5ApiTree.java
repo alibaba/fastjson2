@@ -38,7 +38,7 @@ public class TaobaoH5ApiTree {
     @Benchmark
     public void fastjson2(Blackhole bh) {
         bh.consume(
-                JSON.parseObject(str, Map.class)
+                JSON.parseObject(str)
         );
     }
 
