@@ -1,4 +1,4 @@
-package com.alibaba.example.spring6test.entity;
+package com.alibaba.fastjson2.example.spring6test.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

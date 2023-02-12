@@ -1,6 +1,6 @@
-package com.alibaba.example.spring6test.controller;
+package com.alibaba.fastjson2.example.spring6test.controller;
 
-import com.alibaba.example.spring6test.entity.User;
+import com.alibaba.fastjson2.example.spring6test.entity.User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 

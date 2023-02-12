@@ -1,4 +1,4 @@
-package com.alibaba.example.spring6test.config;
+package com.alibaba.fastjson2.example.spring6test.config;
 
 import com.alibaba.fastjson2.support.spring6.websocket.sockjs.FastjsonSockJsMessageCodec;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
