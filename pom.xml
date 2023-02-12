@@ -960,6 +960,7 @@
                 <module>example-graalvm-native</module>
                 -->
                 <module>extension-spring6</module>
+                <module>example-spring6-test</module>
                 <module>incubator-vector</module>
             </modules>
         </profile>
