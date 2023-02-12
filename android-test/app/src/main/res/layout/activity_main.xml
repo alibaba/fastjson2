@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    tools:context=".MainActivity">
+
+    <RadioGroup
+        android:id="@+id/eishaySerdeGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <RadioButton
+            android:id="@+id/eishaySerde"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="eishay"
+            android:checked="true"
+            />
+
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/fastjson1Serde"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/eishaySerdeGroup"
+        android:onClick="fastjson1Serde"
+        android:text="FASTJSON 1 SERDE" />
+
+    <Button
+        android:id="@+id/fastjson2Serde"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fastjson1Serde"
+        android:text="FASTJSON 2 SERDE"
+        android:onClick="fastjson2Serde"/>
+
+    <Button
+        android:id="@+id/gsonSerde"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fastjson2Serde"
+        android:text="ORG JSON SERDE"
+        android:onClick="gsonSerde"/>
+
+    <Button
+        android:id="@+id/jacksonSerde"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/gsonSerde"
+        android:text="JACKSON SERDE"
+        android:onClick="jacksonSerde"/>
+
+    <RadioGroup
+        android:id="@+id/parseGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/jacksonSerde"
+        >
+
+        <RadioButton
+            android:id="@+id/eishayParse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="eishay"
+            android:checked="true"
+            />
+
+        <RadioButton
+            android:id="@+id/cartParse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="cart" />
+
+        <RadioButton
+            android:id="@+id/homepageParse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="homepage" />
+
+        <RadioButton
+            android:id="@+id/h5apiParse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="h5 api" />
+    </RadioGroup>
+
+
+    <Button
+        android:id="@+id/fastjson1Parse"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/parseGroup"
+        android:onClick="fastjson1Parse"
+        android:text="FASTJSON 1 PARSE" />
+
+    <Button
+        android:id="@+id/fastjson2Parse"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fastjson1Parse"
+        android:text="FASTJSON 2 PARSE"
+        android:onClick="fastjson2Parse"/>
+
+    <Button
+        android:id="@+id/orgjsonParse"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fastjson2Parse"
+        android:text="ORG JSON PARSE"
+        android:onClick="orgjsonParse"/>
+
+    <Button
+        android:id="@+id/btnClear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/orgjsonParse"
+        android:text="clear"
+        android:onClick="clear"/>
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/btnClear" />
+
+
+
+</RelativeLayout>

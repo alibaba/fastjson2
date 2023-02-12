@@ -1,0 +1,2 @@
+rootProject.name = "fastjson2"
+include ':app'
