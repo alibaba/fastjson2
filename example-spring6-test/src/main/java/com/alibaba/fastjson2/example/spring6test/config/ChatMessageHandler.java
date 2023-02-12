@@ -14,11 +14,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ChatMessageHandler
         extends TextWebSocketHandler {
-    // 用于缓存所有的用户和连接之间的关系
+    //用于缓存所有的用户和连接之间的关系
     private static final Map<String, WebSocketSession> allClients;
 
     static {
-        // 初始化连接
+        //初始化连接
         allClients = new ConcurrentHashMap();
     }
 
@@ -38,8 +38,9 @@ public class ChatMessageHandler
     public void sendMessageToUser(String userName, TextMessage message) {
         //根据接收方的名字找到对应的连接
         WebSocketSession webSocketSession = allClients.get(userName);
+
+        //如果没有离线,如果离线,请根据实际业务需求来处理,可能会需要保存离线消息
         if (webSocketSession != null && webSocketSession.isOpen()) {
-            //如果没有离线,如果离线,请根据实际业务需求来处理,可能会需要保存离线消息
             try {
                 //发送消息
                 webSocketSession.sendMessage(message);
@@ -55,8 +56,9 @@ public class ChatMessageHandler
      * @param message
      */
     public void sendMessageToUsers(TextMessage message) {
+        //获取所有的连接
         for (Map.Entry<String, WebSocketSession> webSocketSessionEntry : allClients.entrySet()) {
-            //获取所有的连接
+            //找到每个连接
             WebSocketSession session = webSocketSessionEntry.getValue();
             if (session != null && session.isOpen()) {
                 try {

@@ -4,17 +4,18 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.support.config.FastJsonConfig;
 import com.alibaba.fastjson2.support.spring6.http.converter.FastJsonHttpMessageConverter;
-import com.alibaba.fastjson2.support.spring6.webservlet.view.FastJsonJsonView;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author jiangqiang
+ */
 @Configuration
 @EnableWebMvc
 public class WebMvcConfigurer
@@ -39,15 +40,5 @@ public class WebMvcConfigurer
         supportedMediaTypes.add(MediaType.APPLICATION_JSON_UTF8);
         converter.setSupportedMediaTypes(supportedMediaTypes);
         converters.add(0, converter);
-    }
-
-    @Override
-    public void configureViewResolvers(ViewResolverRegistry registry) {
-        FastJsonJsonView fastJsonJsonView = new FastJsonJsonView();
-        //自定义配置...
-        //FastJsonConfig config = new FastJsonConfig();
-        //config.set...
-        //fastJsonJsonView.setFastJsonConfig(config);
-        registry.enableContentNegotiation(fastJsonJsonView);
     }
 }
