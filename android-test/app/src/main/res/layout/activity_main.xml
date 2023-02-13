@@ -1,133 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    tools:context=".MainActivity">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    tools:ignore="HardcodedText">
 
-    <RadioGroup
-        android:id="@+id/eishaySerdeGroup"
+    <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="HardcodedText">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:text="Fastjson2 Test"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="5dp"
+            android:text="Select libs"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:id="@+id/libs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="-6dp"
+            android:orientation="horizontal" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Select tag"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+
+        <RadioGroup
+            android:id="@+id/tags"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="-6dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Select item"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+
+        <RadioGroup
+            android:id="@+id/items"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="-6dp"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal" />
+
+        <TextView
+            android:id="@+id/result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/btn"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:paddingStart="2dp"
+        android:paddingTop="14dp"
+        android:paddingEnd="2dp"
+        android:paddingBottom="14dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/guideline"
+        app:layout_constraintWidth_percent="0.78">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Test"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+    </RelativeLayout>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        >
+        app:layout_constraintGuide_percent="0.8" />
 
-        <RadioButton
-            android:id="@+id/eishaySerde"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="eishay"
-            android:checked="true"
-            />
-
-    </RadioGroup>
-
-    <Button
-        android:id="@+id/fastjson1Serde"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/eishaySerdeGroup"
-        android:onClick="fastjson1Serde"
-        android:text="FASTJSON 1 SERDE" />
-
-    <Button
-        android:id="@+id/fastjson2Serde"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/fastjson1Serde"
-        android:text="FASTJSON 2 SERDE"
-        android:onClick="fastjson2Serde"/>
-
-    <Button
-        android:id="@+id/gsonSerde"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/fastjson2Serde"
-        android:text="ORG JSON SERDE"
-        android:onClick="gsonSerde"/>
-
-    <Button
-        android:id="@+id/jacksonSerde"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/gsonSerde"
-        android:text="JACKSON SERDE"
-        android:onClick="jacksonSerde"/>
-
-    <RadioGroup
-        android:id="@+id/parseGroup"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_below="@id/jacksonSerde"
-        >
-
-        <RadioButton
-            android:id="@+id/eishayParse"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="eishay"
-            android:checked="true"
-            />
-
-        <RadioButton
-            android:id="@+id/cartParse"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="cart" />
-
-        <RadioButton
-            android:id="@+id/homepageParse"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="homepage" />
-
-        <RadioButton
-            android:id="@+id/h5apiParse"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="h5 api" />
-    </RadioGroup>
-
-
-    <Button
-        android:id="@+id/fastjson1Parse"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/parseGroup"
-        android:onClick="fastjson1Parse"
-        android:text="FASTJSON 1 PARSE" />
-
-    <Button
-        android:id="@+id/fastjson2Parse"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/fastjson1Parse"
-        android:text="FASTJSON 2 PARSE"
-        android:onClick="fastjson2Parse"/>
-
-    <Button
-        android:id="@+id/orgjsonParse"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/fastjson2Parse"
-        android:text="ORG JSON PARSE"
-        android:onClick="orgjsonParse"/>
-
-    <Button
-        android:id="@+id/btnClear"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/orgjsonParse"
-        android:text="clear"
-        android:onClick="clear"/>
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/btnClear" />
-
-
-
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

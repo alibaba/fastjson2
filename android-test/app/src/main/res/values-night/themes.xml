@@ -1,7 +1,0 @@
-<resources>
-
-    <style name="Theme.Fastjson2" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/purple_200</item>
-    </style>
-
-</resources>
