@@ -221,7 +221,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot</artifactId>
-            <version>3.0.1</version>
+            <version>3.0.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
