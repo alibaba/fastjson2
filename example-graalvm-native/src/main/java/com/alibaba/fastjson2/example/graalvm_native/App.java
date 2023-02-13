@@ -69,29 +69,29 @@ public class App {
     private static void registerReaderAndWriter() {
         JSON.register(MediaContent.class, ObjectWriters.objectWriter(
                 MediaContent.class,
-                ObjectWriters.fieldWriter("media", Media.class, (MediaContent e) -> e.getMedia()),
-                ObjectWriters.fieldWriterList("images", Image.class, (MediaContent e) -> e.getImages())
+                ObjectWriters.fieldWriter("media", Media.class, MediaContent::getMedia),
+                ObjectWriters.fieldWriterList("images", Image.class, MediaContent::getImages)
         ));
 
         JSON.register(MediaContent.class, ObjectReaders.of(
                 MediaContent::new,
-                fieldReader("media", Media.class, (MediaContent o, Media v) -> o.setMedia(v)),
-                fieldReaderList("images", Image.class, ArrayList::new, (MediaContent o, List<Image> v) -> o.setImages(v))
+                fieldReader("media", Media.class, MediaContent::setMedia),
+                fieldReaderList("images", Image.class, ArrayList::new, MediaContent::setImages)
         ));
 
         JSON.register(Media.class, ObjectWriters.objectWriter(
                 Media.class,
-                ObjectWriters.fieldWriter("bitrate", (Media e) -> e.getBitrate()),
-                ObjectWriters.fieldWriter("duration", (Media e) -> e.getDuration()),
-                ObjectWriters.fieldWriter("format", (Media e) -> e.getFormat()),
-                ObjectWriters.fieldWriter("height", (Media e) -> e.getHeight()),
-                ObjectWriters.fieldWriterList("persons", String.class, (Media e) -> e.getPersons()),
-                ObjectWriters.fieldWriter("player", Player.class, (Media e) -> e.getPlayer()),
-                ObjectWriters.fieldWriter("size", (Media e) -> e.getSize()),
-                ObjectWriters.fieldWriter("title", (Media e) -> e.getTitle()),
-                ObjectWriters.fieldWriter("uri", (Media e) -> e.getUri()),
-                ObjectWriters.fieldWriter("width", (Media e) -> e.getWidth()),
-                ObjectWriters.fieldWriter("copyright", (Media e) -> e.getCopyright())
+                ObjectWriters.fieldWriter("bitrate", Media::getBitrate),
+                ObjectWriters.fieldWriter("duration", Media::getDuration),
+                ObjectWriters.fieldWriter("format", Media::getFormat),
+                ObjectWriters.fieldWriter("height", Media::getHeight),
+                ObjectWriters.fieldWriterList("persons", String.class, Media::getPersons),
+                ObjectWriters.fieldWriter("player", Player.class, Media::getPlayer),
+                ObjectWriters.fieldWriter("size", Media::getSize),
+                ObjectWriters.fieldWriter("title", Media::getTitle),
+                ObjectWriters.fieldWriter("uri", Media::getUri),
+                ObjectWriters.fieldWriter("width", Media::getWidth),
+                ObjectWriters.fieldWriter("copyright", Media::getCopyright)
         ));
 
         JSON.register(Media.class, ObjectReaders.of(
@@ -100,8 +100,8 @@ public class App {
                 fieldReaderLong("duration", Media::setDuration),
                 fieldReaderString("format", Media::setFormat),
                 fieldReaderInt("height", Media::setHeight),
-                fieldReaderList("persons", String.class, ArrayList::new, (Media o, List<String> v) -> o.setPersons(v)),
-                fieldReader("player", Player.class, (Media o, Player v) -> o.setPlayer(v)),
+                fieldReaderList("persons", String.class, ArrayList::new, Media::setPersons),
+                fieldReader("player", Player.class, Media::setPlayer),
                 fieldReaderLong("size", Media::setSize),
                 fieldReaderString("title", Media::setTitle),
                 fieldReaderString("uri", Media::setUri),
@@ -112,7 +112,7 @@ public class App {
         JSON.register(Image.class, ObjectWriters.objectWriter(
                 Image.class,
                 ObjectWriters.fieldWriter("height", Image::getHeight),
-                ObjectWriters.fieldWriter("size", Size.class, (Image e) -> e.getSize()),
+                ObjectWriters.fieldWriter("size", Size.class, Image::getSize),
                 ObjectWriters.fieldWriter("title", Image::getTitle),
                 ObjectWriters.fieldWriter("uri", Image::getUri),
                 ObjectWriters.fieldWriter("width", Image::getWidth)
@@ -121,9 +121,9 @@ public class App {
         JSON.register(Image.class, ObjectReaders.of(
                 Image::new,
                 fieldReaderInt("height", Image::setHeight),
-                fieldReader("size", Size.class, (Image o, Size v) -> o.setSize(v)),
-                fieldReader("title", String.class, (Image o, String v) -> o.setTitle(v)),
-                fieldReader("uri", String.class, (Image o, String v) -> o.setUri(v)),
+                fieldReader("size", Size.class, Image::setSize),
+                fieldReaderString("title", Image::setTitle),
+                fieldReaderString("uri", Image::setUri),
                 fieldReaderInt("width", Image::setWidth)
         ));
     }

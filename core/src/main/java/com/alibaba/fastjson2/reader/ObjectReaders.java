@@ -56,7 +56,11 @@ public class ObjectReaders {
     public static <T> ObjectReader<T> objectReader(
             Function<Map<Long, Object>, T> creator,
             FieldReader... fieldReaders) {
-        return ObjectReaderCreator.INSTANCE.createObjectReaderNoneDefaultConstructor(null, creator, fieldReaders);
+        return ObjectReaderCreator.INSTANCE.createObjectReaderNoneDefaultConstructor(
+                null,
+                creator,
+                fieldReaders
+        );
     }
 
     public static FieldReader fieldReader(String fieldName, Class fieldClass) {
@@ -149,6 +153,13 @@ public class ObjectReaders {
             BiConsumer<T, List<V>> function
     ) {
         return new FieldReaderListFuncImpl<>(listCreator, null, function, itemType, fieldName);
+    }
+
+    public static <T> FieldReader fieldReaderListStr(
+            String fieldName,
+            BiConsumer<T, List<String>> function
+    ) {
+        return new FieldReaderListFuncImpl<>(ArrayList::new, null, function, String.class, fieldName);
     }
 
     public static <T, V> FieldReader fieldReaderList(
