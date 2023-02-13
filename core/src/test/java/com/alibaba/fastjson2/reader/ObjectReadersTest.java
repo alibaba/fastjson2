@@ -2,8 +2,10 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.TypeUtils;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -143,6 +145,17 @@ public class ObjectReadersTest {
         assertEquals("12.34", bean.value);
     }
 
+    @Test
+    public void testString_1() {
+        ObjectReader<Bean5> objectReader = ObjectReaders.objectReader(
+                Bean5.class,
+                Bean5::new,
+                fieldReader("value", String.class, String.class, Bean5::setValue)
+        );
+        Bean5 bean = objectReader.readObject(JSONReader.of("{\"value\":\"12.34\"}"));
+        assertEquals("12.34", bean.value);
+    }
+
     static class Bean5 {
         private String value;
 
@@ -152,6 +165,57 @@ public class ObjectReadersTest {
 
         public void setValue(String value) {
             this.value = value;
+        }
+    }
+
+    @Test
+    public void testList() {
+        ObjectReader<Bean6> objectReader = ObjectReaders.objectReader(
+                Bean6.class,
+                Bean6::new,
+                fieldReaderListStr("value", Bean6::setValues)
+        );
+        Bean6 bean = objectReader.readObject(JSONReader.of("{\"value\":[\"12\",\"34\"]}"));
+        assertEquals(2, bean.values.size());
+        assertEquals("12", bean.values.get(0));
+        assertEquals("34", bean.values.get(1));
+    }
+
+    @Test
+    public void testList_1() {
+        ObjectReader<Bean6> objectReader = ObjectReaders.objectReader(
+                Bean6.class,
+                Bean6::new,
+                fieldReaderList("value", String.class, Bean6::setValues)
+        );
+        Bean6 bean = objectReader.readObject(JSONReader.of("{\"value\":[\"12\",\"34\"]}"));
+        assertEquals(2, bean.values.size());
+        assertEquals("12", bean.values.get(0));
+        assertEquals("34", bean.values.get(1));
+    }
+
+    @Test
+    public void testList_2() {
+        ObjectReader<Bean6> objectReader = ObjectReaders.objectReader(
+                Bean6.class,
+                Bean6::new,
+                fieldReader("value", TypeUtils.PARAM_TYPE_LIST_STR, List.class, Bean6::setValues)
+        );
+        Bean6 bean = objectReader.readObject(JSONReader.of("{\"value\":[\"12\",\"34\"]}"));
+        assertEquals(2, bean.values.size());
+        assertEquals("12", bean.values.get(0));
+        assertEquals("34", bean.values.get(1));
+    }
+
+    static class Bean6 {
+        private List<String> values;
+
+        public List<String> getValues() {
+            return values;
+        }
+
+        public void setValues(List<String> values) {
+            this.values = values;
         }
     }
 }

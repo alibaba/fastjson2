@@ -7,26 +7,23 @@ import com.alibaba.fastjson2.reader.ObjectReaders;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriters;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.alibaba.fastjson2.reader.ObjectReaders.*;
 
 @JSONAutowired
 public class MediaMixin {
     public static final ObjectWriter<Media> objectWriter = ObjectWriters.objectWriter(
             Media.class,
-            ObjectWriters.fieldWriter("bitrate", (Media e) -> e.getBitrate()),
-            ObjectWriters.fieldWriter("duration", (Media e) -> e.getDuration()),
-            ObjectWriters.fieldWriter("format", (Media e) -> e.getFormat()),
-            ObjectWriters.fieldWriter("height", (Media e) -> e.getHeight()),
-            ObjectWriters.fieldWriterList("persons", String.class, (Media e) -> e.getPersons()),
-            ObjectWriters.fieldWriter("player", Media.Player.class, (Media e) -> e.getPlayer()),
-            ObjectWriters.fieldWriter("size", (Media e) -> e.getSize()),
-            ObjectWriters.fieldWriter("title", (Media e) -> e.getTitle()),
-            ObjectWriters.fieldWriter("uri", (Media e) -> e.getUri()),
-            ObjectWriters.fieldWriter("width", (Media e) -> e.getWidth()),
-            ObjectWriters.fieldWriter("copyright", (Media e) -> e.getCopyright())
+            ObjectWriters.fieldWriter("bitrate", Media::getBitrate),
+            ObjectWriters.fieldWriter("duration", Media::getDuration),
+            ObjectWriters.fieldWriter("format", Media::getFormat),
+            ObjectWriters.fieldWriter("height", Media::getHeight),
+            ObjectWriters.fieldWriterListString("persons", Media::getPersons),
+            ObjectWriters.fieldWriter("player", Media.Player.class, Media::getPlayer),
+            ObjectWriters.fieldWriter("size", Media::getSize),
+            ObjectWriters.fieldWriter("title", Media::getTitle),
+            ObjectWriters.fieldWriter("uri", Media::getUri),
+            ObjectWriters.fieldWriter("width", Media::getWidth),
+            ObjectWriters.fieldWriter("copyright", Media::getCopyright)
     );
 
     public static final ObjectReader<Media> objectReader = ObjectReaders.of(
@@ -35,8 +32,8 @@ public class MediaMixin {
             fieldReaderLong("duration", Media::setDuration),
             fieldReaderString("format", Media::setFormat),
             fieldReaderInt("height", Media::setHeight),
-            fieldReaderList("persons", String.class, ArrayList::new, (Media o, List<String> v) -> o.setPersons(v)),
-            fieldReader("player", Media.Player.class, (Media o, Media.Player v) -> o.setPlayer(v)),
+            fieldReaderListStr("persons", Media::setPersons),
+            fieldReader("player", Media.Player.class, Media::setPlayer),
             fieldReaderLong("size", Media::setSize),
             fieldReaderString("title", Media::setTitle),
             fieldReaderString("uri", Media::setUri),
