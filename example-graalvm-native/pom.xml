@@ -34,8 +34,8 @@
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
-
-        <native.maven.plugin.version>0.9.19</native.maven.plugin.version>
+        <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
+        <fastjson2.version>2.0.24-SNAPSHOT</fastjson2.version>
         <imageName>fastjson2-example-graalvm-native</imageName>
     </properties>
 
@@ -92,15 +92,9 @@
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
             <artifactId>fastjson2</artifactId>
-            <version>${project.version}</version>
+            <version>${fastjson2.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.graalvm.buildtools</groupId>
-            <artifactId>junit-platform-native</artifactId>
-            <version>${native.maven.plugin.version}</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
@@ -112,36 +106,64 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.graalvm.buildtools</groupId>
-                <artifactId>native-maven-plugin</artifactId>
-                <version>${native.maven.plugin.version}</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <id>build-native</id>
-                        <goals>
-                            <goal>compile-no-fork</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                    <execution>
-                        <id>test-native</id>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <phase>test</phase>
-                    </execution>
-                </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin.version}</version>
                 <configuration>
-                    <skip>false</skip>
-                    <useArgFile>false</useArgFile>
-                    <imageName>${imageName}</imageName>
-                    <fallback>false</fallback>
-                    <classpath>
-                        <param>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</param>
-                    </classpath>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.alibaba.fastjson2.example.graalvm_native.App</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>native</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>0.9.19</version>
+                        <extensions>true</extensions>
+                        <executions>
+                            <execution>
+                                <id>build-native</id>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                            <execution>
+                                <id>test-native</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <phase>test</phase>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <imageName>my-app</imageName>
+                            <buildArgs>
+                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                                <!-- <buildArg>-H:+StaticExecutableWithDynamicLibC</buildArg> -->
+                                <buildArg>--verbose</buildArg>
+                                <!-- For Quick Build (22.1+) -->
+                                <buildArg>-Ob</buildArg>
+                            </buildArgs>
+                            <!-- Start: Workaround for 22.2: Disable the default Java Module Path using USE_NATIVE_IMAGE_JAVA_PLATFORM_MODULE_SYSTEM -->
+                            <!-- <environment>
+                              <USE_NATIVE_IMAGE_JAVA_PLATFORM_MODULE_SYSTEM>false</USE_NATIVE_IMAGE_JAVA_PLATFORM_MODULE_SYSTEM>
+                            </environment> -->
+                            <!-- End: Workaround for 22.2: Disable the default Java Module Path using USE_NATIVE_IMAGE_JAVA_PLATFORM_MODULE_SYSTEM -->
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
