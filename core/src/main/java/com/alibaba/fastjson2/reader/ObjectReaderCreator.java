@@ -2508,7 +2508,13 @@ public class ObjectReaderCreator {
         Class fieldClassResolved = null;
 
         if (!(fieldType instanceof Class)) {
-            fieldTypeResolved = BeanUtils.getFieldType(TypeReference.get(objectType), objectClass, method, fieldType);
+            TypeReference<?> objectTypeReference;
+            if (objectType == null) {
+                objectTypeReference = null;
+            } else {
+                objectTypeReference = TypeReference.get(objectType);
+            }
+            fieldTypeResolved = BeanUtils.getFieldType(objectTypeReference, objectClass, method, fieldType);
             fieldClassResolved = TypeUtils.getMapping(fieldTypeResolved);
         }
 

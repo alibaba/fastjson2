@@ -5,7 +5,9 @@ import com.alibaba.fastjson2.function.ToByteFunction;
 import com.alibaba.fastjson2.function.ToFloatFunction;
 import com.alibaba.fastjson2.function.ToShortFunction;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
+import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.function.*;
@@ -25,7 +27,7 @@ public class ObjectWriters {
         return INSTANCE.createObjectWriter(objectType, fieldWriters);
     }
 
-    public static ObjectWriter of(Class objectType, FieldWriter... fieldWriters) {
+    public static <T> ObjectWriter<T> of(Class<T> objectType, FieldWriter... fieldWriters) {
         return INSTANCE.createObjectWriter(objectType, fieldWriters);
     }
 
@@ -124,6 +126,16 @@ public class ObjectWriters {
     }
 
     public static <T, V> FieldWriter fieldWriterList(String fieldName, Class<V> itemType, Function<T, List<V>> function) {
-        return INSTANCE.createFieldWriter(fieldName, new ParameterizedTypeImpl(List.class, itemType), List.class, function);
+        ParameterizedType listType;
+        if (itemType == String.class) {
+            listType = TypeUtils.PARAM_TYPE_LIST_STR;
+        } else {
+            listType = new ParameterizedTypeImpl(List.class, itemType);
+        }
+        return INSTANCE.createFieldWriter(fieldName, listType, List.class, function);
+    }
+
+    public static <T> FieldWriter fieldWriterListString(String fieldName, Function<T, List<String>> function) {
+        return INSTANCE.createFieldWriter(fieldName, TypeUtils.PARAM_TYPE_LIST_STR, List.class, function);
     }
 }
