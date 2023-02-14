@@ -501,6 +501,11 @@ public final class JSONFactory {
         return new JSONReader.Context(provider);
     }
 
+    public static JSONReader.Context createReadContext(long features) {
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        return new JSONReader.Context(provider, features);
+    }
+
     public static JSONReader.Context createReadContext(JSONReader.Feature... features) {
         JSONReader.Context context = new JSONReader.Context(
                 JSONFactory.getDefaultObjectReaderProvider()

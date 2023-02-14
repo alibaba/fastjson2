@@ -3335,6 +3335,14 @@ public abstract class JSONReader
             this.symbolTable = null;
         }
 
+        public Context(ObjectReaderProvider provider, long features) {
+            this.features = features;
+            this.provider = provider;
+            this.objectSupplier = JSONFactory.defaultObjectSupplier;
+            this.arraySupplier = JSONFactory.defaultArraySupplier;
+            this.symbolTable = null;
+        }
+
         public Context(Feature... features) {
             this.features = defaultReaderFeatures;
             this.provider = JSONFactory.getDefaultObjectReaderProvider();
