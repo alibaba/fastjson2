@@ -1770,10 +1770,17 @@ public abstract class JSONReader
             }
         } else if (ch == '-' || (ch >= '0' && ch <= '9')) {
             readNumber();
-            return valueType == JSON_TYPE_INT
-                    && mag1 == 0
-                    && mag2 == 0
-                    && mag3 == 1;
+            if (valueType == JSON_TYPE_INT) {
+                if ((context.features & Feature.NonZeroNumberCastToBooleanAsTrue.mask) != 0) {
+                    return mag0 != 0 || mag1 != 0 || mag2 != 0 || mag3 != 0;
+                } else {
+                    return mag0 == 0
+                            && mag1 == 0
+                            && mag2 == 0
+                            && mag3 == 1;
+                }
+            }
+            return false;
         } else if (ch == 'n') {
             if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
                 throw new JSONException(info("boolean value not support input null"));
@@ -3675,7 +3682,12 @@ public abstract class JSONReader
         /**
          * @since 2.0.21
          */
-        IgnoreAutoTypeNotMatch(1 << 23);
+        IgnoreAutoTypeNotMatch(1 << 23),
+
+        /**
+         * @since 2.0.24
+         */
+        NonZeroNumberCastToBooleanAsTrue(1 << 24);
 
         public final long mask;
 
