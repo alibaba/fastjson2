@@ -8,7 +8,14 @@ import java.lang.reflect.Field;
 
 final class FieldWriterInt8ValField<T>
         extends FieldWriterInt8<T> {
-    FieldWriterInt8ValField(String name, int ordinal, long features, String format, String label, Field field) {
+    FieldWriterInt8ValField(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Field field
+    ) {
         super(name, ordinal, features, format, label, byte.class, field, null);
     }
 

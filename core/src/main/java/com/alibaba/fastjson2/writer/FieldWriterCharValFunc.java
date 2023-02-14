@@ -9,7 +9,15 @@ final class FieldWriterCharValFunc
         extends FieldWriter {
     final ToCharFunction function;
 
-    FieldWriterCharValFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToCharFunction function) {
+    FieldWriterCharValFunc(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Method method,
+            ToCharFunction function
+    ) {
         super(fieldName, ordinal, features, format, label, char.class, char.class, null, method);
         this.function = function;
     }

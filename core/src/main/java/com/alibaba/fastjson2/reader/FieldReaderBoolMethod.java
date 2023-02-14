@@ -11,7 +11,18 @@ import java.util.Locale;
 
 final class FieldReaderBoolMethod<T>
         extends FieldReaderObject<T> {
-    FieldReaderBoolMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Boolean defaultValue, JSONSchema schema, Method method) {
+    FieldReaderBoolMethod(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Boolean defaultValue,
+            JSONSchema schema,
+            Method method
+    ) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null, null);
     }
 

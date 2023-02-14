@@ -6,13 +6,21 @@ import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.Locale;
 
 final class FieldReaderInt64Method<T>
         extends FieldReaderObject<T> {
-    FieldReaderInt64Method(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Long defaultValue, JSONSchema schema, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter, null, null);
+    FieldReaderInt64Method(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            Long defaultValue,
+            JSONSchema schema,
+            Method setter
+    ) {
+        super(fieldName, Long.class, Long.class, ordinal, features, format, locale, defaultValue, schema, setter, null, null);
     }
 
     @Override

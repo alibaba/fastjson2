@@ -10,7 +10,16 @@ import java.math.BigInteger;
 
 final class FieldReaderBigIntegerField<T>
         extends FieldReaderObjectField<T> {
-    FieldReaderBigIntegerField(String fieldName, Class fieldType, int ordinal, long features, String format, BigInteger defaultValue, JSONSchema schema, Field field) {
+    FieldReaderBigIntegerField(
+            String fieldName,
+            Class fieldType,
+            int ordinal,
+            long features,
+            String format,
+            BigInteger defaultValue,
+            JSONSchema schema,
+            Field field
+    ) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
     }
 

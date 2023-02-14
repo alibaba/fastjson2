@@ -11,7 +11,16 @@ import java.util.Collections;
 
 final class FieldReaderCollectionFieldReadOnly<T>
         extends FieldReaderObjectField<T> {
-    FieldReaderCollectionFieldReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Field field) {
+    FieldReaderCollectionFieldReadOnly(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            JSONSchema schema,
+            Field field
+    ) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, null, schema, field);
     }
 

@@ -7,7 +7,15 @@ final class FieldWriterBoolValFunc
         extends FieldWriterBoolVal {
     final Predicate function;
 
-    protected FieldWriterBoolValFunc(String fieldName, int ordinal, long features, String format, String label, Method method, Predicate function) {
+    protected FieldWriterBoolValFunc(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Method method,
+            Predicate function
+    ) {
         super(fieldName, ordinal, features, format, label, Boolean.class, Boolean.class, null, method);
         this.function = function;
     }

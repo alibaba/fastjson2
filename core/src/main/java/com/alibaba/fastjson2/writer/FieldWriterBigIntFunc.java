@@ -10,7 +10,15 @@ final class FieldWriterBigIntFunc<T>
         extends FieldWriter<T> {
     final Function<T, BigInteger> function;
 
-    FieldWriterBigIntFunc(String fieldName, int ordinal, long features, String format, String label, Method method, Function<T, BigInteger> function) {
+    FieldWriterBigIntFunc(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Method method,
+            Function<T, BigInteger> function
+    ) {
         super(fieldName, ordinal, features, format, label, BigInteger.class, BigInteger.class, null, method);
         this.function = function;
     }
