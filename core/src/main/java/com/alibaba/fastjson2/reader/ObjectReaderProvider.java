@@ -616,7 +616,7 @@ public class ObjectReaderProvider
             typeConverts.putIfAbsent(from, new ConcurrentHashMap<>());
             map = typeConverts.get(from);
         }
-        return map.putIfAbsent(to, typeConvert);
+        return map.put(to, typeConvert);
     }
 
     public ObjectReader getObjectReader(long hashCode) {
