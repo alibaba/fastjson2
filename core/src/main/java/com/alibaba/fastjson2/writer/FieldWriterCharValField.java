@@ -8,8 +8,15 @@ import java.lang.reflect.Field;
 
 final class FieldWriterCharValField<T>
         extends FieldWriter<T> {
-    FieldWriterCharValField(String name, int ordinal, String format, String label, Field field) {
-        super(name, ordinal, 0, format, label, char.class, char.class, field, null);
+    FieldWriterCharValField(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Field field
+    ) {
+        super(name, ordinal, features, format, label, char.class, char.class, field, null);
     }
 
     @Override

@@ -10,7 +10,15 @@ final class FieldWriterCalendarFunc<T>
         extends FieldWriterDate<T> {
     final Function<T, Calendar> function;
 
-    FieldWriterCalendarFunc(String fieldName, int ordinal, long features, String dateTimeFormat, String label, Method method, Function<T, Calendar> function) {
+    FieldWriterCalendarFunc(
+            String fieldName,
+            int ordinal,
+            long features,
+            String dateTimeFormat,
+            String label,
+            Method method,
+            Function<T, Calendar> function
+    ) {
         super(fieldName, ordinal, features, dateTimeFormat, label, Calendar.class, Calendar.class, null, method);
         this.function = function;
     }

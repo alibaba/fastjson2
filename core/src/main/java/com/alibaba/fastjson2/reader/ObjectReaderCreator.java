@@ -1886,7 +1886,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == boolean.class) {
-            return new FieldReaderBoolValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (Boolean) defaultValue, jsonSchema, method);
+            return new FieldReaderBoolValueMethod(fieldName, ordinal, features, format, (Boolean) defaultValue, jsonSchema, method);
         }
 
         if (fieldType == Boolean.class) {
@@ -1926,19 +1926,19 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == Integer.class) {
-            return new FieldReaderInt32Method(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Integer) defaultValue, jsonSchema, method);
+            return new FieldReaderInt32Method(fieldName, ordinal, features, format, locale, (Integer) defaultValue, jsonSchema, method);
         }
 
         if (fieldType == Long.class) {
-            return new FieldReaderInt64Method(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, method);
+            return new FieldReaderInt64Method(fieldName, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, method);
         }
 
         if (fieldType == Float.class) {
-            return new FieldReaderFloatMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Float) defaultValue, jsonSchema, method);
+            return new FieldReaderFloatMethod(fieldName, ordinal, features, format, locale, (Float) defaultValue, jsonSchema, method);
         }
 
         if (fieldType == Double.class) {
-            return new FieldReaderDoubleMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (Double) defaultValue, jsonSchema, method);
+            return new FieldReaderDoubleMethod(fieldName, ordinal, features, format, (Double) defaultValue, jsonSchema, method);
         }
 
         if (fieldClass == BigDecimal.class) {
@@ -2190,7 +2190,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == boolean.class) {
-            return new FieldReaderBoolValueField(fieldName, fieldClass, ordinal, features, format, (Boolean) defaultValue, jsonSchema, field);
+            return new FieldReaderBoolValueField(fieldName, ordinal, features, format, (Boolean) defaultValue, jsonSchema, field);
         }
 
         if (fieldClass == Boolean.class) {

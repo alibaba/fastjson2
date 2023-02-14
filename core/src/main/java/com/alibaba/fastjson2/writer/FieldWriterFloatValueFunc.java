@@ -9,7 +9,15 @@ final class FieldWriterFloatValueFunc
         extends FieldWriter {
     final ToFloatFunction function;
 
-    protected FieldWriterFloatValueFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToFloatFunction function) {
+    protected FieldWriterFloatValueFunc(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Method method,
+            ToFloatFunction function
+    ) {
         super(fieldName, ordinal, features, format, label, float.class, float.class, null, method);
         this.function = function;
     }

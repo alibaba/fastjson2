@@ -7,7 +7,15 @@ import java.lang.reflect.Method;
 
 final class FieldWriterInt32Method<T>
         extends FieldWriterInt32<T> {
-    FieldWriterInt32Method(String fieldName, int ordinal, long features, String format, String label, Method method, Class fieldClass) {
+    FieldWriterInt32Method(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Method method,
+            Class fieldClass
+    ) {
         super(fieldName, ordinal, features, format, label, fieldClass, fieldClass, null, method);
     }
 

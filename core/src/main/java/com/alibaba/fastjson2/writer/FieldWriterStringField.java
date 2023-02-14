@@ -12,7 +12,8 @@ final class FieldWriterStringField<T>
             long features,
             String format,
             String label,
-            Field field) {
+            Field field
+    ) {
         super(fieldName, ordinal, features, format, label, String.class, String.class, field, null);
     }
 

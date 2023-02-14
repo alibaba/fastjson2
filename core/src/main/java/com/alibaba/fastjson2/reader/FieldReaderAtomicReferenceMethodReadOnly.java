@@ -9,7 +9,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 final class FieldReaderAtomicReferenceMethodReadOnly<T>
         extends FieldReaderAtomicReference<T> {
-    FieldReaderAtomicReferenceMethodReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, JSONSchema schema, Method method) {
+    FieldReaderAtomicReferenceMethodReadOnly(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            JSONSchema schema,
+            Method method
+    ) {
         super(fieldName, fieldType, fieldClass, ordinal, 0, null, schema, method, null);
     }
 

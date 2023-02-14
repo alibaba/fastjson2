@@ -12,7 +12,18 @@ import java.util.Locale;
 
 final class FieldReaderBigIntegerMethod<T>
         extends FieldReaderObject<T> {
-    FieldReaderBigIntegerMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, BigInteger defaultValue, JSONSchema schema, Method method) {
+    FieldReaderBigIntegerMethod(
+            String fieldName,
+            Type fieldType,
+            Class fieldClass,
+            int ordinal,
+            long features,
+            String format,
+            Locale locale,
+            BigInteger defaultValue,
+            JSONSchema schema,
+            Method method
+    ) {
         super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null, null);
     }
 

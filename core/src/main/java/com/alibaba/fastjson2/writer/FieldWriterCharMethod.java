@@ -8,7 +8,15 @@ import java.lang.reflect.Method;
 
 final class FieldWriterCharMethod<T>
         extends FieldWriter<T> {
-    protected FieldWriterCharMethod(String fieldName, int ordinal, long features, String format, String label, Method method, Class fieldClass) {
+    protected FieldWriterCharMethod(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Method method,
+            Class fieldClass
+    ) {
         super(fieldName, ordinal, features, format, label, fieldClass, fieldClass, null, method);
     }
 

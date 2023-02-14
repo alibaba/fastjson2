@@ -9,7 +9,16 @@ import java.lang.reflect.Field;
 
 final class FieldReaderDoubleField<T>
         extends FieldReaderObjectField<T> {
-    FieldReaderDoubleField(String fieldName, Class fieldType, int ordinal, long features, String format, Double defaultValue, JSONSchema schema, Field field) {
+    FieldReaderDoubleField(
+            String fieldName,
+            Class fieldType,
+            int ordinal,
+            long features,
+            String format,
+            Double defaultValue,
+            JSONSchema schema,
+            Field field
+    ) {
         super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
     }
 

@@ -9,7 +9,15 @@ final class FieldWriterFloatFunc<T>
         extends FieldWriter<T> {
     final Function<T, Float> function;
 
-    protected FieldWriterFloatFunc(String fieldName, int ordinal, long features, String format, String label, Method method, Function<T, Float> function) {
+    protected FieldWriterFloatFunc(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Method method,
+            Function<T, Float> function
+    ) {
         super(fieldName, ordinal, features, format, label, Float.class, Float.class, null, method);
         this.function = function;
     }

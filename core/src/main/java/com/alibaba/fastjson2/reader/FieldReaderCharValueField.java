@@ -8,7 +8,15 @@ import java.lang.reflect.Field;
 
 final class FieldReaderCharValueField<T>
         extends FieldReaderObjectField<T> {
-    FieldReaderCharValueField(String fieldName, int ordinal, long features, String format, Character defaultValue, JSONSchema schema, Field field) {
+    FieldReaderCharValueField(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Character defaultValue,
+            JSONSchema schema,
+            Field field
+    ) {
         super(fieldName, char.class, char.class, ordinal, features, format, defaultValue, schema, field);
     }
 
