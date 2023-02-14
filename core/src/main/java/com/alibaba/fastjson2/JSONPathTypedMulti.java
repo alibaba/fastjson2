@@ -78,7 +78,7 @@ class JSONPathTypedMulti
     }
 
     protected JSONReader.Context createContext() {
-        JSONReader.Context context = JSONFactory.createReadContext();
+        JSONReader.Context context = JSONFactory.createReadContext(features);
         if (zoneId != null && zoneId != DEFAULT_ZONE_ID) {
             context.zoneId = zoneId;
         }
