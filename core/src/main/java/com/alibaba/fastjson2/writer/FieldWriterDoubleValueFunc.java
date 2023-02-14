@@ -9,7 +9,15 @@ final class FieldWriterDoubleValueFunc
         extends FieldWriter {
     final ToDoubleFunction function;
 
-    protected FieldWriterDoubleValueFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToDoubleFunction function) {
+    protected FieldWriterDoubleValueFunc(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Method method,
+            ToDoubleFunction function
+    ) {
         super(fieldName, ordinal, features, format, label, double.class, double.class, null, method);
         this.function = function;
     }

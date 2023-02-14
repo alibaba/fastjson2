@@ -7,7 +7,14 @@ import java.util.Date;
 
 final class FieldWriterDateField<T>
         extends FieldWriterDate<T> {
-    protected FieldWriterDateField(String fieldName, int ordinal, long features, String format, String label, Field field) {
+    protected FieldWriterDateField(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Field field
+    ) {
         super(fieldName, ordinal, features, format, label, Date.class, Date.class, field, null);
     }
 

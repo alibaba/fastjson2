@@ -11,7 +11,15 @@ final class FieldReaderCharValueFunc<T>
         extends FieldReader<T> {
     final ObjCharConsumer<T> function;
 
-    FieldReaderCharValueFunc(String fieldName, int ordinal, String format, Character defaultValue, JSONSchema schema, Method method, ObjCharConsumer<T> function) {
+    FieldReaderCharValueFunc(
+            String fieldName,
+            int ordinal,
+            String format,
+            Character defaultValue,
+            JSONSchema schema,
+            Method method,
+            ObjCharConsumer<T> function
+    ) {
         super(fieldName, char.class, char.class, ordinal, 0, format, null, defaultValue, schema, method, null);
         this.function = function;
     }

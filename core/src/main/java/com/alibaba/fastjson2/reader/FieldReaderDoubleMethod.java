@@ -6,12 +6,19 @@ import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 
 final class FieldReaderDoubleMethod<T>
         extends FieldReaderObject<T> {
-    FieldReaderDoubleMethod(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Double defaultValue, JSONSchema schema, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, defaultValue, schema, setter, null, null);
+    FieldReaderDoubleMethod(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Double defaultValue,
+            JSONSchema schema,
+            Method setter
+    ) {
+        super(fieldName, Double.class, Double.class, ordinal, features, format, null, defaultValue, schema, setter, null, null);
     }
 
     @Override

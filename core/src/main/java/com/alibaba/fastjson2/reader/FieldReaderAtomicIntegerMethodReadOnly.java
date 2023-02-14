@@ -9,7 +9,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 class FieldReaderAtomicIntegerMethodReadOnly<T>
         extends FieldReader<T> {
-    FieldReaderAtomicIntegerMethodReadOnly(String fieldName, Class fieldType, int ordinal, JSONSchema jsonSchema, Method method) {
+    FieldReaderAtomicIntegerMethodReadOnly(
+            String fieldName,
+            Class fieldType,
+            int ordinal,
+            JSONSchema jsonSchema,
+            Method method
+    ) {
         super(fieldName, fieldType, fieldType, ordinal, 0, null, null, null, jsonSchema, method, null);
     }
 

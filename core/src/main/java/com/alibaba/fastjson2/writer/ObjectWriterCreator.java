@@ -741,7 +741,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == float.class) {
-            return new FieldWriterFloatValField(fieldName, ordinal, format, label, field);
+            return new FieldWriterFloatValField(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass == Float.class) {
@@ -757,7 +757,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == char.class) {
-            return new FieldWriterCharValField(fieldName, ordinal, format, label, field);
+            return new FieldWriterCharValField(fieldName, ordinal, features, format, label, field);
         }
 
         if (fieldClass == BigInteger.class) {

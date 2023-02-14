@@ -9,7 +9,15 @@ final class FieldWriterInt16ValFunc
         extends FieldWriterInt16 {
     final ToShortFunction function;
 
-    FieldWriterInt16ValFunc(String fieldName, int ordinal, long features, String format, String label, Method method, ToShortFunction function) {
+    FieldWriterInt16ValFunc(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Method method,
+            ToShortFunction function
+    ) {
         super(fieldName, ordinal, features, format, label, short.class, null, method);
         this.function = function;
     }

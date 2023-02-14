@@ -7,7 +7,15 @@ import java.lang.reflect.Method;
 
 final class FieldWriterBoolMethod
         extends FieldWriterBoolean {
-    protected FieldWriterBoolMethod(String fieldName, int ordinal, long features, String format, String label, Method method, Class fieldClass) {
+    protected FieldWriterBoolMethod(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Method method,
+            Class fieldClass
+    ) {
         super(fieldName, ordinal, features, format, label, fieldClass, fieldClass, null, method);
     }
 

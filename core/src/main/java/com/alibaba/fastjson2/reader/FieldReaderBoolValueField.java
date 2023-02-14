@@ -10,8 +10,16 @@ import java.lang.reflect.Field;
 
 final class FieldReaderBoolValueField<T>
         extends FieldReaderObjectField<T> {
-    FieldReaderBoolValueField(String fieldName, Class fieldType, int ordinal, long features, String format, Boolean defaultValue, JSONSchema schema, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
+    FieldReaderBoolValueField(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            Boolean defaultValue,
+            JSONSchema schema,
+            Field field
+    ) {
+        super(fieldName, boolean.class, boolean.class, ordinal, features, format, defaultValue, schema, field);
     }
 
     @Override
