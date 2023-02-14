@@ -812,6 +812,22 @@ public class JSONObject
         throw new JSONException("Can not cast '" + value.getClass() + "' to byte value");
     }
 
+    public byte[] getBytes(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof byte[]) {
+            return (byte[]) value;
+        }
+        if (value instanceof String) {
+            return IOUtils.decodeBase64((String) value);
+        }
+        throw new JSONException("can not cast to byte[], value : " + value);
+    }
+
     /**
      * Returns the {@link Boolean} of the associated keys in this {@link JSONObject}.
      *

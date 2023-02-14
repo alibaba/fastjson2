@@ -1375,4 +1375,29 @@ public class JSONObjectTest {
         assertEquals(101, object.getByPath("id"));
         assertEquals(1001, object.getByPath("item.itemId"));
     }
+
+    @Test
+    public void test_bytes() {
+        JSONObject object = new JSONObject();
+        assertNull(object.getBytes("bytes"));
+    }
+
+    @Test
+    public void test2() {
+        JSONObject jsonObject = new JSONObject(2);
+        assertTrue(jsonObject.isEmpty());
+        assertTrue(jsonObject.values().isEmpty());
+        assertFalse(jsonObject.containsKey("id"));
+        assertFalse(jsonObject.containsValue("id"));
+        assertNull(jsonObject.remove("id"));
+        jsonObject.clear();
+        jsonObject.putAll(Collections.emptyMap());
+        assertNull(jsonObject.getBytes("id"));
+
+        jsonObject.put("bytes", new byte[0]);
+        assertEquals(0, jsonObject.getBytes("bytes").length);
+
+        jsonObject.put("bytes", Base64.getEncoder().encodeToString("abc中华人民共和国".getBytes()));
+        assertEquals("abc中华人民共和国", new String(jsonObject.getBytes("bytes")));
+    }
 }
