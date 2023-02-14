@@ -171,11 +171,13 @@ public class JSONObjectTest {
         assertTrue(json.getJSONObject("obj") == null);
     }
 
+    @Test
     public void test_bytes() throws Exception {
         JSONObject object = new JSONObject();
         assertNull(object.getBytes("bytes"));
     }
 
+    @Test
     public void test_getObject() throws Exception {
         JSONObject json = new JSONObject();
         json.put("obj", new JSONObject());
