@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.android;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
@@ -29,16 +30,27 @@ public class MainActivity extends AppCompatActivity {
     static final int SERDE_LOOP_COUNT = 10_000;
     static final int PARSE_LOOP_COUNT = 1000;
 
+    static final String FASTJSON2 = "fastjson2",
+            FASTJSON1 = "fastjson1", GSON = "gson",
+            JACKSON = "jackson", ORGJSON = "orgjson";
+
     static final String[] LIB_NAMES = {
-            "fastjson2", "fastjson1", "gson", "jackson"
+            FASTJSON2, FASTJSON1,
+            GSON, JACKSON, ORGJSON
     };
+
+    static final String TAG_SERDE = "SERDE",
+            TAG_PARSE = "PARSE";
 
     static final String[] TAG_NAMES = {
-            "SERDE", "PARSE"
+            TAG_SERDE, TAG_PARSE
     };
 
+    static final String ITEM_EISHAY = "eishay", ITEM_CART = "cart",
+            ITEM_HOMEPAGE = "homepage", ITEM_H5API = "h5 api";
+
     static final String[] ITEM_NAMES = {
-            "eishay", "cart", "homepage", "h5 api"
+            ITEM_EISHAY, ITEM_CART, ITEM_HOMEPAGE, ITEM_H5API
     };
 
     private Gson gson;
@@ -61,6 +73,14 @@ public class MainActivity extends AppCompatActivity {
                 R.color.white, null
         );
 
+        LinearLayout head, tail;
+        inflate.libs.addView(
+                head = new LinearLayout(this)
+        );
+        inflate.libs.addView(
+                tail = new LinearLayout(this)
+        );
+
         CheckBox[] libBoxes = new CheckBox[LIB_NAMES.length];
         for (int i = 0; i < LIB_NAMES.length; i++) {
             CheckBox box = new CheckBox(this);
@@ -69,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
             box.setTag(LIB_NAMES[i]);
             box.setText(LIB_NAMES[i]);
             box.setTextColor(white);
-            inflate.libs.addView(box);
+            (i < 2 ? head : tail).addView(box);
         }
 
         RadioButton[] tagRadios = new RadioButton[TAG_NAMES.length];
@@ -123,15 +143,15 @@ public class MainActivity extends AppCompatActivity {
 
         {
             Map<Object, Map<Object, Runnable>> tags = new HashMap<>();
-            tester.put("fastjson2", tags);
+            tester.put(FASTJSON2, tags);
             {
                 Map<Object, Runnable> items = new HashMap<>();
-                tags.put("SERDE", items);
-                items.put("eishay", this::fastjson2EishaySerde);
+                tags.put(TAG_SERDE, items);
+                items.put(ITEM_EISHAY, this::fastjson2EishaySerde);
             }
             {
                 Map<Object, Runnable> items = new HashMap<>();
-                tags.put("PARSE", items);
+                tags.put(TAG_PARSE, items);
                 for (int i = 0; i < ITEM_NAMES.length; i++) {
                     String text = texts[i];
                     String item = ITEM_NAMES[i];
@@ -142,15 +162,15 @@ public class MainActivity extends AppCompatActivity {
 
         {
             Map<Object, Map<Object, Runnable>> tags = new HashMap<>();
-            tester.put("fastjson1", tags);
+            tester.put(FASTJSON1, tags);
             {
                 Map<Object, Runnable> items = new HashMap<>();
-                tags.put("SERDE", items);
-                items.put("eishay", this::fastjson1EishaySerde);
+                tags.put(TAG_SERDE, items);
+                items.put(ITEM_EISHAY, this::fastjson1EishaySerde);
             }
             {
                 Map<Object, Runnable> items = new HashMap<>();
-                tags.put("PARSE", items);
+                tags.put(TAG_PARSE, items);
                 for (int i = 0; i < ITEM_NAMES.length; i++) {
                     String text = texts[i];
                     String item = ITEM_NAMES[i];
@@ -161,21 +181,35 @@ public class MainActivity extends AppCompatActivity {
 
         {
             Map<Object, Map<Object, Runnable>> tags = new HashMap<>();
-            tester.put("gson", tags);
+            tester.put(GSON, tags);
             {
                 Map<Object, Runnable> items = new HashMap<>();
-                tags.put("SERDE", items);
-                items.put("eishay", this::gsonEishaySerde);
+                tags.put(TAG_SERDE, items);
+                items.put(ITEM_EISHAY, this::gsonEishaySerde);
             }
         }
 
         {
             Map<Object, Map<Object, Runnable>> tags = new HashMap<>();
-            tester.put("jackson", tags);
+            tester.put(JACKSON, tags);
             {
                 Map<Object, Runnable> items = new HashMap<>();
-                tags.put("SERDE", items);
-                items.put("eishay", this::jacksonEishaySerde);
+                tags.put(TAG_SERDE, items);
+                items.put(ITEM_EISHAY, this::jacksonEishaySerde);
+            }
+        }
+
+        {
+            Map<Object, Map<Object, Runnable>> tags = new HashMap<>();
+            tester.put(ORGJSON, tags);
+            {
+                Map<Object, Runnable> items = new HashMap<>();
+                tags.put(TAG_PARSE, items);
+                for (int i = 0; i < ITEM_NAMES.length; i++) {
+                    String text = texts[i];
+                    String item = ITEM_NAMES[i];
+                    items.put(item, () -> orgjsonParse(text, item));
+                }
             }
         }
 
@@ -191,7 +225,6 @@ public class MainActivity extends AppCompatActivity {
             for (RadioButton btn : radios) {
                 if (btn.isChecked()) {
                     return btn.getTag();
-
                 }
             }
             return null;
@@ -202,14 +235,16 @@ public class MainActivity extends AppCompatActivity {
             final Object item = target.apply(itemRadios);
 
             if (tag == null || item == null) {
-                Toast.makeText(this, "Unselected", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "No tag or item is selected", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            result.setLength(0);
-            inflate.result.setText(
-                    result.append(tag).append("  ").append(item).append("\n\n")
-            );
+            synchronized (result) {
+                result.setLength(0);
+                inflate.result.setText(
+                        result.append(tag).append("  ").append(item).append("\n\n")
+                );
+            }
 
             Toast.makeText(this, "Testing", Toast.LENGTH_SHORT).show();
             for (CheckBox box : libBoxes) {
