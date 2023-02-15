@@ -1400,4 +1400,11 @@ public class JSONObjectTest {
         jsonObject.put("bytes", Base64.getEncoder().encodeToString("abc中华人民共和国".getBytes()));
         assertEquals("abc中华人民共和国", new String(jsonObject.getBytes("bytes")));
     }
+
+    @Test
+    public void testGetSzie() {
+        assertEquals(0, JSONObject.of().getSize("value"));
+        assertEquals(1, JSONObject.of("value", JSONObject.of("a", 1)).getSize("value"));
+        assertEquals(2, JSONObject.of("value", JSONArray.of("a", "b")).getSize("value"));
+    }
 }

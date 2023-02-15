@@ -1773,6 +1773,22 @@ public class JSONObject
     }
 
     /**
+     * if value instance of Map or Collection, return size, other return 0
+     * @param key
+     * @since 2.0.24
+     */
+    public int getSize(String key) {
+        Object value = get(key);
+        if (value instanceof Map) {
+            return ((Map<?, ?>) value).size();
+        }
+        if (value instanceof Collection) {
+            return ((Collection<?>) value).size();
+        }
+        return 0;
+    }
+
+    /**
      * <pre>
      * JSONObject jsonObject = JSONObject.of();
      * </pre>
