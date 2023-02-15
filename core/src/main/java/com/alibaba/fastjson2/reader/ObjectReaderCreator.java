@@ -2563,12 +2563,7 @@ public class ObjectReaderCreator {
             try {
                 fieldInfo.init();
                 Field field = objectClass.getField(name);
-                for (ObjectReaderModule module : provider.modules) {
-                    ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-                    if (annotationProcessor != null) {
-                        annotationProcessor.getFieldInfo(fieldInfo, objectClass, field);
-                    }
-                }
+                provider.getFieldInfo(fieldInfo, objectClass, field);
                 String jsonFieldName = fieldInfo.fieldName;
                 if (jsonFieldName != null && !jsonFieldName.isEmpty() && !jsonFieldName.equals(name)) {
                     long jsonFieldNameHash = Fnv.hashCode64(jsonFieldName);

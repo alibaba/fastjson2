@@ -181,9 +181,13 @@ public class ObjectWriterCreator {
         ObjectWriter writeUsingWriter = null;
         if (fieldInfo.writeUsing != null) {
             try {
-                Constructor<?> constructor = fieldInfo.writeUsing.getDeclaredConstructor();
-                constructor.setAccessible(true);
-                writeUsingWriter = (ObjectWriter) constructor.newInstance();
+                if (fieldInfo.writeUsing == ObjectWriterImplToString.class) {
+                    writeUsingWriter = ObjectWriterImplToString.INSTANCE;
+                } else {
+                    Constructor<?> constructor = fieldInfo.writeUsing.getDeclaredConstructor();
+                    constructor.setAccessible(true);
+                    writeUsingWriter = (ObjectWriter) constructor.newInstance();
+                }
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                      NoSuchMethodException e) {
                 throw new JSONException("create writeUsing Writer error", e);
