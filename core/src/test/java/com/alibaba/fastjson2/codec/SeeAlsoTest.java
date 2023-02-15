@@ -23,6 +23,7 @@ public class SeeAlsoTest {
                     Cat.class, Pig.class
             };
             ObjectReader<Animal> objectReader = creator.createObjectReaderSeeAlso(Animal.class, seeAlso);
+            creator.createObjectReaderSeeAlso(Animal.class, "@type", seeAlso, null);
 
             {
                 Animal animal = objectReader.readObject(JSONReader.of("{\"@type\":\"Cat\",\"catId\":1001}"), 0);

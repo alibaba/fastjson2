@@ -405,7 +405,14 @@ public class ObjectReaderCreatorASM
         }
 
         if (beanInfo.seeAlso != null && beanInfo.seeAlso.length != 0) {
-            return createObjectReaderSeeAlso(objectClass, beanInfo.typeKey, beanInfo.seeAlso, beanInfo.seeAlsoNames, fieldReaderArray);
+            return createObjectReaderSeeAlso(
+                    objectClass,
+                    beanInfo.typeKey,
+                    beanInfo.seeAlso,
+                    beanInfo.seeAlsoNames,
+                    beanInfo.seeAlsoDefault,
+                    fieldReaderArray
+            );
         }
 
         if (!fieldBased) {
