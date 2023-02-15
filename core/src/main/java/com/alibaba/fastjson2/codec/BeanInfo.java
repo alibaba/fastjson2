@@ -16,6 +16,7 @@ public class BeanInfo {
     public String builderWithPrefix;
     public Class[] seeAlso;
     public String[] seeAlsoNames;
+    public Class seeAlsoDefault;
     public Constructor creatorConstructor;
     public Constructor markerConstructor;
     public Method createMethod;

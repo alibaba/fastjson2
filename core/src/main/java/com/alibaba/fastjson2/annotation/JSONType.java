@@ -21,6 +21,11 @@ public @interface JSONType {
     Class<?>[] seeAlso() default{};
 
     /**
+     * @since 2.0.24
+     */
+    Class<?> seeAlsoDefault() default Void.class;
+
+    /**
      * Property that defines what to do regarding ordering of properties not explicitly included in annotation instance.
      * If set to true, they will be alphabetically ordered (default setting); if false, order is undefined
      * @return
