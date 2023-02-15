@@ -190,7 +190,7 @@ class JSONPathTypedMultiNames
                 fieldValue = fieldReader.readFieldValue(jsonReader);
             } catch (Exception e) {
                 long features = 0;
-                if (index < this.pathFeatures.length) {
+                if (pathFeatures != null && index < this.pathFeatures.length) {
                     features = this.pathFeatures[index];
                 }
                 if ((features & Feature.NullOnError.mask) == 0) {
