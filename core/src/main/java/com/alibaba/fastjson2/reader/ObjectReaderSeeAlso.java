@@ -2,8 +2,10 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.annotation.JSONType;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -23,10 +25,42 @@ final class ObjectReaderSeeAlso<T>
                 typeKey,
                 null,
                 JSONReader.Feature.SupportAutoType.mask,
-                null, defaultCreator,
+                null,
+                defaultCreator,
                 null,
                 seeAlso,
                 seeAlsoNames,
+                seeAlsoDefault,
+                fieldReaders
+        );
+    }
+
+    ObjectReaderSeeAlso addSubType(Class subTypeClass, String subTypeClassName) {
+        for (Class item : seeAlso) {
+            if (item == subTypeClass) {
+                return this;
+            }
+        }
+
+        Class[] seeAlso1 = Arrays.copyOf(seeAlso, seeAlso.length + 1);
+        String[] seeAlsoNames1 = Arrays.copyOf(this.seeAlsoNames, this.seeAlsoNames.length + 1);
+        seeAlso1[seeAlso1.length - 1] = subTypeClass;
+        if (subTypeClassName == null) {
+            JSONType jsonType = (JSONType) subTypeClass.getAnnotation(JSONType.class);
+            if (jsonType != null) {
+                subTypeClassName = jsonType.typeName();
+            }
+        }
+        if (subTypeClassName != null) {
+            seeAlsoNames1[seeAlsoNames1.length - 1] = subTypeClassName;
+        }
+
+        return new ObjectReaderSeeAlso(
+                objectClass,
+                creator,
+                typeKey,
+                seeAlso1,
+                seeAlsoNames1,
                 seeAlsoDefault,
                 fieldReaders
         );

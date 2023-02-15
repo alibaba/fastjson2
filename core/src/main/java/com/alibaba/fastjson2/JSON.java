@@ -3,10 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
-import com.alibaba.fastjson2.reader.FieldReader;
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderBean;
-import com.alibaba.fastjson2.reader.ObjectReaderNoneDefaultConstructor;
+import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.MultiType;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -2982,7 +2979,17 @@ public interface JSON {
      * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(ObjectReaderModule)
      */
     static boolean register(ObjectReaderModule objectReaderModule) {
-        return JSONFactory.getDefaultObjectReaderProvider().register(objectReaderModule);
+        ObjectReaderProvider provider = getDefaultObjectReaderProvider();
+        return provider.register(objectReaderModule);
+    }
+
+    static void registerSeeAlsoSubType(Class subTypeClass) {
+        registerSeeAlsoSubType(subTypeClass, null);
+    }
+
+    static void registerSeeAlsoSubType(Class subTypeClass, String subTypeClassName) {
+        ObjectReaderProvider provider = getDefaultObjectReaderProvider();
+        provider.registerSeeAlsoSubType(subTypeClass, subTypeClassName);
     }
 
     /**

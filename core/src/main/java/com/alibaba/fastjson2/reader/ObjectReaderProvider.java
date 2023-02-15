@@ -416,6 +416,30 @@ public class ObjectReaderProvider
         cacheFieldBased.remove(target);
     }
 
+    public void registerSeeAlsoSubType(Class subTypeClass) {
+        registerSeeAlsoSubType(subTypeClass, null);
+    }
+
+    public void registerSeeAlsoSubType(Class subTypeClass, String subTypeClassName) {
+        Class superClass = subTypeClass.getSuperclass();
+        if (superClass == null) {
+            throw new JSONException("superclass is null");
+        }
+
+        ObjectReader objectReader = getObjectReader(superClass);
+        if (objectReader instanceof ObjectReaderSeeAlso) {
+            ObjectReaderSeeAlso readerSeeAlso = (ObjectReaderSeeAlso) objectReader;
+            ObjectReaderSeeAlso readerSeeAlsoNew = readerSeeAlso.addSubType(subTypeClass, subTypeClassName);
+            if (readerSeeAlsoNew != readerSeeAlso) {
+                if (cache.containsKey(superClass)) {
+                    cache.put(superClass, readerSeeAlsoNew);
+                } else {
+                    cacheFieldBased.put(subTypeClass, readerSeeAlsoNew);
+                }
+            }
+        }
+    }
+
     public ObjectReader register(Type type, ObjectReader objectReader) {
         if (objectReader == null) {
             return cache.remove(type);
