@@ -25,6 +25,29 @@ public class WriteClassNameTest {
         assertSame(None.class, checker.getClass());
     }
 
+    @Test
+    public void testRegisterSubType() {
+        JSON.registerSeeAlsoSubType(TestChecker.class);
+        Checker checker = JSON.parseObject("{\"type\":\"Test\"}", Checker.class);
+        assertSame(TestChecker.class, checker.getClass());
+    }
+
+    @Test
+    public void testRegisterSubType1() {
+        JSON.registerSeeAlsoSubType(XChecker.class, "X");
+        Checker checker = JSON.parseObject("{\"type\":\"X\"}", Checker.class);
+        assertSame(XChecker.class, checker.getClass());
+    }
+
+    @JSONType(typeName = "Test")
+    public static class TestChecker
+            extends Checker {
+    }
+
+    public static class XChecker
+            extends Checker {
+    }
+
     @JSONType(
             typeKey = "type",
             serializeFeatures = JSONWriter.Feature.WriteClassName,
