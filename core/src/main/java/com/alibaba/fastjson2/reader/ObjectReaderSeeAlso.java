@@ -15,6 +15,7 @@ final class ObjectReaderSeeAlso<T>
             String typeKey,
             Class[] seeAlso,
             String[] seeAlsoNames,
+            Class seeAlsoDefault,
             FieldReader... fieldReaders
     ) {
         super(
@@ -26,6 +27,7 @@ final class ObjectReaderSeeAlso<T>
                 null,
                 seeAlso,
                 seeAlsoNames,
+                seeAlsoDefault,
                 fieldReaders
         );
     }
@@ -140,6 +142,10 @@ final class ObjectReaderSeeAlso<T>
                     reader = context.getObjectReaderAutoType(
                             typeName, objectClass, features3
                     );
+
+                    if (reader == null && seeAlsoDefault != null) {
+                        reader = context.getObjectReader(seeAlsoDefault);
+                    }
 
                     if (reader == null) {
                         throw new JSONException(jsonReader.info("No suitable ObjectReader found for" + typeName));

@@ -32,6 +32,7 @@ public class ObjectReaderAdapter<T>
     // seeAlso
     final Class[] seeAlso;
     final String[] seeAlsoNames;
+    final Class seeAlsoDefault;
     final Map<Long, Class> seeAlsoMapping;
 
     public ObjectReaderAdapter(Class objectClass, Supplier<T> creator, FieldReader... fieldReaders) {
@@ -58,6 +59,7 @@ public class ObjectReaderAdapter<T>
                 buildFunction,
                 null,
                 null,
+                null,
                 fieldReaders
         );
     }
@@ -72,6 +74,34 @@ public class ObjectReaderAdapter<T>
             Function buildFunction,
             Class[] seeAlso,
             String[] seeAlsoNames,
+            FieldReader... fieldReaders
+    ) {
+        this(
+                objectClass,
+                typeKey,
+                typeName,
+                features,
+                schema,
+                creator,
+                buildFunction,
+                seeAlso,
+                seeAlsoNames,
+                null,
+                fieldReaders
+        );
+    }
+
+    public ObjectReaderAdapter(
+            Class objectClass,
+            String typeKey,
+            String typeName,
+            long features,
+            JSONSchema schema,
+            Supplier<T> creator,
+            Function buildFunction,
+            Class[] seeAlso,
+            String[] seeAlsoNames,
+            Class seeAlsoDefault,
             FieldReader... fieldReaders
     ) {
         super(objectClass, creator, typeName, features, schema, buildFunction);
@@ -152,6 +182,7 @@ public class ObjectReaderAdapter<T>
             this.seeAlsoMapping = null;
             this.seeAlsoNames = null;
         }
+        this.seeAlsoDefault = seeAlsoDefault;
     }
 
     @Override

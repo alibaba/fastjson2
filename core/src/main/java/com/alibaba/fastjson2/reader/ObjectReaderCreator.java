@@ -245,7 +245,15 @@ public class ObjectReaderCreator {
             FieldReader... fieldReaders
     ) {
         Supplier<T> instanceSupplier = createSupplier(objectType);
-        return new ObjectReaderSeeAlso(objectType, instanceSupplier, "@type", seeAlso, null, fieldReaders);
+        return new ObjectReaderSeeAlso(
+                objectType,
+                instanceSupplier,
+                "@type",
+                seeAlso,
+                null,
+                null,
+                fieldReaders
+        );
     }
 
     public <T> ObjectReader<T> createObjectReaderSeeAlso(
@@ -256,7 +264,38 @@ public class ObjectReaderCreator {
             FieldReader... fieldReaders
     ) {
         Supplier<T> creator = createSupplier(objectClass);
-        return new ObjectReaderSeeAlso(objectClass, creator, typeKey, seeAlso, seeAlsoNames, fieldReaders);
+        return new ObjectReaderSeeAlso(
+                objectClass,
+                creator,
+                typeKey,
+                seeAlso,
+                seeAlsoNames,
+                null,
+                fieldReaders
+        );
+    }
+
+    /**
+     * @since 2.0.24
+     */
+    public <T> ObjectReader<T> createObjectReaderSeeAlso(
+            Class<T> objectClass,
+            String typeKey,
+            Class[] seeAlso,
+            String[] seeAlsoNames,
+            Class seeAlsoDefault,
+            FieldReader... fieldReaders
+    ) {
+        Supplier<T> creator = createSupplier(objectClass);
+        return new ObjectReaderSeeAlso(
+                objectClass,
+                creator,
+                typeKey,
+                seeAlso,
+                seeAlsoNames,
+                seeAlsoDefault,
+                fieldReaders
+        );
     }
 
     public <T> ObjectReader<T> createObjectReaderSeeAlso(
@@ -267,7 +306,15 @@ public class ObjectReaderCreator {
             String[] seeAlsoNames,
             FieldReader... fieldReaders
     ) {
-        return new ObjectReaderSeeAlso(objectType, defaultCreator, typeKey, seeAlso, seeAlsoNames, fieldReaders);
+        return new ObjectReaderSeeAlso(
+                objectType,
+                defaultCreator,
+                typeKey,
+                seeAlso,
+                seeAlsoNames,
+                null,
+                fieldReaders
+        );
     }
 
     protected <T> ObjectReader<T> createObjectReaderWithBuilder(
@@ -1061,7 +1108,14 @@ public class ObjectReaderCreator {
         }
 
         if (beanInfo.seeAlso != null && beanInfo.seeAlso.length != 0) {
-            return createObjectReaderSeeAlso(objectClass, beanInfo.typeKey, beanInfo.seeAlso, beanInfo.seeAlsoNames, fieldReaderArray);
+            return createObjectReaderSeeAlso(
+                    objectClass,
+                    beanInfo.typeKey,
+                    beanInfo.seeAlso,
+                    beanInfo.seeAlsoNames,
+                    beanInfo.seeAlsoDefault,
+                    fieldReaderArray
+            );
         }
 
         if (objectClass.isInterface()) {
