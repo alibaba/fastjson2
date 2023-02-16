@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.util.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.*;
@@ -62,6 +63,35 @@ class JSONReaderUTF8
         this.offset = 0;
         this.length = off;
         this.in = is;
+        this.start = 0;
+        this.end = length;
+        next();
+
+        while (ch == '/') {
+            next();
+            if (ch == '/') {
+                skipLineComment();
+            } else {
+                throw new JSONException("input not support " + ch + ", offset " + offset);
+            }
+        }
+    }
+
+    JSONReaderUTF8(Context ctx, ByteBuffer buffer) {
+        super(ctx);
+
+        cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
+        byte[] bytes = JSONFactory.allocateByteArray(cacheIndex);
+        final int remaining = buffer.remaining();
+        if (bytes == null || bytes.length < remaining) {
+            bytes = new byte[remaining];
+        }
+        buffer.get(bytes, 0, remaining);
+
+        this.bytes = bytes;
+        this.offset = 0;
+        this.length = remaining;
+        this.in = null;
         this.start = 0;
         this.end = length;
         next();
