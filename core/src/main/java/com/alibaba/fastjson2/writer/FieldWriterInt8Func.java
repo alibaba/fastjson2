@@ -7,7 +7,15 @@ final class FieldWriterInt8Func<T>
         extends FieldWriterInt8<T> {
     final Function<T, Byte> function;
 
-    FieldWriterInt8Func(String fieldName, int ordinal, long features, String format, String label, Method method, Function<T, Byte> function) {
+    FieldWriterInt8Func(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Method method,
+            Function<T, Byte> function
+    ) {
         super(fieldName, ordinal, features, format, label, Byte.class, null, method);
         this.function = function;
     }

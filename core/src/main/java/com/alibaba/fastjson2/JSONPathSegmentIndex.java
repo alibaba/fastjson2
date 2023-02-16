@@ -121,8 +121,7 @@ final class JSONPathSegmentIndex
             List sequence = ((JSONPath.Sequence) object).values;
             JSONArray values = new JSONArray(sequence.size());
             for (int i = 0; i < sequence.size(); i++) {
-                Object item = sequence.get(i);
-                context.value = item;
+                context.value = sequence.get(i);
                 JSONPath.Context itemContext = new JSONPath.Context(context.path, context, context.current, context.next, context.readerFeatures);
                 eval(itemContext);
                 values.add(itemContext.value);
@@ -137,8 +136,7 @@ final class JSONPathSegmentIndex
         }
 
         if (Map.class.isAssignableFrom(objectClass)) {
-            Object value = eval((Map) object);
-            context.value = value;
+            context.value = eval((Map) object);
             context.eval = true;
             return;
         }
@@ -269,7 +267,7 @@ final class JSONPathSegmentIndex
             } else {
                 int itemIndex = list.size() + this.index;
                 if (itemIndex >= 0) {
-                    Object value = list.get(index);
+                    Object value = list.get(itemIndex);
                     value = callback.apply(object, value);
                     list.set(itemIndex, value);
                 }
@@ -286,9 +284,12 @@ final class JSONPathSegmentIndex
                     array[index] = value;
                 }
             } else {
-                Object value = array[index];
-                value = callback.apply(object, value);
-                array[array.length + index] = value;
+                int itemIndex = array.length + this.index;
+                if (itemIndex >= 0) {
+                    Object value = array[itemIndex];
+                    value = callback.apply(object, value);
+                    array[itemIndex] = value;
+                }
             }
             return;
         }
@@ -304,7 +305,7 @@ final class JSONPathSegmentIndex
             } else {
                 int arrayIndex = length + index;
                 if (arrayIndex >= 0) {
-                    Object value = Array.get(object, index);
+                    Object value = Array.get(object, arrayIndex);
                     value = callback.apply(object, value);
                     Array.set(object, arrayIndex, value);
                 }

@@ -6,7 +6,7 @@ public class CartTreeTest {
     static final CartTree benchmark = new CartTree();
 
     public static void fastjson2() {
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 1000 * 10; ++i) {
                 benchmark.fastjson2(BH);
@@ -103,8 +103,8 @@ public class CartTreeTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2();
-        fastjson2_jsonb();
+        fastjson2();
+//        fastjson2_jsonb();
 //        jackson_perf_test();
 //        wastjson_test();
     }

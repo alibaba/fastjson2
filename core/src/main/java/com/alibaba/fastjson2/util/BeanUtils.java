@@ -667,6 +667,14 @@ public abstract class BeanUtils {
                 return method;
             }
 
+            if (methodName.startsWith("get")) {
+                String fieldName = BeanUtils.getterName(methodName, null);
+                Field field = BeanUtils.getDeclaredField(enumClass, fieldName);
+                if (field != null && isJSONField(getAnnotations(field))) {
+                    return method;
+                }
+            }
+
             if (member == null) {
                 AtomicReference<Member> memberRef = new AtomicReference<>();
                 for (Class enumInterface : interfaces) {
@@ -1472,15 +1480,21 @@ public abstract class BeanUtils {
         }
     }
 
-    public static Type getFieldType(TypeReference type, Class<?> raw, Member field, Type fieldType) {
-        Class<?> declaringClass = field.getDeclaringClass();
+    public static Type getFieldType(TypeReference typeReference, Class<?> raw, Member field, Type fieldType) {
+        Class<?> declaringClass;
+        if (field == null) {
+            declaringClass = null;
+        } else {
+            declaringClass = field.getDeclaringClass();
+        }
 
         while (raw != Object.class) {
+            Type type = typeReference == null ? null : typeReference.getType();
             if (declaringClass == raw) {
-                return resolve(type.getType(), declaringClass, fieldType);
+                return resolve(type, declaringClass, fieldType);
             }
-            type = TypeReference.get(resolve(type.getType(), raw, raw.getGenericSuperclass()));
-            raw = type.getRawType();
+            typeReference = TypeReference.get(resolve(type, raw, raw.getGenericSuperclass()));
+            raw = typeReference.getRawType();
         }
         return null;
     }

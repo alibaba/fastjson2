@@ -32,11 +32,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <fastjson1x.version>1.2.83</fastjson1x.version>
-        <jackson.version>2.14.1</jackson.version>
+        <jackson.version>2.14.2</jackson.version>
         <jetty.version>11.0.13</jetty.version>
         <jersey.version>2.37</jersey.version>
-        <springframework5.version>5.3.23</springframework5.version>
-        <springframework6.version>6.0.3</springframework6.version>
+        <springframework5.version>5.3.25</springframework5.version>
+        <springframework6.version>6.0.4</springframework6.version>
 
         <kotlin.version>1.7.22</kotlin.version>
         <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
@@ -174,7 +174,7 @@
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
-                <version>2.10</version>
+                <version>2.10.1</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -601,13 +601,15 @@
                                 com/alibaba/fastjson2/issues/Issue485.java,
                                 com/alibaba/fastjson2/issues/Issue765.java,
                                 com/alibaba/fastjson2/issues/Issue924.java,
+                                com/alibaba/fastjson2/issues_1000/Issue1084.java,
                                 com/alibaba/fastjson/issue_1300/Issue1367_jaxrs.java,
                                 com/fasterxml/jackson/core/*.java,
                                 com/fasterxml/jackson/databind/*.java,
                                 com/alibaba/fastjson2/adapter/http/*.java,
                                 com/alibaba/fastjson2/dubbo/GoogleProtobufBasic.java,
                                 com/alibaba/fastjson2/issues/Issue983.java,
-                                com/alibaba/fastjson2/protobuf/PersonOuterClass.java
+                                com/alibaba/fastjson2/protobuf/PersonOuterClass.java,
+                                com/alibaba/fastjson2/benchmark/protobuf/MediaContentHolder.java
                             </excludes>
                         </configuration>
                     </execution>
@@ -620,7 +622,7 @@
                 <version>2.5.0</version>
                 <configuration>
                     <violationsFiles>
-                        <violationsFile>${project.parent.basedir}/.mvn/modernizer/violations.xml</violationsFile>
+                        <violationsFile>${maven.multiModuleProjectDirectory}/src/violations.xml</violationsFile>
                     </violationsFiles>
                 </configuration>
             </plugin>
@@ -708,7 +710,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M7</version>
+                    <version>3.0.0-M8</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
@@ -820,7 +822,7 @@
                             <encoding>UTF-8</encoding>
                             <docencoding>UTF-8</docencoding>
                             <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/examples/exclude-package-names.html -->
-                            <excludePackageNames>${javadoc.default.exclude.packages}</excludePackageNames>
+                            <excludePackageNames>${javadoc.default.exclude.packages}:jdk.incubator.vector</excludePackageNames>
                             <doclint>all,-missing</doclint>
                             <links>
                                 <link>https://docs.oracle.com/javase/8/docs/api</link>
@@ -947,6 +949,20 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>enable-incubators-for-jdk17+</id>
+            <activation>
+                <jdk>[17,)</jdk>
+            </activation>
+            <modules>
+                <!--
+                <module>example-graalvm-native</module>
+                -->
+                <module>extension-spring6</module>
+                <module>example-spring6-test</module>
+                <module>incubator-vector</module>
+            </modules>
         </profile>
         <profile>
             <id>deploy-settings</id>

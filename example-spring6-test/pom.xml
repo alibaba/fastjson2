@@ -8,19 +8,18 @@
         <version>2.0.24-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <groupId>com.example</groupId>
-    <artifactId>spring6test</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+
+    <groupId>com.com.alibaba.fastjson2</groupId>
+    <artifactId>example-spring6-test</artifactId>
     <name>example-spring6-test</name>
     <description>example-spring6-test</description>
-
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
         <fastjson2.version>2.0.24-SNAPSHOT</fastjson2.version>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
-        <spring.boot.version>3.0.0</spring.boot.version>
+        <spring.boot.version>3.0.2</spring.boot.version>
     </properties>
 
     <dependencies>
@@ -34,11 +33,34 @@
             <artifactId>fastjson2-extension-spring6</artifactId>
             <version>${fastjson2.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.8.12</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <version>${spring.boot.version}</version>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <version>${spring.boot.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+            <version>${spring.boot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -61,7 +83,6 @@
             <artifactId>spring-boot-starter-websocket</artifactId>
             <version>${spring.boot.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>

@@ -501,7 +501,6 @@ abstract class JSONPathSegment {
                 }
             }
             context.value = result;
-            return;
         }
 
         @Override
@@ -690,7 +689,6 @@ abstract class JSONPathSegment {
                 array.add(fieldValue);
             }
             context.value = array;
-            return;
         }
     }
 
@@ -787,11 +785,7 @@ abstract class JSONPathSegment {
                     return;
                 }
 
-                if (context.next != null) {
-                    context.value = new JSONPath.Sequence(list);
-                } else {
-                    context.value = object;
-                }
+                context.value = new JSONPath.Sequence(list);
                 context.eval = true;
                 return;
             }
@@ -982,10 +976,9 @@ abstract class JSONPathSegment {
 
         @Override
         public void eval(JSONPath.Context context) {
-            Object object = context.parent == null
+            context.value = context.parent == null
                     ? context.root
                     : context.parent.value;
-            context.value = object;
         }
     }
 

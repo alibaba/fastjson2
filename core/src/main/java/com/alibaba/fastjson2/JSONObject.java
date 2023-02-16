@@ -812,6 +812,22 @@ public class JSONObject
         throw new JSONException("Can not cast '" + value.getClass() + "' to byte value");
     }
 
+    public byte[] getBytes(String key) {
+        Object value = get(key);
+
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof byte[]) {
+            return (byte[]) value;
+        }
+        if (value instanceof String) {
+            return IOUtils.decodeBase64((String) value);
+        }
+        throw new JSONException("can not cast to byte[], value : " + value);
+    }
+
     /**
      * Returns the {@link Boolean} of the associated keys in this {@link JSONObject}.
      *
@@ -1757,6 +1773,22 @@ public class JSONObject
     }
 
     /**
+     * if value instance of Map or Collection, return size, other return 0
+     * @param key
+     * @since 2.0.24
+     */
+    public int getSize(String key) {
+        Object value = get(key);
+        if (value instanceof Map) {
+            return ((Map<?, ?>) value).size();
+        }
+        if (value instanceof Collection) {
+            return ((Collection<?>) value).size();
+        }
+        return 0;
+    }
+
+    /**
      * <pre>
      * JSONObject jsonObject = JSONObject.of();
      * </pre>
@@ -1941,5 +1973,19 @@ public class JSONObject
      */
     public static JSONObject parse(String text, JSONReader.Feature... features) {
         return JSON.parseObject(text, features);
+    }
+
+    /**
+     * See {@link JSON#toJSON} for details
+     */
+    public static JSONObject from(Object obj) {
+        return (JSONObject) JSON.toJSON(obj);
+    }
+
+    /**
+     * See {@link JSON#toJSON} for details
+     */
+    public static JSONObject from(Object obj, JSONWriter.Feature... writeFeatures) {
+        return (JSONObject) JSON.toJSON(obj, writeFeatures);
     }
 }

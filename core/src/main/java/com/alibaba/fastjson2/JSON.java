@@ -3,10 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
-import com.alibaba.fastjson2.reader.FieldReader;
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderBean;
-import com.alibaba.fastjson2.reader.ObjectReaderNoneDefaultConstructor;
+import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.MultiType;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -31,6 +28,7 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReader.EOI;
 import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreCheckClose;
+import static com.alibaba.fastjson2.JSONReader.Feature.UseNativeObject;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public interface JSON {
@@ -51,8 +49,29 @@ public interface JSON {
         }
 
         try (JSONReader reader = JSONReader.of(text)) {
-            ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
-            Object object = objectReader.readObject(reader, null, null, 0);
+            Object object;
+            int ch = reader.current();
+
+            if (reader.context.objectSupplier == null
+                    && (reader.context.features & UseNativeObject.mask) == 0
+                    && (ch == '{' || ch == '[')
+            ) {
+                if (ch == '{') {
+                    JSONObject jsonObject = new JSONObject();
+                    reader.read(jsonObject, 0);
+                    object = jsonObject;
+                } else {
+                    JSONArray array = new JSONArray();
+                    reader.read(array);
+                    object = array;
+                }
+                if (reader.resolveTasks != null) {
+                    reader.handleResolveTasks(object);
+                }
+            } else {
+                ObjectReader<?> objectReader = reader.getObjectReader(Object.class);
+                object = objectReader.readObject(reader, null, null, 0);
+            }
             if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
@@ -2005,7 +2024,7 @@ public interface JSON {
      *
      * @param text the JSON {@link String} to be parsed
      * @param type specify the {@link Class} to be converted
-     * @since 2.0.20
+     * @since 2.0.21
      */
     static <T> List<T> parseArray(String text, Class<T> type) {
         if (text == null || text.isEmpty()) {
@@ -2238,9 +2257,21 @@ public interface JSON {
         if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = STRING_VALUE != null ? new JSONWriterUTF8JDK9(writeContext) : new JSONWriterUTF8(writeContext);
+            if (STRING_VALUE != null) {
+                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
+                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
+                } else {
+                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+                }
+            } else {
+                jsonWriter = new JSONWriterUTF8(writeContext);
+            }
         } else {
-            jsonWriter = new JSONWriterUTF16(writeContext);
+            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
+                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
+            } else {
+                jsonWriter = new JSONWriterUTF16(writeContext);
+            }
         }
 
         try (JSONWriter writer = pretty ?
@@ -2306,9 +2337,21 @@ public interface JSON {
         if (JVM_VERSION == 8) {
             jsonWriter = new JSONWriterUTF16JDK8(writeContext);
         } else if ((writeContext.features & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
-            jsonWriter = STRING_VALUE != null ? new JSONWriterUTF8JDK9(writeContext) : new JSONWriterUTF8(writeContext);
+            if (STRING_VALUE != null) {
+                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
+                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
+                } else {
+                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+                }
+            } else {
+                jsonWriter = new JSONWriterUTF8(writeContext);
+            }
         } else {
-            jsonWriter = new JSONWriterUTF16(writeContext);
+            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
+                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
+            } else {
+                jsonWriter = new JSONWriterUTF16(writeContext);
+            }
         }
 
         try (JSONWriter writer = pretty ?
@@ -2936,7 +2979,17 @@ public interface JSON {
      * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(ObjectReaderModule)
      */
     static boolean register(ObjectReaderModule objectReaderModule) {
-        return JSONFactory.getDefaultObjectReaderProvider().register(objectReaderModule);
+        ObjectReaderProvider provider = getDefaultObjectReaderProvider();
+        return provider.register(objectReaderModule);
+    }
+
+    static void registerSeeAlsoSubType(Class subTypeClass) {
+        registerSeeAlsoSubType(subTypeClass, null);
+    }
+
+    static void registerSeeAlsoSubType(Class subTypeClass, String subTypeClassName) {
+        ObjectReaderProvider provider = getDefaultObjectReaderProvider();
+        provider.registerSeeAlsoSubType(subTypeClass, subTypeClassName);
     }
 
     /**
@@ -2973,6 +3026,7 @@ public interface JSON {
 
     /**
      * Register ObjectWriterFilter
+     *
      * @param type
      * @param filter
      * @since 2.0.19

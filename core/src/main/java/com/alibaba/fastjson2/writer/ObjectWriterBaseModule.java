@@ -404,6 +404,13 @@ public class ObjectWriterBaseModule
             if (jsonField.jsonDirect()) {
                 fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
             }
+
+            if ((fieldInfo.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0
+                    && !String.class.equals(field.getType())
+                    && fieldInfo.writeUsing == null
+            ) {
+                fieldInfo.writeUsing = ObjectWriterImplToString.class;
+            }
         }
 
         private void processJacksonJsonSubTypes(BeanInfo beanInfo, Annotation annotation) {
@@ -473,6 +480,10 @@ public class ObjectWriterBaseModule
                     && ObjectWriter.class.isAssignableFrom(writeUsing)
             ) {
                 return writeUsing;
+            }
+
+            if ("com.fasterxml.jackson.databind.ser.std.ToStringSerializer".equals(usingName)) {
+                return ObjectWriterImplToString.class;
             }
             return null;
         }
@@ -1019,6 +1030,7 @@ public class ObjectWriterBaseModule
             case "java.net.InetSocketAddress":
             case "java.text.SimpleDateFormat":
             case "java.util.regex.Pattern":
+            case "com.fasterxml.jackson.databind.node.ArrayNode":
                 return ObjectWriterMisc.INSTANCE;
             case "org.apache.commons.lang3.tuple.Pair":
             case "org.apache.commons.lang3.tuple.MutablePair":

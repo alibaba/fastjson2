@@ -14,13 +14,13 @@ class JSONReaderASCII
     final String str;
 
     JSONReaderASCII(Context ctx, String str, byte[] bytes, int offset, int length) {
-        super(ctx, bytes, offset, length);
+        super(ctx, str, bytes, offset, length);
         this.str = str;
         nameAscii = true;
     }
 
     @Override
-    public void next() {
+    public final void next() {
         if (offset >= end) {
             ch = EOI;
             return;
@@ -39,7 +39,7 @@ class JSONReaderASCII
     }
 
     @Override
-    public boolean nextIfMatch(char ch) {
+    public final boolean nextIfMatch(char ch) {
         while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
             if (offset >= end) {
                 this.ch = EOI;
@@ -1311,7 +1311,7 @@ class JSONReaderASCII
                     } else if (c2 == quote) {
                         offset += 2;
                         i += 2;
-                    } else if (c3 == quote) {
+                    } else {
                         offset += 3;
                         i += 3;
                     }

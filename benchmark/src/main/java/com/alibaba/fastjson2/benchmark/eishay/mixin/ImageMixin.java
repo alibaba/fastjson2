@@ -7,26 +7,25 @@ import com.alibaba.fastjson2.reader.ObjectReaders;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriters;
 
-import static com.alibaba.fastjson2.reader.ObjectReaders.fieldReader;
-import static com.alibaba.fastjson2.reader.ObjectReaders.fieldReaderInt;
+import static com.alibaba.fastjson2.reader.ObjectReaders.*;
 
 @JSONAutowired
 public class ImageMixin {
     public static final ObjectWriter<Image> objectWriter = ObjectWriters.objectWriter(
             Image.class,
-            ObjectWriters.fieldWriter("height", (Image e) -> e.height),
-            ObjectWriters.fieldWriter("size", Image.Size.class, (Image e) -> e.size),
-            ObjectWriters.fieldWriter("title", (Image e) -> e.title),
-            ObjectWriters.fieldWriter("uri", (Image e) -> e.uri),
-            ObjectWriters.fieldWriter("width", (Image e) -> e.width)
+            ObjectWriters.fieldWriter("height", Image::getHeight),
+            ObjectWriters.fieldWriter("size", Image.Size.class, Image::getSize),
+            ObjectWriters.fieldWriter("title", Image::getTitle),
+            ObjectWriters.fieldWriter("uri", Image::getUri),
+            ObjectWriters.fieldWriter("width", Image::getWidth)
     );
 
     public static final ObjectReader<Image> objectReader = ObjectReaders.of(
             Image::new,
-            fieldReaderInt("height", (Image o, int v) -> o.height = v),
-            fieldReader("size", Image.Size.class, (Image o, Image.Size v) -> o.size = v),
-            fieldReader("title", String.class, (Image o, String v) -> o.title = v),
-            fieldReader("uri", String.class, (Image o, String v) -> o.uri = v),
-            fieldReaderInt("width", (Image o, int v) -> o.width = v)
+            fieldReaderInt("height", Image::setHeight),
+            fieldReader("size", Image.Size.class, Image::setSize),
+            fieldReaderString("title", Image::setTitle),
+            fieldReaderString("uri", Image::setUri),
+            fieldReaderInt("width", Image::setWidth)
     );
 }

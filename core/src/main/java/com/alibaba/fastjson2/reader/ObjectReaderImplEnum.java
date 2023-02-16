@@ -179,6 +179,9 @@ public final class ObjectReaderImplEnum
                 } catch (Exception error) {
                     throw new JSONException(jsonReader.info("parse enum error, class " + enumClass.getName() + ", value " + intValue), error);
                 }
+                if (fieldValue == null && jsonReader.isEnabled(JSONReader.Feature.ErrorOnEnumNotMatch)) {
+                    throw new JSONException(jsonReader.info("parse enum error, class " + enumClass.getName() + ", " + valueField.getName() + " " + intValue));
+                }
             }
         } else {
             long hashCode = jsonReader.readValueHashCode();
@@ -193,7 +196,7 @@ public final class ObjectReaderImplEnum
                 );
             }
 
-            if (fieldValue == null && jsonReader.getContext().isEnabled(JSONReader.Feature.ErrorOnEnumNotMatch)) {
+            if (fieldValue == null && jsonReader.isEnabled(JSONReader.Feature.ErrorOnEnumNotMatch)) {
                 String strVal = jsonReader.getString();
                 throw new JSONException(jsonReader.info("parse enum error, class " + enumClass.getName() + ", value " + strVal));
             }

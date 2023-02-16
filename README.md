@@ -24,7 +24,6 @@
 - 支持`JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
 - 支持`Android 8+`
 - 支持`Graal Native-Image`
-- 支持 `JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
 
 ![fastjson](docs/logo.jpg "fastjson")
 

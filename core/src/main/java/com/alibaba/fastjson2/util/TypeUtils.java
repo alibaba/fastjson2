@@ -1265,8 +1265,11 @@ public class TypeUtils {
                 int intValue = ((Integer) obj).intValue();
                 ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(targetClass);
                 if (objectReader instanceof ObjectReaderImplEnum) {
-                    Enum e = ((ObjectReaderImplEnum) objectReader).of(intValue);
-                    return (T) e;
+                    return (T) ((ObjectReaderImplEnum) objectReader).of(intValue);
+                }
+
+                if (objectReader instanceof ObjectReaderImplEnum2X4) {
+                    return (T) ((ObjectReaderImplEnum2X4) objectReader).getEnumByOrdinal(intValue);
                 }
             }
         }

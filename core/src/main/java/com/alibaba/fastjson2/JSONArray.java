@@ -1467,9 +1467,23 @@ public class JSONArray
      *
      * @param input the JSON {@link String} to be parsed
      * @param type specify the {@link Class} to be converted
-     * @since 2.0.21
+     * @since 2.0.24
      */
-    static <T> List<T> parseArray(String input, Class<T> type) {
+    public static <T> List<T> parseArray(String input, Class<T> type) {
         return JSON.parseArray(input, type);
+    }
+
+    /**
+     * See {@link JSON#toJSON} for details
+     */
+    public static JSONArray from(Object obj) {
+        return (JSONArray) JSON.toJSON(obj);
+    }
+
+    /**
+     * See {@link JSON#toJSON} for details
+     */
+    public static JSONArray from(Object obj, JSONWriter.Feature... writeFeatures) {
+        return (JSONArray) JSON.toJSON(obj, writeFeatures);
     }
 }

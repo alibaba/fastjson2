@@ -7,7 +7,15 @@ import java.lang.reflect.Field;
 
 final class FieldWriterBoolValField
         extends FieldWriterBoolVal {
-    protected FieldWriterBoolValField(String fieldName, int ordinal, long features, String format, String label, Field field, Class fieldClass) {
+    protected FieldWriterBoolValField(
+            String fieldName,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Field field,
+            Class fieldClass
+    ) {
         super(fieldName, ordinal, features, format, label, fieldClass, fieldClass, field, null);
     }
 

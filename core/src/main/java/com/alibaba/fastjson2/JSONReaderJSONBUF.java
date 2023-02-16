@@ -235,12 +235,8 @@ final class JSONReaderJSONBUF
                 }
 
                 int minCapacity = strlen << 1;
-                if (valueBytes == null) {
+                if (minCapacity > valueBytes.length) {
                     valueBytes = new byte[minCapacity];
-                } else {
-                    if (minCapacity > valueBytes.length) {
-                        valueBytes = new byte[minCapacity];
-                    }
                 }
 
                 int utf16_len = IOUtils.decodeUTF8(bytes, offset, strlen, valueBytes);
@@ -302,7 +298,7 @@ final class JSONReaderJSONBUF
             } else {
                 int minCapacity = symbol * 2 + 2;
                 if (symbols == null) {
-                    symbols = new long[minCapacity < 32 ? 32 : minCapacity];
+                    symbols = new long[Math.max(minCapacity, 32)];
                 } else if (symbols.length < minCapacity) {
                     symbols = Arrays.copyOf(symbols, symbols.length + 16);
                 }
@@ -324,7 +320,7 @@ final class JSONReaderJSONBUF
             strtype = bytes[offset];
             if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32) {
                 int symbol;
-                if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
+                if (strtype <= BC_INT32_NUM_MAX) {
                     offset++;
                     symbol = strtype;
                 } else {
@@ -458,7 +454,7 @@ final class JSONReaderJSONBUF
             int symbolIndex = symbol * 2;
             int minCapacity = symbolIndex + 2;
             if (symbols == null) {
-                symbols = new long[minCapacity < 32 ? 32 : minCapacity];
+                symbols = new long[Math.max(minCapacity, 32)];
             } else if (symbols.length < minCapacity) {
                 symbols = Arrays.copyOf(symbols, minCapacity + 16);
             }

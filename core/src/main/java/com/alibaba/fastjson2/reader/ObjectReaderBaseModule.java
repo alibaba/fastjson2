@@ -429,6 +429,12 @@ public class ObjectReaderBaseModule
                             }
                             break;
                         }
+                        case "seeAlsoDefault": {
+                            Class<?> seeAlsoDefault = (Class<?>) result;
+                            if (seeAlsoDefault != Void.class) {
+                                beanInfo.seeAlsoDefault = seeAlsoDefault;
+                            }
+                        }
                         case "typeKey": {
                             String jsonTypeKey = (String) result;
                             if (!jsonTypeKey.isEmpty()) {

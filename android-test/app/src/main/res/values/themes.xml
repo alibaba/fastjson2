@@ -1,0 +1,18 @@
+<resources>
+
+    <style name="App" parent="Theme.AppCompat.Light.NoActionBar" />
+
+    <style name="AppTheme" parent="App">
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/dark</item>
+        <item name="colorControlNormal">@color/white</item>
+        <item name="colorControlActivated">@color/white</item>
+    </style>
+
+    <style name="SplashTheme" parent="AppTheme">
+        <item name="android:windowBackground">@color/dark</item>
+    </style>
+
+</resources>

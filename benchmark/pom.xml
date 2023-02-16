@@ -31,6 +31,13 @@
             <artifactId>fastjson2-extension</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--
+        <dependency>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2-incubator-vector</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
@@ -43,12 +50,12 @@
         <dependency>
             <groupId>com.dslplatform</groupId>
             <artifactId>dsl-json-java8</artifactId>
-            <version>1.9.9</version>
+            <version>1.10.0</version>
         </dependency>
         <dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
-            <version>5.3.0</version>
+            <version>5.4.0</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -61,6 +68,10 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
         </dependency>
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
@@ -78,7 +89,7 @@
         <dependency>
             <groupId>io.fury</groupId>
             <artifactId>fury-core</artifactId>
-            <version>0.10.0</version>
+            <version>0.10.2</version>
         </dependency>
         -->
         <dependency>
@@ -167,4 +178,19 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>enable-incubators-for-jdk17+</id>
+            <activation>
+                <jdk>[17,)</jdk>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.alibaba.fastjson2</groupId>
+                    <artifactId>fastjson2-incubator-vector</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

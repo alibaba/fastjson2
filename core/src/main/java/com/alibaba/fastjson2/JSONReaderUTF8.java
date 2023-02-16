@@ -76,7 +76,7 @@ class JSONReaderUTF8
         }
     }
 
-    JSONReaderUTF8(Context ctx, byte[] bytes, int offset, int length) {
+    JSONReaderUTF8(Context ctx, String str, byte[] bytes, int offset, int length) {
         super(ctx);
 
         this.bytes = bytes;
@@ -7665,7 +7665,7 @@ class JSONReaderUTF8
     }
 
     @Override
-    public boolean isReference() {
+    public final boolean isReference() {
         if (ch != '{') {
             return false;
         }

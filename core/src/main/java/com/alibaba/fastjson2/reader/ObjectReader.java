@@ -96,17 +96,25 @@ public interface ObjectReader<T> {
 
             if (fieldValue != null) {
                 Class<?> valueClass = fieldValue.getClass();
-                if (valueClass == String.class) {
-                    if (fieldReader.fieldClass == java.util.Date.class) {
-                        autoCast = false;
+                if (!fieldReader.supportAcceptType(valueClass)) {
+                    if (valueClass == String.class) {
+                        if (fieldReader.fieldClass == java.util.Date.class) {
+                            autoCast = false;
+                        }
+                    } else if (valueClass == Integer.class
+                            && (fieldReader.fieldClass == boolean.class || fieldReader.fieldClass == Boolean.class)
+                            && (features & JSONReader.Feature.NonZeroNumberCastToBooleanAsTrue.mask) != 0
+                    ) {
+                        int intValue = ((Integer) fieldValue);
+                        fieldValue = intValue != 0;
                     }
-                }
 
-                if (valueClass != fieldReader.fieldClass && autoCast) {
-                    Function typeConvert = provider.getTypeConvert(valueClass, fieldReader.fieldClass);
+                    if (valueClass != fieldReader.fieldClass && autoCast) {
+                        Function typeConvert = provider.getTypeConvert(valueClass, fieldReader.fieldClass);
 
-                    if (typeConvert != null) {
-                        fieldValue = typeConvert.apply(fieldValue);
+                        if (typeConvert != null) {
+                            fieldValue = typeConvert.apply(fieldValue);
+                        }
                     }
                 }
             }

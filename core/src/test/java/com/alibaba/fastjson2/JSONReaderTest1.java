@@ -1728,7 +1728,7 @@ public class JSONReaderTest1 {
                 assertEquals(name0, name1);
 
                 byte[] ut8Bytes = new String(chars).getBytes(StandardCharsets.UTF_8);
-                JSONReaderUTF8 utf8Reader = new JSONReaderUTF8(JSONFactory.createReadContext(), ut8Bytes, 0, ut8Bytes.length);
+                JSONReaderUTF8 utf8Reader = new JSONReaderUTF8(JSONFactory.createReadContext(), null, ut8Bytes, 0, ut8Bytes.length);
                 assertTrue(utf8Reader.nextIfObjectStart());
                 String name2 = utf8Reader.readFieldName();
                 assertEquals(name0, name2);

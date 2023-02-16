@@ -341,7 +341,7 @@ class ObjectReaderImplMapTyped
                 if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
                     if (origin instanceof Collection) {
                         ((Collection) origin).add(value);
-                        object.put(name, value);
+                        object.put(name, origin);
                     } else {
                         JSONArray array = JSONArray.of(origin, value);
                         object.put(name, array);

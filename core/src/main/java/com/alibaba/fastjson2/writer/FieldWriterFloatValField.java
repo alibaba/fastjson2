@@ -8,8 +8,15 @@ import java.lang.reflect.Field;
 
 final class FieldWriterFloatValField<T>
         extends FieldWriter<T> {
-    FieldWriterFloatValField(String name, int ordinal, String format, String label, Field field) {
-        super(name, ordinal, 0, format, label, float.class, float.class, field, null);
+    FieldWriterFloatValField(
+            String name,
+            int ordinal,
+            long features,
+            String format,
+            String label,
+            Field field
+    ) {
+        super(name, ordinal, features, format, label, float.class, float.class, field, null);
     }
 
     @Override

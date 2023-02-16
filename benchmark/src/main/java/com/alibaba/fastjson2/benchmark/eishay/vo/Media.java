@@ -1,7 +1,5 @@
 package com.alibaba.fastjson2.benchmark.eishay.vo;
 
-import com.alibaba.fastjson2.annotation.JSONField;
-
 import java.util.List;
 import java.util.Objects;
 
@@ -12,28 +10,34 @@ public class Media
         JAVA, FLASH
     }
 
-    public int bitrate;   // Can be unset.
-    @JSONField(serialize = false, deserialize = false)
-    public boolean hasBitrate;
-
-    public long duration;
-    public String format;
-    public int height;
-    public List<String> persons;
-    public Player player;
-    public long size;
-    public String title;     // Can be unset.
-    public String uri;
-    public int width;
-
-    // msgpack requires this
-    public String copyright; // Can be unset.
+    private int bitrate;
+    private long duration;
+    private String format;
+    private int height;
+    private List<String> persons;
+    private Player player;
+    private long size;
+    private String title;
+    private String uri;
+    private int width;
+    private String copyright;
 
     public Media() {
     }
 
-    public Media(String uri, String title, int width, int height, String format, long duration, long size, int bitrate,
-                 boolean hasBitrate, List<String> persons, Player player, String copyright) {
+    public Media(
+            String uri,
+            String title,
+            int width,
+            int height,
+            String format,
+            long duration,
+            long size,
+            int bitrate,
+            List<String> persons,
+            Player player,
+            String copyright
+    ) {
         this.uri = uri;
         this.title = title;
         this.width = width;
@@ -42,7 +46,6 @@ public class Media
         this.duration = duration;
         this.size = size;
         this.bitrate = bitrate;
-        this.hasBitrate = hasBitrate;
         this.persons = persons;
         this.player = player;
         this.copyright = copyright;
@@ -145,11 +148,11 @@ public class Media
             return false;
         }
         Media media = (Media) o;
-        return bitrate == media.bitrate && hasBitrate == media.hasBitrate && duration == media.duration && height == media.height && size == media.size && width == media.width && Objects.equals(format, media.format) && Objects.equals(persons, media.persons) && player == media.player && Objects.equals(title, media.title) && Objects.equals(uri, media.uri) && Objects.equals(copyright, media.copyright);
+        return bitrate == media.bitrate && duration == media.duration && height == media.height && size == media.size && width == media.width && Objects.equals(format, media.format) && Objects.equals(persons, media.persons) && player == media.player && Objects.equals(title, media.title) && Objects.equals(uri, media.uri) && Objects.equals(copyright, media.copyright);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(bitrate, hasBitrate, duration, format, height, persons, player, size, title, uri, width, copyright);
+        return Objects.hash(bitrate, duration, format, height, persons, player, size, title, uri, width, copyright);
     }
 }

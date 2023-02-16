@@ -25,7 +25,7 @@ public class EishayFuryParse {
             JSONReader.Feature.SupportArrayToBean
     };
 
-    static byte[] fastjson2JSONBBytes;
+    static byte[] jsonbBytes;
     static byte[] furyBytes;
 //
 //    static io.fury.ThreadSafeFury fury = io.fury.Fury.builder()
@@ -41,7 +41,7 @@ public class EishayFuryParse {
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
 
-            fastjson2JSONBBytes = JSONB.toBytes(
+            jsonbBytes = JSONB.toBytes(
                     mc,
                     EishayFuryWrite.features
             );
@@ -53,15 +53,15 @@ public class EishayFuryParse {
     }
 
     @Benchmark
-    public void fastjson2JSONB(Blackhole bh) {
-        bh.consume(
-                JSONB.parseObject(fastjson2JSONBBytes, Object.class, features)
-        );
+    public void jsonb(Blackhole bh) {
+        Object object = JSONB.parseObject(jsonbBytes, Object.class, features);
+        bh.consume(object);
     }
 
 //    @Benchmark
     public void fury(Blackhole bh) {
-//        bh.consume(fury.deserialize(furyBytes));
+//        Object object = fury.deserialize(furyBytes);
+//        bh.consume(object);
     }
 
     public static void main(String[] args) throws Exception {
