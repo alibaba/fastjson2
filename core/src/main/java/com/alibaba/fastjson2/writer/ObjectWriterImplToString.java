@@ -11,6 +11,10 @@ public class ObjectWriterImplToString
 
     private final boolean direct;
 
+    public ObjectWriterImplToString() {
+        this(false);
+    }
+
     public ObjectWriterImplToString(boolean direct) {
         this.direct = direct;
     }

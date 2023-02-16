@@ -324,19 +324,15 @@ public class ObjectWriterCreatorASM
 
                     ObjectWriter writeUsingWriter = null;
                     if (fieldInfo.writeUsing != null) {
-                        if (fieldInfo.writeUsing == ObjectWriterImplToString.class) {
-                            writeUsingWriter = ObjectWriterImplToString.INSTANCE;
-                        } else {
-                            try {
-                                Constructor<?> constructor = fieldInfo.writeUsing.getDeclaredConstructor();
-                                constructor.setAccessible(true);
-                                writeUsingWriter = (ObjectWriter) constructor.newInstance();
-                            } catch (Exception e) {
-                                throw new JSONException("create writeUsing Writer error, method " + method.getName()
-                                        + ", serializer "
-                                        + fieldInfo.writeUsing.getName(), e
-                                );
-                            }
+                        try {
+                            Constructor<?> constructor = fieldInfo.writeUsing.getDeclaredConstructor();
+                            constructor.setAccessible(true);
+                            writeUsingWriter = (ObjectWriter) constructor.newInstance();
+                        } catch (Exception e) {
+                            throw new JSONException("create writeUsing Writer error, method " + method.getName()
+                                    + ", serializer "
+                                    + fieldInfo.writeUsing.getName(), e
+                            );
                         }
                     }
 
