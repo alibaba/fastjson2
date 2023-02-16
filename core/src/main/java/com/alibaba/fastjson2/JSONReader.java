@@ -15,6 +15,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -2829,6 +2830,16 @@ public abstract class JSONReader
                 context,
                 is
         );
+    }
+
+    public static JSONReader of(ByteBuffer buffer, Charset charset) {
+        Context context = JSONFactory.createReadContext();
+
+        if (charset == StandardCharsets.UTF_8 || charset == null) {
+            return new JSONReaderUTF8(context, buffer);
+        }
+
+        throw new JSONException("not support charset " + charset);
     }
 
     @Deprecated
