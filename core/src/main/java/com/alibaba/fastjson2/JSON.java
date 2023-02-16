@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -445,6 +446,25 @@ public interface JSON {
 
             JSONObject object = new JSONObject();
             reader.read(object, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    static <T> T parseObject(ByteBuffer buffer, Class<T> objectClass) {
+        if (buffer == null) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(buffer, null)) {
+            ObjectReader<T> objectReader = reader.getObjectReader(objectClass);
+
+            T object = objectReader.readObject(reader, null, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
             }

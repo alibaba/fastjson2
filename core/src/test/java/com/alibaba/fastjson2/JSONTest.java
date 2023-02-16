@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -198,6 +199,17 @@ public class JSONTest {
     @Test
     public void test_parseObject_4() {
         IntField1 vo = JSON.toJavaObject("{\"v0000\":101}", IntField1.class);
+        assertEquals(101, vo.v0000);
+    }
+
+    @Test
+    public void test_parseObject_5() {
+        assertNull(JSON.parseObject((ByteBuffer) null, IntField1.class));
+
+        String str = "{\"v0000\":101}";
+        byte[] bytes = str.getBytes();
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        IntField1 vo = JSON.parseObject(buffer, IntField1.class);
         assertEquals(101, vo.v0000);
     }
 
