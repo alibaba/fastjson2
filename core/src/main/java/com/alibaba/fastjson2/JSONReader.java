@@ -2169,8 +2169,8 @@ public abstract class JSONReader
                 }
 
                 if (exponent != 0) {
-                    double doubleValue = Double.parseDouble(
-                            decimal + "E" + exponent);
+                    String doubleStr = decimal.toPlainString() + "E" + exponent;
+                    double doubleValue = Double.parseDouble(doubleStr);
                     return BigDecimal.valueOf(doubleValue);
                 }
 
