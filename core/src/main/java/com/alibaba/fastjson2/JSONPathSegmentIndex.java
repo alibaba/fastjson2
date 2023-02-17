@@ -52,7 +52,7 @@ final class JSONPathSegmentIndex
             return;
         }
 
-        if (object instanceof java.util.List) {
+        if (object instanceof List) {
             List list = (List) object;
             if (index >= 0) {
                 if (index < list.size()) {
@@ -61,7 +61,9 @@ final class JSONPathSegmentIndex
             } else {
                 int itemIndex = list.size() + this.index;
                 if (itemIndex >= 0) {
-                    context.value = list.get(itemIndex);
+                    if (itemIndex < list.size()) {
+                        context.value = list.get(itemIndex);
+                    }
                 }
             }
             context.eval = true;
@@ -93,7 +95,9 @@ final class JSONPathSegmentIndex
             } else {
                 int itemIndex = array.length + this.index;
                 if (itemIndex >= 0) {
-                    context.value = array[itemIndex];
+                    if (itemIndex < array.length) {
+                        context.value = array[itemIndex];
+                    }
                 }
             }
             context.eval = true;
@@ -110,7 +114,9 @@ final class JSONPathSegmentIndex
             } else {
                 int itemIndex = length + this.index;
                 if (itemIndex >= 0) {
-                    context.value = Array.get(object, itemIndex);
+                    if (itemIndex < length) {
+                        context.value = Array.get(object, itemIndex);
+                    }
                 }
             }
             context.eval = true;
@@ -153,9 +159,20 @@ final class JSONPathSegmentIndex
 
     private Object eval(Map object) {
         Map map = object;
-        Object value = map.get(index);
+        Object value = null;
+        try {
+            value = map.get(index);
+        } catch (Exception e) {
+            //fix: SortedMap
+            System.out.printf("key not format1 : %d : %s\n", index, e.getMessage());
+        }
         if (value == null) {
-            value = map.get(Integer.toString(index));
+            try {
+                value = map.get(Integer.toString(index));
+            } catch (Exception e) {
+                //fix: SortedMap
+                System.out.printf("key not format2 : %d : %s\n", index, e.getMessage());
+            }
         }
 
         if (value == null) {
@@ -224,10 +241,18 @@ final class JSONPathSegmentIndex
 
         if (object instanceof Object[]) {
             Object[] array = (Object[]) object;
+            int length = array.length;
             if (index >= 0) {
-                array[index] = value;
+                if (index < length) {
+                    array[index] = value;
+                }
             } else {
-                array[array.length + index] = value;
+                int arrayIndex = length + index;
+                if (arrayIndex >= 0) {
+                    if (arrayIndex < length) {
+                        array[arrayIndex] = value;
+                    }
+                }
             }
             return;
         }
@@ -241,7 +266,9 @@ final class JSONPathSegmentIndex
             } else {
                 int arrayIndex = length + index;
                 if (arrayIndex >= 0) {
-                    Array.set(object, arrayIndex, value);
+                    if (arrayIndex < length) {
+                        Array.set(object, arrayIndex, value);
+                    }
                 }
             }
             return;
