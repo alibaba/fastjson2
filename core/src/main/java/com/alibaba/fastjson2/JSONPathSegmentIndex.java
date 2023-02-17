@@ -159,20 +159,9 @@ final class JSONPathSegmentIndex
 
     private Object eval(Map object) {
         Map map = object;
-        Object value = null;
-        try {
-            value = map.get(index);
-        } catch (Exception e) {
-            //fix: SortedMap
-            System.out.printf("key not format1 : %d : %s\n", index, e.getMessage());
-        }
+        Object value = map.get(index);
         if (value == null) {
-            try {
-                value = map.get(Integer.toString(index));
-            } catch (Exception e) {
-                //fix: SortedMap
-                System.out.printf("key not format2 : %d : %s\n", index, e.getMessage());
-            }
+            value = map.get(Integer.toString(index));
         }
 
         if (value == null) {
