@@ -2290,6 +2290,10 @@ public abstract class JSONReader
                                         break;
                                 }
                             } else if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
+                                if (unscaledVal == 0) {
+                                    return DOUBLE_ZERO;
+                                }
+
                                 switch (scale) {
                                     case 1:
                                     case 2:
