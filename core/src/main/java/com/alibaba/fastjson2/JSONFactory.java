@@ -130,6 +130,8 @@ public final class JSONFactory {
             1.0e18, 1.0e19, 1.0e20, 1.0e21, 1.0e22
     };
 
+    static final Double DOUBLE_ZERO = Double.valueOf(0);
+
     static {
         Properties properties = new Properties();
 
