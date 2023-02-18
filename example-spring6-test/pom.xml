@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.alibaba.fastjson2</groupId>
         <artifactId>fastjson2-parent</artifactId>
-        <version>2.0.24-SNAPSHOT</version>
+        <version>2.0.24</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -15,7 +15,7 @@
     <description>example-spring6-test</description>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <fastjson2.version>2.0.24-SNAPSHOT</fastjson2.version>
+        <fastjson2.version>2.0.24</fastjson2.version>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
