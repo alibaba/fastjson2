@@ -399,10 +399,10 @@ public final class ObjectSchema
                 int j = 0;
                 for (Iterator<String> it = this.required.iterator(); it.hasNext(); ) {
                     String itemName = it.next();
-                    j++;
                     if (j == i) {
                         fieldName = itemName;
                     }
+                    j++;
                 }
                 return new ValidateResult(false, "required property %s", fieldName);
             }
