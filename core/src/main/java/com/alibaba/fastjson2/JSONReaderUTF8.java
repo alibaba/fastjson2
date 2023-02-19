@@ -3676,6 +3676,21 @@ class JSONReaderUTF8
                             case '\\':
                             case '"':
                                 break;
+                            case 'b':
+                                c = '\b';
+                                break;
+                            case 't':
+                                c = '\t';
+                                break;
+                            case 'n':
+                                c = '\n';
+                                break;
+                            case 'f':
+                                c = '\f';
+                                break;
+                            case 'r':
+                                c = '\r';
+                                break;
                             default:
                                 c = char1(c);
                                 break;
