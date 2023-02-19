@@ -15,16 +15,8 @@ public class LongTextParse2EscapeTest {
             System.out.println("LongTextParse2Escape-fastjson2 : " + millis);
 
             // zulu8.68.0.21 : 698 620
-            // zulu11.52.13 :
-            // zulu17.32.13 :
-            // zulu18.28.13 :
-            // zulu19.0.47 :
-            // corretto-8 :
-            // corretto-11 :
-            // corretto-17 :
-            // corretto-18 :
-            // oracle-jdk-17.0.4 :
-            // oracle-jdk-18.0.2 :
+            // zulu11.52.13 : 555
+            // zulu17.32.13 : 551
         }
     }
 
@@ -38,16 +30,8 @@ public class LongTextParse2EscapeTest {
             System.out.println("LongTextParse2Escape-wastjson : " + millis);
 
             // zulu8.68.0.21 : 595
-            // zulu11.52.13 :
-            // zulu17.32.13 :
-            // zulu18.28.13 :
-            // zulu19.0.47 :
-            // corretto-8 :
-            // corretto-11 :
-            // corretto-17 :
-            // corretto-18 :
-            // oracle-jdk-17.0.4 :
-            // oracle-jdk-18.0.2 :
+            // zulu11.52.13 : 909
+            // zulu17.32.13 : 1361
         }
     }
 
