@@ -15,25 +15,18 @@
 
 # FASTJSON v2
 
-`FASTJSON v2`是`FASTJSON`项目的重要升级，目标是为下一个十年提供一个高性能的`JSON`库。通过同一套`API`，
+`FASTJSON 2`是一个性能极致并且简单易用的Java JSON库。
 
-- 支持`JSON/JSONB`两种协议，[`JSONPath`](https://alibaba.github.io/fastjson2/jsonpath_cn) 是一等公民。
-- 支持全量解析和部分解析。
-- 支持`Java`服务端、客户端`Android`、大数据场景。
+- `FASTJSON 2`是`FASTJSON`项目的重要升级，和FASTJSON 1相比，性能有非常大的提升，解决了autoType功能因为兼容和白名单的安全性问题。
+- 性能极致，性能远超过其他流行JSON库，包括jackson/gson/org.json，性能数据: [https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark](https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark)
+- 支持JDK新特性，包括`JDK 11`/`JDK 17`，针对`compact string`优化，支持Record，支持`GraalVM Native-Image`
+- 完善的[`JSONPath`](https://alibaba.github.io/fastjson2/jsonpath_cn)支持，支持SO/IEC TR 19075-6的JSONPath语法
+- 支持`Android 8+`，客户端和服务器一套API
 - 支持`Kotlin` [https://alibaba.github.io/fastjson2/kotlin_cn](https://alibaba.github.io/fastjson2/kotlin_cn)
 - 支持`JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
-- 支持`Android 8+`
-- 支持`Graal Native-Image`
+- 新增加支持二进制格式JSONB [https://alibaba.github.io/fastjson2/jsonb_format_cn](https://alibaba.github.io/fastjson2/jsonb_format_cn)
 
 ![fastjson](docs/logo.jpg "fastjson")
-
-相关文档：
-
-- `JSONB`格式文档：
-  [https://alibaba.github.io/fastjson2/jsonb_format_cn](https://alibaba.github.io/fastjson2/jsonb_format_cn)
-- `FASTJSON v2`性能有了很大提升，具体性能数据看这里：  
-  [https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark](https://github.com/alibaba/fastjson2/wiki/fastjson_benchmark)
-- `FASTJSON`用户升级指南看这里 [https://github.com/alibaba/fastjson2/wiki/fastjson_1_upgrade_cn](https://github.com/alibaba/fastjson2/wiki/fastjson_1_upgrade_cn)
 
 # 1. 使用准备
 
