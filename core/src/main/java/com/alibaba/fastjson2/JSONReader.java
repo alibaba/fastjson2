@@ -55,6 +55,8 @@ public abstract class JSONReader
     static final char EOI = 0x1A;
     static final long SPACE = (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
 
+    static DateTimeFormatter DATE_TIME_FORMATTER_34;
+
     protected final Context context;
     List<ResolveTask> resolveTasks;
 
@@ -1219,6 +1221,14 @@ public abstract class JSONReader
                 zdt = ZonedDateTime.ofLocal(ldt, context.getZoneId(), null);
             } else if (len >= 20) {
                 zdt = readZonedDateTimeX(len);
+                if (zdt == null && len == 34) {
+                    String str = readString();
+                    DateTimeFormatter formatter = DATE_TIME_FORMATTER_34;
+                    if (formatter == null) {
+                        formatter = DATE_TIME_FORMATTER_34 = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss O yyyy");
+                    }
+                    zdt = ZonedDateTime.parse(str, formatter);
+                }
             }
 
             if (zdt != null) {
