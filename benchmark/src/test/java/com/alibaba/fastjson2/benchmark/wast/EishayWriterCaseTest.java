@@ -15,17 +15,9 @@ public class EishayWriterCaseTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayWriterCase-fastjson2 : " + millis);
 
-            // zulu8.62.0.19 : 630 566 537 523 511
-            // zulu11.52.13 :
-            // zulu17.32.13 :
-            // zulu18.28.13 :
-            // zulu19.0.47 :
-            // corretto-8 :
-            // corretto-11 :
-            // corretto-17 :
-            // corretto-18 :
-            // oracle-jdk-17.0.4 :
-            // oracle-jdk-18.0.2 :
+            // zulu8.68.0.21 : 630 566 537 523 511 525
+            // zulu11.52.13 : 506
+            // zulu17.40.19 : 516
         }
     }
 
@@ -38,22 +30,14 @@ public class EishayWriterCaseTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayWriterCase-wastjson : " + millis);
 
-            // zulu8.62.0.19 : 492
-            // zulu11.52.13 :
-            // zulu17.32.13 :
-            // zulu18.28.13 :
-            // zulu19.0.47 :
-            // corretto-8 :
-            // corretto-11 :
-            // corretto-17 :
-            // corretto-18 :
-            // oracle-jdk-17.0.4 :
-            // oracle-jdk-18.0.2 :
+            // zulu8.68.0.21 : 492 464
+            // zulu11.52.13 : 479
+            // zulu17.40.19 : 525
         }
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2();
-//        wastjson();
+//        fastjson2();
+        wastjson();
     }
 }

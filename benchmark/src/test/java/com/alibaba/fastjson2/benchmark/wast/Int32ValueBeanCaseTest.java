@@ -15,17 +15,9 @@ public class Int32ValueBeanCaseTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("Int32ValueBeanCase-fastjson2 : " + millis);
 
-            // zulu8.62.0.19 : 191
-            // zulu11.52.13 :
-            // zulu17.32.13 :
-            // zulu18.28.13 :
-            // zulu19.0.47 :
-            // corretto-8 :
-            // corretto-11 :
-            // corretto-17 :
-            // corretto-18 :
-            // oracle-jdk-17.0.4 :
-            // oracle-jdk-18.0.2 :
+            // zulu8.68.0.21 : 191
+            // zulu11.52.13 : 185
+            // zulu17.32.13 : 186
         }
     }
 
@@ -38,22 +30,14 @@ public class Int32ValueBeanCaseTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("Int32ValueBeanCase-wastjson : " + millis);
 
-            // zulu8.62.0.19 : 186
-            // zulu11.52.13 :
-            // zulu17.32.13 :
-            // zulu18.28.13 :
-            // zulu19.0.47 :
-            // corretto-8 :
-            // corretto-11 :
-            // corretto-17 :
-            // corretto-18 :
-            // oracle-jdk-17.0.4 :
-            // oracle-jdk-18.0.2 :
+            // zulu8.68.0.21 : 186 136
+            // zulu11.52.13 : 155
+            // zulu17.32.13 : 156
         }
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2();
-//        wastjson();
+//        fastjson2();
+        wastjson();
     }
 }

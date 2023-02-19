@@ -15,17 +15,9 @@ public class DateWriteCaseTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("DateWriteCase-fastjson2 : " + millis);
 
-            // zulu8.62.0.19 : 1727 1642 679 570 363 252 250 148 143 121 119
-            // zulu11.52.13 :
-            // zulu17.32.13 :
-            // zulu18.28.13 :
-            // zulu19.0.47 :
-            // corretto-8 :
-            // corretto-11 :
-            // corretto-17 :
-            // corretto-18 :
-            // oracle-jdk-17.0.4 :
-            // oracle-jdk-18.0.2 :
+            // zulu8.68.0.21 : 1727 1642 679 570 363 252 250 148 143 121 119 117
+            // zulu11.52.13 : 117
+            // zulu17.40.19 : 118
         }
     }
 
@@ -38,22 +30,14 @@ public class DateWriteCaseTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("DateWriteCase-wastjson : " + millis);
 
-            // zulu8.62.0.19 : 288
-            // zulu11.52.13 :
-            // zulu17.32.13 :
-            // zulu18.28.13 :
-            // zulu19.0.47 :
-            // corretto-8 :
-            // corretto-11 :
-            // corretto-17 :
-            // corretto-18 :
-            // oracle-jdk-17.0.4 :
-            // oracle-jdk-18.0.2 :
+            // zulu8.68.0.21 : 288 156
+            // zulu11.52.13 : 159
+            // zulu17.49.19 : 134
         }
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2();
-//        wastjson();
+//        fastjson2();
+        wastjson();
     }
 }
