@@ -14,7 +14,7 @@ public class LongTextParse2EscapeTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("LongTextParse2Escape-fastjson2 : " + millis);
 
-            // zulu8.62.0.19 : 704
+            // zulu8.68.0.21 : 698 620
             // zulu11.52.13 :
             // zulu17.32.13 :
             // zulu18.28.13 :
@@ -37,7 +37,7 @@ public class LongTextParse2EscapeTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("LongTextParse2Escape-wastjson : " + millis);
 
-            // zulu8.62.0.19 : 1138
+            // zulu8.68.0.21 : 595
             // zulu11.52.13 :
             // zulu17.32.13 :
             // zulu18.28.13 :
