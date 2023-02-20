@@ -2581,7 +2581,7 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(byte[] utf8Bytes) {
-        boolean ascii = true;
+        boolean ascii = false;
         if (PREDICATE_IS_ASCII != null) {
             ascii = PREDICATE_IS_ASCII.test(utf8Bytes);
         }
@@ -2603,7 +2603,7 @@ public abstract class JSONReader
 
     @Deprecated
     public static JSONReader of(JSONReader.Context context, byte[] utf8Bytes) {
-        boolean ascii = true;
+        boolean ascii = false;
         if (PREDICATE_IS_ASCII != null) {
             ascii = PREDICATE_IS_ASCII.test(utf8Bytes);
         }
@@ -2623,7 +2623,7 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(byte[] utf8Bytes, JSONReader.Context context) {
-        boolean ascii = true;
+        boolean ascii = false;
         if (PREDICATE_IS_ASCII != null) {
             ascii = PREDICATE_IS_ASCII.test(utf8Bytes);
         }
