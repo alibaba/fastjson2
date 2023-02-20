@@ -24,6 +24,8 @@ public class DateUtils {
             : ZoneId.of(SHANGHAI_ZONE_ID_NAME);
     public static final ZoneRules SHANGHAI_ZONE_RULES = SHANGHAI_ZONE_ID.getRules();
 
+    static DateTimeFormatter DATE_TIME_FORMATTER_34;
+
     static final int LOCAL_EPOCH_DAY;
     static {
         final long timeMillis = System.currentTimeMillis();
@@ -3195,6 +3197,12 @@ public class DateUtils {
             S8 = '0';
             zoneIdBegin = 17;
             isTimeZone = false;
+        } else if (len == 34) {
+            DateTimeFormatter formatter = DATE_TIME_FORMATTER_34;
+            if (formatter == null) {
+                formatter = DATE_TIME_FORMATTER_34 = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss O yyyy");
+            }
+            return ZonedDateTime.parse(str, formatter);
         } else {
             throw new DateTimeParseException("illegal input " + str, str, 0);
         }

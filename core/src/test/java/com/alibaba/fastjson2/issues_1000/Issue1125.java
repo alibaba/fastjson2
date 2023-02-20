@@ -15,6 +15,9 @@ public class Issue1125 {
         Bean bean = JSON.parseObject(str, Bean.class);
         assertNotNull(bean);
         assertEquals(1676803567000L, bean.date.getTime());
+
+        Bean bean1 = JSON.parseObject(str).toJavaObject(Bean.class);
+        assertEquals(bean.date.getTime(), bean1.date.getTime());
     }
 
     public static class Bean {
