@@ -39,6 +39,9 @@ public class JDKUtils {
     public static final ToIntFunction<String> STRING_CODER;
     public static final Function<String, byte[]> STRING_VALUE;
 
+    public static final MethodHandle METHOD_HANDLE_HAS_NEGATIVE;
+    public static final Predicate<byte[]> PREDICATE_IS_ASCII;
+
     static final MethodHandles.Lookup IMPL_LOOKUP;
     static final boolean OPEN_J9;
     static volatile MethodHandle CONSTRUCTOR_LOOKUP;
@@ -165,6 +168,73 @@ public class JDKUtils {
                 trustedLookup = MethodHandles.lookup();
             }
             IMPL_LOOKUP = trustedLookup;
+        }
+
+        {
+            Predicate<byte[]> isAscii = null;
+            // isASCII
+            MethodHandle handle = null;
+            Class<?> classStringCoding = null;
+            if (trustedLookup != null && JVM_VERSION >= 17) {
+                try {
+                    handle = trustedLookup.findStatic(
+                            classStringCoding = String.class,
+                            "isASCII",
+                            MethodType.methodType(boolean.class, byte[].class)
+                    );
+                } catch (Throwable ignored) {
+                    initErrorLast = ignored;
+                }
+            }
+
+            if (handle == null && trustedLookup != null && JVM_VERSION >= 11) {
+                try {
+                    classStringCoding = Class.forName("java.lang.StringCoding");
+                    handle = trustedLookup.findStatic(
+                            classStringCoding,
+                            "isASCII",
+                            MethodType.methodType(boolean.class, byte[].class)
+                    );
+                } catch (Throwable ignored) {
+                    initErrorLast = ignored;
+                }
+            }
+
+            if (handle != null && classStringCoding != null) {
+                try {
+                    MethodHandles.Lookup lookup = trustedLookup(classStringCoding);
+                    CallSite callSite = LambdaMetafactory.metafactory(
+                            lookup,
+                            "test",
+                            methodType(Predicate.class),
+                            methodType(boolean.class, Object.class),
+                            handle,
+                            methodType(boolean.class, byte[].class)
+                    );
+                    isAscii = (Predicate<byte[]>) callSite.getTarget().invokeExact();
+                } catch (Throwable ignored) {
+                    initErrorLast = ignored;
+                }
+            }
+
+            PREDICATE_IS_ASCII = isAscii;
+        }
+
+        {
+            MethodHandle handle = null;
+            if (trustedLookup != null && JVM_VERSION >= 11) {
+                try {
+                    Class<?> classStringCoding = Class.forName("java.lang.StringCoding");
+                    handle = trustedLookup.findStatic(
+                            classStringCoding,
+                            "hasNegatives",
+                            MethodType.methodType(boolean.class, byte[].class, int.class, int.class)
+                    );
+                } catch (Throwable ignored) {
+                    initErrorLast = ignored;
+                }
+            }
+            METHOD_HANDLE_HAS_NEGATIVE = handle;
         }
 
         Boolean compact_strings = null;
