@@ -322,8 +322,23 @@ public abstract class FieldWriter<T>
         if (thisFieldClass == boolean.class && otherFieldClass != boolean.class) {
             return 1;
         }
-        if (otherFieldClass == boolean.class && thisFieldClass == boolean.class) {
+        if (otherFieldClass != boolean.class && thisFieldClass == boolean.class) {
             return -1;
+        }
+
+        if (thisFieldClass == Boolean.class
+                && otherFieldClass == Boolean.class
+                && thisMember instanceof Method
+                && otherMember instanceof Method
+        ) {
+            String thisMethodName = thisMember.getName();
+            String otherMethodName = otherMember.getName();
+            if (thisMethodName.startsWith("is") && otherMethodName.startsWith("get")) {
+                return 1;
+            }
+            if (thisMethodName.startsWith("get") && otherMethodName.startsWith("is")) {
+                return -1;
+            }
         }
 
         return nameCompare;
