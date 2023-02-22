@@ -99,7 +99,7 @@
                 <groupId>org.springframework.data</groupId>
                 <artifactId>spring-data-bom</artifactId>
                 <type>pom</type>
-                <version>2022.0.0</version>
+                <version>2022.0.2</version>
                 <scope>import</scope>
             </dependency>
             <dependency>
