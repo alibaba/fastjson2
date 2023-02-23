@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-20.04 ]
-        java: [ 8, 11, 17 ]
+        java: [ 8, 11, 17, 19 ]
       fail-fast: false
       max-parallel: 16
     name: Test on JDK ${{ matrix.java }} OS ${{ matrix.os }}
