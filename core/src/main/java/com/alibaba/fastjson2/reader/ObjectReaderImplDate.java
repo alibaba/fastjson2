@@ -132,7 +132,11 @@ public class ObjectReaderImplDate
                             }
                         }
                     } else {
-                        ldt = LocalDateTime.parse(str, formatter);
+                        if (str.length() == 19 && jsonReader.isEnabled(JSONReader.Feature.SupportSmartMatch)) {
+                            ldt = DateUtils.parseLocalDateTime(str, 0, str.length());
+                        } else {
+                            ldt = LocalDateTime.parse(str, formatter);
+                        }
                     }
                     zdt = ldt.atZone(jsonReader.getContext().getZoneId());
                 } else {
