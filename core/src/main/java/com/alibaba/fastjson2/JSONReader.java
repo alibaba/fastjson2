@@ -2859,16 +2859,7 @@ public abstract class JSONReader
 
     public static JSONReader of(InputStream is, Charset charset) {
         Context context = JSONFactory.createReadContext();
-
-        if (charset == StandardCharsets.UTF_8 || charset == null) {
-            return new JSONReaderUTF8(context, is);
-        }
-
-        if (charset == StandardCharsets.UTF_16) {
-            return new JSONReaderUTF16(context, is);
-        }
-
-        throw new JSONException("not support charset " + charset);
+        return of(is, charset, context);
     }
 
     public static JSONReader of(InputStream is, Charset charset, Context context) {
