@@ -50,6 +50,7 @@ public class TypeUtilsTest {
         assertNull(TypeUtils.castToLong(null));
         assertNull(TypeUtils.castToDouble(null));
         assertNull(TypeUtils.castToBigDecimal(null));
+        assertNull(TypeUtils.castToBigInteger(null));
         assertNull(TypeUtils.castToTimestamp(null));
         assertNull(TypeUtils.castToSqlDate(null));
         assertNull(TypeUtils.castToJavaBean(null, null));
