@@ -68,9 +68,14 @@ public class JSONTest {
     public void toJSONString() {
         Bean bean = new Bean();
         bean.id = 123;
+        String expected = "{\"id\":123}";
         assertEquals(
-                "{\"id\":123}",
+                expected,
                 JSON.toJSONString(bean, null, null, new SerializeFilter[0])
+        );
+        assertEquals(
+                expected,
+                JSON.toJSONString(bean, SerializeConfig.global, new SerializeFilter[0], SerializerFeature.BrowserCompatible)
         );
     }
 
@@ -117,6 +122,9 @@ public class JSONTest {
     public void parse() {
         JSONArray jsonArray = (JSONArray) JSON.parse("[1,2,3]");
         assertEquals("[1,2,3]", jsonArray.toJSONString());
+
+        JSONArray jsonArray1 = (JSONArray) JSON.parse("[1,2,3]", 0);
+        assertEquals("[1,2,3]", jsonArray1.toJSONString());
     }
 
     @Test
@@ -267,6 +275,25 @@ public class JSONTest {
                         JSON.toJSONBytes(
                                 Collections.emptyList(),
                                 JSON.DEFAULT_GENERATE_FEATURE,
+                                SerializerFeature.BrowserSecure)
+                )
+        );
+        assertEquals(
+                "[]",
+                new String(
+                        JSON.toJSONBytes(
+                                Collections.emptyList(),
+                                SerializeConfig.global,
+                                JSON.DEFAULT_GENERATE_FEATURE,
+                                SerializerFeature.BrowserSecure)
+                )
+        );
+        assertEquals(
+                "[]",
+                new String(
+                        JSON.toJSONBytes(
+                                Collections.emptyList(),
+                                (SerializeFilter) null,
                                 SerializerFeature.BrowserSecure)
                 )
         );
@@ -647,6 +674,14 @@ public class JSONTest {
                         Feature.ErrorOnNotSupportAutoType
                 )
         );
+        assertNull(
+                JSON.parseObject(
+                        "",
+                        (Type) HashMap.class,
+                        (ParseProcess) null,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
     }
 
     @Test
@@ -704,6 +739,20 @@ public class JSONTest {
                         Feature.AllowArbitraryCommas
                 )
         );
+        assertNull(JSON.parseObject((String) null));
+        assertNull(JSON.parseObject(""));
+        assertNull(
+                JSON.parseObject(
+                        (String) null,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+        assertNull(
+                JSON.parseObject(
+                        "",
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
     }
 
     @Test
@@ -719,11 +768,113 @@ public class JSONTest {
                         Feature.ErrorOnNotSupportAutoType
                 )
         );
+        assertEquals(
+                new HashMap<>(),
+                JSON.parseObject(
+                        str,
+                        (Type) HashMap.class,
+                        (ParseProcess) null,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+    }
+
+    @Test
+    public void parseError() {
+        String str = "<>";
+        char[] chars = str.toCharArray();
+        byte[] bytes = str.getBytes();
+
+        assertThrows(
+                JSONException.class,
+                () -> JSON.parseObject(
+                        str,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+        assertThrows(
+                JSONException.class,
+                () -> JSON.parseObject(
+                        str,
+                        (Type) HashMap.class,
+                        (ParseProcess) null,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+        assertThrows(
+                JSONException.class,
+                () -> JSON.parseObject(
+                        str,
+                        (Type) HashMap.class,
+                        ParserConfig.global,
+                        (ParseProcess) null,
+                        0,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+
+        assertThrows(
+                JSONException.class,
+                () -> JSON.parseObject(
+                        chars,
+                        chars.length,
+                        (Type) HashMap.class,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+
+        assertThrows(
+                JSONException.class,
+                () -> JSON.parseObject(
+                        bytes,
+                        StandardCharsets.UTF_8,
+                        (Type) HashMap.class,
+                        (ParserConfig) null,
+                        (ParseProcess) null,
+                        0,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+        assertThrows(
+                JSONException.class,
+                () -> JSON.parseObject(
+                        bytes,
+                        0,
+                        bytes.length,
+                        StandardCharsets.UTF_8,
+                        (Type) HashMap.class,
+                        (ParserConfig) null,
+                        (ParseProcess) null,
+                        0,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+        assertThrows(
+                JSONException.class,
+                () -> JSON.parseArray(
+                        str,
+                        HashMap.class,
+                        Feature.ErrorOnNotSupportAutoType
+                )
+        );
+        assertThrows(
+                JSONException.class,
+                () -> JSON.parseArray(
+                        str,
+                        HashMap.class,
+                        ParserConfig.global
+                )
+        );
     }
 
     @Test
     public void toJSON() {
         assertEquals("123", JSON.toJSON("123", SerializeConfig.global));
+        assertEquals("123", JSON.toJSON("123", ParserConfig.global));
+
+        com.alibaba.fastjson.JSONObject object = new com.alibaba.fastjson.JSONObject();
+        assertSame(object, JSON.toJSON(object, ParserConfig.global));
+        assertSame(object, JSON.toJSON(object, SerializeConfig.global));
     }
 
     @Test
@@ -770,6 +921,30 @@ public class JSONTest {
     @Test
     public void parseArray2() {
         assertThrows(JSONException.class, () -> JSON.parseArray("[", Long.class));
+    }
+
+    @Test
+    public void parseArrayNull() {
+        assertNull(JSON.parseArray(""));
+        assertNull(JSON.parseArray((String) null));
+
+        assertNull(JSON.parseArray("", Bean.class));
+        assertNull(JSON.parseArray((String) null, Bean.class));
+
+        assertNull(JSON.parseArray("", Bean.class, ParserConfig.global));
+        assertNull(JSON.parseArray((String) null, Bean.class, ParserConfig.global));
+        assertNull(JSON.parseArray("null", Bean.class, (ParserConfig) null));
+
+        assertNull(JSON.parseArray("", Bean.class, Feature.ErrorOnEnumNotMatch));
+        assertNull(JSON.parseArray((String) null, Bean.class, Feature.ErrorOnEnumNotMatch));
+        assertNull(JSON.parseArray("null", Bean.class, Feature.ErrorOnEnumNotMatch));
+        assertNull(JSON.parseArray("", new Type[]{Bean.class}));
+        assertNull(JSON.parseArray(null, new Type[]{Bean.class}));
+    }
+
+    @Test
+    public void toJavaObject() {
+        assertNull(JSON.toJavaObject(new com.alibaba.fastjson.JSONObject(), Bean.class).name);
     }
 
     @Test
