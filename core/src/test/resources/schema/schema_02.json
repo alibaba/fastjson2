@@ -1,0 +1,10 @@
+{
+    "type": "array",
+    "items": { "$ref": "#/$defs/positiveInteger" },
+    "$defs": {
+        "positiveInteger": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+        }
+    }
+}
