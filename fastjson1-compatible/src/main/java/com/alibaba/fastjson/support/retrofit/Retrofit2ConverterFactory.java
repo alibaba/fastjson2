@@ -48,17 +48,19 @@ public class Retrofit2ConverterFactory
     }
 
     @Override
-    public Converter<ResponseBody, Object> responseBodyConverter(Type type, //
-                                                                 Annotation[] annotations, //
-                                                                 Retrofit retrofit) {
+    public Converter<ResponseBody, Object> responseBodyConverter(
+            Type type,
+            Annotation[] annotations,
+            Retrofit retrofit) {
         return new ResponseBodyConverter<Object>(type);
     }
 
     @Override
-    public Converter<Object, RequestBody> requestBodyConverter(Type type, //
-                                                               Annotation[] parameterAnnotations, //
-                                                               Annotation[] methodAnnotations, //
-                                                               Retrofit retrofit) {
+    public Converter<Object, RequestBody> requestBodyConverter(
+            Type type,
+            Annotation[] parameterAnnotations,
+            Annotation[] methodAnnotations,
+            Retrofit retrofit) {
         return new RequestBodyConverter<Object>();
     }
 

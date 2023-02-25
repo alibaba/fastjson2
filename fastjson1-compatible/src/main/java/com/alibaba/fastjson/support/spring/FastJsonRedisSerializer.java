@@ -33,12 +33,12 @@ public class FastJsonRedisSerializer<T>
     }
 
     @Override
-    public byte[] serialize(T t) throws SerializationException {
-        if (t == null) {
+    public byte[] serialize(T type) throws SerializationException {
+        if (type == null) {
             return new byte[0];
         }
         try {
-            return JSON.toJSONBytes(t, fastJsonConfig.getSerializeFilters(), fastJsonConfig.getSerializerFeatures());
+            return JSON.toJSONBytes(type, fastJsonConfig.getSerializeFilters(), fastJsonConfig.getSerializerFeatures());
         } catch (Exception ex) {
             throw new SerializationException("Could not serialize: " + ex.getMessage(), ex);
         }
