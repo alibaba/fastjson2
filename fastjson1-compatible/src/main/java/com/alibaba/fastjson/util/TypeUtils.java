@@ -32,6 +32,7 @@ import java.io.Reader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -583,6 +584,10 @@ public class TypeUtils {
 
     public static BigDecimal castToBigDecimal(Object value) {
         return com.alibaba.fastjson2.util.TypeUtils.toBigDecimal(value);
+    }
+
+    public static BigInteger castToBigInteger(Object value) {
+        return com.alibaba.fastjson2.util.TypeUtils.toBigInteger(value);
     }
 
     public static Timestamp castToTimestamp(final Object value) {
