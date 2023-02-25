@@ -7,10 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,6 +51,18 @@ public class TypeUtilsTest {
         assertNull(TypeUtils.castToTimestamp(null));
         assertNull(TypeUtils.castToSqlDate(null));
         assertNull(TypeUtils.castToJavaBean(null, null));
+    }
+
+    @Test
+    public void testCastToDate() {
+        assertNull(TypeUtils.castToDate(null, null));
+
+        Date date = new Date();
+        assertSame(date, TypeUtils.castToDate(date, null));
+
+        String str = "2018-07-28 12:13:14";
+        assertEquals(TypeUtils.castToDate(str), TypeUtils.castToDate(str, null));
+        assertEquals(TypeUtils.castToDate(str), TypeUtils.castToDate(str, "yyyy-MM-dd HH:mm:ss"));
     }
 
     @Test
