@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -51,6 +52,23 @@ public class TypeUtilsTest {
         assertNull(TypeUtils.castToTimestamp(null));
         assertNull(TypeUtils.castToSqlDate(null));
         assertNull(TypeUtils.castToJavaBean(null, null));
+    }
+
+    @Test
+    public void testCastToBytes() {
+        byte[] bytes = new byte[1024];
+        new Random().nextBytes(bytes);
+        String str = Base64.getEncoder().encodeToString(bytes);
+        byte[] bytes1 = TypeUtils.castToBytes(str);
+        assertArrayEquals(bytes, bytes1);
+
+        Exception error = null;
+        try {
+            TypeUtils.castToBytes(new Object());
+        } catch (Exception ex) {
+            error = ex;
+        }
+        assertNotNull(error);
     }
 
     @Test
