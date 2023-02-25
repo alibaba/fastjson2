@@ -686,6 +686,19 @@ public class TypeUtils {
         return com.alibaba.fastjson2.util.TypeUtils.toDate(value);
     }
 
+    public static Date castToDate(Object value, String format) {
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof String) {
+            String str = (String) value;
+            return com.alibaba.fastjson2.util.DateUtils.parseDate(str, format, null);
+        }
+
+        return com.alibaba.fastjson2.util.TypeUtils.toDate(value);
+    }
+
     public static byte[] castToBytes(Object value) {
         if (value instanceof byte[]) {
             return (byte[]) value;
