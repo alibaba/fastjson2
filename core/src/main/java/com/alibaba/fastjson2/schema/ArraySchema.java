@@ -83,7 +83,7 @@ public final class ArraySchema
             additionalItemsSupport = true;
         } else {
             additionalItemsSupport = true;
-            this.itemSchema = JSONSchema.of((JSONObject) items, root);
+            this.itemSchema = JSONSchema.of((JSONObject) items, root != null ? root : this);
         }
 
         if (additionalItems instanceof JSONObject) {
