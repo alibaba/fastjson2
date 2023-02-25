@@ -76,22 +76,29 @@ public class FastJsonHttpMessageConverter
     }
 
     @Override
-    public Object read(Type type, //
-                       Class<?> contextClass, //
-                       HttpInputMessage inputMessage //
+    public Object read(
+            Type type,
+            Class<?> contextClass,
+            HttpInputMessage inputMessage
     ) throws IOException, HttpMessageNotReadableException {
         return readType(getType(type, contextClass), inputMessage);
     }
 
     @Override
-    public void write(Object o, Type type, MediaType contentType, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
+    public void write(
+            Object o,
+            Type type,
+            MediaType contentType,
+            HttpOutputMessage outputMessage
+    ) throws IOException, HttpMessageNotWritableException {
         // support StreamingHttpOutputMessage in spring4.0+
         super.write(o, contentType, outputMessage);
     }
 
     @Override
-    protected Object readInternal(Class<?> clazz, //
-                                  HttpInputMessage inputMessage //
+    protected Object readInternal(
+            Class<?> clazz,
+            HttpInputMessage inputMessage
     ) throws IOException, HttpMessageNotReadableException {
         return readType(getType(clazz, null), inputMessage);
     }
@@ -122,11 +129,18 @@ public class FastJsonHttpMessageConverter
     }
 
     @Override
-    protected void writeInternal(Object object, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
+    protected void writeInternal(
+            Object object,
+            HttpOutputMessage outputMessage
+    ) throws IOException, HttpMessageNotWritableException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             HttpHeaders headers = outputMessage.getHeaders();
 
-            int len = JSON.writeJSONString(baos, object, fastJsonConfig.getSerializeFilters(), fastJsonConfig.getSerializerFeatures());
+            int len = JSON.writeJSONString(
+                    baos, object,
+                    fastJsonConfig.getSerializeFilters(),
+                    fastJsonConfig.getSerializerFeatures()
+            );
 
             if (headers.getContentLength() < 0 && fastJsonConfig.isWriteContentLength()) {
                 headers.setContentLength(len);
@@ -167,7 +181,10 @@ public class FastJsonHttpMessageConverter
             if (contextClass != null) {
                 ResolvableType resolvedType = ResolvableType.forType(type);
                 if (type instanceof TypeVariable) {
-                    ResolvableType resolvedTypeVariable = resolveVariable((TypeVariable) type, ResolvableType.forClass(contextClass));
+                    ResolvableType resolvedTypeVariable = resolveVariable(
+                            (TypeVariable) type,
+                            ResolvableType.forClass(contextClass)
+                    );
                     if (resolvedTypeVariable != ResolvableType.NONE) {
                         return resolvedTypeVariable.resolve();
                     }
@@ -179,7 +196,10 @@ public class FastJsonHttpMessageConverter
                     for (int i = 0; i < typeArguments.length; ++i) {
                         Type typeArgument = typeArguments[i];
                         if (typeArgument instanceof TypeVariable) {
-                            ResolvableType resolvedTypeArgument = resolveVariable((TypeVariable) typeArgument, ResolvableType.forClass(contextClass));
+                            ResolvableType resolvedTypeArgument = resolveVariable(
+                                    (TypeVariable) typeArgument,
+                                    ResolvableType.forClass(contextClass)
+                            );
                             if (resolvedTypeArgument != ResolvableType.NONE) {
                                 generics[i] = resolvedTypeArgument.resolve();
                             } else {
