@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.util.IOUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 class FieldWriterEnum
@@ -236,10 +237,13 @@ class FieldWriterEnum
             byte[] bytes = valueNameCacheUTF8[ordinal];
 
             if (bytes == null) {
-                String name = enumConstants[ordinal].name();
-                bytes = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + name.length() + 2);
+                byte[] nameUft8Bytes = enumConstants[ordinal].name().getBytes(StandardCharsets.UTF_8);
+                bytes = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + nameUft8Bytes.length + 2);
                 bytes[nameWithColonUTF8.length] = '"';
-                name.getBytes(0, name.length(), bytes, nameWithColonUTF8.length + 1);
+                int index = nameWithColonUTF8.length + 1;
+                for (byte b : nameUft8Bytes) {
+                    bytes[index++] = b;
+                }
                 bytes[bytes.length - 1] = '"';
                 valueNameCacheUTF8[ordinal] = bytes;
             }
