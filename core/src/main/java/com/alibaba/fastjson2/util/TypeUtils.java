@@ -1279,7 +1279,22 @@ public class TypeUtils {
             return (T) objectReader.createInstance((Collection) obj);
         }
 
-        throw new JSONException("can not cast to " + targetClass.getName() + ", from " + obj.getClass());
+        String className = targetClass.getName();
+        if (obj instanceof Integer || obj instanceof Long) {
+            long millis = ((Number) obj).longValue();
+            switch (className) {
+                case "java.sql.Date":
+                    return (T) JdbcSupport.createDate(millis);
+                case "java.sql.Timestamp":
+                    return (T) JdbcSupport.createTimestamp(millis);
+                case "java.sql.Time":
+                    return (T) JdbcSupport.createTime(millis);
+                default:
+                    break;
+            }
+        }
+
+        throw new JSONException("can not cast to " + className + ", from " + obj.getClass());
     }
 
     static final Map<Class, String> NAME_MAPPINGS = new IdentityHashMap<>();

@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.reader.ObjectReaderImplDate;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.Reader;
+import java.lang.invoke.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -17,10 +18,20 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
+import java.util.function.LongFunction;
 
 public class JdbcSupport {
     static Class CLASS_CLOB;
     static volatile boolean CLASS_CLOB_ERROR;
+
+    static volatile LongFunction TIMESTAMP_CREATOR;
+    static volatile boolean TIMESTAMP_CREATOR_ERROR;
+
+    static volatile LongFunction DATE_CREATOR;
+    static volatile boolean DATE_CREATOR_ERROR;
+
+    static volatile LongFunction TIME_CREATOR;
+    static volatile boolean TIME_CREATOR_ERROR;
 
     public static ObjectReader createTimeReader(Class objectClass, String format, Locale locale) {
         return new TimeReader(objectClass, format, locale);
@@ -40,6 +51,70 @@ public class JdbcSupport {
         }
 
         return new TimeWriter(format);
+    }
+
+    public static Object createTimestamp(long millis) {
+        if (TIMESTAMP_CREATOR == null && !TIMESTAMP_CREATOR_ERROR) {
+            try {
+                TIMESTAMP_CREATOR = createFunction("java.sql.Timestamp");
+            } catch (Throwable ignored) {
+                TIMESTAMP_CREATOR_ERROR = true;
+            }
+        }
+
+        if (TIMESTAMP_CREATOR == null) {
+            throw new JSONException("create java.sql.Timestamp error");
+        }
+
+        return TIMESTAMP_CREATOR.apply(millis);
+    }
+
+    public static Object createDate(long millis) {
+        if (DATE_CREATOR == null && !DATE_CREATOR_ERROR) {
+            try {
+                DATE_CREATOR = createFunction("java.sql.Date");
+            } catch (Throwable ignored) {
+                DATE_CREATOR_ERROR = true;
+            }
+        }
+
+        if (DATE_CREATOR == null) {
+            throw new JSONException("create java.sql.Date error");
+        }
+
+        return DATE_CREATOR.apply(millis);
+    }
+
+    public static Object createTime(long millis) {
+        if (TIME_CREATOR == null && !TIME_CREATOR_ERROR) {
+            try {
+                TIME_CREATOR = createFunction("java.sql.Time");
+            } catch (Throwable ignored) {
+                TIME_CREATOR_ERROR = true;
+            }
+        }
+
+        if (TIME_CREATOR == null) {
+            throw new JSONException("create java.sql.Timestamp error");
+        }
+
+        return TIME_CREATOR.apply(millis);
+    }
+
+    static LongFunction createFunction(String className) throws Throwable {
+        Class<?> timestampClass = Class.forName(className);
+        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(timestampClass);
+        MethodHandle constructor = lookup.findConstructor(timestampClass, MethodType.methodType(void.class, long.class));
+        CallSite callSite = LambdaMetafactory.metafactory(
+                lookup,
+                "apply",
+                MethodType.methodType(LongFunction.class),
+                MethodType.methodType(Object.class, long.class),
+                constructor,
+                MethodType.methodType(Object.class, long.class)
+        );
+        MethodHandle target = callSite.getTarget();
+        return (LongFunction) target.invokeExact();
     }
 
     public static ObjectWriter createClobWriter(Class objectClass) {
