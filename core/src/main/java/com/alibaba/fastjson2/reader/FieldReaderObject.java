@@ -301,4 +301,30 @@ public class FieldReaderObject<T>
 
         return object;
     }
+
+    public void processExtra(JSONReader jsonReader, Object object) {
+        if (initReader == null) {
+            initReader = getObjectReader(jsonReader);
+        }
+
+        if (initReader instanceof ObjectReaderBean && field != null) {
+            String name = jsonReader.getFieldName();
+            FieldReader extraField = initReader.getFieldReader(name);
+            if (extraField != null) {
+                try {
+                    Object unwrappedFieldValue = field.get(object);
+                    if (unwrappedFieldValue == null) {
+                        unwrappedFieldValue = initReader.createInstance(features);
+                        accept((T) object, unwrappedFieldValue);
+                    }
+                    extraField.readFieldValue(jsonReader, unwrappedFieldValue);
+                    return;
+                } catch (Exception e) {
+                    throw new JSONException("read unwrapped field error", e);
+                }
+            }
+        }
+
+        jsonReader.skipValue();
+    }
 }

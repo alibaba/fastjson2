@@ -132,7 +132,9 @@ public class ObjectReaderAdapter<T>
             hashCodesLCase[i] = fieldReader.fieldNameHashLCase;
 
             if (fieldReader.isUnwrapped()) {
-                this.extraFieldReader = fieldReader;
+                if (this.extraFieldReader == null || !(this.extraFieldReader instanceof FieldReaderAnySetter)) {
+                    this.extraFieldReader = fieldReader;
+                }
             }
 
             if (fieldReader.defaultValue != null) {

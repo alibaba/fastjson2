@@ -88,19 +88,6 @@ public class ObjectReader4<T>
         this.hashCode2LCase = fieldReader2.fieldNameHashLCase;
         this.hashCode3LCase = fieldReader3.fieldNameHashLCase;
 
-        if (fieldReader0.isUnwrapped()) {
-            extraFieldReader = fieldReader0;
-        }
-        if (fieldReader1.isUnwrapped()) {
-            extraFieldReader = fieldReader1;
-        }
-        if (fieldReader2.isUnwrapped()) {
-            extraFieldReader = fieldReader2;
-        }
-        if (fieldReader3.isUnwrapped()) {
-            extraFieldReader = fieldReader3;
-        }
-
         hasDefaultValue = fieldReader0.defaultValue != null
                 || fieldReader1.defaultValue != null
                 || fieldReader2.defaultValue != null

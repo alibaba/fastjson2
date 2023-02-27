@@ -78,16 +78,6 @@ public class ObjectReader3<T>
         this.hashCode1LCase = fieldReader1.fieldNameHashLCase;
         this.hashCode2LCase = fieldReader2.fieldNameHashLCase;
 
-        if (fieldReader0.isUnwrapped()) {
-            extraFieldReader = fieldReader0;
-        }
-        if (fieldReader1.isUnwrapped()) {
-            extraFieldReader = fieldReader1;
-        }
-        if (fieldReader2.isUnwrapped()) {
-            extraFieldReader = fieldReader2;
-        }
-
         hasDefaultValue = fieldReader0.defaultValue != null
                 || fieldReader1.defaultValue != null
                 || fieldReader2.defaultValue != null;
@@ -227,16 +217,6 @@ public class ObjectReader3<T>
                     processExtra(jsonReader, object);
                 }
             }
-        }
-
-        if (fieldReader0.isUnwrapped()) {
-            extraFieldReader = fieldReader0;
-        }
-        if (fieldReader1.isUnwrapped()) {
-            extraFieldReader = fieldReader1;
-        }
-        if (fieldReader2.isUnwrapped()) {
-            extraFieldReader = fieldReader2;
         }
 
         if (buildFunction != null) {
