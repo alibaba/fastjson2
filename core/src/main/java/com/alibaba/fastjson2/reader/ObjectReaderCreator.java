@@ -2127,6 +2127,20 @@ public class ObjectReaderCreator {
             features |= JSONReader.Feature.IgnoreSetNullValue.mask;
         }
 
+        Field field = null;
+        if ((features & FieldInfo.UNWRAPPED_MASK) != 0) {
+            String methodName = method.getName();
+            if (methodName.startsWith("set")) {
+                String setterName = BeanUtils.setterName(methodName, PropertyNamingStrategy.CamelCase.name());
+                field = BeanUtils.getDeclaredField(method.getDeclaringClass(), setterName);
+                try {
+                    field.setAccessible(true);
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            }
+        }
+
         return new FieldReaderObject(
                 fieldName,
                 fieldTypeResolved != null ? fieldTypeResolved : fieldType,
@@ -2138,7 +2152,7 @@ public class ObjectReaderCreator {
                 defaultValue,
                 jsonSchema,
                 method,
-                null,
+                field,
                 null
         );
     }

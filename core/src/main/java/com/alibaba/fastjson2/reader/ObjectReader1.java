@@ -49,10 +49,6 @@ public class ObjectReader1<T>
         this.hashCode0 = fieldReader0.fieldNameHash;
         this.hashCode0LCase = fieldReader0.fieldNameHashLCase;
 
-        if (fieldReader0.isUnwrapped()) {
-            extraFieldReader = fieldReader0;
-        }
-
         hasDefaultValue = fieldReader0.defaultValue != null;
     }
 

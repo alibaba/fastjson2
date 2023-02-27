@@ -106,25 +106,6 @@ public class ObjectReader6<T>
         this.hashCode4LCase = fieldReader4.fieldNameHashLCase;
         this.hashCode5LCase = fieldReader5.fieldNameHashLCase;
 
-        if (fieldReader0.isUnwrapped()) {
-            extraFieldReader = fieldReader0;
-        }
-        if (fieldReader1.isUnwrapped()) {
-            extraFieldReader = fieldReader1;
-        }
-        if (fieldReader2.isUnwrapped()) {
-            extraFieldReader = fieldReader2;
-        }
-        if (fieldReader3.isUnwrapped()) {
-            extraFieldReader = fieldReader3;
-        }
-        if (fieldReader4.isUnwrapped()) {
-            extraFieldReader = fieldReader4;
-        }
-        if (fieldReader5.isUnwrapped()) {
-            extraFieldReader = fieldReader5;
-        }
-
         hasDefaultValue = fieldReader0.defaultValue != null
                 || fieldReader1.defaultValue != null
                 || fieldReader2.defaultValue != null
