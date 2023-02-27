@@ -154,6 +154,9 @@ public class ObjectReader2<T>
         if (object != null && hasDefaultValue) {
             initDefaultValue(object);
         }
+        if (object != null && jsonReader.isInitStringFieldAsEmpty()) {
+            initStringFieldAsEmpty(object);
+        }
 
         for (; ; ) {
             if (jsonReader.nextIfMatch(BC_OBJECT_END)) {
@@ -242,6 +245,9 @@ public class ObjectReader2<T>
         object = creator.get();
         if (hasDefaultValue) {
             initDefaultValue(object);
+        }
+        if (object != null && (featuresAll & JSONReader.Feature.InitStringFieldAsEmpty.mask) != 0) {
+            initStringFieldAsEmpty(object);
         }
 
         for (int i = 0; ; ++i) {

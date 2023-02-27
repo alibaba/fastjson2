@@ -530,4 +530,10 @@ public class ObjectReaderAdapter<T>
 
         return context.getObjectReaderAutoType(typeHash);
     }
+
+    protected void initStringFieldAsEmpty(Object object) {
+        for (FieldReader fieldReader : fieldReaders) {
+            fieldReader.accept(object, "");
+        }
+    }
 }

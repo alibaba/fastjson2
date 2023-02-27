@@ -250,6 +250,10 @@ public abstract class JSONReader
         return (context.features & Feature.SupportSmartMatch.mask) != 0;
     }
 
+    public boolean isInitStringFieldAsEmpty() {
+        return (context.features & Feature.InitStringFieldAsEmpty.mask) != 0;
+    }
+
     public boolean isSupportSmartMatch(long features) {
         return ((context.features | features) & Feature.SupportSmartMatch.mask) != 0;
     }

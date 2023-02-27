@@ -425,7 +425,7 @@ public class ObjectReaderCreatorASM
                 (e) -> objectClass.getName().equals(e) ? objectClass : null
         );
 
-        ObjectWriteContext context = new ObjectWriteContext(objectClass, cw, externalClass);
+        ObjectWriteContext context = new ObjectWriteContext(objectClass, cw, externalClass, fieldReaderArray);
 
         String className = "ORG_" + seed.incrementAndGet() + "_" + fieldReaderArray.length + "_" + objectClass.getSimpleName();
         String classNameType;
@@ -1909,6 +1909,20 @@ public class ObjectReaderCreatorASM
         } else {
             newObject(mw, TYPE_OBJECT, defaultConstructor);
         }
+
+        if (context.hasStringField) {
+            Label endInitStringAsEmpty_ = new Label(), addResolveTask_ = new Label();
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isInitStringFieldAsEmpty", "()Z", false);
+            mw.visitJumpInsn(Opcodes.IFEQ, endInitStringAsEmpty_);
+
+            mw.visitInsn(Opcodes.DUP);
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitInsn(Opcodes.SWAP);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, classNameType, "initStringFieldAsEmpty", "(Ljava/lang/Object;)V", false);
+            mw.visitLabel(endInitStringAsEmpty_);
+        }
     }
 
     private <T> int genReadFieldValue(
@@ -2659,12 +2673,24 @@ public class ObjectReaderCreatorASM
         final ClassWriter cw;
         final boolean publicClass;
         final boolean externalClass;
+        final FieldReader[] fieldReaders;
+        final boolean hasStringField;
 
-        public ObjectWriteContext(Class objectClass, ClassWriter cw, boolean externalClass) {
+        public ObjectWriteContext(Class objectClass, ClassWriter cw, boolean externalClass, FieldReader[] fieldReaders) {
             this.objectClass = objectClass;
             this.cw = cw;
             this.publicClass = Modifier.isPublic(objectClass.getModifiers());
             this.externalClass = externalClass;
+            this.fieldReaders = fieldReaders;
+
+            boolean hasStringField = false;
+            for (FieldReader fieldReader : fieldReaders) {
+                if (fieldReader.fieldClass == String.class) {
+                    hasStringField = true;
+                    break;
+                }
+            }
+            this.hasStringField = hasStringField;
         }
     }
 }
