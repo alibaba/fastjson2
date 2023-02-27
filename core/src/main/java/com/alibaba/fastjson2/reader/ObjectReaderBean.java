@@ -235,6 +235,9 @@ public abstract class ObjectReaderBean<T>
             if (jsonReader.nextIfMatch('}')) {
                 if (object == null) {
                     object = createInstance(jsonReader.getContext().getFeatures() | features);
+                    if (object != null && (featuresAll & JSONReader.Feature.InitStringFieldAsEmpty.mask) != 0) {
+                        initStringFieldAsEmpty(object);
+                    }
                 }
                 break;
             }
@@ -325,5 +328,8 @@ public abstract class ObjectReaderBean<T>
         }
 
         return object;
+    }
+
+    protected void initStringFieldAsEmpty(Object object) {
     }
 }

@@ -339,6 +339,9 @@ public class ObjectReader6<T>
         if (hasDefaultValue) {
             initDefaultValue(object);
         }
+        if (object != null && (featuresAll & JSONReader.Feature.InitStringFieldAsEmpty.mask) != 0) {
+            initStringFieldAsEmpty(object);
+        }
 
         for (int i = 0; ; ++i) {
             if (jsonReader.nextIfMatch('}')) {
