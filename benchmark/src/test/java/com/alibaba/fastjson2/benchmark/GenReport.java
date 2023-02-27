@@ -32,16 +32,25 @@ public class GenReport {
                 LibResult fastjson1 = benchmarkResult.libraryResults.get("fastjson1");
                 LibResult jackson = benchmarkResult.libraryResults.get("jackson");
                 LibResult gson = benchmarkResult.libraryResults.get("gson");
+                LibResult fastjson2UTF8Bytes = benchmarkResult.libraryResults.get("fastjson2UTF8Bytes");
+                LibResult hessian = benchmarkResult.libraryResults.get("hessian");
+                LibResult javaSerialize = benchmarkResult.libraryResults.get("javaSerialize");
+                LibResult jsonb = benchmarkResult.libraryResults.get("jsonb");
                 if (fastjson1 != null && fastjson2 != null && jackson != null && gson != null) {
                     benchmarkResult.libraryResults.clear();
                     benchmarkResult.libraryResults.put("fastjson2", fastjson2);
                     benchmarkResult.libraryResults.put("fastjson1", fastjson1);
                     benchmarkResult.libraryResults.put("jackson", jackson);
                     benchmarkResult.libraryResults.put("gson", gson);
+                } else if (fastjson2UTF8Bytes != null && hessian != null && javaSerialize != null && jsonb != null) {
+                    benchmarkResult.libraryResults.clear();
+                    benchmarkResult.libraryResults.put("jsonb", jsonb);
+                    benchmarkResult.libraryResults.put("fastjson2UTF8Bytes", fastjson2UTF8Bytes);
+                    benchmarkResult.libraryResults.put("hessian", hessian);
+                    benchmarkResult.libraryResults.put("javaSerialize", javaSerialize);
                 } else {
                     LibResult fastjson2JSONB = benchmarkResult.libraryResults.get("fastjson2JSONB");
                     LibResult fastjson1UTF8Bytes = benchmarkResult.libraryResults.get("fastjson1UTF8Bytes");
-                    LibResult fastjson2UTF8Bytes = benchmarkResult.libraryResults.get("fastjson2UTF8Bytes");
                     LibResult kryo = benchmarkResult.libraryResults.get("kryo");
                     if (fastjson1UTF8Bytes != null && fastjson2UTF8Bytes != null && fastjson2JSONB != null && kryo != null) {
                         benchmarkResult.libraryResults.clear();
@@ -58,6 +67,11 @@ public class GenReport {
                 LibResult jackson = benchmarkResult.libraryResults.get("jackson");
                 LibResult gson = benchmarkResult.libraryResults.get("gson");
                 LibResult dsljson = benchmarkResult.libraryResults.get("dsljson");
+                LibResult fastjson1UTF8Bytes = benchmarkResult.libraryResults.get("fastjson1UTF8Bytes");
+                LibResult fastjson2UTF8Bytes = benchmarkResult.libraryResults.get("fastjson2UTF8Bytes");
+                LibResult kryo = benchmarkResult.libraryResults.get("kryo");
+                LibResult jsonb = benchmarkResult.libraryResults.get("jsonb");
+                LibResult protobuf = benchmarkResult.libraryResults.get("protobuf");
                 if (fastjson1 != null && fastjson2_jsonb != null && fastjson2 != null && jackson != null && gson != null) {
                     benchmarkResult.libraryResults.clear();
                     benchmarkResult.libraryResults.put("fastjson2", fastjson2);
@@ -72,6 +86,13 @@ public class GenReport {
                     benchmarkResult.libraryResults.put("fastjson1", fastjson1);
                     benchmarkResult.libraryResults.put("jackson", jackson);
                     benchmarkResult.libraryResults.put("gson", gson);
+                } else if (fastjson1UTF8Bytes != null && fastjson2UTF8Bytes != null && jsonb != null && kryo != null && protobuf != null) {
+                    benchmarkResult.libraryResults.clear();
+                    benchmarkResult.libraryResults.put("jsonb", jsonb);
+                    benchmarkResult.libraryResults.put("kryo", kryo);
+                    benchmarkResult.libraryResults.put("protobuf", protobuf);
+                    benchmarkResult.libraryResults.put("fastjson2UTF8Bytes", fastjson2UTF8Bytes);
+                    benchmarkResult.libraryResults.put("fastjson1UTF8Bytes", fastjson1UTF8Bytes);
                 }
             }
 
