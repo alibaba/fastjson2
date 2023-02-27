@@ -82,7 +82,7 @@ dependencies {
 
 如果项目使用`Kotlin`，可以使用`fastjson-kotlin`模块，使用方式上采用`kotlin`的特性。
 
-`Maven`:
+* `Maven`:
 
 ```xml
 <dependency>
@@ -90,9 +90,16 @@ dependencies {
     <artifactId>fastjson2-kotlin</artifactId>
     <version>2.0.24</version>
 </dependency>
+
+<!-- 有些场景需要依赖kotlin-reflect -->
+<dependency>
+    <groupId>org.jetbrains.kotlin</groupId>
+    <artifactId>kotlin-reflect</artifactId>
+    <version>${kotlin-version}</version>
+</dependency>
 ```
 
-`Kotlin Gradle`:
+* `Kotlin Gradle`:
 
 ```kotlin
 dependencies {
