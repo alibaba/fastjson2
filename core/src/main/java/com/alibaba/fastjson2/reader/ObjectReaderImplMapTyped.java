@@ -74,24 +74,26 @@ class ObjectReaderImplMapTyped
             Object fieldValue = entry.getValue();
 
             Object value = fieldValue;
-            Class<?> valueClass = value.getClass();
-            Function typeConvert = provider.getTypeConvert(valueClass, valueType);
-            if (typeConvert != null) {
-                value = typeConvert.apply(value);
-            } else if (value instanceof Map) {
-                Map map = (Map) value;
-                if (valueObjectReader == null) {
-                    valueObjectReader = provider.getObjectReader(valueType);
-                }
-                value = valueObjectReader.createInstance(map, features);
-            } else if (value instanceof Collection) {
-                if (valueObjectReader == null) {
-                    valueObjectReader = provider.getObjectReader(valueType);
-                }
-                value = valueObjectReader.createInstance((Collection) value);
-            } else {
-                if (!valueClass.isInstance(value)) {
-                    throw new JSONException("can not convert from " + valueClass + " to " + valueType);
+            if (value != null) {
+                Class<?> valueClass = value.getClass();
+                Function typeConvert = provider.getTypeConvert(valueClass, valueType);
+                if (typeConvert != null) {
+                    value = typeConvert.apply(value);
+                } else if (value instanceof Map) {
+                    Map map = (Map) value;
+                    if (valueObjectReader == null) {
+                        valueObjectReader = provider.getObjectReader(valueType);
+                    }
+                    value = valueObjectReader.createInstance(map, features);
+                } else if (value instanceof Collection) {
+                    if (valueObjectReader == null) {
+                        valueObjectReader = provider.getObjectReader(valueType);
+                    }
+                    value = valueObjectReader.createInstance((Collection) value);
+                } else {
+                    if (!valueClass.isInstance(value)) {
+                        throw new JSONException("can not convert from " + valueClass + " to " + valueType);
+                    }
                 }
             }
             object.put(fieldName, value);
