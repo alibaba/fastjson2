@@ -390,14 +390,18 @@ public abstract class JSONSchema {
                                 typeSchemas[i] = new ArraySchema(JSONObject.of("type", "array"), null);
                                 break;
                             default:
-                                throw new JSONException("not support type : " + itemType);
+                                throw new JSONSchemaValidException("not support type : " + itemType);
                         }
                     }
                     return new AnyOf(typeSchemas);
                 }
             }
 
-            throw new JSONException("type required");
+            if (input.getString("type") == null) {
+                throw new JSONSchemaValidException("type required");
+            } else {
+                throw new JSONSchemaValidException("not support type : " + input.getString("type"));
+            }
         }
 
         switch (type) {
@@ -416,7 +420,7 @@ public abstract class JSONSchema {
             case Array:
                 return new ArraySchema(input, parent);
             default:
-                throw new JSONException("not support type : " + type);
+                throw new JSONSchemaValidException("not support type : " + type);
         }
     }
 
