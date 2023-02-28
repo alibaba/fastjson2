@@ -229,6 +229,11 @@
                 <version>2.11.0</version>
             </dependency>
             <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>2.6</version>
+            </dependency>
+            <dependency>
                 <groupId>io.airlift</groupId>
                 <artifactId>slice</artifactId>
                 <!-- DO NOT upgrade to 0.42+, since don't support java 8 -->
