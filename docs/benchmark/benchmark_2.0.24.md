@@ -13,6 +13,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	991.958	|	564.326 (56.89%)	|	135.075 (13.62%)	|	27.163 (2.74%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	1370.663	|	710.863 (51.86%)	|	135.109 (9.86%)	|	25.296 (1.85%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	1388.792	|	728.331 (52.44%)	|	154.613 (11.13%)	|	28.611 (2.06%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	1622.738	|	549.485 (33.86%)	|	117.933 (7.27%)	|	26.914 (1.66%) |
 
 ## EishayParseBinaryArrayMapping
 | aliyun ecs spec | jdk version 	|	jsonb	|	kryo	|	protobuf	|	fastjson2UTF8Bytes	|	fastjson1UTF8Bytes |
@@ -29,6 +30,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	1728.266	|	988.429 (57.19%)	|	692.061 (40.04%)	|	821.558 (47.54%)	|	696.56 (40.3%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	2095.478	|	951.088 (45.39%)	|	767.509 (36.63%)	|	984.142 (46.97%)	|	750.207 (35.8%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	2215.444	|	978.102 (44.15%)	|	941.493 (42.5%)	|	1022.013 (46.13%)	|	844.316 (38.11%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	2798.897	|	886.258 (31.66%)	|	1007.626 (36%)	|	880.265 (31.45%)	|	729.343 (26.06%) |
 
 ## EishayParseBinaryAutoType
 | aliyun ecs spec | jdk version 	|	fastjson2JSONB	|	fastjson2JSONB_autoTypeFilter	|	hessian	|	javaSerialize |
@@ -45,6 +47,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	684.095	|	635.025 (92.83%)	|	132.274 (19.34%)	|	26.351 (3.85%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	821.274	|	818.461 (99.66%)	|	135.07 (16.45%)	|	26.628 (3.24%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	828.171	|	838.085 (101.2%)	|	152.345 (18.4%)	|	28.784 (3.48%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	982.387	|	902.938 (91.91%)	|	120.575 (12.27%)	|	27.403 (2.79%) |
 
 ## EishayParseString
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
@@ -61,6 +64,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	666.238	|	567.375 (85.16%)	|	278.734 (41.84%)	|	225.006 (33.77%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	682.706	|	569.363 (83.4%)	|	262.99 (38.52%)	|	227.115 (33.27%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	696.423	|	798.266 (114.62%)	|	276.021 (39.63%)	|	218.661 (31.4%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	678.122	|	701.504 (103.45%)	|	269.209 (39.7%)	|	227.087 (33.49%) |
 
 ## EishayParseStringPretty
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
@@ -77,6 +81,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	535.757	|	156.929 (29.29%)	|	253.376 (47.29%)	|	207.634 (38.76%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	515.275	|	160.342 (31.12%)	|	240.41 (46.66%)	|	209.234 (40.61%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	515.899	|	185.148 (35.89%)	|	252.741 (48.99%)	|	207.529 (40.23%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	513.488	|	191.72 (37.34%)	|	244.367 (47.59%)	|	210.412 (40.98%) |
 
 ## EishayParseTreeString
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
@@ -93,6 +98,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	433.241	|	205.517 (47.44%)	|	237.549 (54.83%)	|	177.738 (41.03%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	472.798	|	237.68 (50.27%)	|	250.361 (52.95%)	|	189.658 (40.11%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	475.348	|	270.371 (56.88%)	|	272.679 (57.36%)	|	180.616 (38%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	466.865	|	331.618 (71.03%)	|	273.024 (58.48%)	|	203.812 (43.66%) |
 
 ## EishayParseTreeStringPretty
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
@@ -109,6 +115,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	380.984	|	206.811 (54.28%)	|	225.096 (59.08%)	|	168.787 (44.3%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	388.188	|	188.94 (48.67%)	|	233.585 (60.17%)	|	176.391 (45.44%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	392.226	|	237.995 (60.68%)	|	251.676 (64.17%)	|	171.677 (43.77%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	396.485	|	277.776 (70.06%)	|	268.805 (67.8%)	|	190.345 (48.01%) |
 
 ## EishayParseTreeUTF8Bytes
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
@@ -125,6 +132,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	394.537	|	175.84 (44.57%)	|	310.896 (78.8%)	|	157.218 (39.85%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	472.081	|	206.404 (43.72%)	|	297.435 (63.01%)	|	175.768 (37.23%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	474.673	|	236.953 (49.92%)	|	322.097 (67.86%)	|	167.615 (35.31%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	386.308	|	258.279 (66.86%)	|	299.327 (77.48%)	|	175.703 (45.48%) |
 
 ## EishayParseTreeUTF8BytesPretty
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
@@ -141,6 +149,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	348.019	|	154.567 (44.41%)	|	267.256 (76.79%)	|	147.781 (42.46%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	383.812	|	166.238 (43.31%)	|	274.94 (71.63%)	|	165.37 (43.09%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	380.225	|	197.521 (51.95%)	|	291.865 (76.76%)	|	158.698 (41.74%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	319.563	|	208.537 (65.26%)	|	266.894 (83.52%)	|	160.161 (50.12%) |
 
 ## EishayParseUTF8Bytes
 | aliyun ecs spec | jdk version 	|	fastjson2	|	dsljson	|	fastjson1	|	jackson	|	gson |
@@ -157,6 +166,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	545.16	|	461.801 (84.71%)	|	413.805 (75.91%)	|	323.925 (59.42%)	|	157.748 (28.94%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	689.707	|	429.403 (62.26%)	|	454.464 (65.89%)	|	299.677 (43.45%)	|	175.657 (25.47%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	692.432	|	438.478 (63.32%)	|	576.506 (83.26%)	|	306.697 (44.29%)	|	169.936 (24.54%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	528.123	|	302.976 (57.37%)	|	467.163 (88.46%)	|	292.52 (55.39%)	|	177.306 (33.57%) |
 
 ## EishayParseUTF8BytesPretty
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
@@ -173,6 +183,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	449.3	|	136.496 (30.38%)	|	296.033 (65.89%)	|	145.461 (32.38%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	508.742	|	144.54 (28.41%)	|	278.4 (54.72%)	|	166.567 (32.74%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	515.675	|	162.771 (31.56%)	|	291.101 (56.45%)	|	157.342 (30.51%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	398.643	|	156.271 (39.2%)	|	265.942 (66.71%)	|	161.036 (40.4%) |
 
 ## EishayWriteBinary
 | aliyun ecs spec | jdk version 	|	jsonb	|	fastjson2UTF8Bytes	|	hessian	|	javaSerialize |
@@ -189,6 +200,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	998.739	|	816.868 (81.79%)	|	177.096 (17.73%)	|	124.272 (12.44%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	1362.496	|	903.575 (66.32%)	|	208.663 (15.31%)	|	128.286 (9.42%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	1372.37	|	918.59 (66.93%)	|	198.862 (14.49%)	|	129.156 (9.41%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	1521.912	|	962.964 (63.27%)	|	164.031 (10.78%)	|	106.647 (7.01%) |
 
 ## EishayWriteBinaryArrayMapping
 | aliyun ecs spec | jdk version 	|	jsonb	|	kryo	|	protobuf	|	fastjson2UTF8Bytes	|	fastjson1UTF8Bytes |
@@ -205,6 +217,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	1560.194	|	814.836 (52.23%)	|	701.954 (44.99%)	|	969.154 (62.12%)	|	318.786 (20.43%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	2341.059	|	1014.821 (43.35%)	|	817.612 (34.92%)	|	1071.029 (45.75%)	|	309.499 (13.22%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	2419.047	|	954.923 (39.48%)	|	910.389 (37.63%)	|	1059.361 (43.79%)	|	331.887 (13.72%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	2570.746	|	994.439 (38.68%)	|	899.161 (34.98%)	|	1162.628 (45.23%)	|	348.184 (13.54%) |
 
 ## EishayWriteBinaryAutoType
 | aliyun ecs spec | jdk version 	|	fastjson2JSONB	|	fastjson2UTF8Bytes	|	hessian	|	javaSerialize |
@@ -221,6 +234,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	681.52	|	793.012 (116.36%)	|	200.446 (29.41%)	|	123.576 (18.13%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	787.629	|	849.603 (107.87%)	|	193.355 (24.55%)	|	133.954 (17.01%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	773.867	|	847.36 (109.5%)	|	199.524 (25.78%)	|	127.177 (16.43%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	806.607	|	930.383 (115.35%)	|	128.472 (15.93%)	|	104.845 (13%) |
 
 ## EishayWriteString
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
@@ -237,6 +251,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	692.765	|	282.406 (40.77%)	|	385.624 (55.66%)	|	207.077 (29.89%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	846.289	|	313.764 (37.08%)	|	405.44 (47.91%)	|	201.294 (23.79%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	814.864	|	324.255 (39.79%)	|	422.184 (51.81%)	|	165.221 (20.28%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	958.754	|	385.226 (40.18%)	|	444.573 (46.37%)	|	155.795 (16.25%) |
 
 ## EishayWriteStringTree
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
@@ -252,6 +267,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	484.395	|	324.984 (67.09%)	|	384.746 (79.43%)	|	229.907 (47.46%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	606.107	|	368.864 (60.86%)	|	442.941 (73.08%)	|	219.023 (36.14%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	591.122	|	366.766 (62.05%)	|	409.653 (69.3%)	|	165.699 (28.03%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	704.598	|	367.089 (52.1%)	|	438.791 (62.28%)	|	158.542 (22.5%) |
 
 ## EishayWriteStringTree1x
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
@@ -267,6 +283,7 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	431.737	|	312.285 (72.33%)	|	372.598 (86.3%)	|	224.129 (51.91%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	543.838	|	322.81 (59.36%)	|	429.14 (78.91%)	|	214.92 (39.52%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	437.892	|	323.076 (73.78%)	|	390.831 (89.25%)	|	159.964 (36.53%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	555.801	|	249.473 (44.89%)	|	398.637 (71.72%)	|	148.605 (26.74%) |
 
 ## EishayWriteUTF8Bytes
 | aliyun ecs spec | jdk version 	|	fastjson2	|	fastjson1	|	jackson	|	gson |
@@ -282,3 +299,4 @@
 | OrangePi5 | zulu-jdk-8.68.0.21_aarch64	|	814.575	|	281.179 (34.52%)	|	391.287 (48.04%)	|	164.765 (20.23%) |
 | OrangePi5 | zulu-jdk-11.62.17_aarch64	|	911.928	|	283.93 (31.14%)	|	371.34 (40.72%)	|	189.146 (20.74%) |
 | OrangePi5 | zulu-jdk-17.40.19_aarch64	|	899.457	|	292.621 (32.53%)	|	438.086 (48.71%)	|	155.511 (17.29%) |
+| OrangePi5 | graalvm-jdk-17.22.3.1_aarch64	|	964.709	|	283.29 (29.37%)	|	431.152 (44.69%)	|	139.478 (14.46%) |
