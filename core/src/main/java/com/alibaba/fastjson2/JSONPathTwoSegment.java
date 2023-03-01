@@ -12,6 +12,7 @@ class JSONPathTwoSegment
     final JSONPathSegment first;
     final JSONPathSegment second;
     final boolean ref;
+    final boolean extractSupport;
 
     JSONPathTwoSegment(String path, JSONPathSegment first, JSONPathSegment second, Feature... features) {
         super(path, features);
@@ -19,6 +20,18 @@ class JSONPathTwoSegment
         this.second = second;
         this.ref = (first instanceof JSONPathSegmentIndex || first instanceof JSONPathSegmentName)
                 && (second instanceof JSONPathSegmentIndex || second instanceof JSONPathSegmentName);
+
+        boolean extractSupport = true;
+        if (first instanceof JSONPathSegment.EvalSegment) {
+            extractSupport = false;
+        } else if (first instanceof JSONPathSegmentIndex && ((JSONPathSegmentIndex) first).index < 0) {
+            extractSupport = false;
+        } else if (second instanceof JSONPathSegment.EvalSegment) {
+            extractSupport = false;
+        } else if (second instanceof JSONPathSegmentIndex && ((JSONPathSegmentIndex) second).index < 0) {
+            extractSupport = false;
+        }
+        this.extractSupport = extractSupport;
     }
 
     @Override
@@ -175,6 +188,11 @@ class JSONPathTwoSegment
     public Object extract(JSONReader jsonReader) {
         if (jsonReader == null) {
             return null;
+        }
+
+        if (!extractSupport) {
+            Object root = jsonReader.readAny();
+            return eval(root);
         }
 
         Context context0 = new Context(this, null, first, second, 0);
