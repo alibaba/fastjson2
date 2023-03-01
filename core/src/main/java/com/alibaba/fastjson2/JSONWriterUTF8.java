@@ -879,7 +879,7 @@ class JSONWriterUTF8
 
     @Override
     public final void writeChar(char ch) {
-        int minCapacity = bytes.length + 8;
+        int minCapacity = this.off + 8;
         if (minCapacity - bytes.length > 0) {
             int oldCapacity = bytes.length;
             int newCapacity = oldCapacity + (oldCapacity >> 1);
