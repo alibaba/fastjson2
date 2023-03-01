@@ -2339,6 +2339,17 @@ public abstract class BeanUtils {
                         }
                         break;
                     }
+                    case "shape" : {
+                        String shape = ((Enum) result).name();
+                        switch (shape) {
+                            case "STRING":
+                                fieldInfo.features |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
                     default:
                         break;
                 }
