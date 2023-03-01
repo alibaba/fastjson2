@@ -11,20 +11,29 @@ final class JSONPathMulti
         extends JSONPath {
     final List<JSONPathSegment> segments;
     final boolean ref;
+    final boolean extractSupport;
 
     JSONPathMulti(String path, List<JSONPathSegment> segments, Feature... features) {
         super(path, features);
         this.segments = segments;
 
+        boolean extractSupport = true;
         boolean ref = true;
         for (int i = 0, l = segments.size(); i < l; i++) {
             JSONPathSegment segment = segments.get(i);
-            if (segment instanceof JSONPathSegmentIndex || segment instanceof JSONPathSegmentName) {
+            if (segment instanceof JSONPathSegmentIndex) {
+                if (((JSONPathSegmentIndex) segment).index < 0) {
+                    extractSupport = false;
+                }
+                continue;
+            }
+            if (segment instanceof JSONPathSegmentName) {
                 continue;
             }
             ref = false;
             break;
         }
+        this.extractSupport = extractSupport;
         this.ref = ref;
     }
 
@@ -278,6 +287,11 @@ final class JSONPathMulti
         int size = segments.size();
         if (size == 0) {
             return null;
+        }
+
+        if (!extractSupport) {
+            Object root = jsonReader.readAny();
+            return eval(root);
         }
 
         boolean eval = false;

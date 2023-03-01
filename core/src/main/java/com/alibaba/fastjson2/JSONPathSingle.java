@@ -6,11 +6,20 @@ class JSONPathSingle
         extends JSONPath {
     final JSONPathSegment segment;
     final boolean ref;
+    final boolean extractSupport;
 
     JSONPathSingle(JSONPathSegment segment, String path, Feature... features) {
         super(path, features);
         this.segment = segment;
         this.ref = segment instanceof JSONPathSegmentIndex || segment instanceof JSONPathSegmentName;
+
+        boolean extractSupport = true;
+        if (segment instanceof JSONPathSegment.EvalSegment) {
+            extractSupport = false;
+        } else if (segment instanceof JSONPathSegmentIndex && ((JSONPathSegmentIndex) segment).index < 0) {
+            extractSupport = false;
+        }
+        this.extractSupport = extractSupport;
     }
 
     @Override
@@ -78,7 +87,7 @@ class JSONPathSingle
     @Override
     public Object extract(JSONReader jsonReader) {
         Context context = new Context(this, null, segment, null, 0);
-        if (segment instanceof JSONPathSegment.EvalSegment) {
+        if (!extractSupport) {
             context.root = jsonReader.readAny();
             segment.eval(context);
         } else {
