@@ -118,7 +118,7 @@ final class JSONPathTypedMultiIndexes
             while (!jsonReader.nextIfObjectEnd()) {
                 long nameHashCode = jsonReader.readFieldNameHashCode();
                 boolean match = nameHashCode == prefixNameHash;
-                if (!match && (!jsonReader.isObject()) && !jsonReader.isArray()) {
+                if (!match) {
                     jsonReader.skipValue();
                     continue;
                 }
