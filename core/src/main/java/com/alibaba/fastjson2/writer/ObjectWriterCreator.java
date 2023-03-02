@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName;
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 
 public class ObjectWriterCreator {
@@ -429,6 +430,12 @@ public class ObjectWriterCreator {
                         if (!match) {
                             return;
                         }
+                    }
+
+                    // skip typeKey field
+                    if ((beanInfo.writerFeatures & WriteClassName.mask) != 0
+                            && fieldName.equals(beanInfo.typeKey)) {
+                        return;
                     }
 
                     if (beanInfo.orders != null) {

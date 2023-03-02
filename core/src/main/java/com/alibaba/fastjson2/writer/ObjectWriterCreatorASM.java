@@ -320,6 +320,12 @@ public class ObjectWriterCreatorASM
                         }
                     }
 
+                    // skip typeKey field
+                    if ((beanInfo.writerFeatures & WriteClassName.mask) != 0
+                            && fieldName.equals(beanInfo.typeKey)) {
+                        return;
+                    }
+
                     method.setAccessible(true);
 
                     ObjectWriter writeUsingWriter = null;
