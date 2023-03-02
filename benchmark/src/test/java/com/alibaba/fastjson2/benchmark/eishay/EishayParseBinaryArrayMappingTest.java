@@ -55,9 +55,27 @@ public class EishayParseBinaryArrayMappingTest {
         }
     }
 
+    public static void fastjson2UTF8Bytes() throws Exception {
+        System.out.println("fastjson2UTF8Bytes size " + EishayParseBinaryArrayMapping.fastjson2UTF8Bytes.length); // 235
+        System.out.println();
+
+        for (int j = 0; j < 10; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.fastjson2UTF8Bytes(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("EishayParseBinaryArrayMapping-fastjson2UTF8Bytes millis : " + millis);
+            // zulu8.58.0.13 : 531
+            // zulu11.52.13 :
+            // zulu17.32.13 :
+        }
+    }
+
     public static void main(String[] args) throws Exception {
 //        jsonb();
 //        kryo();
-        protobuf();
+//        protobuf();
+        fastjson2UTF8Bytes();
     }
 }
