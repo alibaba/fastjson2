@@ -1361,6 +1361,11 @@ public class ObjectReaderCreator {
         Type fieldType = method.getGenericParameterTypes()[0];
         Class fieldClass = method.getParameterTypes()[0];
 
+        // skip function
+        if (fieldClass.getName().startsWith("java.util.function.")) {
+            return;
+        }
+
         ObjectReader initReader = getInitReader(provider, fieldType, fieldClass, fieldInfo);
         FieldReader fieldReader = null;
         boolean jit = (fieldInfo.features & FieldInfo.JIT) != 0;

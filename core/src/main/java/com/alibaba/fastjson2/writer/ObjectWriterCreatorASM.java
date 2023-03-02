@@ -326,6 +326,12 @@ public class ObjectWriterCreatorASM
                         return;
                     }
 
+                    Class<?> returnType = method.getReturnType();
+                    // skip function
+                    if (returnType.getName().startsWith("java.util.function.")) {
+                        return;
+                    }
+
                     method.setAccessible(true);
 
                     ObjectWriter writeUsingWriter = null;
