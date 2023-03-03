@@ -3849,6 +3849,7 @@ class JSONReaderUTF16
                 next();
                 for (; ; ) {
                     if (ch == '}') {
+                        comma = false;
                         next();
                         break;
                     }
