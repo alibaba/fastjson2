@@ -6,8 +6,9 @@ import java.util.List;
 
 public class ReadResult {
     public static void main(String[] args) throws Exception {
-        File file = new File("/Users/wenshao/Downloads/result_2.0.25.out");
-        DocReader reader = new DocReader("OrangePi5", file);
+//        File file = new File("/Users/wenshao/Downloads/result_2.0.25.out");
+        File file = new File("/Users/wenshao/Downloads/result_2.0.25_c7.out");
+        DocReader reader = new DocReader("ecs.c7.xlarge", file);
         reader.read();
         for (String line : reader.blockLines) {
             System.out.println(line);
@@ -42,7 +43,7 @@ public class ReadResult {
                 }
 
                 if (block) {
-                    if (line.startsWith("#") || line.startsWith("Error: ")) {
+                    if (line.startsWith("#") || line.startsWith("Error: ") || line.startsWith("./run")) {
                         blockLines.add("```");
                         block = false;
                     }
@@ -50,11 +51,24 @@ public class ReadResult {
 
                 if (line.startsWith("Benchmark ")) {
                     block = true;
-                    String ends;
-                    ends = "/jre/bin/java";
-                    if (!vmInvoker.endsWith(ends)) {
-                        ends = "/bin/java";
+                    String ends = null;
+                    String[] strings = new String[] {
+                            "/Contents/Home/jre/bin/java",
+                            "/Contents/Home/bin/java",
+                            "/jre/bin/java",
+                            "/bin/java"
+                    };
+
+                    for (String string : strings) {
+                        if (vmInvoker.endsWith(string)) {
+                            ends = string;
+                            break;
+                        }
                     }
+                    if (ends == null) {
+                        throw new IOException("not support VMInvoker");
+                    }
+
                     int index = vmInvoker.lastIndexOf('/', vmInvoker.length() - ends.length() - 1);
                     String title = "# " + spec + "-" + vmInvoker.substring(index + 1, vmInvoker.length() - ends.length());
                     blockLines.add(title);
