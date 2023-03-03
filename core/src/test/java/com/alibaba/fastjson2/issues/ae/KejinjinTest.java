@@ -8,6 +8,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class KejinjinTest {
@@ -63,6 +66,10 @@ public class KejinjinTest {
         public String name() {
             return this.getClass().getSimpleName();
         }
+
+        @JsonIgnore
+        @JSONField(serialize = false)
+        public abstract Set<String> getKeys();
     }
 
     @EqualsAndHashCode(callSuper = true)
@@ -76,6 +83,10 @@ public class KejinjinTest {
     @JSONType(typeName = "DataSetComponent")
     public static class DataSetComponent
             extends CombinedComponent {
+        @Override
+        public Set<String> getKeys() {
+            return new HashSet<>();
+        }
     }
 
     @EqualsAndHashCode(callSuper = true)
@@ -89,6 +100,10 @@ public class KejinjinTest {
     @JSONType(typeName = "TextComponent")
     public class TextComponent
             extends PrimitiveComponent {
+        @Override
+        public Set<String> getKeys() {
+            return new HashSet<>();
+        }
     }
 
     @EqualsAndHashCode(callSuper = true)
@@ -96,6 +111,10 @@ public class KejinjinTest {
     @JSONType(typeName = "TabComponent")
     public class TabComponent
             extends CombinedComponent {
+        @Override
+        public Set<String> getKeys() {
+            return new HashSet<>();
+        }
     }
 
     @EqualsAndHashCode(callSuper = true)
@@ -103,6 +122,10 @@ public class KejinjinTest {
     @JSONType(typeName = "LinkComponent")
     public class LinkComponent
             extends PrimitiveComponent {
+        @Override
+        public Set<String> getKeys() {
+            return new HashSet<>();
+        }
     }
 
     @EqualsAndHashCode(callSuper = true)
@@ -110,6 +133,10 @@ public class KejinjinTest {
     @JSONType(typeName = "ImageComponent")
     public class ImageComponent
             extends PrimitiveComponent {
+        @Override
+        public Set<String> getKeys() {
+            return new HashSet<>();
+        }
     }
 
     @EqualsAndHashCode(callSuper = true)
@@ -117,5 +144,9 @@ public class KejinjinTest {
     @JSONType(typeName = "TableComponent")
     public class TableComponent
             extends CombinedComponent {
+        @Override
+        public Set<String> getKeys() {
+            return new HashSet<>();
+        }
     }
 }

@@ -781,6 +781,22 @@ public class ObjectWriterBaseModule
                 fieldInfo.ignore = true;
             }
 
+            if (objectClass != null) {
+                Class superclass = objectClass.getSuperclass();
+                Method supperMethod = BeanUtils.getMethod(superclass, method);
+                if (supperMethod != null) {
+                    getFieldInfo(beanInfo, fieldInfo, superclass, supperMethod);
+                }
+
+                Class[] interfaces = objectClass.getInterfaces();
+                for (int i = 0; i < interfaces.length; i++) {
+                    Method interfaceMethod = BeanUtils.getMethod(interfaces[i], method);
+                    if (interfaceMethod != null) {
+                        getFieldInfo(beanInfo, fieldInfo, superclass, interfaceMethod);
+                    }
+                }
+            }
+
             Annotation[] annotations = getAnnotations(method);
             processAnnotations(fieldInfo, annotations);
 

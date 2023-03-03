@@ -642,6 +642,22 @@ public class ObjectReaderBaseModule
 
         @Override
         public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Method method) {
+            if (objectClass != null) {
+                Class superclass = objectClass.getSuperclass();
+                Method supperMethod = BeanUtils.getMethod(superclass, method);
+                if (supperMethod != null) {
+                    getFieldInfo(fieldInfo, superclass, supperMethod);
+                }
+
+                Class[] interfaces = objectClass.getInterfaces();
+                for (int i = 0; i < interfaces.length; i++) {
+                    Method interfaceMethod = BeanUtils.getMethod(interfaces[i], method);
+                    if (interfaceMethod != null) {
+                        getFieldInfo(fieldInfo, superclass, interfaceMethod);
+                    }
+                }
+            }
+
             Class mixInSource = provider.mixInCache.get(objectClass);
             String methodName = method.getName();
             if (mixInSource != null && mixInSource != objectClass) {

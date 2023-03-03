@@ -223,6 +223,41 @@ public abstract class BeanUtils {
         return null;
     }
 
+    public static Method getMethod(Class objectClass, Method signature) {
+        if (objectClass == null || objectClass == Object.class) {
+            return null;
+        }
+
+        Method[] methods = methodCache.get(objectClass);
+        if (methods == null) {
+            methods = objectClass.getMethods();
+            methodCache.putIfAbsent(objectClass, methods);
+        }
+
+        for (Method method : methods) {
+            if (!method.getName().equals(signature.getName())) {
+                continue;
+            }
+            if (method.getParameterCount() != signature.getParameterCount()) {
+                continue;
+            }
+            Class<?>[] parameterTypes0 = method.getParameterTypes();
+            Class<?>[] parameterTypes1 = signature.getParameterTypes();
+            boolean paramMatch = true;
+            for (int i = 0; i < parameterTypes0.length; i++) {
+                if (!parameterTypes0[i].equals(parameterTypes1[i])) {
+                    paramMatch = false;
+                    break;
+                }
+            }
+            if (paramMatch) {
+                return method;
+            }
+        }
+
+        return null;
+    }
+
     public static Field getDeclaredField(Class objectClass, String fieldName) {
         Map<String, Field> fieldMap = fieldMapCache.get(objectClass);
         if (fieldMap == null) {
