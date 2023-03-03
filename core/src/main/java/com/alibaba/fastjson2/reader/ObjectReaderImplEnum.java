@@ -183,6 +183,8 @@ public final class ObjectReaderImplEnum
                     throw new JSONException(jsonReader.info("parse enum error, class " + enumClass.getName() + ", " + valueField.getName() + " " + intValue));
                 }
             }
+        } else if (jsonReader.nextIfNullOrEmptyString()) {
+            fieldValue = null;
         } else {
             long hashCode = jsonReader.readValueHashCode();
             fieldValue = getEnumByHashCode(hashCode);
