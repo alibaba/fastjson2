@@ -135,6 +135,8 @@ public final class ObjectReaderImplEnum2X4
             } else {
                 fieldValue = null;
             }
+        } else if (jsonReader.nextIfNullOrEmptyString()) {
+            fieldValue = null;
         } else {
             long hashCode = jsonReader.readValueHashCode();
             if (enumNameHashCode00 == hashCode || enumNameHashCode01 == hashCode) {
