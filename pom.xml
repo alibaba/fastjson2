@@ -147,7 +147,7 @@
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
                 <artifactId>odps-sdk-udf</artifactId>
-                <version>0.40.10-public</version>
+                <version>0.43.1-public</version>
             </dependency>
             <dependency>
                 <groupId>com.caucho</groupId>
