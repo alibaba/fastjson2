@@ -5,8 +5,10 @@ import com.alibaba.fastjson2.JSONPath;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1130 {
@@ -49,5 +51,23 @@ public class Issue1130 {
         Object[] results = (Object[]) path.extract(raw);
         assertEquals("b", results[0]);
         assertEquals("a", results[1]);
+    }
+
+    @Test
+    public void testArrayParseCase6() {
+        String raw = "{\"arr1\":[\"a\"],\"numeric\":1,\"arr2\":[\"a\", \"1\"]]}";
+        JSONPath path = JSONPath.of(new String[]{"$.arr2[0]", "$.arr2[0]", "$.arr2[1]", "$.arr2[1]"},
+                new Type[]{String.class, String.class, BigDecimal.class, Long.class});
+        Object[] results = (Object[]) path.extract(raw);
+        assertArrayEquals(new Object[]{"a", "a", BigDecimal.valueOf(1), 1L}, results);
+    }
+
+    @Test
+    public void testArrayParseCase7() {
+        String raw = "{\"arr1\":[\"a\"],\"numeric\":1,\"arr2\":[\"a\", \"1\"], \"arr3\":[[1,2,3], [2,1,5]]}";
+        JSONPath path = JSONPath.of(new String[]{"$.arr3[0]", "$.arr3[0]"},
+                new Type[]{String.class, String[].class});
+        Object[] results = (Object[]) path.extract(raw);
+        assertArrayEquals(new Object[]{"[1,2,3]", new String[]{"1", "2", "3"}}, results);
     }
 }
