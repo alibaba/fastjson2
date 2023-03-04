@@ -542,7 +542,7 @@ public abstract class BeanUtils {
             // read only getter
             if (paramType == 0) {
                 String methodName = method.getName();
-                if (methodName.length() <= 3 || (checkPrefix && !methodName.startsWith("get"))) {
+                if (checkPrefix && (methodName.length() <= 3 || !methodName.startsWith("get"))) {
                     continue;
                 }
 
@@ -570,7 +570,7 @@ public abstract class BeanUtils {
 
             String methodName = method.getName();
             final int methodNameLength = methodName.length();
-            if (methodNameLength <= 3 || (checkPrefix && !methodName.startsWith("set"))) {
+            if (checkPrefix && (methodNameLength <= 3 || !methodName.startsWith("set"))) {
                 continue;
             }
 
