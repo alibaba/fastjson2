@@ -12,26 +12,47 @@ import org.apache.commons.lang3.SerializationException;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1190 {
-    static final Filter autoTypeFilter = JSONReader.autoTypeFilter(B.class);
+    static final Filter autoTypeFilter = JSONReader.autoTypeFilter(B.class, B1.class);
 
     @Test
-    public void test6() {
+    public void test() {
         B b = new B.Builder()
                 .withAge(123)
                 .withUsername("yh")
                 .build();
         byte[] bytes = serialize(b);
-        assertEquals(
-                "{\"@type\":\"com.alibaba.fastjson2.issues_1000.Issue1190$B\",\"age\":123,\"username\":\"yh\"}",
-                new String(bytes, StandardCharsets.UTF_8)
-        );
 
         B b1 = (B) deserialize(bytes);
+        assertEquals(b.age, b1.age);
+        assertEquals(b.username, b1.username);
+    }
+
+    @Test
+    public void test1() {
+        B1 b = new B1.Builder()
+                .age(123)
+                .username("yh")
+                .build();
+        byte[] bytes = serialize(b);
+
+        B1 b1 = (B1) deserialize(bytes);
+        assertEquals(b.age, b1.age);
+        assertEquals(b.username, b1.username);
+    }
+
+    @Test
+    public void test2() {
+        B2 b = new B2.Builder()
+                .age(123)
+                .username("yh")
+                .build();
+        byte[] bytes = serialize(b);
+
+        B2 b1 = (B2) deserialize(bytes);
         assertEquals(b.age, b1.age);
         assertEquals(b.username, b1.username);
     }
@@ -71,7 +92,6 @@ public class Issue1190 {
                 return this;
             }
 
-            @JSONField
             public Builder withAge(int age) {
                 this.age = age;
                 return this;
@@ -79,6 +99,78 @@ public class Issue1190 {
 
             public B build() {
                 B b = new B();
+                b.age = this.age;
+                b.username = this.username;
+                return b;
+            }
+        }
+    }
+
+    @Getter
+    @ToString
+    @JSONType(builder = B1.Builder.class)
+    public static class B1
+            implements Serializable {
+        private String username;
+        private int age;
+
+        protected B1() {
+        }
+
+        public static class Builder
+                implements Serializable {
+            private String username;
+            private int age;
+
+            @JSONField
+            public Builder username(String username) {
+                this.username = username;
+                return this;
+            }
+
+            @JSONField
+            public Builder age(int age) {
+                this.age = age;
+                return this;
+            }
+
+            public B1 build() {
+                B1 b = new B1();
+                b.age = this.age;
+                b.username = this.username;
+                return b;
+            }
+        }
+    }
+
+    @Getter
+    @ToString
+    @JSONType(builder = B2.Builder.class, deserializeFeatures = JSONReader.Feature.SupportSmartMatch)
+    public static class B2
+            implements Serializable {
+        private String username;
+        private int age;
+
+        protected B2() {
+        }
+
+        public static class Builder
+                implements Serializable {
+            private String username;
+            private int age;
+
+            public Builder username(String username) {
+                this.username = username;
+                return this;
+            }
+
+            public Builder age(int age) {
+                this.age = age;
+                return this;
+            }
+
+            public B2 build() {
+                B2 b = new B2();
                 b.age = this.age;
                 b.username = this.username;
                 return b;

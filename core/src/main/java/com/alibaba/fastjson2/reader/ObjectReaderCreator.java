@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.*;
@@ -341,13 +342,7 @@ public class ObjectReaderCreator {
         final FieldInfo fieldInfo = new FieldInfo();
         BeanUtils.setters(builderClass, false, method -> {
             fieldInfo.init();
-            for (ObjectReaderModule module : provider.modules) {
-                ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-                if (annotationProcessor == null) {
-                    continue;
-                }
-                annotationProcessor.getFieldInfo(fieldInfo, objectClass, method);
-            }
+            provider.getFieldInfo(fieldInfo, objectClass, method);
 
             if (fieldInfo.ignore) {
                 return;
@@ -357,11 +352,19 @@ public class ObjectReaderCreator {
             String fieldName;
             if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
                 final int methodNameLength = methodName.length();
-                if (methodNameLength <= prefix.length() || !methodName.startsWith(prefix)) {
-                    return;
+                boolean prefixNotMach = methodNameLength <= prefix.length() || !methodName.startsWith(prefix);
+                if (prefixNotMach) {
+                    if ((method.getDeclaringClass() != Object.class && method.getReturnType() == builderClass)
+                            && (method.getAnnotation(JSONField.class) != null
+                            || (beanInfo.readerFeatures & JSONReader.Feature.SupportSmartMatch.mask) != 0)
+                    ) {
+                        fieldName = methodName;
+                    } else {
+                        return;
+                    }
+                } else {
+                    fieldName = BeanUtils.setterName(methodName, builderWithPrefixLenth);
                 }
-
-                fieldName = BeanUtils.setterName(methodName, builderWithPrefixLenth);
             } else {
                 fieldName = fieldInfo.fieldName;
             }
