@@ -5,7 +5,10 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 final class JSONPathTypedMultiIndexes
         extends JSONPathTypedMulti {
@@ -144,23 +147,49 @@ final class JSONPathTypedMultiIndexes
             return eval(object);
         }
 
+        Map<Integer, List<Integer>> map = new HashMap<>(maxIndex);
+        for (int i = 0; i < indexes.length; i++) {
+            List<Integer> indexList = map.computeIfAbsent(indexes[i], k -> new ArrayList<>());
+            indexList.add(i);
+        }
+
         int max = jsonReader.startArray();
         Object[] array = new Object[indexes.length];
         for (int i = 0; i <= maxIndex && i < max; ++i) {
-            Integer index = null;
-            for (int j = 0; j < indexes.length; j++) {
-                if (indexes[j] == i) {
-                    index = j;
-                    break;
-                }
-            }
-            if (index == null) {
+            List<Integer> indexList = map.get(i);
+            if (indexList == null || indexList.isEmpty()) {
                 jsonReader.skipValue();
                 continue;
             }
 
-            Type type = types[index];
-            array[index] = jsonReader.read(type);
+            Integer index0 = indexList.get(0);
+            Type type0 = types[index0];
+            if ((array[index0] = jsonReader.read(type0)) == null) {
+                continue;
+            }
+            for (int k = 1; k < indexList.size(); k++) {
+                Object result = array[index0];
+                Integer curIndex = indexList.get(k);
+                Type type = types[curIndex];
+                try {
+                    if (type != type0) {
+                        if (type == Long.class) {
+                            result = TypeUtils.toLong(result);
+                        } else if (type == BigDecimal.class) {
+                            result = TypeUtils.toBigDecimal(result);
+                        } else if (type == String[].class) {
+                            result = TypeUtils.toStringArray(result);
+                        } else {
+                            result = TypeUtils.cast(result, type);
+                        }
+                    }
+                    array[curIndex] = result;
+                } catch (Exception e) {
+                    if (!isIgnoreError(i)) {
+                        throw new JSONException("jsonpath extract path, path : " + paths[curIndex] + ", msg : " + e.getMessage(), e);
+                    }
+                }
+            }
         }
         return array;
     }
