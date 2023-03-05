@@ -14,7 +14,7 @@ import java.time.*;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
-import static com.alibaba.fastjson2.JSONWriter.Feature.WriteByteArrayAsBase64;
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static java.time.temporal.ChronoField.SECOND_OF_DAY;
 import static java.time.temporal.ChronoField.YEAR;
 
@@ -58,6 +58,10 @@ public abstract class FieldWriter<T>
             Field field,
             Method method
     ) {
+        if ("string".equals(format) && fieldClass != String.class) {
+            features |= WriteNonStringValueAsString.mask;
+        }
+
         this.fieldName = name;
         this.ordinal = ordinal;
         this.format = format;
@@ -406,13 +410,17 @@ public abstract class FieldWriter<T>
 
     public void writeInt64(JSONWriter jsonWriter, long value) {
         writeFieldName(jsonWriter);
-        jsonWriter.writeInt64(value);
+        if ((features & WriteNonStringValueAsString.mask) != 0) {
+            jsonWriter.writeString(Long.toString(value));
+        } else {
+            jsonWriter.writeInt64(value);
+        }
     }
 
     public void writeString(JSONWriter jsonWriter, String value) {
         writeFieldName(jsonWriter);
 
-        if (value == null && (features & (JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) != 0) {
+        if (value == null && (features & (NullAsDefaultValue.mask | WriteNullStringAsEmpty.mask)) != 0) {
             jsonWriter.writeString("");
             return;
         }
