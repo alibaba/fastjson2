@@ -886,9 +886,10 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == long.class || fieldClass == Long.class) {
-            if (format == null || format.isEmpty()) {
+            if (format == null || format.isEmpty() || "string".equals(format)) {
                 return new FieldWriterInt64Method(fieldName, ordinal, features, format, label, method, fieldClass);
             }
+
             return new FieldWriterMillisMethod(fieldName, ordinal, features, format, label, fieldClass, method);
         }
 
@@ -1229,7 +1230,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == long.class) {
-            if (format == null || format.isEmpty()) {
+            if (format == null || format.isEmpty() || "string".equals(format)) {
                 return new FieldWriterInt64ValFunc(fieldName, ordinal, features, format, label, method, (ToLongFunction) lambda);
             }
 
