@@ -167,6 +167,10 @@ final class JSONPathTypedMultiIndexes
         int max = jsonReader.startArray();
         Object[] array = new Object[indexes.length];
         for (int i = 0; i <= maxIndex && i < max; ++i) {
+            if ((!jsonReader.isJSONB()) && jsonReader.nextIfMatch(']')) {
+                break;
+            }
+
             Integer index = null;
             for (int j = 0; j < indexes.length; j++) {
                 if (indexes[j] == i) {
