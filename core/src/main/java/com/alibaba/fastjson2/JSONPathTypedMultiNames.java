@@ -49,7 +49,7 @@ class JSONPathTypedMultiNames
             Class fieldClass = TypeUtils.getClass(fieldType);
 
             long fieldFeatures = 0;
-            if (isIgnoreError(i)) {
+            if (ignoreError(i)) {
                 fieldFeatures |= JSONReader.Feature.NullOnError.mask;
             }
             fieldReaders[i] = ObjectReaderCreator.INSTANCE.createFieldReader(
@@ -189,11 +189,7 @@ class JSONPathTypedMultiNames
             try {
                 fieldValue = fieldReader.readFieldValue(jsonReader);
             } catch (Exception e) {
-                long features = 0;
-                if (pathFeatures != null && index < this.pathFeatures.length) {
-                    features = this.pathFeatures[index];
-                }
-                if ((features & Feature.NullOnError.mask) == 0) {
+                if (!ignoreError(index)) {
                     throw e;
                 }
                 fieldValue = null;
