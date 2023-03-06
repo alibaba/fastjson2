@@ -226,6 +226,32 @@ public class ObjectReaderBaseModule
                 );
             }
 
+            Class seeAlsoClass = null;
+            for (Class superClass = objectClass.getSuperclass(); ; superClass = superClass.getSuperclass()) {
+                if (superClass == null || superClass == Object.class) {
+                    break;
+                }
+
+                BeanInfo superBeanInfo = new BeanInfo();
+                getBeanInfo(superBeanInfo, superClass);
+                if (superBeanInfo.seeAlso != null) {
+                    boolean inSeeAlso = false;
+                    for (Class seeAlsoItem : superBeanInfo.seeAlso) {
+                        if (seeAlsoItem == objectClass) {
+                            inSeeAlso = true;
+                            break;
+                        }
+                    }
+                    if (!inSeeAlso) {
+                        seeAlsoClass = superClass;
+                    }
+                }
+            }
+
+            if (seeAlsoClass != null) {
+                getBeanInfo(beanInfo, seeAlsoClass);
+            }
+
             Annotation[] annotations = getAnnotations(objectClass);
             getBeanInfo(beanInfo, annotations);
 
@@ -418,7 +444,7 @@ public class ObjectReaderBaseModule
                                     Class<?> item = classes[i];
 
                                     BeanInfo itemBeanInfo = new BeanInfo();
-                                    getBeanInfo(itemBeanInfo, item);
+                                    processSeeAlsoAnnotation(itemBeanInfo, item);
                                     String typeName = itemBeanInfo.typeName;
                                     if (typeName == null || typeName.isEmpty()) {
                                         typeName = item.getSimpleName();
@@ -562,6 +588,52 @@ public class ObjectReaderBaseModule
                 } catch (Throwable ignored) {
                 }
             });
+        }
+
+        private void processSeeAlsoAnnotation(BeanInfo beanInfo, Class<?> objectClass) {
+            Class mixInSource = provider.mixInCache.get(objectClass);
+            if (mixInSource == null) {
+                String typeName = objectClass.getName();
+                switch (typeName) {
+                    case "org.apache.commons.lang3.tuple.Triple":
+                        provider.mixIn(objectClass, mixInSource = ApacheLang3Support.TripleMixIn.class);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (mixInSource != null && mixInSource != objectClass) {
+                beanInfo.mixIn = true;
+                processSeeAlsoAnnotation(beanInfo, getAnnotations(mixInSource));
+            }
+
+            processSeeAlsoAnnotation(beanInfo, getAnnotations(objectClass));
+        }
+
+        private void processSeeAlsoAnnotation(BeanInfo beanInfo, Annotation[] annotations) {
+            for (Annotation annotation : annotations) {
+                Class<? extends Annotation> itemAnnotationType = annotation.annotationType();
+                BeanUtils.annotationMethods(itemAnnotationType, m -> {
+                    String name = m.getName();
+                    try {
+                        Object result = m.invoke(annotation);
+                        switch (name) {
+                            case "typeName": {
+                                String typeName = (String) result;
+                                if (!typeName.isEmpty()) {
+                                    beanInfo.typeName = typeName;
+                                }
+                                break;
+                            }
+                            default:
+                                break;
+                        }
+                    } catch (Throwable ignored) {
+                        // ignored
+                    }
+                });
+            }
         }
 
         @Override

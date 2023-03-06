@@ -8,8 +8,6 @@ import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.internal.asm.*;
-import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
-import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
@@ -296,12 +294,7 @@ public class ObjectReaderCreatorASM
         }
 
         BeanInfo beanInfo = new BeanInfo();
-        for (ObjectReaderModule module : provider.modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor != null) {
-                annotationProcessor.getBeanInfo(beanInfo, objectClass);
-            }
-        }
+        provider.getBeanInfo(beanInfo, objectClass);
         if (externalClass || !Modifier.isPublic(objectClassModifiers)) {
             beanInfo.readerFeatures |= FieldInfo.JIT;
         }
