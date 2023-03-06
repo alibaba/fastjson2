@@ -43,6 +43,9 @@ final class JSONPathSingleIndex
         int max = jsonReader.startArray();
         for (int i = 0; i < index && i < max; i++) {
             jsonReader.skipValue();
+            if ((!jsonReader.isJSONB()) && jsonReader.nextIfMatch(']')) {
+                return null;
+            }
         }
         return jsonReader.readAny();
     }
