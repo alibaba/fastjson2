@@ -49,6 +49,10 @@ public class JSONPathTypedMultiNamesPrefixIndex1
             return new Object[paths.length];
         }
 
+        if (jsonReader.nextIfMatch(']')) {
+            return new Object[paths.length];
+        }
+
         if (!jsonReader.nextIfObjectStart()) {
             throw new JSONException(jsonReader.info("illegal input, expect '[', but " + jsonReader.current()));
         }
@@ -69,11 +73,7 @@ public class JSONPathTypedMultiNamesPrefixIndex1
             try {
                 fieldValue = fieldReader.readFieldValue(jsonReader);
             } catch (Exception e) {
-                long features = 0;
-                if (index < this.pathFeatures.length) {
-                    features = this.pathFeatures[index];
-                }
-                if ((features & Feature.NullOnError.mask) == 0) {
+                if (!ignoreError(index)) {
                     throw e;
                 }
                 fieldValue = null;

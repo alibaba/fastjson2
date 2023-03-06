@@ -66,13 +66,14 @@ final class JSONPathTypedMultiIndexes
         }
 
         if (object == null) {
-            return null;
+            return array;
         }
 
         if (object instanceof List) {
             List list = (List) object;
             for (int i = 0; i < indexes.length; i++) {
-                Object result = list.get(indexes[i]);
+                int index = indexes[i];
+                Object result = index < list.size() ? list.get(index) : null;
                 Type type = types[i];
                 try {
                     if (result != null && result.getClass() != type) {
@@ -88,7 +89,7 @@ final class JSONPathTypedMultiIndexes
                     }
                     array[i] = result;
                 } catch (Exception e) {
-                    if (!isIgnoreError(i)) {
+                    if (!ignoreError(i)) {
                         throw new JSONException("jsonpath eval path, path : " + paths[i] + ", msg : " + e.getMessage(), e);
                     }
                 }
@@ -112,7 +113,7 @@ final class JSONPathTypedMultiIndexes
                     }
                     array[i] = result;
                 } catch (Exception e) {
-                    if (!isIgnoreError(i)) {
+                    if (!ignoreError(i)) {
                         throw new JSONException("jsonpath eval path, path : " + paths[i] + ", msg : " + e.getMessage(), e);
                     }
                 }
@@ -125,7 +126,7 @@ final class JSONPathTypedMultiIndexes
     @Override
     public Object extract(JSONReader jsonReader) {
         if (jsonReader.nextIfNull()) {
-            return null;
+            return new Object[indexes.length];
         }
 
         if (prefix instanceof JSONPathSingleName) {
@@ -147,7 +148,7 @@ final class JSONPathTypedMultiIndexes
             }
 
             if (jsonReader.nextIfNull()) {
-                return null;
+                return new Object[indexes.length];
             }
         } else if (prefix instanceof JSONPathSingleIndex) {
             int index = ((JSONPathSingleIndex) prefix).index;
@@ -184,7 +185,15 @@ final class JSONPathTypedMultiIndexes
             }
 
             Type type = types[index];
-            Object value = jsonReader.read(type);
+            Object value;
+            try {
+                value = jsonReader.read(type);
+            } catch (Exception e) {
+                if (!ignoreError(index)) {
+                    throw e;
+                }
+                value = null;
+            }
             array[index] = value;
 
             if (!duplicate) {

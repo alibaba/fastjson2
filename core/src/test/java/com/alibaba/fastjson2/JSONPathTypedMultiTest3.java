@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -41,7 +42,7 @@ public class JSONPathTypedMultiTest3 {
         assertEquals(101L, values[1]);
         assertEquals("DataWorks", values[0]);
 
-        assertNull(jsonPath.extract("null"));
+        Assertions.assertNull(((Object[]) jsonPath.extract("null"))[0]);
         assertThrows(JSONException.class, () -> jsonPath.extract("12"));
     }
 
@@ -89,16 +90,16 @@ public class JSONPathTypedMultiTest3 {
         assertEquals(101L, values[0]);
         assertEquals("DataWorks", values[1]);
 
-        assertNull(jsonPath.extract("null"));
-        assertNull(jsonPath.extract("{\"values\":null}"));
-        assertNull(jsonPath.extract("{\"id\":123,\"values\":null}"));
-        assertNull(jsonPath.extract(JSONReader.ofJSONB(JSONB.toBytes(null))));
-        assertNull(
+        assertNull(((Object[]) jsonPath.extract("null"))[0]);
+        assertNull(((Object[]) jsonPath.extract("{\"values\":null}"))[0]);
+        assertNull(((Object[]) jsonPath.extract("{\"id\":123,\"values\":null}"))[0]);
+        assertNull(((Object[]) jsonPath.extract(JSONReader.ofJSONB(JSONB.toBytes(null))))[0]);
+        assertNull(((Object[])
                 jsonPath.extract(
                         JSONReader.ofJSONB(
                                 JSONObject.of("values", null).toJSONBBytes(JSONWriter.Feature.WriteNulls)
                         )
-                )
+                ))[0]
         );
     }
 
@@ -203,7 +204,7 @@ public class JSONPathTypedMultiTest3 {
 
     @Test
     public void testNullOnError() {
-        Class[] classes = new Class[] {
+        Class[] classes = new Class[]{
                 Float.class,
                 Double.class,
                 Byte.class,
@@ -233,7 +234,7 @@ public class JSONPathTypedMultiTest3 {
 
     @Test
     public void testNullOnError1() {
-        Class[] classes = new Class[] {
+        Class[] classes = new Class[]{
                 Float.class,
                 Double.class,
                 Byte.class,
@@ -262,7 +263,7 @@ public class JSONPathTypedMultiTest3 {
 
     @Test
     public void testNullOnError2() {
-        Class[] classes = new Class[] {
+        Class[] classes = new Class[]{
                 Float.class,
                 Double.class,
                 Byte.class,

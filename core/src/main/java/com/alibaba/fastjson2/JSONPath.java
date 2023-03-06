@@ -500,7 +500,28 @@ public abstract class JSONPath {
         boolean allSingleName = true, allSinglePositiveIndex = true;
         boolean allTwoName = true, allTwoIndexPositive = true;
         boolean allThreeName = true;
-        for (JSONPath path : jsonPaths) {
+        boolean sameMultiLength = true;
+        JSONPathMulti firstMulti = null;
+        for (int i = 0; i < jsonPaths.length; i++) {
+            JSONPath path = jsonPaths[i];
+            if (i == 0) {
+                if (path instanceof JSONPathMulti) {
+                    firstMulti = (JSONPathMulti) path;
+                } else {
+                    sameMultiLength = false;
+                }
+            } else {
+                if (sameMultiLength) {
+                    if (path instanceof JSONPathMulti) {
+                        if (((JSONPathMulti) path).segments.size() != firstMulti.segments.size()) {
+                            sameMultiLength = false;
+                        }
+                    }
+                } else {
+                    sameMultiLength = false;
+                }
+            }
+
             if (allSingleName && !(path instanceof JSONPathSingleName)) {
                 allSingleName = false;
             }
@@ -705,6 +726,66 @@ public abstract class JSONPath {
                         zoneId,
                         featuresValue
                 );
+            }
+        }
+
+        if (sameMultiLength) {
+            boolean samePrefix = true;
+            boolean sameType = true;
+            int lastIndex = firstMulti.segments.size() - 1;
+            JSONPathSegment lastSegment = firstMulti.segments.get(lastIndex);
+
+            for (int i = 0; i < lastIndex; i++) {
+                JSONPathSegment segment = firstMulti.segments.get(i);
+                for (int j = 1; j < paths.length; j++) {
+                    JSONPathMulti path = (JSONPathMulti) jsonPaths[j];
+                    if (!segment.equals(path.segments.get(i))) {
+                        samePrefix = false;
+                        break;
+                    }
+                }
+                if (!samePrefix) {
+                    break;
+                }
+            }
+
+            if (samePrefix) {
+                for (int i = 1; i < paths.length; i++) {
+                    JSONPathMulti path = (JSONPathMulti) jsonPaths[i];
+                    if (!lastSegment.getClass().equals(path.segments.get(lastIndex).getClass())) {
+                        sameType = false;
+                        break;
+                    }
+                }
+                if (sameType) {
+                    List<JSONPathSegment> prefixSegments = firstMulti.segments.subList(0, lastIndex - 1);
+                    String prefixPath = null;
+                    int dotIndex = firstMulti.path.lastIndexOf('.');
+                    if (dotIndex != -1) {
+                        prefixPath = firstMulti.path.substring(0, dotIndex - 1);
+                    }
+                    if (prefixPath != null) {
+                        JSONPathMulti prefix = new JSONPathMulti(prefixPath, prefixSegments);
+                        if (lastSegment instanceof JSONPathSegmentIndex) {
+                            JSONPath[] indexPaths = new JSONPath[paths.length];
+                            for (int i = 0; i < jsonPaths.length; i++) {
+                                JSONPathMulti path = (JSONPathMulti) jsonPaths[i];
+                                JSONPathSegmentIndex lastSegmentIndex = (JSONPathSegmentIndex) path.segments.get(lastIndex);
+                                indexPaths[i] = new JSONPathSingleIndex(lastSegmentIndex.toString(), lastSegmentIndex);
+                            }
+                            return new JSONPathTypedMultiIndexes(
+                                    jsonPaths,
+                                    prefix,
+                                    indexPaths,
+                                    types,
+                                    formats,
+                                    pathFeatures,
+                                    zoneId,
+                                    featuresValue
+                            );
+                        }
+                    }
+                }
             }
         }
 

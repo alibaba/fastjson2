@@ -52,12 +52,10 @@ class JSONPathTypedMulti
         return false;
     }
 
-    protected boolean isIgnoreError(int index) {
-        if (pathFeatures != null && index < pathFeatures.length) {
-            long features = pathFeatures[index];
-            return (features & Feature.NullOnError.mask) != 0;
-        }
-        return false;
+    protected final boolean ignoreError(int index) {
+        return pathFeatures != null
+                && index < pathFeatures.length
+                && (pathFeatures[index] & Feature.NullOnError.mask) != 0;
     }
 
     @Override
@@ -69,7 +67,7 @@ class JSONPathTypedMulti
             try {
                 array[i] = TypeUtils.cast(result, types[i]);
             } catch (Exception e) {
-                if (!isIgnoreError(i)) {
+                if (!ignoreError(i)) {
                     throw new JSONException("jsonpath eval path, path : " + jsonPath + ", msg : " + e.getMessage(), e);
                 }
             }
