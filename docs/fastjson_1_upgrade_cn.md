@@ -107,4 +107,27 @@ FASTJSON v2中有比较完善的扩展机制，如下：
 | com.alibaba.fastjson.parser.Feature                         | com.alibaba.fastjson2.JSONWriter.Feature              |
 
 
+## 4.4 SerializerFeature.UseISO8601DateFormat在fastjson2的替代方案
 
+fastjson2的JSONWriter.Feature没有和UseISO8601DateFormat的Feature，代替方法是使用format="iso8601"，如下：
+```java
+import com.alibaba.fastjson2.JSON;
+
+String format = "iso8601";
+JSON.toJSONString(obj, format);
+```
+
+## 4.5 ## SerializerFeature.DisableCircularReferenceDetect在fastjson2的替代方案
+在fastjson2中，代替的是JSONWriter.Feature.ReferenceDetection，但语义相反，缺省不一样。fastjson2中的JSONWriter.Feature.ReferenceDetection缺省是关闭的，而fastjson1是现实打开的。
+
+## 4.6 SerializerFeature.SortField在fastjson2的替代方案
+不需要，在fastjson2中，JSONObject继承自LinkedHashMap，不需要配置这个Feature
+
+## 4.7 SerializerFeature.WriteDateUseDateFormat在fastjson2的替代方案
+在fastjson2中的缺省行为就是使用dateFormat，如果要修改为成和fastjson 1.x一样的行为，需要配置format = "millis"，如下：
+```java
+import com.alibaba.fastjson2.JSON;
+
+String format = "millis";
+JSON.toJSONString(obj, format);
+```
