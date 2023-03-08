@@ -213,7 +213,9 @@ public class JSONObject
         }
 
         if (value instanceof Collection) {
-            return new JSONArray((Collection<?>) value);
+            JSONArray array = new JSONArray((Collection<?>) value);
+            put(key, array);
+            return array;
         }
 
         if (value instanceof Object[]) {
@@ -272,7 +274,9 @@ public class JSONObject
         }
 
         if (value instanceof Map) {
-            return new JSONObject((Map) value);
+            JSONObject object = new JSONObject((Map) value);
+            put(key, object);
+            return object;
         }
 
         Class valueClass = value.getClass();
