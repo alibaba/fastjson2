@@ -1,15 +1,14 @@
 package com.alibaba.fastjson.serializer;
 
+import com.alibaba.fastjson.JSONObject;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Date;
 
-import com.alibaba.fastjson.JSONObject;
-
-public class JSONLibDataFormatSerializer implements ObjectSerializer {
-
-    public JSONLibDataFormatSerializer(){
+public class JSONLibDataFormatSerializer
+        implements ObjectSerializer {
+    public JSONLibDataFormatSerializer() {
     }
 
     @SuppressWarnings("deprecation")
