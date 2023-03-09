@@ -363,16 +363,22 @@ public class ObjectReaderCreatorASM
             }
         }
 
-        for (FieldReader fieldReader : fieldReaderArray) {
-            if (fieldReader.defaultValue != null || fieldReader.schema != null) {
-                match = false;
-                break;
-            }
+        if (beanInfo.autoTypeBeforeHandler != null) {
+            match = false;
+        }
 
-            Class fieldClass = fieldReader.fieldClass;
-            if (!Modifier.isPublic(fieldClass.getModifiers())) {
-                match = false;
-                break;
+        if (match) {
+            for (FieldReader fieldReader : fieldReaderArray) {
+                if (fieldReader.defaultValue != null || fieldReader.schema != null) {
+                    match = false;
+                    break;
+                }
+
+                Class fieldClass = fieldReader.fieldClass;
+                if (!Modifier.isPublic(fieldClass.getModifiers())) {
+                    match = false;
+                    break;
+                }
             }
         }
 
@@ -414,6 +420,28 @@ public class ObjectReaderCreatorASM
             }
         }
 
+        return jitObjectReader(
+                objectClass,
+                objectType,
+                fieldBased,
+                externalClass,
+                objectClassModifiers,
+                beanInfo,
+                fieldReaderArray,
+                defaultConstructor
+        );
+    }
+
+    private <T> ObjectReaderBean jitObjectReader(
+            Class<T> objectClass,
+            Type objectType,
+            boolean fieldBased,
+            boolean externalClass,
+            int objectClassModifiers,
+            BeanInfo beanInfo,
+            FieldReader[] fieldReaderArray,
+            Constructor defaultConstructor
+    ) {
         ClassWriter cw = new ClassWriter(
                 (e) -> objectClass.getName().equals(e) ? objectClass : null
         );
@@ -590,7 +618,7 @@ public class ObjectReaderCreatorASM
 
         try {
             Constructor<?> constructor = readerClass.getConstructors()[0];
-            return (ObjectReader) constructor
+            return (ObjectReaderBean) constructor
                     .newInstance(objectClass, supplier, fieldReaderArray);
         } catch (Throwable e) {
             throw new JSONException("create objectReader error, objectType " + objectType.getTypeName(), e);
@@ -2669,7 +2697,10 @@ public class ObjectReaderCreatorASM
         final FieldReader[] fieldReaders;
         final boolean hasStringField;
 
-        public ObjectWriteContext(Class objectClass, ClassWriter cw, boolean externalClass, FieldReader[] fieldReaders) {
+        public ObjectWriteContext(Class objectClass,
+                                  ClassWriter cw,
+                                  boolean externalClass,
+                                  FieldReader[] fieldReaders) {
             this.objectClass = objectClass;
             this.cw = cw;
             this.publicClass = Modifier.isPublic(objectClass.getModifiers());

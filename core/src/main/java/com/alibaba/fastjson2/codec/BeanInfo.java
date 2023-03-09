@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.filter.Filter;
 
 import java.lang.reflect.Constructor;
@@ -44,6 +45,7 @@ public class BeanInfo {
     public boolean alphabetic = true;
     public String objectWriterFieldName;
     public String objectReaderFieldName;
+    public Class<? extends JSONReader.AutoTypeBeforeHandler> autoTypeBeforeHandler;
 
     public void required(String fieldName) {
         if (schema == null) {
