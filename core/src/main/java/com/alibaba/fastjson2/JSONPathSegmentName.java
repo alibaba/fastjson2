@@ -525,6 +525,7 @@ class JSONPathSegmentName
                 if (jsonReader.isEnd()) {
                     return;
                 }
+                jsonReader.nextIfMatch(',');
                 // return object;
             }
 
