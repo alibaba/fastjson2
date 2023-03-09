@@ -31,7 +31,16 @@ public abstract class ObjectReaderBean<T>
 
     protected final JSONSchema schema;
 
-    protected ObjectReaderBean(Class objectClass, Supplier<T> creator, String typeName, long features, JSONSchema schema, Function buildFunction) {
+    protected JSONReader.AutoTypeBeforeHandler autoTypeBeforeHandler;
+
+    protected ObjectReaderBean(
+            Class objectClass,
+            Supplier<T> creator,
+            String typeName,
+            long features,
+            JSONSchema schema,
+            Function buildFunction
+    ) {
         if (typeName == null) {
             if (objectClass != null) {
                 typeName = TypeUtils.getTypeName(objectClass);
@@ -54,10 +63,12 @@ public abstract class ObjectReaderBean<T>
         return objectClass;
     }
 
-    protected T processObjectInputSingleItemArray(JSONReader jsonReader,
-                                                  Type fieldType,
-                                                  Object fieldName,
-                                                  long features) {
+    protected T processObjectInputSingleItemArray(
+            JSONReader jsonReader,
+            Type fieldType,
+            Object fieldName,
+            long features
+    ) {
         String message = "expect {, but [, class " + this.typeName;
         if (fieldName != null) {
             message += ", parent fieldName " + fieldName;
@@ -244,7 +255,11 @@ public abstract class ObjectReaderBean<T>
 
             JSONReader.Context context = jsonReader.getContext();
             long features3, hash = jsonReader.readFieldNameHashCode();
-            JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
+            JSONReader.AutoTypeBeforeHandler autoTypeFilter = this.autoTypeBeforeHandler;
+            if (autoTypeFilter == null) {
+                autoTypeFilter = context.getContextAutoTypeBeforeHandler();
+            }
+
             if (i == 0
                     && hash == getTypeKeyHash()
                     && ((((features3 = (features | getFeatures() | context.getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0) || autoTypeFilter != null)
@@ -331,5 +346,13 @@ public abstract class ObjectReaderBean<T>
     }
 
     protected void initStringFieldAsEmpty(Object object) {
+    }
+
+    public JSONReader.AutoTypeBeforeHandler getAutoTypeBeforeHandler() {
+        return autoTypeBeforeHandler;
+    }
+
+    public void setAutoTypeBeforeHandler(JSONReader.AutoTypeBeforeHandler autoTypeBeforeHandler) {
+        this.autoTypeBeforeHandler = autoTypeBeforeHandler;
     }
 }
