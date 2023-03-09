@@ -3,16 +3,22 @@ package com.alibaba.fastjson.parser;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.util.DateUtils;
 
+import java.io.Closeable;
 import java.math.BigDecimal;
+import java.util.Calendar;
 
 public class JSONScanner
-        extends JSONLexerBase {
+        extends JSONLexerBase
+        implements Closeable {
     private final JSONReader reader;
     private boolean orderedField;
 
     protected int token;
     private String strVal;
+    protected Calendar calendar;
+    protected String str;
 
     public JSONScanner(JSONReader reader) {
         this.reader = reader;
@@ -20,10 +26,35 @@ public class JSONScanner
 
     public JSONScanner(String str) {
         this.reader = JSONReader.of(str);
+        this.str = str;
     }
 
     public JSONScanner(String str, int features) {
         this.reader = JSONReader.of(str, JSON.createReadContext(features));
+    }
+
+    public Calendar getCalendar() {
+        return calendar;
+    }
+
+    public boolean scanISO8601DateIfMatch() {
+        return scanISO8601DateIfMatch(true);
+    }
+
+    public boolean scanISO8601DateIfMatch(boolean strict) {
+        if (str != null) {
+            try {
+                long millis = DateUtils.parseMillis(str);
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(millis);
+                this.calendar = calendar;
+                return true;
+            } catch (Exception ignored) {
+                return false;
+            }
+        }
+
+        throw new JSONException("UnsupportedOperation");
     }
 
     @Override
@@ -246,5 +277,9 @@ public class JSONScanner
     @Override
     public boolean isEOF() {
         return reader.isEnd();
+    }
+
+    @Override
+    public void close() {
     }
 }
