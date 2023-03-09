@@ -2,6 +2,7 @@ package com.alibaba.fastjson.annotation;
 
 import com.alibaba.fastjson.PropertyNamingStrategy;
 import com.alibaba.fastjson.parser.Feature;
+import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
@@ -70,4 +71,6 @@ public @interface JSONType {
      * @since 1.2.49
      */
     Class<? extends SerializeFilter>[] serialzeFilters() default {};
+
+    Class<? extends ParserConfig.AutoTypeCheckHandler> autoTypeCheckHandler() default ParserConfig.AutoTypeCheckHandler.class;
 }

@@ -72,4 +72,9 @@ public @interface JSONType {
      * @since 2.0.8
      */
     String locale() default "";
+
+    /**
+     * @since 2.0.25
+     */
+    Class<? extends JSONReader.AutoTypeBeforeHandler> autoTypeBeforeHandler() default JSONReader.AutoTypeBeforeHandler.class;
 }

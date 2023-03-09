@@ -1135,7 +1135,7 @@ public class ObjectReaderCreator {
 
         Supplier<T> creator = createSupplier(objectClass);
         JSONSchema jsonSchema = JSONSchema.of(JSON.parseObject(beanInfo.schema), objectClass);
-        return createObjectReader(
+        ObjectReader<T> objectReader = createObjectReader(
                 objectClass,
                 beanInfo.typeKey,
                 beanInfo.readerFeatures,
@@ -1143,6 +1143,25 @@ public class ObjectReaderCreator {
                 creator,
                 null,
                 fieldReaderArray);
+
+        if (objectReader instanceof ObjectReaderBean) {
+            JSONReader.AutoTypeBeforeHandler beforeHandler = null;
+            if (beanInfo.autoTypeBeforeHandler != null) {
+                try {
+                    Constructor constructor = beanInfo.autoTypeBeforeHandler.getDeclaredConstructor();
+                    constructor.setAccessible(true);
+                    beforeHandler = (JSONReader.AutoTypeBeforeHandler) constructor.newInstance();
+                } catch (Exception ignored) {
+                    // ignored
+                }
+            }
+
+            if (beforeHandler != null) {
+                ((ObjectReaderBean<T>) objectReader).setAutoTypeBeforeHandler(beforeHandler);
+            }
+        }
+
+        return objectReader;
     }
 
     public <T> FieldReader[] createFieldReaders(Class<T> objectClass) {
