@@ -658,19 +658,29 @@ public class ObjectWriterCreator {
         Class<?> declaringClass = field.getDeclaringClass();
         Method method = null;
 
-        boolean unsafeFieldWriter = JDKUtils.UNSAFE_SUPPORT;
-        if (declaringClass == Throwable.class && !unsafeFieldWriter) {
-            unsafeFieldWriter = JDKUtils.UNSAFE_SUPPORT;
+        final boolean unsafeFieldWriter = JDKUtils.UNSAFE_SUPPORT;
+        if (declaringClass == Throwable.class) {
             switch (field.getName()) {
                 case "detailMessage":
-                    method = BeanUtils.getMethod(Throwable.class, "getMessage");
-                    fieldName = "message";
+                    if (!unsafeFieldWriter) {
+                        method = BeanUtils.getMethod(Throwable.class, "getMessage");
+                        fieldName = "message";
+                    }
                     break;
                 case "cause":
-                    method = BeanUtils.getMethod(Throwable.class, "getCause");
+                    if (!unsafeFieldWriter) {
+                        method = BeanUtils.getMethod(Throwable.class, "getCause");
+                    }
                     break;
                 case "suppressedExceptions": {
-                    fieldName = "suppressed";
+                    if (!unsafeFieldWriter) {
+                        fieldName = "suppressed";
+                    }
+                    break;
+                }
+                case "stackTrace": {
+                    method = BeanUtils.getMethod(Throwable.class, "getStackTrace");
+                    break;
                 }
                 default:
                     break;
