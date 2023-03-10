@@ -1852,7 +1852,7 @@ public abstract class JSONReader
 
         List list = new ArrayList();
         if (!nextIfMatch('[')) {
-            throw new JSONException("syntax error : " + ch);
+            throw new JSONException(info("syntax error : " + ch));
         }
 
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
