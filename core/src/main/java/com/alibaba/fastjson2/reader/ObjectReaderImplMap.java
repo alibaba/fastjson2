@@ -39,6 +39,14 @@ public final class ObjectReaderImplMap
     public static ObjectReader of(Type fieldType, Class mapType, long features) {
         Function builder = null;
         Class instanceType = mapType;
+
+        if ("".equals(instanceType.getSimpleName())) {
+            instanceType = mapType.getSuperclass();
+            if (fieldType == null) {
+                fieldType = mapType.getGenericSuperclass();
+            }
+        }
+
         if (mapType == Map.class
                 || mapType == AbstractMap.class
                 || mapType == CLASS_SINGLETON_MAP

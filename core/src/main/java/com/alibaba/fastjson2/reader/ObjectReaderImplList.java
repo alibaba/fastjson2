@@ -41,6 +41,11 @@ public final class ObjectReaderImplList
     volatile boolean instanceError;
 
     public static ObjectReader of(Type type, Class listClass, long features) {
+        if (listClass == type && "".equals(listClass.getSimpleName())) {
+            type = listClass.getGenericSuperclass();
+            listClass = listClass.getSuperclass();
+        }
+
         Type itemType = Object.class;
         Type rawType;
         if (type instanceof ParameterizedType) {
