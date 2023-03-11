@@ -266,6 +266,21 @@ public class ObjectWriterProvider
             return objectWriter;
         }
 
+        if (TypeUtils.isProxy(objectClass)) {
+            Class superclass = objectClass.getSuperclass();
+            if (objectClass == objectType) {
+                objectType = superclass;
+            }
+            objectClass = superclass;
+            if (fieldBased) {
+                fieldBased = false;
+                objectWriter = cacheFieldBased.get(objectType);
+                if (objectWriter != null) {
+                    return objectWriter;
+                }
+            }
+        }
+
         boolean useModules = true;
         if (fieldBased && objectClass != null) {
             if (Iterable.class.isAssignableFrom(objectClass)
