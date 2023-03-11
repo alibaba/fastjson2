@@ -633,7 +633,7 @@ class JSONReaderJSONB
                         zoneId = SHANGHAI_ZONE_ID;
                     } else {
                         String zoneIdStr = readString();
-                        zoneId = ZoneId.of(zoneIdStr);
+                        zoneId = DateUtils.getZoneId(zoneIdStr, SHANGHAI_ZONE_ID);
                     }
                 }
                 LocalDateTime ldt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
@@ -4565,7 +4565,7 @@ class JSONReaderJSONB
                     if (contextZondId.getId().equals(zoneIdStr)) {
                         zoneId = contextZondId;
                     } else {
-                        zoneId = ZoneId.of(zoneIdStr);
+                        zoneId = DateUtils.getZoneId(zoneIdStr, SHANGHAI_ZONE_ID);
                     }
                 }
                 return ZonedDateTime.ofLocal(ldt, zoneId, null);
