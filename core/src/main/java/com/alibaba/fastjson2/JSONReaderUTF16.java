@@ -5651,6 +5651,8 @@ class JSONReaderUTF16
             return null;
         }
 
+        String zoneIdStr = null;
+
         char c0 = chars[offset];
         char c1 = chars[offset + 1];
         char c2 = chars[offset + 2];
@@ -6292,6 +6294,45 @@ class JSONReaderUTF16
             S8 = '0';
             zoneIdBegin = 28;
             isTimeZone = c28 == '|';
+        } else if (len == 28 && c3 == ' ' && c7 == ' ' && c10 == ' ' && c13 == ':' && c16 == ':' && c19 == ' ' && c23 == ' ') {
+            int month = DateUtils.month(c4, c5, c6);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            y0 = c24;
+            y1 = c25;
+            y2 = c26;
+            y3 = c27;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 19;
+            zoneIdStr = new String(chars, 21, 3);
+            isTimeZone = false;
         } else if (len == 28 && c3 == ',' && c4 == ' ' && c6 == ' ' && c10 == ' ' && c15 == ' ' && c18 == ':' && c21 == ':' && c24 == ' ') {
             // RFC 1123
             y0 = c11;
@@ -6426,16 +6467,17 @@ class JSONReaderUTF16
             if (first == 'Z') {
                 zoneId = UTC;
             } else {
-                String zoneIdStr;
-                if (first == '+' || first == '-') {
-                    zoneIdStr = new String(chars, this.offset + zoneIdBegin, len - zoneIdBegin);
-                } else if (first == ' ') {
-                    zoneIdStr = new String(chars, this.offset + zoneIdBegin + 1, len - zoneIdBegin - 1);
-                } else { // '[
-                    if (zoneIdBegin < len) {
-                        zoneIdStr = new String(chars, this.offset + zoneIdBegin + 1, len - zoneIdBegin - 2);
-                    } else {
-                        zoneIdStr = null;
+                if (zoneIdStr == null) {
+                    if (first == '+' || first == '-') {
+                        zoneIdStr = new String(chars, this.offset + zoneIdBegin, len - zoneIdBegin);
+                    } else if (first == ' ') {
+                        zoneIdStr = new String(chars, this.offset + zoneIdBegin + 1, len - zoneIdBegin - 1);
+                    } else { // '[
+                        if (zoneIdBegin < len) {
+                            zoneIdStr = new String(chars, this.offset + zoneIdBegin + 1, len - zoneIdBegin - 2);
+                        } else {
+                            zoneIdStr = null;
+                        }
                     }
                 }
                 zoneId = DateUtils.getZoneId(zoneIdStr, context.zoneId);

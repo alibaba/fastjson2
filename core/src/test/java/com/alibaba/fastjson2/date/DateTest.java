@@ -9,11 +9,9 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateTest {
+    static final long millis = DateUtils.parseMillis("2023-03-11T11:33:22Z");
     @Test
     public void test() {
-        String str = "2023-03-11T11:33:22Z";
-        long millis = DateUtils.parseMillis(str);
-
         assertEquals(millis, DateUtils.parseMillis("2023-03-11 19:33:22 CST"));
         assertEquals(
                 millis,
@@ -31,6 +29,29 @@ public class DateTest {
         assertEquals(
                 millis,
                 JSON.parseObject("\"2023-03-11T11:33:22+0000\"", Date.class)
+                        .getTime()
+        );
+    }
+
+    @Test
+    public void test1() {
+        String str = "Sun Mar 11 19:33:22 CST 2023";
+        String json = "\"" + str + "\"";
+
+        assertEquals(
+                millis,
+                DateUtils.parseMillis(str)
+        );
+
+        assertEquals(
+                millis,
+                JSON.parseObject(json.getBytes(), Date.class)
+                        .getTime()
+        );
+
+        assertEquals(
+                millis,
+                JSON.parseObject(json, Date.class)
                         .getTime()
         );
     }
