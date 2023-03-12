@@ -1407,4 +1407,12 @@ public class JSONObjectTest {
         assertEquals(1, JSONObject.of("value", JSONObject.of("a", 1)).getSize("value"));
         assertEquals(2, JSONObject.of("value", JSONArray.of("a", "b")).getSize("value"));
     }
+
+    @Test
+    public void from() {
+        Bean bean = new Bean();
+        bean.id = 1001;
+        JSONObject object = JSONObject.from(bean, JSONWriter.Feature.NotWriteDefaultValue);
+        assertEquals(bean.id, object.getIntValue("id"));
+    }
 }

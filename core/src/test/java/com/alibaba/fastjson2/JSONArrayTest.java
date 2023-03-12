@@ -1459,4 +1459,10 @@ public class JSONArrayTest {
         assertEquals("2", strings.get(1));
         assertEquals("3", strings.get(2));
     }
+
+    @Test
+    public void from() {
+        JSONArray array = JSONArray.from(Collections.emptyList(), JSONWriter.Feature.NotWriteEmptyArray);
+        assertEquals(0, array.size());
+    }
 }
