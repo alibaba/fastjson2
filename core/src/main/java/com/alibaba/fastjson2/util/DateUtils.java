@@ -25,6 +25,8 @@ public class DateUtils {
     public static final ZoneRules SHANGHAI_ZONE_RULES = SHANGHAI_ZONE_ID.getRules();
 
     static DateTimeFormatter DATE_TIME_FORMATTER_34;
+    static DateTimeFormatter DATE_TIME_FORMATTER_COOKIE;
+    static DateTimeFormatter DATE_TIME_FORMATTER_COOKIE_LOCAL;
     static DateTimeFormatter DATE_TIME_FORMATTER_RFC_2822;
 
     static final int LOCAL_EPOCH_DAY;
@@ -3239,6 +3241,12 @@ public class DateUtils {
             S8 = '0';
             zoneIdBegin = 17;
             isTimeZone = false;
+        } else if ((len == 32 && c6 == ',' && c7 == ' ' && c10 == '-' && c14 == '-' && c19 == ' ' && c22 == ':' && c25 == ':' && str.charAt(28) == ' ')
+                || (len == 33 && c7 == ',' && c8 == ' ' && c11 == '-' && c15 == '-' && c20 == ' ' && c23 == ':' && c26 == ':' && str.charAt(29) == ' ')
+                || (len == 34 && c8 == ',' && c9 == ' ' && c12 == '-' && c16 == '-' && c21 == ' ' && c24 == ':' && c27 == ':' && str.charAt(30) == ' ')
+                || (len == 35 && c9 == ',' && c10 == ' ' && c13 == '-' && c17 == '-' && c22 == ' ' && c25 == ':' && c28 == ':' && str.charAt(31) == ' ')
+        ) {
+            return parseZonedDateTimeCookie(str);
         } else if (len == 34) {
             DateTimeFormatter formatter = DATE_TIME_FORMATTER_34;
             if (formatter == null) {
@@ -3315,6 +3323,26 @@ public class DateUtils {
         }
 
         return ZonedDateTime.ofLocal(ldt, zoneId, null);
+    }
+
+    private static ZonedDateTime parseZonedDateTimeCookie(String str) {
+        if (str.endsWith(" CST")) {
+            DateTimeFormatter formatter = DATE_TIME_FORMATTER_COOKIE_LOCAL;
+            if (formatter == null) {
+                formatter = DateTimeFormatter.ofPattern("EEEE, dd-MMM-yyyy HH:mm:ss");
+                DATE_TIME_FORMATTER_COOKIE_LOCAL = formatter;
+            }
+            String strLocalDateTime = str.substring(0, str.length() - 4);
+            LocalDateTime ldt = LocalDateTime.parse(strLocalDateTime, formatter);
+            return ZonedDateTime.of(ldt, DateUtils.SHANGHAI_ZONE_ID);
+        }
+
+        DateTimeFormatter formatter = DATE_TIME_FORMATTER_COOKIE;
+        if (formatter == null) {
+            formatter = DateTimeFormatter.ofPattern("EEEE, dd-MMM-yyyy HH:mm:ss zzz");
+            DATE_TIME_FORMATTER_COOKIE = formatter;
+        }
+        return ZonedDateTime.parse(str, formatter);
     }
 
     public static ZoneId getZoneId(String zoneIdStr, ZoneId defaultZoneId) {
