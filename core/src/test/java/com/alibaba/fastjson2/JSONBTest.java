@@ -1090,4 +1090,18 @@ public class JSONBTest {
         byte[] bytes = {(byte) 0xa6, 0x79, 0x48, 0x7f, 0x7f, 0x7f, 0x7f};
         assertThrows(JSONException.class, () -> JSONB.parseObject(bytes));
     }
+
+    @Test
+    public void parseArray() {
+        assertNull(JSONB.parseArray(null, Bean.class, JSONReader.Feature.SupportAutoType));
+        assertNull(JSONB.parseArray(new byte[0], Bean.class, JSONReader.Feature.SupportAutoType));
+
+        byte[] jsonbBytes = JSONArray.of().toJSONBBytes();
+        List<Object> objects = JSONB.parseArray(jsonbBytes, Bean.class, JSONReader.Feature.SupportAutoType);
+        assertEquals(0, objects.size());
+    }
+
+    public static class Bean {
+        public int id;
+    }
 }
