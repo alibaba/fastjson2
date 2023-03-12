@@ -1223,7 +1223,7 @@ public abstract class JSONReader
                 zdt = ZonedDateTime.ofLocal(ldt, context.getZoneId(), null);
             } else if (len >= 20) {
                 zdt = readZonedDateTimeX(len);
-                if (zdt == null && len == 34) {
+                if (zdt == null && (len >= 32 && len <= 35)) {
                     String str = readString();
                     zdt = DateUtils.parseZonedDateTime(str, null);
                 }
