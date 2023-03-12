@@ -429,6 +429,11 @@ public class ObjectWriterAdapter<T>
 
     @Override
     public void writeWithFilter(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+        if (object == null) {
+            jsonWriter.writeNull();
+            return;
+        }
+
         if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
             if (jsonWriter.jsonb) {
                 writeClassInfo(jsonWriter);
