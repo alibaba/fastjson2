@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues_1000;
 
 import com.alibaba.fastjson2.JSON;
+import lombok.Data;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Function;
@@ -46,5 +47,59 @@ public class Issue1177 {
         public void setFunc(Function<String, String> func) {
             this.func = func;
         }
+    }
+
+    @Test
+    public void test1() {
+        Bean1 bean = new Bean1();
+        String str = JSON.toJSONString(bean);
+        assertEquals("{}", str);
+    }
+
+    @Data
+    public static class Bean1 {
+        private MyFunction function = new MyFunction() {
+            @Override
+            public Object apply(Object o) {
+                return null;
+            }
+        };
+    }
+
+    @Test
+    public void test2() {
+        Bean2 bean = new Bean2();
+        String str = JSON.toJSONString(bean);
+        assertEquals("{}", str);
+    }
+
+    public static class Bean2 {
+        public MyFunction function = new MyFunction() {
+            @Override
+            public Object apply(Object o) {
+                return null;
+            }
+        };
+    }
+
+    @Test
+    public void test3() {
+        Bean3 bean = new Bean3();
+        String str = JSON.toJSONString(bean);
+        assertEquals("{}", str);
+    }
+
+    private static class Bean3 {
+        public MyFunction function = new MyFunction() {
+            @Override
+            public Object apply(Object o) {
+                return null;
+            }
+        };
+    }
+
+    @FunctionalInterface
+    public interface MyFunction<R, T> {
+        R apply(T t);
     }
 }
