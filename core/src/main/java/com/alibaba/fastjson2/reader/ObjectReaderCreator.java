@@ -27,6 +27,7 @@ import java.util.function.*;
 
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
+import static com.alibaba.fastjson2.util.TypeUtils.isFunction;
 
 public class ObjectReaderCreator {
     public static final boolean JIT = !JDKUtils.ANDROID && !JDKUtils.GRAAL;
@@ -1384,7 +1385,7 @@ public class ObjectReaderCreator {
         Class fieldClass = method.getParameterTypes()[0];
 
         // skip function
-        if (fieldClass.getName().startsWith("java.util.function.")) {
+        if (isFunction(fieldClass)) {
             return;
         }
 

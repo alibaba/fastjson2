@@ -2791,4 +2791,19 @@ public class TypeUtils {
 
         return object;
     }
+
+    public static boolean isFunction(Class type) {
+        if (type.isInterface()) {
+            String typeName = type.getName();
+            if (typeName.startsWith("java.util.function.")) {
+                return true;
+            }
+
+            if (type.isAnnotationPresent(FunctionalInterface.class)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
