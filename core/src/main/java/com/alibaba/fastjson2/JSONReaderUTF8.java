@@ -5130,14 +5130,25 @@ class JSONReaderUTF8
             S0 = c20;
             S1 = c21;
             S2 = c22;
-            S3 = c23;
-            S4 = c24;
-            S5 = c25;
-            S6 = c26;
-            S7 = '0';
-            S8 = '0';
-            zoneIdBegin = 27;
-            isTimeZone = c27 == '|';
+            if (c23 == ' ' && len == 27) {
+                S3 = '0';
+                S4 = '0';
+                S5 = '0';
+                S6 = '0';
+                S7 = '0';
+                S8 = '0';
+                zoneIdBegin = 23;
+                zoneIdStr = new String(bytes, this.offset + 24, 3);
+            } else {
+                S3 = c23;
+                S4 = c24;
+                S5 = c25;
+                S6 = c26;
+                S7 = '0';
+                S8 = '0';
+                zoneIdBegin = 27;
+                isTimeZone = c27 == '|';
+            }
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && (len == 28 || c28 == '[' || c28 == '|' || c28 == '+' || c28 == '-' || c28 == 'Z')) {
             y0 = c0;
