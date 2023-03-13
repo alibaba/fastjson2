@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateTest {
     static final long millis = DateUtils.parseMillis("2023-03-11T11:33:22Z");
+
     @Test
     public void test() {
         assertEquals(millis, DateUtils.parseMillis("2023-03-11 19:33:22 CST"));
@@ -58,7 +59,6 @@ public class DateTest {
                         .getTime()
         );
     }
-
 
     @Test
     public void test2() {
