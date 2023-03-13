@@ -483,8 +483,9 @@ public abstract class JSON {
         }
     }
 
-    public static <T> T parseObject(String str, TypeReference typeReference, Feature... features) {
-        return parseObject(str, typeReference.getType(), features);
+    @SuppressWarnings("unchecked")
+    public static <T> T parseObject(String str, TypeReference<T> typeReference, Feature... features) {
+        return (T) parseObject(str, typeReference.getType(), features);
     }
 
     public static <T> T parseObject(String input, Type clazz, int featureValues, Feature... features) {
@@ -2055,7 +2056,7 @@ public abstract class JSON {
 
     public abstract <T> T toJavaObject(Type type);
 
-    public <T> T toJavaObject(TypeReference typeReference) {
+    public <T> T toJavaObject(TypeReference<T> typeReference) {
         Type type = typeReference != null ? typeReference.getType() : Object.class;
         return toJavaObject(type);
     }

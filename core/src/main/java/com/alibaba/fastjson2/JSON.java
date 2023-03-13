@@ -771,7 +771,7 @@ public interface JSON {
      * @param typeReference specify the {@link TypeReference} to be converted
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    static <T> T parseObject(String text, TypeReference typeReference, JSONReader.Feature... features) {
+    static <T> T parseObject(String text, TypeReference<T> typeReference, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
             return null;
         }
@@ -790,7 +790,7 @@ public interface JSON {
             if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
-            return object;
+            return (T) object;
         }
     }
 
@@ -802,7 +802,7 @@ public interface JSON {
      * @param filter specify filters to be enabled
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    static <T> T parseObject(String text, TypeReference typeReference, Filter filter, JSONReader.Feature... features) {
+    static <T> T parseObject(String text, TypeReference<T> typeReference, Filter filter, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
             return null;
         }
