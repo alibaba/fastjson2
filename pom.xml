@@ -616,7 +616,8 @@
                                 com/alibaba/fastjson2/dubbo/GoogleProtobufBasic.java,
                                 com/alibaba/fastjson2/issues/Issue983.java,
                                 com/alibaba/fastjson2/protobuf/PersonOuterClass.java,
-                                com/alibaba/fastjson2/benchmark/protobuf/MediaContentHolder.java
+                                com/alibaba/fastjson2/benchmark/protobuf/MediaContentHolder.java,
+                                org/apache/dubbo/springboot/demo/BusinessException.java
                             </excludes>
                         </configuration>
                     </execution>
