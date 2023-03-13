@@ -59,6 +59,31 @@ public class DateTest {
         );
     }
 
+
+    @Test
+    public void test2() {
+        long millis = 1678669374000L;
+        String str = "Mon Mar 13 09:02:54 CST 2023";
+        String json = "\"" + str + "\"";
+
+        assertEquals(
+                millis,
+                DateUtils.parseMillis(str)
+        );
+
+        assertEquals(
+                millis,
+                JSON.parseObject(json.getBytes(), Date.class)
+                        .getTime()
+        );
+
+        assertEquals(
+                millis,
+                JSON.parseObject(json, Date.class)
+                        .getTime()
+        );
+    }
+
     @Test
     public void cookie() {
         String str = "Saturday, 11-Mar-2023 11:33:22 UTC";
