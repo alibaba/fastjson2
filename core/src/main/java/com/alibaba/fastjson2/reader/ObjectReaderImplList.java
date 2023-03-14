@@ -394,6 +394,18 @@ public final class ObjectReaderImplList
             list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
         }
 
+        ObjectReader itemObjectReader = this.itemObjectReader;
+        Type itemType = this.itemType;
+        if (fieldType != null && fieldType != listType && fieldType instanceof ParameterizedType) {
+            Type[] actualTypeArguments = ((ParameterizedType) fieldType).getActualTypeArguments();
+            if (actualTypeArguments.length == 1) {
+                itemType = actualTypeArguments[0];
+                if (itemType != this.itemType) {
+                    itemObjectReader = jsonReader.getObjectReader(itemType);
+                }
+            }
+        }
+
         for (int i = 0; i < entryCnt; ++i) {
             Object item;
 
@@ -485,6 +497,18 @@ public final class ObjectReaderImplList
             }
 
             throw new JSONException(jsonReader.info());
+        }
+
+        ObjectReader itemObjectReader = this.itemObjectReader;
+        Type itemType = this.itemType;
+        if (fieldType != null && fieldType != listType && fieldType instanceof ParameterizedType) {
+            Type[] actualTypeArguments = ((ParameterizedType) fieldType).getActualTypeArguments();
+            if (actualTypeArguments.length == 1) {
+                itemType = actualTypeArguments[0];
+                if (itemType != this.itemType) {
+                    itemObjectReader = jsonReader.getObjectReader(itemType);
+                }
+            }
         }
 
         for (int i = 0; ; ++i) {

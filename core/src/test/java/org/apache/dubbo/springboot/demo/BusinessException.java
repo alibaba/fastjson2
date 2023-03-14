@@ -70,4 +70,5 @@ public class BusinessException
         this.recorded = recorded;
         return this;
     }
+
 }
