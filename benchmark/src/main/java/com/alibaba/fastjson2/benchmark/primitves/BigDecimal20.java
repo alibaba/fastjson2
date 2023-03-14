@@ -3,6 +3,8 @@ package com.alibaba.fastjson2.benchmark.primitves;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.benchmark.primitves.vo.BigDecimal20Field;
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -17,6 +19,8 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +32,8 @@ public class BigDecimal20 {
     static Gson gson = new Gson();
     static Kryo kryo;
     static byte[] kryoBytes;
+
+    static byte[] hessianBytes;
 
 //    static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
 //            .withLanguage(io.fury.Language.JAVA)
@@ -51,6 +57,14 @@ public class BigDecimal20 {
             Output output = new Output(1024, -1);
             kryo.writeObject(output, bean);
             kryoBytes = output.toBytes();
+
+            {
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                Hessian2Output hessian2Output = new Hessian2Output(byteArrayOutputStream);
+                hessian2Output.writeObject(bean);
+                hessian2Output.flush();
+                hessianBytes = byteArrayOutputStream.toByteArray();
+            }
 
 //            furyCompatibleBytes = furyCompatible.serialize(bean);
         } catch (Exception ex) {
@@ -84,6 +98,13 @@ public class BigDecimal20 {
         Input input = new Input(kryoBytes);
         BigDecimal20Field object = kryo.readObject(input, BigDecimal20Field.class);
         bh.consume(object);
+    }
+
+    @Benchmark
+    public void hessian(Blackhole bh) throws Exception {
+        ByteArrayInputStream bytesIn = new ByteArrayInputStream(hessianBytes);
+        Hessian2Input hessian2Input = new Hessian2Input(bytesIn);
+        bh.consume(hessian2Input.readObject());
     }
 
 //    @Benchmark
