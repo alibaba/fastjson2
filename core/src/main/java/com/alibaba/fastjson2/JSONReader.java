@@ -1259,6 +1259,14 @@ public abstract class JSONReader
         }
 
         if (format != null && !format.isEmpty()) {
+            if ("yyyy-MM-dd HH:mm:ss".equals(format)) {
+                if ((str.length() < 4 || str.charAt(4) != '-') && IOUtils.isNumber(str)) {
+                    return Long.parseLong(str);
+                }
+
+                return DateUtils.parseMillis19(str, null);
+            }
+
             SimpleDateFormat utilFormat = new SimpleDateFormat(format);
             try {
                 return utilFormat
