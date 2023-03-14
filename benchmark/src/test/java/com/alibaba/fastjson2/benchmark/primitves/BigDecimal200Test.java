@@ -32,7 +32,7 @@ public class BigDecimal200Test {
         for (int j = 0; j < 10; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 1000 * 1000; ++i) {
-                benchmark.fastjson2_jsonb(BH);
+                benchmark.jsonb(BH);
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("BigDecimal20-fastjson2_jsonb : " + millis);

@@ -3,6 +3,9 @@ package com.alibaba.fastjson2.benchmark.primitves;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.benchmark.primitves.vo.BigDecimal20Field;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.commons.io.IOUtils;
@@ -15,6 +18,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
 
 public class BigDecimal20 {
@@ -22,14 +26,33 @@ public class BigDecimal20 {
     static byte[] jsonbBytes;
     static ObjectMapper mapper = new ObjectMapper();
     static Gson gson = new Gson();
+    static Kryo kryo;
+    static byte[] kryoBytes;
+
+//    static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
+//            .withLanguage(io.fury.Language.JAVA)
+//            .withReferenceTracking(true)
+//            .disableSecureMode()
+//            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
+//            .buildThreadSafeFury();
+//    static byte[] furyCompatibleBytes;
 
     public BigDecimal20() {
         try {
             InputStream is = BigDecimal20.class.getClassLoader().getResourceAsStream("data/dec20.json");
             str = IOUtils.toString(is, "UTF-8");
-            jsonbBytes = JSONB.toBytes(
-                    JSON.parseObject(str, BigDecimal20Field.class)
-            );
+            BigDecimal20Field bean = JSON.parseObject(str, BigDecimal20Field.class);
+            jsonbBytes = JSONB.toBytes(bean);
+
+            kryo = new Kryo();
+            kryo.register(BigDecimal20Field.class);
+            kryo.register(BigDecimal.class);
+
+            Output output = new Output(1024, -1);
+            kryo.writeObject(output, bean);
+            kryoBytes = output.toBytes();
+
+//            furyCompatibleBytes = furyCompatible.serialize(bean);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -50,10 +73,23 @@ public class BigDecimal20 {
     }
 
     @Benchmark
-    public void fastjson2_jsonb(Blackhole bh) {
+    public void jsonb(Blackhole bh) {
         bh.consume(
                 JSONB.parseObject(jsonbBytes, BigDecimal20Field.class)
         );
+    }
+
+    @Benchmark
+    public void kryo(Blackhole bh) {
+        Input input = new Input(kryoBytes);
+        BigDecimal20Field object = kryo.readObject(input, BigDecimal20Field.class);
+        bh.consume(object);
+    }
+
+//    @Benchmark
+    public void fury(Blackhole bh) {
+//        Object object = furyCompatible.deserialize(furyCompatibleBytes);
+//        bh.consume(object);
     }
 
     @Benchmark
