@@ -1,8 +1,10 @@
 package com.alibaba.fastjson2.benchmark.primitves.vo;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class BigDecimal20Field {
+public class BigDecimal20Field
+        implements Serializable {
     public BigDecimal v0000;
     public BigDecimal v0001;
     public BigDecimal v0002;

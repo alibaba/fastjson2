@@ -35,7 +35,7 @@ public class BigDecimal20Test {
                 benchmark.jsonb(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("BigDecimal20-fastjson2 : " + millis);
+            System.out.println("BigDecimal20-jsonb : " + millis);
 
             // zulu8.62.0.19 : 276
             // zulu11.52.13 : 236
@@ -53,6 +53,21 @@ public class BigDecimal20Test {
             System.out.println("BigDecimal20-kryo : " + millis);
 
             // zulu8.62.0.19 : 513
+            // zulu11.52.13 :
+            // zulu17.32.13 :
+        }
+    }
+
+    public static void hessian() throws Exception {
+        for (int j = 0; j < 10; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.hessian(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("BigDecimal20-hessian : " + millis);
+
+            // zulu8.62.0.19 : 2953
             // zulu11.52.13 :
             // zulu17.32.13 :
         }
@@ -103,8 +118,9 @@ public class BigDecimal20Test {
 
     public static void main(String[] args) throws Exception {
 //        fastjson2();
-//        jsonb();
-        fury();
+        jsonb();
+//        hessian();
+//        fury();
 //        jackson();
 //        wastjson();
 //        kryo();
