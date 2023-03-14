@@ -339,22 +339,24 @@ final class ObjectReaderException<T>
 
     @Override
     public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY && jsonReader.isSupportAutoType(features)) {
-            jsonReader.next();
-            long typeHash = jsonReader.readTypeHashCode();
-
+        if (jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY) {
             JSONReader.Context context = jsonReader.getContext();
 
-            ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
-            if (autoTypeObjectReader == null) {
-                String typeName = jsonReader.getString();
-                autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
+            if (jsonReader.isSupportAutoType(features) || context.getContextAutoTypeBeforeHandler() != null) {
+                jsonReader.next();
+                long typeHash = jsonReader.readTypeHashCode();
 
+                ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
                 if (autoTypeObjectReader == null) {
-                    throw new JSONException("auoType not support : " + typeName + ", offset " + jsonReader.getOffset());
+                    String typeName = jsonReader.getString();
+                    autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
+
+                    if (autoTypeObjectReader == null) {
+                        throw new JSONException("auoType not support : " + typeName + ", offset " + jsonReader.getOffset());
+                    }
                 }
+                return (T) autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, 0);
             }
-            return (T) autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
         return readObject(jsonReader, fieldType, fieldName, features);
