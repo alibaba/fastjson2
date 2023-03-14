@@ -4021,6 +4021,32 @@ class JSONReaderJSONB
                     return BigDecimal.valueOf(unscaledLongValue, scale);
                 }
 
+                if (bytes[offset] == BC_INT32) {
+                    offset++;
+                    int unscaledValue =
+                            ((bytes[offset + 3] & 0xFF)) +
+                                    ((bytes[offset + 2] & 0xFF) << 8) +
+                                    ((bytes[offset + 1] & 0xFF) << 16) +
+                                    ((bytes[offset]) << 24);
+                    offset += 4;
+                    return BigDecimal.valueOf(unscaledValue, scale);
+                }
+
+                if (bytes[offset] == BC_INT64) {
+                    offset++;
+                    long unscaledValue =
+                            ((bytes[offset + 7] & 0xFFL)) +
+                                    ((bytes[offset + 6] & 0xFFL) << 8) +
+                                    ((bytes[offset + 5] & 0xFFL) << 16) +
+                                    ((bytes[offset + 4] & 0xFFL) << 24) +
+                                    ((bytes[offset + 3] & 0xFFL) << 32) +
+                                    ((bytes[offset + 2] & 0xFFL) << 40) +
+                                    ((bytes[offset + 1] & 0xFFL) << 48) +
+                                    ((long) (bytes[offset]) << 56);
+                    offset += 8;
+                    return BigDecimal.valueOf(unscaledValue, scale);
+                }
+
                 BigInteger unscaledValue = readBigInteger();
                 if (scale == 0) {
                     return new BigDecimal(unscaledValue);
