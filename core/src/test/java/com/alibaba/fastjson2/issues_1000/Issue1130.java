@@ -70,4 +70,14 @@ public class Issue1130 {
         Object[] results = (Object[]) path.extract(raw);
         assertArrayEquals(new Object[]{"[1,2,3]", new String[]{"1", "2", "3"}}, results);
     }
+
+    @Test
+    public void test1() {
+        String raw = "[[{\"a\":1},{\"a\":2}],[{\"a\":3}]]";
+        assertEquals("[[{\"a\":1},{\"a\":2}],[{\"a\":3}]]",
+                ((JSONArray) JSONPath.extract(raw, "$")).toJSONString());
+
+        assertEquals("[[{\"a\":1},{\"a\":2}],[{\"a\":3}]]",
+                ((JSONArray) JSONPath.extract(raw, "$[*]")).toJSONString());
+    }
 }
