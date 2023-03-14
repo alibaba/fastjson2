@@ -130,6 +130,10 @@ final class ConstructorFunction<T>
                 Object arg = values.get(hashCodes[i]);
                 if (arg == null) {
                     arg = TypeUtils.getDefaultValue(paramType);
+                } else {
+                    if (!paramType.isInstance(arg)) {
+                        arg = TypeUtils.cast(arg, paramType);
+                    }
                 }
                 args[i] = arg;
             }
