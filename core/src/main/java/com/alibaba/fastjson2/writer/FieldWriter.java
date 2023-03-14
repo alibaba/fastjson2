@@ -345,6 +345,21 @@ public abstract class FieldWriter<T>
             }
         }
 
+        if (thisMember instanceof Method && otherMember instanceof Method) {
+            String thisMethodName = thisMember.getName();
+            String otherMethodName = otherMember.getName();
+            if (!thisMethodName.equals(otherMethodName)) {
+                String thisSetterName = BeanUtils.getterName(thisMethodName, null);
+                String otherSetterName = BeanUtils.getterName(otherMethodName, null);
+                if (this.fieldName.equals(thisSetterName) && !other.fieldName.equals(otherSetterName)) {
+                    return 1;
+                }
+                if (this.fieldName.equals(otherSetterName) && !other.fieldName.equals(thisSetterName)) {
+                    return -1;
+                }
+            }
+        }
+
         return nameCompare;
     }
 
