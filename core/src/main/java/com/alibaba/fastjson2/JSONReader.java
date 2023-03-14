@@ -1265,7 +1265,7 @@ public abstract class JSONReader
                         .parse(str)
                         .getTime();
             } catch (ParseException e) {
-                throw new JSONException("parse date error, " + str + ", expect format " + utilFormat);
+                throw new JSONException("parse date error, " + str + ", expect format " + utilFormat.toPattern());
             }
         }
         if ("0000-00-00T00:00:00".equals(str)
