@@ -2801,6 +2801,11 @@ public class ObjectReaderCreator {
                 if (objectReader != ObjectReaderImplBigInteger.INSTANCE) {
                     initReader = objectReader;
                 }
+            } else if (fieldClass == Date.class) {
+                ObjectReader objectReader = provider.getObjectReader(Date.class);
+                if (objectReader != ObjectReaderImplDate.INSTANCE) {
+                    initReader = objectReader;
+                }
             }
         }
         return initReader;
