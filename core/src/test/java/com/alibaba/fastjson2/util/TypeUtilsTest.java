@@ -139,10 +139,13 @@ public class TypeUtilsTest {
         assertEquals(BigInteger.valueOf(1), TypeUtils.toBigInteger(1));
         assertEquals(BigInteger.valueOf(1), TypeUtils.toBigInteger("1"));
 
-        assertNull(TypeUtils.toBigDecimal(null));
+        assertNull(TypeUtils.toBigDecimal((String) null));
+        assertNull(TypeUtils.toBigDecimal((byte[]) null));
+        assertNull(TypeUtils.toBigDecimal((Object) null));
         assertNull(TypeUtils.toBigDecimal(""));
         assertNull(TypeUtils.toBigDecimal("null"));
         assertEquals(BigDecimal.valueOf(1), TypeUtils.toBigDecimal(1));
+        assertEquals(BigDecimal.valueOf(1), TypeUtils.toBigDecimal(1L));
         assertEquals(BigDecimal.valueOf(1), TypeUtils.toBigDecimal("1"));
 
         assertEquals(byte.class, TypeUtils.loadClass("B"));
@@ -528,5 +531,54 @@ public class TypeUtilsTest {
 
     public static class Bean<T> {
         public T id;
+    }
+
+    @Test
+    public void toBigDecimal() {
+        String[] strings = new String[] {
+                "0",
+                "1",
+                "-1",
+                "10",
+                "-10",
+                "55618.851",
+                "-55618.851",
+                "1234567890123456789",
+                "-1234567890123456789",
+                "12345678901234567890",
+                "-12345678901234567890",
+                "1234e10",
+                "-1234e10",
+                "1234567890.123456789",
+                "-1234567890.123456789",
+                "1234567890.1234567890",
+                "-1234567890.1234567890",
+        };
+        for (String string : strings) {
+            BigDecimal decimal = new BigDecimal(string);
+            assertEquals(decimal, TypeUtils.toBigDecimal(string));
+            assertEquals(decimal, TypeUtils.toBigDecimal(string.getBytes()));
+            assertEquals(decimal, TypeUtils.toBigDecimal(string.toCharArray()));
+        }
+    }
+
+    @Test
+    public void toBigDecimalError() {
+        assertThrows(Exception.class, () -> TypeUtils.toBigDecimal("123.45.67"));
+        assertThrows(Exception.class, () -> TypeUtils.toBigDecimal("123.45.67".getBytes()));
+        assertThrows(Exception.class, () -> TypeUtils.toBigDecimal("123.45.67".toCharArray()));
+
+        assertNull(TypeUtils.toBigDecimal((byte[]) null));
+        assertNull(TypeUtils.toBigDecimal(new byte[0]));
+
+        assertNull(TypeUtils.toBigDecimal((char[]) null));
+        assertNull(TypeUtils.toBigDecimal(new char[0]));
+    }
+
+    @Test
+    public void test() {
+        String str = "123.45";
+        byte[] bytes = str.getBytes();
+        assertArrayEquals(str.toCharArray(), TypeUtils.toAsciiCharArray(bytes));
     }
 }

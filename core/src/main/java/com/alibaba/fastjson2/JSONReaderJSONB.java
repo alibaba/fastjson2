@@ -17,6 +17,7 @@ import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.DateUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
+import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 class JSONReaderJSONB
@@ -3183,7 +3184,7 @@ class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
                 } else {
-                    return new BigDecimal(str).intValue();
+                    return toBigDecimal(str).intValue();
                 }
             }
             case BC_STR_UTF8: {
@@ -3193,7 +3194,7 @@ class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
                 } else {
-                    return new BigDecimal(str).intValue();
+                    return toBigDecimal(str).intValue();
                 }
             }
             case BC_STR_UTF16LE: {
@@ -3203,7 +3204,7 @@ class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
                 } else {
-                    return new BigDecimal(str).intValue();
+                    return toBigDecimal(str).intValue();
                 }
             }
             default:
@@ -3214,7 +3215,7 @@ class JSONReaderJSONB
                     if (str.indexOf('.') == -1) {
                         return new BigInteger(str).longValue();
                     } else {
-                        return new BigDecimal(str).longValue();
+                        return toBigDecimal(str).longValue();
                     }
                 }
                 break;
@@ -3327,7 +3328,7 @@ class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
                 } else {
-                    return new BigDecimal(str).intValue();
+                    return toBigDecimal(str).intValue();
                 }
             }
             case BC_STR_UTF16LE: {
@@ -3337,7 +3338,7 @@ class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
                 } else {
-                    return new BigDecimal(str).intValue();
+                    return toBigDecimal(str).intValue();
                 }
             }
             case BC_STR_UTF8: {
@@ -3347,7 +3348,7 @@ class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
                 } else {
-                    return new BigDecimal(str).intValue();
+                    return toBigDecimal(str).intValue();
                 }
             }
             case BC_DECIMAL: {
@@ -3369,7 +3370,7 @@ class JSONReaderJSONB
                     if (str.indexOf('.') == -1) {
                         return new BigInteger(str).intValue();
                     } else {
-                        return new BigDecimal(str).intValue();
+                        return toBigDecimal(str).intValue();
                     }
                 }
                 break;
@@ -3519,7 +3520,7 @@ class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
                 } else {
-                    return new BigDecimal(str).intValue();
+                    return toBigDecimal(str).intValue();
                 }
             }
             case BC_STR_UTF16LE: {
@@ -3529,7 +3530,7 @@ class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
                 } else {
-                    return new BigDecimal(str).intValue();
+                    return toBigDecimal(str).intValue();
                 }
             }
             case BC_STR_UTF8: {
@@ -3539,7 +3540,7 @@ class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
                 } else {
-                    return new BigDecimal(str).intValue();
+                    return toBigDecimal(str).intValue();
                 }
             }
             case BC_DECIMAL: {
@@ -3599,7 +3600,7 @@ class JSONReaderJSONB
                     if (str.indexOf('.') == -1) {
                         return new BigInteger(str).intValue();
                     } else {
-                        return new BigDecimal(str).intValue();
+                        return toBigDecimal(str).intValue();
                     }
                 }
                 break;
@@ -3680,7 +3681,7 @@ class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
                 } else {
-                    return new BigDecimal(str).intValue();
+                    return toBigDecimal(str).intValue();
                 }
             }
             case BC_STR_UTF16LE: {
@@ -3690,7 +3691,7 @@ class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
                 } else {
-                    return new BigDecimal(str).intValue();
+                    return toBigDecimal(str).intValue();
                 }
             }
             case BC_STR_UTF8: {
@@ -3700,7 +3701,7 @@ class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
                 } else {
-                    return new BigDecimal(str).intValue();
+                    return toBigDecimal(str).intValue();
                 }
             }
             case BC_DECIMAL: {
@@ -3760,7 +3761,7 @@ class JSONReaderJSONB
                     if (str.indexOf('.') == -1) {
                         return new BigInteger(str).intValue();
                     } else {
-                        return new BigDecimal(str).intValue();
+                        return toBigDecimal(str).intValue();
                     }
                 }
                 break;
@@ -3911,13 +3912,13 @@ class JSONReaderJSONB
                 int strlen = readInt32Value();
                 String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
                 offset += strlen;
-                return new BigDecimal(str);
+                return toBigDecimal(str);
             }
             case BC_STR_UTF8: {
                 int strlen = readInt32Value();
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
                 offset += strlen;
-                return new BigDecimal(str);
+                return toBigDecimal(str);
             }
             case BC_TYPED_ANY: {
                 String typeName = readString();
@@ -3928,7 +3929,7 @@ class JSONReaderJSONB
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
                     String str = readFixedAsciiString(strlen);
                     offset += strlen;
-                    return new BigDecimal(str);
+                    return toBigDecimal(str);
                 }
                 break;
         }
@@ -4067,19 +4068,19 @@ class JSONReaderJSONB
                 int strlen = readInt32Value();
                 String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
                 offset += strlen;
-                return new BigDecimal(str);
+                return toBigDecimal(str);
             }
             case BC_STR_UTF16LE: {
                 int strlen = readInt32Value();
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
                 offset += strlen;
-                return new BigDecimal(str);
+                return toBigDecimal(str);
             }
             case BC_STR_UTF8: {
                 int strlen = readInt32Value();
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
                 offset += strlen;
-                return new BigDecimal(str);
+                return toBigDecimal(str);
             }
             default:
                 if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
@@ -4121,7 +4122,7 @@ class JSONReaderJSONB
                     int strlen = type - BC_STR_ASCII_FIX_MIN;
                     String str = readFixedAsciiString(strlen);
                     offset += strlen;
-                    return new BigDecimal(str);
+                    return toBigDecimal(str);
                 }
                 break;
         }
@@ -4237,7 +4238,7 @@ class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str);
                 } else {
-                    return new BigDecimal(str).toBigInteger();
+                    return toBigDecimal(str).toBigInteger();
                 }
             }
             case BC_STR_UTF8: {
@@ -4247,7 +4248,7 @@ class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str);
                 } else {
-                    return new BigDecimal(str).toBigInteger();
+                    return toBigDecimal(str).toBigInteger();
                 }
             }
             case BC_STR_UTF16LE: {
@@ -4257,7 +4258,7 @@ class JSONReaderJSONB
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str);
                 } else {
-                    return new BigDecimal(str).toBigInteger();
+                    return toBigDecimal(str).toBigInteger();
                 }
             }
             default:
