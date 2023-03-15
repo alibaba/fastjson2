@@ -487,7 +487,7 @@ public final class ObjectReaderImplList
         }
 
         if (!jsonReader.nextIfMatch('[')) {
-            if (itemClass != Object.class && itemObjectReader != null) {
+            if ((itemClass != Object.class && itemObjectReader != null) || (itemClass == Object.class && jsonReader.isObject())) {
                 Object item = itemObjectReader.readObject(jsonReader, itemType, 0, 0);
                 list.add(item);
                 if (builder != null) {
