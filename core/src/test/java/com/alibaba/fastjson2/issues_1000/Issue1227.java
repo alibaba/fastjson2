@@ -1,10 +1,17 @@
 package com.alibaba.fastjson2.issues_1000;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderBean;
+import com.alibaba.fastjson2.reader.ObjectReaderImplDate;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.Locale;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Issue1227 {
     @Test
@@ -33,6 +40,25 @@ public class Issue1227 {
         assertEquals(bean.sqlDate, bean2.sqlDate);
         assertEquals(bean.timestamp, bean2.timestamp);
         assertEquals(bean.utilDate, bean2.utilDate);
+    }
+
+    @Test
+    public void test1() {
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+        ObjectReaderImplDate dateReader = ObjectReaderImplDate.of("yyyy-MM-dd HH:mm:ss zzz", Locale.CHINA);
+        provider.register(java.util.Date.class, dateReader);
+        ObjectReaderBean objectReader = (ObjectReaderBean) provider.getObjectReader(Bean.class);
+        JSONReader.Context context = JSONFactory.createReadContext(provider);
+        ObjectReader dateReader1 = objectReader
+                .getFieldReader("utilDate")
+                .getObjectReader(context);
+        assertSame(dateReader, dateReader1);
+
+        String str = "{\"sqlDate\":\"2021-11-11 12:12:12 CST\",\"timestamp\":\"2023-03-13 09:41:16.404 CST\",\"utilDate\":\"2020-12-31 00:00:00 CST\"}";
+        Bean bean = JSON.parseObject(str, Bean.class, context);
+        assertNotNull(bean.sqlDate);
+        assertNotNull(bean.timestamp);
+        assertNotNull(bean.utilDate);
     }
 
     public static class Bean {
