@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
+
 public class ToBigDecimal
         implements Function {
     @Override
@@ -31,7 +33,8 @@ public class ToBigDecimal
         }
 
         if (o instanceof Float || o instanceof Double) {
-            return BigDecimal.valueOf(((Number) o).doubleValue());
+            double doubleValue = ((Number) o).doubleValue();
+            return toBigDecimal(doubleValue);
         }
 
         if (o instanceof BigInteger) {

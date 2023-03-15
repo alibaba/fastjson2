@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.util;
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.reader.*;
 
+import java.lang.invoke.*;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -14,6 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
+
+import static java.lang.invoke.MethodType.methodType;
 
 public class TypeUtils {
     public static final Class CLASS_JSON_OBJECT_1x;
@@ -28,6 +31,48 @@ public class TypeUtils {
     public static final Class CLASS_UNMODIFIABLE_SORTED_SET = Collections.unmodifiableSortedSet(new TreeSet<>()).getClass();
     public static final Class CLASS_UNMODIFIABLE_NAVIGABLE_SET = Collections.unmodifiableNavigableSet(new TreeSet<>()).getClass();
     public static final ParameterizedType PARAM_TYPE_LIST_STR = new ParameterizedTypeImpl(List.class, String.class);
+
+    static class X1 {
+        static final Function<byte[], char[]> TO_CHARS;
+
+        static {
+            Function<byte[], char[]> toChars = null;
+            if (JDKUtils.JVM_VERSION > 9) {
+                try {
+                    Class<?> latin1Class = Class.forName("java.lang.StringLatin1");
+                    MethodHandles.Lookup lookup = JDKUtils.trustedLookup(latin1Class);
+                    MethodHandle handle = lookup.findStatic(
+                            latin1Class, "toChars", MethodType.methodType(char[].class, byte[].class)
+                    );
+
+                    CallSite callSite = LambdaMetafactory.metafactory(
+                            lookup,
+                            "apply",
+                            methodType(Function.class),
+                            methodType(Object.class, Object.class),
+                            handle,
+                            methodType(char[].class, byte[].class)
+                    );
+                    toChars = (Function<byte[], char[]>) callSite.getTarget().invokeExact();
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            }
+
+            if (toChars == null) {
+                toChars = TypeUtils::toAsciiCharArray;
+            }
+            TO_CHARS = toChars;
+        }
+    }
+
+    static char[] toAsciiCharArray(byte[] bytes) {
+        char[] charArray = new char[bytes.length];
+        for (int i = 0; i < bytes.length; i++) {
+            charArray[i] = (char) bytes[i];
+        }
+        return charArray;
+    }
 
     public static Type intern(Type type) {
         if (type instanceof ParameterizedType) {
@@ -1597,6 +1642,128 @@ public class TypeUtils {
         }
 
         throw new JSONException("can not cast to decimal from " + value.getClass());
+    }
+
+    public static BigDecimal toBigDecimal(long i) {
+        return BigDecimal.valueOf(i);
+    }
+
+    public static BigDecimal toBigDecimal(float f) {
+        return toBigDecimal(Float.toString(f));
+    }
+
+    public static BigDecimal toBigDecimal(double d) {
+        return toBigDecimal(Double.toString(d));
+    }
+
+    public static BigDecimal toBigDecimal(String str) {
+        if (str == null || str.isEmpty() || "null".equals(str)) {
+            return null;
+        }
+
+        if (JDKUtils.STRING_CODER != null) {
+            int code = JDKUtils.STRING_CODER.applyAsInt(str);
+            if (code == JDKUtils.LATIN1 && JDKUtils.STRING_VALUE != null) {
+                byte[] bytes = JDKUtils.STRING_VALUE.apply(str);
+                return toBigDecimal(bytes);
+            }
+        }
+
+        char[] chars = JDKUtils.getCharArray(str);
+        return toBigDecimal(chars);
+    }
+
+    public static BigDecimal toBigDecimal(char[] chars) {
+        if (chars == null || chars.length == 0) {
+            return null;
+        }
+
+        boolean negative = false;
+        int j = 0;
+        if (chars[0] == '-') {
+            negative = true;
+            j = 1;
+        }
+
+        if (chars.length <= 20 || (negative && chars.length == 21)) {
+            int dot = 0;
+            int dotIndex = -1;
+            long unscaleValue = 0;
+            for (; j < chars.length; j++) {
+                char b = chars[j];
+                if (b == '.') {
+                    dot++;
+                    if (dot > 1) {
+                        break;
+                    }
+                    dotIndex = j;
+                } else if (b >= '0' && b <= '9') {
+                    unscaleValue = unscaleValue * 10 + (b - '0');
+                } else {
+                    unscaleValue = -1;
+                    break;
+                }
+            }
+            int scale = 0;
+            if (unscaleValue >= 0 && dot <= 1) {
+                if (negative) {
+                    unscaleValue = -unscaleValue;
+                }
+                if (dotIndex != -1) {
+                    scale = chars.length - dotIndex - 1;
+                }
+                return BigDecimal.valueOf(unscaleValue, scale);
+            }
+        }
+
+        return new BigDecimal(chars, 0, chars.length);
+    }
+
+    public static BigDecimal toBigDecimal(byte[] strBytes) {
+        if (strBytes == null || strBytes.length == 0) {
+            return null;
+        }
+
+        boolean negative = false;
+        int j = 0;
+        if (strBytes[0] == '-') {
+            negative = true;
+            j = 1;
+        }
+
+        if (strBytes.length <= 20 || (negative && strBytes.length == 21)) {
+            int dot = 0;
+            int dotIndex = -1;
+            long unscaleValue = 0;
+            for (; j < strBytes.length; j++) {
+                byte b = strBytes[j];
+                if (b == '.') {
+                    dot++;
+                    if (dot > 1) {
+                        break;
+                    }
+                    dotIndex = j;
+                } else if (b >= '0' && b <= '9') {
+                    unscaleValue = unscaleValue * 10 + (b - '0');
+                } else {
+                    unscaleValue = -1;
+                    break;
+                }
+            }
+            int scale = 0;
+            if (unscaleValue >= 0 && dot <= 1) {
+                if (negative) {
+                    unscaleValue = -unscaleValue;
+                }
+                if (dotIndex != -1) {
+                    scale = strBytes.length - dotIndex - 1;
+                }
+                return BigDecimal.valueOf(unscaleValue, scale);
+            }
+        }
+
+        char[] chars = X1.TO_CHARS.apply(strBytes);
+        return new BigDecimal(chars, 0, chars.length);
     }
 
     public static BigInteger toBigInteger(Object value) {

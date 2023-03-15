@@ -40,6 +40,8 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
+
 /**
  * @author wenshao[szujobs@hotmail.com]
  */
@@ -736,10 +738,14 @@ public class JSONObject
                 return new BigDecimal((BigInteger) value);
             }
 
-            if (value instanceof Float
-                    || value instanceof Double) {
-                // Floating point number have no cached BigDecimal
-                return new BigDecimal(value.toString());
+            if (value instanceof Float) {
+                float floatValue = ((Float) value).floatValue();
+                return toBigDecimal(floatValue);
+            }
+
+            if (value instanceof Double) {
+                double doubleValue = ((Double) value).doubleValue();
+                return toBigDecimal(doubleValue);
             }
 
             long longValue = ((Number) value).longValue();
@@ -747,13 +753,7 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            String str = (String) value;
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                return null;
-            }
-
-            return new BigDecimal(str);
+            return toBigDecimal((String) value);
         }
 
         throw new JSONException("Can not cast '" + value.getClass() + "' to BigDecimal");

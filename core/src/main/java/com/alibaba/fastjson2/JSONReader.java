@@ -30,6 +30,7 @@ import java.util.function.Supplier;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
+import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
 public abstract class JSONReader
         implements Closeable {
@@ -2187,19 +2188,19 @@ public abstract class JSONReader
                 if (exponent != 0) {
                     String doubleStr = decimal.toPlainString() + "E" + exponent;
                     double doubleValue = Double.parseDouble(doubleStr);
-                    return BigDecimal.valueOf(doubleValue);
+                    return toBigDecimal(doubleValue);
                 }
 
                 return decimal;
             }
             case JSON_TYPE_BIG_DEC: {
-                return new BigDecimal(stringValue);
+                return toBigDecimal(stringValue);
             }
             case JSON_TYPE_BOOL:
                 return boolValue ? BigDecimal.ONE : BigDecimal.ZERO;
             case JSON_TYPE_STRING: {
                 try {
-                    return new BigDecimal(stringValue);
+                    return toBigDecimal(stringValue);
                 } catch (NumberFormatException ex) {
                     throw new JSONException(info("read decimal error, value " + stringValue), ex);
                 }
@@ -2459,7 +2460,7 @@ public abstract class JSONReader
             }
             case JSON_TYPE_BIG_DEC: {
                 if (scale > 0) {
-                    return new BigDecimal(stringValue);
+                    return toBigDecimal(stringValue);
                 } else {
                     return new BigInteger(stringValue);
                 }
@@ -2572,7 +2573,7 @@ public abstract class JSONReader
             }
 
             if (val instanceof String) {
-                return new BigDecimal((String) val);
+                return toBigDecimal((String) val);
             }
         }
         return null;
