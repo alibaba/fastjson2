@@ -439,6 +439,11 @@ public abstract class JSONPath {
         return JSONPathTyped.of(jsonPath, type);
     }
 
+    public static JSONPath of(String path, Type type, Feature... features) {
+        JSONPath jsonPath = of(path, features);
+        return JSONPathTyped.of(jsonPath, type);
+    }
+
     /**
      * create multi-path jsonpath
      *
@@ -1138,7 +1143,9 @@ public abstract class JSONPath {
 
     public enum Feature {
         AlwaysReturnList(1),
-        NullOnError(1 << 1);
+        NullOnError(1 << 1),
+        KeepNullValue(1 << 2);
+
         public final long mask;
 
         Feature(long mask) {
