@@ -2079,6 +2079,8 @@ public class ObjectReaderBaseModule
                 return JdbcSupport.createTimestampReader((Class) type, null, null);
             case "java.sql.Date":
                 return JdbcSupport.createDateReader((Class) type, null, null);
+            case "java.util.RegularEnumSet":
+                return ObjectReaderImplList.INSTANCE;
             case "org.joda.time.Chronology":
                 return JodaSupport.createChronologyReader((Class) type);
             case "org.joda.time.LocalDate":
