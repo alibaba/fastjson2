@@ -18,6 +18,7 @@ public class BigDecimalNewTest {
             // zulu8.58.0.13 : 3874
             // zulu11.52.13 :
             // zulu17.38.21 :
+            // zulu21.0.35 : 2739
         }
     }
 
@@ -32,6 +33,7 @@ public class BigDecimalNewTest {
             // zulu8.58.0.13 :
             // zulu11.52.13 :
             // zulu17.38.21 :
+            // zulu21.0.35 : 2307
         }
     }
 
@@ -46,6 +48,7 @@ public class BigDecimalNewTest {
             // zulu8.58.0.13 :
             // zulu11.52.13 :
             // zulu17.38.21 :
+            // zulu21.0.35 : 1367
         }
     }
 
@@ -88,6 +91,7 @@ public class BigDecimalNewTest {
             // zulu8.58.0.13 :
             // zulu11.52.13 :
             // zulu17.40.19 : 1191
+            // zulu21.0.35 : 1248
         }
     }
 

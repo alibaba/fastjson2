@@ -1,15 +1,10 @@
 package com.alibaba.fastjson2.benchmark.fastcode;
 
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.infra.Blackhole;
 
-import java.lang.invoke.*;
 import java.math.BigDecimal;
-import java.util.function.Function;
-
-import static java.lang.invoke.MethodType.methodType;
 
 public class BigDecimalNew {
     @Benchmark
@@ -53,7 +48,7 @@ public class BigDecimalNew {
     public void chars2(Blackhole bh) throws Throwable {
         for (int i = 0; i < decimalBytes.length; i++) {
             byte[] bytes = decimalBytes[i];
-            char[] chars = TO_CHARS.apply(bytes);
+            char[] chars = toAsciiCharArray(bytes);
             BigDecimal decimal = new BigDecimal(chars, 0, chars.length);
             bh.consume(decimal);
         }
@@ -181,7 +176,6 @@ public class BigDecimalNew {
     };
 
     static final byte[][] decimalBytes;
-    static final Function<byte[], char[]> TO_CHARS;
 
     static {
         byte[][] array2 = new byte[strings.length][];
@@ -189,32 +183,5 @@ public class BigDecimalNew {
             array2[i] = strings[i].getBytes();
         }
         decimalBytes = array2;
-
-        Function<byte[], char[]> toChars = null;
-        try {
-            Class<?> latin1Class = Class.forName("java.lang.StringLatin1");
-            MethodHandles.Lookup lookup = JDKUtils.trustedLookup(latin1Class);
-            MethodHandle handle = lookup.findStatic(
-                    latin1Class, "toChars", MethodType.methodType(char[].class, byte[].class)
-            );
-
-            CallSite callSite = LambdaMetafactory.metafactory(
-                    lookup,
-                    "apply",
-                    methodType(Function.class),
-                    methodType(Object.class, Object.class),
-                    handle,
-                    methodType(char[].class, byte[].class)
-            );
-            toChars = (Function<byte[], char[]>) callSite.getTarget().invokeExact();
-        } catch (Throwable ignored) {
-            ignored.printStackTrace();
-            // ignored
-        }
-
-        if (toChars == null) {
-            toChars = BigDecimalNew::toAsciiCharArray;
-        }
-        TO_CHARS = toChars;
     }
 }
