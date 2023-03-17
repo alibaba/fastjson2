@@ -16,7 +16,7 @@ public class SeeAlsoTest5 {
         assertEquals(123, bean.id);
     }
 
-    @JSONType(seeAlso = {Bean.class})
+    @JSONType(seeAlso = Bean.class)
     public interface IBean {
     }
 
