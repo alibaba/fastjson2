@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONType;
 import org.junit.jupiter.api.Test;
 
@@ -12,13 +11,12 @@ public class SeeAlsoTest5 {
     public void test() {
         Bean bean = (Bean) JSON.parseObject(
                 "{\"@type\":\"com.alibaba.fastjson2.codec.SeeAlsoTest5$Bean\",\"id\":123}",
-                IBean.class,
-                JSONReader.Feature.SupportAutoType
+                IBean.class
         );
         assertEquals(123, bean.id);
     }
 
-    @JSONType(seeAlso = {})
+    @JSONType(seeAlso = {Bean.class})
     public interface IBean {
     }
 
