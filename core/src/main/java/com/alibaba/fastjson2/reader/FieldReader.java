@@ -34,6 +34,7 @@ public abstract class FieldReader<T>
 
     volatile JSONPath referenceCache;
     final boolean noneStaticMemberClass;
+    final boolean readOnly;
 
     Type itemType;
     Class itemClass;
@@ -83,6 +84,14 @@ public abstract class FieldReader<T>
         this.schema = schema;
         this.method = method;
         this.field = field;
+
+        boolean readOnly = false;
+        if (method != null && method.getParameterCount() == 0) {
+            readOnly = true;
+        } else if (field != null && Modifier.isFinal(field.getModifiers())) {
+            readOnly = true;
+        }
+        this.readOnly = readOnly;
 
         long fieldOffset = -1L;
         if (field != null && JDKUtils.UNSAFE_SUPPORT && (features & FieldInfo.DISABLE_UNSAFE) == 0) {
@@ -345,7 +354,7 @@ public abstract class FieldReader<T>
     }
 
     public boolean isReadOnly() {
-        return false;
+        return readOnly;
     }
 
     public ObjectReader getInitReader() {
