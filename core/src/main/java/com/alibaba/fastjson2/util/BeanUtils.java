@@ -2495,4 +2495,32 @@ public abstract class BeanUtils {
             }
         });
     }
+
+    public static void processGsonSerializedName(FieldInfo fieldInfo, Annotation annotation) {
+        Class<? extends Annotation> annotationClass = annotation.getClass();
+        BeanUtils.annotationMethods(annotationClass, m -> {
+            String name = m.getName();
+            try {
+                Object result = m.invoke(annotation);
+                switch (name) {
+                    case "value":
+                        String value = (String) result;
+                        if (!value.isEmpty()) {
+                            fieldInfo.fieldName = value;
+                        }
+                        break;
+                    case "alternate":
+                        String[] alternate = (String[]) result;
+                        if (alternate.length != 0) {
+                            fieldInfo.alternateNames = alternate;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        });
+    }
 }
