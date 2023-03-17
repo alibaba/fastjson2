@@ -380,6 +380,9 @@ public class ObjectWriterBaseModule
                             processJacksonJsonSerialize(fieldInfo, annotation);
                         }
                         break;
+                    case "com.google.gson.annotations.SerializedName":
+                        processGsonSerializedName(fieldInfo, annotation);
+                        break;
                     default:
                         break;
                 }

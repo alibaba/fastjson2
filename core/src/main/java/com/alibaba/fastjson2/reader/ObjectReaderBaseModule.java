@@ -815,6 +815,9 @@ public class ObjectReaderBaseModule
                             processJacksonJsonAlias(fieldInfo, annotation);
                         }
                         break;
+                    case "com.google.gson.annotations.SerializedName":
+                        processGsonSerializedName(fieldInfo, annotation);
+                        break;
                     default:
                         break;
                 }
@@ -930,6 +933,9 @@ public class ObjectReaderBaseModule
                         if (useJacksonAnnotation) {
                             processJacksonJsonAlias(fieldInfo, annotation);
                         }
+                        break;
+                    case "com.google.gson.annotations.SerializedName":
+                        processGsonSerializedName(fieldInfo, annotation);
                         break;
                     default:
                         break;
