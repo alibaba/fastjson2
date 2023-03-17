@@ -1906,14 +1906,6 @@ public class ObjectReaderBaseModule
                     //
                 }
             }
-
-            if (objectClass.isInterface()) {
-                BeanInfo beanInfo = new BeanInfo();
-                annotationProcessor.getBeanInfo(beanInfo, objectClass);
-                if (beanInfo.seeAlso != null && beanInfo.seeAlso.length == 0) {
-                    return new ObjectReaderInterfaceImpl(type);
-                }
-            }
         }
 
         if (type instanceof ParameterizedType) {
