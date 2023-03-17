@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.function.*;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -127,13 +128,27 @@ public class ObjectReaders {
         return ObjectReaderCreator.INSTANCE.createFieldReader(fieldName, fieldType, fieldClass, null, function);
     }
 
-    public static <T, U> FieldReader fieldReader(
+    public static <T, V> FieldReader fieldReader(
             String fieldName,
             Type fieldType,
-            BiConsumer<T, U> consumer,
-            ObjectReader<U> fieldObjectReader
+            BiConsumer<T, V> consumer,
+            ObjectReader<V> fieldObjectReader
     ) {
-        return new FieldReaderObjectFunc2<>(fieldObjectReader, consumer, fieldType, fieldName);
+//        return new FieldReaderObjectFunc2<>(fieldObjectReader, consumer, fieldType, fieldName);
+        return new FieldReaderObjectFunc<>(
+                fieldName,
+                fieldType,
+                (Class<V>) TypeUtils.getClass(fieldType),
+                0,
+                0,
+                null,
+                null,
+                null,
+                null,
+                null,
+                consumer,
+                fieldObjectReader
+        );
     }
 
     public static <T, V> FieldReader fieldReaderList(

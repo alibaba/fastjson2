@@ -1,9 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONSchemaValidException;
-import com.alibaba.fastjson2.TestUtils;
+import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.annotation.JSONCompiler;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -88,6 +86,33 @@ public class FieldReaderBigIntegerFuncTest {
     public static class Bean2 {
         public void setValue(BigInteger value) {
             throw new UnsupportedOperationException();
+        }
+    }
+
+    @Test
+    public void test3() {
+        Bean3 bean = new Bean3();
+        bean.value = BigInteger.valueOf(256);
+        String str = JSON.toJSONString(bean);
+        assertEquals("{\"value\":256}", str);
+        Bean3 bean1 = JSON.parseObject(str, Bean3.class);
+        assertEquals(bean.value, bean1.value);
+
+        Bean3 bean2 = JSON.parseObject(str).toJavaObject(Bean3.class);
+        assertEquals(bean.value, bean2.value);
+    }
+
+    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
+    private static class Bean3 {
+        @JSONField(schema = "{'minimum':128}")
+        private BigInteger value;
+
+        public BigInteger getValue() {
+            return value;
+        }
+
+        public void setValue(BigInteger value) {
+            this.value = value;
         }
     }
 }

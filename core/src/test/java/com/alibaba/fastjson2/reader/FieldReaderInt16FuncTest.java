@@ -1,9 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONSchemaValidException;
-import com.alibaba.fastjson2.TestUtils;
+import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.annotation.JSONCompiler;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +37,7 @@ public class FieldReaderInt16FuncTest {
         );
     }
 
+    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean {
         private Short value;
 
@@ -72,6 +71,7 @@ public class FieldReaderInt16FuncTest {
         );
     }
 
+    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean1 {
         @JSONField(schema = "{'minimum':128}")
         private Short value;
@@ -98,6 +98,7 @@ public class FieldReaderInt16FuncTest {
         assertThrows(Exception.class, () -> fieldReader.accept(bean, 123D));
     }
 
+    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean2 {
         public void setValue(Short value) {
             throw new UnsupportedOperationException();
@@ -115,6 +116,7 @@ public class FieldReaderInt16FuncTest {
         );
     }
 
+    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean3 {
         private Short value;
         public final int id;
@@ -122,6 +124,33 @@ public class FieldReaderInt16FuncTest {
         public Bean3(@JSONField(name = "id") int id) {
             this.id = id;
         }
+
+        public Short getValue() {
+            return value;
+        }
+
+        public void setValue(Short value) {
+            this.value = value;
+        }
+    }
+
+    @Test
+    public void test4() {
+        Bean4 bean = new Bean4();
+        bean.value = Short.valueOf((short) 256);
+        String str = JSON.toJSONString(bean);
+        assertEquals("{\"value\":256}", str);
+        Bean4 bean1 = JSON.parseObject(str, Bean4.class);
+        assertEquals(bean.value, bean1.value);
+
+        Bean4 bean2 = JSON.parseObject(str).toJavaObject(Bean4.class);
+        assertEquals(bean.value, bean2.value);
+    }
+
+    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
+    private static class Bean4 {
+        @JSONField(schema = "{'minimum':128}")
+        private Short value;
 
         public Short getValue() {
             return value;
