@@ -17,9 +17,11 @@ import static java.lang.invoke.MethodType.methodType;
 
 public class AsciiToChars {
     static final Function<byte[], char[]> TO_CHARS;
+    static final MethodHandle INFLATE;
 
     static {
         Function<byte[], char[]> toChars = null;
+        MethodHandle inflate = null;
         if (JDKUtils.JVM_VERSION > 9) {
             try {
                 Class<?> latin1Class = Class.forName("java.lang.StringLatin1");
@@ -37,6 +39,12 @@ public class AsciiToChars {
                         methodType(char[].class, byte[].class)
                 );
                 toChars = (Function<byte[], char[]>) callSite.getTarget().invokeExact();
+
+                inflate = lookup.findStatic(
+                        latin1Class,
+                        "inflate",
+                        MethodType.methodType(void.class, byte[].class, int.class, char[].class, int.class, int.class)
+                );
             } catch (Throwable ignored) {
                 // ignored
             }
@@ -46,6 +54,8 @@ public class AsciiToChars {
             toChars = AsciiToChars::toAsciiCharArray;
         }
         TO_CHARS = toChars;
+
+        INFLATE = inflate;
     }
 
     @Benchmark
@@ -62,6 +72,20 @@ public class AsciiToChars {
         for (int i = 0; i < bytesArray.length; i++) {
             byte[] bytes = bytesArray[i];
             char[] chars = TO_CHARS.apply(bytes);
+            bh.consume(chars);
+        }
+    }
+
+    @Benchmark
+    public void mh_inflate(Blackhole bh) throws Throwable {
+        if (INFLATE == null) {
+            return;
+        }
+
+        for (int i = 0; i < bytesArray.length; i++) {
+            byte[] bytes = bytesArray[i];
+            char[] chars = new char[bytes.length];
+            INFLATE.invokeExact(bytes, 0, chars, 0, bytes.length);
             bh.consume(chars);
         }
     }
