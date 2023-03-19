@@ -14,6 +14,7 @@ public class Eishay {
                 .include(Eishay.class.getName())
                 .exclude(EishayParseStringNoneCache.class.getName())
                 .exclude(EishayWriteStringNoneCache.class.getName())
+                .exclude(EishayWriteStringTree1x.class.getName())
                 .exclude(EishayFury.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
