@@ -118,7 +118,7 @@ public class EishayParseBinaryAutoType {
         );
     }
 
-    @Benchmark
+//    @Benchmark
     public void fastjson2JSONB_autoTypeFilter(Blackhole bh) {
         bh.consume(
                 JSONB.parseObject(

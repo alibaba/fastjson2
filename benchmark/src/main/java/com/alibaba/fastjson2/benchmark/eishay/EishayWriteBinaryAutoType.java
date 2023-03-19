@@ -46,7 +46,7 @@ public class EishayWriteBinaryAutoType {
         }
     }
 
-    @Benchmark
+//    @Benchmark
     public void fastjson2UTF8Bytes(Blackhole bh) {
         bh.consume(JSON.toJSONBytes(mc, JSONWriter.Feature.WriteClassName));
     }
