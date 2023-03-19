@@ -7,8 +7,11 @@ import java.util.List;
 public class ReadResult {
     public static void main(String[] args) throws Exception {
 //        File file = new File("/Users/wenshao/Downloads/result_2.0.25.out");
-        File file = new File("/Users/wenshao/Downloads/result_2.0.25_c7.out");
-        DocReader reader = new DocReader("ecs.c7.xlarge", file);
+        File file = new File("/Users/wenshao/Downloads/result_2.0.26_applem1pro.out");
+//        DocReader reader = new DocReader("ecs.c7.xlarge", file);
+//        DocReader reader = new DocReader("ecs.g8m.xlarge", file);
+//        DocReader reader = new DocReader("OrangePi5", file);
+        DocReader reader = new DocReader("AppleM1Pro", file);
         reader.read();
         for (String line : reader.blockLines) {
             System.out.println(line);
