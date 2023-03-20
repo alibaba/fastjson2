@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.support.hppc;
+package com.alibaba.fastjson2.support;
 
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaders;
@@ -10,10 +10,11 @@ import java.lang.invoke.*;
 import java.lang.reflect.Type;
 import java.util.function.*;
 
-public class HppcSupport {
+import static com.alibaba.fastjson2.util.TypeUtils.METHOD_TYPE_FUNCTION;
+import static com.alibaba.fastjson2.util.TypeUtils.METHOD_TYPE_OBJECT_OBJECT;
+
+public class LambdaMiscCodec {
     static volatile boolean hppcError;
-    static final MethodType METHOD_TYPE_FUNCTION = MethodType.methodType(Function.class);
-    static final MethodType METHOD_TYPE_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class);
 
     public static ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
         if (hppcError) {
@@ -23,6 +24,9 @@ public class HppcSupport {
         String className = objectClass.getName();
 
         switch (className) {
+            case "gnu.trove.set.hash.TByteHashSet":
+            case "gnu.trove.stack.array.TByteArrayStack":
+            case "gnu.trove.list.array.TByteArrayList":
             case "com.carrotsearch.hppc.ByteArrayList": {
                 MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
@@ -45,6 +49,8 @@ public class HppcSupport {
                 }
                 break;
             }
+            case "gnu.trove.set.hash.TShortHashSet":
+            case "gnu.trove.list.array.TShortArrayList":
             case "com.carrotsearch.hppc.ShortArrayList": {
                 MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
@@ -67,6 +73,8 @@ public class HppcSupport {
                 }
                 break;
             }
+            case "gnu.trove.list.array.TIntArrayList":
+            case "gnu.trove.set.hash.TIntHashSet":
             case "com.carrotsearch.hppc.IntArrayList":
             case "com.carrotsearch.hppc.IntHashSet": {
                 MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
@@ -90,6 +98,8 @@ public class HppcSupport {
                 }
                 break;
             }
+            case "gnu.trove.list.array.TLongArrayList":
+            case "gnu.trove.set.hash.TLongHashSet":
             case "com.carrotsearch.hppc.LongArrayList":
             case "com.carrotsearch.hppc.LongHashSet": {
                 MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
@@ -113,6 +123,7 @@ public class HppcSupport {
                 }
                 break;
             }
+            case "gnu.trove.list.array.TCharArrayList":
             case "com.carrotsearch.hppc.CharArrayList":
             case "com.carrotsearch.hppc.CharHashSet": {
                 MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
@@ -136,6 +147,7 @@ public class HppcSupport {
                 }
                 break;
             }
+            case "gnu.trove.list.array.TFloatArrayList":
             case "com.carrotsearch.hppc.FloatArrayList": {
                 MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
@@ -158,6 +170,7 @@ public class HppcSupport {
                 }
                 break;
             }
+            case "gnu.trove.list.array.TDoubleArrayList":
             case "com.carrotsearch.hppc.DoubleArrayList": {
                 MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
@@ -366,6 +379,165 @@ public class HppcSupport {
                 MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
                     MethodHandle methodHandle = lookup.findStatic(objectClass, "from", MethodType.methodType(objectClass, double[].class));
+
+                    CallSite callSite = LambdaMetafactory.metafactory(
+                            lookup,
+                            "apply",
+                            METHOD_TYPE_FUNCTION,
+                            METHOD_TYPE_OBJECT_OBJECT,
+                            methodHandle,
+                            MethodType.methodType(objectClass, double[].class)
+                    );
+                    MethodHandle target = callSite.getTarget();
+                    Function<double[], Object> function = (Function<double[], Object>) target.invokeExact();
+                    return ObjectReaders.fromDoubleArray(function);
+                } catch (Throwable ignored) {
+                    hppcError = true;
+                    // ignored
+                }
+                break;
+            }
+            case "gnu.trove.set.hash.TByteHashSet":
+            case "gnu.trove.stack.array.TByteArrayStack":
+            case "gnu.trove.list.array.TByteArrayList": {
+                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
+                try {
+                    MethodHandle methodHandle = lookup.findConstructor(objectClass, MethodType.methodType(void.class, byte[].class));
+
+                    CallSite callSite = LambdaMetafactory.metafactory(
+                            lookup,
+                            "apply",
+                            METHOD_TYPE_FUNCTION,
+                            METHOD_TYPE_OBJECT_OBJECT,
+                            methodHandle,
+                            MethodType.methodType(objectClass, byte[].class)
+                    );
+                    MethodHandle target = callSite.getTarget();
+                    Function<byte[], Object> function = (Function<byte[], Object>) target.invokeExact();
+                    return ObjectReaders.fromByteArray(function);
+                } catch (Throwable ignored) {
+                    hppcError = true;
+                    // ignored
+                }
+                break;
+            }
+            case "gnu.trove.list.array.TCharArrayList": {
+                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
+                try {
+                    MethodHandle methodHandle = lookup.findConstructor(objectClass, MethodType.methodType(void.class, char[].class));
+
+                    CallSite callSite = LambdaMetafactory.metafactory(
+                            lookup,
+                            "apply",
+                            METHOD_TYPE_FUNCTION,
+                            METHOD_TYPE_OBJECT_OBJECT,
+                            methodHandle,
+                            MethodType.methodType(objectClass, char[].class)
+                    );
+                    MethodHandle target = callSite.getTarget();
+                    Function<char[], Object> function = (Function<char[], Object>) target.invokeExact();
+                    return ObjectReaders.fromCharArray(function);
+                } catch (Throwable ignored) {
+                    hppcError = true;
+                    // ignored
+                }
+                break;
+            }
+            case "gnu.trove.set.hash.TShortHashSet":
+            case "gnu.trove.list.array.TShortArrayList": {
+                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
+                try {
+                    MethodHandle methodHandle = lookup.findConstructor(objectClass, MethodType.methodType(void.class, short[].class));
+
+                    CallSite callSite = LambdaMetafactory.metafactory(
+                            lookup,
+                            "apply",
+                            METHOD_TYPE_FUNCTION,
+                            METHOD_TYPE_OBJECT_OBJECT,
+                            methodHandle,
+                            MethodType.methodType(objectClass, short[].class)
+                    );
+                    MethodHandle target = callSite.getTarget();
+                    Function<short[], Object> function = (Function<short[], Object>) target.invokeExact();
+                    return ObjectReaders.fromShortArray(function);
+                } catch (Throwable ignored) {
+                    hppcError = true;
+                    // ignored
+                }
+                break;
+            }
+            case "gnu.trove.set.hash.TIntHashSet":
+            case "gnu.trove.list.array.TIntArrayList": {
+                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
+                try {
+                    MethodHandle methodHandle = lookup.findConstructor(objectClass, MethodType.methodType(void.class, int[].class));
+
+                    CallSite callSite = LambdaMetafactory.metafactory(
+                            lookup,
+                            "apply",
+                            METHOD_TYPE_FUNCTION,
+                            METHOD_TYPE_OBJECT_OBJECT,
+                            methodHandle,
+                            MethodType.methodType(objectClass, int[].class)
+                    );
+                    MethodHandle target = callSite.getTarget();
+                    Function<int[], Object> function = (Function<int[], Object>) target.invokeExact();
+                    return ObjectReaders.fromIntArray(function);
+                } catch (Throwable ignored) {
+                    hppcError = true;
+                    // ignored
+                }
+                break;
+            }
+            case "gnu.trove.set.hash.TLongHashSet":
+            case "gnu.trove.list.array.TLongArrayList": {
+                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
+                try {
+                    MethodHandle methodHandle = lookup.findConstructor(objectClass, MethodType.methodType(void.class, long[].class));
+
+                    CallSite callSite = LambdaMetafactory.metafactory(
+                            lookup,
+                            "apply",
+                            METHOD_TYPE_FUNCTION,
+                            METHOD_TYPE_OBJECT_OBJECT,
+                            methodHandle,
+                            MethodType.methodType(objectClass, long[].class)
+                    );
+                    MethodHandle target = callSite.getTarget();
+                    Function<long[], Object> function = (Function<long[], Object>) target.invokeExact();
+                    return ObjectReaders.fromLongArray(function);
+                } catch (Throwable ignored) {
+                    hppcError = true;
+                    // ignored
+                }
+                break;
+            }
+            case "gnu.trove.list.array.TFloatArrayList": {
+                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
+                try {
+                    MethodHandle methodHandle = lookup.findConstructor(objectClass, MethodType.methodType(void.class, float[].class));
+
+                    CallSite callSite = LambdaMetafactory.metafactory(
+                            lookup,
+                            "apply",
+                            METHOD_TYPE_FUNCTION,
+                            METHOD_TYPE_OBJECT_OBJECT,
+                            methodHandle,
+                            MethodType.methodType(objectClass, float[].class)
+                    );
+                    MethodHandle target = callSite.getTarget();
+                    Function<float[], Object> function = (Function<float[], Object>) target.invokeExact();
+                    return ObjectReaders.fromFloatArray(function);
+                } catch (Throwable ignored) {
+                    hppcError = true;
+                    // ignored
+                }
+                break;
+            }
+            case "gnu.trove.list.array.TDoubleArrayList": {
+                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
+                try {
+                    MethodHandle methodHandle = lookup.findConstructor(objectClass, MethodType.methodType(void.class, double[].class));
 
                     CallSite callSite = LambdaMetafactory.metafactory(
                             lookup,
