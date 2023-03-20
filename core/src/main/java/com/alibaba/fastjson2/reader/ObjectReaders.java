@@ -38,6 +38,34 @@ public class ObjectReaders {
         return new ObjectReaderImplFromLong<>(null, function);
     }
 
+    public static <T> ObjectReader<T> fromCharArray(Function<char[], Object> function) {
+        return (ObjectReader<T>) new ObjectReaderImplCharValueArray(function);
+    }
+
+    public static <T> ObjectReader<T> fromByteArray(Function<byte[], Object> function) {
+        return (ObjectReader<T>) new ObjectReaderImplInt8ValueArray(function, "base64");
+    }
+
+    public static <T> ObjectReader<T> fromShortArray(Function<short[], Object> function) {
+        return (ObjectReader<T>) new ObjectReaderImplInt16ValueArray(function);
+    }
+
+    public static <T> ObjectReader<T> fromIntArray(Function<int[], Object> function) {
+        return (ObjectReader<T>) new ObjectReaderImplInt32ValueArray(function);
+    }
+
+    public static <T> ObjectReader<T> fromLongArray(Function<long[], Object> function) {
+        return (ObjectReader<T>) new ObjectReaderImplInt64ValueArray(function);
+    }
+
+    public static <T> ObjectReader<T> fromFloatArray(Function<float[], Object> function) {
+        return (ObjectReader<T>) new ObjectReaderImplFloatValueArray(function);
+    }
+
+    public static <T> ObjectReader<T> fromDoubleArray(Function<double[], Object> function) {
+        return (ObjectReader<T>) new ObjectReaderImplDoubleValueArray(function);
+    }
+
     public static <T> ObjectReader<T> objectReader(
             Class<T> objectClass,
             Supplier<T> defaultCreator,

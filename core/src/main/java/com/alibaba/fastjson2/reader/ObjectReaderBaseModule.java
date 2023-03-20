@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.impl.*;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
+import com.alibaba.fastjson2.support.hppc.HppcSupport;
 import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
 
@@ -2119,6 +2120,17 @@ public class ObjectReaderBaseModule
             case "org.apache.commons.lang3.tuple.Pair":
             case "org.apache.commons.lang3.tuple.ImmutablePair":
                 return new ApacheLang3Support.PairReader((Class) type, Object.class, Object.class);
+            case "com.carrotsearch.hppc.ByteArrayList":
+            case "com.carrotsearch.hppc.ShortArrayList":
+            case "com.carrotsearch.hppc.IntArrayList":
+            case "com.carrotsearch.hppc.IntHashSet":
+            case "com.carrotsearch.hppc.LongArrayList":
+            case "com.carrotsearch.hppc.LongHashSet":
+            case "com.carrotsearch.hppc.CharArrayList":
+            case "com.carrotsearch.hppc.CharHashSet":
+            case "com.carrotsearch.hppc.FloatArrayList":
+            case "com.carrotsearch.hppc.DoubleArrayList":
+                return HppcSupport.getObjectReader((Class) type);
             default:
                 break;
         }

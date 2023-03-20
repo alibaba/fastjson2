@@ -5,15 +5,22 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
+import java.util.function.Function;
 
 import static com.alibaba.fastjson2.writer.ObjectWriterProvider.TYPE_INT64_MASK;
 
 final class ObjectWriterImplInt64ValueArray
         extends ObjectWriterBaseModule.PrimitiveImpl {
-    static final ObjectWriterImplInt64ValueArray INSTANCE = new ObjectWriterImplInt64ValueArray();
+    static final ObjectWriterImplInt64ValueArray INSTANCE = new ObjectWriterImplInt64ValueArray(null);
 
     static final byte[] JSONB_TYPE_NAME_BYTES = JSONB.toBytes("[J");
     static final long JSONB_TYPE_HASH = Fnv.hashCode64("[J");
+
+    private final Function<Object, long[]> function;
+
+    public ObjectWriterImplInt64ValueArray(Function<Object, long[]> function) {
+        this.function = function;
+    }
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
@@ -26,7 +33,14 @@ final class ObjectWriterImplInt64ValueArray
             jsonWriter.writeTypeName(JSONB_TYPE_NAME_BYTES, JSONB_TYPE_HASH);
         }
 
-        jsonWriter.writeInt64((long[]) object);
+        long[] array;
+        if (function != null && object != null) {
+            array = function.apply(object);
+        } else {
+            array = (long[]) object;
+        }
+
+        jsonWriter.writeInt64(array);
     }
 
     @Override
@@ -42,7 +56,13 @@ final class ObjectWriterImplInt64ValueArray
             objectWriter = jsonWriter.context.getObjectWriter(Long.class);
         }
 
-        long[] array = (long[]) object;
+        long[] array;
+        if (function != null && object != null) {
+            array = function.apply(object);
+        } else {
+            array = (long[]) object;
+        }
+
         if (objectWriter == null || objectWriter == ObjectWriterImplInt32.INSTANCE) {
             jsonWriter.writeInt64(array);
             return;

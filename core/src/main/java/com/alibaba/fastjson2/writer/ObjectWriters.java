@@ -85,6 +85,47 @@ public class ObjectWriters {
         );
     }
 
+    public static <T> ObjectWriter ofToByteArray(Function<Object, byte[]> function) {
+        return new ObjectWriterImplInt8ValueArray(function);
+    }
+
+    public static <T> ObjectWriter ofToShortArray(Function<Object, short[]> function) {
+        return new ObjectWriterImplInt16ValueArray(function);
+    }
+
+    public static <T> ObjectWriter ofToIntArray(Function<Object, int[]> function) {
+        return new ObjectWriterImplInt32ValueArray(function);
+    }
+
+    public static <T> ObjectWriter ofToLongArray(Function<Object, long[]> function) {
+        return new ObjectWriterImplInt64ValueArray(function);
+    }
+
+    public static <T> ObjectWriter ofToCharArray(Function<Object, char[]> function) {
+        return new ObjectWriterImplCharValueArray(function);
+    }
+
+    public static <T> ObjectWriter ofToFloatArray(Function<Object, float[]> function) {
+        return new ObjectWriterImplFloatValueArray(function, null);
+    }
+
+    public static <T> ObjectWriter ofToDoubleArray(Function<Object, double[]> function) {
+        return new ObjectWriterImplDoubleValueArray(function, null);
+    }
+
+    public static <T> ObjectWriter ofToBooleanArray(Function<Object, boolean[]> function) {
+        return new ObjectWriterImplBoolValueArray(function);
+    }
+
+    public static <T> ObjectWriter ofToBooleanArray(ToIntFunction functionSize, BiFunction<Object, Integer, Boolean> functionGet) {
+        return new ObjectWriterImplBoolValueArrayLambda(functionSize, functionGet);
+    }
+
+    public static <T> ObjectWriter ofToBooleanArray(ToLongFunction functionSize, BiFunction<Object, Integer, Boolean> functionGet) {
+        ToIntFunction functionSizeInt = o -> (int) functionSize.applyAsLong(o);
+        return new ObjectWriterImplBoolValueArrayLambda(functionSizeInt, functionGet);
+    }
+
     public static <T> FieldWriter fieldWriter(String fieldName, ToLongFunction<T> function) {
         return INSTANCE.createFieldWriter(fieldName, function);
     }

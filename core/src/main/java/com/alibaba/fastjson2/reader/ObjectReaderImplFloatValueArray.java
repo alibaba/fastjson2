@@ -13,11 +13,14 @@ import java.util.function.Function;
 
 class ObjectReaderImplFloatValueArray
         extends ObjectReaderPrimitive {
-    static final ObjectReaderImplFloatValueArray INSTANCE = new ObjectReaderImplFloatValueArray();
+    static final ObjectReaderImplFloatValueArray INSTANCE = new ObjectReaderImplFloatValueArray(null);
     static final long TYPE_HASH = Fnv.hashCode64("[F");
 
-    ObjectReaderImplFloatValueArray() {
+    final Function<float[], Object> builder;
+
+    ObjectReaderImplFloatValueArray(Function<float[], Object> builder) {
         super(float[].class);
+        this.builder = builder;
     }
 
     @Override
@@ -53,7 +56,11 @@ class ObjectReaderImplFloatValueArray
             }
             jsonReader.nextIfMatch(',');
 
-            return Arrays.copyOf(values, size);
+            float[] array = Arrays.copyOf(values, size);
+            if (builder != null) {
+                return builder.apply(array);
+            }
+            return array;
         }
 
         if (jsonReader.isString()) {
@@ -85,6 +92,9 @@ class ObjectReaderImplFloatValueArray
         for (int i = 0; i < entryCnt; i++) {
             array[i] = jsonReader.readFloatValue();
         }
+        if (builder != null) {
+            return builder.apply(array);
+        }
         return array;
     }
 
@@ -106,6 +116,9 @@ class ObjectReaderImplFloatValueArray
                 value = (Float) typeConvert.apply(item);
             }
             array[i++] = value;
+        }
+        if (builder != null) {
+            return builder.apply(array);
         }
         return array;
     }

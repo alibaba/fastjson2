@@ -5,12 +5,19 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
+import java.util.function.Function;
 
 final class ObjectWriterImplInt32ValueArray
         extends ObjectWriterBaseModule.PrimitiveImpl {
-    static final ObjectWriterImplInt32ValueArray INSTANCE = new ObjectWriterImplInt32ValueArray();
+    static final ObjectWriterImplInt32ValueArray INSTANCE = new ObjectWriterImplInt32ValueArray(null);
     static final byte[] JSONB_TYPE_NAME_BYTES = JSONB.toBytes("[I");
     static final long JSONB_TYPE_HASH = Fnv.hashCode64("[I");
+
+    private final Function<Object, int[]> function;
+
+    public ObjectWriterImplInt32ValueArray(Function<Object, int[]> function) {
+        this.function = function;
+    }
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
@@ -23,7 +30,14 @@ final class ObjectWriterImplInt32ValueArray
             jsonWriter.writeTypeName(JSONB_TYPE_NAME_BYTES, JSONB_TYPE_HASH);
         }
 
-        jsonWriter.writeInt32((int[]) object);
+        int[] array;
+        if (function != null && object != null) {
+            array = function.apply(object);
+        } else {
+            array = (int[]) object;
+        }
+
+        jsonWriter.writeInt32(array);
     }
 
     @Override
@@ -33,6 +47,13 @@ final class ObjectWriterImplInt32ValueArray
             return;
         }
 
-        jsonWriter.writeInt32((int[]) object);
+        int[] array;
+        if (function != null && object != null) {
+            array = function.apply(object);
+        } else {
+            array = (int[]) object;
+        }
+
+        jsonWriter.writeInt32(array);
     }
 }

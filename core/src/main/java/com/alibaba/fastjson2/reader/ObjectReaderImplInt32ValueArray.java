@@ -13,11 +13,14 @@ import java.util.function.Function;
 
 final class ObjectReaderImplInt32ValueArray
         extends ObjectReaderPrimitive {
-    static final ObjectReaderImplInt32ValueArray INSTANCE = new ObjectReaderImplInt32ValueArray();
+    static final ObjectReaderImplInt32ValueArray INSTANCE = new ObjectReaderImplInt32ValueArray(null);
     static final long TYPE_HASH = Fnv.hashCode64("[I");
 
-    ObjectReaderImplInt32ValueArray() {
+    final Function<int[], Object> builder;
+
+    ObjectReaderImplInt32ValueArray(Function<int[], Object> builder) {
         super(int[].class);
+        this.builder = builder;
     }
 
     @Override
@@ -57,7 +60,11 @@ final class ObjectReaderImplInt32ValueArray
             }
             jsonReader.nextIfMatch(',');
 
-            return Arrays.copyOf(values, size);
+            int[] array = Arrays.copyOf(values, size);
+            if (builder != null) {
+                return builder.apply(array);
+            }
+            return array;
         }
 
         if (jsonReader.isString()) {
@@ -89,6 +96,11 @@ final class ObjectReaderImplInt32ValueArray
         for (int i = 0; i < entryCnt; i++) {
             array[i] = jsonReader.readInt32Value();
         }
+
+        if (builder != null) {
+            return builder.apply(array);
+        }
+
         return array;
     }
 
@@ -110,6 +122,9 @@ final class ObjectReaderImplInt32ValueArray
                 value = (Integer) typeConvert.apply(item);
             }
             array[i++] = value;
+        }
+        if (builder != null) {
+            return builder.apply(array);
         }
         return array;
     }

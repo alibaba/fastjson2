@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
+import com.alibaba.fastjson2.support.hppc.HppcSupport;
 import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
 
@@ -1057,6 +1058,18 @@ public class ObjectWriterBaseModule
             case "org.apache.commons.lang3.tuple.MutablePair":
             case "org.apache.commons.lang3.tuple.ImmutablePair":
                 return new ApacheLang3Support.PairWriter(objectClass);
+            case "com.carrotsearch.hppc.ByteArrayList":
+            case "com.carrotsearch.hppc.ShortArrayList":
+            case "com.carrotsearch.hppc.IntArrayList":
+            case "com.carrotsearch.hppc.IntHashSet":
+            case "com.carrotsearch.hppc.LongArrayList":
+            case "com.carrotsearch.hppc.LongHashSet":
+            case "com.carrotsearch.hppc.CharArrayList":
+            case "com.carrotsearch.hppc.CharHashSet":
+            case "com.carrotsearch.hppc.FloatArrayList":
+            case "com.carrotsearch.hppc.DoubleArrayList":
+            case "com.carrotsearch.hppc.BitSet":
+                return HppcSupport.getObjectWriter(objectType, objectClass);
             default:
                 break;
         }
