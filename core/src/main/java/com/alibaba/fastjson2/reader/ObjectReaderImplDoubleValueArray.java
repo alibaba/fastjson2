@@ -13,11 +13,14 @@ import java.util.function.Function;
 
 class ObjectReaderImplDoubleValueArray
         extends ObjectReaderPrimitive {
-    static final ObjectReaderImplDoubleValueArray INSTANCE = new ObjectReaderImplDoubleValueArray();
+    static final ObjectReaderImplDoubleValueArray INSTANCE = new ObjectReaderImplDoubleValueArray(null);
     static final long TYPE_HASH = Fnv.hashCode64("[D");
 
-    ObjectReaderImplDoubleValueArray() {
+    final Function<double[], Object> builder;
+
+    ObjectReaderImplDoubleValueArray(Function<double[], Object> builder) {
         super(double[].class);
+        this.builder = builder;
     }
 
     @Override
@@ -53,7 +56,11 @@ class ObjectReaderImplDoubleValueArray
             }
             jsonReader.nextIfMatch(',');
 
-            return Arrays.copyOf(values, size);
+            double[] array = Arrays.copyOf(values, size);
+            if (builder != null) {
+                return builder.apply(array);
+            }
+            return array;
         }
 
         if (jsonReader.isString()) {
@@ -81,9 +88,14 @@ class ObjectReaderImplDoubleValueArray
         if (entryCnt == -1) {
             return null;
         }
+
         double[] array = new double[entryCnt];
         for (int i = 0; i < entryCnt; i++) {
             array[i] = jsonReader.readDoubleValue();
+        }
+
+        if (builder != null) {
+            return builder.apply(array);
         }
         return array;
     }
@@ -106,6 +118,10 @@ class ObjectReaderImplDoubleValueArray
                 value = (Double) typeConvert.apply(item);
             }
             array[i++] = value;
+        }
+
+        if (builder != null) {
+            return builder.apply(array);
         }
         return array;
     }

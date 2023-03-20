@@ -9,15 +9,22 @@ import com.alibaba.fastjson2.util.IOUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.function.Function;
 import java.util.zip.GZIPOutputStream;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteByteArrayAsBase64;
 
 final class ObjectWriterImplInt8ValueArray
         extends ObjectWriterBaseModule.PrimitiveImpl {
-    static final ObjectWriterImplInt8ValueArray INSTANCE = new ObjectWriterImplInt8ValueArray();
+    static final ObjectWriterImplInt8ValueArray INSTANCE = new ObjectWriterImplInt8ValueArray(null);
     static final byte[] JSONB_TYPE_NAME_BYTES = JSONB.toBytes("[B");
     static final long JSONB_TYPE_HASH = Fnv.hashCode64("[B");
+
+    private final Function<Object, byte[]> function;
+
+    public ObjectWriterImplInt8ValueArray(Function<Object, byte[]> function) {
+        this.function = function;
+    }
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
@@ -25,7 +32,13 @@ final class ObjectWriterImplInt8ValueArray
             jsonWriter.writeTypeName(JSONB_TYPE_NAME_BYTES, JSONB_TYPE_HASH);
         }
 
-        byte[] bytes = (byte[]) object;
+        byte[] bytes;
+        if (function != null && object != null) {
+            bytes = function.apply(object);
+        } else {
+            bytes = (byte[]) object;
+        }
+
         jsonWriter.writeBinary(bytes);
     }
 
@@ -36,7 +49,12 @@ final class ObjectWriterImplInt8ValueArray
             return;
         }
 
-        byte[] array = (byte[]) object;
+        byte[] bytes;
+        if (function != null && object != null) {
+            bytes = function.apply(object);
+        } else {
+            bytes = (byte[]) object;
+        }
 
         String format = jsonWriter.context.getDateFormat();
         if ("millis".equals(format)) {
@@ -47,14 +65,14 @@ final class ObjectWriterImplInt8ValueArray
             GZIPOutputStream gzipOut = null;
             try {
                 ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-                if (array.length < 512) {
-                    gzipOut = new GZIPOutputStream(byteOut, array.length);
+                if (bytes.length < 512) {
+                    gzipOut = new GZIPOutputStream(byteOut, bytes.length);
                 } else {
                     gzipOut = new GZIPOutputStream(byteOut);
                 }
-                gzipOut.write(array);
+                gzipOut.write(bytes);
                 gzipOut.finish();
-                array = byteOut.toByteArray();
+                bytes = byteOut.toByteArray();
             } catch (IOException ex) {
                 throw new JSONException("write gzipBytes error", ex);
             } finally {
@@ -65,16 +83,16 @@ final class ObjectWriterImplInt8ValueArray
         if ("base64".equals(format)
                 || "gzip,base64".equals(format)
                 || (format == null && (jsonWriter.getFeatures(features) & WriteByteArrayAsBase64.mask) != 0)) {
-            jsonWriter.writeBase64(array);
+            jsonWriter.writeBase64(bytes);
             return;
         }
 
         jsonWriter.startArray();
-        for (int i = 0; i < array.length; i++) {
+        for (int i = 0; i < bytes.length; i++) {
             if (i != 0) {
                 jsonWriter.writeComma();
             }
-            jsonWriter.writeInt32(array[i]);
+            jsonWriter.writeInt32(bytes[i]);
         }
         jsonWriter.endArray();
     }

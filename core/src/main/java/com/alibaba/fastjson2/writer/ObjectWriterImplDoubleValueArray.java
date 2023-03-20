@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.text.DecimalFormat;
+import java.util.function.Function;
 
 final class ObjectWriterImplDoubleValueArray
         extends ObjectWriterBaseModule.PrimitiveImpl {
@@ -15,7 +16,15 @@ final class ObjectWriterImplDoubleValueArray
 
     final DecimalFormat format;
 
+    private final Function<Object, double[]> function;
+
     public ObjectWriterImplDoubleValueArray(DecimalFormat format) {
+        this.format = format;
+        this.function = null;
+    }
+
+    public ObjectWriterImplDoubleValueArray(Function<Object, double[]> function, DecimalFormat format) {
+        this.function = function;
         this.format = format;
     }
 
@@ -25,15 +34,28 @@ final class ObjectWriterImplDoubleValueArray
             jsonWriter.writeTypeName(JSONB_TYPE_NAME_BYTES, JSONB_TYPE_HASH);
         }
 
-        jsonWriter.writeDouble((double[]) object);
+        double[] array;
+        if (function != null && object != null) {
+            array = function.apply(object);
+        } else {
+            array = (double[]) object;
+        }
+        jsonWriter.writeDouble(array);
     }
 
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-        if (format == null) {
-            jsonWriter.writeDouble((double[]) object);
+        double[] array;
+        if (function != null && object != null) {
+            array = function.apply(object);
         } else {
-            jsonWriter.writeDouble((double[]) object, format);
+            array = (double[]) object;
+        }
+
+        if (format == null) {
+            jsonWriter.writeDouble(array);
+        } else {
+            jsonWriter.writeDouble(array, format);
         }
     }
 }

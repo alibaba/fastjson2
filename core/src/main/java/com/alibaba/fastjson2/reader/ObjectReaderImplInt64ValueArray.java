@@ -13,12 +13,15 @@ import java.util.function.Function;
 
 final class ObjectReaderImplInt64ValueArray
         extends ObjectReaderPrimitive {
-    static final ObjectReaderImplInt64ValueArray INSTANCE = new ObjectReaderImplInt64ValueArray();
+    static final ObjectReaderImplInt64ValueArray INSTANCE = new ObjectReaderImplInt64ValueArray(null);
 
     static final long HASH_TYPE = Fnv.hashCode64("[J");
 
-    ObjectReaderImplInt64ValueArray() {
+    final Function<long[], Object> builder;
+
+    ObjectReaderImplInt64ValueArray(Function<long[], Object> builder) {
         super(long[].class);
+        this.builder = builder;
     }
 
     @Override
@@ -58,7 +61,11 @@ final class ObjectReaderImplInt64ValueArray
             }
             jsonReader.nextIfMatch(',');
 
-            return Arrays.copyOf(values, size);
+            long[] array = Arrays.copyOf(values, size);
+            if (builder != null) {
+                return builder.apply(array);
+            }
+            return array;
         }
 
         if (jsonReader.isString()) {
@@ -86,9 +93,14 @@ final class ObjectReaderImplInt64ValueArray
         if (entryCnt == -1) {
             return null;
         }
+
         long[] array = new long[entryCnt];
         for (int i = 0; i < entryCnt; i++) {
             array[i] = jsonReader.readInt64Value();
+        }
+
+        if (builder != null) {
+            return builder.apply(array);
         }
         return array;
     }
@@ -111,6 +123,10 @@ final class ObjectReaderImplInt64ValueArray
                 value = (Long) typeConvert.apply(item);
             }
             array[i++] = value;
+        }
+
+        if (builder != null) {
+            return builder.apply(array);
         }
         return array;
     }

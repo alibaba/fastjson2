@@ -7,14 +7,18 @@ import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.function.Function;
 
 final class ObjectReaderImplCharValueArray
         extends ObjectReaderPrimitive {
-    static final ObjectReaderImplCharValueArray INSTANCE = new ObjectReaderImplCharValueArray();
+    static final ObjectReaderImplCharValueArray INSTANCE = new ObjectReaderImplCharValueArray(null);
     static final long TYPE_HASH = Fnv.hashCode64("[C");
 
-    ObjectReaderImplCharValueArray() {
+    final Function<char[], Object> builder;
+
+    public ObjectReaderImplCharValueArray(Function<char[], Object> builder) {
         super(char[].class);
+        this.builder = builder;
     }
 
     @Override
@@ -25,7 +29,11 @@ final class ObjectReaderImplCharValueArray
 
         if (jsonReader.current() == '"') {
             String str = jsonReader.readString();
-            return str.toCharArray();
+            char[] chars = str.toCharArray();
+            if (builder != null) {
+                return builder.apply(chars);
+            }
+            return chars;
         }
 
         if (jsonReader.nextIfMatch('[')) {
@@ -56,7 +64,11 @@ final class ObjectReaderImplCharValueArray
             }
             jsonReader.nextIfMatch(',');
 
-            return Arrays.copyOf(values, size);
+            char[] chars = Arrays.copyOf(values, size);
+            if (builder != null) {
+                return builder.apply(chars);
+            }
+            return chars;
         }
 
         throw new JSONException(jsonReader.info("TODO"));
@@ -80,14 +92,17 @@ final class ObjectReaderImplCharValueArray
         if (entryCnt == -1) {
             return null;
         }
-        char[] array = new char[entryCnt];
+        char[] chars = new char[entryCnt];
         for (int i = 0; i < entryCnt; i++) {
             if (jsonReader.isInt()) {
-                array[i] = (char) jsonReader.readInt32Value();
+                chars[i] = (char) jsonReader.readInt32Value();
             } else {
-                array[i] = jsonReader.readString().charAt(0);
+                chars[i] = jsonReader.readString().charAt(0);
             }
         }
-        return array;
+        if (builder != null) {
+            return builder.apply(chars);
+        }
+        return chars;
     }
 }

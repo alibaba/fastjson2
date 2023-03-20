@@ -10,15 +10,28 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONReader.Feature.Base64StringAsByteArray;
+
 class ObjectReaderImplInt8ValueArray
         extends ObjectReaderPrimitive {
     static final ObjectReaderImplInt8ValueArray INSTANCE = new ObjectReaderImplInt8ValueArray(null);
 
     final String format;
+    final Function<byte[], Object> builder;
+    final long features;
 
     ObjectReaderImplInt8ValueArray(String format) {
         super(byte[].class);
         this.format = format;
+        this.builder = null;
+        this.features = 0;
+    }
+
+    ObjectReaderImplInt8ValueArray(Function<byte[], Object> builder, String format) {
+        super(byte[].class);
+        this.format = format;
+        this.features = "base64".equals(format) ? Base64StringAsByteArray.mask : 0;
+        this.builder = builder;
     }
 
     @Override
@@ -54,16 +67,26 @@ class ObjectReaderImplInt8ValueArray
             }
             jsonReader.nextIfMatch(',');
 
-            return Arrays.copyOf(values, size);
+            byte[] bytes = Arrays.copyOf(values, size);
+            if (builder != null) {
+                return builder.apply(bytes);
+            }
+            return bytes;
         }
 
         if (jsonReader.isString()) {
-            if ((jsonReader.features(features) & JSONReader.Feature.Base64StringAsByteArray.mask) != 0) {
+            byte[] bytes;
+            if ((jsonReader.features(this.features | features) & Base64StringAsByteArray.mask) != 0) {
                 String str = jsonReader.readString();
-                return Base64.getDecoder().decode(str);
+                bytes = Base64.getDecoder().decode(str);
+            } else {
+                bytes = jsonReader.readBinary();
             }
 
-            return jsonReader.readBinary();
+            if (builder != null) {
+                return builder.apply(bytes);
+            }
+            return bytes;
         }
 
         throw new JSONException(jsonReader.info("TODO"));
@@ -79,16 +102,19 @@ class ObjectReaderImplInt8ValueArray
         if (entryCnt == -1) {
             return null;
         }
-        byte[] array = new byte[entryCnt];
+        byte[] bytes = new byte[entryCnt];
         for (int i = 0; i < entryCnt; i++) {
-            array[i] = (byte) jsonReader.readInt32Value();
+            bytes[i] = (byte) jsonReader.readInt32Value();
         }
-        return array;
+        if (builder != null) {
+            return builder.apply(bytes);
+        }
+        return bytes;
     }
 
     @Override
     public Object createInstance(Collection collection) {
-        byte[] array = new byte[collection.size()];
+        byte[] bytes = new byte[collection.size()];
         int i = 0;
         for (Object item : collection) {
             byte value;
@@ -103,8 +129,12 @@ class ObjectReaderImplInt8ValueArray
                 }
                 value = (Byte) typeConvert.apply(item);
             }
-            array[i++] = value;
+            bytes[i++] = value;
         }
-        return array;
+
+        if (builder != null) {
+            return builder.apply(bytes);
+        }
+        return bytes;
     }
 }
