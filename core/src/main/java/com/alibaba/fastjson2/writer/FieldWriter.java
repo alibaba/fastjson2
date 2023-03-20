@@ -784,7 +784,7 @@ public abstract class FieldWriter<T>
                 if (format == null || format.isEmpty()) {
                     return ObjectWriterImplBigDecimal.INSTANCE;
                 } else {
-                    return new ObjectWriterImplBigDecimal(new DecimalFormat(format));
+                    return new ObjectWriterImplBigDecimal(new DecimalFormat(format), null);
                 }
             }
 

@@ -49,7 +49,7 @@ final class ObjectWriterArrayFinal
                 }
             } else if (itemClass == BigDecimal.class) {
                 if (format != null) {
-                    itemObjectWriter = new ObjectWriterImplBigDecimal(format);
+                    itemObjectWriter = new ObjectWriterImplBigDecimal(format, null);
                 } else {
                     itemObjectWriter = ObjectWriterImplBigDecimal.INSTANCE;
                 }

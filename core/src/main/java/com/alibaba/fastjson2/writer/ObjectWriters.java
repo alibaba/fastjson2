@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.function.*;
 
@@ -117,11 +118,21 @@ public class ObjectWriters {
         return new ObjectWriterImplBoolValueArray(function);
     }
 
-    public static <T> ObjectWriter ofToBooleanArray(ToIntFunction functionSize, BiFunction<Object, Integer, Boolean> functionGet) {
+    public static <T> ObjectWriter ofToBooleanArray(
+            ToIntFunction functionSize,
+            BiFunction<Object, Integer, Boolean> functionGet
+    ) {
         return new ObjectWriterImplBoolValueArrayLambda(functionSize, functionGet);
     }
 
-    public static <T> ObjectWriter ofToBooleanArray(ToLongFunction functionSize, BiFunction<Object, Integer, Boolean> functionGet) {
+    public static <T> ObjectWriter ofToBigDecimal(Function<Object, BigDecimal> function) {
+        return new ObjectWriterImplBigDecimal(null, function);
+    }
+
+    public static <T> ObjectWriter ofToBooleanArray(
+            ToLongFunction functionSize,
+            BiFunction<Object, Integer, Boolean> functionGet
+    ) {
         ToIntFunction functionSizeInt = o -> (int) functionSize.applyAsLong(o);
         return new ObjectWriterImplBoolValueArrayLambda(functionSizeInt, functionGet);
     }
@@ -162,11 +173,16 @@ public class ObjectWriters {
         return INSTANCE.createFieldWriter(fieldName, fieldClass, function);
     }
 
-    public static <T, V> FieldWriter fieldWriter(String fieldName, Type fieldType, Class<V> fieldClass, Function<T, V> function) {
+    public static <T, V> FieldWriter fieldWriter(String fieldName,
+                                                 Type fieldType,
+                                                 Class<V> fieldClass,
+                                                 Function<T, V> function) {
         return INSTANCE.createFieldWriter(fieldName, fieldType, fieldClass, function);
     }
 
-    public static <T, V> FieldWriter fieldWriterList(String fieldName, Class<V> itemType, Function<T, List<V>> function) {
+    public static <T, V> FieldWriter fieldWriterList(String fieldName,
+                                                     Class<V> itemType,
+                                                     Function<T, List<V>> function) {
         ParameterizedType listType;
         if (itemType == String.class) {
             listType = TypeUtils.PARAM_TYPE_LIST_STR;

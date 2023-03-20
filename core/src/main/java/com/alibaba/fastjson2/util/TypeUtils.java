@@ -14,7 +14,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static java.lang.invoke.MethodType.methodType;
 
@@ -32,8 +34,12 @@ public class TypeUtils {
     public static final Class CLASS_UNMODIFIABLE_NAVIGABLE_SET = Collections.unmodifiableNavigableSet(new TreeSet<>()).getClass();
     public static final ParameterizedType PARAM_TYPE_LIST_STR = new ParameterizedTypeImpl(List.class, String.class);
 
+    public static final MethodType METHOD_TYPE_SUPPLIER = MethodType.methodType(Supplier.class);
     public static final MethodType METHOD_TYPE_FUNCTION = MethodType.methodType(Function.class);
+    public static final MethodType METHOD_TYPE_BI_FUNCTION = MethodType.methodType(BiFunction.class);
+    public static final MethodType METHOD_TYPE_OBJECT = MethodType.methodType(Object.class);
     public static final MethodType METHOD_TYPE_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class);
+    public static final MethodType METHOD_TYPE_OBJECT_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class, Object.class);
 
     static class X1 {
         static final Function<byte[], char[]> TO_CHARS;

@@ -84,7 +84,7 @@ abstract class FieldWriterList<T>
                 }
 
                 if (itemType == BigDecimal.class) {
-                    return itemObjectWriter = new ObjectWriterImplBigDecimal(new DecimalFormat(format));
+                    return itemObjectWriter = new ObjectWriterImplBigDecimal(new DecimalFormat(format), null);
                 }
             }
 
