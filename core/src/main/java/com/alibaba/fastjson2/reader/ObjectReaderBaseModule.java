@@ -7,7 +7,7 @@ import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.impl.*;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
-import com.alibaba.fastjson2.support.hppc.HppcSupport;
+import com.alibaba.fastjson2.support.LambdaMiscCodec;
 import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
 
@@ -2130,7 +2130,18 @@ public class ObjectReaderBaseModule
             case "com.carrotsearch.hppc.CharHashSet":
             case "com.carrotsearch.hppc.FloatArrayList":
             case "com.carrotsearch.hppc.DoubleArrayList":
-                return HppcSupport.getObjectReader((Class) type);
+            case "gnu.trove.list.array.TByteArrayList":
+            case "gnu.trove.list.array.TCharArrayList":
+            case "gnu.trove.list.array.TShortArrayList":
+            case "gnu.trove.list.array.TIntArrayList":
+            case "gnu.trove.list.array.TLongArrayList":
+            case "gnu.trove.list.array.TFloatArrayList":
+            case "gnu.trove.list.array.TDoubleArrayList":
+            case "gnu.trove.set.hash.TByteHashSet":
+            case "gnu.trove.set.hash.TShortHashSet":
+            case "gnu.trove.set.hash.TIntHashSet":
+            case "gnu.trove.set.hash.TLongHashSet":
+                return LambdaMiscCodec.getObjectReader((Class) type);
             default:
                 break;
         }

@@ -32,6 +32,9 @@ public class TypeUtils {
     public static final Class CLASS_UNMODIFIABLE_NAVIGABLE_SET = Collections.unmodifiableNavigableSet(new TreeSet<>()).getClass();
     public static final ParameterizedType PARAM_TYPE_LIST_STR = new ParameterizedTypeImpl(List.class, String.class);
 
+    public static final MethodType METHOD_TYPE_FUNCTION = MethodType.methodType(Function.class);
+    public static final MethodType METHOD_TYPE_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class);
+
     static class X1 {
         static final Function<byte[], char[]> TO_CHARS;
 

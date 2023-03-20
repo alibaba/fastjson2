@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TestContainerSerializers {
     @Test
-    public void testByteSerializer() {
+    public void testByteArray() {
         final byte[] input = new byte[]{
                 (byte) -12, (byte) 0, (byte) -1, (byte) 0x7F
         };
@@ -25,7 +25,7 @@ public class TestContainerSerializers {
     }
 
     @Test
-    public void testShortSerializer() {
+    public void testShortArray() {
         ShortArrayList array = new ShortArrayList();
         array.add((short) -12, (short) 0);
         String str = JSON.toJSONString(array);

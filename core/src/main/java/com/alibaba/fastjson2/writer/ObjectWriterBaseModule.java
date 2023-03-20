@@ -9,7 +9,7 @@ import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
-import com.alibaba.fastjson2.support.hppc.HppcSupport;
+import com.alibaba.fastjson2.support.LambdaMiscCodec;
 import com.alibaba.fastjson2.support.money.MoneySupport;
 import com.alibaba.fastjson2.util.*;
 
@@ -1069,7 +1069,19 @@ public class ObjectWriterBaseModule
             case "com.carrotsearch.hppc.FloatArrayList":
             case "com.carrotsearch.hppc.DoubleArrayList":
             case "com.carrotsearch.hppc.BitSet":
-                return HppcSupport.getObjectWriter(objectType, objectClass);
+            case "gnu.trove.list.array.TByteArrayList":
+            case "gnu.trove.list.array.TCharArrayList":
+            case "gnu.trove.list.array.TShortArrayList":
+            case "gnu.trove.list.array.TIntArrayList":
+            case "gnu.trove.list.array.TLongArrayList":
+            case "gnu.trove.list.array.TFloatArrayList":
+            case "gnu.trove.list.array.TDoubleArrayList":
+            case "gnu.trove.set.hash.TByteHashSet":
+            case "gnu.trove.set.hash.TShortHashSet":
+            case "gnu.trove.set.hash.TIntHashSet":
+            case "gnu.trove.set.hash.TLongHashSet":
+            case "gnu.trove.stack.array.TByteArrayStack":
+                return LambdaMiscCodec.getObjectWriter(objectType, objectClass);
             default:
                 break;
         }
