@@ -8,7 +8,6 @@ import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.internal.asm.*;
-import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
@@ -21,6 +20,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.*;
 
+import static com.alibaba.fastjson2.internal.asm.ASMUtils.*;
 import static com.alibaba.fastjson2.internal.asm.Opcodes.ALOAD;
 import static com.alibaba.fastjson2.internal.asm.Opcodes.PUTFIELD;
 import static com.alibaba.fastjson2.reader.ObjectReader.HASH_TYPE;
@@ -36,31 +36,6 @@ public class ObjectReaderCreatorASM
 
     protected final DynamicClassLoader classLoader;
 
-    static final String TYPE_UNSAFE_UTILS = ASMUtils.type(UnsafeUtils.class);
-
-    static final String TYPE_JSON_READER = ASMUtils.type(JSONReader.class);
-    static final String TYPE_OBJECT_READER_ADAPTER = ASMUtils.type(ObjectReaderAdapter.class);
-    static final String TYPE_OBJECT_READER_1 = ASMUtils.type(ObjectReader1.class);
-    static final String TYPE_OBJECT_READER_2 = ASMUtils.type(ObjectReader2.class);
-    static final String TYPE_OBJECT_READER_3 = ASMUtils.type(ObjectReader3.class);
-    static final String TYPE_OBJECT_READER_4 = ASMUtils.type(ObjectReader4.class);
-    static final String TYPE_OBJECT_READER_5 = ASMUtils.type(ObjectReader5.class);
-    static final String TYPE_OBJECT_READER_6 = ASMUtils.type(ObjectReader6.class);
-    static final String TYPE_OBJECT_READER_7 = ASMUtils.type(ObjectReader7.class);
-    static final String TYPE_OBJECT_READER_8 = ASMUtils.type(ObjectReader8.class);
-    static final String TYPE_OBJECT_READER_9 = ASMUtils.type(ObjectReader9.class);
-    static final String TYPE_OBJECT_READER_10 = ASMUtils.type(ObjectReader10.class);
-    static final String TYPE_OBJECT_READER_11 = ASMUtils.type(ObjectReader11.class);
-    static final String TYPE_OBJECT_READER_12 = ASMUtils.type(ObjectReader12.class);
-    static final String TYPE_OBJECT_READER = ASMUtils.type(ObjectReader.class);
-    static final String TYPE_FIELD_READE = ASMUtils.type(FieldReader.class);
-
-    static final String DESC_JSON_READER = ASMUtils.desc(JSONReader.class);
-    static final String DESC_FIELD_READER = ASMUtils.desc(FieldReader.class);
-    static final String DESC_OBJECT_READER = ASMUtils.desc(ObjectReader.class);
-    static final String DESC_SUPPLIER = ASMUtils.desc(Supplier.class);
-    static final String DESC_JSONSCHEMA = ASMUtils.desc(JSONSchema.class);
-    static final String DESC_FIELD_READER_ARRAY = ASMUtils.desc(FieldReader[].class);
     static final String METHOD_DESC_GET_ITEM_OBJECT_READER = "(" + DESC_JSON_READER + ")" + DESC_OBJECT_READER;
     static final String METHOD_DESC_GET_OBJECT_READER_1 = "(" + DESC_JSON_READER + ")" + DESC_OBJECT_READER;
     static final String METHOD_DESC_INIT = "(Ljava/lang/Class;" + DESC_SUPPLIER + DESC_FIELD_READER_ARRAY + ")V";

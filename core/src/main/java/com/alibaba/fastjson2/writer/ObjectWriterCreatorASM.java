@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.internal.asm.ASMUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 import static com.alibaba.fastjson2.util.TypeUtils.isFunction;
 import static com.alibaba.fastjson2.writer.ObjectWriterProvider.TYPE_INT64_MASK;
@@ -36,29 +37,7 @@ public class ObjectWriterCreatorASM
     protected static final AtomicLong seed = new AtomicLong();
     protected final DynamicClassLoader classLoader;
 
-    static final String TYPE_OBJECT_WRITER = ASMUtils.type(ObjectWriter.class);
-    static final String TYPE_JSON_WRITER = ASMUtils.type(JSONWriter.class);
-    static final String TYPE_FIELD_WRITER = ASMUtils.type(FieldWriter.class);
-    static final String TYPE_OBJECT_WRITER_ADAPTER = ASMUtils.type(ObjectWriterAdapter.class);
-    static final String TYPE_OBJECT_WRITER_1 = ASMUtils.type(ObjectWriter1.class);
-    static final String TYPE_OBJECT_WRITER_2 = ASMUtils.type(ObjectWriter2.class);
-    static final String TYPE_OBJECT_WRITER_3 = ASMUtils.type(ObjectWriter3.class);
-    static final String TYPE_OBJECT_WRITER_4 = ASMUtils.type(ObjectWriter4.class);
-    static final String TYPE_OBJECT_WRITER_5 = ASMUtils.type(ObjectWriter5.class);
-    static final String TYPE_OBJECT_WRITER_6 = ASMUtils.type(ObjectWriter6.class);
-    static final String TYPE_OBJECT_WRITER_7 = ASMUtils.type(ObjectWriter7.class);
-    static final String TYPE_OBJECT_WRITER_8 = ASMUtils.type(ObjectWriter8.class);
-    static final String TYPE_OBJECT_WRITER_9 = ASMUtils.type(ObjectWriter9.class);
-    static final String TYPE_OBJECT_WRITER_10 = ASMUtils.type(ObjectWriter10.class);
-    static final String TYPE_OBJECT_WRITER_11 = ASMUtils.type(ObjectWriter11.class);
-    static final String TYPE_OBJECT_WRITER_12 = ASMUtils.type(ObjectWriter12.class);
-
     static final String[] INTERFACES = {TYPE_OBJECT_WRITER};
-
-    static final String DESC_OBJECT_WRITER = ASMUtils.desc(ObjectWriter.class);
-    static final String DESC_JSON_WRITER = ASMUtils.desc(JSONWriter.class);
-    static final String DESC_FIELD_WRITER = ASMUtils.desc(FieldWriter.class);
-    static final String DESC_FIELD_WRITER_ARRAY = ASMUtils.desc(FieldWriter[].class);
 
     static final String METHOD_DESC_WRITE_VALUE = "(" + DESC_JSON_WRITER + "Ljava/lang/Object;)V";
     static final String METHOD_DESC_WRITE = "(" + DESC_JSON_WRITER + "Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/reflect/Type;J)V";
