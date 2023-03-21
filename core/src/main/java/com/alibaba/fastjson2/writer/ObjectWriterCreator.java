@@ -25,6 +25,7 @@ import java.util.function.*;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName;
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
+import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
 
 public class ObjectWriterCreator {
     public static final ObjectWriterCreator INSTANCE = new ObjectWriterCreator();
@@ -522,6 +523,17 @@ public class ObjectWriterCreator {
 
         if (beanInfo.alphabetic) {
             Collections.sort(fieldWriters);
+        }
+
+        if (BeanUtils.isExtendedMap(objectClass)) {
+            Type superType = objectClass.getGenericSuperclass();
+            FieldWriter superWriter = ObjectWriters.fieldWriter(
+                    SUPER,
+                    superType,
+                    objectClass.getSuperclass(),
+                    o -> o
+            );
+            fieldWriters.add(superWriter);
         }
 
         ObjectWriterAdapter writerAdapter = null;

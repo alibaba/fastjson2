@@ -1869,6 +1869,11 @@ public class ObjectReaderBaseModule
 
         if (type instanceof Class) {
             Class objectClass = (Class) type;
+
+            if (isExtendedMap(objectClass)) {
+                return null;
+            }
+
             if (Map.class.isAssignableFrom(objectClass)) {
                 return ObjectReaderImplMap.of(null, objectClass, 0);
             }

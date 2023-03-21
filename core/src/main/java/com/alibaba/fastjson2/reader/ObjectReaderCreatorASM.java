@@ -306,7 +306,7 @@ public class ObjectReaderCreatorASM
             return createObjectReaderWithBuilder(objectClass, objectType, provider, beanInfo);
         }
 
-        if (Throwable.class.isAssignableFrom(objectClass)) {
+        if (Throwable.class.isAssignableFrom(objectClass) || BeanUtils.isExtendedMap(objectClass)) {
             return super.createObjectReader(objectClass, objectType, fieldBased, provider);
         }
 
