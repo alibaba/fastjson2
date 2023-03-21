@@ -21,7 +21,13 @@ public class MapGhostTest {
         byte[] bytes1 = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         assertArrayEquals(bytes, bytes1);
 
-        MapGhost mapGhost = JSONB.parseObject(bytes, MapGhost.class, JSONReader.Feature.FieldBased, JSONReader.Feature.SupportAutoType);
+        System.out.println(JSONB.toJSONString(bytes));
+
+        MapGhost mapGhost = (MapGhost) JSONB.parseObject(
+                bytes, Object.class,
+                JSONReader.Feature.FieldBased,
+                JSONReader.Feature.SupportAutoType
+        );
         assertEquals(map.name, mapGhost.name);
         assertEquals(map.get("name"), mapGhost.get("name"));
     }
