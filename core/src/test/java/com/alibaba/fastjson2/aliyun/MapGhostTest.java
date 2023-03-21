@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.aliyun;
 
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
@@ -18,16 +19,14 @@ public class MapGhostTest {
         byte[] bytes = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         byte[] bytes1 = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         assertArrayEquals(bytes, bytes1);
-//
-//        System.out.println(JSONB.toJSONString(bytes));
-//
-//        MapGhost mapGhost = (MapGhost) JSONB.parseObject(
-//                bytes, Object.class,
-//                JSONReader.Feature.FieldBased,
-//                JSONReader.Feature.SupportAutoType
-//        );
-//        assertEquals(map.name, mapGhost.name);
-//        assertEquals(map.get("name"), mapGhost.get("name"));
+
+        MapGhost mapGhost = (MapGhost) JSONB.parseObject(
+                bytes, Object.class,
+                JSONReader.Feature.FieldBased,
+                JSONReader.Feature.SupportAutoType
+        );
+        assertEquals(map.name, mapGhost.name);
+        assertEquals(map.get("name"), mapGhost.get("name"));
     }
 
     public static class MapGhost<K, V>
@@ -45,10 +44,10 @@ public class MapGhostTest {
         map.put("name", 123);
         byte[] bytes = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         assertNotNull(bytes);
-//
-//        MapGhost1 mapGhost = JSONB.parseObject(bytes, MapGhost1.class, JSONReader.Feature.FieldBased, JSONReader.Feature.SupportAutoType);
-//        assertEquals(map.name, mapGhost.name);
-//        assertEquals(map.get("name"), mapGhost.get("name"));
+
+        MapGhost1 mapGhost = JSONB.parseObject(bytes, MapGhost1.class, JSONReader.Feature.FieldBased, JSONReader.Feature.SupportAutoType);
+        assertEquals(map.name, mapGhost.name);
+        assertEquals(map.get("name"), mapGhost.get("name"));
     }
 
     public static class MapGhost1<K, V>
@@ -66,10 +65,10 @@ public class MapGhostTest {
         map.put("name", 123);
         byte[] bytes = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
         assertNotNull(bytes);
-//
-//        MapGhost2 mapGhost = JSONB.parseObject(bytes, MapGhost2.class, JSONReader.Feature.FieldBased, JSONReader.Feature.SupportAutoType);
-//        assertEquals(map.name, mapGhost.name);
-//        assertEquals(map.get("name"), mapGhost.get("name"));
+
+        MapGhost2 mapGhost = JSONB.parseObject(bytes, MapGhost2.class, JSONReader.Feature.FieldBased, JSONReader.Feature.SupportAutoType);
+        assertEquals(map.name, mapGhost.name);
+        assertEquals(map.get("name"), mapGhost.get("name"));
     }
 
     public static class MapGhost2<K, V>

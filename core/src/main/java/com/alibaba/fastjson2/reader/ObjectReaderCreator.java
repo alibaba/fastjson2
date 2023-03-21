@@ -1540,13 +1540,20 @@ public class ObjectReaderCreator {
         Class<? super T> superclass = objectClass.getSuperclass();
         if (BeanUtils.isExtendedMap(objectClass)) {
             Type superType = objectClass.getGenericSuperclass();
-            FieldReader fieldReader = ObjectReaders.fieldReader(SUPER, superType, superclass, (o, f) -> {
-                Map thisMap = (Map) o;
-                Map superMap = (Map) f;
-                if (thisMap != superMap && !superMap.isEmpty()) {
-                    thisMap.putAll(superMap);
-                }
-            });
+            FieldReader fieldReader = ObjectReaders.fieldReader(
+                    SUPER,
+                    superType,
+                    superclass,
+                    (o, f) -> {
+                        Map thisMap = (Map) o;
+                        Map superMap = (Map) f;
+                        // avoid putAll oom
+                        for (Iterator it = superMap.entrySet().iterator(); it.hasNext(); ) {
+                            Map.Entry entry = (Map.Entry) it.next();
+                            thisMap.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+            );
             fieldReaders.put(SUPER, fieldReader);
         }
 
