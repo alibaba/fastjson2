@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.*;
 import java.util.function.*;
 
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
+import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 import static com.alibaba.fastjson2.util.TypeUtils.isFunction;
 
@@ -1534,6 +1535,17 @@ public class ObjectReaderCreator {
                     createFieldReader(objectClass, objectType, namingStrategy, orders, finalBeanInfo, fieldInfo, method, fieldReaders, provider);
                 });
             }
+        }
+
+        Class<? super T> superclass = objectClass.getSuperclass();
+        if (BeanUtils.isExtendedMap(objectClass)) {
+            Type superType = objectClass.getGenericSuperclass();
+            FieldReader fieldReader = ObjectReaders.fieldReader(SUPER, superType, superclass, (o, f) -> {
+                Map thisMap = (Map) o;
+                Map superMap = (Map) f;
+                thisMap.putAll(superMap);
+            });
+            fieldReaders.put(SUPER, fieldReader);
         }
 
         FieldReader[] fieldReaderArray = new FieldReader[fieldReaders.size()];

@@ -170,7 +170,9 @@ public class ObjectWriterCreatorASM
         final boolean fieldBased = (writerFieldFeatures & JSONWriter.Feature.FieldBased.mask) != 0
                 && !(objectClass.isInterface() || objectClass.isInterface());
 
-        if (Throwable.class.isAssignableFrom(objectClass)) {
+        if (Throwable.class.isAssignableFrom(objectClass)
+                || BeanUtils.isExtendedMap(objectClass)
+        ) {
             return super.createObjectWriter(objectClass, features, provider);
         }
 

@@ -37,6 +37,8 @@ public abstract class BeanUtils {
     private static volatile Method RECORD_GET_RECORD_COMPONENTS;
     private static volatile Method RECORD_COMPONENT_GET_NAME;
 
+    public static final String SUPER = "$super$";
+
     public static String[] getRecordFieldNames(Class<?> recordType) {
         if (JVM_VERSION < 14) {
             return new String[0];
@@ -336,6 +338,16 @@ public abstract class BeanUtils {
                         && fieldClass.getName().equals("com.google.protobuf.MapField")) {
                     return;
                 }
+            }
+
+            Class<?> declaringClass = field.getDeclaringClass();
+            if (declaringClass == AbstractMap.class
+                    || declaringClass == HashMap.class
+                    || declaringClass == LinkedHashMap.class
+                    || declaringClass == TreeMap.class
+                    || declaringClass == ConcurrentHashMap.class
+            ) {
+                continue;
             }
 
             fieldConsumer.accept(field);
@@ -1534,7 +1546,11 @@ public abstract class BeanUtils {
         return null;
     }
 
-    public static Type getParamType(TypeReference type, Class<?> raw, Class declaringClass, Parameter field, Type fieldType) {
+    public static Type getParamType(TypeReference type,
+                                    Class<?> raw,
+                                    Class declaringClass,
+                                    Parameter field,
+                                    Type fieldType) {
         while (raw != Object.class) {
             if (declaringClass == raw) {
                 return resolve(type.getType(), declaringClass, fieldType);
@@ -1738,7 +1754,7 @@ public abstract class BeanUtils {
         }
 
         // check our supertypes
-        if (!rawType.isInterface()) {
+        if (rawType != null && !rawType.isInterface()) {
             while (rawType != Object.class) {
                 Class<?> rawSupertype = rawType.getSuperclass();
                 if (rawSupertype == toResolve) {
@@ -2191,7 +2207,7 @@ public abstract class BeanUtils {
     }
 
     public static void cleanupCache(ClassLoader classLoader) {
-        for (Iterator<Map.Entry<Class, Field[]>> it = fieldCache.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry<Class, Field[]>> it = fieldCache.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<Class, Field[]> entry = it.next();
             Class entryKey = entry.getKey();
             if (entryKey.getClassLoader() == classLoader) {
@@ -2199,7 +2215,7 @@ public abstract class BeanUtils {
             }
         }
 
-        for (Iterator<Map.Entry<Class, Map<String, Field>>> it = fieldMapCache.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry<Class, Map<String, Field>>> it = fieldMapCache.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<Class, Map<String, Field>> entry = it.next();
             Class entryKey = entry.getKey();
             if (entryKey.getClassLoader() == classLoader) {
@@ -2207,7 +2223,7 @@ public abstract class BeanUtils {
             }
         }
 
-        for (Iterator<Map.Entry<Class, Field[]>> it = declaredFieldCache.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry<Class, Field[]>> it = declaredFieldCache.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<Class, Field[]> entry = it.next();
             Class entryKey = entry.getKey();
             if (entryKey.getClassLoader() == classLoader) {
@@ -2215,7 +2231,7 @@ public abstract class BeanUtils {
             }
         }
 
-        for (Iterator<Map.Entry<Class, Method[]>> it = methodCache.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry<Class, Method[]>> it = methodCache.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<Class, Method[]> entry = it.next();
             Class entryKey = entry.getKey();
             if (entryKey.getClassLoader() == classLoader) {
@@ -2223,7 +2239,7 @@ public abstract class BeanUtils {
             }
         }
 
-        for (Iterator<Map.Entry<Class, Constructor[]>> it = constructorCache.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Map.Entry<Class, Constructor[]>> it = constructorCache.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<Class, Constructor[]> entry = it.next();
             Class entryKey = entry.getKey();
             if (entryKey.getClassLoader() == classLoader) {
@@ -2374,7 +2390,7 @@ public abstract class BeanUtils {
                         }
                         break;
                     }
-                    case "shape" : {
+                    case "shape": {
                         String shape = ((Enum) result).name();
                         switch (shape) {
                             case "STRING":
@@ -2522,5 +2538,39 @@ public abstract class BeanUtils {
                 // ignored
             }
         });
+    }
+
+    public static boolean isExtendedMap(Class objectClass) {
+        if (objectClass == HashMap.class
+                || objectClass == LinkedHashMap.class
+                || objectClass == TreeMap.class
+                || "".equals(objectClass.getSimpleName())
+        ) {
+            return false;
+        }
+
+        Class superclass = objectClass.getSuperclass();
+        if (superclass != HashMap.class
+                && superclass != LinkedHashMap.class
+                && superclass != TreeMap.class
+        ) {
+            return false;
+        }
+
+        List<Field> fields = new ArrayList<>();
+        BeanUtils.declaredFields(objectClass, field -> {
+            int modifiers = field.getModifiers();
+            if (Modifier.isStatic(modifiers)
+                    || Modifier.isTransient(modifiers)
+                    || field.getDeclaringClass().isAssignableFrom(superclass)
+                    || field.getName().equals("this$0")
+            ) {
+                return;
+            }
+
+            fields.add(field);
+        });
+
+        return !fields.isEmpty();
     }
 }

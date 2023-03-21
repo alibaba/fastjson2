@@ -1125,6 +1125,10 @@ public class ObjectWriterBaseModule
             return ObjectWriterImplCollection.INSTANCE;
         }
 
+        if (isExtendedMap(objectClass)) {
+            return null;
+        }
+
         if (Map.class.isAssignableFrom(objectClass)) {
             return ObjectWriterImplMap.of(objectClass);
         }

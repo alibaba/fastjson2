@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.util.BeanUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -12,6 +13,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+
+import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
 
 public class FieldWriterObject<T>
         extends FieldWriter<T> {
@@ -73,6 +76,10 @@ public class FieldWriterObject<T>
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         if (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
             ObjectWriter formattedWriter = null;
+            if (BeanUtils.isExtendedMap(valueClass) && SUPER.equals(fieldName)) {
+                valueClass = fieldClass;
+            }
+
             if (format == null) {
                 JSONWriter.Context context = jsonWriter.context;
                 boolean fieldBased = ((features | context.getFeatures()) & JSONWriter.Feature.FieldBased.mask) != 0;
