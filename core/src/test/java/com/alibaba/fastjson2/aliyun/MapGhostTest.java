@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.TreeMap;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MapGhostTest {
@@ -17,6 +18,8 @@ public class MapGhostTest {
         MapGhost<String, Object> map = new MapGhost<String, Object>("abc");
         map.put("name", 123);
         byte[] bytes = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
+        byte[] bytes1 = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
+        assertArrayEquals(bytes, bytes1);
 
         MapGhost mapGhost = JSONB.parseObject(bytes, MapGhost.class, JSONReader.Feature.FieldBased, JSONReader.Feature.SupportAutoType);
         assertEquals(map.name, mapGhost.name);
