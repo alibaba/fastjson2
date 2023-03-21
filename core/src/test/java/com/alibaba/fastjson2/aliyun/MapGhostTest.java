@@ -18,8 +18,6 @@ public class MapGhostTest {
         map.put("name", 123);
         byte[] bytes = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
 
-        System.out.println(JSONB.toJSONString(bytes));
-
         MapGhost mapGhost = JSONB.parseObject(bytes, MapGhost.class, JSONReader.Feature.FieldBased, JSONReader.Feature.SupportAutoType);
         assertEquals(map.name, mapGhost.name);
         assertEquals(map.get("name"), mapGhost.get("name"));
@@ -40,8 +38,6 @@ public class MapGhostTest {
         map.put("name", 123);
         byte[] bytes = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
 
-        System.out.println(JSONB.toJSONString(bytes));
-
         MapGhost1 mapGhost = JSONB.parseObject(bytes, MapGhost1.class, JSONReader.Feature.FieldBased, JSONReader.Feature.SupportAutoType);
         assertEquals(map.name, mapGhost.name);
         assertEquals(map.get("name"), mapGhost.get("name"));
@@ -61,8 +57,6 @@ public class MapGhostTest {
         MapGhost2<String, Object> map = new MapGhost2<String, Object>("abc");
         map.put("name", 123);
         byte[] bytes = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
-
-        System.out.println(JSONB.toJSONString(bytes));
 
         MapGhost2 mapGhost = JSONB.parseObject(bytes, MapGhost2.class, JSONReader.Feature.FieldBased, JSONReader.Feature.SupportAutoType);
         assertEquals(map.name, mapGhost.name);

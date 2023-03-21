@@ -1543,7 +1543,9 @@ public class ObjectReaderCreator {
             FieldReader fieldReader = ObjectReaders.fieldReader(SUPER, superType, superclass, (o, f) -> {
                 Map thisMap = (Map) o;
                 Map superMap = (Map) f;
-                thisMap.putAll(superMap);
+                if (thisMap != superMap && !superMap.isEmpty()) {
+                    thisMap.putAll(superMap);
+                }
             });
             fieldReaders.put(SUPER, fieldReader);
         }
