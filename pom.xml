@@ -35,7 +35,7 @@
         <jackson.version>2.14.2</jackson.version>
         <jetty.version>11.0.14</jetty.version>
         <jersey.version>2.39</jersey.version>
-        <springframework5.version>5.3.26</springframework5.version>
+        <springframework5.version>6.0.7</springframework5.version>
         <springframework6.version>6.0.7</springframework6.version>
         <sprintboot2.version>2.7.9</sprintboot2.version>
         <sprintboot3.version>3.0.4</sprintboot3.version>
