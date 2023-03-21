@@ -1,11 +1,14 @@
 package com.alibaba.fastjson2.internal.asm;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.reader.*;
+import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 import com.alibaba.fastjson2.writer.*;
+import com.alibaba.fastjson2.writer.FieldWriter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,12 +19,59 @@ import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
-import java.util.function.ObjDoubleConsumer;
-import java.util.function.ObjIntConsumer;
-import java.util.function.ObjLongConsumer;
+import java.util.function.*;
 
 public class ASMUtils {
+    public static final String TYPE_UNSAFE_UTILS = UnsafeUtils.class.getName().replace('.', '/');
+
+    public static final String TYPE_OBJECT_WRITER_ADAPTER
+            = ObjectWriterAdapter.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_WRITER_1 = ObjectWriter1.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_WRITER_2 = ObjectWriter2.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_WRITER_3 = ObjectWriter3.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_WRITER_4 = ObjectWriter4.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_WRITER_5 = ObjectWriter5.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_WRITER_6 = ObjectWriter6.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_WRITER_7 = ObjectWriter7.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_WRITER_8 = ObjectWriter8.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_WRITER_9 = ObjectWriter9.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_WRITER_10 = ObjectWriter10.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_WRITER_11 = ObjectWriter11.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_WRITER_12 = ObjectWriter12.class.getName().replace('.', '/');
+    public static final String TYPE_FIELD_READE = FieldReader.class.getName().replace('.', '/');
+    public static final String TYPE_JSON_READER = JSONReader.class.getName().replace('.', '/');
+
+    public static final String TYPE_OBJECT_READER = ObjectReader.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_READER_ADAPTER
+            = ObjectReaderAdapter.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_READER_1 = ObjectReader1.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_READER_2 = ObjectReader2.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_READER_3 = ObjectReader3.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_READER_4 = ObjectReader4.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_READER_5 = ObjectReader5.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_READER_6 = ObjectReader6.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_READER_7 = ObjectReader7.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_READER_8 = ObjectReader8.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_READER_9 = ObjectReader9.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_READER_10 = ObjectReader10.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_READER_11 = ObjectReader11.class.getName().replace('.', '/');
+    public static final String TYPE_OBJECT_READER_12 = ObjectReader12.class.getName().replace('.', '/');
+
+    public static final String TYPE_OBJECT_WRITER = ObjectWriter.class.getName().replace('.', '/');
+    public static final String TYPE_JSON_WRITER = JSONWriter.class.getName().replace('.', '/');
+    public static final String TYPE_FIELD_WRITER = FieldWriter.class.getName().replace('.', '/');
+
+    public static final String DESC_FIELD_WRITER = 'L' + FieldWriter.class.getName().replace('.', '/') + ';';
+    public static final String DESC_FIELD_WRITER_ARRAY = "[" + DESC_FIELD_WRITER;
+    public static final String DESC_FIELD_READER = 'L' + FieldReader.class.getName().replace('.', '/') + ';';
+    public static final String DESC_FIELD_READER_ARRAY = "[" + DESC_FIELD_READER;
+    public static final String DESC_JSON_READER = 'L' + TYPE_JSON_READER + ';';
+    public static final String DESC_JSON_WRITER = 'L' + TYPE_JSON_WRITER + ';';
+    public static final String DESC_OBJECT_READER = 'L' + TYPE_OBJECT_READER + ';';
+    public static final String DESC_OBJECT_WRITER = 'L' + TYPE_OBJECT_WRITER + ';';
+    public static final String DESC_SUPPLIER = "Ljava/util/function/Supplier;";
+    public static final String DESC_JSONSCHEMA = 'L' + JSONSchema.class.getName().replace('.', '/') + ';';
+
     static Map<Class, String> descMapping = new HashMap<>();
     static Map<Class, String> typeMapping = new HashMap<>();
 
@@ -35,8 +85,6 @@ public class ASMUtils {
         descMapping.put(float.class, "F");
         descMapping.put(long.class, "J");
         descMapping.put(double.class, "D");
-        descMapping.put(java.util.List.class, "Ljava/util/List;");
-        typeMapping.put(java.util.Collection.class, "Ljava/util/Collection;");
 
         typeMapping.put(int.class, "I");
         typeMapping.put(void.class, "V");
@@ -78,7 +126,6 @@ public class ASMUtils {
                 ObjDoubleConsumer.class,
                 BiConsumer.class,
                 UnsafeUtils.class,
-                ObjectWriter.class,
                 ObjectWriterAdapter.class,
                 ObjectWriter1.class,
                 ObjectWriter2.class,
@@ -94,13 +141,27 @@ public class ASMUtils {
                 ObjectWriter12.class,
                 com.alibaba.fastjson2.writer.FieldWriter.class,
                 JSONPathCompilerReflect.SingleNamePathTyped.class,
-                JSONWriter.class,
                 JSONWriter.Context.class,
-                JSONB.class
+                JSONB.class,
+                JSONSchema.class,
+                JSONType.class,
+                java.util.Date.class,
+                java.util.function.Supplier.class
         };
         for (Class objectType : classes) {
-            typeMapping.put(objectType, objectType.getName().replace('.', '/'));
+            String type = objectType.getName().replace('.', '/');
+            typeMapping.put(objectType, type);
+            String desc = 'L' + type + ';';
+            descMapping.put(objectType, desc);
         }
+
+        typeMapping.put(JSONWriter.class, TYPE_JSON_WRITER);
+        descMapping.put(JSONWriter.class, DESC_JSON_WRITER);
+        typeMapping.put(ObjectWriter.class, TYPE_OBJECT_WRITER);
+        descMapping.put(ObjectWriter.class, DESC_OBJECT_WRITER);
+
+        descMapping.put(FieldWriter[].class, DESC_FIELD_WRITER_ARRAY);
+        descMapping.put(FieldReader[].class, DESC_FIELD_READER_ARRAY);
     }
 
     public static String type(Class<?> clazz) {
@@ -111,10 +172,6 @@ public class ASMUtils {
 
         if (clazz.isArray()) {
             return "[" + desc(clazz.getComponentType());
-        }
-
-        if (clazz.isPrimitive()) {
-            return typeMapping.get(clazz);
         }
 
         // 直接基于字符串替换，不使用正则替换
@@ -129,50 +186,12 @@ public class ASMUtils {
             return desc;
         }
 
-        if (clazz.isPrimitive()) {
-            return typeMapping.get(clazz);
-        }
-
         if (clazz.isArray()) {
             Class<?> componentType = clazz.getComponentType();
-            switch (componentType.getName()) {
-                case "com.alibaba.fastjson2.writer.FieldWriter":
-                    return "[Lcom/alibaba/fastjson2/writer/FieldWriter;";
-                case "com.alibaba.fastjson2.reader.FieldReader":
-                    return "[Lcom/alibaba/fastjson2/reader/FieldReader;";
-                default:
-                    return "[" + desc(componentType);
-            }
+            return "[" + desc(componentType);
         }
 
         String className = clazz.getName();
-        switch (className) {
-            case "java.util.Date":
-                return "Ljava/util/Date;";
-            case "java.lang.String":
-                return "Ljava/lang/String;";
-            case "com.alibaba.fastjson2.writer.ObjectWriter":
-                return "Lcom/alibaba/fastjson2/writer/ObjectWriter;";
-            case "com.alibaba.fastjson2.JSONWriter":
-                return "Lcom/alibaba/fastjson2/JSONWriter;";
-            case "com.alibaba.fastjson2.writer.FieldWriter":
-                return "Lcom/alibaba/fastjson2/writer/FieldWriter;";
-            case "com.alibaba.fastjson2.JSONReader":
-                return "Lcom/alibaba/fastjson2/JSONReader;";
-            case "com.alibaba.fastjson2.reader.FieldReader":
-                return "Lcom/alibaba/fastjson2/reader/FieldReader;";
-            case "com.alibaba.fastjson2.reader.ObjectReader":
-                return "Lcom/alibaba/fastjson2/reader/ObjectReader;";
-            case "java.util.function.Supplier":
-                return "Ljava/util/function/Supplier;";
-            case "com.alibaba.fastjson2.schema.JSONSchema":
-                return "Lcom/alibaba/fastjson2/schema/JSONSchema;";
-            case "com.alibaba.fastjson2.annotation.JSONType":
-                return "Lcom/alibaba/fastjson2/annotation/JSONType;";
-            default:
-                break;
-        }
-
         char[] chars = descCacheRef.getAndSet(null);
         if (chars == null) {
             chars = new char[512];
