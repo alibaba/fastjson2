@@ -77,7 +77,16 @@ public class FieldWriterObject<T>
         if (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
             ObjectWriter formattedWriter = null;
             if (BeanUtils.isExtendedMap(valueClass) && SUPER.equals(fieldName)) {
-                valueClass = fieldClass;
+                JSONWriter.Context context = jsonWriter.context;
+                boolean fieldBased = ((features | context.getFeatures()) & JSONWriter.Feature.FieldBased.mask) != 0;
+                formattedWriter = context.provider.getObjectWriter(fieldType, fieldClass, fieldBased);
+                if (initObjectWriter == null) {
+                    boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
+                    if (success) {
+                        initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
+                    }
+                }
+                return formattedWriter;
             }
 
             if (format == null) {
