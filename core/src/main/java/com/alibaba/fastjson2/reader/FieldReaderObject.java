@@ -19,7 +19,7 @@ import java.util.function.Function;
 public class FieldReaderObject<T>
         extends FieldReader<T> {
     protected ObjectReader initReader;
-    protected BiConsumer function;
+    protected final BiConsumer function;
 
     public FieldReaderObject(
             String fieldName,
