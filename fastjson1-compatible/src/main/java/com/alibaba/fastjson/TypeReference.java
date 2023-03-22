@@ -57,6 +57,12 @@ public class TypeReference<T> {
      * @since 1.2.9
      */
     protected TypeReference(Type... actualTypeArguments) {
+        if (actualTypeArguments != null
+                && actualTypeArguments.length == 1
+                && actualTypeArguments[0] == null) {
+            actualTypeArguments[0] = Object.class;
+        }
+
         Class<?> thisClass = this.getClass();
         Type superClass = thisClass.getGenericSuperclass();
 
