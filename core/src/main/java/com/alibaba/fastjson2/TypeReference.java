@@ -80,6 +80,10 @@ public abstract class TypeReference<T> {
             throw new NullPointerException();
         }
 
+        if (actualTypeArguments.length == 1 && actualTypeArguments[0] == null) {
+            actualTypeArguments[0] = Object.class;
+        }
+
         Class<?> thisClass = getClass();
         Type superClass = thisClass.getGenericSuperclass();
         ParameterizedType argType = (ParameterizedType) ((ParameterizedType) superClass).getActualTypeArguments()[0];
