@@ -10,7 +10,10 @@ import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+
+import static com.alibaba.fastjson2.JSONReader.Feature.Base64StringAsByteArray;
 
 class ObjectReaderImplGenericArray
         implements ObjectReader {
@@ -87,6 +90,20 @@ class ObjectReaderImplGenericArray
 
         char ch = jsonReader.current();
         if (ch == '"') {
+            if (fieldType instanceof GenericArrayType
+                    && ((GenericArrayType) fieldType).getGenericComponentType() == byte.class
+            ) {
+                byte[] bytes;
+                if ((jsonReader.features(features) & Base64StringAsByteArray.mask) != 0) {
+                    String str = jsonReader.readString();
+                    bytes = Base64.getDecoder().decode(str);
+                } else {
+                    bytes = jsonReader.readBinary();
+                }
+
+                return bytes;
+            }
+
             String str = jsonReader.readString();
             if (str.isEmpty()) {
                 return null;
