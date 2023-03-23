@@ -60,7 +60,7 @@ public class TypeReference<T> {
         if (actualTypeArguments != null
                 && actualTypeArguments.length == 1
                 && actualTypeArguments[0] == null) {
-            actualTypeArguments[0] = Object.class;
+            actualTypeArguments = new Type[]{Object.class};
         }
 
         Class<?> thisClass = this.getClass();
