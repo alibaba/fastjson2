@@ -14,9 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 import static java.lang.invoke.MethodType.methodType;
 
@@ -36,9 +34,16 @@ public class TypeUtils {
 
     public static final MethodType METHOD_TYPE_SUPPLIER = MethodType.methodType(Supplier.class);
     public static final MethodType METHOD_TYPE_FUNCTION = MethodType.methodType(Function.class);
+    public static final MethodType METHOD_TYPE_TO_INT_FUNCTION = MethodType.methodType(ToIntFunction.class);
+    public static final MethodType METHOD_TYPE_OBJECT_INT_CONSUMER = MethodType.methodType(ObjIntConsumer.class);
+    public static final MethodType METHOD_TYPE_LONG_FUNCTION = MethodType.methodType(LongFunction.class);
     public static final MethodType METHOD_TYPE_BI_FUNCTION = MethodType.methodType(BiFunction.class);
     public static final MethodType METHOD_TYPE_OBJECT = MethodType.methodType(Object.class);
     public static final MethodType METHOD_TYPE_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class);
+    public static final MethodType METHOD_TYPE_INT_OBJECT = MethodType.methodType(int.class, Object.class);
+    public static final MethodType METHOD_TYPE_VOID_OBJECT_INT = MethodType.methodType(void.class, Object.class, int.class);
+    public static final MethodType METHOD_TYPE_OBJECT_LONG = MethodType.methodType(Object.class, long.class);
+    public static final MethodType METHOD_TYPE_VOID_LONG = MethodType.methodType(void.class, long.class);
     public static final MethodType METHOD_TYPE_OBJECT_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class, Object.class);
 
     static class X1 {
