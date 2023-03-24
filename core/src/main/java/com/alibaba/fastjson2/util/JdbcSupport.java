@@ -491,10 +491,17 @@ public class JdbcSupport {
             try {
                 constructor = objectClass.getConstructor(long.class);
                 methodSetNanos = objectClass.getMethod("setNanos", int.class);
-                methodValueOf = objectClass.getMethod("valueOf", LocalDateTime.class);
             } catch (NoSuchMethodException e) {
                 throw new IllegalStateException("illegal stat", e);
             }
+
+            Method methodValueOf = null;
+            try {
+                methodValueOf = objectClass.getMethod("valueOf", LocalDateTime.class);
+            } catch (NoSuchMethodException ignored) {
+                // ignored
+            }
+            this.methodValueOf = methodValueOf;
         }
 
         @Override
@@ -540,22 +547,24 @@ public class JdbcSupport {
                 return createTimestamp(millis, 0);
             }
 
-            if (jsonReader.readIfNull()) {
+            if (jsonReader.nextIfNullOrEmptyString()) {
                 return null;
             }
 
             if (format == null || formatISO8601 || formatMillis) {
-                LocalDateTime localDateTime = jsonReader.readLocalDateTime();
-                if (localDateTime != null) {
-                    try {
-                        return methodValueOf.invoke(null, localDateTime);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new JSONException("invoke java.sql.Timestamp.valueOf error", e);
+                if (methodValueOf != null) {
+                    LocalDateTime localDateTime = jsonReader.readLocalDateTime();
+                    if (localDateTime != null) {
+                        try {
+                            return methodValueOf.invoke(null, localDateTime);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            throw new JSONException("invoke java.sql.Timestamp.valueOf error", e);
+                        }
                     }
-                }
 
-                if (jsonReader.wasNull()) {
-                    return null;
+                    if (jsonReader.wasNull()) {
+                        return null;
+                    }
                 }
 
                 long millis = jsonReader.readMillisFromString();
