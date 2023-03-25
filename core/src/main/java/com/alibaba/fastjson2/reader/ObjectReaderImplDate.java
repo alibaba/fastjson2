@@ -132,8 +132,9 @@ public class ObjectReaderImplDate
                             }
                         }
                     } else {
-                        if (str.length() == 19 && jsonReader.isEnabled(JSONReader.Feature.SupportSmartMatch)) {
-                            ldt = DateUtils.parseLocalDateTime(str, 0, str.length());
+                        if (str.length() == 19 && (yyyyMMddhhmm16 || jsonReader.isEnabled(JSONReader.Feature.SupportSmartMatch))) {
+                            int length = yyyyMMddhhmm16 ? 16 : 19;
+                            ldt = DateUtils.parseLocalDateTime(str, 0, length);
                         } else {
                             ldt = LocalDateTime.parse(str, formatter);
                         }
