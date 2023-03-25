@@ -30,6 +30,7 @@ android {
     buildFeatures {
         viewBinding true
     }
+    namespace 'com.alibaba.fastjson2.android'
 }
 
 dependencies {
