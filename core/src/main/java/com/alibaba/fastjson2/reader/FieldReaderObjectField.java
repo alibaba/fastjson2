@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.DateUtils;
@@ -10,6 +11,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 
@@ -201,7 +203,10 @@ class FieldReaderObjectField<T>
                 return;
             }
 
-            if (!fieldClass.isInstance(value)) {
+            if (fieldType != fieldClass && Map.class.isAssignableFrom(fieldClass) && value instanceof Map) {
+                ObjectReader objectReader = getObjectReader(JSONFactory.createReadContext());
+                value = objectReader.createInstance((Map) value);
+            } else if (!fieldClass.isInstance(value)) {
                 if (value instanceof String) {
                     String str = (String) value;
                     if (fieldClass == LocalDate.class) {

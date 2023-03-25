@@ -14,8 +14,8 @@ public class ToBigDecimal
         implements Function {
     @Override
     public Object apply(Object o) {
-        if (o == null) {
-            return null;
+        if (o == null || o instanceof BigDecimal) {
+            return o;
         }
 
         if (o instanceof Boolean) {
