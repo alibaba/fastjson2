@@ -806,7 +806,7 @@ class JSONReaderASCII
 
         int offset = nameBegin;
         for (int i = 0; offset < nameEnd; ++i) {
-            char c = (char) bytes[offset];
+            char c = (char) (bytes[offset] & 0xff);
 
             if (c == '\\') {
                 c = (char) bytes[++offset];
@@ -1209,7 +1209,7 @@ class JSONReaderASCII
             char[] chars = new char[valueLength];
             offset = start;
             for (int i = 0; ; ++i) {
-                char c = (char) bytes[offset];
+                char c = (char) (bytes[offset] & 0xff);
                 if (c == '\\') {
                     c = (char) (bytes[++offset]);
                     switch (c) {
@@ -1357,7 +1357,7 @@ class JSONReaderASCII
                 char[] chars = new char[valueLength];
                 offset = start;
                 for (int i = 0; ; ++i) {
-                    char c = (char) bytes[offset];
+                    char c = (char) (bytes[offset] & 0xff);
                     if (c == '\\') {
                         c = (char) bytes[++offset];
                         switch (c) {
