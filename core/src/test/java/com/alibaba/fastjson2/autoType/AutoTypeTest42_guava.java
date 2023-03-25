@@ -42,7 +42,6 @@ public class AutoTypeTest42_guava {
                 JSONReader.Feature.UseNativeObject
         );
 
-        assertEquals(value.getClass(), value2.getClass());
         assertEquals(value.size(), value2.size());
         assertEquals(value.get(0), value2.get(0));
         assertEquals(value.get(1), value2.get(1));

@@ -615,6 +615,147 @@ public class LambdaMiscCodec {
         return new ReflectToIntFunction(method);
     }
 
+    public static Supplier createSupplier(Method method) {
+        try {
+            Class<?> declaringClass = method.getDeclaringClass();
+            Class objectClass = method.getReturnType();
+            MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+            MethodHandle methodHandle = lookup.findStatic(
+                    declaringClass,
+                    method.getName(),
+                    MethodType.methodType(objectClass)
+            );
+
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "get",
+                    METHOD_TYPE_SUPPLIER,
+                    METHOD_TYPE_OBJECT,
+                    methodHandle,
+                    MethodType.methodType(objectClass)
+            );
+            return (Supplier) callSite.getTarget().invokeExact();
+        } catch (Throwable ignored) {
+            // ignored
+        }
+
+        return new ReflectSupplier(method);
+    }
+
+    public static BiFunction createBiFunction(Method method) {
+        try {
+            Class<?> declaringClass = method.getDeclaringClass();
+            Class objectClass = method.getReturnType();
+            MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            Class<?> param0 = parameterTypes[0];
+            Class<?> param1 = parameterTypes[1];
+
+            MethodHandle methodHandle = lookup.findStatic(
+                    declaringClass,
+                    method.getName(),
+                    MethodType.methodType(objectClass, param0, param1)
+            );
+
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHOD_TYPE_BI_FUNCTION,
+                    METHOD_TYPE_OBJECT_OBJECT_OBJECT,
+                    methodHandle,
+                    MethodType.methodType(objectClass, param0, param0)
+            );
+            return (BiFunction) callSite.getTarget().invokeExact();
+        } catch (Throwable ignored) {
+            // ignored
+        }
+
+        return new ReflectBiFunction(method);
+    }
+
+    public static BiFunction createBiFunction(Constructor constructor) {
+        try {
+            Class<?> declaringClass = constructor.getDeclaringClass();
+            MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+            Class<?>[] parameterTypes = constructor.getParameterTypes();
+            Class<?> param0 = parameterTypes[0];
+            Class<?> param1 = parameterTypes[1];
+
+            MethodHandle methodHandle = lookup.findConstructor(
+                    declaringClass,
+                    MethodType.methodType(void.class, param0, param1)
+            );
+
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHOD_TYPE_BI_FUNCTION,
+                    METHOD_TYPE_OBJECT_OBJECT_OBJECT,
+                    methodHandle,
+                    METHOD_TYPE_OBJECT_OBJECT_OBJECT
+            );
+            return (BiFunction) callSite.getTarget().invokeExact();
+        } catch (Throwable ignored) {
+            // ignored
+        }
+
+        return new ConstructorBiFunction(constructor);
+    }
+
+    static final class ConstructorBiFunction
+            implements BiFunction {
+        final Constructor constructor;
+
+        ConstructorBiFunction(Constructor constructor) {
+            this.constructor = constructor;
+        }
+
+        @Override
+        public Object apply(Object arg0, Object arg1) {
+            try {
+                return constructor.newInstance(arg0, arg0);
+            } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+                throw new JSONException("invoke error", e);
+            }
+        }
+    }
+
+    static final class ReflectBiFunction
+            implements BiFunction {
+        final Method method;
+
+        ReflectBiFunction(Method method) {
+            this.method = method;
+        }
+
+        @Override
+        public Object apply(Object arg0, Object arg1) {
+            try {
+                return method.invoke(null, arg0, arg0);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new JSONException("invoke error", e);
+            }
+        }
+    }
+
+    static final class ReflectSupplier
+            implements Supplier {
+        final Method method;
+
+        ReflectSupplier(Method method) {
+            this.method = method;
+        }
+
+        @Override
+        public Object get() {
+            try {
+                return method.invoke(null);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new JSONException("invoke error", e);
+            }
+        }
+    }
+
     public static Function createFunction(Method method) {
         Class<?> declaringClass = method.getDeclaringClass();
         int modifiers = method.getModifiers();
