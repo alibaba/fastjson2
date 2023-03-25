@@ -67,11 +67,17 @@ class ObjectReaderImplMapTyped
     public Object createInstance(Map input, long features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
 
-        Map<String, Object> object = (Map<String, Object>) createInstance();
+        Map object = (Map<String, Object>) createInstance();
         for (Iterator<Map.Entry> it = input.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = it.next();
-            String fieldName = entry.getKey().toString();
+            Object key = entry.getKey();
             Object fieldValue = entry.getValue();
+            Object fieldName;
+            if (keyType == null || key == String.class) {
+                fieldName = key.toString();
+            } else {
+                fieldName = TypeUtils.cast(key, keyType);
+            }
 
             Object value = fieldValue;
             if (value != null) {

@@ -12,8 +12,8 @@ public class ToBigInteger
         implements Function {
     @Override
     public Object apply(Object o) {
-        if (o == null) {
-            return null;
+        if (o == null || o instanceof BigInteger) {
+            return o;
         }
 
         if (o instanceof Boolean) {
