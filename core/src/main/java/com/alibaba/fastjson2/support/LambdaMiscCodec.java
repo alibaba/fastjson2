@@ -16,6 +16,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.METHOD_TYPE_OBJECT_LONG;
 
 public class LambdaMiscCodec {
     static volatile boolean hppcError;
+    static volatile Throwable errorLast;
 
     public static ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
         if (hppcError) {
@@ -29,184 +30,100 @@ public class LambdaMiscCodec {
             case "gnu.trove.stack.array.TByteArrayStack":
             case "gnu.trove.list.array.TByteArrayList":
             case "com.carrotsearch.hppc.ByteArrayList": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findVirtual(objectClass, "toArray", MethodType.methodType(byte[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(byte[].class, objectClass)
+                    return ObjectWriters.ofToByteArray(
+                            createFunction(
+                                    objectClass.getMethod("toArray")
+                            )
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<Object, byte[]> function = (Function<Object, byte[]>) target.invokeExact();
-                    return ObjectWriters.ofToByteArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "gnu.trove.set.hash.TShortHashSet":
             case "gnu.trove.list.array.TShortArrayList":
             case "com.carrotsearch.hppc.ShortArrayList": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findVirtual(objectClass, "toArray", MethodType.methodType(short[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(short[].class, objectClass)
+                    return ObjectWriters.ofToShortArray(
+                            createFunction(
+                                    objectClass.getMethod("toArray")
+                            )
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<Object, short[]> function = (Function<Object, short[]>) target.invokeExact();
-                    return ObjectWriters.ofToShortArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "gnu.trove.list.array.TIntArrayList":
             case "gnu.trove.set.hash.TIntHashSet":
             case "com.carrotsearch.hppc.IntArrayList":
             case "com.carrotsearch.hppc.IntHashSet": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findVirtual(objectClass, "toArray", MethodType.methodType(int[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(int[].class, objectClass)
+                    return ObjectWriters.ofToIntArray(
+                            createFunction(
+                                    objectClass.getMethod("toArray")
+                            )
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<Object, int[]> function = (Function<Object, int[]>) target.invokeExact();
-                    return ObjectWriters.ofToIntArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "gnu.trove.list.array.TLongArrayList":
             case "gnu.trove.set.hash.TLongHashSet":
             case "com.carrotsearch.hppc.LongArrayList":
             case "com.carrotsearch.hppc.LongHashSet": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findVirtual(objectClass, "toArray", MethodType.methodType(long[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(long[].class, objectClass)
+                    return ObjectWriters.ofToLongArray(
+                            createFunction(
+                                    objectClass.getMethod("toArray")
+                            )
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<Object, long[]> function = (Function<Object, long[]>) target.invokeExact();
-                    return ObjectWriters.ofToLongArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "gnu.trove.list.array.TCharArrayList":
             case "com.carrotsearch.hppc.CharArrayList":
             case "com.carrotsearch.hppc.CharHashSet": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findVirtual(objectClass, "toArray", MethodType.methodType(char[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(char[].class, objectClass)
+                    return ObjectWriters.ofToCharArray(
+                            createFunction(
+                                    objectClass.getMethod("toArray")
+                            )
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<Object, char[]> function = (Function<Object, char[]>) target.invokeExact();
-                    return ObjectWriters.ofToCharArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "gnu.trove.list.array.TFloatArrayList":
             case "com.carrotsearch.hppc.FloatArrayList": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findVirtual(objectClass, "toArray", MethodType.methodType(float[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(float[].class, objectClass)
+                    return ObjectWriters.ofToFloatArray(
+                            createFunction(
+                                    objectClass.getMethod("toArray")
+                            )
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<Object, float[]> function = (Function<Object, float[]>) target.invokeExact();
-                    return ObjectWriters.ofToFloatArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "gnu.trove.list.array.TDoubleArrayList":
             case "com.carrotsearch.hppc.DoubleArrayList": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findVirtual(objectClass, "toArray", MethodType.methodType(double[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(double[].class, objectClass)
+                    return ObjectWriters.ofToDoubleArray(
+                            createFunction(
+                                    objectClass.getMethod("toArray")
+                            )
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<Object, double[]> function = (Function<Object, double[]>) target.invokeExact();
-                    return ObjectWriters.ofToDoubleArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "com.carrotsearch.hppc.BitSet": {
                 MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle sizeHandler = lookup.findVirtual(objectClass, "size", MethodType.methodType(long.class));
-                    CallSite sizeCallSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "applyAsLong",
-                            MethodType.methodType(ToLongFunction.class),
-                            MethodType.methodType(long.class, Object.class),
-                            sizeHandler,
-                            MethodType.methodType(long.class, objectClass)
+                    ToLongFunction functionSize = createToLongFunction(
+                            objectClass.getMethod("size")
                     );
-                    ToLongFunction functionSize = (ToLongFunction) sizeCallSite.getTarget().invokeExact();
 
                     MethodHandle getHandler = lookup.findVirtual(objectClass, "get", MethodType.methodType(boolean.class, int.class));
                     CallSite getCallSite = LambdaMetafactory.metafactory(
@@ -242,320 +159,151 @@ public class LambdaMiscCodec {
 
         switch (className) {
             case "com.carrotsearch.hppc.ByteArrayList": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findStatic(objectClass, "from", MethodType.methodType(objectClass, byte[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(objectClass, byte[].class)
+                    Function<byte[], Object> function = createFunction(
+                            objectClass.getMethod("from", byte[].class)
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<byte[], Object> function = (Function<byte[], Object>) target.invokeExact();
                     return ObjectReaders.fromByteArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "com.carrotsearch.hppc.ShortArrayList": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findStatic(objectClass, "from", MethodType.methodType(objectClass, short[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(objectClass, short[].class)
+                    Function<short[], Object> function = createFunction(
+                            objectClass.getMethod("from", short[].class)
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<short[], Object> function = (Function<short[], Object>) target.invokeExact();
                     return ObjectReaders.fromShortArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "com.carrotsearch.hppc.IntArrayList":
             case "com.carrotsearch.hppc.IntHashSet": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findStatic(objectClass, "from", MethodType.methodType(objectClass, int[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(objectClass, int[].class)
+                    Function<int[], Object> function = createFunction(
+                            objectClass.getMethod("from", int[].class)
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<int[], Object> function = (Function<int[], Object>) target.invokeExact();
                     return ObjectReaders.fromIntArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "com.carrotsearch.hppc.LongArrayList":
             case "com.carrotsearch.hppc.LongHashSet": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findStatic(objectClass, "from", MethodType.methodType(objectClass, long[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(objectClass, long[].class)
+                    Function<long[], Object> function = createFunction(
+                            objectClass.getMethod("from", long[].class)
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<long[], Object> function = (Function<long[], Object>) target.invokeExact();
                     return ObjectReaders.fromLongArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "com.carrotsearch.hppc.CharArrayList":
             case "com.carrotsearch.hppc.CharHashSet": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findStatic(objectClass, "from", MethodType.methodType(objectClass, char[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(objectClass, char[].class)
+                    Function<char[], Object> function = createFunction(
+                            objectClass.getMethod("from", char[].class)
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<char[], Object> function = (Function<char[], Object>) target.invokeExact();
                     return ObjectReaders.fromCharArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "com.carrotsearch.hppc.FloatArrayList": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findStatic(objectClass, "from", MethodType.methodType(objectClass, float[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(objectClass, float[].class)
-                    );
-                    MethodHandle target = callSite.getTarget();
-                    Function<float[], Object> function = (Function<float[], Object>) target.invokeExact();
+                    Method method = objectClass.getMethod("from", float[].class);
+                    Function<float[], Object> function = createFunction(method);
                     return ObjectReaders.fromFloatArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "com.carrotsearch.hppc.DoubleArrayList": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findStatic(objectClass, "from", MethodType.methodType(objectClass, double[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(objectClass, double[].class)
+                    Function<double[], Object> function = createFunction(
+                            objectClass.getMethod("from", double[].class)
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<double[], Object> function = (Function<double[], Object>) target.invokeExact();
                     return ObjectReaders.fromDoubleArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "gnu.trove.set.hash.TByteHashSet":
             case "gnu.trove.stack.array.TByteArrayStack":
             case "gnu.trove.list.array.TByteArrayList": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findConstructor(objectClass, MethodType.methodType(void.class, byte[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(objectClass, byte[].class)
+                    Function<byte[], Object> function = createFunction(
+                            objectClass.getConstructor(byte[].class)
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<byte[], Object> function = (Function<byte[], Object>) target.invokeExact();
                     return ObjectReaders.fromByteArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "gnu.trove.list.array.TCharArrayList": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findConstructor(objectClass, MethodType.methodType(void.class, char[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(objectClass, char[].class)
+                    Function<char[], Object> function = createFunction(
+                            objectClass.getConstructor(char[].class)
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<char[], Object> function = (Function<char[], Object>) target.invokeExact();
                     return ObjectReaders.fromCharArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "gnu.trove.set.hash.TShortHashSet":
             case "gnu.trove.list.array.TShortArrayList": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findConstructor(objectClass, MethodType.methodType(void.class, short[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(objectClass, short[].class)
+                    Function<short[], Object> function = createFunction(
+                            objectClass.getConstructor(short[].class)
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<short[], Object> function = (Function<short[], Object>) target.invokeExact();
                     return ObjectReaders.fromShortArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "gnu.trove.set.hash.TIntHashSet":
             case "gnu.trove.list.array.TIntArrayList": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findConstructor(objectClass, MethodType.methodType(void.class, int[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(objectClass, int[].class)
+                    Function<int[], Object> function = createFunction(
+                            objectClass.getConstructor(int[].class)
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<int[], Object> function = (Function<int[], Object>) target.invokeExact();
                     return ObjectReaders.fromIntArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "gnu.trove.set.hash.TLongHashSet":
             case "gnu.trove.list.array.TLongArrayList": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findConstructor(objectClass, MethodType.methodType(void.class, long[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(objectClass, long[].class)
+                    Function<long[], Object> function = createFunction(
+                            objectClass.getConstructor(long[].class)
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<long[], Object> function = (Function<long[], Object>) target.invokeExact();
                     return ObjectReaders.fromLongArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "gnu.trove.list.array.TFloatArrayList": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findConstructor(objectClass, MethodType.methodType(void.class, float[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(objectClass, float[].class)
+                    Function<float[], Object> function = createFunction(
+                            objectClass.getConstructor(float[].class)
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<float[], Object> function = (Function<float[], Object>) target.invokeExact();
                     return ObjectReaders.fromFloatArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             case "gnu.trove.list.array.TDoubleArrayList": {
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
                 try {
-                    MethodHandle methodHandle = lookup.findConstructor(objectClass, MethodType.methodType(void.class, double[].class));
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            METHOD_TYPE_FUNCTION,
-                            METHOD_TYPE_OBJECT_OBJECT,
-                            methodHandle,
-                            MethodType.methodType(objectClass, double[].class)
+                    Function<double[], Object> function = createFunction(
+                            objectClass.getConstructor(double[].class)
                     );
-                    MethodHandle target = callSite.getTarget();
-                    Function<double[], Object> function = (Function<double[], Object>) target.invokeExact();
                     return ObjectReaders.fromDoubleArray(function);
-                } catch (Throwable ignored) {
-                    hppcError = true;
-                    // ignored
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
                 }
-                break;
             }
             default:
                 break;
@@ -584,7 +332,7 @@ public class LambdaMiscCodec {
             );
             return (LongFunction) callSite.getTarget().invokeExact();
         } catch (Throwable ignored) {
-            // ignored
+            errorLast = ignored;
         }
         return new ReflectLongFunction(constructor);
     }
@@ -606,13 +354,67 @@ public class LambdaMiscCodec {
                     METHOD_TYPE_TO_INT_FUNCTION,
                     METHOD_TYPE_INT_OBJECT,
                     methodHandle,
-                    methodType
+                    MethodType.methodType(int.class, objectClass)
             );
             return (ToIntFunction) callSite.getTarget().invokeExact();
         } catch (Throwable ignored) {
-            // ignored
+            errorLast = ignored;
         }
         return new ReflectToIntFunction(method);
+    }
+
+    public static ToLongFunction createToLongFunction(Method method) {
+        Class<?> objectClass = method.getDeclaringClass();
+        try {
+            MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
+            MethodType methodType = MethodType.methodType(long.class);
+            MethodHandle methodHandle
+                    = lookup.findVirtual(
+                    objectClass,
+                    method.getName(),
+                    methodType
+            );
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "applyAsLong",
+                    METHOD_TYPE_TO_LONG_FUNCTION,
+                    METHOD_TYPE_LONG_OBJECT,
+                    methodHandle,
+                    MethodType.methodType(long.class, objectClass)
+            );
+            return (ToLongFunction) callSite.getTarget().invokeExact();
+        } catch (Throwable ignored) {
+            errorLast = ignored;
+        }
+        return new ReflectToLongFunction(method);
+    }
+
+    public static Function createFunction(Constructor constructor) {
+        try {
+            Class<?> declaringClass = constructor.getDeclaringClass();
+            MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+            Class<?>[] parameterTypes = constructor.getParameterTypes();
+            Class<?> param0 = parameterTypes[0];
+
+            MethodHandle methodHandle = lookup.findConstructor(
+                    declaringClass,
+                    MethodType.methodType(void.class, param0)
+            );
+
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "apply",
+                    METHOD_TYPE_FUNCTION,
+                    METHOD_TYPE_OBJECT_OBJECT,
+                    methodHandle,
+                    METHOD_TYPE_OBJECT_OBJECT
+            );
+            return (Function) callSite.getTarget().invokeExact();
+        } catch (Throwable ignored) {
+            errorLast = ignored;
+        }
+
+        return new ConstructorFunction(constructor);
     }
 
     public static Supplier createSupplier(Method method) {
@@ -636,7 +438,7 @@ public class LambdaMiscCodec {
             );
             return (Supplier) callSite.getTarget().invokeExact();
         } catch (Throwable ignored) {
-            // ignored
+            errorLast = ignored;
         }
 
         return new ReflectSupplier(method);
@@ -667,7 +469,7 @@ public class LambdaMiscCodec {
             );
             return (BiFunction) callSite.getTarget().invokeExact();
         } catch (Throwable ignored) {
-            // ignored
+            errorLast = ignored;
         }
 
         return new ReflectBiFunction(method);
@@ -696,10 +498,28 @@ public class LambdaMiscCodec {
             );
             return (BiFunction) callSite.getTarget().invokeExact();
         } catch (Throwable ignored) {
-            // ignored
+            errorLast = ignored;
         }
 
         return new ConstructorBiFunction(constructor);
+    }
+
+    static final class ConstructorFunction
+            implements Function {
+        final Constructor constructor;
+
+        ConstructorFunction(Constructor constructor) {
+            this.constructor = constructor;
+        }
+
+        @Override
+        public Object apply(Object arg0) {
+            try {
+                return constructor.newInstance(arg0);
+            } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+                throw new JSONException("invoke error", e);
+            }
+        }
     }
 
     static final class ConstructorBiFunction
@@ -798,7 +618,7 @@ public class LambdaMiscCodec {
             );
             return (Function) callSite.getTarget().invokeExact();
         } catch (Throwable ignored) {
-            // ignored
+            errorLast = ignored;
         }
         return new FactoryFunction(method);
     }
@@ -807,7 +627,7 @@ public class LambdaMiscCodec {
         Class<?> declaringClass = method.getDeclaringClass();
         try {
             MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
-            MethodType methodType = MethodType.methodType(int.class);
+            MethodType methodType = MethodType.methodType(void.class, int.class);
             MethodHandle methodHandle
                     = lookup.findVirtual(
                     declaringClass,
@@ -820,11 +640,11 @@ public class LambdaMiscCodec {
                     METHOD_TYPE_OBJECT_INT_CONSUMER,
                     METHOD_TYPE_VOID_OBJECT_INT,
                     methodHandle,
-                    methodType
+                    MethodType.methodType(void.class, declaringClass, int.class)
             );
             return (ObjIntConsumer) callSite.getTarget().invokeExact();
         } catch (Throwable ignored) {
-            // ignored
+            errorLast = ignored;
         }
         return new ReflectObjIntConsumer(method);
     }
@@ -865,24 +685,6 @@ public class LambdaMiscCodec {
         }
     }
 
-    static final class GetterFunction
-            implements Function {
-        final Method method;
-
-        GetterFunction(Method method) {
-            this.method = method;
-        }
-
-        @Override
-        public Object apply(Object object) {
-            try {
-                return method.invoke(object);
-            } catch (Exception e) {
-                throw new JSONException("createInstance error", e);
-            }
-        }
-    }
-
     static final class ReflectLongFunction
             implements LongFunction {
         final Constructor constructor;
@@ -913,7 +715,24 @@ public class LambdaMiscCodec {
             try {
                 return (Integer) method.invoke(object);
             } catch (Exception e) {
-                throw new JSONException("createInstance error", e);
+                throw new JSONException("applyAsInt error", e);
+            }
+        }
+    }
+
+    static final class ReflectToLongFunction
+            implements ToLongFunction {
+        final Method method;
+
+        public ReflectToLongFunction(Method method) {
+            this.method = method;
+        }
+
+        public long applyAsLong(Object object) {
+            try {
+                return (Long) method.invoke(object);
+            } catch (Exception e) {
+                throw new JSONException("applyAsLong error", e);
             }
         }
     }

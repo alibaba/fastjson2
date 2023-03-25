@@ -35,6 +35,7 @@ public class TypeUtils {
     public static final MethodType METHOD_TYPE_SUPPLIER = MethodType.methodType(Supplier.class);
     public static final MethodType METHOD_TYPE_FUNCTION = MethodType.methodType(Function.class);
     public static final MethodType METHOD_TYPE_TO_INT_FUNCTION = MethodType.methodType(ToIntFunction.class);
+    public static final MethodType METHOD_TYPE_TO_LONG_FUNCTION = MethodType.methodType(ToLongFunction.class);
     public static final MethodType METHOD_TYPE_OBJECT_INT_CONSUMER = MethodType.methodType(ObjIntConsumer.class);
     public static final MethodType METHOD_TYPE_INT_FUNCTION = MethodType.methodType(IntFunction.class);
     public static final MethodType METHOD_TYPE_LONG_FUNCTION = MethodType.methodType(LongFunction.class);
@@ -45,6 +46,7 @@ public class TypeUtils {
     public static final MethodType METHOD_TYPE_OBJECT = MethodType.methodType(Object.class);
     public static final MethodType METHOD_TYPE_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class);
     public static final MethodType METHOD_TYPE_INT_OBJECT = MethodType.methodType(int.class, Object.class);
+    public static final MethodType METHOD_TYPE_LONG_OBJECT = MethodType.methodType(long.class, Object.class);
     public static final MethodType METHOD_TYPE_VOID_OBJECT_INT = MethodType.methodType(void.class, Object.class, int.class);
     public static final MethodType METHOD_TYPE_OBJECT_LONG = MethodType.methodType(Object.class, long.class);
     public static final MethodType METHOD_TYPE_VOID_LONG = MethodType.methodType(void.class, long.class);
