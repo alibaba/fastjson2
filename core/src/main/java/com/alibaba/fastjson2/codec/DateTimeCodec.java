@@ -16,6 +16,7 @@ public abstract class DateTimeCodec {
     public final Locale locale;
 
     protected final boolean yyyyMMddhhmmss19;
+    protected final boolean yyyyMMddhhmm16;
     protected final boolean yyyyMMddhhmmss14;
     protected final boolean yyyyMMdd10;
     protected final boolean yyyyMMdd8;
@@ -35,6 +36,7 @@ public abstract class DateTimeCodec {
         this.locale = locale;
         this.yyyyMMddhhmmss14 = "yyyyMMddHHmmss".equals(format);
         this.yyyyMMddhhmmss19 = "yyyy-MM-dd HH:mm:ss".equals(format);
+        this.yyyyMMddhhmm16 = "yyyy-MM-dd HH:mm".equals(format);
         this.yyyyMMdd10 = "yyyy-MM-dd".equals(format);
         this.yyyyMMdd8 = "yyyyMMdd".equals(format);
 
