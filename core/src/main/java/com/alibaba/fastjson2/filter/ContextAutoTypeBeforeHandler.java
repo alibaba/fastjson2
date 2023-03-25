@@ -86,7 +86,7 @@ public class ContextAutoTypeBeforeHandler
             Collections.emptyList().getClass(),
             Collections.emptyMap().getClass(),
             CLASS_SINGLE_SET,
-            CLASS_SINGLE_List,
+            CLASS_SINGLE_LIST,
             CLASS_UNMODIFIABLE_COLLECTION,
             CLASS_UNMODIFIABLE_LIST,
             CLASS_UNMODIFIABLE_SET,

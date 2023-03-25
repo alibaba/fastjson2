@@ -28,7 +28,7 @@ import java.util.function.*;
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
-import static com.alibaba.fastjson2.util.TypeUtils.isFunction;
+import static com.alibaba.fastjson2.util.TypeUtils.*;
 
 public class ObjectReaderCreator {
     public static final boolean JIT = !JDKUtils.ANDROID && !JDKUtils.GRAAL;
@@ -37,20 +37,7 @@ public class ObjectReaderCreator {
     protected AtomicInteger jitErrorCount = new AtomicInteger();
     protected volatile Throwable jitErrorLast;
 
-    static final MethodType METHODTYPE_VOID = MethodType.methodType(void.class);
-    static final MethodType METHODTYPE_VOID_INT = MethodType.methodType(void.class, int.class);
-    static final MethodType METHODTYPE_VOID_STRING = MethodType.methodType(void.class, String.class);
-    static final MethodType METHODTYPE_SUPPLIER = MethodType.methodType(Supplier.class);
-    static final MethodType METHODTYPE_INT_FUNCTION = MethodType.methodType(IntFunction.class);
-    static final MethodType METHODTYPE_OBJECT = MethodType.methodType(Object.class);
-    static final MethodType METHODTYPE_OBJECT_INT = MethodType.methodType(Object.class, int.class);
-    static final MethodType METHODTYPE_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class);
-
     protected static final Map<Class, LambdaSetterInfo> methodTypeMapping = new HashMap<>();
-
-    protected static final MethodType METHODTYPE_BI_CONSUMER = MethodType.methodType(BiConsumer.class);
-    protected static final MethodType METHODTYPE_FUNCTION = MethodType.methodType(Function.class);
-    protected static final MethodType METHODTYPE_VOO = MethodType.methodType(void.class, Object.class, Object.class);
 
     static class LambdaSetterInfo {
         final Class fieldClass;
@@ -1594,14 +1581,14 @@ public class ObjectReaderCreator {
             MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
             try {
                 if (constructor.getParameterCount() == 0) {
-                    MethodHandle handle = lookup.findConstructor(declaringClass, METHODTYPE_VOID);
+                    MethodHandle handle = lookup.findConstructor(declaringClass, METHOD_TYPE_VOID);
                     CallSite callSite = LambdaMetafactory.metafactory(
                             lookup,
                             "get",
-                            METHODTYPE_SUPPLIER,
-                            METHODTYPE_OBJECT,
+                            METHOD_TYPE_SUPPLIER,
+                            METHOD_TYPE_OBJECT,
                             handle,
-                            METHODTYPE_OBJECT
+                            METHOD_TYPE_OBJECT
                     );
                     return (Supplier) callSite.getTarget().invokeExact();
                 }
@@ -1618,13 +1605,13 @@ public class ObjectReaderCreator {
         Class declaringClass = constructor.getDeclaringClass();
         MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
         try {
-            MethodHandle handle = lookup.findConstructor(declaringClass, METHODTYPE_VOID_INT);
+            MethodHandle handle = lookup.findConstructor(declaringClass, METHOD_TYPE_VOID_INT);
             MethodType instantiatedMethodType = MethodType.methodType(declaringClass, int.class);
             CallSite callSite = LambdaMetafactory.metafactory(
                     lookup,
                     "apply",
-                    METHODTYPE_INT_FUNCTION,
-                    METHODTYPE_OBJECT_INT,
+                    METHOD_TYPE_INT_FUNCTION,
+                    METHOD_TYPE_OBJECT_INT,
                     handle,
                     instantiatedMethodType
             );
@@ -1647,8 +1634,8 @@ public class ObjectReaderCreator {
             CallSite callSite = LambdaMetafactory.metafactory(
                     lookup,
                     "apply",
-                    METHODTYPE_INT_FUNCTION,
-                    METHODTYPE_OBJECT_INT,
+                    METHOD_TYPE_INT_FUNCTION,
+                    METHOD_TYPE_OBJECT_INT,
                     handle,
                     instantiatedMethodType
             );
@@ -1665,13 +1652,13 @@ public class ObjectReaderCreator {
         Class declaringClass = constructor.getDeclaringClass();
         MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
         try {
-            MethodHandle handle = lookup.findConstructor(declaringClass, METHODTYPE_VOID_STRING);
+            MethodHandle handle = lookup.findConstructor(declaringClass, METHOD_TYPE_VOID_STRING);
             MethodType instantiatedMethodType = MethodType.methodType(declaringClass, String.class);
             CallSite callSite = LambdaMetafactory.metafactory(
                     lookup,
                     "apply",
-                    METHODTYPE_FUNCTION,
-                    METHODTYPE_OBJECT_OBJECT,
+                    METHOD_TYPE_FUNCTION,
+                    METHOD_TYPE_OBJECT_OBJECT,
                     handle,
                     instantiatedMethodType
             );
@@ -1694,8 +1681,8 @@ public class ObjectReaderCreator {
             CallSite callSite = LambdaMetafactory.metafactory(
                     lookup,
                     "apply",
-                    METHODTYPE_FUNCTION,
-                    METHODTYPE_OBJECT_OBJECT,
+                    METHOD_TYPE_FUNCTION,
+                    METHOD_TYPE_OBJECT_OBJECT,
                     handle,
                     instantiatedMethodType
             );
@@ -1718,8 +1705,8 @@ public class ObjectReaderCreator {
             CallSite callSite = LambdaMetafactory.metafactory(
                     lookup,
                     "apply",
-                    METHODTYPE_FUNCTION,
-                    METHODTYPE_OBJECT_OBJECT,
+                    METHOD_TYPE_FUNCTION,
+                    METHOD_TYPE_OBJECT_OBJECT,
                     handle,
                     instantiatedMethodType
             );
@@ -1742,8 +1729,8 @@ public class ObjectReaderCreator {
             CallSite callSite = LambdaMetafactory.metafactory(
                     lookup,
                     "apply",
-                    METHODTYPE_FUNCTION,
-                    METHODTYPE_OBJECT_OBJECT,
+                    METHOD_TYPE_FUNCTION,
+                    METHOD_TYPE_OBJECT_OBJECT,
                     handle,
                     instantiatedMethodType
             );
@@ -1777,7 +1764,7 @@ public class ObjectReaderCreator {
 
     <T, R> Function<T, R> createBuildFunctionLambda(Method builderMethod) {
         MethodHandles.Lookup lookup = JDKUtils.trustedLookup(builderMethod.getDeclaringClass());
-        MethodType invokedType = METHODTYPE_FUNCTION;
+        MethodType invokedType = METHOD_TYPE_FUNCTION;
         try {
             MethodHandle target = lookup.findVirtual(builderMethod.getDeclaringClass(),
                     builderMethod.getName(),
@@ -2931,8 +2918,8 @@ public class ObjectReaderCreator {
                 methodType = lambdaInfo.methodType;
             }
         } else {
-            samMethodType = METHODTYPE_VOO;
-            invokedType = METHODTYPE_BI_CONSUMER;
+            samMethodType = METHOD_TYPE_VOO;
+            invokedType = METHOD_TYPE_BI_CONSUMER;
         }
 
         if (methodType == null) {
