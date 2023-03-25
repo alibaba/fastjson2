@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.support.LambdaMiscCodec;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.lang.reflect.Constructor;
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.function.*;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_LOCAL_DATE;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_LOCAL_DATETIME;
@@ -66,12 +68,14 @@ public class JodaSupport {
     static class InstantReader
             implements ObjectReader {
         final Class objectClass;
-        final Constructor constructor;
+        final LongFunction constructor;
 
         InstantReader(Class objectClass) {
             this.objectClass = objectClass;
             try {
-                constructor = objectClass.getConstructor(long.class);
+                this.constructor = LambdaMiscCodec.createLongFunction(
+                        objectClass.getConstructor(long.class)
+                );
             } catch (NoSuchMethodException e) {
                 throw new JSONException("create joda instant reader error", e);
             }
@@ -99,11 +103,7 @@ public class JodaSupport {
         }
 
         public Object createInstanceFromMillis(long millis) {
-            try {
-                return constructor.newInstance(millis);
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                throw new JSONException("create joda instant error", e);
-            }
+            return constructor.apply(millis);
         }
 
         @Override
@@ -149,8 +149,8 @@ public class JodaSupport {
         final Class objectClass;
         final Class gregorianChronology;
         final Class dateTimeZone;
-        final Method forID;
-        final Method getInstance;
+        final Function forID;
+        final Function getInstance;
         final Object utc;
 
         ChronologyReader(Class objectClass) {
@@ -161,8 +161,12 @@ public class JodaSupport {
                 dateTimeZone = classLoader.loadClass("org.joda.time.DateTimeZone");
 
                 utc = gregorianChronology.getMethod("getInstanceUTC").invoke(null);
-                forID = dateTimeZone.getMethod("forID", String.class);
-                getInstance = gregorianChronology.getMethod("getInstance", dateTimeZone);
+                forID = LambdaMiscCodec.createFunction(
+                        dateTimeZone.getMethod("forID", String.class)
+                );
+                getInstance = LambdaMiscCodec.createFunction(
+                        gregorianChronology.getMethod("getInstance", dateTimeZone)
+                );
             } catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 throw new JSONException("create ChronologyReader error", e);
             }
@@ -202,12 +206,8 @@ public class JodaSupport {
                     return utc;
                 }
 
-                try {
-                    Object datetimeZone = forID.invoke(null, zoneId);
-                    return getInstance.invoke(null, datetimeZone);
-                } catch (IllegalAccessException | InvocationTargetException ignored) {
-                    // ignored
-                }
+                Object datetimeZone = forID.apply(zoneId);
+                return getInstance.apply(datetimeZone);
             }
 
             throw new JSONException(jsonReader.info("not support"));
@@ -217,16 +217,21 @@ public class JodaSupport {
     static class GregorianChronologyWriter
             implements ObjectWriter {
         final Class objectClass;
-        final Method getMinimumDaysInFirstWeek;
-        final Method getZone;
-        final Method getID;
+        final ToIntFunction getMinimumDaysInFirstWeek;
+        final Function getZone;
+        final Function getID;
 
         GregorianChronologyWriter(Class objectClass) {
             this.objectClass = objectClass;
             try {
-                this.getMinimumDaysInFirstWeek = objectClass.getMethod("getMinimumDaysInFirstWeek");
-                this.getZone = objectClass.getMethod("getZone");
-                this.getID = this.getZone.getReturnType().getMethod("getID");
+                this.getMinimumDaysInFirstWeek = LambdaMiscCodec.createToIntFunction(
+                        objectClass.getMethod("getMinimumDaysInFirstWeek")
+                );
+                Method method = objectClass.getMethod("getZone");
+                this.getZone = LambdaMiscCodec.createFunction(method);
+                this.getID = LambdaMiscCodec.createFunction(
+                        method.getReturnType().getMethod("getID")
+                );
             } catch (NoSuchMethodException e) {
                 throw new JSONException("getMethod error", e);
             }
@@ -234,60 +239,55 @@ public class JodaSupport {
 
         @Override
         public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-            try {
-                Object zone = getZone.invoke(object);
-                String zoneId = (String) getID.invoke(zone);
+            Object zone = getZone.apply(object);
+            String zoneId = (String) getID.apply(zone);
 
-                int minDaysInFirstWeek = (Integer) getMinimumDaysInFirstWeek.invoke(object);
+            int minDaysInFirstWeek = getMinimumDaysInFirstWeek.applyAsInt(object);
 
-                if (minDaysInFirstWeek == 4) {
-                    jsonWriter.startObject();
-                    jsonWriter.writeName("zoneId");
-                    jsonWriter.writeString(zoneId);
-                    jsonWriter.endObject();
-                } else {
-                    jsonWriter.startObject();
-                    jsonWriter.writeName("minimumDaysInFirstWeek");
-                    jsonWriter.writeInt32(minDaysInFirstWeek);
-                    jsonWriter.writeName("zoneId");
-                    jsonWriter.writeString(zoneId);
-                    jsonWriter.endObject();
-                }
-            } catch (InvocationTargetException | IllegalAccessException e) {
-                throw new JSONException("write joda GregorianChronology error", e);
-            }
-        }
-
-        @Override
-        public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-            try {
-                Object zone = getZone.invoke(object);
-                String zoneId = (String) getID.invoke(zone);
-
-                int minDaysInFirstWeek = (Integer) getMinimumDaysInFirstWeek.invoke(object);
+            if (minDaysInFirstWeek == 4) {
+                jsonWriter.startObject();
+                jsonWriter.writeName("zoneId");
+                jsonWriter.writeString(zoneId);
+                jsonWriter.endObject();
+            } else {
                 jsonWriter.startObject();
                 jsonWriter.writeName("minimumDaysInFirstWeek");
                 jsonWriter.writeInt32(minDaysInFirstWeek);
                 jsonWriter.writeName("zoneId");
                 jsonWriter.writeString(zoneId);
                 jsonWriter.endObject();
-            } catch (InvocationTargetException | IllegalAccessException e) {
-                throw new JSONException("write joda GregorianChronology error", e);
             }
+        }
+
+        @Override
+        public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+            Object zone = getZone.apply(object);
+            String zoneId = (String) getID.apply(zone);
+
+            int minDaysInFirstWeek = (Integer) getMinimumDaysInFirstWeek.applyAsInt(object);
+            jsonWriter.startObject();
+            jsonWriter.writeName("minimumDaysInFirstWeek");
+            jsonWriter.writeInt32(minDaysInFirstWeek);
+            jsonWriter.writeName("zoneId");
+            jsonWriter.writeString(zoneId);
+            jsonWriter.endObject();
         }
     }
 
     static class ISOChronologyWriter
             implements ObjectWriter {
         final Class objectClass;
-        final Method getZone;
-        final Method getID;
+        final Function getZone;
+        final Function getID;
 
         ISOChronologyWriter(Class objectClass) {
             this.objectClass = objectClass;
             try {
-                this.getZone = objectClass.getMethod("getZone");
-                this.getID = this.getZone.getReturnType().getMethod("getID");
+                Method method = objectClass.getMethod("getZone");
+                this.getZone = LambdaMiscCodec.createFunction(method);
+                this.getID = LambdaMiscCodec.createFunction(
+                        method.getReturnType().getMethod("getID")
+                );
             } catch (NoSuchMethodException e) {
                 throw new JSONException("getMethod error", e);
             }
@@ -295,32 +295,24 @@ public class JodaSupport {
 
         @Override
         public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-            try {
-                Object zone = getZone.invoke(object);
-                String zoneId = (String) getID.invoke(zone);
+            Object zone = getZone.apply(object);
+            String zoneId = (String) getID.apply(zone);
 
-                jsonWriter.startObject();
-                jsonWriter.writeName("zoneId");
-                jsonWriter.writeString(zoneId);
-                jsonWriter.endObject();
-            } catch (InvocationTargetException | IllegalAccessException e) {
-                throw new JSONException("write joda GregorianChronology error", e);
-            }
+            jsonWriter.startObject();
+            jsonWriter.writeName("zoneId");
+            jsonWriter.writeString(zoneId);
+            jsonWriter.endObject();
         }
 
         @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-            try {
-                Object zone = getZone.invoke(object);
-                String zoneId = (String) getID.invoke(zone);
+            Object zone = getZone.apply(object);
+            String zoneId = (String) getID.apply(zone);
 
-                jsonWriter.startObject();
-                jsonWriter.writeName("zoneId");
-                jsonWriter.writeString(zoneId);
-                jsonWriter.endObject();
-            } catch (InvocationTargetException | IllegalAccessException e) {
-                throw new JSONException("write joda GregorianChronology error", e);
-            }
+            jsonWriter.startObject();
+            jsonWriter.writeName("zoneId");
+            jsonWriter.writeString(zoneId);
+            jsonWriter.endObject();
         }
     }
 
@@ -427,10 +419,10 @@ public class JodaSupport {
             extends DateTimeCodec
             implements ObjectWriter {
         final Class objectClass;
-        final Method getYear;
-        final Method getMonthOfYear;
-        final Method getDayOfMonth;
-        final Method getChronology;
+        final ToIntFunction getYear;
+        final ToIntFunction getMonthOfYear;
+        final ToIntFunction getDayOfMonth;
+        final Function getChronology;
 
         final Class isoChronology;
         final Object utc;
@@ -445,10 +437,18 @@ public class JodaSupport {
                 Object instance = isoChronology.getMethod("getInstance").invoke(null);
                 utc = isoChronology.getMethod("withUTC").invoke(instance);
 
-                getYear = objectClass.getMethod("getYear");
-                getMonthOfYear = objectClass.getMethod("getMonthOfYear");
-                getDayOfMonth = objectClass.getMethod("getDayOfMonth");
-                getChronology = objectClass.getMethod("getChronology");
+                getYear = LambdaMiscCodec.createToIntFunction(
+                        objectClass.getMethod("getYear")
+                );
+                getMonthOfYear = LambdaMiscCodec.createToIntFunction(
+                        objectClass.getMethod("getMonthOfYear")
+                );
+                getDayOfMonth = LambdaMiscCodec.createToIntFunction(
+                        objectClass.getMethod("getDayOfMonth")
+                );
+                getChronology = LambdaMiscCodec.createFunction(
+                        objectClass.getMethod("getChronology")
+                );
             } catch (ClassNotFoundException
                     | NoSuchMethodException
                     | IllegalAccessException
@@ -460,85 +460,77 @@ public class JodaSupport {
 
         @Override
         public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-            try {
-                int year = (Integer) getYear.invoke(object);
-                int monthOfYear = (Integer) getMonthOfYear.invoke(object);
-                int dayOfMonth = (Integer) getDayOfMonth.invoke(object);
-                Object chronology = getChronology.invoke(object);
+            int year = getYear.applyAsInt(object);
+            int monthOfYear = getMonthOfYear.applyAsInt(object);
+            int dayOfMonth = getDayOfMonth.applyAsInt(object);
+            Object chronology = getChronology.apply(object);
 
-                if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
-                    jsonWriter.writeTypeName(TypeUtils.getTypeName(object.getClass()));
-                }
-
-                if (chronology == utc || chronology == null) {
-                    jsonWriter.writeLocalDate(LocalDate.of(year, monthOfYear, dayOfMonth));
-                    return;
-                }
-
-                jsonWriter.startObject();
-
-                jsonWriter.writeName("year");
-                jsonWriter.writeInt32(year);
-
-                jsonWriter.writeName("month");
-                jsonWriter.writeInt32(monthOfYear);
-
-                jsonWriter.writeName("day");
-                jsonWriter.writeInt32(dayOfMonth);
-
-                jsonWriter.writeName("chronology");
-                jsonWriter.writeAny(chronology);
-
-                jsonWriter.endObject();
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new JSONException("write LocalDateWriter error", e);
+            if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
+                jsonWriter.writeTypeName(TypeUtils.getTypeName(object.getClass()));
             }
+
+            if (chronology == utc || chronology == null) {
+                jsonWriter.writeLocalDate(LocalDate.of(year, monthOfYear, dayOfMonth));
+                return;
+            }
+
+            jsonWriter.startObject();
+
+            jsonWriter.writeName("year");
+            jsonWriter.writeInt32(year);
+
+            jsonWriter.writeName("month");
+            jsonWriter.writeInt32(monthOfYear);
+
+            jsonWriter.writeName("day");
+            jsonWriter.writeInt32(dayOfMonth);
+
+            jsonWriter.writeName("chronology");
+            jsonWriter.writeAny(chronology);
+
+            jsonWriter.endObject();
         }
 
         @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-            try {
-                int year = (Integer) getYear.invoke(object);
-                int monthOfYear = (Integer) getMonthOfYear.invoke(object);
-                int dayOfMonth = (Integer) getDayOfMonth.invoke(object);
-                Object chronology = getChronology.invoke(object);
+            int year = getYear.applyAsInt(object);
+            int monthOfYear = getMonthOfYear.applyAsInt(object);
+            int dayOfMonth = getDayOfMonth.applyAsInt(object);
+            Object chronology = getChronology.apply(object);
 
-                if (chronology == utc || chronology == null) {
-                    LocalDate localDate = LocalDate.of(year, monthOfYear, dayOfMonth);
+            if (chronology == utc || chronology == null) {
+                LocalDate localDate = LocalDate.of(year, monthOfYear, dayOfMonth);
 
-                    DateTimeFormatter formatter = this.getDateFormatter();
-                    if (formatter == null) {
-                        formatter = jsonWriter.context.getDateFormatter();
-                    }
+                DateTimeFormatter formatter = this.getDateFormatter();
+                if (formatter == null) {
+                    formatter = jsonWriter.context.getDateFormatter();
+                }
 
-                    if (formatter == null) {
-                        jsonWriter.writeLocalDate(localDate);
-                        return;
-                    }
-
-                    String str = formatter.format(localDate);
-                    jsonWriter.writeString(str);
+                if (formatter == null) {
+                    jsonWriter.writeLocalDate(localDate);
                     return;
                 }
 
-                jsonWriter.startObject();
-
-                jsonWriter.writeName("year");
-                jsonWriter.writeInt32(year);
-
-                jsonWriter.writeName("month");
-                jsonWriter.writeInt32(monthOfYear);
-
-                jsonWriter.writeName("day");
-                jsonWriter.writeInt32(dayOfMonth);
-
-                jsonWriter.writeName("chronology");
-                jsonWriter.writeAny(chronology);
-
-                jsonWriter.endObject();
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new JSONException("write LocalDateWriter error", e);
+                String str = formatter.format(localDate);
+                jsonWriter.writeString(str);
+                return;
             }
+
+            jsonWriter.startObject();
+
+            jsonWriter.writeName("year");
+            jsonWriter.writeInt32(year);
+
+            jsonWriter.writeName("month");
+            jsonWriter.writeInt32(monthOfYear);
+
+            jsonWriter.writeName("day");
+            jsonWriter.writeInt32(dayOfMonth);
+
+            jsonWriter.writeName("chronology");
+            jsonWriter.writeAny(chronology);
+
+            jsonWriter.endObject();
         }
     }
 
@@ -667,12 +659,12 @@ public class JodaSupport {
         final Method getMonthOfYear;
         final Method getDayOfMonth;
 
-        final Method getHourOfDay;
-        final Method getMinuteOfHour;
-        final Method getSecondOfMinute;
-        final Method getMillisOfSecond;
+        final ToIntFunction getHourOfDay;
+        final ToIntFunction getMinuteOfHour;
+        final ToIntFunction getSecondOfMinute;
+        final ToIntFunction getMillisOfSecond;
 
-        final Method getChronology;
+        final Function getChronology;
 
         final Class isoChronology;
         final Object utc;
@@ -691,12 +683,22 @@ public class JodaSupport {
                 getMonthOfYear = objectClass.getMethod("getMonthOfYear");
                 getDayOfMonth = objectClass.getMethod("getDayOfMonth");
 
-                getHourOfDay = objectClass.getMethod("getHourOfDay");
-                getMinuteOfHour = objectClass.getMethod("getMinuteOfHour");
-                getSecondOfMinute = objectClass.getMethod("getSecondOfMinute");
-                getMillisOfSecond = objectClass.getMethod("getMillisOfSecond");
+                getHourOfDay = LambdaMiscCodec.createToIntFunction(
+                        objectClass.getMethod("getHourOfDay")
+                );
+                getMinuteOfHour = LambdaMiscCodec.createToIntFunction(
+                        objectClass.getMethod("getMinuteOfHour")
+                );
+                getSecondOfMinute = LambdaMiscCodec.createToIntFunction(
+                        objectClass.getMethod("getSecondOfMinute")
+                );
+                getMillisOfSecond = LambdaMiscCodec.createToIntFunction(
+                        objectClass.getMethod("getMillisOfSecond")
+                );
 
-                getChronology = objectClass.getMethod("getChronology");
+                getChronology = LambdaMiscCodec.createFunction(
+                        objectClass.getMethod("getChronology")
+                );
             } catch (ClassNotFoundException
                     | NoSuchMethodException
                     | IllegalAccessException
@@ -713,12 +715,12 @@ public class JodaSupport {
                 int monthOfYear = (Integer) getMonthOfYear.invoke(object);
                 int dayOfMonth = (Integer) getDayOfMonth.invoke(object);
 
-                int hour = (Integer) getHourOfDay.invoke(object);
-                int minute = (Integer) getMinuteOfHour.invoke(object);
-                int second = (Integer) getSecondOfMinute.invoke(object);
-                int millis = (Integer) getMillisOfSecond.invoke(object);
+                int hour = getHourOfDay.applyAsInt(object);
+                int minute = getMinuteOfHour.applyAsInt(object);
+                int second = getSecondOfMinute.applyAsInt(object);
+                int millis = getMillisOfSecond.applyAsInt(object);
 
-                Object chronology = getChronology.invoke(object);
+                Object chronology = getChronology.apply(object);
 
                 if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
                     jsonWriter.writeTypeName(TypeUtils.getTypeName(object.getClass()));
@@ -769,12 +771,12 @@ public class JodaSupport {
                 int monthOfYear = (Integer) getMonthOfYear.invoke(object);
                 int dayOfMonth = (Integer) getDayOfMonth.invoke(object);
 
-                int hour = (Integer) getHourOfDay.invoke(object);
-                int minute = (Integer) getMinuteOfHour.invoke(object);
-                int second = (Integer) getSecondOfMinute.invoke(object);
-                int millis = (Integer) getMillisOfSecond.invoke(object);
+                int hour = getHourOfDay.applyAsInt(object);
+                int minute = getMinuteOfHour.applyAsInt(object);
+                int second = getSecondOfMinute.applyAsInt(object);
+                int millis = getMillisOfSecond.applyAsInt(object);
 
-                Object chronology = getChronology.invoke(object);
+                Object chronology = getChronology.apply(object);
 
                 if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
                     jsonWriter.writeTypeName(TypeUtils.getTypeName(object.getClass()));
