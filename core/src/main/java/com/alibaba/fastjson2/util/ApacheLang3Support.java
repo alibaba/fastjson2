@@ -6,10 +6,12 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONCreator;
 import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.support.LambdaMiscCodec;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
 
@@ -34,7 +36,7 @@ public interface ApacheLang3Support {
         final Type leftType;
         final Type rightType;
 
-        final Method of;
+        final BiFunction of;
 
         public PairReader(Class objectClass, Type leftType, Type rightType) {
             this.objectClass = objectClass;
@@ -42,7 +44,9 @@ public interface ApacheLang3Support {
             this.rightType = rightType;
 
             try {
-                of = objectClass.getMethod("of", Object.class, Object.class);
+                of = LambdaMiscCodec.createBiFunction(
+                        objectClass.getMethod("of", Object.class, Object.class)
+                );
             } catch (NoSuchMethodException e) {
                 throw new JSONException("Pair.of method not found", e);
             }
@@ -97,11 +101,7 @@ public interface ApacheLang3Support {
                 throw new JSONException(jsonReader.info("not support input"));
             }
 
-            try {
-                return of.invoke(null, left, right);
-            } catch (Exception e) {
-                throw new JSONException("create pair error", e);
-            }
+            return of.apply(left, right);
         }
 
         @Override
@@ -147,11 +147,7 @@ public interface ApacheLang3Support {
                 throw new JSONException(jsonReader.info("not support input"));
             }
 
-            try {
-                return of.invoke(null, left, right);
-            } catch (Exception e) {
-                throw new JSONException("create pair error", e);
-            }
+            return of.apply(left, right);
         }
     }
 
@@ -160,11 +156,9 @@ public interface ApacheLang3Support {
         final Class objectClass;
         final String typeName;
         final long typeNameHash;
-        Method leftMethod;
-        Method rightMethod;
+        Function left;
+        Function right;
 
-        byte[] nameWithColonUTF8;
-        char[] nameWithColonUTF16;
         byte[] typeNameJSONB;
 
         static byte[] leftName = JSONB.toBytes("left");
@@ -233,36 +227,32 @@ public interface ApacheLang3Support {
 
         Object getLeft(Object object) {
             Class<?> objectClass = object.getClass();
-            if (leftMethod == null) {
+            if (left == null) {
                 try {
-                    leftMethod = objectClass.getMethod("getLeft");
+                    left = LambdaMiscCodec.createFunction(
+                            objectClass.getMethod("getLeft")
+                    );
                 } catch (NoSuchMethodException e) {
                     throw new JSONException("getLeft method not found", e);
                 }
             }
 
-            try {
-                return leftMethod.invoke(object);
-            } catch (Exception e) {
-                throw new JSONException("invoke getLeft method error", e);
-            }
+            return left.apply(object);
         }
 
         Object getRight(Object object) {
             Class<?> objectClass = object.getClass();
-            if (rightMethod == null) {
+            if (right == null) {
                 try {
-                    rightMethod = objectClass.getMethod("getRight");
+                    right = LambdaMiscCodec.createFunction(
+                            objectClass.getMethod("getRight")
+                    );
                 } catch (NoSuchMethodException e) {
                     throw new JSONException("getRight method not found", e);
                 }
             }
 
-            try {
-                return rightMethod.invoke(object);
-            } catch (Exception e) {
-                throw new JSONException("invoke getRight method error", e);
-            }
+            return right.apply(object);
         }
     }
 }
