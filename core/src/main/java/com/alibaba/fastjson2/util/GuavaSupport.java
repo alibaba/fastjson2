@@ -1,15 +1,18 @@
 package com.alibaba.fastjson2.util;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.support.LambdaMiscCodec;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class GuavaSupport {
     static Class CLASS_IMMUTABLE_MAP;
@@ -17,23 +20,23 @@ public class GuavaSupport {
     static Class CLASS_IMMUTABLE_SET;
     static Class CLASS_ARRAYLIST_MULTI_MAP;
 
-    static Method METHOD_IMMUTABLE_MAP_OF_0;
-    static Method METHOD_IMMUTABLE_MAP_OF_1;
-    static Method METHOD_IMMUTABLE_MAP_COPY_OF;
+    static Supplier FUNC_IMMUTABLE_MAP_OF_0;
+    static BiFunction FUNC_IMMUTABLE_MAP_OF_1;
+    static Function FUNC_IMMUTABLE_MAP_COPY_OF;
 
-    static Method METHOD_IMMUTABLE_LIST_OF_0;
-    static Method METHOD_IMMUTABLE_LIST_OF_1;
-    static Method METHOD_IMMUTABLE_LIST_COPY_OF;
+    static Supplier FUNC_IMMUTABLE_LIST_OF_0;
+    static Function FUNC_IMMUTABLE_LIST_OF_1;
+    static Function FUNC_IMMUTABLE_LIST_COPY_OF;
 
-    static Method METHOD_IMMUTABLE_SET_OF_0;
-    static Method METHOD_IMMUTABLE_SET_OF_1;
-    static Method METHOD_IMMUTABLE_SET_COPY_OF;
+    static Supplier FUNC_IMMUTABLE_SET_OF_0;
+    static Function FUNC_IMMUTABLE_SET_OF_1;
+    static Function FUNC_IMMUTABLE_SET_COPY_OF;
 
-    static Method METHOD_ARRAYLIST_MULTI_MAP_CREATE;
+    static Supplier FUNC_ARRAYLIST_MULTI_MAP_CREATE;
     static Method METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL;
     static volatile boolean METHOD_ARRAYLIST_MULTI_MAP_ERROR;
 
-    static Constructor CONSTRUCTOR_SINGLETON_IMMUTABLE_BIMAP;
+    static BiFunction FUNC_SINGLETON_IMMUTABLE_BIMAP;
 
     public static Function immutableListConverter() {
         return new ImmutableListConvertFunction();
@@ -65,54 +68,42 @@ public class GuavaSupport {
 
             List list = (List) object;
             if (list.isEmpty()) {
-                if (METHOD_IMMUTABLE_SET_OF_0 == null) {
+                if (FUNC_IMMUTABLE_SET_OF_0 == null) {
                     try {
                         Method method = CLASS_IMMUTABLE_SET.getMethod("of");
-                        METHOD_IMMUTABLE_SET_OF_0 = method;
+                        FUNC_IMMUTABLE_SET_OF_0 = LambdaMiscCodec.createSupplier(method);
                     } catch (NoSuchMethodException e) {
                         throw new JSONException("method not found : com.google.common.collect.ImmutableSet.of", e);
                     }
                 }
 
-                try {
-                    return METHOD_IMMUTABLE_SET_OF_0.invoke(null);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new JSONException("create ImmutableSet error", e);
-                }
+                return FUNC_IMMUTABLE_SET_OF_0.get();
             }
 
             if (list.size() == 1) {
-                if (METHOD_IMMUTABLE_SET_OF_1 == null) {
+                if (FUNC_IMMUTABLE_SET_OF_1 == null) {
                     try {
                         Method method = CLASS_IMMUTABLE_SET.getMethod("of", Object.class);
-                        METHOD_IMMUTABLE_SET_OF_1 = method;
+                        FUNC_IMMUTABLE_SET_OF_1 = LambdaMiscCodec.createFunction(method);
                     } catch (NoSuchMethodException e) {
                         throw new JSONException("method not found : com.google.common.collect.ImmutableSet.of", e);
                     }
                 }
 
-                try {
-                    Object first = list.get(0);
-                    return METHOD_IMMUTABLE_SET_OF_1.invoke(null, first);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new JSONException("create ImmutableSet error", e);
-                }
+                Object first = list.get(0);
+                return FUNC_IMMUTABLE_SET_OF_1.apply(first);
             }
 
-            if (METHOD_IMMUTABLE_SET_COPY_OF == null) {
+            if (FUNC_IMMUTABLE_SET_COPY_OF == null) {
                 try {
                     Method method = CLASS_IMMUTABLE_SET.getMethod("copyOf", Collection.class);
-                    METHOD_IMMUTABLE_SET_COPY_OF = method;
+                    FUNC_IMMUTABLE_SET_COPY_OF = LambdaMiscCodec.createFunction(method);
                 } catch (NoSuchMethodException e) {
                     throw new JSONException("method not found : com.google.common.collect.ImmutableSet.copyOf", e);
                 }
             }
 
-            try {
-                return METHOD_IMMUTABLE_SET_COPY_OF.invoke(null, list);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new JSONException("create ImmutableSet error", e);
-            }
+            return FUNC_IMMUTABLE_SET_COPY_OF.apply(list);
         }
     }
 
@@ -130,54 +121,42 @@ public class GuavaSupport {
 
             List list = (List) object;
             if (list.isEmpty()) {
-                if (METHOD_IMMUTABLE_LIST_OF_0 == null) {
+                if (FUNC_IMMUTABLE_LIST_OF_0 == null) {
                     try {
                         Method method = CLASS_IMMUTABLE_LIST.getMethod("of");
-                        METHOD_IMMUTABLE_LIST_OF_0 = method;
+                        FUNC_IMMUTABLE_LIST_OF_0 = LambdaMiscCodec.createSupplier(method);
                     } catch (NoSuchMethodException e) {
                         throw new JSONException("method not found : com.google.common.collect.ImmutableList.of", e);
                     }
                 }
 
-                try {
-                    return METHOD_IMMUTABLE_LIST_OF_0.invoke(null);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new JSONException("create ImmutableSet error", e);
-                }
+                return FUNC_IMMUTABLE_LIST_OF_0.get();
             }
 
             if (list.size() == 1) {
-                if (METHOD_IMMUTABLE_LIST_OF_1 == null) {
+                if (FUNC_IMMUTABLE_LIST_OF_1 == null) {
                     try {
                         Method method = CLASS_IMMUTABLE_LIST.getMethod("of", Object.class);
-                        METHOD_IMMUTABLE_LIST_OF_1 = method;
+                        FUNC_IMMUTABLE_LIST_OF_1 = LambdaMiscCodec.createFunction(method);
                     } catch (NoSuchMethodException e) {
                         throw new JSONException("method not found : com.google.common.collect.ImmutableList.of", e);
                     }
                 }
 
-                try {
-                    Object first = list.get(0);
-                    return METHOD_IMMUTABLE_LIST_OF_1.invoke(null, first);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new JSONException("create ImmutableSet error", e);
-                }
+                Object first = list.get(0);
+                return FUNC_IMMUTABLE_LIST_OF_1.apply(first);
             }
 
-            if (METHOD_IMMUTABLE_LIST_COPY_OF == null) {
+            if (FUNC_IMMUTABLE_LIST_COPY_OF == null) {
                 try {
                     Method method = CLASS_IMMUTABLE_LIST.getMethod("copyOf", Collection.class);
-                    METHOD_IMMUTABLE_LIST_COPY_OF = method;
+                    FUNC_IMMUTABLE_LIST_COPY_OF = LambdaMiscCodec.createFunction(method);
                 } catch (NoSuchMethodException e) {
                     throw new JSONException("method not found : com.google.common.collect.ImmutableList.copyOf", e);
                 }
             }
 
-            try {
-                return METHOD_IMMUTABLE_LIST_COPY_OF.invoke(null, list);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new JSONException("create ImmutableList error", e);
-            }
+            return FUNC_IMMUTABLE_LIST_COPY_OF.apply(list);
         }
     }
 
@@ -187,12 +166,20 @@ public class GuavaSupport {
 
     static class AsMapWriter
             implements ObjectWriter {
-        private Method method;
+        final Class objectClass;
+        final String typeName;
+        final long typeNameHash;
+        final Function asMap;
+
+        protected byte[] typeNameJSONB;
 
         public AsMapWriter(Class objectClass) {
+            this.objectClass = objectClass;
+            this.typeName = TypeUtils.getTypeName(objectClass);
+            this.typeNameHash = Fnv.hashCode64(typeName);
             try {
-                method = objectClass.getMethod("asMap");
-                method.setAccessible(true);
+                Method method = objectClass.getMethod("asMap");
+                asMap = LambdaMiscCodec.createFunction(method);
             } catch (NoSuchMethodException e) {
                 throw new JSONException("create Guava AsMapWriter error", e);
             }
@@ -200,22 +187,21 @@ public class GuavaSupport {
 
         @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-            try {
-                Map map = (Map) method.invoke(object);
-                jsonWriter.write(map);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                throw new JSONException("create Guava AsMapWriter error", e);
-            }
+            Map map = (Map) asMap.apply(object);
+            jsonWriter.write(map);
         }
 
         @Override
         public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-            try {
-                Map map = (Map) method.invoke(object);
-                jsonWriter.write(map);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                throw new JSONException("create Guava AsMapWriter error", e);
+            if (jsonWriter.isWriteTypeInfo(object, fieldType, features)) {
+                if (typeNameJSONB == null) {
+                    typeNameJSONB = JSONB.toBytes(typeName);
+                }
+                jsonWriter.writeTypeName(typeNameJSONB, typeNameHash);
             }
+
+            Map map = (Map) asMap.apply(object);
+            jsonWriter.write(map);
         }
     }
 
@@ -227,9 +213,10 @@ public class GuavaSupport {
                     CLASS_ARRAYLIST_MULTI_MAP = objectClass;
                 }
 
-                if (!METHOD_ARRAYLIST_MULTI_MAP_ERROR && METHOD_ARRAYLIST_MULTI_MAP_CREATE == null) {
+                if (!METHOD_ARRAYLIST_MULTI_MAP_ERROR && FUNC_ARRAYLIST_MULTI_MAP_CREATE == null) {
                     try {
-                        METHOD_ARRAYLIST_MULTI_MAP_CREATE = CLASS_ARRAYLIST_MULTI_MAP.getMethod("create");
+                        Method method = CLASS_ARRAYLIST_MULTI_MAP.getMethod("create");
+                        FUNC_ARRAYLIST_MULTI_MAP_CREATE = LambdaMiscCodec.createSupplier(method);
                     } catch (Throwable ignored) {
                         METHOD_ARRAYLIST_MULTI_MAP_ERROR = true;
                     }
@@ -243,8 +230,8 @@ public class GuavaSupport {
                     }
                 }
 
-                if (METHOD_ARRAYLIST_MULTI_MAP_CREATE != null && METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL != null) {
-                    return new ArrayListMultimapConvertFunction(METHOD_ARRAYLIST_MULTI_MAP_CREATE, METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL);
+                if (FUNC_ARRAYLIST_MULTI_MAP_CREATE != null && METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL != null) {
+                    return new ArrayListMultimapConvertFunction(FUNC_ARRAYLIST_MULTI_MAP_CREATE, METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL);
                 }
         }
 
@@ -253,10 +240,10 @@ public class GuavaSupport {
 
     static class ArrayListMultimapConvertFunction
             implements Function {
-        final Method method;
+        final Supplier method;
         final Method putAllMethod;
 
-        public ArrayListMultimapConvertFunction(Method method, Method putAllMethod) {
+        public ArrayListMultimapConvertFunction(Supplier method, Method putAllMethod) {
             this.method = method;
             this.putAllMethod = putAllMethod;
         }
@@ -265,12 +252,7 @@ public class GuavaSupport {
         public Object apply(Object o) {
             Map map = (Map) o;
 
-            Object multiMap;
-            try {
-                multiMap = method.invoke(null);
-            } catch (Throwable e) {
-                throw new JSONException("create ArrayListMultimap error", e);
-            }
+            Object multiMap = method.get();
 
             for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext();) {
                 Map.Entry entry = it.next();
@@ -292,12 +274,11 @@ public class GuavaSupport {
             implements Function {
         @Override
         public Object apply(Object object) {
-            if (CONSTRUCTOR_SINGLETON_IMMUTABLE_BIMAP == null) {
+            if (FUNC_SINGLETON_IMMUTABLE_BIMAP == null) {
                 try {
                     Constructor constructor = TypeUtils.loadClass("com.google.common.collect.SingletonImmutableBiMap")
                             .getDeclaredConstructor(Object.class, Object.class);
-                    constructor.setAccessible(true);
-                    CONSTRUCTOR_SINGLETON_IMMUTABLE_BIMAP = constructor;
+                    FUNC_SINGLETON_IMMUTABLE_BIMAP = LambdaMiscCodec.createBiFunction(constructor);
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new JSONException("method not found : com.google.common.collect.SingletonImmutableBiMap(Object, Object)", e);
                 }
@@ -306,11 +287,7 @@ public class GuavaSupport {
             Map map = (Map) object;
             Map.Entry entry = (Map.Entry) map.entrySet().iterator().next();
 
-            try {
-                return CONSTRUCTOR_SINGLETON_IMMUTABLE_BIMAP.newInstance(entry.getKey(), entry.getValue());
-            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                throw new JSONException("create map error", e);
-            }
+            return FUNC_SINGLETON_IMMUTABLE_BIMAP.apply(entry.getKey(), entry.getValue());
         }
     }
 
@@ -329,58 +306,43 @@ public class GuavaSupport {
             Map map = (Map) object;
 
             if (map.size() == 0) {
-                if (METHOD_IMMUTABLE_MAP_OF_0 == null) {
+                if (FUNC_IMMUTABLE_MAP_OF_0 == null) {
                     try {
                         Method method = CLASS_IMMUTABLE_MAP.getMethod("of");
-                        method.setAccessible(true);
-                        METHOD_IMMUTABLE_MAP_OF_0 = method;
+                        FUNC_IMMUTABLE_MAP_OF_0 = LambdaMiscCodec.createSupplier(method);
                     } catch (NoSuchMethodException e) {
                         throw new JSONException("method not found : com.google.common.collect.ImmutableMap.of", e);
                     }
                 }
 
-                try {
-                    return METHOD_IMMUTABLE_MAP_OF_0.invoke(null);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new JSONException("create map error", e);
-                }
+                return FUNC_IMMUTABLE_MAP_OF_0.get();
             }
 
             if (map.size() == 1) {
-                if (METHOD_IMMUTABLE_MAP_OF_1 == null) {
+                if (FUNC_IMMUTABLE_MAP_OF_1 == null) {
                     try {
                         Method method = CLASS_IMMUTABLE_MAP.getMethod("of", Object.class, Object.class);
                         method.setAccessible(true);
-                        METHOD_IMMUTABLE_MAP_OF_1 = method;
+                        FUNC_IMMUTABLE_MAP_OF_1 = LambdaMiscCodec.createBiFunction(method);
                     } catch (NoSuchMethodException e) {
                         throw new JSONException("method not found : com.google.common.collect.ImmutableBiMap.of", e);
                     }
                 }
 
                 Map.Entry entry = (Map.Entry) map.entrySet().iterator().next();
-
-                try {
-                    return METHOD_IMMUTABLE_MAP_OF_1.invoke(null, entry.getKey(), entry.getValue());
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new JSONException("create map error", e);
-                }
+                return FUNC_IMMUTABLE_MAP_OF_1.apply(entry.getKey(), entry.getValue());
             }
 
-            if (METHOD_IMMUTABLE_MAP_COPY_OF == null) {
+            if (FUNC_IMMUTABLE_MAP_COPY_OF == null) {
                 try {
                     Method method = CLASS_IMMUTABLE_MAP.getMethod("copyOf", Map.class);
-                    method.setAccessible(true);
-                    METHOD_IMMUTABLE_MAP_COPY_OF = method;
+                    FUNC_IMMUTABLE_MAP_COPY_OF = LambdaMiscCodec.createFunction(method);
                 } catch (NoSuchMethodException e) {
                     throw new JSONException("method not found : com.google.common.collect.ImmutableBiMap.copyOf", e);
                 }
             }
 
-            try {
-                return METHOD_IMMUTABLE_MAP_COPY_OF.invoke(null, map);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new JSONException("create map error", e);
-            }
+            return FUNC_IMMUTABLE_MAP_COPY_OF.apply(map);
         }
     }
 }

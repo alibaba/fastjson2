@@ -306,7 +306,7 @@ public class ObjectWriterProvider
             }
         }
 
-        if (objectWriter == null && objectClass != null && !fieldBased) {
+        if (objectWriter == null && objectClass != null) {
             String className = objectClass.getName();
             switch (className) {
                 case "com.google.common.collect.HashMultimap":
@@ -315,6 +315,9 @@ public class ObjectWriterProvider
                 case "com.google.common.collect.ArrayListMultimap":
                 case "com.google.common.collect.TreeMultimap":
                     objectWriter = GuavaSupport.createAsMapWriter(objectClass);
+                    break;
+                case "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList":
+                    objectWriter = ObjectWriterImplList.INSTANCE;
                     break;
                 case "com.alibaba.fastjson.JSONObject":
                     objectWriter = ObjectWriterImplMap.of(objectClass);

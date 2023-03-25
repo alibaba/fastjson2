@@ -123,10 +123,15 @@ public final class ObjectReaderImplList
             String typeName = listClass.getTypeName();
             switch (typeName) {
                 case "com.google.common.collect.ImmutableList":
+                case "com.google.common.collect.SingletonImmutableList":
+                case "com.google.common.collect.RegularImmutableList":
+                case "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList":
                     instanceClass = ArrayList.class;
                     builder = GuavaSupport.immutableListConverter();
                     break;
                 case "com.google.common.collect.ImmutableSet":
+                case "com.google.common.collect.SingletonImmutableSet":
+                case "com.google.common.collect.RegularImmutableSet":
                     instanceClass = ArrayList.class;
                     builder = GuavaSupport.immutableSetConverter();
                     break;

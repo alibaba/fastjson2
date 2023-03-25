@@ -1566,7 +1566,6 @@ public class ObjectReaderBaseModule
         String internalMixin = null;
         String typeName = type.getTypeName();
         switch (typeName) {
-            case "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList":
             case "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet":
                 return null;
             case "org.springframework.util.LinkedMultiValueMap":
@@ -2040,6 +2039,7 @@ public class ObjectReaderBaseModule
                     case "com.google.common.collect.ImmutableList":
                         return ObjectReaderImplList.of(type, null, 0);
                     case "com.google.common.collect.ImmutableSet":
+                    case "com.google.common.collect.SingletonImmutableSet":
                         return ObjectReaderImplList.of(type, null, 0);
                     default:
                         break;
@@ -2125,6 +2125,13 @@ public class ObjectReaderBaseModule
             case "org.apache.commons.lang3.tuple.Pair":
             case "org.apache.commons.lang3.tuple.ImmutablePair":
                 return new ApacheLang3Support.PairReader((Class) type, Object.class, Object.class);
+            case "com.google.common.collect.ImmutableList":
+                return ObjectReaderImplList.of(type, null, 0);
+            case "com.google.common.collect.ImmutableSet":
+            case "com.google.common.collect.SingletonImmutableSet":
+            case "com.google.common.collect.RegularImmutableSet":
+            case "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList":
+                return ObjectReaderImplList.of(type, null, 0);
             case "com.carrotsearch.hppc.ByteArrayList":
             case "com.carrotsearch.hppc.ShortArrayList":
             case "com.carrotsearch.hppc.IntArrayList":
