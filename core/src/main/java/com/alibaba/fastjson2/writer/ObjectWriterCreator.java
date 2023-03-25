@@ -26,13 +26,13 @@ import java.util.function.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName;
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
+import static com.alibaba.fastjson2.util.TypeUtils.METHOD_TYPE_FUNCTION;
+import static com.alibaba.fastjson2.util.TypeUtils.METHOD_TYPE_OBJECT_OBJECT;
 
 public class ObjectWriterCreator {
     public static final ObjectWriterCreator INSTANCE = new ObjectWriterCreator();
 
     static Map<Class, LambdaInfo> lambdaMapping = new HashMap<>();
-    static MethodType METHODTYPE_FUNCTION = MethodType.methodType(Function.class);
-    static MethodType METHODTYPE_OO = MethodType.methodType(Object.class, Object.class);
 
     static {
         lambdaMapping.put(boolean.class, new LambdaInfo(boolean.class, Predicate.class, "test"));
@@ -1166,9 +1166,9 @@ public class ObjectWriterCreator {
             samMethodType = buildInfo.samMethodType;
         } else {
             methodType = MethodType.methodType(fieldClass);
-            invokedType = METHODTYPE_FUNCTION;
+            invokedType = METHOD_TYPE_FUNCTION;
             methodName = "apply";
-            samMethodType = METHODTYPE_OO;
+            samMethodType = METHOD_TYPE_OBJECT_OBJECT;
         }
 
         try {

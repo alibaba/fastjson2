@@ -24,7 +24,7 @@ public class TypeUtils {
     public static final Class CLASS_JSON_ARRAY_1x;
 
     public static final Class CLASS_SINGLE_SET = Collections.singleton(1).getClass();
-    public static final Class CLASS_SINGLE_List = Collections.singletonList(1).getClass();
+    public static final Class CLASS_SINGLE_LIST = Collections.singletonList(1).getClass();
     public static final Class CLASS_UNMODIFIABLE_COLLECTION = Collections.unmodifiableCollection(new ArrayList<>()).getClass();
     public static final Class CLASS_UNMODIFIABLE_LIST = Collections.unmodifiableList(new ArrayList<>()).getClass();
     public static final Class CLASS_UNMODIFIABLE_SET = Collections.unmodifiableSet(new HashSet<>()).getClass();
@@ -36,8 +36,12 @@ public class TypeUtils {
     public static final MethodType METHOD_TYPE_FUNCTION = MethodType.methodType(Function.class);
     public static final MethodType METHOD_TYPE_TO_INT_FUNCTION = MethodType.methodType(ToIntFunction.class);
     public static final MethodType METHOD_TYPE_OBJECT_INT_CONSUMER = MethodType.methodType(ObjIntConsumer.class);
+    public static final MethodType METHOD_TYPE_INT_FUNCTION = MethodType.methodType(IntFunction.class);
     public static final MethodType METHOD_TYPE_LONG_FUNCTION = MethodType.methodType(LongFunction.class);
     public static final MethodType METHOD_TYPE_BI_FUNCTION = MethodType.methodType(BiFunction.class);
+    public static final MethodType METHOD_TYPE_BI_CONSUMER = MethodType.methodType(BiConsumer.class);
+    public static final MethodType METHOD_TYPE_VOO = MethodType.methodType(void.class, Object.class, Object.class);
+
     public static final MethodType METHOD_TYPE_OBJECT = MethodType.methodType(Object.class);
     public static final MethodType METHOD_TYPE_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class);
     public static final MethodType METHOD_TYPE_INT_OBJECT = MethodType.methodType(int.class, Object.class);
@@ -45,6 +49,11 @@ public class TypeUtils {
     public static final MethodType METHOD_TYPE_OBJECT_LONG = MethodType.methodType(Object.class, long.class);
     public static final MethodType METHOD_TYPE_VOID_LONG = MethodType.methodType(void.class, long.class);
     public static final MethodType METHOD_TYPE_OBJECT_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class, Object.class);
+
+    public static final MethodType METHOD_TYPE_VOID = MethodType.methodType(void.class);
+    public static final MethodType METHOD_TYPE_VOID_INT = MethodType.methodType(void.class, int.class);
+    public static final MethodType METHOD_TYPE_VOID_STRING = MethodType.methodType(void.class, String.class);
+    public static final MethodType METHOD_TYPE_OBJECT_INT = MethodType.methodType(Object.class, int.class);
 
     static class X1 {
         static final Function<byte[], char[]> TO_CHARS;
@@ -2826,7 +2835,7 @@ public class TypeUtils {
             case "java.util.Arrays$ArrayList":
                 return Arrays.asList(1).getClass();
             case "java.util.Collections$SingletonList":
-                return CLASS_SINGLE_List;
+                return CLASS_SINGLE_LIST;
             case "java.util.Collections$SingletonSet":
                 return CLASS_SINGLE_SET;
             default:
