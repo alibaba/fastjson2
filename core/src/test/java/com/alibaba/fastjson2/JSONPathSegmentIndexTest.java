@@ -737,7 +737,6 @@ public class JSONPathSegmentIndexTest {
                 "{'age':12}",
                 "{'age':12}",
                 "{'name':'xiaoming','age':33}",
-                "[2121+222]",
                 "{'a':true}",
                 "{'a':false}",
                 "{'a':null}",

@@ -46,4 +46,245 @@ public class JSONValidatorTest {
         assertTrue(validator.validate());
         assertTrue(validator.validate());
     }
+
+    @Test
+    public void testNumber() {
+        String[] strings = new String[] {
+                "-1",
+                "+1",
+                "-1.0",
+                ".0",
+                "+1.0",
+                "1.",
+                "+1.1e10",
+                "+1.1e+10",
+                "+1.1e-10"
+        };
+
+        for (String string : strings) {
+            assertTrue(JSON.isValid(string));
+            assertTrue(JSON.isValid(string.getBytes()));
+        }
+    }
+    @Test
+    public void testNumbers() {
+        String[] strings = new String[] {
+                "-1 ",
+                "+1 ",
+                "-1.0 ",
+                ".0 ",
+                "+1.0 ",
+                "1. ",
+                "+1.1e10 ",
+                "+1.1e+10 ",
+                "+1.1e-10 "
+        };
+
+        for (String string : strings) {
+            assertTrue(JSON.isValid(string));
+            assertTrue(JSON.isValid(string.getBytes()));
+        }
+    }
+
+    @Test
+    public void testNumberArray1() {
+        String[] strings = new String[] {
+                "[-1]",
+                "[+1]",
+                "[-1.0]",
+                "[.0]",
+                "[+1.0]",
+                "[1.]",
+                "[+1.1e10]",
+                "[+1.1e+10]",
+                "[+1.1e-10]"
+        };
+
+        for (String string : strings) {
+            assertTrue(JSON.isValid(string), string);
+            assertTrue(JSON.isValid(string.getBytes()));
+        }
+    }
+
+    @Test
+    public void testNumberArray1False() {
+        String[] strings = new String[] {
+                "[-1,",
+                "[+1,",
+                "[-1.0,",
+                "[.0,",
+                "[+1.0,",
+                "[1.,",
+                "[+1.1e10,",
+                "[+1.1e+10,",
+                "[+1.1e-10,"
+        };
+
+        for (String string : strings) {
+            assertFalse(JSON.isValid(string), string);
+            assertFalse(JSON.isValid(string.getBytes()));
+        }
+    }
+
+    @Test
+    public void testNumberArray1sFalse() {
+        String[] strings = new String[] {
+                "[-1, ",
+                "[+1, ",
+                "[-1.0, ",
+                "[.0, ",
+                "[+1.0, ",
+                "[1., ",
+                "[+1.1e10, ",
+                "[+1.1e+10, ",
+                "[+1.1e-10, "
+        };
+
+        for (String string : strings) {
+            assertFalse(JSON.isValid(string), string);
+            assertFalse(JSON.isValid(string.getBytes()));
+        }
+    }
+
+    @Test
+    public void testNumberArray2() {
+        String[] strings = new String[] {
+                "[-1,-1]",
+                "[+1,+1]",
+                "[-1.0,-1.0]",
+                "[.0,.0]",
+                "[+1.0,+1.0]",
+                "[1.,1.0]",
+                "[+1.1e10,+1.1e10]",
+                "[+1.1e+10,+1.1e+10]",
+                "[+1.1e-10,+1.1e-10]"
+        };
+
+        for (String string : strings) {
+            assertTrue(JSON.isValid(string), string);
+            assertTrue(JSON.isValid(string.getBytes()));
+        }
+    }
+
+    @Test
+    public void testNumberArray2s() {
+        String[] strings = new String[] {
+                "[-1 ,-1 ]",
+                "[+1 ,+1 ]",
+                "[-1.0 ,-1.0 ]",
+                "[.0 ,.0 ]",
+                "[+1.0 ,+1.0 ]",
+                "[1. ,1.0 ]",
+                "[+1.1e10 ,+1.1e10 ]",
+                "[+1.1e+10 ,+1.1e+10 ]",
+                "[+1.1e-10 ,+1.1e-10 ]"
+        };
+
+        for (String string : strings) {
+            assertTrue(JSON.isValid(string), string);
+            assertTrue(JSON.isValid(string.getBytes()));
+        }
+    }
+
+    @Test
+    public void testNumberMap() {
+        String[] strings = new String[] {
+                "{\"v\":-1}",
+                "{\"v\":+1}",
+                "{\"v\":-1.0}",
+                "{\"v\":.0}",
+                "{\"v\":+1.0}",
+                "{\"v\":1.}",
+                "{\"v\":+1.1e10}",
+                "{\"v\":+1.1e+10}",
+                "{\"v\":+1.1e-10}"
+        };
+
+        for (String string : strings) {
+            assertTrue(JSON.isValid(string), string);
+            assertTrue(JSON.isValid(string.getBytes()));
+        }
+    }
+
+    @Test
+    public void testNumberMap2() {
+        String[] strings = new String[] {
+                "{\"v\":-1,\"v1\":-1}",
+                "{\"v\":+1,\"v1\":+1}",
+                "{\"v\":-1.0,\"v1\":-1.0}",
+                "{\"v\":.0,\"v1\":.0}",
+                "{\"v\":+1.0,\"v1\":+1.0}",
+                "{\"v\":1.,\"v1\":1.}",
+                "{\"v\":+1.1e10,\"v1\":+1.1e10}",
+                "{\"v\":+1.1e+10,\"v1\":+1.1e+10}",
+                "{\"v\":+1.1e-10,\"v1\":+1.1e-10}"
+        };
+
+        for (String string : strings) {
+            assertTrue(JSON.isValid(string), string);
+            assertTrue(JSON.isValid(string.getBytes()));
+        }
+    }
+
+    @Test
+    public void testNumberMap2s() {
+        String[] strings = new String[] {
+                "{\"v\":-1 ,\"v1\":-1 }",
+                "{\"v\":+1 ,\"v1\":+1 }",
+                "{\"v\":-1.0 ,\"v1\":-1.0 }",
+                "{\"v\":.0 ,\"v1\":.0 }",
+                "{\"v\":+1.0 ,\"v1\":+1.0 }",
+                "{\"v\":1. ,\"v1\":1. }",
+                "{\"v\":+1.1e10 ,\"v1\":+1.1e10 }",
+                "{\"v\":+1.1e+10 ,\"v1\":+1.1e+10 }",
+                "{\"v\":+1.1e-10 ,\"v1\":+1.1e-10 }"
+        };
+
+        for (String string : strings) {
+            assertTrue(JSON.isValid(string), string);
+            assertTrue(JSON.isValid(string.getBytes()));
+        }
+    }
+
+    @Test
+    public void testNumberFlase() {
+        String[] strings = new String[] {
+                "-",
+                "+",
+                "++1",
+                "--1",
+                "+1.1.",
+                "+1e+",
+                "+1e-",
+                "+1e1e",
+                "+1e+1e ",
+                "+1e-1e "
+        };
+
+        for (String string : strings) {
+            assertFalse(JSON.isValid(string), string);
+            assertFalse(JSON.isValid(string.getBytes()));
+        }
+    }
+
+    @Test
+    public void testNumberFlase1() {
+        String[] strings = new String[] {
+                "- ",
+                "+ ",
+                "++1 ",
+                "--1 ",
+                "+1.1. ",
+                "+1e+ ",
+                "+1e- ",
+                "+1e1e ",
+                "+1e+1e ",
+                "+1e-1e "
+        };
+
+        for (String string : strings) {
+            assertFalse(JSON.isValid(string), string);
+            assertFalse(JSON.isValid(string.getBytes()));
+        }
+    }
 }
