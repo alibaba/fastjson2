@@ -55,10 +55,19 @@ public class EishayFuryCompatibleWrite {
         bh.consume(bytes);
     }
 
+    public int jsonbSize() {
+        return JSONB.toBytes(mc, context).length;
+    }
+
 //    @Benchmark
     public void fury(Blackhole bh) {
 //        byte[] bytes = furyCompatible.serialize(mc);
 //        bh.consume(bytes);
+    }
+
+    public int furySize() {
+//        return furyCompatible.serialize(mc).length;
+        return 0;
     }
 
     public static void main(String[] args) throws RunnerException {
