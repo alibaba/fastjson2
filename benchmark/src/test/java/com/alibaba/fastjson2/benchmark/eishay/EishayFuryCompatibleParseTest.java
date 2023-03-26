@@ -21,6 +21,9 @@ public class EishayFuryCompatibleParseTest {
             // zulu11.62.17_AppleM1Max : 3023 3196
             // zulu17.40.19_AppleM1Max : 3109 3074
             // oracle-jdk-17.0.6 3052
+
+            // jdk1.8.0_361_x86_i9 7343
+            // jdk17.0.6_x86_i9 6338
         }
     }
 
@@ -38,6 +41,9 @@ public class EishayFuryCompatibleParseTest {
             // zulu8.68.0.21_AppleM1Max : 2840
             // zulu11.62.17_AppleM1Max : 3361 3385
             // zulu17.40.19_AppleM1Max : 3360 3403
+
+            // jdk1.8.0_361_x86_i9 4488
+            // jdk17.0.6_x86_i9 4425
         }
     }
 

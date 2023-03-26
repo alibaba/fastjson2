@@ -18,6 +18,9 @@ public class EishayFuryCompatibleWriteTest {
             // zulu8.68.0.21_AppleM1Max : 3839
             // zulu11.62.17_AppleM1Max : 3327
             // zulu17.40.19_AppleM1Max : 3287
+
+            // jdk1.8.0_361_x86_i9 6372
+            // jdk17.0.6_x86_i9 4674
         }
     }
 
@@ -33,6 +36,9 @@ public class EishayFuryCompatibleWriteTest {
             // zulu8.68.0.21_AppleM1Max : 2644
             // zulu11.62.17_AppleM1Max : 2270
             // zulu17.40.19_AppleM1Max : 2296
+
+            // jdk1.8.0_361_x86_i9 5279
+            // jdk17.0.6_x86_i9 5910
         }
     }
 
