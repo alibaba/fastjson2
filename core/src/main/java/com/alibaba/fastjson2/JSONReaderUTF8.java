@@ -3277,6 +3277,127 @@ class JSONReaderUTF8
             case '8':
             case '9':
             case '.':
+                boolean sign = ch == '-' || ch == '+';
+                if (sign) {
+                    if (offset < end) {
+                        ch = (char) (bytes[offset++] & 0xff);
+                    } else {
+                        throw new JSONException("illegal number, offset " + offset);
+                    }
+                }
+                boolean dot = ch == '.';
+                boolean space = false;
+                boolean num = false;
+                if (!dot && (ch >= '0' && ch <= '9')) {
+                    num = true;
+                    for (; ; ) {
+                        if (offset < end) {
+                            ch = (char) (bytes[offset++] & 0xff);
+                        } else {
+                            ch = EOI;
+                            return;
+                        }
+
+                        if (space || ch < '0' || ch > '9') {
+                            break;
+                        }
+                    }
+                }
+
+                boolean small = false;
+                if (ch == '.') {
+                    small = true;
+                    if (offset < end) {
+                        ch = (char) (bytes[offset++] & 0xff);
+                    } else {
+                        ch = EOI;
+                        return;
+                    }
+
+                    if (ch >= '0' && ch <= '9') {
+                        for (; ; ) {
+                            if (offset < end) {
+                                ch = (char) (bytes[offset++] & 0xff);
+                            } else {
+                                ch = EOI;
+                                return;
+                            }
+
+                            if (space || ch < '0' || ch > '9') {
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (!num && !small) {
+                    throw new JSONException("illegal number, offset " + offset + ", char " + ch);
+                }
+
+                if (ch == 'e' || ch == 'E') {
+                    ch = (char) (bytes[offset++] & 0xff);
+
+                    boolean eSign = false;
+                    if (ch == '+' || ch == '-') {
+                        eSign = true;
+                        if (offset < end) {
+                            ch = (char) (bytes[offset++] & 0xff);
+                        } else {
+                            throw new JSONException("illegal number, offset " + offset);
+                        }
+                    }
+
+                    if (ch >= '0' && ch <= '9') {
+                        for (; ; ) {
+                            if (offset < end) {
+                                ch = (char) (bytes[offset++] & 0xff);
+                            } else {
+                                ch = EOI;
+                                return;
+                            }
+
+                            if (ch < '0' || ch > '9') {
+                                break;
+                            }
+                        }
+                    } else if (eSign) {
+                        throw new JSONException("illegal number, offset " + offset + ", char " + ch);
+                    }
+                }
+
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset < end) {
+                        ch = (char) (bytes[offset++] & 0xff);
+                    } else {
+                        ch = EOI;
+                        return;
+                    }
+                }
+
+                if (ch == '}' || ch == ']') {
+                    return;
+                }
+
+                if (ch == ',') {
+                    comma = true;
+                    if (offset >= end) {
+                        throw new JSONException("illegal number, offset " + offset);
+                    }
+
+                    ch = (char) (bytes[offset] & 0xff);
+                    while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                        offset++;
+                        if (offset >= end) {
+                            throw new JSONException("illegal number, offset " + offset);
+                        }
+                        ch = (char) (bytes[offset] & 0xff);
+                    }
+                    comma = true;
+                    offset++;
+                    return;
+                }
+
+                throw new JSONException("error, offset " + offset + ", char " + ch);
             case 't':
             case 'f':
             case 'n':
