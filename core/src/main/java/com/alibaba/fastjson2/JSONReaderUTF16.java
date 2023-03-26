@@ -3997,43 +3997,87 @@ class JSONReaderUTF16
 
                 throw new JSONException("error, offset " + offset + ", char " + ch);
             case 't':
-            case 'f':
-            case 'n':
-                for (; ; ) {
+                if (offset + 3 > end) {
+                    throw new JSONException("error, offset " + offset + ", char " + ch);
+                }
+                if (chars[offset] != 'r' || chars[offset + 1] != 'u' || chars[offset + 2] != 'e') {
+                    throw new JSONException("error, offset " + offset + ", char " + ch);
+                }
+                offset += 3;
+                if (offset < end) {
+                    ch = chars[offset++];
+                } else {
+                    ch = EOI;
+                    return;
+                }
+
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset < end) {
                         ch = chars[offset++];
                     } else {
                         ch = EOI;
-                        break;
+                        return;
                     }
-                    if (ch == '}' || ch == ']' || ch == '{' || ch == '[') {
-                        break;
-                    }
+                }
 
-                    if (ch == '\"' || ch == '\'') {
-                        throw new JSONException("error, offset " + offset + ", char " + ch);
-                    }
+                if (ch == '}' || ch == ']') {
+                    return;
+                }
+                break;
+            case 'f':
+                if (offset + 4 > end) {
+                    throw new JSONException("error, offset " + offset + ", char " + ch);
+                }
+                if (chars[offset] != 'a' || chars[offset + 1] != 'l' || chars[offset + 2] != 's' || chars[offset + 3] != 'e') {
+                    throw new JSONException("error, offset " + offset + ", char " + ch);
+                }
+                offset += 4;
+                if (offset < end) {
+                    ch = chars[offset++];
+                } else {
+                    ch = EOI;
+                    return;
+                }
 
-                    if (ch == ',') {
-                        comma = true;
-                        if (offset >= end) {
-                            ch = EOI;
-                            return;
-                        }
-
-                        ch = chars[offset];
-                        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                            offset++;
-                            if (offset >= end) {
-                                ch = EOI;
-                                return;
-                            }
-                            ch = chars[offset];
-                        }
-                        comma = true;
-                        offset++;
-                        break;
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset < end) {
+                        ch = chars[offset++];
+                    } else {
+                        ch = EOI;
+                        return;
                     }
+                }
+
+                if (ch == '}' || ch == ']') {
+                    return;
+                }
+                break;
+            case 'n':
+                if (offset + 3 > end) {
+                    throw new JSONException("error, offset " + offset + ", char " + ch);
+                }
+                if (chars[offset] != 'u' || chars[offset + 1] != 'l' || chars[offset + 2] != 'l') {
+                    throw new JSONException("error, offset " + offset + ", char " + ch);
+                }
+                offset += 3;
+                if (offset < end) {
+                    ch = chars[offset++];
+                } else {
+                    ch = EOI;
+                    return;
+                }
+
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset < end) {
+                        ch = chars[offset++];
+                    } else {
+                        ch = EOI;
+                        return;
+                    }
+                }
+
+                if (ch == '}' || ch == ']') {
+                    return;
                 }
                 break;
             case 'S':
@@ -4049,16 +4093,14 @@ class JSONReaderUTF16
         if (ch == ',') {
             comma = true;
             if (offset >= length) {
-                ch = EOI;
-                return;
+                throw new JSONException("error, offset " + offset + ", char " + ch);
             }
 
             ch = chars[offset];
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 offset++;
                 if (offset >= length) {
-                    ch = EOI;
-                    return;
+                    throw new JSONException("error, offset " + offset + ", char " + ch);
                 }
                 ch = chars[offset];
             }
