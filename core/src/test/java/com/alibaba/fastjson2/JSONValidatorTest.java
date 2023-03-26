@@ -287,4 +287,123 @@ public class JSONValidatorTest {
             assertFalse(JSON.isValid(string.getBytes()));
         }
     }
+
+    @Test
+    public void validateTrue() {
+        String[] strings = new String[] {
+                "true",
+                "true ",
+                "[true]",
+                "[true,true]",
+                "[true ,true ]",
+                "{\"v0\":true,\"v1\":true}",
+                "{\"v0\":true ,\"v1\":true }",
+        };
+
+        for (String string : strings) {
+            assertTrue(JSON.isValid(string), string);
+            assertTrue(JSON.isValid(string.getBytes()));
+        }
+    }
+
+    @Test
+    public void validateTrueError() {
+        String[] strings = new String[] {
+                "t",
+                "t ",
+                "tr",
+                "tr ",
+                "tru",
+                "tru ",
+                "true1",
+                "true1 ",
+                "true,",
+                "true ,"
+        };
+
+        for (String string : strings) {
+            assertFalse(JSON.isValid(string), string);
+            assertFalse(JSON.isValid(string.getBytes()));
+        }
+    }
+
+    @Test
+    public void validateFalse() {
+        String[] strings = new String[] {
+                "false",
+                "false ",
+                "[false]",
+                "[false,false]",
+                "[false ,false ]",
+                "{\"v0\":false,\"v1\":false}",
+                "{\"v0\":false ,\"v1\":false }",
+        };
+
+        for (String string : strings) {
+            assertTrue(JSON.isValid(string), string);
+            assertTrue(JSON.isValid(string.getBytes()), string);
+        }
+    }
+
+    @Test
+    public void validateFalseError() {
+        String[] strings = new String[] {
+                "f",
+                "f ",
+                "fa",
+                "fa ",
+                "fal",
+                "fal ",
+                "fals",
+                "fals ",
+                "false1",
+                "false,",
+                "false ,",
+                "false1 "
+        };
+
+        for (String string : strings) {
+            assertFalse(JSON.isValid(string), string);
+            assertFalse(JSON.isValid(string.getBytes()));
+        }
+    }
+
+    @Test
+    public void validateNull() {
+        String[] strings = new String[] {
+                "null",
+                "null ",
+                "[null]",
+                "[null,null]",
+                "[null ,null ]",
+                "{\"v0\":null,\"v1\":null}",
+                "{\"v0\":null ,\"v1\":null }",
+        };
+
+        for (String string : strings) {
+            assertTrue(JSON.isValid(string), string);
+            assertTrue(JSON.isValid(string.getBytes()));
+        }
+    }
+
+    @Test
+    public void validateNullError() {
+        String[] strings = new String[] {
+                "n",
+                "n ",
+                "nu",
+                "nu ",
+                "nul",
+                "nul ",
+                "null,",
+                "null ,",
+                "null1",
+                "null1 "
+        };
+
+        for (String string : strings) {
+            assertFalse(JSON.isValid(string), string);
+            assertFalse(JSON.isValid(string.getBytes()), string);
+        }
+    }
 }
