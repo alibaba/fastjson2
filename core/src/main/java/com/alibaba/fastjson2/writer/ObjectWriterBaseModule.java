@@ -1433,14 +1433,19 @@ public class ObjectWriterBaseModule
 
             if (StackTraceElement.class == clazz) {
                 if (STACK_TRACE_ELEMENT_WRITER == null) {
-                    STACK_TRACE_ELEMENT_WRITER = new ObjectWriterAdapter(StackTraceElement.class, Arrays.asList(
-                            new FieldWriter[]{
-                                    ObjectWriters.fieldWriter("fileName", String.class, StackTraceElement::getFileName),
-                                    ObjectWriters.fieldWriter("lineNumber", StackTraceElement::getLineNumber),
-                                    ObjectWriters.fieldWriter("className", String.class, StackTraceElement::getClassName),
-                                    ObjectWriters.fieldWriter("methodName", String.class, StackTraceElement::getMethodName),
-                            }
-                    ));
+                    STACK_TRACE_ELEMENT_WRITER = new ObjectWriterAdapter(
+                            StackTraceElement.class,
+                            null,
+                            null,
+                            0,
+                            Arrays.asList(
+                                    new FieldWriter[]{
+                                            ObjectWriters.fieldWriter("fileName", String.class, StackTraceElement::getFileName),
+                                            ObjectWriters.fieldWriter("lineNumber", StackTraceElement::getLineNumber),
+                                            ObjectWriters.fieldWriter("className", String.class, StackTraceElement::getClassName),
+                                            ObjectWriters.fieldWriter("methodName", String.class, StackTraceElement::getMethodName),
+                                    }
+                            ));
                 }
                 return STACK_TRACE_ELEMENT_WRITER;
             }
@@ -1452,6 +1457,9 @@ public class ObjectWriterBaseModule
             if (Method.class == clazz) {
                 return new ObjectWriterAdapter<>(
                         Method.class,
+                        null,
+                        null,
+                        0,
                         Arrays.asList(
                                 ObjectWriters.fieldWriter("declaringClass", Class.class, Method::getDeclaringClass),
                                 ObjectWriters.fieldWriter("name", String.class, Method::getName),
@@ -1463,6 +1471,9 @@ public class ObjectWriterBaseModule
             if (Field.class == clazz) {
                 return new ObjectWriterAdapter<>(
                         Method.class,
+                        null,
+                        null,
+                        0,
                         Arrays.asList(
                                 ObjectWriters.fieldWriter("declaringClass", Class.class, Field::getDeclaringClass),
                                 ObjectWriters.fieldWriter("name", String.class, Field::getName)

@@ -19,18 +19,6 @@ public class ObjectWriter8<T>
     public final FieldWriter fieldWriter6;
     public final FieldWriter fieldWriter7;
 
-    public ObjectWriter8(Class objectClass, long features, FieldWriter[] fieldWriters) {
-        super(objectClass, features, fieldWriters);
-        fieldWriter0 = fieldWriters[0];
-        fieldWriter1 = fieldWriters[1];
-        fieldWriter2 = fieldWriters[2];
-        fieldWriter3 = fieldWriters[3];
-        fieldWriter4 = fieldWriters[4];
-        fieldWriter5 = fieldWriters[5];
-        fieldWriter6 = fieldWriters[6];
-        fieldWriter7 = fieldWriters[7];
-    }
-
     public ObjectWriter8(
             Class<T> objectClass,
             String typeKey,

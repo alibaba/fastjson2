@@ -14,13 +14,6 @@ public class ObjectWriter3<T>
     public final FieldWriter fieldWriter1;
     public final FieldWriter fieldWriter2;
 
-    public ObjectWriter3(Class<T> objectClass, long features, FieldWriter[] fieldWriters) {
-        super(objectClass, features, fieldWriters);
-        fieldWriter0 = fieldWriters[0];
-        fieldWriter1 = fieldWriters[1];
-        fieldWriter2 = fieldWriters[2];
-    }
-
     public ObjectWriter3(
             Class<T> objectClass,
             String typeKey,

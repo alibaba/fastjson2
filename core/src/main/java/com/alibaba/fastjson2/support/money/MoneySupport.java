@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.support.money;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.reader.*;
+import com.alibaba.fastjson2.support.LambdaMiscCodec;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.*;
@@ -149,46 +150,19 @@ public class MoneySupport {
         }
 
         Function<Object, Object> FUNC_GET_CURRENCY;
-        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(CLASS_MONETARY_AMOUNT);
         try {
-            MethodHandle methodHandle = lookup.findVirtual(
-                    CLASS_MONETARY_AMOUNT,
-                    "getCurrency",
-                    MethodType.methodType(CLASS_CURRENCY_UNIT)
+            FUNC_GET_CURRENCY = LambdaMiscCodec.createFunction(
+                    CLASS_MONETARY_AMOUNT.getMethod("getCurrency")
             );
-
-            CallSite callSite = LambdaMetafactory.metafactory(
-                    lookup,
-                    "apply",
-                    METHOD_TYPE_FUNCTION,
-                    METHOD_TYPE_OBJECT_OBJECT,
-                    methodHandle,
-                    MethodType.methodType(CLASS_CURRENCY_UNIT, CLASS_MONETARY_AMOUNT)
-            );
-            MethodHandle target = callSite.getTarget();
-            FUNC_GET_CURRENCY = (Function<Object, Object>) target.invokeExact();
         } catch (Throwable e) {
             throw new JSONException("method not found : javax.money.Monetary.getCurrency", e);
         }
 
         Function<Object, Object> FUNC_GET_NUMBER;
         try {
-            MethodHandle methodHandle = lookup.findVirtual(
-                    CLASS_MONETARY_AMOUNT,
-                    "getNumber",
-                    MethodType.methodType(CLASS_NUMBER_VALUE)
+            FUNC_GET_NUMBER = LambdaMiscCodec.createFunction(
+                    CLASS_MONETARY_AMOUNT.getMethod("getNumber")
             );
-
-            CallSite callSite = LambdaMetafactory.metafactory(
-                    lookup,
-                    "apply",
-                    METHOD_TYPE_FUNCTION,
-                    METHOD_TYPE_OBJECT_OBJECT,
-                    methodHandle,
-                    MethodType.methodType(CLASS_NUMBER_VALUE, CLASS_MONETARY_AMOUNT)
-            );
-            MethodHandle target = callSite.getTarget();
-            FUNC_GET_NUMBER = (Function<Object, Object>) target.invokeExact();
         } catch (Throwable e) {
             throw new JSONException("method not found : javax.money.Monetary.getNumber", e);
         }
@@ -206,7 +180,7 @@ public class MoneySupport {
                 CLASS_NUMBER_VALUE,
                 FUNC_GET_NUMBER);
 
-        return new ObjectWriterAdapter(CLASS_MONETARY_AMOUNT, Arrays.asList(fieldWriter0, fieldWriter1));
+        return new ObjectWriterAdapter(CLASS_MONETARY_AMOUNT, null, null, 0, Arrays.asList(fieldWriter0, fieldWriter1));
     }
 
     public static ObjectWriter createNumberValueWriter() {
@@ -215,24 +189,10 @@ public class MoneySupport {
         }
 
         if (FUNC_NUMBER_VALUE == null) {
-            MethodHandles.Lookup lookup = JDKUtils.trustedLookup(CLASS_NUMBER_VALUE);
             try {
-                MethodHandle methodHandle = lookup.findVirtual(
-                        CLASS_NUMBER_VALUE,
-                        "numberValue",
-                        MethodType.methodType(Number.class, Class.class)
+                BiFunction<Object, Class, Number> biFunctionNumberValue = LambdaMiscCodec.createBiFunction(
+                        CLASS_NUMBER_VALUE.getMethod("numberValue", Class.class)
                 );
-
-                CallSite callSite = LambdaMetafactory.metafactory(
-                        lookup,
-                        "apply",
-                        METHOD_TYPE_BI_FUNCTION,
-                        METHOD_TYPE_OBJECT_OBJECT_OBJECT,
-                        methodHandle,
-                        MethodType.methodType(Number.class, CLASS_NUMBER_VALUE, Class.class)
-                );
-                MethodHandle target = callSite.getTarget();
-                BiFunction<Object, Class, Number> biFunctionNumberValue = (BiFunction<Object, Class, Number>) target.invokeExact();
                 FUNC_NUMBER_VALUE = o -> (BigDecimal) biFunctionNumberValue.apply(o, BigDecimal.class);
             } catch (Throwable e) {
                 throw new JSONException("method not found : javax.money.NumberValue.numberValue", e);

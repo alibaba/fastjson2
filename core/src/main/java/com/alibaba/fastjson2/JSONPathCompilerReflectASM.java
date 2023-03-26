@@ -36,10 +36,6 @@ class JSONPathCompilerReflectASM
 
     protected final DynamicClassLoader classLoader;
 
-    public JSONPathCompilerReflectASM() {
-        this.classLoader = new DynamicClassLoader();
-    }
-
     public JSONPathCompilerReflectASM(DynamicClassLoader classLoader) {
         this.classLoader = classLoader;
     }

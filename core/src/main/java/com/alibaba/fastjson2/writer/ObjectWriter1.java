@@ -12,11 +12,6 @@ public class ObjectWriter1<T>
         extends ObjectWriterAdapter<T> {
     public final FieldWriter fieldWriter0;
 
-    public ObjectWriter1(Class objectClass, long features, FieldWriter[] fieldWriters) {
-        super(objectClass, features, fieldWriters);
-        fieldWriter0 = fieldWriters[0];
-    }
-
     public ObjectWriter1(
             Class<T> objectClass,
             String typeKey,

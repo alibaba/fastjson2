@@ -76,7 +76,7 @@ public class ObjectWriterAdapter<T>
         this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
         this.features = features;
         this.fieldWriters = fieldWriters;
-        this.serializable = java.io.Serializable.class.isAssignableFrom(objectClass);
+        this.serializable = objectClass == null || java.io.Serializable.class.isAssignableFrom(objectClass);
         this.googleCollection =
                 "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList".equals(typeName)
                 || "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet".equals(typeName);
@@ -113,57 +113,6 @@ public class ObjectWriterAdapter<T>
     @Override
     public long getFeatures() {
         return features;
-    }
-
-    public ObjectWriterAdapter(Class<T> objectClass, long features, FieldWriter... fieldWriters) {
-        this.objectClass = objectClass;
-        this.typeKey = TYPE;
-        this.fieldWriters = Arrays.asList(fieldWriters);
-        this.fieldWriterArray = fieldWriters;
-        this.features = features;
-        this.hasValueField = fieldWriterArray.length == 1
-                && (fieldWriterArray[0].features & FieldInfo.VALUE_MASK) != 0;
-        this.serializable = objectClass == null || java.io.Serializable.class.isAssignableFrom(objectClass);
-
-        String typeName = null;
-        if (objectClass != null) {
-            if (Enum.class.isAssignableFrom(objectClass) && !objectClass.isEnum()) {
-                typeName = objectClass.getSuperclass().getName();
-            } else {
-                typeName = TypeUtils.getTypeName(objectClass);
-            }
-        }
-        this.typeName = typeName;
-        this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
-
-        this.googleCollection =
-                "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList".equals(typeName)
-                        || "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet".equals(typeName);
-
-        boolean containsNoneFieldGetter = false;
-        long[] hashCodes = new long[fieldWriterArray.length];
-        for (int i = 0; i < fieldWriterArray.length; i++) {
-            FieldWriter fieldWriter = fieldWriterArray[i];
-            long hashCode = Fnv.hashCode64(
-                    fieldWriter.fieldName
-            );
-            hashCodes[i] = hashCode;
-
-            if (fieldWriter.method != null && (fieldWriter.features & FieldInfo.FIELD_MASK) == 0) {
-                containsNoneFieldGetter = true;
-            }
-        }
-        this.containsNoneFieldGetter = containsNoneFieldGetter;
-
-        this.hashCodes = Arrays.copyOf(hashCodes, hashCodes.length);
-        Arrays.sort(this.hashCodes);
-
-        mapping = new short[this.hashCodes.length];
-        for (int i = 0; i < hashCodes.length; i++) {
-            long hashCode = hashCodes[i];
-            int index = Arrays.binarySearch(this.hashCodes, hashCode);
-            mapping[index] = (short) i;
-        }
     }
 
     @Override
