@@ -831,6 +831,25 @@ public class JSONReaderTest {
         bean.value = bytes;
 
         String str = JSON.toJSONString(bean);
+        String str1 = JSON.toJSONString(bean, JSONWriter.Feature.OptimizedForAscii);
+        assertEquals(str, str1);
+        assertEquals(
+                str,
+                new String(
+                        JSON.toJSONBytes(bean)
+                )
+        );
+        String str2 = JSON.toJSONString(bean, JSONWriter.Feature.PrettyFormat);
+        assertArrayEquals(
+                JSON.parseObject(str).getBytes("value"),
+                JSON.parseObject(str2).getBytes("value")
+        );
+
+        JSONWriter jsonWriter = JSONWriter.ofUTF8();
+        jsonWriter.writeAny(bean);
+        assertEquals(str, new String(jsonWriter.getBytes(StandardCharsets.UTF_8)));
+        assertEquals(str, new String(jsonWriter.getBytes(StandardCharsets.US_ASCII)));
+        assertEquals(str.length(), jsonWriter.size());
 
         Bean bean1 = JSON.parseObject(str, Bean.class);
         assertArrayEquals(bean.value, bean1.value);

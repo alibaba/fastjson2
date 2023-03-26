@@ -1218,4 +1218,22 @@ public class JSONWriterTest {
 
         return reader.read(objectClass);
     }
+
+    @Test
+    public void testError() {
+        assertThrows(JSONException.class, () -> JSONWriter.of().writeSymbol(-1));
+    }
+
+    @Test
+    public void ofJSONB() {
+        JSONWriter.Context context = JSONFactory.createWriteContext();
+        JSONWriter jsonWriter = JSONWriter.ofJSONB(context);
+        assertSame(context, jsonWriter.getContext());
+        jsonWriter.close();
+    }
+
+    @Test
+    public void testPathHashCode() {
+        assertTrue(ROOT.hashCode() != 0);
+    }
 }

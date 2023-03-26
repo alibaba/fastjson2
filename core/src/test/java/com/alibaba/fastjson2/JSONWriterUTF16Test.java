@@ -1,12 +1,15 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONWriterUTF16Test {
     @Test
@@ -403,5 +406,62 @@ public class JSONWriterUTF16Test {
         JSONWriterUTF16 writer = new JSONWriterUTF16(JSONFactory.createWriteContext());
         writer.writeUUID(null);
         assertEquals("null", writer.toString());
+    }
+
+    @Test
+    public void test_writeRaw() {
+        {
+            JSONWriter writer = JSONWriter.ofUTF16();
+            writer.writeRaw('1', '2');
+            assertEquals("12", writer.toString());
+        }
+        {
+            JSONWriter writer = JSONWriter.ofUTF16(JSONWriter.Feature.PrettyFormat);
+            writer.writeRaw('1', '2');
+            assertEquals("12", writer.toString());
+            assertEquals(
+                    "12",
+                    new String(writer.getBytes(StandardCharsets.UTF_8))
+            );
+            assertEquals(2, writer.size());
+        }
+        {
+            JSONWriter writer = JSONWriter.ofUTF16();
+            int size = 1000000;
+            for (int i = 0; i < size; i++) {
+                writer.writeRaw('1', '1');
+            }
+            char[] chars = new char[size * 2];
+            Arrays.fill(chars, '1');
+            assertEquals(new String(chars), writer.toString());
+        }
+    }
+
+    @Test
+    public void test_writeDateTime14() {
+        Bean bean = new Bean();
+        bean.date = new Date(1679826319000L);
+        String str;
+        JSONWriter jsonWriter = JSONWriter.ofUTF16();
+        jsonWriter.writeAny(bean);
+        str = jsonWriter.toString();
+
+        assertEquals(StandardCharsets.UTF_16, jsonWriter.getCharset());
+        assertFalse(jsonWriter.isUseSingleQuotes());
+
+        String str2;
+        JSONWriter jsonWriter1 = JSONWriter.ofUTF16(JSONWriter.Feature.PrettyFormat);
+        jsonWriter1.writeAny(bean);
+        str2 = jsonWriter1.toString();
+
+        Bean bean1 = JSON.parseObject(str, Bean.class);
+        Bean bean2 = JSON.parseObject(str2, Bean.class);
+        assertEquals(bean.date.getTime(), bean1.date.getTime());
+        assertEquals(bean.date.getTime(), bean2.date.getTime());
+    }
+
+    public static class Bean {
+        @JSONField(format = "yyyyMMddHHmmss")
+        public Date date;
     }
 }
