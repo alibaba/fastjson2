@@ -2058,6 +2058,9 @@ public abstract class JSONReader
                     val = null;
                     break;
                 }
+                case '/':
+                    skipLineComment();
+                    continue _for;
                 default:
                     throw new JSONException("TODO : " + ch);
             }
