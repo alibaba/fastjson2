@@ -56,18 +56,20 @@ public class ObjectWriterBaseModule
             implements ObjectWriterAnnotationProcessor {
         @Override
         public void getBeanInfo(BeanInfo beanInfo, Class objectClass) {
-            Class superclass = objectClass.getSuperclass();
-            if (superclass != Object.class && superclass != null && superclass != Enum.class) {
-                getBeanInfo(beanInfo, superclass);
+            if (objectClass != null) {
+                Class superclass = objectClass.getSuperclass();
+                if (superclass != Object.class && superclass != null && superclass != Enum.class) {
+                    getBeanInfo(beanInfo, superclass);
 
-                if (beanInfo.seeAlso != null && beanInfo.seeAlsoNames != null) {
-                    for (int i = 0; i < beanInfo.seeAlso.length; i++) {
-                        Class seeAlso = beanInfo.seeAlso[i];
-                        if (seeAlso == objectClass && i < beanInfo.seeAlsoNames.length) {
-                            String seeAlsoName = beanInfo.seeAlsoNames[i];
-                            if (seeAlsoName != null && seeAlsoName.length() != 0) {
-                                beanInfo.typeName = seeAlsoName;
-                                break;
+                    if (beanInfo.seeAlso != null && beanInfo.seeAlsoNames != null) {
+                        for (int i = 0; i < beanInfo.seeAlso.length; i++) {
+                            Class seeAlso = beanInfo.seeAlso[i];
+                            if (seeAlso == objectClass && i < beanInfo.seeAlsoNames.length) {
+                                String seeAlsoName = beanInfo.seeAlsoNames[i];
+                                if (seeAlsoName != null && seeAlsoName.length() != 0) {
+                                    beanInfo.typeName = seeAlsoName;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -290,18 +292,20 @@ public class ObjectWriterBaseModule
         }
 
         @Override
-        public void getFieldInfo(BeanInfo beanInfo, FieldInfo fieldInfo, Class objectType, Field field) {
-            Class mixInSource = provider.mixInCache.get(objectType);
+        public void getFieldInfo(BeanInfo beanInfo, FieldInfo fieldInfo, Class objectClass, Field field) {
+            if (objectClass != null) {
+                Class mixInSource = provider.mixInCache.get(objectClass);
 
-            if (mixInSource != null && mixInSource != objectType) {
-                Field mixInField = null;
-                try {
-                    mixInField = mixInSource.getDeclaredField(field.getName());
-                } catch (Exception ignored) {
-                }
+                if (mixInSource != null && mixInSource != objectClass) {
+                    Field mixInField = null;
+                    try {
+                        mixInField = mixInSource.getDeclaredField(field.getName());
+                    } catch (Exception ignored) {
+                    }
 
-                if (mixInField != null) {
-                    getFieldInfo(beanInfo, fieldInfo, mixInSource, mixInField);
+                    if (mixInField != null) {
+                        getFieldInfo(beanInfo, fieldInfo, mixInSource, mixInField);
+                    }
                 }
             }
 

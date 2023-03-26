@@ -653,16 +653,18 @@ public class ObjectReaderBaseModule
                 int paramIndex,
                 Parameter parameter
         ) {
-            Class mixInSource = provider.mixInCache.get(objectClass);
-            if (mixInSource != null && mixInSource != objectClass) {
-                Constructor mixInConstructor = null;
-                try {
-                    mixInConstructor = mixInSource.getDeclaredConstructor(constructor.getParameterTypes());
-                } catch (NoSuchMethodException ignored) {
-                }
-                if (mixInConstructor != null) {
-                    Parameter mixInParam = mixInConstructor.getParameters()[paramIndex];
-                    processAnnotation(fieldInfo, getAnnotations(mixInParam));
+            if (objectClass != null) {
+                Class mixInSource = provider.mixInCache.get(objectClass);
+                if (mixInSource != null && mixInSource != objectClass) {
+                    Constructor mixInConstructor = null;
+                    try {
+                        mixInConstructor = mixInSource.getDeclaredConstructor(constructor.getParameterTypes());
+                    } catch (NoSuchMethodException ignored) {
+                    }
+                    if (mixInConstructor != null) {
+                        Parameter mixInParam = mixInConstructor.getParameters()[paramIndex];
+                        processAnnotation(fieldInfo, getAnnotations(mixInParam));
+                    }
                 }
             }
 
@@ -686,16 +688,18 @@ public class ObjectReaderBaseModule
                 int paramIndex,
                 Parameter parameter
         ) {
-            Class mixInSource = provider.mixInCache.get(objectClass);
-            if (mixInSource != null && mixInSource != objectClass) {
-                Method mixInMethod = null;
-                try {
-                    mixInMethod = mixInSource.getMethod(method.getName(), method.getParameterTypes());
-                } catch (NoSuchMethodException ignored) {
-                }
-                if (mixInMethod != null) {
-                    Parameter mixInParam = mixInMethod.getParameters()[paramIndex];
-                    processAnnotation(fieldInfo, getAnnotations(mixInParam));
+            if (objectClass != null) {
+                Class mixInSource = provider.mixInCache.get(objectClass);
+                if (mixInSource != null && mixInSource != objectClass) {
+                    Method mixInMethod = null;
+                    try {
+                        mixInMethod = mixInSource.getMethod(method.getName(), method.getParameterTypes());
+                    } catch (NoSuchMethodException ignored) {
+                    }
+                    if (mixInMethod != null) {
+                        Parameter mixInParam = mixInMethod.getParameters()[paramIndex];
+                        processAnnotation(fieldInfo, getAnnotations(mixInParam));
+                    }
                 }
             }
 
@@ -704,16 +708,18 @@ public class ObjectReaderBaseModule
 
         @Override
         public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Field field) {
-            Class mixInSource = provider.mixInCache.get(objectClass);
-            if (mixInSource != null && mixInSource != objectClass) {
-                Field mixInField = null;
-                try {
-                    mixInField = mixInSource.getDeclaredField(field.getName());
-                } catch (Exception ignored) {
-                }
+            if (objectClass != null) {
+                Class mixInSource = provider.mixInCache.get(objectClass);
+                if (mixInSource != null && mixInSource != objectClass) {
+                    Field mixInField = null;
+                    try {
+                        mixInField = mixInSource.getDeclaredField(field.getName());
+                    } catch (Exception ignored) {
+                    }
 
-                if (mixInField != null) {
-                    getFieldInfo(fieldInfo, mixInSource, mixInField);
+                    if (mixInField != null) {
+                        getFieldInfo(fieldInfo, mixInSource, mixInField);
+                    }
                 }
             }
 
@@ -723,6 +729,8 @@ public class ObjectReaderBaseModule
 
         @Override
         public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Method method) {
+            String methodName = method.getName();
+
             if (objectClass != null) {
                 Class superclass = objectClass.getSuperclass();
                 Method supperMethod = BeanUtils.getMethod(superclass, method);
@@ -737,19 +745,18 @@ public class ObjectReaderBaseModule
                         getFieldInfo(fieldInfo, superclass, interfaceMethod);
                     }
                 }
-            }
 
-            Class mixInSource = provider.mixInCache.get(objectClass);
-            String methodName = method.getName();
-            if (mixInSource != null && mixInSource != objectClass) {
-                Method mixInMethod = null;
-                try {
-                    mixInMethod = mixInSource.getDeclaredMethod(methodName, method.getParameterTypes());
-                } catch (Exception ignored) {
-                }
+                Class mixInSource = provider.mixInCache.get(objectClass);
+                if (mixInSource != null && mixInSource != objectClass) {
+                    Method mixInMethod = null;
+                    try {
+                        mixInMethod = mixInSource.getDeclaredMethod(methodName, method.getParameterTypes());
+                    } catch (Exception ignored) {
+                    }
 
-                if (mixInMethod != null) {
-                    getFieldInfo(fieldInfo, mixInSource, mixInMethod);
+                    if (mixInMethod != null) {
+                        getFieldInfo(fieldInfo, mixInSource, mixInMethod);
+                    }
                 }
             }
 
