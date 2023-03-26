@@ -46,7 +46,7 @@ public class ObjectWriterCreatorASM
     static final String METHOD_DESC_WRITE_J = "(" + DESC_JSON_WRITER + "J)V";
     static final String METHOD_DESC_WRITE_D = "(" + DESC_JSON_WRITER + "D)V";
     static final String METHOD_DESC_WRITE_F = "(" + DESC_JSON_WRITER + "F)V";
-    static final String METHOD_DESC_WRITE_DATE_WITH_FIELD_NAME = "(" + DESC_JSON_WRITER + "Z" + ASMUtils.desc(Date.class) + ")V";
+    static final String METHOD_DESC_WRITE_DATE_WITH_FIELD_NAME = "(" + DESC_JSON_WRITER + "ZLjava/util/Date;)V";
     static final String METHOD_DESC_WRITE_Z = "(" + DESC_JSON_WRITER + "Z)V";
     static final String METHOD_DESC_WRITE_ZARRAY = "(" + DESC_JSON_WRITER + "[Z)V";
     static final String METHOD_DESC_WRITE_FARRAY = "(" + DESC_JSON_WRITER + "[F)V";
