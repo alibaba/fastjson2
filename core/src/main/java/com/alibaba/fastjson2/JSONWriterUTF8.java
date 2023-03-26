@@ -101,8 +101,8 @@ class JSONWriterUTF8
         int charsLen = bytes.length * 2 + 3;
 
         ensureCapacity(off + charsLen + 2);
-        bytes[off++] = 'x';
-        bytes[off++] = '\'';
+        this.bytes[off++] = 'x';
+        this.bytes[off++] = '\'';
 
         for (int i = 0; i < bytes.length; ++i) {
             byte b = bytes[i];
@@ -111,11 +111,11 @@ class JSONWriterUTF8
             int b0 = a >> 4;
             int b1 = a & 0xf;
 
-            bytes[off++] = (byte) (b0 + (b0 < 10 ? 48 : 55));
-            bytes[off++] = (byte) (b1 + (b1 < 10 ? 48 : 55));
+            this.bytes[off++] = (byte) (b0 + (b0 < 10 ? 48 : 55));
+            this.bytes[off++] = (byte) (b1 + (b1 < 10 ? 48 : 55));
         }
 
-        bytes[off++] = '\'';
+        this.bytes[off++] = '\'';
     }
 
     @Override
@@ -1114,7 +1114,7 @@ class JSONWriterUTF8
 
     @Override
     public final void writeRaw(char ch) {
-        if (ch < 0 || ch > 128) {
+        if (ch > 128) {
             throw new JSONException("not support " + ch);
         }
 
@@ -1137,10 +1137,10 @@ class JSONWriterUTF8
 
     @Override
     public final void writeRaw(char c0, char c1) {
-        if (c0 < 0 || c0 > 128) {
+        if (c0 > 128) {
             throw new JSONException("not support " + c0);
         }
-        if (c1 < 0 || c1 > 128) {
+        if (c1 > 128) {
             throw new JSONException("not support " + c1);
         }
 

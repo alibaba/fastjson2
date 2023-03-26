@@ -2085,7 +2085,7 @@ class JSONWriterUTF16
 
     @Override
     public final int size() {
-        throw new JSONException("UnsupportedOperation");
+        return off;
     }
 
     @Override

@@ -1568,6 +1568,9 @@ public abstract class JSONReader
                         throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
                     }
                     break;
+                case 'x':
+                    value = readBinary();
+                    break;
                 default:
                     throw new JSONException("FASTJSON" + JSON.VERSION + "error, offset " + offset + ", char " + ch);
             }

@@ -23,6 +23,7 @@ abstract class FieldWriterDate<T>
     protected DateTimeFormatter formatter;
     final boolean formatMillis;
     final boolean formatISO8601;
+    final boolean formatyyyyMMdd8;
     final boolean formatyyyyMMddhhmmss14;
     final boolean formatyyyyMMddhhmmss19;
     final boolean formatUnixTime;
@@ -43,7 +44,7 @@ abstract class FieldWriterDate<T>
         super(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method);
 
         boolean formatMillis = false, formatISO8601 = false, formatUnixTime = false;
-        boolean formatyyyyMMddhhmmss14 = false, formatyyyyMMddhhmmss19 = false;
+        boolean formatyyyyMMdd8 = false, formatyyyyMMddhhmmss14 = false, formatyyyyMMddhhmmss19 = false;
         if (format != null) {
             switch (format) {
                 case "millis":
@@ -58,6 +59,9 @@ abstract class FieldWriterDate<T>
                 case "yyyy-MM-dd HH:mm:ss":
                     formatyyyyMMddhhmmss19 = true;
                     break;
+                case "yyyyMMdd":
+                    formatyyyyMMdd8 = true;
+                    break;
                 case "yyyyMMddHHmmss":
                     formatyyyyMMddhhmmss14 = true;
                     break;
@@ -69,6 +73,7 @@ abstract class FieldWriterDate<T>
         this.formatMillis = formatMillis;
         this.formatISO8601 = formatISO8601;
         this.formatUnixTime = formatUnixTime;
+        this.formatyyyyMMdd8 = formatyyyyMMdd8;
         this.formatyyyyMMddhhmmss14 = formatyyyyMMddhhmmss14;
         this.formatyyyyMMddhhmmss19 = formatyyyyMMddhhmmss19;
     }
@@ -280,6 +285,16 @@ abstract class FieldWriterDate<T>
                 int millis = zdt.getNano() / 1000_000;
                 int offsetSeconds = zdt.getOffset().getTotalSeconds();
                 jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, true);
+                return;
+            }
+        }
+
+        if (formatyyyyMMdd8) {
+            int year = zdt.getYear();
+            if (year >= 0 && year <= 9999) {
+                int month = zdt.getMonthValue();
+                int dayOfMonth = zdt.getDayOfMonth();
+                jsonWriter.writeDateYYYMMDD8(year, month, dayOfMonth);
                 return;
             }
         }
