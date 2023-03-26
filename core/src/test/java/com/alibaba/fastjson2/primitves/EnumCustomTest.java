@@ -16,6 +16,9 @@ public class EnumCustomTest {
 
         Bean bean1 = JSON.parseObject(str, Bean.class);
         assertEquals(bean.size, bean1.size);
+
+        Bean bean2 = JSON.parseObject(str).to(Bean.class);
+        assertEquals(bean.size, bean2.size);
     }
 
     public static class Bean {
@@ -42,6 +45,38 @@ public class EnumCustomTest {
         @Override
         public int getValue() {
             return value;
+        }
+    }
+
+    @Test
+    public void test1() {
+        Bean1 bean = new Bean1();
+        bean.size = Size1.Large;
+        String str = JSON.toJSONString(bean);
+        assertEquals("{\"size\":101}", str);
+
+        Bean1 bean1 = JSON.parseObject(str, Bean1.class);
+        assertEquals(bean.size, bean1.size);
+
+        Bean1 bean2 = JSON.parseObject(str).to(Bean1.class);
+        assertEquals(bean.size, bean2.size);
+    }
+
+    public static class Bean1 {
+        public Size1 size;
+    }
+
+    public enum Size1 {
+        Small(99),
+        Medium(100),
+        Large(101),
+        XLarge(102);
+
+        @JSONField(value = true)
+        public final int value;
+
+        Size1(int value) {
+            this.value = value;
         }
     }
 }

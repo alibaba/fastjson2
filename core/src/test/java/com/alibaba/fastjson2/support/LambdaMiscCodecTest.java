@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.support;
 
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -29,6 +31,48 @@ public class LambdaMiscCodecTest {
                 Collections.class.getMethod("singleton", Object.class)
         );
         assertEquals(Collections.singleton(123L), function.apply(123L));
+    }
+
+    @Test
+    public void testConstructorFunction() throws Throwable {
+        LambdaMiscCodec.ConstructorFunction function = new LambdaMiscCodec.ConstructorFunction(
+                String.class.getConstructor(char[].class)
+        );
+
+        String str = "abcdefg";
+        assertEquals(str, function.apply(str.toCharArray()));
+    }
+
+    @Test
+    public void testBiFunction() throws Throwable {
+        LambdaMiscCodec.ConstructorBiFunction function = new LambdaMiscCodec.ConstructorBiFunction(
+                MutablePair.class.getConstructor(Object.class, Object.class)
+        );
+
+        String left = "a", right = "b";
+        MutablePair pair = (MutablePair) function.apply(left, right);
+        assertEquals(left, pair.left);
+        assertEquals(right, pair.right);
+    }
+
+    @Test
+    public void testBiFunction1() throws Throwable {
+        LambdaMiscCodec.ReflectBiFunction function = new LambdaMiscCodec.ReflectBiFunction(
+                Pair.class.getMethod("of", Object.class, Object.class)
+        );
+
+        String left = "a", right = "b";
+        Pair pair = (Pair) function.apply(left, right);
+        assertEquals(left, pair.getLeft());
+        assertEquals(right, pair.getRight());
+    }
+
+    @Test
+    public void testSupplier() throws Throwable {
+        LambdaMiscCodec.ReflectSupplier function = new LambdaMiscCodec.ReflectSupplier(
+                Collections.class.getMethod("emptyList")
+        );
+        assertEquals(Collections.emptyList(), function.get());
     }
 
     @Test

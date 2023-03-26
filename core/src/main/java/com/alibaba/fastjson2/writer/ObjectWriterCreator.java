@@ -52,11 +52,11 @@ public class ObjectWriterCreator {
     }
 
     public ObjectWriter createObjectWriter(List<FieldWriter> fieldWriters) {
-        return new ObjectWriterAdapter(null, fieldWriters);
+        return new ObjectWriterAdapter(null, null, null, 0, fieldWriters);
     }
 
     public ObjectWriter createObjectWriter(FieldWriter... fieldWriters) {
-        return new ObjectWriterAdapter(null, 0, fieldWriters);
+        return new ObjectWriterAdapter(null, null, null, 0, Arrays.asList(fieldWriters));
     }
 
     public ObjectWriter createObjectWriter(Class objectType) {
@@ -93,37 +93,37 @@ public class ObjectWriterCreator {
             switch (fieldWriters.length) {
                 case 1:
                     if ((fieldWriters[0].features & FieldInfo.VALUE_MASK) == 0) {
-                        return new ObjectWriter1(objectClass, features, fieldWriters);
+                        return new ObjectWriter1(objectClass, null, null, features, Arrays.asList(fieldWriters));
                     }
-                    return new ObjectWriterAdapter(objectClass, features, fieldWriters);
+                    return new ObjectWriterAdapter(objectClass, null, null, features, Arrays.asList(fieldWriters));
                 case 2:
-                    return new ObjectWriter2(objectClass, features, fieldWriters);
+                    return new ObjectWriter2(objectClass, null, null, features, Arrays.asList(fieldWriters));
                 case 3:
-                    return new ObjectWriter3(objectClass, features, fieldWriters);
+                    return new ObjectWriter3(objectClass, null, null, features, Arrays.asList(fieldWriters));
                 case 4:
-                    return new ObjectWriter4(objectClass, features, fieldWriters);
+                    return new ObjectWriter4(objectClass, null, null, features, Arrays.asList(fieldWriters));
                 case 5:
-                    return new ObjectWriter5(objectClass, features, fieldWriters);
+                    return new ObjectWriter5(objectClass, null, null, features, Arrays.asList(fieldWriters));
                 case 6:
-                    return new ObjectWriter6(objectClass, features, fieldWriters);
+                    return new ObjectWriter6(objectClass, null, null, features, Arrays.asList(fieldWriters));
                 case 7:
-                    return new ObjectWriter7(objectClass, features, fieldWriters);
+                    return new ObjectWriter7(objectClass, null, null, features, Arrays.asList(fieldWriters));
                 case 8:
-                    return new ObjectWriter8(objectClass, features, fieldWriters);
+                    return new ObjectWriter8(objectClass, null, null, features, Arrays.asList(fieldWriters));
                 case 9:
-                    return new ObjectWriter9(objectClass, features, fieldWriters);
+                    return new ObjectWriter9(objectClass, null, null, features, Arrays.asList(fieldWriters));
                 case 10:
-                    return new ObjectWriter10(objectClass, features, fieldWriters);
+                    return new ObjectWriter10(objectClass, null, null, features, Arrays.asList(fieldWriters));
                 case 11:
-                    return new ObjectWriter11(objectClass, features, fieldWriters);
+                    return new ObjectWriter11(objectClass, null, null, features, Arrays.asList(fieldWriters));
                 case 12:
-                    return new ObjectWriter12(objectClass, features, fieldWriters);
+                    return new ObjectWriter12(objectClass, null, null, features, Arrays.asList(fieldWriters));
                 default:
-                    return new ObjectWriterAdapter(objectClass, features, fieldWriters);
+                    return new ObjectWriterAdapter(objectClass, null, null, features, Arrays.asList(fieldWriters));
             }
         }
 
-        return new ObjectWriterAdapter(objectClass, features, fieldWriters);
+        return new ObjectWriterAdapter(objectClass, null, null, features, Arrays.asList(fieldWriters));
     }
 
     protected FieldWriter creteFieldWriter(

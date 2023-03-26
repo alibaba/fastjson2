@@ -160,20 +160,22 @@ public class LambdaMiscCodec {
         switch (className) {
             case "com.carrotsearch.hppc.ByteArrayList": {
                 try {
-                    Function<byte[], Object> function = createFunction(
-                            objectClass.getMethod("from", byte[].class)
+                    return ObjectReaders.fromByteArray(
+                            createFunction(
+                                    objectClass.getMethod("from", byte[].class)
+                            )
                     );
-                    return ObjectReaders.fromByteArray(function);
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new JSONException("illegal stat", e);
                 }
             }
             case "com.carrotsearch.hppc.ShortArrayList": {
                 try {
-                    Function<short[], Object> function = createFunction(
-                            objectClass.getMethod("from", short[].class)
+                    return ObjectReaders.fromShortArray(
+                            createFunction(
+                                    objectClass.getMethod("from", short[].class)
+                            )
                     );
-                    return ObjectReaders.fromShortArray(function);
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new JSONException("illegal stat", e);
                 }
@@ -181,10 +183,11 @@ public class LambdaMiscCodec {
             case "com.carrotsearch.hppc.IntArrayList":
             case "com.carrotsearch.hppc.IntHashSet": {
                 try {
-                    Function<int[], Object> function = createFunction(
-                            objectClass.getMethod("from", int[].class)
+                    return ObjectReaders.fromIntArray(
+                            createFunction(
+                                    objectClass.getMethod("from", int[].class)
+                            )
                     );
-                    return ObjectReaders.fromIntArray(function);
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new JSONException("illegal stat", e);
                 }
@@ -192,10 +195,11 @@ public class LambdaMiscCodec {
             case "com.carrotsearch.hppc.LongArrayList":
             case "com.carrotsearch.hppc.LongHashSet": {
                 try {
-                    Function<long[], Object> function = createFunction(
-                            objectClass.getMethod("from", long[].class)
+                    return ObjectReaders.fromLongArray(
+                            createFunction(
+                                    objectClass.getMethod("from", long[].class)
+                            )
                     );
-                    return ObjectReaders.fromLongArray(function);
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new JSONException("illegal stat", e);
                 }
@@ -203,29 +207,33 @@ public class LambdaMiscCodec {
             case "com.carrotsearch.hppc.CharArrayList":
             case "com.carrotsearch.hppc.CharHashSet": {
                 try {
-                    Function<char[], Object> function = createFunction(
-                            objectClass.getMethod("from", char[].class)
+                    return ObjectReaders.fromCharArray(
+                            createFunction(
+                                    objectClass.getMethod("from", char[].class)
+                            )
                     );
-                    return ObjectReaders.fromCharArray(function);
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new JSONException("illegal stat", e);
                 }
             }
             case "com.carrotsearch.hppc.FloatArrayList": {
                 try {
-                    Method method = objectClass.getMethod("from", float[].class);
-                    Function<float[], Object> function = createFunction(method);
-                    return ObjectReaders.fromFloatArray(function);
+                    return ObjectReaders.fromFloatArray(
+                            createFunction(
+                                    objectClass.getMethod("from", float[].class)
+                            )
+                    );
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new JSONException("illegal stat", e);
                 }
             }
             case "com.carrotsearch.hppc.DoubleArrayList": {
                 try {
-                    Function<double[], Object> function = createFunction(
-                            objectClass.getMethod("from", double[].class)
+                    return ObjectReaders.fromDoubleArray(
+                            createFunction(
+                                    objectClass.getMethod("from", double[].class)
+                            )
                     );
-                    return ObjectReaders.fromDoubleArray(function);
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new JSONException("illegal stat", e);
                 }
@@ -234,20 +242,22 @@ public class LambdaMiscCodec {
             case "gnu.trove.stack.array.TByteArrayStack":
             case "gnu.trove.list.array.TByteArrayList": {
                 try {
-                    Function<byte[], Object> function = createFunction(
-                            objectClass.getConstructor(byte[].class)
+                    return ObjectReaders.fromByteArray(
+                            createFunction(
+                                    objectClass.getConstructor(byte[].class)
+                            )
                     );
-                    return ObjectReaders.fromByteArray(function);
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new JSONException("illegal stat", e);
                 }
             }
             case "gnu.trove.list.array.TCharArrayList": {
                 try {
-                    Function<char[], Object> function = createFunction(
-                            objectClass.getConstructor(char[].class)
+                    return ObjectReaders.fromCharArray(
+                            createFunction(
+                                    objectClass.getConstructor(char[].class)
+                            )
                     );
-                    return ObjectReaders.fromCharArray(function);
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new JSONException("illegal stat", e);
                 }
@@ -255,10 +265,11 @@ public class LambdaMiscCodec {
             case "gnu.trove.set.hash.TShortHashSet":
             case "gnu.trove.list.array.TShortArrayList": {
                 try {
-                    Function<short[], Object> function = createFunction(
-                            objectClass.getConstructor(short[].class)
+                    return ObjectReaders.fromShortArray(
+                            createFunction(
+                                    objectClass.getConstructor(short[].class)
+                            )
                     );
-                    return ObjectReaders.fromShortArray(function);
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new JSONException("illegal stat", e);
                 }
@@ -266,10 +277,11 @@ public class LambdaMiscCodec {
             case "gnu.trove.set.hash.TIntHashSet":
             case "gnu.trove.list.array.TIntArrayList": {
                 try {
-                    Function<int[], Object> function = createFunction(
-                            objectClass.getConstructor(int[].class)
+                    return ObjectReaders.fromIntArray(
+                            createFunction(
+                                    objectClass.getConstructor(int[].class)
+                            )
                     );
-                    return ObjectReaders.fromIntArray(function);
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new JSONException("illegal stat", e);
                 }
@@ -277,30 +289,33 @@ public class LambdaMiscCodec {
             case "gnu.trove.set.hash.TLongHashSet":
             case "gnu.trove.list.array.TLongArrayList": {
                 try {
-                    Function<long[], Object> function = createFunction(
-                            objectClass.getConstructor(long[].class)
+                    return ObjectReaders.fromLongArray(
+                            createFunction(
+                                    objectClass.getConstructor(long[].class)
+                            )
                     );
-                    return ObjectReaders.fromLongArray(function);
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new JSONException("illegal stat", e);
                 }
             }
             case "gnu.trove.list.array.TFloatArrayList": {
                 try {
-                    Function<float[], Object> function = createFunction(
-                            objectClass.getConstructor(float[].class)
+                    return ObjectReaders.fromFloatArray(
+                            createFunction(
+                                    objectClass.getConstructor(float[].class)
+                            )
                     );
-                    return ObjectReaders.fromFloatArray(function);
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new JSONException("illegal stat", e);
                 }
             }
             case "gnu.trove.list.array.TDoubleArrayList": {
                 try {
-                    Function<double[], Object> function = createFunction(
-                            objectClass.getConstructor(double[].class)
+                    return ObjectReaders.fromDoubleArray(
+                            createFunction(
+                                    objectClass.getConstructor(double[].class)
+                            )
                     );
-                    return ObjectReaders.fromDoubleArray(function);
                 } catch (NoSuchMethodException | SecurityException e) {
                     throw new JSONException("illegal stat", e);
                 }
@@ -451,13 +466,26 @@ public class LambdaMiscCodec {
             MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
             Class<?>[] parameterTypes = method.getParameterTypes();
             Class<?> param0 = parameterTypes[0];
-            Class<?> param1 = parameterTypes[1];
 
-            MethodHandle methodHandle = lookup.findStatic(
-                    declaringClass,
-                    method.getName(),
-                    MethodType.methodType(objectClass, param0, param1)
-            );
+            MethodType methodType;
+            MethodHandle methodHandle;
+            if (Modifier.isStatic(method.getModifiers())) {
+                Class<?> param1 = parameterTypes[1];
+
+                methodHandle = lookup.findStatic(
+                        declaringClass,
+                        method.getName(),
+                        MethodType.methodType(objectClass, param0, param1)
+                );
+                methodType = MethodType.methodType(objectClass, param0, param1);
+            } else {
+                methodHandle = lookup.findVirtual(
+                        declaringClass,
+                        method.getName(),
+                        MethodType.methodType(objectClass, param0)
+                );
+                methodType = MethodType.methodType(objectClass, declaringClass, param0);
+            }
 
             CallSite callSite = LambdaMetafactory.metafactory(
                     lookup,
@@ -465,7 +493,7 @@ public class LambdaMiscCodec {
                     METHOD_TYPE_BI_FUNCTION,
                     METHOD_TYPE_OBJECT_OBJECT_OBJECT,
                     methodHandle,
-                    MethodType.methodType(objectClass, param0, param0)
+                    methodType
             );
             return (BiFunction) callSite.getTarget().invokeExact();
         } catch (Throwable ignored) {
@@ -533,7 +561,7 @@ public class LambdaMiscCodec {
         @Override
         public Object apply(Object arg0, Object arg1) {
             try {
-                return constructor.newInstance(arg0, arg0);
+                return constructor.newInstance(arg0, arg1);
             } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
                 throw new JSONException("invoke error", e);
             }
@@ -551,7 +579,11 @@ public class LambdaMiscCodec {
         @Override
         public Object apply(Object arg0, Object arg1) {
             try {
-                return method.invoke(null, arg0, arg0);
+                if (Modifier.isStatic(method.getModifiers())) {
+                    return method.invoke(null, arg0, arg1);
+                } else {
+                    return method.invoke(arg0, arg1);
+                }
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new JSONException("invoke error", e);
             }

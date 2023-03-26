@@ -238,10 +238,6 @@ public class ObjectReaderCreatorASM
         }
     }
 
-    public ObjectReaderCreatorASM() {
-        this.classLoader = new DynamicClassLoader();
-    }
-
     public ObjectReaderCreatorASM(ClassLoader classLoader) {
         this.classLoader = classLoader instanceof DynamicClassLoader
                 ? (DynamicClassLoader) classLoader
@@ -581,7 +577,20 @@ public class ObjectReaderCreatorASM
 
             genMethodReadObject(context, defaultConstructor, readerFeatures, TYPE_OBJECT, fieldReaderArray, cw, classNameType, objectReaderAdapter);
 
-            if (objectReaderSuper == TYPE_OBJECT_READER_ADAPTER) {
+            if (objectReaderSuper == TYPE_OBJECT_READER_ADAPTER
+                    || objectReaderSuper == TYPE_OBJECT_READER_1
+                    || objectReaderSuper == TYPE_OBJECT_READER_2
+                    || objectReaderSuper == TYPE_OBJECT_READER_3
+                    || objectReaderSuper == TYPE_OBJECT_READER_4
+                    || objectReaderSuper == TYPE_OBJECT_READER_5
+                    || objectReaderSuper == TYPE_OBJECT_READER_6
+                    || objectReaderSuper == TYPE_OBJECT_READER_7
+                    || objectReaderSuper == TYPE_OBJECT_READER_8
+                    || objectReaderSuper == TYPE_OBJECT_READER_9
+                    || objectReaderSuper == TYPE_OBJECT_READER_10
+                    || objectReaderSuper == TYPE_OBJECT_READER_11
+                    || objectReaderSuper == TYPE_OBJECT_READER_12
+            ) {
                 genMethodGetFieldReader(fieldReaderArray, cw, classNameType, objectReaderAdapter);
                 genMethodGetFieldReaderLCase(fieldReaderArray, cw, classNameType, objectReaderAdapter);
             }
