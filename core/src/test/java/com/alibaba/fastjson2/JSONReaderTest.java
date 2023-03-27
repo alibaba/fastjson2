@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Locale;
@@ -861,5 +862,15 @@ public class JSONReaderTest {
     public static class Bean {
         @JSONField(format = "hex")
         public byte[] value;
+    }
+
+    @Test
+    public void readLocalTime5() {
+        String str = "\"12:34\"";
+        JSONReader jsonReader = JSONReader.of(str.getBytes());
+        LocalTime localTime = jsonReader.readLocalTime();
+        assertEquals(12, localTime.getHour());
+        assertEquals(34, localTime.getMinute());
+        assertEquals(0, localTime.getSecond());
     }
 }
