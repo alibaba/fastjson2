@@ -174,7 +174,7 @@ public final class ObjectReaderImplListStr
                 list.add(
                         jsonReader.readString());
             }
-        } else if (ch == '"' || ch == '\'') {
+        } else if (ch == '"' || ch == '\'' || ch == '{') {
             String str = jsonReader.readString();
             list.add(str);
         } else {
