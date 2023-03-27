@@ -2,6 +2,9 @@ package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.PropertyNamingStrategy;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -268,5 +271,18 @@ public class BeanUtilsTest {
     public void declaredFieldsNull() {
         BeanUtils.declaredFields(null, o -> {});
         BeanUtils.declaredFields(Object.class, null);
+    }
+
+    @Test
+    public void igoreTest() throws Throwable {
+        ClassPool pool = ClassPool.getDefault();
+        CtClass clazz = pool.makeClass("a");
+        CtConstructor constructor = new CtConstructor(new CtClass[]{}, clazz);
+        clazz.addConstructor(constructor);
+
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.add(clazz);
+        String str = jsonArray.toString();
+        assertEquals("[{}]", str);
     }
 }
