@@ -94,17 +94,18 @@ class ObjectReaderImplInt8ValueArray
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        byte[] bytes;
         if (jsonReader.isBinary()) {
-            return jsonReader.readBinary();
-        }
-
-        int entryCnt = jsonReader.startArray();
-        if (entryCnt == -1) {
-            return null;
-        }
-        byte[] bytes = new byte[entryCnt];
-        for (int i = 0; i < entryCnt; i++) {
-            bytes[i] = (byte) jsonReader.readInt32Value();
+            bytes = jsonReader.readBinary();
+        } else {
+            int entryCnt = jsonReader.startArray();
+            if (entryCnt == -1) {
+                return null;
+            }
+            bytes = new byte[entryCnt];
+            for (int i = 0; i < entryCnt; i++) {
+                bytes[i] = (byte) jsonReader.readInt32Value();
+            }
         }
         if (builder != null) {
             return builder.apply(bytes);
