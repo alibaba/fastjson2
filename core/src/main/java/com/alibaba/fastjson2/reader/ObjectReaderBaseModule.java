@@ -2091,7 +2091,8 @@ public class ObjectReaderBaseModule
             case "java.sql.Date":
                 return JdbcSupport.createDateReader((Class) type, null, null);
             case "java.util.RegularEnumSet":
-                return ObjectReaderImplList.INSTANCE;
+            case "java.util.JumboEnumSet":
+                return ObjectReaderImplList.of(type, TypeUtils.getClass(type), 0);
             case "org.joda.time.Chronology":
                 return JodaSupport.createChronologyReader((Class) type);
             case "org.joda.time.LocalDate":
