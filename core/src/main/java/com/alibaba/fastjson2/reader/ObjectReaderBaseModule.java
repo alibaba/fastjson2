@@ -17,6 +17,7 @@ import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.*;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.time.*;
@@ -2130,6 +2131,9 @@ public class ObjectReaderBaseModule
                     return new ObjectReaderException((Class) type);
                 }
                 break;
+            case "java.nio.HeapByteBuffer":
+            case "java.nio.ByteBuffer":
+                return new ObjectReaderImplInt8ValueArray(ByteBuffer::wrap, null);
             case "org.apache.commons.lang3.tuple.Pair":
             case "org.apache.commons.lang3.tuple.ImmutablePair":
                 return new ApacheLang3Support.PairReader((Class) type, Object.class, Object.class);

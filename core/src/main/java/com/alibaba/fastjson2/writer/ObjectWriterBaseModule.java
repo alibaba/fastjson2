@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.time.*;
 import java.util.*;
@@ -1093,6 +1094,11 @@ public class ObjectWriterBaseModule
             case "gnu.trove.set.hash.TLongHashSet":
             case "gnu.trove.stack.array.TByteArrayStack":
                 return LambdaMiscCodec.getObjectWriter(objectType, objectClass);
+            case "java.nio.HeapByteBuffer":
+            case "java.nio.DirectByteBuffer":
+                return new ObjectWriterImplInt8ValueArray(
+                        o -> ((ByteBuffer) o).array()
+                );
             default:
                 break;
         }
