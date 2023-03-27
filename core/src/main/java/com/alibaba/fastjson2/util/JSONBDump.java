@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -382,6 +383,13 @@ public class JSONBDump {
                 jsonWriter.writeLocalDate(localDate);
                 break;
             }
+            case BC_TIMESTAMP:
+                long epochSeconds = readInt64Value();
+                int nano = readInt32Value();
+                jsonWriter.writeInstant(
+                        Instant.ofEpochSecond(epochSeconds, nano)
+                );
+                break;
             case BC_OBJECT: {
                 dumpObject(null);
                 break;

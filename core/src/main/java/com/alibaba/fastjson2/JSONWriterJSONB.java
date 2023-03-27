@@ -1464,22 +1464,6 @@ final class JSONWriterJSONB
         }
     }
 
-    static int size(int val) {
-        if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
-            return 1;
-        }
-
-        if (val >= INT32_BYTE_MIN && val <= INT32_BYTE_MAX) {
-            return 2;
-        }
-
-        if (val >= INT32_SHORT_MIN && val <= INT32_SHORT_MAX) {
-            return 3;
-        }
-
-        return 5;
-    }
-
     @Override
     public void writeInt32(int val) {
         if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
@@ -2114,7 +2098,13 @@ final class JSONWriterJSONB
 
     @Override
     public void writeDateYYYMMDD8(int year, int month, int dayOfMonth) {
-        throw new JSONException("unsupported operation");
+        ensureCapacity(off + 5);
+
+        bytes[off++] = BC_LOCAL_DATE;
+        bytes[off++] = (byte) (year >>> 8);
+        bytes[off++] = (byte) year;
+        bytes[off++] = (byte) month;
+        bytes[off++] = (byte) dayOfMonth;
     }
 
     @Override
@@ -2134,7 +2124,7 @@ final class JSONWriterJSONB
 
     @Override
     public void writeHex(byte[] bytes) {
-        throw new JSONException("UnsupportedOperation");
+        writeBinary(bytes);
     }
 
     @Override
