@@ -263,4 +263,10 @@ public class BeanUtilsTest {
             return null;
         }
     }
+
+    @Test
+    public void declaredFieldsNull() {
+        BeanUtils.declaredFields(null, o -> {});
+        BeanUtils.declaredFields(Object.class, null);
+    }
 }
