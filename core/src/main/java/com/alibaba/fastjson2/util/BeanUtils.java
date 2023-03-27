@@ -277,6 +277,10 @@ public abstract class BeanUtils {
      * ignore static fields
      */
     public static void declaredFields(Class objectClass, Consumer<Field> fieldConsumer) {
+        if (objectClass == null || fieldConsumer == null) {
+            return;
+        }
+
         if (TypeUtils.isProxy(objectClass)) {
             Class superclass = objectClass.getSuperclass();
             declaredFields(superclass, fieldConsumer);
