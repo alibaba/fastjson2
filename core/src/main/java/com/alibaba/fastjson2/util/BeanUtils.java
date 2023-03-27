@@ -281,6 +281,10 @@ public abstract class BeanUtils {
             return;
         }
 
+        if (ignore(objectClass)) {
+            return;
+        }
+
         if (TypeUtils.isProxy(objectClass)) {
             Class superclass = objectClass.getSuperclass();
             declaredFields(superclass, fieldConsumer);
@@ -459,6 +463,10 @@ public abstract class BeanUtils {
     }
 
     public static void setters(Class objectClass, Consumer<Method> methodConsumer) {
+        if (ignore(objectClass)) {
+            return;
+        }
+
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
             methods = objectClass.getMethods();
@@ -546,6 +554,10 @@ public abstract class BeanUtils {
     }
 
     public static void setters(Class objectClass, boolean checkPrefix, Consumer<Method> methodConsumer) {
+        if (ignore(objectClass)) {
+            return;
+        }
+
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
             methods = objectClass.getMethods();
@@ -834,6 +846,10 @@ public abstract class BeanUtils {
             }
         }
 
+        if (ignore(objectClass)) {
+            return;
+        }
+
         Class superClass = objectClass.getSuperclass();
         if (TypeUtils.isProxy(objectClass)) {
             Class superclass = superClass;
@@ -1025,6 +1041,37 @@ public abstract class BeanUtils {
 
             methodConsumer.accept(method);
         }
+    }
+
+    static boolean ignore(Class objectClass) {
+        if (objectClass == null) {
+            return true;
+        }
+
+        String name = objectClass.getName();
+        switch (name) {
+            case "javassist.CtNewClass":
+            case "javassist.CtNewNestedClass":
+            case "javassist.CtClass":
+            case "javassist.CtConstructor":
+            case "javassist.CtMethod":
+            case "org.apache.ibatis.javassist.CtNewClass":
+            case "org.apache.ibatis.javassist.CtClass":
+            case "org.apache.ibatis.javassist.CtConstructor":
+            case "org.apache.ibatis.javassist.CtMethod":
+            case "com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet":
+            case "com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl":
+            case "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl":
+            case "org.apache.wicket.util.io.DeferredFileOutputStream":
+            case "org.apache.xalan.xsltc.trax.TemplatesImpl":
+            case "org.apache.xalan.xsltc.runtime.AbstractTranslet":
+            case "org.apache.xalan.xsltc.trax.TransformerFactoryImpl":
+            case "org.apache.commons.collections.functors.ChainedTransformer":
+                return true;
+            default:
+                break;
+        }
+        return false;
     }
 
     public static boolean isRecord(Class objectClass) {
