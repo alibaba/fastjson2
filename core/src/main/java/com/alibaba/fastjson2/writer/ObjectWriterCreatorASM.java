@@ -428,6 +428,13 @@ public class ObjectWriterCreatorASM
             }
         }
 
+        if (objectClass.getSuperclass() == Object.class && fieldWriters.isEmpty()) {
+            String simpleName = objectClass.getSimpleName();
+            if (simpleName.indexOf('$') != -1 && simpleName.contains("$$")) {
+                match = false;
+            }
+        }
+
         long writerFeatures = features | beanInfo.writerFeatures;
         if (!match) {
             return super.createObjectWriter(objectClass, features, provider);
