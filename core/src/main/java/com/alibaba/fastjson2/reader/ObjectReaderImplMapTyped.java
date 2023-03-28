@@ -73,7 +73,7 @@ class ObjectReaderImplMapTyped
             Object key = entry.getKey();
             Object fieldValue = entry.getValue();
             Object fieldName;
-            if (keyType == null || key == String.class) {
+            if (keyType == null || keyType == String.class) {
                 fieldName = key.toString();
             } else {
                 fieldName = TypeUtils.cast(key, keyType);
