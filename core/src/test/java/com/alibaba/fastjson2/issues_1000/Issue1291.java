@@ -25,7 +25,7 @@ public class Issue1291 {
     @Test
     public void test_1() {
         String info = "{\"obj\":{\"unitCode\":\"755H\"}}";
-        Result<List<String>> result =  JSONObject.parseObject(info, new TypeReference<Result<List<String>>>() {});
+        Result<List<String>> result = JSONObject.parseObject(info, new TypeReference<Result<List<String>>>() {});
         assertEquals(1, result.obj.size());
         String string = result.obj.get(0);
         assertEquals("{\"unitCode\":\"755H\"}", string);
@@ -34,7 +34,17 @@ public class Issue1291 {
     @Test
     public void test_2() {
         String info = "{\"obj\":{\"unitCode\":\"755H\"}}";
-        Result<List<Info>> result =  JSONObject.parseObject(info, new TypeReference<Result<List<Info>>>() {});
+        Result<List<Info>> result = JSONObject.parseObject(info, new TypeReference<Result<List<Info>>>() {});
+        assertEquals(1, result.obj.size());
+        Info object = result.obj.get(0);
+        assertNotNull(object);
+        assertEquals("755H", object.unitCode);
+    }
+
+    @Test
+    public void test_3() {
+        String info = "{\"obj\":[{\"unitCode\":\"755H\"}]}";
+        Result<List<Info>> result = JSONObject.parseObject(info, new TypeReference<Result<List<Info>>>() {});
         assertEquals(1, result.obj.size());
         Info object = result.obj.get(0);
         assertNotNull(object);
@@ -52,5 +62,4 @@ public class Issue1291 {
     public static class Info{
         public String unitCode;
     }
-
 }
