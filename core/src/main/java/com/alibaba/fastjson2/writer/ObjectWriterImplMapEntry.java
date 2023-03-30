@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 final class ObjectWriterImplMapEntry
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplMapEntry INSTANCE = new ObjectWriterImplMapEntry();
 
     @Override

@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Type;
 
 public class ObjectWriterImplToString
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     public static final ObjectWriterImplToString INSTANCE = new ObjectWriterImplToString(false);
     public static final ObjectWriterImplToString DIRECT = new ObjectWriterImplToString(true);
 

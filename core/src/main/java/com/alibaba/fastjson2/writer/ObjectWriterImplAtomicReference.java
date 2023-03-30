@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicReference;
 
 final class ObjectWriterImplAtomicReference
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplAtomicReference INSTANCE = new ObjectWriterImplAtomicReference(null);
 
     final Class defineClass;

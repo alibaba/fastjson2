@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import java.util.TimeZone;
 
 final class ObjectWriterImplTimeZone
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplTimeZone INSTANCE = new ObjectWriterImplTimeZone();
 
     @Override

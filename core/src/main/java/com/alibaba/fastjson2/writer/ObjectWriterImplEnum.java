@@ -9,7 +9,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.*;
 
 final class ObjectWriterImplEnum<E extends Enum<E>>
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     final Member valueField;
 
     final Class defineClass;

@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import java.util.OptionalLong;
 
 final class ObjectWriterImplOptionalLong
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplOptionalLong INSTANCE = new ObjectWriterImplOptionalLong();
 
     @Override

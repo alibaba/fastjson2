@@ -18,7 +18,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_ARRAY_1x;
 import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
 final class ObjectWriterImplList
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplList
             INSTANCE = new ObjectWriterImplList(null, null, null, null, 0);
 

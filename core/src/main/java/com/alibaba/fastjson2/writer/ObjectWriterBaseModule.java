@@ -1093,6 +1093,7 @@ public class ObjectWriterBaseModule
             case "gnu.trove.set.hash.TIntHashSet":
             case "gnu.trove.set.hash.TLongHashSet":
             case "gnu.trove.stack.array.TByteArrayStack":
+            case "org.bson.types.Decimal128":
                 return LambdaMiscCodec.getObjectWriter(objectType, objectClass);
             case "java.nio.HeapByteBuffer":
             case "java.nio.DirectByteBuffer":
@@ -1537,27 +1538,6 @@ public class ObjectWriterBaseModule
 
         String[] annotationNames = BeanUtils.getEnumAnnotationNames(enumClass);
         return new ObjectWriterImplEnum(null, enumClass, valueField, annotationNames, 0);
-    }
-
-    abstract static class PrimitiveImpl<T>
-            implements ObjectWriter<T> {
-        @Override
-        public void writeArrayMappingJSONB(JSONWriter jsonWriter,
-                                           Object object,
-                                           Object fieldName,
-                                           Type fieldType,
-                                           long features) {
-            writeJSONB(jsonWriter, object, null, null, 0);
-        }
-
-        @Override
-        public void writeArrayMapping(JSONWriter jsonWriter,
-                                      Object object,
-                                      Object fieldName,
-                                      Type fieldType,
-                                      long features) {
-            write(jsonWriter, object, null, null, 0);
-        }
     }
 
     static class VoidObjectWriter

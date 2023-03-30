@@ -10,7 +10,7 @@ import static com.alibaba.fastjson2.writer.ObjectWriterImplBoolValueArray.JSONB_
 import static com.alibaba.fastjson2.writer.ObjectWriterImplBoolValueArray.JSONB_TYPE_NAME_BYTES;
 
 class ObjectWriterImplBoolValueArrayLambda
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     private final ToIntFunction functionSize;
     private final BiFunction<Object, Integer, Boolean> functionGet;
 

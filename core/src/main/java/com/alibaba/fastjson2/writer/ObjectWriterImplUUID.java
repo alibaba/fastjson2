@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import java.util.UUID;
 
 final class ObjectWriterImplUUID
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplUUID INSTANCE = new ObjectWriterImplUUID();
 
     @Override

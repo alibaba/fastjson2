@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 
 final class ObjectWriterImplDouble
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplDouble INSTANCE = new ObjectWriterImplDouble(null);
 
     private final DecimalFormat format;

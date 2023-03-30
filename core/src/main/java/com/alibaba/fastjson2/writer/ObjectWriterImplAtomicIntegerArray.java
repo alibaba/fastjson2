@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 class ObjectWriterImplAtomicIntegerArray
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplAtomicIntegerArray INSTANCE = new ObjectWriterImplAtomicIntegerArray();
 
     @Override

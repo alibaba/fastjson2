@@ -9,7 +9,7 @@ import java.text.DecimalFormat;
 import java.util.function.Function;
 
 final class ObjectWriterImplDoubleValueArray
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplDoubleValueArray INSTANCE = new ObjectWriterImplDoubleValueArray(null);
     static final byte[] JSONB_TYPE_NAME_BYTES = JSONB.toBytes("[D");
     static final long JSONB_TYPE_HASH = Fnv.hashCode64("[D");

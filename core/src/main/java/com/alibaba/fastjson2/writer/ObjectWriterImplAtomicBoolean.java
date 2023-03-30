@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 final class ObjectWriterImplAtomicBoolean
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplAtomicBoolean INSTANCE = new ObjectWriterImplAtomicBoolean();
 
     @Override

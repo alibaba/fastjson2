@@ -10,7 +10,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 final class ObjectWriterImplCollection
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplCollection INSTANCE = new ObjectWriterImplCollection();
 
     static final byte[] LINKED_HASH_SET_JSONB_TYPE_NAME_BYTES = JSONB.toBytes(TypeUtils.getTypeName(LinkedHashSet.class));
