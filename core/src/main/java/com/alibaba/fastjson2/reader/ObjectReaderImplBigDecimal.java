@@ -11,20 +11,31 @@ import java.util.function.Function;
 final class ObjectReaderImplBigDecimal
         extends ObjectReaderPrimitive {
     private Function converter = new ToBigDecimal();
-    static final ObjectReaderImplBigDecimal INSTANCE = new ObjectReaderImplBigDecimal();
+    static final ObjectReaderImplBigDecimal INSTANCE = new ObjectReaderImplBigDecimal(null);
 
-    public ObjectReaderImplBigDecimal() {
+    final Function<BigDecimal, Object> function;
+
+    public ObjectReaderImplBigDecimal(Function<BigDecimal, Object> function) {
         super(BigDecimal.class);
+        this.function = function;
     }
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        return jsonReader.readBigDecimal();
+        BigDecimal decimal = jsonReader.readBigDecimal();
+        if (function != null) {
+            return function.apply(decimal);
+        }
+        return decimal;
     }
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        return jsonReader.readBigDecimal();
+        BigDecimal decimal = jsonReader.readBigDecimal();
+        if (function != null) {
+            return function.apply(decimal);
+        }
+        return decimal;
     }
 
     @Override
@@ -38,6 +49,11 @@ final class ObjectReaderImplBigDecimal
             value = converter.apply(value);
         }
 
-        return value;
+        BigDecimal decimal = (BigDecimal) value;
+        if (function != null) {
+            return function.apply(decimal);
+        }
+
+        return decimal;
     }
 }

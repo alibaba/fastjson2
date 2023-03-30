@@ -2166,6 +2166,8 @@ public class ObjectReaderBaseModule
             case "gnu.trove.set.hash.TIntHashSet":
             case "gnu.trove.set.hash.TLongHashSet":
                 return LambdaMiscCodec.getObjectReader((Class) type);
+            case "org.bson.types.Decimal128":
+                return LambdaMiscCodec.getObjectReader((Class) type);
             default:
                 break;
         }
