@@ -8,7 +8,7 @@ import java.lang.reflect.Type;
 import java.util.function.Function;
 
 final class ObjectWriterImplInt16ValueArray
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplInt16ValueArray INSTANCE = new ObjectWriterImplInt16ValueArray(null);
     static final byte[] JSONB_TYPE_NAME_BYTES = JSONB.toBytes("[S");
     static final long JSONB_TYPE_HASH = Fnv.hashCode64("[S");

@@ -2,6 +2,8 @@ package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.reader.*;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterPrimitiveImpl;
 
 import java.lang.invoke.*;
 import java.lang.reflect.*;
@@ -1364,6 +1366,19 @@ public class TypeUtils {
             }
         }
 
+        ObjectWriter objectWriter = JSONFactory
+                .getDefaultObjectWriterProvider()
+                .getObjectWriter(obj.getClass());
+        if (objectWriter instanceof ObjectWriterPrimitiveImpl) {
+            Function function = ((ObjectWriterPrimitiveImpl<?>) objectWriter).getFunction();
+            if (function != null) {
+                Object apply = function.apply(obj);
+                if (targetClass.isInstance(apply)) {
+                    return (T) apply;
+                }
+            }
+        }
+
         throw new JSONException("can not cast to " + className + ", from " + obj.getClass());
     }
 
@@ -1666,7 +1681,7 @@ public class TypeUtils {
             return new BigDecimal(str);
         }
 
-        throw new JSONException("can not cast to decimal from " + value.getClass());
+        return cast(value, BigDecimal.class);
     }
 
     public static BigDecimal toBigDecimal(long i) {

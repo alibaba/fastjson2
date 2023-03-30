@@ -8,7 +8,7 @@ import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicLong;
 
 final class ObjectWriterImplAtomicLong
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplAtomicLong INSTANCE = new ObjectWriterImplAtomicLong(null);
     static final byte[] JSONB_TYPE_NAME_BYTES = JSONB.toBytes("AtomicLong");
     static final long JSONB_TYPE_HASH = Fnv.hashCode64("AtomicLong");

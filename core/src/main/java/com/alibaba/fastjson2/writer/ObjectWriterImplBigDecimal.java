@@ -8,7 +8,7 @@ import java.text.DecimalFormat;
 import java.util.function.Function;
 
 final class ObjectWriterImplBigDecimal
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplBigDecimal INSTANCE = new ObjectWriterImplBigDecimal(null, null);
 
     private final DecimalFormat format;
@@ -47,5 +47,9 @@ final class ObjectWriterImplBigDecimal
         }
 
         jsonWriter.writeDecimal(decimal, features);
+    }
+
+    public Function getFunction() {
+        return function;
     }
 }

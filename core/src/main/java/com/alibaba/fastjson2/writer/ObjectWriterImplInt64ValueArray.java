@@ -10,7 +10,7 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.writer.ObjectWriterProvider.TYPE_INT64_MASK;
 
 final class ObjectWriterImplInt64ValueArray
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplInt64ValueArray INSTANCE = new ObjectWriterImplInt64ValueArray(null);
 
     static final byte[] JSONB_TYPE_NAME_BYTES = JSONB.toBytes("[J");

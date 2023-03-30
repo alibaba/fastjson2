@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import java.util.OptionalDouble;
 
 final class ObjectWriterImplOptionalDouble
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplOptionalDouble INSTANCE = new ObjectWriterImplOptionalDouble();
 
     @Override

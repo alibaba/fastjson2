@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSONWriter;
 import java.lang.reflect.Type;
 
 final class ObjectWriterImplInt8
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplInt8 INSTANCE = new ObjectWriterImplInt8();
 
     @Override

@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import java.util.BitSet;
 
 final class ObjectWriterImplBitSet
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplBitSet INSTANCE = new ObjectWriterImplBitSet();
 
     @Override

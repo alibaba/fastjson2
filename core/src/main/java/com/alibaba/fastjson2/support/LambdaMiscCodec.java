@@ -144,6 +144,16 @@ public class LambdaMiscCodec {
                 }
                 break;
             }
+            case "org.bson.types.Decimal128":
+                try {
+                    return ObjectWriters.ofToBigDecimal(
+                            createFunction(
+                                    objectClass.getMethod("bigDecimalValue")
+                            )
+                    );
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal stat", e);
+                }
             default:
                 break;
         }

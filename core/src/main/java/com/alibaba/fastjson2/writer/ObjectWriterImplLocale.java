@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import java.util.Locale;
 
 final class ObjectWriterImplLocale
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplLocale INSTANCE = new ObjectWriterImplLocale();
 
     @Override

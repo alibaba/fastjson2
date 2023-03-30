@@ -10,7 +10,7 @@ import static com.alibaba.fastjson2.JSONWriter.Feature.NullAsDefaultValue;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNullListAsEmpty;
 
 final class ObjectWriterImplInt32Array
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplInt32Array INSTANCE = new ObjectWriterImplInt32Array();
     static final byte[] JSONB_TYPE_NAME_BYTES = JSONB.toBytes("[Integer");
     static final long JSONB_TYPE_HASH = Fnv.hashCode64("[Integer");

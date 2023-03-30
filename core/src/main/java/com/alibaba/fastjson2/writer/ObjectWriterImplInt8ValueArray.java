@@ -15,7 +15,7 @@ import java.util.zip.GZIPOutputStream;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteByteArrayAsBase64;
 
 final class ObjectWriterImplInt8ValueArray
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplInt8ValueArray INSTANCE = new ObjectWriterImplInt8ValueArray(null);
     static final byte[] JSONB_TYPE_NAME_BYTES = JSONB.toBytes("[B");
     static final long JSONB_TYPE_HASH = Fnv.hashCode64("[B");

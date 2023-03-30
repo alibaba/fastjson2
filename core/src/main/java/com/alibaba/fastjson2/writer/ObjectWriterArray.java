@@ -8,7 +8,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Type;
 
 final class ObjectWriterArray
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterArray INSTANCE = new ObjectWriterArray(Object.class);
 
     final byte[] typeNameBytes;

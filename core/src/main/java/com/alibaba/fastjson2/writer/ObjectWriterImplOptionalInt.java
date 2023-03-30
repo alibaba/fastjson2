@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 import java.util.OptionalInt;
 
 final class ObjectWriterImplOptionalInt
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplOptionalInt INSTANCE = new ObjectWriterImplOptionalInt();
 
     @Override

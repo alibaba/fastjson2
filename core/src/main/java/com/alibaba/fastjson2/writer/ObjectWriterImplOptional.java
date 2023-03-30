@@ -7,7 +7,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 final class ObjectWriterImplOptional
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplOptional INSTANCE = new ObjectWriterImplOptional(null, null);
 
     Type valueType;

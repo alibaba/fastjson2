@@ -16,7 +16,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
 public final class ObjectWriterImplMap
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     static final byte[] TYPE_NAME_JSONObject1O = JSONB.toBytes("JO10");
     static final long TYPE_HASH_JSONObject1O = Fnv.hashCode64("JO10");
 

@@ -7,7 +7,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 final class ObjectWriterImplListEnum
-        extends ObjectWriterBaseModule.PrimitiveImpl {
+        extends ObjectWriterPrimitiveImpl {
     final Class defineClass;
     final Class enumType;
     final long features;
