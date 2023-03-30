@@ -26,5 +26,8 @@ public class Issue1300 {
                 decimal,
                 TypeUtils.toBigDecimal(decimal128)
         );
+
+        Decimal128 dec1 = JSON.parseObject("123.45", Decimal128.class);
+        assertEquals(decimal, dec1.bigDecimalValue());
     }
 }

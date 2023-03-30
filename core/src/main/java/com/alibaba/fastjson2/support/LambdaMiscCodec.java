@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.writer.ObjectWriters;
 
 import java.lang.invoke.*;
 import java.lang.reflect.*;
+import java.math.BigDecimal;
 import java.util.function.*;
 
 import static com.alibaba.fastjson2.util.TypeUtils.*;
@@ -37,7 +38,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "gnu.trove.set.hash.TShortHashSet":
@@ -50,7 +51,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "gnu.trove.list.array.TIntArrayList":
@@ -64,7 +65,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "gnu.trove.list.array.TLongArrayList":
@@ -78,7 +79,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "gnu.trove.list.array.TCharArrayList":
@@ -91,7 +92,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "gnu.trove.list.array.TFloatArrayList":
@@ -103,7 +104,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "gnu.trove.list.array.TDoubleArrayList":
@@ -115,7 +116,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "com.carrotsearch.hppc.BitSet": {
@@ -152,7 +153,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             default:
                 break;
@@ -176,7 +177,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "com.carrotsearch.hppc.ShortArrayList": {
@@ -187,7 +188,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "com.carrotsearch.hppc.IntArrayList":
@@ -199,7 +200,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "com.carrotsearch.hppc.LongArrayList":
@@ -211,7 +212,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "com.carrotsearch.hppc.CharArrayList":
@@ -223,7 +224,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "com.carrotsearch.hppc.FloatArrayList": {
@@ -234,7 +235,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "com.carrotsearch.hppc.DoubleArrayList": {
@@ -245,7 +246,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "gnu.trove.set.hash.TByteHashSet":
@@ -258,7 +259,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "gnu.trove.list.array.TCharArrayList": {
@@ -269,7 +270,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "gnu.trove.set.hash.TShortHashSet":
@@ -281,7 +282,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "gnu.trove.set.hash.TIntHashSet":
@@ -293,7 +294,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "gnu.trove.set.hash.TLongHashSet":
@@ -305,7 +306,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "gnu.trove.list.array.TFloatArrayList": {
@@ -316,7 +317,7 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
             case "gnu.trove.list.array.TDoubleArrayList": {
@@ -327,9 +328,19 @@ public class LambdaMiscCodec {
                             )
                     );
                 } catch (NoSuchMethodException | SecurityException e) {
-                    throw new JSONException("illegal stat", e);
+                    throw new JSONException("illegal state", e);
                 }
             }
+            case "org.bson.types.Decimal128":
+                try {
+                    return ObjectReaders.fromBigDecimal(
+                            createFunction(
+                                    objectClass.getConstructor(BigDecimal.class)
+                            )
+                    );
+                } catch (NoSuchMethodException | SecurityException e) {
+                    throw new JSONException("illegal state", e);
+                }
             default:
                 break;
         }

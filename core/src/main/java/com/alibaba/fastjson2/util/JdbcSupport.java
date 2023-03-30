@@ -191,7 +191,7 @@ public class JdbcSupport {
                 Method methodValueOf = objectClass.getMethod("valueOf", String.class);
                 functionValueOf = LambdaMiscCodec.createFunction(methodValueOf);
             } catch (NoSuchMethodException e) {
-                throw new IllegalStateException("illegal stat", e);
+                throw new IllegalStateException("illegal state", e);
             }
         }
 
@@ -363,7 +363,7 @@ public class JdbcSupport {
                 Method methodToLocalDateTime = objectClass.getMethod("toLocalDateTime");
                 functionToLocalDateTime = LambdaMiscCodec.createFunction(methodToLocalDateTime);
             } catch (NoSuchMethodException e) {
-                throw new JSONException("illegal stat", e);
+                throw new JSONException("illegal state", e);
             }
         }
 
@@ -474,14 +474,14 @@ public class JdbcSupport {
                 Constructor constructor = objectClass.getConstructor(long.class);
                 this.function = createLongFunction(constructor);
             } catch (Throwable e) {
-                throw new IllegalStateException("illegal stat", e);
+                throw new IllegalStateException("illegal state", e);
             }
 
             try {
                 Method methodSetNanos = objectClass.getMethod("setNanos", int.class);
                 functionSetNanos = createObjIntConsumer(methodSetNanos);
             } catch (NoSuchMethodException e) {
-                throw new IllegalStateException("illegal stat", e);
+                throw new IllegalStateException("illegal state", e);
             }
 
             Function functionValueOf = null;
@@ -589,14 +589,14 @@ public class JdbcSupport {
                 Constructor constructor = objectClass.getConstructor(long.class);
                 this.function = createLongFunction(constructor);
             } catch (Throwable e) {
-                throw new IllegalStateException("illegal stat", e);
+                throw new IllegalStateException("illegal state", e);
             }
 
             try {
                 Method methodValueOf = objectClass.getMethod("valueOf", LocalDate.class);
                 functionValueOf = LambdaMiscCodec.createFunction(methodValueOf);
             } catch (NoSuchMethodException | SecurityException e) {
-                throw new IllegalStateException("illegal stat", e);
+                throw new IllegalStateException("illegal state", e);
             }
         }
 

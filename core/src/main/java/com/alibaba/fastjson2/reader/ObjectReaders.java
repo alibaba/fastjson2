@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,10 @@ public class ObjectReaders {
 
     public static <T> ObjectReader<T> fromDoubleArray(Function<double[], Object> function) {
         return (ObjectReader<T>) new ObjectReaderImplDoubleValueArray(function);
+    }
+
+    public static <T> ObjectReader<T> fromBigDecimal(Function<BigDecimal, Object> function) {
+        return (ObjectReader<T>) new ObjectReaderImplBigDecimal(function);
     }
 
     public static <T> ObjectReader<T> objectReader(
