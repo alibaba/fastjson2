@@ -847,6 +847,17 @@ public class JSONArray
     }
 
     /**
+     * @since 2.0.27
+     */
+    public Date getDate(int index, Date defaultValue) {
+        Date date = getDate(index);
+        if (date == null) {
+            date = defaultValue;
+        }
+        return date;
+    }
+
+    /**
      * Returns the {@link Instant} at the specified location in this {@link JSONArray}.
      *
      * @param index index of the element to return

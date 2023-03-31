@@ -1050,6 +1050,17 @@ public class JSONObject
     }
 
     /**
+     * @since 2.0.27
+     */
+    public Date getDate(String key, Date defaultValue) {
+        Date date = getDate(key);
+        if (date == null) {
+            date = defaultValue;
+        }
+        return date;
+    }
+
+    /**
      * Returns the {@link BigInteger} of the associated keys in this {@link JSONObject}.
      *
      * @param key the key whose associated value is to be returned
