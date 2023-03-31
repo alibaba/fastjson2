@@ -623,7 +623,8 @@
                                 com/alibaba/fastjson2/protobuf/PersonOuterClass.java,
                                 com/alibaba/fastjson2/benchmark/protobuf/MediaContentHolder.java,
                                 org/apache/dubbo/springboot/demo/BusinessException.java,
-                                com/alibaba/fastjson2/issues_1000/Issue1246.java
+                                com/alibaba/fastjson2/issues_1000/Issue1246.java,
+                                com/alibaba/fastjson/issues_compatible/Issue1303.java
                             </excludes>
                         </configuration>
                     </execution>
