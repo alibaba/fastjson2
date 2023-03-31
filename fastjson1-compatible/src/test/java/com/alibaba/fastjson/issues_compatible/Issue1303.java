@@ -20,6 +20,9 @@ public class Issue1303 {
             assertNull(SerializeConfig.DEFAULT_PROVIDER.getNamingStrategy());
         } finally {
             TypeUtils.compatibleWithFieldName = false;
+            SerializeConfig.DEFAULT_PROVIDER.setNamingStrategy(
+                    com.alibaba.fastjson2.PropertyNamingStrategy.CamelCase1x
+            );
         }
     }
 
