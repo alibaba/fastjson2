@@ -305,7 +305,12 @@ public abstract class BeanUtils {
 
         Field[] fields = declaredFieldCache.get(objectClass);
         if (fields == null) {
-            Field[] declaredFields = objectClass.getDeclaredFields();
+            Field[] declaredFields = null;
+            try {
+                declaredFields = objectClass.getDeclaredFields();
+            } catch (Throwable ignored) {
+                declaredFields = new Field[0];
+            }
 
             boolean allMatch = true;
             for (Field field : declaredFields) {
