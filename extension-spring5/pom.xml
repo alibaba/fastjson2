@@ -218,19 +218,19 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot</artifactId>
-            <version>${sprintboot2.version}</version>
+            <version>${springboot2.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${sprintboot2.version}</version>
+            <version>${springboot2.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test</artifactId>
-            <version>${sprintboot2.version}</version>
+            <version>${springboot2.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
