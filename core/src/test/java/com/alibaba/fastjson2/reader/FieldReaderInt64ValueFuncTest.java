@@ -1,9 +1,11 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.annotation.JSONCompiler;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
+import static com.alibaba.fastjson2.annotation.JSONCompiler.CompilerOption.LAMBDA;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FieldReaderInt64ValueFuncTest {
@@ -27,6 +29,7 @@ public class FieldReaderInt64ValueFuncTest {
         );
     }
 
+    @JSONCompiler(LAMBDA)
     public static class Bean {
         private long value;
 
@@ -59,6 +62,7 @@ public class FieldReaderInt64ValueFuncTest {
         );
     }
 
+    @JSONCompiler(LAMBDA)
     public static class Bean1 {
         @JSONField(schema = "{'minimum':128}")
         private long value;
@@ -84,6 +88,7 @@ public class FieldReaderInt64ValueFuncTest {
         assertThrows(Exception.class, () -> fieldReader.accept(bean, 123D));
     }
 
+    @JSONCompiler(LAMBDA)
     public static class Bean2 {
         public void setValue(long value) {
             throw new UnsupportedOperationException();
@@ -101,6 +106,7 @@ public class FieldReaderInt64ValueFuncTest {
         );
     }
 
+    @JSONCompiler(LAMBDA)
     public static class Bean3 {
         private long value;
         public final int id;

@@ -821,18 +821,6 @@ public abstract class BeanUtils {
         return false;
     }
 
-    public static void methods(Class objectClass, Consumer<Method> consumer) {
-        Method[] methods = methodCache.get(objectClass);
-        if (methods == null) {
-            methods = objectClass.getMethods();
-            methodCache.putIfAbsent(objectClass, methods);
-        }
-
-        for (Method method : methods) {
-            consumer.accept(method);
-        }
-    }
-
     public static void getters(Class objectClass, Consumer<Method> methodConsumer) {
         if (objectClass == null) {
             return;
