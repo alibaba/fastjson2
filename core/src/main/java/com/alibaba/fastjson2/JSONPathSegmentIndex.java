@@ -534,7 +534,7 @@ final class JSONPathSegmentIndex
                     val = null;
                     break;
                 default:
-                    throw new JSONException("TODO : " + jsonReader.ch);
+                    throw new JSONException(jsonReader.info("not support : " + jsonReader.ch));
             }
 
             if (index == -1) {

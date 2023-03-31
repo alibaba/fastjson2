@@ -4106,7 +4106,7 @@ class JSONReaderUTF16
             }
             offset++;
         } else if (!comma && ch != '}' && ch != ']' && ch != EOI) {
-            throw new JSONValidException("offset " + offset);
+            throw new JSONValidException(info("illegal ch " + ch));
         }
     }
 
