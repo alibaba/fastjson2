@@ -232,13 +232,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot</artifactId>
-            <version>${sprintboot3.version}</version>
+            <version>${springboot3.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${sprintboot3.version}</version>
+            <version>${springboot3.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
