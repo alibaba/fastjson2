@@ -75,6 +75,14 @@ public class ObjectWriterProvider
         this.creator = creator;
     }
 
+    public PropertyNamingStrategy getNamingStrategy() {
+        return namingStrategy;
+    }
+
+    public void setNamingStrategy(PropertyNamingStrategy namingStrategy) {
+        this.namingStrategy = namingStrategy;
+    }
+
     public void mixIn(Class target, Class mixinSource) {
         if (mixinSource == null) {
             mixInCache.remove(target);

@@ -13,7 +13,11 @@ import java.lang.reflect.Type;
 public class SerializeConfig {
     public static final SerializeConfig global = new SerializeConfig(null);
     public static final SerializeConfig globalInstance = global;
-    public static final ObjectWriterProvider DEFAULT_PROVIDER = new ObjectWriterProvider(com.alibaba.fastjson2.PropertyNamingStrategy.CamelCase1x);
+    public static final ObjectWriterProvider DEFAULT_PROVIDER = new ObjectWriterProvider(
+            com.alibaba.fastjson.util.TypeUtils.compatibleWithFieldName
+                    ? null
+                    : com.alibaba.fastjson2.PropertyNamingStrategy.CamelCase1x
+    );
 
     public final boolean fieldBased;
     public PropertyNamingStrategy propertyNamingStrategy;
@@ -41,6 +45,12 @@ public class SerializeConfig {
         ObjectWriterProvider provider = this.provider;
         if (provider == null) {
             provider = DEFAULT_PROVIDER;
+        }
+
+        if (com.alibaba.fastjson.util.TypeUtils.compatibleWithFieldName
+                && provider.getNamingStrategy() == com.alibaba.fastjson2.PropertyNamingStrategy.CamelCase1x
+        ) {
+            provider.setNamingStrategy(null);
         }
         return provider;
     }
