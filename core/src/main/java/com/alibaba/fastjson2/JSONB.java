@@ -969,6 +969,10 @@ public interface JSONB {
             type = BC_STR_UTF16BE;
         } else if (charset == StandardCharsets.UTF_16LE) {
             type = BC_STR_UTF16LE;
+        } else if (charset == StandardCharsets.UTF_8) {
+            type = BC_STR_UTF8;
+        } else if (charset == StandardCharsets.US_ASCII) {
+            type = BC_STR_ASCII;
         } else if (charset != null && "GB18030".equals(charset.name())) { // GraalVM support
             type = BC_STR_GB18030;
         } else {

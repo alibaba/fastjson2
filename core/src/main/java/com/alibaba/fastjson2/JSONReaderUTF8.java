@@ -7883,8 +7883,11 @@ class JSONReaderUTF8
 
     @Override
     public byte[] readHex() {
-        next();
-        if (ch != '\'') {
+        if (ch == 'x') {
+            next();
+        }
+        final char quote = ch;
+        if (quote != '\'' && quote != '"') {
             throw new JSONException("illegal state. " + ch);
         }
         int start = offset;
@@ -7894,7 +7897,7 @@ class JSONReaderUTF8
             ch = (char) bytes[offset++];
             if ((ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F')) {
                 // continue;
-            } else if (ch == '\'') {
+            } else if (ch == quote) {
                 ch = (char) bytes[offset++];
                 break;
             } else {

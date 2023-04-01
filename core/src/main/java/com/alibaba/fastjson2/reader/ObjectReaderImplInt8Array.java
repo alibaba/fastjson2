@@ -67,6 +67,10 @@ class ObjectReaderImplInt8Array
         }
 
         if (jsonReader.isString()) {
+            if ("hex".equals(format)) {
+                return jsonReader.readHex();
+            }
+
             String strVal = jsonReader.readString();
             if (strVal.isEmpty()) {
                 return null;
@@ -106,6 +110,10 @@ class ObjectReaderImplInt8Array
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.isString() && "hex".equals(format)) {
+            return jsonReader.readHex();
+        }
+
         int entryCnt = jsonReader.startArray();
         if (entryCnt == -1) {
             return null;

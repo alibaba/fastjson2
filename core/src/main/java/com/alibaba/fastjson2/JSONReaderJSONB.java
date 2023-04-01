@@ -1078,7 +1078,17 @@ class JSONReaderJSONB
 
     @Override
     public byte[] readHex() {
-        throw new JSONException("UnsupportedOperation");
+        String str = readString();
+        byte[] bytes = new byte[str.length() / 2];
+        for (int i = 0; i < bytes.length; ++i) {
+            char c0 = str.charAt(i * 2);
+            char c1 = str.charAt(i * 2 + 1);
+
+            int b0 = c0 - (c0 <= 57 ? 48 : 55);
+            int b1 = c1 - (c1 <= 57 ? 48 : 55);
+            bytes[i] = (byte) ((b0 << 4) | b1);
+        }
+        return bytes;
     }
 
     @Override
@@ -3038,14 +3048,16 @@ class JSONReaderJSONB
         if (type == BC_CHAR) {
             offset++;
             return (char) readInt32Value();
-        } else if (type >= BC_STR_ASCII_FIX_0 && type < BC_STR_ASCII_FIX_MAX) {
+        } else if (type == BC_STR_ASCII_FIX_0) {
+            offset++;
+            return '\0';
+        } else if (type > BC_STR_ASCII_FIX_0 && type < BC_STR_ASCII_FIX_MAX) {
             offset++;
             return (char) bytes[offset++];
         }
 
         String str = readString();
         if (str == null || str.isEmpty()) {
-            wasNull = true;
             return '\0';
         }
         return str.charAt(0);
@@ -4478,6 +4490,8 @@ class JSONReaderJSONB
         if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
             int len = getStringLength();
             switch (len) {
+                case 5:
+                    return readLocalTime5();
                 case 8:
                     return readLocalTime8();
                 case 10:
@@ -4494,27 +4508,6 @@ class JSONReaderJSONB
             throw new JSONException("not support len : " + len);
         }
 
-        if (type == BC_STR_UTF8 || type == BC_STR_ASCII) {
-            strtype = (byte) type;
-            offset++;
-            strlen = readLength();
-            switch (strlen) {
-                case 8:
-                    return readLocalTime8();
-                case 10:
-                    return readLocalTime10();
-                case 11:
-                    return readLocalTime11();
-                case 12:
-                    return readLocalTime12();
-                case 18:
-                    return readLocalTime18();
-                default:
-                    break;
-            }
-            throw new JSONException("not support len : " + strlen);
-        }
-
         throw new UnsupportedOperationException();
     }
 
@@ -4528,16 +4521,35 @@ class JSONReaderJSONB
                 return Instant.ofEpochSecond(second, nano);
             }
             case BC_TIMESTAMP_MINUTES: {
-                long second = readInt32Value() * 60;
-                return Instant.ofEpochSecond(second, 0);
+                long minutes =
+                        ((bytes[offset + 3] & 0xFF)) +
+                                ((bytes[offset + 2] & 0xFF) << 8) +
+                                ((bytes[offset + 1] & 0xFF) << 16) +
+                                ((bytes[offset]) << 24);
+                offset += 4;
+                return Instant.ofEpochSecond(minutes * 60, 0);
             }
             case BC_TIMESTAMP_SECONDS: {
-                long second = readInt32Value();
-                return Instant.ofEpochSecond(second, 0);
+                long seconds =
+                        ((bytes[offset + 3] & 0xFF)) +
+                                ((bytes[offset + 2] & 0xFF) << 8) +
+                                ((bytes[offset + 1] & 0xFF) << 16) +
+                                ((bytes[offset]) << 24);
+                offset += 4;
+                return Instant.ofEpochSecond(seconds, 0);
             }
             case BC_INT64:
             case BC_TIMESTAMP_MILLIS: {
-                long millis = readInt64Value();
+                long millis =
+                        ((bytes[offset + 7] & 0xFFL)) +
+                                ((bytes[offset + 6] & 0xFFL) << 8) +
+                                ((bytes[offset + 5] & 0xFFL) << 16) +
+                                ((bytes[offset + 4] & 0xFFL) << 24) +
+                                ((bytes[offset + 3] & 0xFFL) << 32) +
+                                ((bytes[offset + 2] & 0xFFL) << 40) +
+                                ((bytes[offset + 1] & 0xFFL) << 48) +
+                                ((long) (bytes[offset]) << 56);
+                offset += 8;
                 return Instant.ofEpochMilli(millis);
             }
             default:
@@ -4554,23 +4566,42 @@ class JSONReaderJSONB
                 long second = readInt64Value();
                 int nano = readInt32Value();
                 Instant instant = Instant.ofEpochSecond(second, nano);
-                return ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
+                return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
             }
             case BC_TIMESTAMP_MINUTES: {
-                long second = readInt32Value() * 60;
-                Instant instant = Instant.ofEpochSecond(second);
-                return ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
+                long minutes =
+                        ((bytes[offset + 3] & 0xFF)) +
+                                ((bytes[offset + 2] & 0xFF) << 8) +
+                                ((bytes[offset + 1] & 0xFF) << 16) +
+                                ((bytes[offset]) << 24);
+                offset += 4;
+                Instant instant = Instant.ofEpochSecond(minutes * 60);
+                return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
             }
             case BC_TIMESTAMP_SECONDS: {
-                long second = readInt32Value();
-                Instant instant = Instant.ofEpochSecond(second);
-                return ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
+                long seconds =
+                        ((bytes[offset + 3] & 0xFF)) +
+                                ((bytes[offset + 2] & 0xFF) << 8) +
+                                ((bytes[offset + 1] & 0xFF) << 16) +
+                                ((bytes[offset]) << 24);
+                offset += 4;
+                Instant instant = Instant.ofEpochSecond(seconds);
+                return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
             }
             case BC_INT64:
             case BC_TIMESTAMP_MILLIS: {
-                long millis = readInt64Value();
+                long millis =
+                        ((bytes[offset + 7] & 0xFFL)) +
+                                ((bytes[offset + 6] & 0xFFL) << 8) +
+                                ((bytes[offset + 5] & 0xFFL) << 16) +
+                                ((bytes[offset + 4] & 0xFFL) << 24) +
+                                ((bytes[offset + 3] & 0xFFL) << 32) +
+                                ((bytes[offset + 2] & 0xFFL) << 40) +
+                                ((bytes[offset + 1] & 0xFFL) << 48) +
+                                ((long) (bytes[offset]) << 56);
+                offset += 8;
                 Instant instant = Instant.ofEpochMilli(millis);
-                return ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
+                return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
             }
             case BC_TIMESTAMP_WITH_TIMEZONE:
                 int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
@@ -4787,6 +4818,7 @@ class JSONReaderJSONB
                     offset += 5;
                     return false;
                 }
+            case BC_STR_UTF8:
             case BC_STR_ASCII: {
                 strlen = readLength();
                 if (strlen == 1) {
@@ -4827,16 +4859,30 @@ class JSONReaderJSONB
                 offset += strlen;
                 throw new JSONException("not support input " + str);
             }
+            case BC_STR_UTF16:
+            case BC_STR_UTF16BE:
             case BC_STR_UTF16LE: {
                 strlen = readLength();
-                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
+                byte[] chars = new byte[strlen];
+                System.arraycopy(bytes, offset, chars, 0, strlen);
+
+                Charset charset = type == BC_STR_UTF16BE
+                        ? StandardCharsets.UTF_16BE
+                        : type == BC_STR_UTF16LE ? StandardCharsets.UTF_16LE : StandardCharsets.UTF_16;
+
+                String str = new String(chars, charset);
                 offset += strlen;
+
                 switch (str) {
                     case "0":
                     case "N":
+                    case "false":
+                    case "FALSE":
                         return false;
                     case "1":
                     case "Y":
+                    case "true":
+                    case "TRUE":
                         return true;
                     default:
                         throw new JSONException("not support input " + str);
@@ -5259,19 +5305,6 @@ class JSONReaderJSONB
             c9 = bytes[offset + 10];
             c10 = bytes[offset + 11];
             c11 = bytes[offset + 12];
-        } else if ((strtype == BC_STR_UTF8 || strtype == BC_STR_ASCII) && strlen == 12) {
-            c0 = bytes[offset];
-            c1 = bytes[offset + 1];
-            c2 = bytes[offset + 2];
-            c3 = bytes[offset + 3];
-            c4 = bytes[offset + 4];
-            c5 = bytes[offset + 5];
-            c6 = bytes[offset + 6];
-            c7 = bytes[offset + 7];
-            c8 = bytes[offset + 8];
-            c9 = bytes[offset + 9];
-            c10 = bytes[offset + 10];
-            c11 = bytes[offset + 11];
         } else {
             throw new JSONException("date only support string input");
         }
@@ -5356,25 +5389,6 @@ class JSONReaderJSONB
             c15 = bytes[offset + 16];
             c16 = bytes[offset + 17];
             c17 = bytes[offset + 18];
-        } else if ((strtype == BC_STR_UTF8 || strtype == BC_STR_ASCII) && strlen == 18) {
-            c0 = bytes[offset];
-            c1 = bytes[offset + 1];
-            c2 = bytes[offset + 2];
-            c3 = bytes[offset + 3];
-            c4 = bytes[offset + 4];
-            c5 = bytes[offset + 5];
-            c6 = bytes[offset + 6];
-            c7 = bytes[offset + 7];
-            c8 = bytes[offset + 8];
-            c9 = bytes[offset + 9];
-            c10 = bytes[offset + 10];
-            c11 = bytes[offset + 11];
-            c12 = bytes[offset + 12];
-            c13 = bytes[offset + 13];
-            c14 = bytes[offset + 14];
-            c15 = bytes[offset + 15];
-            c16 = bytes[offset + 16];
-            c17 = bytes[offset + 17];
         } else {
             throw new JSONException("date only support string input");
         }
