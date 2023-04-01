@@ -382,6 +382,59 @@ class JSONReaderJSONB
         throw new JSONException("object not support input " + error(type));
     }
 
+    public void read(final Map map, long features) {
+        if (bytes[offset] != BC_OBJECT) {
+            throw new JSONException("object not support input " + error(type));
+        }
+        offset++;
+
+        for (int i = 0; ; ++i) {
+            byte type = bytes[offset];
+            if (type == BC_OBJECT_END) {
+                offset++;
+                break;
+            }
+
+            Object name;
+            if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_SYMBOL) {
+                name = readFieldName();
+            } else {
+                name = readAny();
+            }
+
+            if (isReference()) {
+                String reference = readReference();
+                if ("..".equals(reference)) {
+                    map.put(name, map);
+                } else {
+                    addResolveTask(map, name, JSONPath.of(reference));
+                    map.put(name, null);
+                }
+                continue;
+            }
+
+            byte valueType = bytes[offset];
+            Object value;
+            if (valueType >= BC_STR_ASCII_FIX_MIN && valueType <= BC_STR_GB18030) {
+                value = readString();
+            } else if (valueType >= BC_INT32_NUM_MIN && valueType <= BC_INT32_NUM_MAX) {
+                offset++;
+                value = (int) valueType;
+            } else if (valueType == BC_TRUE) {
+                offset++;
+                value = Boolean.TRUE;
+            } else if (valueType == BC_FALSE) {
+                offset++;
+                value = Boolean.FALSE;
+            } else if (valueType == BC_OBJECT) {
+                value = readObject();
+            } else {
+                value = readAny();
+            }
+            map.put(name, value);
+        }
+    }
+
     @Override
     public Object readAny() {
         if (offset >= bytes.length) {
@@ -2679,6 +2732,13 @@ class JSONReaderJSONB
             }
 
             charset = StandardCharsets.UTF_16BE;
+        } else if (strtype == BC_STR_GB18030) {
+            strlen = readLength();
+
+            if (GB18030 == null) {
+                GB18030 = Charset.forName("GB18030");
+            }
+            charset = GB18030;
         }
 
         if (strlen < 0) {

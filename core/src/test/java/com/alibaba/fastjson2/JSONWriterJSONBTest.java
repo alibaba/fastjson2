@@ -68,7 +68,6 @@ public class JSONWriterJSONBTest {
         assertThrows(JSONException.class, () -> jsonWriter.writeTimeHHMMSS8(12, 13, 14));
         assertThrows(JSONException.class, () -> jsonWriter.writeBase64(new byte[0]));
         assertThrows(JSONException.class, () -> jsonWriter.writeRaw('A'));
-        assertThrows(JSONException.class, () -> jsonWriter.writeNameRaw(new byte[0]));
         assertThrows(JSONException.class, () -> jsonWriter.writeNameRaw(new byte[0], 0, 0));
         assertThrows(JSONException.class, () -> jsonWriter.writeNameRaw(new char[0]));
         assertThrows(JSONException.class, () -> jsonWriter.writeNameRaw(new char[0], 0, 0));

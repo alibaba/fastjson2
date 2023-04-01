@@ -2134,7 +2134,7 @@ final class JSONWriterJSONB
 
     @Override
     public void writeNameRaw(byte[] bytes) {
-        throw new JSONException("UnsupportedOperation");
+        writeRaw(bytes);
     }
 
     @Override
