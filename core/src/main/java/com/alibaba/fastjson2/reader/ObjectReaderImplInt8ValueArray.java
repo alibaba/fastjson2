@@ -97,6 +97,9 @@ class ObjectReaderImplInt8ValueArray
         byte[] bytes;
         if (jsonReader.isBinary()) {
             bytes = jsonReader.readBinary();
+        } else if (jsonReader.isString()) {
+            String str = jsonReader.readString();
+            bytes = Base64.getDecoder().decode(str);
         } else {
             int entryCnt = jsonReader.startArray();
             if (entryCnt == -1) {
