@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PathTest {
     private String str;
@@ -140,4 +140,26 @@ public class PathTest {
 //        Object result = path.extract(parser);
 //        assertEquals("xy123", result);
 //    }
+
+    @Test
+    public void setCallback() {
+        JSONPath path = JSONPath.of("$.*");
+        assertThrows(Exception.class, () -> path.setCallback(new Object(), (a, b) -> 1));
+    }
+
+    @Test
+    public void testSellEval() {
+        JSONPath path = JSONPath.of("@");
+        Object object = new Object();
+        assertSame(object, path.eval(object));
+    }
+
+    @Test
+    public void testMin() {
+        JSONPath path = JSONPath.of("$.min()");
+        Object[] array = new Object[]{3, 1, 2};
+        assertSame(1, path.eval(array));
+        assertSame(1, path.extract("[3,1,2]"));
+        assertSame(1, path.extract(JSONReader.of("[3,1,2]")));
+    }
 }

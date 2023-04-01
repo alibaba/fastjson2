@@ -1,17 +1,17 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
+import java.io.StringReader;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Random;
-import java.util.TimeZone;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -872,5 +872,72 @@ public class JSONReaderTest {
         assertEquals(12, localTime.getHour());
         assertEquals(34, localTime.getMinute());
         assertEquals(0, localTime.getSecond());
+    }
+
+    @Test
+    public void nextIfInfinity() {
+        assertFalse(JSONReader.ofJSONB(JSONB.toBytes(123)).nextIfInfinity());
+        String str = "Infinity";
+        char[] chars = str.toCharArray();
+        byte[] bytes = str.getBytes();
+        assertTrue(JSONReader.of(str).nextIfInfinity());
+        assertTrue(JSONReader.of(chars).nextIfInfinity());
+        assertTrue(JSONReader.of(bytes).nextIfInfinity());
+        assertTrue(JSONReader.of(new StringReader(str)).nextIfInfinity());
+        assertTrue(JSONReader.of(new StringReader(str), JSONFactory.createReadContext()).nextIfInfinity());
+        assertTrue(JSONReader.of(JSONFactory.createReadContext(), str).nextIfInfinity());
+    }
+
+    @Test
+    public void readMap() {
+        String str = "{\"123\":\"456\",\"234\":\"567\"}";
+        JSONReader jsonReader = JSONReader.of(JSONFactory.createReadContext(), str.toCharArray());
+        Map map = new HashMap();
+        jsonReader.read(map, Long.class, BigDecimal.class, 0L);
+        assertEquals(new BigDecimal("456"), map.get(123L));
+    }
+
+    @Test
+    public void readArray() {
+        String str = "[\"123\",\"456\"]";
+        JSONReader jsonReader = JSONReader.of(JSONFactory.createReadContext(), str.getBytes());
+        Object[] array = jsonReader.readArray(new Type[]{Long.class, BigDecimal.class});
+        assertEquals(123L, array[0]);
+        assertEquals(new BigDecimal("456"), array[1]);
+    }
+
+    @Test
+    public void readArray1() {
+        String str = "[\"123\",\"456\", \"678\"]";
+        char[] chars = str.toCharArray();
+        JSONReader jsonReader = JSONReader.of(chars, 0, chars.length, JSONFactory.createReadContext());
+        Object[] array = jsonReader.readArray(new Type[]{Long.class, BigDecimal.class, String.class});
+        assertEquals(123L, array[0]);
+        assertEquals(new BigDecimal("456"), array[1]);
+        assertEquals("678", array[2]);
+    }
+
+    @Test
+    public void autoTypeFilter() {
+        JSONReader.AutoTypeBeforeHandler filter = JSONReader.autoTypeFilter(true, this.getClass());
+        assertEquals(Boolean.class, filter.apply("Boolean", Boolean.class, 0L));
+    }
+
+    @Test
+    public void context() {
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        SymbolTable symbolTable = JSONB.symbolTable("id", "name");
+        JSONReader.Context context = new JSONReader.Context(provider, symbolTable, JSONReader.Feature.SupportAutoType);
+        assertSame(symbolTable, context.symbolTable);
+        assertFalse(context.isFormatUnixTime());
+        assertFalse(context.isFormatyyyyMMddhhmmss19());
+        assertFalse(context.isFormatyyyyMMddhhmmssT19());
+        assertFalse(context.isFormatyyyyMMdd8());
+        assertFalse(context.isFormatMillis());
+        assertFalse(context.isFormatISO8601());
+        assertFalse(context.isFormatHasHour());
+
+        context.setExtraProcessor(null);
+        assertNull(context.getExtraProcessor());
     }
 }

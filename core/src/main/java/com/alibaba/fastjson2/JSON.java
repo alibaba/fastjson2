@@ -594,11 +594,13 @@ public interface JSON {
      * @param features features to be enabled in parsing
      * @return JSONObject
      */
-    static JSONObject parseObject(byte[] bytes,
-                                  int offset,
-                                  int length,
-                                  Charset charset,
-                                  JSONReader.Feature... features) {
+    static JSONObject parseObject(
+            byte[] bytes,
+            int offset,
+            int length,
+            Charset charset,
+            JSONReader.Feature... features
+    ) {
         if (bytes == null || bytes.length == 0 || length == 0) {
             return null;
         }
@@ -802,7 +804,10 @@ public interface JSON {
      * @param filter specify filters to be enabled
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    static <T> T parseObject(String text, TypeReference<T> typeReference, Filter filter, JSONReader.Feature... features) {
+    static <T> T parseObject(String text,
+                             TypeReference<T> typeReference,
+                             Filter filter,
+                             JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
             return null;
         }
