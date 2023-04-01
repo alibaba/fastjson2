@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.issues;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +15,14 @@ public class Issue647 {
     public void test() {
         URL url = Issue647.class.getClassLoader().getResource("issues/issue647.json");
         JSONObject jsonObject = JSON.parseObject(url);
+        assertNotNull(jsonObject);
+    }
+
+    @Test
+    public void testUrl() throws Exception {
+        URL url = Issue647.class.getClassLoader().getResource("issues/issue647.json");
+        JSONReader jsonReader = JSONReader.of(url, JSONFactory.createReadContext());
+        JSONObject jsonObject = (JSONObject) jsonReader.readObject();
         assertNotNull(jsonObject);
     }
 

@@ -444,9 +444,7 @@ public abstract class JSONReader
 
     public abstract boolean nextIfSet();
 
-    public boolean nextIfInfinity() {
-        return false;
-    }
+    public abstract boolean nextIfInfinity();
 
     public abstract String readPattern();
 
