@@ -277,6 +277,13 @@ final class JSONReaderJSONBUF
             }
 
             charset = StandardCharsets.UTF_16BE;
+        } else if (strtype == BC_STR_GB18030) {
+            strlen = readLength();
+
+            if (GB18030 == null) {
+                GB18030 = Charset.forName("GB18030");
+            }
+            charset = GB18030;
         }
 
         if (strlen < 0) {

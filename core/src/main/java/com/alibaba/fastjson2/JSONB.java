@@ -277,11 +277,20 @@ public interface JSONB {
 
     static JSONObject parseObject(byte[] jsonbBytes) {
         JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider());
-        JSONReader reader = new JSONReaderJSONB(
-                context,
-                jsonbBytes,
-                0,
-                jsonbBytes.length);
+        JSONReader reader;
+        if (UNSAFE_SUPPORT) {
+            reader = new JSONReaderJSONBUF(
+                    context,
+                    jsonbBytes,
+                    0,
+                    jsonbBytes.length);
+        } else {
+            reader = new JSONReaderJSONB(
+                    context,
+                    jsonbBytes,
+                    0,
+                    jsonbBytes.length);
+        }
 
         JSONObject object = (JSONObject) reader.readObject();
         if (reader.resolveTasks != null) {
