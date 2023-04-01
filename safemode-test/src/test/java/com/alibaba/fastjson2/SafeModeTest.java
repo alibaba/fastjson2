@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SafeModeTest {
     @Test
@@ -17,8 +16,10 @@ public class SafeModeTest {
         assertTrue(object instanceof Map);
         assertTrue(JSON.parse(str, JSONReader.Feature.SupportAutoType) instanceof Map);
     }
+
     public static class Bean {
     }
+
     @Test
     public void test1() {
         IOException ex = new IOException();
@@ -26,7 +27,9 @@ public class SafeModeTest {
         Throwable e1 = JSON.parseObject(jsonString, Throwable.class);
         assertEquals(Throwable.class, e1.getClass());
         JSONObject object = JSON.parseObject(jsonString);
-        Throwable e2 = object.toJavaObject(Throwable.class);
-        assertEquals(Throwable.class, e2.getClass());
+        assertThrows(
+                Exception.class,
+                () -> object.toJavaObject(Throwable.class)
+        );
     }
 }
