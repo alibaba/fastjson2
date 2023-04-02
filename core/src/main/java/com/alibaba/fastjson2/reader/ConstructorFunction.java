@@ -10,11 +10,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 final class ConstructorFunction<T>
         implements Function<Map<Long, Object>, T> {
     final Constructor constructor;
+    final Function function;
+    final BiFunction biFunction;
+
     final Parameter[] parameters;
     final String[] paramNames;
     final boolean kotlinMaker;
@@ -28,10 +32,14 @@ final class ConstructorFunction<T>
     ConstructorFunction(
             List<Constructor> alternateConstructors,
             Constructor constructor,
+            Function function,
+            BiFunction biFunction,
             Constructor markerConstructor,
             String... paramNames
     ) {
         this.kotlinMaker = markerConstructor != null;
+        this.function = function;
+        this.biFunction = biFunction;
         this.constructor = kotlinMaker ? markerConstructor : constructor;
         this.parameters = constructor.getParameters();
         this.paramNames = paramNames;
@@ -104,6 +112,46 @@ final class ConstructorFunction<T>
                     throw new JSONException("invoke constructor error, " + constructor, e);
                 }
             }
+        }
+
+        if (function != null && parameters.length == 1) {
+            Parameter param = parameters[0];
+            Object arg = values.get(hashCodes[0]);
+            Class<?> paramType = param.getType();
+            if (arg == null) {
+                arg = TypeUtils.getDefaultValue(paramType);
+            } else {
+                if (!paramType.isInstance(arg)) {
+                    arg = TypeUtils.cast(arg, paramType);
+                }
+            }
+            return (T) function.apply(arg);
+        }
+
+        if (biFunction != null && parameters.length == 2) {
+            Object arg0 = values.get(hashCodes[0]);
+            Parameter param0 = parameters[0];
+            Class<?> param0Type = param0.getType();
+            if (arg0 == null) {
+                arg0 = TypeUtils.getDefaultValue(param0Type);
+            } else {
+                if (!param0Type.isInstance(arg0)) {
+                    arg0 = TypeUtils.cast(arg0, param0Type);
+                }
+            }
+
+            Object arg1 = values.get(hashCodes[1]);
+            Parameter param1 = parameters[1];
+            Class<?> param1Type = param1.getType();
+            if (arg1 == null) {
+                arg1 = TypeUtils.getDefaultValue(param1Type);
+            } else {
+                if (!param1Type.isInstance(arg1)) {
+                    arg1 = TypeUtils.cast(arg1, param1Type);
+                }
+            }
+
+            return (T) biFunction.apply(arg0, arg1);
         }
 
         Object[] args;

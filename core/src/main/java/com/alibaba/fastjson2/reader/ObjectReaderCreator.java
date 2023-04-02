@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.internal.asm.ASMUtils;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.support.LambdaMiscCodec;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
@@ -27,6 +28,7 @@ import java.util.function.*;
 
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
+import static com.alibaba.fastjson2.util.BeanUtils.constructor;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 
@@ -194,7 +196,14 @@ public class ObjectReaderCreator {
 
     public <T> Function<Map<Long, Object>, T> createFunction(Constructor constructor, String... paramNames) {
         constructor.setAccessible(true);
-        return new ConstructorFunction(null, constructor, null, paramNames);
+        return new ConstructorFunction(
+                null,
+                constructor,
+                null,
+                null,
+                null,
+                paramNames
+        );
     }
 
     public <T> Function<Map<Long, Object>, T> createFunction(
@@ -207,7 +216,14 @@ public class ObjectReaderCreator {
         } else {
             markerConstructor.setAccessible(true);
         }
-        return new ConstructorFunction(null, constructor, markerConstructor, paramNames);
+        return new ConstructorFunction(
+                null,
+                constructor,
+                null,
+                null,
+                markerConstructor,
+                paramNames
+        );
     }
 
     public <T> ObjectReader<T> createObjectReader(
@@ -1078,7 +1094,25 @@ public class ObjectReaderCreator {
                     }
                 }
 
-                Function<Map<Long, Object>, T> function = new ConstructorFunction(alternateConstructors, creatorConstructor, null, parameterNames);
+                Function function = null;
+                BiFunction biFunction = null;
+                if (creatorConstructor != null && JIT) {
+                    if (creatorConstructor.getParameterCount() == 1) {
+                        function = LambdaMiscCodec.createFunction(creatorConstructor);
+                    } else if (creatorConstructor.getParameterCount() == 2) {
+                        biFunction = LambdaMiscCodec.createBiFunction(creatorConstructor);
+                    }
+                }
+
+                Function<Map<Long, Object>, T> constructorFunction = new ConstructorFunction(
+                        alternateConstructors,
+                        creatorConstructor,
+                        function,
+                        biFunction,
+                        null,
+                        parameterNames
+                );
+
                 FieldReader[] paramFieldReaders = createFieldReaders(
                         provider,
                         objectClass,
@@ -1092,7 +1126,7 @@ public class ObjectReaderCreator {
                         beanInfo.typeKey,
                         beanInfo.typeName,
                         beanInfo.readerFeatures,
-                        function,
+                        constructorFunction,
                         alternateConstructors,
                         parameterNames,
                         paramFieldReaders,
