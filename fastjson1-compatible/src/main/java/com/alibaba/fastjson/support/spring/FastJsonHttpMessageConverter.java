@@ -136,14 +136,25 @@ public class FastJsonHttpMessageConverter
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             HttpHeaders headers = outputMessage.getHeaders();
 
-            int len = JSON.writeJSONString(
-                    baos, object,
-                    fastJsonConfig.getSerializeFilters(),
-                    fastJsonConfig.getSerializerFeatures()
-            );
+            int contentLength;
+            if (object instanceof String && com.alibaba.fastjson2.JSON.isValidObject((String) object)) {
+                byte[] strBytes = ((String) object).getBytes(fastJsonConfig.getCharset());
+                contentLength = strBytes.length;
+                outputMessage.getBody().write(strBytes, 0, strBytes.length);
+            } else if (object instanceof byte[] && com.alibaba.fastjson2.JSON.isValid((byte[]) object)) {
+                byte[] strBytes = (byte[]) object;
+                contentLength = strBytes.length;
+                outputMessage.getBody().write(strBytes, 0, strBytes.length);
+            } else {
+                contentLength = JSON.writeJSONString(
+                        baos, object,
+                        fastJsonConfig.getSerializeFilters(),
+                        fastJsonConfig.getSerializerFeatures()
+                );
+            }
 
             if (headers.getContentLength() < 0 && fastJsonConfig.isWriteContentLength()) {
-                headers.setContentLength(len);
+                headers.setContentLength(contentLength);
             }
 
             baos.writeTo(outputMessage.getBody());

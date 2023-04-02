@@ -8,7 +8,6 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.util.IOUtils;
-import com.alibaba.fastjson2.JSONWriter;
 
 import java.nio.charset.Charset;
 import java.util.Map;
