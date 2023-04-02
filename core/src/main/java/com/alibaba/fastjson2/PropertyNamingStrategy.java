@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.BeanUtils;
+
 /**
  * An enumeration that defines a few standard naming conventions for JSON field names.
  * @since 1.2.15
@@ -125,6 +127,10 @@ public enum PropertyNamingStrategy {
      */
     LowerCaseWithDots,
     NeverUseThisValueExceptDefaultValue;
+
+    public String fieldName(String name) {
+        return BeanUtils.fieldName(name, this.name());
+    }
 
     public static String snakeToCamel(String name) {
         if (name == null || name.indexOf('_') == -1) {
