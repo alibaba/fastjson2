@@ -55,7 +55,9 @@
     </properties>
 
     <modules>
+        <!--
         <module>adapter</module>
+        -->
         <module>benchmark</module>
         <module>core</module>
         <!--
