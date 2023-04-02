@@ -71,7 +71,10 @@ public class FastJsonConfig {
         this.dateFormat = "yyyy-MM-dd HH:mm:ss";
         this.charset = StandardCharsets.UTF_8;
         this.readerFeatures = new JSONReader.Feature[0];
-        this.writerFeatures = new JSONWriter.Feature[0];
+        this.writerFeatures = new JSONWriter.Feature[] {
+                JSONWriter.Feature.WriteByteArrayAsBase64,
+                JSONWriter.Feature.BrowserSecure
+        };
         this.readerFilters = new Filter[0];
         this.writerFilters = new Filter[0];
         this.writeContentLength = true;
