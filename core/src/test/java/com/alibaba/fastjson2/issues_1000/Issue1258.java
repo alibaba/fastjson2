@@ -11,6 +11,7 @@ import lombok.Setter;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Issue1258 {
     @Getter
@@ -91,6 +92,61 @@ public class Issue1258 {
 
         public Bean3(@JSONField(name = "E") long et) {
             this.et = et;
+        }
+    }
+
+    @Test
+    public void test4() {
+        String str = "{\"E1\":101,\"E2\":102,\"E3\":103}";
+        Bean4 bean = JSON.parseObject(str, Bean4.class);
+        assertEquals(101, bean.f0);
+        assertEquals(102, bean.f1);
+        assertEquals(103, bean.f2);
+    }
+
+    public static class Bean4 {
+        private int f0;
+        private int f1;
+        private int f2;
+
+        public Bean4(
+                @JSONField(name = "E1")
+                int f0,
+
+                @JSONField(name = "E2")
+                int f1,
+
+                @JSONField(name = "E3")
+                int f2
+        ) {
+            this.f0 = f0;
+            this.f1 = f1;
+            this.f2 = f2;
+        }
+    }
+
+    @Test
+    public void test5() {
+        String str = "{\"E1\":101,\"E2\":102,\"E3\":103}";
+        assertThrows(Exception.class, () -> JSON.parseObject(str, Bean5.class));
+    }
+
+    public static class Bean5 {
+        private int f0;
+        private int f1;
+        private int f2;
+
+        public Bean5(
+                @JSONField(name = "E1")
+                int f0,
+
+                @JSONField(name = "E2")
+                int f1,
+
+                @JSONField(name = "E3")
+                int f2
+        ) {
+            throw new RuntimeException();
         }
     }
 }
