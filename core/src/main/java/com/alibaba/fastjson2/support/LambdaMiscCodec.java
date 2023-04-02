@@ -443,7 +443,7 @@ public class LambdaMiscCodec {
                     METHOD_TYPE_FUNCTION,
                     METHOD_TYPE_OBJECT_OBJECT,
                     methodHandle,
-                    METHOD_TYPE_OBJECT_OBJECT
+                    MethodType.methodType(declaringClass, param0)
             );
             return (Function) callSite.getTarget().invokeExact();
         } catch (Throwable ignored) {
@@ -543,7 +543,7 @@ public class LambdaMiscCodec {
                     METHOD_TYPE_BI_FUNCTION,
                     METHOD_TYPE_OBJECT_OBJECT_OBJECT,
                     methodHandle,
-                    METHOD_TYPE_OBJECT_OBJECT_OBJECT
+                    MethodType.methodType(declaringClass, param0, param1)
             );
             return (BiFunction) callSite.getTarget().invokeExact();
         } catch (Throwable ignored) {

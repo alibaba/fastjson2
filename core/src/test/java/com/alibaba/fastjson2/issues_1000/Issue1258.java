@@ -56,7 +56,40 @@ public class Issue1258 {
     public static class Bean1 {
         private Long et;
 
-        public Bean1(@JSONField(name = "E")Long et) {
+        public Bean1(@JSONField(name = "E") Long et) {
+            this.et = et;
+        }
+    }
+
+    @Test
+    public void test2() {
+        String str = "{\"E\":123,\"e\":\"abc\"}";
+        Bean2 bean = JSON.parseObject(str, Bean2.class);
+        assertEquals(123L, bean.et);
+        assertEquals("abc", bean.event);
+    }
+
+    public static class Bean2 {
+        private String event;
+        private Long et;
+
+        public Bean2(@JSONField(name = "E") Long et, @JSONField(name = "e") String event) {
+            this.et = et;
+            this.event = event;
+        }
+    }
+
+    @Test
+    public void test3() {
+        String str = "{\"E\":123,\"e\":\"abc\"}";
+        Bean3 bean = JSON.parseObject(str, Bean3.class);
+        assertEquals(123L, bean.et);
+    }
+
+    public static class Bean3 {
+        private long et;
+
+        public Bean3(@JSONField(name = "E") long et) {
             this.et = et;
         }
     }

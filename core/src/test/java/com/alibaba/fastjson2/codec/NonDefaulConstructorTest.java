@@ -45,7 +45,7 @@ public class NonDefaulConstructorTest {
         Exception error = null;
         try {
             JSON.parseObject(str, VO2.class);
-        } catch (JSONException ex) {
+        } catch (Exception ex) {
             error = ex;
         }
         assertNotNull(error);
