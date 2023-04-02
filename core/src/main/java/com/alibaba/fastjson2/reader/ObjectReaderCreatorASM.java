@@ -1112,20 +1112,18 @@ public class ObjectReaderCreatorASM
                 mw.visitLabel(next_);
             }
 
-            Label noneSmartMatch_ = new Label();
+            Label processExtra_ = new Label();
 
             if ((readerFeatures & JSONReader.Feature.SupportSmartMatch.mask) == 0) {
                 mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                 mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
                 mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isSupportSmartMatch", "(J)Z", false);
-                mw.visitJumpInsn(Opcodes.IFEQ, noneSmartMatch_);
+                mw.visitJumpInsn(Opcodes.IFEQ, processExtra_);
             }
 
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "getNameHashCodeLCase", "()J", false);
             mw.visitVarInsn(Opcodes.LSTORE, HASH_CODE64);
-
-            mw.visitLabel(noneSmartMatch_);
 
             for (int i = 0; i < fieldReaderArray.length; ++i) {
                 Label next_ = new Label();
@@ -1162,6 +1160,8 @@ public class ObjectReaderCreatorASM
 
                 mw.visitLabel(next_);
             }
+
+            mw.visitLabel(processExtra_);
 
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
@@ -1675,20 +1675,18 @@ public class ObjectReaderCreatorASM
                 mw.visitLabel(next_);
             }
 
-            Label noneSmartMatch_ = new Label();
+            Label processExtra_ = new Label();
 
             if ((readerFeatures & JSONReader.Feature.SupportSmartMatch.mask) == 0) {
                 mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                 mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
                 mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isSupportSmartMatch", "(J)Z", false);
-                mw.visitJumpInsn(Opcodes.IFEQ, noneSmartMatch_);
+                mw.visitJumpInsn(Opcodes.IFEQ, processExtra_);
             }
 
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "getNameHashCodeLCase", "()J", false);
             mw.visitVarInsn(Opcodes.LSTORE, HASH_CODE64);
-
-            mw.visitLabel(noneSmartMatch_);
 
             for (int i = 0; i < fieldReaderArray.length; ++i) {
                 Label next_ = new Label(), get_ = new Label();
@@ -1739,6 +1737,7 @@ public class ObjectReaderCreatorASM
                 mw.visitLabel(next_);
             }
 
+            mw.visitLabel(processExtra_);
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
