@@ -149,6 +149,10 @@ public class ObjectReaderCreator {
             }
 
             if (owner instanceof Constructor) {
+                provider.getFieldInfo(fieldInfo, declaringClass, (Constructor) owner, i, parameter);
+            }
+
+            if (owner instanceof Constructor) {
                 Field field = BeanUtils.getDeclaredField(declaringClass, paramName);
                 if (field != null) {
                     provider.getFieldInfo(fieldInfo, declaringClass, field);
