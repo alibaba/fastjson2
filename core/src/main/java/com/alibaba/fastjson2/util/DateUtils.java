@@ -3975,7 +3975,7 @@ public class DateUtils {
             c8 = (char) bytes[8];
             c9 = (char) bytes[9];
         } else {
-            if (str.length() != 19) {
+            if (str.length() != 10) {
                 throw new DateTimeParseException("illegal input " + str, str, 0);
             }
 

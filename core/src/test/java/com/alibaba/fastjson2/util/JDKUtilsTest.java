@@ -36,7 +36,7 @@ public class JDKUtilsTest {
 
     @Test
     public void lookupJDK8() throws Throwable {
-        if (JVM_VERSION != 8) {
+        if (JVM_VERSION != 8 || OPENJ9) {
             return;
         }
 

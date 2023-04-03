@@ -15,15 +15,20 @@ public class JDKUtils {
     public static final Byte LATIN1 = 0;
     public static final Byte UTF16 = 1;
 
-    static final Field FIELD_STRING_VALUE;
-    static final long FIELD_STRING_VALUE_OFFSET;
-    static volatile boolean FIELD_VALUE_STRING_ERROR;
+    public static final Field FIELD_STRING_VALUE;
+    public static final long FIELD_STRING_VALUE_OFFSET;
+    public static volatile boolean FIELD_STRING_VALUE_ERROR;
+
+    public static final Field FIELD_STRING_CODER;
+    public static final long FIELD_STRING_CODER_OFFSET;
+    public static volatile boolean FIELD_STRING_CODER_ERROR;
 
     static final Class<?> CLASS_SQL_DATASOURCE;
     static final Class<?> CLASS_SQL_ROW_SET;
     public static final boolean HAS_SQL;
     public static final boolean ANDROID;
     public static final boolean GRAAL;
+    public static final boolean OPENJ9;
 
     // Android not support
     public static final Class CLASS_TRANSIENT;
@@ -43,7 +48,6 @@ public class JDKUtils {
     public static final Predicate<byte[]> PREDICATE_IS_ASCII;
 
     static final MethodHandles.Lookup IMPL_LOOKUP;
-    static final boolean OPEN_J9;
     static volatile MethodHandle CONSTRUCTOR_LOOKUP;
     static volatile boolean CONSTRUCTOR_LOOKUP_ERROR;
     static volatile Throwable initErrorLast;
@@ -59,7 +63,7 @@ public class JDKUtils {
             android = jmvName.equals("Dalvik");
             graal = jmvName.equals("Substrate VM");
             if (openj9 || android || graal) {
-                FIELD_VALUE_STRING_ERROR = true;
+                FIELD_STRING_VALUE_ERROR = true;
             }
 
             String javaSpecVer = System.getProperty("java.specification.version");
@@ -74,7 +78,7 @@ public class JDKUtils {
             initErrorLast = ignored;
         }
 
-        OPEN_J9 = openj9;
+        OPENJ9 = openj9;
         ANDROID = android;
         GRAAL = graal;
 
@@ -110,15 +114,37 @@ public class JDKUtils {
                 field.setAccessible(true);
                 fieldOffset = UnsafeUtils.objectFieldOffset(field);
             } catch (Exception ignored) {
-                FIELD_VALUE_STRING_ERROR = true;
+                FIELD_STRING_VALUE_ERROR = true;
             }
 
             FIELD_STRING_VALUE = field;
             FIELD_STRING_VALUE_OFFSET = fieldOffset;
+
+            FIELD_STRING_CODER = null;
+            FIELD_STRING_CODER_OFFSET = -1;
+            FIELD_STRING_CODER_ERROR = true;
         } else {
-            FIELD_VALUE_STRING_ERROR = true;
-            FIELD_STRING_VALUE = null;
-            FIELD_STRING_VALUE_OFFSET = -1;
+            Field fieldValue = null;
+            long fieldValueOffset = -1;
+            try {
+                fieldValue = String.class.getDeclaredField("value");
+                fieldValueOffset = UnsafeUtils.objectFieldOffset(fieldValue);
+            } catch (Exception ignored) {
+                FIELD_STRING_VALUE_ERROR = true;
+            }
+            FIELD_STRING_VALUE_OFFSET = fieldValueOffset;
+            FIELD_STRING_VALUE = fieldValue;
+
+            Field fieldCode = null;
+            long fieldCodeOffset = -1;
+            try {
+                fieldCode = String.class.getDeclaredField("coder");
+                fieldCodeOffset = UnsafeUtils.objectFieldOffset(fieldCode);
+            } catch (Exception ignored) {
+                FIELD_STRING_CODER_ERROR = true;
+            }
+            FIELD_STRING_CODER_OFFSET = fieldCodeOffset;
+            FIELD_STRING_CODER = fieldCode;
         }
 
         boolean vector_support = false;
@@ -350,11 +376,11 @@ public class JDKUtils {
     public static char[] getCharArray(String str) {
         // GraalVM not support
         // Android not support
-        if (!FIELD_VALUE_STRING_ERROR) {
+        if (!FIELD_STRING_VALUE_ERROR) {
             try {
                 return (char[]) UnsafeUtils.UNSAFE.getObject(str, FIELD_STRING_VALUE_OFFSET);
             } catch (Exception ignored) {
-                FIELD_VALUE_STRING_ERROR = true;
+                FIELD_STRING_VALUE_ERROR = true;
             }
         }
 
@@ -378,7 +404,7 @@ public class JDKUtils {
                     int FULL_ACCESS_MASK = 31; // for IBM Open J9 JDK
                     return (MethodHandles.Lookup) constructor.invoke(
                             objectClass,
-                            OPEN_J9 ? FULL_ACCESS_MASK : TRUSTED
+                            OPENJ9 ? FULL_ACCESS_MASK : TRUSTED
                     );
                 } else {
                     if (constructor == null) {

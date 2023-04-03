@@ -253,6 +253,56 @@ class JSONWriterUTF16
         chars[off++] = ']';
     }
 
+    public void writeStringLatin1(byte[] value) {
+        if (value == null) {
+            writeStringNull();
+            return;
+        }
+
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+        boolean escape = false;
+        int minCapacity = off + value.length + 2;
+        if (minCapacity - chars.length > 0) {
+            int oldCapacity = chars.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            chars = Arrays.copyOf(chars, newCapacity);
+        }
+
+        final int mark = off;
+        chars[off++] = quote;
+
+        for (int i = 0; i < value.length; i++) {
+            byte c = value[i];
+            if (c == '\\' || c == quote || c < ' ') {
+                escape = true;
+                break;
+            }
+
+            if (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')')) {
+                escape = true;
+                break;
+            }
+
+            chars[off++] = (char) c;
+        }
+
+        if (!escape) {
+            chars[off++] = quote;
+            return;
+        }
+        off = mark;
+
+        writeStringEscape(value);
+    }
+
     @Override
     public void writeString(String str) {
         if (str == null) {
@@ -455,6 +505,264 @@ class JSONWriterUTF16
         chars[off++] = quote;
         for (int i = 0; i < strlen; ++i) {
             char ch = str.charAt(i);
+            switch (ch) {
+                case '"':
+                case '\'':
+                    if (ch == quote) {
+                        chars[off++] = '\\';
+                    }
+                    chars[off++] = ch;
+                    break;
+                case '\\':
+                    chars[off++] = '\\';
+                    chars[off++] = ch;
+                    break;
+                case '\r':
+                    chars[off++] = '\\';
+                    chars[off++] = 'r';
+                    break;
+                case '\n':
+                    chars[off++] = '\\';
+                    chars[off++] = 'n';
+                    break;
+                case '\b':
+                    chars[off++] = '\\';
+                    chars[off++] = 'b';
+                    break;
+                case '\f':
+                    chars[off++] = '\\';
+                    chars[off++] = 'f';
+                    break;
+                case '\t':
+                    chars[off++] = '\\';
+                    chars[off++] = 't';
+                    break;
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                    chars[off++] = '\\';
+                    chars[off++] = 'u';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = (char) ('0' + (int) ch);
+                    break;
+                case 11:
+                case 14:
+                case 15:
+                    chars[off++] = '\\';
+                    chars[off++] = 'u';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = (char) ('a' + (ch - 10));
+                    break;
+                case 16:
+                case 17:
+                case 18:
+                case 19:
+                case 20:
+                case 21:
+                case 22:
+                case 23:
+                case 24:
+                case 25:
+                    chars[off++] = '\\';
+                    chars[off++] = 'u';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = '1';
+                    chars[off++] = (char) ('0' + (ch - 16));
+                    break;
+                case 26:
+                case 27:
+                case 28:
+                case 29:
+                case 30:
+                case 31:
+                    chars[off++] = '\\';
+                    chars[off++] = 'u';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = '1';
+                    chars[off++] = (char) ('a' + (ch - 26));
+                    break;
+                case '<':
+                case '>':
+                case '(':
+                case ')':
+                    if (browserSecure && (ch == '<' || ch == '>' || ch == '(' || ch == ')')) {
+                        chars[off++] = '\\';
+                        chars[off++] = 'u';
+                        chars[off++] = DIGITS[(ch >>> 12) & 15];
+                        chars[off++] = DIGITS[(ch >>> 8) & 15];
+                        chars[off++] = DIGITS[(ch >>> 4) & 15];
+                        chars[off++] = DIGITS[ch & 15];
+                    } else {
+                        chars[off++] = ch;
+                    }
+                    break;
+                default:
+                    if (escapeNoneAscii && ch > 0x007F) {
+                        chars[off++] = '\\';
+                        chars[off++] = 'u';
+                        chars[off++] = DIGITS[(ch >>> 12) & 15];
+                        chars[off++] = DIGITS[(ch >>> 8) & 15];
+                        chars[off++] = DIGITS[(ch >>> 4) & 15];
+                        chars[off++] = DIGITS[ch & 15];
+                    } else {
+                        chars[off++] = ch;
+                    }
+                    break;
+            }
+        }
+        chars[off++] = quote;
+    }
+
+    protected final void writeStringEscape(char[] str) {
+        final int strlen = str.length;
+        boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+
+        ensureCapacity(off + strlen * 6 + 2);
+
+        chars[off++] = quote;
+        for (int i = 0; i < strlen; ++i) {
+            char ch = str[i];
+            switch (ch) {
+                case '"':
+                case '\'':
+                    if (ch == quote) {
+                        chars[off++] = '\\';
+                    }
+                    chars[off++] = ch;
+                    break;
+                case '\\':
+                    chars[off++] = '\\';
+                    chars[off++] = ch;
+                    break;
+                case '\r':
+                    chars[off++] = '\\';
+                    chars[off++] = 'r';
+                    break;
+                case '\n':
+                    chars[off++] = '\\';
+                    chars[off++] = 'n';
+                    break;
+                case '\b':
+                    chars[off++] = '\\';
+                    chars[off++] = 'b';
+                    break;
+                case '\f':
+                    chars[off++] = '\\';
+                    chars[off++] = 'f';
+                    break;
+                case '\t':
+                    chars[off++] = '\\';
+                    chars[off++] = 't';
+                    break;
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                    chars[off++] = '\\';
+                    chars[off++] = 'u';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = (char) ('0' + (int) ch);
+                    break;
+                case 11:
+                case 14:
+                case 15:
+                    chars[off++] = '\\';
+                    chars[off++] = 'u';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = (char) ('a' + (ch - 10));
+                    break;
+                case 16:
+                case 17:
+                case 18:
+                case 19:
+                case 20:
+                case 21:
+                case 22:
+                case 23:
+                case 24:
+                case 25:
+                    chars[off++] = '\\';
+                    chars[off++] = 'u';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = '1';
+                    chars[off++] = (char) ('0' + (ch - 16));
+                    break;
+                case 26:
+                case 27:
+                case 28:
+                case 29:
+                case 30:
+                case 31:
+                    chars[off++] = '\\';
+                    chars[off++] = 'u';
+                    chars[off++] = '0';
+                    chars[off++] = '0';
+                    chars[off++] = '1';
+                    chars[off++] = (char) ('a' + (ch - 26));
+                    break;
+                case '<':
+                case '>':
+                case '(':
+                case ')':
+                    if (browserSecure && (ch == '<' || ch == '>' || ch == '(' || ch == ')')) {
+                        chars[off++] = '\\';
+                        chars[off++] = 'u';
+                        chars[off++] = DIGITS[(ch >>> 12) & 15];
+                        chars[off++] = DIGITS[(ch >>> 8) & 15];
+                        chars[off++] = DIGITS[(ch >>> 4) & 15];
+                        chars[off++] = DIGITS[ch & 15];
+                    } else {
+                        chars[off++] = ch;
+                    }
+                    break;
+                default:
+                    if (escapeNoneAscii && ch > 0x007F) {
+                        chars[off++] = '\\';
+                        chars[off++] = 'u';
+                        chars[off++] = DIGITS[(ch >>> 12) & 15];
+                        chars[off++] = DIGITS[(ch >>> 8) & 15];
+                        chars[off++] = DIGITS[(ch >>> 4) & 15];
+                        chars[off++] = DIGITS[ch & 15];
+                    } else {
+                        chars[off++] = ch;
+                    }
+                    break;
+            }
+        }
+        chars[off++] = quote;
+    }
+
+    protected final void writeStringEscape(byte[] str) {
+        final int strlen = str.length;
+        boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+
+        ensureCapacity(off + strlen * 6 + 2);
+
+        chars[off++] = quote;
+        for (int i = 0; i < strlen; ++i) {
+            char ch = (char) (str[i] & 0xff);
             switch (ch) {
                 case '"':
                 case '\'':
@@ -2379,5 +2687,53 @@ class JSONWriterUTF16
             chars = Arrays.copyOf(chars, newCapacity);
         }
         chars[off++] = ']';
+    }
+
+    public void writeString(final char[] chars) {
+        if (chars == null) {
+            writeStringNull();
+            return;
+        }
+
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+        boolean special = false;
+        for (int i = 0; i < chars.length; ++i) {
+            char c = chars[i];
+            if (c == '\\' || c == quote) {
+                special = true;
+                break;
+            }
+
+            if (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')')) {
+                special = true;
+                break;
+            }
+        }
+
+        if (!special) {
+            // inline ensureCapacity
+            int minCapacity = this.off + chars.length + 2;
+            if (minCapacity - this.chars.length > 0) {
+                int oldCapacity = this.chars.length;
+                int newCapacity = oldCapacity + (oldCapacity >> 1);
+                if (newCapacity - minCapacity < 0) {
+                    newCapacity = minCapacity;
+                }
+                if (newCapacity - maxArraySize > 0) {
+                    throw new OutOfMemoryError();
+                }
+
+                // minCapacity is usually close to size, so this is a win:
+                this.chars = Arrays.copyOf(this.chars, newCapacity);
+            }
+
+            this.chars[this.off++] = quote;
+            System.arraycopy(chars, 0, this.chars, this.off, chars.length);
+            this.off += chars.length;
+            this.chars[this.off++] = quote;
+            return;
+        }
+
+        writeStringEscape(chars);
     }
 }
