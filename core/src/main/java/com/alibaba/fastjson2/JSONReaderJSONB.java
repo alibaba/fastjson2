@@ -77,7 +77,7 @@ class JSONReaderJSONB
             if (STRING_CREATOR_JDK8 != null) {
                 char[] chars = new char[strlen];
                 for (int i = 0; i < strlen; ++i) {
-                    chars[i] = (char) bytes[strBegin + i];
+                    chars[i] = (char) (bytes[strBegin + i] & 0xff);
                 }
                 return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
             } else if (STRING_CREATOR_JDK11 != null) {
@@ -935,7 +935,7 @@ class JSONReaderJSONB
                     if (STRING_CREATOR_JDK8 != null) {
                         char[] chars = new char[strlen];
                         for (int i = 0; i < strlen; ++i) {
-                            chars[i] = (char) bytes[offset + i];
+                            chars[i] = (char) (bytes[offset + i] & 0xff);
                         }
                         offset += strlen;
 
@@ -2623,7 +2623,7 @@ class JSONReaderJSONB
                         if (STRING_CREATOR_JDK8 != null) {
                             char[] chars = new char[strlen];
                             for (int i = 0; i < strlen; ++i) {
-                                chars[i] = (char) bytes[offset + i];
+                                chars[i] = (char) (bytes[offset + i] & 0xff);
                             }
                             str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                         } else {
@@ -2643,7 +2643,7 @@ class JSONReaderJSONB
                         if (STRING_CREATOR_JDK8 != null) {
                             char[] chars = new char[strlen];
                             for (int i = 0; i < strlen; ++i) {
-                                chars[i] = (char) bytes[offset + i];
+                                chars[i] = (char) (bytes[offset + i] & 0xff);
                             }
                             str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                         } else {
@@ -2663,7 +2663,7 @@ class JSONReaderJSONB
                 if (STRING_CREATOR_JDK8 != null && strlen >= 0) {
                     char[] chars = new char[strlen];
                     for (int i = 0; i < strlen; ++i) {
-                        chars[i] = (char) bytes[offset + i];
+                        chars[i] = (char) (bytes[offset + i] & 0xff);
                     }
                     offset += strlen;
 
@@ -2811,7 +2811,7 @@ class JSONReaderJSONB
                 if (STRING_CREATOR_JDK8 != null) {
                     char[] chars = new char[strlen];
                     for (int i = 0; i < strlen; ++i) {
-                        chars[i] = (char) bytes[offset + i];
+                        chars[i] = (char) (bytes[offset + i] & 0xff);
                     }
                     offset += strlen;
                     str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
@@ -3113,7 +3113,7 @@ class JSONReaderJSONB
             return '\0';
         } else if (type > BC_STR_ASCII_FIX_0 && type < BC_STR_ASCII_FIX_MAX) {
             offset++;
-            return (char) bytes[offset++];
+            return (char) (bytes[offset++] & 0xff);
         }
 
         String str = readString();
@@ -3505,7 +3505,7 @@ class JSONReaderJSONB
         if (STRING_CREATOR_JDK8 != null) {
             char[] chars = new char[strlen];
             for (int i = 0; i < strlen; ++i) {
-                chars[i] = (char) bytes[offset + i];
+                chars[i] = (char) (bytes[offset + i] & 0xff);
             }
 
             str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);

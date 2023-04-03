@@ -767,7 +767,8 @@ public class JSONWriterTest {
                 JSONWriter jsonWriter = JSONWriter.ofJSONB();
                 jsonWriter.writeString(str);
                 byte[] jsonbBytes = jsonWriter.getBytes();
-                assertEquals(str, JSONB.parse(jsonbBytes));
+                Object parse = JSONB.parse(jsonbBytes);
+                assertEquals(str, parse);
             }
             {
                 JSONWriter jsonWriter = JSONWriter.ofJSONB();
