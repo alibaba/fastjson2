@@ -202,6 +202,10 @@ final class JSONWriterPretty
         jsonWriter.writeString(chars);
     }
 
+    public void writeString(char[] chars, int off, int len) {
+        jsonWriter.writeString(chars, off, len);
+    }
+
     @Override
     public void writeRaw(char[] chars, int off, int len) {
         jsonWriter.writeRaw(chars, off, len);

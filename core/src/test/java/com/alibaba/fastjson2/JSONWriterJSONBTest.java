@@ -380,4 +380,77 @@ public class JSONWriterJSONBTest {
 
         assertThrows(Exception.class, () -> jsonWriter.getBytes(StandardCharsets.UTF_8));
     }
+
+    @Test
+    public void writeChars() {
+        char[] chars = new char[256];
+        for (int i = 0; i < chars.length; i++) {
+            chars[i] = (char) i;
+        }
+        JSONWriter jsonWriter = JSONWriter.ofJSONB();
+        jsonWriter.writeString(chars);
+        byte[] jsonbBytes = jsonWriter.getBytes();
+        assertEquals(new String(chars), JSONB.parse(jsonbBytes));
+    }
+
+    @Test
+    public void writeChars1() {
+        char[] chars = new char[1024];
+        Arrays.fill(chars, 'A');
+        for (int i = 256; i < 768; i++) {
+            chars[i] = (char) (i - 256);
+        }
+        JSONWriter jsonWriter = JSONWriter.ofJSONB();
+        jsonWriter.writeString(chars, 256, 512);
+        byte[] jsonbBytes = jsonWriter.getBytes();
+        assertEquals(new String(chars), JSONB.parse(jsonbBytes));
+    }
+
+    @Test
+    public void writeCharsNull() {
+        JSONWriter jsonWriter = JSONWriter.ofJSONB();
+        jsonWriter.writeString((char[]) null);
+        byte[] jsonbBytes = jsonWriter.getBytes();
+        assertNull(JSONB.parse(jsonbBytes));
+    }
+
+    @Test
+    public void writeCharsNull1() {
+        JSONWriter jsonWriter = JSONWriter.ofJSONB();
+        jsonWriter.writeString((char[]) null);
+        byte[] jsonbBytes = jsonWriter.getBytes();
+        assertNull(JSONB.parse(jsonbBytes));
+    }
+
+    @Test
+    public void writeStringNull() {
+        JSONWriter jsonWriter = JSONWriter.ofJSONB();
+        jsonWriter.writeStringNull();
+        byte[] jsonbBytes = jsonWriter.getBytes();
+        assertNull(JSONB.parse(jsonbBytes));
+    }
+
+    @Test
+    public void writeStringLatin1() {
+        byte[] bytes = new byte[256];
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] = (byte) i;
+        }
+        JSONWriter jsonWriter = JSONWriter.ofJSONB();
+        jsonWriter.writeStringLatin1(bytes);
+        String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+        byte[] jsonbBytes = jsonWriter.getBytes();
+        assertEquals(str, JSONB.parse(jsonbBytes));
+    }
+
+    @Test
+    public void writeStringLatin1Pretty() {
+        byte[] bytes = new byte[1024 * 128];
+        Arrays.fill(bytes, (byte) '\\');
+        JSONWriter jsonWriter = JSONWriter.ofJSONB();
+        jsonWriter.writeStringLatin1(bytes);
+        String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+        byte[] jsonbBytes = jsonWriter.getBytes();
+        assertEquals(str, JSONB.parse(jsonbBytes));
+    }
 }

@@ -2736,4 +2736,45 @@ class JSONWriterUTF16
 
         writeStringEscape(chars);
     }
+
+    public void writeString(char[] chars, int off, int len) {
+        if (chars == null) {
+            writeStringNull();
+            return;
+        }
+
+        boolean special = false;
+        for (int i = off; i < len; ++i) {
+            if (chars[i] == '\\' || chars[i] == '"') {
+                special = true;
+                break;
+            }
+        }
+
+        if (!special) {
+            // inline ensureCapacity
+            int minCapacity = this.off + len + 2;
+            if (minCapacity - this.chars.length > 0) {
+                int oldCapacity = this.chars.length;
+                int newCapacity = oldCapacity + (oldCapacity >> 1);
+                if (newCapacity - minCapacity < 0) {
+                    newCapacity = minCapacity;
+                }
+                if (newCapacity - maxArraySize > 0) {
+                    throw new OutOfMemoryError();
+                }
+
+                // minCapacity is usually close to size, so this is a win:
+                this.chars = Arrays.copyOf(this.chars, newCapacity);
+            }
+
+            this.chars[this.off++] = quote;
+            System.arraycopy(chars, off, this.chars, this.off, len);
+            this.off += len;
+            this.chars[this.off++] = quote;
+            return;
+        }
+
+        writeStringEscape(new String(chars, off, len));
+    }
 }
