@@ -48,7 +48,7 @@ public class EishayFuryCompatibleParseTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        jsonb();
-        fury();
+        jsonb();
+//        fury();
     }
 }
