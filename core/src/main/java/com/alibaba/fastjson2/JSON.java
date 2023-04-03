@@ -2280,7 +2280,11 @@ public interface JSON {
 
         JSONWriter jsonWriter;
         if (JVM_VERSION == 8) {
-            jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
+                jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
+            } else {
+                jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+            }
         } else if ((writeContext.features & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
             if (STRING_VALUE != null) {
                 if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
@@ -2360,7 +2364,11 @@ public interface JSON {
 
         JSONWriter jsonWriter;
         if (JVM_VERSION == 8) {
-            jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
+                jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
+            } else {
+                jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+            }
         } else if ((writeContext.features & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
             if (STRING_VALUE != null) {
                 if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
