@@ -62,8 +62,8 @@ public class EishayWriteBinaryAutoTypeTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2JSONB();
-        fastjson2JSONB_symbols();
+        fastjson2JSONB();
+//        fastjson2JSONB_symbols();
 //        fastjson2JSONB_ArrayMapping();
 //        fastjson2UTF8Bytes();
 //        hessian();
