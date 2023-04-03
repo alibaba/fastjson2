@@ -949,7 +949,7 @@
                         -->
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.8</version>
+                        <version>0.8.9</version>
                         <configuration>
                             <excludes>
                                 <exclude>com/alibaba/fastjson2/benchmark</exclude>
