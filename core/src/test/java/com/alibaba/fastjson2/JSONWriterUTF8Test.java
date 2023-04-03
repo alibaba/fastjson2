@@ -13,6 +13,7 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Date;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.NullAsDefaultValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -596,5 +597,74 @@ public class JSONWriterUTF8Test {
 
     public static class Bean4 {
         public LocalTime time;
+    }
+
+    @Test
+    public void writeChars() {
+        char[] chars = new char[256];
+        for (int i = 0; i < chars.length; i++) {
+            chars[i] = (char) i;
+        }
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        jsonWriter.writeString(chars);
+        String json = jsonWriter.toString();
+        assertEquals(new String(chars), JSON.parse(json));
+    }
+
+    @Test
+    public void writeChars1() {
+        char[] chars = new char[1024];
+        Arrays.fill(chars, 'A');
+        for (int i = 256; i < 768; i++) {
+            chars[i] = (char) (i - 256);
+        }
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        jsonWriter.writeString(chars, 256, 512);
+        String json = jsonWriter.toString();
+        assertEquals(new String(chars, 256, 512), JSON.parse(json));
+    }
+
+    @Test
+    public void writeCharsNull() {
+        JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        jsonWriter.writeString((char[]) null);
+        assertEquals("null", jsonWriter.toString());
+    }
+
+    @Test
+    public void writeCharsNull1() {
+        JSONWriter jsonWriter = new JSONWriterPretty(
+                new JSONWriterUTF8(
+                        JSONFactory.createWriteContext(NullAsDefaultValue)
+                )
+        );
+        jsonWriter.writeString((char[]) null);
+        assertEquals("\"\"", jsonWriter.toString());
+    }
+
+    @Test
+    public void writeStringLatin1() {
+        byte[] bytes = new byte[256];
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] = (byte) i;
+        }
+        JSONWriter jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
+        jsonWriter.writeStringLatin1(bytes);
+        String json = jsonWriter.toString();
+        String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+        Object parse = JSON.parse(json);
+        assertEquals(str, parse);
+    }
+
+    @Test
+    public void writeStringLatin1Pretty() {
+        byte[] bytes = new byte[1024 * 128];
+        Arrays.fill(bytes, (byte) '\\');
+        JSONWriter jsonWriter = new JSONWriterPretty(new JSONWriterUTF8(JSONFactory.createWriteContext()));
+        jsonWriter.writeStringLatin1(bytes);
+        String json = jsonWriter.toString();
+        String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
+        Object parse = JSON.parse(json);
+        assertEquals(str, parse);
     }
 }

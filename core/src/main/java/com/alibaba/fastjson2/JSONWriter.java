@@ -1245,45 +1245,9 @@ public abstract class JSONWriter
         writeString(string);
     }
 
-    public void writeString(char[] chars) {
-        if (chars == null) {
-            writeStringNull();
-            return;
-        }
+    public abstract void writeString(char[] chars);
 
-        writeString(chars, 0, chars.length);
-    }
-
-    public void writeString(final char[] chars, final int off, final int charslen) {
-        if (chars == null) {
-            writeStringNull();
-            return;
-        }
-
-        boolean special = false;
-        for (int i = off; i < charslen; ++i) {
-            if (chars[i] == '\\' || chars[i] == '"') {
-                special = true;
-                break;
-            }
-        }
-
-        if (!special) {
-            write0('"');
-            writeRaw(chars, off, charslen);
-            write0('"');
-        } else {
-            write0('"');
-            for (int i = off; i < charslen; ++i) {
-                char ch = chars[i];
-                if (ch == '\\' || ch == '"') {
-                    write0('\\');
-                }
-                write0(ch);
-            }
-            write0('"');
-        }
-    }
+    public abstract void writeString(char[] chars, int off, int len);
 
     public abstract void writeString(char[] chars, int off, int len, boolean quote);
 

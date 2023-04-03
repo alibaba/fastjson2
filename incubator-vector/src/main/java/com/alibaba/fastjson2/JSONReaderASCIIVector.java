@@ -97,9 +97,9 @@ final class JSONReaderASCIIVector
                 char[] chars = new char[valueLength];
                 offset = start;
                 for (int i = 0; ; ++i) {
-                    char c = (char) bytes[offset];
+                    char c = (char) (bytes[offset] & 0xff);
                     if (c == '\\') {
-                        c = (char) bytes[++offset];
+                        c = (char) (bytes[++offset] & 0xff);
                         switch (c) {
                             case 'u': {
                                 char c1 = (char) this.bytes[++offset];
