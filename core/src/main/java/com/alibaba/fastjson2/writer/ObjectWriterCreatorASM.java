@@ -43,7 +43,13 @@ public class ObjectWriterCreatorASM
                     property = str;
                 }
             }
-            DISABLE_STRING_UNSAFE_GET = !("".equals(property) || "true".equals(property));
+            boolean value = JVM_VERSION > 8;
+            if ("".equals(property) || "true".equals(property)) {
+                value = true;
+            } else if ("false".equals(property)) {
+                value = false;
+            }
+            DISABLE_STRING_UNSAFE_GET = value;
         }
     }
 
