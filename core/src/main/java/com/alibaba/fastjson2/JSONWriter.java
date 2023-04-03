@@ -517,7 +517,11 @@ public abstract class JSONWriter
 
         JSONWriter jsonWriter;
         if (JVM_VERSION == 8) {
-            jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
+                jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
+            } else {
+                jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+            }
         } else if ((defaultWriterFeatures & Feature.OptimizedForAscii.mask) != 0) {
             if (STRING_VALUE != null) {
                 if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
@@ -551,7 +555,11 @@ public abstract class JSONWriter
 
         JSONWriter jsonWriter;
         if (JVM_VERSION == 8) {
-            jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
+                jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
+            } else {
+                jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+            }
         } else if ((writeContext.features & Feature.OptimizedForAscii.mask) != 0) {
             if (STRING_VALUE != null) {
                 if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
@@ -580,7 +588,11 @@ public abstract class JSONWriter
         Context writeContext = JSONFactory.createWriteContext(features);
         JSONWriter jsonWriter;
         if (JVM_VERSION == 8) {
-            jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
+                jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
+            } else {
+                jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+            }
         } else if ((writeContext.features & Feature.OptimizedForAscii.mask) != 0) {
             if (STRING_VALUE != null) {
                 if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
@@ -611,7 +623,11 @@ public abstract class JSONWriter
         Context writeContext = JSONFactory.createWriteContext(features);
         JSONWriter jsonWriter;
         if (JVM_VERSION == 8) {
-            jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
+                jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
+            } else {
+                jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+            }
         } else {
             if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
                 jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
