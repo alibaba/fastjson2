@@ -127,125 +127,15 @@ final class JSONWriterUTF8Vector
                 this.bytes = Arrays.copyOf(this.bytes, newCapacity);
             }
 
-            bytes[off++] = (byte) quote;
             if (!escape) {
+                bytes[off++] = (byte) quote;
                 System.arraycopy(value, 0, bytes, off, value.length);
                 off += value.length;
+                bytes[off++] = (byte) quote;
             } else {
-                for (int i = 0; i < value.length; ++i) {
-                    byte ch = value[i];
-                    switch (ch) {
-                        case '\\':
-                            bytes[off++] = (byte) '\\';
-                            bytes[off++] = (byte) '\\';
-                            break;
-                        case '\n':
-                            bytes[off++] = (byte) '\\';
-                            bytes[off++] = (byte) 'n';
-                            break;
-                        case '\r':
-                            bytes[off++] = (byte) '\\';
-                            bytes[off++] = (byte) 'r';
-                            break;
-                        case '\f':
-                            bytes[off++] = (byte) '\\';
-                            bytes[off++] = (byte) 'f';
-                            break;
-                        case '\b':
-                            bytes[off++] = (byte) '\\';
-                            bytes[off++] = (byte) 'b';
-                            break;
-                        case '\t':
-                            bytes[off++] = (byte) '\\';
-                            bytes[off++] = (byte) 't';
-                            break;
-                        case 0:
-                        case 1:
-                        case 2:
-                        case 3:
-                        case 4:
-                        case 5:
-                        case 6:
-                        case 7:
-                            bytes[off++] = '\\';
-                            bytes[off++] = 'u';
-                            bytes[off++] = '0';
-                            bytes[off++] = '0';
-                            bytes[off++] = '0';
-                            bytes[off++] = (byte) ('0' + (int) ch);
-                            break;
-                        case 11:
-                        case 14:
-                        case 15:
-                            bytes[off++] = '\\';
-                            bytes[off++] = 'u';
-                            bytes[off++] = '0';
-                            bytes[off++] = '0';
-                            bytes[off++] = '0';
-                            bytes[off++] = (byte) ('a' + (ch - 10));
-                            break;
-                        case 16:
-                        case 17:
-                        case 18:
-                        case 19:
-                        case 20:
-                        case 21:
-                        case 22:
-                        case 23:
-                        case 24:
-                        case 25:
-                            bytes[off++] = '\\';
-                            bytes[off++] = 'u';
-                            bytes[off++] = '0';
-                            bytes[off++] = '0';
-                            bytes[off++] = '1';
-                            bytes[off++] = (byte) ('0' + (ch - 16));
-                            break;
-                        case 26:
-                        case 27:
-                        case 28:
-                        case 29:
-                        case 30:
-                        case 31:
-                            bytes[off++] = '\\';
-                            bytes[off++] = 'u';
-                            bytes[off++] = '0';
-                            bytes[off++] = '0';
-                            bytes[off++] = '1';
-                            bytes[off++] = (byte) ('a' + (ch - 26));
-                            break;
-                        case '<':
-                        case '>':
-                        case '(':
-                        case ')':
-                            if (browserSecure) {
-                                bytes[off++] = '\\';
-                                bytes[off++] = 'u';
-                                bytes[off++] = (byte) DIGITS[(ch >>> 12) & 15];
-                                bytes[off++] = (byte) DIGITS[(ch >>> 8) & 15];
-                                bytes[off++] = (byte) DIGITS[(ch >>> 4) & 15];
-                                bytes[off++] = (byte) DIGITS[ch & 15];
-                            } else {
-                                bytes[off++] = ch;
-                            }
-                            break;
-                        default:
-                            if (ch == quote) {
-                                bytes[off++] = (byte) '\\';
-                                bytes[off++] = (byte) quote;
-                            } else if (coder == 0 && ch < 0) {
-                                // latin
-                                int c = ch & 0xFF;
-                                bytes[off++] = (byte) (0xc0 | (c >> 6));
-                                bytes[off++] = (byte) (0x80 | (c & 0x3f));
-                            } else {
-                                bytes[off++] = (byte) ch;
-                            }
-                            break;
-                    }
-                }
+                writeStringEscaped(value);
             }
-            bytes[off++] = (byte) quote;
+
             return;
             // end of latin
         }
@@ -430,6 +320,116 @@ final class JSONWriterUTF8Vector
         }
 
         bytes[off++] = (byte) quote;
+    }
+
+    @Override
+    public void writeStringLatin1(byte[] value) {
+        if (value == null) {
+            if (isEnabled(JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) {
+                writeString("");
+                return;
+            }
+
+            writeNull();
+            return;
+        }
+
+        final boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+        boolean escape = false;
+
+        int valueOffset = 0;
+        // vector optimize 8
+        int upperBound = ByteVector.SPECIES_64.loopBound(value.length - valueOffset);
+        for (; valueOffset < upperBound; valueOffset += 8) {
+            Vector<Byte> v = ByteVector.SPECIES_64.fromArray(value, valueOffset);
+
+            if (v.eq(V_BYTE_64_DOUBLE_QUOTE)
+                    .or(v.eq(V_BYTE_64_SLASH))
+                    .or(v.lt(V_BYTE_64_SPACE))
+                    .anyTrue()
+            ) {
+                escape = true;
+                break;
+            }
+
+            if (browserSecure
+                    && v.eq(V_BYTE_64_LT)
+                    .or(v.eq(V_BYTE_64_GT))
+                    .or(v.eq(V_BYTE_64_LB))
+                    .or(v.eq(V_BYTE_64_RB))
+                    .anyTrue()
+            ) {
+                escape = true;
+                break;
+            }
+        }
+
+        // vector optimize 4
+        if (!escape) {
+            while (valueOffset + 4 <= value.length) {
+                byte c0 = value[valueOffset];
+                byte c1 = value[valueOffset + 1];
+                byte c2 = value[valueOffset + 2];
+                byte c3 = value[valueOffset + 3];
+                if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
+                        || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
+                        || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
+                        || (browserSecure
+                        && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'
+                        || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'
+                        || c2 == '<' || c2 == '>' || c2 == '(' || c2 == ')'
+                        || c3 == '<' || c3 == '>' || c3 == '(' || c3 == ')'))
+                ) {
+                    escape = true;
+                    break;
+                }
+                valueOffset += 4;
+            }
+        }
+
+        if (!escape && valueOffset + 2 <= value.length) {
+            byte c0 = value[valueOffset];
+            byte c1 = value[valueOffset + 1];
+            if (c0 == quote || c1 == quote || c0 == '\\' || c1 == '\\' || c0 < ' ' || c1 < ' '
+                    || (browserSecure && (c0 == '<' || c0 == '>' || c0 == '('
+                    || c0 == ')' || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'))
+            ) {
+                escape = true;
+            } else {
+                valueOffset += 2;
+            }
+        }
+        if (!escape && valueOffset + 1 == value.length) {
+            byte c0 = value[valueOffset];
+            escape = c0 == quote || c0 == '\\' || c0 < ' '
+                    || (browserSecure && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'));
+        }
+
+        int minCapacity = off
+                + (escape ? value.length * 4 : value.length)
+                + 2;
+        if (minCapacity - this.bytes.length > 0) {
+            int oldCapacity = this.bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+        }
+
+        if (!escape) {
+            bytes[off++] = (byte) quote;
+            System.arraycopy(value, 0, bytes, off, value.length);
+            off += value.length;
+            bytes[off++] = (byte) quote;
+            return;
+        }
+        writeStringEscaped(value);
     }
 
     public static class Factory

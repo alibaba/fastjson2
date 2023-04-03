@@ -451,6 +451,404 @@ class JSONWriterUTF8
             this.bytes = Arrays.copyOf(this.bytes, newCapacity);
         }
 
+        if (i < chars.length) {
+            writeStringEscapedRest(chars, browserSecure, escapeNoneAscii, i);
+        }
+
+        bytes[off++] = (byte) quote;
+    }
+
+    public void writeStringLatin1(byte[] value) {
+        if (value == null) {
+            writeStringNull();
+            return;
+        }
+
+        boolean escape = false;
+        final boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+
+        int valueOffset = 0;
+        // vector optimize 8
+        while (valueOffset + 8 <= value.length) {
+            byte c0 = value[valueOffset];
+            byte c1 = value[valueOffset + 1];
+            byte c2 = value[valueOffset + 2];
+            byte c3 = value[valueOffset + 3];
+            byte c4 = value[valueOffset + 4];
+            byte c5 = value[valueOffset + 5];
+            byte c6 = value[valueOffset + 6];
+            byte c7 = value[valueOffset + 7];
+            if (c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote
+                    || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\' || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\'
+                    || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' ' || c4 < ' ' || c5 < ' ' || c6 < ' ' || c7 < ' '
+                    || (browserSecure
+                    && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'
+                    || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'
+                    || c2 == '<' || c2 == '>' || c2 == '(' || c2 == ')'
+                    || c3 == '<' || c3 == '>' || c3 == '(' || c3 == ')'
+                    || c4 == '<' || c4 == '>' || c4 == '(' || c4 == ')'
+                    || c5 == '<' || c5 == '>' || c5 == '(' || c5 == ')'
+                    || c6 == '<' || c6 == '>' || c6 == '(' || c6 == ')'
+                    || c7 == '<' || c7 == '>' || c7 == '(' || c7 == ')'))
+            ) {
+                escape = true;
+                break;
+            }
+            valueOffset += 8;
+        }
+
+        // vector optimize 4
+        if (!escape) {
+            while (valueOffset + 4 <= value.length) {
+                byte c0 = value[valueOffset];
+                byte c1 = value[valueOffset + 1];
+                byte c2 = value[valueOffset + 2];
+                byte c3 = value[valueOffset + 3];
+                if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
+                        || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
+                        || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
+                        || (browserSecure
+                        && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'
+                        || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'
+                        || c2 == '<' || c2 == '>' || c2 == '(' || c2 == ')'
+                        || c3 == '<' || c3 == '>' || c3 == '(' || c3 == ')'))
+                ) {
+                    escape = true;
+                    break;
+                }
+                valueOffset += 4;
+            }
+        }
+
+        if (!escape && valueOffset + 2 <= value.length) {
+            byte c0 = value[valueOffset];
+            byte c1 = value[valueOffset + 1];
+            if (c0 == quote || c1 == quote || c0 == '\\' || c1 == '\\' || c0 < ' ' || c1 < ' '
+                    || (browserSecure && (c0 == '<' || c0 == '>' || c0 == '('
+                    || c0 == ')' || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'))
+            ) {
+                escape = true;
+            } else {
+                valueOffset += 2;
+            }
+        }
+        if (!escape && valueOffset + 1 == value.length) {
+            byte c0 = value[valueOffset];
+            escape = c0 == quote || c0 == '\\' || c0 < ' '
+                    || (browserSecure && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'));
+        }
+
+        int minCapacity = off
+                + (escape ? value.length * 4 : value.length)
+                + 2;
+        if (minCapacity - this.bytes.length > 0) {
+            int oldCapacity = this.bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+        }
+
+        if (!escape) {
+            bytes[off++] = (byte) quote;
+            System.arraycopy(value, 0, bytes, off, value.length);
+            off += value.length;
+            bytes[off++] = (byte) quote;
+            return;
+        }
+        writeStringEscaped(value);
+    }
+
+    public void writeString(final char[] chars) {
+        if (chars == null) {
+            if (isEnabled(Feature.NullAsDefaultValue.mask | Feature.WriteNullStringAsEmpty.mask)) {
+                writeString("");
+                return;
+            }
+
+            writeNull();
+            return;
+        }
+
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+        boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
+
+        // ensureCapacity
+        int minCapacity = off
+                + chars.length * 3 // utf8 3 bytes
+                + 2;
+
+        if (escapeNoneAscii || browserSecure) {
+            minCapacity += chars.length * 3;
+        }
+
+        if (minCapacity - this.bytes.length > 0) {
+            int oldCapacity = this.bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+        }
+
+        bytes[off++] = (byte) quote;
+
+        int i = 0;
+
+        // vector optimize 8
+        while (i + 8 <= chars.length) {
+            char c0 = chars[i];
+            char c1 = chars[i + 1];
+            char c2 = chars[i + 2];
+            char c3 = chars[i + 3];
+            char c4 = chars[i + 4];
+            char c5 = chars[i + 5];
+            char c6 = chars[i + 6];
+            char c7 = chars[i + 7];
+            if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
+                    || c4 == quote || c5 == quote || c6 == quote || c7 == quote
+                    || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
+                    || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\'
+                    || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
+                    || c4 < ' ' || c5 < ' ' || c6 < ' ' || c7 < ' '
+                    || c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F
+                    || c4 > 0x007F || c5 > 0x007F || c6 > 0x007F || c7 > 0x007F
+                    || (browserSecure
+                    && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'
+                    || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'
+                    || c2 == '<' || c2 == '>' || c2 == '(' || c2 == ')'
+                    || c3 == '<' || c3 == '>' || c3 == '(' || c3 == ')'
+                    || c4 == '<' || c4 == '>' || c4 == '(' || c4 == ')'
+                    || c5 == '<' || c5 == '>' || c5 == '(' || c5 == ')'
+                    || c6 == '<' || c6 == '>' || c6 == '(' || c6 == ')'
+                    || c7 == '<' || c7 == '>' || c7 == '(' || c7 == ')'))
+            ) {
+                break;
+            }
+
+            bytes[off] = (byte) c0;
+            bytes[off + 1] = (byte) c1;
+            bytes[off + 2] = (byte) c2;
+            bytes[off + 3] = (byte) c3;
+            bytes[off + 4] = (byte) c4;
+            bytes[off + 5] = (byte) c5;
+            bytes[off + 6] = (byte) c6;
+            bytes[off + 7] = (byte) c7;
+            off += 8;
+            i += 8;
+        }
+
+        // vector optimize 4
+        while (i + 4 <= chars.length) {
+            char c0 = chars[i];
+            char c1 = chars[i + 1];
+            char c2 = chars[i + 2];
+            char c3 = chars[i + 3];
+            if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
+                    || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
+                    || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
+                    || c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F
+                    || (browserSecure
+                    && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'
+                    || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'
+                    || c2 == '<' || c2 == '>' || c2 == '(' || c2 == ')'
+                    || c3 == '<' || c3 == '>' || c3 == '(' || c3 == ')'))
+            ) {
+                break;
+            }
+
+            bytes[off] = (byte) c0;
+            bytes[off + 1] = (byte) c1;
+            bytes[off + 2] = (byte) c2;
+            bytes[off + 3] = (byte) c3;
+            off += 4;
+            i += 4;
+        }
+
+        if (i + 2 <= chars.length) {
+            char c0 = chars[i];
+            char c1 = chars[i + 1];
+
+            if (!(c0 == quote || c1 == quote
+                    || c0 == '\\' || c1 == '\\'
+                    || c0 < ' ' || c1 < ' '
+                    || c0 > 0x007F || c1 > 0x007F)
+                    && !(browserSecure && (c0 == '<' || c0 == '>' || c0 == '('
+                    || c0 == ')' || c1 == '<' || c1 == '>' || c1 == '(' || c1 == ')'))
+            ) {
+                bytes[off] = (byte) c0;
+                bytes[off + 1] = (byte) c1;
+                off += 2;
+                i += 2;
+            }
+        }
+        if (i + 1 == chars.length) {
+            char c0 = chars[i];
+            if (c0 != quote
+                    && c0 != '\\'
+                    && c0 >= ' '
+                    && c0 <= 0x007F
+                    && !(browserSecure && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'))
+            ) {
+                bytes[off++] = (byte) c0;
+                bytes[off++] = (byte) quote;
+                return;
+            }
+        }
+
+        int rest = chars.length - i;
+        minCapacity = off + rest * 6 + 2;
+        if (minCapacity - this.bytes.length > 0) {
+            int oldCapacity = this.bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+        }
+
+        if (i < chars.length) {
+            writeStringEscapedRest(chars, browserSecure, escapeNoneAscii, i);
+        }
+
+        bytes[off++] = (byte) quote;
+    }
+
+    protected void writeStringEscaped(byte[] value) {
+        final boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+        bytes[off++] = (byte) quote;
+        for (int i = 0; i < value.length; ++i) {
+            byte ch = value[i];
+            switch (ch) {
+                case '\\':
+                    bytes[off++] = (byte) '\\';
+                    bytes[off++] = (byte) '\\';
+                    break;
+                case '\n':
+                    bytes[off++] = (byte) '\\';
+                    bytes[off++] = (byte) 'n';
+                    break;
+                case '\r':
+                    bytes[off++] = (byte) '\\';
+                    bytes[off++] = (byte) 'r';
+                    break;
+                case '\f':
+                    bytes[off++] = (byte) '\\';
+                    bytes[off++] = (byte) 'f';
+                    break;
+                case '\b':
+                    bytes[off++] = (byte) '\\';
+                    bytes[off++] = (byte) 'b';
+                    break;
+                case '\t':
+                    bytes[off++] = (byte) '\\';
+                    bytes[off++] = (byte) 't';
+                    break;
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                    bytes[off++] = '\\';
+                    bytes[off++] = 'u';
+                    bytes[off++] = '0';
+                    bytes[off++] = '0';
+                    bytes[off++] = '0';
+                    bytes[off++] = (byte) ('0' + (int) ch);
+                    break;
+                case 11:
+                case 14:
+                case 15:
+                    bytes[off++] = '\\';
+                    bytes[off++] = 'u';
+                    bytes[off++] = '0';
+                    bytes[off++] = '0';
+                    bytes[off++] = '0';
+                    bytes[off++] = (byte) ('a' + (ch - 10));
+                    break;
+                case 16:
+                case 17:
+                case 18:
+                case 19:
+                case 20:
+                case 21:
+                case 22:
+                case 23:
+                case 24:
+                case 25:
+                    bytes[off++] = '\\';
+                    bytes[off++] = 'u';
+                    bytes[off++] = '0';
+                    bytes[off++] = '0';
+                    bytes[off++] = '1';
+                    bytes[off++] = (byte) ('0' + (ch - 16));
+                    break;
+                case 26:
+                case 27:
+                case 28:
+                case 29:
+                case 30:
+                case 31:
+                    bytes[off++] = '\\';
+                    bytes[off++] = 'u';
+                    bytes[off++] = '0';
+                    bytes[off++] = '0';
+                    bytes[off++] = '1';
+                    bytes[off++] = (byte) ('a' + (ch - 26));
+                    break;
+                case '<':
+                case '>':
+                case '(':
+                case ')':
+                    if (browserSecure) {
+                        bytes[off++] = '\\';
+                        bytes[off++] = 'u';
+                        bytes[off++] = (byte) DIGITS[(ch >>> 12) & 15];
+                        bytes[off++] = (byte) DIGITS[(ch >>> 8) & 15];
+                        bytes[off++] = (byte) DIGITS[(ch >>> 4) & 15];
+                        bytes[off++] = (byte) DIGITS[ch & 15];
+                    } else {
+                        bytes[off++] = ch;
+                    }
+                    break;
+                default:
+                    if (ch == quote) {
+                        bytes[off++] = (byte) '\\';
+                        bytes[off++] = (byte) quote;
+                    } else if (ch < 0) {
+                        // latin
+                        int c = ch & 0xFF;
+                        bytes[off++] = (byte) (0xc0 | (c >> 6));
+                        bytes[off++] = (byte) (0x80 | (c & 0x3f));
+                    } else {
+                        bytes[off++] = (byte) ch;
+                    }
+                    break;
+            }
+        }
+        bytes[off++] = (byte) quote;
+    }
+
+    private void writeStringEscapedRest(char[] chars, boolean browserSecure, boolean escapeNoneAscii, int i) {
         for (; i < chars.length; ++i) { // ascii none special fast write
             char ch = chars[i];
             if ((ch >= 0x0000) && (ch <= 0x007F)) {
@@ -610,8 +1008,6 @@ class JSONWriterUTF8
                 bytes[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
             }
         }
-
-        bytes[off++] = (byte) quote;
     }
 
     @Override

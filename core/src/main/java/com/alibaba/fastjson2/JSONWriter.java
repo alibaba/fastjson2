@@ -1226,6 +1226,7 @@ public abstract class JSONWriter
     }
 
     public abstract void writeString(String str);
+    public abstract void writeStringLatin1(byte[] value);
 
     public void writeString(List<String> list) {
         startArray();
@@ -1253,13 +1254,12 @@ public abstract class JSONWriter
         writeString(chars, 0, chars.length);
     }
 
-    public void writeString(char[] chars, int off, int charslen) {
+    public void writeString(final char[] chars, final int off, final int charslen) {
         if (chars == null) {
             writeStringNull();
             return;
         }
 
-        write0('"');
         boolean special = false;
         for (int i = off; i < charslen; ++i) {
             if (chars[i] == '\\' || chars[i] == '"') {
@@ -1269,8 +1269,11 @@ public abstract class JSONWriter
         }
 
         if (!special) {
+            write0('"');
             writeRaw(chars, off, charslen);
+            write0('"');
         } else {
+            write0('"');
             for (int i = off; i < charslen; ++i) {
                 char ch = chars[i];
                 if (ch == '\\' || ch == '"') {
@@ -1278,8 +1281,8 @@ public abstract class JSONWriter
                 }
                 write0(ch);
             }
+            write0('"');
         }
-        write0('"');
     }
 
     public abstract void writeString(char[] chars, int off, int len, boolean quote);

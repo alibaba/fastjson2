@@ -73,6 +73,11 @@ final class JSONWriterPretty
     }
 
     @Override
+    public void writeStringLatin1(byte[] str) {
+        jsonWriter.writeStringLatin1(str);
+    }
+
+    @Override
     public void writeString(char[] chars, int off, int len, boolean quote) {
         jsonWriter.writeString(chars, off, len, quote);
     }
@@ -191,6 +196,10 @@ final class JSONWriterPretty
 
         write0(']');
         jsonWriter.startObject = false;
+    }
+
+    public void writeString(char[] chars) {
+        jsonWriter.writeString(chars);
     }
 
     @Override

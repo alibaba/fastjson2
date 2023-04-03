@@ -279,7 +279,7 @@ final class JSONWriterJSONB
 
         boolean ascii = true;
         for (int i = 0; i < len; ++i) {
-            if (chars[i + off] > 0x007F) {
+            if (chars[i + off] > 0x00FF) {
                 ascii = false;
                 break;
             }
@@ -301,35 +301,292 @@ final class JSONWriterJSONB
         writeString(new String(chars, off, len));
     }
 
-    @Override
-    public void writeString(char[] str, int stroff, int strlen) {
+    public void writeStringLatin1(final byte[] str) {
         if (str == null) {
+            writeStringNull();
+            return;
+        }
+
+        int strlen = str.length;
+        int minCapacity = str.length
+                + off
+                + 5 /*max str len*/
+                + 1;
+
+        if (minCapacity - bytes.length > 0) {
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
+
+        if (strlen <= STR_ASCII_FIX_LEN) {
+            bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+        } else if (strlen >= INT32_BYTE_MIN && strlen <= INT32_BYTE_MAX) {
+            bytes[off++] = BC_STR_ASCII;
+            bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (strlen >> 8));
+            bytes[off++] = (byte) (strlen);
+        } else {
+            bytes[off++] = BC_STR_ASCII;
+            writeInt32(strlen);
+        }
+        System.arraycopy(str, 0, bytes, off, str.length);
+        off += strlen;
+    }
+
+    @Override
+    public void writeString(final char[] chars) {
+        if (chars == null) {
             writeNull();
             return;
         }
 
         boolean ascii = true;
-        for (int i = stroff; i < strlen; ++i) {
-            if (str[i] > 0x007F) {
-                ascii = false;
-                break;
+        int strlen = chars.length;
+        if (chars.length < STR_ASCII_FIX_LEN) {
+            final int mark = off;
+
+            int minCapacity = off + 1 + strlen;
+            if (minCapacity - bytes.length > 0) {
+                int oldCapacity = bytes.length;
+                int newCapacity = oldCapacity + (oldCapacity >> 1);
+                if (newCapacity - minCapacity < 0) {
+                    newCapacity = minCapacity;
+                }
+                if (newCapacity - maxArraySize > 0) {
+                    throw new OutOfMemoryError();
+                }
+
+                // minCapacity is usually close to size, so this is a win:
+                bytes = Arrays.copyOf(bytes, newCapacity);
             }
+
+            bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            for (int i = 0; i < chars.length; i++) {
+                char ch = chars[i];
+                if (ch > 0x00FF) {
+                    ascii = false;
+                    break;
+                }
+                bytes[off++] = (byte) ch;
+            }
+
+            if (ascii) {
+                return;
+            }
+
+            off = mark;
+        }
+
+        {
+            int i = 0;
+            int upperBound = chars.length & ~3;
+            for (; i < upperBound; i += 4) {
+                char c0 = chars[i];
+                char c1 = chars[i + 1];
+                char c2 = chars[i + 2];
+                char c3 = chars[i + 3];
+                if (c0 > 0x00FF || c1 > 0x00FF || c2 > 0x00FF || c3 > 0x00FF) {
+                    ascii = false;
+                    break;
+                }
+            }
+            if (ascii) {
+                for (; i < chars.length; ++i) {
+                    if (chars[i] > 0x00FF) {
+                        ascii = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        int minCapacity = (ascii ? strlen : strlen * 3)
+                + off
+                + 5 /*max str len*/
+                + 1;
+
+        if (minCapacity - bytes.length > 0) {
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
         }
 
         if (ascii) {
             if (strlen <= STR_ASCII_FIX_LEN) {
                 bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            } else if (strlen >= INT32_BYTE_MIN && strlen <= INT32_BYTE_MAX) {
+                bytes[off++] = BC_STR_ASCII;
+                bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (strlen >> 8));
+                bytes[off++] = (byte) (strlen);
             } else {
                 bytes[off++] = BC_STR_ASCII;
                 writeInt32(strlen);
             }
-            for (int i = stroff; i < strlen; ++i) {
-                bytes[off++] = (byte) str[i];
+            for (int i = 0; i < chars.length; i++) {
+                bytes[off++] = (byte) chars[i];
             }
+        } else {
+            int maxSize = chars.length * 3;
+            int lenByteCnt = sizeOfInt(maxSize);
+            ensureCapacity(off + maxSize + lenByteCnt + 1);
+            int result = IOUtils.encodeUTF8(chars, 0, chars.length, bytes, off + lenByteCnt + 1);
+
+            int utf8len = result - off - lenByteCnt - 1;
+            int utf8lenByteCnt = sizeOfInt(utf8len);
+            if (lenByteCnt != utf8lenByteCnt) {
+                System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
+            }
+            bytes[off++] = BC_STR_UTF8;
+            if (utf8len >= BC_INT32_NUM_MIN && utf8len <= BC_INT32_NUM_MAX) {
+                bytes[off++] = (byte) utf8len;
+            } else if (utf8len >= INT32_BYTE_MIN && utf8len <= INT32_BYTE_MAX) {
+                bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (utf8len >> 8));
+                bytes[off++] = (byte) (utf8len);
+            } else {
+                writeInt32(utf8len);
+            }
+            off += utf8len;
+        }
+    }
+
+    @Override
+    public void writeString(final char[] chars, final int stroff, final int strlen) {
+        if (chars == null) {
+            writeNull();
             return;
         }
 
-        writeString(new String(str, stroff, strlen));
+        boolean ascii = true;
+
+        if (strlen < STR_ASCII_FIX_LEN) {
+            final int mark = off;
+
+            int minCapacity = off + 1 + strlen;
+            if (minCapacity - bytes.length > 0) {
+                int oldCapacity = bytes.length;
+                int newCapacity = oldCapacity + (oldCapacity >> 1);
+                if (newCapacity - minCapacity < 0) {
+                    newCapacity = minCapacity;
+                }
+                if (newCapacity - maxArraySize > 0) {
+                    throw new OutOfMemoryError();
+                }
+
+                // minCapacity is usually close to size, so this is a win:
+                bytes = Arrays.copyOf(bytes, newCapacity);
+            }
+
+            bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            for (int i = 0; i < strlen; i++) {
+                char ch = chars[i];
+                if (ch > 0x00FF) {
+                    ascii = false;
+                    break;
+                }
+                bytes[off++] = (byte) ch;
+            }
+
+            if (ascii) {
+                return;
+            }
+
+            off = mark;
+        }
+
+        {
+            int i = 0;
+            int upperBound = chars.length & ~3;
+            for (; i < upperBound; i += 4) {
+                char c0 = chars[i];
+                char c1 = chars[i + 1];
+                char c2 = chars[i + 2];
+                char c3 = chars[i + 3];
+                if (c0 > 0x00FF || c1 > 0x00FF || c2 > 0x00FF || c3 > 0x00FF) {
+                    ascii = false;
+                    break;
+                }
+            }
+            if (ascii) {
+                for (; i < chars.length; ++i) {
+                    if (chars[i] > 0x00FF) {
+                        ascii = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        int minCapacity = (ascii ? strlen : strlen * 3)
+                + off
+                + 5 /*max str len*/
+                + 1;
+
+        if (minCapacity - bytes.length > 0) {
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0) {
+                newCapacity = minCapacity;
+            }
+            if (newCapacity - maxArraySize > 0) {
+                throw new OutOfMemoryError();
+            }
+
+            // minCapacity is usually close to size, so this is a win:
+            bytes = Arrays.copyOf(bytes, newCapacity);
+        }
+
+        if (ascii) {
+            if (strlen <= STR_ASCII_FIX_LEN) {
+                bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
+            } else if (strlen >= INT32_BYTE_MIN && strlen <= INT32_BYTE_MAX) {
+                bytes[off++] = BC_STR_ASCII;
+                bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (strlen >> 8));
+                bytes[off++] = (byte) (strlen);
+            } else {
+                bytes[off++] = BC_STR_ASCII;
+                writeInt32(strlen);
+            }
+            for (int i = 0; i < chars.length; i++) {
+                bytes[off++] = (byte) chars[i];
+            }
+        } else {
+            int maxSize = chars.length * 3;
+            int lenByteCnt = sizeOfInt(maxSize);
+            ensureCapacity(off + maxSize + lenByteCnt + 1);
+            int result = IOUtils.encodeUTF8(chars, 0, chars.length, bytes, off + lenByteCnt + 1);
+
+            int utf8len = result - off - lenByteCnt - 1;
+            int utf8lenByteCnt = sizeOfInt(utf8len);
+            if (lenByteCnt != utf8lenByteCnt) {
+                System.arraycopy(bytes, off + lenByteCnt + 1, bytes, off + utf8lenByteCnt + 1, utf8len);
+            }
+            bytes[off++] = BC_STR_UTF8;
+            if (utf8len >= BC_INT32_NUM_MIN && utf8len <= BC_INT32_NUM_MAX) {
+                bytes[off++] = (byte) utf8len;
+            } else if (utf8len >= INT32_BYTE_MIN && utf8len <= INT32_BYTE_MAX) {
+                bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (utf8len >> 8));
+                bytes[off++] = (byte) (utf8len);
+            } else {
+                writeInt32(utf8len);
+            }
+            off += utf8len;
+        }
     }
 
     @Override
@@ -584,38 +841,7 @@ final class JSONWriterJSONB
             byte[] value = STRING_VALUE.apply(str);
 
             if (coder == 0) {
-                int strlen = str.length();
-                int minCapacity = str.length()
-                        + off
-                        + 5 /*max str len*/
-                        + 1;
-
-                if (minCapacity - bytes.length > 0) {
-                    int oldCapacity = bytes.length;
-                    int newCapacity = oldCapacity + (oldCapacity >> 1);
-                    if (newCapacity - minCapacity < 0) {
-                        newCapacity = minCapacity;
-                    }
-                    if (newCapacity - maxArraySize > 0) {
-                        throw new OutOfMemoryError();
-                    }
-
-                    // minCapacity is usually close to size, so this is a win:
-                    bytes = Arrays.copyOf(bytes, newCapacity);
-                }
-
-                if (strlen <= STR_ASCII_FIX_LEN) {
-                    bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
-                } else if (strlen >= INT32_BYTE_MIN && strlen <= INT32_BYTE_MAX) {
-                    bytes[off++] = BC_STR_ASCII;
-                    bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (strlen >> 8));
-                    bytes[off++] = (byte) (strlen);
-                } else {
-                    bytes[off++] = BC_STR_ASCII;
-                    writeInt32(strlen);
-                }
-                System.arraycopy(value, 0, bytes, off, value.length);
-                off += strlen;
+                writeStringLatin1(value);
                 return;
             } else {
                 int check_cnt = 128;
@@ -722,7 +948,7 @@ final class JSONWriterJSONB
             bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
             for (int i = 0; i < chars.length; i++) {
                 char ch = chars[i];
-                if (ch > 0x007F) {
+                if (ch > 0x00FF) {
                     ascii = false;
                     break;
                 }
@@ -744,14 +970,14 @@ final class JSONWriterJSONB
                 char c1 = chars[i + 1];
                 char c2 = chars[i + 2];
                 char c3 = chars[i + 3];
-                if (c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F) {
+                if (c0 > 0x00FF || c1 > 0x00FF || c2 > 0x00FF || c3 > 0x00FF) {
                     ascii = false;
                     break;
                 }
             }
             if (ascii) {
                 for (; i < chars.length; ++i) {
-                    if (chars[i] > 0x007F) {
+                    if (chars[i] > 0x00FF) {
                         ascii = false;
                         break;
                     }

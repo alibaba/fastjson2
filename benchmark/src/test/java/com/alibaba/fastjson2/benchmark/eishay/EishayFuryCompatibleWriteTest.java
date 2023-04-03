@@ -15,9 +15,9 @@ public class EishayFuryCompatibleWriteTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayFuryCompatibleWrite-jsonb millis : " + millis);
-            // zulu8.68.0.21_AppleM1Max : 3839
-            // zulu11.62.17_AppleM1Max : 3327
-            // zulu17.40.19_AppleM1Max : 3287
+            // zulu8.68.0.21_AppleM1Max : 3839 3798
+            // zulu11.62.17_AppleM1Max : 3327 3244
+            // zulu17.40.19_AppleM1Max : 3287 3256
 
             // jdk1.8.0_361_x86_i9 6372
             // jdk17.0.6_x86_i9 4674

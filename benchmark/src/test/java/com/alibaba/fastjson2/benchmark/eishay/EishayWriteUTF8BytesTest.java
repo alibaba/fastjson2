@@ -14,9 +14,9 @@ public class EishayWriteUTF8BytesTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
-            // zulu8.58.0.13 : 336
-            // zulu11.52.13 : 337
-            // zulu17.40.19 : 317
+            // zulu8.58.0.13 : 336 347
+            // zulu11.52.13 : 337 314
+            // zulu17.40.19 : 317 320
             // zulu17.40.19_vec : 267
         }
     }
