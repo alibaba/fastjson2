@@ -24,7 +24,7 @@ public class EishayWriteBinaryArrayMappingTest {
     public static void jsonb() throws Exception {
         System.out.println("protobuf size " + benchmark.jsonbSize()); // 235
 
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 1000 * 1000; ++i) {
                 benchmark.jsonb(BH);
@@ -33,7 +33,7 @@ public class EishayWriteBinaryArrayMappingTest {
             System.out.println("EishayWriteBinaryArrayMapping-jsonb millis : " + millis);
             // zulu8.62.0.19 : 190 168
             // zulu11.52.13 : 105
-            // zulu17.32.13 : 105
+            // zulu17.32.13 : 105 978
         }
     }
 
@@ -54,8 +54,8 @@ public class EishayWriteBinaryArrayMappingTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        jsonb();
-        kryo();
+        jsonb();
+//        kryo();
 //        protobuf();
     }
 }
