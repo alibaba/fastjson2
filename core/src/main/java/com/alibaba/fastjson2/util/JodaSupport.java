@@ -669,8 +669,8 @@ public class JodaSupport {
         final Class isoChronology;
         final Object utc;
 
-        LocalDateTimeWriter(Class objectClass, String fromat) {
-            super(fromat);
+        LocalDateTimeWriter(Class objectClass, String format) {
+            super(format);
 
             this.objectClass = objectClass;
             try {
