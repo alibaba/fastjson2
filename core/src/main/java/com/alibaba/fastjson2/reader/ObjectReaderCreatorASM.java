@@ -2095,6 +2095,13 @@ public class ObjectReaderCreatorASM
                     && !fieldClass.getName().startsWith("com.google.common.collect.Immutable");
 
             if (list) {
+                Class itemClass = TypeUtils.getMapping(itemType);
+                if (itemClass != null && Collection.class.isAssignableFrom(itemClass)) {
+                    list = false;
+                }
+            }
+
+            if (list) {
                 if (itemType == null) {
                     itemType = Object.class;
                 }
