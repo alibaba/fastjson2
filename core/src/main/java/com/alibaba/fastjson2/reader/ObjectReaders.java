@@ -52,11 +52,11 @@ public class ObjectReaders {
     }
 
     public static <T> ObjectReader<T> fromIntArray(Function<int[], Object> function) {
-        return (ObjectReader<T>) new ObjectReaderImplInt32ValueArray(function);
+        return (ObjectReader<T>) new ObjectReaderImplInt32ValueArray(null, function);
     }
 
     public static <T> ObjectReader<T> fromLongArray(Function<long[], Object> function) {
-        return (ObjectReader<T>) new ObjectReaderImplInt64ValueArray(function);
+        return (ObjectReader<T>) new ObjectReaderImplInt64ValueArray(null, function);
     }
 
     public static <T> ObjectReader<T> fromFloatArray(Function<float[], Object> function) {

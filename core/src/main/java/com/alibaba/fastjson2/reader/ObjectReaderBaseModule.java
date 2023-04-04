@@ -1527,8 +1527,18 @@ public class ObjectReaderBaseModule
             return ObjectReaderImplUUID.INSTANCE;
         }
 
+        if (type == AtomicBoolean.class) {
+            return new ObjectReaderImplFromBoolean(
+                    AtomicBoolean.class,
+                    (Function<Boolean, AtomicBoolean>) AtomicBoolean::new
+            );
+        }
+
         if (type == URI.class) {
-            return new ObjectReaderImplFromString<URI>(URI.class, e -> URI.create(e));
+            return new ObjectReaderImplFromString<URI>(
+                    URI.class,
+                    URI::create
+            );
         }
 
         if (type == Charset.class) {
@@ -1757,19 +1767,21 @@ public class ObjectReaderBaseModule
         }
 
         if (type == AtomicInteger.class) {
-            return ObjectReaderImplAtomicInteger.INSTANCE;
+            return new ObjectReaderImplFromInt(AtomicInteger.class, AtomicInteger::new);
         }
 
         if (type == AtomicLong.class) {
-            return ObjectReaderImplAtomicLong.INSTANCE;
+            return new ObjectReaderImplFromLong(AtomicLong.class, AtomicLong::new);
         }
 
         if (type == AtomicIntegerArray.class) {
-            return ObjectReaderImplAtomicIntegerArray.INSTANCE;
+            return new ObjectReaderImplInt32ValueArray(AtomicIntegerArray.class, AtomicIntegerArray::new);
+            //return ObjectReaderImplAtomicIntegerArray.INSTANCE;
         }
 
         if (type == AtomicLongArray.class) {
-            return ObjectReaderImplAtomicLongArray.INSTANCE;
+            return new ObjectReaderImplInt64ValueArray(AtomicLongArray.class, AtomicLongArray::new);
+//            return ObjectReaderImplAtomicLongArray.INSTANCE;
         }
 
         if (type == AtomicReference.class) {
