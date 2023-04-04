@@ -13,13 +13,13 @@ import java.util.function.Function;
 
 final class ObjectReaderImplInt32ValueArray
         extends ObjectReaderPrimitive {
-    static final ObjectReaderImplInt32ValueArray INSTANCE = new ObjectReaderImplInt32ValueArray(null);
+    static final ObjectReaderImplInt32ValueArray INSTANCE = new ObjectReaderImplInt32ValueArray(int[].class, null);
     static final long TYPE_HASH = Fnv.hashCode64("[I");
 
     final Function<int[], Object> builder;
 
-    ObjectReaderImplInt32ValueArray(Function<int[], Object> builder) {
-        super(int[].class);
+    ObjectReaderImplInt32ValueArray(Class objectClass, Function<int[], Object> builder) {
+        super(objectClass);
         this.builder = builder;
     }
 
