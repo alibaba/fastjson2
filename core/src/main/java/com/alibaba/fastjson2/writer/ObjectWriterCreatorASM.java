@@ -2706,7 +2706,7 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(notNull_);
         }
 
-        if (DISABLE_STRING_UNSAFE_GET
+        if ((!DISABLE_STRING_UNSAFE_GET)
                 && JVM_VERSION == 8
                 && UNSAFE_SUPPORT
                 && !OPENJ9
@@ -2726,7 +2726,7 @@ public class ObjectWriterCreatorASM
                     "([C)V",
                     false
             );
-        } else if (DISABLE_STRING_UNSAFE_GET
+        } else if ((!DISABLE_STRING_UNSAFE_GET)
                 && JVM_VERSION > 8
                 && UNSAFE_SUPPORT
                 && !OPENJ9
