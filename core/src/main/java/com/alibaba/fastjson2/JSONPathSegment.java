@@ -822,6 +822,86 @@ abstract class JSONPathSegment {
             throw new JSONException("UnsupportedOperation " + getClass());
         }
 
+        public void set(JSONPath.Context context, Object value) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof Map) {
+                Map map = (Map) object;
+                for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
+                    Map.Entry entry = (Map.Entry) it.next();
+                    entry.setValue(value);
+                }
+
+                return;
+            }
+
+            if (object instanceof List) {
+                List list = (List) object;
+                for (int i = 0; i < list.size(); i++) {
+                    list.set(i, value);
+                }
+                return;
+            }
+
+            if (object != null && object.getClass().isArray()) {
+                int len = Array.getLength(object);
+                for (int i = 0; i < len; i++) {
+                    Array.set(object, i, value);
+                }
+                return;
+            }
+
+            throw new JSONException("UnsupportedOperation " + getClass());
+        }
+
+        public void setCallback(JSONPath.Context context, BiFunction callback) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof Map) {
+                Map map = (Map) object;
+                for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
+                    Map.Entry entry = (Map.Entry) it.next();
+                    Object value = entry.getValue();
+                    Object apply = callback.apply(object, value);
+                    if (apply != value) {
+                        entry.setValue(apply);
+                    }
+                }
+
+                return;
+            }
+
+            if (object instanceof List) {
+                List list = (List) object;
+                for (int i = 0; i < list.size(); i++) {
+                    Object value = list.get(i);
+                    Object apply = callback.apply(object, value);
+                    if (apply != value) {
+                        list.set(i, apply);
+                    }
+                }
+                return;
+            }
+
+            if (object != null && object.getClass().isArray()) {
+                int len = Array.getLength(object);
+                for (int i = 0; i < len; i++) {
+                    Object value = Array.get(object, i);
+                    Object apply = callback.apply(object, value);
+                    if (apply != value) {
+                        Array.set(object, i, apply);
+                    }
+                }
+                return;
+            }
+
+            throw new JSONException("UnsupportedOperation " + getClass());
+        }
+
         @Override
         public void accept(JSONReader jsonReader, JSONPath.Context context) {
             if (context.parent != null && context.parent.eval) {
