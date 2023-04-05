@@ -2,20 +2,41 @@ package com.alibaba.fastjson2.benchmark;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ReadResult {
     public static void main(String[] args) throws Exception {
+        File outFile = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.27_raw.md");
 //        File file = new File("/Users/wenshao/Downloads/result_2.0.25.out");
-        File file = new File("/Users/wenshao/Downloads/result_2.0.26_applem1pro.out");
-//        DocReader reader = new DocReader("ecs.c7.xlarge", file);
-//        DocReader reader = new DocReader("ecs.g8m.xlarge", file);
-//        DocReader reader = new DocReader("OrangePi5", file);
-        DocReader reader = new DocReader("AppleM1Pro", file);
-        reader.read();
-        for (String line : reader.blockLines) {
-            System.out.println(line);
-        }
+
+        Map<String, String> files = new LinkedHashMap<>();
+        files.put("ecs.g7.xlarge", "/Users/wenshao/Downloads/result_2.0.27_g7.out");
+        files.put("ecs.g7a.xlarge", "/Users/wenshao/Downloads/result_2.0.27_g7a.out");
+        files.put("ecs.g8m.xlarge", "/Users/wenshao/Downloads/result_2.0.27_g8m.out");
+        files.put("OrangePI5", "/Users/wenshao/Downloads/result_2.0.27_orangepi5.out");
+        files.put("AppleM1Pro", "/Users/wenshao/Downloads/result_2.0.27_applem1pro.out");
+        files.put("MacBookPro2016", "/Users/wenshao/Downloads/result_2.0.27_mac_book_pro_2019_i9.out");
+
+        PrintStream out = new PrintStream(new FileOutputStream(outFile));
+        files.forEach((k, v) -> {
+            try {
+                File file = new File(v);
+                DocReader reader = new DocReader(k, file);
+                reader.read();
+
+                for (String line : reader.blockLines) {
+                    out.println(line);
+                }
+                reader.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        out.close();
+
+        // benchmark_2.0.27_raw.md
     }
 
     static class DocReader
@@ -73,7 +94,13 @@ public class ReadResult {
                     }
 
                     int index = vmInvoker.lastIndexOf('/', vmInvoker.length() - ends.length() - 1);
-                    String title = "# " + spec + "-" + vmInvoker.substring(index + 1, vmInvoker.length() - ends.length());
+                    String vm = vmInvoker.substring(index + 1, vmInvoker.length() - ends.length());
+                    if (vm.startsWith("graalvm-ce-java1")) {
+                        vm = "graalvm-ce-1" + vm.substring("graalvm-ce-java1".length());
+                    } else if (vm.startsWith("graalvm-ee-java1")) {
+                        vm = "graalvm-ee-1" + vm.substring("graalvm-ee-java1".length());
+                    }
+                    String title = "# " + spec + "-" + vm;
                     blockLines.add(title);
                     blockLines.add("```java");
                 }
