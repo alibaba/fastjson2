@@ -505,4 +505,18 @@ public abstract class CSVParser
             }
         }
     }
+
+    protected JSONException error(int columnIndex, Exception e) {
+        String message = "read csv error, line " + rowCount + ", column ";
+        String column = null;
+        if (columns != null && columnIndex < columns.size()) {
+            column = columns.get(columnIndex);
+        }
+        if (column != null && !column.isEmpty()) {
+            message += column;
+        } else {
+            message += columnIndex;
+        }
+        return new JSONException(message, e);
+    }
 }

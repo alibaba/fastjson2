@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -11,7 +12,11 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -223,6 +228,47 @@ class CSVParserUTF8
             return TypeUtils.parseDouble(bytes, off, len);
         }
 
+        if (type == Date.class) {
+            LocalDateTime ldt;
+            switch (len) {
+                case 8: {
+                    LocalDate localDate = DateUtils.parseLocalDate8(bytes, off);
+                    ldt = localDate.atStartOfDay();
+                    break;
+                }
+                case 9: {
+                    LocalDate localDate = DateUtils.parseLocalDate9(bytes, off);
+                    ldt = localDate.atStartOfDay();
+                    break;
+                }
+                case 10: {
+                    LocalDate localDate = DateUtils.parseLocalDate10(bytes, off);
+                    ldt = localDate.atStartOfDay();
+                    break;
+                }
+                case 19: {
+                    long millis = DateUtils.parseMillis19(bytes, off, DateUtils.DEFAULT_ZONE_ID);
+                    return new Date(millis);
+                }
+                default:
+                    String str = new String(bytes, off, len, charset);
+                    return DateUtils.parseDate(str);
+            }
+
+            if (ldt != null) {
+                ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, DateUtils.DEFAULT_ZONE_ID, null);
+                long seconds = zdt.toEpochSecond();
+                int nanos = ldt.getNano();
+                long millis;
+                if (seconds < 0 && nanos > 0) {
+                    millis = (seconds + 1) * 1000 + nanos / 1000_000 - 1000;
+                } else {
+                    millis = seconds * 1000L + nanos / 1000_000;
+                }
+                return new Date(millis);
+            }
+        }
+
         String str = new String(bytes, off, len, charset);
         return TypeUtils.cast(str, type);
     }
@@ -307,7 +353,11 @@ class CSVParserUTF8
                         if (type == null || type == String.class || type == Object.class) {
                             value = new String(buf, valueStart + 1, valueSize, charset);
                         } else {
-                            value = readValue(buf, valueStart + 1, valueSize, type);
+                            try {
+                                value = readValue(buf, valueStart + 1, valueSize, type);
+                            } catch (Exception e) {
+                                throw error(columnIndex, e);
+                            }
                         }
                     } else {
                         byte[] bytes = new byte[valueSize - escapeCount];
@@ -323,14 +373,22 @@ class CSVParserUTF8
                         if (type == null || type == String.class || type == Object.class) {
                             value = new String(bytes, 0, bytes.length, charset);
                         } else {
-                            value = readValue(bytes, 0, bytes.length, type);
+                            try {
+                                value = readValue(bytes, 0, bytes.length, type);
+                            } catch (Exception e) {
+                                throw error(columnIndex, e);
+                            }
                         }
                     }
                 } else {
-                    if (type == null || type == String.class || type == Object.class) {
+                    if (type == null || type == String.class || type == Object.class || strings) {
                         value = new String(buf, valueStart, valueSize, charset);
                     } else {
-                        value = readValue(buf, valueStart, valueSize, type);
+                        try {
+                            value = readValue(buf, valueStart, valueSize, type);
+                        } catch (Exception e) {
+                            throw error(columnIndex, e);
+                        }
                     }
                 }
 
@@ -385,7 +443,7 @@ class CSVParserUTF8
                     }
                 }
             } else {
-                if (type == null || type == String.class || type == Object.class) {
+                if (type == null || type == String.class || type == Object.class || strings) {
                     value = new String(buf, valueStart, valueSize, charset);
                 } else {
                     value = readValue(buf, valueStart, valueSize, type);

@@ -2063,6 +2063,163 @@ public class TypeUtils {
         return Integer.parseInt(str);
     }
 
+    public static Integer parseInt(char[] bytes, int off, int len) {
+        switch (len) {
+            case 0:
+                return null;
+            case 1: {
+                char b0 = bytes[off];
+                if (b0 >= '0' && b0 <= '9') {
+                    return b0 - '0';
+                }
+                break;
+            }
+            case 2: {
+                char b0 = bytes[off];
+                char b1 = bytes[off + 1];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9') {
+                    return (b0 - '0') * 10
+                            + (b1 - '0');
+                }
+                break;
+            }
+            case 3: {
+                char b0 = bytes[off];
+                char b1 = bytes[off + 1];
+                char b2 = bytes[off + 2];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9') {
+                    return (b0 - '0') * 100
+                            + (b1 - '0') * 10
+                            + (b2 - '0');
+                }
+                break;
+            }
+            case 4: {
+                char b0 = bytes[off];
+                char b1 = bytes[off + 1];
+                char b2 = bytes[off + 2];
+                char b3 = bytes[off + 3];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                ) {
+                    return (b0 - '0') * 1000
+                            + (b1 - '0') * 100
+                            + (b2 - '0') * 10
+                            + (b3 - '0');
+                }
+                break;
+            }
+            case 5: {
+                char b0 = bytes[off];
+                char b1 = bytes[off + 1];
+                char b2 = bytes[off + 2];
+                char b3 = bytes[off + 3];
+                char b4 = bytes[off + 4];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                        && b4 >= '0' && b4 <= '9'
+                ) {
+                    return (b0 - '0') * 10_000
+                            + (b1 - '0') * 1000
+                            + (b2 - '0') * 100
+                            + (b3 - '0') * 10
+                            + (b4 - '0');
+                }
+                break;
+            }
+            case 6: {
+                char b0 = bytes[off];
+                char b1 = bytes[off + 1];
+                char b2 = bytes[off + 2];
+                char b3 = bytes[off + 3];
+                char b4 = bytes[off + 4];
+                char b5 = bytes[off + 5];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                        && b4 >= '0' && b4 <= '9'
+                        && b5 >= '0' && b5 <= '9'
+                ) {
+                    return (b0 - '0') * 100_000
+                            + (b1 - '0') * 10_000
+                            + (b2 - '0') * 1_000
+                            + (b3 - '0') * 100
+                            + (b4 - '0') * 10
+                            + (b5 - '0');
+                }
+                break;
+            }
+            case 7: {
+                char b0 = bytes[off];
+                char b1 = bytes[off + 1];
+                char b2 = bytes[off + 2];
+                char b3 = bytes[off + 3];
+                char b4 = bytes[off + 4];
+                char b5 = bytes[off + 5];
+                char b6 = bytes[off + 6];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                        && b4 >= '0' && b4 <= '9'
+                        && b5 >= '0' && b5 <= '9'
+                        && b6 >= '0' && b6 <= '9'
+                ) {
+                    return (b0 - '0') * 1_000_000
+                            + (b1 - '0') * 100_000
+                            + (b2 - '0') * 10_000
+                            + (b3 - '0') * 1_000
+                            + (b4 - '0') * 100
+                            + (b5 - '0') * 10
+                            + (b6 - '0');
+                }
+                break;
+            }
+            case 8: {
+                char b0 = bytes[off];
+                char b1 = bytes[off + 1];
+                char b2 = bytes[off + 2];
+                char b3 = bytes[off + 3];
+                char b4 = bytes[off + 4];
+                char b5 = bytes[off + 5];
+                char b6 = bytes[off + 6];
+                char b7 = bytes[off + 7];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                        && b4 >= '0' && b4 <= '9'
+                        && b5 >= '0' && b5 <= '9'
+                        && b6 >= '0' && b6 <= '9'
+                        && b7 >= '0' && b7 <= '9'
+                ) {
+                    return (b0 - '0') * 10_000_000
+                            + (b1 - '0') * 1_000_000
+                            + (b2 - '0') * 100_000
+                            + (b3 - '0') * 10_000
+                            + (b4 - '0') * 1_000
+                            + (b5 - '0') * 100
+                            + (b6 - '0') * 10
+                            + (b7 - '0');
+                }
+                break;
+            }
+            default:
+                break;
+        }
+
+        String str = new String(bytes, off, len);
+        return Integer.parseInt(str);
+    }
+
     public static Long parseLong(byte[] bytes, int off, int len) {
         switch (len) {
             case 0:
@@ -2217,6 +2374,209 @@ public class TypeUtils {
 
         String str = new String(bytes, off, len);
         return Long.parseLong(str);
+    }
+
+    public static Long parseLong(char[] bytes, int off, int len) {
+        switch (len) {
+            case 0:
+                return null;
+            case 1: {
+                char b0 = bytes[off];
+                if (b0 >= '0' && b0 <= '9') {
+                    return (long) (b0 - '0');
+                }
+                break;
+            }
+            case 2: {
+                char b0 = bytes[off];
+                char b1 = bytes[off + 1];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9') {
+                    return (long) (b0 - '0') * 10
+                            + (b1 - '0');
+                }
+                break;
+            }
+            case 3: {
+                char b0 = bytes[off];
+                char b1 = bytes[off + 1];
+                char b2 = bytes[off + 2];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9') {
+                    return (long) (b0 - '0') * 100
+                            + (b1 - '0') * 10
+                            + (b2 - '0');
+                }
+                break;
+            }
+            case 4: {
+                char b0 = bytes[off];
+                char b1 = bytes[off + 1];
+                char b2 = bytes[off + 2];
+                char b3 = bytes[off + 3];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9') {
+                    return (long) (b0 - '0') * 1000
+                            + (b1 - '0') * 100
+                            + (b2 - '0') * 10
+                            + (b3 - '0');
+                }
+                break;
+            }
+            case 5: {
+                char b0 = bytes[off];
+                char b1 = bytes[off + 1];
+                char b2 = bytes[off + 2];
+                char b3 = bytes[off + 3];
+                char b4 = bytes[off + 4];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                        && b4 >= '0' && b4 <= '9'
+                ) {
+                    return (long) (b0 - '0') * 10_000
+                            + (b1 - '0') * 1000
+                            + (b2 - '0') * 100
+                            + (b3 - '0') * 10
+                            + (b4 - '0');
+                }
+                break;
+            }
+            case 6: {
+                char b0 = bytes[off];
+                char b1 = bytes[off + 1];
+                char b2 = bytes[off + 2];
+                char b3 = bytes[off + 3];
+                char b4 = bytes[off + 4];
+                char b5 = bytes[off + 5];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                        && b4 >= '0' && b4 <= '9'
+                        && b5 >= '0' && b5 <= '9'
+                ) {
+                    return (long) (b0 - '0') * 100_000
+                            + (b1 - '0') * 10_000
+                            + (b2 - '0') * 1_000
+                            + (b3 - '0') * 100
+                            + (b4 - '0') * 10
+                            + (b5 - '0');
+                }
+                break;
+            }
+            case 7: {
+                char b0 = bytes[off];
+                char b1 = bytes[off + 1];
+                char b2 = bytes[off + 2];
+                char b3 = bytes[off + 3];
+                char b4 = bytes[off + 4];
+                char b5 = bytes[off + 5];
+                char b6 = bytes[off + 6];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                        && b4 >= '0' && b4 <= '9'
+                        && b5 >= '0' && b5 <= '9'
+                        && b6 >= '0' && b6 <= '9'
+                ) {
+                    return (long) (b0 - '0') * 1_000_000
+                            + (b1 - '0') * 100_000
+                            + (b2 - '0') * 10_000
+                            + (b3 - '0') * 1_000
+                            + (b4 - '0') * 100
+                            + (b5 - '0') * 10
+                            + (b6 - '0');
+                }
+                break;
+            }
+            case 8: {
+                char b0 = bytes[off];
+                char b1 = bytes[off + 1];
+                char b2 = bytes[off + 2];
+                char b3 = bytes[off + 3];
+                char b4 = bytes[off + 4];
+                char b5 = bytes[off + 5];
+                char b6 = bytes[off + 6];
+                char b7 = bytes[off + 7];
+                if (b0 >= '0' && b0 <= '9'
+                        && b1 >= '0' && b1 <= '9'
+                        && b2 >= '0' && b2 <= '9'
+                        && b3 >= '0' && b3 <= '9'
+                        && b4 >= '0' && b4 <= '9'
+                        && b5 >= '0' && b5 <= '9'
+                        && b6 >= '0' && b6 <= '9'
+                        && b7 >= '0' && b7 <= '9'
+                ) {
+                    return (long) (b0 - '0') * 10_000_000
+                            + (b1 - '0') * 1_000_000
+                            + (b2 - '0') * 100_000
+                            + (b3 - '0') * 10_000
+                            + (b4 - '0') * 1_000
+                            + (b5 - '0') * 100
+                            + (b6 - '0') * 10
+                            + (b7 - '0');
+                }
+                break;
+            }
+            default:
+                break;
+        }
+
+        String str = new String(bytes, off, len);
+        return Long.parseLong(str);
+    }
+
+    public static BigDecimal parseBigDecimal(char[] bytes, int off, int len) {
+        if (len == 0) {
+            return null;
+        }
+
+        boolean negative = false;
+        int j = off;
+        if (bytes[off] == '-') {
+            negative = true;
+            j++;
+        }
+
+        if (len <= 20 || (negative && len == 21)) {
+            int end = off + len;
+            int dot = 0;
+            int dotIndex = -1;
+            long unscaleValue = 0;
+            for (; j < end; j++) {
+                char b = bytes[j];
+                if (b == '.') {
+                    dot++;
+                    if (dot > 1) {
+                        break;
+                    }
+                    dotIndex = j;
+                } else if (b >= '0' && b <= '9') {
+                    unscaleValue = unscaleValue * 10 + (b - '0');
+                } else {
+                    unscaleValue = -1;
+                    break;
+                }
+            }
+            int scale = 0;
+            if (unscaleValue >= 0 && dot <= 1) {
+                if (negative) {
+                    unscaleValue = -unscaleValue;
+                }
+                if (dotIndex != -1) {
+                    scale = len - (dotIndex - off) - 1;
+                }
+                return BigDecimal.valueOf(unscaleValue, scale);
+            }
+        }
+
+        return new BigDecimal(bytes, 0, len);
     }
 
     public static BigDecimal parseBigDecimal(byte[] bytes, int off, int len) {

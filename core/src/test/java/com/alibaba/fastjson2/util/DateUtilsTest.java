@@ -2377,4 +2377,77 @@ public class DateUtilsTest {
             }
         }
     }
+
+    @Test
+    public void parseLocalDate8() {
+        String str = "1-Nov-19";
+        LocalDate expect = LocalDate.of(2019, 11, 1);
+        assertEquals(expect, DateUtils.parseLocalDate8(str, 0));
+        assertEquals(expect, DateUtils.parseLocalDate8(str.getBytes(), 0));
+    }
+
+    @Test
+    public void parseLocalDate8_1() {
+        String str = "2/1/2019";
+        LocalDate expect = LocalDate.of(2019, 2, 1);
+        assertEquals(expect, DateUtils.parseLocalDate8(str, 0));
+        assertEquals(expect, DateUtils.parseLocalDate8(str.getBytes(), 0));
+    }
+
+    @Test
+    public void parseLocalDate9() {
+        String str = "31-May-19";
+        LocalDate expect = LocalDate.of(2019, 5, 31);
+        assertEquals(expect, DateUtils.parseLocalDate9(str, 0));
+        assertEquals(expect, DateUtils.parseLocalDate9(str.getBytes(), 0));
+    }
+
+    @Test
+    public void parseLocalDate9_1() {
+        String str = "10/1/2019";
+        LocalDate expect = LocalDate.of(2019, 10, 1);
+        assertEquals(expect, DateUtils.parseLocalDate9(str, 0));
+        assertEquals(expect, DateUtils.parseLocalDate9(str.getBytes(), 0));
+    }
+
+    @Test
+    public void parseLocalDate9_2() {
+        String str = "1/10/2019";
+        LocalDate expect = LocalDate.of(2019, 1, 10);
+        assertEquals(expect, DateUtils.parseLocalDate9(str, 0));
+        assertEquals(expect, DateUtils.parseLocalDate9(str.getBytes(), 0));
+    }
+
+    @Test
+    public void parseLocalDate10() {
+        String str = "10/11/2019";
+        LocalDate expect = LocalDate.of(2019, 10, 11);
+        assertEquals(expect, DateUtils.parseLocalDate10(str, 0));
+        assertEquals(expect, DateUtils.parseLocalDate10(str.getBytes(), 0));
+    }
+
+    @Test
+    public void parseLocalDate10_1() {
+        String str = "2019-10-11";
+        LocalDate expect = LocalDate.of(2019, 10, 11);
+        assertEquals(expect, DateUtils.parseLocalDate10(str, 0));
+        assertEquals(expect, DateUtils.parseLocalDate10(str.getBytes(), 0));
+    }
+
+    @Test
+    public void parseMillis19() {
+        String str = "2019-10-11 12:13:14";
+        LocalDateTime ldt = LocalDateTime.of(2019, 10, 11, 12, 13, 14);
+        long millis = ldt.atZone(DateUtils.DEFAULT_ZONE_ID).toInstant().toEpochMilli();
+        assertEquals(millis, DateUtils.parseMillis19(str, DateUtils.DEFAULT_ZONE_ID));
+        assertEquals(millis, DateUtils.parseMillis19(str.getBytes(), 0, DateUtils.DEFAULT_ZONE_ID));
+    }
+
+    @Test
+    public void parseDate22() {
+        String str = "04/03/2023 12:13:14 AM";
+        LocalDateTime ldt = LocalDateTime.of(2023, 4, 3, 12, 13, 14);
+        long millis = ldt.atZone(DateUtils.DEFAULT_ZONE_ID).toInstant().toEpochMilli();
+        assertEquals(millis, DateUtils.parseMillis(str, DateUtils.DEFAULT_ZONE_ID));
+    }
 }
