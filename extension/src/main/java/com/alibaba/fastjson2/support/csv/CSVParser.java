@@ -14,6 +14,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
@@ -196,6 +197,19 @@ public abstract class CSVParser
 
         this.columns = Arrays.asList(columns);
         return this.columns;
+    }
+
+    public <T> Stream<T> readAsStream() {
+        return readAsStream(Integer.MAX_VALUE);
+    }
+
+    public <T> Stream<T> readAsStream(int limit) {
+        return StreamUtil.stream(c -> {
+            T t;
+            for (int left = limit; left > 0 && (t = readLoneObject()) != null; left--) {
+                c.accept(t);
+            }
+        });
     }
 
     public <T> T readLoneObject() {
