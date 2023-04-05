@@ -45,4 +45,46 @@ public class JSONPathSetTest1 {
         assertEquals("{\"store\":{\"book\":[\"a\",\"a\",\"x2\",\"x3\"]}}",
                 JSONPath.set("{'store':{'book':['x0','x1','x2','x3']}}", "$.store.book[0:2]", "a"));
     }
+
+    @Test
+    public void test3() {
+        JSONObject root = JSONObject.of("values", JSONArray.of(1, 2, 3));
+        JSONPath.set(root, "$.values[*]", 100);
+        assertEquals("[100,100,100]", root.get("values").toString());
+    }
+
+    @Test
+    public void test4() {
+        JSONObject root = JSONObject.of("values", JSONObject.of("a", 1, "b2", 2, "c", 3));
+        JSONPath.set(root, "$.values[*]", 100);
+        assertEquals("{\"a\":100,\"b2\":100,\"c\":100}", root.get("values").toString());
+    }
+
+    @Test
+    public void test5() {
+        JSONObject root = JSONObject.of("values", JSONArray.of(1, 2, 3));
+        JSONPath.setCallback(root, "$.values[*]", v -> ((Integer) v).intValue() + 100);
+        assertEquals("[101,102,103]", root.get("values").toString());
+    }
+
+    @Test
+    public void test6() {
+        JSONObject root = JSONObject.of("values", JSONObject.of("a", 1, "b2", 2, "c", 3));
+        JSONPath.setCallback(root, "$.values[*]", v -> ((Integer) v).intValue() + 100);
+        assertEquals("{\"a\":101,\"b2\":102,\"c\":103}", root.get("values").toString());
+    }
+
+    @Test
+    public void test7() {
+        JSONObject root = JSONObject.of("values", new int[] {1, 2, 3});
+        JSONPath.setCallback(root, "$.values[*]", v -> ((Integer) v).intValue() + 100);
+        assertEquals("[101,102,103]", JSONArray.toJSONString(root.get("values")));
+    }
+
+    @Test
+    public void test8() {
+        JSONObject root = JSONObject.of("values", new int[] {1, 2, 3});
+        JSONPath.set(root, "$.values[*]", 100);
+        assertEquals("[100,100,100]", JSONArray.toJSONString(root.get("values")));
+    }
 }
