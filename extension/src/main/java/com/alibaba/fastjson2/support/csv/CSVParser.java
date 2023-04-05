@@ -197,6 +197,9 @@ public abstract class CSVParser
         }
 
         Object[] values = readLineValues(false);
+        if (values == null) {
+            return null;
+        }
 
         if (columns != null) {
             Map map = new HashMap();
