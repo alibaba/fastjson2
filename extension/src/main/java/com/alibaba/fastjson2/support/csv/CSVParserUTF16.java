@@ -2,14 +2,19 @@ package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 
 class CSVParserUTF16
         extends CSVParser {
@@ -194,7 +199,38 @@ class CSVParserUTF16
     }
 
     Object readValue(char[] chars, int off, int len, Type type) {
+        if (type == Integer.class) {
+            return TypeUtils.parseInt(chars, off, len);
+        }
+
+        if (type == Long.class) {
+            return TypeUtils.parseLong(chars, off, len);
+        }
+
+        if (type == BigDecimal.class) {
+            return TypeUtils.parseBigDecimal(chars, off, len);
+        }
+
+        if (type == Float.class) {
+            if (len == 0) {
+                return null;
+            }
+            return TypeUtils.parseFloat(chars, off, len);
+        }
+
+        if (type == Double.class) {
+            if (len == 0) {
+                return null;
+            }
+            return TypeUtils.parseDouble(chars, off, len);
+        }
+
         String str = new String(chars, off, len);
+
+        if (type == Date.class) {
+            return DateUtils.parseDate(str, DEFAULT_ZONE_ID);
+        }
+
         return TypeUtils.cast(str, type);
     }
 
@@ -275,7 +311,7 @@ class CSVParserUTF16
                 Object value;
                 if (quote) {
                     if (escapeCount == 0) {
-                        if (type == null || type == String.class || type == Object.class) {
+                        if (type == null || type == String.class || type == Object.class || strings) {
                             value = new String(buf, valueStart + 1, valueSize);
                         } else {
                             value = readValue(buf, valueStart + 1, valueSize, type);
@@ -291,17 +327,21 @@ class CSVParserUTF16
                             }
                         }
 
-                        if (type == null || type == String.class || type == Object.class) {
+                        if (type == null || type == String.class || type == Object.class || strings) {
                             value = new String(bytes);
                         } else {
                             value = readValue(bytes, 0, bytes.length, type);
                         }
                     }
                 } else {
-                    if (type == null || type == String.class || type == Object.class) {
+                    if (type == null || type == String.class || type == Object.class || strings) {
                         value = new String(buf, valueStart, valueSize);
                     } else {
-                        value = readValue(buf, valueStart, valueSize, type);
+                        try {
+                            value = readValue(buf, valueStart, valueSize, type);
+                        } catch (Exception e) {
+                            throw error(columnIndex, e);
+                        }
                     }
                 }
 
@@ -333,7 +373,7 @@ class CSVParserUTF16
             Object value;
             if (quote) {
                 if (escapeCount == 0) {
-                    if (type == null || type == String.class || type == Object.class) {
+                    if (type == null || type == String.class || type == Object.class || strings) {
                         value = new String(buf, valueStart + 1, valueSize);
                     } else {
                         value = readValue(buf, valueStart + 1, valueSize, type);
@@ -349,17 +389,25 @@ class CSVParserUTF16
                         }
                     }
 
-                    if (type == null || type == String.class || type == Object.class) {
+                    if (type == null || type == String.class || type == Object.class || strings) {
                         value = new String(bytes);
                     } else {
-                        value = readValue(bytes, 0, bytes.length, type);
+                        try {
+                            value = readValue(bytes, 0, bytes.length, type);
+                        } catch (Exception e) {
+                            throw error(columnIndex, e);
+                        }
                     }
                 }
             } else {
-                if (type == null || type == String.class || type == Object.class) {
+                if (type == null || type == String.class || type == Object.class || strings) {
                     value = new String(buf, valueStart, valueSize);
                 } else {
-                    value = readValue(buf, valueStart, valueSize, type);
+                    try {
+                        value = readValue(buf, valueStart, valueSize, type);
+                    } catch (Exception e) {
+                        throw error(columnIndex, e);
+                    }
                 }
             }
 

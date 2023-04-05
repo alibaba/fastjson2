@@ -58,6 +58,9 @@ public class TypeUtilsTest2 {
             String str = Integer.toString(value);
             byte[] bytes = str.getBytes();
             assertEquals(value, TypeUtils.parseInt(bytes, 0, bytes.length));
+
+            char[] chars = str.toCharArray();
+            assertEquals(value, TypeUtils.parseInt(chars, 0, bytes.length));
         }
 
         for (int i = 0; i < 1000; i++) {
@@ -65,6 +68,8 @@ public class TypeUtilsTest2 {
             String str = Long.toString(value);
             byte[] bytes = str.getBytes();
             assertEquals(value, TypeUtils.parseLong(bytes, 0, bytes.length));
+            char[] chars = str.toCharArray();
+            assertEquals(value, TypeUtils.parseLong(chars, 0, bytes.length));
         }
     }
 
@@ -152,18 +157,30 @@ public class TypeUtilsTest2 {
             byte[] bytes = ("a," + string).getBytes();
             BigDecimal decimal = TypeUtils.parseBigDecimal(bytes, 2, string.length());
             assertEquals(new BigDecimal(string), decimal);
+
+            char[] chars = ("a," + string).toCharArray();
+            BigDecimal decimal1 = TypeUtils.parseBigDecimal(chars, 2, string.length());
+            assertEquals(new BigDecimal(string), decimal1);
         }
 
         for (String string : strings) {
             byte[] bytes = ("ab," + string).getBytes();
             BigDecimal decimal = TypeUtils.parseBigDecimal(bytes, 3, string.length());
             assertEquals(new BigDecimal(string), decimal);
+
+            char[] chars = ("ab," + string).toCharArray();
+            BigDecimal decimal1 = TypeUtils.parseBigDecimal(chars, 3, string.length());
+            assertEquals(new BigDecimal(string), decimal1);
         }
 
         for (String string : strings) {
             byte[] bytes = ("abc," + string).getBytes();
             BigDecimal decimal = TypeUtils.parseBigDecimal(bytes, 4, string.length());
             assertEquals(new BigDecimal(string), decimal);
+
+            char[] chars = ("abc," + string).toCharArray();
+            BigDecimal decimal1 = TypeUtils.parseBigDecimal(chars, 4, string.length());
+            assertEquals(new BigDecimal(string), decimal1);
         }
     }
 }
