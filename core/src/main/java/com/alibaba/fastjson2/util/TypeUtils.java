@@ -2576,7 +2576,7 @@ public class TypeUtils {
             }
         }
 
-        return new BigDecimal(bytes, 0, len);
+        return new BigDecimal(bytes, off, len);
     }
 
     public static BigDecimal parseBigDecimal(byte[] bytes, int off, int len) {
