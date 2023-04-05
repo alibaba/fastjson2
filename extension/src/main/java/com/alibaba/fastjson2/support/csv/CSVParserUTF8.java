@@ -53,7 +53,7 @@ class CSVParserUTF8
         this.schema = schema;
     }
 
-    boolean seekLine() throws IOException {
+    protected boolean seekLine() throws IOException {
         if (buf == null) {
             if (input != null) {
                 buf = new byte[SIZE_256K];

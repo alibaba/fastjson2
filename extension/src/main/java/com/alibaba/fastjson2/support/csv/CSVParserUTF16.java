@@ -56,7 +56,7 @@ class CSVParserUTF16
         this.end = off + len;
     }
 
-    boolean seekLine() throws IOException {
+    protected boolean seekLine() throws IOException {
         if (buf == null) {
             if (input != null) {
                 buf = new char[SIZE_256K];
