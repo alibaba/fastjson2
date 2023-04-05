@@ -62,7 +62,7 @@ public class EishayParseBinaryArrayMapping {
         }
     }
 
-    @Benchmark
+//    @Benchmark
     public void fastjson1UTF8Bytes(Blackhole bh) {
         bh.consume(com.alibaba.fastjson.JSON.parseObject(fastjson2UTF8Bytes, MediaContent.class, Feature.SupportArrayToBean));
     }
