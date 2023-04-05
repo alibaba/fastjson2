@@ -31,6 +31,9 @@ public class TypeUtilsTest2 {
             String str = Integer.toString(value);
             byte[] bytes = str.getBytes();
             assertEquals(value, TypeUtils.parseInt(bytes, 0, bytes.length));
+
+            char[] chars = str.toCharArray();
+            assertEquals(value, TypeUtils.parseInt(chars, 0, bytes.length));
         }
 
         for (int value : values) {
@@ -40,12 +43,19 @@ public class TypeUtilsTest2 {
             String str = Integer.toString(value);
             byte[] bytes = str.getBytes();
             assertEquals(value, TypeUtils.parseInt(bytes, 0, bytes.length));
+
+            char[] chars = str.toCharArray();
+            assertEquals(value, TypeUtils.parseInt(chars, 0, bytes.length));
         }
 
         for (int value : values) {
             String str = Integer.toString(value);
             byte[] bytes = str.getBytes();
-            assertEquals(BigDecimal.valueOf(value), TypeUtils.parseBigDecimal(bytes, 0, bytes.length));
+            BigDecimal expected = BigDecimal.valueOf(value);
+            assertEquals(expected, TypeUtils.parseBigDecimal(bytes, 0, bytes.length));
+
+            char[] chars = str.toCharArray();
+            assertEquals(expected, TypeUtils.parseBigDecimal(chars, 0, bytes.length));
         }
     }
 
@@ -108,6 +118,9 @@ public class TypeUtilsTest2 {
             String str = Long.toString(value);
             byte[] bytes = str.getBytes();
             assertEquals(value, TypeUtils.parseLong(bytes, 0, bytes.length));
+
+            char[] chars = str.toCharArray();
+            assertEquals(value, TypeUtils.parseLong(chars, 0, bytes.length));
         }
     }
 
@@ -150,7 +163,32 @@ public class TypeUtilsTest2 {
                 "123.",
                 "123.4",
                 "1234.56",
-                "1.23456"
+                "1.23456E1",
+                "123E1",
+                "123E-1",
+                "1234567890.1234567890",
+                "12345678901234567890.1234567890",
+                "123456789012345678901234567890.1234567890",
+                "1234567890123456789012345678901234567890.1234567890",
+                "12345678901234567890123456789012345678901234567890.1234567890",
+                "123456789012345678901234567890123456789012345678901234567890.1234567890",
+                "1234567890123456789012345678901234567890123456789012345678901234567890.1234567890",
+                "-12.34",
+                "-.34",
+                "-123.",
+                "-123.4",
+                "-1234.56",
+                "-1.23456",
+                "-1.23456E1",
+                "-123E1",
+                "-123E-1",
+                "-1234567890.1234567890",
+                "-12345678901234567890.1234567890",
+                "-123456789012345678901234567890.1234567890",
+                "-1234567890123456789012345678901234567890.1234567890",
+                "-12345678901234567890123456789012345678901234567890.1234567890",
+                "-123456789012345678901234567890123456789012345678901234567890.1234567890",
+                "-1234567890123456789012345678901234567890123456789012345678901234567890.1234567890"
         };
 
         for (String string : strings) {
@@ -182,5 +220,12 @@ public class TypeUtilsTest2 {
             BigDecimal decimal1 = TypeUtils.parseBigDecimal(chars, 4, string.length());
             assertEquals(new BigDecimal(string), decimal1);
         }
+
+        assertNull(TypeUtils.parseBigDecimal(new byte[128], 0, 0));
+        assertNull(TypeUtils.parseBigDecimal(new char[128], 0, 0));
+        assertNull(TypeUtils.parseInt(new byte[128], 0, 0));
+        assertNull(TypeUtils.parseInt(new char[128], 0, 0));
+        assertNull(TypeUtils.parseLong(new byte[128], 0, 0));
+        assertNull(TypeUtils.parseLong(new char[128], 0, 0));
     }
 }
