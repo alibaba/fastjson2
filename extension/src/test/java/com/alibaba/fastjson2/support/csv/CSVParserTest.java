@@ -1,13 +1,16 @@
 package com.alibaba.fastjson2.support.csv;
 
+import lombok.Data;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -155,10 +158,26 @@ public class CSVParserTest {
         }
     }
 
+    @Test
+    public void testFileAsStream() {
+        CSVParser csvParser = CSVParser.of(new InputStreamReader(getClass().getResourceAsStream("/person.csv")), Person.class);
+//        CSVParser csvParser = CSVParser.of(getClass().getResourceAsStream("/person.csv"), Person.class);
+        System.out.println(csvParser.readHeader());
+        Stream<Person> stream = csvParser.readAsStream();
+        stream.forEach(System.out::println);
+    }
+
     final String str = "Year,Make,Model,Description,Price\n" +
             "1997,Ford,E350,\"ac, abs, moon\",3000.00\n" +
             "1999,Chevy,\"Venture \"\"Extended Edition\"\"\",\"\",4900.00\n" +
             "1999,Chevy,\"Venture \"\"Extended Edition, Very Large\"\"\",\"\",5000.00\n" +
             "1996,Jeep,Grand Cherokee,\"MUST SELL!\n" +
             "air, moon roof, loaded\",4799.00";
+
+    @Data
+    static class Person {
+        private String name;
+        private String weight;
+        private String age;
+    }
 }
