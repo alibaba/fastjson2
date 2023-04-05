@@ -38,7 +38,7 @@ public class CSVBig38MTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("CSVBig38M-readLines millis : " + millis);
-            // zulu8.62.0.19 : 2267
+            // zulu8.68.0.21 2468 1809 1798
         }
     }
 

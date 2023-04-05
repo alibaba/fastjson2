@@ -2224,6 +2224,45 @@ public class TypeUtils {
             return null;
         }
 
+        boolean negative = false;
+        int j = off;
+        if (bytes[off] == '-') {
+            negative = true;
+            j++;
+        }
+
+        if (len <= 20 || (negative && len == 21)) {
+            int end = off + len;
+            int dot = 0;
+            int dotIndex = -1;
+            long unscaleValue = 0;
+            for (; j < end; j++) {
+                byte b = bytes[j];
+                if (b == '.') {
+                    dot++;
+                    if (dot > 1) {
+                        break;
+                    }
+                    dotIndex = j;
+                } else if (b >= '0' && b <= '9') {
+                    unscaleValue = unscaleValue * 10 + (b - '0');
+                } else {
+                    unscaleValue = -1;
+                    break;
+                }
+            }
+            int scale = 0;
+            if (unscaleValue >= 0 && dot <= 1) {
+                if (negative) {
+                    unscaleValue = -unscaleValue;
+                }
+                if (dotIndex != -1) {
+                    scale = len - dotIndex - 1;
+                }
+                return BigDecimal.valueOf(unscaleValue, scale);
+            }
+        }
+
         char[] chars = new char[len];
         for (int i = 0; i < len; i++) {
             chars[i] = (char) bytes[off + i];
