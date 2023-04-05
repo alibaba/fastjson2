@@ -48,6 +48,12 @@ class CSVParserUTF8
         this.input = input;
     }
 
+    CSVParserUTF8(InputStream input, Charset charset, ObjectReaderAdapter objectReader) {
+        super(objectReader);
+        this.charset = charset;
+        this.input = input;
+    }
+
     CSVParserUTF8(InputStream input, Map<String, Type> schema) {
         this.input = input;
         this.schema = schema;

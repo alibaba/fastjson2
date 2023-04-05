@@ -160,7 +160,7 @@ public class CSVParserTest {
 
     @Test
     public void testFileAsStream() {
-        CSVParser csvParser = CSVParser.of(new InputStreamReader(getClass().getResourceAsStream("/person.csv")), Person.class);
+        CSVParser csvParser = CSVParser.of(getClass().getResourceAsStream("/person.csv"), Person.class);
         System.out.println(csvParser.readHeader());
         Stream<Person> stream = csvParser.readAsStream();
         stream.forEach(System.out::println);

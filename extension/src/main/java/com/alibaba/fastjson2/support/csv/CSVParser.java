@@ -99,6 +99,16 @@ public abstract class CSVParser
         return new CSVParserUTF8(in, StandardCharsets.UTF_8, types);
     }
 
+    public static CSVParser of(InputStream in, Class objectClass) {
+        return of(in, StandardCharsets.UTF_8, objectClass);
+    }
+
+    public static CSVParser of(InputStream in, Charset charset, Class objectClass) {
+        JSONReader.Context context = JSONFactory.createReadContext();
+        ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
+        return new CSVParserUTF8(in, charset, objectReader);
+    }
+
     public static CSVParser of(InputStream in, Charset charset, Type... types) throws IOException {
         if (charset == StandardCharsets.UTF_16
                 || charset == StandardCharsets.UTF_16LE
