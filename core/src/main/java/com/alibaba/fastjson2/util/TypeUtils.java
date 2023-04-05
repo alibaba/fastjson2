@@ -2257,7 +2257,7 @@ public class TypeUtils {
                     unscaleValue = -unscaleValue;
                 }
                 if (dotIndex != -1) {
-                    scale = len - dotIndex - 1;
+                    scale = len - (dotIndex - off) - 1;
                 }
                 return BigDecimal.valueOf(unscaleValue, scale);
             }

@@ -95,6 +95,25 @@ public abstract class CSVParser
         return new CSVParserUTF8(new FileInputStream(file), charset, types);
     }
 
+    public static CSVParser of(File file, Class objectClass) throws IOException {
+        return of(file, StandardCharsets.UTF_8, objectClass);
+    }
+
+    public static CSVParser of(File file, Charset charset, Class objectClass) throws IOException {
+        JSONReader.Context context = JSONFactory.createReadContext();
+        ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
+
+        if (charset == StandardCharsets.UTF_16
+                || charset == StandardCharsets.UTF_16LE
+                || charset == StandardCharsets.UTF_16BE) {
+            return new CSVParserUTF16(
+                    new InputStreamReader(new FileInputStream(file), charset), objectReader
+            );
+        }
+
+        return new CSVParserUTF8(new FileInputStream(file), charset, objectReader);
+    }
+
     public static CSVParser of(InputStream in, Type... types) throws IOException {
         return new CSVParserUTF8(in, StandardCharsets.UTF_8, types);
     }

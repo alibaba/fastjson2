@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -130,6 +131,41 @@ public class CSVParserTest {
     }
 
     @Test
+    public void testFileObject() throws Exception {
+        Charset[] charsets = new Charset[] {
+                StandardCharsets.UTF_8,
+                StandardCharsets.ISO_8859_1,
+                StandardCharsets.US_ASCII,
+                StandardCharsets.UTF_16,
+                StandardCharsets.UTF_16LE,
+                StandardCharsets.UTF_16BE
+        };
+
+        for (Charset charset : charsets) {
+            File file = File.createTempFile("abc", "txt");
+            FileOutputStream out = new FileOutputStream(file);
+            out.write(str.getBytes(charset));
+            out.flush();
+            out.close();
+
+            CSVParser parser = CSVParser.of(file, charset, Item.class);
+            List<String> columns = parser.readHeader();
+            assertEquals(5, columns.size());
+
+            for (int i = 0; ; ++i) {
+                Item item = parser.readLoneObject();
+                if (item == null) {
+                    break;
+                }
+                String[] line = new String[] {item.year, item.make, item.model, item.description, item.price.toString()};
+                assertArrayEquals(lines[i], line);
+            }
+
+            parser.close();
+        }
+    }
+
+    @Test
     public void testInputStreamFile() throws Exception {
         Charset[] charsets = new Charset[] {
                 StandardCharsets.UTF_8,
@@ -180,6 +216,14 @@ public class CSVParserTest {
             "1999,Chevy,\"Venture \"\"Extended Edition, Very Large\"\"\",\"\",5000.00\n" +
             "1996,Jeep,Grand Cherokee,\"MUST SELL!\n" +
             "air, moon roof, loaded\",4799.00";
+
+    public static class Item {
+        public String year;
+        public String make;
+        public String model;
+        public String description;
+        public BigDecimal price;
+    }
 
     @Data
     static class Person {
