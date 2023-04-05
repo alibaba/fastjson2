@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.stream.StreamReader;
 import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.io.*;
@@ -19,32 +19,12 @@ import java.util.stream.Stream;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public abstract class CSVParser
+        extends StreamReader
         implements Closeable {
-    static final int SIZE_256K = 1024 * 256;
-
-    ObjectReaderProvider provider;
-    long features;
-
-    Type[] types;
-    ObjectReader[] typeReaders;
-    ObjectReaderAdapter objectReader;
-
     List<String> columns;
     Map<String, Type> schema;
 
     boolean quote;
-    int lineSize;
-    int rowCount;
-
-    int lineStart;
-    int lineEnd;
-    int lineNextStart;
-
-    int end;
-    int off;
-
-    boolean inputEnd;
-    boolean lineTerminated;
 
     CSVParser() {
     }
@@ -54,23 +34,11 @@ public abstract class CSVParser
     }
 
     CSVParser(ObjectReaderAdapter objectReader) {
-        this.objectReader = objectReader;
+        super(objectReader);
     }
 
     public CSVParser(Type[] types) {
-        this.types = types;
-
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader[] readers = new ObjectReader[types.length];
-        for (int i = 0; i < types.length; i++) {
-            Type type = types[i];
-            if (type == String.class || type == Object.class) {
-                readers[i] = null;
-            } else {
-                readers[i] = provider.getObjectReader(type);
-            }
-        }
-        this.typeReaders = readers;
+        super(types);
     }
 
     public static CSVParser of(Reader reader, Class objectClass) {
@@ -175,8 +143,6 @@ public abstract class CSVParser
     public static CSVParser of(byte[] utf8Bytes, Type... types) {
         return new CSVParserUTF8(utf8Bytes, 0, utf8Bytes.length, types);
     }
-
-    abstract boolean seekLine() throws IOException;
 
     public List<String> readHeader() {
         String[] columns = (String[]) readLineValues(true);
@@ -505,16 +471,6 @@ public abstract class CSVParser
             } else {
                 lineSize++;
             }
-        }
-    }
-
-    public enum Feature {
-        IgnoreEmptyLine(1);
-
-        public final long mask;
-
-        Feature(long mask) {
-            this.mask = mask;
         }
     }
 }
