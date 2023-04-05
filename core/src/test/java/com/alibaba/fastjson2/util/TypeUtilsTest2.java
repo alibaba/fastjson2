@@ -136,4 +136,34 @@ public class TypeUtilsTest2 {
             assertEquals(Boolean.parseBoolean(str), TypeUtils.parseBoolean(bytes, 0, bytes.length));
         }
     }
+
+    @Test
+    public void parseBigDecimal() {
+        String[] strings = new String[]{
+                "12.34",
+                ".34",
+                "123.",
+                "123.4",
+                "1234.56",
+                "1.23456"
+        };
+
+        for (String string : strings) {
+            byte[] bytes = ("a," + string).getBytes();
+            BigDecimal decimal = TypeUtils.parseBigDecimal(bytes, 2, string.length());
+            assertEquals(new BigDecimal(string), decimal);
+        }
+
+        for (String string : strings) {
+            byte[] bytes = ("ab," + string).getBytes();
+            BigDecimal decimal = TypeUtils.parseBigDecimal(bytes, 3, string.length());
+            assertEquals(new BigDecimal(string), decimal);
+        }
+
+        for (String string : strings) {
+            byte[] bytes = ("abc," + string).getBytes();
+            BigDecimal decimal = TypeUtils.parseBigDecimal(bytes, 4, string.length());
+            assertEquals(new BigDecimal(string), decimal);
+        }
+    }
 }
