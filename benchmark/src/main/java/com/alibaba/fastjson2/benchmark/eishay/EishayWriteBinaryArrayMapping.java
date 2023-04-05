@@ -48,12 +48,12 @@ public class EishayWriteBinaryArrayMapping {
         }
     }
 
-    @Benchmark
+//    @Benchmark
     public void fastjson1UTF8Bytes(Blackhole bh) {
         bh.consume(com.alibaba.fastjson.JSON.toJSONBytes(mc, SerializerFeature.BeanToArray));
     }
 
-//    @Benchmark
+    @Benchmark
     public void fastjson2UTF8Bytes(Blackhole bh) {
         bh.consume(JSON.toJSONBytes(mc, JSONWriter.Feature.BeanToArray));
     }

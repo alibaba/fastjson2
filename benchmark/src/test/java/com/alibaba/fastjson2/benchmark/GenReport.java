@@ -7,7 +7,8 @@ import java.util.*;
 public class GenReport {
     public void gen() throws Exception {
         File dir = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/");
-        File file = new File(dir, "benchmark_2.0.26_raw.md");
+        File file = new File(dir, "benchmark_2.0.27_raw.md");
+        File outFile = new File(dir, "benchmark_2.0.27.md");
 
         Map<String, BenchmarkResult> benchResults = new LinkedHashMap<>();
 
@@ -27,6 +28,14 @@ public class GenReport {
             }
         }
 
+        gen(outFile, benchResults);
+    }
+
+    private static void gen(
+            File outFile,
+            Map<String, BenchmarkResult> benchResults
+    ) throws FileNotFoundException {
+        PrintStream out = new PrintStream(new FileOutputStream(outFile));
         for (BenchmarkResult benchmarkResult : benchResults.values()) {
             if (benchmarkResult.libraryResults.size() == 4) {
                 LibResult fastjson2 = benchmarkResult.libraryResults.get("fastjson2");
@@ -34,9 +43,12 @@ public class GenReport {
                 LibResult jackson = benchmarkResult.libraryResults.get("jackson");
                 LibResult gson = benchmarkResult.libraryResults.get("gson");
                 LibResult fastjson2UTF8Bytes = benchmarkResult.libraryResults.get("fastjson2UTF8Bytes");
+                LibResult fastjson1UTF8Bytes = benchmarkResult.libraryResults.get("fastjson1UTF8Bytes");
                 LibResult hessian = benchmarkResult.libraryResults.get("hessian");
                 LibResult javaSerialize = benchmarkResult.libraryResults.get("javaSerialize");
                 LibResult jsonb = benchmarkResult.libraryResults.get("jsonb");
+                LibResult kryo = benchmarkResult.libraryResults.get("kryo");
+                LibResult protobuf = benchmarkResult.libraryResults.get("protobuf");
                 if (fastjson1 != null && fastjson2 != null && jackson != null && gson != null) {
                     benchmarkResult.libraryResults.clear();
                     benchmarkResult.libraryResults.put("fastjson2", fastjson2);
@@ -49,10 +61,20 @@ public class GenReport {
                     benchmarkResult.libraryResults.put("fastjson2UTF8Bytes", fastjson2UTF8Bytes);
                     benchmarkResult.libraryResults.put("hessian", hessian);
                     benchmarkResult.libraryResults.put("javaSerialize", javaSerialize);
+                } else if (fastjson1UTF8Bytes != null && jsonb != null && kryo != null && protobuf != null) {
+                    benchmarkResult.libraryResults.clear();
+                    benchmarkResult.libraryResults.put("jsonb", jsonb);
+                    benchmarkResult.libraryResults.put("kryo", kryo);
+                    benchmarkResult.libraryResults.put("protobuf", protobuf);
+//                    benchmarkResult.libraryResults.put("fastjson1UTF8Bytes", fastjson1UTF8Bytes);
+                } else if (fastjson2UTF8Bytes != null && jsonb != null && kryo != null && protobuf != null) {
+                    benchmarkResult.libraryResults.clear();
+                    benchmarkResult.libraryResults.put("jsonb", jsonb);
+                    benchmarkResult.libraryResults.put("kryo", kryo);
+                    benchmarkResult.libraryResults.put("protobuf", protobuf);
+                    benchmarkResult.libraryResults.put("fastjson2UTF8Bytes", fastjson2UTF8Bytes);
                 } else {
                     LibResult fastjson2JSONB = benchmarkResult.libraryResults.get("fastjson2JSONB");
-                    LibResult fastjson1UTF8Bytes = benchmarkResult.libraryResults.get("fastjson1UTF8Bytes");
-                    LibResult kryo = benchmarkResult.libraryResults.get("kryo");
                     if (fastjson1UTF8Bytes != null && fastjson2UTF8Bytes != null && fastjson2JSONB != null && kryo != null) {
                         benchmarkResult.libraryResults.clear();
                         benchmarkResult.libraryResults.put("fastjson2JSONB", fastjson2JSONB);
@@ -97,58 +119,59 @@ public class GenReport {
                 }
             }
 
-            System.out.println("## " + benchmarkResult.benchmarkCase);
+            out.println("## " + benchmarkResult.benchmarkCase);
 
             LibResult firLib = benchmarkResult.libraryResults.values().iterator().next();
             Set<String> jdks = firLib.scores.keySet();
-            System.out.print("| aliyun ecs spec | jdk version ");
+            out.print("| aliyun ecs spec | jdk version ");
             for (LibResult libResult : benchmarkResult.libraryResults.values()) {
-                System.out.print("\t|\t");
-                System.out.print(libResult.library);
+                out.print("\t|\t");
+                out.print(libResult.library);
             }
-            System.out.print(" |");
-            System.out.println();
+            out.print(" |");
+            out.println();
 
-            System.out.print("|-----|");
+            out.print("|-----|");
             for (LibResult libResult : benchmarkResult.libraryResults.values()) {
-                System.out.print("-----|-----");
+                out.print("-----|-----");
             }
-            System.out.print("|");
-            System.out.println();
+            out.print("|");
+            out.println();
 
             for (String jdk : jdks) {
                 double firstScore = benchmarkResult.libraryResults.values().iterator().next().scores.get(jdk);
 
-                System.out.print("| ");
+                out.print("| ");
 
                 int p = jdk.indexOf('-');
                 if (p == -1) {
-                    System.out.print(jdk);
-                    System.out.print(" | ");
+                    out.print(jdk);
+                    out.print(" | ");
                 } else {
                     String ecs = jdk.substring(0, p);
-                    System.out.print(ecs);
-                    System.out.print(" | ");
-                    System.out.print(jdk.substring(p + 1));
+                    out.print(ecs);
+                    out.print(" | ");
+                    out.print(jdk.substring(p + 1));
                 }
 
                 int i = 0;
                 for (LibResult libResult : benchmarkResult.libraryResults.values()) {
                     Double score = libResult.scores.get(jdk);
-                    System.out.print("\t|\t");
-                    System.out.print(score);
+                    out.print("\t|\t");
+                    out.print(score);
                     if (i != 0) {
                         double percent = score / firstScore;
-                        System.out.print(" (" + new DecimalFormat("#,##0.##%").format(percent) + ")");
+                        out.print(" (" + new DecimalFormat("#,##0.##%").format(percent) + ")");
                     }
                     ++i;
                 }
-                System.out.print(" |");
-                System.out.println();
+                out.print(" |");
+                out.println();
             }
 
-            System.out.println();
+            out.println();
         }
+        out.close();
     }
 
     static class LibResult {
@@ -227,7 +250,7 @@ public class GenReport {
                 }
                 line = line.trim();
 
-//                System.out.println(line);
+//                out.println(line);
                 String[] items = line.split("(\\s)+");
                 String[] item0Parts = items[0].split("\\.");
 
