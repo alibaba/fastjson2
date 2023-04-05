@@ -176,7 +176,9 @@ public final class ObjectReaderImplListStr
             }
         } else if (ch == '"' || ch == '\'' || ch == '{') {
             String str = jsonReader.readString();
-            list.add(str);
+            if (!str.isEmpty()) {
+                list.add(str);
+            }
         } else {
             throw new JSONException(jsonReader.info());
         }

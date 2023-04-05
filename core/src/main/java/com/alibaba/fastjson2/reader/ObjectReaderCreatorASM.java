@@ -2198,6 +2198,10 @@ public class ObjectReaderCreatorASM
                         }
                         mw.visitVarInsn(Opcodes.ASTORE, LIST);
 
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfNullOrEmptyString", "()Z", false);
+                        mw.visitJumpInsn(Opcodes.IFNE, loadList_);
+
                         mw.visitVarInsn(Opcodes.ALOAD, LIST);
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readString", "()Ljava/lang/String;", false);
