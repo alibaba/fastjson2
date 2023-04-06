@@ -3009,13 +3009,15 @@ class JSONReaderJSONB
                     return Double.toString(doubleValue);
                 }
                 case BC_TIMESTAMP_SECONDS: {
-                    long int32Value =
+                    long seconds =
                             ((bytes[offset + 3] & 0xFF)) +
                                     ((bytes[offset + 2] & 0xFF) << 8) +
                                     ((bytes[offset + 1] & 0xFF) << 16) +
                                     ((bytes[offset]) << 24);
                     offset += 4;
-                    return Long.toString(int32Value * 1000);
+                    long millis = seconds * 1000;
+                    Date date = new Date(millis);
+                    return DateUtils.toString(date);
                 }
                 case BC_TIMESTAMP_MINUTES: {
                     long minutes =
@@ -3024,9 +3026,24 @@ class JSONReaderJSONB
                                     ((bytes[offset + 1] & 0xFF) << 16) +
                                     ((bytes[offset]) << 24);
                     offset += 4;
-                    return Long.toString(minutes * 60 * 1000);
+                    long millis = minutes * 60 * 1000;
+                    Date date = new Date(millis);
+                    return DateUtils.toString(date);
                 }
-                case BC_TIMESTAMP_MILLIS:
+                case BC_TIMESTAMP_MILLIS: {
+                    long millis =
+                            ((bytes[offset + 7] & 0xFFL)) +
+                                    ((bytes[offset + 6] & 0xFFL) << 8) +
+                                    ((bytes[offset + 5] & 0xFFL) << 16) +
+                                    ((bytes[offset + 4] & 0xFFL) << 24) +
+                                    ((bytes[offset + 3] & 0xFFL) << 32) +
+                                    ((bytes[offset + 2] & 0xFFL) << 40) +
+                                    ((bytes[offset + 1] & 0xFFL) << 48) +
+                                    ((long) (bytes[offset]) << 56);
+                    offset += 8;
+                    Date date = new Date(millis);
+                    return DateUtils.toString(date);
+                }
                 case BC_INT64:
                     long int64Value =
                             ((bytes[offset + 7] & 0xFFL)) +
@@ -3058,8 +3075,9 @@ class JSONReaderJSONB
                     return decimal.toString();
                 }
                 case BC_TYPED_ANY: {
+                    offset--;
                     Object typedAny = readAny();
-                    return typedAny == null ? null : typedAny.toString();
+                    return typedAny == null ? null : JSON.toJSONString(typedAny);
                 }
                 case BC_DECIMAL_LONG:
                 case BC_BIGINT_LONG: {
