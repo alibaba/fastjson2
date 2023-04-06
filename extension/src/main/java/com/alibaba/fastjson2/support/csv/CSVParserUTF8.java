@@ -356,7 +356,7 @@ class CSVParserUTF8
                             try {
                                 value = readValue(buf, valueStart + 1, valueSize, type);
                             } catch (Exception e) {
-                                throw error(columnIndex, e);
+                                value = error(columnIndex, e);
                             }
                         }
                     } else {
@@ -376,7 +376,7 @@ class CSVParserUTF8
                             try {
                                 value = readValue(bytes, 0, bytes.length, type);
                             } catch (Exception e) {
-                                throw error(columnIndex, e);
+                                value = error(columnIndex, e);
                             }
                         }
                     }
@@ -387,7 +387,7 @@ class CSVParserUTF8
                         try {
                             value = readValue(buf, valueStart, valueSize, type);
                         } catch (Exception e) {
-                            throw error(columnIndex, e);
+                            value = error(columnIndex, e);
                         }
                     }
                 }
@@ -423,7 +423,11 @@ class CSVParserUTF8
                     if (type == null || type == String.class || type == Object.class) {
                         value = new String(buf, valueStart + 1, valueSize, charset);
                     } else {
-                        value = readValue(buf, valueStart + 1, valueSize, type);
+                        try {
+                            value = readValue(buf, valueStart + 1, valueSize, type);
+                        } catch (Exception e) {
+                            value = error(columnIndex, e);
+                        }
                     }
                 } else {
                     byte[] bytes = new byte[valueSize - escapeCount];
@@ -439,14 +443,22 @@ class CSVParserUTF8
                     if (type == null || type == String.class || type == Object.class) {
                         value = new String(bytes, 0, bytes.length, charset);
                     } else {
-                        value = readValue(bytes, 0, bytes.length, type);
+                        try {
+                            value = readValue(bytes, 0, bytes.length, type);
+                        } catch (Exception e) {
+                            value = error(columnIndex, e);
+                        }
                     }
                 }
             } else {
                 if (type == null || type == String.class || type == Object.class || strings) {
                     value = new String(buf, valueStart, valueSize, charset);
                 } else {
-                    value = readValue(buf, valueStart, valueSize, type);
+                    try {
+                        value = readValue(buf, valueStart, valueSize, type);
+                    } catch (Exception e) {
+                        value = error(columnIndex, e);
+                    }
                 }
             }
 
@@ -472,6 +484,8 @@ class CSVParserUTF8
                 valueList.toArray(values);
             }
         }
+
+        rowCount++;
         return values;
     }
 

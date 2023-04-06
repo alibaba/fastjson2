@@ -153,7 +153,7 @@ public class CSVParserTest {
             assertEquals(5, columns.size());
 
             for (int i = 0; ; ++i) {
-                Item item = parser.readLoneObject();
+                Item item = parser.readLineObject();
                 if (item == null) {
                     break;
                 }

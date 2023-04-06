@@ -228,4 +228,46 @@ public class TypeUtilsTest2 {
         assertNull(TypeUtils.parseLong(new byte[128], 0, 0));
         assertNull(TypeUtils.parseLong(new char[128], 0, 0));
     }
+
+    @Test
+    public void isInteger() {
+        assertFalse(TypeUtils.isInteger("+"));
+        assertFalse(TypeUtils.isInteger("-"));
+        assertFalse(TypeUtils.isInteger("A"));
+        assertFalse(TypeUtils.isInteger("+A"));
+        assertFalse(TypeUtils.isInteger("+1A"));
+        assertTrue(TypeUtils.isInteger("+1"));
+        assertTrue(TypeUtils.isInteger("-1"));
+        assertTrue(TypeUtils.isInteger("1"));
+        assertTrue(TypeUtils.isInteger("123"));
+        assertFalse(TypeUtils.isInteger("123."));
+        assertFalse(TypeUtils.isInteger("+123."));
+        assertFalse(TypeUtils.isInteger("-123."));
+        assertFalse(TypeUtils.isInteger(".123"));
+    }
+
+    @Test
+    public void isNumber() {
+        assertFalse(TypeUtils.isNumber("+"));
+        assertFalse(TypeUtils.isNumber("-"));
+        assertFalse(TypeUtils.isNumber("A"));
+        assertFalse(TypeUtils.isNumber("+A"));
+        assertFalse(TypeUtils.isNumber("+1A"));
+
+        assertTrue(TypeUtils.isNumber("+1"));
+        assertTrue(TypeUtils.isNumber("-1"));
+        assertTrue(TypeUtils.isNumber("1"));
+        assertTrue(TypeUtils.isNumber("123"));
+        assertTrue(TypeUtils.isNumber("123."));
+        assertTrue(TypeUtils.isNumber("+123."));
+        assertTrue(TypeUtils.isNumber("-123."));
+        assertTrue(TypeUtils.isNumber(".123"));
+
+        assertFalse(TypeUtils.isNumber("."));
+        assertFalse(TypeUtils.isNumber(".12."));
+        assertFalse(TypeUtils.isNumber(".12A"));
+
+        assertTrue(TypeUtils.isNumber(".12E"));
+        assertTrue(TypeUtils.isNumber(".12e"));
+    }
 }

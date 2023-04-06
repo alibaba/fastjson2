@@ -314,7 +314,11 @@ class CSVParserUTF16
                         if (type == null || type == String.class || type == Object.class || strings) {
                             value = new String(buf, valueStart + 1, valueSize);
                         } else {
-                            value = readValue(buf, valueStart + 1, valueSize, type);
+                            try {
+                                value = readValue(buf, valueStart + 1, valueSize, type);
+                            } catch (Exception e) {
+                                value = error(columnIndex, e);
+                            }
                         }
                     } else {
                         char[] bytes = new char[valueSize - escapeCount];
@@ -330,7 +334,11 @@ class CSVParserUTF16
                         if (type == null || type == String.class || type == Object.class || strings) {
                             value = new String(bytes);
                         } else {
-                            value = readValue(bytes, 0, bytes.length, type);
+                            try {
+                                value = readValue(bytes, 0, bytes.length, type);
+                            } catch (Exception e) {
+                                value = error(columnIndex, e);
+                            }
                         }
                     }
                 } else {
@@ -340,7 +348,7 @@ class CSVParserUTF16
                         try {
                             value = readValue(buf, valueStart, valueSize, type);
                         } catch (Exception e) {
-                            throw error(columnIndex, e);
+                            value = error(columnIndex, e);
                         }
                     }
                 }
@@ -395,7 +403,7 @@ class CSVParserUTF16
                         try {
                             value = readValue(bytes, 0, bytes.length, type);
                         } catch (Exception e) {
-                            throw error(columnIndex, e);
+                            value = error(columnIndex, e);
                         }
                     }
                 }
@@ -406,7 +414,7 @@ class CSVParserUTF16
                     try {
                         value = readValue(buf, valueStart, valueSize, type);
                     } catch (Exception e) {
-                        throw error(columnIndex, e);
+                        value = error(columnIndex, e);
                     }
                 }
             }

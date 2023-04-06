@@ -3412,4 +3412,137 @@ public class TypeUtils {
 
         return false;
     }
+
+    public static boolean isInteger(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+
+        char ch = str.charAt(0);
+        boolean sign = ch == '-' || ch == '+';
+        if (sign) {
+            if (str.length() == 1) {
+                return false;
+            }
+        } else if (ch < '0' || ch > '9') {
+            return false;
+        }
+
+        for (int i = 1; i < str.length(); ++i) {
+            ch = str.charAt(i);
+            if (ch < '0' || ch > '9') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean isNumber(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+        char ch = str.charAt(0);
+        int offset;
+        boolean sign = ch == '-' || ch == '+';
+        if (sign) {
+            if (str.length() == 1) {
+                return false;
+            }
+            ch = str.charAt(1);
+            offset = 1;
+        } else {
+            if (ch == '.') {
+                if (str.length() == 1) {
+                    return false;
+                }
+
+                offset = 1;
+            } else {
+                offset = 0;
+            }
+        }
+
+        int end = str.length();
+        boolean dot = ch == '.';
+        boolean space = false;
+        boolean num = false;
+        if (!dot && (ch >= '0' && ch <= '9')) {
+            num = true;
+            for (; ; ) {
+                if (offset < end) {
+                    ch = str.charAt(offset++);
+                } else {
+                    return true;
+                }
+
+                if (space || ch < '0' || ch > '9') {
+                    break;
+                }
+            }
+        }
+
+        boolean small = false;
+        if (ch == '.') {
+            small = true;
+            if (offset < end) {
+                ch = str.charAt(offset++);
+            } else {
+                return true;
+            }
+
+            if (ch >= '0' && ch <= '9') {
+                for (; ; ) {
+                    if (offset < end) {
+                        ch = str.charAt(offset++);
+                    } else {
+                        return true;
+                    }
+
+                    if (space || ch < '0' || ch > '9') {
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!num && !small) {
+            return false;
+        }
+
+        if (ch == 'e' || ch == 'E') {
+            if (offset == end) {
+                return true;
+            }
+
+            ch = str.charAt(offset++);
+
+            boolean eSign = false;
+            if (ch == '+' || ch == '-') {
+                eSign = true;
+                if (offset < end) {
+                    ch = str.charAt(offset++);
+                } else {
+                    return false;
+                }
+            }
+
+            if (ch >= '0' && ch <= '9') {
+                for (; ; ) {
+                    if (offset < end) {
+                        ch = str.charAt(offset++);
+                    } else {
+                        return true;
+                    }
+
+                    if (ch < '0' || ch > '9') {
+                        break;
+                    }
+                }
+            } else if (eSign) {
+                return false;
+            }
+        }
+
+        return false;
+    }
 }

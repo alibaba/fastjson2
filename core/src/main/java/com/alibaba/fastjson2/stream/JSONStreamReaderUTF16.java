@@ -142,7 +142,7 @@ public class JSONStreamReaderUTF16
     }
 
     @Override
-    public <T> T readLoneObject() {
+    public <T> T readLineObject() {
         try {
             if (inputEnd) {
                 return null;

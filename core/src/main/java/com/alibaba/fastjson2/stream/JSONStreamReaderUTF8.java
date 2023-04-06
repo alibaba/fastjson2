@@ -143,7 +143,7 @@ class JSONStreamReaderUTF8
         return true;
     }
 
-    public <T> T readLoneObject() {
+    public <T> T readLineObject() {
         try {
             if (inputEnd) {
                 return null;
