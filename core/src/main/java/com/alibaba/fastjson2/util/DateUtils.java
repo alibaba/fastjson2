@@ -4207,10 +4207,10 @@ public class DateUtils {
             final int DAYS_PER_CYCLE = 146097;
             final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
 
-            int daysToYear = 365 * year;
-            int leapDays = ((year + 3) / 4 - (year + 99) / 100 + (year + 399) / 400);
-            int daysToMonth = ((367 * month - 362) / 12);
-            int total = daysToYear + leapDays + daysToMonth + (dom - 1);
+            long daysToYear = 365 * year;
+            long leapDays = ((year + 3) / 4 - (year + 99) / 100 + (year + 399) / 400);
+            long daysToMonth = ((367 * month - 362) / 12);
+            long total = daysToYear + leapDays + daysToMonth + (dom - 1);
 
             if (month > 2) {
                 total--;
