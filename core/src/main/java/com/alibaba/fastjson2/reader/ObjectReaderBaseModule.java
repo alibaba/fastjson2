@@ -8,7 +8,7 @@ import com.alibaba.fastjson2.function.impl.*;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.support.LambdaMiscCodec;
-import com.alibaba.fastjson2.support.money.MoneySupport;
+import com.alibaba.fastjson2.support.money.MoneyReader;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.*;
@@ -2115,12 +2115,12 @@ public class ObjectReaderBaseModule
             case "org.joda.time.Instant":
                 return JodaSupport.createInstantReader((Class) type);
             case "javax.money.CurrencyUnit":
-                return MoneySupport.createCurrencyUnitReader();
+                return MoneyReader.createCurrencyUnitReader();
             case "javax.money.MonetaryAmount":
             case "javax.money.Money":
-                return MoneySupport.createMonetaryAmountReader();
+                return MoneyReader.createMonetaryAmountReader();
             case "javax.money.NumberValue":
-                return MoneySupport.createNumberValueReader();
+                return MoneyReader.createNumberValueReader();
             case "java.net.InetSocketAddress":
                 return new ObjectReaderMisc((Class) type);
             case "java.net.InetAddress":

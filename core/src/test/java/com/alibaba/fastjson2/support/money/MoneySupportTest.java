@@ -15,7 +15,7 @@ public class MoneySupportTest {
     @Test
     public void test() {
         MoneySupport.CLASS_NUMBER_VALUE = null;
-        ObjectWriter writer = MoneySupport.createNumberValueWriter();
+        ObjectWriter writer = MoneyWriter.createNumberValueWriter();
         NumberValue numberValue = DefaultNumberValue.of(123);
         JSONWriter jsonWriter = JSONWriter.of();
         writer.write(jsonWriter, numberValue);

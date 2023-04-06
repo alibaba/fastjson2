@@ -10,7 +10,7 @@ import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.support.LambdaMiscCodec;
-import com.alibaba.fastjson2.support.money.MoneySupport;
+import com.alibaba.fastjson2.support.money.MoneyWriter;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.File;
@@ -1055,9 +1055,9 @@ public class ObjectWriterBaseModule
             case "com.fasterxml.jackson.databind.node.ObjectNode":
                 return ObjectWriterImplToString.DIRECT;
             case "org.javamoney.moneta.Money":
-                return MoneySupport.createMonetaryAmountWriter();
+                return MoneyWriter.createMonetaryAmountWriter();
             case "org.javamoney.moneta.spi.DefaultNumberValue":
-                return MoneySupport.createNumberValueWriter();
+                return MoneyWriter.createNumberValueWriter();
             case "net.sf.json.JSONNull":
             case "java.net.Inet4Address":
             case "java.net.Inet6Address":
