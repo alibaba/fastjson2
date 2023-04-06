@@ -358,11 +358,7 @@ class JSONReaderJSONB
                     value = new Integer(int32Value);
                 } else if (valueType == BC_INT32) {
                     offset++;
-                    int int32Value =
-                            ((bytes[offset + 3] & 0xFF)) +
-                                    ((bytes[offset + 2] & 0xFF) << 8) +
-                                    ((bytes[offset + 1] & 0xFF) << 16) +
-                                    ((bytes[offset]) << 24);
+                    int int32Value = readInt32Value(bytes, offset);
                     offset += 4;
                     value = new Integer(int32Value);
                 } else {
@@ -2973,11 +2969,7 @@ class JSONReaderJSONB
                     return "1.0";
                 case BC_INT64_INT:
                 case BC_INT32: {
-                    long int32Value =
-                            ((bytes[offset + 3] & 0xFF)) +
-                                    ((bytes[offset + 2] & 0xFF) << 8) +
-                                    ((bytes[offset + 1] & 0xFF) << 16) +
-                                    ((bytes[offset]) << 24);
+                    long int32Value = readInt32Value(bytes, offset);
                     offset += 4;
                     return Long.toString(int32Value);
                 }
@@ -2985,11 +2977,7 @@ class JSONReaderJSONB
                     return Float.toString(
                             readInt32Value());
                 case BC_FLOAT: {
-                    int int32Value =
-                            ((bytes[offset + 3] & 0xFF)) +
-                                    ((bytes[offset + 2] & 0xFF) << 8) +
-                                    ((bytes[offset + 1] & 0xFF) << 16) +
-                                    ((bytes[offset]) << 24);
+                    int int32Value = readInt32Value(bytes, offset);
                     offset += 4;
                     float floatValue = Float.intBitsToFloat(int32Value);
                     return Float.toString(floatValue);
@@ -3009,20 +2997,12 @@ class JSONReaderJSONB
                     return Double.toString(doubleValue);
                 }
                 case BC_TIMESTAMP_SECONDS: {
-                    long int32Value =
-                            ((bytes[offset + 3] & 0xFF)) +
-                                    ((bytes[offset + 2] & 0xFF) << 8) +
-                                    ((bytes[offset + 1] & 0xFF) << 16) +
-                                    ((bytes[offset]) << 24);
+                    long int32Value = readInt32Value(bytes, offset);
                     offset += 4;
                     return Long.toString(int32Value * 1000);
                 }
                 case BC_TIMESTAMP_MINUTES: {
-                    long minutes =
-                            ((bytes[offset + 3] & 0xFF)) +
-                                    ((bytes[offset + 2] & 0xFF) << 8) +
-                                    ((bytes[offset + 1] & 0xFF) << 16) +
-                                    ((bytes[offset]) << 24);
+                    long minutes = readInt32Value(bytes, offset);
                     offset += 4;
                     return Long.toString(minutes * 60 * 1000);
                 }
@@ -4096,11 +4076,7 @@ class JSONReaderJSONB
 
                 if (bytes[offset] == BC_INT32) {
                     offset++;
-                    int unscaledValue =
-                            ((bytes[offset + 3] & 0xFF)) +
-                                    ((bytes[offset + 2] & 0xFF) << 8) +
-                                    ((bytes[offset + 1] & 0xFF) << 16) +
-                                    ((bytes[offset]) << 24);
+                    int unscaledValue = readInt32Value(bytes, offset);
                     offset += 4;
                     return BigDecimal.valueOf(unscaledValue, scale);
                 }
@@ -6049,5 +6025,12 @@ class JSONReaderJSONB
         if (valueBytes != null) {
             JSONFactory.releaseByteArray(cachedIndex, valueBytes);
         }
+    }
+
+    private int readInt32Value(byte[] bytes, int offset) {
+        return ((bytes[offset + 3] & 0xFF)) +
+                ((bytes[offset + 2] & 0xFF) << 8) +
+                ((bytes[offset + 1] & 0xFF) << 16) +
+                ((bytes[offset]) << 24);
     }
 }
