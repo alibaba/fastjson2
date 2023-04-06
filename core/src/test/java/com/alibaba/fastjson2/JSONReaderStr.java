@@ -6136,13 +6136,7 @@ public final class JSONReaderStr
             return false;
         }
 
-        if (str.charAt(this.offset + 1) != '$'
-                || str.charAt(this.offset + 2) != 'r'
-                || str.charAt(this.offset + 3) != 'e'
-                || str.charAt(this.offset + 4) != 'f'
-                || str.charAt(this.offset + 5) != quote
-                || offset + 6 >= end
-        ) {
+        if (isReferenceToken(quote)) {
             this.offset = start;
             this.ch = '{';
             return false;
@@ -6187,6 +6181,14 @@ public final class JSONReaderStr
         this.offset = start;
         this.ch = '{';
         return true;
+    }
+    private boolean isReferenceToken(char quote) {
+        return str.charAt(this.offset + 1) != '$'
+                || str.charAt(this.offset + 2) != 'r'
+                || str.charAt(this.offset + 3) != 'e'
+                || str.charAt(this.offset + 4) != 'f'
+                || str.charAt(this.offset + 5) != quote
+                || offset + 6 >= end;
     }
 
     @Override
