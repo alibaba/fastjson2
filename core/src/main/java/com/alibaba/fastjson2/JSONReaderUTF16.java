@@ -2552,22 +2552,7 @@ class JSONReaderUTF16
             ch = chars[offset++];
         }
 
-        boolean notMatch = false;
-        if (ch == '.'
-                || ch == 'e'
-                || ch == 'E'
-                || ch == 't'
-                || ch == 'f'
-                || ch == 'n'
-                || ch == '{'
-                || ch == '['
-                || overflow) {
-            notMatch = true;
-        } else if (quote != 0 && ch != quote) {
-            notMatch = true;
-        }
-
-        if (notMatch) {
+        if (isNotMatch(quote, overflow)) {
             this.offset = firstOffset;
             this.ch = firstChar;
             readNumber0();
@@ -2638,6 +2623,22 @@ class JSONReaderUTF16
         }
 
         return negative ? -intValue : intValue;
+    }
+
+    private boolean isNotMatch(char quote, boolean overflow) {
+        boolean hasDecimal = (ch == '.');
+        boolean hasExponent = (ch == 'e' || ch == 'E');
+        boolean isTrueFalseNull = (ch == 't' || ch == 'f' || ch == 'n');
+        boolean isObjectStart = (ch == '{');
+        boolean isArrayStart = (ch == '[');
+        boolean isOverflow = overflow;
+        boolean isMismatchedQuote = (quote != 0 && ch != quote);
+
+        if (hasDecimal || hasExponent || isTrueFalseNull || isObjectStart || isArrayStart || isOverflow || isMismatchedQuote) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override
