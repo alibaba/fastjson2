@@ -40,24 +40,6 @@ public class ObjectWriters {
         return INSTANCE.createObjectWriter(fieldWriters);
     }
 
-    public static <T> ObjectWriter ofToString(Function<T, String> function) {
-        return INSTANCE.createObjectWriter(
-                INSTANCE.createFieldWriter(
-                        null,
-                        null,
-                        "toString",
-                        0,
-                        FieldInfo.VALUE_MASK,
-                        null,
-                        null,
-                        String.class,
-                        String.class,
-                        null,
-                        function
-                )
-        );
-    }
-
     public static <T> ObjectWriter ofToInt(ToIntFunction function) {
         return INSTANCE.createObjectWriter(
                 new FieldWriterInt32ValFunc(

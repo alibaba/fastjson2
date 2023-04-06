@@ -1298,4 +1298,22 @@ public class ObjectWriterCreator {
         Function function = (Function) lambda;
         return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, label, fieldType, fieldClass, method, function);
     }
+
+    public static <T> ObjectWriter ofToString(Function<T, String> function) {
+        return INSTANCE.createObjectWriter(
+                INSTANCE.createFieldWriter(
+                        null,
+                        null,
+                        "toString",
+                        0,
+                        FieldInfo.VALUE_MASK,
+                        null,
+                        null,
+                        String.class,
+                        String.class,
+                        null,
+                        function
+                )
+        );
+    }
 }

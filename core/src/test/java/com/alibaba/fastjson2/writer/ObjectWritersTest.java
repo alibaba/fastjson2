@@ -59,7 +59,7 @@ public class ObjectWritersTest {
 
     @Test
     public void testToString() {
-        ObjectWriter objectWriter = ObjectWriters.ofToString(Bean::toString);
+        ObjectWriter objectWriter = ObjectWriterCreator.ofToString(Bean::toString);
 
         Bean bean = new Bean();
         bean.id = 101;
