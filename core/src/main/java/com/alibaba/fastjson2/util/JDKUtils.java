@@ -80,7 +80,7 @@ public class JDKUtils {
 
         OPENJ9 = openj9;
         ANDROID = android;
-        GRAAL = graal;
+        GRAAL = (System.getProperty("org.graalvm.nativeimage.imagecode") != null);
 
         boolean hasJavaSql = true;
         Class dataSourceClass = null;
