@@ -19,12 +19,12 @@ public class JSONStreamReaderTest1 {
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         JSONStreamReader reader = JSONStreamReader.of(in, Long.class, String.class, BigDecimal.class);
 
-        List obj1 = (List) reader.readLoneObject();
+        List obj1 = (List) reader.readLineObject();
         assertEquals(101L, obj1.get(0));
         assertEquals("102", obj1.get(1));
         assertEquals(BigDecimal.valueOf(103), obj1.get(2));
 
-        List obj2 = (List) reader.readLoneObject();
+        List obj2 = (List) reader.readLineObject();
         assertEquals(201L, obj2.get(0));
         assertEquals("202", obj2.get(1));
         assertEquals(BigDecimal.valueOf(203), obj2.get(2));
@@ -38,10 +38,10 @@ public class JSONStreamReaderTest1 {
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         JSONStreamReader reader = JSONStreamReader.of(in, charset);
 
-        List obj1 = (List) reader.readLoneObject();
+        List obj1 = (List) reader.readLineObject();
         assertEquals("[101,102,103]", JSON.toJSONString(obj1));
 
-        List obj2 = (List) reader.readLoneObject();
+        List obj2 = (List) reader.readLineObject();
         assertEquals("[201,202,203]", JSON.toJSONString(obj2));
     }
 
@@ -53,12 +53,12 @@ public class JSONStreamReaderTest1 {
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         JSONStreamReader reader = JSONStreamReader.of(in, charset, Long.class, String.class, BigDecimal.class);
 
-        List obj1 = (List) reader.readLoneObject();
+        List obj1 = (List) reader.readLineObject();
         assertEquals(101L, obj1.get(0));
         assertEquals("102", obj1.get(1));
         assertEquals(BigDecimal.valueOf(103), obj1.get(2));
 
-        List obj2 = (List) reader.readLoneObject();
+        List obj2 = (List) reader.readLineObject();
         assertEquals(201L, obj2.get(0));
         assertEquals("202", obj2.get(1));
         assertEquals(BigDecimal.valueOf(203), obj2.get(2));
@@ -72,10 +72,10 @@ public class JSONStreamReaderTest1 {
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         JSONStreamReader reader = JSONStreamReader.of(in, charset);
 
-        List obj1 = (List) reader.readLoneObject();
+        List obj1 = (List) reader.readLineObject();
         assertEquals("[101,102,103]", JSON.toJSONString(obj1));
 
-        List obj2 = (List) reader.readLoneObject();
+        List obj2 = (List) reader.readLineObject();
         assertEquals("[201,202,203]", JSON.toJSONString(obj2));
     }
 }

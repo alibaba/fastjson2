@@ -22,7 +22,10 @@ public abstract class CSVParser
         extends StreamReader
         implements Closeable {
     List<String> columns;
+    List<ColumnStat> columnStats;
     Map<String, Type> schema;
+    int rowCount;
+    int errorCount;
 
     boolean quote;
 
@@ -39,6 +42,20 @@ public abstract class CSVParser
 
     public CSVParser(Type[] types) {
         super(types);
+    }
+
+    public void config(Feature... features) {
+        for (Feature feature : features) {
+            this.features |= feature.mask;
+        }
+    }
+
+    public void config(Feature feature, boolean state) {
+        if (state) {
+            this.features |= feature.mask;
+        } else {
+            this.features &= ~feature.mask;
+        }
     }
 
     public static CSVParser of(Reader reader, Class objectClass) {
@@ -173,6 +190,15 @@ public abstract class CSVParser
         return new CSVParserUTF8(utf8Bytes, 0, utf8Bytes.length, types);
     }
 
+    public void skipLines(int lines) throws IOException {
+        if (lines < 0) {
+            throw new IllegalArgumentException();
+        }
+        for (int i = 0; i < lines; i++) {
+            seekLine();
+        }
+    }
+
     public List<String> readHeader() {
         String[] columns = (String[]) readLineValues(true);
 
@@ -191,7 +217,23 @@ public abstract class CSVParser
         }
 
         this.columns = Arrays.asList(columns);
+        this.columnStats = new ArrayList<>();
+        for (int i = 0; i < columns.length; i++) {
+            this.columnStats.add(new ColumnStat(columns[i]));
+        }
+
+        if (rowCount == 1) {
+            rowCount = 0;
+        }
         return this.columns;
+    }
+
+    public List<String> getColumns() {
+        return columns;
+    }
+
+    public List<ColumnStat> getColumnStats() {
+        return columnStats;
     }
 
     public <T> Stream<T> readAsStream() {
@@ -201,13 +243,13 @@ public abstract class CSVParser
     public <T> Stream<T> readAsStream(int limit) {
         return StreamUtil.stream(c -> {
             T t;
-            for (int left = limit; left > 0 && (t = readLoneObject()) != null; left--) {
+            for (int left = limit; left > 0 && (t = readLineObject()) != null; left--) {
                 c.accept(t);
             }
         });
     }
 
-    public <T> T readLoneObject() {
+    public <T> T readLineObject() {
         if (inputEnd) {
             return null;
         }
@@ -297,6 +339,10 @@ public abstract class CSVParser
         }
 
         return state.rowCount();
+    }
+
+    public int errorCount() {
+        return errorCount;
     }
 
     public int rowCount() {
@@ -506,7 +552,14 @@ public abstract class CSVParser
         }
     }
 
-    protected JSONException error(int columnIndex, Exception e) {
+    protected Object error(int columnIndex, Exception e) {
+        errorCount++;
+        getColumnStat(columnIndex).errors++;
+
+        if ((features & Feature.ErrorAsNull.mask) != 0) {
+            return null;
+        }
+
         String message = "read csv error, line " + rowCount + ", column ";
         String column = null;
         if (columns != null && columnIndex < columns.size()) {
@@ -517,6 +570,41 @@ public abstract class CSVParser
         } else {
             message += columnIndex;
         }
-        return new JSONException(message, e);
+        throw new JSONException(message, e);
+    }
+
+    protected ColumnStat getColumnStat(int i) {
+        if (columnStats == null) {
+            columnStats = new ArrayList<>();
+        }
+
+        StreamReader.ColumnStat stat = null;
+        if (i >= columnStats.size()) {
+            for (int j = columnStats.size(); j <= i; j++) {
+                String column = null;
+                if (columns != null && i < columns.size()) {
+                    column = columns.get(i);
+                }
+                stat = new ColumnStat(column);
+                columnStats.add(stat);
+            }
+        } else {
+            stat = columnStats.get(i);
+        }
+        return stat;
+    }
+
+    public void statAll() {
+        String[] line;
+        while ((line = readLine()) != null) {
+            for (int i = 0; i < line.length; i++) {
+                String value = line[i];
+                if (columnStats == null) {
+                    columnStats = new ArrayList<>();
+                }
+                StreamReader.ColumnStat stat = getColumnStat(i);
+                stat.stat(value);
+            }
+        }
     }
 }

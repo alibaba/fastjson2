@@ -19,7 +19,7 @@ public class CSVTest1 {
 
         CSVParser parser = CSVParser.of(csv, Bean.class);
 
-        Bean bean1 = parser.readLoneObject();
+        Bean bean1 = parser.readLineObject();
         assertEquals(bean.id, bean1.id);
         assertEquals(bean.name, bean1.name);
     }
@@ -50,8 +50,8 @@ public class CSVTest1 {
                 "1002,MaxCompute\n", csv);
 
         CSVParser parser = CSVParser.of(csv, Bean.class);
-        Bean bean0 = parser.readLoneObject();
-        Bean bean1 = parser.readLoneObject();
+        Bean bean0 = parser.readLineObject();
+        Bean bean1 = parser.readLineObject();
 
         Bean[] beans1 = {bean0, bean1};
         for (int i = 0; i < beans.length; i++) {

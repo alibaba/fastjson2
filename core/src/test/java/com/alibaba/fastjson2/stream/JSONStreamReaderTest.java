@@ -26,7 +26,7 @@ public class JSONStreamReaderTest {
 
             int rowCount = 0;
             Object object;
-            while ((object = streamReader.readLoneObject()) != null) {
+            while ((object = streamReader.readLineObject()) != null) {
                 JSONObject jsonObject = (JSONObject) object;
                 jsonObject.size();
                 rowCount++;
@@ -47,7 +47,7 @@ public class JSONStreamReaderTest {
 
             int rowCount = 0;
             Object object;
-            while ((object = streamReader.readLoneObject()) != null) {
+            while ((object = streamReader.readLineObject()) != null) {
                 Event event = (Event) object;
                 rowCount++;
             }

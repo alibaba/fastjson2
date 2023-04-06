@@ -55,7 +55,7 @@ public class CSVParserTest3 {
         String str = "id,name\n101,DataWorks\n";
         CSVParser parser = CSVParser.of(str, Bean.class);
         parser.readHeader();
-        Bean bean = parser.readLoneObject();
+        Bean bean = parser.readLineObject();
         assertEquals(101, bean.id);
         assertEquals("DataWorks", bean.name);
     }
@@ -77,7 +77,7 @@ public class CSVParserTest3 {
                 "DataWorks,101\n";
         CSVParser parser = CSVParser.of(str, Bean.class);
         parser.readHeader();
-        Bean bean = parser.readLoneObject();
+        Bean bean = parser.readLineObject();
         assertEquals(101, bean.id);
         assertEquals("DataWorks", bean.name);
     }
@@ -86,7 +86,7 @@ public class CSVParserTest3 {
     public void testObject2() {
         String str = "101,DataWorks\n";
         CSVParser parser = CSVParser.of(str, Bean.class);
-        Bean bean = parser.readLoneObject();
+        Bean bean = parser.readLineObject();
         assertEquals(101, bean.id);
         assertEquals("DataWorks", bean.name);
     }

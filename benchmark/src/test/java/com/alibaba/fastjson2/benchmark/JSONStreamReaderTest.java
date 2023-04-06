@@ -20,7 +20,7 @@ public class JSONStreamReaderTest {
                 JSONStreamReader streamReader = JSONStreamReader.of(fis);
 
                 Object object;
-                while ((object = streamReader.readLoneObject()) != null) {
+                while ((object = streamReader.readLineObject()) != null) {
                     JSONObject jsonObject = (JSONObject) object;
                     jsonObject.size();
                     rowCount++;
