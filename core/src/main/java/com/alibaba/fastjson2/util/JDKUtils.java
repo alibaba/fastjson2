@@ -61,7 +61,7 @@ public class JDKUtils {
             String jmvName = System.getProperty("java.vm.name");
             openj9 = jmvName.contains("OpenJ9");
             android = jmvName.equals("Dalvik");
-            graal = jmvName.equals("Substrate VM");
+            graal = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
             if (openj9 || android || graal) {
                 FIELD_STRING_VALUE_ERROR = true;
             }
@@ -80,7 +80,7 @@ public class JDKUtils {
 
         OPENJ9 = openj9;
         ANDROID = android;
-        GRAAL = (System.getProperty("org.graalvm.nativeimage.imagecode") != null);
+        GRAAL = graal;
 
         boolean hasJavaSql = true;
         Class dataSourceClass = null;
