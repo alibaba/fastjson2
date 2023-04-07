@@ -43,6 +43,6 @@ public class CSVCOVID19Test {
     }
 
     public static void main(String[] args) throws Exception {
-        readLineValues();
+        rowCount();
     }
 }

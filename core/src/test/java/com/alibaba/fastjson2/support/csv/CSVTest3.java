@@ -49,7 +49,7 @@ public class CSVTest3 {
         byte[] bytes = out.toByteArray();
 
         ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-        CSVParser parser = CSVParser.of(in, types);
+        CSVReader parser = CSVReader.of(in, types);
         Object[] row1 = parser.readLineValues();
         assertArrayEquals(row, row1);
     }

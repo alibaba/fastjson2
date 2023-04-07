@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public class CSVParserTest2 {
+public class CSVReaderTest2 {
     @Test
     public void test() {
         String str = "1997,Ford,E350";
@@ -14,7 +14,7 @@ public class CSVParserTest2 {
         };
 
         {
-            CSVParser parser = CSVParser.of(str);
+            CSVReader parser = CSVReader.of(str);
             for (int i = 0; ; ++i) {
                 String[] line = parser.readLine();
                 if (line == null) {
@@ -24,7 +24,7 @@ public class CSVParserTest2 {
             }
         }
         {
-            CSVParser parser = CSVParser.of(str.getBytes());
+            CSVReader parser = CSVReader.of(str.getBytes());
             for (int i = 0; ; ++i) {
                 String[] line = parser.readLine();
                 if (line == null) {

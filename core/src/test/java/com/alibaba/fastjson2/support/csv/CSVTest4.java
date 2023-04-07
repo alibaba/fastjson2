@@ -14,8 +14,10 @@ public class CSVTest4 {
         String str = "1,101\n2,abc";
         byte[] bytes = str.getBytes();
         InputStream in = new ByteArrayInputStream(bytes);
-        CSVParser parser = CSVParser.of(in, Integer.class, Integer.class);
+        CSVReader parser = CSVReader.of(in, Integer.class, Integer.class);
         parser.config(StreamReader.Feature.ErrorAsNull);
+        parser.config(StreamReader.Feature.ErrorAsNull, false);
+        parser.config(StreamReader.Feature.ErrorAsNull, true);
         Object[] line0 = parser.readLineValues();
         assertEquals(1, line0[0]);
         assertEquals(101, line0[1]);

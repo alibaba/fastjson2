@@ -9,7 +9,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CSVParserTest4 {
+public class CSVReaderTest4 {
     @Test
     public void test() throws IOException {
         URL resource = this.getClass().getClassLoader().getResource("states.csv");
@@ -19,10 +19,10 @@ public class CSVParserTest4 {
 
         File file = new File(resource.getFile());
 
-        int rowCount = CSVParser.rowCount(file);
+        int rowCount = CSVReader.rowCount(file);
         assertEquals(53, rowCount);
 
-        CSVParser parser = CSVParser.of(file);
+        CSVReader parser = CSVReader.of(file);
         List<String> columns = parser.readHeader();
         assertEquals(3, columns.size());
 

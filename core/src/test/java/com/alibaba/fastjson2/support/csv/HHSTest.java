@@ -7,12 +7,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class BankListTest {
-    static final String file = "csv/banklist.csv";
+public class HHSTest {
+    static final String file = "csv/HHS_IDs.csv";
 
     @Test
     public void readLineValues() throws IOException {
@@ -23,16 +22,19 @@ public class BankListTest {
 
         File file = new File(resource.getFile());
         Type[] types = new Type[] {
-                String.class,
-                String.class,
-                String.class,
-                Integer.class,
+                String.class, // hhs_id
+                String.class, // ccn
+                String.class, // facility_name
+                String.class, // address
+                String.class, // city
 
-                String.class,
-                Date.class,
-                Integer.class
+                String.class, // zip
+                Integer.class, // fips_code
+                String.class, // state
+                String.class, // geohash
+                String.class, // geocoded_hospital_address
         };
-        CSVParser parser = CSVParser.of(file, types);
+        CSVReader parser = CSVReader.of(file, types);
         parser.readHeader();
         int rowCount = 0;
         while (true) {
@@ -42,7 +44,7 @@ public class BankListTest {
             }
             rowCount++;
         }
-        assertEquals(565, rowCount);
+        assertEquals(7354, rowCount);
     }
 
     @Test
@@ -54,16 +56,19 @@ public class BankListTest {
 
         File file = new File(resource.getFile());
         Type[] types = new Type[] {
-                String.class,
-                String.class,
-                String.class,
-                Integer.class,
+                String.class, // hhs_id
+                String.class, // ccn
+                String.class, // facility_name
+                String.class, // address
+                String.class, // city
 
-                String.class,
-                Date.class,
-                Integer.class
+                String.class, // zip
+                Integer.class, // fips_code
+                String.class, // state
+                String.class, // geohash
+                String.class, // geocoded_hospital_address
         };
-        CSVParser parser = CSVParser.of(new FileReader(file), types);
+        CSVReader parser = CSVReader.of(new FileReader(file), types);
         parser.readHeader();
         int rowCount = 0;
         while (true) {
@@ -73,6 +78,6 @@ public class BankListTest {
             }
             rowCount++;
         }
-        assertEquals(565, rowCount);
+        assertEquals(7354, rowCount);
     }
 }

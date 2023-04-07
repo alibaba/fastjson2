@@ -16,28 +16,28 @@ import java.util.List;
 
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 
-class CSVParserUTF16
-        extends CSVParser {
+class CSVReaderUTF16
+        extends CSVReader {
     char[] buf;
     Reader input;
 
-    CSVParserUTF16(Feature... features) {
+    CSVReaderUTF16(Feature... features) {
         for (Feature feature : features) {
             this.features |= feature.mask;
         }
     }
 
-    CSVParserUTF16(Reader input, ObjectReaderAdapter objectReader) {
+    CSVReaderUTF16(Reader input, ObjectReaderAdapter objectReader) {
         super(objectReader);
         this.input = input;
     }
 
-    CSVParserUTF16(Reader input, Type[] types) {
+    CSVReaderUTF16(Reader input, Type[] types) {
         super(types);
         this.input = input;
     }
 
-    CSVParserUTF16(
+    CSVReaderUTF16(
             char[] bytes,
             int off,
             int len,
@@ -49,7 +49,7 @@ class CSVParserUTF16
         this.end = off + len;
     }
 
-    CSVParserUTF16(
+    CSVReaderUTF16(
             char[] bytes,
             int off,
             int len,

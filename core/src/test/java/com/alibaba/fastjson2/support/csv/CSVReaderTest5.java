@@ -10,7 +10,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CSVParserTest5 {
+public class CSVReaderTest5 {
     @Test
     public void testInputStreamFile() throws Exception {
         Charset[] charsets = new Charset[] {
@@ -23,7 +23,7 @@ public class CSVParserTest5 {
             byte[] bytes = str.getBytes(charset);
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
 
-            CSVParser parser = CSVParser.of(in, charset);
+            CSVReader parser = CSVReader.of(in, charset);
             List<String> columns = parser.readHeader();
             assertEquals(5, columns.size());
 
@@ -49,7 +49,7 @@ public class CSVParserTest5 {
             byte[] bytes = str.getBytes(charset);
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
 
-            CSVParser parser = CSVParser.of(in, charset);
+            CSVReader parser = CSVReader.of(in, charset);
             List<String> columns = parser.readHeader();
             assertEquals(5, columns.size());
 
@@ -75,7 +75,7 @@ public class CSVParserTest5 {
             byte[] bytes = strW.getBytes(charset);
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
 
-            CSVParser parser = CSVParser.of(in, charset);
+            CSVReader parser = CSVReader.of(in, charset);
             List<String> columns = parser.readHeader();
             assertEquals(5, columns.size());
 
@@ -101,7 +101,7 @@ public class CSVParserTest5 {
             byte[] bytes = strW.getBytes(charset);
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
 
-            CSVParser parser = CSVParser.of(in, charset);
+            CSVReader parser = CSVReader.of(in, charset);
             List<String> columns = parser.readHeader();
             assertEquals(5, columns.size());
 
