@@ -300,7 +300,11 @@ class ObjectReaderImplMapTyped
                     }
                 }
             } else {
-                if (i == 0 && jsonReader.isEnabled(JSONReader.Feature.SupportAutoType) && jsonReader.current() == '"') {
+                if (i == 0
+                        && jsonReader.isEnabled(JSONReader.Feature.SupportAutoType)
+                        && jsonReader.current() == '"'
+                        && !(keyType instanceof Class && Enum.class.isAssignableFrom((Class) keyType))
+                ) {
                     name = jsonReader.readFieldName();
                     if (name.equals(getTypeKey())) {
                         long typeHashCode = jsonReader.readTypeHashCode();
