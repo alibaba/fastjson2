@@ -819,9 +819,11 @@ public class ObjectReaderProvider
                     afterAutoType(typeName, clazz);
                     return clazz;
                 } else {
-                    if ((features & JSONReader.Feature.IgnoreAutoTypeNotMatch.mask) == 0) {
-                        throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
+                    if ((features & JSONReader.Feature.IgnoreAutoTypeNotMatch.mask) != 0) {
+                        return expectClass;
                     }
+
+                    throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
                 }
             }
         }
