@@ -12,6 +12,35 @@ public class Issue1325 {
     @Test
     public void test() {
         Date date = DateUtils.parseDate("2022-02-16T16:00:00.000Z");
+
+        String[] strings = new String[] {
+                "\"2022-02-16T16:00:00Z\"",
+                "\"2022-02-16T16:00:00.0Z\"",
+                "\"2022-02-16T16:00:00.00Z\"",
+                "\"2022-02-16T16:00:00.000Z\"",
+                "\"2022-02-16T16:00:00.0000Z\"",
+                "\"2022-02-16T16:00:00.00000Z\"",
+                "\"2022-02-16T16:00:00.000000Z\"",
+                "\"2022-02-16T16:00:00.0000000Z\"",
+                "\"2022-02-16T16:00:00.00000000Z\"",
+                "\"2022-02-16T16:00:00.000000000Z\"",
+        };
+
+        for (String string : strings) {
+            assertEquals(
+                    date.getTime(),
+                    JSON.parseObject(string, Date.class).getTime()
+            );
+            assertEquals(
+                    date.getTime(),
+                    JSON.parseObject(string.getBytes(), Date.class).getTime()
+            );
+            assertEquals(
+                    date.getTime(),
+                    JSON.parseObject(string.toCharArray(), Date.class).getTime()
+            );
+        }
+
         String str = " {\"activeDate\": \"2022-02-16T16:00:00.000Z\"}";
         assertEquals(
                 date.getTime(),
