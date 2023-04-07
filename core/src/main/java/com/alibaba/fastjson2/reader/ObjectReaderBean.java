@@ -149,6 +149,17 @@ public abstract class ObjectReaderBean<T>
 
             if (autoTypeObjectReader == null) {
                 throw new JSONException(jsonReader.info("auotype not support"));
+            } else {
+                Class autoTypeObjectReaderClass = autoTypeObjectReader.getObjectClass();
+                if (expectClass != null
+                        && autoTypeObjectReaderClass != null
+                        && !expectClass.isAssignableFrom(autoTypeObjectReaderClass)) {
+                    if ((jsonReader.features(features | this.features) & JSONReader.Feature.IgnoreAutoTypeNotMatch.mask) != 0) {
+                        return context.getObjectReader(expectClass);
+                    }
+
+                    throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
+                }
             }
 
             if (typeHash == this.typeNameHash) {

@@ -685,7 +685,9 @@ public class ObjectReaderProvider
         boolean fieldBased = (features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = getObjectReader(autoTypeClass, fieldBased);
 
-        registerIfAbsent(Fnv.hashCode64(typeName), objectReader);
+        if (autoTypeClass != expectClass) {
+            registerIfAbsent(Fnv.hashCode64(typeName), objectReader);
+        }
         return objectReader;
     }
 

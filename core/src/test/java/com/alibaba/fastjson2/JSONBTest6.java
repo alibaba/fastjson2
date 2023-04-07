@@ -47,7 +47,7 @@ public class JSONBTest6 {
         bean.id = 1001;
 
         byte[] jsonbBytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName);
-        Bean bean1 = JSONB.parseObject(jsonbBytes, (Type) Bean1.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.IgnoreAutoTypeNotMatch);
+        Bean1 bean1 = JSONB.parseObject(jsonbBytes, (Type) Bean1.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.IgnoreAutoTypeNotMatch);
         assertEquals(bean.id, bean1.id);
     }
 
@@ -57,7 +57,7 @@ public class JSONBTest6 {
         bean.id = 1001;
 
         byte[] jsonbBytes = JSONB.toBytes(bean, new JSONWriter.Context(JSONWriter.Feature.WriteClassName));
-        Bean bean1 = JSONB.parseObject(jsonbBytes, (Type) Bean1.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.IgnoreAutoTypeNotMatch);
+        Bean1 bean1 = JSONB.parseObject(jsonbBytes, (Type) Bean1.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.IgnoreAutoTypeNotMatch);
         assertEquals(bean.id, bean1.id);
     }
 
@@ -66,6 +66,6 @@ public class JSONBTest6 {
     }
 
     public static class Bean1 {
-        public int id2;
+        public int id;
     }
 }
