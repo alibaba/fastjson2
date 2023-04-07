@@ -574,6 +574,7 @@ class CSVReaderUTF8
                     consumer.accept(rowCount, columnIndex, buf, valueStart, valueSize, charset);
                 }
             }
+            consumer.afterRow(rowCount);
         }
     }
 }

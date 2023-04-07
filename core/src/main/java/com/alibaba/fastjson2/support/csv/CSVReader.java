@@ -616,6 +616,7 @@ public abstract class CSVReader
 
     public interface ByteArrayConsumer {
         void accept(int row, int column, byte[] bytes, int off, int len, Charset charset);
+        default void afterRow(int row) {};
     }
 
     public void readAll(ByteArrayConsumer consumer) {
