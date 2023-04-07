@@ -1475,8 +1475,6 @@ public class JSONArray
         return JSON.parseArray(text, type, features);
     }
 
-
-
     /**
      * Parse JSON {@link String} into {@link JSONArray}
      *

@@ -1465,4 +1465,11 @@ public class JSONArrayTest {
         JSONArray array = JSONArray.from(Collections.emptyList(), JSONWriter.Feature.NotWriteEmptyArray);
         assertEquals(0, array.size());
     }
+
+    @Test
+    public void parseArray() {
+        List<Long> integers = JSONArray.parseArray("[1,2]", Long.class, JSONReader.Feature.Base64StringAsByteArray);
+        assertEquals(1L, integers.get(0));
+        assertEquals(2L, integers.get(1));
+    }
 }
