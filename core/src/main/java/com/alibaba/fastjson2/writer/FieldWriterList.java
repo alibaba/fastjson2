@@ -230,7 +230,7 @@ abstract class FieldWriterList<T>
 
             itemObjectWriter.write(jsonWriter, item, null, itemType, features);
 
-            if (refDetect) {
+            if (itemRefDetect) {
                 jsonWriter.popPath(item);
             }
         }
