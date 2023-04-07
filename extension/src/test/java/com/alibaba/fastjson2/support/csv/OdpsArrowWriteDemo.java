@@ -39,7 +39,7 @@ public class OdpsArrowWriteDemo {
             Instance dropTableTask = SQLTask.run(odps, dropTable);
             dropTableTask.waitForSuccess();
 
-            String ddl = CSVMaxComputeUtls.genCreateTable(file, tableName);
+            String ddl = CSVMaxComputeUtils.genCreateTable(file, tableName);
             System.out.println(ddl);
 
             Instance createTableTask = SQLTask.run(odps, ddl);

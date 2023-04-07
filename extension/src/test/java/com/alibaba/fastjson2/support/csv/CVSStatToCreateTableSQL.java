@@ -12,7 +12,7 @@ public class CVSStatToCreateTableSQL {
             return;
         }
 
-        String ddl = CSVMaxComputeUtls.genCreateTable(file, "x5");
+        String ddl = CSVMaxComputeUtils.genCreateTable(file, "x5");
         System.out.println(ddl);
     }
 }

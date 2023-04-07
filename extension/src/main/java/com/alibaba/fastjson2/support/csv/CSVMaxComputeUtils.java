@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public class CSVMaxComputeUtls {
+public class CSVMaxComputeUtils {
     public static String genCreateTable(File file, String tableName) throws IOException {
         CSVReader csvReader = CSVReader.of(file);
         csvReader.readHeader();
@@ -54,7 +54,7 @@ public class CSVMaxComputeUtls {
 
             sql.append(' ');
             sql.append(
-                    CSVMaxComputeUtls.getInferType(columnStat)
+                    columnStat.getInferSQLType()
             );
 
             if (special) {
@@ -72,42 +72,5 @@ public class CSVMaxComputeUtls {
         sql.append(");");
 
         return sql.toString();
-    }
-
-    public static String getInferType(StreamReader.ColumnStat stat) {
-        if (stat.nonAsciiStrings > 0 || stat.nulls == stat.values) {
-            return "STRING";
-        }
-
-        if (stat.values == stat.dates + stat.nulls) {
-            if (stat.precision != 0) {
-                return "TIMESTAMP";
-            }
-            return "DATETIME";
-        }
-
-        if (stat.values == stat.integers + stat.nulls) {
-            if (stat.precision < 10) {
-                return "INT";
-            }
-            if (stat.precision < 20) {
-                return "BIGINT";
-            }
-            return "DECIMAL(" + stat.precision + ", 0)";
-        }
-
-        if (stat.values == stat.numbers + stat.nulls) {
-            if (stat.doubles > 0 || stat.scale > 5) {
-                return "DOUBLE";
-            }
-
-            int precision = stat.precision;
-            if (precision < 19) {
-                precision = 19;
-            }
-            return "DECIMAL(" + precision + ", " + stat.scale + ")";
-        }
-
-        return "STRING";
     }
 }

@@ -17,7 +17,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public abstract class StreamReader {
     protected static final int SIZE_512K = 1024 * 512;
@@ -31,6 +34,7 @@ public abstract class StreamReader {
 
     protected int lineSize;
     protected int rowCount;
+    protected int errorCount;
 
     protected int lineStart;
     protected int lineEnd;
@@ -41,6 +45,10 @@ public abstract class StreamReader {
 
     protected boolean inputEnd;
     protected boolean lineTerminated = true;
+
+    protected Map<String, ColumnStat> columnStatsMap;
+    protected List<String> columns;
+    protected List<ColumnStat> columnStats;
 
     public StreamReader() {
     }
@@ -96,6 +104,8 @@ public abstract class StreamReader {
         public int scale;
         public int nonAsciiStrings;
         public int errors;
+        public int maps;
+        public int arrays;
 
         public ColumnStat(String name) {
             this.name = name;
@@ -387,6 +397,43 @@ public abstract class StreamReader {
             }
         }
 
+        public String getInferSQLType() {
+            if (nonAsciiStrings > 0 || nulls == values) {
+                return "STRING";
+            }
+
+            if (values == dates + nulls) {
+                if (precision != 0) {
+                    return "TIMESTAMP";
+                }
+                return "DATETIME";
+            }
+
+            if (values == integers + nulls) {
+                if (precision < 10) {
+                    return "INT";
+                }
+                if (precision < 20) {
+                    return "BIGINT";
+                }
+                return "DECIMAL(" + precision + ", 0)";
+            }
+
+            if (values == numbers + nulls) {
+                if (doubles > 0 || scale > 5) {
+                    return "DOUBLE";
+                }
+
+                int precision = this.precision;
+                if (precision < 19) {
+                    precision = 19;
+                }
+                return "DECIMAL(" + precision + ", " + scale + ")";
+            }
+
+            return "STRING";
+        }
+
         public Type getInferType() {
             if (nonAsciiStrings > 0 || nulls == values) {
                 return String.class;
@@ -419,6 +466,14 @@ public abstract class StreamReader {
 
             if (values == numbers + nulls) {
                 return BigDecimal.class;
+            }
+
+            if (arrays > 0) {
+                return Collection.class;
+            }
+
+            if (maps > 0) {
+                return Map.class;
             }
 
             return String.class;
