@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
+import com.alibaba.fastjson2.stream.StreamReader;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -18,28 +19,27 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-class CSVParserUTF8
-        extends CSVParser {
+class CSVReaderUTF8
+        extends CSVReader {
     byte[] buf;
     InputStream input;
     Charset charset = StandardCharsets.UTF_8;
 
-    CSVParserUTF8(Feature... features) {
+    CSVReaderUTF8(Feature... features) {
         for (Feature feature : features) {
             this.features |= feature.mask;
         }
     }
 
-    CSVParserUTF8(byte[] bytes, int off, int len, ObjectReaderAdapter objectReader) {
+    CSVReaderUTF8(byte[] bytes, int off, int len, ObjectReaderAdapter objectReader) {
         super(objectReader);
         this.buf = bytes;
         this.off = off;
         this.end = off + len;
     }
 
-    CSVParserUTF8(byte[] bytes, int off, int len, Type[] types) {
+    CSVReaderUTF8(byte[] bytes, int off, int len, Type[] types) {
         super(types);
         this.buf = bytes;
         this.off = off;
@@ -47,21 +47,16 @@ class CSVParserUTF8
         this.types = types;
     }
 
-    CSVParserUTF8(InputStream input, Charset charset, Type[] types) {
+    CSVReaderUTF8(InputStream input, Charset charset, Type[] types) {
         super(types);
         this.charset = charset;
         this.input = input;
     }
 
-    CSVParserUTF8(InputStream input, Charset charset, ObjectReaderAdapter objectReader) {
+    CSVReaderUTF8(InputStream input, Charset charset, ObjectReaderAdapter objectReader) {
         super(objectReader);
         this.charset = charset;
         this.input = input;
-    }
-
-    CSVParserUTF8(InputStream input, Map<String, Type> schema) {
-        this.input = input;
-        this.schema = schema;
     }
 
     protected boolean seekLine() throws IOException {
@@ -493,6 +488,133 @@ class CSVParserUTF8
     public void close() {
         if (input != null) {
             IOUtils.close(input);
+        }
+    }
+
+    public void statAll() {
+        while (true) {
+            try {
+                if (inputEnd) {
+                    break;
+                }
+
+                if (input == null) {
+                    if (off >= end) {
+                        break;
+                    }
+                }
+
+                boolean result = seekLine();
+
+                if (!result) {
+                    break;
+                }
+            } catch (IOException e) {
+                throw new JSONException("seekLine error", e);
+            }
+
+            boolean quote = false;
+            int valueStart = lineStart;
+            int valueSize = 0;
+            int escapeCount = 0;
+            int columnIndex = 0;
+            for (int i = lineStart; i < lineEnd; ++i) {
+                byte ch = buf[i];
+
+                if (quote) {
+                    if (ch == '"') {
+                        int n = i + 1;
+                        if (n < lineEnd) {
+                            byte c1 = buf[n];
+                            if (c1 == '"') {
+                                valueSize += 2;
+                                escapeCount++;
+                                ++i;
+                                continue;
+                            } else if (c1 == ',') {
+                                ++i;
+                                ch = c1;
+                            }
+                        } else if (n == lineEnd) {
+                            break;
+                        }
+                    } else {
+                        valueSize++;
+                        continue;
+                    }
+                } else {
+                    if (ch == '"') {
+                        quote = true;
+                        continue;
+                    }
+                }
+
+                if (ch == ',') {
+                    if (quote) {
+                        if (escapeCount == 0) {
+//                            value = new String(buf, valueStart + 1, valueSize, charset);
+                            StreamReader.ColumnStat stat = getColumnStat(columnIndex);
+                            stat.stat(buf, valueStart + 1, valueSize, charset);
+                        } else {
+                            byte[] bytes = new byte[valueSize - escapeCount];
+                            int valueEnd = valueStart + valueSize;
+                            for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
+                                byte c = buf[j];
+                                bytes[k++] = c;
+                                if (c == '"' && buf[j + 1] == '"') {
+                                    ++j;
+                                }
+                            }
+
+                            StreamReader.ColumnStat stat = getColumnStat(columnIndex);
+                            stat.stat(bytes, 0, bytes.length, charset);
+                        }
+                    } else {
+//                        value = new String(buf, valueStart, valueSize, charset);
+                        StreamReader.ColumnStat stat = getColumnStat(columnIndex);
+                        stat.stat(buf, valueStart, valueSize, charset);
+                    }
+
+                    quote = false;
+                    valueStart = i + 1;
+                    valueSize = 0;
+                    escapeCount = 0;
+                    columnIndex++;
+                    continue;
+                }
+
+                valueSize++;
+            }
+
+            if (valueSize > 0) {
+                if (quote) {
+                    if (escapeCount == 0) {
+//                        value = new String(buf, valueStart + 1, valueSize, charset);
+                        StreamReader.ColumnStat stat = getColumnStat(columnIndex);
+                        stat.stat(buf, valueStart + 1, valueSize, charset);
+                    } else {
+                        byte[] bytes = new byte[valueSize - escapeCount];
+                        int valueEnd = lineEnd;
+                        for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
+                            byte c = buf[j];
+                            bytes[k++] = c;
+                            if (c == '"' && buf[j + 1] == '"') {
+                                ++j;
+                            }
+                        }
+
+//                        value = new String(bytes, 0, bytes.length, charset);
+                        StreamReader.ColumnStat stat = getColumnStat(columnIndex);
+                        stat.stat(bytes, 0, bytes.length, charset);
+                    }
+                } else {
+//                    value = new String(buf, valueStart, valueSize, charset);
+                    StreamReader.ColumnStat stat = getColumnStat(columnIndex);
+                    stat.stat(buf, valueStart, valueSize, charset);
+                }
+            }
+
+            rowCount++;
         }
     }
 }

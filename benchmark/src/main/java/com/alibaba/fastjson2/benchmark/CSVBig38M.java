@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.benchmark;
 
-import com.alibaba.fastjson2.support.csv.CSVParser;
+import com.alibaba.fastjson2.support.csv.CSVReader;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.infra.Blackhole;
 
@@ -21,7 +21,7 @@ public class CSVBig38M {
 
         File file = new File(resource.getFile());
         FileInputStream fileIn = new FileInputStream(file);
-        int rowCount = CSVParser.rowCount(fileIn);
+        int rowCount = CSVReader.rowCount(fileIn);
         bh.consume(rowCount);
     }
 
@@ -33,7 +33,7 @@ public class CSVBig38M {
         }
 
         File file = new File(resource.getFile());
-        CSVParser parser = CSVParser.of(file);
+        CSVReader parser = CSVReader.of(file);
         int rowCount = 0;
         while (true) {
             String[] line = parser.readLine();
@@ -56,7 +56,7 @@ public class CSVBig38M {
         Type[] types = new Type[] {
                 Integer.class, Integer.class, Integer.class, String.class, String.class, String.class, BigDecimal.class
         };
-        CSVParser parser = CSVParser.of(file, types);
+        CSVReader parser = CSVReader.of(file, types);
         int rowCount = 0;
         while (true) {
             Object[] line = parser.readLineValues();

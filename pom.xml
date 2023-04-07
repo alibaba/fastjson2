@@ -39,6 +39,7 @@
         <springframework6.version>6.0.7</springframework6.version>
         <springboot2.version>2.7.9</springboot2.version>
         <springboot3.version>3.0.4</springboot3.version>
+        <arrow.version>9.0.0</arrow.version>
 
         <kotlin.version>1.8.20</kotlin.version>
         <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
@@ -148,6 +149,11 @@
                 <groupId>cglib</groupId>
                 <artifactId>cglib-nodep</artifactId>
                 <version>3.3.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aliyun.odps</groupId>
+                <artifactId>odps-sdk-core</artifactId>
+                <version>0.43.3-public</version>
             </dependency>
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
@@ -322,6 +328,11 @@
             </dependency>
 
             <dependency>
+                <groupId>org.apache.arrow</groupId>
+                <artifactId>arrow-vector</artifactId>
+                <version>${arrow.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
                 <version>4.4</version>
@@ -331,7 +342,6 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>3.12.0</version>
             </dependency>
-
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-bom</artifactId>

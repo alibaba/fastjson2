@@ -231,43 +231,100 @@ public class TypeUtilsTest2 {
 
     @Test
     public void isInteger() {
-        assertFalse(TypeUtils.isInteger("+"));
-        assertFalse(TypeUtils.isInteger("-"));
-        assertFalse(TypeUtils.isInteger("A"));
-        assertFalse(TypeUtils.isInteger("+A"));
-        assertFalse(TypeUtils.isInteger("+1A"));
-        assertTrue(TypeUtils.isInteger("+1"));
-        assertTrue(TypeUtils.isInteger("-1"));
-        assertTrue(TypeUtils.isInteger("1"));
-        assertTrue(TypeUtils.isInteger("123"));
-        assertFalse(TypeUtils.isInteger("123."));
-        assertFalse(TypeUtils.isInteger("+123."));
-        assertFalse(TypeUtils.isInteger("-123."));
-        assertFalse(TypeUtils.isInteger(".123"));
+        String[] strings = new String[] {
+                "+",
+                "-",
+                "A",
+                "+A",
+                "+1A",
+                "+1A",
+                "123.",
+                "+123.",
+                "-123.",
+                ".123",
+                "+.123",
+                "-.123"
+        };
+        for (String string : strings) {
+            assertFalse(TypeUtils.isInteger(string));
+
+            byte[] bytes = string.getBytes();
+            assertFalse(TypeUtils.isInteger(bytes, 0, bytes.length));
+
+            String prefix = "ABC";
+            byte[] bytes2 = (prefix + string).getBytes();
+            assertFalse(TypeUtils.isInteger(bytes2, prefix.length(), string.length()));
+        }
+
+        String[] trues = new String[] {
+                "+1",
+                "-1",
+                "1",
+                "123",
+                "+123",
+                "-123",
+        };
+        for (String string : trues) {
+            assertTrue(TypeUtils.isInteger(string));
+
+            byte[] bytes = string.getBytes();
+            assertTrue(TypeUtils.isInteger(bytes, 0, bytes.length));
+
+            String prefix = "ABC";
+            byte[] bytes2 = (prefix + string).getBytes();
+            assertTrue(TypeUtils.isInteger(bytes2, prefix.length(), string.length()));
+        }
     }
 
     @Test
-    public void isNumber() {
-        assertFalse(TypeUtils.isNumber("+"));
-        assertFalse(TypeUtils.isNumber("-"));
-        assertFalse(TypeUtils.isNumber("A"));
-        assertFalse(TypeUtils.isNumber("+A"));
-        assertFalse(TypeUtils.isNumber("+1A"));
+    public void isNumber1() {
+        String[] strings = new String[] {
+                "+",
+                "-",
+                "A",
+                "+A",
+                "+1A",
+                "+1A",
+                ".",
+                ".12.",
+                ".12A."
+        };
+        for (String string : strings) {
+            assertFalse(TypeUtils.isNumber(string));
 
-        assertTrue(TypeUtils.isNumber("+1"));
-        assertTrue(TypeUtils.isNumber("-1"));
-        assertTrue(TypeUtils.isNumber("1"));
-        assertTrue(TypeUtils.isNumber("123"));
-        assertTrue(TypeUtils.isNumber("123."));
-        assertTrue(TypeUtils.isNumber("+123."));
-        assertTrue(TypeUtils.isNumber("-123."));
-        assertTrue(TypeUtils.isNumber(".123"));
+            byte[] bytes = string.getBytes();
+            assertFalse(TypeUtils.isNumber(bytes, 0, bytes.length));
 
-        assertFalse(TypeUtils.isNumber("."));
-        assertFalse(TypeUtils.isNumber(".12."));
-        assertFalse(TypeUtils.isNumber(".12A"));
+            String prefix = "ABC";
+            byte[] bytes2 = (prefix + string).getBytes();
+            assertFalse(TypeUtils.isNumber(bytes2, prefix.length(), string.length()));
+        }
 
-        assertTrue(TypeUtils.isNumber(".12E"));
-        assertTrue(TypeUtils.isNumber(".12e"));
+        String[] trues = new String[] {
+                "+1",
+                "-1",
+                "1",
+                "123",
+                "+123",
+                "-123",
+                "123.",
+                "+123.",
+                "-123.",
+                ".123",
+                ".123E",
+                ".123e",
+        };
+        for (String string : trues) {
+            assertTrue(TypeUtils.isNumber(string));
+
+            byte[] bytes = string.getBytes();
+            assertTrue(TypeUtils.isNumber(bytes, 0, bytes.length));
+
+            String prefix = "ABC";
+            byte[] bytes2 = (prefix + string).getBytes();
+            assertTrue(
+                    TypeUtils.isNumber(bytes2, prefix.length(), string.length()), string
+            );
+        }
     }
 }

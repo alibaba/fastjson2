@@ -17,7 +17,7 @@ public class CSVTest1 {
         String csv = writer.toString();
         assertEquals("1001,DataWorks\n", csv);
 
-        CSVParser parser = CSVParser.of(csv, Bean.class);
+        CSVReader parser = CSVReader.of(csv, Bean.class);
 
         Bean bean1 = parser.readLineObject();
         assertEquals(bean.id, bean1.id);
@@ -49,7 +49,7 @@ public class CSVTest1 {
         assertEquals("1001,DataWorks\n" +
                 "1002,MaxCompute\n", csv);
 
-        CSVParser parser = CSVParser.of(csv, Bean.class);
+        CSVReader parser = CSVReader.of(csv, Bean.class);
         Bean bean0 = parser.readLineObject();
         Bean bean1 = parser.readLineObject();
 

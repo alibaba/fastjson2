@@ -38,15 +38,15 @@ public class CSVTest2 {
         };
 
         for (String string : strings) {
-            assertEquals(1, CSVParser.rowCount(string, CSVParser.Feature.IgnoreEmptyLine));
+            assertEquals(1, CSVReader.rowCount(string, CSVReader.Feature.IgnoreEmptyLine));
         }
 
         for (String string : strings) {
-            assertEquals(1, CSVParser.rowCount(string.toCharArray(), CSVParser.Feature.IgnoreEmptyLine));
+            assertEquals(1, CSVReader.rowCount(string.toCharArray(), CSVReader.Feature.IgnoreEmptyLine));
         }
 
         for (String string : strings) {
-            assertEquals(1, CSVParser.rowCount(string.getBytes(), CSVParser.Feature.IgnoreEmptyLine));
+            assertEquals(1, CSVReader.rowCount(string.getBytes(), CSVReader.Feature.IgnoreEmptyLine));
         }
     }
 
@@ -60,15 +60,15 @@ public class CSVTest2 {
                 "\"State\",\"Abbrev\",\"Code\"\n\"Alabama\",\"Ala.\",\"AL\"\n"
         };
         for (String string : strings) {
-            assertEquals(2, CSVParser.rowCount(string, CSVParser.Feature.IgnoreEmptyLine));
+            assertEquals(2, CSVReader.rowCount(string, CSVReader.Feature.IgnoreEmptyLine));
         }
 
         for (String string : strings) {
-            assertEquals(2, CSVParser.rowCount(string.toCharArray(), CSVParser.Feature.IgnoreEmptyLine));
+            assertEquals(2, CSVReader.rowCount(string.toCharArray(), CSVReader.Feature.IgnoreEmptyLine));
         }
 
         for (String string : strings) {
-            assertEquals(2, CSVParser.rowCount(string.getBytes(StandardCharsets.UTF_8), CSVParser.Feature.IgnoreEmptyLine));
+            assertEquals(2, CSVReader.rowCount(string.getBytes(StandardCharsets.UTF_8), CSVReader.Feature.IgnoreEmptyLine));
         }
     }
 
@@ -80,7 +80,7 @@ public class CSVTest2 {
         }
 
         File file = new File(resource.getFile());
-        assertEquals(53, CSVParser.rowCount(file));
+        assertEquals(53, CSVReader.rowCount(file));
     }
 
     @Test
@@ -94,7 +94,7 @@ public class CSVTest2 {
         FileInputStream fileIn = new FileInputStream(file);
         ZipInputStream zipIn = new ZipInputStream(fileIn);
         zipIn.getNextEntry();
-        assertEquals(496774, CSVParser.rowCount(zipIn));
+        assertEquals(496774, CSVReader.rowCount(zipIn));
     }
 
     @Test
@@ -110,7 +110,7 @@ public class CSVTest2 {
         zipIn.getNextEntry();
 
         int rowCount = 0;
-        CSVParser parser = CSVParser.of(zipIn);
+        CSVReader parser = CSVReader.of(zipIn);
         while (true) {
             Object[] line = parser.readLineValues();
             if (line == null) {
@@ -140,7 +140,7 @@ public class CSVTest2 {
         InputStreamReader inputReader = new InputStreamReader(zipIn);
 
         int rowCount = 0;
-        CSVParser parser = CSVParser.of(inputReader);
+        CSVReader parser = CSVReader.of(inputReader);
         while (true) {
             Object[] line = parser.readLineValues();
             if (line == null) {
@@ -164,7 +164,7 @@ public class CSVTest2 {
 
         File file = new File(resource.getFile());
         int rowCount = 0;
-        CSVParser parser = CSVParser.of(file);
+        CSVReader parser = CSVReader.of(file);
         while (true) {
             Object[] line = parser.readLineValues();
             if (line == null) {
@@ -192,7 +192,7 @@ public class CSVTest2 {
 
         File file = new File(resource.getFile());
         int rowCount = 0;
-        CSVParser parser = CSVParser.of(file, types);
+        CSVReader parser = CSVReader.of(file, types);
         while (true) {
             Object[] line = parser.readLineValues();
             if (line == null) {
@@ -220,7 +220,7 @@ public class CSVTest2 {
 
         File file = new File(resource.getFile());
         int rowCount = 0;
-        CSVParser parser = CSVParser.of(file, types);
+        CSVReader parser = CSVReader.of(file, types);
         while (true) {
             Object[] line = parser.readLineValues();
             if (line == null) {
@@ -248,7 +248,7 @@ public class CSVTest2 {
 
         File file = new File(resource.getFile());
         int rowCount = 0;
-        CSVParser parser = CSVParser.of(file, types);
+        CSVReader parser = CSVReader.of(file, types);
         while (true) {
             Object[] line = parser.readLineValues();
             if (line == null) {
@@ -276,7 +276,7 @@ public class CSVTest2 {
 
         File file = new File(resource.getFile());
         int rowCount = 0;
-        CSVParser parser = CSVParser.of(file, types);
+        CSVReader parser = CSVReader.of(file, types);
         while (true) {
             Object[] line = parser.readLineValues();
             if (line == null) {
@@ -306,7 +306,7 @@ public class CSVTest2 {
         File tempFile = File.createTempFile("fastjson", "csv");
 
         int rowCount = 0;
-        CSVParser parser = CSVParser.of(file, types);
+        CSVReader parser = CSVReader.of(file, types);
         CSVWriter writer = CSVWriter.of(tempFile);
         while (true) {
             Object[] line = parser.readLineValues();

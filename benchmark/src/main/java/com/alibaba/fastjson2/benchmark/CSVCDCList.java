@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.benchmark;
 
-import com.alibaba.fastjson2.support.csv.CSVParser;
+import com.alibaba.fastjson2.support.csv.CSVReader;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.infra.Blackhole;
 
@@ -24,7 +24,7 @@ public class CSVCDCList {
 
         File file = new File(resource.getFile());
         FileInputStream fileIn = new FileInputStream(file);
-        int rowCount = CSVParser.rowCount(fileIn);
+        int rowCount = CSVReader.rowCount(fileIn);
         bh.consume(rowCount);
     }
 
@@ -36,7 +36,7 @@ public class CSVCDCList {
         }
 
         File file = new File(resource.getFile());
-        CSVParser parser = CSVParser.of(file);
+        CSVReader parser = CSVReader.of(file);
         int rowCount = 0;
         while (true) {
             String[] line = parser.readLine();
@@ -85,7 +85,7 @@ public class CSVCDCList {
                 String.class, // ProvisionGroupID
                 Integer.class // ProvisionID
         };
-        CSVParser parser = CSVParser.of(file, types);
+        CSVReader parser = CSVReader.of(file, types);
         parser.readHeader();
         int rowCount = 0;
         while (true) {

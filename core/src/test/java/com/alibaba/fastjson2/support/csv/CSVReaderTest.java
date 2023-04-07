@@ -10,13 +10,18 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CSVParserTest {
+public class CSVReaderTest {
     String[][] lines = new String[][]{
             new String[]{"1997", "Ford", "E350", "ac, abs, moon", "3000.00"},
             new String[]{"1999", "Chevy", "Venture \"Extended Edition\"", "", "4900.00"},
@@ -27,7 +32,7 @@ public class CSVParserTest {
 
     @Test
     public void test0() {
-        CSVParser parser = CSVParser.of(str);
+        CSVReader parser = CSVReader.of(str);
         List<String> columns = parser.readHeader();
         assertEquals(5, columns.size());
 
@@ -42,7 +47,7 @@ public class CSVParserTest {
 
     @Test
     public void test0Chars() {
-        CSVParser parser = CSVParser.of(str.toCharArray());
+        CSVReader parser = CSVReader.of(str.toCharArray());
         List<String> columns = parser.readHeader();
         assertEquals(5, columns.size());
 
@@ -57,7 +62,7 @@ public class CSVParserTest {
 
     @Test
     public void test0Bytes() {
-        CSVParser parser = CSVParser.of(str.getBytes(StandardCharsets.UTF_8));
+        CSVReader parser = CSVReader.of(str.getBytes(StandardCharsets.UTF_8));
         List<String> columns = parser.readHeader();
         assertEquals(5, columns.size());
 
@@ -72,7 +77,7 @@ public class CSVParserTest {
 
     @Test
     public void testBytes() {
-        CSVParser parser = CSVParser.of(str.getBytes());
+        CSVReader parser = CSVReader.of(str.getBytes());
         List<String> columns = parser.readHeader();
         assertEquals(5, columns.size());
 
@@ -114,7 +119,7 @@ public class CSVParserTest {
             out.flush();
             out.close();
 
-            CSVParser parser = CSVParser.of(file, charset);
+            CSVReader parser = CSVReader.of(file, charset);
             List<String> columns = parser.readHeader();
             assertEquals(5, columns.size());
 
@@ -148,7 +153,7 @@ public class CSVParserTest {
             out.flush();
             out.close();
 
-            CSVParser parser = CSVParser.of(file, charset, Item.class);
+            CSVReader parser = CSVReader.of(file, charset, Item.class);
             List<String> columns = parser.readHeader();
             assertEquals(5, columns.size());
 
@@ -180,7 +185,7 @@ public class CSVParserTest {
             byte[] bytes = str.getBytes(charset);
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
 
-            CSVParser parser = CSVParser.of(in, charset);
+            CSVReader parser = CSVReader.of(in, charset);
             List<String> columns = parser.readHeader();
             assertEquals(5, columns.size());
 
@@ -194,19 +199,52 @@ public class CSVParserTest {
         }
     }
 
+    public static <T> Stream<T> stream(Consumer<Consumer<? super T>> consumer) {
+        Iterator<T> iterator = new Iterator<T>() {
+            @Override
+            public boolean hasNext() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public T next() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void forEachRemaining(Consumer<? super T> action) {
+                consumer.accept(action);
+            }
+        };
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false);
+    }
+
+    public static <T> Stream<T> readAsStream(CSVReader parser) {
+        return readAsStream(parser, Integer.MAX_VALUE);
+    }
+
+    public static <T> Stream<T> readAsStream(CSVReader parser, int limit) {
+        return stream(c -> {
+            T t;
+            for (int left = limit; left > 0 && (t = parser.readLineObject()) != null; left--) {
+                c.accept(t);
+            }
+        });
+    }
+
     @Test
     public void testFileAsStream() {
-        CSVParser csvParser = CSVParser.of(getClass().getResourceAsStream("/person.csv"), Person.class);
-        System.out.println(csvParser.readHeader());
-        Stream<Person> stream = csvParser.readAsStream();
+        CSVReader csvReader = CSVReader.of(getClass().getResourceAsStream("/person.csv"), Person.class);
+        System.out.println(csvReader.readHeader());
+        Stream<Person> stream = readAsStream(csvReader);
         stream.forEach(System.out::println);
     }
 
     @Test
     public void testFileAsStream1() {
-        CSVParser csvParser = CSVParser.of(new InputStreamReader(getClass().getResourceAsStream("/person.csv")), Person.class);
-        System.out.println(csvParser.readHeader());
-        Stream<Person> stream = csvParser.readAsStream();
+        CSVReader csvReader = CSVReader.of(new InputStreamReader(getClass().getResourceAsStream("/person.csv")), Person.class);
+        System.out.println(csvReader.readHeader());
+        Stream<Person> stream = readAsStream(csvReader);
         stream.forEach(System.out::println);
     }
 

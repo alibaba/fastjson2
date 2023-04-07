@@ -19,7 +19,7 @@ public class CSVTest0 {
         String csv = writer.toString();
         assertEquals("1001,DataWorks\n", csv);
 
-        CSVParser parser = CSVParser.of(csv, Bean.class);
+        CSVReader parser = CSVReader.of(csv, Bean.class);
         Bean bean1 = parser.readLineObject();
         assertEquals(bean.id, bean1.id);
         assertEquals(bean.name, bean1.name);
@@ -39,7 +39,7 @@ public class CSVTest0 {
 
         byte[] bytes = csv.getBytes(StandardCharsets.US_ASCII);
 
-        CSVParser parser = CSVParser.of(bytes, Bean.class);
+        CSVReader parser = CSVReader.of(bytes, Bean.class);
         Bean bean1 = parser.readLineObject();
         assertEquals(bean.id, bean1.id);
         assertEquals(bean.name, bean1.name);
@@ -59,7 +59,7 @@ public class CSVTest0 {
 
         char[] chars = csv.toCharArray();
 
-        CSVParser parser = CSVParser.of(chars, Bean.class);
+        CSVReader parser = CSVReader.of(chars, Bean.class);
         Bean bean1 = parser.readLineObject();
         assertEquals(bean.id, bean1.id);
         assertEquals(bean.name, bean1.name);
@@ -90,7 +90,7 @@ public class CSVTest0 {
         assertEquals("1001,DataWorks\n" +
                 "1002,MaxCompute\n", csv);
 
-        CSVParser parser = CSVParser.of(csv, Bean.class);
+        CSVReader parser = CSVReader.of(csv, Bean.class);
         Bean bean0 = parser.readLineObject();
         Bean bean1 = parser.readLineObject();
 

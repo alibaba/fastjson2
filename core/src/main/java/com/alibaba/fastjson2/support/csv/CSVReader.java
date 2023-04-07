@@ -14,33 +14,27 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Stream;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
-public abstract class CSVParser
+public abstract class CSVReader
         extends StreamReader
         implements Closeable {
     List<String> columns;
     List<ColumnStat> columnStats;
-    Map<String, Type> schema;
     int rowCount;
     int errorCount;
 
     boolean quote;
 
-    CSVParser() {
+    CSVReader() {
     }
 
-    CSVParser(Map<String, Type> schema) {
-        this.schema = schema;
-    }
-
-    CSVParser(ObjectReaderAdapter objectReader) {
+    CSVReader(ObjectReaderAdapter objectReader) {
         super(objectReader);
     }
 
-    public CSVParser(Type[] types) {
+    public CSVReader(Type[] types) {
         super(types);
     }
 
@@ -58,13 +52,13 @@ public abstract class CSVParser
         }
     }
 
-    public static CSVParser of(Reader reader, Class objectClass) {
+    public static CSVReader of(Reader reader, Class objectClass) {
         JSONReader.Context context = JSONFactory.createReadContext();
         ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
-        return new CSVParserUTF16(reader, objectReader);
+        return new CSVReaderUTF16(reader, objectReader);
     }
 
-    public static CSVParser of(String str, Class objectClass) {
+    public static CSVReader of(String str, Class objectClass) {
         JSONReader.Context context = JSONFactory.createReadContext();
         ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
 
@@ -73,7 +67,7 @@ public abstract class CSVParser
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == 0) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    return new CSVParserUTF8(bytes, 0, bytes.length, objectReader);
+                    return new CSVReaderUTF8(bytes, 0, bytes.length, objectReader);
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
@@ -81,97 +75,93 @@ public abstract class CSVParser
         }
 
         char[] chars = JDKUtils.getCharArray(str);
-        return new CSVParserUTF16(chars, 0, chars.length, objectReader);
+        return new CSVReaderUTF16(chars, 0, chars.length, objectReader);
     }
 
-    public static CSVParser of(char[] chars, Class objectClass) {
+    public static CSVReader of(char[] chars, Class objectClass) {
         JSONReader.Context context = JSONFactory.createReadContext();
         ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
-        return new CSVParserUTF16(chars, 0, chars.length, objectReader);
+        return new CSVReaderUTF16(chars, 0, chars.length, objectReader);
     }
 
-    public static CSVParser of(byte[] utf8Bytes, Class objectClass) {
+    public static CSVReader of(byte[] utf8Bytes, Class objectClass) {
         JSONReader.Context context = JSONFactory.createReadContext();
         ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
-        return new CSVParserUTF8(utf8Bytes, 0, utf8Bytes.length, objectReader);
+        return new CSVReaderUTF8(utf8Bytes, 0, utf8Bytes.length, objectReader);
     }
 
-    public static CSVParser of(File file, Type... types) throws IOException {
-        return new CSVParserUTF8(new FileInputStream(file), StandardCharsets.UTF_8, types);
+    public static CSVReader of(File file, Type... types) throws IOException {
+        return new CSVReaderUTF8(new FileInputStream(file), StandardCharsets.UTF_8, types);
     }
 
-    public static CSVParser of(File file, Charset charset, Type... types) throws IOException {
+    public static CSVReader of(File file, Charset charset, Type... types) throws IOException {
         if (charset == StandardCharsets.UTF_16
                 || charset == StandardCharsets.UTF_16LE
                 || charset == StandardCharsets.UTF_16BE) {
-            return new CSVParserUTF16(
+            return new CSVReaderUTF16(
                     new InputStreamReader(new FileInputStream(file), charset), types
             );
         }
 
-        return new CSVParserUTF8(new FileInputStream(file), charset, types);
+        return new CSVReaderUTF8(new FileInputStream(file), charset, types);
     }
 
-    public static CSVParser of(File file, Class objectClass) throws IOException {
+    public static CSVReader of(File file, Class objectClass) throws IOException {
         return of(file, StandardCharsets.UTF_8, objectClass);
     }
 
-    public static CSVParser of(File file, Charset charset, Class objectClass) throws IOException {
+    public static CSVReader of(File file, Charset charset, Class objectClass) throws IOException {
         JSONReader.Context context = JSONFactory.createReadContext();
         ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
 
         if (charset == StandardCharsets.UTF_16
                 || charset == StandardCharsets.UTF_16LE
                 || charset == StandardCharsets.UTF_16BE) {
-            return new CSVParserUTF16(
+            return new CSVReaderUTF16(
                     new InputStreamReader(new FileInputStream(file), charset), objectReader
             );
         }
 
-        return new CSVParserUTF8(new FileInputStream(file), charset, objectReader);
+        return new CSVReaderUTF8(new FileInputStream(file), charset, objectReader);
     }
 
-    public static CSVParser of(InputStream in, Type... types) throws IOException {
-        return new CSVParserUTF8(in, StandardCharsets.UTF_8, types);
+    public static CSVReader of(InputStream in, Type... types) throws IOException {
+        return new CSVReaderUTF8(in, StandardCharsets.UTF_8, types);
     }
 
-    public static CSVParser of(InputStream in, Class objectClass) {
+    public static CSVReader of(InputStream in, Class objectClass) {
         return of(in, StandardCharsets.UTF_8, objectClass);
     }
 
-    public static CSVParser of(InputStream in, Charset charset, Class objectClass) {
+    public static CSVReader of(InputStream in, Charset charset, Class objectClass) {
         JSONReader.Context context = JSONFactory.createReadContext();
         ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
-        return new CSVParserUTF8(in, charset, objectReader);
+        return new CSVReaderUTF8(in, charset, objectReader);
     }
 
-    public static CSVParser of(InputStream in, Charset charset, Type... types) throws IOException {
+    public static CSVReader of(InputStream in, Charset charset, Type... types) throws IOException {
         if (charset == StandardCharsets.UTF_16
                 || charset == StandardCharsets.UTF_16LE
                 || charset == StandardCharsets.UTF_16BE) {
-            return new CSVParserUTF16(
+            return new CSVReaderUTF16(
                     new InputStreamReader(in, charset), types
             );
         }
 
-        return new CSVParserUTF8(in, charset, types);
+        return new CSVReaderUTF8(in, charset, types);
     }
 
-    public static CSVParser of(Reader in, Type... types) throws IOException {
-        return new CSVParserUTF16(in, types);
+    public static CSVReader of(Reader in, Type... types) throws IOException {
+        return new CSVReaderUTF16(in, types);
     }
 
-    public static CSVParser of(File file, Map<String, Type> types) throws IOException {
-        return new CSVParserUTF8(new FileInputStream(file), types);
-    }
-
-    public static CSVParser of(String str, Type... types) {
+    public static CSVReader of(String str, Type... types) {
         if (JVM_VERSION > 8 && STRING_VALUE != null) {
             try {
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == 0) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    return new CSVParserUTF8(bytes, 0, bytes.length, types);
+                    return new CSVReaderUTF8(bytes, 0, bytes.length, types);
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
@@ -179,15 +169,15 @@ public abstract class CSVParser
         }
 
         char[] chars = JDKUtils.getCharArray(str);
-        return new CSVParserUTF16(chars, 0, chars.length, types);
+        return new CSVReaderUTF16(chars, 0, chars.length, types);
     }
 
-    public static CSVParser of(char[] chars, Type... types) {
-        return new CSVParserUTF16(chars, 0, chars.length, types);
+    public static CSVReader of(char[] chars, Type... types) {
+        return new CSVReaderUTF16(chars, 0, chars.length, types);
     }
 
-    public static CSVParser of(byte[] utf8Bytes, Type... types) {
-        return new CSVParserUTF8(utf8Bytes, 0, utf8Bytes.length, types);
+    public static CSVReader of(byte[] utf8Bytes, Type... types) {
+        return new CSVReaderUTF8(utf8Bytes, 0, utf8Bytes.length, types);
     }
 
     public void skipLines(int lines) throws IOException {
@@ -234,19 +224,6 @@ public abstract class CSVParser
 
     public List<ColumnStat> getColumnStats() {
         return columnStats;
-    }
-
-    public <T> Stream<T> readAsStream() {
-        return readAsStream(Integer.MAX_VALUE);
-    }
-
-    public <T> Stream<T> readAsStream(int limit) {
-        return StreamUtil.stream(c -> {
-            T t;
-            for (int left = limit; left > 0 && (t = readLineObject()) != null; left--) {
-                c.accept(t);
-            }
-        });
     }
 
     public <T> T readLineObject() {
@@ -299,19 +276,19 @@ public abstract class CSVParser
     }
 
     public static int rowCount(String str, Feature... features) {
-        CSVParser state = new CSVParserUTF8(features);
+        CSVReader state = new CSVReaderUTF8(features);
         state.rowCount(str, str.length());
         return state.rowCount();
     }
 
     public static int rowCount(byte[] bytes, Feature... features) {
-        CSVParserUTF8 state = new CSVParserUTF8(features);
+        CSVReaderUTF8 state = new CSVReaderUTF8(features);
         state.rowCount(bytes, bytes.length);
         return state.rowCount();
     }
 
     public static int rowCount(char[] chars, Feature... features) {
-        CSVParserUTF16 state = new CSVParserUTF16(features);
+        CSVReaderUTF16 state = new CSVReaderUTF16(features);
         state.rowCount(chars, chars.length);
         return state.rowCount();
     }
@@ -329,7 +306,7 @@ public abstract class CSVParser
     public static int rowCount(InputStream in) throws IOException {
         byte[] bytes = new byte[SIZE_256K];
 
-        CSVParserUTF8 state = new CSVParserUTF8();
+        CSVReaderUTF8 state = new CSVReaderUTF8();
         while (true) {
             int cnt = in.read(bytes);
             if (cnt == -1) {
@@ -596,7 +573,7 @@ public abstract class CSVParser
 
     public void statAll() {
         String[] line;
-        while ((line = readLine()) != null) {
+        while ((line = (String[]) readLineValues(true)) != null) {
             for (int i = 0; i < line.length; i++) {
                 String value = line[i];
                 if (columnStats == null) {
