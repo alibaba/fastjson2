@@ -1465,6 +1465,19 @@ public class JSONArray
     }
 
     /**
+     * Parse JSON {@link String} into {@link List}
+     *
+     * @param text the JSON {@link String} to be parsed
+     * @param type specify the {@link Class} to be converted
+     * @param features features to be enabled in parsing
+     */
+    public static <T> List<T> parseArray(String text, Class<T> type, JSONReader.Feature... features) {
+        return JSON.parseArray(text, type, features);
+    }
+
+
+
+    /**
      * Parse JSON {@link String} into {@link JSONArray}
      *
      * @param text the JSON {@link String} to be parsed
