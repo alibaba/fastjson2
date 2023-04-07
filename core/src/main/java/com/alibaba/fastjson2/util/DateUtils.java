@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.util;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.ObjectReaderImplDate;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -450,6 +451,49 @@ public class DateUtils {
         }
 
         return LocalDate.of(year, month, dom);
+    }
+
+    public static long parseMillis(byte[] bytes, int off, int len, Charset charset) {
+        LocalDateTime ldt;
+        switch (len) {
+            case 8: {
+                LocalDate localDate = DateUtils.parseLocalDate8(bytes, off);
+                ldt = localDate.atStartOfDay();
+                break;
+            }
+            case 9: {
+                LocalDate localDate = DateUtils.parseLocalDate9(bytes, off);
+                ldt = localDate.atStartOfDay();
+                break;
+            }
+            case 10: {
+                LocalDate localDate = DateUtils.parseLocalDate10(bytes, off);
+                ldt = localDate.atStartOfDay();
+                break;
+            }
+            case 19: {
+                return DateUtils.parseMillis19(bytes, off, DateUtils.DEFAULT_ZONE_ID);
+            }
+            default:
+                ldt = null;
+                break;
+        }
+
+        if (ldt != null) {
+            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, DateUtils.DEFAULT_ZONE_ID, null);
+            long seconds = zdt.toEpochSecond();
+            int nanos = ldt.getNano();
+            long millis;
+            if (seconds < 0 && nanos > 0) {
+                millis = (seconds + 1) * 1000 + nanos / 1000_000 - 1000;
+            } else {
+                millis = seconds * 1000L + nanos / 1000_000;
+            }
+            return millis;
+        }
+
+        String str = new String(bytes, off, len, charset);
+        return DateUtils.parseMillis(str);
     }
 
     /**

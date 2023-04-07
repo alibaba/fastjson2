@@ -39,7 +39,7 @@
         <springframework6.version>6.0.7</springframework6.version>
         <springboot2.version>2.7.9</springboot2.version>
         <springboot3.version>3.0.4</springboot3.version>
-        <arrow.version>9.0.0</arrow.version>
+        <arrow.version>11.0.0</arrow.version>
 
         <kotlin.version>1.8.20</kotlin.version>
         <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
@@ -327,6 +327,11 @@
                 <version>3.0.3</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.apache.arrow</groupId>
+                <artifactId>arrow-memory-netty</artifactId>
+                <version>${arrow.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.arrow</groupId>
                 <artifactId>arrow-vector</artifactId>
