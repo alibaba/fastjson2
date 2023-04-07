@@ -91,6 +91,11 @@
         -->
         <dependency>
             <groupId>com.aliyun.odps</groupId>
+            <artifactId>odps-sdk-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun.odps</groupId>
             <artifactId>odps-sdk-udf</artifactId>
             <scope>provided</scope>
             <exclusions>

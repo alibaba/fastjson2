@@ -14,6 +14,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
@@ -85,6 +87,7 @@ public abstract class StreamReader {
         public int values;
         public int nulls;
         public int integers;
+        public int doubles;
         public int numbers;
         public int dates;
         public int booleans;
@@ -134,15 +137,19 @@ public abstract class StreamReader {
                 if (TypeUtils.isInteger(bytes, off, len)) {
                     integers++;
                 } else {
-                    // lastIndexOf('.')
+                    boolean e = false;
                     int dotIndex = -1;
-                    for (int i = end - 1; i >= off; i--) {
-                        if (bytes[i] == '.') {
+                    for (int i = off; i < end; i++) {
+                        byte b = bytes[i];
+                        if (b == '.') {
                             dotIndex = i;
-                            break;
+                        } else if (b == 'e' || b == 'E') {
+                            e = true;
                         }
                     }
-                    if (dotIndex != -1) {
+                    if (e) {
+                        doubles++;
+                    } else if (dotIndex != -1) {
                         int scale = end - dotIndex - 1;
                         if (this.scale < scale) {
                             this.scale = scale;
@@ -176,7 +183,7 @@ public abstract class StreamReader {
                     }
                 }
 
-                if (!checkDate && (sub == 2 || slash == 2 || colon == 2)) {
+                if ((!checkDate) && (sub == 2 || slash == 2 || colon == 2)) {
                     checkDate = true;
                 }
 
@@ -186,13 +193,39 @@ public abstract class StreamReader {
 
                 if (checkDate) {
                     try {
-                        String str = new String(bytes, off, len, charset);
-                        ZonedDateTime zdt = DateUtils.parseZonedDateTime(str);
-                        if (zdt != null) {
+                        LocalDateTime ldt = null;
+                        switch (len) {
+                            case 8: {
+                                LocalDate localDate = DateUtils.parseLocalDate8(bytes, off);
+                                ldt = localDate.atStartOfDay();
+                                break;
+                            }
+                            case 9: {
+                                LocalDate localDate = DateUtils.parseLocalDate9(bytes, off);
+                                ldt = localDate.atStartOfDay();
+                                break;
+                            }
+                            case 10: {
+                                LocalDate localDate = DateUtils.parseLocalDate10(bytes, off);
+                                ldt = localDate.atStartOfDay();
+                                break;
+                            }
+                            default:
+                                break;
+                        }
+
+                        if (ldt == null) {
+                            String str = new String(bytes, off, len, charset);
+                            ZonedDateTime zdt = DateUtils.parseZonedDateTime(str);
+                            if (zdt != null) {
+                                ldt = zdt.toLocalDateTime();
+                            }
+                        }
+                        if (ldt != null) {
                             precision = 0;
                             dates++;
                         }
-                        int nanoOfSeconds = zdt.getNano();
+                        int nanoOfSeconds = ldt.getNano();
                         if (nanoOfSeconds != 0) {
                             if (nanoOfSeconds % 100000000 == 0) {
                                 precision = 1;
@@ -260,8 +293,19 @@ public abstract class StreamReader {
                 if (TypeUtils.isInteger(value)) {
                     integers++;
                 } else {
-                    int dotIndex = value.lastIndexOf('.');
-                    if (dotIndex != -1) {
+                    boolean e = false;
+                    int dotIndex = -1;
+                    for (int i = 0; i < value.length(); i++) {
+                        char b = value.charAt(i);
+                        if (b == '.') {
+                            dotIndex = i;
+                        } else if (b == 'e' || b == 'E') {
+                            e = true;
+                        }
+                    }
+                    if (e) {
+                        doubles++;
+                    } else if (dotIndex != -1) {
                         int scale = value.length() - dotIndex - 1;
                         if (this.scale < scale) {
                             this.scale = scale;
@@ -295,7 +339,7 @@ public abstract class StreamReader {
                     }
                 }
 
-                if (!checkDate && (sub == 2 || slash == 2 || colon == 2)) {
+                if ((!checkDate) && (sub == 2 || slash == 2 || colon == 2)) {
                     checkDate = true;
                 }
 
@@ -357,6 +401,10 @@ public abstract class StreamReader {
                     return Instant.class;
                 }
                 return Date.class;
+            }
+
+            if (doubles > 0) {
+                return Double.class;
             }
 
             if (values == integers + nulls) {
