@@ -318,7 +318,7 @@ public abstract class CSVReader
     }
 
     public static int rowCount(InputStream in) throws IOException {
-        byte[] bytes = new byte[SIZE_256K];
+        byte[] bytes = new byte[SIZE_512K];
 
         CSVReaderUTF8 state = new CSVReaderUTF8();
         while (true) {

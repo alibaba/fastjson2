@@ -22,20 +22,30 @@ public class CSVMaxComputeUtls {
             columnName = columnName.replace(' ', '_');
             columnName = columnName.replace('-', '_');
             columnName = columnName.replace('+', '_');
+            columnName = columnName.replace('.', '_');
             boolean special = false;
             for (int j = 0; j < columnName.length(); j++) {
                 char ch = columnName.charAt(j);
+                boolean firstIdent = (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_';
+
                 if (j == 0) {
-                    if (!((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_')) {
+                    if (!firstIdent) {
                         special = true;
+                        break;
                     }
                 }
-                if (!((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_' || (ch >= '0' || ch <= '9'))) {
+
+                if (!firstIdent && !(ch >= '0' && ch <= '9')) {
                     special = true;
+                    break;
                 }
+            }
+            if (!special && columnName.length() > 20) {
+                special = true;
             }
 
             sql.append('\t');
+
             if (special) {
                 sql.append("COL_" + i);
             } else {
@@ -46,13 +56,20 @@ public class CSVMaxComputeUtls {
             sql.append(
                     CSVMaxComputeUtls.getInferType(columnStat)
             );
+
+            if (special) {
+                sql.append(" COMMENT '");
+                String comment = columnStat.name.replaceAll("'", "''");
+                sql.append(comment).append('\'');
+            }
+
             if (i != columns.size() - 1) {
                 sql.append(',');
             }
             sql.append("\n");
         }
 
-        sql.append(")");
+        sql.append(");");
 
         return sql.toString();
     }

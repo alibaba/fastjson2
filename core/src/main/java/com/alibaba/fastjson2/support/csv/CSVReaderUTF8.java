@@ -59,7 +59,7 @@ class CSVReaderUTF8
     protected boolean seekLine() throws IOException {
         if (buf == null) {
             if (input != null) {
-                buf = new byte[SIZE_256K];
+                buf = new byte[SIZE_512K];
                 int cnt = input.read(buf);
                 if (cnt == -1) {
                     inputEnd = true;
