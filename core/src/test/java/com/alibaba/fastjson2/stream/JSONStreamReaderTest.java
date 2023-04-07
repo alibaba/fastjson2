@@ -1,9 +1,12 @@
 package com.alibaba.fastjson2.stream;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.util.IOUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -54,6 +57,21 @@ public class JSONStreamReaderTest {
 
             assertEquals(7702, rowCount);
         }
+    }
+
+    @Test
+    public void statAll() throws Exception {
+        init();
+
+        long lines = IOUtils.lines(tempFile);
+        assertEquals(7702L, lines);
+
+        JSONStreamReader reader = JSONStreamReader.of(tempFile);
+        reader.statAll();
+
+        System.out.println(
+                JSON.toJSONString(reader.columnStats, JSONWriter.Feature.PrettyFormat, JSONWriter.Feature.NotWriteDefaultValue)
+        );
     }
 
     private void init() throws IOException {

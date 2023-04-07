@@ -20,11 +20,6 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
 public abstract class CSVReader
         extends StreamReader
         implements Closeable {
-    List<String> columns;
-    List<ColumnStat> columnStats;
-    int rowCount;
-    int errorCount;
-
     boolean quote;
 
     CSVReader() {

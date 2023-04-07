@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2.util;
 
 import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Arrays;
 
 public class IOUtils {
@@ -610,5 +613,29 @@ public class IOUtils {
         }
 
         return dArr;
+    }
+
+    public static long lines(File file) throws Exception {
+        try (FileInputStream in = new FileInputStream(file)) {
+            return lines(in);
+        }
+    }
+
+    public static long lines(InputStream in) throws Exception {
+        long lines = 0;
+        byte[] buf = new byte[1024 * 8];
+        while (true) {
+            int len = in.read(buf, 0, buf.length);
+            if (len == -1) {
+                break;
+            }
+            for (int i = 0; i < len; i++) {
+                byte b = buf[i];
+                if (b == '\n') {
+                    lines++;
+                }
+            }
+        }
+        return lines;
     }
 }
