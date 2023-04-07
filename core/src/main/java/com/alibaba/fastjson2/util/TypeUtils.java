@@ -1906,10 +1906,8 @@ public class TypeUtils {
         return Boolean.parseBoolean(str);
     }
 
-    public static Integer parseInt(byte[] bytes, int off, int len) {
+    public static int parseInt(byte[] bytes, int off, int len) {
         switch (len) {
-            case 0:
-                return null;
             case 1: {
                 byte b0 = bytes[off];
                 if (b0 >= '0' && b0 <= '9') {
@@ -2063,10 +2061,8 @@ public class TypeUtils {
         return Integer.parseInt(str);
     }
 
-    public static Integer parseInt(char[] bytes, int off, int len) {
+    public static int parseInt(char[] bytes, int off, int len) {
         switch (len) {
-            case 0:
-                return null;
             case 1: {
                 char b0 = bytes[off];
                 if (b0 >= '0' && b0 <= '9') {
@@ -2220,10 +2216,8 @@ public class TypeUtils {
         return Integer.parseInt(str);
     }
 
-    public static Long parseLong(byte[] bytes, int off, int len) {
+    public static long parseLong(byte[] bytes, int off, int len) {
         switch (len) {
-            case 0:
-                return null;
             case 1: {
                 byte b0 = bytes[off];
                 if (b0 >= '0' && b0 <= '9') {
@@ -2376,10 +2370,8 @@ public class TypeUtils {
         return Long.parseLong(str);
     }
 
-    public static Long parseLong(char[] bytes, int off, int len) {
+    public static long parseLong(char[] bytes, int off, int len) {
         switch (len) {
-            case 0:
-                return null;
             case 1: {
                 char b0 = bytes[off];
                 if (b0 >= '0' && b0 <= '9') {

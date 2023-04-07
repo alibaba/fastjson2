@@ -13,9 +13,6 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -224,44 +221,8 @@ class CSVReaderUTF8
         }
 
         if (type == Date.class) {
-            LocalDateTime ldt;
-            switch (len) {
-                case 8: {
-                    LocalDate localDate = DateUtils.parseLocalDate8(bytes, off);
-                    ldt = localDate.atStartOfDay();
-                    break;
-                }
-                case 9: {
-                    LocalDate localDate = DateUtils.parseLocalDate9(bytes, off);
-                    ldt = localDate.atStartOfDay();
-                    break;
-                }
-                case 10: {
-                    LocalDate localDate = DateUtils.parseLocalDate10(bytes, off);
-                    ldt = localDate.atStartOfDay();
-                    break;
-                }
-                case 19: {
-                    long millis = DateUtils.parseMillis19(bytes, off, DateUtils.DEFAULT_ZONE_ID);
-                    return new Date(millis);
-                }
-                default:
-                    String str = new String(bytes, off, len, charset);
-                    return DateUtils.parseDate(str);
-            }
-
-            if (ldt != null) {
-                ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, DateUtils.DEFAULT_ZONE_ID, null);
-                long seconds = zdt.toEpochSecond();
-                int nanos = ldt.getNano();
-                long millis;
-                if (seconds < 0 && nanos > 0) {
-                    millis = (seconds + 1) * 1000 + nanos / 1000_000 - 1000;
-                } else {
-                    millis = seconds * 1000L + nanos / 1000_000;
-                }
-                return new Date(millis);
-            }
+            long millis = DateUtils.parseMillis(bytes, off, len, charset);
+            return new Date(millis);
         }
 
         String str = new String(bytes, off, len, charset);
@@ -480,7 +441,6 @@ class CSVReaderUTF8
             }
         }
 
-        rowCount++;
         return values;
     }
 
@@ -492,6 +452,14 @@ class CSVReaderUTF8
     }
 
     public void statAll() {
+        ByteArrayConsumer consumer = (row, column, bytes, off, len, charset) -> {
+            StreamReader.ColumnStat stat = getColumnStat(column);
+            stat.stat(bytes, off, len, charset);
+        };
+        readAll(consumer);
+    }
+
+    public void readAll(ByteArrayConsumer consumer) {
         while (true) {
             try {
                 if (inputEnd) {
@@ -553,8 +521,7 @@ class CSVReaderUTF8
                     if (quote) {
                         if (escapeCount == 0) {
 //                            value = new String(buf, valueStart + 1, valueSize, charset);
-                            StreamReader.ColumnStat stat = getColumnStat(columnIndex);
-                            stat.stat(buf, valueStart + 1, valueSize, charset);
+                            consumer.accept(rowCount, columnIndex, buf, valueStart + 1, valueSize, charset);
                         } else {
                             byte[] bytes = new byte[valueSize - escapeCount];
                             int valueEnd = valueStart + valueSize;
@@ -566,13 +533,10 @@ class CSVReaderUTF8
                                 }
                             }
 
-                            StreamReader.ColumnStat stat = getColumnStat(columnIndex);
-                            stat.stat(bytes, 0, bytes.length, charset);
+                            consumer.accept(rowCount, columnIndex, bytes, 0, bytes.length, charset);
                         }
                     } else {
-//                        value = new String(buf, valueStart, valueSize, charset);
-                        StreamReader.ColumnStat stat = getColumnStat(columnIndex);
-                        stat.stat(buf, valueStart, valueSize, charset);
+                        consumer.accept(rowCount, columnIndex, buf, valueStart, valueSize, charset);
                     }
 
                     quote = false;
@@ -590,8 +554,7 @@ class CSVReaderUTF8
                 if (quote) {
                     if (escapeCount == 0) {
 //                        value = new String(buf, valueStart + 1, valueSize, charset);
-                        StreamReader.ColumnStat stat = getColumnStat(columnIndex);
-                        stat.stat(buf, valueStart + 1, valueSize, charset);
+                        consumer.accept(rowCount, columnIndex, buf, valueStart + 1, valueSize, charset);
                     } else {
                         byte[] bytes = new byte[valueSize - escapeCount];
                         int valueEnd = lineEnd;
@@ -604,17 +567,13 @@ class CSVReaderUTF8
                         }
 
 //                        value = new String(bytes, 0, bytes.length, charset);
-                        StreamReader.ColumnStat stat = getColumnStat(columnIndex);
-                        stat.stat(bytes, 0, bytes.length, charset);
+                        consumer.accept(rowCount, columnIndex, bytes, 0, bytes.length, charset);
                     }
                 } else {
 //                    value = new String(buf, valueStart, valueSize, charset);
-                    StreamReader.ColumnStat stat = getColumnStat(columnIndex);
-                    stat.stat(buf, valueStart, valueSize, charset);
+                    consumer.accept(rowCount, columnIndex, buf, valueStart, valueSize, charset);
                 }
             }
-
-            rowCount++;
         }
     }
 }

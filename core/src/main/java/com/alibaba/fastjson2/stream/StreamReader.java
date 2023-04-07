@@ -38,7 +38,7 @@ public abstract class StreamReader {
     protected int off;
 
     protected boolean inputEnd;
-    protected boolean lineTerminated;
+    protected boolean lineTerminated = true;
 
     public StreamReader() {
     }

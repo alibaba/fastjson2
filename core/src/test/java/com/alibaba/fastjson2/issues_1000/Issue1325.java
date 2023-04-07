@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1325 {
     @Test
     public void test() {
-        Date date = DateUtils.parseDate( "2022-02-16T16:00:00.000Z");
+        Date date = DateUtils.parseDate("2022-02-16T16:00:00.000Z");
         String str = " {\"activeDate\": \"2022-02-16T16:00:00.000Z\"}";
         assertEquals(
                 date.getTime(),

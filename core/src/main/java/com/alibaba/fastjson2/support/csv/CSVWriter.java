@@ -54,6 +54,10 @@ public class CSVWriter
         return of(new FileOutputStream(file), StandardCharsets.UTF_8);
     }
 
+    public static CSVWriter of(File file, Charset charset) throws FileNotFoundException {
+        return of(new FileOutputStream(file), charset);
+    }
+
     public void writeRowObject(Object object) {
         if (object == null) {
             writeRow();
@@ -81,7 +85,7 @@ public class CSVWriter
         }
     }
 
-    public void writeDate(Date date) {
+    protected void writeDate(Date date) {
         if (date == null) {
             return;
         }
@@ -89,7 +93,7 @@ public class CSVWriter
         writeInstant(Instant.ofEpochMilli(millis));
     }
 
-    public void writeInstant(Instant instant) {
+    protected void writeInstant(Instant instant) {
         if (instant == null) {
             return;
         }
@@ -105,7 +109,7 @@ public class CSVWriter
         }
     }
 
-    public void writeDate(LocalDate date) {
+    protected void writeDate(LocalDate date) {
         if (date == null) {
             return;
         }
@@ -113,7 +117,7 @@ public class CSVWriter
         writeRaw(str);
     }
 
-    public void writeDateTime(LocalDateTime instant) {
+    protected void writeDateTime(LocalDateTime instant) {
         if (instant == null) {
             return;
         }
@@ -152,48 +156,11 @@ public class CSVWriter
             }
 
             if (value instanceof Integer) {
-                int intValue = ((Integer) value).intValue();
-                if (intValue == Integer.MIN_VALUE) {
-                    writeRaw("-2147483648");
-                    continue;
-                }
-
-                int size = (intValue < 0) ? IOUtils.stringSize(-intValue) + 1 : IOUtils.stringSize(intValue);
-
-                int minCapacity = off + size;
-                if (minCapacity - this.bytes.length > 0) {
-                    flush();
-                }
-
-                IOUtils.getChars(intValue, off + size, bytes);
-                off += size;
+                writeInt32((Integer) value);
             } else if (value instanceof Long) {
-                long longValue = ((Long) value).longValue();
-                if (longValue == Long.MIN_VALUE) {
-                    writeRaw("-9223372036854775808");
-                    continue;
-                }
-
-                int size = (longValue < 0) ? IOUtils.stringSize(-longValue) + 1 : IOUtils.stringSize(longValue);
-
-                int minCapacity = off + size;
-                if (minCapacity - this.bytes.length > 0) {
-                    flush();
-                }
-
-                IOUtils.getChars(longValue, off + size, bytes);
-                off += size;
+                writeInt64((Long) value);
             } else if (value instanceof String) {
-                String str = (String) value;
-                byte[] bytes;
-                if (JDKUtils.STRING_CODER != null
-                        && JDKUtils.STRING_VALUE != null
-                        && JDKUtils.STRING_CODER.applyAsInt(str) == JDKUtils.LATIN1) {
-                    bytes = JDKUtils.STRING_VALUE.apply(str);
-                } else {
-                    bytes = str.getBytes(charset);
-                }
-                writeString(bytes);
+                writeString((String) value);
             } else if (value instanceof Boolean) {
                 boolean booleanValue = ((Boolean) value).booleanValue();
                 byte[] valueBytes = booleanValue ? BYTES_TRUE : BYTES_FALSE;
@@ -211,39 +178,11 @@ public class CSVWriter
                 int size = RyuFloat.toString(floatValue, bytes, off);
                 off += size;
             } else if (value instanceof Double) {
-                double doubleValue = ((Double) value).doubleValue();
-                if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
-                    continue;
-                }
-
-                if (off + 24 > this.bytes.length) {
-                    flush();
-                }
-
-                int size = RyuDouble.toString(doubleValue, bytes, off);
-                off += size;
+                writeDouble((Double) value);
             } else if (value instanceof Short) {
-                int intValue = ((Short) value).intValue();
-                int size = (intValue < 0) ? IOUtils.stringSize(-intValue) + 1 : IOUtils.stringSize(intValue);
-
-                int minCapacity = off + size;
-                if (minCapacity - this.bytes.length > 0) {
-                    flush();
-                }
-
-                IOUtils.getChars(intValue, off + size, bytes);
-                off += size;
+                writeInt32((Short) value);
             } else if (value instanceof Byte) {
-                int intValue = ((Byte) value).intValue();
-                int size = (intValue < 0) ? IOUtils.stringSize(-intValue) + 1 : IOUtils.stringSize(intValue);
-
-                int minCapacity = off + size;
-                if (minCapacity - this.bytes.length > 0) {
-                    flush();
-                }
-
-                IOUtils.getChars(intValue, off + size, bytes);
-                off += size;
+                writeInt32((Byte) value);
             } else if (value instanceof BigDecimal) {
                 String str = value.toString();
                 byte[] bytes = str.getBytes(StandardCharsets.ISO_8859_1);
@@ -271,6 +210,68 @@ public class CSVWriter
             flush();
         }
         bytes[off++] = '\n';
+    }
+
+    protected void writeInt64(Long value) {
+        long longValue = value.longValue();
+        if (longValue == Long.MIN_VALUE) {
+            writeRaw("-9223372036854775808");
+            return;
+        }
+
+        int size = (longValue < 0) ? IOUtils.stringSize(-longValue) + 1 : IOUtils.stringSize(longValue);
+
+        int minCapacity = off + size;
+        if (minCapacity - this.bytes.length > 0) {
+            flush();
+        }
+
+        IOUtils.getChars(longValue, off + size, bytes);
+        off += size;
+    }
+
+    protected void writeDouble(Double value) {
+        double doubleValue = value.doubleValue();
+        if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
+            return;
+        }
+
+        if (off + 24 > this.bytes.length) {
+            flush();
+        }
+
+        int size = RyuDouble.toString(doubleValue, bytes, off);
+        off += size;
+    }
+
+    protected void writeString(String value) {
+        String str = value;
+        byte[] bytes;
+        if (JDKUtils.STRING_CODER != null
+                && JDKUtils.STRING_VALUE != null
+                && JDKUtils.STRING_CODER.applyAsInt(str) == JDKUtils.LATIN1) {
+            bytes = JDKUtils.STRING_VALUE.apply(str);
+        } else {
+            bytes = str.getBytes(charset);
+        }
+        writeString(bytes);
+    }
+
+    protected void writeInt32(int intValue) {
+        if (intValue == Integer.MIN_VALUE) {
+            writeRaw("-2147483648");
+            return;
+        }
+
+        int size = (intValue < 0) ? IOUtils.stringSize(-intValue) + 1 : IOUtils.stringSize(intValue);
+
+        int minCapacity = off + size;
+        if (minCapacity - this.bytes.length > 0) {
+            flush();
+        }
+
+        IOUtils.getChars(intValue, off + size, bytes);
+        off += size;
     }
 
     public void flush() {
@@ -347,7 +348,7 @@ public class CSVWriter
         }
     }
 
-    public void writeDecimal(BigDecimal value) {
+    protected void writeDecimal(BigDecimal value) {
         if (value == null) {
             return;
         }

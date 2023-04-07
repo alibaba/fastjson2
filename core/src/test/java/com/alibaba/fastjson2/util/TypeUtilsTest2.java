@@ -10,9 +10,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TypeUtilsTest2 {
     @Test
     public void parseInt() {
-        assertNull(TypeUtils.parseInt(new byte[0], 0, 0));
-        assertNull(TypeUtils.parseBigDecimal(new byte[0], 0, 0));
-
         int[] values = new int[]{
                 1, 2, 3, 4, 5,
                 11, 12, 13, 14, 15,
@@ -85,8 +82,6 @@ public class TypeUtilsTest2 {
 
     @Test
     public void parseLong() {
-        assertNull(TypeUtils.parseLong(new byte[0], 0, 0));
-
         long[] values = new long[]{
                 1, 2, 3, 4, 5,
                 11, 12, 13, 14, 15,
@@ -223,15 +218,11 @@ public class TypeUtilsTest2 {
 
         assertNull(TypeUtils.parseBigDecimal(new byte[128], 0, 0));
         assertNull(TypeUtils.parseBigDecimal(new char[128], 0, 0));
-        assertNull(TypeUtils.parseInt(new byte[128], 0, 0));
-        assertNull(TypeUtils.parseInt(new char[128], 0, 0));
-        assertNull(TypeUtils.parseLong(new byte[128], 0, 0));
-        assertNull(TypeUtils.parseLong(new char[128], 0, 0));
     }
 
     @Test
     public void isInteger() {
-        String[] strings = new String[] {
+        String[] strings = new String[]{
                 "+",
                 "-",
                 "A",
@@ -256,7 +247,7 @@ public class TypeUtilsTest2 {
             assertFalse(TypeUtils.isInteger(bytes2, prefix.length(), string.length()));
         }
 
-        String[] trues = new String[] {
+        String[] trues = new String[]{
                 "+1",
                 "-1",
                 "1",
@@ -278,7 +269,7 @@ public class TypeUtilsTest2 {
 
     @Test
     public void isNumber1() {
-        String[] strings = new String[] {
+        String[] strings = new String[]{
                 "+",
                 "-",
                 "A",
@@ -300,7 +291,7 @@ public class TypeUtilsTest2 {
             assertFalse(TypeUtils.isNumber(bytes2, prefix.length(), string.length()));
         }
 
-        String[] trues = new String[] {
+        String[] trues = new String[]{
                 "+1",
                 "-1",
                 "1",

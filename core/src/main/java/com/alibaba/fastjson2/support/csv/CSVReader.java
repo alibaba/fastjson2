@@ -213,13 +213,27 @@ public abstract class CSVReader
         }
 
         if (rowCount == 1) {
-            rowCount = 0;
+            rowCount = lineTerminated ? 0 : -1;
         }
         return this.columns;
     }
 
     public List<String> getColumns() {
         return columns;
+    }
+
+    public String getColumn(int columnIndex) {
+        if (columns != null && columnIndex < columns.size()) {
+            return columns.get(columnIndex);
+        }
+        return null;
+    }
+
+    public Type getColumnType(int columnIndex) {
+        if (types != null && columnIndex < types.length) {
+            return types[columnIndex];
+        }
+        return null;
     }
 
     public List<ColumnStat> getColumnStats() {
@@ -327,6 +341,7 @@ public abstract class CSVReader
     }
 
     void rowCount(String bytes, int length) {
+        lineTerminated = false;
         for (int i = 0; i < length; i++) {
             char ch = bytes.charAt(i);
             if (ch == '"') {
@@ -384,6 +399,8 @@ public abstract class CSVReader
     }
 
     void rowCount(byte[] bytes, int length) {
+        lineTerminated = false;
+
         for (int i = 0; i < length; i++) {
             if (i + 4 < length) {
                 byte b0 = bytes[i];
@@ -457,6 +474,7 @@ public abstract class CSVReader
     }
 
     void rowCount(char[] bytes, int length) {
+        lineTerminated = false;
         for (int i = 0; i < length; i++) {
             if (i + 4 < length) {
                 char b0 = bytes[i];
@@ -550,7 +568,18 @@ public abstract class CSVReader
         throw new JSONException(message, e);
     }
 
-    protected ColumnStat getColumnStat(int i) {
+    public ColumnStat getColumnStat(String name) {
+        if (columnStats != null) {
+            for (ColumnStat stat : columnStats) {
+                if (name.equals(stat.name)) {
+                    return stat;
+                }
+            }
+        }
+        return null;
+    }
+
+    public ColumnStat getColumnStat(int i) {
         if (columnStats == null) {
             columnStats = new ArrayList<>();
         }
@@ -583,5 +612,13 @@ public abstract class CSVReader
                 stat.stat(value);
             }
         }
+    }
+
+    public interface ByteArrayConsumer {
+        void accept(int row, int column, byte[] bytes, int off, int len, Charset charset);
+    }
+
+    public void readAll(ByteArrayConsumer consumer) {
+        throw new UnsupportedOperationException();
     }
 }

@@ -38,11 +38,22 @@ public class CSVTest2 {
         };
 
         for (String string : strings) {
-            assertEquals(1, CSVReader.rowCount(string, CSVReader.Feature.IgnoreEmptyLine));
+            assertEquals(
+                    1,
+                    CSVReader.rowCount(string, CSVReader.Feature.IgnoreEmptyLine),
+                    string
+            );
         }
 
         for (String string : strings) {
-            assertEquals(1, CSVReader.rowCount(string.toCharArray(), CSVReader.Feature.IgnoreEmptyLine));
+            assertEquals(
+                    1,
+                    CSVReader.rowCount(
+                            string.toCharArray(),
+                            CSVReader.Feature.IgnoreEmptyLine
+                    ),
+                    string
+            );
         }
 
         for (String string : strings) {
