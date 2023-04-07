@@ -20,9 +20,10 @@ public class ArrowByteArrayConsumer
     static final int CHUNK_SIZE = 10000;
     final Schema schema;
     final int rowCount;
-    final int varcharValueSize = 512;
+    final int varcharValueSize = 2048;
     final ObjIntConsumer<VectorSchemaRoot> rootConsumer;
     final Consumer<Long[]> commiter;
+    BufferAllocator allocator;
 
     VectorSchemaRoot root;
     int blockSize;
@@ -35,6 +36,7 @@ public class ArrowByteArrayConsumer
             ObjIntConsumer<VectorSchemaRoot> rootConsumer,
             Consumer<Long[]> commiter
     ) {
+        allocator = new RootAllocator();
         this.schema = schema;
         this.rowCount = rowCount;
         this.rootConsumer = rootConsumer;
@@ -54,6 +56,7 @@ public class ArrowByteArrayConsumer
             }
 
             rootConsumer.accept(root, blockIndex);
+            root.close();
 
             if (row + 1 == rowCount) {
                 Long[] blocks = new Long[blockIndex + 1];
@@ -70,7 +73,6 @@ public class ArrowByteArrayConsumer
     }
 
     public void allocateNew(int blockSize) {
-        BufferAllocator allocator = new RootAllocator();
         root = VectorSchemaRoot.create(schema, allocator);
 
         this.blockSize = blockSize;

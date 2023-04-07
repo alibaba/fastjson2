@@ -20,7 +20,7 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 
 public abstract class StreamReader {
-    protected static final int SIZE_256K = 1024 * 256;
+    protected static final int SIZE_512K = 1024 * 512;
 
     protected ObjectReaderProvider provider;
     protected long features;

@@ -64,7 +64,7 @@ class CSVReaderUTF16
     protected boolean seekLine() throws IOException {
         if (buf == null) {
             if (input != null) {
-                buf = new char[SIZE_256K];
+                buf = new char[SIZE_512K];
                 int cnt = input.read(buf);
                 if (cnt == -1) {
                     inputEnd = true;
