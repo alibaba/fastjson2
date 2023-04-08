@@ -11,7 +11,7 @@ If your project uses `kotlin`, you can use the` Fastjson-Kotlin` module, and use
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-kotlin</artifactId>
-    <version>2.0.26</version>
+    <version>2.0.27</version>
 </dependency>
 ```
 
@@ -19,7 +19,7 @@ If your project uses `kotlin`, you can use the` Fastjson-Kotlin` module, and use
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.26")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.27")
 }
 ```
 
