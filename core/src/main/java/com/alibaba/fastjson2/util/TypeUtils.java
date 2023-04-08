@@ -3319,6 +3319,33 @@ public class TypeUtils {
         return Array.newInstance(componentClass, 1).getClass();
     }
 
+    public static Class nonePrimitive(Class type) {
+        if (type.isPrimitive()) {
+            String name = type.getName();
+            switch (name) {
+                case "byte":
+                    return Byte.class;
+                case "short":
+                    return Short.class;
+                case "int":
+                    return Integer.class;
+                case "long":
+                    return Long.class;
+                case "float":
+                    return Float.class;
+                case "double":
+                    return Double.class;
+                case "char":
+                    return Character.class;
+                case "boolean":
+                    return Boolean.class;
+                default:
+                    break;
+            }
+        }
+        return type;
+    }
+
     public static Class<?> getClass(Type type) {
         if (type == null) {
             return null;

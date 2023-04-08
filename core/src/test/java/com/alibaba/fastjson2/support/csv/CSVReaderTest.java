@@ -153,7 +153,7 @@ public class CSVReaderTest {
             out.flush();
             out.close();
 
-            CSVReader parser = CSVReader.of(file, charset, Item.class);
+            CSVReader<Item> parser = CSVReader.of(file, charset, Item.class);
             List<String> columns = parser.readHeader();
             assertEquals(5, columns.size());
 
@@ -219,11 +219,11 @@ public class CSVReaderTest {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false);
     }
 
-    public static <T> Stream<T> readAsStream(CSVReader parser) {
+    public static <T> Stream<T> readAsStream(CSVReader<T> parser) {
         return readAsStream(parser, Integer.MAX_VALUE);
     }
 
-    public static <T> Stream<T> readAsStream(CSVReader parser, int limit) {
+    public static <T> Stream<T> readAsStream(CSVReader<T> parser, int limit) {
         return stream(c -> {
             T t;
             for (int left = limit; left > 0 && (t = parser.readLineObject()) != null; left--) {

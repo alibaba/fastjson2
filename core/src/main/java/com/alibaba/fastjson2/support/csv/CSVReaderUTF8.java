@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
 import com.alibaba.fastjson2.stream.StreamReader;
 import com.alibaba.fastjson2.util.DateUtils;
@@ -13,12 +14,11 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
 
-class CSVReaderUTF8
-        extends CSVReader {
+final class CSVReaderUTF8<T>
+        extends CSVReader<T> {
     byte[] buf;
     InputStream input;
     Charset charset = StandardCharsets.UTF_8;
@@ -208,13 +208,6 @@ class CSVReaderUTF8
 
         if (type == BigDecimal.class) {
             return TypeUtils.parseBigDecimal(bytes, off, len);
-        }
-
-        if (type == Float.class) {
-            if (len == 0) {
-                return null;
-            }
-            return TypeUtils.parseFloat(bytes, off, len);
         }
 
         if (type == Double.class) {
@@ -467,6 +460,46 @@ class CSVReaderUTF8
         readAll(consumer);
     }
 
+    public void readLineObjectAll(boolean readHeader, Consumer<T> consumer) {
+        if (readHeader) {
+            readHeader();
+        }
+        ByteArrayConsumer bytesConsumer = new ByteArrayConsumerImpl(consumer);
+        readAll(bytesConsumer);
+    }
+
+    final class ByteArrayConsumerImpl<T>
+            implements ByteArrayConsumer {
+        T object;
+        final Consumer<T> consumer;
+
+        public ByteArrayConsumerImpl(Consumer<T> consumer) {
+            this.consumer = consumer;
+        }
+
+        @Override
+        public void beforeRow(int row) {
+            object = (T) objectReader.createInstance();
+        }
+
+        @Override
+        public void accept(int row, int column, byte[] bytes, int off, int len, Charset charset) {
+            if (column >= fieldReaders.length || len == 0) {
+                return;
+            }
+
+            FieldReader fieldReader = fieldReaders[column];
+            Object fieldValue = readValue(bytes, off, len, fieldReader.fieldType);
+            fieldReader.accept(object, fieldValue);
+        }
+
+        @Override
+        public void afterRow(int row) {
+            consumer.accept(object);
+            object = null;
+        }
+    }
+
     public void readAll(ByteArrayConsumer consumer) {
         while (true) {
             try {
@@ -488,6 +521,8 @@ class CSVReaderUTF8
             } catch (IOException e) {
                 throw new JSONException("seekLine error", e);
             }
+
+            consumer.beforeRow(rowCount);
 
             boolean quote = false;
             int valueStart = lineStart;

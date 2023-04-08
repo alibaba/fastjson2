@@ -14,7 +14,7 @@ public class CSVBankTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
-            // zulu8.68.0.21 : 235
+            // zulu8.68.0.21 : 235 206
             // zulu11.62.17 : 158
             // zulu17.40.19 : 161
         }

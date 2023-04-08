@@ -27,15 +27,9 @@ public class CSVBank {
 
     @Benchmark
     public void fastjson2(Blackhole BH) {
-        CSVReader reader = CSVReader.of(new ByteArrayInputStream(byteArray), Bank.class);
-        reader.readHeader();
-        while (true) {
-            Bank object = reader.readLineObject();
-            if (object == null) {
-                break;
-            }
-            BH.consume(object);
-        }
+        CSVReader
+                .of(new ByteArrayInputStream(byteArray), Bank.class)
+                .readLineObjectAll(BH::consume);
     }
 
     @Benchmark
@@ -45,14 +39,14 @@ public class CSVBank {
         settings.getFormat().setLineSeparator("\n");
         settings.setNumberOfRowsToSkip(1);
         processor.iterate(Bank.class, new ByteArrayInputStream(byteArray))
-                .forEach(t -> BH.consume(t));
+                .forEach(BH::consume);
     }
 
     public void cainiao(Blackhole BH) {
 //        com.cainiao.ai.seq.csv.CsvType.of(Bank.class, false)
 //                .csvReader(',')
 //                .read(com.cainiao.ai.seq.InputSource.of(byteArray), 1)
-//                .supply(p -> BH.consume(p));
+//                .supply(BH::consume);
     }
 
     public static class Bank {

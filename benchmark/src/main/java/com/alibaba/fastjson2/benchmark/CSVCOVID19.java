@@ -27,15 +27,9 @@ public class CSVCOVID19 {
 
     @Benchmark
     public void fastjson2(Blackhole BH) {
-        CSVReader reader = CSVReader.of(new ByteArrayInputStream(byteArray), Covid19.class);
-        reader.readHeader();
-        while (true) {
-            Covid19 object = reader.readLineObject();
-            if (object == null) {
-                break;
-            }
-            BH.consume(object);
-        }
+        CSVReader
+                .of(new ByteArrayInputStream(byteArray), Covid19.class)
+                .readLineObjectAll(BH::consume);
     }
 
     @Benchmark
@@ -45,14 +39,14 @@ public class CSVCOVID19 {
         settings.getFormat().setLineSeparator("\n");
         settings.setNumberOfRowsToSkip(1);
         processor.iterate(Covid19.class, new ByteArrayInputStream(byteArray))
-                .forEach(t -> BH.consume(t));
+                .forEach(BH::consume);
     }
 
     public void cainiao(Blackhole BH) {
 //        com.cainiao.ai.seq.csv.CsvType.of(Covid19.class, false)
 //                .csvReader(',')
 //                .read(com.cainiao.ai.seq.InputSource.of(byteArray), 1)
-//                .supply(p -> BH.consume(p));
+//                .supply(BH::consume);
     }
 
     public static class Covid19 {
