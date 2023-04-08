@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.dubbo;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.DateUtils;
 import org.junit.jupiter.api.Test;
 
@@ -11,6 +8,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class DubboTest7 {
     static final JSONWriter.Feature[] writerFeatures = {
@@ -74,5 +72,17 @@ public class DubboTest7 {
     public static class Bean1
             implements Serializable {
         public String id;
+    }
+
+    @Test
+    public void test3() {
+        String str = JSONB.parseObject(
+                JSONB.toBytes(new RuntimeException(), writerFeatures),
+                String.class,
+                readerFeatures
+        );
+        assertNotNull(str);
+        JSONObject object = JSON.parseObject(str);
+        assertEquals("RuntimeException", object.get("@type"));
     }
 }
