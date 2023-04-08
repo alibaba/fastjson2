@@ -36,7 +36,7 @@ public interface JSON {
     /**
      * FASTJSON2 version name
      */
-    String VERSION = "2.0.27";
+    String VERSION = "2.0.28";
 
     /**
      * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject}
