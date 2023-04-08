@@ -19,6 +19,7 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -148,6 +149,9 @@ public class ObjectReaderProvider
     final ConcurrentMap<Integer, ConcurrentHashMap<Long, ObjectReader>> tclHashCaches = new ConcurrentHashMap<>();
     final ConcurrentMap<Long, ObjectReader> hashCache = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
+
+    final ConcurrentMap<Class, BiFunction<Consumer, int[], ByteArrayValueConsumer>>
+            valueConsumerCreators = new ConcurrentHashMap<>();
 
     final LRUAutoTypeCache autoTypeList = new LRUAutoTypeCache(1024);
 
@@ -887,6 +891,25 @@ public class ObjectReaderProvider
 
     public ObjectReader getObjectReader(Type objectType) {
         return getObjectReader(objectType, false);
+    }
+
+    public BiFunction<Consumer, int[], ByteArrayValueConsumer> getValueConsumerCreator(Class objectClass, boolean fieldBased) {
+        BiFunction<Consumer, int[], ByteArrayValueConsumer> consumerCreator = valueConsumerCreators.get(objectClass);
+        if (consumerCreator != null) {
+            return consumerCreator;
+        }
+
+        ObjectReader objectReader = getObjectReader(objectClass, fieldBased);
+        if (!(objectReader instanceof ObjectReaderAdapter)) {
+            return null;
+        }
+
+        consumerCreator = creator.createValueConsumerCreator((ObjectReaderAdapter) objectReader);
+        if (consumerCreator != null) {
+            valueConsumerCreators.putIfAbsent(objectClass, consumerCreator);
+            return valueConsumerCreators.get(objectClass);
+        }
+        return null;
     }
 
     public ObjectReader getObjectReader(Type objectType, boolean fieldBased) {

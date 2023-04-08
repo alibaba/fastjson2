@@ -24,6 +24,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -3510,6 +3511,11 @@ public abstract class JSONReader
         public ObjectReader getObjectReader(Type type) {
             boolean fieldBased = (features & Feature.FieldBased.mask) != 0;
             return provider.getObjectReader(type, fieldBased);
+        }
+
+        public BiFunction<Consumer, int[], ByteArrayValueConsumer> getValueConsumerCreator(Class objectClass) {
+            boolean fieldBased = (features & Feature.FieldBased.mask) != 0;
+            return provider.getValueConsumerCreator(objectClass, fieldBased);
         }
 
         public ObjectReaderProvider getProvider() {

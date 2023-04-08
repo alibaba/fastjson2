@@ -14,9 +14,9 @@ public class CSVPersonTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
-            // zulu8.68.0.21 : 3621 3270 2788
-            // zulu11.62.17 : 2576 1848 2155
-            // zulu17.40.19 : 3501 3134 2586
+            // zulu8.68.0.21 : 3621 3270 2788 2424
+            // zulu11.62.17 : 2576 1848 2155 1567
+            // zulu17.40.19 : 3501 3134 2586 2788
         }
     }
 

@@ -51,6 +51,7 @@ public abstract class StreamReader {
     protected Map<String, ColumnStat> columnStatsMap;
     protected List<String> columns;
     protected List<ColumnStat> columnStats;
+    protected int[] mapping;
 
     public StreamReader() {
     }

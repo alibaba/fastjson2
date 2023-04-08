@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.reader.ByteArrayValueConsumer;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
 import com.alibaba.fastjson2.stream.StreamReader;
@@ -15,6 +16,7 @@ import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 final class CSVReaderUTF8<T>
@@ -22,6 +24,7 @@ final class CSVReaderUTF8<T>
     byte[] buf;
     InputStream input;
     Charset charset = StandardCharsets.UTF_8;
+    BiFunction<Consumer, int[], ByteArrayValueConsumer> valueConsumerCreator;
 
     CSVReaderUTF8(Feature... features) {
         for (Feature feature : features) {
@@ -50,10 +53,16 @@ final class CSVReaderUTF8<T>
         this.input = input;
     }
 
-    CSVReaderUTF8(InputStream input, Charset charset, ObjectReaderAdapter objectReader) {
+    CSVReaderUTF8(
+            InputStream input,
+            Charset charset,
+            ObjectReaderAdapter objectReader,
+            BiFunction<Consumer, int[], ByteArrayValueConsumer> valueConsumerCreator
+    ) {
         super(objectReader);
         this.charset = charset;
         this.input = input;
+        this.valueConsumerCreator = valueConsumerCreator;
     }
 
     protected boolean seekLine() throws IOException {
@@ -211,9 +220,6 @@ final class CSVReaderUTF8<T>
         }
 
         if (type == Double.class) {
-            if (len == 0) {
-                return null;
-            }
             return TypeUtils.parseDouble(bytes, off, len);
         }
 
@@ -453,7 +459,7 @@ final class CSVReaderUTF8<T>
     }
 
     public void statAll() {
-        ByteArrayConsumer consumer = (row, column, bytes, off, len, charset) -> {
+        ByteArrayValueConsumer consumer = (row, column, bytes, off, len, charset) -> {
             StreamReader.ColumnStat stat = getColumnStat(column);
             stat.stat(bytes, off, len, charset);
         };
@@ -464,13 +470,22 @@ final class CSVReaderUTF8<T>
         if (readHeader) {
             readHeader();
         }
-        ByteArrayConsumer bytesConsumer = new ByteArrayConsumerImpl(consumer);
+
+        ByteArrayValueConsumer bytesConsumer = null;
+        if (valueConsumerCreator != null) {
+            bytesConsumer = valueConsumerCreator.apply(consumer, mapping);
+        }
+
+        if (bytesConsumer == null) {
+            bytesConsumer = new ByteArrayConsumerImpl(consumer);
+        }
+
         readAll(bytesConsumer);
     }
 
-    final class ByteArrayConsumerImpl<T>
-            implements ByteArrayConsumer {
-        T object;
+    class ByteArrayConsumerImpl<T>
+            implements ByteArrayValueConsumer {
+        protected T object;
         final Consumer<T> consumer;
 
         public ByteArrayConsumerImpl(Consumer<T> consumer) {
@@ -478,7 +493,7 @@ final class CSVReaderUTF8<T>
         }
 
         @Override
-        public void beforeRow(int row) {
+        public final void beforeRow(int row) {
             object = (T) objectReader.createInstance();
         }
 
@@ -494,13 +509,13 @@ final class CSVReaderUTF8<T>
         }
 
         @Override
-        public void afterRow(int row) {
+        public final void afterRow(int row) {
             consumer.accept(object);
             object = null;
         }
     }
 
-    public void readAll(ByteArrayConsumer consumer) {
+    public void readAll(ByteArrayValueConsumer consumer) {
         while (true) {
             try {
                 if (inputEnd) {

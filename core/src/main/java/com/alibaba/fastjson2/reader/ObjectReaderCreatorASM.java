@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.internal.asm.*;
+import com.alibaba.fastjson2.support.LambdaMiscCodec;
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
@@ -2710,5 +2711,259 @@ public class ObjectReaderCreatorASM
             }
             this.hasStringField = hasStringField;
         }
+    }
+
+    public BiFunction<Consumer, int[], ByteArrayValueConsumer> createValueConsumerCreator(ObjectReaderAdapter objectReader) {
+        Class objectClass = objectReader.getObjectClass();
+        Constructor defaultConstructor = BeanUtils.getDefaultConstructor(objectClass, false);
+        if (defaultConstructor == null) {
+            return null;
+        }
+
+        ClassWriter cw = new ClassWriter(
+                (e) -> objectClass.getName().equals(e) ? objectClass : null
+        );
+        FieldReader[] fieldReaderArray = objectReader.fieldReaders;
+
+        String className = "VCG_" + seed.incrementAndGet() + "_" + fieldReaderArray.length + "_" + objectClass.getSimpleName();
+        String classNameType;
+        String classNameFull;
+
+        Package pkg = ObjectReaderCreatorASM.class.getPackage();
+        if (pkg != null) {
+            String packageName = pkg.getName();
+            int packageNameLength = packageName.length();
+            int charsLength = packageNameLength + 1 + className.length();
+            char[] chars = new char[charsLength];
+            packageName.getChars(0, packageName.length(), chars, 0);
+            chars[packageNameLength] = '.';
+            className.getChars(0, className.length(), chars, packageNameLength + 1);
+            classNameFull = new String(chars);
+
+            chars[packageNameLength] = '/';
+            for (int i = 0; i < packageNameLength; ++i) {
+                if (chars[i] == '.') {
+                    chars[i] = '/';
+                }
+            }
+            classNameType = new String(chars);
+        } else {
+            classNameType = className;
+            classNameFull = className;
+        }
+
+        String TYPE_OBJECT = ASMUtils.type(objectClass);
+        String DESC_OBJECT = ASMUtils.desc(objectClass);
+
+        cw.visitField(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, "consumer", "Ljava/util/function/Consumer;")
+                .visitEnd();
+        cw.visitField(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, "mapping", "[I")
+                .visitEnd();
+        cw.visitField(Opcodes.ACC_PUBLIC, "object", DESC_OBJECT)
+                .visitEnd();
+
+        cw.visit(
+                Opcodes.V1_8,
+                Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER,
+                classNameType,
+                "java/lang/Object",
+                new String[]{TYPE_VALUE_CONSUMER}
+        );
+
+        {
+            final int CONSUMER = 1, MAPPING = 2;
+
+            MethodWriter mw = cw.visitMethod(
+                    Opcodes.ACC_PUBLIC,
+                    "<init>",
+                    "(Ljava/util/function/Consumer;[I)V",
+                    32
+            );
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitVarInsn(Opcodes.ALOAD, CONSUMER);
+            mw.visitFieldInsn(PUTFIELD, classNameType, "consumer", "Ljava/util/function/Consumer;");
+
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitVarInsn(Opcodes.ALOAD, MAPPING);
+            mw.visitFieldInsn(PUTFIELD, classNameType, "mapping", "[I");
+
+            mw.visitInsn(Opcodes.RETURN);
+            mw.visitMaxs(3, 3);
+        }
+
+        {
+            MethodWriter mw = cw.visitMethod(
+                    Opcodes.ACC_PUBLIC,
+                    "beforeRow",
+                    "(I)V",
+                    32
+            );
+
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            newObject(mw, TYPE_OBJECT, defaultConstructor);
+            mw.visitFieldInsn(PUTFIELD, classNameType, "object", DESC_OBJECT);
+
+            mw.visitInsn(Opcodes.RETURN);
+            mw.visitMaxs(3, 3);
+        }
+
+        {
+            MethodWriter mw = cw.visitMethod(
+                    Opcodes.ACC_PUBLIC,
+                    "afterRow",
+                    "(I)V",
+                    32
+            );
+
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, "consumer", "Ljava/util/function/Consumer;");
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, "object", DESC_OBJECT);
+            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/function/Consumer", "accept", "(Ljava/lang/Object;)V", true);
+
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitInsn(Opcodes.ACONST_NULL);
+            mw.visitFieldInsn(PUTFIELD, classNameType, "object", DESC_OBJECT);
+
+            mw.visitInsn(Opcodes.RETURN);
+            mw.visitMaxs(3, 3);
+        }
+
+        {
+            final int ROW = 1, COLUMN = 2, BYTES = 3, OFF = 4, LEN = 5, CHARSET = 6;
+            final int MCOLUMN = 7;
+
+            MethodWriter mw = cw.visitMethod(
+                    Opcodes.ACC_PUBLIC,
+                    "accept",
+                    "(II[BIILjava/nio/charset/Charset;)V",
+                    32
+            );
+
+            Label switch_ = new Label(), L0_ = new Label(), L1_ = new Label(), L2_ = new Label(), L3_ = new Label();
+
+            mw.visitVarInsn(Opcodes.ILOAD, LEN);
+            mw.visitJumpInsn(Opcodes.IFNE, L0_);
+            mw.visitInsn(Opcodes.RETURN);
+
+            mw.visitLabel(L0_);
+            mw.visitVarInsn(Opcodes.ILOAD, COLUMN);
+            mw.visitJumpInsn(Opcodes.IFGE, L1_);
+            mw.visitInsn(Opcodes.RETURN);
+
+            mw.visitLabel(L1_);
+            mw.visitVarInsn(Opcodes.ILOAD, COLUMN);
+            mw.visitLdcInsn(fieldReaderArray.length);
+            mw.visitJumpInsn(Opcodes.IF_ICMPLE, L2_);
+            mw.visitInsn(Opcodes.RETURN);
+
+            mw.visitLabel(L2_);
+
+            mw.visitVarInsn(ALOAD, THIS);
+            mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, "mapping", "[I");
+            mw.visitVarInsn(Opcodes.ILOAD, COLUMN);
+            mw.visitInsn(Opcodes.IALOAD);
+            mw.visitVarInsn(Opcodes.ISTORE, MCOLUMN);
+
+            mw.visitVarInsn(Opcodes.ILOAD, MCOLUMN);
+            mw.visitJumpInsn(Opcodes.IFGE, L3_);
+            mw.visitInsn(Opcodes.RETURN);
+
+            mw.visitLabel(L3_);
+            mw.visitVarInsn(Opcodes.ILOAD, MCOLUMN);
+            mw.visitLdcInsn(fieldReaderArray.length);
+            mw.visitJumpInsn(Opcodes.IF_ICMPLE, switch_);
+            mw.visitInsn(Opcodes.RETURN);
+
+            mw.visitLabel(switch_);
+
+            Label dflt = new Label();
+            Label[] labels = new Label[fieldReaderArray.length];
+            int[] columns = new int[fieldReaderArray.length];
+            for (int i = 0; i < columns.length; i++) {
+                columns[i] = i;
+                labels[i] = new Label();
+            }
+
+            mw.visitVarInsn(Opcodes.ILOAD, MCOLUMN);
+            mw.visitLookupSwitchInsn(dflt, columns, labels);
+
+            for (int i = 0; i < labels.length; i++) {
+                mw.visitLabel(labels[i]);
+                FieldReader fieldReader = fieldReaderArray[i];
+                Field field = fieldReader.field;
+                Class fieldClass = fieldReader.fieldClass;
+                Type fieldType = fieldReader.fieldType;
+
+                mw.visitVarInsn(ALOAD, THIS);
+                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, "object", DESC_OBJECT);
+
+                String DESC_FIELD_CLASS;
+                if (fieldType == String.class) {
+                    mw.visitTypeInsn(Opcodes.NEW, "java/lang/String");
+                    mw.visitInsn(Opcodes.DUP);
+                    mw.visitVarInsn(ALOAD, BYTES);
+                    mw.visitVarInsn(Opcodes.ILOAD, OFF);
+                    mw.visitVarInsn(Opcodes.ILOAD, LEN);
+                    mw.visitVarInsn(ALOAD, CHARSET);
+                    mw.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/String", "<init>", "([BIILjava/nio/charset/Charset;)V", false);
+
+                    DESC_FIELD_CLASS = "Ljava/lang/String;";
+                } else if (fieldType == Integer.class) {
+                    mw.visitVarInsn(ALOAD, BYTES);
+                    mw.visitVarInsn(Opcodes.ILOAD, OFF);
+                    mw.visitVarInsn(Opcodes.ILOAD, LEN);
+                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_TYPE_UTILS, "parseInt", "([BII)I", false);
+                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+
+                    DESC_FIELD_CLASS = "Ljava/lang/Integer;";
+                } else if (fieldType == Double.class) {
+                    mw.visitVarInsn(ALOAD, BYTES);
+                    mw.visitVarInsn(Opcodes.ILOAD, OFF);
+                    mw.visitVarInsn(Opcodes.ILOAD, LEN);
+                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_TYPE_UTILS, "parseDouble", "([BII)D", false);
+                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false);
+
+                    DESC_FIELD_CLASS = "Ljava/lang/Double;";
+                } else if (fieldType == Boolean.class) {
+                    mw.visitVarInsn(ALOAD, BYTES);
+                    mw.visitVarInsn(Opcodes.ILOAD, OFF);
+                    mw.visitVarInsn(Opcodes.ILOAD, LEN);
+                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_TYPE_UTILS, "parseBoolean", "([BII)Ljava/lang/Boolean;", false);
+
+                    DESC_FIELD_CLASS = "Ljava/lang/Boolean;";
+                } else {
+                    return null; // TODO
+                }
+
+                if (fieldReader.method != null) {
+                    return null; // TODO
+                } else if (field != null) {
+                    mw.visitFieldInsn(PUTFIELD, TYPE_OBJECT, field.getName(), DESC_FIELD_CLASS);
+                } else {
+                    return null; // not support
+                }
+                mw.visitJumpInsn(Opcodes.GOTO, dflt);
+            }
+
+            mw.visitLabel(dflt);
+
+            mw.visitInsn(Opcodes.RETURN);
+            mw.visitMaxs(3, 3);
+        }
+
+        byte[] code = cw.toByteArray();
+
+        try {
+            Class<?> consumerClass = classLoader.defineClassPublic(classNameFull, code, 0, code.length);
+            Constructor<?> constructor = consumerClass.getConstructor(Consumer.class, int[].class);
+            return LambdaMiscCodec.createBiFunction(constructor);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.support.csv;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.reader.ByteArrayValueConsumer;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
@@ -15,6 +16,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
@@ -119,7 +121,7 @@ public abstract class CSVReader<T>
             );
         }
 
-        return new CSVReaderUTF8(new FileInputStream(file), charset, objectReader);
+        return new CSVReaderUTF8(new FileInputStream(file), charset, objectReader, null);
     }
 
     public static CSVReader of(InputStream in, Type... types) throws IOException {
@@ -131,9 +133,24 @@ public abstract class CSVReader<T>
     }
 
     public static <T> CSVReader<T> of(InputStream in, Charset charset, Class<T> objectClass) {
+        return of(in, charset, objectClass, null);
+    }
+
+    public static <T> CSVReader<T> of(
+            InputStream in,
+            Charset charset,
+            Class<T> objectClass,
+            BiFunction<Consumer, int[], ByteArrayValueConsumer> valueConsumerCreator
+    ) {
         JSONReader.Context context = JSONFactory.createReadContext();
+
         ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
-        return new CSVReaderUTF8(in, charset, objectReader);
+
+        if (valueConsumerCreator == null) {
+            valueConsumerCreator = context.getValueConsumerCreator(objectClass);
+        }
+
+        return new CSVReaderUTF8(in, charset, objectReader, valueConsumerCreator);
     }
 
     public static CSVReader of(InputStream in, Charset charset, Type... types) throws IOException {
@@ -191,9 +208,14 @@ public abstract class CSVReader<T>
 
         if (objectReader != null) {
             JSONReader.Context context = JSONFactory.createReadContext(provider);
+
             Type[] types = new Type[columns.length];
+            int[] mapping = new int[columns.length];
             ObjectReader[] typeReaders = new ObjectReader[columns.length];
             FieldReader[] fieldReaders = new FieldReader[columns.length];
+
+            FieldReader[] originFieldReaders = objectReader.getFieldReaders();
+
             for (int i = 0; i < columns.length; i++) {
                 String column = columns[i].trim();
                 FieldReader fieldReader = objectReader.getFieldReader(column);
@@ -205,10 +227,19 @@ public abstract class CSVReader<T>
                     }
                     types[i] = fieldType;
                     typeReaders[i] = fieldReader.getObjectReader(context);
+
+                    for (int j = 0; j < originFieldReaders.length; j++) {
+                        if (originFieldReaders[j] == fieldReader) {
+                            mapping[i] = j;
+                            break;
+                        }
+                    }
                 } else {
                     types[i] = String.class;
                 }
             }
+
+            this.mapping = mapping;
             this.types = types;
             this.typeReaders = typeReaders;
             this.fieldReaders = fieldReaders;
@@ -648,13 +679,7 @@ public abstract class CSVReader<T>
         }
     }
 
-    public interface ByteArrayConsumer {
-        default void beforeRow(int row) {}
-        void accept(int row, int column, byte[] bytes, int off, int len, Charset charset);
-        default void afterRow(int row) {};
-    }
-
-    public void readAll(ByteArrayConsumer consumer) {
+    public void readAll(ByteArrayValueConsumer consumer) {
         throw new UnsupportedOperationException();
     }
 }
