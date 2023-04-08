@@ -191,14 +191,21 @@ public abstract class CSVReader
             JSONReader.Context context = JSONFactory.createReadContext(provider);
             Type[] types = new Type[columns.length];
             ObjectReader[] typeReaders = new ObjectReader[columns.length];
+            FieldReader[] fieldReaders = new FieldReader[columns.length];
             for (int i = 0; i < columns.length; i++) {
-                String column = columns[i];
+                String column = columns[i].trim();
                 FieldReader fieldReader = objectReader.getFieldReader(column);
-                types[i] = fieldReader.fieldType;
-                typeReaders[i] = fieldReader.getObjectReader(context);
+                if (fieldReader != null) {
+                    fieldReaders[i] = fieldReader;
+                    types[i] = fieldReader.fieldType;
+                    typeReaders[i] = fieldReader.getObjectReader(context);
+                } else {
+                    types[i] = String.class;
+                }
             }
             this.types = types;
             this.typeReaders = typeReaders;
+            this.fieldReaders = fieldReaders;
         }
 
         this.columns = Arrays.asList(columns);
@@ -245,7 +252,6 @@ public abstract class CSVReader
         }
 
         if (types == null) {
-            FieldReader[] fieldReaders = objectReader.getFieldReaders();
             Type[] types = new Type[fieldReaders.length];
             for (int i = 0; i < fieldReaders.length; i++) {
                 types[i] = fieldReaders[i].fieldType;
@@ -258,7 +264,16 @@ public abstract class CSVReader
             return null;
         }
 
-        if (columns != null) {
+        if (fieldReaders != null) {
+            Object object = objectReader.createInstance();
+            for (int i = 0; i < this.fieldReaders.length; i++) {
+                FieldReader fieldReader = fieldReaders[i];
+                if (fieldReader != null) {
+                    fieldReader.accept(object, values[i]);
+                }
+            }
+            return (T) object;
+        } else if (columns != null) {
             Map map = new HashMap();
             for (int i = 0; i < values.length; i++) {
                 if (i < columns.size()) {

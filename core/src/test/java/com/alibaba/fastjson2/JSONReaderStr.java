@@ -1036,7 +1036,7 @@ public final class JSONReaderStr
                     break;
                 }
 
-                if (c == '_' || c == '-') {
+                if (c == '_' || c == '-' || c == ' ') {
                     char c1 = str.charAt(offset + 1);
                     if (c1 != '"' && c1 != '\'' && c1 != c) {
                         continue;
@@ -1114,7 +1114,7 @@ public final class JSONReaderStr
             }
 
             offset++;
-            if (c == '_' || c == '-') {
+            if (c == '_' || c == '-' || c == ' ') {
                 char c1 = str.charAt(offset);
                 if (c1 != '"' && c1 != '\'' && c1 != c) {
                     continue;

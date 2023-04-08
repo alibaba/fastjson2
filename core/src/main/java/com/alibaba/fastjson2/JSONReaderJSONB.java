@@ -2136,7 +2136,7 @@ class JSONReaderJSONB
                     break;
                 }
 
-                if (c == '_' || c == '-') {
+                if (c == '_' || c == '-' || c == ' ') {
                     byte c1 = bytes[offset + 1];
                     if (c1 != c) {
                         continue;
@@ -2190,7 +2190,7 @@ class JSONReaderJSONB
                 c = (byte) (c + 32);
             }
 
-            if (c == '_' || c == '-') {
+            if (c == '_' || c == '-' || c == ' ') {
                 continue;
             }
 

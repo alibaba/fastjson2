@@ -1554,7 +1554,7 @@ class JSONReaderUTF16
                     break;
                 }
 
-                if (c == '_' || c == '-') {
+                if (c == '_' || c == '-' || c == ' ') {
                     char c1 = chars[offset + 1];
                     if (c1 != '"' && c1 != '\'' && c1 != c) {
                         continue;
@@ -1633,7 +1633,7 @@ class JSONReaderUTF16
             }
 
             offset++;
-            if (c == '_' || c == '-') {
+            if (c == '_' || c == '-' || c == ' ') {
                 char c1 = chars[offset];
                 if (c1 != '"' && c1 != '\'' && c1 != c) {
                     continue;

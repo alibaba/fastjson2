@@ -20,7 +20,7 @@ public class Fnv {
                     break;
                 }
 
-                if (ch == '-' || ch == '_') {
+                if (ch == '-' || ch == '_' || ch == ' ') {
                     scoreCount++;
                 }
             }
@@ -28,7 +28,7 @@ public class Fnv {
             if (ascii && (name.length() - scoreCount) <= 8) {
                 for (int i = name.length() - 1, j = 0; i >= 0; --i) {
                     char ch = name.charAt(i);
-                    if (ch == '-' || ch == '_') {
+                    if (ch == '-' || ch == '_' || ch == ' ') {
                         continue;
                     }
                     if (ch >= 'A' && ch <= 'Z') {
@@ -54,7 +54,7 @@ public class Fnv {
         for (int i = 0; i < name.length(); ++i) {
             char ch = name.charAt(i);
 
-            if (ch == '-' || ch == '_') {
+            if (ch == '-' || ch == '_' || ch == ' ') {
                 continue;
             }
             if (ch >= 'A' && ch <= 'Z') {
