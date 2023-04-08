@@ -194,6 +194,10 @@ class CSVReaderUTF8
     }
 
     Object readValue(byte[] bytes, int off, int len, Type type) {
+        if (len == 0) {
+            return null;
+        }
+
         if (type == Integer.class) {
             return TypeUtils.parseInt(bytes, off, len);
         }
@@ -223,6 +227,10 @@ class CSVReaderUTF8
         if (type == Date.class) {
             long millis = DateUtils.parseMillis(bytes, off, len, charset);
             return new Date(millis);
+        }
+
+        if (type == Boolean.class) {
+            return TypeUtils.parseBoolean(bytes, off, len);
         }
 
         String str = new String(bytes, off, len, charset);

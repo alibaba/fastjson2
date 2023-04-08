@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.stream;
 
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
@@ -31,6 +32,7 @@ public abstract class StreamReader {
     protected Type[] types;
     protected ObjectReader[] typeReaders;
     protected ObjectReaderAdapter objectReader;
+    protected FieldReader[] fieldReaders;
 
     protected int lineSize;
     protected int rowCount;
@@ -71,6 +73,11 @@ public abstract class StreamReader {
 
     public StreamReader(ObjectReaderAdapter objectReader) {
         this.objectReader = objectReader;
+        this.fieldReaders = objectReader.getFieldReaders();
+        this.types = new Type[fieldReaders.length];
+        for (int i = 0; i < this.fieldReaders.length; i++) {
+            this.types[i] = this.fieldReaders[i].fieldType;
+        }
     }
 
     protected abstract boolean seekLine() throws IOException;

@@ -38,6 +38,13 @@
             <artifactId>fastjson</artifactId>
             <version>${fastjson1x.version}</version>
         </dependency>
+        <!--
+        <dependency>
+            <groupId>com.cainiao.ai</groupId>
+            <artifactId>seq-csv</artifactId>
+            <version>0.1.3</version>
+        </dependency>
+        -->
         <dependency>
             <groupId>com.caucho</groupId>
             <artifactId>hessian</artifactId>
@@ -75,6 +82,11 @@
         <dependency>
             <groupId>com.networknt</groupId>
             <artifactId>json-schema-validator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.univocity</groupId>
+            <artifactId>univocity-parsers</artifactId>
+            <version>2.9.1</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>

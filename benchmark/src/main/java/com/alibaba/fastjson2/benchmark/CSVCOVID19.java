@@ -1,89 +1,104 @@
 package com.alibaba.fastjson2.benchmark;
 
+import com.alibaba.fastjson2.benchmark.eishay.EishayParseBinary;
 import com.alibaba.fastjson2.support.csv.CSVReader;
+import com.univocity.parsers.annotations.Parsed;
+import com.univocity.parsers.csv.CsvParserSettings;
+import com.univocity.parsers.csv.CsvRoutines;
+import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.infra.Blackhole;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.net.URL;
-import java.util.Date;
+import java.io.InputStream;
 
 public class CSVCOVID19 {
     static final String file = "csv/COVID-19_Public_Therapeutic_Locator.csv";
-
-    @Benchmark
-    public void rowCount(Blackhole bh) throws IOException {
-        URL resource = Thread.currentThread().getContextClassLoader().getResource(file);
-        if (resource == null) {
-            return;
+    static byte[] byteArray;
+    static {
+        try (InputStream is = EishayParseBinary.class.getClassLoader().getResourceAsStream(file)) {
+            String str = IOUtils.toString(is, "UTF-8");
+            byteArray = str.getBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        File file = new File(resource.getFile());
-        FileInputStream fileIn = new FileInputStream(file);
-        int rowCount = CSVReader.rowCount(fileIn);
-        bh.consume(rowCount);
     }
 
     @Benchmark
-    public void readLines(Blackhole bh) throws IOException {
-        URL resource = Thread.currentThread().getContextClassLoader().getResource(file);
-        if (resource == null) {
-            return;
-        }
-
-        File file = new File(resource.getFile());
-        CSVReader parser = CSVReader.of(file);
-        int rowCount = 0;
+    public void fastjson2(Blackhole BH) {
+        CSVReader reader = CSVReader.of(new ByteArrayInputStream(byteArray), Covid19.class);
+        reader.readHeader();
         while (true) {
-            String[] line = parser.readLine();
-            if (line == null) {
+            Covid19 object = reader.readLineObject();
+            if (object == null) {
                 break;
             }
-            rowCount++;
+            BH.consume(object);
         }
-        bh.consume(rowCount);
     }
 
     @Benchmark
-    public void readLineValues(Blackhole bh) throws IOException {
-        URL resource = Thread.currentThread().getContextClassLoader().getResource(file);
-        if (resource == null) {
-            return;
-        }
+    public void univocity(Blackhole BH) {
+        CsvParserSettings settings = new CsvParserSettings();
+        CsvRoutines processor = new CsvRoutines(settings);
+        settings.getFormat().setLineSeparator("\n");
+        settings.setNumberOfRowsToSkip(1);
+        processor.iterate(Covid19.class, new ByteArrayInputStream(byteArray))
+                .forEach(t -> BH.consume(t));
+    }
 
-        File file = new File(resource.getFile());
-        Type[] types = new Type[] {
-                String.class, // Provider Name
-                String.class, // Address1
-                String.class, // Address2
-                String.class, // City
-                String.class, // County
+    public void cainiao(Blackhole BH) {
+//        com.cainiao.ai.seq.csv.CsvType.of(Covid19.class, false)
+//                .csvReader(',')
+//                .read(com.cainiao.ai.seq.InputSource.of(byteArray), 1)
+//                .supply(p -> BH.consume(p));
+    }
 
-                String.class, // State Code
-                Integer.class, // Zip
-                String.class, // National Drug Code
-                String.class, // Order Label
-                Integer.class, // Courses Available
+    public static class Covid19 {
+        @Parsed(index = 0)
+        public String providerName;
 
-                String.class, // Geocoded Address
-                String.class, // NPI
-                Date.class, // Last Report Date
-                String.class, // Provider Status
-                String.class, // Provider Note
-        };
-        CSVReader parser = CSVReader.of(file, types);
-        parser.readHeader();
-        int rowCount = 0;
-        while (true) {
-            Object[] line = parser.readLineValues();
-            if (line == null) {
-                break;
-            }
-            rowCount++;
-        }
-        bh.consume(rowCount);
+        @Parsed(index = 1)
+        public String address1;
+
+        @Parsed(index = 2)
+        public String address2;
+
+        @Parsed(index = 3)
+        public String city;
+
+        @Parsed(index = 4)
+        public String county;
+
+        @Parsed(index = 5)
+        public String stateCode;
+
+        @Parsed(index = 6)
+        public Integer zip;
+
+        @Parsed(index = 7)
+        public String nationalDrugCode;
+
+        @Parsed(index = 8)
+        public String orderLabel;
+
+        @Parsed(index = 9)
+        public Integer coursesAvailable;
+
+        @Parsed(index = 10)
+        public String geocodedAddress;
+
+        @Parsed(index = 11)
+        public String npi;
+
+        @Parsed(index = 12)
+        public String lastReportDate;
+
+        @Parsed(index = 13)
+        public String providerStatus;
+
+        @Parsed(index = 14)
+        public String providerNote;
     }
 }

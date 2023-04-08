@@ -1193,7 +1193,7 @@ class JSONReaderUTF8
                     break;
                 }
 
-                if (c == '_' || c == '-') {
+                if (c == '_' || c == '-' || c == ' ') {
                     byte c1 = bytes[offset + 1];
                     if (c1 != '"' && c1 != '\'' && c1 != c) {
                         continue;
@@ -1247,7 +1247,7 @@ class JSONReaderUTF8
                     c = (char) (c + 32);
                 }
 
-                if (c == '_' || c == '-') {
+                if (c == '_' || c == '-' || c == ' ') {
                     byte c1 = bytes[i + 1];
                     if (c1 != '"' && c1 != '\'' && c1 != c) {
                         continue;
@@ -1324,7 +1324,7 @@ class JSONReaderUTF8
                 }
             }
 
-            if (c == '_') {
+            if (c == '_' || c == '-' || c == ' ') {
                 continue;
             }
 
