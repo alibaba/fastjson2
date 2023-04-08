@@ -2983,4 +2983,8 @@ public class ObjectReaderCreator {
             throw new JSONException("create fieldReader error", e);
         }
     }
+
+    public BiFunction<Consumer, int[], ByteArrayValueConsumer> createValueConsumerCreator(ObjectReaderAdapter objectReader) {
+        return null;
+    }
 }

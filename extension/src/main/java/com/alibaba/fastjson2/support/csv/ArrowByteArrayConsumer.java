@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.reader.ByteArrayValueConsumer;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import org.apache.arrow.memory.BufferAllocator;
@@ -16,7 +17,7 @@ import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
 
 public class ArrowByteArrayConsumer
-        implements CSVReader.ByteArrayConsumer {
+        implements ByteArrayValueConsumer {
     static final int CHUNK_SIZE = 10000;
     final Schema schema;
     final int rowCount;
