@@ -76,7 +76,11 @@ public abstract class StreamReader {
         this.fieldReaders = objectReader.getFieldReaders();
         this.types = new Type[fieldReaders.length];
         for (int i = 0; i < this.fieldReaders.length; i++) {
-            this.types[i] = this.fieldReaders[i].fieldType;
+            Type fieldType = this.fieldReaders[i].fieldType;
+            if (fieldType instanceof Class) {
+                fieldType = TypeUtils.nonePrimitive((Class) fieldType);
+            }
+            this.types[i] = fieldType;
         }
     }
 

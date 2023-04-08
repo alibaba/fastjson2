@@ -8,16 +8,18 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
 import com.alibaba.fastjson2.stream.StreamReader;
 import com.alibaba.fastjson2.util.JDKUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
-public abstract class CSVReader
+public abstract class CSVReader<T>
         extends StreamReader
         implements Closeable {
     boolean quote;
@@ -47,13 +49,13 @@ public abstract class CSVReader
         }
     }
 
-    public static CSVReader of(Reader reader, Class objectClass) {
+    public static <T> CSVReader<T> of(Reader reader, Class<T> objectClass) {
         JSONReader.Context context = JSONFactory.createReadContext();
         ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
         return new CSVReaderUTF16(reader, objectReader);
     }
 
-    public static CSVReader of(String str, Class objectClass) {
+    public static <T> CSVReader of(String str, Class<T> objectClass) {
         JSONReader.Context context = JSONFactory.createReadContext();
         ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
 
@@ -73,13 +75,13 @@ public abstract class CSVReader
         return new CSVReaderUTF16(chars, 0, chars.length, objectReader);
     }
 
-    public static CSVReader of(char[] chars, Class objectClass) {
+    public static <T> CSVReader<T> of(char[] chars, Class<T> objectClass) {
         JSONReader.Context context = JSONFactory.createReadContext();
         ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
         return new CSVReaderUTF16(chars, 0, chars.length, objectReader);
     }
 
-    public static CSVReader of(byte[] utf8Bytes, Class objectClass) {
+    public static <T> CSVReader<T> of(byte[] utf8Bytes, Class<T> objectClass) {
         JSONReader.Context context = JSONFactory.createReadContext();
         ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
         return new CSVReaderUTF8(utf8Bytes, 0, utf8Bytes.length, objectReader);
@@ -101,11 +103,11 @@ public abstract class CSVReader
         return new CSVReaderUTF8(new FileInputStream(file), charset, types);
     }
 
-    public static CSVReader of(File file, Class objectClass) throws IOException {
+    public static <T> CSVReader<T> of(File file, Class<T> objectClass) throws IOException {
         return of(file, StandardCharsets.UTF_8, objectClass);
     }
 
-    public static CSVReader of(File file, Charset charset, Class objectClass) throws IOException {
+    public static <T> CSVReader<T> of(File file, Charset charset, Class<T> objectClass) throws IOException {
         JSONReader.Context context = JSONFactory.createReadContext();
         ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
 
@@ -124,11 +126,11 @@ public abstract class CSVReader
         return new CSVReaderUTF8(in, StandardCharsets.UTF_8, types);
     }
 
-    public static CSVReader of(InputStream in, Class objectClass) {
+    public static <T> CSVReader<T> of(InputStream in, Class<T> objectClass) {
         return of(in, StandardCharsets.UTF_8, objectClass);
     }
 
-    public static CSVReader of(InputStream in, Charset charset, Class objectClass) {
+    public static <T> CSVReader<T> of(InputStream in, Charset charset, Class<T> objectClass) {
         JSONReader.Context context = JSONFactory.createReadContext();
         ObjectReaderAdapter objectReader = (ObjectReaderAdapter) context.getObjectReader(objectClass);
         return new CSVReaderUTF8(in, charset, objectReader);
@@ -197,7 +199,11 @@ public abstract class CSVReader
                 FieldReader fieldReader = objectReader.getFieldReader(column);
                 if (fieldReader != null) {
                     fieldReaders[i] = fieldReader;
-                    types[i] = fieldReader.fieldType;
+                    Type fieldType = fieldReader.fieldType;
+                    if (fieldType instanceof Class) {
+                        fieldType = TypeUtils.nonePrimitive((Class) fieldType);
+                    }
+                    types[i] = fieldType;
                     typeReaders[i] = fieldReader.getObjectReader(context);
                 } else {
                     types[i] = String.class;
@@ -240,6 +246,24 @@ public abstract class CSVReader
 
     public List<ColumnStat> getColumnStats() {
         return columnStats;
+    }
+
+    public void readLineObjectAll(Consumer<T> consumer) {
+        readLineObjectAll(true, consumer);
+    }
+
+    public void readLineObjectAll(boolean readHeader, Consumer<T> consumer) {
+        if (readHeader) {
+            readHeader();
+        }
+
+        while (true) {
+            T object = readLineObject();
+            if (object == null) {
+                break;
+            }
+            consumer.accept(object);
+        }
     }
 
     public <T> T readLineObject() {
@@ -625,6 +649,7 @@ public abstract class CSVReader
     }
 
     public interface ByteArrayConsumer {
+        default void beforeRow(int row) {}
         void accept(int row, int column, byte[] bytes, int off, int len, Charset charset);
         default void afterRow(int row) {};
     }

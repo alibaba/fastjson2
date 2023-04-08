@@ -14,9 +14,9 @@ public class CSVCOVID19Test {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
-            // zulu8.68.0.21 : 1002
-            // zulu11.62.17 : 590
-            // zulu17.40.19 : 553
+            // zulu8.68.0.21 : 1002 764 731
+            // zulu11.62.17 : 590 581
+            // zulu17.40.19 : 553 537
         }
     }
 

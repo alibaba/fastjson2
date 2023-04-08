@@ -16,8 +16,8 @@ import java.util.List;
 
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 
-class CSVReaderUTF16
-        extends CSVReader {
+class CSVReaderUTF16<T>
+        extends CSVReader<T> {
     char[] buf;
     Reader input;
 
