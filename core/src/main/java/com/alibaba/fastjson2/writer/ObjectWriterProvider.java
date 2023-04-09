@@ -335,6 +335,13 @@ public class ObjectWriterProvider
             }
         }
 
+        if (objectWriter == null
+                && (!fieldBased)
+                && Map.class.isAssignableFrom(objectClass)
+                && BeanUtils.isExtendedMap(objectClass)) {
+            return ObjectWriterImplMap.of(objectClass);
+        }
+
         if (objectWriter == null) {
             ObjectWriterCreator creator = getCreator();
             if (objectClass == null) {
