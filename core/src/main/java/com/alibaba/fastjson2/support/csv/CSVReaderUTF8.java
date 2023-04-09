@@ -74,6 +74,7 @@ final class CSVReaderUTF8<T>
                 this.end = cnt;
 
                 if (end > 3) {
+                    // UTF8-BOM EF BB BF
                     if (buf[0] == -17 && buf[1] == -69 && buf[2] == -65) {
                         off = 3;
                         lineNextStart = off;
