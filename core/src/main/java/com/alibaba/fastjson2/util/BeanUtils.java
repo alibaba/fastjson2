@@ -2601,6 +2601,11 @@ public abstract class BeanUtils {
             return false;
         }
 
+        Constructor defaultConstructor = getDefaultConstructor(objectClass, false);
+        if (defaultConstructor != null) {
+            return false;
+        }
+
         List<Field> fields = new ArrayList<>();
         BeanUtils.declaredFields(objectClass, field -> {
             int modifiers = field.getModifiers();
