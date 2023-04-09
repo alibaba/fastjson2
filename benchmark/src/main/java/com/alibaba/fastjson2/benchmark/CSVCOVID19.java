@@ -7,11 +7,17 @@ import com.univocity.parsers.csv.CsvParserSettings;
 import com.univocity.parsers.csv.CsvRoutines;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 public class CSVCOVID19 {
     static final String file = "csv/COVID-19_Public_Therapeutic_Locator.csv";
@@ -94,5 +100,16 @@ public class CSVCOVID19 {
 
         @Parsed(index = 14)
         public String providerNote;
+    }
+
+    public static void main(String[] args) throws RunnerException {
+        Options options = new OptionsBuilder()
+                .include(CSVCOVID19.class.getName())
+                .mode(Mode.Throughput)
+                .timeUnit(TimeUnit.MILLISECONDS)
+                .warmupIterations(3)
+                .forks(1)
+                .build();
+        new Runner(options).run();
     }
 }

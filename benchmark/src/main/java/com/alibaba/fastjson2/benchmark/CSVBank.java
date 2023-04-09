@@ -7,11 +7,17 @@ import com.univocity.parsers.csv.CsvParserSettings;
 import com.univocity.parsers.csv.CsvRoutines;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 public class CSVBank {
     static final String file = "csv/banklist.csv";
@@ -70,5 +76,16 @@ public class CSVBank {
 
         @Parsed(index = 6)
         public Integer fund;
+    }
+
+    public static void main(String[] args) throws RunnerException {
+        Options options = new OptionsBuilder()
+                .include(CSVBank.class.getName())
+                .mode(Mode.Throughput)
+                .timeUnit(TimeUnit.MILLISECONDS)
+                .warmupIterations(3)
+                .forks(1)
+                .build();
+        new Runner(options).run();
     }
 }
