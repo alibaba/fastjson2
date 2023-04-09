@@ -1963,14 +1963,15 @@ public class ObjectReaderCreatorASM
         String DESC_FIELD_CLASS = ASMUtils.desc(fieldClass);
 
         mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-        int fieldModifer = 0;
-        if (fieldBased && field != null) {
-            fieldModifer = field.getModifiers();
+        int fieldModifier = 0;
+        if ((fieldBased || method == null) && field != null) {
+            fieldModifier = field.getModifiers();
         }
+
         if (fieldBased
                 && Modifier.isPublic(objectClass.getModifiers())
-                && Modifier.isPublic(fieldModifer)
-                && !Modifier.isFinal(fieldModifer)
+                && Modifier.isPublic(fieldModifier)
+                && !Modifier.isFinal(fieldModifier)
                 && !classLoader.isExternalClass(objectClass)
         ) {
             mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_OBJECT);
@@ -2430,8 +2431,8 @@ public class ObjectReaderCreatorASM
                         true);
 
                 if (method != null || (Modifier.isPublic(objectClass.getModifiers())
-                        && Modifier.isPublic(fieldModifer)
-                        && !Modifier.isFinal(fieldModifer)
+                        && Modifier.isPublic(fieldModifier)
+                        && !Modifier.isFinal(fieldModifier)
                         && !classLoader.isExternalClass(objectClass))
                 ) {
                     mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_FIELD_CLASS); // cast
@@ -2580,8 +2581,8 @@ public class ObjectReaderCreatorASM
         } else if (field != null) {
             String fieldClassName = fieldClass.getName();
             boolean setDirect = (objectClass.getModifiers() & Modifier.PUBLIC) != 0
-                    && (fieldModifer & Modifier.PUBLIC) != 0
-                    && (fieldModifer & Modifier.FINAL) == 0
+                    && (fieldModifier & Modifier.PUBLIC) != 0
+                    && (fieldModifier & Modifier.FINAL) == 0
                     && (ObjectWriterProvider.isPrimitiveOrEnum(fieldClass) || fieldClassName.startsWith("java.") || fieldClass.getClassLoader() == ObjectReaderProvider.FASTJSON2_CLASS_LOADER)
                     && !classLoader.isExternalClass(objectClass)
                     && field.getDeclaringClass() == objectClass;
