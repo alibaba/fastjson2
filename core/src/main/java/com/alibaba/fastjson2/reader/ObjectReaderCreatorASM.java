@@ -625,7 +625,8 @@ public class ObjectReaderCreatorASM
             FieldReader[] fieldReaderArray,
             ClassWriter cw,
             String classNameType,
-            ObjectReaderAdapter objectReaderAdapter) {
+            ObjectReaderAdapter objectReaderAdapter
+    ) {
         MethodWriter mw = cw.visitMethod(
                 Opcodes.ACC_PUBLIC,
                 "getFieldReader",
@@ -735,7 +736,8 @@ public class ObjectReaderCreatorASM
             FieldReader[] fieldReaderArray,
             ClassWriter cw,
             String classNameType,
-            ObjectReaderAdapter objectReaderAdapter) {
+            ObjectReaderAdapter objectReaderAdapter
+    ) {
         MethodWriter mw = cw.visitMethod(
                 Opcodes.ACC_PUBLIC,
                 "getFieldReaderLCase",
@@ -1419,7 +1421,8 @@ public class ObjectReaderCreatorASM
             int FIELD_TYPE,
             int FIELD_NAME,
             int FEATURES,
-            int AUTO_TYPE_OBJECT_READER) {
+            int AUTO_TYPE_OBJECT_READER
+    ) {
         Label checkArrayAutoTypeNull_ = new Label();
 
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
@@ -2692,10 +2695,12 @@ public class ObjectReaderCreatorASM
         final FieldReader[] fieldReaders;
         final boolean hasStringField;
 
-        public ObjectWriteContext(Class objectClass,
-                                  ClassWriter cw,
-                                  boolean externalClass,
-                                  FieldReader[] fieldReaders) {
+        public ObjectWriteContext(
+                Class objectClass,
+                ClassWriter cw,
+                boolean externalClass,
+                FieldReader[] fieldReaders
+        ) {
             this.objectClass = objectClass;
             this.cw = cw;
             this.publicClass = Modifier.isPublic(objectClass.getModifiers());

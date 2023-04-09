@@ -666,7 +666,8 @@ public interface JSON {
             String text,
             Class<T> clazz,
             Filter filter,
-            JSONReader.Feature... features) {
+            JSONReader.Feature... features
+    ) {
         if (text == null || text.isEmpty()) {
             return null;
         }
@@ -709,7 +710,8 @@ public interface JSON {
             Type type,
             String format,
             Filter[] filters,
-            JSONReader.Feature... features) {
+            JSONReader.Feature... features
+    ) {
         if (text == null || text.isEmpty()) {
             return null;
         }
@@ -804,10 +806,12 @@ public interface JSON {
      * @param filter specify filters to be enabled
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    static <T> T parseObject(String text,
-                             TypeReference<T> typeReference,
-                             Filter filter,
-                             JSONReader.Feature... features) {
+    static <T> T parseObject(
+            String text,
+            TypeReference<T> typeReference,
+            Filter filter,
+            JSONReader.Feature... features
+    ) {
         if (text == null || text.isEmpty()) {
             return null;
         }
@@ -1198,7 +1202,8 @@ public interface JSON {
             byte[] utf8Bytes,
             Class<T> clazz,
             Filter filter,
-            JSONReader.Feature... features) {
+            JSONReader.Feature... features
+    ) {
         if (utf8Bytes == null || utf8Bytes.length == 0) {
             return null;
         }
@@ -1233,7 +1238,8 @@ public interface JSON {
     static <T> T parseObject(
             byte[] utf8Bytes,
             Class<T> clazz,
-            JSONReader.Context context) {
+            JSONReader.Context context
+    ) {
         if (utf8Bytes == null || utf8Bytes.length == 0) {
             return null;
         }
@@ -1269,7 +1275,8 @@ public interface JSON {
             Type type,
             String format,
             Filter[] filters,
-            JSONReader.Feature... features) {
+            JSONReader.Feature... features
+    ) {
         if (utf8Bytes == null || utf8Bytes.length == 0) {
             return null;
         }
@@ -1634,12 +1641,14 @@ public interface JSON {
      * @throws IndexOutOfBoundsException If the offset and the length arguments index characters outside the bounds of the bytes array
      */
     @SuppressWarnings("unchecked")
-    static <T> T parseObject(byte[] bytes,
-                             int offset,
-                             int length,
-                             Charset charset,
-                             Class<T> type,
-                             JSONReader.Feature... features) {
+    static <T> T parseObject(
+            byte[] bytes,
+            int offset,
+            int length,
+            Charset charset,
+            Class<T> type,
+            JSONReader.Feature... features
+    ) {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
@@ -1686,12 +1695,14 @@ public interface JSON {
      * @since 2.0.2
      */
     @SuppressWarnings("unchecked")
-    static <T> void parseObject(InputStream input,
-                                Charset charset,
-                                char delimiter,
-                                Type type,
-                                Consumer<T> consumer,
-                                JSONReader.Feature... features) {
+    static <T> void parseObject(
+            InputStream input,
+            Charset charset,
+            char delimiter,
+            Type type,
+            Consumer<T> consumer,
+            JSONReader.Feature... features
+    ) {
         int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
         byte[] bytes = JSONFactory.allocateByteArray(cachedIndex);
 
@@ -2245,12 +2256,14 @@ public interface JSON {
      * @param features features to be enabled in parsing
      */
     @SuppressWarnings("unchecked")
-    static <T> List<T> parseArray(byte[] bytes,
-                                  int offset,
-                                  int length,
-                                  Charset charset,
-                                  Class<T> type,
-                                  JSONReader.Feature... features) {
+    static <T> List<T> parseArray(
+            byte[] bytes,
+            int offset,
+            int length,
+            Charset charset,
+            Class<T> type,
+            JSONReader.Feature... features
+    ) {
         if (bytes == null || bytes.length == 0) {
             return null;
         }
@@ -2705,11 +2718,13 @@ public interface JSON {
      * @param features features to be enabled in serialization
      * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
      */
-    static int writeTo(OutputStream out,
-                       Object object,
-                       String format,
-                       Filter[] filters,
-                       JSONWriter.Feature... features) {
+    static int writeTo(
+            OutputStream out,
+            Object object,
+            String format,
+            Filter[] filters,
+            JSONWriter.Feature... features
+    ) {
         try (JSONWriter writer = JSONWriter.ofUTF8(features)) {
             if (object == null) {
                 writer.writeNull();
