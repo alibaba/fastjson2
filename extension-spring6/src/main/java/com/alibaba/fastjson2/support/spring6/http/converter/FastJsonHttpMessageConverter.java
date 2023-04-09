@@ -126,6 +126,7 @@ public class FastJsonHttpMessageConverter
             } else if (object instanceof byte[] && JSON.isValid((byte[]) object)) {
                 byte[] strBytes = (byte[]) object;
                 contentLength = strBytes.length;
+                outputMessage.getBody().write(strBytes, 0, strBytes.length);
             } else {
                 contentLength = JSON.writeTo(
                         outputMessage.getBody(),
