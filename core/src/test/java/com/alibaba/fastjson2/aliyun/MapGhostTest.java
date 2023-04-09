@@ -80,6 +80,17 @@ public class MapGhostTest {
         assertEquals("{\"name\":123}", str);
     }
 
+    @Test
+    public void test4() {
+        MapGhost2<String, Object> map = new MapGhost2<String, Object>("abc");
+        map.put("name", 123);
+        byte[] bytes = JSONB.toBytes(map);
+        String str = JSONB.toJSONString(bytes);
+        assertEquals("{\n" +
+                "\t\"name\":123\n" +
+                "}", str);
+    }
+
     public static class MapGhost2<K, V>
             extends TreeMap<K, V> {
         private String name;
