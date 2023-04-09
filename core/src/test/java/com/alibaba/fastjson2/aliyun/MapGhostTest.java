@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.aliyun;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
@@ -69,6 +70,14 @@ public class MapGhostTest {
         MapGhost2 mapGhost = JSONB.parseObject(bytes, MapGhost2.class, JSONReader.Feature.FieldBased, JSONReader.Feature.SupportAutoType);
         assertEquals(map.name, mapGhost.name);
         assertEquals(map.get("name"), mapGhost.get("name"));
+    }
+
+    @Test
+    public void test3() {
+        MapGhost2<String, Object> map = new MapGhost2<String, Object>("abc");
+        map.put("name", 123);
+        String str = JSON.toJSONString(map);
+        assertEquals("{\"name\":123}", str);
     }
 
     public static class MapGhost2<K, V>
