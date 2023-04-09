@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -22,16 +21,16 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public abstract class StreamReader {
     protected static final int SIZE_512K = 1024 * 512;
-
-    protected ObjectReaderProvider provider;
     protected long features;
 
     protected Type[] types;
     protected ObjectReader[] typeReaders;
-    protected ObjectReaderAdapter objectReader;
+
+    protected Supplier objectCreator;
     protected FieldReader[] fieldReaders;
 
     protected int lineSize;
@@ -71,19 +70,19 @@ public abstract class StreamReader {
         }
         this.typeReaders = readers;
     }
-
-    public StreamReader(ObjectReaderAdapter objectReader) {
-        this.objectReader = objectReader;
-        this.fieldReaders = objectReader.getFieldReaders();
-        this.types = new Type[fieldReaders.length];
-        for (int i = 0; i < this.fieldReaders.length; i++) {
-            Type fieldType = this.fieldReaders[i].fieldType;
-            if (fieldType instanceof Class) {
-                fieldType = TypeUtils.nonePrimitive((Class) fieldType);
-            }
-            this.types[i] = fieldType;
-        }
-    }
+//
+//    public StreamReader(ObjectReaderAdapter objectReader) {
+//        this.objectReader = objectReader;
+//        this.fieldReaders = objectReader.getFieldReaders();
+//        this.types = new Type[fieldReaders.length];
+//        for (int i = 0; i < this.fieldReaders.length; i++) {
+//            Type fieldType = this.fieldReaders[i].fieldType;
+//            if (fieldType instanceof Class) {
+//                fieldType = TypeUtils.nonePrimitive((Class) fieldType);
+//            }
+//            this.types[i] = fieldType;
+//        }
+//    }
 
     protected abstract boolean seekLine() throws IOException;
 

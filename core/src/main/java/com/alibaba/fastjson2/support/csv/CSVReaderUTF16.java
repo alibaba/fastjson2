@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -27,8 +26,8 @@ class CSVReaderUTF16<T>
         }
     }
 
-    CSVReaderUTF16(Reader input, ObjectReaderAdapter objectReader) {
-        super(objectReader);
+    CSVReaderUTF16(Reader input, Class<T> objectClass) {
+        super(objectClass);
         this.input = input;
     }
 
@@ -37,13 +36,8 @@ class CSVReaderUTF16<T>
         this.input = input;
     }
 
-    CSVReaderUTF16(
-            char[] bytes,
-            int off,
-            int len,
-            ObjectReaderAdapter objectReader
-    ) {
-        super(objectReader);
+    CSVReaderUTF16(char[] bytes, int off, int len, Class<T> objectClass) {
+        super(objectClass);
         this.buf = bytes;
         this.off = off;
         this.end = off + len;

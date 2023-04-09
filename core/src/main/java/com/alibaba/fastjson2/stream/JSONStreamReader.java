@@ -11,12 +11,14 @@ import java.util.*;
 
 public abstract class JSONStreamReader
         extends StreamReader {
+    protected ObjectReaderAdapter objectReader;
+
     public JSONStreamReader(Type[] types) {
         super(types);
     }
 
     public JSONStreamReader(ObjectReaderAdapter objectReader) {
-        super(objectReader);
+        this.objectReader = objectReader;
     }
 
     public static JSONStreamReader of(File file) throws IOException {

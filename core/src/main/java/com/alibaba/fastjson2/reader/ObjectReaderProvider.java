@@ -1,15 +1,13 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.JSONReader.AutoTypeBeforeHandler;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
+import com.alibaba.fastjson2.support.LambdaMiscCodec;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
@@ -19,9 +17,10 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.BiFunction;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
@@ -149,9 +148,6 @@ public class ObjectReaderProvider
     final ConcurrentMap<Integer, ConcurrentHashMap<Long, ObjectReader>> tclHashCaches = new ConcurrentHashMap<>();
     final ConcurrentMap<Long, ObjectReader> hashCache = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
-
-    final ConcurrentMap<Class, BiFunction<Consumer, int[], ByteArrayValueConsumer>>
-            valueConsumerCreators = new ConcurrentHashMap<>();
 
     final LRUAutoTypeCache autoTypeList = new LRUAutoTypeCache(1024);
 
@@ -893,23 +889,11 @@ public class ObjectReaderProvider
         return getObjectReader(objectType, false);
     }
 
-    public BiFunction<Consumer, int[], ByteArrayValueConsumer> getValueConsumerCreator(Class objectClass, boolean fieldBased) {
-        BiFunction<Consumer, int[], ByteArrayValueConsumer> consumerCreator = valueConsumerCreators.get(objectClass);
-        if (consumerCreator != null) {
-            return consumerCreator;
-        }
-
-        ObjectReader objectReader = getObjectReader(objectClass, fieldBased);
-        if (!(objectReader instanceof ObjectReaderAdapter)) {
-            return null;
-        }
-
-        consumerCreator = creator.createValueConsumerCreator((ObjectReaderAdapter) objectReader);
-        if (consumerCreator != null) {
-            valueConsumerCreators.putIfAbsent(objectClass, consumerCreator);
-            return valueConsumerCreators.get(objectClass);
-        }
-        return null;
+    public Function<Consumer, ByteArrayValueConsumer> createValueConsumerCreator(
+            Class objectClass,
+            FieldReader[] fieldReaderArray
+    ) {
+        return creator.createValueConsumerCreator(objectClass, fieldReaderArray);
     }
 
     public ObjectReader getObjectReader(Type objectType, boolean fieldBased) {
@@ -1061,5 +1045,64 @@ public class ObjectReaderProvider
                 }
             }
         }
+    }
+
+    public <T> Supplier<T> createObjectCreator(Class<T> objectClass, long readerFeatures) {
+        boolean fieldBased = (readerFeatures & JSONReader.Feature.FieldBased.mask) != 0;
+        ObjectReader objectReader = fieldBased
+                ? cacheFieldBased.get(objectClass)
+                : cache.get(objectClass);
+        if (objectReader != null) {
+            return () -> (T) objectReader.createInstance(0);
+        }
+
+        Constructor constructor = BeanUtils.getDefaultConstructor(objectClass, false);
+        if (constructor == null) {
+            throw new JSONException("default constructor not found : " + objectClass.getName());
+        }
+
+        return LambdaMiscCodec.createSupplier(constructor);
+    }
+
+    public FieldReader createFieldReader(Class objectClass, String fieldName, long readerFeatures) {
+        boolean fieldBased = (readerFeatures & JSONReader.Feature.FieldBased.mask) != 0;
+
+        ObjectReader objectReader = fieldBased
+                ? cacheFieldBased.get(objectClass)
+                : cache.get(objectClass);
+
+        if (objectReader != null) {
+            return objectReader.getFieldReader(fieldName);
+        }
+
+        AtomicReference<Field> fieldRef = new AtomicReference<>();
+        long nameHashLCase = Fnv.hashCode64LCase(fieldName);
+        BeanUtils.fields(objectClass, field -> {
+            if (nameHashLCase == Fnv.hashCode64LCase(field.getName())) {
+                fieldRef.set(field);
+            }
+        });
+
+        Field field = fieldRef.get();
+        if (field != null) {
+            return creator.createFieldReader(fieldName, null, field.getType(), field);
+        }
+
+        AtomicReference<Method> methodRef = new AtomicReference<>();
+        BeanUtils.setters(objectClass, method -> {
+            String setterName = BeanUtils.setterName(method.getName(), PropertyNamingStrategy.CamelCase.name());
+            if (nameHashLCase == Fnv.hashCode64LCase(setterName)) {
+                methodRef.set(method);
+            }
+        });
+
+        Method method = methodRef.get();
+        if (method != null) {
+            Class<?>[] params = method.getParameterTypes();
+            Class fieldClass = params[0];
+            return creator.createFieldReaderMethod(objectClass, fieldName, null, fieldClass, fieldClass, method);
+        }
+
+        return null;
     }
 }

@@ -14,9 +14,9 @@ public class CSVCOVID19Test {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
-            // zulu8.68.0.21 : 1002 764 731
-            // zulu11.62.17 : 590 581
-            // zulu17.40.19 : 553 537
+            // zulu8.68.0.21 : 597
+            // zulu11.62.17 : 514
+            // zulu17.40.19 : 540
         }
     }
 
@@ -28,9 +28,9 @@ public class CSVCOVID19Test {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("univocity millis : " + millis);
-            // zulu8.68.0.21 : 631
-            // zulu11.62.17 : 538
-            // zulu17.40.19 : 536
+            // zulu8.68.0.21 : 619
+            // zulu11.62.17 : 521
+            // zulu17.40.19 : 541
         }
     }
 
@@ -49,8 +49,8 @@ public class CSVCOVID19Test {
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2();
-//        univocity();
+//        fastjson2();
+        univocity();
 //        cainiao();
     }
 }
