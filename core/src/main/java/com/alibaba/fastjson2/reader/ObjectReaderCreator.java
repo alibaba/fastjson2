@@ -466,7 +466,8 @@ public class ObjectReaderCreator {
             Class<T> objectClass,
             Type objectType,
             ObjectReaderProvider provider,
-            BeanInfo beanInfo) {
+            BeanInfo beanInfo
+    ) {
         FieldInfo fieldInfo = new FieldInfo();
 
         Map<String, FieldReader> fieldReaders = new LinkedHashMap<>();
@@ -843,9 +844,11 @@ public class ObjectReaderCreator {
         );
     }
 
-    protected ObjectReader getAnnotatedObjectReader(ObjectReaderProvider provider,
-                                                    Class objectClass,
-                                                    BeanInfo beanInfo) {
+    protected ObjectReader getAnnotatedObjectReader(
+            ObjectReaderProvider provider,
+            Class objectClass,
+            BeanInfo beanInfo
+    ) {
         if ((beanInfo.readerFeatures & JSON_AUTO_WIRED_ANNOTATED) == 0) {
             return null;
         }
@@ -1223,7 +1226,8 @@ public class ObjectReaderCreator {
         provider.getFieldInfo(fieldInfo, objectClass, field);
 
         if (fieldInfo.ignore) {
-            boolean unwrap = (fieldInfo.features & FieldInfo.UNWRAPPED_MASK) != 0 && Map.class.isAssignableFrom(field.getType());
+            boolean unwrap = (fieldInfo.features & FieldInfo.UNWRAPPED_MASK) != 0
+                    && Map.class.isAssignableFrom(field.getType());
             if (!unwrap) {
                 return;
             }
@@ -1835,7 +1839,21 @@ public class ObjectReaderCreator {
             Class fieldClass,
             Method method
     ) {
-        return createFieldReaderMethod(objectType, objectType, fieldName, 0, 0L, null, null, null, null, fieldType, fieldClass, method, null);
+        return createFieldReaderMethod(
+                objectType,
+                objectType,
+                fieldName,
+                0,
+                0L,
+                null,
+                null,
+                null,
+                null,
+                fieldType,
+                fieldClass,
+                method,
+                null
+        );
     }
 
     public <T> FieldReader createFieldReader(
@@ -1857,7 +1875,21 @@ public class ObjectReaderCreator {
             Class fieldClass,
             Method method
     ) {
-        return createFieldReaderMethod(objectClass, objectClass, fieldName, 0, 0L, format, null, null, null, fieldType, fieldClass, method, null);
+        return createFieldReaderMethod(
+                objectClass,
+                objectClass,
+                fieldName,
+                0,
+                0L,
+                format,
+                null,
+                null,
+                null,
+                fieldType,
+                fieldClass,
+                method,
+                null
+        );
     }
 
     public <T> FieldReader createFieldReaderParam(
@@ -2259,7 +2291,21 @@ public class ObjectReaderCreator {
             Class fieldClass,
             Field field
     ) {
-        return createFieldReader(objectClass, objectType, fieldName, 0, features, format, null, null, null, fieldType, field.getType(), field, null);
+        return createFieldReader(
+                objectClass,
+                objectType,
+                fieldName,
+                0,
+                features,
+                format,
+                null,
+                null,
+                null,
+                fieldType,
+                field.getType(),
+                field,
+                null
+        );
     }
 
     public <T> FieldReader<T> createFieldReader(
@@ -2788,10 +2834,12 @@ public class ObjectReaderCreator {
         return new ObjectReaderImplEnum(objectClass, createMethod, enumValueField, enums, ordinalEnums, enumNameHashCodes);
     }
 
-    static ObjectReader getInitReader(ObjectReaderProvider provider,
-                                      Type fieldType,
-                                      Class fieldClass,
-                                      FieldInfo fieldInfo) {
+    static ObjectReader getInitReader(
+            ObjectReaderProvider provider,
+            Type fieldType,
+            Class fieldClass,
+            FieldInfo fieldInfo
+    ) {
         ObjectReader initReader = fieldInfo.getInitReader();
         if (initReader == null && Map.class.isAssignableFrom(fieldClass) && (fieldInfo.keyUsing != null || fieldInfo.valueUsing != null)) {
             ObjectReader keyReader = null;
