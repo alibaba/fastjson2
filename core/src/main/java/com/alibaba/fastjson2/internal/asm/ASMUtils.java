@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
@@ -59,6 +60,7 @@ public class ASMUtils {
     public static final String TYPE_OBJECT_READER_12 = ObjectReader12.class.getName().replace('.', '/');
     public static final String TYPE_VALUE_CONSUMER = ByteArrayValueConsumer.class.getName().replace('.', '/');
     public static final String TYPE_TYPE_UTILS = TypeUtils.class.getName().replace('.', '/');
+    public static final String TYPE_DATE_UTILS = DateUtils.class.getName().replace('.', '/');
 
     public static final String TYPE_OBJECT_WRITER = ObjectWriter.class.getName().replace('.', '/');
     public static final String TYPE_JSON_WRITER = JSONWriter.class.getName().replace('.', '/');
@@ -72,7 +74,6 @@ public class ASMUtils {
     public static final String DESC_JSON_WRITER = 'L' + TYPE_JSON_WRITER + ';';
     public static final String DESC_OBJECT_READER = 'L' + TYPE_OBJECT_READER + ';';
     public static final String DESC_OBJECT_WRITER = 'L' + TYPE_OBJECT_WRITER + ';';
-    public static final String DESC_VALUE_CONSUMER = 'L' + TYPE_VALUE_CONSUMER + ';';
     public static final String DESC_SUPPLIER = "Ljava/util/function/Supplier;";
     public static final String DESC_JSONSCHEMA = 'L' + JSONSchema.class.getName().replace('.', '/') + ';';
 

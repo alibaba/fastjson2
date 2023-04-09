@@ -2984,7 +2984,10 @@ public class ObjectReaderCreator {
         }
     }
 
-    public BiFunction<Consumer, int[], ByteArrayValueConsumer> createValueConsumerCreator(ObjectReaderAdapter objectReader) {
+    public Function<Consumer, ByteArrayValueConsumer> createValueConsumerCreator(
+            Class objectClass,
+            FieldReader[] fieldReaderArray
+    ) {
         return null;
     }
 }

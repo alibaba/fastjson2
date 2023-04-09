@@ -1,11 +1,11 @@
 package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.reader.ByteArrayValueConsumer;
-import com.alibaba.fastjson2.reader.FieldReader;
-import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.stream.StreamReader;
 import com.alibaba.fastjson2.util.DateUtils;
+import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -16,15 +16,18 @@ import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.BiFunction;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 final class CSVReaderUTF8<T>
         extends CSVReader<T> {
+    static final Map<Long, Function<Consumer, ByteArrayValueConsumer>> valueConsumerCreators
+            = new ConcurrentHashMap<>();
+
     byte[] buf;
     InputStream input;
     Charset charset = StandardCharsets.UTF_8;
-    BiFunction<Consumer, int[], ByteArrayValueConsumer> valueConsumerCreator;
 
     CSVReaderUTF8(Feature... features) {
         for (Feature feature : features) {
@@ -32,8 +35,8 @@ final class CSVReaderUTF8<T>
         }
     }
 
-    CSVReaderUTF8(byte[] bytes, int off, int len, ObjectReaderAdapter objectReader) {
-        super(objectReader);
+    CSVReaderUTF8(byte[] bytes, int off, int len, Class<T> objectClass) {
+        super(objectClass);
         this.buf = bytes;
         this.off = off;
         this.end = off + len;
@@ -53,16 +56,10 @@ final class CSVReaderUTF8<T>
         this.input = input;
     }
 
-    CSVReaderUTF8(
-            InputStream input,
-            Charset charset,
-            ObjectReaderAdapter objectReader,
-            BiFunction<Consumer, int[], ByteArrayValueConsumer> valueConsumerCreator
-    ) {
-        super(objectReader);
+    CSVReaderUTF8(InputStream input, Charset charset, Class<T> objectClass) {
+        super(objectClass);
         this.charset = charset;
         this.input = input;
-        this.valueConsumerCreator = valueConsumerCreator;
     }
 
     protected boolean seekLine() throws IOException {
@@ -471,9 +468,36 @@ final class CSVReaderUTF8<T>
             readHeader();
         }
 
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+
+        // valueConsumerCreators
+        if (this.fieldReaders == null) {
+            if (objectClass != null) {
+                ObjectReaderAdapter objectReader = (ObjectReaderAdapter) provider.getObjectReader(objectClass);
+                this.fieldReaders = objectReader.getFieldReaders();
+                this.objectCreator = provider.createObjectCreator(objectClass, features);
+            }
+        }
+
+        Function<Consumer, ByteArrayValueConsumer> valueConsumerCreator;
+        String[] strings = new String[this.fieldReaders.length + 1];
+        strings[0] = objectClass.getName();
+        for (int i = 0; i < this.fieldReaders.length; i++) {
+            strings[i + 1] = this.fieldReaders[i].fieldName;
+        }
+        long fullNameHash = Fnv.hashCode64(strings);
+        valueConsumerCreator = valueConsumerCreators.get(fullNameHash);
+        if (valueConsumerCreator == null) {
+            valueConsumerCreator = provider
+                    .createValueConsumerCreator(objectClass, fieldReaders);
+            if (valueConsumerCreator != null) {
+                valueConsumerCreators.putIfAbsent(fullNameHash, valueConsumerCreator);
+            }
+        }
+
         ByteArrayValueConsumer bytesConsumer = null;
         if (valueConsumerCreator != null) {
-            bytesConsumer = valueConsumerCreator.apply(consumer, mapping);
+            bytesConsumer = valueConsumerCreator.apply(consumer);
         }
 
         if (bytesConsumer == null) {
@@ -494,7 +518,7 @@ final class CSVReaderUTF8<T>
 
         @Override
         public final void beforeRow(int row) {
-            object = (T) objectReader.createInstance();
+            object = (T) objectCreator.get();
         }
 
         @Override

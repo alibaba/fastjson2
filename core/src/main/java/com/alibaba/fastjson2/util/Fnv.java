@@ -67,6 +67,22 @@ public class Fnv {
         return hashCode;
     }
 
+    public static long hashCode64(String... names) {
+        if (names.length == 1) {
+            return hashCode64(names[0]);
+        }
+
+        long hashCode = MAGIC_HASH_CODE;
+
+        for (int i = 0; i < names.length; ++i) {
+            long h = hashCode64(names[i]);
+            hashCode ^= h;
+            hashCode *= MAGIC_PRIME;
+        }
+
+        return hashCode;
+    }
+
     public static long hashCode64(String name) {
         if (MIXED_HASH_ALGORITHM && name.length() <= 8) {
             boolean ascii = true;

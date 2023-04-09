@@ -14,9 +14,9 @@ public class CSVBankTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
-            // zulu8.68.0.21 : 235 206
-            // zulu11.62.17 : 158
-            // zulu17.40.19 : 161
+            // zulu8.68.0.21 : 213
+            // zulu11.62.17 : 148
+            // zulu17.40.19 : 150
         }
     }
 
@@ -28,8 +28,8 @@ public class CSVBankTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("univocity millis : " + millis);
-            // zulu8.68.0.21 : 378
-            // zulu11.62.17 : 320
+            // zulu8.68.0.21 : 353
+            // zulu11.62.17 : 315
             // zulu17.40.19 : 280
         }
     }
@@ -49,8 +49,8 @@ public class CSVBankTest {
     }
 
     public static void main(String[] args) throws Exception {
-        fastjson2();
-//        univocity();
+//        fastjson2();
+        univocity();
 //        cainiao();
     }
 }

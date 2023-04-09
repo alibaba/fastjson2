@@ -453,6 +453,31 @@ public class LambdaMiscCodec {
         return new ConstructorFunction(constructor);
     }
 
+    public static Supplier createSupplier(Constructor constructor) {
+        try {
+            Class<?> declaringClass = constructor.getDeclaringClass();
+            MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+            MethodHandle methodHandle = lookup.findConstructor(
+                    declaringClass,
+                    MethodType.methodType(void.class)
+            );
+
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    lookup,
+                    "get",
+                    METHOD_TYPE_SUPPLIER,
+                    METHOD_TYPE_OBJECT,
+                    methodHandle,
+                    MethodType.methodType(declaringClass)
+            );
+            return (Supplier) callSite.getTarget().invokeExact();
+        } catch (Throwable ignored) {
+            errorLast = ignored;
+        }
+
+        return new ConstructorSupplier(constructor);
+    }
+
     public static Supplier createSupplier(Method method) {
         try {
             Class<?> declaringClass = method.getDeclaringClass();
@@ -551,6 +576,24 @@ public class LambdaMiscCodec {
         }
 
         return new ConstructorBiFunction(constructor);
+    }
+
+    static final class ConstructorSupplier
+            implements Supplier {
+        final Constructor constructor;
+
+        ConstructorSupplier(Constructor constructor) {
+            this.constructor = constructor;
+        }
+
+        @Override
+        public Object get() {
+            try {
+                return constructor.newInstance();
+            } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+                throw new JSONException("invoke error", e);
+            }
+        }
     }
 
     static final class ConstructorFunction
