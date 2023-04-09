@@ -2718,7 +2718,7 @@ public class ObjectReaderCreatorASM
             FieldReader[] fieldReaderArray
     ) {
         Constructor defaultConstructor = BeanUtils.getDefaultConstructor(objectClass, false);
-        if (defaultConstructor == null) {
+        if (defaultConstructor == null || !Modifier.isPublic(objectClass.getModifiers())) {
             return null;
         }
 
