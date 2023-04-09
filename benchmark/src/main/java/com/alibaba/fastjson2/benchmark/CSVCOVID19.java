@@ -13,6 +13,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -109,6 +110,7 @@ public class CSVCOVID19 {
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)
                 .forks(1)
+                .measurementTime(TimeValue.seconds(30))
                 .build();
         new Runner(options).run();
     }
