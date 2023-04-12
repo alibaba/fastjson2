@@ -341,7 +341,7 @@ class ObjectReaderImplMapTyped
             if (valueObjectReader == null) {
                 valueObjectReader = jsonReader.getObjectReader(valueType);
             }
-            Object value = valueObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
+            Object value = valueObjectReader.readObject(jsonReader, valueType, fieldName, 0);
             Object origin;
             if (innerMap != null) {
                 origin = innerMap.put(name, value);
