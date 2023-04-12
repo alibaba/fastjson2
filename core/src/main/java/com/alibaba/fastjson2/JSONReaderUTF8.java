@@ -5269,6 +5269,25 @@ class JSONReaderUTF8
     }
 
     @Override
+    protected LocalDateTime readLocalDateTime14() {
+        if (!isString()) {
+            throw new JSONException("date only support string input");
+        }
+
+        LocalDateTime ldt = DateUtils.parseLocalDateTime14(bytes, offset);
+        if (ldt == null) {
+            return null;
+        }
+
+        offset += 15;
+        next();
+        if (comma = (ch == ',')) {
+            next();
+        }
+        return ldt;
+    }
+
+    @Override
     protected LocalDateTime readLocalDateTime16() {
         if (!isString()) {
             throw new JSONException("date only support string input");

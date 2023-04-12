@@ -1175,7 +1175,7 @@ public abstract class JSONReader
                 || context.formatISO8601) {
             int len = getStringLength();
             LocalDateTime ldt = null;
-            LocalDate localDate = null;
+            LocalDate localDate;
             switch (len) {
                 case 8: {
                     localDate = readLocalDate8();
@@ -1214,6 +1214,10 @@ public abstract class JSONReader
                     if (localDate != null) {
                         ldt = LocalDateTime.of(localDate, LocalTime.MIN);
                     }
+                    break;
+                }
+                case 14: {
+                    ldt = readLocalDateTime14();
                     break;
                 }
                 case 16: {
@@ -1319,6 +1323,8 @@ public abstract class JSONReader
 
         throw new JSONException(info("format " + format + " not support, input " + str));
     }
+
+    protected abstract LocalDateTime readLocalDateTime14();
 
     protected abstract LocalDateTime readLocalDateTime16();
 
