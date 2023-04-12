@@ -1541,7 +1541,7 @@ class JSONWriterUTF16
         }
 
         if (i == Long.MIN_VALUE) {
-            writeRaw("-9223372036854775808");
+            writeRaw(writeAsString ? "\"-9223372036854775808\"" : "-9223372036854775808");
             return;
         }
 
