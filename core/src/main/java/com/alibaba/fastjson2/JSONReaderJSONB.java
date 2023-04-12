@@ -4519,6 +4519,11 @@ class JSONReaderJSONB
     }
 
     @Override
+    protected LocalDateTime readLocalDateTime14() {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
     protected LocalDateTime readLocalDateTime16() {
         throw new JSONException("UnsupportedOperation");
     }
