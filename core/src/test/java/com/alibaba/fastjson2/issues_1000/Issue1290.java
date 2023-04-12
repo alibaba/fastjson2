@@ -20,4 +20,17 @@ public class Issue1290 {
     public static class Bean {
         public Object function;
     }
+
+    @Test
+    public void test1() {
+        IntFunction function = (int i) -> Integer.valueOf(i);
+        Bean1 bean = new Bean1();
+        bean.functions = new Object[] {function};
+        String str = JSON.toJSONString(bean);
+        assertEquals("{\"functions\":[{}]}", str);
+    }
+
+    public static class Bean1 {
+        public Object[] functions;
+    }
 }
