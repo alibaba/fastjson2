@@ -1,14 +1,14 @@
 package com.alibaba.fastjson2.dubbo;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
 import com.alibaba.fastjson2.util.DateUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DubboTest7 {
     static final JSONWriter.Feature[] writerFeatures = {
@@ -84,5 +84,51 @@ public class DubboTest7 {
         assertNotNull(str);
         JSONObject object = JSON.parseObject(str);
         assertEquals("RuntimeException", object.get("@type"));
+    }
+
+    static class A
+            implements Serializable {
+        public String a;
+    }
+
+    static class B
+            implements Serializable {
+        public String b;
+    }
+
+    static class A1
+            implements Serializable {
+        public String a;
+    }
+
+    static class B1
+            implements Serializable {
+        public String b;
+    }
+
+    @Test
+    public void test4() {
+        byte[] jsonbBytes = JSONB.toBytes(new A(), writerFeatures);
+        ContextAutoTypeBeforeHandler typeFilter = new ContextAutoTypeBeforeHandler(this.getClass().getName());
+        Object obj = JSONB.parseObject(jsonbBytes, B.class, typeFilter, readerFeatures);
+        assertEquals(B.class, obj.getClass());
+    }
+
+    @Test
+    public void test5() {
+        byte[] jsonbBytes = JSONB.toBytes(new A1(), writerFeatures);
+        ContextAutoTypeBeforeHandler typeFilter = new ContextAutoTypeBeforeHandler(this.getClass().getName());
+        assertThrows(Exception.class,
+                () -> JSONB.parseObject(
+                        jsonbBytes,
+                        B1.class,
+                        typeFilter,
+                        JSONReader.Feature.SupportAutoType,
+                        JSONReader.Feature.UseDefaultConstructorAsPossible,
+                        JSONReader.Feature.ErrorOnNoneSerializable,
+                        JSONReader.Feature.UseNativeObject,
+                        JSONReader.Feature.FieldBased
+                )
+        );
     }
 }
