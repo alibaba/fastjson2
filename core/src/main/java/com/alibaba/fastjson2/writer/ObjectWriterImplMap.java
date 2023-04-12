@@ -558,6 +558,7 @@ public final class ObjectWriterImplMap
     @Override
     public void writeWithFilter(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         if (object == null) {
+            jsonWriter.writeNull();
             return;
         }
 
