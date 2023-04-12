@@ -58,7 +58,8 @@ public class ASMUtils {
     public static final String TYPE_OBJECT_READER_10 = ObjectReader10.class.getName().replace('.', '/');
     public static final String TYPE_OBJECT_READER_11 = ObjectReader11.class.getName().replace('.', '/');
     public static final String TYPE_OBJECT_READER_12 = ObjectReader12.class.getName().replace('.', '/');
-    public static final String TYPE_VALUE_CONSUMER = ByteArrayValueConsumer.class.getName().replace('.', '/');
+    public static final String TYPE_BYTE_ARRAY_VALUE_CONSUMER = ByteArrayValueConsumer.class.getName().replace('.', '/');
+    public static final String TYPE_CHAR_ARRAY_VALUE_CONSUMER = CharArrayValueConsumer.class.getName().replace('.', '/');
     public static final String TYPE_TYPE_UTILS = TypeUtils.class.getName().replace('.', '/');
     public static final String TYPE_DATE_UTILS = DateUtils.class.getName().replace('.', '/');
 

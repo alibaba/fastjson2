@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONSchemaValidException;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONCompiler;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;

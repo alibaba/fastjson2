@@ -4,9 +4,12 @@ import com.alibaba.fastjson2.util.AnnotationUtils;
 import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test for {@link JSONType}

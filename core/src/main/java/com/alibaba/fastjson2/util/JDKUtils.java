@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.util;
 import java.lang.invoke.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.nio.ByteOrder;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,6 +19,8 @@ public class JDKUtils {
     public static final Field FIELD_STRING_VALUE;
     public static final long FIELD_STRING_VALUE_OFFSET;
     public static volatile boolean FIELD_STRING_VALUE_ERROR;
+
+    public static final long FIELD_DECIMAL_INT_COMPACT_OFFSET;
 
     public static final Field FIELD_STRING_CODER;
     public static final long FIELD_STRING_CODER_OFFSET;
@@ -172,6 +175,19 @@ public class JDKUtils {
             }
         }).test(null);
         UNSAFE_SUPPORT = unsafeSupport;
+
+        {
+            long fieldOffset = -1;
+            if (UNSAFE_SUPPORT) {
+                try {
+                    Field field = BigDecimal.class.getDeclaredField("intCompact");
+                    fieldOffset = UnsafeUtils.objectFieldOffset(field);
+                } catch (Throwable ignored) {
+                    // ignored
+                }
+            }
+            FIELD_DECIMAL_INT_COMPACT_OFFSET = fieldOffset;
+        }
 
         BIG_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
 

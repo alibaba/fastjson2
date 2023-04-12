@@ -167,80 +167,13 @@ public class DateUtils {
             return 0;
         }
 
-        final int len = str.length();
-        if (len == 0 || (len == 4 && "null".equals(str))) {
-            return 0;
+        if (STRING_CODER != null && STRING_VALUE != null && STRING_CODER.applyAsInt(str) == 0) {
+            byte[] bytes = JDKUtils.STRING_VALUE.apply(str);
+            return parseMillis(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1, zoneId);
         }
 
-        char c10;
-        long millis;
-        char c0 = str.charAt(0);
-        if (c0 == '"' && str.charAt(len - 1) == '"') {
-            try (JSONReader jsonReader = JSONReader.of(str)) {
-                Date date = (Date) ObjectReaderImplDate.INSTANCE.readObject(
-                        jsonReader,
-                        null,
-                        null,
-                        0
-                );
-                millis = date.getTime();
-            }
-        } else if (len == 19) {
-            millis = DateUtils.parseMillis19(str, zoneId);
-        } else if (len > 19
-                // ISO Date with offset example '2011-12-03+01:00'
-                || (len == 16 && ((c10 = str.charAt(10)) == '+' || c10 == '-'))
-        ) {
-            ZonedDateTime zdt = parseZonedDateTime(str, zoneId);
-            millis = zdt.toInstant().toEpochMilli();
-        } else if ((c0 == '-' || c0 >= '0' && c0 <= '9') && IOUtils.isNumber(str)) {
-            millis = Long.parseLong(str);
-            if (len == 8 && millis >= 19700101 && millis <= 21000101) {
-                int year = (int) millis / 10000;
-                int month = ((int) millis % 10000) / 100;
-                int dom = (int) millis % 100;
-
-                if (month >= 1 && month <= 12) {
-                    int max = 31;
-                    switch (month) {
-                        case 2:
-                            boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
-                            max = leapYear ? 29 : 28;
-                            break;
-                        case 4:
-                        case 6:
-                        case 9:
-                        case 11:
-                            max = 30;
-                            break;
-                    }
-                    if (dom <= max) {
-                        LocalDateTime ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
-                        ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, zoneId, null);
-                        long seconds = zdt.toEpochSecond();
-                        millis = seconds * 1000L;
-                    }
-                }
-            }
-        } else {
-            char last = str.charAt(len - 1);
-            if (last == 'Z') {
-                zoneId = UTC;
-            }
-            LocalDateTime ldt = DateUtils.parseLocalDateTime(str, 0, len);
-            if (ldt == null && "0000-00-00".equals(str)) {
-                ldt = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
-            }
-            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, zoneId, null);
-            long seconds = zdt.toEpochSecond();
-            int nanos = ldt.getNano();
-            if (seconds < 0 && nanos > 0) {
-                millis = (seconds + 1) * 1000 + nanos / 1000_000 - 1000;
-            } else {
-                millis = seconds * 1000L + nanos / 1000_000;
-            }
-        }
-        return millis;
+        char[] chars = JDKUtils.getCharArray(str);
+        return parseMillis(chars, 0, chars.length, zoneId);
     }
 
     public static LocalDateTime parseLocalDateTime(String str) {
@@ -255,12 +188,105 @@ public class DateUtils {
             return null;
         }
 
+        LocalDateTime ldt;
+        if (STRING_CODER != null && STRING_VALUE != null && STRING_CODER.applyAsInt(str) == 0) {
+            byte[] bytes = JDKUtils.STRING_VALUE.apply(str);
+            ldt = parseLocalDateTime(bytes, off, len);
+        } else if (JVM_VERSION == 8 && !FIELD_STRING_VALUE_ERROR) {
+            char[] chars = JDKUtils.getCharArray(str);
+            ldt = parseLocalDateTime(chars, off, len);
+        } else {
+            char[] chars = new char[len];
+            str.getChars(off, off + len, chars, 0);
+            ldt = parseLocalDateTime(chars, off, len);
+        }
+
+        if (ldt == null) {
+            switch (str) {
+                case "":
+                case "null":
+                case "00000000":
+                case "000000000000":
+                case "0000年00月00日":
+                case "0000-0-00":
+                case "0000-00-0":
+                case "0000-00-00":
+                    return null;
+                default:
+                    throw new DateTimeParseException(str, str, off);
+            }
+        }
+
+        return ldt;
+    }
+
+    public static LocalDateTime parseLocalDateTime(char[] str, int off, int len) {
+        if (str == null || len == 0) {
+            return null;
+        }
+
         switch (len) {
             case 4:
-                if (str.regionMatches(0, "null", off, len)) {
+                if (str[off] == 'n' && str[off + 1] == 'u' && str[off + 2] == 'l' && str[off + 3] == 'l') {
                     return null;
                 }
-                String input = str.substring(off, len);
+                String input = new String(str, off, len);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            case 8: {
+                LocalDate localDate = parseLocalDate8(str, off);
+                if (localDate == null) {
+                    return null;
+                }
+                return LocalDateTime.of(localDate, LocalTime.MIN);
+            }
+            case 9: {
+                LocalDate localDate = parseLocalDate9(str, off);
+                if (localDate == null) {
+                    return null;
+                }
+                return LocalDateTime.of(localDate, LocalTime.MIN);
+            }
+            case 10: {
+                LocalDate localDate = parseLocalDate10(str, off);
+                if (localDate == null) {
+                    return null;
+                }
+                return LocalDateTime.of(localDate, LocalTime.MIN);
+            }
+            case 11: {
+                LocalDate localDate = parseLocalDate11(str, off);
+                return LocalDateTime.of(localDate, LocalTime.MIN);
+            }
+            case 12:
+                return parseLocalDateTime12(str, off);
+            case 14:
+                return parseLocalDateTime14(str, off);
+            case 16:
+                return parseLocalDateTime16(str, off);
+            case 17:
+                return parseLocalDateTime17(str, off);
+            case 18:
+                return parseLocalDateTime18(str, off);
+            case 19:
+                return parseLocalDateTime19(str, off);
+            case 20:
+                return parseLocalDateTime20(str, off);
+            default:
+                return parseLocalDateTimeX(str, off, len);
+        }
+    }
+
+    public static LocalDateTime parseLocalDateTime(byte[] str, int off, int len) {
+        if (str == null || len == 0) {
+            return null;
+        }
+
+        switch (len) {
+            case 4:
+                if (str[off] == 'n' && str[off + 1] == 'u' && str[off + 2] == 'l' && str[off + 3] == 'l') {
+                    return null;
+                }
+                String input = new String(str, off, len);
                 throw new DateTimeParseException("illegal input " + input, input, 0);
             case 8: {
                 LocalDate localDate = parseLocalDate8(str, off);
@@ -310,16 +336,40 @@ public class DateUtils {
         if (str == null) {
             return null;
         }
-        return parseLocalDate(str, 0, str.length());
+
+        LocalDate localDate;
+        if (STRING_CODER != null && STRING_VALUE != null && STRING_CODER.applyAsInt(str) == 0) {
+            byte[] bytes = JDKUtils.STRING_VALUE.apply(str);
+            localDate = parseLocalDate(bytes, 0, bytes.length);
+        } else {
+            char[] chars = JDKUtils.getCharArray(str);
+            localDate = parseLocalDate(chars, 0, chars.length);
+        }
+
+        if (localDate == null) {
+            switch (str) {
+                case "":
+                case "null":
+                case "00000000":
+                case "0000年00月00日":
+                case "0000-0-00":
+                case "0000-00-00":
+                    return null;
+                default:
+                    throw new DateTimeParseException(str, str, 0);
+            }
+        }
+
+        return localDate;
     }
 
-    public static LocalDate parseLocalDate(String str, int off, int len) {
+    public static LocalDate parseLocalDate(byte[] str, int off, int len) {
         if (str == null || len == 0) {
             return null;
         }
 
-        if (off + len > str.length()) {
-            String input = str.substring(off);
+        if (off + len > str.length) {
+            String input = new String(str, off, len);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -333,167 +383,246 @@ public class DateUtils {
             case 11:
                 return parseLocalDate11(str, off);
             default:
-                String input = str.substring(off, off + len);
-                if ("null".equals(input)) {
+                if (len == 4 && str[off] == 'n' && str[off + 1] == 'u' && str[off + 2] == 'l' && str[off + 3] == 'l') {
                     return null;
                 }
+                String input = new String(str, off, len);
                 throw new DateTimeParseException("illegal input " + input, input, 0);
         }
     }
 
-    /**
-     * yyyy-m-d
-     * yyyyMMdd
-     * d-MMM-yy
-     */
-    public static LocalDate parseLocalDate8(String str, int off) {
-        if (off + 8 > str.length()) {
-            throw new DateTimeParseException("illegal input", str.substring(off), 0);
-        }
-
-        char c0 = str.charAt(off + 0);
-        char c1 = str.charAt(off + 1);
-        char c2 = str.charAt(off + 2);
-        char c3 = str.charAt(off + 3);
-        char c4 = str.charAt(off + 4);
-        char c5 = str.charAt(off + 5);
-        char c6 = str.charAt(off + 6);
-        char c7 = str.charAt(off + 7);
-
-        char y0, y1, y2, y3, m0, m1, d0, d1;
-        if (c4 == '-' && c6 == '-') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = '0';
-            d1 = c7;
-        } else if (c1 == '/' && c3 == '/') {
-            m0 = '0';
-            m1 = c0;
-
-            d0 = '0';
-            d1 = c2;
-
-            y0 = c4;
-            y1 = c5;
-            y2 = c6;
-            y3 = c7;
-        } else if (c1 == '-' && c5 == '-') {
-            // d-MMM-yy
-            d0 = '0';
-            d1 = c0;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = str.substring(off, off + 8);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            y0 = '2';
-            y1 = '0';
-            y2 = c6;
-            y3 = c7;
-        } else {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c4;
-            m1 = c5;
-
-            d0 = c6;
-            d1 = c7;
-        }
-
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            String input = str.substring(off, off + 8);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            String input = str.substring(off, off + 8);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            String input = str.substring(off, off + 8);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        if (year == 0 && month == 0 && dom == 0) {
+    public static LocalDate parseLocalDate(char[] str, int off, int len) {
+        if (str == null || len == 0) {
             return null;
         }
 
-        return LocalDate.of(year, month, dom);
+        if (off + len > str.length) {
+            String input = new String(str, off, len);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        switch (len) {
+            case 8:
+                return parseLocalDate8(str, off);
+            case 9:
+                return parseLocalDate9(str, off);
+            case 10:
+                return parseLocalDate10(str, off);
+            case 11:
+                return parseLocalDate11(str, off);
+            default:
+                if (len == 4 && str[off] == 'n' && str[off + 1] == 'u' && str[off + 2] == 'l' && str[off + 3] == 'l') {
+                    return null;
+                }
+                String input = new String(str, off, len);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+    }
+
+    public static long parseMillis(byte[] bytes, int off, int len) {
+        return parseMillis(bytes, off, len, StandardCharsets.UTF_8, DEFAULT_ZONE_ID);
     }
 
     public static long parseMillis(byte[] bytes, int off, int len, Charset charset) {
-        LocalDateTime ldt;
-        switch (len) {
-            case 8: {
-                LocalDate localDate = DateUtils.parseLocalDate8(bytes, off);
-                ldt = localDate.atStartOfDay();
-                break;
-            }
-            case 9: {
-                LocalDate localDate = DateUtils.parseLocalDate9(bytes, off);
-                ldt = localDate.atStartOfDay();
-                break;
-            }
-            case 10: {
-                LocalDate localDate = DateUtils.parseLocalDate10(bytes, off);
-                ldt = localDate.atStartOfDay();
-                break;
-            }
-            case 19: {
-                return DateUtils.parseMillis19(bytes, off, DateUtils.DEFAULT_ZONE_ID);
-            }
-            default:
-                ldt = null;
-                break;
+        return parseMillis(bytes, off, len, charset, DEFAULT_ZONE_ID);
+    }
+
+    public static long parseMillis(byte[] chars, int off, int len, Charset charset, ZoneId zoneId) {
+        if (chars == null || len == 0) {
+            return 0;
         }
 
-        if (ldt != null) {
-            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, DateUtils.DEFAULT_ZONE_ID, null);
+        if (len == 4
+                && chars[off] == 'n'
+                && chars[off + 1] == 'u'
+                && chars[off + 2] == 'l'
+                && chars[off + 3] == 'l'
+        ) {
+            return 0;
+        }
+
+        char c10;
+        long millis;
+        char c0 = (char) chars[off];
+        if (c0 == '"' && chars[len - 1] == '"') {
+            try (JSONReader jsonReader = JSONReader.of(chars, off, len, charset)) {
+                Date date = (Date) ObjectReaderImplDate.INSTANCE.readObject(
+                        jsonReader,
+                        null,
+                        null,
+                        0
+                );
+                millis = date.getTime();
+            }
+        } else if (len == 19) {
+            millis = DateUtils.parseMillis19(chars, off, zoneId);
+        } else if (len > 19
+                // ISO Date with offset example '2011-12-03+01:00'
+                || (len == 16 && ((c10 = (char) chars[off + 10]) == '+' || c10 == '-'))
+        ) {
+            ZonedDateTime zdt = parseZonedDateTime(chars, off, len, zoneId);
+            millis = zdt.toInstant().toEpochMilli();
+        } else if ((c0 == '-' || c0 >= '0' && c0 <= '9') && IOUtils.isNumber(chars, off, len)) {
+            millis = TypeUtils.parseLong(chars, off, len);
+            if (len == 8 && millis >= 19700101 && millis <= 21000101) {
+                int year = (int) millis / 10000;
+                int month = ((int) millis % 10000) / 100;
+                int dom = (int) millis % 100;
+
+                if (month >= 1 && month <= 12) {
+                    int max = 31;
+                    switch (month) {
+                        case 2:
+                            boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
+                            max = leapYear ? 29 : 28;
+                            break;
+                        case 4:
+                        case 6:
+                        case 9:
+                        case 11:
+                            max = 30;
+                            break;
+                    }
+                    if (dom <= max) {
+                        LocalDateTime ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+                        ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, zoneId, null);
+                        long seconds = zdt.toEpochSecond();
+                        millis = seconds * 1000L;
+                    }
+                }
+            }
+        } else {
+            char last = (char) chars[len - 1];
+            if (last == 'Z') {
+                zoneId = UTC;
+            }
+            LocalDateTime ldt = DateUtils.parseLocalDateTime(chars, off, len);
+            if (ldt == null
+                    // && "0000-00-00".equals(str)
+                    && chars[off] == '0'
+                    && chars[off + 1] == '0'
+                    && chars[off + 2] == '0'
+                    && chars[off + 3] == '0'
+                    && chars[off + 4] == '-'
+                    && chars[off + 5] == '0'
+                    && chars[off + 6] == '0'
+                    && chars[off + 7] == '-'
+                    && chars[off + 8] == '0'
+                    && chars[off + 9] == '0'
+            ) {
+                ldt = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
+            }
+            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, zoneId, null);
             long seconds = zdt.toEpochSecond();
             int nanos = ldt.getNano();
-            long millis;
             if (seconds < 0 && nanos > 0) {
                 millis = (seconds + 1) * 1000 + nanos / 1000_000 - 1000;
             } else {
                 millis = seconds * 1000L + nanos / 1000_000;
             }
-            return millis;
+        }
+        return millis;
+    }
+
+    public static long parseMillis(char[] bytes, int off, int len) {
+        return parseMillis(bytes, off, len, DEFAULT_ZONE_ID);
+    }
+
+    public static long parseMillis(char[] chars, int off, int len, ZoneId zoneId) {
+        if (chars == null || len == 0) {
+            return 0;
         }
 
-        String str = new String(bytes, off, len, charset);
-        return DateUtils.parseMillis(str);
+        if (len == 4
+                && chars[off] == 'n'
+                && chars[off + 1] == 'u'
+                && chars[off + 2] == 'l'
+                && chars[off + 3] == 'l'
+        ) {
+            return 0;
+        }
+
+        char c10;
+        long millis;
+        char c0 = chars[off];
+        if (c0 == '"' && chars[len - 1] == '"') {
+            try (JSONReader jsonReader = JSONReader.of(chars, off, len)) {
+                Date date = (Date) ObjectReaderImplDate.INSTANCE.readObject(
+                        jsonReader,
+                        null,
+                        null,
+                        0
+                );
+                millis = date.getTime();
+            }
+        } else if (len == 19) {
+            millis = DateUtils.parseMillis19(chars, off, zoneId);
+        } else if (len > 19
+                // ISO Date with offset example '2011-12-03+01:00'
+                || (len == 16 && ((c10 = chars[off + 10]) == '+' || c10 == '-'))
+        ) {
+            ZonedDateTime zdt = parseZonedDateTime(chars, off, len, zoneId);
+            millis = zdt.toInstant().toEpochMilli();
+        } else if ((c0 == '-' || c0 >= '0' && c0 <= '9') && IOUtils.isNumber(chars, off, len)) {
+            millis = TypeUtils.parseLong(chars, off, len);
+            if (len == 8 && millis >= 19700101 && millis <= 21000101) {
+                int year = (int) millis / 10000;
+                int month = ((int) millis % 10000) / 100;
+                int dom = (int) millis % 100;
+
+                if (month >= 1 && month <= 12) {
+                    int max = 31;
+                    switch (month) {
+                        case 2:
+                            boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
+                            max = leapYear ? 29 : 28;
+                            break;
+                        case 4:
+                        case 6:
+                        case 9:
+                        case 11:
+                            max = 30;
+                            break;
+                    }
+                    if (dom <= max) {
+                        LocalDateTime ldt = LocalDateTime.of(year, month, dom, 0, 0, 0);
+                        ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, zoneId, null);
+                        long seconds = zdt.toEpochSecond();
+                        millis = seconds * 1000L;
+                    }
+                }
+            }
+        } else {
+            char last = chars[len - 1];
+            if (last == 'Z') {
+                zoneId = UTC;
+            }
+            LocalDateTime ldt = DateUtils.parseLocalDateTime(chars, off, len);
+            if (ldt == null
+                    // && "0000-00-00".equals(str)
+                    && chars[off] == '0'
+                    && chars[off + 1] == '0'
+                    && chars[off + 2] == '0'
+                    && chars[off + 3] == '0'
+                    && chars[off + 4] == '-'
+                    && chars[off + 5] == '0'
+                    && chars[off + 6] == '0'
+                    && chars[off + 7] == '-'
+                    && chars[off + 8] == '0'
+                    && chars[off + 9] == '0'
+            ) {
+                ldt = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
+            }
+            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, zoneId, null);
+            long seconds = zdt.toEpochSecond();
+            int nanos = ldt.getNano();
+            if (seconds < 0 && nanos > 0) {
+                millis = (seconds + 1) * 1000 + nanos / 1000_000 - 1000;
+            } else {
+                millis = seconds * 1000L + nanos / 1000_000;
+            }
+        }
+        return millis;
     }
 
     /**
@@ -503,7 +632,7 @@ public class DateUtils {
      */
     public static LocalDate parseLocalDate8(byte[] str, int off) {
         if (off + 8 > str.length) {
-            throw new DateTimeParseException("illegal input", new String(str), 0);
+            return null;
         }
 
         char c0 = (char) str[off + 0];
@@ -548,8 +677,7 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                String input = new String(str, off, 8);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
+                return null;
             }
 
             y0 = '2';
@@ -577,8 +705,7 @@ public class DateUtils {
         ) {
             year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
         } else {
-            String input = new String(str, off, 8);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int month;
@@ -587,8 +714,7 @@ public class DateUtils {
         ) {
             month = (m0 - '0') * 10 + (m1 - '0');
         } else {
-            String input = new String(str, off, 8);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int dom;
@@ -597,8 +723,7 @@ public class DateUtils {
         ) {
             dom = (d0 - '0') * 10 + (d1 - '0');
         } else {
-            String input = new String(str, off, 8);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         if (year == 0 && month == 0 && dom == 0) {
@@ -609,115 +734,26 @@ public class DateUtils {
     }
 
     /**
-     * yyyy-MM-d
-     * yyyy-M-dd
-     * dd-MMM-yy
+     * yyyy-m-d
+     * yyyyMMdd
+     * d-MMM-yy
      */
-    public static LocalDate parseLocalDate9(String str, int off) {
-        if (off + 9 > str.length()) {
-            throw new DateTimeParseException("illegal input", str.substring(off), 0);
+    public static LocalDate parseLocalDate8(char[] str, int off) {
+        if (off + 8 > str.length) {
+            return null;
         }
 
-        char c0 = str.charAt(off + 0);
-        char c1 = str.charAt(off + 1);
-        char c2 = str.charAt(off + 2);
-        char c3 = str.charAt(off + 3);
-        char c4 = str.charAt(off + 4);
-        char c5 = str.charAt(off + 5);
-        char c6 = str.charAt(off + 6);
-        char c7 = str.charAt(off + 7);
-        char c8 = str.charAt(off + 8);
+        char c0 = str[off + 0];
+        char c1 = str[off + 1];
+        char c2 = str[off + 2];
+        char c3 = str[off + 3];
+        char c4 = str[off + 4];
+        char c5 = str[off + 5];
+        char c6 = str[off + 6];
+        char c7 = str[off + 7];
 
         char y0, y1, y2, y3, m0, m1, d0, d1;
-        if (c4 == '-' && c7 == '-') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = '0';
-            d1 = c8;
-        } else if (c4 == '-' && c6 == '-') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = c7;
-            d1 = c8;
-        } else if (c4 == '/' && c7 == '/') { // tw : yyyy/mm/d
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = '0';
-            d1 = c8;
-        } else if (c4 == '/' && c6 == '/') { // tw : yyyy/m/dd
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = c7;
-            d1 = c8;
-        } else if (c1 == '.' && c4 == '.') {
-            d0 = '0';
-            d1 = c0;
-
-            m0 = c2;
-            m1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
-        } else if (c2 == '.' && c4 == '.') {
-            d0 = c0;
-            d1 = c1;
-
-            m0 = '0';
-            m1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
-        } else if (c1 == '-' && c4 == '-') {
-            d0 = '0';
-            d1 = c0;
-
-            m0 = c2;
-            m1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
-        } else if (c2 == '-' && c4 == '-') {
-            d0 = c0;
-            d1 = c1;
-
-            m0 = '0';
-            m1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
-        } else if (c4 == '年' && c6 == '月' && c8 == '日') {
+        if (c4 == '-' && c6 == '-') {
             y0 = c0;
             y1 = c1;
             y2 = c2;
@@ -728,62 +764,45 @@ public class DateUtils {
 
             d0 = '0';
             d1 = c7;
-        } else if (c4 == '년' && c6 == '월' && c8 == '일') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
+        } else if (c1 == '/' && c3 == '/') {
             m0 = '0';
-            m1 = c5;
+            m1 = c0;
 
             d0 = '0';
-            d1 = c7;
-        } else if (c2 == '-' && c6 == '-') {
-            // dd-MMM-yy
-            d0 = c0;
-            d1 = c1;
+            d1 = c2;
 
-            int month = DateUtils.month(c3, c4, c5);
+            y0 = c4;
+            y1 = c5;
+            y2 = c6;
+            y3 = c7;
+        } else if (c1 == '-' && c5 == '-') {
+            // d-MMM-yy
+            d0 = '0';
+            d1 = c0;
+
+            int month = DateUtils.month(c2, c3, c4);
             if (month > 0) {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                String input = str.substring(off, off + 9);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
+                return null;
             }
 
             y0 = '2';
             y1 = '0';
-            y2 = c7;
-            y3 = c8;
-        } else if (c1 == '/' && c4 == '/') {
-            // M/dd/dddd
-            m0 = '0';
-            m1 = c0;
-
-            d0 = c2;
-            d1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
-        } else if (c2 == '/' && c4 == '/') {
-            // MM/d/dddd
-            m0 = c0;
-            m1 = c1;
-
-            d0 = '0';
-            d1 = c3;
-
-            y0 = c5;
-            y1 = c6;
-            y2 = c7;
-            y3 = c8;
+            y2 = c6;
+            y3 = c7;
         } else {
-            String input = str.substring(off, off + 9);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c4;
+            m1 = c5;
+
+            d0 = c6;
+            d1 = c7;
         }
 
         int year;
@@ -794,8 +813,7 @@ public class DateUtils {
         ) {
             year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
         } else {
-            String input = str.substring(off, off + 9);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int month;
@@ -804,8 +822,7 @@ public class DateUtils {
         ) {
             month = (m0 - '0') * 10 + (m1 - '0');
         } else {
-            String input = str.substring(off, off + 9);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int dom;
@@ -814,8 +831,7 @@ public class DateUtils {
         ) {
             dom = (d0 - '0') * 10 + (d1 - '0');
         } else {
-            String input = str.substring(off, off + 9);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         if (year == 0 && month == 0 && dom == 0) {
@@ -832,7 +848,7 @@ public class DateUtils {
      */
     public static LocalDate parseLocalDate9(byte[] str, int off) {
         if (off + 9 > str.length) {
-            throw new DateTimeParseException("illegal input", new String(str), 0);
+            return null;
         }
 
         char c0 = (char) str[off + 0];
@@ -934,6 +950,196 @@ public class DateUtils {
             y1 = c6;
             y2 = c7;
             y3 = c8;
+        } else if (c2 == '-' && c6 == '-') {
+            // dd-MMM-yy
+            d0 = c0;
+            d1 = c1;
+
+            int month = DateUtils.month(c3, c4, c5);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                return null;
+            }
+
+            y0 = '2';
+            y1 = '0';
+            y2 = c7;
+            y3 = c8;
+        } else if (c1 == '/' && c4 == '/') {
+            // M/dd/dddd
+            m0 = '0';
+            m1 = c0;
+
+            d0 = c2;
+            d1 = c3;
+
+            y0 = c5;
+            y1 = c6;
+            y2 = c7;
+            y3 = c8;
+        } else if (c2 == '/' && c4 == '/') {
+            // MM/d/dddd
+            m0 = c0;
+            m1 = c1;
+
+            d0 = '0';
+            d1 = c3;
+
+            y0 = c5;
+            y1 = c6;
+            y2 = c7;
+            y3 = c8;
+        } else {
+            return null;
+        }
+
+        int year;
+        if (y0 >= '0' && y0 <= '9'
+                && y1 >= '0' && y1 <= '9'
+                && y2 >= '0' && y2 <= '9'
+                && y3 >= '0' && y3 <= '9'
+        ) {
+            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+        } else {
+            return null;
+        }
+
+        int month;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+        ) {
+            month = (m0 - '0') * 10 + (m1 - '0');
+        } else {
+            return null;
+        }
+
+        int dom;
+        if (d0 >= '0' && d0 <= '9'
+                && d1 >= '0' && d1 <= '9'
+        ) {
+            dom = (d0 - '0') * 10 + (d1 - '0');
+        } else {
+            return null;
+        }
+
+        if (year == 0 && month == 0 && dom == 0) {
+            return null;
+        }
+
+        return LocalDate.of(year, month, dom);
+    }
+
+    /**
+     * yyyy-MM-d
+     * yyyy-M-dd
+     * dd-MMM-yy
+     */
+    public static LocalDate parseLocalDate9(char[] str, int off) {
+        if (off + 9 > str.length) {
+            return null;
+        }
+
+        char c0 = str[off + 0];
+        char c1 = str[off + 1];
+        char c2 = str[off + 2];
+        char c3 = str[off + 3];
+        char c4 = str[off + 4];
+        char c5 = str[off + 5];
+        char c6 = str[off + 6];
+        char c7 = str[off + 7];
+        char c8 = str[off + 8];
+
+        char y0, y1, y2, y3, m0, m1, d0, d1;
+        if (c4 == '-' && c7 == '-') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = '0';
+            d1 = c8;
+        } else if (c4 == '-' && c6 == '-') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = '0';
+            m1 = c5;
+
+            d0 = c7;
+            d1 = c8;
+        } else if (c4 == '/' && c7 == '/') { // tw : yyyy/mm/d
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = '0';
+            d1 = c8;
+        } else if (c4 == '/' && c6 == '/') { // tw : yyyy/m/dd
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = '0';
+            m1 = c5;
+
+            d0 = c7;
+            d1 = c8;
+        } else if (c1 == '.' && c4 == '.') {
+            d0 = '0';
+            d1 = c0;
+
+            m0 = c2;
+            m1 = c3;
+
+            y0 = c5;
+            y1 = c6;
+            y2 = c7;
+            y3 = c8;
+        } else if (c2 == '.' && c4 == '.') {
+            d0 = c0;
+            d1 = c1;
+
+            m0 = '0';
+            m1 = c3;
+
+            y0 = c5;
+            y1 = c6;
+            y2 = c7;
+            y3 = c8;
+        } else if (c1 == '-' && c4 == '-') {
+            d0 = '0';
+            d1 = c0;
+
+            m0 = c2;
+            m1 = c3;
+
+            y0 = c5;
+            y1 = c6;
+            y2 = c7;
+            y3 = c8;
+        } else if (c2 == '-' && c4 == '-') {
+            d0 = c0;
+            d1 = c1;
+
+            m0 = '0';
+            m1 = c3;
+
+            y0 = c5;
+            y1 = c6;
+            y2 = c7;
+            y3 = c8;
         } else if (c4 == '年' && c6 == '月' && c8 == '日') {
             y0 = c0;
             y1 = c1;
@@ -966,8 +1172,7 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                String input = new String(str, off, 9);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
+                return null;
             }
 
             y0 = '2';
@@ -999,205 +1204,9 @@ public class DateUtils {
             y2 = c7;
             y3 = c8;
         } else {
-            String input = new String(str, off, 9);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            String input = new String(str, off, 9);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            String input = new String(str, off, 9);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            String input = new String(str, off, 9);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        if (year == 0 && month == 0 && dom == 0) {
             return null;
         }
 
-        return LocalDate.of(year, month, dom);
-    }
-
-    /**
-     * yyyy-MM-dd
-     * yyyy/MM/dd
-     * MM/dd/yyyy
-     * dd.MM.yyyy
-     * yyyy年M月dd日
-     * yyyy年MM月d日
-     * yyyy MMM d
-     */
-    public static LocalDate parseLocalDate10(String str, int off) {
-        if (off + 10 > str.length()) {
-            throw new DateTimeParseException("illegal input", str.substring(off), 0);
-        }
-
-        char c0 = str.charAt(off + 0);
-        char c1 = str.charAt(off + 1);
-        char c2 = str.charAt(off + 2);
-        char c3 = str.charAt(off + 3);
-        char c4 = str.charAt(off + 4);
-        char c5 = str.charAt(off + 5);
-        char c6 = str.charAt(off + 6);
-        char c7 = str.charAt(off + 7);
-        char c8 = str.charAt(off + 8);
-        char c9 = str.charAt(off + 9);
-
-        char y0, y1, y2, y3, m0, m1, d0, d1;
-        if (c4 == '-' && c7 == '-') {
-            // yyyy-MM-dd
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-        } else if (c4 == '/' && c7 == '/') {
-            // tw : yyyy/mm/dd
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-        } else if (c2 == '.' && c5 == '.') {
-            // dd.MM.yyyy
-            d0 = c0;
-            d1 = c1;
-
-            m0 = c3;
-            m1 = c4;
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-        } else if (c2 == '-' && c5 == '-') {
-            // dd-MM-yyyy
-            d0 = c0;
-            d1 = c1;
-
-            m0 = c3;
-            m1 = c4;
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-        } else if (c2 == '/' && c5 == '/') {
-            // MM/dd/yyyy
-            m0 = c0;
-            m1 = c1;
-
-            d0 = c3;
-            d1 = c4;
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-        } else if (c4 == '年' && c6 == '月' && c9 == '日') {
-            // yyyy年M月dd日
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = c7;
-            d1 = c8;
-        } else if (c4 == '년' && c6 == '월' && c9 == '일') {
-            // yyyy년M월dd일
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = '0';
-            m1 = c5;
-
-            d0 = c7;
-            d1 = c8;
-        } else if (c4 == '年' && c7 == '月' && c9 == '日') {
-            // // yyyy年MM月d日
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = '0';
-            d1 = c8;
-        } else if (c4 == '년' && c7 == '월' && c9 == '일') {
-            // yyyy년MM월d일
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = '0';
-            d1 = c8;
-        } else if (c1 == ' ' && c5 == ' ') {
-            // yyyy MMM d
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-
-            int month = DateUtils.month(c2, c3, c4);
-            if (month > 0) {
-                m0 = (char) ('0' + month / 10);
-                m1 = (char) ('0' + (month % 10));
-            } else {
-                String input = str.substring(off, off + 16);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
-            }
-
-            d0 = '0';
-            d1 = c0;
-        } else {
-            throw new DateTimeParseException("illegal input", str.substring(off, off + 10), 0);
-        }
-
         int year;
         if (y0 >= '0' && y0 <= '9'
                 && y1 >= '0' && y1 <= '9'
@@ -1206,7 +1215,7 @@ public class DateUtils {
         ) {
             year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
         } else {
-            throw new DateTimeParseException("illegal input", str.substring(off, off + 10), 0);
+            return null;
         }
 
         int month;
@@ -1215,7 +1224,7 @@ public class DateUtils {
         ) {
             month = (m0 - '0') * 10 + (m1 - '0');
         } else {
-            throw new DateTimeParseException("illegal input", str.substring(off, off + 10), 0);
+            return null;
         }
 
         int dom;
@@ -1224,7 +1233,7 @@ public class DateUtils {
         ) {
             dom = (d0 - '0') * 10 + (d1 - '0');
         } else {
-            throw new DateTimeParseException("illegal input", str.substring(off, off + 10), 0);
+            return null;
         }
 
         if (year == 0 && month == 0 && dom == 0) {
@@ -1245,7 +1254,7 @@ public class DateUtils {
      */
     public static LocalDate parseLocalDate10(byte[] str, int off) {
         if (off + 10 > str.length) {
-            throw new DateTimeParseException("illegal input", new String(str), 0);
+            return null;
         }
 
         char c0 = (char) str[off + 0];
@@ -1320,6 +1329,149 @@ public class DateUtils {
             y1 = c7;
             y2 = c8;
             y3 = c9;
+        } else if (c1 == ' ' && c5 == ' ') {
+            // yyyy MMM d
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
+
+            int month = DateUtils.month(c2, c3, c4);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                return null;
+            }
+
+            d0 = '0';
+            d1 = c0;
+        } else {
+            return null;
+        }
+
+        int year;
+        if (y0 >= '0' && y0 <= '9'
+                && y1 >= '0' && y1 <= '9'
+                && y2 >= '0' && y2 <= '9'
+                && y3 >= '0' && y3 <= '9'
+        ) {
+            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+        } else {
+            return null;
+        }
+
+        int month;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+        ) {
+            month = (m0 - '0') * 10 + (m1 - '0');
+        } else {
+            return null;
+        }
+
+        int dom;
+        if (d0 >= '0' && d0 <= '9'
+                && d1 >= '0' && d1 <= '9'
+        ) {
+            dom = (d0 - '0') * 10 + (d1 - '0');
+        } else {
+            return null;
+        }
+
+        if (year == 0 && month == 0 && dom == 0) {
+            return null;
+        }
+
+        return LocalDate.of(year, month, dom);
+    }
+
+    /**
+     * yyyy-MM-dd
+     * yyyy/MM/dd
+     * MM/dd/yyyy
+     * dd.MM.yyyy
+     * yyyy年M月dd日
+     * yyyy年MM月d日
+     * yyyy MMM d
+     */
+    public static LocalDate parseLocalDate10(char[] str, int off) {
+        if (off + 10 > str.length) {
+            return null;
+        }
+
+        char c0 = str[off + 0];
+        char c1 = str[off + 1];
+        char c2 = str[off + 2];
+        char c3 = str[off + 3];
+        char c4 = str[off + 4];
+        char c5 = str[off + 5];
+        char c6 = str[off + 6];
+        char c7 = str[off + 7];
+        char c8 = str[off + 8];
+        char c9 = str[off + 9];
+
+        char y0, y1, y2, y3, m0, m1, d0, d1;
+        if (c4 == '-' && c7 == '-') {
+            // yyyy-MM-dd
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+        } else if (c4 == '/' && c7 == '/') {
+            // tw : yyyy/mm/dd
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+        } else if (c2 == '.' && c5 == '.') {
+            // dd.MM.yyyy
+            d0 = c0;
+            d1 = c1;
+
+            m0 = c3;
+            m1 = c4;
+
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
+        } else if (c2 == '-' && c5 == '-') {
+            // dd-MM-yyyy
+            d0 = c0;
+            d1 = c1;
+
+            m0 = c3;
+            m1 = c4;
+
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
+        } else if (c2 == '/' && c5 == '/') {
+            // MM/dd/yyyy
+            m0 = c0;
+            m1 = c1;
+
+            d0 = c3;
+            d1 = c4;
+
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
         } else if (c4 == '年' && c6 == '月' && c9 == '日') {
             // yyyy年M月dd日
             y0 = c0;
@@ -1380,14 +1532,13 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                String input = new String(str, off, 10);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
+                return null;
             }
 
             d0 = '0';
             d1 = c0;
         } else {
-            throw new DateTimeParseException("illegal input", new String(str, off, 10), 0);
+            return null;
         }
 
         int year;
@@ -1398,7 +1549,7 @@ public class DateUtils {
         ) {
             year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
         } else {
-            throw new DateTimeParseException("illegal input", new String(str, off, 10), 0);
+            return null;
         }
 
         int month;
@@ -1407,7 +1558,7 @@ public class DateUtils {
         ) {
             month = (m0 - '0') * 10 + (m1 - '0');
         } else {
-            throw new DateTimeParseException("illegal input", new String(str, off, 10), 0);
+            return null;
         }
 
         int dom;
@@ -1416,7 +1567,7 @@ public class DateUtils {
         ) {
             dom = (d0 - '0') * 10 + (d1 - '0');
         } else {
-            throw new DateTimeParseException("illegal input", new String(str, off, 10), 0);
+            return null;
         }
 
         if (year == 0 && month == 0 && dom == 0) {
@@ -1430,25 +1581,36 @@ public class DateUtils {
      * yyyy年MM月dd日
      * yyyy년MM월dd일
      */
-    public static LocalDate parseLocalDate11(String str, int off) {
-        if (off + 11 > str.length()) {
-            throw new DateTimeParseException("illegal input", str.substring(off), 0);
+    public static LocalDate parseLocalDate11(char[] str, int off) {
+        if (off + 11 > str.length) {
+            return null;
         }
 
-        char c0 = str.charAt(off + 0);
-        char c1 = str.charAt(off + 1);
-        char c2 = str.charAt(off + 2);
-        char c3 = str.charAt(off + 3);
-        char c4 = str.charAt(off + 4);
-        char c5 = str.charAt(off + 5);
-        char c6 = str.charAt(off + 6);
-        char c7 = str.charAt(off + 7);
-        char c8 = str.charAt(off + 8);
-        char c9 = str.charAt(off + 9);
-        char c10 = str.charAt(off + 10);
+        char c0 = str[off + 0];
+        char c1 = str[off + 1];
+        char c2 = str[off + 2];
+        char c3 = str[off + 3];
+        char c4 = str[off + 4];
+        char c5 = str[off + 5];
+        char c6 = str[off + 6];
+        char c7 = str[off + 7];
+        char c8 = str[off + 8];
+        char c9 = str[off + 9];
+        char c10 = str[off + 10];
 
         char y0, y1, y2, y3, m0, m1, d0, d1;
         if (c4 == '年' && c7 == '月' && c10 == '日') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+        } else if (c4 == '-' && c7 == '-' && c10 == 'Z') {
             y0 = c0;
             y1 = c1;
             y2 = c2;
@@ -1481,15 +1643,13 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                String input = str.substring(off, off + 11);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
+                return null;
             }
 
             d0 = c0;
             d1 = c1;
         } else {
-            String input = str.substring(off, off + 11);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int year;
@@ -1500,8 +1660,7 @@ public class DateUtils {
         ) {
             year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
         } else {
-            String input = str.substring(off, off + 11);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int month;
@@ -1510,8 +1669,7 @@ public class DateUtils {
         ) {
             month = (m0 - '0') * 10 + (m1 - '0');
         } else {
-            String input = str.substring(off, off + 11);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int dom;
@@ -1520,8 +1678,7 @@ public class DateUtils {
         ) {
             dom = (d0 - '0') * 10 + (d1 - '0');
         } else {
-            String input = str.substring(off, off + 11);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         if (year == 0 && month == 0 && dom == 0) {
@@ -1532,28 +1689,56 @@ public class DateUtils {
     }
 
     /**
-     * yyyyMMddHHmm
      *
-     * @return
      */
-    public static LocalDateTime parseLocalDateTime12(String str, int off) {
-        if (off + 12 > str.length()) {
-            String input = str.substring(off);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+    public static LocalDate parseLocalDate11(byte[] str, int off) {
+        if (off + 11 > str.length) {
+            return null;
         }
 
-        char y0 = str.charAt(off + 0);
-        char y1 = str.charAt(off + 1);
-        char y2 = str.charAt(off + 2);
-        char y3 = str.charAt(off + 3);
-        char m0 = str.charAt(off + 4);
-        char m1 = str.charAt(off + 5);
-        char d0 = str.charAt(off + 6);
-        char d1 = str.charAt(off + 7);
-        char h0 = str.charAt(off + 8);
-        char h1 = str.charAt(off + 9);
-        char i0 = str.charAt(off + 10);
-        char i1 = str.charAt(off + 11);
+        char c0 = (char) str[off + 0];
+        char c1 = (char) str[off + 1];
+        char c2 = (char) str[off + 2];
+        char c3 = (char) str[off + 3];
+        char c4 = (char) str[off + 4];
+        char c5 = (char) str[off + 5];
+        char c6 = (char) str[off + 6];
+        char c7 = (char) str[off + 7];
+        char c8 = (char) str[off + 8];
+        char c9 = (char) str[off + 9];
+        char c10 = (char) str[off + 10];
+
+        char y0, y1, y2, y3, m0, m1, d0, d1;
+        if (c4 == '-' && c7 == '-' && c10 == 'Z') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+        } else if (c2 == ' ' && c6 == ' ') {
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            int month = DateUtils.month(c3, c4, c5);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                return null;
+            }
+
+            d0 = c0;
+            d1 = c1;
+        } else {
+            return null;
+        }
 
         int year;
         if (y0 >= '0' && y0 <= '9'
@@ -1563,7 +1748,62 @@ public class DateUtils {
         ) {
             year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
         } else {
-            String input = str.substring(off, off + 12);
+            return null;
+        }
+
+        int month;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+        ) {
+            month = (m0 - '0') * 10 + (m1 - '0');
+        } else {
+            return null;
+        }
+
+        int dom;
+        if (d0 >= '0' && d0 <= '9'
+                && d1 >= '0' && d1 <= '9'
+        ) {
+            dom = (d0 - '0') * 10 + (d1 - '0');
+        } else {
+            return null;
+        }
+
+        if (year == 0 && month == 0 && dom == 0) {
+            return null;
+        }
+
+        return LocalDate.of(year, month, dom);
+    }
+
+    public static LocalDateTime parseLocalDateTime12(char[] str, int off) {
+        if (off + 12 > str.length) {
+            String input = new String(str, off, str.length - off);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        char y0 = str[off + 0];
+        char y1 = str[off + 1];
+        char y2 = str[off + 2];
+        char y3 = str[off + 3];
+        char m0 = str[off + 4];
+        char m1 = str[off + 5];
+        char d0 = str[off + 6];
+        char d1 = str[off + 7];
+        char h0 = str[off + 8];
+        char h1 = str[off + 9];
+        char i0 = str[off + 10];
+        char i1 = str[off + 11];
+
+        int year;
+        if (y0 >= '0' && y0 <= '9'
+                && y1 >= '0' && y1 <= '9'
+                && y2 >= '0' && y2 <= '9'
+                && y3 >= '0' && y3 <= '9'
+        ) {
+            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+        } else {
+            String input = new String(str, off, off + 12);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -1573,7 +1813,7 @@ public class DateUtils {
         ) {
             month = (m0 - '0') * 10 + (m1 - '0');
         } else {
-            String input = str.substring(off, off + 12);
+            String input = new String(str, off, off + 12);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -1583,7 +1823,7 @@ public class DateUtils {
         ) {
             dom = (d0 - '0') * 10 + (d1 - '0');
         } else {
-            String input = str.substring(off, off + 12);
+            String input = new String(str, off, off + 12);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -1593,7 +1833,7 @@ public class DateUtils {
         ) {
             hour = (h0 - '0') * 10 + (h1 - '0');
         } else {
-            String input = str.substring(off, off + 12);
+            String input = new String(str, off, off + 12);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -1603,7 +1843,85 @@ public class DateUtils {
         ) {
             minute = (i0 - '0') * 10 + (i1 - '0');
         } else {
-            String input = str.substring(off, off + 12);
+            String input = new String(str, off, off + 12);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        if (year == 0 && month == 0 && dom == 0 && hour == 0 && minute == 0) {
+            return null;
+        }
+
+        return LocalDateTime.of(year, month, dom, hour, minute, 0);
+    }
+
+    public static LocalDateTime parseLocalDateTime12(byte[] str, int off) {
+        if (off + 12 > str.length) {
+            String input = new String(str, off, str.length - off);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        char y0 = (char) str[off + 0];
+        char y1 = (char) str[off + 1];
+        char y2 = (char) str[off + 2];
+        char y3 = (char) str[off + 3];
+        char m0 = (char) str[off + 4];
+        char m1 = (char) str[off + 5];
+        char d0 = (char) str[off + 6];
+        char d1 = (char) str[off + 7];
+        char h0 = (char) str[off + 8];
+        char h1 = (char) str[off + 9];
+        char i0 = (char) str[off + 10];
+        char i1 = (char) str[off + 11];
+
+        int year;
+        if (y0 >= '0' && y0 <= '9'
+                && y1 >= '0' && y1 <= '9'
+                && y2 >= '0' && y2 <= '9'
+                && y3 >= '0' && y3 <= '9'
+        ) {
+            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+        } else {
+            String input = new String(str, off, off + 12);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int month;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+        ) {
+            month = (m0 - '0') * 10 + (m1 - '0');
+        } else {
+            String input = new String(str, off, off + 12);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int dom;
+        if (d0 >= '0' && d0 <= '9'
+                && d1 >= '0' && d1 <= '9'
+        ) {
+            dom = (d0 - '0') * 10 + (d1 - '0');
+        } else {
+            String input = new String(str, off, off + 12);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            String input = new String(str, off, off + 12);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            String input = new String(str, off, off + 12);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -1617,26 +1935,26 @@ public class DateUtils {
     /**
      * yyyyMMddHHmmss
      */
-    public static LocalDateTime parseLocalDateTime14(String str, int off) {
-        if (off + 14 > str.length()) {
-            String input = str.substring(off);
+    public static LocalDateTime parseLocalDateTime14(char[] str, int off) {
+        if (off + 14 > str.length) {
+            String input = new String(str, off, str.length - off);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        char y0 = str.charAt(off + 0);
-        char y1 = str.charAt(off + 1);
-        char y2 = str.charAt(off + 2);
-        char y3 = str.charAt(off + 3);
-        char m0 = str.charAt(off + 4);
-        char m1 = str.charAt(off + 5);
-        char d0 = str.charAt(off + 6);
-        char d1 = str.charAt(off + 7);
-        char h0 = str.charAt(off + 8);
-        char h1 = str.charAt(off + 9);
-        char i0 = str.charAt(off + 10);
-        char i1 = str.charAt(off + 11);
-        char s0 = str.charAt(off + 12);
-        char s1 = str.charAt(off + 13);
+        char y0 = str[off + 0];
+        char y1 = str[off + 1];
+        char y2 = str[off + 2];
+        char y3 = str[off + 3];
+        char m0 = str[off + 4];
+        char m1 = str[off + 5];
+        char d0 = str[off + 6];
+        char d1 = str[off + 7];
+        char h0 = str[off + 8];
+        char h1 = str[off + 9];
+        char i0 = str[off + 10];
+        char i1 = str[off + 11];
+        char s0 = str[off + 12];
+        char s1 = str[off + 13];
 
         int year;
         if (y0 >= '0' && y0 <= '9'
@@ -1646,7 +1964,7 @@ public class DateUtils {
         ) {
             year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
         } else {
-            String input = str.substring(off, off + 14);
+            String input = new String(str, off, 14);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -1656,7 +1974,7 @@ public class DateUtils {
         ) {
             month = (m0 - '0') * 10 + (m1 - '0');
         } else {
-            String input = str.substring(off, off + 14);
+            String input = new String(str, off, 14);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -1666,7 +1984,7 @@ public class DateUtils {
         ) {
             dom = (d0 - '0') * 10 + (d1 - '0');
         } else {
-            String input = str.substring(off, off + 14);
+            String input = new String(str, off, 14);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -1676,7 +1994,7 @@ public class DateUtils {
         ) {
             hour = (h0 - '0') * 10 + (h1 - '0');
         } else {
-            String input = str.substring(off, off + 14);
+            String input = new String(str, off, 14);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -1686,7 +2004,7 @@ public class DateUtils {
         ) {
             minute = (i0 - '0') * 10 + (i1 - '0');
         } else {
-            String input = str.substring(off, off + 14);
+            String input = new String(str, off, 14);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -1696,7 +2014,96 @@ public class DateUtils {
         ) {
             second = (s0 - '0') * 10 + (s1 - '0');
         } else {
-            String input = str.substring(off, off + 14);
+            String input = new String(str, off, 14);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        return LocalDateTime.of(year, month, dom, hour, minute, second);
+    }
+
+    /**
+     * yyyyMMddHHmmss
+     */
+    public static LocalDateTime parseLocalDateTime14(byte[] str, int off) {
+        if (off + 14 > str.length) {
+            String input = new String(str, off, str.length - off);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        char y0 = (char) str[off + 0];
+        char y1 = (char) str[off + 1];
+        char y2 = (char) str[off + 2];
+        char y3 = (char) str[off + 3];
+        char m0 = (char) str[off + 4];
+        char m1 = (char) str[off + 5];
+        char d0 = (char) str[off + 6];
+        char d1 = (char) str[off + 7];
+        char h0 = (char) str[off + 8];
+        char h1 = (char) str[off + 9];
+        char i0 = (char) str[off + 10];
+        char i1 = (char) str[off + 11];
+        char s0 = (char) str[off + 12];
+        char s1 = (char) str[off + 13];
+
+        int year;
+        if (y0 >= '0' && y0 <= '9'
+                && y1 >= '0' && y1 <= '9'
+                && y2 >= '0' && y2 <= '9'
+                && y3 >= '0' && y3 <= '9'
+        ) {
+            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+        } else {
+            String input = new String(str, off, 14);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int month;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+        ) {
+            month = (m0 - '0') * 10 + (m1 - '0');
+        } else {
+            String input = new String(str, off, 14);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int dom;
+        if (d0 >= '0' && d0 <= '9'
+                && d1 >= '0' && d1 <= '9'
+        ) {
+            dom = (d0 - '0') * 10 + (d1 - '0');
+        } else {
+            String input = new String(str, off, 14);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            String input = new String(str, off, 14);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            String input = new String(str, off, 14);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int second;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            second = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            String input = new String(str, off, 14);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -1710,28 +2117,27 @@ public class DateUtils {
      * yyyy-MM-ddTH:m:s
      * yyyy-MM-dd H:m:s
      */
-    public static LocalDateTime parseLocalDateTime16(String str, int off) {
-        if (off + 16 > str.length()) {
-            String input = str.substring(off);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+    public static LocalDateTime parseLocalDateTime16(char[] str, int off) {
+        if (off + 16 > str.length) {
+            return null;
         }
 
-        char c0 = str.charAt(off + 0);
-        char c1 = str.charAt(off + 1);
-        char c2 = str.charAt(off + 2);
-        char c3 = str.charAt(off + 3);
-        char c4 = str.charAt(off + 4);
-        char c5 = str.charAt(off + 5);
-        char c6 = str.charAt(off + 6);
-        char c7 = str.charAt(off + 7);
-        char c8 = str.charAt(off + 8);
-        char c9 = str.charAt(off + 9);
-        char c10 = str.charAt(off + 10);
-        char c11 = str.charAt(off + 11);
-        char c12 = str.charAt(off + 12);
-        char c13 = str.charAt(off + 13);
-        char c14 = str.charAt(off + 14);
-        char c15 = str.charAt(off + 15);
+        char c0 = str[off + 0];
+        char c1 = str[off + 1];
+        char c2 = str[off + 2];
+        char c3 = str[off + 3];
+        char c4 = str[off + 4];
+        char c5 = str[off + 5];
+        char c6 = str[off + 6];
+        char c7 = str[off + 7];
+        char c8 = str[off + 8];
+        char c9 = str[off + 9];
+        char c10 = str[off + 10];
+        char c11 = str[off + 11];
+        char c12 = str[off + 12];
+        char c13 = str[off + 13];
+        char c14 = str[off + 14];
+        char c15 = str[off + 15];
 
         char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0 = '0', s1 = '0';
         if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':') {
@@ -1797,8 +2203,7 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                String input = str.substring(off, off + 16);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
+                return null;
             }
 
             d0 = '0';
@@ -1823,7 +2228,7 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                throw new DateTimeParseException("illegal input " + str, str, 0);
+                return null;
             }
 
             y0 = c6;
@@ -1840,8 +2245,7 @@ public class DateUtils {
             s0 = '0';
             s1 = c15;
         } else {
-            String input = str.substring(off, off + 16);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int year;
@@ -1852,8 +2256,7 @@ public class DateUtils {
         ) {
             year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
         } else {
-            String input = str.substring(off, off + 16);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int month;
@@ -1862,8 +2265,7 @@ public class DateUtils {
         ) {
             month = (m0 - '0') * 10 + (m1 - '0');
         } else {
-            String input = str.substring(off, off + 16);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int dom;
@@ -1872,8 +2274,7 @@ public class DateUtils {
         ) {
             dom = (d0 - '0') * 10 + (d1 - '0');
         } else {
-            String input = str.substring(off, off + 16);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int hour;
@@ -1882,8 +2283,7 @@ public class DateUtils {
         ) {
             hour = (h0 - '0') * 10 + (h1 - '0');
         } else {
-            String input = str.substring(off, off + 16);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int minute;
@@ -1892,8 +2292,7 @@ public class DateUtils {
         ) {
             minute = (i0 - '0') * 10 + (i1 - '0');
         } else {
-            String input = str.substring(off, off + 16);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int second;
@@ -1902,8 +2301,244 @@ public class DateUtils {
         ) {
             second = (s0 - '0') * 10 + (s1 - '0');
         } else {
-            String input = str.substring(off, off + 16);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
+        }
+
+        return LocalDateTime.of(year, month, dom, hour, minute, second);
+    }
+
+    /**
+     * yyyy-MM-ddTHH:mm
+     * yyyy-MM-dd HH:mm
+     * yyyyMMddTHHmmssZ
+     * yyyy-MM-ddTH:m:s
+     * yyyy-MM-dd H:m:s
+     */
+    public static LocalDateTime parseLocalDateTime16(byte[] str, int off) {
+        if (off + 16 > str.length) {
+            return null;
+        }
+
+        byte c0 = str[off + 0];
+        byte c1 = str[off + 1];
+        byte c2 = str[off + 2];
+        byte c3 = str[off + 3];
+        byte c4 = str[off + 4];
+        byte c5 = str[off + 5];
+        byte c6 = str[off + 6];
+        byte c7 = str[off + 7];
+        byte c8 = str[off + 8];
+        byte c9 = str[off + 9];
+        byte c10 = str[off + 10];
+        byte c11 = str[off + 11];
+        byte c12 = str[off + 12];
+        byte c13 = str[off + 13];
+        byte c14 = str[off + 14];
+        byte c15 = str[off + 15];
+
+        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0 = '0', s1 = '0';
+        if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':') {
+            y0 = (char) c0;
+            y1 = (char) c1;
+            y2 = (char) c2;
+            y3 = (char) c3;
+
+            m0 = (char) c5;
+            m1 = (char) c6;
+
+            d0 = (char) c8;
+            d1 = (char) c9;
+
+            h0 = (char) c11;
+            h1 = (char) c12;
+
+            i0 = (char) c14;
+            i1 = (char) c15;
+        } else if (c8 == 'T' && c15 == 'Z') {
+            y0 = (char) c0;
+            y1 = (char) c1;
+            y2 = (char) c2;
+            y3 = (char) c3;
+            m0 = (char) c4;
+            m1 = (char) c5;
+            d0 = (char) c6;
+            d1 = (char) c7;
+            h0 = (char) c9;
+            h1 = (char) c10;
+            i0 = (char) c11;
+            i1 = (char) c12;
+            s0 = (char) c13;
+            s1 = (char) c14;
+        } else if (c4 == -27 && c5 == -71 && c6 == -76 // 年
+                && c8 == -26 && c9 == -100 && c10 == -120 // 月
+                && c13 == -26 && c14 == -105 && c15 == -91 // 日
+        ) {
+            y0 = (char) c0;
+            y1 = (char) c1;
+            y2 = (char) c2;
+            y3 = (char) c3;
+
+            m0 = '0';
+            m1 = (char) c7;
+
+            d0 = (char) c11;
+            d1 = (char) c12;
+
+            h0 = '0';
+            h1 = '0';
+
+            i0 = '0';
+            i1 = '0';
+        } else if (c4 == -27 && c5 == -71 && c6 == -76 // 年
+                && c9 == -26 && c10 == -100 && c11 == -120 // 月
+                && c13 == -26 && c14 == -105 && c15 == -91 // 日
+        ) {
+            y0 = (char) c0;
+            y1 = (char) c1;
+            y2 = (char) c2;
+            y3 = (char) c3;
+
+            m0 = (char) c7;
+            m1 = (char) c8;
+
+            d0 = '0';
+            d1 = (char) c12;
+
+            h0 = '0';
+            h1 = '0';
+
+            i0 = '0';
+            i1 = '0';
+        } else if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c12 == ':' && c14 == ':') {
+            y0 = (char) c0;
+            y1 = (char) c1;
+            y2 = (char) c2;
+            y3 = (char) c3;
+
+            m0 = (char) c5;
+            m1 = (char) c6;
+
+            d0 = (char) c8;
+            d1 = (char) c9;
+
+            h0 = '0';
+            h1 = (char) c11;
+
+            i0 = '0';
+            i1 = (char) c13;
+
+            s0 = '0';
+            s1 = (char) c15;
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':') {
+            y0 = (char) c6;
+            y1 = (char) c7;
+            y2 = (char) c8;
+            y3 = (char) c9;
+
+            int month = DateUtils.month((char) c2, (char) c3, (char) c4);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                return null;
+            }
+
+            d0 = '0';
+            d1 = (char) c0;
+
+            h0 = (char) c11;
+            h1 = (char) c12;
+
+            i0 = (char) c14;
+            i1 = (char) c15;
+
+            s0 = '0';
+            s1 = '0';
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c14 == ':') {
+            // d MMM yyyy H:m:ss
+            // 6 DEC 2020 2:3:14
+            d0 = '0';
+            d1 = (char) c0;
+
+            int month = DateUtils.month((char) c2, (char) c3, (char) c4);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                return null;
+            }
+
+            y0 = (char) c6;
+            y1 = (char) c7;
+            y2 = (char) c8;
+            y3 = (char) c9;
+
+            h0 = '0';
+            h1 = (char) c11;
+
+            i0 = '0';
+            i1 = (char) c13;
+
+            s0 = '0';
+            s1 = (char) c15;
+        } else {
+            return null;
+        }
+
+        int year;
+        if (y0 >= '0' && y0 <= '9'
+                && y1 >= '0' && y1 <= '9'
+                && y2 >= '0' && y2 <= '9'
+                && y3 >= '0' && y3 <= '9'
+        ) {
+            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+        } else {
+            return null;
+        }
+
+        int month;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+        ) {
+            month = (m0 - '0') * 10 + (m1 - '0');
+        } else {
+            return null;
+        }
+
+        int dom;
+        if (d0 >= '0' && d0 <= '9'
+                && d1 >= '0' && d1 <= '9'
+        ) {
+            dom = (d0 - '0') * 10 + (d1 - '0');
+        } else {
+            return null;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            return null;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            return null;
+        }
+
+        int second;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            second = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            return null;
         }
 
         return LocalDateTime.of(year, month, dom, hour, minute, second);
@@ -1915,31 +2550,32 @@ public class DateUtils {
      * yyyy-M-dTHH:mm:ss
      * yyyy-M-d HH:mm:ss
      */
-    public static LocalDateTime parseLocalDateTime17(String str, int off) {
-        if (off + 17 > str.length()) {
-            String input = str.substring(off);
+    public static LocalDateTime parseLocalDateTime17(char[] str, int off) {
+        if (off + 17 > str.length) {
+            String input = new String(str, off, str.length - off);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        char c0 = str.charAt(off + 0);
-        char c1 = str.charAt(off + 1);
-        char c2 = str.charAt(off + 2);
-        char c3 = str.charAt(off + 3);
-        char c4 = str.charAt(off + 4);
-        char c5 = str.charAt(off + 5);
-        char c6 = str.charAt(off + 6);
-        char c7 = str.charAt(off + 7);
-        char c8 = str.charAt(off + 8);
-        char c9 = str.charAt(off + 9);
-        char c10 = str.charAt(off + 10);
-        char c11 = str.charAt(off + 11);
-        char c12 = str.charAt(off + 12);
-        char c13 = str.charAt(off + 13);
-        char c14 = str.charAt(off + 14);
-        char c15 = str.charAt(off + 15);
-        char c16 = str.charAt(off + 16);
+        char c0 = str[off + 0];
+        char c1 = str[off + 1];
+        char c2 = str[off + 2];
+        char c3 = str[off + 3];
+        char c4 = str[off + 4];
+        char c5 = str[off + 5];
+        char c6 = str[off + 6];
+        char c7 = str[off + 7];
+        char c8 = str[off + 8];
+        char c9 = str[off + 9];
+        char c10 = str[off + 10];
+        char c11 = str[off + 11];
+        char c12 = str[off + 12];
+        char c13 = str[off + 13];
+        char c14 = str[off + 14];
+        char c15 = str[off + 15];
+        char c16 = str[off + 16];
 
         char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
+        int nanoOfSecond = 0;
         if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':' && c16 == 'Z') {
             y0 = c0;
             y1 = c1;
@@ -1991,8 +2627,7 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                String input = str.substring(off, off + 17);
-                throw new DateTimeParseException("illegal input " + input, input, 0);
+                return null;
             }
 
             d0 = c0;
@@ -2017,7 +2652,7 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                throw new DateTimeParseException("illegal input " + str, str, 0);
+                return null;
             }
 
             y0 = c6;
@@ -2044,7 +2679,7 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                throw new DateTimeParseException("illegal input " + str, str, 0);
+                return null;
             }
 
             y0 = c6;
@@ -2071,7 +2706,7 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                throw new DateTimeParseException("illegal input " + str, str, 0);
+                return null;
             }
 
             y0 = c6;
@@ -2098,7 +2733,7 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                throw new DateTimeParseException("illegal input " + str, str, 0);
+                return null;
             }
 
             y0 = c7;
@@ -2115,8 +2750,34 @@ public class DateUtils {
             s0 = '0';
             s1 = c16;
         } else {
-            String input = str.substring(off, off + 17);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c4;
+            m1 = c5;
+
+            d0 = c6;
+            d1 = c7;
+
+            h0 = c8;
+            h1 = c9;
+
+            i0 = c10;
+            i1 = c11;
+
+            s0 = c12;
+            s1 = c13;
+
+            if (c14 >= '0' && c14 <= '9'
+                    && c15 >= '0' && c15 <= '9'
+                    && c16 >= '0' && c16 <= '9'
+            ) {
+                nanoOfSecond = ((c14 - '0') * 100 + (c15 - '0') * 10 + (c16 - '0')) * 1_000_000;
+            } else {
+                return null;
+            }
         }
 
         int year;
@@ -2127,7 +2788,330 @@ public class DateUtils {
         ) {
             year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
         } else {
-            String input = str.substring(off, off + 17);
+            return null;
+        }
+
+        int month;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+        ) {
+            month = (m0 - '0') * 10 + (m1 - '0');
+        } else {
+            return null;
+        }
+
+        int dom;
+        if (d0 >= '0' && d0 <= '9'
+                && d1 >= '0' && d1 <= '9'
+        ) {
+            dom = (d0 - '0') * 10 + (d1 - '0');
+        } else {
+            return null;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            return null;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            return null;
+        }
+
+        int second;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            second = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            return null;
+        }
+
+        return LocalDateTime.of(year, month, dom, hour, minute, second, nanoOfSecond);
+    }
+
+    /**
+     * yyyy-MM-ddTHH:mmZ
+     * yyyy-MM-dd HH:mmZ
+     * yyyy-M-dTHH:mm:ss
+     * yyyy-M-d HH:mm:ss
+     */
+    public static LocalDateTime parseLocalDateTime17(byte[] str, int off) {
+        if (off + 17 > str.length) {
+            String input = new String(str, off, str.length - off);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        byte c0 = str[off + 0];
+        byte c1 = str[off + 1];
+        byte c2 = str[off + 2];
+        byte c3 = str[off + 3];
+        byte c4 = str[off + 4];
+        byte c5 = str[off + 5];
+        byte c6 = str[off + 6];
+        byte c7 = str[off + 7];
+        byte c8 = str[off + 8];
+        byte c9 = str[off + 9];
+        byte c10 = str[off + 10];
+        byte c11 = str[off + 11];
+        byte c12 = str[off + 12];
+        byte c13 = str[off + 13];
+        byte c14 = str[off + 14];
+        byte c15 = str[off + 15];
+        byte c16 = str[off + 16];
+
+        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
+        int nanoOfSecond = 0;
+        if (c4 == '-' && c7 == '-' && (c10 == 'T' || c10 == ' ') && c13 == ':' && c16 == 'Z') {
+            y0 = (char) c0;
+            y1 = (char) c1;
+            y2 = (char) c2;
+            y3 = (char) c3;
+
+            m0 = (char) c5;
+            m1 = (char) c6;
+
+            d0 = (char) c8;
+            d1 = (char) c9;
+
+            h0 = (char) c11;
+            h1 = (char) c12;
+
+            i0 = (char) c14;
+            i1 = (char) c15;
+
+            s0 = '0';
+            s1 = '0';
+        } else if (c4 == '-' && c6 == '-' && (c8 == ' ' || c8 == 'T') && c11 == ':' && c14 == ':') {
+            y0 = (char) c0;
+            y1 = (char) c1;
+            y2 = (char) c2;
+            y3 = (char) c3;
+
+            m0 = '0';
+            m1 = (char) c5;
+
+            d0 = '0';
+            d1 = (char) c7;
+
+            h0 = (char) c9;
+            h1 = (char) c10;
+
+            i0 = (char) c12;
+            i1 = (char) c13;
+
+            s0 = (char) c15;
+            s1 = (char) c16;
+        } else if (c4 == -27 && c5 == -71 && c6 == -76 // 年
+                && c9 == -26 && c10 == -100 && c11 == -120 // 月
+                && c14 == -26 && c15 == -105 && c16 == -91 // 日
+        ) {
+            y0 = (char) c0;
+            y1 = (char) c1;
+            y2 = (char) c2;
+            y3 = (char) c3;
+
+            m0 = (char) c7;
+            m1 = (char) c8;
+
+            d0 = (char) c12;
+            d1 = (char) c13;
+
+            h0 = '0';
+            h1 = '0';
+
+            i0 = '0';
+            i1 = '0';
+
+            s0 = '0';
+            s1 = '0';
+        } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c14 == ':') {
+            y0 = (char) c7;
+            y1 = (char) c8;
+            y2 = (char) c9;
+            y3 = (char) c10;
+
+            int month = DateUtils.month((char) c3, (char) c4, (char) c5);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String input = new String(str, off, 17);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
+
+            d0 = (char) c0;
+            d1 = (char) c1;
+
+            h0 = (char) c12;
+            h1 = (char) c13;
+
+            i0 = (char) c15;
+            i1 = (char) c16;
+
+            s0 = '0';
+            s1 = '0';
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c14 == ':') {
+            // d MMM yyyy H:m:ss
+            // 6 DEC 2020 1:3:14
+            d0 = '0';
+            d1 = (char) c0;
+
+            int month = DateUtils.month((char) c2, (char) c3, (char) c4);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String input = new String(str, off, 17);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
+
+            y0 = (char) c6;
+            y1 = (char) c7;
+            y2 = (char) c8;
+            y3 = (char) c9;
+
+            h0 = '0';
+            h1 = (char) c11;
+
+            i0 = '0';
+            i1 = (char) c13;
+
+            s0 = (char) c15;
+            s1 = (char) c16;
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c15 == ':') {
+            // d MMM yyyy H:mm:s
+            // 6 DEC 2020 1:13:4
+            d0 = '0';
+            d1 = (char) c0;
+
+            int month = DateUtils.month((char) c2, (char) c3, (char) c4);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String input = new String(str, off, 17);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
+
+            y0 = (char) c6;
+            y1 = (char) c7;
+            y2 = (char) c8;
+            y3 = (char) c9;
+
+            h0 = '0';
+            h1 = (char) c11;
+
+            i0 = (char) c13;
+            i1 = (char) c14;
+
+            s0 = '0';
+            s1 = (char) c16;
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c15 == ':') {
+            // d MMM yyyy HH:m:s
+            // 6 DEC 2020 11:3:4
+            d0 = '0';
+            d1 = (char) c0;
+
+            int month = DateUtils.month((char) c2, (char) c3, (char) c4);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String input = new String(str, off, 17);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
+
+            y0 = (char) c6;
+            y1 = (char) c7;
+            y2 = (char) c8;
+            y3 = (char) c9;
+
+            h0 = (char) c11;
+            h1 = (char) c12;
+
+            i0 = '0';
+            i1 = (char) c14;
+
+            s0 = '0';
+            s1 = (char) c16;
+        } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c15 == ':') {
+            // dd MMM yyyy H:m:s
+            // 16 DEC 2020 1:3:4
+            d0 = (char) c0;
+            d1 = (char) c1;
+
+            int month = DateUtils.month((char) c3, (char) c4, (char) c5);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String input = new String(str, off, 17);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
+
+            y0 = (char) c7;
+            y1 = (char) c8;
+            y2 = (char) c9;
+            y3 = (char) c10;
+
+            h0 = '0';
+            h1 = (char) c12;
+
+            i0 = '0';
+            i1 = (char) c14;
+
+            s0 = '0';
+            s1 = (char) c16;
+        } else {
+            y0 = (char) c0;
+            y1 = (char) c1;
+            y2 = (char) c2;
+            y3 = (char) c3;
+
+            m0 = (char) c4;
+            m1 = (char) c5;
+
+            d0 = (char) c6;
+            d1 = (char) c7;
+
+            h0 = (char) c8;
+            h1 = (char) c9;
+
+            i0 = (char) c10;
+            i1 = (char) c11;
+
+            s0 = (char) c12;
+            s1 = (char) c13;
+
+            if (c14 >= '0' && c14 <= '9'
+                    && c15 >= '0' && c15 <= '9'
+                    && c16 >= '0' && c16 <= '9'
+            ) {
+                nanoOfSecond = ((c14 - '0') * 100 + (c15 - '0') * 10 + (c16 - '0')) * 1_000_000;
+            } else {
+                return null;
+            }
+        }
+
+        int year;
+        if (y0 >= '0' && y0 <= '9'
+                && y1 >= '0' && y1 <= '9'
+                && y2 >= '0' && y2 <= '9'
+                && y3 >= '0' && y3 <= '9'
+        ) {
+            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+        } else {
+            String input = new String(str, off, 17);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -2137,7 +3121,7 @@ public class DateUtils {
         ) {
             month = (m0 - '0') * 10 + (m1 - '0');
         } else {
-            String input = str.substring(off, off + 17);
+            String input = new String(str, off, 17);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -2147,7 +3131,7 @@ public class DateUtils {
         ) {
             dom = (d0 - '0') * 10 + (d1 - '0');
         } else {
-            String input = str.substring(off, off + 17);
+            String input = new String(str, off, 17);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -2157,7 +3141,7 @@ public class DateUtils {
         ) {
             hour = (h0 - '0') * 10 + (h1 - '0');
         } else {
-            String input = str.substring(off, off + 17);
+            String input = new String(str, off, 17);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -2167,7 +3151,7 @@ public class DateUtils {
         ) {
             minute = (i0 - '0') * 10 + (i1 - '0');
         } else {
-            String input = str.substring(off, off + 17);
+            String input = new String(str, off, 17);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -2177,11 +3161,11 @@ public class DateUtils {
         ) {
             second = (s0 - '0') * 10 + (s1 - '0');
         } else {
-            String input = str.substring(off, off + 17);
+            String input = new String(str, off, 17);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        return LocalDateTime.of(year, month, dom, hour, minute, second);
+        return LocalDateTime.of(year, month, dom, hour, minute, second, nanoOfSecond);
     }
 
     /**
@@ -2196,30 +3180,30 @@ public class DateUtils {
      * yyyy-MM-ddTHH:mm:s
      * yyyy-MM-dd HH:mm:s
      */
-    public static LocalDateTime parseLocalDateTime18(String str, int off) {
-        if (off + 18 > str.length()) {
-            String input = str.substring(off);
+    public static LocalDateTime parseLocalDateTime18(char[] str, int off) {
+        if (off + 18 > str.length) {
+            String input = new String(str, off, str.length - off);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        char c0 = str.charAt(off + 0);
-        char c1 = str.charAt(off + 1);
-        char c2 = str.charAt(off + 2);
-        char c3 = str.charAt(off + 3);
-        char c4 = str.charAt(off + 4);
-        char c5 = str.charAt(off + 5);
-        char c6 = str.charAt(off + 6);
-        char c7 = str.charAt(off + 7);
-        char c8 = str.charAt(off + 8);
-        char c9 = str.charAt(off + 9);
-        char c10 = str.charAt(off + 10);
-        char c11 = str.charAt(off + 11);
-        char c12 = str.charAt(off + 12);
-        char c13 = str.charAt(off + 13);
-        char c14 = str.charAt(off + 14);
-        char c15 = str.charAt(off + 15);
-        char c16 = str.charAt(off + 16);
-        char c17 = str.charAt(off + 17);
+        char c0 = str[off + 0];
+        char c1 = str[off + 1];
+        char c2 = str[off + 2];
+        char c3 = str[off + 3];
+        char c4 = str[off + 4];
+        char c5 = str[off + 5];
+        char c6 = str[off + 6];
+        char c7 = str[off + 7];
+        char c8 = str[off + 8];
+        char c9 = str[off + 9];
+        char c10 = str[off + 10];
+        char c11 = str[off + 11];
+        char c12 = str[off + 12];
+        char c13 = str[off + 13];
+        char c14 = str[off + 14];
+        char c15 = str[off + 15];
+        char c16 = str[off + 16];
+        char c17 = str[off + 17];
 
         char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
         if (c4 == '-' && c6 == '-' && (c9 == ' ' || c9 == 'T') && c12 == ':' && c15 == ':') {
@@ -2333,7 +3317,8 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                throw new DateTimeParseException("illegal input " + str, str, 0);
+                String input = new String(str, off, 18);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
             }
 
             y0 = c6;
@@ -2360,7 +3345,8 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                throw new DateTimeParseException("illegal input " + str, str, 0);
+                String input = new String(str, off, 18);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
             }
 
             y0 = c6;
@@ -2387,7 +3373,8 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                throw new DateTimeParseException("illegal input " + str, str, 0);
+                String input = new String(str, off, 18);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
             }
 
             y0 = c6;
@@ -2414,7 +3401,8 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                throw new DateTimeParseException("illegal input " + str, str, 0);
+                String input = new String(str, off, 18);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
             }
 
             y0 = c7;
@@ -2441,7 +3429,8 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                throw new DateTimeParseException("illegal input " + str, str, 0);
+                String input = new String(str, off, 18);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
             }
 
             y0 = c7;
@@ -2468,7 +3457,8 @@ public class DateUtils {
                 m0 = (char) ('0' + month / 10);
                 m1 = (char) ('0' + (month % 10));
             } else {
-                throw new DateTimeParseException("illegal input " + str, str, 0);
+                String input = new String(str, off, 18);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
             }
 
             y0 = c7;
@@ -2485,7 +3475,7 @@ public class DateUtils {
             s0 = c16;
             s1 = c17;
         } else {
-            String input = str.substring(off, off + 18);
+            String input = new String(str, off, 18);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -2497,7 +3487,7 @@ public class DateUtils {
         ) {
             year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
         } else {
-            String input = str.substring(off, off + 18);
+            String input = new String(str, off, 18);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -2507,7 +3497,7 @@ public class DateUtils {
         ) {
             month = (m0 - '0') * 10 + (m1 - '0');
         } else {
-            String input = str.substring(off, off + 18);
+            String input = new String(str, off, 18);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -2517,7 +3507,7 @@ public class DateUtils {
         ) {
             dom = (d0 - '0') * 10 + (d1 - '0');
         } else {
-            String input = str.substring(off, off + 18);
+            String input = new String(str, off, 18);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -2527,7 +3517,7 @@ public class DateUtils {
         ) {
             hour = (h0 - '0') * 10 + (h1 - '0');
         } else {
-            String input = str.substring(off, off + 18);
+            String input = new String(str, off, 18);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -2537,7 +3527,7 @@ public class DateUtils {
         ) {
             minute = (i0 - '0') * 10 + (i1 - '0');
         } else {
-            String input = str.substring(off, off + 18);
+            String input = new String(str, off, 18);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -2547,7 +3537,383 @@ public class DateUtils {
         ) {
             second = (s0 - '0') * 10 + (s1 - '0');
         } else {
-            String input = str.substring(off, off + 18);
+            String input = new String(str, off, 18);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        return LocalDateTime.of(year, month, dom, hour, minute, second);
+    }
+
+    /**
+     * yyyy-M-ddTHH:mm:ss
+     * yyyy-M-dd HH:mm:ss
+     * yyyy-MM-dTHH:mm:ss
+     * yyyy-MM-d HH:mm:ss
+     * yyyy-MM-ddTH:mm:ss
+     * yyyy-MM-dd H:mm:ss
+     * yyyy-MM-ddTHH:m:ss
+     * yyyy-MM-dd HH:m:ss
+     * yyyy-MM-ddTHH:mm:s
+     * yyyy-MM-dd HH:mm:s
+     */
+    public static LocalDateTime parseLocalDateTime18(byte[] str, int off) {
+        if (off + 18 > str.length) {
+            String input = new String(str, off, str.length - off);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        char c0 = (char) str[off + 0];
+        char c1 = (char) str[off + 1];
+        char c2 = (char) str[off + 2];
+        char c3 = (char) str[off + 3];
+        char c4 = (char) str[off + 4];
+        char c5 = (char) str[off + 5];
+        char c6 = (char) str[off + 6];
+        char c7 = (char) str[off + 7];
+        char c8 = (char) str[off + 8];
+        char c9 = (char) str[off + 9];
+        char c10 = (char) str[off + 10];
+        char c11 = (char) str[off + 11];
+        char c12 = (char) str[off + 12];
+        char c13 = (char) str[off + 13];
+        char c14 = (char) str[off + 14];
+        char c15 = (char) str[off + 15];
+        char c16 = (char) str[off + 16];
+        char c17 = (char) str[off + 17];
+
+        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
+        if (c4 == '-' && c6 == '-' && (c9 == ' ' || c9 == 'T') && c12 == ':' && c15 == ':') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = '0';
+            m1 = c5;
+
+            d0 = c7;
+            d1 = c8;
+
+            h0 = c10;
+            h1 = c11;
+
+            i0 = c13;
+            i1 = c14;
+
+            s0 = c16;
+            s1 = c17;
+        } else if (c4 == '-' && c7 == '-' && (c9 == ' ' || c9 == 'T') && c12 == ':' && c15 == ':') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = '0';
+            d1 = c8;
+
+            h0 = c10;
+            h1 = c11;
+
+            i0 = c13;
+            i1 = c14;
+
+            s0 = c16;
+            s1 = c17;
+        } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c12 == ':' && c15 == ':') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = '0';
+            h1 = c11;
+
+            i0 = c13;
+            i1 = c14;
+
+            s0 = c16;
+            s1 = c17;
+        } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c15 == ':') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = '0';
+            i1 = c14;
+
+            s0 = c16;
+            s1 = c17;
+        } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = '0';
+            s1 = c17;
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c15 == ':') {
+            // d MMM yyyy H:mm:ss
+            // 6 DEC 2020 2:13:14
+            d0 = '0';
+            d1 = c0;
+
+            int month = DateUtils.month(c2, c3, c4);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String input = new String(str, off, 18);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
+
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
+
+            h0 = '0';
+            h1 = c11;
+
+            i0 = c13;
+            i1 = c14;
+
+            s0 = c16;
+            s1 = c17;
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c15 == ':') {
+            // d MMM yyyy HH:m:ss
+            // 6 DEC 2020 12:3:14
+            d0 = '0';
+            d1 = c0;
+
+            int month = DateUtils.month(c2, c3, c4);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String input = new String(str, off, 18);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
+
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = '0';
+            i1 = c14;
+
+            s0 = c16;
+            s1 = c17;
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c16 == ':') {
+            // d MMM yyyy HH:m:ss
+            // 6 DEC 2020 12:3:14
+            d0 = '0';
+            d1 = c0;
+
+            int month = DateUtils.month(c2, c3, c4);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String input = new String(str, off, 18);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
+
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = '0';
+            s1 = c17;
+        } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c14 == ':' && c16 == ':') {
+            // dd MMM yyyy HH:m:s
+            // 16 DEC 2020 12:3:4
+            d0 = c0;
+            d1 = c1;
+
+            int month = DateUtils.month(c3, c4, c5);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String input = new String(str, off, 18);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
+
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            h0 = c12;
+            h1 = c13;
+
+            i0 = '0';
+            i1 = c15;
+
+            s0 = '0';
+            s1 = c17;
+        } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c16 == ':') {
+            // dd MMM yyyy H:mm:s
+            // 16 DEC 2020 1:13:4
+            d0 = c0;
+            d1 = c1;
+
+            int month = DateUtils.month(c3, c4, c5);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String input = new String(str, off, 18);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
+
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            h0 = '0';
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = '0';
+            s1 = c17;
+        } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c15 == ':') {
+            // dd MMM yyyy H:mm:s
+            // 16 DEC 2020 1:13:4
+            d0 = c0;
+            d1 = c1;
+
+            int month = DateUtils.month(c3, c4, c5);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String input = new String(str, off, 18);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
+
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            h0 = '0';
+            h1 = c12;
+
+            i0 = '0';
+            i1 = c14;
+
+            s0 = c16;
+            s1 = c17;
+        } else {
+            String input = new String(str, off, 18);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int year;
+        if (y0 >= '0' && y0 <= '9'
+                && y1 >= '0' && y1 <= '9'
+                && y2 >= '0' && y2 <= '9'
+                && y3 >= '0' && y3 <= '9'
+        ) {
+            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+        } else {
+            String input = new String(str, off, 18);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int month;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+        ) {
+            month = (m0 - '0') * 10 + (m1 - '0');
+        } else {
+            String input = new String(str, off, 18);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int dom;
+        if (d0 >= '0' && d0 <= '9'
+                && d1 >= '0' && d1 <= '9'
+        ) {
+            dom = (d0 - '0') * 10 + (d1 - '0');
+        } else {
+            String input = new String(str, off, 18);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            String input = new String(str, off, 18);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            String input = new String(str, off, 18);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int second;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            second = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            String input = new String(str, off, 18);
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
@@ -2560,31 +3926,30 @@ public class DateUtils {
      * yyyy/MM/ddTHH:mm:ss
      * yyyy/MM/dd HH:mm:ss
      */
-    public static LocalDateTime parseLocalDateTime19(String str, int off) {
-        if (off + 19 > str.length()) {
-            String input = str.substring(off);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+    public static LocalDateTime parseLocalDateTime19(char[] str, int off) {
+        if (off + 19 > str.length) {
+            return null;
         }
 
-        char c0 = str.charAt(off + 0);
-        char c1 = str.charAt(off + 1);
-        char c2 = str.charAt(off + 2);
-        char c3 = str.charAt(off + 3);
-        char c4 = str.charAt(off + 4);
-        char c5 = str.charAt(off + 5);
-        char c6 = str.charAt(off + 6);
-        char c7 = str.charAt(off + 7);
-        char c8 = str.charAt(off + 8);
-        char c9 = str.charAt(off + 9);
-        char c10 = str.charAt(off + 10);
-        char c11 = str.charAt(off + 11);
-        char c12 = str.charAt(off + 12);
-        char c13 = str.charAt(off + 13);
-        char c14 = str.charAt(off + 14);
-        char c15 = str.charAt(off + 15);
-        char c16 = str.charAt(off + 16);
-        char c17 = str.charAt(off + 17);
-        char c18 = str.charAt(off + 18);
+        char c0 = str[off + 0];
+        char c1 = str[off + 1];
+        char c2 = str[off + 2];
+        char c3 = str[off + 3];
+        char c4 = str[off + 4];
+        char c5 = str[off + 5];
+        char c6 = str[off + 6];
+        char c7 = str[off + 7];
+        char c8 = str[off + 8];
+        char c9 = str[off + 9];
+        char c10 = str[off + 10];
+        char c11 = str[off + 11];
+        char c12 = str[off + 12];
+        char c13 = str[off + 13];
+        char c14 = str[off + 14];
+        char c15 = str[off + 15];
+        char c16 = str[off + 16];
+        char c17 = str[off + 17];
+        char c18 = str[off + 18];
 
         char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
         if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
@@ -2674,49 +4039,165 @@ public class DateUtils {
             s0 = c17;
             s1 = c18;
         } else {
-            String input = str.substring(off, off + 19);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
-        LocalDateTime ldt = localDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1);
-        if (ldt == null) {
-            String input = str.substring(off, off + 19);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        return ldt;
+        return localDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1);
     }
 
-    public static LocalDateTime parseLocalDateTime20(String str, int off) {
-        if (off + 19 > str.length()) {
-            String input = str.substring(off);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+    /**
+     * yyyy-MM-ddTHH:mm:ss
+     * yyyy-MM-dd HH:mm:ss
+     * yyyy/MM/ddTHH:mm:ss
+     * yyyy/MM/dd HH:mm:ss
+     */
+    public static LocalDateTime parseLocalDateTime19(byte[] str, int off) {
+        if (off + 19 > str.length) {
+            return null;
         }
 
-        char c0 = str.charAt(off + 0);
-        char c1 = str.charAt(off + 1);
-        char c2 = str.charAt(off + 2);
-        char c3 = str.charAt(off + 3);
-        char c4 = str.charAt(off + 4);
-        char c5 = str.charAt(off + 5);
-        char c6 = str.charAt(off + 6);
-        char c7 = str.charAt(off + 7);
-        char c8 = str.charAt(off + 8);
-        char c9 = str.charAt(off + 9);
-        char c10 = str.charAt(off + 10);
-        char c11 = str.charAt(off + 11);
-        char c12 = str.charAt(off + 12);
-        char c13 = str.charAt(off + 13);
-        char c14 = str.charAt(off + 14);
-        char c15 = str.charAt(off + 15);
-        char c16 = str.charAt(off + 16);
-        char c17 = str.charAt(off + 17);
-        char c18 = str.charAt(off + 18);
-        char c19 = str.charAt(off + 19);
+        char c0 = (char) str[off + 0];
+        char c1 = (char) str[off + 1];
+        char c2 = (char) str[off + 2];
+        char c3 = (char) str[off + 3];
+        char c4 = (char) str[off + 4];
+        char c5 = (char) str[off + 5];
+        char c6 = (char) str[off + 6];
+        char c7 = (char) str[off + 7];
+        char c8 = (char) str[off + 8];
+        char c9 = (char) str[off + 9];
+        char c10 = (char) str[off + 10];
+        char c11 = (char) str[off + 11];
+        char c12 = (char) str[off + 12];
+        char c13 = (char) str[off + 13];
+        char c14 = (char) str[off + 14];
+        char c15 = (char) str[off + 15];
+        char c16 = (char) str[off + 16];
+        char c17 = (char) str[off + 17];
+        char c18 = (char) str[off + 18];
+
+        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
+        if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+        } else if (c4 == '/' && c7 == '/' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+        } else if (c2 == '/' && c5 == '/' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
+            d0 = c0;
+            d1 = c1;
+
+            m0 = c3;
+            m1 = c4;
+
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c16 == ':') {
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
+
+            int month = DateUtils.month(c2, c3, c4);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = '0';
+            d1 = c0;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+        } else {
+            return null;
+        }
+
+        return localDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1);
+    }
+
+    public static LocalDateTime parseLocalDateTime20(char[] str, int off) {
+        if (off + 19 > str.length) {
+            return null;
+        }
+
+        char c0 = str[off + 0];
+        char c1 = str[off + 1];
+        char c2 = str[off + 2];
+        char c3 = str[off + 3];
+        char c4 = str[off + 4];
+        char c5 = str[off + 5];
+        char c6 = str[off + 6];
+        char c7 = str[off + 7];
+        char c8 = str[off + 8];
+        char c9 = str[off + 9];
+        char c10 = str[off + 10];
+        char c11 = str[off + 11];
+        char c12 = str[off + 12];
+        char c13 = str[off + 13];
+        char c14 = str[off + 14];
+        char c15 = str[off + 15];
+        char c16 = str[off + 16];
+        char c17 = str[off + 17];
+        char c18 = str[off + 18];
+        char c19 = str[off + 19];
 
         if (c2 != ' ' || c6 != ' ' || c11 != ' ' || c14 != ':' || c17 != ':') {
-            String input = str.substring(off);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         char y0 = c7;
@@ -2747,7 +4228,7 @@ public class DateUtils {
         char s0 = c18;
         char s1 = c19;
 
-        LocalDateTime ldt = localDateTime(
+        return localDateTime(
                 y0, y1, y2, y3,
                 m0, m1,
                 d0, d1,
@@ -2755,108 +4236,169 @@ public class DateUtils {
                 i0, i1,
                 s0, s1
         );
-        if (ldt == null) {
-            String input = str.substring(off, off + 20);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
-        }
-
-        return ldt;
     }
 
-    static LocalDateTime parseLocalDateTimeX(String str, int offset, int len) {
+    public static LocalDateTime parseLocalDateTime20(byte[] str, int off) {
+        if (off + 19 > str.length) {
+            return null;
+        }
+
+        char c0 = (char) str[off + 0];
+        char c1 = (char) str[off + 1];
+        char c2 = (char) str[off + 2];
+        char c3 = (char) str[off + 3];
+        char c4 = (char) str[off + 4];
+        char c5 = (char) str[off + 5];
+        char c6 = (char) str[off + 6];
+        char c7 = (char) str[off + 7];
+        char c8 = (char) str[off + 8];
+        char c9 = (char) str[off + 9];
+        char c10 = (char) str[off + 10];
+        char c11 = (char) str[off + 11];
+        char c12 = (char) str[off + 12];
+        char c13 = (char) str[off + 13];
+        char c14 = (char) str[off + 14];
+        char c15 = (char) str[off + 15];
+        char c16 = (char) str[off + 16];
+        char c17 = (char) str[off + 17];
+        char c18 = (char) str[off + 18];
+        char c19 = (char) str[off + 19];
+
+        if (c2 != ' ' || c6 != ' ' || c11 != ' ' || c14 != ':' || c17 != ':') {
+            return null;
+        }
+
+        char y0 = c7;
+        char y1 = c8;
+        char y2 = c9;
+        char y3 = c10;
+
+        char m0, m1;
+
+        int month = DateUtils.month(c3, c4, c5);
+        if (month > 0) {
+            m0 = (char) ('0' + month / 10);
+            m1 = (char) ('0' + (month % 10));
+        } else {
+            m0 = '0';
+            m1 = '0';
+        }
+
+        char d0 = c0;
+        char d1 = c1;
+
+        char h0 = c12;
+        char h1 = c13;
+
+        char i0 = c15;
+        char i1 = c16;
+
+        char s0 = c18;
+        char s1 = c19;
+
+        return localDateTime(
+                y0, y1, y2, y3,
+                m0, m1,
+                d0, d1,
+                h0, h1,
+                i0, i1,
+                s0, s1
+        );
+    }
+
+    public static LocalDateTime parseLocalDateTimeX(char[] str, int offset, int len) {
         if (str == null || len == 0) {
             return null;
         }
 
         if (len < 21 || len > 29) {
-            String input = str.substring(offset, len);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
-        char c0 = str.charAt(offset + 0);
-        char c1 = str.charAt(offset + 1);
-        char c2 = str.charAt(offset + 2);
-        char c3 = str.charAt(offset + 3);
-        char c4 = str.charAt(offset + 4);
-        char c5 = str.charAt(offset + 5);
-        char c6 = str.charAt(offset + 6);
-        char c7 = str.charAt(offset + 7);
-        char c8 = str.charAt(offset + 8);
-        char c9 = str.charAt(offset + 9);
-        char c10 = str.charAt(offset + 10);
-        char c11 = str.charAt(offset + 11);
-        char c12 = str.charAt(offset + 12);
-        char c13 = str.charAt(offset + 13);
-        char c14 = str.charAt(offset + 14);
-        char c15 = str.charAt(offset + 15);
-        char c16 = str.charAt(offset + 16);
-        char c17 = str.charAt(offset + 17);
-        char c18 = str.charAt(offset + 18);
-        char c19 = str.charAt(offset + 19);
+        char c0 = str[offset + 0];
+        char c1 = str[offset + 1];
+        char c2 = str[offset + 2];
+        char c3 = str[offset + 3];
+        char c4 = str[offset + 4];
+        char c5 = str[offset + 5];
+        char c6 = str[offset + 6];
+        char c7 = str[offset + 7];
+        char c8 = str[offset + 8];
+        char c9 = str[offset + 9];
+        char c10 = str[offset + 10];
+        char c11 = str[offset + 11];
+        char c12 = str[offset + 12];
+        char c13 = str[offset + 13];
+        char c14 = str[offset + 14];
+        char c15 = str[offset + 15];
+        char c16 = str[offset + 16];
+        char c17 = str[offset + 17];
+        char c18 = str[offset + 18];
+        char c19 = str[offset + 19];
         char c20, c21 = '0', c22 = '0', c23 = '0', c24 = '0', c25 = '0', c26 = '0', c27 = '0', c28 = '0';
         switch (len) {
             case 21:
-                c20 = str.charAt(offset + 20);
+                c20 = str[offset + 20];
                 break;
             case 22:
-                c20 = str.charAt(offset + 20);
-                c21 = str.charAt(offset + 21);
+                c20 = str[offset + 20];
+                c21 = str[offset + 21];
                 break;
             case 23:
-                c20 = str.charAt(offset + 20);
-                c21 = str.charAt(offset + 21);
-                c22 = str.charAt(offset + 22);
+                c20 = str[offset + 20];
+                c21 = str[offset + 21];
+                c22 = str[offset + 22];
                 break;
             case 24:
-                c20 = str.charAt(offset + 20);
-                c21 = str.charAt(offset + 21);
-                c22 = str.charAt(offset + 22);
-                c23 = str.charAt(offset + 23);
+                c20 = str[offset + 20];
+                c21 = str[offset + 21];
+                c22 = str[offset + 22];
+                c23 = str[offset + 23];
                 break;
             case 25:
-                c20 = str.charAt(offset + 20);
-                c21 = str.charAt(offset + 21);
-                c22 = str.charAt(offset + 22);
-                c23 = str.charAt(offset + 23);
-                c24 = str.charAt(offset + 24);
+                c20 = str[offset + 20];
+                c21 = str[offset + 21];
+                c22 = str[offset + 22];
+                c23 = str[offset + 23];
+                c24 = str[offset + 24];
                 break;
             case 26:
-                c20 = str.charAt(offset + 20);
-                c21 = str.charAt(offset + 21);
-                c22 = str.charAt(offset + 22);
-                c23 = str.charAt(offset + 23);
-                c24 = str.charAt(offset + 24);
-                c25 = str.charAt(offset + 25);
+                c20 = str[offset + 20];
+                c21 = str[offset + 21];
+                c22 = str[offset + 22];
+                c23 = str[offset + 23];
+                c24 = str[offset + 24];
+                c25 = str[offset + 25];
                 break;
             case 27:
-                c20 = str.charAt(offset + 20);
-                c21 = str.charAt(offset + 21);
-                c22 = str.charAt(offset + 22);
-                c23 = str.charAt(offset + 23);
-                c24 = str.charAt(offset + 24);
-                c25 = str.charAt(offset + 25);
-                c26 = str.charAt(offset + 26);
+                c20 = str[offset + 20];
+                c21 = str[offset + 21];
+                c22 = str[offset + 22];
+                c23 = str[offset + 23];
+                c24 = str[offset + 24];
+                c25 = str[offset + 25];
+                c26 = str[offset + 26];
                 break;
             case 28:
-                c20 = str.charAt(offset + 20);
-                c21 = str.charAt(offset + 21);
-                c22 = str.charAt(offset + 22);
-                c23 = str.charAt(offset + 23);
-                c24 = str.charAt(offset + 24);
-                c25 = str.charAt(offset + 25);
-                c26 = str.charAt(offset + 26);
-                c27 = str.charAt(offset + 27);
+                c20 = str[offset + 20];
+                c21 = str[offset + 21];
+                c22 = str[offset + 22];
+                c23 = str[offset + 23];
+                c24 = str[offset + 24];
+                c25 = str[offset + 25];
+                c26 = str[offset + 26];
+                c27 = str[offset + 27];
                 break;
             default:
-                c20 = str.charAt(offset + 20);
-                c21 = str.charAt(offset + 21);
-                c22 = str.charAt(offset + 22);
-                c23 = str.charAt(offset + 23);
-                c24 = str.charAt(offset + 24);
-                c25 = str.charAt(offset + 25);
-                c26 = str.charAt(offset + 26);
-                c27 = str.charAt(offset + 27);
-                c28 = str.charAt(offset + 28);
+                c20 = str[offset + 20];
+                c21 = str[offset + 21];
+                c22 = str[offset + 22];
+                c23 = str[offset + 23];
+                c24 = str[offset + 24];
+                c25 = str[offset + 25];
+                c26 = str[offset + 26];
+                c27 = str[offset + 27];
+                c28 = str[offset + 28];
                 break;
         }
 
@@ -2892,42 +4434,171 @@ public class DateUtils {
             S7 = c27;
             S8 = c28;
         } else {
-            String input = str.substring(offset, len);
-            throw new DateTimeParseException("illegal input " + input, input, offset);
+            return null;
         }
 
-        LocalDateTime ldt = localDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2, S3, S4, S5, S6, S7, S8);
-        if (ldt == null) {
-            String input = str.substring(offset, len);
-            throw new DateTimeParseException("illegal input " + input, input, offset);
+        return localDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2, S3, S4, S5, S6, S7, S8);
+    }
+
+    public static LocalDateTime parseLocalDateTimeX(byte[] str, int offset, int len) {
+        if (str == null || len == 0) {
+            return null;
         }
-        return ldt;
+
+        if (len < 21 || len > 29) {
+            return null;
+        }
+
+        char c0 = (char) str[offset + 0];
+        char c1 = (char) str[offset + 1];
+        char c2 = (char) str[offset + 2];
+        char c3 = (char) str[offset + 3];
+        char c4 = (char) str[offset + 4];
+        char c5 = (char) str[offset + 5];
+        char c6 = (char) str[offset + 6];
+        char c7 = (char) str[offset + 7];
+        char c8 = (char) str[offset + 8];
+        char c9 = (char) str[offset + 9];
+        char c10 = (char) str[offset + 10];
+        char c11 = (char) str[offset + 11];
+        char c12 = (char) str[offset + 12];
+        char c13 = (char) str[offset + 13];
+        char c14 = (char) str[offset + 14];
+        char c15 = (char) str[offset + 15];
+        char c16 = (char) str[offset + 16];
+        char c17 = (char) str[offset + 17];
+        char c18 = (char) str[offset + 18];
+        char c19 = (char) str[offset + 19];
+        char c20, c21 = '0', c22 = '0', c23 = '0', c24 = '0', c25 = '0', c26 = '0', c27 = '0', c28 = '0';
+        switch (len) {
+            case 21:
+                c20 = (char) str[offset + 20];
+                break;
+            case 22:
+                c20 = (char) str[offset + 20];
+                c21 = (char) str[offset + 21];
+                break;
+            case 23:
+                c20 = (char) str[offset + 20];
+                c21 = (char) str[offset + 21];
+                c22 = (char) str[offset + 22];
+                break;
+            case 24:
+                c20 = (char) str[offset + 20];
+                c21 = (char) str[offset + 21];
+                c22 = (char) str[offset + 22];
+                c23 = (char) str[offset + 23];
+                break;
+            case 25:
+                c20 = (char) str[offset + 20];
+                c21 = (char) str[offset + 21];
+                c22 = (char) str[offset + 22];
+                c23 = (char) str[offset + 23];
+                c24 = (char) str[offset + 24];
+                break;
+            case 26:
+                c20 = (char) str[offset + 20];
+                c21 = (char) str[offset + 21];
+                c22 = (char) str[offset + 22];
+                c23 = (char) str[offset + 23];
+                c24 = (char) str[offset + 24];
+                c25 = (char) str[offset + 25];
+                break;
+            case 27:
+                c20 = (char) str[offset + 20];
+                c21 = (char) str[offset + 21];
+                c22 = (char) str[offset + 22];
+                c23 = (char) str[offset + 23];
+                c24 = (char) str[offset + 24];
+                c25 = (char) str[offset + 25];
+                c26 = (char) str[offset + 26];
+                break;
+            case 28:
+                c20 = (char) str[offset + 20];
+                c21 = (char) str[offset + 21];
+                c22 = (char) str[offset + 22];
+                c23 = (char) str[offset + 23];
+                c24 = (char) str[offset + 24];
+                c25 = (char) str[offset + 25];
+                c26 = (char) str[offset + 26];
+                c27 = (char) str[offset + 27];
+                break;
+            default:
+                c20 = (char) str[offset + 20];
+                c21 = (char) str[offset + 21];
+                c22 = (char) str[offset + 22];
+                c23 = (char) str[offset + 23];
+                c24 = (char) str[offset + 24];
+                c25 = (char) str[offset + 25];
+                c26 = (char) str[offset + 26];
+                c27 = (char) str[offset + 27];
+                c28 = (char) str[offset + 28];
+                break;
+        }
+
+        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2, S3, S4, S5, S6, S7, S8;
+        if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = c20;
+            S1 = c21;
+            S2 = c22;
+            S3 = c23;
+            S4 = c24;
+            S5 = c25;
+            S6 = c26;
+            S7 = c27;
+            S8 = c28;
+        } else {
+            return null;
+        }
+
+        return localDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2, S3, S4, S5, S6, S7, S8);
     }
 
     /**
      * ISO Date with offset, example '2011-12-03+01:00'
      */
-    public static ZonedDateTime parseZonedDateTime16(String str) {
-        if (str.length() != 16) {
-            throw new DateTimeParseException("illegal input " + str, str, 0);
+    static ZonedDateTime parseZonedDateTime16(char[] str, int off, ZoneId defaultZonedId) {
+        if (off + 16 > str.length) {
+            String input = new String(str, off, str.length - off);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        char c0 = str.charAt(0);
-        char c1 = str.charAt(1);
-        char c2 = str.charAt(2);
-        char c3 = str.charAt(3);
-        char c4 = str.charAt(4);
-        char c5 = str.charAt(5);
-        char c6 = str.charAt(6);
-        char c7 = str.charAt(7);
-        char c8 = str.charAt(8);
-        char c9 = str.charAt(9);
-        char c10 = str.charAt(10);
-        char c11 = str.charAt(11);
-        char c12 = str.charAt(12);
-        char c13 = str.charAt(13);
-        char c14 = str.charAt(14);
-        char c15 = str.charAt(15);
+        char c0 = str[off];
+        char c1 = str[off + 1];
+        char c2 = str[off + 2];
+        char c3 = str[off + 3];
+        char c4 = str[off + 4];
+        char c5 = str[off + 5];
+        char c6 = str[off + 6];
+        char c7 = str[off + 7];
+        char c8 = str[off + 8];
+        char c9 = str[off + 9];
+        char c10 = str[off + 10];
+        char c11 = str[off + 11];
+        char c12 = str[off + 12];
+        char c13 = str[off + 13];
+        char c14 = str[off + 14];
+        char c15 = str[off + 15];
 
         char y0, y1, y2, y3, m0, m1, d0, d1;
         if (c4 == '-' && c7 == '-' && (c10 == '+' || c10 == '-') && c13 == ':') {
@@ -2942,7 +4613,8 @@ public class DateUtils {
             d0 = c8;
             d1 = c9;
         } else {
-            throw new DateTimeParseException("illegal input " + str, str, 0);
+            String input = new String(str, off, 16);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
         int year;
@@ -2953,7 +4625,8 @@ public class DateUtils {
         ) {
             year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
         } else {
-            throw new DateTimeParseException("illegal input " + str, str, 0);
+            String input = new String(str, off, 16);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
         int month;
@@ -2962,7 +4635,8 @@ public class DateUtils {
         ) {
             month = (m0 - '0') * 10 + (m1 - '0');
         } else {
-            throw new DateTimeParseException("illegal input " + str, str, 0);
+            String input = new String(str, off, 16);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
         int dom;
@@ -2971,19 +4645,103 @@ public class DateUtils {
         ) {
             dom = (d0 - '0') * 10 + (d1 - '0');
         } else {
-            throw new DateTimeParseException("illegal input " + str, str, 0);
+            String input = new String(str, off, 16);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
         ZoneId zoneId;
-        String zoneIdStr = str.substring(10, 16);
-        zoneId = getZoneId(zoneIdStr, DEFAULT_ZONE_ID);
+        String zoneIdStr = new String(str, off + 10, 6);
+        zoneId = getZoneId(zoneIdStr, defaultZonedId);
+
+        LocalDateTime ldt = LocalDateTime.of(LocalDate.of(year, month, dom), LocalTime.MIN);
+        return ZonedDateTime.of(ldt, zoneId);
+    }
+
+    /**
+     * ISO Date with offset, example '2011-12-03+01:00'
+     */
+    static ZonedDateTime parseZonedDateTime16(byte[] str, int off, ZoneId defaultZonedId) {
+        if (off + 16 > str.length) {
+            String input = new String(str, off, str.length - off);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        char c0 = (char) str[off];
+        char c1 = (char) str[off + 1];
+        char c2 = (char) str[off + 2];
+        char c3 = (char) str[off + 3];
+        char c4 = (char) str[off + 4];
+        char c5 = (char) str[off + 5];
+        char c6 = (char) str[off + 6];
+        char c7 = (char) str[off + 7];
+        char c8 = (char) str[off + 8];
+        char c9 = (char) str[off + 9];
+        char c10 = (char) str[off + 10];
+        char c11 = (char) str[off + 11];
+        char c12 = (char) str[off + 12];
+        char c13 = (char) str[off + 13];
+        char c14 = (char) str[off + 14];
+        char c15 = (char) str[off + 15];
+
+        char y0, y1, y2, y3, m0, m1, d0, d1;
+        if (c4 == '-' && c7 == '-' && (c10 == '+' || c10 == '-') && c13 == ':') {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+        } else {
+            String input = new String(str, off, 16);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int year;
+        if (y0 >= '0' && y0 <= '9'
+                && y1 >= '0' && y1 <= '9'
+                && y2 >= '0' && y2 <= '9'
+                && y3 >= '0' && y3 <= '9'
+        ) {
+            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+        } else {
+            String input = new String(str, off, 16);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int month;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+        ) {
+            month = (m0 - '0') * 10 + (m1 - '0');
+        } else {
+            String input = new String(str, off, 16);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        int dom;
+        if (d0 >= '0' && d0 <= '9'
+                && d1 >= '0' && d1 <= '9'
+        ) {
+            dom = (d0 - '0') * 10 + (d1 - '0');
+        } else {
+            String input = new String(str, off, 16);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        ZoneId zoneId;
+        String zoneIdStr = new String(str, off + 10, 6);
+        zoneId = getZoneId(zoneIdStr, defaultZonedId);
 
         LocalDateTime ldt = LocalDateTime.of(LocalDate.of(year, month, dom), LocalTime.MIN);
         return ZonedDateTime.of(ldt, zoneId);
     }
 
     public static ZonedDateTime parseZonedDateTime(String str) {
-        return parseZonedDateTime(str, null);
+        return parseZonedDateTime(str, DEFAULT_ZONE_ID);
     }
 
     public static ZonedDateTime parseZonedDateTime(String str, ZoneId defaultZoneId) {
@@ -2996,36 +4754,76 @@ public class DateUtils {
             return null;
         }
 
+        ZonedDateTime zdt;
+        if (STRING_CODER != null && STRING_VALUE != null && STRING_CODER.applyAsInt(str) == 0) {
+            byte[] bytes = JDKUtils.STRING_VALUE.apply(str);
+            zdt = parseZonedDateTime(bytes, 0, bytes.length, defaultZoneId);
+        } else {
+            char[] chars = JDKUtils.getCharArray(str);
+            zdt = parseZonedDateTime(chars, 0, chars.length, defaultZoneId);
+        }
+
+        if (zdt == null) {
+            switch (str) {
+                case "null":
+                case "0":
+                case "0000-00-00":
+                    return null;
+                default:
+                    throw new DateTimeParseException(str, str, 0);
+            }
+        }
+
+        return zdt;
+    }
+
+    public static ZonedDateTime parseZonedDateTime(byte[] str, int off, int len) {
+        return parseZonedDateTime(str, off, len, DEFAULT_ZONE_ID);
+    }
+
+    public static ZonedDateTime parseZonedDateTime(char[] str, int off, int len) {
+        return parseZonedDateTime(str, off, len, DEFAULT_ZONE_ID);
+    }
+
+    public static ZonedDateTime parseZonedDateTime(byte[] str, int off, int len, ZoneId defaultZoneId) {
+        if (str == null) {
+            return null;
+        }
+
+        if (len == 0) {
+            return null;
+        }
+
         if (len == 16) {
-            return parseZonedDateTime16(str);
+            return parseZonedDateTime16(str, off, defaultZoneId);
         }
 
         if (len < 19) {
-            throw new DateTimeParseException("illegal input " + str, str, 0);
+            return null;
         }
 
         String zoneIdStr = null;
 
-        char c0 = str.charAt(0);
-        char c1 = str.charAt(1);
-        char c2 = str.charAt(2);
-        char c3 = str.charAt(3);
-        char c4 = str.charAt(4);
-        char c5 = str.charAt(5);
-        char c6 = str.charAt(6);
-        char c7 = str.charAt(7);
-        char c8 = str.charAt(8);
-        char c9 = str.charAt(9);
-        char c10 = str.charAt(10);
-        char c11 = str.charAt(11);
-        char c12 = str.charAt(12);
-        char c13 = str.charAt(13);
-        char c14 = str.charAt(14);
-        char c15 = str.charAt(15);
-        char c16 = str.charAt(16);
-        char c17 = str.charAt(17);
-        char c18 = str.charAt(18);
-        char c19 = len == 19 ? ' ' : str.charAt(19);
+        char c0 = (char) str[off];
+        char c1 = (char) str[off + 1];
+        char c2 = (char) str[off + 2];
+        char c3 = (char) str[off + 3];
+        char c4 = (char) str[off + 4];
+        char c5 = (char) str[off + 5];
+        char c6 = (char) str[off + 6];
+        char c7 = (char) str[off + 7];
+        char c8 = (char) str[off + 8];
+        char c9 = (char) str[off + 9];
+        char c10 = (char) str[off + 10];
+        char c11 = (char) str[off + 11];
+        char c12 = (char) str[off + 12];
+        char c13 = (char) str[off + 13];
+        char c14 = (char) str[off + 14];
+        char c15 = (char) str[off + 15];
+        char c16 = (char) str[off + 16];
+        char c17 = (char) str[off + 17];
+        char c18 = (char) str[off + 18];
+        char c19 = len == 19 ? ' ' : (char) str[off + 19];
 
         char c20, c21 = '0', c22 = '0', c23 = '0', c24 = '0', c25 = '0', c26 = '0', c27 = '0', c28 = '0', c29 = '\0';
         switch (len) {
@@ -3034,79 +4832,79 @@ public class DateUtils {
                 c20 = '\0';
                 break;
             case 21:
-                c20 = str.charAt(20);
+                c20 = (char) str[off + 20];
                 break;
             case 22:
-                c20 = str.charAt(20);
-                c21 = str.charAt(21);
+                c20 = (char) str[off + 20];
+                c21 = (char) str[off + 21];
                 break;
             case 23:
-                c20 = str.charAt(20);
-                c21 = str.charAt(21);
-                c22 = str.charAt(22);
+                c20 = (char) str[off + 20];
+                c21 = (char) str[off + 21];
+                c22 = (char) str[off + 22];
                 break;
             case 24:
-                c20 = str.charAt(20);
-                c21 = str.charAt(21);
-                c22 = str.charAt(22);
-                c23 = str.charAt(23);
+                c20 = (char) str[off + 20];
+                c21 = (char) str[off + 21];
+                c22 = (char) str[off + 22];
+                c23 = (char) str[off + 23];
                 break;
             case 25:
-                c20 = str.charAt(20);
-                c21 = str.charAt(21);
-                c22 = str.charAt(22);
-                c23 = str.charAt(23);
-                c24 = str.charAt(24);
+                c20 = (char) str[off + 20];
+                c21 = (char) str[off + 21];
+                c22 = (char) str[off + 22];
+                c23 = (char) str[off + 23];
+                c24 = (char) str[off + 24];
                 break;
             case 26:
-                c20 = str.charAt(20);
-                c21 = str.charAt(21);
-                c22 = str.charAt(22);
-                c23 = str.charAt(23);
-                c24 = str.charAt(24);
-                c25 = str.charAt(25);
+                c20 = (char) str[off + 20];
+                c21 = (char) str[off + 21];
+                c22 = (char) str[off + 22];
+                c23 = (char) str[off + 23];
+                c24 = (char) str[off + 24];
+                c25 = (char) str[off + 25];
                 break;
             case 27:
-                c20 = str.charAt(20);
-                c21 = str.charAt(21);
-                c22 = str.charAt(22);
-                c23 = str.charAt(23);
-                c24 = str.charAt(24);
-                c25 = str.charAt(25);
-                c26 = str.charAt(26);
+                c20 = (char) str[off + 20];
+                c21 = (char) str[off + 21];
+                c22 = (char) str[off + 22];
+                c23 = (char) str[off + 23];
+                c24 = (char) str[off + 24];
+                c25 = (char) str[off + 25];
+                c26 = (char) str[off + 26];
                 break;
             case 28:
-                c20 = str.charAt(20);
-                c21 = str.charAt(21);
-                c22 = str.charAt(22);
-                c23 = str.charAt(23);
-                c24 = str.charAt(24);
-                c25 = str.charAt(25);
-                c26 = str.charAt(26);
-                c27 = str.charAt(27);
+                c20 = (char) str[off + 20];
+                c21 = (char) str[off + 21];
+                c22 = (char) str[off + 22];
+                c23 = (char) str[off + 23];
+                c24 = (char) str[off + 24];
+                c25 = (char) str[off + 25];
+                c26 = (char) str[off + 26];
+                c27 = (char) str[off + 27];
                 break;
             case 29:
-                c20 = str.charAt(20);
-                c21 = str.charAt(21);
-                c22 = str.charAt(22);
-                c23 = str.charAt(23);
-                c24 = str.charAt(24);
-                c25 = str.charAt(25);
-                c26 = str.charAt(26);
-                c27 = str.charAt(27);
-                c28 = str.charAt(28);
+                c20 = (char) str[off + 20];
+                c21 = (char) str[off + 21];
+                c22 = (char) str[off + 22];
+                c23 = (char) str[off + 23];
+                c24 = (char) str[off + 24];
+                c25 = (char) str[off + 25];
+                c26 = (char) str[off + 26];
+                c27 = (char) str[off + 27];
+                c28 = (char) str[off + 28];
                 break;
             default:
-                c20 = str.charAt(20);
-                c21 = str.charAt(21);
-                c22 = str.charAt(22);
-                c23 = str.charAt(23);
-                c24 = str.charAt(24);
-                c25 = str.charAt(25);
-                c26 = str.charAt(26);
-                c27 = str.charAt(27);
-                c28 = str.charAt(28);
-                c29 = str.charAt(29);
+                c20 = (char) str[off + 20];
+                c21 = (char) str[off + 21];
+                c22 = (char) str[off + 22];
+                c23 = (char) str[off + 23];
+                c24 = (char) str[off + 24];
+                c25 = (char) str[off + 25];
+                c26 = (char) str[off + 26];
+                c27 = (char) str[off + 27];
+                c28 = (char) str[off + 28];
+                c29 = (char) str[off + 29];
                 break;
         }
 
@@ -3696,14 +5494,25 @@ public class DateUtils {
             S0 = c20;
             S1 = c21;
             S2 = c22;
-            S3 = c23;
-            S4 = c24;
-            S5 = c25;
-            S6 = c26;
-            S7 = '0';
-            S8 = '0';
-            zoneIdBegin = 27;
-            isTimeZone = c27 == '|';
+            if (c23 == ' ') {
+                S3 = '0';
+                S4 = '0';
+                S5 = '0';
+                S6 = '0';
+                S7 = '0';
+                S8 = '0';
+                zoneIdBegin = 23;
+                isTimeZone = false;
+            } else {
+                S3 = c23;
+                S4 = c24;
+                S5 = c25;
+                S6 = c26;
+                S7 = '0';
+                S8 = '0';
+                zoneIdBegin = 27;
+                isTimeZone = c27 == '|';
+            }
         } else if (c4 == '-' && c7 == '-'
                 && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && (len == 28 || c28 == '[' || c28 == '|' || c28 == '+' || c28 == '-' || c28 == 'Z')
@@ -3776,7 +5585,7 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 19;
-            zoneIdStr = str.substring(20, 23);
+            zoneIdStr = new String(str, off + 20, 3);
             isTimeZone = false;
         } else if (len == 28 && c3 == ',' && c4 == ' ' && c6 == ' ' && c10 == ' ' && c15 == ' '
                 && c18 == ':' && c21 == ':' && c24 == ' ') {
@@ -3929,27 +5738,27 @@ public class DateUtils {
             S8 = '0';
             zoneIdBegin = 17;
             isTimeZone = false;
-        } else if ((len == 32 && c6 == ',' && c7 == ' ' && c10 == '-' && c14 == '-' && c19 == ' ' && c22 == ':' && c25 == ':' && str.charAt(28) == ' ')
-                || (len == 33 && c7 == ',' && c8 == ' ' && c11 == '-' && c15 == '-' && c20 == ' ' && c23 == ':' && c26 == ':' && str.charAt(29) == ' ')
-                || (len == 34 && c8 == ',' && c9 == ' ' && c12 == '-' && c16 == '-' && c21 == ' ' && c24 == ':' && c27 == ':' && str.charAt(30) == ' ')
-                || (len == 35 && c9 == ',' && c10 == ' ' && c13 == '-' && c17 == '-' && c22 == ' ' && c25 == ':' && c28 == ':' && str.charAt(31) == ' ')
+        } else if ((len == 32 && c6 == ',' && c7 == ' ' && c10 == '-' && c14 == '-' && c19 == ' ' && c22 == ':' && c25 == ':' && str[off + 28] == ' ')
+                || (len == 33 && c7 == ',' && c8 == ' ' && c11 == '-' && c15 == '-' && c20 == ' ' && c23 == ':' && c26 == ':' && str[off + 29] == ' ')
+                || (len == 34 && c8 == ',' && c9 == ' ' && c12 == '-' && c16 == '-' && c21 == ' ' && c24 == ':' && c27 == ':' && str[off + 30] == ' ')
+                || (len == 35 && c9 == ',' && c10 == ' ' && c13 == '-' && c17 == '-' && c22 == ' ' && c25 == ':' && c28 == ':' && str[off + 31] == ' ')
         ) {
-            return parseZonedDateTimeCookie(str);
+            return parseZonedDateTimeCookie(new String(str, off, len));
         } else if (len == 34) {
             DateTimeFormatter formatter = DATE_TIME_FORMATTER_34;
             if (formatter == null) {
                 formatter = DATE_TIME_FORMATTER_34 = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss O yyyy");
             }
-            return ZonedDateTime.parse(str, formatter);
-        } else if (len == 31 && str.charAt(3) == ',') {
+            return ZonedDateTime.parse(new String(str, off, len), formatter);
+        } else if (len == 31 && str[off + 3] == ',') {
             DateTimeFormatter formatter;
             formatter = DATE_TIME_FORMATTER_RFC_2822;
             if (formatter == null) {
                 formatter = DATE_TIME_FORMATTER_RFC_2822 = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z");
             }
-            return ZonedDateTime.parse(str, formatter);
+            return ZonedDateTime.parse(new String(str, off, len), formatter);
         } else {
-            throw new DateTimeParseException("illegal input " + str, str, 0);
+            return null;
         }
 
         if (pm) {
@@ -3968,12 +5777,12 @@ public class DateUtils {
                 S0, S1, S2, S3, S4, S5, S6, S7, S8
         );
         if (ldt == null) {
-            throw new DateTimeParseException("illegal input " + str, str, 0);
+            return null;
         }
 
         ZoneId zoneId;
         if (isTimeZone) {
-            String tzStr = str.substring(zoneIdBegin, len);
+            String tzStr = new String(str, zoneIdBegin, len - zoneIdBegin);
             switch (tzStr) {
                 case "UTC":
                 case "[UTC]":
@@ -3986,21 +5795,22 @@ public class DateUtils {
             }
             // String tzStr = new String(chars, this.offset + zoneIdBegin, len - zoneIdBegin);
         } else if (zoneIdBegin == len) {
-            zoneId = DEFAULT_ZONE_ID;
+            zoneId = defaultZoneId;
         } else {
-            char first = str.charAt(zoneIdBegin);
+            char first = (char) str[off + zoneIdBegin];
             if (first == 'Z') {
                 zoneId = UTC;
             } else {
                 if (zoneIdStr == null) {
                     if (first == '+' || first == '-') {
-                        zoneIdStr = str.substring(zoneIdBegin, len);
+                        zoneIdStr = new String(str, off + zoneIdBegin, len - zoneIdBegin);
                         //                    zoneIdStr = new String(chars, zoneIdBegin, len - zoneIdBegin);
                     } else if (first == ' ') {
-                        zoneIdStr = str.substring(zoneIdBegin + 1, len);
+                        zoneIdStr = new String(str, off + zoneIdBegin + 1, len - zoneIdBegin - 1);
                     } else { // '[
                         if (zoneIdBegin < len) {
-                            zoneIdStr = str.substring(zoneIdBegin + 1, len - 1);
+                            zoneIdStr = new String(str, off + zoneIdBegin + 1, len - zoneIdBegin - 2);
+//                            zoneIdStr = str.substring(zoneIdBegin + 1, len - 1);
                         } else {
                             zoneIdStr = null;
                         }
@@ -4010,10 +5820,1065 @@ public class DateUtils {
             }
         }
 
+        if (zoneId == null) {
+            zoneId = defaultZoneId;
+        }
+
+        if (zoneId == null) {
+            zoneId = DEFAULT_ZONE_ID;
+        }
+
         return ZonedDateTime.ofLocal(ldt, zoneId, null);
     }
 
-    private static ZonedDateTime parseZonedDateTimeCookie(String str) {
+    public static ZonedDateTime parseZonedDateTime(char[] str, int off, int len, ZoneId defaultZoneId) {
+        if (str == null) {
+            return null;
+        }
+
+        if (len == 0) {
+            return null;
+        }
+
+        if (len == 16) {
+            return parseZonedDateTime16(str, off, defaultZoneId);
+        }
+
+        if (len < 19) {
+            String input = new String(str, off, str.length - off);
+            throw new DateTimeParseException("illegal input " + input, input, 0);
+        }
+
+        String zoneIdStr = null;
+
+        char c0 = str[off];
+        char c1 = str[off + 1];
+        char c2 = str[off + 2];
+        char c3 = str[off + 3];
+        char c4 = str[off + 4];
+        char c5 = str[off + 5];
+        char c6 = str[off + 6];
+        char c7 = str[off + 7];
+        char c8 = str[off + 8];
+        char c9 = str[off + 9];
+        char c10 = str[off + 10];
+        char c11 = str[off + 11];
+        char c12 = str[off + 12];
+        char c13 = str[off + 13];
+        char c14 = str[off + 14];
+        char c15 = str[off + 15];
+        char c16 = str[off + 16];
+        char c17 = str[off + 17];
+        char c18 = str[off + 18];
+        char c19 = len == 19 ? ' ' : str[off + 19];
+
+        char c20, c21 = '0', c22 = '0', c23 = '0', c24 = '0', c25 = '0', c26 = '0', c27 = '0', c28 = '0', c29 = '\0';
+        switch (len) {
+            case 19:
+            case 20:
+                c20 = '\0';
+                break;
+            case 21:
+                c20 = str[off + 20];
+                break;
+            case 22:
+                c20 = str[off + 20];
+                c21 = str[off + 21];
+                break;
+            case 23:
+                c20 = str[off + 20];
+                c21 = str[off + 21];
+                c22 = str[off + 22];
+                break;
+            case 24:
+                c20 = str[off + 20];
+                c21 = str[off + 21];
+                c22 = str[off + 22];
+                c23 = str[off + 23];
+                break;
+            case 25:
+                c20 = str[off + 20];
+                c21 = str[off + 21];
+                c22 = str[off + 22];
+                c23 = str[off + 23];
+                c24 = str[off + 24];
+                break;
+            case 26:
+                c20 = str[off + 20];
+                c21 = str[off + 21];
+                c22 = str[off + 22];
+                c23 = str[off + 23];
+                c24 = str[off + 24];
+                c25 = str[off + 25];
+                break;
+            case 27:
+                c20 = str[off + 20];
+                c21 = str[off + 21];
+                c22 = str[off + 22];
+                c23 = str[off + 23];
+                c24 = str[off + 24];
+                c25 = str[off + 25];
+                c26 = str[off + 26];
+                break;
+            case 28:
+                c20 = str[off + 20];
+                c21 = str[off + 21];
+                c22 = str[off + 22];
+                c23 = str[off + 23];
+                c24 = str[off + 24];
+                c25 = str[off + 25];
+                c26 = str[off + 26];
+                c27 = str[off + 27];
+                break;
+            case 29:
+                c20 = str[off + 20];
+                c21 = str[off + 21];
+                c22 = str[off + 22];
+                c23 = str[off + 23];
+                c24 = str[off + 24];
+                c25 = str[off + 25];
+                c26 = str[off + 26];
+                c27 = str[off + 27];
+                c28 = str[off + 28];
+                break;
+            default:
+                c20 = str[off + 20];
+                c21 = str[off + 21];
+                c22 = str[off + 22];
+                c23 = str[off + 23];
+                c24 = str[off + 24];
+                c25 = str[off + 25];
+                c26 = str[off + 26];
+                c27 = str[off + 27];
+                c28 = str[off + 28];
+                c29 = str[off + 29];
+                break;
+        }
+
+        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2, S3, S4, S5, S6, S7, S8;
+        int zoneIdBegin;
+        boolean isTimeZone = false, pm = false;
+        if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':'
+                && (c19 == '[' || c19 == 'Z' || c19 == '+' || c19 == '-' || c19 == ' ')
+        ) {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 19;
+        } else if (c4 == '-' && c7 == '-' && (c10 == ' ' && c11 == ' ') && c14 == ':' && c17 == ':' && len == 20) {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c12;
+            h1 = c13;
+
+            i0 = c15;
+            i1 = c16;
+
+            s0 = c18;
+            s1 = c19;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 20;
+        } else if (len == 20 && c2 == ' ' && c6 == ' ' && c11 == ' ' && c14 == ':' && c17 == ':') {
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            int month = DateUtils.month(c3, c4, c5);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = c0;
+            d1 = c1;
+
+            h0 = c12;
+            h1 = c13;
+
+            i0 = c15;
+            i1 = c16;
+
+            s0 = c18;
+            s1 = c19;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 20;
+            isTimeZone = false;
+        } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
+                && (len == 21 || c21 == '[' || c21 == '+' || c21 == '-' || c21 == 'Z')) {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = c20;
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 21;
+            isTimeZone = c21 == '|';
+        } else if (c4 == '-' && c7 == '-'
+                && (c10 == ' ' || c10 == 'T')
+                && c13 == ':' && c16 == ':'
+                && c19 == '.' && (len == 22 || c22 == '[' || c22 == '+' || c22 == '-' || c22 == 'Z')) {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = c20;
+            S1 = c21;
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 22;
+            isTimeZone = c22 == '|';
+        } else if (c4 == '-' && c7 == '-'
+                && (c10 == ' ' || c10 == 'T')
+                && c13 == ':' && c16 == 'Z'
+                && c17 == '[' && c21 == ']'
+                && len == 22) {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = '0';
+            s1 = '0';
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            isTimeZone = true;
+            zoneIdBegin = 17;
+        } else if (len == 22
+                && c3 == ' ' && c5 == ',' && c6 == ' ' && c11 == ' '
+                && c13 == ':' && c16 == ':'
+                && c19 == ' ' && (c20 == 'A' || c20 == 'P') && c21 == 'M'
+        ) {
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            int month = DateUtils.month(c0, c1, c2);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = '0';
+            d1 = c4;
+
+            h0 = '0';
+            h1 = c12;
+            pm = c20 == 'P';
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 22;
+            isTimeZone = false;
+        } else if (len == 22
+                && c2 == '/' && c5 == '/' && c10 == ' '
+                && c13 == ':' && c16 == ':'
+                && c19 == ' ' && (c20 == 'A' || c20 == 'P') && c21 == 'M'
+        ) {
+            m0 = c0;
+            m1 = c1;
+
+            d0 = c3;
+            d1 = c4;
+
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
+
+            h0 = c11;
+            h1 = c12;
+            pm = c20 == 'P';
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 22;
+            isTimeZone = false;
+        } else if (len == 23
+                && c3 == ' ' && c5 == ',' && c6 == ' ' && c11 == ' '
+                && c14 == ':' && c17 == ':' && c20 == ' '
+                && (c21 == 'A' || c21 == 'P') && c22 == 'M'
+        ) {
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            int month = DateUtils.month(c0, c1, c2);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = '0';
+            d1 = c4;
+
+            h0 = c12;
+            h1 = c13;
+            pm = c21 == 'P';
+
+            i0 = c15;
+            i1 = c16;
+
+            s0 = c18;
+            s1 = c19;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 23;
+            isTimeZone = false;
+        } else if (len == 23
+                && c3 == ' ' && c6 == ',' && c7 == ' ' && c12 == ' '
+                && c14 == ':' && c17 == ':'
+                && c20 == ' ' && (c21 == 'A' || c21 == 'P') && c22 == 'M'
+        ) {
+            y0 = c8;
+            y1 = c9;
+            y2 = c10;
+            y3 = c11;
+
+            int month = DateUtils.month(c0, c1, c2);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = c4;
+            d1 = c5;
+
+            h0 = '0';
+            h1 = c13;
+            pm = c21 == 'P';
+
+            i0 = c15;
+            i1 = c16;
+
+            s0 = c18;
+            s1 = c19;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 23;
+            isTimeZone = false;
+        } else if (len == 24
+                && c3 == ' ' && c6 == ',' && c7 == ' ' && c12 == ' '
+                && c15 == ':' && c18 == ':'
+                && c21 == ' ' && (c22 == 'A' || c22 == 'P') && c23 == 'M'
+        ) {
+            y0 = c8;
+            y1 = c9;
+            y2 = c10;
+            y3 = c11;
+
+            int month = DateUtils.month(c0, c1, c2);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = c4;
+            d1 = c5;
+
+            h0 = c13;
+            h1 = c14;
+            pm = c22 == 'P';
+
+            i0 = c16;
+            i1 = c17;
+
+            s0 = c19;
+            s1 = c20;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 24;
+            isTimeZone = false;
+        } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
+                && (len == 23 || c23 == '[' || c23 == '|' || c23 == '+' || c23 == '-' || c23 == 'Z')) {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = c20;
+            S1 = c21;
+            S2 = c22;
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 23;
+            isTimeZone = c23 == '|';
+        } else if (c4 == '-' && c7 == '-'
+                && (c10 == ' ' || c10 == 'T')
+                && c13 == ':' && c16 == ':' && c19 == '.'
+                && (len == 24 || c24 == '[' || c24 == '|' || c24 == '+' || c24 == '-' || c24 == 'Z')) {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = c20;
+            S1 = c21;
+            S2 = c22;
+            S3 = c23;
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 24;
+            isTimeZone = c24 == '|';
+        } else if (c4 == '-' && c7 == '-'
+                && (c10 == ' ' || c10 == 'T')
+                && c13 == ':' && c16 == ':' && c19 == '.'
+                && (len == 25 || c25 == '[' || c25 == '|' || c25 == '+' || c25 == '-' || c25 == 'Z')
+        ) {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = c20;
+            S1 = c21;
+            S2 = c22;
+            S3 = c23;
+            S4 = c24;
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 25;
+            isTimeZone = c25 == '|';
+        } else if (c4 == '-' && c7 == '-'
+                && (c10 == ' ' || c10 == 'T')
+                && c13 == ':' && c16 == ':' && c19 == '.'
+                && (len == 26 || c26 == '[' || c26 == '|' || c26 == '+' || c26 == '-' || c26 == 'Z')
+        ) {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = c20;
+            S1 = c21;
+            S2 = c22;
+            S3 = c23;
+            S4 = c24;
+            S5 = c25;
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 26;
+            isTimeZone = c26 == '|';
+        } else if (c4 == '-' && c7 == '-'
+                && (c10 == ' ' || c10 == 'T')
+                && c13 == ':' && c16 == ':' && c19 == '.'
+                && (len == 27 || c27 == '[' || c27 == '|' || c27 == '+' || c27 == '-' || c27 == 'Z')
+        ) {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = c20;
+            S1 = c21;
+            S2 = c22;
+            if (c23 == ' ') {
+                S3 = '0';
+                S4 = '0';
+                S5 = '0';
+                S6 = '0';
+                S7 = '0';
+                S8 = '0';
+                zoneIdBegin = 23;
+                isTimeZone = false;
+            } else {
+                S3 = c23;
+                S4 = c24;
+                S5 = c25;
+                S6 = c26;
+                S7 = '0';
+                S8 = '0';
+                zoneIdBegin = 27;
+                isTimeZone = c27 == '|';
+            }
+        } else if (c4 == '-' && c7 == '-'
+                && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
+                && (len == 28 || c28 == '[' || c28 == '|' || c28 == '+' || c28 == '-' || c28 == 'Z')
+        ) {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = c20;
+            S1 = c21;
+            S2 = c22;
+            S3 = c23;
+            S4 = c24;
+            S5 = c25;
+            S6 = c26;
+            S7 = c27;
+            S8 = '0';
+            zoneIdBegin = 28;
+            isTimeZone = c28 == '|';
+        } else if (len == 28 && c3 == ' ' && c7 == ' ' && c10 == ' ' && c13 == ':' && c16 == ':' && c19 == ' ' && c23 == ' ') {
+            int month = DateUtils.month(c4, c5, c6);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            y0 = c24;
+            y1 = c25;
+            y2 = c26;
+            y3 = c27;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 19;
+            zoneIdStr = new String(str, off + 20, 3);
+            isTimeZone = false;
+        } else if (len == 28 && c3 == ',' && c4 == ' ' && c6 == ' ' && c10 == ' ' && c15 == ' '
+                && c18 == ':' && c21 == ':' && c24 == ' ') {
+            // RFC 1123
+            y0 = c11;
+            y1 = c12;
+            y2 = c13;
+            y3 = c14;
+
+            int month = DateUtils.month(c7, c8, c9);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = '0';
+            d1 = c5;
+
+            h0 = c16;
+            h1 = c17;
+
+            i0 = c19;
+            i1 = c20;
+
+            s0 = c22;
+            s1 = c23;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 24;
+            isTimeZone = true;
+        } else if (len == 29
+                && c3 == ',' && c4 == ' ' && c7 == ' ' && c11 == ' ' && c16 == ' '
+                && c19 == ':' && c22 == ':' && c25 == ' '
+        ) {
+            // RFC 1123
+            y0 = c12;
+            y1 = c13;
+            y2 = c14;
+            y3 = c15;
+
+            int month = DateUtils.month(c8, c9, c10);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                m0 = '0';
+                m1 = '0';
+            }
+
+            d0 = c5;
+            d1 = c6;
+
+            h0 = c17;
+            h1 = c18;
+
+            i0 = c20;
+            i1 = c21;
+
+            s0 = c23;
+            s1 = c24;
+
+            S0 = '0';
+            S1 = '0';
+            S2 = '0';
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 25;
+            isTimeZone = true;
+        } else if (c4 == '-' && c7 == '-'
+                && (c10 == ' ' || c10 == 'T')
+                && c13 == ':' && c16 == ':' && c19 == '.'
+                && (len == 29 || c29 == '[' || c29 == '|' || c29 == '+' || c29 == '-' || c29 == 'Z')
+        ) {
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+
+            S0 = c20;
+            S1 = c21;
+            S2 = c22;
+            S3 = c23;
+            S4 = c24;
+            S5 = c25;
+            S6 = c26;
+            S7 = c27;
+            S8 = c28;
+            zoneIdBegin = 29;
+            isTimeZone = c29 == '|';
+        } else if (len == 22 && (c17 == '+' || c17 == '-')) {
+            // yyyyMMddHHmmssSSSZ
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c4;
+            m1 = c5;
+
+            d0 = c6;
+            d1 = c7;
+
+            h0 = c8;
+            h1 = c9;
+
+            i0 = c10;
+            i1 = c11;
+
+            s0 = c12;
+            s1 = c13;
+
+            S0 = c14;
+            S1 = c15;
+            S2 = c16;
+            S3 = '0';
+            S4 = '0';
+            S5 = '0';
+            S6 = '0';
+            S7 = '0';
+            S8 = '0';
+            zoneIdBegin = 17;
+            isTimeZone = false;
+        } else if ((len == 32 && c6 == ',' && c7 == ' ' && c10 == '-' && c14 == '-' && c19 == ' ' && c22 == ':' && c25 == ':' && str[off + 28] == ' ')
+                || (len == 33 && c7 == ',' && c8 == ' ' && c11 == '-' && c15 == '-' && c20 == ' ' && c23 == ':' && c26 == ':' && str[off + 29] == ' ')
+                || (len == 34 && c8 == ',' && c9 == ' ' && c12 == '-' && c16 == '-' && c21 == ' ' && c24 == ':' && c27 == ':' && str[off + 30] == ' ')
+                || (len == 35 && c9 == ',' && c10 == ' ' && c13 == '-' && c17 == '-' && c22 == ' ' && c25 == ':' && c28 == ':' && str[off + 31] == ' ')
+        ) {
+            return parseZonedDateTimeCookie(new String(str, off, len));
+        } else if (len == 34) {
+            DateTimeFormatter formatter = DATE_TIME_FORMATTER_34;
+            if (formatter == null) {
+                formatter = DATE_TIME_FORMATTER_34 = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss O yyyy");
+            }
+            return ZonedDateTime.parse(new String(str, off, len), formatter);
+        } else if (len == 31 && str[off + 3] == ',') {
+            DateTimeFormatter formatter;
+            formatter = DATE_TIME_FORMATTER_RFC_2822;
+            if (formatter == null) {
+                formatter = DATE_TIME_FORMATTER_RFC_2822 = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z");
+            }
+            return ZonedDateTime.parse(new String(str, off, len), formatter);
+        } else {
+            return null;
+        }
+
+        if (pm) {
+            int hourValue = DateUtils.hourAfterNoon(h0, h1);
+            h0 = (char) (hourValue >> 16);
+            h1 = (char) ((short) hourValue);
+        }
+
+        LocalDateTime ldt = localDateTime(
+                y0, y1, y2, y3,
+                m0, m1,
+                d0, d1,
+                h0, h1,
+                i0, i1,
+                s0, s1,
+                S0, S1, S2, S3, S4, S5, S6, S7, S8
+        );
+        if (ldt == null) {
+            return null;
+        }
+
+        ZoneId zoneId;
+        if (isTimeZone) {
+            String tzStr = new String(str, zoneIdBegin, len - zoneIdBegin);
+            switch (tzStr) {
+                case "UTC":
+                case "[UTC]":
+                    zoneId = UTC;
+                    break;
+                default:
+                    TimeZone timeZone = TimeZone.getTimeZone(tzStr);
+                    zoneId = timeZone.toZoneId();
+                    break;
+            }
+            // String tzStr = new String(chars, this.offset + zoneIdBegin, len - zoneIdBegin);
+        } else if (zoneIdBegin == len) {
+            zoneId = defaultZoneId;
+        } else {
+            char first = str[off + zoneIdBegin];
+            if (first == 'Z') {
+                zoneId = UTC;
+            } else {
+                if (zoneIdStr == null) {
+                    if (first == '+' || first == '-') {
+                        zoneIdStr = new String(str, off + zoneIdBegin, len - zoneIdBegin);
+                        //                    zoneIdStr = new String(chars, zoneIdBegin, len - zoneIdBegin);
+                    } else if (first == ' ') {
+                        zoneIdStr = new String(str, off + zoneIdBegin + 1, len - zoneIdBegin - 1);
+                    } else { // '[
+                        if (zoneIdBegin < len) {
+                            zoneIdStr = new String(str, off + zoneIdBegin + 1, len - zoneIdBegin - 2);
+//                            zoneIdStr = str.substring(zoneIdBegin + 1, len - 1);
+                        } else {
+                            zoneIdStr = null;
+                        }
+                    }
+                }
+                zoneId = getZoneId(zoneIdStr, defaultZoneId);
+            }
+        }
+
+        if (zoneId == null) {
+            zoneId = defaultZoneId;
+        }
+
+        if (zoneId == null) {
+            zoneId = DEFAULT_ZONE_ID;
+        }
+
+        return ZonedDateTime.ofLocal(ldt, zoneId, null);
+    }
+
+    static ZonedDateTime parseZonedDateTimeCookie(String str) {
         if (str.endsWith(" CST")) {
             DateTimeFormatter formatter = DATE_TIME_FORMATTER_COOKIE_LOCAL;
             if (formatter == null) {
@@ -5596,6 +8461,376 @@ public class DateUtils {
         return (utcSeconds - zoneOffsetTotalSeconds) * 1000L;
     }
 
+    public static long parseMillis19(char[] bytes, int off, ZoneId zoneId) {
+        if (bytes == null) {
+            throw new NullPointerException();
+        }
+
+        char c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18;
+        c0 = (char) bytes[off + 0];
+        c1 = (char) bytes[off + 1];
+        c2 = (char) bytes[off + 2];
+        c3 = (char) bytes[off + 3];
+        c4 = (char) bytes[off + 4];
+        c5 = (char) bytes[off + 5];
+        c6 = (char) bytes[off + 6];
+        c7 = (char) bytes[off + 7];
+        c8 = (char) bytes[off + 8];
+        c9 = (char) bytes[off + 9];
+        c10 = (char) bytes[off + 10];
+        c11 = (char) bytes[off + 11];
+        c12 = (char) bytes[off + 12];
+        c13 = (char) bytes[off + 13];
+        c14 = (char) bytes[off + 14];
+        c15 = (char) bytes[off + 15];
+        c16 = (char) bytes[off + 16];
+        c17 = (char) bytes[off + 17];
+        c18 = (char) bytes[off + 18];
+
+        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
+        if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
+            // yyyy-MM-dd HH:mm:ss
+            // yyyy-MM-dd'T'HH:mm:ss
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+        } else if (c4 == '/' && c7 == '/' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
+            // yyyy/MM/dd HH:mm:ss
+            // yyyy/MM/dd'T'HH:mm:ss
+            y0 = c0;
+            y1 = c1;
+            y2 = c2;
+            y3 = c3;
+
+            m0 = c5;
+            m1 = c6;
+
+            d0 = c8;
+            d1 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+        } else if (c2 == '/' && c5 == '/' && c10 == ' ' && c13 == ':' && c16 == ':') {
+            // dd/MM/yyyy HH:mm:ss
+            d0 = c0;
+            d1 = c1;
+
+            m0 = c3;
+            m1 = c4;
+
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+        } else if (c2 == '.' && c5 == '.' && c10 == ' ' && c13 == ':' && c16 == ':') {
+            // dd.MM.yyyy HH:mm:ss
+            d0 = c0;
+            d1 = c1;
+
+            m0 = c3;
+            m1 = c4;
+
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+        } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':' && c16 == ':') {
+            // d MMM yyyy HH:mm:ss
+            // 6 DEC 2020 12:13:14
+            d0 = '0';
+            d1 = c0;
+
+            int month = DateUtils.month(c2, c3, c4);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String str = new String(bytes, off, 19);
+                throw new DateTimeParseException("illegal input " + str, str, 0);
+            }
+
+            y0 = c6;
+            y1 = c7;
+            y2 = c8;
+            y3 = c9;
+
+            h0 = c11;
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+        } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c13 == ':' && c16 == ':') {
+            // dd MMM yyyy H:mm:ss
+            // 16 DEC 2020 2:13:14
+            d0 = c0;
+            d1 = c1;
+
+            int month = DateUtils.month(c3, c4, c5);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String str = new String(bytes, off, 19);
+                throw new DateTimeParseException("illegal input " + str, str, 0);
+            }
+
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            h0 = '0';
+            h1 = c12;
+
+            i0 = c14;
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+        } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c14 == ':' && c16 == ':') {
+            // dd MMM yyyy HH:m:ss
+            // 16 DEC 2020 12:3:14
+            d0 = c0;
+            d1 = c1;
+
+            int month = DateUtils.month(c3, c4, c5);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String str = new String(bytes, off, 19);
+                throw new DateTimeParseException("illegal input " + str, str, 0);
+            }
+
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            h0 = c12;
+            h1 = c13;
+
+            i0 = '0';
+            i1 = c15;
+
+            s0 = c17;
+            s1 = c18;
+        } else if (c2 == ' ' && c6 == ' ' && c11 == ' ' && c14 == ':' && c17 == ':') {
+            // dd MMM yyyy HH:m:ss
+            // 16 DEC 2020 12:3:14
+            d0 = c0;
+            d1 = c1;
+
+            int month = DateUtils.month(c3, c4, c5);
+            if (month > 0) {
+                m0 = (char) ('0' + month / 10);
+                m1 = (char) ('0' + (month % 10));
+            } else {
+                String str = new String(bytes, off, 19);
+                throw new DateTimeParseException("illegal input " + str, str, 0);
+            }
+
+            y0 = c7;
+            y1 = c8;
+            y2 = c9;
+            y3 = c10;
+
+            h0 = c12;
+            h1 = c13;
+
+            i0 = c15;
+            i1 = c16;
+
+            s0 = '0';
+            s1 = c18;
+        } else {
+            String str = new String(bytes, off, 19);
+            throw new DateTimeParseException("illegal input " + str, str, 0);
+        }
+
+        int year;
+        if (y0 >= '0' && y0 <= '9'
+                && y1 >= '0' && y1 <= '9'
+                && y2 >= '0' && y2 <= '9'
+                && y3 >= '0' && y3 <= '9'
+        ) {
+            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+        } else {
+            String str = new String(bytes, off, 19);
+            throw new DateTimeParseException("illegal input " + str, str, 0);
+        }
+
+        int month;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+        ) {
+            month = (m0 - '0') * 10 + (m1 - '0');
+
+            if ((month == 0 && year != 0) || month > 12) {
+                String str = new String(bytes, off, 19);
+                throw new DateTimeParseException("illegal input " + str, str, 0);
+            }
+        } else {
+            String str = new String(bytes, off, 19);
+            throw new DateTimeParseException("illegal input " + str, str, 0);
+        }
+
+        int dom;
+        if (d0 >= '0' && d0 <= '9'
+                && d1 >= '0' && d1 <= '9'
+        ) {
+            dom = (d0 - '0') * 10 + (d1 - '0');
+
+            int max = 31;
+            switch (month) {
+                case 2:
+                    boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
+                    max = leapYear ? 29 : 28;
+                    break;
+                case 4:
+                case 6:
+                case 9:
+                case 11:
+                    max = 30;
+                    break;
+            }
+
+            if ((dom == 0 && year != 0) || dom > max) {
+                String str = new String(bytes, off, 19);
+                throw new DateTimeParseException("illegal input " + str, str, 0);
+            }
+        } else {
+            String str = new String(bytes, off, 19);
+            throw new DateTimeParseException("illegal input " + str, str, 0);
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            String str = new String(bytes, off, 19);
+            throw new DateTimeParseException("illegal input " + str, str, 0);
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            String str = new String(bytes, off, 19);
+            throw new DateTimeParseException("illegal input " + str, str, 0);
+        }
+
+        int second;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            second = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            String str = new String(bytes, off, 19);
+            throw new DateTimeParseException("illegal input " + str, str, 0);
+        }
+
+        if (year == 0 && month == 0 && dom == 0) {
+            year = 1970;
+            month = 1;
+            dom = 1;
+        }
+
+        long utcSeconds;
+        {
+            final int DAYS_PER_CYCLE = 146097;
+            final long DAYS_0000_TO_1970 = (DAYS_PER_CYCLE * 5L) - (30L * 365L + 7L);
+
+            long total = (365 * year)
+                    + ((year + 3) / 4 - (year + 99) / 100 + (year + 399) / 400)
+                    + ((367 * month - 362) / 12)
+                    + (dom - 1);
+
+            if (month > 2) {
+                total--;
+                boolean leapYear = (year & 3) == 0 && ((year % 100) != 0 || (year % 400) == 0);
+                if (!leapYear) {
+                    total--;
+                }
+            }
+
+            long epochDay = total - DAYS_0000_TO_1970;
+            utcSeconds = epochDay * 86400
+                    + hour * 3600
+                    + minute * 60
+                    + second;
+        }
+
+        int zoneOffsetTotalSeconds;
+
+        if (zoneId == null) {
+            zoneId = DEFAULT_ZONE_ID;
+        }
+        boolean shanghai = zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES;
+        long SECONDS_1991_09_15_02 = 684900000; // utcMillis(1991, 9, 15, 2, 0, 0);
+        if (shanghai && utcSeconds >= SECONDS_1991_09_15_02) {
+            final int OFFSET_0800_TOTAL_SECONDS = 28800;
+            zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+        } else if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
+            zoneOffsetTotalSeconds = 0;
+        } else {
+            LocalDate localDate = LocalDate.of(year, month, dom);
+            LocalTime localTime = LocalTime.of(hour, minute, second, 0);
+            LocalDateTime ldt = LocalDateTime.of(localDate, localTime);
+            ZoneOffset offset = zoneId.getRules().getOffset(ldt);
+            zoneOffsetTotalSeconds = offset.getTotalSeconds();
+        }
+
+        return (utcSeconds - zoneOffsetTotalSeconds) * 1000L;
+    }
+
     public static LocalDateTime localDateTime(
             char y0,
             char y1,
@@ -5668,8 +8903,15 @@ public class DateUtils {
             return null;
         }
 
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, second, 0);
-        return ldt;
+        if (year == 0 && month == 0 && dom == 0 && hour == 0 && minute == 0 && second == 0) {
+            return null;
+        }
+
+        if (hour > 24 || minute > 60 || second > 60) {
+            return null;
+        }
+
+        return LocalDateTime.of(year, month, dom, hour, minute, second, 0);
     }
 
     public static LocalDateTime localDateTime(

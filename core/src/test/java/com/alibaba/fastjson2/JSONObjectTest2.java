@@ -7,17 +7,16 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONObjectTest2 {
     @Test
     public void testSqlDate() {
-        assertNotNull(JSONObject
+        assertNull(JSONObject
                 .of("date", "0000-00-00")
                 .getObject("date", Date.class));
 
-        assertNotNull(JSONObject
+        assertNull(JSONObject
                 .of("date", "0000-00-00")
                 .getObject("date", Timestamp.class));
 
@@ -28,11 +27,11 @@ public class JSONObjectTest2 {
 
     @Test
     public void testSqlDate1() {
-        assertNotNull(JSONObject
+        assertNull(JSONObject
                 .of("date", "0000-00-00 00:00:00")
                 .getObject("date", Date.class));
 
-        assertNotNull(JSONObject
+        assertNull(JSONObject
                 .of("date", "0000-00-00 00:00:00")
                 .getObject("date", Timestamp.class));
 
@@ -65,12 +64,12 @@ public class JSONObjectTest2 {
         {
             Bean<Date> bean = JSON.parseObject(str, new TypeReference<Bean<Date>>() {
             }.getType());
-            assertNotNull(bean.date);
+            assertNull(bean.date);
         }
         {
             Bean<Date> bean = JSON.parseObject(str, new TypeReference<Bean<Timestamp>>() {
             }.getType());
-            assertNotNull(bean.date);
+            assertNull(bean.date);
         }
         {
             Bean<Date> bean = JSON.parseObject(str, new TypeReference<Bean<Time>>() {
@@ -85,12 +84,12 @@ public class JSONObjectTest2 {
         {
             Bean<Date> bean = JSON.parseObject(str, new TypeReference<Bean<Date>>() {
             }.getType());
-            assertNotNull(bean.date);
+            assertNull(bean.date);
         }
         {
             Bean<Date> bean = JSON.parseObject(str, new TypeReference<Bean<Timestamp>>() {
             }.getType());
-            assertNotNull(bean.date);
+            assertNull(bean.date);
         }
         {
             Bean<Date> bean = JSON.parseObject(str, new TypeReference<Bean<Time>>() {

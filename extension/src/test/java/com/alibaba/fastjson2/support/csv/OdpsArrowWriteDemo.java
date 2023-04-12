@@ -19,7 +19,7 @@ import java.util.Arrays;
 
 public class OdpsArrowWriteDemo {
     // EPA_SmartLocationDatabase_V3_Jan_2021_Final.csv X4
-    static final File file = new File("/Users/wenshao/Downloads/EPA_SmartLocationDatabase_V3_Jan_2021_Final.csv");
+    static final File file = new File("/Users/wenshao/Downloads/Demographics_by_Zip_Code.csv");
 
     private static String accessID = "";
     private static String accessKey = "";
@@ -39,15 +39,12 @@ public class OdpsArrowWriteDemo {
             Instance dropTableTask = SQLTask.run(odps, dropTable);
             dropTableTask.waitForSuccess();
 
-            String ddl = CSVMaxComputeUtils.genCreateTable(file, tableName);
+            String ddl = CSVUtils.genMaxComputeCreateTable(file, tableName);
             System.out.println(ddl);
 
             Instance createTableTask = SQLTask.run(odps, ddl);
             createTableTask.waitForSuccess();
         }
-
-        CSVReader csvReader = CSVReader.of(file);
-        csvReader.readHeader();
 
         TableTunnel.UploadSession uploadSession = tunnel.createUploadSession(project, tableName);
         int rowCount = CSVReader.rowCount(file) - 1;
@@ -57,6 +54,7 @@ public class OdpsArrowWriteDemo {
 
         long start = System.currentTimeMillis();
         CompressOption compressOption = new CompressOption(CompressOption.CompressAlgorithm.ODPS_ARROW_LZ4_FRAME, 0, 0);
+
         ArrowByteArrayConsumer consumer = new ArrowByteArrayConsumer(
                 schema,
                 rowCount,
@@ -86,6 +84,8 @@ public class OdpsArrowWriteDemo {
                 }
         );
 
-        csvReader.readAll(consumer);
+        CSVReader csvReader = CSVReader.of(file, consumer);
+        csvReader.readHeader();
+        csvReader.readAll();
     }
 }

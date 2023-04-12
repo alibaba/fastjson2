@@ -1,7 +1,11 @@
 package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.reader.*;
+import com.alibaba.fastjson2.stream.StreamReader;
 import com.alibaba.fastjson2.util.DateUtils;
+import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -12,11 +16,19 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 
 class CSVReaderUTF16<T>
         extends CSVReader<T> {
+    static final Map<Long, Function<Consumer, CharArrayValueConsumer>> valueConsumerCreators
+            = new ConcurrentHashMap<>();
+    CharArrayValueConsumer valueConsumer;
+
     char[] buf;
     Reader input;
 
@@ -31,6 +43,11 @@ class CSVReaderUTF16<T>
         this.input = input;
     }
 
+    CSVReaderUTF16(Reader input, CharArrayValueConsumer valueConsumer) {
+        this.valueConsumer = valueConsumer;
+        this.input = input;
+    }
+
     CSVReaderUTF16(Reader input, Type[] types) {
         super(types);
         this.input = input;
@@ -38,6 +55,13 @@ class CSVReaderUTF16<T>
 
     CSVReaderUTF16(char[] bytes, int off, int len, Class<T> objectClass) {
         super(objectClass);
+        this.buf = bytes;
+        this.off = off;
+        this.end = off + len;
+    }
+
+    CSVReaderUTF16(char[] bytes, int off, int len, CharArrayValueConsumer valueConsumer) {
+        this.valueConsumer = valueConsumer;
         this.buf = bytes;
         this.off = off;
         this.end = off + len;
@@ -193,6 +217,10 @@ class CSVReaderUTF16<T>
     }
 
     Object readValue(char[] chars, int off, int len, Type type) {
+        if (len == 0) {
+            return null;
+        }
+
         if (type == Integer.class) {
             return TypeUtils.parseInt(chars, off, len);
         }
@@ -219,12 +247,16 @@ class CSVReaderUTF16<T>
             return TypeUtils.parseDouble(chars, off, len);
         }
 
-        String str = new String(chars, off, len);
-
         if (type == Date.class) {
-            return DateUtils.parseDate(str, DEFAULT_ZONE_ID);
+            long millis = DateUtils.parseMillis(chars, off, len, DEFAULT_ZONE_ID);
+            return new Date(millis);
         }
 
+        if (type == Boolean.class) {
+            return TypeUtils.parseBoolean(chars, off, len);
+        }
+
+        String str = new String(chars, off, len);
         return TypeUtils.cast(str, type);
     }
 
@@ -435,6 +467,11 @@ class CSVReaderUTF16<T>
                 valueList.toArray(values);
             }
         }
+
+        if (input == null && off == end) {
+            inputEnd = true;
+        }
+
         return values;
     }
 
@@ -442,6 +479,221 @@ class CSVReaderUTF16<T>
     public void close() {
         if (input != null) {
             IOUtils.close(input);
+        }
+    }
+
+    public void statAll() {
+        CharArrayValueConsumer consumer = (row, column, bytes, off, len) -> {
+            StreamReader.ColumnStat stat = getColumnStat(column);
+            stat.stat(bytes, off, len);
+        };
+        readAll(consumer);
+    }
+
+    public void readLineObjectAll(boolean readHeader, Consumer<T> consumer) {
+        if (readHeader) {
+            readHeader();
+        }
+
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+
+        // valueConsumerCreators
+        if (this.fieldReaders == null) {
+            if (objectClass != null) {
+                ObjectReaderAdapter objectReader = (ObjectReaderAdapter) provider.getObjectReader(objectClass);
+                this.fieldReaders = objectReader.getFieldReaders();
+                this.objectCreator = provider.createObjectCreator(objectClass, features);
+            }
+        }
+
+        Function<Consumer, CharArrayValueConsumer> valueConsumerCreator;
+        String[] strings = new String[this.fieldReaders.length + 1];
+        strings[0] = objectClass.getName();
+        for (int i = 0; i < this.fieldReaders.length; i++) {
+            strings[i + 1] = this.fieldReaders[i].fieldName;
+        }
+        long fullNameHash = Fnv.hashCode64(strings);
+        valueConsumerCreator = valueConsumerCreators.get(fullNameHash);
+        if (valueConsumerCreator == null) {
+            valueConsumerCreator = provider
+                    .createCharArrayValueConsumerCreator(objectClass, fieldReaders);
+            if (valueConsumerCreator != null) {
+                valueConsumerCreators.putIfAbsent(fullNameHash, valueConsumerCreator);
+            }
+        }
+
+        CharArrayValueConsumer bytesConsumer = null;
+        if (valueConsumerCreator != null) {
+            bytesConsumer = valueConsumerCreator.apply(consumer);
+        }
+
+        if (bytesConsumer == null) {
+            bytesConsumer = new CharArrayConsumerImpl(consumer);
+        }
+
+        readAll(bytesConsumer);
+    }
+
+    public void readAll() {
+        if (valueConsumer == null) {
+            throw new JSONException("unsupported operation, consumer is null");
+        }
+
+        readAll(valueConsumer);
+    }
+
+    public void readAll(CharArrayValueConsumer<T> consumer) {
+        while (true) {
+            try {
+                if (inputEnd) {
+                    break;
+                }
+
+                if (input == null) {
+                    if (off >= end) {
+                        break;
+                    }
+                }
+
+                boolean result = seekLine();
+
+                if (!result) {
+                    break;
+                }
+            } catch (IOException e) {
+                throw new JSONException("seekLine error", e);
+            }
+
+            consumer.beforeRow(rowCount);
+
+            boolean quote = false;
+            int valueStart = lineStart;
+            int valueSize = 0;
+            int escapeCount = 0;
+            int columnIndex = 0;
+            for (int i = lineStart; i < lineEnd; ++i) {
+                char ch = buf[i];
+
+                if (quote) {
+                    if (ch == '"') {
+                        int n = i + 1;
+                        if (n < lineEnd) {
+                            char c1 = buf[n];
+                            if (c1 == '"') {
+                                valueSize += 2;
+                                escapeCount++;
+                                ++i;
+                                continue;
+                            } else if (c1 == ',') {
+                                ++i;
+                                ch = c1;
+                            }
+                        } else if (n == lineEnd) {
+                            break;
+                        }
+                    } else {
+                        valueSize++;
+                        continue;
+                    }
+                } else {
+                    if (ch == '"') {
+                        quote = true;
+                        continue;
+                    }
+                }
+
+                if (ch == ',') {
+                    if (quote) {
+                        if (escapeCount == 0) {
+//                            value = new String(buf, valueStart + 1, valueSize, charset);
+                            consumer.accept(rowCount, columnIndex, buf, valueStart + 1, valueSize);
+                        } else {
+                            char[] bytes = new char[valueSize - escapeCount];
+                            int valueEnd = valueStart + valueSize;
+                            for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
+                                char c = buf[j];
+                                bytes[k++] = c;
+                                if (c == '"' && buf[j + 1] == '"') {
+                                    ++j;
+                                }
+                            }
+
+                            consumer.accept(rowCount, columnIndex, bytes, 0, bytes.length);
+                        }
+                    } else {
+                        consumer.accept(rowCount, columnIndex, buf, valueStart, valueSize);
+                    }
+
+                    quote = false;
+                    valueStart = i + 1;
+                    valueSize = 0;
+                    escapeCount = 0;
+                    columnIndex++;
+                    continue;
+                }
+
+                valueSize++;
+            }
+
+            if (valueSize > 0) {
+                if (quote) {
+                    if (escapeCount == 0) {
+//                        value = new String(buf, valueStart + 1, valueSize, charset);
+                        consumer.accept(rowCount, columnIndex, buf, valueStart + 1, valueSize);
+                    } else {
+                        char[] bytes = new char[valueSize - escapeCount];
+                        int valueEnd = lineEnd;
+                        for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
+                            char c = buf[j];
+                            bytes[k++] = c;
+                            if (c == '"' && buf[j + 1] == '"') {
+                                ++j;
+                            }
+                        }
+
+//                        value = new String(bytes, 0, bytes.length, charset);
+                        consumer.accept(rowCount, columnIndex, bytes, 0, bytes.length);
+                    }
+                } else {
+//                    value = new String(buf, valueStart, valueSize, charset);
+                    consumer.accept(rowCount, columnIndex, buf, valueStart, valueSize);
+                }
+            }
+            consumer.afterRow(rowCount);
+        }
+    }
+
+    class CharArrayConsumerImpl<T>
+            implements CharArrayValueConsumer {
+        protected T object;
+        final Consumer<T> consumer;
+
+        public CharArrayConsumerImpl(Consumer<T> consumer) {
+            this.consumer = consumer;
+        }
+
+        @Override
+        public final void beforeRow(int row) {
+            if (objectCreator != null) {
+                object = (T) objectCreator.get();
+            }
+        }
+
+        @Override
+        public void accept(int row, int column, char[] bytes, int off, int len) {
+            if (column >= fieldReaders.length || len == 0) {
+                return;
+            }
+
+            FieldReader fieldReader = fieldReaders[column];
+            Object fieldValue = readValue(bytes, off, len, fieldReader.fieldType);
+            fieldReader.accept(object, fieldValue);
+        }
+
+        @Override
+        public final void afterRow(int row) {
+            consumer.accept(object);
+            object = null;
         }
     }
 }

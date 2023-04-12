@@ -112,8 +112,13 @@ public class JSONTest {
         Date1 date1 = JSON.parseObject("{\"date\":\"20180131022733000-0800\"}",
                 (Type) Date1.class, "yyyyMMddHHmmssSSSZ", JSONReader.Feature.FieldBased);
         assertNotNull(date1.getDate());
-        assertThrows(JSONException.class, () -> JSON.parseObject("{\"date\":\"20180131022733000-0800\"}",
-                (Type) Date1.class, ""));
+        assertNotNull(
+                JSON.parseObject(
+                        "{\"date\":\"20180131022733000-0800\"}",
+                        (Type) Date1.class,
+                        ""
+                )
+        );
     }
 
     @Test
@@ -131,7 +136,7 @@ public class JSONTest {
         Date1 date1 = JSON.parseObject("{\"date\":\"20180131022733000-0800\"}".getBytes(StandardCharsets.UTF_8),
                 (Type) Date1.class, "yyyyMMddHHmmssSSSZ", JSONReader.Feature.FieldBased);
         assertNotNull(date1.getDate());
-        assertThrows(JSONException.class, () -> JSON.parseObject("{\"date\":\"20180131022733000-0800\"}".getBytes(StandardCharsets.UTF_8),
+        assertNotNull(JSON.parseObject("{\"date\":\"20180131022733000-0800\"}".getBytes(StandardCharsets.UTF_8),
                 (Type) Date1.class, ""));
     }
 
@@ -145,7 +150,7 @@ public class JSONTest {
         Date1 date1 = JSON.parseObject(new ByteArrayInputStream(dateBytes),
                 Date1.class, "yyyyMMddHHmmssSSSZ", JSONReader.Feature.FieldBased);
         assertNotNull(date1.getDate());
-        assertThrows(JSONException.class, () -> JSON.parseObject(new ByteArrayInputStream(dateBytes),
+        assertNotNull(JSON.parseObject(new ByteArrayInputStream(dateBytes),
                 Date1.class, ""));
     }
 
@@ -627,9 +632,12 @@ public class JSONTest {
         assertNull(JSON.parseObject("".getBytes(StandardCharsets.UTF_8), Object.class, "", new Filter[0]));
         assertNull(JSON.parseObject("null".getBytes(StandardCharsets.UTF_8), Object.class, "", new Filter[0]));
 
-        assertNull(JSON.parseObject((String) null, new TypeReference<List<Map>>(){}, (Filter) null));
-        assertNull(JSON.parseObject("", new TypeReference<List<Map>>(){}, (Filter) null));
-        assertNull(JSON.parseObject("null", new TypeReference<List<Map>>(){}, (Filter) null));
+        assertNull(JSON.parseObject((String) null, new TypeReference<List<Map>>() {
+        }, (Filter) null));
+        assertNull(JSON.parseObject("", new TypeReference<List<Map>>() {
+        }, (Filter) null));
+        assertNull(JSON.parseObject("null", new TypeReference<List<Map>>() {
+        }, (Filter) null));
 
         assertNull(JSON.parseArray((byte[]) null, (Type) Object.class));
         assertNull(JSON.parseArray(new byte[0], (Type) Object.class));
@@ -769,19 +777,23 @@ public class JSONTest {
 
         assertEquals(123,
                 ((List) JSON.parseObject("\"123\"",
-                        new TypeReference<List<Integer>>() {}.getType())
+                        new TypeReference<List<Integer>>() {
+                        }.getType())
                 ).get(0));
         assertEquals(123,
                 ((List) JSON.parseObject("\"123\"",
-                        new TypeReference<LinkedList<Integer>>() {}.getType()))
+                        new TypeReference<LinkedList<Integer>>() {
+                        }.getType()))
                         .get(0));
         assertEquals(123,
                 ((List) JSON.parseObject("\"123\"",
-                        new TypeReference<ArrayList<Integer>>() {}.getType()))
+                        new TypeReference<ArrayList<Integer>>() {
+                        }.getType()))
                         .get(0));
         assertEquals(123,
                 ((List) JSON.parseObject("\"123\"",
-                        new TypeReference<AbstractList<Integer>>() {}.getType()))
+                        new TypeReference<AbstractList<Integer>>() {
+                        }.getType()))
                         .get(0));
 
         new ObjectReaderImplList(MyList.class, MyList.class, MyList.class, Integer.class, null).createInstance();
@@ -794,19 +806,23 @@ public class JSONTest {
     public void test_list_str_0() {
         assertEquals("123",
                 ((List) JSON.parseObject("[\"123\"]",
-                        new TypeReference<List<String>>() {}.getType()))
+                        new TypeReference<List<String>>() {
+                        }.getType()))
                         .get(0));
         assertEquals("123",
                 ((List) JSON.parseObject("[\"123\"]",
-                        new TypeReference<LinkedList<String>>() {}.getType()))
+                        new TypeReference<LinkedList<String>>() {
+                        }.getType()))
                         .get(0));
         assertEquals("123",
                 ((List) JSON.parseObject("[\"123\"]",
-                        new TypeReference<ArrayList<String>>() {}.getType()))
+                        new TypeReference<ArrayList<String>>() {
+                        }.getType()))
                         .get(0));
         assertEquals("123",
                 ((List) JSON.parseObject("[\"123\"]",
-                        new TypeReference<AbstractList<String>>() {}.getType()))
+                        new TypeReference<AbstractList<String>>() {
+                        }.getType()))
                         .get(0));
 
         new ObjectReaderImplListStr(MyList.class, MyList.class).createInstance();

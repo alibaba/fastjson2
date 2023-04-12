@@ -2718,9 +2718,24 @@ public class ObjectReaderCreatorASM
         }
     }
 
-    public Function<Consumer, ByteArrayValueConsumer> createValueConsumerCreator(
+    public Function<Consumer, ByteArrayValueConsumer> createByteArrayValueConsumerCreator(
             Class objectClass,
             FieldReader[] fieldReaderArray
+    ) {
+        return createValueConsumer0(objectClass, fieldReaderArray, true);
+    }
+
+    public Function<Consumer, CharArrayValueConsumer> createCharArrayValueConsumerCreator(
+            Class objectClass,
+            FieldReader[] fieldReaderArray
+    ) {
+        return createValueConsumer0(objectClass, fieldReaderArray, false);
+    }
+
+    private Function createValueConsumer0(
+            Class objectClass,
+            FieldReader[] fieldReaderArray,
+            boolean bytes
     ) {
         Constructor defaultConstructor = BeanUtils.getDefaultConstructor(objectClass, false);
         if (defaultConstructor == null || !Modifier.isPublic(objectClass.getModifiers())) {
@@ -2731,7 +2746,10 @@ public class ObjectReaderCreatorASM
                 (e) -> objectClass.getName().equals(e) ? objectClass : null
         );
 
-        String className = "VCG_" + seed.incrementAndGet() + "_" + fieldReaderArray.length + "_" + objectClass.getSimpleName();
+        String className = (bytes ? "VBACG_" : "VCACG_")
+                + seed.incrementAndGet()
+                + "_" + fieldReaderArray.length
+                + "_" + objectClass.getSimpleName();
         String classNameType;
         String classNameFull;
 
@@ -2771,7 +2789,9 @@ public class ObjectReaderCreatorASM
                 Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER,
                 classNameType,
                 "java/lang/Object",
-                new String[]{TYPE_VALUE_CONSUMER}
+                new String[]{
+                        bytes ? TYPE_BYTE_ARRAY_VALUE_CONSUMER : TYPE_CHAR_ARRAY_VALUE_CONSUMER
+                }
         );
 
         {
@@ -2835,10 +2855,17 @@ public class ObjectReaderCreatorASM
         {
             final int ROW = 1, COLUMN = 2, BYTES = 3, OFF = 4, LEN = 5, CHARSET = 6;
 
+            String methodDesc;
+            if (bytes) {
+                methodDesc = "(II[BIILjava/nio/charset/Charset;)V";
+            } else {
+                methodDesc = "(II[CII)V";
+            }
+
             MethodWriter mw = cw.visitMethod(
                     Opcodes.ACC_PUBLIC,
                     "accept",
-                    "(II[BIILjava/nio/charset/Charset;)V",
+                    methodDesc,
                     32
             );
 
@@ -2893,7 +2920,7 @@ public class ObjectReaderCreatorASM
                     mw.visitVarInsn(ALOAD, BYTES);
                     mw.visitVarInsn(Opcodes.ILOAD, OFF);
                     mw.visitVarInsn(Opcodes.ILOAD, LEN);
-                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_TYPE_UTILS, "parseInt", "([BII)I", false);
+                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_TYPE_UTILS, "parseInt", bytes ? "([BII)I" : "([CII)I", false);
 
                     if (fieldType == short.class) {
                         DESC_FIELD_CLASS = "S";
@@ -2921,7 +2948,7 @@ public class ObjectReaderCreatorASM
                     mw.visitVarInsn(ALOAD, BYTES);
                     mw.visitVarInsn(Opcodes.ILOAD, OFF);
                     mw.visitVarInsn(Opcodes.ILOAD, LEN);
-                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_TYPE_UTILS, "parseLong", "([BII)J", false);
+                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_TYPE_UTILS, "parseLong", bytes ? "([BII)J" : "([CII)J", false);
                     if (fieldType == long.class) {
                         DESC_FIELD_CLASS = "J";
                         DESC_METHOD = "(J)V";
@@ -2934,7 +2961,7 @@ public class ObjectReaderCreatorASM
                     mw.visitVarInsn(ALOAD, BYTES);
                     mw.visitVarInsn(Opcodes.ILOAD, OFF);
                     mw.visitVarInsn(Opcodes.ILOAD, LEN);
-                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_TYPE_UTILS, "parseFloat", "([BII)F", false);
+                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_TYPE_UTILS, "parseFloat", bytes ? "([BII)F" : "([CII)F", false);
 
                     if (fieldType == float.class) {
                         DESC_FIELD_CLASS = "F";
@@ -2948,7 +2975,7 @@ public class ObjectReaderCreatorASM
                     mw.visitVarInsn(ALOAD, BYTES);
                     mw.visitVarInsn(Opcodes.ILOAD, OFF);
                     mw.visitVarInsn(Opcodes.ILOAD, LEN);
-                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_TYPE_UTILS, "parseDouble", "([BII)D", false);
+                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_TYPE_UTILS, "parseDouble", bytes ? "([BII)D" : "([CII)D", false);
 
                     if (fieldType == double.class) {
                         DESC_FIELD_CLASS = "D";
@@ -2962,7 +2989,7 @@ public class ObjectReaderCreatorASM
                     mw.visitVarInsn(ALOAD, BYTES);
                     mw.visitVarInsn(Opcodes.ILOAD, OFF);
                     mw.visitVarInsn(Opcodes.ILOAD, LEN);
-                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_TYPE_UTILS, "parseBoolean", "([BII)Ljava/lang/Boolean;", false);
+                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_TYPE_UTILS, "parseBoolean", bytes ? "([BII)Ljava/lang/Boolean;" : "([CII)Ljava/lang/Boolean;", false);
 
                     if (fieldType == boolean.class) {
                         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false);
@@ -2980,9 +3007,12 @@ public class ObjectReaderCreatorASM
                     mw.visitVarInsn(ALOAD, BYTES);
                     mw.visitVarInsn(Opcodes.ILOAD, OFF);
                     mw.visitVarInsn(Opcodes.ILOAD, LEN);
-                    mw.visitVarInsn(ALOAD, CHARSET);
-                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_DATE_UTILS, "parseMillis", "([BIILjava/nio/charset/Charset;)J", false);
-
+                    if (bytes) {
+                        mw.visitVarInsn(ALOAD, CHARSET);
+                        mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_DATE_UTILS, "parseMillis", "([BIILjava/nio/charset/Charset;)J", false);
+                    } else {
+                        mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_DATE_UTILS, "parseMillis", "([CII)J", false);
+                    }
                     mw.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/util/Date", "<init>", "(J)V", false);
 
                     DESC_FIELD_CLASS = "Ljava/util/Date;";
@@ -2991,7 +3021,7 @@ public class ObjectReaderCreatorASM
                     mw.visitVarInsn(ALOAD, BYTES);
                     mw.visitVarInsn(Opcodes.ILOAD, OFF);
                     mw.visitVarInsn(Opcodes.ILOAD, LEN);
-                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_TYPE_UTILS, "parseBigDecimal", "([BII)Ljava/math/BigDecimal;", false);
+                    mw.visitMethodInsn(Opcodes.INVOKESTATIC, TYPE_TYPE_UTILS, "parseBigDecimal", bytes ? "([BII)Ljava/math/BigDecimal;" : "([CII)Ljava/math/BigDecimal;", false);
 
                     DESC_FIELD_CLASS = "Ljava/math/BigDecimal;";
                     DESC_METHOD = "(Ljava/math/BigDecimal;)V";
@@ -3001,8 +3031,12 @@ public class ObjectReaderCreatorASM
                     mw.visitVarInsn(ALOAD, BYTES);
                     mw.visitVarInsn(Opcodes.ILOAD, OFF);
                     mw.visitVarInsn(Opcodes.ILOAD, LEN);
-                    mw.visitVarInsn(ALOAD, CHARSET);
-                    mw.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/String", "<init>", "([BIILjava/nio/charset/Charset;)V", false);
+                    if (bytes) {
+                        mw.visitVarInsn(ALOAD, CHARSET);
+                        mw.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/String", "<init>", "([BIILjava/nio/charset/Charset;)V", false);
+                    } else {
+                        mw.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/String", "<init>", "([CII)V", false);
+                    }
 
                     if (fieldType == String.class) {
                         DESC_FIELD_CLASS = "Ljava/lang/String;";
@@ -3030,7 +3064,7 @@ public class ObjectReaderCreatorASM
                 } else if (field != null) {
                     mw.visitFieldInsn(PUTFIELD, TYPE_OBJECT, field.getName(), DESC_FIELD_CLASS);
                 } else {
-                    return null; // not support
+                    return null;
                 }
                 mw.visitJumpInsn(Opcodes.GOTO, dflt);
             }
@@ -3048,7 +3082,7 @@ public class ObjectReaderCreatorASM
             Constructor<?> constructor = consumerClass.getConstructor(Consumer.class);
             return (c) -> {
                 try {
-                    return (ByteArrayValueConsumer) constructor.newInstance(c);
+                    return constructor.newInstance(c);
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                     throw new JSONException("create ByteArrayValueConsumer error", e);
                 }

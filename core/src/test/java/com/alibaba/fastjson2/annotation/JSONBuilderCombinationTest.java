@@ -3,9 +3,12 @@ package com.alibaba.fastjson2.annotation;
 import com.alibaba.fastjson2.util.AnnotationUtils;
 import org.junit.jupiter.api.Test;
 
-import java.lang.annotation.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Test for {@link JSONBuilder}

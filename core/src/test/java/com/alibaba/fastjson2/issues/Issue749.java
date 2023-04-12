@@ -6,7 +6,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Issue749 {
     @Test

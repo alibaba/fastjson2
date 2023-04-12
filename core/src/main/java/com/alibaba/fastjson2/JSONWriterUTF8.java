@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.RyuDouble;
-import com.alibaba.fastjson2.util.RyuFloat;
+import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
@@ -2573,21 +2570,16 @@ class JSONWriterUTF8
             return;
         }
 
-        String str = value.toString();
-
+        ensureCapacity(off + value.precision() + 2);
         if ((context.features & Feature.BrowserCompatible.mask) != 0
                 && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0)) {
-            final int strlen = str.length();
-            ensureCapacity(off + strlen + 2);
             bytes[off++] = '"';
-            str.getBytes(0, strlen, bytes, off);
-            off += strlen;
+            int size = getDecimalChars(value, bytes, off);
+            off += size;
             bytes[off++] = '"';
         } else {
-            final int strlen = str.length();
-            ensureCapacity(off + strlen);
-            str.getBytes(0, strlen, bytes, off);
-            off += strlen;
+            int size = getDecimalChars(value, bytes, off);
+            off += size;
         }
     }
 

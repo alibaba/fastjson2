@@ -1139,21 +1139,16 @@ class JSONWriterUTF16
             return;
         }
 
-        String str = value.toString();
-
+        ensureCapacity(off + value.precision() + 2);
         if ((context.features & Feature.BrowserCompatible.mask) != 0
                 && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0)) {
-            final int strlen = str.length();
-            ensureCapacity(off + strlen + 2);
             chars[off++] = '"';
-            str.getChars(0, strlen, chars, off);
-            off += strlen;
+            int size = getDecimalChars(value, chars, off);
+            off += size;
             chars[off++] = '"';
         } else {
-            final int strlen = str.length();
-            ensureCapacity(off + strlen);
-            str.getChars(0, strlen, chars, off);
-            off += strlen;
+            int size = getDecimalChars(value, chars, off);
+            off += size;
         }
     }
 

@@ -20,7 +20,6 @@ import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DubboTest6 {
     @Test

@@ -893,7 +893,14 @@ public class ObjectReaderProvider
             Class objectClass,
             FieldReader[] fieldReaderArray
     ) {
-        return creator.createValueConsumerCreator(objectClass, fieldReaderArray);
+        return creator.createByteArrayValueConsumerCreator(objectClass, fieldReaderArray);
+    }
+
+    public Function<Consumer, CharArrayValueConsumer> createCharArrayValueConsumerCreator(
+            Class objectClass,
+            FieldReader[] fieldReaderArray
+    ) {
+        return creator.createCharArrayValueConsumerCreator(objectClass, fieldReaderArray);
     }
 
     public ObjectReader getObjectReader(Type objectType, boolean fieldBased) {

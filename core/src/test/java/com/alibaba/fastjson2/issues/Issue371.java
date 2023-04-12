@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.TestUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;

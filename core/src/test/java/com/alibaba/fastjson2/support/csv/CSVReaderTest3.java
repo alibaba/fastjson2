@@ -1,7 +1,13 @@
 package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.reader.ByteArrayValueConsumer;
+import com.alibaba.fastjson2.reader.CharArrayValueConsumer;
 import org.junit.jupiter.api.Test;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -85,7 +91,20 @@ public class CSVReaderTest3 {
     @Test
     public void testObject2() {
         String str = "101,DataWorks\n";
-        CSVReader<Bean> parser = CSVReader.of(str, Bean.class);
+        CSVReader<Bean> parser = CSVReader.of(str.toCharArray(), Bean.class);
+        Bean bean = parser.readLineObject();
+        assertEquals(101, bean.id);
+        assertEquals("DataWorks", bean.name);
+
+        CSVReader.of(str, Bean.class)
+                .readLineObjectAll(false, o -> {});
+    }
+
+    @Test
+    public void testObject2UTF8() {
+        String str = "101,DataWorks\n";
+        byte[] bytes = str.getBytes();
+        CSVReader<Bean> parser = new CSVReaderUTF8(bytes, 0, bytes.length, StandardCharsets.UTF_8, Bean.class);
         Bean bean = parser.readLineObject();
         assertEquals(101, bean.id);
         assertEquals("DataWorks", bean.name);
@@ -98,6 +117,27 @@ public class CSVReaderTest3 {
     public void testObject3() {
         String str = "id,name\n101,DataWorks\n";
         CSVReader<Bean> parser = CSVReader.of(str.toCharArray(), Bean.class);
+        parser.readHeader();
+        Bean bean = parser.readLineObject();
+        assertEquals(101, bean.id);
+        assertEquals("DataWorks", bean.name);
+        assertEquals(Integer.class, parser.getColumnType(0));
+        assertEquals(String.class, parser.getColumnType(1));
+
+        CSVReader.of(str, Bean.class)
+                .readLineObjectAll(
+                        o -> {
+                            assertEquals(101, bean.id);
+                            assertEquals("DataWorks", bean.name);
+                        }
+                );
+    }
+
+    @Test
+    public void testObject3UTF8() {
+        String str = "id,name\n101,DataWorks\n";
+        byte[] bytes = str.getBytes();
+        CSVReader<Bean> parser = new CSVReaderUTF8<>(bytes, 0, bytes.length, StandardCharsets.UTF_8, Bean.class);
         parser.readHeader();
         Bean bean = parser.readLineObject();
         assertEquals(101, bean.id);
@@ -169,6 +209,50 @@ public class CSVReaderTest3 {
 
     @JSONType(orders = {"id", "name"})
     public static class Bean {
+        public int id;
+        public String name;
+    }
+
+    @Test
+    public void testBean2UTF8() {
+        String str = "101,DataWorks\n";
+        byte[] bytes = str.getBytes();
+        CSVReaderUTF8<Bean2> parser = new CSVReaderUTF8(bytes, 0, bytes.length, StandardCharsets.UTF_8, Bean2.class);
+
+        parser.new ByteArrayConsumerImpl(
+                (Consumer) o -> {}
+        );
+
+        ByteArrayValueConsumer consumer = new ByteArrayValueConsumer() {
+            @Override
+            public void accept(int row, int column, byte[] bytes, int off, int len, Charset charset) {
+            }
+        };
+        consumer.beforeRow(1);
+        consumer.afterRow(1);
+    }
+
+    @Test
+    public void testBean2UTF16() {
+        String str = "101,DataWorks\n";
+        char[] chars = str.toCharArray();
+        CSVReaderUTF16<Bean2> parser = new CSVReaderUTF16(chars, 0, chars.length, Bean2.class);
+
+        parser.new CharArrayConsumerImpl<Bean2>(
+                e -> {}
+        );
+
+        CharArrayValueConsumer consumer = new CharArrayValueConsumer() {
+            @Override
+            public void accept(int row, int column, char[] bytes, int off, int len) {
+            }
+        };
+        consumer.beforeRow(1);
+        consumer.afterRow(1);
+    }
+
+    @JSONType(orders = {"id", "name"})
+    public static class Bean2 {
         public int id;
         public String name;
     }

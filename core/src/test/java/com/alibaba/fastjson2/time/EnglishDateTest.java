@@ -246,6 +246,12 @@ public class EnglishDateTest {
             assertEquals(11, ldt.getHour());
             assertEquals(5, ldt.getMinute());
             assertEquals(30, ldt.getSecond());
+
+            byte[] bytes = str.getBytes();
+            assertEquals(ldt, DateUtils.parseLocalDateTime(bytes, 0, bytes.length));
+
+            char[] chars = str.toCharArray();
+            assertEquals(ldt, DateUtils.parseLocalDateTime(chars, 0, bytes.length));
         }
 
         {
@@ -257,6 +263,12 @@ public class EnglishDateTest {
             assertEquals(11, ldt.getHour());
             assertEquals(5, ldt.getMinute());
             assertEquals(30, ldt.getSecond());
+
+            byte[] bytes = str.getBytes();
+            assertEquals(ldt, DateUtils.parseLocalDateTime(bytes, 0, bytes.length));
+
+            char[] chars = str.toCharArray();
+            assertEquals(ldt, DateUtils.parseLocalDateTime(chars, 0, bytes.length));
         }
 
         {
@@ -268,6 +280,12 @@ public class EnglishDateTest {
             assertEquals(11, ldt.getHour());
             assertEquals(5, ldt.getMinute());
             assertEquals(0, ldt.getSecond());
+
+            byte[] bytes = str.getBytes();
+            assertEquals(ldt, DateUtils.parseLocalDateTime(bytes, 0, bytes.length));
+
+            char[] chars = str.toCharArray();
+            assertEquals(ldt, DateUtils.parseLocalDateTime(chars, 0, bytes.length));
         }
         {
             String str = "13 Jun 2008 11:05";
@@ -278,6 +296,12 @@ public class EnglishDateTest {
             assertEquals(11, ldt.getHour());
             assertEquals(5, ldt.getMinute());
             assertEquals(0, ldt.getSecond());
+
+            byte[] bytes = str.getBytes();
+            assertEquals(ldt, DateUtils.parseLocalDateTime(bytes, 0, bytes.length));
+
+            char[] chars = str.toCharArray();
+            assertEquals(ldt, DateUtils.parseLocalDateTime(chars, 0, bytes.length));
         }
     }
 

@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2.v1issues.issue_4200;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -42,11 +45,6 @@ public class Issue4278 {
         assertEquals(
                 Double.POSITIVE_INFINITY,
                 JSON.parseObject(bytes, 0, bytes.length, StandardCharsets.US_ASCII).get("num")
-        );
-
-        assertEquals(
-                Double.POSITIVE_INFINITY,
-                new JSONReaderStr(str).readObject().get("num")
         );
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders4(str)) {

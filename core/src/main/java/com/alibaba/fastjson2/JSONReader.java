@@ -883,12 +883,27 @@ public abstract class JSONReader
                     return localDate == null ? null : LocalDateTime.of(localDate, LocalTime.MIN);
                 case 16:
                     return readLocalDateTime16();
-                case 17:
-                    return readLocalDateTime17();
-                case 18:
-                    return readLocalDateTime18();
-                case 19:
-                    return readLocalDateTime19();
+                case 17: {
+                    LocalDateTime ldt = readLocalDateTime17();
+                    if (ldt != null) {
+                        return ldt;
+                    }
+                    break;
+                }
+                case 18: {
+                    LocalDateTime ldt = readLocalDateTime18();
+                    if (ldt != null) {
+                        return ldt;
+                    }
+                    break;
+                }
+                case 19: {
+                    LocalDateTime ldt = readLocalDateTime19();
+                    if (ldt != null) {
+                        return ldt;
+                    }
+                    break;
+                }
                 case 20: {
                     ZonedDateTime zdt = readZonedDateTimeX(len);
                     if (zdt != null) {
@@ -967,7 +982,13 @@ public abstract class JSONReader
             return LocalDateTime.ofInstant(instant, context.getZoneId());
         }
 
-        throw new JSONException(info("read LocalDateTime error " + str));
+        switch (str) {
+            case "0000-00-00 00:00:00":
+                wasNull = true;
+                return null;
+            default:
+                throw new JSONException(info("read LocalDateTime error " + str));
+        }
     }
 
     public ZonedDateTime readZonedDateTime() {
@@ -1145,6 +1166,7 @@ public abstract class JSONReader
     }
 
     public long readMillisFromString() {
+        wasNull = false;
         String format = context.dateFormat;
         if (format == null
                 || context.formatyyyyMMddhhmmss19
@@ -1175,6 +1197,7 @@ public abstract class JSONReader
                     if (localDate == null) {
                         String str = readString();
                         if ("0000-00-00".equals(str)) {
+                            wasNull = true;
                             return 0;
                         }
                         if (IOUtils.isNumber(str)) {

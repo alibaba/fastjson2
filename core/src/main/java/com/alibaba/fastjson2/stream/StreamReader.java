@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.DateUtils;
+import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -57,6 +59,11 @@ public abstract class StreamReader {
 
     public StreamReader(Type[] types) {
         this.types = types;
+
+        if (types.length == 0) {
+            this.typeReaders = new ObjectReader[0];
+            return;
+        }
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader[] readers = new ObjectReader[types.length];
@@ -120,6 +127,164 @@ public abstract class StreamReader {
 
         public ColumnStat(String name) {
             this.name = name;
+        }
+
+        public void stat(char[] bytes, int off, int len) {
+            values++;
+
+            if (len == 0) {
+                nulls++;
+                return;
+            }
+
+            int end = off + len;
+            boolean nonAscii = false;
+            for (int i = off; i < end; i++) {
+                char b = bytes[i];
+                if (b < 0) {
+                    nonAscii = true;
+                    break;
+                }
+            }
+
+            if (nonAscii) {
+                if (precision < len) {
+                    precision = len;
+                }
+                nonAsciiStrings++;
+                return;
+            }
+
+            int precision = len;
+            if (TypeUtils.isNumber(bytes, off, len)) {
+                char ch = (char) bytes[off];
+                if (ch == '+' || ch == '-') {
+                    precision--;
+                }
+                numbers++;
+                if (TypeUtils.isInteger(bytes, off, len)) {
+                    integers++;
+                } else {
+                    boolean e = false;
+                    int dotIndex = -1;
+                    for (int i = off; i < end; i++) {
+                        char b = bytes[i];
+                        if (b == '.') {
+                            dotIndex = i;
+                        } else if (b == 'e' || b == 'E') {
+                            e = true;
+                        }
+                    }
+                    if (e) {
+                        doubles++;
+                    } else if (dotIndex != -1) {
+                        int scale = end - dotIndex - 1;
+                        if (this.scale < scale) {
+                            this.scale = scale;
+                        }
+                        precision--;
+                    }
+                }
+            } else {
+                boolean checkDate = false;
+                int sub = 0, slash = 0, colon = 0, dot = 0, nums = 0;
+                for (int i = off; i < end; i++) {
+                    char ch = (char) bytes[i];
+                    switch (ch) {
+                        case '-':
+                            sub++;
+                            break;
+                        case '/':
+                            slash++;
+                            break;
+                        case ':':
+                            colon++;
+                            break;
+                        case '.':
+                            dot++;
+                            break;
+                        default:
+                            if (ch >= '0' && ch <= '9') {
+                                nums++;
+                            }
+                            break;
+                    }
+                }
+
+                if ((!checkDate) && (sub == 2 || slash == 2 || colon == 2)) {
+                    checkDate = true;
+                }
+
+                if (checkDate && (nums < 2 || len > 36)) {
+                    checkDate = false;
+                }
+
+                if (checkDate) {
+                    try {
+                        LocalDateTime ldt = null;
+                        switch (len) {
+                            case 8: {
+                                LocalDate localDate = DateUtils.parseLocalDate8(bytes, off);
+                                ldt = localDate.atStartOfDay();
+                                break;
+                            }
+                            case 9: {
+                                LocalDate localDate = DateUtils.parseLocalDate9(bytes, off);
+                                ldt = localDate.atStartOfDay();
+                                break;
+                            }
+                            case 10: {
+                                LocalDate localDate = DateUtils.parseLocalDate10(bytes, off);
+                                ldt = localDate.atStartOfDay();
+                                break;
+                            }
+                            default:
+                                break;
+                        }
+
+                        if (ldt == null) {
+                            String str = new String(bytes, off, len);
+                            ZonedDateTime zdt = DateUtils.parseZonedDateTime(str);
+                            if (zdt != null) {
+                                ldt = zdt.toLocalDateTime();
+                            }
+                        }
+                        if (ldt != null) {
+                            precision = 0;
+                            dates++;
+                        }
+                        int nanoOfSeconds = ldt.getNano();
+                        if (nanoOfSeconds != 0) {
+                            if (nanoOfSeconds % 100000000 == 0) {
+                                precision = 1;
+                            } else if (nanoOfSeconds % 10000000 == 0) {
+                                precision = 2;
+                            } else if (nanoOfSeconds % 1000000 == 0) {
+                                precision = 3;
+                            } else if (nanoOfSeconds % 100000 == 0) {
+                                precision = 4;
+                            } else if (nanoOfSeconds % 10000 == 0) {
+                                precision = 5;
+                            } else if (nanoOfSeconds % 1000 == 0) {
+                                precision = 6;
+                            } else if (nanoOfSeconds % 100 == 0) {
+                                precision = 7;
+                            } else if (nanoOfSeconds % 10 == 0) {
+                                precision = 8;
+                            } else {
+                                precision = 9;
+                            }
+                        }
+                    } catch (Exception ignored) {
+                        errors++;
+                        // ignored
+                    }
+                }
+            }
+
+            if (this.precision < precision) {
+                this.precision = precision;
+            }
         }
 
         public void stat(byte[] bytes, int off, int len, Charset charset) {
@@ -208,7 +373,7 @@ public abstract class StreamReader {
                     checkDate = true;
                 }
 
-                if (checkDate && (nums < 4 || len > 36)) {
+                if (checkDate && (nums < 2 || len > 36)) {
                     checkDate = false;
                 }
 
@@ -269,6 +434,7 @@ public abstract class StreamReader {
                             }
                         }
                     } catch (Exception ignored) {
+                        errors++;
                         // ignored
                     }
                 }
@@ -279,133 +445,18 @@ public abstract class StreamReader {
             }
         }
 
-        public void stat(String value) {
-            values++;
-
-            if (value == null || value.isEmpty()) {
-                nulls++;
+        public void stat(String str) {
+            if (JDKUtils.STRING_CODER != null
+                    && JDKUtils.STRING_CODER.applyAsInt(str) == JDKUtils.LATIN1
+                    && JDKUtils.STRING_VALUE != null
+            ) {
+                byte[] bytes = JDKUtils.STRING_VALUE.apply(str);
+                stat(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
                 return;
             }
 
-            final int len = value.length();
-            boolean nonAscii = false;
-            for (int i = 0; i < value.length(); i++) {
-                char ch = value.charAt(i);
-                if (ch > 127) {
-                    nonAscii = true;
-                    break;
-                }
-            }
-            if (nonAscii) {
-                if (precision < len) {
-                    precision = len;
-                }
-                nonAsciiStrings++;
-                return;
-            }
-
-            int precision = len;
-            if (TypeUtils.isNumber(value)) {
-                char ch = value.charAt(0);
-                if (ch == '+' || ch == '-') {
-                    precision--;
-                }
-                numbers++;
-                if (TypeUtils.isInteger(value)) {
-                    integers++;
-                } else {
-                    boolean e = false;
-                    int dotIndex = -1;
-                    for (int i = 0; i < value.length(); i++) {
-                        char b = value.charAt(i);
-                        if (b == '.') {
-                            dotIndex = i;
-                        } else if (b == 'e' || b == 'E') {
-                            e = true;
-                        }
-                    }
-                    if (e) {
-                        doubles++;
-                    } else if (dotIndex != -1) {
-                        int scale = value.length() - dotIndex - 1;
-                        if (this.scale < scale) {
-                            this.scale = scale;
-                        }
-                        precision--;
-                    }
-                }
-            } else {
-                boolean checkDate = false;
-                int sub = 0, slash = 0, colon = 0, dot = 0, nums = 0;
-                for (int i = 0; i < value.length(); i++) {
-                    char ch = value.charAt(i);
-                    switch (ch) {
-                        case '-':
-                            sub++;
-                            break;
-                        case '/':
-                            slash++;
-                            break;
-                        case ':':
-                            colon++;
-                            break;
-                        case '.':
-                            dot++;
-                            break;
-                        default:
-                            if (ch >= '0' && ch <= '9') {
-                                nums++;
-                            }
-                            break;
-                    }
-                }
-
-                if ((!checkDate) && (sub == 2 || slash == 2 || colon == 2)) {
-                    checkDate = true;
-                }
-
-                if (checkDate && (nums < 4 || len > 36)) {
-                    checkDate = false;
-                }
-
-                if (checkDate) {
-                    try {
-                        ZonedDateTime zdt = DateUtils.parseZonedDateTime(value);
-                        if (zdt != null) {
-                            precision = 0;
-                            dates++;
-                        }
-                        int nanoOfSeconds = zdt.getNano();
-                        if (nanoOfSeconds != 0) {
-                            if (nanoOfSeconds % 100000000 == 0) {
-                                precision = 1;
-                            } else if (nanoOfSeconds % 10000000 == 0) {
-                                precision = 2;
-                            } else if (nanoOfSeconds % 1000000 == 0) {
-                                precision = 3;
-                            } else if (nanoOfSeconds % 100000 == 0) {
-                                precision = 4;
-                            } else if (nanoOfSeconds % 10000 == 0) {
-                                precision = 5;
-                            } else if (nanoOfSeconds % 1000 == 0) {
-                                precision = 6;
-                            } else if (nanoOfSeconds % 100 == 0) {
-                                precision = 7;
-                            } else if (nanoOfSeconds % 10 == 0) {
-                                precision = 8;
-                            } else {
-                                precision = 9;
-                            }
-                        }
-                    } catch (Exception ignored) {
-                        // ignored
-                    }
-                }
-            }
-
-            if (this.precision < precision) {
-                this.precision = precision;
-            }
+            char[] chars = JDKUtils.getCharArray(str);
+            stat(chars, 0, chars.length);
         }
 
         public String getInferSQLType() {

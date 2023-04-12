@@ -2,7 +2,10 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.FieldReader;
-import com.alibaba.fastjson2.util.*;
+import com.alibaba.fastjson2.util.DateUtils;
+import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 import com.alibaba.fastjson2_vo.*;
 import org.junit.jupiter.api.Test;
 
@@ -759,10 +762,10 @@ public class JSONReaderTest1 {
             assertFalse(jsonReader.comma);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'20183301'")) {
-            assertNull(jsonReader.readLocalDate8());
+            assertThrows(JSONException.class, () -> jsonReader.readLocalDate8());
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'20180241'")) {
-            assertNull(jsonReader.readLocalDate8());
+            assertThrows(JSONException.class, () -> jsonReader.readLocalDate8());
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'20180231'")) {
             assertThrows(JSONException.class, () -> jsonReader.readLocalDate8());
@@ -841,7 +844,10 @@ public class JSONReaderTest1 {
         }
 
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'2018-02-31'")) {
-            assertThrows(JSONException.class, () -> jsonReader.readLocalDate10());
+            assertThrows(
+                    JSONException.class,
+                    () -> jsonReader.readLocalDate10()
+            );
         }
     }
 
@@ -1915,7 +1921,7 @@ public class JSONReaderTest1 {
         JSONReader.BigIntegerCreator bigIntegerCreator = new JSONReader.BigIntegerCreator();
 
         {
-            BigInteger[] values = new BigInteger[] {
+            BigInteger[] values = new BigInteger[]{
                     BigInteger.ZERO,
                     BigInteger.ONE,
                     BigInteger.TEN,
@@ -1934,7 +1940,7 @@ public class JSONReaderTest1 {
             }
         }
         {
-            BigInteger[] values = new BigInteger[] {
+            BigInteger[] values = new BigInteger[]{
                     new BigInteger("-1"),
                     new BigInteger("-10"),
                     new BigInteger("-100"),
