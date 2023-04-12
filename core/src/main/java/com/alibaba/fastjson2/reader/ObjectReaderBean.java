@@ -134,6 +134,14 @@ public abstract class ObjectReaderBean<T>
                 if (filterClass == null) {
                     String typeName = jsonReader.getString();
                     filterClass = autoTypeFilter.apply(typeName, expectClass, features);
+
+                    if (!expectClass.isAssignableFrom(filterClass)) {
+                        if ((jsonReader.features(features) & JSONReader.Feature.IgnoreAutoTypeNotMatch.mask) == 0) {
+                            throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
+                        }
+
+                        filterClass = expectClass;
+                    }
                 }
 
                 if (filterClass != null) {
