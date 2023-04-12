@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2.jsonpath;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONPath;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;

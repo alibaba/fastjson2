@@ -20,6 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
+
 final class CSVReaderUTF8<T>
         extends CSVReader<T> {
     static final Map<Long, Function<Consumer, ByteArrayValueConsumer>> valueConsumerCreators
@@ -28,6 +30,7 @@ final class CSVReaderUTF8<T>
     byte[] buf;
     InputStream input;
     Charset charset = StandardCharsets.UTF_8;
+    ByteArrayValueConsumer valueConsumer;
 
     CSVReaderUTF8(Feature... features) {
         for (Feature feature : features) {
@@ -35,11 +38,20 @@ final class CSVReaderUTF8<T>
         }
     }
 
-    CSVReaderUTF8(byte[] bytes, int off, int len, Class<T> objectClass) {
+    CSVReaderUTF8(byte[] bytes, int off, int len, Charset charset, Class<T> objectClass) {
         super(objectClass);
         this.buf = bytes;
         this.off = off;
         this.end = off + len;
+        this.charset = charset;
+    }
+
+    CSVReaderUTF8(byte[] bytes, int off, int len, Charset charset, ByteArrayValueConsumer valueConsumer) {
+        this.valueConsumer = valueConsumer;
+        this.buf = bytes;
+        this.off = off;
+        this.end = off + len;
+        this.charset = charset;
     }
 
     CSVReaderUTF8(byte[] bytes, int off, int len, Type[] types) {
@@ -48,6 +60,13 @@ final class CSVReaderUTF8<T>
         this.off = off;
         this.end = off + len;
         this.types = types;
+    }
+
+    CSVReaderUTF8(byte[] bytes, int off, int len, Class<T> objectClass) {
+        super(objectClass);
+        this.buf = bytes;
+        this.off = off;
+        this.end = off + len;
     }
 
     CSVReaderUTF8(InputStream input, Charset charset, Type[] types) {
@@ -60,6 +79,12 @@ final class CSVReaderUTF8<T>
         super(objectClass);
         this.charset = charset;
         this.input = input;
+    }
+
+    CSVReaderUTF8(InputStream input, Charset charset, ByteArrayValueConsumer valueConsumer) {
+        this.charset = charset;
+        this.input = input;
+        this.valueConsumer = valueConsumer;
     }
 
     protected boolean seekLine() throws IOException {
@@ -217,12 +242,19 @@ final class CSVReaderUTF8<T>
             return TypeUtils.parseBigDecimal(bytes, off, len);
         }
 
+        if (type == Float.class) {
+            if (len == 0) {
+                return null;
+            }
+            return TypeUtils.parseFloat(bytes, off, len);
+        }
+
         if (type == Double.class) {
             return TypeUtils.parseDouble(bytes, off, len);
         }
 
         if (type == Date.class) {
-            long millis = DateUtils.parseMillis(bytes, off, len, charset);
+            long millis = DateUtils.parseMillis(bytes, off, len, charset, DEFAULT_ZONE_ID);
             return new Date(millis);
         }
 
@@ -446,6 +478,10 @@ final class CSVReaderUTF8<T>
             }
         }
 
+        if (input == null && off == end) {
+            inputEnd = true;
+        }
+
         return values;
     }
 
@@ -462,6 +498,14 @@ final class CSVReaderUTF8<T>
             stat.stat(bytes, off, len, charset);
         };
         readAll(consumer);
+    }
+
+    public void readAll() {
+        if (valueConsumer == null) {
+            throw new JSONException("unsupported operation, consumer is null");
+        }
+
+        readAll(valueConsumer);
     }
 
     public void readLineObjectAll(boolean readHeader, Consumer<T> consumer) {
@@ -508,18 +552,20 @@ final class CSVReaderUTF8<T>
         readAll(bytesConsumer);
     }
 
-    class ByteArrayConsumerImpl<T>
+    class ByteArrayConsumerImpl
             implements ByteArrayValueConsumer {
-        protected T object;
-        final Consumer<T> consumer;
+        protected Object object;
+        final Consumer consumer;
 
-        public ByteArrayConsumerImpl(Consumer<T> consumer) {
+        public ByteArrayConsumerImpl(Consumer consumer) {
             this.consumer = consumer;
         }
 
         @Override
         public final void beforeRow(int row) {
-            object = (T) objectCreator.get();
+            if (objectCreator != null) {
+                object = objectCreator.get();
+            }
         }
 
         @Override
@@ -540,7 +586,7 @@ final class CSVReaderUTF8<T>
         }
     }
 
-    public void readAll(ByteArrayValueConsumer consumer) {
+    protected void readAll(ByteArrayValueConsumer consumer) {
         while (true) {
             try {
                 if (inputEnd) {

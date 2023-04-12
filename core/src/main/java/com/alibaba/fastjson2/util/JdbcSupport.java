@@ -550,6 +550,9 @@ public class JdbcSupport {
                 }
 
                 long millis = jsonReader.readMillisFromString();
+                if (millis == 0 && jsonReader.wasNull()) {
+                    return null;
+                }
                 return function.apply(millis);
             }
 
@@ -641,6 +644,9 @@ public class JdbcSupport {
                 }
 
                 long millis = jsonReader.readMillisFromString();
+                if (millis == 0 && jsonReader.wasNull()) {
+                    return null;
+                }
                 return function.apply(millis);
             }
 

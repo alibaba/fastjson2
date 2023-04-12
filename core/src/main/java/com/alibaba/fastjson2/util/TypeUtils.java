@@ -1906,6 +1906,42 @@ public class TypeUtils {
         return Boolean.parseBoolean(str);
     }
 
+    public static Boolean parseBoolean(char[] bytes, int off, int len) {
+        switch (len) {
+            case 0:
+                return null;
+            case 1: {
+                char b0 = bytes[off];
+                if (b0 == '1' || b0 == 'Y') {
+                    return Boolean.TRUE;
+                }
+                if (b0 == '0' || b0 == 'N') {
+                    return Boolean.FALSE;
+                }
+                break;
+            }
+            case 4:
+                if (bytes[off] == 't' && bytes[off + 1] == 'r' && bytes[off + 2] == 'u' && bytes[off + 3] == 'e') {
+                    return Boolean.TRUE;
+                }
+                break;
+            case 5:
+                if (bytes[off] == 'f'
+                        && bytes[off + 1] == 'a'
+                        && bytes[off + 2] == 'l'
+                        && bytes[off + 3] == 's'
+                        && bytes[off + 4] == 'e') {
+                    return Boolean.FALSE;
+                }
+                break;
+            default:
+                break;
+        }
+
+        String str = new String(bytes, off, len);
+        return Boolean.parseBoolean(str);
+    }
+
     public static int parseInt(byte[] bytes, int off, int len) {
         switch (len) {
             case 1: {
@@ -3481,6 +3517,31 @@ public class TypeUtils {
         return true;
     }
 
+    public static boolean isInteger(char[] str, int off, int len) {
+        if (str == null || len == 0) {
+            return false;
+        }
+
+        char ch = (char) str[off];
+        boolean sign = ch == '-' || ch == '+';
+        if (sign) {
+            if (len == 1) {
+                return false;
+            }
+        } else if (ch < '0' || ch > '9') {
+            return false;
+        }
+
+        final int end = off + len;
+        for (int i = off + 1; i < end; ++i) {
+            ch = (char) str[i];
+            if (ch < '0' || ch > '9') {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static boolean isNumber(String str) {
         if (str == null || str.isEmpty()) {
             return false;
@@ -3591,6 +3652,116 @@ public class TypeUtils {
     }
 
     public static boolean isNumber(byte[] str, int off, int len) {
+        if (str == null || len == 0) {
+            return false;
+        }
+
+        char ch = (char) str[off];
+        int offset;
+        boolean sign = ch == '-' || ch == '+';
+        if (sign) {
+            if (len == 1) {
+                return false;
+            }
+            ch = (char) str[off + 1];
+            offset = off + 1;
+        } else {
+            if (ch == '.') {
+                if (len == 1) {
+                    return false;
+                }
+
+                offset = off + 1;
+            } else {
+                offset = off;
+            }
+        }
+
+        int end = off + len;
+        boolean dot = ch == '.';
+        boolean space = false;
+        boolean num = false;
+        if (!dot && (ch >= '0' && ch <= '9')) {
+            num = true;
+            for (; ; ) {
+                if (offset < end) {
+                    ch = (char) str[offset++];
+                } else {
+                    return true;
+                }
+
+                if (space || ch < '0' || ch > '9') {
+                    break;
+                }
+            }
+        }
+
+        boolean small = false;
+        if (ch == '.') {
+            small = true;
+            if (offset < end) {
+                ch = (char) str[offset++];
+            } else {
+                return true;
+            }
+
+            if (ch >= '0' && ch <= '9') {
+                for (; ; ) {
+                    if (offset < end) {
+                        ch = (char) str[offset++];
+                    } else {
+                        return true;
+                    }
+
+                    if (space || ch < '0' || ch > '9') {
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!num && !small) {
+            return false;
+        }
+
+        if (ch == 'e' || ch == 'E') {
+            if (offset == end) {
+                return true;
+            }
+
+            ch = (char) str[offset++];
+
+            boolean eSign = false;
+            if (ch == '+' || ch == '-') {
+                eSign = true;
+                if (offset < end) {
+                    ch = (char) str[offset++];
+                } else {
+                    return false;
+                }
+            }
+
+            if (ch >= '0' && ch <= '9') {
+                for (; ; ) {
+                    if (offset < end) {
+                        ch = (char) str[offset++];
+                    } else {
+                        return true;
+                    }
+
+                    if (ch < '0' || ch > '9') {
+                        break;
+                    }
+                }
+            } else if (eSign) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean isNumber(char[] str, int off, int len) {
         if (str == null || len == 0) {
             return false;
         }

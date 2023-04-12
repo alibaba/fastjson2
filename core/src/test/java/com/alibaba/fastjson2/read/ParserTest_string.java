@@ -1,13 +1,11 @@
 package com.alibaba.fastjson2.read;
 
-import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
-import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,16 +54,6 @@ public class ParserTest_string {
     @Test
     public void test_0_string() {
         JSONReader lexer = JSONReader.of(str);
-        lexerTest(lexer);
-    }
-
-    @Test
-    public void test_0_stringExtract() throws Exception {
-        JSONReader.Context ctx = JSONFactory.createReadContext();
-        Class<?> clazz = Class.forName("com.alibaba.fastjson2.JSONReaderStr");
-        Constructor<?> constructor = clazz.getDeclaredConstructor(JSONReader.Context.class, String.class, int.class, int.class);
-        constructor.setAccessible(true);
-        JSONReader lexer = (JSONReader) constructor.newInstance(ctx, str, 0, str.length());
         lexerTest(lexer);
     }
 

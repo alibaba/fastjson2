@@ -3,7 +3,7 @@ package com.alibaba.fastjson2.jsonb.basic;
 import com.alibaba.fastjson2.JSONB;
 import org.junit.jupiter.api.Test;
 
-import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.JSONB.Constants.BC_NULL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NullTest {

@@ -4,7 +4,10 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.Arrays;
+
+import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
 
 public class IOUtils {
     public static final byte[] digits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
@@ -26,6 +29,7 @@ public class IOUtils {
 
     static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
     static final int[] IA = new int[256];
+
     static {
         Arrays.fill(IA, -1);
         for (int i = 0, iS = CA.length; i < iS; i++) {
@@ -219,6 +223,136 @@ public class IOUtils {
         }
     }
 
+    public static int getDecimalChars(BigDecimal value, byte[] buf, int off) {
+        int precision = value.precision();
+        if (precision < 20 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
+            long unscaleValue = UnsafeUtils.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET);
+            if (unscaleValue != Long.MIN_VALUE) {
+                int scale = value.scale();
+                return getDecimalChars(unscaleValue, scale, buf, off);
+            }
+        }
+
+        String str = value.toString();
+        final int strlen = str.length();
+        str.getBytes(0, strlen, buf, off);
+        return strlen;
+    }
+
+    public static int getDecimalChars(BigDecimal value, char[] buf, int off) {
+        int precision = value.precision();
+        if (precision < 20 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
+            long unscaleValue = UnsafeUtils.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET);
+            if (unscaleValue != Long.MIN_VALUE) {
+                int scale = value.scale();
+                return getDecimalChars(unscaleValue, scale, buf, off);
+            }
+        }
+
+        String str = value.toString();
+        final int strlen = str.length();
+        str.getChars(0, strlen, buf, off);
+        return strlen;
+    }
+
+    public static int getDecimalChars(long unscaledVal, int scale, byte[] buf, int off) {
+        final int start = off;
+        boolean negative = unscaledVal < 0;
+        int size = IOUtils.stringSize(Math.abs(unscaledVal));
+
+        if (scale == 0) {
+            if (unscaledVal < 0) {
+                size++;
+            }
+            getChars(unscaledVal, off + size, buf);
+            return size;
+        }
+
+        int insertionPoint = size - scale;
+        if (insertionPoint == 0) {
+            if (negative) {
+                buf[off++] = (byte) '-';
+            }
+            buf[off++] = (byte) '0';
+            buf[off++] = (byte) '.';
+        } else if (insertionPoint < 0) {
+            if (negative) {
+                buf[off++] = (byte) '-';
+            }
+            buf[off++] = (byte) '0';
+            buf[off++] = (byte) '.';
+
+            for (int i = 0; i < -insertionPoint; i++) {
+                buf[off++] = (byte) '0';
+            }
+        } else {
+            if (negative) {
+                buf[off++] = (byte) '-';
+            }
+        }
+
+        IOUtils.getChars(Math.abs(unscaledVal), off + size, buf);
+        off += size;
+
+        if (insertionPoint > 0) {
+            int insertPointOff = off - scale;
+            System.arraycopy(buf, insertPointOff, buf, insertPointOff + 1, scale);
+            buf[insertPointOff] = (byte) '.';
+            off++;
+        }
+
+        return off - start;
+    }
+
+    public static int getDecimalChars(long unscaledVal, int scale, char[] buf, int off) {
+        final int start = off;
+        boolean negative = unscaledVal < 0;
+        int size = IOUtils.stringSize(Math.abs(unscaledVal));
+
+        if (scale == 0) {
+            if (unscaledVal < 0) {
+                size++;
+            }
+            getChars(unscaledVal, off + size, buf);
+            return size;
+        }
+
+        int insertionPoint = size - scale;
+        if (insertionPoint == 0) {
+            if (negative) {
+                buf[off++] = '-';
+            }
+            buf[off++] = '0';
+            buf[off++] = '.';
+        } else if (insertionPoint < 0) {
+            if (negative) {
+                buf[off++] = '-';
+            }
+            buf[off++] = '0';
+            buf[off++] = '.';
+
+            for (int i = 0; i < -insertionPoint; i++) {
+                buf[off++] = '0';
+            }
+        } else {
+            if (negative) {
+                buf[off++] = '-';
+            }
+        }
+
+        IOUtils.getChars(Math.abs(unscaledVal), off + size, buf);
+        off += size;
+
+        if (insertionPoint > 0) {
+            int insertPointOff = off - scale;
+            System.arraycopy(buf, insertPointOff, buf, insertPointOff + 1, scale);
+            buf[insertPointOff] = '.';
+            off++;
+        }
+
+        return off - start;
+    }
+
     public static int encodeUTF8(byte[] src, int offset, int len, byte[] dst, int dp) {
         int sl = offset + len;
         while (offset < sl) {
@@ -347,6 +481,34 @@ public class IOUtils {
     public static boolean isNumber(String str) {
         for (int i = 0; i < str.length(); ++i) {
             char ch = str.charAt(i);
+            if (ch == '+' || ch == '-') {
+                if (i != 0) {
+                    return false;
+                }
+            } else if (ch < '0' || ch > '9') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean isNumber(char[] chars, int off, int len) {
+        for (int i = off, end = off + len; i < end; ++i) {
+            char ch = chars[i];
+            if (ch == '+' || ch == '-') {
+                if (i != 0) {
+                    return false;
+                }
+            } else if (ch < '0' || ch > '9') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean isNumber(byte[] chars, int off, int len) {
+        for (int i = off, end = off + len; i < end; ++i) {
+            char ch = (char) chars[i];
             if (ch == '+' || ch == '-') {
                 if (i != 0) {
                     return false;
@@ -583,7 +745,7 @@ public class IOUtils {
 
         // Decode all but the last 0 - 2 bytes.
         int d = 0;
-        for (int cc = 0, eLen = (len / 3) * 3; d < eLen;) {
+        for (int cc = 0, eLen = (len / 3) * 3; d < eLen; ) {
             // Assemble three bytes into an int from four "valid" characters.
             int i = IA[s.charAt(sIx++)] << 18 | IA[s.charAt(sIx++)] << 12 | IA[s.charAt(sIx++)] << 6
                     | IA[s.charAt(sIx++)];

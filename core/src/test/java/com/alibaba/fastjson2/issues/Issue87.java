@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONReaderUtils;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -34,7 +33,7 @@ public class Issue87 {
         String errorJson = "[{\"a\":1}{\"b\":2}null undefined 676]";
 
         boolean valid = true;
-        JSONReader jsonReader = JSONReaderUtils.createJSONReader(errorJson);
+        JSONReader jsonReader = JSONReader.of(errorJson.toCharArray());
         try {
             jsonReader.skipValue();
         } catch (JSONException error) {
@@ -49,7 +48,7 @@ public class Issue87 {
         String errorJson = "[\"a\",\"b\"]";
 
         boolean valid = true;
-        JSONReader jsonReader = JSONReaderUtils.createJSONReader(errorJson);
+        JSONReader jsonReader = JSONReader.of(errorJson.toCharArray());
         try {
             jsonReader.skipValue();
         } catch (JSONException error) {

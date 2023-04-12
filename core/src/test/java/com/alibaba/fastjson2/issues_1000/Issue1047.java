@@ -3,7 +3,7 @@ package com.alibaba.fastjson2.issues_1000;
 import com.alibaba.fastjson2.JSONException;
 import org.junit.jupiter.api.Test;
 
-import static com.alibaba.fastjson2.JSON.*;
+import static com.alibaba.fastjson2.JSON.to;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Issue1047 {

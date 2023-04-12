@@ -28,7 +28,6 @@ import java.util.function.*;
 
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
-import static com.alibaba.fastjson2.util.BeanUtils.constructor;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 
@@ -3032,7 +3031,14 @@ public class ObjectReaderCreator {
         }
     }
 
-    public Function<Consumer, ByteArrayValueConsumer> createValueConsumerCreator(
+    public Function<Consumer, ByteArrayValueConsumer> createByteArrayValueConsumerCreator(
+            Class objectClass,
+            FieldReader[] fieldReaderArray
+    ) {
+        return null;
+    }
+
+    public Function<Consumer, CharArrayValueConsumer> createCharArrayValueConsumerCreator(
             Class objectClass,
             FieldReader[] fieldReaderArray
     ) {

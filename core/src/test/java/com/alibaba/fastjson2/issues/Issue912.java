@@ -5,7 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import java.time.format.DateTimeParseException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Issue912 {
     @Test

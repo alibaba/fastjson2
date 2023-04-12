@@ -6,8 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public class CSVMaxComputeUtils {
-    public static String genCreateTable(File file, String tableName) throws IOException {
+public class CSVUtils {
+    public static String genMaxComputeCreateTable(File file, String tableName) throws IOException {
         CSVReader csvReader = CSVReader.of(file);
         csvReader.readHeader();
         csvReader.statAll();
@@ -18,11 +18,25 @@ public class CSVMaxComputeUtils {
         List<StreamReader.ColumnStat> columns = csvReader.getColumnStats();
         for (int i = 0; i < columns.size(); i++) {
             StreamReader.ColumnStat columnStat = columns.get(i);
-            String columnName = columnStat.name;
-            columnName = columnName.replace(' ', '_');
-            columnName = columnName.replace('-', '_');
-            columnName = columnName.replace('+', '_');
-            columnName = columnName.replace('.', '_');
+
+            String columnName;
+            {
+                StringBuffer buf = new StringBuffer();
+                for (int j = 0; j < columnStat.name.length(); j++) {
+                    char ch = columnStat.name.charAt(j);
+                    if (ch == 0xFFFD) {
+                        continue;
+                    }
+
+                    if (ch == ' ' || ch == '-' || ch == '+' || ch == '.') {
+                        buf.append('_');
+                    } else {
+                        buf.append(ch);
+                    }
+                }
+                columnName = buf.toString();
+            }
+
             boolean special = false;
             for (int j = 0; j < columnName.length(); j++) {
                 char ch = columnName.charAt(j);
@@ -40,7 +54,7 @@ public class CSVMaxComputeUtils {
                     break;
                 }
             }
-            if (!special && columnName.length() > 20) {
+            if (!special && columnName.length() > 30) {
                 special = true;
             }
 
@@ -59,8 +73,18 @@ public class CSVMaxComputeUtils {
 
             if (special) {
                 sql.append(" COMMENT '");
-                String comment = columnStat.name.replaceAll("'", "''");
-                sql.append(comment).append('\'');
+                for (int j = 0; j < columnStat.name.length(); j++) {
+                    char ch = columnStat.name.charAt(j);
+                    if (ch == 0xFFFD) {
+                        continue;
+                    }
+
+                    if (ch == '\'') {
+                        sql.append(ch);
+                    }
+                    sql.append(ch);
+                }
+                sql.append('\'');
             }
 
             if (i != columns.size() - 1) {

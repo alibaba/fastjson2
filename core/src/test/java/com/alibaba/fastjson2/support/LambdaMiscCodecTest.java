@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class LambdaMiscCodecTest {
     @Test
@@ -102,6 +102,52 @@ public class LambdaMiscCodecTest {
 
         public void setId(int id) {
             this.id = id;
+        }
+    }
+
+    @Test
+    public void testConstructFunction() throws Throwable {
+        LambdaMiscCodec.ConstructorFunction function = new LambdaMiscCodec.ConstructorFunction(
+                BeanX.class.getConstructor(Bean.class)
+        );
+        Bean bean = new Bean();
+        BeanX apply = (BeanX) function.apply(bean);
+        assertSame(bean, apply.bean);
+    }
+
+    @Test
+    public void testConstructSupplier() throws Throwable {
+        LambdaMiscCodec.ConstructorSupplier supplier = new LambdaMiscCodec.ConstructorSupplier(
+                Bean.class.getConstructor()
+        );
+        Bean bean = (Bean) supplier.get();
+        assertNotNull(bean);
+    }
+
+    public static class BeanX {
+        private Bean bean;
+
+        public BeanX(Bean bean) {
+            this.bean = bean;
+        }
+    }
+
+    @Test
+    public void testError() throws Throwable {
+        LambdaMiscCodec.ConstructorFunction function = new LambdaMiscCodec.ConstructorFunction(
+                BeanError.class.getConstructor(Bean.class)
+        );
+        assertThrows(Exception.class, () -> function.apply(new Bean()));
+
+        LambdaMiscCodec.ConstructorSupplier supplier = new LambdaMiscCodec.ConstructorSupplier(
+                BeanError.class.getConstructor(Bean.class)
+        );
+        assertThrows(Exception.class, () -> supplier.get());
+    }
+
+    public static class BeanError {
+        public BeanError(Bean bean) {
+            throw new RuntimeException();
         }
     }
 }

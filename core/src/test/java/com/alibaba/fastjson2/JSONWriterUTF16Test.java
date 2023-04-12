@@ -10,7 +10,8 @@ import java.util.Arrays;
 import java.util.Date;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.NullAsDefaultValue;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class JSONWriterUTF16Test {
     @Test

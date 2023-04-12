@@ -3,10 +3,7 @@ package com.alibaba.fastjson2.support.csv;
 import com.alibaba.fastjson2.util.TypeUtils;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -173,6 +170,7 @@ public class CSVTest2 {
             return;
         }
 
+        long start = System.currentTimeMillis();
         File file = new File(resource.getFile());
         int rowCount = 0;
         CSVReader parser = CSVReader.of(file);
@@ -188,6 +186,37 @@ public class CSVTest2 {
             rowCount++;
         }
         assertEquals(496774, rowCount);
+
+        long millis = System.currentTimeMillis() - start;
+        System.out.println("millis : " + millis);
+    }
+
+    @Test
+    public void testReadLines3() throws IOException {
+        URL resource = this.getClass().getClassLoader().getResource("organised_Gen.csv");
+        if (resource == null) {
+            return;
+        }
+
+        long start = System.currentTimeMillis();
+        File file = new File(resource.getFile());
+        int rowCount = 0;
+        CSVReader parser = CSVReader.of(new FileReader(file));
+        while (true) {
+            Object[] line = parser.readLineValues();
+            if (line == null) {
+                break;
+            }
+            Integer id = TypeUtils.toIntValue(line[0]);
+            if (rowCount < 41214) {
+                assertEquals(rowCount, id);
+            }
+            rowCount++;
+        }
+        assertEquals(496774, rowCount);
+
+        long millis = System.currentTimeMillis() - start;
+        System.out.println("millis : " + millis);
     }
 
     @Test

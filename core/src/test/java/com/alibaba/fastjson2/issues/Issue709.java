@@ -161,37 +161,6 @@ public class Issue709 {
                 () -> JSONReader.of(bytes, 0, bytes.length, StandardCharsets.US_ASCII)
                         .readArray(String.class)
         );
-
-        assertThrows(
-                JSONException.class,
-                () -> new JSONReaderStr(str)
-                        .readArray()
-        );
-        assertThrows(
-                JSONException.class,
-                () -> new JSONReaderStr(str)
-                        .readArray(Integer.class)
-        );
-        assertThrows(
-                JSONException.class,
-                () -> new JSONReaderStr(str)
-                        .readArray(Long.class)
-        );
-        assertThrows(
-                JSONException.class,
-                () -> new JSONReaderStr(str)
-                        .readArray(Float.class)
-        );
-        assertThrows(
-                JSONException.class,
-                () -> new JSONReaderStr(str)
-                        .readArray(Double.class)
-        );
-        assertThrows(
-                JSONException.class,
-                () -> new JSONReaderStr(str)
-                        .readArray(String.class)
-        );
     }
 
     @Test

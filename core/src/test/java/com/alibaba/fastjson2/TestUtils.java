@@ -1,7 +1,9 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson.util.IOUtils;
-import com.alibaba.fastjson2.reader.*;
+import com.alibaba.fastjson2.reader.ObjectReader;
+import com.alibaba.fastjson2.reader.ObjectReaderCreator;
+import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
@@ -119,17 +121,10 @@ public class TestUtils {
         return dArr;
     }
 
-    public static JSONReader createJSONReaderStr(String str, JSONReader.Feature... features) {
-        JSONReader.Context readContext = JSONFactory.createReadContext();
-        readContext.config(features);
-        return new JSONReaderStr(readContext, str);
-    }
-
     public static JSONReader[] createJSONReaders(String str) {
         byte[] utf8Bytes = str.getBytes(StandardCharsets.UTF_8);
         byte[] utf16Bytes = str.getBytes(StandardCharsets.UTF_16);
         return new JSONReader[]{
-                new JSONReaderStr(JSONFactory.createReadContext(), str),
                 new JSONReaderUTF8(JSONFactory.createReadContext(), null, utf8Bytes, 0, utf8Bytes.length),
                 new JSONReaderUTF16(JSONFactory.createReadContext(), utf16Bytes, 0, utf16Bytes.length)
         };
@@ -139,7 +134,6 @@ public class TestUtils {
         byte[] utf8Bytes = str.getBytes(StandardCharsets.UTF_8);
         byte[] utf16Bytes = str.getBytes(StandardCharsets.UTF_16);
         return new JSONReader[]{
-                new JSONReaderStr(JSONFactory.createReadContext(), str),
                 new JSONReaderUTF8(JSONFactory.createReadContext(), null, utf8Bytes, 0, utf8Bytes.length),
                 new JSONReaderUTF16(JSONFactory.createReadContext(), utf16Bytes, 0, utf16Bytes.length),
                 new JSONReaderASCII(JSONFactory.createReadContext(), null, utf8Bytes, 0, utf8Bytes.length)
@@ -149,8 +143,11 @@ public class TestUtils {
     public static JSONReader[] createJSONReaders2(String str) {
         byte[] utf16Bytes = str.getBytes(StandardCharsets.UTF_16);
         return new JSONReader[]{
-                new JSONReaderStr(JSONFactory.createReadContext(), str),
                 new JSONReaderUTF16(JSONFactory.createReadContext(), utf16Bytes, 0, utf16Bytes.length),
         };
+    }
+
+    public static JSONReader createJSONReaderStr(String str, JSONReader.Feature... features) {
+        return JSONReader.of(str, JSONFactory.createReadContext(features));
     }
 }

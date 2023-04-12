@@ -23,7 +23,7 @@ public class ArrowByteArrayConsumer
     final int rowCount;
     final int varcharValueSize = 2048;
     final ObjIntConsumer<VectorSchemaRoot> rootConsumer;
-    final Consumer<Long[]> commiter;
+    final Consumer<Long[]> committer;
     BufferAllocator allocator;
 
     VectorSchemaRoot root;
@@ -35,13 +35,13 @@ public class ArrowByteArrayConsumer
             Schema schema,
             int rowCount,
             ObjIntConsumer<VectorSchemaRoot> rootConsumer,
-            Consumer<Long[]> commiter
+            Consumer<Long[]> committer
     ) {
         allocator = new RootAllocator();
         this.schema = schema;
         this.rowCount = rowCount;
         this.rootConsumer = rootConsumer;
-        this.commiter = commiter;
+        this.committer = committer;
         int blockSize = Math.min(CHUNK_SIZE, rowCount);
         allocateNew(blockSize);
     }
@@ -60,12 +60,14 @@ public class ArrowByteArrayConsumer
             root.close();
 
             if (row + 1 == rowCount) {
-                Long[] blocks = new Long[blockIndex + 1];
-                for (int i = 0; i <= blockIndex; i++) {
-                    blocks[i] = Long.valueOf(i);
+                if (committer != null) {
+                    Long[] blocks = new Long[blockIndex + 1];
+                    for (int i = 0; i <= blockIndex; i++) {
+                        blocks[i] = Long.valueOf(i);
+                    }
+                    committer.accept(blocks);
                 }
-                commiter.accept(blocks);
-            } else {
+            } else if (row < rowCount) {
                 int rest = rowCount - row - 1;
                 int blockSize = Math.min(rest, CHUNK_SIZE);
                 allocateNew(blockSize);
@@ -128,13 +130,8 @@ public class ArrowByteArrayConsumer
         }
 
         if (vector instanceof DecimalVector) {
-            BigDecimal decimal = TypeUtils.parseBigDecimal(bytes, off, len);
             DecimalVector decimalVector = (DecimalVector) vector;
-            int scale = decimalVector.getScale();
-            if (decimal.scale() != scale) {
-                decimal = decimal.setScale(scale);
-            }
-            decimalVector.set(row, decimal);
+            ArrowUtils.setDecimal(decimalVector, row, bytes, off, len);
             return;
         }
 
@@ -182,6 +179,15 @@ public class ArrowByteArrayConsumer
         if (vector instanceof TimeStampMilliVector) {
             long millis = DateUtils.parseMillis(bytes, off, len, charset);
             ((TimeStampMilliVector) vector).set(row, millis);
+            return;
+        }
+
+        if (vector instanceof BitVector) {
+            Boolean value = TypeUtils.parseBoolean(bytes, off, len);
+            if (value != null) {
+                int intValue = value.booleanValue() ? 1 : 0;
+                ((BitVector) vector).set(row, intValue);
+            }
             return;
         }
 

@@ -48,27 +48,4 @@ public class JSONReaderInfoTest {
         assertTrue(error.getMessage().contains("line 3"));
         assertTrue(error.getMessage().contains("column 19"));
     }
-
-    @Test
-    public void testStr() {
-        String str = "{\n" +
-                "    \"id\":123,\n" +
-                "    \"name\":\"abc\"{}\n" +
-                "}";
-        JSONReaderStr reader = new JSONReaderStr(JSONFactory.createReadContext(), str, 0, str.length());
-
-        Exception error = null;
-        try {
-            JSONObject object = new JSONObject();
-            reader.read(object, 0L);
-        } catch (JSONException e) {
-            error = e;
-        }
-        assertNotNull(error);
-        assertTrue(error.getMessage().contains("offset 33"));
-        assertTrue(error.getMessage().contains("character {"));
-        assertTrue(error.getMessage().contains("line 3"));
-        assertTrue(error.getMessage().contains("column 19"));
-        error.printStackTrace();
-    }
 }

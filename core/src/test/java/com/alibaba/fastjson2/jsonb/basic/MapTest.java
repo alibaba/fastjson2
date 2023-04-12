@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
+import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MapTest {

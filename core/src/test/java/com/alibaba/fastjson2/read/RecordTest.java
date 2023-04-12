@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2.read;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 

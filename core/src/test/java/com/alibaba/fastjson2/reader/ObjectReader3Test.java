@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ObjectReader3Test {
     @Test

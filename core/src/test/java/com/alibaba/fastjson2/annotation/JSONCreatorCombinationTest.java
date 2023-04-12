@@ -7,7 +7,7 @@ import java.lang.annotation.*;
 import java.lang.reflect.Constructor;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test for {@link JSONCreator}

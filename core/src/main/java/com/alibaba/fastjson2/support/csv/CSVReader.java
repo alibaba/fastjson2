@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.stream.StreamReader;
+import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -58,7 +59,7 @@ public abstract class CSVReader<T>
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == 0) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    return new CSVReaderUTF8(bytes, 0, bytes.length, objectClass);
+                    return new CSVReaderUTF8(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1, objectClass);
                 }
             } catch (Exception e) {
                 throw new JSONException("unsafe get String.coder error");
@@ -74,17 +75,35 @@ public abstract class CSVReader<T>
     }
 
     public static <T> CSVReader<T> of(byte[] utf8Bytes, Class<T> objectClass) {
-        return new CSVReaderUTF8(utf8Bytes, 0, utf8Bytes.length, objectClass);
+        return of(utf8Bytes, 0, utf8Bytes.length, StandardCharsets.UTF_8, objectClass);
     }
 
     public static CSVReader of(File file, Type... types) throws IOException {
         return new CSVReaderUTF8(new FileInputStream(file), StandardCharsets.UTF_8, types);
     }
 
+    public static CSVReader of(File file, ByteArrayValueConsumer consumer) throws IOException {
+        return of(file, StandardCharsets.UTF_8, consumer);
+    }
+
+    public static CSVReader of(File file, Charset charset, ByteArrayValueConsumer consumer) throws IOException {
+        return new CSVReaderUTF8(new FileInputStream(file), charset, consumer);
+    }
+
+    public static CSVReader of(File file, CharArrayValueConsumer consumer) throws IOException {
+        return of(file, StandardCharsets.UTF_8, consumer);
+    }
+
+    public static CSVReader of(File file, Charset charset, CharArrayValueConsumer consumer) throws IOException {
+        return new CSVReaderUTF16(new InputStreamReader(new FileInputStream(file), charset), consumer);
+    }
+
     public static CSVReader of(File file, Charset charset, Type... types) throws IOException {
-        if (charset == StandardCharsets.UTF_16
+        if (JDKUtils.JVM_VERSION == 8
+                || charset == StandardCharsets.UTF_16
                 || charset == StandardCharsets.UTF_16LE
-                || charset == StandardCharsets.UTF_16BE) {
+                || charset == StandardCharsets.UTF_16BE
+        ) {
             return new CSVReaderUTF16(
                     new InputStreamReader(new FileInputStream(file), charset), types
             );
@@ -98,7 +117,8 @@ public abstract class CSVReader<T>
     }
 
     public static <T> CSVReader<T> of(File file, Charset charset, Class<T> objectClass) throws IOException {
-        if (charset == StandardCharsets.UTF_16
+        if (JDKUtils.JVM_VERSION == 8
+                || charset == StandardCharsets.UTF_16
                 || charset == StandardCharsets.UTF_16LE
                 || charset == StandardCharsets.UTF_16BE) {
             return new CSVReaderUTF16(
@@ -114,7 +134,7 @@ public abstract class CSVReader<T>
     }
 
     public static CSVReader of(InputStream in, Type... types) throws IOException {
-        return new CSVReaderUTF8(in, StandardCharsets.UTF_8, types);
+        return of(in, StandardCharsets.UTF_8, types);
     }
 
     public static <T> CSVReader<T> of(InputStream in, Class<T> objectClass) {
@@ -122,7 +142,8 @@ public abstract class CSVReader<T>
     }
 
     public static <T> CSVReader<T> of(InputStream in, Charset charset, Class<T> objectClass) {
-        if (charset == StandardCharsets.UTF_16
+        if (JDKUtils.JVM_VERSION == 8
+                || charset == StandardCharsets.UTF_16
                 || charset == StandardCharsets.UTF_16LE
                 || charset == StandardCharsets.UTF_16BE
         ) {
@@ -136,7 +157,8 @@ public abstract class CSVReader<T>
     }
 
     public static CSVReader of(InputStream in, Charset charset, Type... types) throws IOException {
-        if (charset == StandardCharsets.UTF_16
+        if (JDKUtils.JVM_VERSION == 8
+                || charset == StandardCharsets.UTF_16
                 || charset == StandardCharsets.UTF_16LE
                 || charset == StandardCharsets.UTF_16BE) {
             return new CSVReaderUTF16(
@@ -172,8 +194,55 @@ public abstract class CSVReader<T>
         return new CSVReaderUTF16(chars, 0, chars.length, types);
     }
 
+    public static <T> CSVReader<T> of(
+            char[] chars,
+            int off,
+            int len,
+            CharArrayValueConsumer consumer
+    ) {
+        return new CSVReaderUTF16(chars, off, len, consumer);
+    }
+
     public static CSVReader of(byte[] utf8Bytes, Type... types) {
         return new CSVReaderUTF8(utf8Bytes, 0, utf8Bytes.length, types);
+    }
+
+    public static CSVReader of(byte[] utf8Bytes, ByteArrayValueConsumer consumer) {
+        return of(utf8Bytes, 0, utf8Bytes.length, StandardCharsets.UTF_8, consumer);
+    }
+
+    public static <T> CSVReader<T> of(
+            byte[] utf8Bytes,
+            int off,
+            int len,
+            Charset charset, ByteArrayValueConsumer consumer
+    ) {
+        return new CSVReaderUTF8(utf8Bytes, off, len, charset, consumer);
+    }
+
+    public static <T> CSVReader<T> of(byte[] utf8Bytes, Charset charset, Class<T> objectClass) {
+        return of(utf8Bytes, 0, utf8Bytes.length, charset, objectClass);
+    }
+
+    public static <T> CSVReader<T> of(byte[] utf8Bytes, int off, int len, Class<T> objectClass) {
+        return new CSVReaderUTF8(utf8Bytes, off, len, StandardCharsets.UTF_8, objectClass);
+    }
+
+    public static <T> CSVReader<T> of(byte[] utf8Bytes, int off, int len, Charset charset, Class<T> objectClass) {
+        if (charset == StandardCharsets.UTF_16
+                || charset == StandardCharsets.UTF_16LE
+                || charset == StandardCharsets.UTF_16BE
+        ) {
+            char[] chars = new char[len];
+            int size = IOUtils.decodeUTF8(utf8Bytes, off, len, chars);
+            return new CSVReaderUTF16(chars, 0, size, objectClass);
+        }
+
+        return new CSVReaderUTF8(utf8Bytes, off, len, charset, objectClass);
+    }
+
+    public static <T> CSVReader<T> of(char[] utf8Bytes, int off, int len, Class<T> objectClass) {
+        return new CSVReaderUTF16(utf8Bytes, off, len, objectClass);
     }
 
     public void skipLines(int lines) throws IOException {
@@ -203,7 +272,10 @@ public abstract class CSVReader<T>
                     fieldReaders[i] = fieldReader;
                     Type fieldType = fieldReader.fieldType;
                     if (fieldType instanceof Class) {
-                        fieldType = TypeUtils.nonePrimitive((Class) fieldType);
+                        Class fieldClass = (Class) fieldType;
+                        if (fieldClass.isPrimitive()) {
+                            fieldType = TypeUtils.nonePrimitive((Class) fieldType);
+                        }
                     }
                     types[i] = fieldType;
                     typeReaders[i] = provider.getObjectReader(fieldType, fieldBased);
@@ -256,21 +328,9 @@ public abstract class CSVReader<T>
         readLineObjectAll(true, consumer);
     }
 
-    public void readLineObjectAll(boolean readHeader, Consumer<T> consumer) {
-        if (readHeader) {
-            readHeader();
-        }
+    public abstract void readLineObjectAll(boolean readHeader, Consumer<T> consumer);
 
-        while (true) {
-            T object = readLineObject();
-            if (object == null) {
-                break;
-            }
-            consumer.accept(object);
-        }
-    }
-
-    public <T> T readLineObject() {
+    public T readLineObject() {
         if (inputEnd) {
             return null;
         }
@@ -641,21 +701,7 @@ public abstract class CSVReader<T>
         return stat;
     }
 
-    public void statAll() {
-        String[] line;
-        while ((line = (String[]) readLineValues(true)) != null) {
-            for (int i = 0; i < line.length; i++) {
-                String value = line[i];
-                if (columnStats == null) {
-                    columnStats = new ArrayList<>();
-                }
-                StreamReader.ColumnStat stat = getColumnStat(i);
-                stat.stat(value);
-            }
-        }
-    }
+    public abstract void statAll();
 
-    public void readAll(ByteArrayValueConsumer consumer) {
-        throw new UnsupportedOperationException();
-    }
+    public abstract void readAll();
 }
