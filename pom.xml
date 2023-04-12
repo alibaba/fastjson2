@@ -363,7 +363,7 @@
             <dependency>
                 <groupId>org.gitlab4j</groupId>
                 <artifactId>gitlab4j-api</artifactId>
-                <version>5.1.0</version>
+                <version>5.2.0</version>
             </dependency>
 
             <dependency>
