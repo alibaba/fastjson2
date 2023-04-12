@@ -447,7 +447,7 @@ public class ObjectWriterCreatorASM
             }
         }
 
-        if (objectClass.getSuperclass() == Object.class && fieldWriters.isEmpty()) {
+        if (objectClass.getSuperclass() == Object.class) {
             String simpleName = objectClass.getSimpleName();
             if (simpleName.indexOf('$') != -1 && simpleName.contains("$$")) {
                 match = false;
