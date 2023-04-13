@@ -87,6 +87,12 @@ public abstract class CSVReader<T>
     }
 
     public static CSVReader of(File file, Charset charset, ByteArrayValueConsumer consumer) throws IOException {
+        if (charset == StandardCharsets.UTF_16
+                || charset == StandardCharsets.UTF_16LE
+                || charset == StandardCharsets.UTF_16BE
+        ) {
+            throw new JSONException("not support charset : " + charset);
+        }
         return new CSVReaderUTF8(new FileInputStream(file), charset, consumer);
     }
 

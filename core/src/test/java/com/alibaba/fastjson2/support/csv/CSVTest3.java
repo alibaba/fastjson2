@@ -43,7 +43,7 @@ public class CSVTest3 {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         CSVWriter writer = CSVWriter.of(out);
-        writer.writeRow(row);
+        writer.writeLine(row);
         writer.close();
 
         byte[] bytes = out.toByteArray();

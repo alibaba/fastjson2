@@ -38,7 +38,7 @@ public class OdpsArrowReadDemo {
 
         Schema arrowSchema = downloadSession.getArrowSchema();
         List<Field> fields = arrowSchema.getFields();
-        writer.writeRow(
+        writer.writeLine(
                 fields.size(),
                 column -> fields.get(column).getName()
         );

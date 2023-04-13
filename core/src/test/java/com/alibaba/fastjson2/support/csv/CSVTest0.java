@@ -14,7 +14,7 @@ public class CSVTest0 {
         bean.name = "DataWorks";
 
         CSVWriter writer = CSVWriter.of();
-        writer.writeRowObject(bean);
+        writer.writeLineObject(bean);
 
         String csv = writer.toString();
         assertEquals("1001,DataWorks\n", csv);
@@ -32,7 +32,7 @@ public class CSVTest0 {
         bean.name = "DataWorks";
 
         CSVWriter writer = CSVWriter.of();
-        writer.writeRowObject(bean);
+        writer.writeLineObject(bean);
 
         String csv = writer.toString();
         assertEquals("1001,DataWorks\n", csv);
@@ -52,7 +52,7 @@ public class CSVTest0 {
         bean.name = "DataWorks";
 
         CSVWriter writer = CSVWriter.of();
-        writer.writeRowObject(bean);
+        writer.writeLineObject(bean);
 
         String csv = writer.toString();
         assertEquals("1001,DataWorks\n", csv);
@@ -83,7 +83,7 @@ public class CSVTest0 {
 
         CSVWriter writer = CSVWriter.of();
         for (Bean bean : beans) {
-            writer.writeRowObject(bean);
+            writer.writeLineObject(bean);
         }
 
         String csv = writer.toString();

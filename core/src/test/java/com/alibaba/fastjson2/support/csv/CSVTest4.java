@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -24,5 +25,57 @@ public class CSVTest4 {
         Object[] line1 = parser.readLineValues();
         assertEquals(2, line1[0]);
         assertEquals(null, line1[1]);
+    }
+
+    @Test
+    public void test1() throws Exception {
+        String str = "1,a\n2,a";
+        {
+            CSVReader csvReader = CSVReader.of(str.toCharArray());
+            String[] line0 = csvReader.readLine();
+            assertEquals("1", line0[0]);
+            assertEquals("a", line0[1]);
+
+            String[] line1 = csvReader.readLine();
+            assertEquals("2", line1[0]);
+            assertEquals("a", line1[1]);
+        }
+        {
+            byte[] bytes = str.getBytes();
+            CSVReader csvReader = new CSVReaderUTF8(bytes, 0, bytes.length, StandardCharsets.UTF_8, (Class) null);
+            String[] line0 = csvReader.readLine();
+            assertEquals("1", line0[0]);
+            assertEquals("a", line0[1]);
+
+            String[] line1 = csvReader.readLine();
+            assertEquals("2", line1[0]);
+            assertEquals("a", line1[1]);
+        }
+    }
+
+    @Test
+    public void test2() throws Exception {
+        String str = "\"1\",\"a\"\n2,\"a\"";
+        {
+            CSVReader csvReader = CSVReader.of(str.toCharArray());
+            String[] line0 = csvReader.readLine();
+            assertEquals("1", line0[0]);
+            assertEquals("a", line0[1]);
+
+            String[] line1 = csvReader.readLine();
+            assertEquals("2", line1[0]);
+            assertEquals("a", line1[1]);
+        }
+        {
+            byte[] bytes = str.getBytes();
+            CSVReader csvReader = new CSVReaderUTF8(bytes, 0, bytes.length, StandardCharsets.UTF_8, (Class) null);
+            String[] line0 = csvReader.readLine();
+            assertEquals("1", line0[0]);
+            assertEquals("a", line0[1]);
+
+            String[] line1 = csvReader.readLine();
+            assertEquals("2", line1[0]);
+            assertEquals("a", line1[1]);
+        }
     }
 }

@@ -375,7 +375,17 @@ final class CSVReaderUTF8<T>
                     }
                 } else {
                     if (type == null || type == String.class || type == Object.class || strings) {
-                        value = new String(buf, valueStart, valueSize, charset);
+                        byte c0, c1;
+                        if (valueSize == 1 && (c0 = buf[valueStart]) >= 0) {
+                            value = TypeUtils.toString((char) c0);
+                        } else if (valueSize == 2
+                                && (c0 = buf[valueStart]) >= 0
+                                && (c1 = buf[valueStart + 1]) >= 0
+                        ) {
+                            value = TypeUtils.toString((char) c0, (char) c1);
+                        } else {
+                            value = new String(buf, valueStart, valueSize, charset);
+                        }
                     } else {
                         try {
                             value = readValue(buf, valueStart, valueSize, type);
@@ -445,7 +455,17 @@ final class CSVReaderUTF8<T>
                 }
             } else {
                 if (type == null || type == String.class || type == Object.class || strings) {
-                    value = new String(buf, valueStart, valueSize, charset);
+                    byte c0, c1;
+                    if (valueSize == 1 && (c0 = buf[valueStart]) >= 0) {
+                        value = TypeUtils.toString((char) c0);
+                    } else if (valueSize == 2
+                            && (c0 = buf[valueStart]) >= 0
+                            && (c1 = buf[valueStart + 1]) >= 0
+                    ) {
+                        value = TypeUtils.toString((char) c0, (char) c1);
+                    } else {
+                        value = new String(buf, valueStart, valueSize, charset);
+                    }
                 } else {
                     try {
                         value = readValue(buf, valueStart, valueSize, type);
@@ -511,6 +531,17 @@ final class CSVReaderUTF8<T>
     public void readLineObjectAll(boolean readHeader, Consumer<T> consumer) {
         if (readHeader) {
             readHeader();
+        }
+
+        if (fieldReaders == null) {
+            while (true) {
+                Object[] line = readLineValues(false);
+                if (line == null) {
+                    break;
+                }
+                consumer.accept((T) line);
+            }
+            return;
         }
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
