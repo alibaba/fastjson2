@@ -31,7 +31,7 @@
     </scm>
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
+        <maven.compiler.target>11</maven.compiler.target>
         <add.modules.option>--add-modules=jdk.incubator.vector</add.modules.option>
     </properties>
 
