@@ -97,7 +97,7 @@ public class TypeUtils {
         static final String[] chars;
         static final String[] chars2;
         static final char START = ' '; // 32
-        static final char END = 'z'; // 122
+        static final char END = '~'; // 126
         static final int SIZE2 = (END - START + 1);
         static {
             String[] array0 = new String[128];

@@ -453,7 +453,7 @@ public class JSONBDump {
                         return;
                     }
 
-                    String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                    String str = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                     offset += strlen;
                     jsonWriter.writeString(str);
                     return;
@@ -882,7 +882,7 @@ public class JSONBDump {
                 strlen = strtype - BC_STR_ASCII_FIX_MIN;
             }
 
-            charset = StandardCharsets.US_ASCII;
+            charset = StandardCharsets.ISO_8859_1;
         } else if (strtype == BC_STR_UTF8) {
             strlen = readLength();
             strBegin = offset;

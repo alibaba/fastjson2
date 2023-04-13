@@ -2210,7 +2210,7 @@ public abstract class JSONWriter
                 }
             }
 
-            return fullPath = new String(buf, 0, off, ascii ? StandardCharsets.US_ASCII : StandardCharsets.UTF_8);
+            return fullPath = new String(buf, 0, off, ascii ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8);
         }
     }
 }

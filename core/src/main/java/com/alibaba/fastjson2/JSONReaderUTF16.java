@@ -1789,20 +1789,9 @@ class JSONReaderUTF16
             int c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15;
             switch (nameLength) {
                 case 1:
-                    c0 = chars[nameBegin];
-                    if ((c0 & 0xFF) == c0) {
-                        nameValue0 = (byte) c0;
-                    }
-                    break;
+                    return TypeUtils.toString(chars[nameBegin]);
                 case 2:
-                    c0 = chars[nameBegin];
-                    c1 = chars[nameBegin + 1];
-                    if ((c0 & 0xFF) == c0 && (c1 & 0xFF) == c1) {
-                        nameValue0
-                                = (((byte) c1) << 8)
-                                + c0;
-                    }
-                    break;
+                    return TypeUtils.toString(chars[nameBegin], chars[nameBegin + 1]);
                 case 3:
                     c0 = chars[nameBegin];
                     c1 = chars[nameBegin + 1];
@@ -3749,7 +3738,16 @@ class JSONReaderUTF16
                     str = new String(chars);
                 }
             } else {
-                if (this.str != null && (JVM_VERSION > 8 || ANDROID)) {
+                char c0, c1;
+                int strlen = offset - this.offset;
+                if (strlen == 1 && (c0 = this.chars[this.offset]) < 128) {
+                    str = TypeUtils.toString(c0);
+                } else if (strlen == 2
+                        && (c0 = this.chars[this.offset]) < 128
+                        && (c1 = this.chars[this.offset + 1]) < 128
+                ) {
+                    str = TypeUtils.toString(c0, c1);
+                } else if (this.str != null && (JVM_VERSION > 8 || ANDROID)) {
                     str = this.str.substring(this.offset, offset);
                 } else {
                     str = new String(chars, this.offset, offset - this.offset);

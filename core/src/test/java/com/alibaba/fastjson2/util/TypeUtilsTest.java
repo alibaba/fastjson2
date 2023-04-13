@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.util;
 
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.TypeReference;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2_vo.Int1;
 import org.junit.jupiter.api.Test;
 
@@ -591,6 +589,119 @@ public class TypeUtilsTest {
         for (char i = 0; i < 512; i++) {
             for (char j = 0; j < 512; j++) {
                 assertEquals(new String(new char[]{i, j}), TypeUtils.toString(i, j));
+            }
+        }
+    }
+
+    @Test
+    public void toStringTestJSON() {
+        for (char i = 0; i < 512; i++) {
+            String s1 = Character.toString(i);
+            String json = JSON.toJSONString(s1);
+            assertEquals(s1, JSON.parse(json.toCharArray()));
+            assertEquals(s1, JSON.parse(json.getBytes()));
+        }
+
+        for (char i = 0; i < 512; i++) {
+            for (char j = 0; j < 512; j++) {
+                String s2 = new String(new char[]{i, j});
+                String json = JSON.toJSONString(s2);
+                assertEquals(s2, JSON.parse(json.toCharArray()));
+                assertEquals(s2, JSON.parse(json.getBytes()));
+            }
+        }
+    }
+
+    @Test
+    public void toStringTestJSONB() {
+        for (char i = 0; i < 512; i++) {
+            String s1 = Character.toString(i);
+            byte[] json = JSONB.toBytes(s1);
+            assertEquals(s1, JSONB.parse(json));
+        }
+
+        for (char i = 0; i < 512; i++) {
+            for (char j = 0; j < 512; j++) {
+                String s2 = new String(new char[]{i, j});
+                byte[] json = JSONB.toBytes(s2);
+                assertEquals(s2, JSONB.parse(json));
+            }
+        }
+    }
+
+    @Test
+    public void toStringTestJSONB1() {
+        for (char i = 0; i < 512; i++) {
+            String s1 = Character.toString(i);
+            byte[] json = JSONB.toBytes(JSONObject.of("value", s1));
+            assertEquals(s1, JSONB.parseObject(json).get("value"));
+        }
+
+        for (char i = 0; i < 512; i++) {
+            for (char j = 0; j < 512; j++) {
+                String s2 = new String(new char[]{i, j});
+                byte[] json = JSONB.toBytes(JSONObject.of("value", s2));
+                assertEquals(s2, JSONB.parseObject(json).get("value"));
+            }
+        }
+    }
+
+    @Test
+    public void toStringTestJSONB2() {
+        for (char i = '0'; i <= '9'; i++) {
+            String s1 = Character.toString(i);
+            byte[] json = JSONB.toBytes(s1);
+            assertEquals(Integer.parseInt(s1), JSONB.parseObject(json, Integer.class));
+        }
+
+        for (char i = '1'; i <= '9'; i++) {
+            for (char j = '0'; j <= '9'; j++) {
+                String s2 = new String(new char[]{i, j});
+                byte[] json = JSONB.toBytes(s2);
+                assertEquals(Integer.parseInt(s2), JSONB.parseObject(json, Integer.class));
+            }
+        }
+    }
+
+    @Test
+    public void toStringTestJSONB3() {
+        for (char i = 0; i < 512; i++) {
+            String s1 = Character.toString(i);
+            byte[] json = JSONB.toBytes(JSONObject.of(s1, s1));
+            JSONObject object = JSONB.parseObject(json);
+            Object v1 = object.get(s1);
+            assertEquals(s1, v1);
+        }
+
+        for (char i = 0; i < 512; i++) {
+            for (char j = 0; j < 512; j++) {
+                String s2 = new String(new char[]{i, j});
+                byte[] json = JSONB.toBytes(JSONObject.of(s2, s2));
+                JSONObject object = JSONB.parseObject(json);
+                Object v2 = object.get(s2);
+                assertEquals(s2, v2, Integer.toString(i) + "-" + Integer.toString(j));
+            }
+        }
+    }
+
+    @Test
+    public void toStringTestJSONB3_3() {
+        for (char i = 0; i < 256; i++) {
+            for (char j = 0; j < 256; j++) {
+                for (char k = 0; k < 256; k++) {
+                    String s3 = new String(new char[]{i, j, k});
+                    byte[] json = JSONB.toBytes(JSONObject.of(s3, s3));
+                    if (i == 128 && j == 0 && k == 1) {
+                        JSONB.parseObject(json);
+                    }
+                    JSONObject object = JSONB.parseObject(json);
+                    Object v2 = object.get(s3);
+                    assertEquals(
+                            s3,
+                            v2,
+                            Integer.toString(i) + "-" + Integer.toString(j) + "-" + Integer.toString(k)
+                    );
+                }
             }
         }
     }
