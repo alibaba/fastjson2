@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.support.csv;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.*;
@@ -21,31 +20,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.IntFunction;
 
-public class CSVWriter
+import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
+
+public abstract class CSVWriter
         implements Closeable, Flushable {
     private long features;
 
-    static final byte[] BYTES_TRUE = "true".getBytes();
-    static final byte[] BYTES_FALSE = "false".getBytes();
-    static final byte[] BYTES_LONG_MIN = "-9223372036854775808".getBytes();
-    static final byte[] BYTES_LONG_MIN_UN_SIGNED = "9223372036854775808".getBytes();
-
-    final OutputStream out;
-    final Charset charset;
     final ZoneId zoneId;
 
-    byte[] bytes;
     int off;
 
-    CSVWriter(OutputStream out, Charset charset, ZoneId zoneId, Feature... features) {
+    CSVWriter(ZoneId zoneId, Feature... features) {
         for (Feature feature : features) {
             this.features |= feature.mask;
         }
 
-        this.out = out;
-        this.charset = charset;
         this.zoneId = zoneId;
-        this.bytes = new byte[1024 * 64];
     }
 
     public static CSVWriter of() {
@@ -60,9 +50,9 @@ public class CSVWriter
         return of(new FileOutputStream(file), charset);
     }
 
-    public void writeRowObject(Object object) {
+    public final void writeLineObject(Object object) {
         if (object == null) {
-            writeRow();
+            this.writeLine();
             return;
         }
         ObjectWriterProvider provider = JSONFactory.getDefaultObjectWriterProvider();
@@ -73,7 +63,7 @@ public class CSVWriter
             List<FieldWriter> fieldWriters = adapter.getFieldWriters();
             if (fieldWriters.size() == 1 && (fieldWriters.get(0).features & FieldInfo.VALUE_MASK) != 0) {
                 Object fieldValue = fieldWriters.get(0).getFieldValue(object);
-                writeRowObject(fieldValue);
+                writeLineObject(fieldValue);
                 return;
             }
 
@@ -81,13 +71,13 @@ public class CSVWriter
             for (int i = 0; i < fieldWriters.size(); i++) {
                 values[i] = fieldWriters.get(i).getFieldValue(object);
             }
-            writeRow(values);
+            writeLine(values);
         } else {
-            writeRow(object);
+            writeLine(object);
         }
     }
 
-    protected void writeDate(Date date) {
+    public final void writeDate(Date date) {
         if (date == null) {
             return;
         }
@@ -95,31 +85,27 @@ public class CSVWriter
         writeDate(millis);
     }
 
-    protected void writeInstant(Instant instant) {
+    public final void writeInstant(Instant instant) {
         if (instant == null) {
             return;
         }
 
-        ZonedDateTime zdt = instant.atZone(ZoneOffset.UTC);
-        String str = DateTimeFormatter.ISO_ZONED_DATE_TIME.format(zdt);
-        if ((features & Feature.AlwaysQuoteStrings.mask) != 0) {
-            if (off + 1 == bytes.length) {
-                flush();
-            }
-            bytes[off++] = (byte) '"';
-
-            writeRaw(str);
-
-            if (off + 1 == bytes.length) {
-                flush();
-            }
-            bytes[off++] = (byte) '"';
-        } else {
-            writeRaw(str);
+        int nano = instant.getNano();
+        if (nano % 1000000 == 0) {
+            long millis = instant.toEpochMilli();
+            writeDate(millis);
+            return;
         }
+
+        if ((features & Feature.AlwaysQuoteStrings.mask) != 0) {
+            writeQuote();
+        }
+
+        LocalDateTime ldt = instant.atZone(zoneId).toLocalDateTime();
+        writeLocalDateTime(ldt);
     }
 
-    protected void writeDate(LocalDate date) {
+    public void writeLocalDate(LocalDate date) {
         if (date == null) {
             return;
         }
@@ -127,73 +113,53 @@ public class CSVWriter
         writeRaw(str);
     }
 
-    protected void writeDateTime(LocalDateTime instant) {
-        if (instant == null) {
-            return;
-        }
-        String str = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(instant);
-        writeRaw(str);
-    }
+    public abstract void writeLocalDateTime(LocalDateTime instant);
 
-    protected void writeDirect(byte[] bytes, int off, int len) {
-        try {
-            out.write(bytes, off, len);
-        } catch (IOException e) {
-            throw new JSONException("write csv error", e);
-        }
-    }
+//    protected abstract void writeDirect(byte[] bytes, int off, int len);
 
-    public void writeRow(int columnCount, IntFunction function) {
+    public final void writeLine(int columnCount, IntFunction function) {
         for (int i = 0; i < columnCount; i++) {
             Object value = function.apply(i);
 
             if (i != 0) {
-                if (off + 1 >= bytes.length) {
-                    flush();
-                }
-                bytes[off++] = ',';
+                writeComma();
             }
 
             writeValue(value);
         }
 
-        if (off + 1 >= bytes.length) {
-            flush();
-        }
-        bytes[off++] = '\n';
+        writeLine();
     }
 
-    public void writeRow(Object... values) {
+    public final void writeLine(List values) {
+        for (int i = 0; i < values.size(); i++) {
+            if (i != 0) {
+                writeComma();
+            }
+
+            writeValue(values.get(i));
+        }
+
+        writeLine();
+    }
+
+    public final void writeLine(Object... values) {
         for (int i = 0; i < values.length; i++) {
             if (i != 0) {
-                if (off + 1 >= bytes.length) {
-                    flush();
-                }
-                bytes[off++] = ',';
+                writeComma();
             }
 
             writeValue(values[i]);
         }
 
-        if (off + 1 == bytes.length) {
-            flush();
-        }
-        bytes[off++] = '\n';
+        writeLine();
     }
 
-    public void writeComma() {
-        if (off + 1 == bytes.length) {
-            flush();
-        }
-        bytes[off++] = ',';
-    }
+    public abstract void writeComma();
 
-    public void writeLine() {
-        if (off + 1 == bytes.length) {
-            flush();
-        }
-        bytes[off++] = '\n';
-    }
+    protected abstract void writeQuote();
+
+    public abstract void writeLine();
 
     public void writeValue(Object value) {
         if (value == null) {
@@ -219,16 +185,7 @@ public class CSVWriter
             writeBoolean(booleanValue);
         } else if (value instanceof Float) {
             float floatValue = ((Float) value).floatValue();
-            if (Float.isNaN(floatValue) || Float.isInfinite(floatValue)) {
-                return;
-            }
-
-            if (off + 15 > this.bytes.length) {
-                flush();
-            }
-
-            int size = RyuFloat.toString(floatValue, bytes, off);
-            off += size;
+            writeFloat(floatValue);
         } else if (value instanceof Double) {
             writeDouble((Double) value);
         } else if (value instanceof Short) {
@@ -238,46 +195,35 @@ public class CSVWriter
         } else if (value instanceof BigDecimal) {
             writeDecimal((BigDecimal) value);
         } else if (value instanceof BigInteger) {
-            String str = value.toString();
-            byte[] bytes = str.getBytes(StandardCharsets.ISO_8859_1);
-            writeRaw(bytes);
+            writeBigInteger((BigInteger) value);
         } else if (value instanceof Date) {
             writeDate((Date) value);
         } else if (value instanceof Instant) {
             writeInstant((Instant) value);
         } else if (value instanceof LocalDate) {
-            writeDate((LocalDate) value);
+            writeLocalDate((LocalDate) value);
         } else if (value instanceof LocalDateTime) {
-            writeDateTime((LocalDateTime) value);
+            writeLocalDateTime((LocalDateTime) value);
         } else {
             String str = value.toString();
             writeString(str);
         }
     }
 
-    public void writeBoolean(boolean booleanValue) {
-        byte[] valueBytes = booleanValue ? BYTES_TRUE : BYTES_FALSE;
-        writeRaw(valueBytes);
-    }
-
-    public void writeInt64(long longValue) {
-        if (longValue == Long.MIN_VALUE) {
-            writeRaw(BYTES_LONG_MIN);
+    public void writeBigInteger(BigInteger value) {
+        if (value == null) {
             return;
         }
 
-        int size = (longValue < 0) ? IOUtils.stringSize(-longValue) + 1 : IOUtils.stringSize(longValue);
-
-        int minCapacity = off + size;
-        if (minCapacity - this.bytes.length > 0) {
-            flush();
-        }
-
-        IOUtils.getChars(longValue, off + size, bytes);
-        off += size;
+        String str = value.toString();
+        writeRaw(str);
     }
 
-    public void writeDate(long millis) {
+    public abstract void writeBoolean(boolean booleanValue);
+
+    public abstract void writeInt64(long longValue);
+
+    public final void writeDate(long millis) {
         ZoneId zoneId = this.zoneId;
 
         final int SECONDS_PER_DAY = 60 * 60 * 24;
@@ -368,294 +314,68 @@ public class CSVWriter
         writeRaw(str);
     }
 
-    public final void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
-        if (off + 10 >= this.bytes.length) {
-            flush();
-        }
+    public abstract void writeDateYYYMMDD10(int year, int month, int dayOfMonth);
 
-        bytes[off++] = (byte) (year / 1000 + '0');
-        bytes[off++] = (byte) ((year / 100) % 10 + '0');
-        bytes[off++] = (byte) ((year / 10) % 10 + '0');
-        bytes[off++] = (byte) (year % 10 + '0');
-        bytes[off++] = '-';
-        bytes[off++] = (byte) (month / 10 + '0');
-        bytes[off++] = (byte) (month % 10 + '0');
-        bytes[off++] = '-';
-        bytes[off++] = (byte) (dayOfMonth / 10 + '0');
-        bytes[off++] = (byte) (dayOfMonth % 10 + '0');
-    }
-
-    public final void writeDateTime19(
+    public abstract void writeDateTime19(
             int year,
             int month,
             int dayOfMonth,
             int hour,
             int minute,
-            int second) {
-        if (off + 19 >= this.bytes.length) {
-            flush();
-        }
+            int second);
 
-        bytes[off++] = (byte) (year / 1000 + '0');
-        bytes[off++] = (byte) ((year / 100) % 10 + '0');
-        bytes[off++] = (byte) ((year / 10) % 10 + '0');
-        bytes[off++] = (byte) (year % 10 + '0');
-        bytes[off++] = '-';
-        bytes[off++] = (byte) (month / 10 + '0');
-        bytes[off++] = (byte) (month % 10 + '0');
-        bytes[off++] = '-';
-        bytes[off++] = (byte) (dayOfMonth / 10 + '0');
-        bytes[off++] = (byte) (dayOfMonth % 10 + '0');
-        bytes[off++] = ' ';
-        bytes[off++] = (byte) (hour / 10 + '0');
-        bytes[off++] = (byte) (hour % 10 + '0');
-        bytes[off++] = ':';
-        bytes[off++] = (byte) (minute / 10 + '0');
-        bytes[off++] = (byte) (minute % 10 + '0');
-        bytes[off++] = ':';
-        bytes[off++] = (byte) (second / 10 + '0');
-        bytes[off++] = (byte) (second % 10 + '0');
-    }
+    public abstract void writeString(String value);
 
-    public void writeString(String value) {
-        String str = value;
-        byte[] bytes;
-        if (JDKUtils.STRING_CODER != null
-                && JDKUtils.STRING_VALUE != null
-                && JDKUtils.STRING_CODER.applyAsInt(str) == JDKUtils.LATIN1) {
-            bytes = JDKUtils.STRING_VALUE.apply(str);
-        } else {
-            bytes = str.getBytes(charset);
-        }
-        writeString(bytes);
-    }
+    public abstract void writeInt32(int intValue);
 
-    public void writeInt32(int intValue) {
-        if (intValue == Integer.MIN_VALUE) {
-            writeRaw("-2147483648");
-            return;
-        }
+    public abstract void writeDouble(double value);
 
-        int size = (intValue < 0) ? IOUtils.stringSize(-intValue) + 1 : IOUtils.stringSize(intValue);
+    public abstract void writeFloat(float value);
 
-        int minCapacity = off + size;
-        if (minCapacity - this.bytes.length > 0) {
-            flush();
-        }
+    public abstract void flush();
 
-        IOUtils.getChars(intValue, off + size, bytes);
-        off += size;
-    }
+    public abstract void writeString(byte[] utf8);
 
-    public void writeDouble(double value) {
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
-            return;
-        }
+    public abstract void writeDecimal(BigDecimal value);
 
-        int minCapacity = off + 24;
-        if (minCapacity - this.bytes.length > 0) {
-            flush();
-        }
+    public abstract void writeDecimal(long unscaledVal, int scale);
 
-        int size = RyuDouble.toString(value, this.bytes, off);
-        off += size;
-    }
+//    protected abstract void writeRaw(byte[] strBytes);
 
-    public void writeFloat(float value) {
-        if (Float.isNaN(value) || Float.isInfinite(value)) {
-            return;
-        }
-
-        int minCapacity = off + 15;
-        if (minCapacity - this.bytes.length > 0) {
-            flush();
-        }
-
-        int size = RyuFloat.toString(value, this.bytes, off);
-        off += size;
-    }
-
-    public void flush() {
-        try {
-            out.write(bytes, 0, off);
-            off = 0;
-            out.flush();
-        } catch (IOException e) {
-            throw new JSONException("write csv error", e);
-        }
-    }
-
-    public void writeString(byte[] utf8) {
-        if (utf8 == null || utf8.length == 0) {
-            return;
-        }
-
-        final int len = utf8.length;
-        int escapeCount = 0;
-        boolean comma = false;
-
-        if (utf8[0] == '"') {
-            for (int i = 0; i < len; i++) {
-                byte ch = utf8[i];
-                if (ch == '"') {
-                    escapeCount++;
-                }
-            }
-        } else {
-            for (int i = 0; i < len; i++) {
-                byte ch = utf8[i];
-                if (ch == ',') {
-                    comma = true;
-                } else if (ch == '"') {
-                    escapeCount++;
-                }
-            }
-            if (!comma) {
-                escapeCount = 0;
-            }
-        }
-
-        if (escapeCount == 0) {
-            writeRaw(utf8);
-            return;
-        }
-
-        if (utf8[0] == '"') {
-            byte[] bytes = new byte[utf8.length + 2 + escapeCount];
-            int j = 0;
-            bytes[0] = '"';
-            for (int i = off, end = off + len; i < end; i++) {
-                byte b = bytes[i];
-                bytes[j++] = b;
-                if (b == '"') {
-                    bytes[j++] = b;
-                }
-            }
-            bytes[j] = '"';
-            writeRaw(bytes);
-        } else {
-            byte[] bytes = new byte[utf8.length + 2 + escapeCount];
-            int j = 0;
-            bytes[0] = '"';
-            for (int i = off, end = off + len; i < end; i++) {
-                byte b = bytes[i];
-                bytes[j++] = b;
-                if (b == '"') {
-                    bytes[j++] = b;
-                }
-            }
-            bytes[j] = '"';
-            writeRaw(bytes);
-        }
-    }
-
-    public void writeDecimal(BigDecimal value) {
-        if (value == null) {
-            return;
-        }
-
-        int minCapacity = off + value.precision() + 2;
-        if (minCapacity - this.bytes.length > 0) {
-            flush();
-        }
-
-        int size = IOUtils.getDecimalChars(value, bytes, off);
-        off += size;
-    }
-
-    public void writeDecimal(long unscaledVal, int scale) {
-        if (scale == 0) {
-            writeInt64(unscaledVal);
-            return;
-        }
-
-        if (unscaledVal == Long.MIN_VALUE || scale > 20) {
-            writeDecimal(BigDecimal.valueOf(unscaledVal, scale));
-            return;
-        }
-
-        int minCapacity = off + 24;
-        if (minCapacity - this.bytes.length > 0) {
-            flush();
-        }
-
-        int size = IOUtils.getDecimalChars(unscaledVal, scale, bytes, off);
-        off += size;
-    }
-
-    public String toString() {
-        if (out instanceof ByteArrayOutputStream) {
-            flush();
-            byte[] strBytes = ((ByteArrayOutputStream) out).toByteArray();
-            return new String(strBytes, StandardCharsets.UTF_8);
-        }
-        return super.toString();
-    }
-
-    protected void writeRaw(byte[] strBytes) {
-        if (strBytes.length + off < bytes.length) {
-            System.arraycopy(strBytes, 0, bytes, off, strBytes.length);
-            off += strBytes.length;
-        } else {
-            flush();
-            if (strBytes.length >= bytes.length) {
-                writeDirect(strBytes, 0, strBytes.length);
-            } else {
-                System.arraycopy(strBytes, 0, bytes, off, strBytes.length);
-                off += strBytes.length;
-            }
-        }
-    }
-
-    protected void writeRaw(String str) {
-        if (str == null || str.isEmpty()) {
-            return;
-        }
-
-        byte[] strBytes = str.getBytes(charset);
-        if (strBytes.length + off < bytes.length) {
-            System.arraycopy(strBytes, 0, bytes, off, strBytes.length);
-            off += strBytes.length;
-        } else {
-            flush();
-            if (strBytes.length >= bytes.length) {
-                writeDirect(strBytes, 0, strBytes.length);
-            } else {
-                System.arraycopy(strBytes, 0, bytes, off, strBytes.length);
-                off += strBytes.length;
-            }
-        }
-    }
+    protected abstract void writeRaw(String str);
 
     @Override
-    public void close() throws IOException {
-        if (off > 0) {
-            flush();
-        }
-
-        out.close();
-    }
+    public abstract void close() throws IOException;
 
     public static CSVWriter of(OutputStream out, Feature... features) {
-        return new CSVWriter(out, StandardCharsets.UTF_8, DateUtils.DEFAULT_ZONE_ID, features);
+        return new CSVWriterUTF8(out, StandardCharsets.UTF_8, DEFAULT_ZONE_ID, features);
     }
 
     public static CSVWriter of(OutputStream out, Charset charset) {
-        return of(out, charset, DateUtils.DEFAULT_ZONE_ID);
+        return of(out, charset, DEFAULT_ZONE_ID);
     }
 
     public static CSVWriter of(OutputStream out, Charset charset, ZoneId zoneId) {
         if (charset == StandardCharsets.UTF_16
                 || charset == StandardCharsets.UTF_16LE
-                || charset == StandardCharsets.UTF_16BE) {
-            throw new UnsupportedOperationException("not support charset : " + charset);
+                || charset == StandardCharsets.UTF_16BE
+        ) {
+            return of(new OutputStreamWriter(out, charset), zoneId);
         }
 
         if (charset == null) {
             charset = StandardCharsets.UTF_8;
         }
 
-        return new CSVWriter(out, charset, zoneId);
+        return new CSVWriterUTF8(out, charset, zoneId);
+    }
+
+    public static CSVWriter of(Writer out) {
+        return new CSVWriterUTF16(out, DEFAULT_ZONE_ID);
+    }
+
+    public static CSVWriter of(Writer out, ZoneId zoneId) {
+        return new CSVWriterUTF16(out, zoneId);
     }
 
     public enum Feature {

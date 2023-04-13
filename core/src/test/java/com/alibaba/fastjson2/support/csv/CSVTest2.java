@@ -354,7 +354,7 @@ public class CSVTest2 {
                 break;
             }
 
-            writer.writeRow(line);
+            writer.writeLine(line);
             rowCount++;
         }
         writer.close();

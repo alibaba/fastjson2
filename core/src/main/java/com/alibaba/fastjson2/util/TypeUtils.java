@@ -93,12 +93,54 @@ public class TypeUtils {
         }
     }
 
+    static class X2 {
+        static final String[] chars;
+        static final String[] chars2;
+        static final char START = ' '; // 32
+        static final char END = 'z'; // 122
+        static final int SIZE2 = (END - START + 1);
+        static {
+            String[] array0 = new String[128];
+            for (char i = 0; i < array0.length; i++) {
+                array0[i] = Character.toString(i);
+            }
+            chars = array0;
+
+            String[] array1 = new String[SIZE2 * SIZE2];
+            char[] c2 = new char[2];
+            for (char i = START; i <= END; i++) {
+                for (char j = START; j <= END; j++) {
+                    int value = (i - START) * SIZE2 + (j - START);
+                    c2[0] = i;
+                    c2[1] = j;
+                    array1[value] = new String(c2);
+                }
+            }
+            chars2 = array1;
+        }
+    }
+
     static char[] toAsciiCharArray(byte[] bytes) {
         char[] charArray = new char[bytes.length];
         for (int i = 0; i < bytes.length; i++) {
             charArray[i] = (char) bytes[i];
         }
         return charArray;
+    }
+
+    public static String toString(char ch) {
+        if (ch < X2.chars.length) {
+            return X2.chars[ch];
+        }
+        return Character.toString(ch);
+    }
+
+    public static String toString(char c0, char c1) {
+        if (c0 >= X2.START && c0 <= X2.END && c1 >= X2.START && c1 <= X2.END) {
+            int value = (c0 - X2.START) * X2.SIZE2 + (c1 - X2.START);
+            return X2.chars2[value];
+        }
+        return new String(new char[] {c0, c1});
     }
 
     public static Type intern(Type type) {

@@ -347,21 +347,21 @@ class CSVReaderUTF16<T>
                             }
                         }
                     } else {
-                        char[] bytes = new char[valueSize - escapeCount];
+                        char[] chars = new char[valueSize - escapeCount];
                         int valueEnd = valueStart + valueSize;
                         for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
                             char c = buf[j];
-                            bytes[k++] = c;
+                            chars[k++] = c;
                             if (c == '"' && buf[j + 1] == '"') {
                                 ++j;
                             }
                         }
 
                         if (type == null || type == String.class || type == Object.class || strings) {
-                            value = new String(bytes);
+                            value = new String(chars);
                         } else {
                             try {
-                                value = readValue(bytes, 0, bytes.length, type);
+                                value = readValue(chars, 0, chars.length, type);
                             } catch (Exception e) {
                                 value = error(columnIndex, e);
                             }
@@ -369,7 +369,13 @@ class CSVReaderUTF16<T>
                     }
                 } else {
                     if (type == null || type == String.class || type == Object.class || strings) {
-                        value = new String(buf, valueStart, valueSize);
+                        if (valueSize == 1) {
+                            value = TypeUtils.toString(buf[valueStart]);
+                        } else if (valueSize == 2) {
+                            value = TypeUtils.toString(buf[valueStart], buf[valueStart + 1]);
+                        } else {
+                            value = new String(buf, valueStart, valueSize);
+                        }
                     } else {
                         try {
                             value = readValue(buf, valueStart, valueSize, type);
@@ -413,21 +419,21 @@ class CSVReaderUTF16<T>
                         value = readValue(buf, valueStart + 1, valueSize, type);
                     }
                 } else {
-                    char[] bytes = new char[valueSize - escapeCount];
+                    char[] chars = new char[valueSize - escapeCount];
                     int valueEnd = lineEnd;
                     for (int j = valueStart + 1, k = 0; j < valueEnd; ++j) {
                         char c = buf[j];
-                        bytes[k++] = c;
+                        chars[k++] = c;
                         if (c == '"' && buf[j + 1] == '"') {
                             ++j;
                         }
                     }
 
                     if (type == null || type == String.class || type == Object.class || strings) {
-                        value = new String(bytes);
+                        value = new String(chars);
                     } else {
                         try {
-                            value = readValue(bytes, 0, bytes.length, type);
+                            value = readValue(chars, 0, chars.length, type);
                         } catch (Exception e) {
                             value = error(columnIndex, e);
                         }
@@ -435,7 +441,14 @@ class CSVReaderUTF16<T>
                 }
             } else {
                 if (type == null || type == String.class || type == Object.class || strings) {
-                    value = new String(buf, valueStart, valueSize);
+                    char c0, c1;
+                    if (valueSize == 1) {
+                        value = TypeUtils.toString(buf[valueStart]);
+                    } else if (valueSize == 2) {
+                        value = TypeUtils.toString(buf[valueStart], buf[valueStart + 1]);
+                    } else {
+                        value = new String(buf, valueStart, valueSize);
+                    }
                 } else {
                     try {
                         value = readValue(buf, valueStart, valueSize, type);
@@ -493,6 +506,17 @@ class CSVReaderUTF16<T>
     public void readLineObjectAll(boolean readHeader, Consumer<T> consumer) {
         if (readHeader) {
             readHeader();
+        }
+
+        if (fieldReaders == null) {
+            while (true) {
+                Object[] line = readLineValues(false);
+                if (line == null) {
+                    break;
+                }
+                consumer.accept((T) line);
+            }
+            return;
         }
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
