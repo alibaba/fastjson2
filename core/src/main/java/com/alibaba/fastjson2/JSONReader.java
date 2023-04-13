@@ -555,7 +555,15 @@ public abstract class JSONReader
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
                     return negative ? -mag3 : mag3;
                 }
-                return getNumber().intValue();
+                Number number = getNumber();
+                if (number instanceof Long) {
+                    long longValue = number.longValue();
+                    if (longValue < Integer.MIN_VALUE || longValue > Integer.MAX_VALUE) {
+                        throw new JSONException(info("integer overflow " + longValue));
+                    }
+                    return (int) longValue;
+                }
+                return number.intValue();
             case JSON_TYPE_DEC:
                 return getNumber().intValue();
             case JSON_TYPE_BOOL:
