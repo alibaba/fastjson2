@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
 import com.alibaba.fastjson2.util.DateUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
 import java.text.ParseException;
@@ -127,6 +128,11 @@ public class ObjectReaderImplDate
                             if (str.length() == 19 && jsonReader.isEnabled(JSONReader.Feature.SupportSmartMatch)) {
                                 ldt = DateUtils.parseLocalDateTime(str, 0, str.length());
                             } else {
+                                if (format.indexOf('-') != -1 && str.indexOf('-') == -1 && TypeUtils.isInteger(str)) {
+                                    millis = Long.parseLong(str);
+                                    return new Date(millis);
+                                }
+
                                 localDate = LocalDate.parse(str, formatter);
                                 ldt = LocalDateTime.of(localDate, LocalTime.MIN);
                             }
