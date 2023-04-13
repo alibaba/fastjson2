@@ -1357,8 +1357,8 @@ public class DateUtilsTest {
 
     @Test
     public void parseLocalDateTime_L14_NullOrError() {
-        assertThrows(DateTimeException.class, () -> DateUtils.parseLocalDateTime14("00".toCharArray(), 0));
-        assertThrows(DateTimeException.class, () -> DateUtils.parseLocalDateTime14("00".getBytes(), 0));
+        assertNull(DateUtils.parseLocalDateTime14("00".toCharArray(), 0));
+        assertNull(DateUtils.parseLocalDateTime14("00".getBytes(), 0));
 
         assertThrows(DateTimeException.class, () -> DateUtils.parseLocalDateTime("A0000101010101"));
         assertThrows(DateTimeException.class, () -> DateUtils.parseLocalDateTime("0A000101010101"));

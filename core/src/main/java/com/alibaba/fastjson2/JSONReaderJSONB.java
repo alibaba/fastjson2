@@ -4490,6 +4490,8 @@ class JSONReaderJSONB
                     return readLocalDateTime18();
                 case 19:
                     return readLocalDateTime19();
+                case 20:
+                    return readLocalDateTime20();
                 case 21:
                 case 22:
                 case 23:
@@ -4516,6 +4518,11 @@ class JSONReaderJSONB
         }
 
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected LocalDateTime readLocalDateTime12() {
+        throw new JSONException("UnsupportedOperation");
     }
 
     @Override
@@ -5555,6 +5562,11 @@ class JSONReaderJSONB
 
     @Override
     protected LocalDateTime readLocalDateTime18() {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
+    protected LocalDateTime readLocalDateTime20() {
         throw new JSONException("UnsupportedOperation");
     }
 

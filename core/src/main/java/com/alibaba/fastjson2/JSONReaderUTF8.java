@@ -4816,37 +4816,8 @@ class JSONReaderUTF8
             throw new JSONException("localTime only support string input");
         }
 
-        byte c0 = bytes[offset + 0];
-        byte c1 = bytes[offset + 1];
-        byte c2 = bytes[offset + 2];
-        byte c3 = bytes[offset + 3];
-        byte c4 = bytes[offset + 4];
-
-        byte h0, h1, i0, i1;
-        if (c2 == ':') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
+        LocalTime time = DateUtils.parseLocalTime5(bytes, offset);
+        if (time == null) {
             return null;
         }
 
@@ -4856,7 +4827,7 @@ class JSONReaderUTF8
             next();
         }
 
-        return LocalTime.of(hour, minute);
+        return time;
     }
 
     @Override
@@ -4865,51 +4836,8 @@ class JSONReaderUTF8
             throw new JSONException("localTime only support string input");
         }
 
-        byte c0 = bytes[offset + 0];
-        byte c1 = bytes[offset + 1];
-        byte c2 = bytes[offset + 2];
-        byte c3 = bytes[offset + 3];
-        byte c4 = bytes[offset + 4];
-        byte c5 = bytes[offset + 5];
-        byte c6 = bytes[offset + 6];
-        byte c7 = bytes[offset + 7];
-
-        byte h0, h1, i0, i1, s0, s1;
-        if (c2 == ':' && c5 == ':') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int seccond;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
-        } else {
+        LocalTime time = DateUtils.parseLocalTime8(bytes, offset);
+        if (time == null) {
             return null;
         }
 
@@ -4919,87 +4847,7 @@ class JSONReaderUTF8
             next();
         }
 
-        return LocalTime.of(hour, minute, seccond);
-    }
-
-    @Override
-    protected LocalTime readLocalTime11() {
-        if (!isString()) {
-            throw new JSONException("localTime only support string input");
-        }
-
-        byte c0 = bytes[offset + 0];
-        byte c1 = bytes[offset + 1];
-        byte c2 = bytes[offset + 2];
-        byte c3 = bytes[offset + 3];
-        byte c4 = bytes[offset + 4];
-        byte c5 = bytes[offset + 5];
-        byte c6 = bytes[offset + 6];
-        byte c7 = bytes[offset + 7];
-        byte c8 = bytes[offset + 8];
-        byte c9 = bytes[offset + 9];
-        byte c10 = bytes[offset + 10];
-
-        byte h0, h1, i0, i1, s0, s1, m0, m1, m2;
-        if (c2 == ':' && c5 == ':' && c8 == '.') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-            m0 = c9;
-            m1 = c10;
-            m2 = '0';
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int seccond;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int millis;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-                && m2 >= '0' && m2 <= '9'
-        ) {
-            millis = (m0 - '0') * 100 + (m1 - '0') * 10 + (m2 - '0');
-            millis *= 1000_000;
-        } else {
-            return null;
-        }
-
-        offset += 12;
-        next();
-        if (comma = (ch == ',')) {
-            next();
-        }
-
-        return LocalTime.of(hour, minute, seccond, millis);
+        return time;
     }
 
     @Override
@@ -5008,67 +4856,8 @@ class JSONReaderUTF8
             throw new JSONException("localTime only support string input");
         }
 
-        byte c0 = bytes[offset + 0];
-        byte c1 = bytes[offset + 1];
-        byte c2 = bytes[offset + 2];
-        byte c3 = bytes[offset + 3];
-        byte c4 = bytes[offset + 4];
-        byte c5 = bytes[offset + 5];
-        byte c6 = bytes[offset + 6];
-        byte c7 = bytes[offset + 7];
-        byte c8 = bytes[offset + 8];
-        byte c9 = bytes[offset + 9];
-
-        byte h0, h1, i0, i1, s0, s1, m0, m1, m2;
-        if (c2 == ':' && c5 == ':' && c8 == '.') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-            m0 = c9;
-            m1 = '0';
-            m2 = '0';
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int seccond;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int millis;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-                && m2 >= '0' && m2 <= '9'
-        ) {
-            millis = (m0 - '0') * 100 + (m1 - '0') * 10 + (m2 - '0');
-            millis *= 1000_000;
-        } else {
+        LocalTime time = DateUtils.parseLocalTime10(bytes, offset);
+        if (time == null) {
             return null;
         }
 
@@ -5078,7 +4867,27 @@ class JSONReaderUTF8
             next();
         }
 
-        return LocalTime.of(hour, minute, seccond, millis);
+        return time;
+    }
+
+    @Override
+    protected LocalTime readLocalTime11() {
+        if (!isString()) {
+            throw new JSONException("localTime only support string input");
+        }
+
+        LocalTime time = DateUtils.parseLocalTime11(bytes, offset);
+        if (time == null) {
+            return null;
+        }
+
+        offset += 12;
+        next();
+        if (comma = (ch == ',')) {
+            next();
+        }
+
+        return time;
     }
 
     @Override
@@ -5087,69 +4896,8 @@ class JSONReaderUTF8
             throw new JSONException("localTime only support string input");
         }
 
-        byte c0 = bytes[offset + 0];
-        byte c1 = bytes[offset + 1];
-        byte c2 = bytes[offset + 2];
-        byte c3 = bytes[offset + 3];
-        byte c4 = bytes[offset + 4];
-        byte c5 = bytes[offset + 5];
-        byte c6 = bytes[offset + 6];
-        byte c7 = bytes[offset + 7];
-        byte c8 = bytes[offset + 8];
-        byte c9 = bytes[offset + 9];
-        byte c10 = bytes[offset + 10];
-        byte c11 = bytes[offset + 11];
-
-        byte h0, h1, i0, i1, s0, s1, m0, m1, m2;
-        if (c2 == ':' && c5 == ':' && c8 == '.') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-            m0 = c9;
-            m1 = c10;
-            m2 = c11;
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int seccond;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int millis;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-                && m2 >= '0' && m2 <= '9'
-        ) {
-            millis = (m0 - '0') * 100 + (m1 - '0') * 10 + (m2 - '0');
-            millis *= 1000_000;
-        } else {
+        LocalTime time = DateUtils.parseLocalTime12(bytes, offset);
+        if (time == null) {
             return null;
         }
 
@@ -5159,7 +4907,7 @@ class JSONReaderUTF8
             next();
         }
 
-        return LocalTime.of(hour, minute, seccond, millis);
+        return time;
     }
 
     @Override
@@ -5168,94 +4916,8 @@ class JSONReaderUTF8
             throw new JSONException("localTime only support string input");
         }
 
-        byte c0 = bytes[offset + 0];
-        byte c1 = bytes[offset + 1];
-        byte c2 = bytes[offset + 2];
-        byte c3 = bytes[offset + 3];
-        byte c4 = bytes[offset + 4];
-        byte c5 = bytes[offset + 5];
-        byte c6 = bytes[offset + 6];
-        byte c7 = bytes[offset + 7];
-        byte c8 = bytes[offset + 8];
-        byte c9 = bytes[offset + 9];
-        byte c10 = bytes[offset + 10];
-        byte c11 = bytes[offset + 11];
-        byte c12 = bytes[offset + 12];
-        byte c13 = bytes[offset + 13];
-        byte c14 = bytes[offset + 14];
-        byte c15 = bytes[offset + 15];
-        byte c16 = bytes[offset + 16];
-        byte c17 = bytes[offset + 17];
-
-        byte h0, h1, i0, i1, s0, s1, m0, m1, m2, m3, m4, m5, m6, m7, m8;
-        if (c2 == ':' && c5 == ':' && c8 == '.') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-            m0 = c9;
-            m1 = c10;
-            m2 = c11;
-            m3 = c12;
-            m4 = c13;
-            m5 = c14;
-            m6 = c15;
-            m7 = c16;
-            m8 = c17;
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int seccond;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int millis;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-                && m2 >= '0' && m2 <= '9'
-                && m3 >= '0' && m3 <= '9'
-                && m4 >= '0' && m4 <= '9'
-                && m5 >= '0' && m5 <= '9'
-                && m6 >= '0' && m6 <= '9'
-                && m7 >= '0' && m7 <= '9'
-                && m8 >= '0' && m8 <= '9'
-        ) {
-            millis = (m0 - '0') * 1000_000_00
-                    + (m1 - '0') * 1000_000_0
-                    + (m2 - '0') * 1000_000
-                    + (m3 - '0') * 1000_00
-                    + (m4 - '0') * 1000_0
-                    + (m5 - '0') * 1000
-                    + (m6 - '0') * 100
-                    + (m7 - '0') * 10
-                    + (m8 - '0');
-        } else {
+        LocalTime time = DateUtils.parseLocalTime18(bytes, offset);
+        if (time == null) {
             return null;
         }
 
@@ -5265,7 +4927,26 @@ class JSONReaderUTF8
             next();
         }
 
-        return LocalTime.of(hour, minute, seccond, millis);
+        return time;
+    }
+
+    @Override
+    protected LocalDateTime readLocalDateTime12() {
+        if (!isString()) {
+            throw new JSONException("date only support string input");
+        }
+
+        LocalDateTime ldt = DateUtils.parseLocalDateTime12(bytes, offset);
+        if (ldt == null) {
+            return null;
+        }
+
+        offset += 13;
+        next();
+        if (comma = (ch == ',')) {
+            next();
+        }
+        return ldt;
     }
 
     @Override
@@ -5337,6 +5018,25 @@ class JSONReaderUTF8
         }
 
         offset += 20;
+        next();
+        if (comma = (ch == ',')) {
+            next();
+        }
+        return ldt;
+    }
+
+    @Override
+    protected LocalDateTime readLocalDateTime20() {
+        if (!isString()) {
+            throw new JSONException("date only support string input");
+        }
+
+        LocalDateTime ldt = DateUtils.parseLocalDateTime20(bytes, offset);
+        if (ldt == null) {
+            return null;
+        }
+
+        offset += 21;
         next();
         if (comma = (ch == ',')) {
             next();
