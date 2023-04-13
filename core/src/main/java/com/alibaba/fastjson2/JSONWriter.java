@@ -1867,7 +1867,8 @@ public abstract class JSONWriter
         /**
          * @since 2.0.20
          */
-        BrowserSecure(1L << 35);
+        BrowserSecure(1L << 35),
+        WriteEnumUsingOrdinal(1L << 36),;
 
         public final long mask;
 

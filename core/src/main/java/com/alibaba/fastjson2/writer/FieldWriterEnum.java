@@ -196,7 +196,8 @@ class FieldWriterEnum
             return;
         }
 
-        final boolean usingOrdinal = (features & (JSONWriter.Feature.WriteEnumUsingToString.mask | JSONWriter.Feature.WriteEnumsUsingName.mask)) == 0;
+        final boolean usingOrdinal = (features & JSONWriter.Feature.WriteEnumUsingOrdinal.mask) != 0;
+        final boolean usingName = (features & JSONWriter.Feature.WriteEnumsUsingName.mask) != 0;
         final boolean utf8 = jsonWriter.utf8;
         final boolean utf16 = utf8 ? false : jsonWriter.utf16;
         final int ordinal = e.ordinal();
@@ -233,37 +234,39 @@ class FieldWriterEnum
             return;
         }
 
-        if (utf8) {
-            byte[] bytes = valueNameCacheUTF8[ordinal];
+        if (usingName) {
+            if (utf8) {
+                byte[] bytes = valueNameCacheUTF8[ordinal];
 
-            if (bytes == null) {
-                byte[] nameUft8Bytes = enumConstants[ordinal].name().getBytes(StandardCharsets.UTF_8);
-                bytes = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + nameUft8Bytes.length + 2);
-                bytes[nameWithColonUTF8.length] = '"';
-                int index = nameWithColonUTF8.length + 1;
-                for (byte b : nameUft8Bytes) {
-                    bytes[index++] = b;
+                if (bytes == null) {
+                    byte[] nameUft8Bytes = enumConstants[ordinal].name().getBytes(StandardCharsets.UTF_8);
+                    bytes = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + nameUft8Bytes.length + 2);
+                    bytes[nameWithColonUTF8.length] = '"';
+                    int index = nameWithColonUTF8.length + 1;
+                    for (byte b : nameUft8Bytes) {
+                        bytes[index++] = b;
+                    }
+                    bytes[bytes.length - 1] = '"';
+                    valueNameCacheUTF8[ordinal] = bytes;
                 }
-                bytes[bytes.length - 1] = '"';
-                valueNameCacheUTF8[ordinal] = bytes;
+                jsonWriter.writeNameRaw(bytes);
+                return;
             }
-            jsonWriter.writeNameRaw(bytes);
-            return;
-        }
 
-        if (utf16) {
-            char[] chars = valueNameCacheUTF16[ordinal];
+            if (utf16) {
+                char[] chars = valueNameCacheUTF16[ordinal];
 
-            if (chars == null) {
-                String name = enumConstants[ordinal].name();
-                chars = Arrays.copyOf(nameWithColonUTF16, nameWithColonUTF16.length + name.length() + 2);
-                chars[nameWithColonUTF16.length] = '"';
-                name.getChars(0, name.length(), chars, nameWithColonUTF16.length + 1);
-                chars[chars.length - 1] = '"';
-                valueNameCacheUTF16[ordinal] = chars;
+                if (chars == null) {
+                    String name = enumConstants[ordinal].name();
+                    chars = Arrays.copyOf(nameWithColonUTF16, nameWithColonUTF16.length + name.length() + 2);
+                    chars[nameWithColonUTF16.length] = '"';
+                    name.getChars(0, name.length(), chars, nameWithColonUTF16.length + 1);
+                    chars[chars.length - 1] = '"';
+                    valueNameCacheUTF16[ordinal] = chars;
+                }
+                jsonWriter.writeNameRaw(chars);
+                return;
             }
-            jsonWriter.writeNameRaw(chars);
-            return;
         }
 
         if (jsonWriter.jsonb) {
@@ -272,7 +275,7 @@ class FieldWriterEnum
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeString(e.name());
+        jsonWriter.writeString(e.toString());
     }
 
     @Override

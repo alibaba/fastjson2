@@ -69,7 +69,7 @@ public class Enum_0 {
                 VO vo = new VO();
                 vo.setValue(Type.T0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"value\":0}",
+                assertEquals("{\"value\":\"T0\"}",
                         jsonWriter.toString());
             }
             {
@@ -77,7 +77,7 @@ public class Enum_0 {
                 VO vo = new VO();
                 vo.setValue(Type.T0);
                 objectWriter.write(jsonWriter, vo);
-                assertEquals("{\"value\":0}",
+                assertEquals("{\"value\":\"T0\"}",
                         jsonWriter.toString());
             }
 
@@ -403,6 +403,18 @@ public class Enum_0 {
             VO vo = new VO();
             vo.setValue(id);
             byte[] utf8Bytes = JSON.toJSONBytes(vo);
+
+            VO v1 = JSON.parseObject(utf8Bytes, 0, utf8Bytes.length, StandardCharsets.UTF_8, VO.class);
+            assertEquals(vo.getValue(), v1.getValue());
+        }
+    }
+
+    @Test
+    public void test_ordinal() {
+        for (Type id : types) {
+            VO vo = new VO();
+            vo.setValue(id);
+            byte[] utf8Bytes = JSON.toJSONBytes(vo, JSONWriter.Feature.WriteEnumUsingOrdinal);
 
             VO v1 = JSON.parseObject(utf8Bytes, 0, utf8Bytes.length, StandardCharsets.US_ASCII, VO.class);
             assertEquals(vo.getValue(), v1.getValue());

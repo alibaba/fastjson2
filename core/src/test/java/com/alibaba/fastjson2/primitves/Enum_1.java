@@ -17,8 +17,8 @@ public class Enum_1 {
         Bean bean = new Bean();
         bean.unit = TimeUnit.DAYS;
 
-        assertEquals("{\"unit\":\"" + bean.unit.name() + "\"}", JSON.toJSONString(bean, JSONWriter.Feature.WriteEnumsUsingName));
-        assertEquals("{\"unit\":" + bean.unit.ordinal() + "}", JSON.toJSONString(bean));
+        assertEquals("{\"unit\":\"" + bean.unit.name() + "\"}", JSON.toJSONString(bean, JSONWriter.Feature.WriteEnumUsingToString));
+        assertEquals("{\"unit\":\"" + bean.unit.name() + "\"}", JSON.toJSONString(bean));
 
         assertEquals(TimeUnit.DAYS, JSON.parseObject("{\"unit\":6}", Bean.class).unit);
         assertEquals(TimeUnit.DAYS, JSON.parseObject("{\"unit\":6}").to(Bean.class).unit);
