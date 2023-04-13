@@ -559,7 +559,7 @@ final class JSONPathSegmentIndex
         if (STRING_CREATOR_JDK11 != null) {
             str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
         } else {
-            str = new String(bytes, StandardCharsets.US_ASCII);
+            str = new String(bytes, StandardCharsets.ISO_8859_1);
         }
         return str;
     }

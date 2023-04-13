@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -925,13 +926,12 @@ class JSONReaderASCII
             int length = nameEnd - nameBegin;
             switch (length) {
                 case 1:
-                    nameValue0 = bytes[nameBegin];
-                    break;
+                    return TypeUtils.toString((char) (bytes[nameBegin] & 0xff));
                 case 2:
-                    nameValue0
-                            = (bytes[nameBegin + 1] << 8)
-                            + (bytes[nameBegin] & 0xFF);
-                    break;
+                    return TypeUtils.toString(
+                            (char) (bytes[nameBegin] & 0xff),
+                            (char) (bytes[nameBegin + 1] & 0xff)
+                    );
                 case 3:
                     nameValue0
                             = (bytes[nameBegin + 2] << 16)
@@ -1247,7 +1247,7 @@ class JSONReaderASCII
                 byte[] bytes = Arrays.copyOfRange(this.bytes, start, offset);
                 str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
             } else {
-                str = new String(bytes, start, this.offset - start, StandardCharsets.US_ASCII);
+                str = new String(bytes, start, this.offset - start, StandardCharsets.ISO_8859_1);
             }
         }
 
@@ -1412,7 +1412,7 @@ class JSONReaderASCII
                     byte[] bytes = Arrays.copyOfRange(this.bytes, this.offset, offset);
                     str = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
                 } else {
-                    str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.US_ASCII);
+                    str = new String(bytes, this.offset, offset - this.offset, StandardCharsets.ISO_8859_1);
                 }
             }
 

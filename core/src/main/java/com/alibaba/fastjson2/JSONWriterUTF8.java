@@ -22,7 +22,7 @@ import static com.alibaba.fastjson2.util.IOUtils.*;
 
 class JSONWriterUTF8
         extends JSONWriter {
-    static final byte[] REF_PREF = "{\"$ref\":".getBytes(StandardCharsets.US_ASCII);
+    static final byte[] REF_PREF = "{\"$ref\":".getBytes(StandardCharsets.ISO_8859_1);
 
     private final int cachedIndex;
     protected byte[] bytes;

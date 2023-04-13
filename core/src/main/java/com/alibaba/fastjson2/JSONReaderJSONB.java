@@ -72,7 +72,7 @@ class JSONReaderJSONB
 
         Charset charset;
         if (strtype == BC_STR_ASCII) {
-            charset = StandardCharsets.US_ASCII;
+            charset = StandardCharsets.ISO_8859_1;
         } else if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII_FIX_MAX) {
             if (STRING_CREATOR_JDK8 != null) {
                 char[] chars = new char[strlen];
@@ -85,7 +85,7 @@ class JSONReaderJSONB
                 System.arraycopy(bytes, strBegin, chars, 0, strlen);
                 return STRING_CREATOR_JDK11.apply(chars, LATIN1);
             }
-            charset = StandardCharsets.US_ASCII;
+            charset = StandardCharsets.ISO_8859_1;
         } else if (strtype == BC_STR_UTF8) {
             charset = StandardCharsets.UTF_8;
         } else if (strtype == BC_STR_UTF16) {
@@ -955,7 +955,7 @@ class JSONReaderJSONB
                         }
                         return str;
                     }
-                    String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                    String str = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                     offset += strlen;
 
                     if ((context.features & Feature.TrimString.mask) != 0) {
@@ -2410,7 +2410,18 @@ class JSONReaderJSONB
         strBegin = offset;
         Charset charset = null;
         String str = null;
-        if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII) {
+        if (strtype == BC_STR_ASCII_FIX_MIN + 1) {
+            str = TypeUtils.toString((char) (bytes[offset] & 0xff));
+            strlen = 1;
+            offset++;
+        } else if (strtype == BC_STR_ASCII_FIX_MIN + 2) {
+            str = TypeUtils.toString(
+                    (char) (bytes[offset] & 0xff),
+                    (char) (bytes[offset + 1] & 0xff)
+            );
+            strlen = 2;
+            offset += 2;
+        } else if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII) {
             long nameValue0 = -1, nameValue1 = -1;
 
             if (strtype == BC_STR_ASCII) {
@@ -2420,14 +2431,6 @@ class JSONReaderJSONB
                 strlen = strtype - BC_STR_ASCII_FIX_MIN;
 
                 switch (strlen) {
-                    case 1:
-                        nameValue0 = bytes[offset];
-                        break;
-                    case 2:
-                        nameValue0
-                                = (bytes[offset + 1] << 8)
-                                + (bytes[offset] & 0xFFL);
-                        break;
                     case 3:
                         nameValue0
                                 = (bytes[offset + 2] << 16)
@@ -2615,7 +2618,7 @@ class JSONReaderJSONB
                 }
             }
 
-            if (nameValue0 != -1) {
+            if (bytes[offset + strlen - 1] > 0 && nameValue0 != -1) {
                 if (nameValue1 != -1) {
                     int indexMask = ((int) nameValue1) & (NAME_CACHE2.length - 1);
                     JSONFactory.NameCacheEntry2 entry = NAME_CACHE2[indexMask];
@@ -2627,7 +2630,7 @@ class JSONReaderJSONB
                             }
                             str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                         } else {
-                            str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                            str = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                         }
 
                         NAME_CACHE2[indexMask] = new JSONFactory.NameCacheEntry2(str, nameValue0, nameValue1);
@@ -2647,7 +2650,7 @@ class JSONReaderJSONB
                             }
                             str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                         } else {
-                            str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                            str = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                         }
 
                         NAME_CACHE[indexMask] = new JSONFactory.NameCacheEntry(str, nameValue0);
@@ -2675,7 +2678,7 @@ class JSONReaderJSONB
                     offset += strlen;
                 }
             }
-            charset = StandardCharsets.US_ASCII;
+            charset = StandardCharsets.ISO_8859_1;
         } else if (strtype == BC_STR_UTF8) {
             strlen = readLength();
             strBegin = offset;
@@ -2808,7 +2811,18 @@ class JSONReaderJSONB
             }
 
             if (strlen >= 0) {
-                if (STRING_CREATOR_JDK8 != null) {
+                if (strlen == 1) {
+                    str = TypeUtils.toString((char) (bytes[offset] & 0xff));
+                    offset++;
+                    return str;
+                } else if (strlen == 2) {
+                    str = TypeUtils.toString(
+                            (char) (bytes[offset] & 0xff),
+                            (char) (bytes[offset + 1] & 0xff)
+                    );
+                    offset += 2;
+                    return str;
+                } else if (STRING_CREATOR_JDK8 != null) {
                     char[] chars = new char[strlen];
                     for (int i = 0; i < strlen; ++i) {
                         chars[i] = (char) (bytes[offset + i] & 0xff);
@@ -2834,7 +2848,7 @@ class JSONReaderJSONB
                 }
             }
 
-            charset = StandardCharsets.US_ASCII;
+            charset = StandardCharsets.ISO_8859_1;
         } else if (strtype == BC_STR_UTF8) {
             byte strType = bytes[offset];
             if (strType >= BC_INT32_NUM_MIN && strType <= BC_INT32_NUM_MAX) {
@@ -3269,7 +3283,7 @@ class JSONReaderJSONB
             }
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
-                String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                String str = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
@@ -3413,7 +3427,7 @@ class JSONReaderJSONB
                 return int32Value;
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
-                String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                String str = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
@@ -3520,7 +3534,14 @@ class JSONReaderJSONB
 
     protected final String readFixedAsciiString(int strlen) {
         String str;
-        if (STRING_CREATOR_JDK8 != null) {
+        if (strlen == 1) {
+            str = TypeUtils.toString((char) (bytes[offset] & 0xff));
+        } else if (strlen == 2) {
+            str = TypeUtils.toString(
+                    (char) (bytes[offset] & 0xff),
+                    (char) (bytes[offset + 1] & 0xff)
+            );
+        } else if (STRING_CREATOR_JDK8 != null) {
             char[] chars = new char[strlen];
             for (int i = 0; i < strlen; ++i) {
                 chars[i] = (char) (bytes[offset + i] & 0xff);
@@ -3605,7 +3626,7 @@ class JSONReaderJSONB
             }
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
-                String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                String str = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
@@ -3766,7 +3787,7 @@ class JSONReaderJSONB
                 return readInt64Value();
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
-                String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                String str = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str).intValue();
@@ -4000,7 +4021,7 @@ class JSONReaderJSONB
             }
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
-                String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                String str = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                 offset += strlen;
                 return toBigDecimal(str);
             }
@@ -4156,7 +4177,7 @@ class JSONReaderJSONB
             }
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
-                String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                String str = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                 offset += strlen;
                 return toBigDecimal(str);
             }
@@ -4323,7 +4344,7 @@ class JSONReaderJSONB
             }
             case BC_STR_ASCII: {
                 int strlen = readInt32Value();
-                String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                String str = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                 offset += strlen;
                 if (str.indexOf('.') == -1) {
                     return new BigInteger(str);
@@ -4772,7 +4793,7 @@ class JSONReaderJSONB
                             msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
                             lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
                 }
-                throw new JSONException("Invalid UUID string:  " + new String(bytes, offset, 32, StandardCharsets.US_ASCII));
+                throw new JSONException("Invalid UUID string:  " + new String(bytes, offset, 32, StandardCharsets.ISO_8859_1));
             }
             case BC_STR_ASCII_FIX_36: {
                 byte ch1 = bytes[offset + 8];
@@ -4795,7 +4816,7 @@ class JSONReaderJSONB
                                 lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
                     }
                 }
-                throw new JSONException("Invalid UUID string:  " + new String(bytes, offset, 36, StandardCharsets.US_ASCII));
+                throw new JSONException("Invalid UUID string:  " + new String(bytes, offset, 36, StandardCharsets.ISO_8859_1));
             }
             case BC_STR_ASCII:
             case BC_STR_UTF8: {
@@ -4945,7 +4966,7 @@ class JSONReaderJSONB
                         return false;
                     }
                 }
-                String str = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                String str = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                 offset += strlen;
                 throw new JSONException("not support input " + str);
             }

@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -60,7 +61,18 @@ final class JSONReaderJSONBUF
         strBegin = offset;
         Charset charset = null;
         String str = null;
-        if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII) {
+        if (strtype == BC_STR_ASCII_FIX_MIN + 1) {
+            str = TypeUtils.toString((char) (bytes[offset] & 0xff));
+            strlen = 1;
+            offset++;
+        } else if (strtype == BC_STR_ASCII_FIX_MIN + 2) {
+            str = TypeUtils.toString(
+                    (char) (bytes[offset] & 0xff),
+                    (char) (bytes[offset + 1] & 0xff)
+            );
+            strlen = 2;
+            offset += 2;
+        } else if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII) {
             long nameValue0 = -1, nameValue1 = -1;
 
             if (strtype == BC_STR_ASCII) {
@@ -74,14 +86,6 @@ final class JSONReaderJSONBUF
                 }
 
                 switch (strlen) {
-                    case 1:
-                        nameValue0 = bytes[offset];
-                        break;
-                    case 2:
-                        nameValue0
-                                = (bytes[offset + 1] << 8)
-                                + (bytes[offset] & 0xFFL);
-                        break;
                     case 3:
                         nameValue0
                                 = (bytes[offset + 2] << 16)
@@ -161,7 +165,7 @@ final class JSONReaderJSONBUF
                 }
             }
 
-            if (nameValue0 != -1) {
+            if (bytes[offset + strlen - 1] > 0 && nameValue0 != -1) {
                 if (nameValue1 != -1) {
                     int indexMask = ((int) nameValue1) & (NAME_CACHE2.length - 1);
                     JSONFactory.NameCacheEntry2 entry = NAME_CACHE2[indexMask];
@@ -170,11 +174,11 @@ final class JSONReaderJSONBUF
                         if (STRING_CREATOR_JDK8 != null) {
                             char[] chars = new char[strlen];
                             for (int i = 0; i < strlen; ++i) {
-                                chars[i] = (char) bytes[offset + i];
+                                chars[i] = (char) (bytes[offset + i] & 0xff);
                             }
                             name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                         } else {
-                            name = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                            name = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                         }
 
                         NAME_CACHE2[indexMask] = new JSONFactory.NameCacheEntry2(name, nameValue0, nameValue1);
@@ -192,11 +196,11 @@ final class JSONReaderJSONBUF
                         if (STRING_CREATOR_JDK8 != null) {
                             char[] chars = new char[strlen];
                             for (int i = 0; i < strlen; ++i) {
-                                chars[i] = (char) bytes[offset + i];
+                                chars[i] = (char) (bytes[offset + i] & 0xff);
                             }
                             name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                         } else {
-                            name = new String(bytes, offset, strlen, StandardCharsets.US_ASCII);
+                            name = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                         }
 
                         NAME_CACHE[indexMask] = new JSONFactory.NameCacheEntry(name, nameValue0);
@@ -213,7 +217,7 @@ final class JSONReaderJSONBUF
                 if (STRING_CREATOR_JDK8 != null && strlen >= 0) {
                     char[] chars = new char[strlen];
                     for (int i = 0; i < strlen; ++i) {
-                        chars[i] = (char) bytes[offset + i];
+                        chars[i] = (char) (bytes[offset + i] & 0xff);
                     }
                     offset += strlen;
                     str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
@@ -223,7 +227,7 @@ final class JSONReaderJSONBUF
                     str = STRING_CREATOR_JDK11.apply(chars, LATIN1);
                     offset += strlen;
                 }
-                charset = StandardCharsets.US_ASCII;
+                charset = StandardCharsets.ISO_8859_1;
             }
         } else if (strtype == BC_STR_UTF8) {
             strlen = readLength();
