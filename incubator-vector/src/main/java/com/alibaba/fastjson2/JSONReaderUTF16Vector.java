@@ -1,10 +1,10 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.TypeUtils;
 import jdk.incubator.vector.ShortVector;
 import jdk.incubator.vector.Vector;
 
 import static com.alibaba.fastjson2.JSONWriterUTF16Vector.*;
-import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK8;
 
 final class JSONReaderUTF16Vector
@@ -130,10 +130,17 @@ final class JSONReaderUTF16Vector
                     str = new String(chars);
                 }
             } else {
-                if (this.str != null && JVM_VERSION > 8) {
-                    str = this.str.substring(this.offset, offset);
+                char c0, c1;
+                int strlen = offset - this.offset;
+                if (strlen == 1 && (c0 = this.chars[this.offset]) < 128) {
+                    str = TypeUtils.toString(c0);
+                } else if (strlen == 2
+                        && (c0 = this.chars[this.offset]) < 128
+                        && (c1 = this.chars[this.offset + 1]) < 128
+                ) {
+                    str = TypeUtils.toString(c0, c1);
                 } else {
-                    str = new String(chars, this.offset, offset - this.offset);
+                    str = this.str.substring(this.offset, offset);
                 }
             }
 

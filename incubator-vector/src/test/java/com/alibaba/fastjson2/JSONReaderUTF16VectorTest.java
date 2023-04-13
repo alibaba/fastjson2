@@ -2,42 +2,29 @@ package com.alibaba.fastjson2;
 
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.StandardCharsets;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class JSONReaderUTF8VectorTest {
-    @Test
-    public void test() {
-        JSONReader.Context ctx = JSONFactory.createReadContext();
-        String str = "abcdef1234567890中国";
-        String json = JSON.toJSONString(str);
-        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
-        JSONReaderUTF8Vector jsonReader = new JSONReaderUTF8Vector(ctx, json, bytes, 0, bytes.length);
-        String parsed = jsonReader.readString();
-        assertEquals(str, parsed);
-    }
-
+public class JSONReaderUTF16VectorTest {
     @Test
     public void testJSON() {
         for (char i = 0; i < 512; i++) {
             String s1 = Character.toString(i);
             String json = JSON.toJSONString(JSONObject.of(s1, s1));
-            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+            char[] chars = json.toCharArray();
             JSONReader.Context ctx = JSONFactory.createReadContext();
-            JSONReaderUTF8Vector jsonReader = new JSONReaderUTF8Vector(ctx, s1, bytes, 0, bytes.length);
+            JSONReaderUTF16Vector jsonReader = new JSONReaderUTF16Vector(ctx, json, chars, 0, chars.length);
             JSONObject object = (JSONObject) jsonReader.readObject();
             Object v1 = object.get(s1);
-            assertEquals(s1, v1);
+            assertEquals(s1, v1, Integer.toString(i));
         }
 
         for (char i = 0; i < 512; i++) {
             for (char j = 0; j < 512; j++) {
                 String s2 = new String(new char[]{i, j});
                 String json = JSON.toJSONString(JSONObject.of(s2, s2));
-                byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+                char[] chars = json.toCharArray();
                 JSONReader.Context ctx = JSONFactory.createReadContext();
-                JSONReaderUTF8Vector jsonReader = new JSONReaderUTF8Vector(ctx, s2, bytes, 0, bytes.length);
+                JSONReaderUTF16Vector jsonReader = new JSONReaderUTF16Vector(ctx, json, chars, 0, chars.length);
                 JSONObject object = (JSONObject) jsonReader.readObject();
                 Object v1 = object.get(s2);
                 assertEquals(s2, v1);

@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.util.TypeUtils;
 import jdk.incubator.vector.ByteVector;
 import jdk.incubator.vector.Vector;
 
@@ -193,8 +194,15 @@ final class JSONReaderUTF8Vector
 
                 str = new String(chars);
             } else if (ascii) {
-                if (STRING_CREATOR_JDK8 != null) {
-                    int strlen = offset - this.offset;
+                int strlen = offset - this.offset;
+                if (strlen == 1) {
+                    str = TypeUtils.toString((char) (bytes[this.offset] & 0xff));
+                } else if (strlen == 2) {
+                    str = TypeUtils.toString(
+                            (char) (bytes[this.offset] & 0xff),
+                            (char) (bytes[this.offset + 1] & 0xff)
+                    );
+                } else if (STRING_CREATOR_JDK8 != null) {
                     char[] chars = new char[strlen];
                     for (int i = 0; i < strlen; ++i) {
                         chars[i] = (char) bytes[this.offset + i];
