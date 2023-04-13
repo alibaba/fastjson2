@@ -786,6 +786,9 @@ public abstract class JSONReader
                 case 19:
                     ldt = readLocalDateTime19();
                     break;
+                case 20:
+                    ldt = readLocalDateTime20();
+                    break;
                 default:
                     if (len > 20) {
                         ldt = readLocalDateTimeX(len);
@@ -837,6 +840,8 @@ public abstract class JSONReader
                 return readLocalDateTime18() != null;
             case 19:
                 return readLocalDateTime19() != null;
+            case 20:
+                return readLocalDateTime20() != null;
             case 21:
             case 22:
             case 23:
@@ -905,6 +910,10 @@ public abstract class JSONReader
                     break;
                 }
                 case 20: {
+                    LocalDateTime ldt = readLocalDateTime20();
+                    if (ldt != null) {
+                        return ldt;
+                    }
                     ZonedDateTime zdt = readZonedDateTimeX(len);
                     if (zdt != null) {
                         return zdt.toLocalDateTime();
@@ -1039,6 +1048,10 @@ public abstract class JSONReader
                     case 19:
                         ldt = readLocalDateTime19();
                         break;
+                    case 20: {
+                        ldt = readLocalDateTime20();
+                        break;
+                    }
                     default:
                         ZonedDateTime zdt = readZonedDateTimeX(len);
                         if (zdt != null) {
@@ -1112,6 +1125,9 @@ public abstract class JSONReader
                 return readLocalTime18();
             case 19:
                 return readLocalDateTime19()
+                        .toLocalTime();
+            case 20:
+                return readLocalDateTime20()
                         .toLocalTime();
             default:
                 break;
@@ -1216,6 +1232,10 @@ public abstract class JSONReader
                     }
                     break;
                 }
+                case 12: {
+                    ldt = readLocalDateTime12();
+                    break;
+                }
                 case 14: {
                     ldt = readLocalDateTime14();
                     break;
@@ -1239,6 +1259,10 @@ public abstract class JSONReader
                     }
 
                     ldt = readLocalDateTime19();
+                }
+                case 20: {
+                    ldt = readLocalDateTime20();
+                    break;
                 }
                 default:
                     break;
@@ -1324,6 +1348,8 @@ public abstract class JSONReader
         throw new JSONException(info("format " + format + " not support, input " + str));
     }
 
+    protected abstract LocalDateTime readLocalDateTime12();
+
     protected abstract LocalDateTime readLocalDateTime14();
 
     protected abstract LocalDateTime readLocalDateTime16();
@@ -1333,6 +1359,8 @@ public abstract class JSONReader
     protected abstract LocalDateTime readLocalDateTime18();
 
     protected abstract LocalDateTime readLocalDateTime19();
+
+    protected abstract LocalDateTime readLocalDateTime20();
 
     public abstract long readMillis19();
 

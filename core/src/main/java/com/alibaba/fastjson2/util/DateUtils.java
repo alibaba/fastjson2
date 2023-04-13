@@ -276,6 +276,740 @@ public class DateUtils {
         }
     }
 
+    public static LocalTime parseLocalTime5(byte[] bytes, int off) {
+        if (off + 5 > bytes.length) {
+            return null;
+        }
+
+        byte c0 = bytes[off];
+        byte c1 = bytes[off + 1];
+        byte c2 = bytes[off + 2];
+        byte c3 = bytes[off + 3];
+        byte c4 = bytes[off + 4];
+
+        byte h0, h1, i0, i1;
+        if (c2 == ':') {
+            h0 = c0;
+            h1 = c1;
+            i0 = c3;
+            i1 = c4;
+        } else {
+            return null;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            return null;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            return null;
+        }
+
+        return LocalTime.of(hour, minute);
+    }
+
+    public static LocalTime parseLocalTime8(byte[] bytes, int off) {
+        if (off + 8 > bytes.length) {
+            return null;
+        }
+
+        byte c0 = bytes[off];
+        byte c1 = bytes[off + 1];
+        byte c2 = bytes[off + 2];
+        byte c3 = bytes[off + 3];
+        byte c4 = bytes[off + 4];
+        byte c5 = bytes[off + 5];
+        byte c6 = bytes[off + 6];
+        byte c7 = bytes[off + 7];
+
+        byte h0, h1, i0, i1, s0, s1;
+        if (c2 == ':' && c5 == ':') {
+            h0 = c0;
+            h1 = c1;
+            i0 = c3;
+            i1 = c4;
+            s0 = c6;
+            s1 = c7;
+        } else {
+            return null;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            return null;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            return null;
+        }
+
+        int seccond;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            seccond = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            return null;
+        }
+
+        return LocalTime.of(hour, minute, seccond);
+    }
+
+    public static LocalTime parseLocalTime10(byte[] bytes, int off) {
+        if (off + 10 > bytes.length) {
+            return null;
+        }
+
+        byte c0 = bytes[off];
+        byte c1 = bytes[off + 1];
+        byte c2 = bytes[off + 2];
+        byte c3 = bytes[off + 3];
+        byte c4 = bytes[off + 4];
+        byte c5 = bytes[off + 5];
+        byte c6 = bytes[off + 6];
+        byte c7 = bytes[off + 7];
+        byte c8 = bytes[off + 8];
+        byte c9 = bytes[off + 9];
+
+        byte h0, h1, i0, i1, s0, s1, m0, m1, m2;
+        if (c2 == ':' && c5 == ':' && c8 == '.') {
+            h0 = c0;
+            h1 = c1;
+            i0 = c3;
+            i1 = c4;
+            s0 = c6;
+            s1 = c7;
+            m0 = c9;
+            m1 = '0';
+            m2 = '0';
+        } else {
+            return null;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            return null;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            return null;
+        }
+
+        int seccond;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            seccond = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            return null;
+        }
+
+        int millis;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+                && m2 >= '0' && m2 <= '9'
+        ) {
+            millis = (m0 - '0') * 100 + (m1 - '0') * 10 + (m2 - '0');
+            millis *= 1000_000;
+        } else {
+            return null;
+        }
+
+        return LocalTime.of(hour, minute, seccond, millis);
+    }
+
+    public static LocalTime parseLocalTime10(char[] bytes, int off) {
+        if (off + 10 > bytes.length) {
+            return null;
+        }
+
+        char c0 = bytes[off];
+        char c1 = bytes[off + 1];
+        char c2 = bytes[off + 2];
+        char c3 = bytes[off + 3];
+        char c4 = bytes[off + 4];
+        char c5 = bytes[off + 5];
+        char c6 = bytes[off + 6];
+        char c7 = bytes[off + 7];
+        char c8 = bytes[off + 8];
+        char c9 = bytes[off + 9];
+
+        char h0, h1, i0, i1, s0, s1, m0, m1, m2;
+        if (c2 == ':' && c5 == ':' && c8 == '.') {
+            h0 = c0;
+            h1 = c1;
+            i0 = c3;
+            i1 = c4;
+            s0 = c6;
+            s1 = c7;
+            m0 = c9;
+            m1 = '0';
+            m2 = '0';
+        } else {
+            return null;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            return null;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            return null;
+        }
+
+        int seccond;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            seccond = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            return null;
+        }
+
+        int millis;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+                && m2 >= '0' && m2 <= '9'
+        ) {
+            millis = (m0 - '0') * 100 + (m1 - '0') * 10 + (m2 - '0');
+            millis *= 1000_000;
+        } else {
+            return null;
+        }
+
+        return LocalTime.of(hour, minute, seccond, millis);
+    }
+
+    public static LocalTime parseLocalTime11(byte[] bytes, int off) {
+        if (off + 11 > bytes.length) {
+            return null;
+        }
+
+        byte c0 = bytes[off];
+        byte c1 = bytes[off + 1];
+        byte c2 = bytes[off + 2];
+        byte c3 = bytes[off + 3];
+        byte c4 = bytes[off + 4];
+        byte c5 = bytes[off + 5];
+        byte c6 = bytes[off + 6];
+        byte c7 = bytes[off + 7];
+        byte c8 = bytes[off + 8];
+        byte c9 = bytes[off + 9];
+        byte c10 = bytes[off + 10];
+
+        byte h0, h1, i0, i1, s0, s1, m0, m1, m2;
+        if (c2 == ':' && c5 == ':' && c8 == '.') {
+            h0 = c0;
+            h1 = c1;
+            i0 = c3;
+            i1 = c4;
+            s0 = c6;
+            s1 = c7;
+            m0 = c9;
+            m1 = c10;
+            m2 = '0';
+        } else {
+            return null;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            return null;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            return null;
+        }
+
+        int seccond;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            seccond = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            return null;
+        }
+
+        int millis;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+                && m2 >= '0' && m2 <= '9'
+        ) {
+            millis = (m0 - '0') * 100 + (m1 - '0') * 10 + (m2 - '0');
+            millis *= 1000_000;
+        } else {
+            return null;
+        }
+
+        return LocalTime.of(hour, minute, seccond, millis);
+    }
+
+    public static LocalTime parseLocalTime11(char[] bytes, int off) {
+        if (off + 11 > bytes.length) {
+            return null;
+        }
+
+        char c0 = bytes[off];
+        char c1 = bytes[off + 1];
+        char c2 = bytes[off + 2];
+        char c3 = bytes[off + 3];
+        char c4 = bytes[off + 4];
+        char c5 = bytes[off + 5];
+        char c6 = bytes[off + 6];
+        char c7 = bytes[off + 7];
+        char c8 = bytes[off + 8];
+        char c9 = bytes[off + 9];
+        char c10 = bytes[off + 10];
+
+        char h0, h1, i0, i1, s0, s1, m0, m1, m2;
+        if (c2 == ':' && c5 == ':' && c8 == '.') {
+            h0 = c0;
+            h1 = c1;
+            i0 = c3;
+            i1 = c4;
+            s0 = c6;
+            s1 = c7;
+            m0 = c9;
+            m1 = c10;
+            m2 = '0';
+        } else {
+            return null;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            return null;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            return null;
+        }
+
+        int seccond;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            seccond = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            return null;
+        }
+
+        int millis;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+                && m2 >= '0' && m2 <= '9'
+        ) {
+            millis = (m0 - '0') * 100 + (m1 - '0') * 10 + (m2 - '0');
+            millis *= 1000_000;
+        } else {
+            return null;
+        }
+
+        return LocalTime.of(hour, minute, seccond, millis);
+    }
+
+    public static LocalTime parseLocalTime12(byte[] bytes, int off) {
+        if (off + 12 > bytes.length) {
+            return null;
+        }
+
+        byte c0 = bytes[off];
+        byte c1 = bytes[off + 1];
+        byte c2 = bytes[off + 2];
+        byte c3 = bytes[off + 3];
+        byte c4 = bytes[off + 4];
+        byte c5 = bytes[off + 5];
+        byte c6 = bytes[off + 6];
+        byte c7 = bytes[off + 7];
+        byte c8 = bytes[off + 8];
+        byte c9 = bytes[off + 9];
+        byte c10 = bytes[off + 10];
+        byte c11 = bytes[off + 11];
+
+        byte h0, h1, i0, i1, s0, s1, m0, m1, m2;
+        if (c2 == ':' && c5 == ':' && c8 == '.') {
+            h0 = c0;
+            h1 = c1;
+            i0 = c3;
+            i1 = c4;
+            s0 = c6;
+            s1 = c7;
+            m0 = c9;
+            m1 = c10;
+            m2 = c11;
+        } else {
+            return null;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            return null;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            return null;
+        }
+
+        int seccond;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            seccond = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            return null;
+        }
+
+        int millis;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+                && m2 >= '0' && m2 <= '9'
+        ) {
+            millis = (m0 - '0') * 100 + (m1 - '0') * 10 + (m2 - '0');
+            millis *= 1000_000;
+        } else {
+            return null;
+        }
+
+        return LocalTime.of(hour, minute, seccond, millis);
+    }
+
+    public static LocalTime parseLocalTime12(char[] bytes, int off) {
+        if (off + 12 > bytes.length) {
+            return null;
+        }
+
+        char c0 = bytes[off];
+        char c1 = bytes[off + 1];
+        char c2 = bytes[off + 2];
+        char c3 = bytes[off + 3];
+        char c4 = bytes[off + 4];
+        char c5 = bytes[off + 5];
+        char c6 = bytes[off + 6];
+        char c7 = bytes[off + 7];
+        char c8 = bytes[off + 8];
+        char c9 = bytes[off + 9];
+        char c10 = bytes[off + 10];
+        char c11 = bytes[off + 11];
+
+        char h0, h1, i0, i1, s0, s1, m0, m1, m2;
+        if (c2 == ':' && c5 == ':' && c8 == '.') {
+            h0 = c0;
+            h1 = c1;
+            i0 = c3;
+            i1 = c4;
+            s0 = c6;
+            s1 = c7;
+            m0 = c9;
+            m1 = c10;
+            m2 = c11;
+        } else {
+            return null;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            return null;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            return null;
+        }
+
+        int seccond;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            seccond = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            return null;
+        }
+
+        int millis;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+                && m2 >= '0' && m2 <= '9'
+        ) {
+            millis = (m0 - '0') * 100 + (m1 - '0') * 10 + (m2 - '0');
+            millis *= 1000_000;
+        } else {
+            return null;
+        }
+
+        return LocalTime.of(hour, minute, seccond, millis);
+    }
+
+    public static LocalTime parseLocalTime18(byte[] bytes, int off) {
+        if (off + 18 > bytes.length) {
+            return null;
+        }
+
+        byte c0 = bytes[off];
+        byte c1 = bytes[off + 1];
+        byte c2 = bytes[off + 2];
+        byte c3 = bytes[off + 3];
+        byte c4 = bytes[off + 4];
+        byte c5 = bytes[off + 5];
+        byte c6 = bytes[off + 6];
+        byte c7 = bytes[off + 7];
+        byte c8 = bytes[off + 8];
+        byte c9 = bytes[off + 9];
+        byte c10 = bytes[off + 10];
+        byte c11 = bytes[off + 11];
+        byte c12 = bytes[off + 12];
+        byte c13 = bytes[off + 13];
+        byte c14 = bytes[off + 14];
+        byte c15 = bytes[off + 15];
+        byte c16 = bytes[off + 16];
+        byte c17 = bytes[off + 17];
+
+        byte h0, h1, i0, i1, s0, s1, m0, m1, m2, m3, m4, m5, m6, m7, m8;
+        if (c2 == ':' && c5 == ':' && c8 == '.') {
+            h0 = c0;
+            h1 = c1;
+            i0 = c3;
+            i1 = c4;
+            s0 = c6;
+            s1 = c7;
+            m0 = c9;
+            m1 = c10;
+            m2 = c11;
+            m3 = c12;
+            m4 = c13;
+            m5 = c14;
+            m6 = c15;
+            m7 = c16;
+            m8 = c17;
+        } else {
+            return null;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            return null;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            return null;
+        }
+
+        int seccond;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            seccond = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            return null;
+        }
+
+        int millis;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+                && m2 >= '0' && m2 <= '9'
+                && m3 >= '0' && m3 <= '9'
+                && m4 >= '0' && m4 <= '9'
+                && m5 >= '0' && m5 <= '9'
+                && m6 >= '0' && m6 <= '9'
+                && m7 >= '0' && m7 <= '9'
+                && m8 >= '0' && m8 <= '9'
+        ) {
+            millis = (m0 - '0') * 1000_000_00
+                    + (m1 - '0') * 1000_000_0
+                    + (m2 - '0') * 1000_000
+                    + (m3 - '0') * 1000_00
+                    + (m4 - '0') * 1000_0
+                    + (m5 - '0') * 1000
+                    + (m6 - '0') * 100
+                    + (m7 - '0') * 10
+                    + (m8 - '0');
+        } else {
+            return null;
+        }
+
+        return LocalTime.of(hour, minute, seccond, millis);
+    }
+
+    public static LocalTime parseLocalTime18(char[] bytes, int off) {
+        if (off + 18 > bytes.length) {
+            return null;
+        }
+
+        char c0 = bytes[off];
+        char c1 = bytes[off + 1];
+        char c2 = bytes[off + 2];
+        char c3 = bytes[off + 3];
+        char c4 = bytes[off + 4];
+        char c5 = bytes[off + 5];
+        char c6 = bytes[off + 6];
+        char c7 = bytes[off + 7];
+        char c8 = bytes[off + 8];
+        char c9 = bytes[off + 9];
+        char c10 = bytes[off + 10];
+        char c11 = bytes[off + 11];
+        char c12 = bytes[off + 12];
+        char c13 = bytes[off + 13];
+        char c14 = bytes[off + 14];
+        char c15 = bytes[off + 15];
+        char c16 = bytes[off + 16];
+        char c17 = bytes[off + 17];
+
+        char h0, h1, i0, i1, s0, s1, m0, m1, m2, m3, m4, m5, m6, m7, m8;
+        if (c2 == ':' && c5 == ':' && c8 == '.') {
+            h0 = c0;
+            h1 = c1;
+            i0 = c3;
+            i1 = c4;
+            s0 = c6;
+            s1 = c7;
+            m0 = c9;
+            m1 = c10;
+            m2 = c11;
+            m3 = c12;
+            m4 = c13;
+            m5 = c14;
+            m6 = c15;
+            m7 = c16;
+            m8 = c17;
+        } else {
+            return null;
+        }
+
+        int hour;
+        if (h0 >= '0' && h0 <= '9'
+                && h1 >= '0' && h1 <= '9'
+        ) {
+            hour = (h0 - '0') * 10 + (h1 - '0');
+        } else {
+            return null;
+        }
+
+        int minute;
+        if (i0 >= '0' && i0 <= '9'
+                && i1 >= '0' && i1 <= '9'
+        ) {
+            minute = (i0 - '0') * 10 + (i1 - '0');
+        } else {
+            return null;
+        }
+
+        int seccond;
+        if (s0 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
+        ) {
+            seccond = (s0 - '0') * 10 + (s1 - '0');
+        } else {
+            return null;
+        }
+
+        int millis;
+        if (m0 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
+                && m2 >= '0' && m2 <= '9'
+                && m3 >= '0' && m3 <= '9'
+                && m4 >= '0' && m4 <= '9'
+                && m5 >= '0' && m5 <= '9'
+                && m6 >= '0' && m6 <= '9'
+                && m7 >= '0' && m7 <= '9'
+                && m8 >= '0' && m8 <= '9'
+        ) {
+            millis = (m0 - '0') * 1000_000_00
+                    + (m1 - '0') * 1000_000_0
+                    + (m2 - '0') * 1000_000
+                    + (m3 - '0') * 1000_00
+                    + (m4 - '0') * 1000_0
+                    + (m5 - '0') * 1000
+                    + (m6 - '0') * 100
+                    + (m7 - '0') * 10
+                    + (m8 - '0');
+        } else {
+            return null;
+        }
+
+        return LocalTime.of(hour, minute, seccond, millis);
+    }
+
     public static LocalDateTime parseLocalDateTime(byte[] str, int off, int len) {
         if (str == null || len == 0) {
             return null;
@@ -1937,8 +2671,7 @@ public class DateUtils {
      */
     public static LocalDateTime parseLocalDateTime14(char[] str, int off) {
         if (off + 14 > str.length) {
-            String input = new String(str, off, str.length - off);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         char y0 = str[off + 0];
@@ -1964,8 +2697,7 @@ public class DateUtils {
         ) {
             year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
         } else {
-            String input = new String(str, off, 14);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int month;
@@ -1974,8 +2706,7 @@ public class DateUtils {
         ) {
             month = (m0 - '0') * 10 + (m1 - '0');
         } else {
-            String input = new String(str, off, 14);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int dom;
@@ -1984,8 +2715,7 @@ public class DateUtils {
         ) {
             dom = (d0 - '0') * 10 + (d1 - '0');
         } else {
-            String input = new String(str, off, 14);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int hour;
@@ -1994,8 +2724,7 @@ public class DateUtils {
         ) {
             hour = (h0 - '0') * 10 + (h1 - '0');
         } else {
-            String input = new String(str, off, 14);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int minute;
@@ -2004,8 +2733,7 @@ public class DateUtils {
         ) {
             minute = (i0 - '0') * 10 + (i1 - '0');
         } else {
-            String input = new String(str, off, 14);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int second;
@@ -2014,8 +2742,7 @@ public class DateUtils {
         ) {
             second = (s0 - '0') * 10 + (s1 - '0');
         } else {
-            String input = new String(str, off, 14);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         return LocalDateTime.of(year, month, dom, hour, minute, second);
@@ -2026,8 +2753,7 @@ public class DateUtils {
      */
     public static LocalDateTime parseLocalDateTime14(byte[] str, int off) {
         if (off + 14 > str.length) {
-            String input = new String(str, off, str.length - off);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         char y0 = (char) str[off + 0];
@@ -2053,8 +2779,7 @@ public class DateUtils {
         ) {
             year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
         } else {
-            String input = new String(str, off, 14);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int month;
@@ -2063,8 +2788,7 @@ public class DateUtils {
         ) {
             month = (m0 - '0') * 10 + (m1 - '0');
         } else {
-            String input = new String(str, off, 14);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int dom;
@@ -2073,8 +2797,7 @@ public class DateUtils {
         ) {
             dom = (d0 - '0') * 10 + (d1 - '0');
         } else {
-            String input = new String(str, off, 14);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int hour;
@@ -2083,8 +2806,7 @@ public class DateUtils {
         ) {
             hour = (h0 - '0') * 10 + (h1 - '0');
         } else {
-            String input = new String(str, off, 14);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int minute;
@@ -2093,8 +2815,7 @@ public class DateUtils {
         ) {
             minute = (i0 - '0') * 10 + (i1 - '0');
         } else {
-            String input = new String(str, off, 14);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         int second;
@@ -2103,8 +2824,7 @@ public class DateUtils {
         ) {
             second = (s0 - '0') * 10 + (s1 - '0');
         } else {
-            String input = new String(str, off, 14);
-            throw new DateTimeParseException("illegal input " + input, input, 0);
+            return null;
         }
 
         return LocalDateTime.of(year, month, dom, hour, minute, second);
