@@ -597,10 +597,9 @@ public class ObjectReaderCreatorASM
         }
 
         byte[] code = cw.toByteArray();
-
-        Class<?> readerClass = classLoader.defineClassPublic(classNameFull, code, 0, code.length);
-
         try {
+            Class<?> readerClass = classLoader.defineClassPublic(classNameFull, code, 0, code.length);
+
             Constructor<?> constructor = readerClass.getConstructors()[0];
             return (ObjectReaderBean) constructor
                     .newInstance(objectClass, supplier, fieldReaderArray);
