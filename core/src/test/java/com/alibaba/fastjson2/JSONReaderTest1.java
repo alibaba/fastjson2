@@ -1959,4 +1959,85 @@ public class JSONReaderTest1 {
             }
         }
     }
+
+    @Test
+    public void testASCII() {
+        for (char i = 0; i < 256; i++) {
+            String s1 = Character.toString(i);
+            String json = JSON.toJSONString(JSONObject.of(s1, s1));
+            byte[] bytes = json.getBytes(StandardCharsets.ISO_8859_1);
+            JSONReader.Context ctx = JSONFactory.createReadContext();
+            JSONReaderASCII jsonReader = new JSONReaderASCII(ctx, json, bytes, 0, bytes.length);
+            JSONObject object = (JSONObject) jsonReader.readObject();
+            Object v1 = object.get(s1);
+            assertEquals(s1, v1, Integer.toString(i));
+        }
+
+        for (char i = 0; i < 256; i++) {
+            for (char j = 0; j < 256; j++) {
+                String s2 = new String(new char[]{i, j});
+                String json = JSON.toJSONString(JSONObject.of(s2, s2));
+                byte[] bytes = json.getBytes(StandardCharsets.ISO_8859_1);
+                JSONReader.Context ctx = JSONFactory.createReadContext();
+                JSONReaderASCII jsonReader = new JSONReaderASCII(ctx, json, bytes, 0, bytes.length);
+                JSONObject object = (JSONObject) jsonReader.readObject();
+                Object v1 = object.get(s2);
+                assertEquals(s2, v1);
+            }
+        }
+    }
+
+    @Test
+    public void testUTF8() {
+        for (char i = 0; i < 512; i++) {
+            String s1 = Character.toString(i);
+            String json = JSON.toJSONString(JSONObject.of(s1, s1));
+            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+            JSONReader.Context ctx = JSONFactory.createReadContext();
+            JSONReaderUTF8 jsonReader = new JSONReaderUTF8(ctx, s1, bytes, 0, bytes.length);
+            JSONObject object = (JSONObject) jsonReader.readObject();
+            Object v1 = object.get(s1);
+            assertEquals(s1, v1);
+        }
+
+        for (char i = 0; i < 512; i++) {
+            for (char j = 0; j < 512; j++) {
+                String s2 = new String(new char[]{i, j});
+                String json = JSON.toJSONString(JSONObject.of(s2, s2));
+                byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+                JSONReader.Context ctx = JSONFactory.createReadContext();
+                JSONReaderUTF8 jsonReader = new JSONReaderUTF8(ctx, s2, bytes, 0, bytes.length);
+                JSONObject object = (JSONObject) jsonReader.readObject();
+                Object v1 = object.get(s2);
+                assertEquals(s2, v1);
+            }
+        }
+    }
+
+    @Test
+    public void testUTF16() {
+        for (char i = 0; i < 512; i++) {
+            String s1 = Character.toString(i);
+            String json = JSON.toJSONString(JSONObject.of(s1, s1));
+            char[] chars = json.toCharArray();
+            JSONReader.Context ctx = JSONFactory.createReadContext();
+            JSONReaderUTF16 jsonReader = new JSONReaderUTF16(ctx, json, chars, 0, chars.length);
+            JSONObject object = (JSONObject) jsonReader.readObject();
+            Object v1 = object.get(s1);
+            assertEquals(s1, v1, Integer.toString(i));
+        }
+
+        for (char i = 0; i < 512; i++) {
+            for (char j = 0; j < 512; j++) {
+                String s2 = new String(new char[]{i, j});
+                String json = JSON.toJSONString(JSONObject.of(s2, s2));
+                char[] chars = json.toCharArray();
+                JSONReader.Context ctx = JSONFactory.createReadContext();
+                JSONReaderUTF16 jsonReader = new JSONReaderUTF16(ctx, json, chars, 0, chars.length);
+                JSONObject object = (JSONObject) jsonReader.readObject();
+                Object v1 = object.get(s2);
+                assertEquals(s2, v1);
+            }
+        }
+    }
 }

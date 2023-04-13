@@ -9,6 +9,7 @@ import java.lang.invoke.*;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -135,12 +136,27 @@ public class TypeUtils {
         return Character.toString(ch);
     }
 
+    public static String toString(byte ch) {
+        if (ch >= 0 && ch < X2.chars.length) {
+            return X2.chars[ch];
+        }
+        return new String(new byte[] {ch}, StandardCharsets.ISO_8859_1);
+    }
+
     public static String toString(char c0, char c1) {
         if (c0 >= X2.START && c0 <= X2.END && c1 >= X2.START && c1 <= X2.END) {
             int value = (c0 - X2.START) * X2.SIZE2 + (c1 - X2.START);
             return X2.chars2[value];
         }
         return new String(new char[] {c0, c1});
+    }
+
+    public static String toString(byte c0, byte c1) {
+        if (c0 >= X2.START && c0 <= X2.END && c1 >= X2.START && c1 <= X2.END) {
+            int value = (c0 - X2.START) * X2.SIZE2 + (c1 - X2.START);
+            return X2.chars2[value];
+        }
+        return new String(new byte[] {c0, c1}, StandardCharsets.ISO_8859_1);
     }
 
     public static Type intern(Type type) {
