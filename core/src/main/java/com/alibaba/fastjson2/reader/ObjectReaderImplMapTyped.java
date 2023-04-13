@@ -238,7 +238,7 @@ class ObjectReaderImplMapTyped
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         boolean match = jsonReader.nextIfMatch('{');
         if (!match) {
-            if (jsonReader.nextIfNull()) {
+            if (jsonReader.nextIfNullOrEmptyString()) {
                 return null;
             }
 
