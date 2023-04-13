@@ -152,7 +152,7 @@ public class JDKUtils {
 
         boolean vector_support = false;
         try {
-            if (JVM_VERSION >= 17) {
+            if (JVM_VERSION >= 11) {
                 Class<?> factorClass = Class.forName("java.lang.management.ManagementFactory");
                 Class<?> runtimeMXBeanClass = Class.forName("java.lang.management.RuntimeMXBean");
                 Method getRuntimeMXBean = factorClass.getMethod("getRuntimeMXBean");
