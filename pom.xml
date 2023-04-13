@@ -206,7 +206,7 @@
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-bom</artifactId>
                 <type>pom</type>
-                <version>3.22.2</version>
+                <version>3.22.3</version>
                 <scope>import</scope>
             </dependency>
             <dependency>
