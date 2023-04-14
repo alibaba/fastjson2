@@ -23,7 +23,7 @@ import java.util.function.Function;
 
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
 
-class CSVReaderUTF16<T>
+final class CSVReaderUTF16<T>
         extends CSVReader<T> {
     static final Map<Long, Function<Consumer, CharArrayValueConsumer>> valueConsumerCreators
             = new ConcurrentHashMap<>();
@@ -567,6 +567,8 @@ class CSVReaderUTF16<T>
     }
 
     public void readAll(CharArrayValueConsumer<T> consumer) {
+        consumer.start();
+
         while (true) {
             try {
                 if (inputEnd) {
@@ -685,6 +687,7 @@ class CSVReaderUTF16<T>
             }
             consumer.afterRow(rowCount);
         }
+        consumer.end();
     }
 
     class CharArrayConsumerImpl<T>

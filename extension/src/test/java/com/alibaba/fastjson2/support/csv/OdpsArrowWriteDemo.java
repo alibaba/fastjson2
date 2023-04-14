@@ -3,8 +3,6 @@ package com.alibaba.fastjson2.support.csv;
 import com.alibaba.fastjson2.JSONException;
 import com.aliyun.odps.Instance;
 import com.aliyun.odps.Odps;
-import com.aliyun.odps.account.Account;
-import com.aliyun.odps.account.AliyunAccount;
 import com.aliyun.odps.data.ArrowRecordWriter;
 import com.aliyun.odps.task.SQLTask;
 import com.aliyun.odps.tunnel.TableTunnel;
@@ -19,19 +17,11 @@ import java.util.Arrays;
 
 public class OdpsArrowWriteDemo {
     // EPA_SmartLocationDatabase_V3_Jan_2021_Final.csv X4
-    static final File file = new File("/Users/wenshao/Downloads/Demographics_by_Zip_Code.csv");
-
-    private static String accessID = "";
-    private static String accessKey = "";
-    private static String project = "sonar_test";
+    static final File file = new File("/Users/wenshao/Downloads/Public_School_Characteristics_2020-21.csv");
 
     public static void main(String[] args) throws Exception {
-        Account account = new AliyunAccount(accessID, accessKey);
-        Odps odps = new Odps(account);
-        odps.setDefaultProject(project);
+        Odps odps = OdpsTestUtils.odps();
         String tableName = "x7";
-
-        TableTunnel tunnel = new TableTunnel(odps);
 
         {
             String dropTable = "drop table if exists " + tableName + ";";
@@ -46,13 +36,14 @@ public class OdpsArrowWriteDemo {
             createTableTask.waitForSuccess();
         }
 
-        TableTunnel.UploadSession uploadSession = tunnel.createUploadSession(project, tableName);
+        long start = System.currentTimeMillis();
+
         int rowCount = CSVReader.rowCount(file) - 1;
         System.out.println("rowCount : " + rowCount);
 
+        TableTunnel tunnel = new TableTunnel(odps);
+        TableTunnel.UploadSession uploadSession = tunnel.createUploadSession(odps.getDefaultProject(), tableName);
         final Schema schema = uploadSession.getArrowSchema();
-
-        long start = System.currentTimeMillis();
         CompressOption compressOption = new CompressOption(CompressOption.CompressAlgorithm.ODPS_ARROW_LZ4_FRAME, 0, 0);
 
         ArrowByteArrayConsumer consumer = new ArrowByteArrayConsumer(

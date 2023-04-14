@@ -18,10 +18,10 @@ import java.util.function.ObjIntConsumer;
 
 public class ArrowByteArrayConsumer
         implements ByteArrayValueConsumer {
-    static final int CHUNK_SIZE = 10000;
+    static final int CHUNK_SIZE = 1_000_000;
     final Schema schema;
     final int rowCount;
-    final int varcharValueSize = 2048;
+    final int varcharValueSize = 128;
     final ObjIntConsumer<VectorSchemaRoot> rootConsumer;
     final Consumer<Long[]> committer;
     BufferAllocator allocator;
@@ -30,6 +30,7 @@ public class ArrowByteArrayConsumer
     int blockSize;
     int blockRowIndex;
     int blockIndex = -1;
+    int[] valueCapacities;
 
     public ArrowByteArrayConsumer(
             Schema schema,
@@ -77,19 +78,21 @@ public class ArrowByteArrayConsumer
 
     public void allocateNew(int blockSize) {
         root = VectorSchemaRoot.create(schema, allocator);
-
         this.blockSize = blockSize;
         this.blockRowIndex = 0;
         root.setRowCount(blockSize);
 
         List<Field> fields = root.getSchema().getFields();
-        for (int i = 0; i < fields.size(); i++) {
+        final int fieldsSize = fields.size();
+        valueCapacities = new int[fieldsSize];
+        for (int i = 0; i < fieldsSize; i++) {
             FieldVector vector = root.getVector(i);
             if (vector instanceof FixedWidthVector) {
                 ((FixedWidthVector) vector).allocateNew(blockSize);
             } else if (vector instanceof VariableWidthVector) {
                 VariableWidthVector variableWidthVector = (VariableWidthVector) vector;
                 variableWidthVector.allocateNew(varcharValueSize * blockSize, blockSize);
+                valueCapacities[i] = variableWidthVector.getValueCapacity();
             } else {
                 throw new JSONException("TODO");
             }
@@ -125,6 +128,13 @@ public class ArrowByteArrayConsumer
 
         if (vector instanceof VarCharVector) {
             VarCharVector charVector = (VarCharVector) vector;
+            int valueCapacity = valueCapacities[column];
+            int startOffset = charVector.getStartOffset(row);
+            if (startOffset + len >= valueCapacity) {
+                int newValueCapacity = valueCapacity + Math.max(len, varcharValueSize * rowCount);
+                charVector.reallocDataBuffer(newValueCapacity);
+                valueCapacities[column] = newValueCapacity;
+            }
             charVector.set(row, bytes, off, len);
             return;
         }
