@@ -1165,6 +1165,14 @@ public interface JSONB {
                 .toString();
     }
 
+    /**
+     * @since 2.0.28
+     */
+    static String toJSONString(byte[] jsonbBytes, boolean raw) {
+        return new JSONBDump(jsonbBytes, raw)
+                .toString();
+    }
+
     static String toJSONString(byte[] jsonbBytes, SymbolTable symbolTable) {
         return new JSONBDump(jsonbBytes, symbolTable, false)
                 .toString();
