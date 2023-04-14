@@ -1,18 +1,3 @@
-/**
- * Project: eve.services
- * <p>
- * File Created at 2011-12-21
- * $Id$
- * <p>
- * Copyright 2008 Alibaba.com Corporation Limited.
- * All rights reserved.
- * <p>
- * This software is the confidential and proprietary information of
- * Alibaba Company. ("Confidential Information").  You shall not
- * disclose such Confidential Information and shall use it only in
- * accordance with the terms of the license agreement you entered into
- * with Alibaba.com.
- */
 package com.alibaba.json.bvtVO;
 
 import java.io.Serializable;
@@ -20,7 +5,6 @@ import java.sql.Timestamp;
 import java.util.Map;
 
 /**
- * �¼�����
  *
  * @author wb_jianhui.shijh
  */
