@@ -3,7 +3,10 @@ package com.alibaba.fastjson2.schema;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 final class StringSchema
@@ -16,6 +19,8 @@ final class StringSchema
     final boolean typed;
     final AnyOf anyOf;
     final OneOf oneOf;
+    final String constValue;
+    final Set<String> enumValues;
 
     final FormatValidator formatValidator;
 
@@ -40,6 +45,22 @@ final class StringSchema
             this.oneOf = oneOf((JSONArray) oneOf, String.class);
         } else {
             this.oneOf = null;
+        }
+
+        this.constValue = input.getString("const");
+
+        {
+            Set<String> enumValues = null;
+            Object property = input.get("enum");
+            if (property instanceof Collection) {
+                Collection enums = (Collection) property;
+
+                if (enums != null) {
+                    enumValues = new HashSet<>(enums.size());
+                    enumValues.addAll((Collection<String>) enums);
+                }
+            }
+            this.enumValues = enumValues;
         }
 
         if (format == null) {
@@ -131,6 +152,18 @@ final class StringSchema
                 ValidateResult result = oneOf.validate(str);
                 if (!result.isSuccess()) {
                     return result;
+                }
+            }
+
+            if (constValue != null) {
+                if (!constValue.equals(str)) {
+                    return new ValidateResult(false, "must be const %s, but %s", constValue, str);
+                }
+            }
+
+            if (enumValues != null) {
+                if (!enumValues.contains(str)) {
+                    return new ValidateResult(false, "not in enum values, %s", str);
                 }
             }
 
