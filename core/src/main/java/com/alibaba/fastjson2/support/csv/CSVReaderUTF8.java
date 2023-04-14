@@ -618,6 +618,8 @@ final class CSVReaderUTF8<T>
     }
 
     protected void readAll(ByteArrayValueConsumer consumer) {
+        consumer.start();
+
         while (true) {
             try {
                 if (inputEnd) {
@@ -736,5 +738,6 @@ final class CSVReaderUTF8<T>
             }
             consumer.afterRow(rowCount);
         }
+        consumer.end();
     }
 }

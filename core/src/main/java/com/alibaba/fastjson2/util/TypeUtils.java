@@ -140,7 +140,7 @@ public class TypeUtils {
         if (ch >= 0 && ch < X2.chars.length) {
             return X2.chars[ch];
         }
-        return new String(new byte[] {ch}, StandardCharsets.ISO_8859_1);
+        return new String(new byte[]{ch}, StandardCharsets.ISO_8859_1);
     }
 
     public static String toString(char c0, char c1) {
@@ -148,7 +148,7 @@ public class TypeUtils {
             int value = (c0 - X2.START) * X2.SIZE2 + (c1 - X2.START);
             return X2.chars2[value];
         }
-        return new String(new char[] {c0, c1});
+        return new String(new char[]{c0, c1});
     }
 
     public static String toString(byte c0, byte c1) {
@@ -156,7 +156,7 @@ public class TypeUtils {
             int value = (c0 - X2.START) * X2.SIZE2 + (c1 - X2.START);
             return X2.chars2[value];
         }
-        return new String(new byte[] {c0, c1}, StandardCharsets.ISO_8859_1);
+        return new String(new byte[]{c0, c1}, StandardCharsets.ISO_8859_1);
     }
 
     public static Type intern(Type type) {
@@ -1768,100 +1768,21 @@ public class TypeUtils {
         }
 
         char[] chars = JDKUtils.getCharArray(str);
-        return toBigDecimal(chars);
+        return parseBigDecimal(chars, 0, chars.length);
     }
 
     public static BigDecimal toBigDecimal(char[] chars) {
-        if (chars == null || chars.length == 0) {
+        if (chars == null) {
             return null;
         }
-
-        boolean negative = false;
-        int j = 0;
-        if (chars[0] == '-') {
-            negative = true;
-            j = 1;
-        }
-
-        if (chars.length <= 20 || (negative && chars.length == 21)) {
-            int dot = 0;
-            int dotIndex = -1;
-            long unscaleValue = 0;
-            for (; j < chars.length; j++) {
-                char b = chars[j];
-                if (b == '.') {
-                    dot++;
-                    if (dot > 1) {
-                        break;
-                    }
-                    dotIndex = j;
-                } else if (b >= '0' && b <= '9') {
-                    unscaleValue = unscaleValue * 10 + (b - '0');
-                } else {
-                    unscaleValue = -1;
-                    break;
-                }
-            }
-            int scale = 0;
-            if (unscaleValue >= 0 && dot <= 1) {
-                if (negative) {
-                    unscaleValue = -unscaleValue;
-                }
-                if (dotIndex != -1) {
-                    scale = chars.length - dotIndex - 1;
-                }
-                return BigDecimal.valueOf(unscaleValue, scale);
-            }
-        }
-
-        return new BigDecimal(chars, 0, chars.length);
+        return parseBigDecimal(chars, 0, chars.length);
     }
 
     public static BigDecimal toBigDecimal(byte[] strBytes) {
-        if (strBytes == null || strBytes.length == 0) {
+        if (strBytes == null) {
             return null;
         }
-
-        boolean negative = false;
-        int j = 0;
-        if (strBytes[0] == '-') {
-            negative = true;
-            j = 1;
-        }
-
-        if (strBytes.length <= 20 || (negative && strBytes.length == 21)) {
-            int dot = 0;
-            int dotIndex = -1;
-            long unscaleValue = 0;
-            for (; j < strBytes.length; j++) {
-                byte b = strBytes[j];
-                if (b == '.') {
-                    dot++;
-                    if (dot > 1) {
-                        break;
-                    }
-                    dotIndex = j;
-                } else if (b >= '0' && b <= '9') {
-                    unscaleValue = unscaleValue * 10 + (b - '0');
-                } else {
-                    unscaleValue = -1;
-                    break;
-                }
-            }
-            int scale = 0;
-            if (unscaleValue >= 0 && dot <= 1) {
-                if (negative) {
-                    unscaleValue = -unscaleValue;
-                }
-                if (dotIndex != -1) {
-                    scale = strBytes.length - dotIndex - 1;
-                }
-                return BigDecimal.valueOf(unscaleValue, scale);
-            }
-        }
-
-        char[] chars = X1.TO_CHARS.apply(strBytes);
-        return new BigDecimal(chars, 0, chars.length);
+        return parseBigDecimal(strBytes, 0, strBytes.length);
     }
 
     public static BigInteger toBigInteger(Object value) {
@@ -2619,7 +2540,7 @@ public class TypeUtils {
     }
 
     public static BigDecimal parseBigDecimal(char[] bytes, int off, int len) {
-        if (len == 0) {
+        if (bytes == null || len == 0) {
             return null;
         }
 
@@ -2666,7 +2587,7 @@ public class TypeUtils {
     }
 
     public static BigDecimal parseBigDecimal(byte[] bytes, int off, int len) {
-        if (len == 0) {
+        if (bytes == null || len == 0) {
             return null;
         }
 
@@ -2709,10 +2630,16 @@ public class TypeUtils {
             }
         }
 
-        char[] chars = new char[len];
-        for (int i = 0; i < len; i++) {
-            chars[i] = (char) bytes[off + i];
+        char[] chars;
+        if (off == 0 && len == bytes.length) {
+            chars = X1.TO_CHARS.apply(bytes);
+        } else {
+            chars = new char[len];
+            for (int i = 0; i < len; i++) {
+                chars[i] = (char) bytes[off + i];
+            }
         }
+
         return new BigDecimal(chars, 0, chars.length);
     }
 
