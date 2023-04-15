@@ -56,52 +56,36 @@ class DomainValidator {
      */
     public static boolean isValidTld(String tld) {
         tld = unicodeToASCII(tld);
-        return isValidInfrastructureTld(tld)
-                || isValidGenericTld(tld)
-                || isValidCountryCodeTld(tld);
-    }
-
-    /**
-     * Returns true if the specified <code>String</code> matches any
-     * IANA-defined infrastructure top-level domain. Leading dots are
-     * ignored if present. The search is case-insensitive.
-     * @param iTld the parameter to check for infrastructure TLD status, not null
-     * @return true if the parameter is an infrastructure TLD
-     */
-    static boolean isValidInfrastructureTld(String iTld) {
-        final String key = chompLeadingDot(unicodeToASCII(iTld).toLowerCase(Locale.ENGLISH));
-        return arrayContains(INFRASTRUCTURE_TLDS, key);
-    }
-
-    /**
-     * Returns true if the specified <code>String</code> matches any
-     * IANA-defined generic top-level domain. Leading dots are ignored
-     * if present. The search is case-insensitive.
-     * @param gTld the parameter to check for generic TLD status, not null
-     * @return true if the parameter is a generic TLD
-     */
-    public static boolean isValidGenericTld(String gTld) {
-        final String key = chompLeadingDot(unicodeToASCII(gTld).toLowerCase(Locale.ENGLISH));
-        return (arrayContains(GENERIC_TLDS, key));
-    }
-
-    /**
-     * Returns true if the specified <code>String</code> matches any
-     * IANA-defined country code top-level domain. Leading dots are
-     * ignored if present. The search is case-insensitive.
-     * @param ccTld the parameter to check for country code TLD status, not null
-     * @return true if the parameter is a country code TLD
-     */
-    static boolean isValidCountryCodeTld(String ccTld) {
-        final String key = chompLeadingDot(unicodeToASCII(ccTld).toLowerCase(Locale.ENGLISH));
-        return (arrayContains(COUNTRY_CODE_TLDS, key));
-    }
-
-    private static String chompLeadingDot(String str) {
-        if (str.startsWith(".")) {
-            return str.substring(1);
+        String key = unicodeToASCII(tld).toLowerCase(Locale.ENGLISH);
+        if (key.startsWith(".")) {
+            key = key.substring(1);
         }
-        return str;
+        return Arrays.binarySearch(INFRASTRUCTURE_TLDS, key) >= 0
+                || Arrays.binarySearch(GENERIC_TLDS, key) >= 0
+                || Arrays.binarySearch(COUNTRY_CODE_TLDS, key) >= 0;
+    }
+
+    /**
+     * Converts potentially Unicode input to punycode.
+     * If conversion fails, returns the original input.
+     *
+     * @param input the string to convert, not null
+     * @return converted input, or original input if conversion fails
+     */
+    // Needed by UrlValidator
+    static String unicodeToASCII(String input) {
+        boolean ascii = true;
+        for (int i = 0; i < input.length(); i++) {
+            if (input.charAt(i) > 0x7F) {
+                ascii = false;
+                break;
+            }
+        }
+
+        if (ascii) { // skip possibly expensive processing
+            return input;
+        }
+        return IDN.toASCII(input);
     }
 
     // ---------------------------------------------
@@ -1232,46 +1216,4 @@ class DomainValidator {
             "zm",                 // Zambia
             "zw",                 // Zimbabwe
     };
-
-    /**
-     * Converts potentially Unicode input to punycode.
-     * If conversion fails, returns the original input.
-     *
-     * @param input the string to convert, not null
-     * @return converted input, or original input if conversion fails
-     */
-    // Needed by UrlValidator
-    static String unicodeToASCII(String input) {
-        if (isOnlyASCII(input)) { // skip possibly expensive processing
-            return input;
-        }
-        return IDN.toASCII(input);
-    }
-
-    /*
-     * Check if input contains only ASCII
-     * Treats null as all ASCII
-     */
-    private static boolean isOnlyASCII(String input) {
-        if (input == null) {
-            return true;
-        }
-        for (int i = 0; i < input.length(); i++) {
-            if (input.charAt(i) > 0x7F) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Check if a sorted array contains the specified key
-     *
-     * @param sortedArray the array to search
-     * @param key the key to find
-     * @return {@code true} if the array contains the key
-     */
-    private static boolean arrayContains(String[] sortedArray, String key) {
-        return Arrays.binarySearch(sortedArray, key) >= 0;
-    }
 }
