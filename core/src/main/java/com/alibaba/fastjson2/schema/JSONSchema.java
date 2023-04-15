@@ -53,11 +53,7 @@ public abstract class JSONSchema {
                 || objectClass == AtomicInteger.class
                 || objectClass == AtomicLong.class
         ) {
-            if (input.containsKey("AnyOf")) {
-                return anyOf(input, objectClass);
-            }
-
-            if (input.containsKey("anyOf")) {
+            if (input.containsKey("AnyOf") || input.containsKey("anyOf")) {
                 return anyOf(input, objectClass);
             }
 
@@ -79,11 +75,7 @@ public abstract class JSONSchema {
                 || objectClass == Double.class
                 || objectClass == Number.class
         ) {
-            if (input.containsKey("AnyOf")) {
-                return anyOf(input, objectClass);
-            }
-
-            if (input.containsKey("anyOf")) {
+            if (input.containsKey("AnyOf") || input.containsKey("anyOf")) {
                 return anyOf(input, objectClass);
             }
 
