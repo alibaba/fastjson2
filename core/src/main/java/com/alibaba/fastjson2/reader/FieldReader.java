@@ -288,7 +288,31 @@ public abstract class FieldReader<T>
         if (thisInitReader != null && otherInitReader == null) {
             return -1;
         }
+
         if (thisInitReader == null && otherInitReader != null) {
+            return 1;
+        }
+
+        Class thisFieldClass = this.fieldClass;
+        Class otherClass = o.fieldClass;
+
+        boolean thisClassPrimitive = thisFieldClass.isPrimitive();
+        boolean otherClassPrimitive = otherClass.isPrimitive();
+        if (thisClassPrimitive && !otherClassPrimitive) {
+            return -1;
+        }
+
+        if (!thisClassPrimitive && otherClassPrimitive) {
+            return 1;
+        }
+
+        boolean thisClassStartsWithJava = thisFieldClass.getName().startsWith("java.");
+        boolean otherClassStartsWithJava = otherClass.getName().startsWith("java.");
+        if (thisClassStartsWithJava && !otherClassStartsWithJava) {
+            return -1;
+        }
+
+        if (!thisClassStartsWithJava && otherClassStartsWithJava) {
             return 1;
         }
 
