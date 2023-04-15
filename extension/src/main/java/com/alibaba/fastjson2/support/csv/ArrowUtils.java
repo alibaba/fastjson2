@@ -406,7 +406,7 @@ public class ArrowUtils {
             decimal = decimal.setScale(scale, BigDecimal.ROUND_CEILING);
         }
         int precision = decimal.precision();
-        if (precision < 20 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
+        if (precision < 19 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
             long unscaleValue = UnsafeUtils.getLong(decimal, FIELD_DECIMAL_INT_COMPACT_OFFSET);
             if (unscaleValue != Long.MIN_VALUE) {
                 BitVectorHelper.setBit(vector.getValidityBuffer(), row);

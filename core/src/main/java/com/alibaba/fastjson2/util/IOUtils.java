@@ -225,7 +225,7 @@ public class IOUtils {
 
     public static int getDecimalChars(BigDecimal value, byte[] buf, int off) {
         int precision = value.precision();
-        if (precision < 20 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
+        if (precision < 19 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
             long unscaleValue = UnsafeUtils.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET);
             if (unscaleValue != Long.MIN_VALUE) {
                 int scale = value.scale();
@@ -241,7 +241,7 @@ public class IOUtils {
 
     public static int getDecimalChars(BigDecimal value, char[] buf, int off) {
         int precision = value.precision();
-        if (precision < 20 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
+        if (precision < 19 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
             long unscaleValue = UnsafeUtils.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET);
             if (unscaleValue != Long.MIN_VALUE) {
                 int scale = value.scale();

@@ -1,12 +1,13 @@
 package com.alibaba.fastjson2.schema;
 
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class EnumSchemaTest {
     @Test
@@ -68,5 +69,20 @@ public class EnumSchemaTest {
                         new BigDecimal("12.34")
                 ).isSuccess()
         );
+    }
+
+    @Test
+    public void testStr() {
+        JSONSchema schema = JSONSchema.of(
+                JSONObject.of(
+                        "enum",
+                        JSONArray.of("big", "medium", "small")
+                )
+        );
+        assertEquals(JSONSchema.Type.String, schema.getType());
+        assertFalse(schema.isValid("abc"));
+        assertTrue(schema.isValid("big"));
+        assertTrue(schema.isValid("medium"));
+        assertTrue(schema.isValid("small"));
     }
 }

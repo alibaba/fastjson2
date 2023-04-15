@@ -1077,7 +1077,9 @@ public class JSONSchemaTest {
         assertFalse(jsonSchema.isValid(3.0F));
         assertFalse(jsonSchema.isValid(3.0D));
         assertFalse(jsonSchema.isValid(new BigDecimal("3.0")));
+        assertFalse(jsonSchema.isValid(new BigDecimal("3.1")));
         assertFalse(jsonSchema.isValid(new BigInteger("3")));
+        assertFalse(jsonSchema.isValid(new BigInteger("-92233720368547758081")));
     }
 
     @Test

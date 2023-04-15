@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.internal.trove.map.hash.TLongIntHashMap;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
+import com.alibaba.fastjson2.util.UnsafeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
@@ -20,15 +21,10 @@ import static com.alibaba.fastjson2.JSONFactory.CACHE_SIZE;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNameAsSymbol;
 import static com.alibaba.fastjson2.util.DateUtils.SHANGHAI_ZONE_ID_NAME;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
+import static com.alibaba.fastjson2.util.TypeUtils.*;
 
 final class JSONWriterJSONB
         extends JSONWriter {
-    static final BigInteger BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE);
-    static final BigInteger BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
-
-    static final BigInteger BIGINT_INT32_MIN = BigInteger.valueOf(Integer.MIN_VALUE);
-    static final BigInteger BIGINT_INT32_MAX = BigInteger.valueOf(Integer.MAX_VALUE);
-
     // optimize for write ZonedDateTime
     static final byte[] SHANGHAI_ZONE_ID_NAME_BYTES = JSONB.toBytes(SHANGHAI_ZONE_ID_NAME);
 
@@ -2116,7 +2112,7 @@ final class JSONWriterJSONB
             return;
         }
 
-        if (value.compareTo(BIGINT_INT64_MIN) >= 0 && value.compareTo(BIGINT_INT64_MAX) <= 0) {
+        if (isInt64(value)) {
             if (off == bytes.length) {
                 int minCapacity = off + 1;
                 int oldCapacity = bytes.length;
@@ -2173,12 +2169,33 @@ final class JSONWriterJSONB
             return;
         }
 
-        BigInteger unscaledValue = value.unscaledValue();
+        int precision = value.precision();
         int scale = value.scale();
 
+        if (precision < 19 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
+            long intCompact = UnsafeUtils.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET);
+            if (scale == 0) {
+                ensureCapacity(off + 1);
+                this.bytes[off++] = BC_DECIMAL_LONG;
+                long longValue = intCompact;
+                writeInt64(longValue);
+                return;
+            }
+
+            ensureCapacity(off + 1);
+            this.bytes[off++] = BC_DECIMAL;
+            writeInt32(scale);
+            if (intCompact >= Integer.MIN_VALUE && intCompact <= Integer.MAX_VALUE) {
+                writeInt32((int) intCompact);
+            } else {
+                writeInt64(intCompact);
+            }
+            return;
+        }
+
+        BigInteger unscaledValue = value.unscaledValue();
         if (scale == 0
-                && unscaledValue.compareTo(BIGINT_INT64_MIN) >= 0
-                && unscaledValue.compareTo(BIGINT_INT64_MAX) <= 0) {
+                && isInt64(unscaledValue)) {
             ensureCapacity(off + 1);
             this.bytes[off++] = BC_DECIMAL_LONG;
             long longValue = unscaledValue.longValue();
@@ -2190,10 +2207,10 @@ final class JSONWriterJSONB
         this.bytes[off++] = BC_DECIMAL;
         writeInt32(scale);
 
-        if (unscaledValue.compareTo(BIGINT_INT32_MIN) >= 0 && unscaledValue.compareTo(BIGINT_INT32_MAX) <= 0) {
+        if (isInt32(unscaledValue)) {
             int intValue = unscaledValue.intValue();
             writeInt32(intValue);
-        } else if (unscaledValue.compareTo(BIGINT_INT64_MIN) >= 0 && unscaledValue.compareTo(BIGINT_INT64_MAX) <= 0) {
+        } else if (isInt64(unscaledValue)) {
             long longValue = unscaledValue.longValue();
             writeInt64(longValue);
         } else {

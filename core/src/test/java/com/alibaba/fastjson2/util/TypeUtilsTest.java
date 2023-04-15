@@ -705,4 +705,35 @@ public class TypeUtilsTest {
             }
         }
     }
+
+    @Test
+    public void isInteger() {
+        assertTrue(TypeUtils.isInteger(new BigDecimal("2.0")));
+        assertFalse(TypeUtils.isInteger(new BigDecimal("2.1")));
+        assertTrue(TypeUtils.isInteger(new BigDecimal("2.00")));
+        assertFalse(TypeUtils.isInteger(new BigDecimal("2.01")));
+        assertTrue(TypeUtils.isInteger(new BigDecimal("2.000")));
+        assertFalse(TypeUtils.isInteger(new BigDecimal("2.001")));
+        assertTrue(TypeUtils.isInteger(new BigDecimal("2.0000")));
+        assertFalse(TypeUtils.isInteger(new BigDecimal("2.0001")));
+        assertTrue(TypeUtils.isInteger(new BigDecimal("2.00000")));
+        assertFalse(TypeUtils.isInteger(new BigDecimal("2.00001")));
+        assertTrue(TypeUtils.isInteger(new BigDecimal("2.000000")));
+        assertFalse(TypeUtils.isInteger(new BigDecimal("2.000001")));
+        assertTrue(TypeUtils.isInteger(new BigDecimal("2.0000000")));
+        assertFalse(TypeUtils.isInteger(new BigDecimal("2.0000001")));
+        assertTrue(TypeUtils.isInteger(new BigDecimal("2.00000000")));
+        assertFalse(TypeUtils.isInteger(new BigDecimal("2.00000001")));
+        assertTrue(TypeUtils.isInteger(new BigDecimal("2.000000000")));
+        assertFalse(TypeUtils.isInteger(new BigDecimal("2.000000001")));
+        assertTrue(TypeUtils.isInteger(new BigDecimal("2.0000000000")));
+        assertFalse(TypeUtils.isInteger(new BigDecimal("2.0000000001")));
+        assertTrue(TypeUtils.isInteger(new BigDecimal("2.00000000000")));
+        assertFalse(TypeUtils.isInteger(new BigDecimal("2.00000000001")));
+        assertTrue(TypeUtils.isInteger(new BigDecimal("2.000000000000")));
+        assertFalse(TypeUtils.isInteger(new BigDecimal("2.000000000001")));
+        assertTrue(TypeUtils.isInteger(new BigDecimal("-92233720368547758081")));
+        assertTrue(TypeUtils.isInteger(new BigDecimal("-92233720368547758081")));
+        assertFalse(TypeUtils.isInteger(new BigDecimal("-9223372036854775808.1")));
+    }
 }

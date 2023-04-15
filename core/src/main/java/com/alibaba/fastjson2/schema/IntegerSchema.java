@@ -1,12 +1,15 @@
 package com.alibaba.fastjson2.schema;
 
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static com.alibaba.fastjson2.util.TypeUtils.*;
 
 final class IntegerSchema
         extends JSONSchema {
@@ -18,6 +21,8 @@ final class IntegerSchema
     final boolean exclusiveMaximum;
 
     final long multipleOf;
+
+    final Long constValue;
 
     IntegerSchema(JSONObject input) {
         super(input);
@@ -51,6 +56,8 @@ final class IntegerSchema
         }
 
         this.multipleOf = input.getLongValue("multipleOf", 0);
+
+        this.constValue = input.getLong("const");
     }
 
     @Override
@@ -73,33 +80,88 @@ final class IntegerSchema
                 || valueClass == AtomicInteger.class
                 || valueClass == AtomicLong.class
         ) {
+            boolean isInt64 = true;
+            if (valueClass == BigInteger.class) {
+                isInt64 = isInt64((BigInteger) value);
+            }
+
+            long longValue = ((Number) value).longValue();
+
             if (minimum != Long.MIN_VALUE) {
-                long longValue = ((Number) value).longValue();
                 if (exclusiveMinimum ? longValue <= minimum : longValue < minimum) {
                     return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
                 }
             }
 
             if (maximum != Long.MIN_VALUE) {
-                long longValue = ((Number) value).longValue();
                 if (exclusiveMaximum ? longValue >= maximum : longValue > maximum) {
                     return new ValidateResult(false, exclusiveMaximum ? "exclusiveMaximum not match, expect >= %s, but %s" : "maximum not match, expect >= %s, but %s", maximum, value);
                 }
             }
 
             if (multipleOf != 0) {
-                long longValue = ((Number) value).longValue();
                 if (longValue % multipleOf != 0) {
                     return new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, (Number) value);
                 }
             }
+
+            if (constValue != null) {
+                if (this.constValue != longValue || !isInt64) {
+                    return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                }
+            }
+
             return SUCCESS;
         }
 
         if (value instanceof BigDecimal) {
             BigDecimal decimal = (BigDecimal) value;
-            if (decimal.compareTo(new BigDecimal(decimal.toBigInteger())) == 0) {
+            boolean integer = TypeUtils.isInteger(decimal);
+            if (integer) {
+                BigInteger unscaleValue = decimal.toBigInteger();
+                if (constValue != null) {
+                    boolean equals = false;
+                    if (isInt64(unscaleValue)) {
+                        equals = this.constValue == unscaleValue.longValue();
+                    }
+                    if (!equals) {
+                        return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                    }
+                }
+
                 return SUCCESS;
+            }
+
+            if (constValue != null) {
+                return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+            }
+        }
+
+        if (constValue != null) {
+            if (value instanceof Float) {
+                float floatValue = ((Float) value).floatValue();
+                if (this.constValue != floatValue) {
+                    return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                }
+            } else if (value instanceof Double) {
+                double doubleValue = ((Double) value).doubleValue();
+                if (this.constValue != doubleValue) {
+                    return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                }
+            } else if (value instanceof String) {
+                String str = (String) value;
+                boolean equals = false;
+                if (TypeUtils.isInteger(str) && str.length() < 21) {
+                    try {
+                        long longValue = Long.parseLong(str);
+                        equals = constValue == longValue;
+                    } catch (NumberFormatException ignored) {
+                        // ignored
+                    }
+                }
+                if (!equals) {
+                    return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+                }
             }
         }
 
@@ -125,6 +187,13 @@ final class IntegerSchema
                 return new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, longValue);
             }
         }
+
+        if (constValue != null) {
+            if (this.constValue != longValue) {
+                return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, longValue);
+            }
+        }
+
         return SUCCESS;
     }
 
@@ -150,6 +219,12 @@ final class IntegerSchema
         if (multipleOf != 0) {
             if (longValue % multipleOf != 0) {
                 return new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, longValue);
+            }
+        }
+
+        if (constValue != null) {
+            if (this.constValue != longValue) {
+                return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
             }
         }
         return SUCCESS;
@@ -179,6 +254,13 @@ final class IntegerSchema
                 return new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, longValue);
             }
         }
+
+        if (constValue != null) {
+            if (this.constValue != longValue) {
+                return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
+            }
+        }
+
         return SUCCESS;
     }
 
