@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,7 +34,7 @@ final class StringSchema
     final String constValue;
     final Set<String> enumValues;
 
-    final FormatValidator formatValidator;
+    final Predicate<String> formatValidator;
 
     StringSchema(JSONObject input) {
         super(input);
@@ -169,7 +170,7 @@ final class StringSchema
             }
 
             if (formatValidator != null) {
-                if (!formatValidator.isValid(str)) {
+                if (!formatValidator.test(str)) {
                     return new ValidateResult(false, "format not match, expect %s, but %s", format, str);
                 }
             }
