@@ -856,6 +856,13 @@ class JSONPathParser {
                 segment = new JSONPathFilter.NameObjectOpSegment(fieldName, hashCode, fieldName2, hashCode2, function, operator, object);
                 break;
             }
+            case 'n':
+                boolean nextNull = jsonReader.nextIfNull();
+                if (nextNull) {
+                    segment = new JSONPathFilter.NameIsNull(fieldName, hashCode, fieldName2, hashCode2, function);
+                    break;
+                }
+                throw new JSONException(jsonReader.info("jsonpath syntax error"));
             default:
                 throw new JSONException(jsonReader.info("jsonpath syntax error"));
         }

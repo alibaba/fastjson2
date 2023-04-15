@@ -43,6 +43,27 @@ abstract class JSONPathFilter
         NOT_CONTAINS
     }
 
+    static final class NameIsNull
+            extends NameFilter {
+        public NameIsNull(
+                String fieldName,
+                long fieldNameNameHash,
+                String[] fieldName2,
+                long[] fieldNameNameHash2,
+                Function function
+        ) {
+            super(fieldName, fieldNameNameHash, fieldName2, fieldNameNameHash2, function);
+        }
+
+        @Override
+        boolean apply(Object fieldValue) {
+            if (function != null) {
+                fieldValue = function.apply(fieldValue);
+            }
+            return fieldValue == null;
+        }
+    }
+
     static final class NameIntOpSegment
             extends NameFilter {
         final Operator operator;
@@ -372,11 +393,13 @@ abstract class JSONPathFilter
             this.function = null;
         }
 
-        public NameFilter(String fieldName,
-                          long fieldNameNameHash,
-                          String[] fieldName2,
-                          long[] fieldNameNameHash2,
-                          Function function) {
+        public NameFilter(
+                String fieldName,
+                long fieldNameNameHash,
+                String[] fieldName2,
+                long[] fieldNameNameHash2,
+                Function function
+        ) {
             this.fieldName = fieldName;
             this.fieldNameNameHash = fieldNameNameHash;
             this.fieldName2 = fieldName2;
@@ -485,6 +508,9 @@ abstract class JSONPathFilter
             if (object instanceof Map) {
                 Object fieldValue = fieldName == null ? object : ((Map<?, ?>) object).get(fieldName);
                 if (fieldValue == null) {
+                    if (this instanceof NameIsNull) {
+                        return true;
+                    }
                     return false;
                 }
 
@@ -507,6 +533,9 @@ abstract class JSONPathFilter
                         }
 
                         if (fieldValue == null) {
+                            if (this instanceof NameIsNull) {
+                                return true;
+                            }
                             return false;
                         }
                     }
