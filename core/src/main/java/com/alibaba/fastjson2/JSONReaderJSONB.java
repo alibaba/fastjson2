@@ -1525,6 +1525,47 @@ class JSONReaderJSONB
     public long readTypeHashCode() {
         strtype = bytes[offset];
 
+        boolean typeSymbol = strtype == BC_SYMBOL;
+        if (typeSymbol) {
+            offset++;
+            strtype = bytes[offset];
+            if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32) {
+                int symbol;
+                if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
+                    offset++;
+                    symbol = strtype;
+                } else {
+                    symbol = readInt32Value();
+                }
+
+                if (symbol < 0) {
+                    return symbolTable.getHashCode(-symbol);
+                }
+
+                if (symbol == 0) {
+                    strtype = symbol0StrType;
+                    strlen = symbol0Length;
+                    strBegin = symbol0Begin;
+                    if (symbol0Hash == 0) {
+                        symbol0Hash = getNameHashCode();
+                    }
+                    return symbol0Hash;
+                }
+
+                int index = symbol * 2;
+                long strInfo = symbols[index + 1];
+                this.strtype = (byte) strInfo;
+                strlen = ((int) strInfo) >> 8;
+                strBegin = (int) (strInfo >> 32);
+                long nameHashCode = symbols[index];
+                if (nameHashCode == 0) {
+                    nameHashCode = getNameHashCode();
+                    symbols[index] = nameHashCode;
+                }
+                return nameHashCode;
+            }
+        }
+
         if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32) {
             int typeIndex;
             if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
@@ -6105,5 +6146,9 @@ class JSONReaderJSONB
         if (valueBytes != null) {
             JSONFactory.releaseByteArray(cachedIndex, valueBytes);
         }
+    }
+
+    public final boolean isEnd() {
+        return offset >= end;
     }
 }
