@@ -89,7 +89,7 @@ public abstract class JSONReader
         return ch;
     }
 
-    public final boolean isEnd() {
+    public boolean isEnd() {
         return ch == EOI;
     }
 

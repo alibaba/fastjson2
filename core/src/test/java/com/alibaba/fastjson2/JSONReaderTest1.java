@@ -2040,4 +2040,84 @@ public class JSONReaderTest1 {
             }
         }
     }
+
+    @Test
+    public void testReadTypeHashCode() {
+        SymbolTable symbolTable = JSONB.symbolTable("abc");
+        JSONWriter.Context writeContext = JSONFactory.createWriteContext(JSONWriter.Feature.WriteNameAsSymbol);
+        JSONWriterJSONB writer = new JSONWriterJSONB(writeContext, symbolTable);
+
+        writer.startObject();
+        String name = "id";
+        byte[] nameBytes = JSONB.toBytes(name);
+        long nameHash = Fnv.hashCode64(name);
+
+        writer.writeName(name);
+        writer.writeNameRaw(nameBytes, nameHash);
+
+        writer.writeName(name);
+        writer.writeNameRaw(nameBytes, nameHash);
+
+        writer.endObject();
+
+        byte[] jsonbByte = writer.getBytes();
+
+        System.out.println(JSONB.toJSONString(jsonbByte, true));
+
+        JSONReader.Context readerContext = JSONFactory.createReadContext();
+        JSONReaderJSONB reader = new JSONReaderJSONB(readerContext, jsonbByte, 0, jsonbByte.length);
+
+        assertTrue(reader.nextIfObjectStart());
+
+        assertEquals(name, reader.readFieldName());
+        assertEquals(nameHash, reader.readTypeHashCode());
+        assertEquals(name, reader.getString());
+
+        assertEquals(name, reader.readFieldName());
+        assertEquals(nameHash, reader.readTypeHashCode());
+        assertEquals(name, reader.getString());
+
+        assertTrue(reader.nextIfObjectEnd());
+        assertTrue(reader.isEnd());
+    }
+
+    @Test
+    public void testReadTypeHashCode1() {
+        SymbolTable symbolTable = JSONB.symbolTable("abc");
+        JSONWriter.Context writeContext = JSONFactory.createWriteContext(JSONWriter.Feature.WriteNameAsSymbol);
+        JSONWriterJSONB writer = new JSONWriterJSONB(writeContext, symbolTable);
+
+        writer.startObject();
+        String name = "id";
+        byte[] nameBytes = JSONB.toBytes(name);
+        long nameHash = Fnv.hashCode64(name);
+
+        writer.writeNameRaw(nameBytes, nameHash);
+        writer.writeNameRaw(nameBytes, nameHash);
+
+        writer.writeNameRaw(nameBytes, nameHash);
+        writer.writeNameRaw(nameBytes, nameHash);
+
+        writer.endObject();
+
+        byte[] jsonbByte = writer.getBytes();
+
+        System.out.println(JSONB.toJSONString(jsonbByte, true));
+
+        JSONReader.Context readerContext = JSONFactory.createReadContext();
+        JSONReaderJSONB reader = new JSONReaderJSONB(readerContext, jsonbByte, 0, jsonbByte.length);
+
+        assertTrue(reader.nextIfObjectStart());
+
+        assertEquals(name, reader.readFieldName());
+        assertEquals(nameHash, reader.readTypeHashCode());
+        assertEquals(name, reader.getString());
+
+        assertEquals(name, reader.readFieldName());
+        assertEquals(nameHash, reader.readTypeHashCode());
+        assertEquals(name, reader.getString());
+
+        assertTrue(reader.nextIfObjectEnd());
+        assertTrue(reader.isEnd());
+    }
 }
