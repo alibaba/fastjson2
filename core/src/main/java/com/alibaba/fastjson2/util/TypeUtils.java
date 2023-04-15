@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.*;
 
+import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
 import static java.lang.invoke.MethodType.methodType;
 
 public class TypeUtils {
@@ -59,6 +60,11 @@ public class TypeUtils {
     public static final MethodType METHOD_TYPE_VOID_INT = MethodType.methodType(void.class, int.class);
     public static final MethodType METHOD_TYPE_VOID_STRING = MethodType.methodType(void.class, String.class);
     public static final MethodType METHOD_TYPE_OBJECT_INT = MethodType.methodType(Object.class, int.class);
+
+    public static final BigInteger BIGINT_INT32_MIN = BigInteger.valueOf(Integer.MIN_VALUE);
+    public static final BigInteger BIGINT_INT32_MAX = BigInteger.valueOf(Integer.MAX_VALUE);
+    public static final BigInteger BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE);
+    public static final BigInteger BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
 
     static class X1 {
         static final Function<byte[], char[]> TO_CHARS;
@@ -1783,6 +1789,57 @@ public class TypeUtils {
             return null;
         }
         return parseBigDecimal(strBytes, 0, strBytes.length);
+    }
+
+    public static boolean isInt32(BigInteger value) {
+        return value.compareTo(BIGINT_INT32_MIN) >= 0 && value.compareTo(BIGINT_INT32_MAX) <= 0;
+    }
+
+    public static boolean isInt64(BigInteger value) {
+        return value.compareTo(BIGINT_INT64_MIN) >= 0 && value.compareTo(BIGINT_INT64_MAX) <= 0;
+    }
+
+    /**
+     * decimal is integer, check has non-zero small
+     * @param decimal
+     * @return
+     */
+    public static boolean isInteger(BigDecimal decimal) {
+        int scale = decimal.scale();
+        if (scale == 0) {
+            return true;
+        }
+
+        int precision = decimal.precision();
+        if (precision < 19) {
+            if (FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
+                long intCompact = UnsafeUtils.getLong(decimal, FIELD_DECIMAL_INT_COMPACT_OFFSET);
+                switch (scale) {
+                    case 1:
+                        return intCompact % 10 == 0;
+                    case 2:
+                        return intCompact % 100 == 0;
+                    case 3:
+                        return intCompact % 1000 == 0;
+                    case 4:
+                        return intCompact % 10000 == 0;
+                    case 5:
+                        return intCompact % 100000 == 0;
+                    case 6:
+                        return intCompact % 1000000 == 0;
+                    case 7:
+                        return intCompact % 10000000 == 0;
+                    case 8:
+                        return intCompact % 100000000 == 0;
+                    case 9:
+                        return intCompact % 1000000000 == 0;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        return decimal.stripTrailingZeros().scale() == 0;
     }
 
     public static BigInteger toBigInteger(Object value) {

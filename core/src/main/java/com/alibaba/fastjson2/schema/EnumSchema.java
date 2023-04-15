@@ -5,14 +5,10 @@ import java.math.BigInteger;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import static com.alibaba.fastjson2.util.TypeUtils.*;
+
 final class EnumSchema
         extends JSONSchema {
-    static final BigInteger BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE);
-    static final BigInteger BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
-
-    static final BigInteger BIGINT_INT32_MIN = BigInteger.valueOf(Integer.MIN_VALUE);
-    static final BigInteger BIGINT_INT32_MAX = BigInteger.valueOf(Integer.MAX_VALUE);
-
     Set<Object> items;
 
     EnumSchema(Object... items) {
