@@ -106,6 +106,7 @@ public class TypeUtils {
         static final char START = ' '; // 32
         static final char END = '~'; // 126
         static final int SIZE2 = (END - START + 1);
+
         static {
             String[] array0 = new String[128];
             for (char i = 0; i < array0.length; i++) {
@@ -1801,6 +1802,7 @@ public class TypeUtils {
 
     /**
      * decimal is integer, check has non-zero small
+     *
      * @param decimal
      * @return
      */
@@ -3911,5 +3913,214 @@ public class TypeUtils {
         }
 
         return false;
+    }
+
+    public static boolean isUUID(String str) {
+        if (str == null) {
+            return false;
+        }
+
+        if (str.length() == 32) {
+            long msb1 = UUIDUtils.parse4Nibbles(str, 0);
+            long msb2 = UUIDUtils.parse4Nibbles(str, 4);
+            long msb3 = UUIDUtils.parse4Nibbles(str, 8);
+            long msb4 = UUIDUtils.parse4Nibbles(str, 12);
+            long lsb1 = UUIDUtils.parse4Nibbles(str, 16);
+            long lsb2 = UUIDUtils.parse4Nibbles(str, 20);
+            long lsb3 = UUIDUtils.parse4Nibbles(str, 24);
+            long lsb4 = UUIDUtils.parse4Nibbles(str, 28);
+
+            return (msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0;
+        }
+
+        if (str.length() == 36) {
+            char ch1 = str.charAt(8);
+            char ch2 = str.charAt(13);
+            char ch3 = str.charAt(18);
+            char ch4 = str.charAt(23);
+            if (ch1 == '-' && ch2 == '-' && ch3 == '-' && ch4 == '-') {
+                long msb1 = UUIDUtils.parse4Nibbles(str, 0);
+                long msb2 = UUIDUtils.parse4Nibbles(str, 4);
+                long msb3 = UUIDUtils.parse4Nibbles(str, 9);
+                long msb4 = UUIDUtils.parse4Nibbles(str, 14);
+                long lsb1 = UUIDUtils.parse4Nibbles(str, 19);
+                long lsb2 = UUIDUtils.parse4Nibbles(str, 24);
+                long lsb3 = UUIDUtils.parse4Nibbles(str, 28);
+                long lsb4 = UUIDUtils.parse4Nibbles(str, 32);
+                return (msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0;
+            }
+        }
+        return false;
+    }
+
+    public static boolean validateIPv4(String str) {
+        return validateIPv4(str, 0);
+    }
+
+    static boolean validateIPv4(String str, int off) {
+        if (str == null) {
+            return false;
+        }
+
+        int strlen = str.length();
+        {
+            final int len = strlen - off;
+            if (len < 7 || len > 25) {
+                return false;
+            }
+        }
+
+        int start = off;
+        int dotCount = 0;
+        for (int i = off; i < strlen; i++) {
+            char ch = str.charAt(i);
+            if (ch == '.' || i == strlen - 1) {
+                int end = ch == '.' ? i : i + 1;
+                int n = end - start;
+
+                char c0, c1, c2;
+                switch (n) {
+                    case 1:
+                        c0 = str.charAt(end - 1);
+                        if (c0 < '0' || c0 > '9') {
+                            return false;
+                        }
+                        break;
+                    case 2:
+                        c0 = str.charAt(end - 2);
+                        c1 = str.charAt(end - 1);
+
+                        if (c0 < '0' || c0 > '9') {
+                            return false;
+                        }
+                        if (c1 < '0' || c1 > '9') {
+                            return false;
+                        }
+                        break;
+                    case 3:
+                        c0 = str.charAt(end - 3);
+                        c1 = str.charAt(end - 2);
+                        c2 = str.charAt(end - 1);
+
+                        if (c0 < '0' || c0 > '2') {
+                            return false;
+                        }
+                        if (c1 < '0' || c1 > '9') {
+                            return false;
+                        }
+                        if (c2 < '0' || c2 > '9') {
+                            return false;
+                        }
+                        int value = (c0 - '0') * 100 + (c1 - '0') * 10 + (c2 - '0');
+                        if (value > 255) {
+                            return false;
+                        }
+                        break;
+                    default:
+                        return false;
+                }
+
+                if (ch == '.') {
+                    dotCount++;
+                    start = i + 1;
+                }
+            }
+        }
+
+        return dotCount == 3;
+    }
+
+    public static boolean validateIPv6(String str) {
+        if (str == null) {
+            return false;
+        }
+
+        final int len = str.length();
+        if (len < 2 || len > 39) {
+            return false;
+        }
+
+        int start = 0;
+        int colonCount = 0;
+        for (int i = 0; i < len; i++) {
+            char ch = str.charAt(i);
+            if (ch == '.') {
+                boolean ipV4 = validateIPv4(str, start);
+                if (!ipV4) {
+                    return false;
+                }
+                break;
+            }
+            if (ch == ':' || i == len - 1) {
+                int end = ch == ':' ? i : i + 1;
+                int n = end - start;
+
+                char c0, c1, c2, c3;
+                switch (n) {
+                    case 0:
+                        break;
+                    case 1:
+                        c0 = str.charAt(end - 1);
+                        if (!(c0 >= '0' && c0 <= '9' || (c0 >= 'A' && c0 <= 'F') || (c0 >= 'a' && c0 <= 'f'))) {
+                            return false;
+                        }
+                        break;
+                    case 2:
+                        c0 = str.charAt(end - 2);
+                        c1 = str.charAt(end - 1);
+
+                        if (!(c0 >= '0' && c0 <= '9' || (c0 >= 'A' && c0 <= 'F') || (c0 >= 'a' && c0 <= 'f'))) {
+                            return false;
+                        }
+                        if (!(c1 >= '0' && c1 <= '9' || (c1 >= 'A' && c1 <= 'F') || (c1 >= 'a' && c1 <= 'f'))) {
+                            return false;
+                        }
+                        break;
+                    case 3:
+                        c0 = str.charAt(end - 3);
+                        c1 = str.charAt(end - 2);
+                        c2 = str.charAt(end - 1);
+
+                        if (!(c0 >= '0' && c0 <= '9' || (c0 >= 'A' && c0 <= 'F') || (c0 >= 'a' && c0 <= 'f'))) {
+                            return false;
+                        }
+                        if (!(c1 >= '0' && c1 <= '9' || (c1 >= 'A' && c1 <= 'F') || (c1 >= 'a' && c1 <= 'f'))) {
+                            return false;
+                        }
+                        if (!(c2 >= '0' && c2 <= '9' || (c2 >= 'A' && c2 <= 'F') || (c2 >= 'a' && c2 <= 'f'))) {
+                            return false;
+                        }
+                        break;
+                    case 4:
+                        c0 = str.charAt(end - 4);
+                        c1 = str.charAt(end - 3);
+                        c2 = str.charAt(end - 2);
+                        c3 = str.charAt(end - 1);
+
+                        if (!(c0 >= '0' && c0 <= '9' || (c0 >= 'A' && c0 <= 'F') || (c0 >= 'a' && c0 <= 'f'))) {
+                            return false;
+                        }
+                        if (!(c1 >= '0' && c1 <= '9' || (c1 >= 'A' && c1 <= 'F') || (c1 >= 'a' && c1 <= 'f'))) {
+                            return false;
+                        }
+                        if (!(c2 >= '0' && c2 <= '9' || (c2 >= 'A' && c2 <= 'F') || (c2 >= 'a' && c2 <= 'f'))) {
+                            return false;
+                        }
+                        if (!(c3 >= '0' && c3 <= '9' || (c3 >= 'A' && c3 <= 'F') || (c3 >= 'a' && c3 <= 'f'))) {
+                            return false;
+                        }
+                        break;
+                    default:
+                        return false;
+                }
+
+                if (ch == ':') {
+                    colonCount++;
+                    start = i + 1;
+                }
+            }
+        }
+
+        return colonCount > 0 && colonCount < 8;
     }
 }

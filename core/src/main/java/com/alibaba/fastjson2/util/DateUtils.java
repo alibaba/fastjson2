@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.util;
 
+import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.reader.ObjectReaderImplDate;
 
@@ -1195,6 +1196,10 @@ public class DateUtils {
                 || (len == 16 && ((c10 = (char) chars[off + 10]) == '+' || c10 == '-'))
         ) {
             ZonedDateTime zdt = parseZonedDateTime(chars, off, len, zoneId);
+            if (zdt == null) {
+                String input = new String(chars, off, len - off);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
             millis = zdt.toInstant().toEpochMilli();
         } else if ((c0 == '-' || c0 >= '0' && c0 <= '9') && IOUtils.isNumber(chars, off, len)) {
             millis = TypeUtils.parseLong(chars, off, len);
@@ -1296,6 +1301,10 @@ public class DateUtils {
                 || (len == 16 && ((c10 = chars[off + 10]) == '+' || c10 == '-'))
         ) {
             ZonedDateTime zdt = parseZonedDateTime(chars, off, len, zoneId);
+            if (zdt == null) {
+                String input = new String(chars, off, len - off);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
             millis = zdt.toInstant().toEpochMilli();
         } else if ((c0 == '-' || c0 >= '0' && c0 <= '9') && IOUtils.isNumber(chars, off, len)) {
             millis = TypeUtils.parseLong(chars, off, len);
@@ -11367,5 +11376,216 @@ public class DateUtils {
             this.pattern = pattern;
             this.length = length;
         }
+    }
+
+    public static boolean isLocalDate(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+
+        if (str.length() == 10
+                && str.charAt(4) == '-'
+                && str.charAt(7) == '-'
+        ) {
+            // yyyy-MM-dd
+            char y0 = str.charAt(0);
+            char y1 = str.charAt(1);
+            char y2 = str.charAt(2);
+            char y3 = str.charAt(3);
+            char m0 = str.charAt(5);
+            char m1 = str.charAt(6);
+            char d0 = str.charAt(8);
+            char d1 = str.charAt(9);
+
+            int yyyy = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+            int mm = (m0 - '0') * 10 + (m1 - '0');
+            int dd = (d0 - '0') * 10 + (d1 - '0');
+
+            if (mm > 12) {
+                return false;
+            }
+
+            if (dd > 28) {
+                int dom = 31;
+                switch (mm) {
+                    case 2:
+                        boolean isLeapYear = ((yyyy & 3) == 0) && ((yyyy % 100) != 0 || (yyyy % 400) == 0);
+                        dom = isLeapYear ? 29 : 28;
+                        break;
+                    case 4:
+                    case 6:
+                    case 9:
+                    case 11:
+                        dom = 30;
+                        break;
+                }
+                if (dd > dom) {
+                    return false;
+                }
+            } else if (dd > 31) {
+                return false;
+            }
+
+            return true;
+        }
+
+        if (str.length() < 9 || str.length() > 40) {
+            return false;
+        }
+
+        try {
+            return parseLocalDate(str) != null;
+        } catch (DateTimeException | JSONException ignored) {
+            return false;
+        }
+    }
+
+    public static boolean isDate(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+
+        char c10;
+        if (str.length() == 19
+                && str.charAt(4) == '-'
+                && str.charAt(7) == '-'
+                && ((c10 = str.charAt(10)) == ' ' || c10 == 'T')
+                && str.charAt(13) == ':'
+                && str.charAt(16) == ':'
+        ) {
+            // yyyy-MM-dd hh:mm:ss
+            char y0 = str.charAt(0);
+            char y1 = str.charAt(1);
+            char y2 = str.charAt(2);
+            char y3 = str.charAt(3);
+            char m0 = str.charAt(5);
+            char m1 = str.charAt(6);
+            char d0 = str.charAt(8);
+            char d1 = str.charAt(9);
+            char h0 = str.charAt(11);
+            char h1 = str.charAt(12);
+            char i0 = str.charAt(14);
+            char i1 = str.charAt(15);
+            char s0 = str.charAt(17);
+            char s1 = str.charAt(18);
+
+            if (y0 < '0' || y0 > '9'
+                    || y1 < '0' || y1 > '9'
+                    || y2 < '0' || y2 > '9'
+                    || y3 < '0' || y3 > '9'
+                    || m0 < '0' || m0 > '9'
+                    || m1 < '0' || m1 > '9'
+                    || d0 < '0' || d0 > '9'
+                    || d1 < '0' || d1 > '9'
+                    || h0 < '0' || h0 > '9'
+                    || h1 < '0' || h1 > '9'
+                    || i0 < '0' || i0 > '9'
+                    || i1 < '0' || i1 > '9'
+                    || s0 < '0' || s0 > '9'
+                    || s1 < '0' || s1 > '9'
+            ) {
+                return false;
+            }
+
+            int yyyy = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+            int mm = (m0 - '0') * 10 + (m1 - '0');
+            int dd = (d0 - '0') * 10 + (d1 - '0');
+            int hh = (h0 - '0') * 10 + (h1 - '0');
+            int ii = (i0 - '0') * 10 + (i1 - '0');
+            int ss = (s0 - '0') * 10 + (s1 - '0');
+
+            if (mm > 12) {
+                return false;
+            }
+
+            if (dd > 28) {
+                int dom = 31;
+                switch (mm) {
+                    case 2:
+                        boolean isLeapYear = ((yyyy & 3) == 0) && ((yyyy % 100) != 0 || (yyyy % 400) == 0);
+                        dom = isLeapYear ? 29 : 28;
+                        break;
+                    case 4:
+                    case 6:
+                    case 9:
+                    case 11:
+                        dom = 30;
+                        break;
+                }
+                if (dd > dom) {
+                    return false;
+                }
+            }
+
+            if (hh > 24) {
+                return false;
+            }
+
+            if (ii > 60) {
+                return false;
+            }
+
+            if (ss > 61) {
+                return false;
+            }
+
+            return true;
+        }
+
+        try {
+            return parseMillis(str, DEFAULT_ZONE_ID) != 0;
+        } catch (DateTimeException | JSONException ignored) {
+            return false;
+        }
+    }
+
+    public static boolean isLocalTime(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+
+        char h0, h1, m0, m1, s0, s1;
+        if (str.length() == 8 && str.charAt(2) == ':' && str.charAt(5) == ':') {
+            h0 = str.charAt(0);
+            h1 = str.charAt(1);
+            m0 = str.charAt(3);
+            m1 = str.charAt(4);
+            s0 = str.charAt(6);
+            s1 = str.charAt(7);
+        } else {
+            try {
+                LocalTime.parse(str);
+                return true;
+            } catch (DateTimeParseException ignored) {
+                return false;
+            }
+        }
+
+        if (h0 >= '0' && h0 <= '2'
+                && h1 >= '0' && h1 <= '9'
+                && m0 >= '0' && m0 <= '6'
+                && m1 >= '0' && m0 <= '9'
+                && s0 >= '0' && s0 <= '6'
+                && s1 >= '0' && s0 <= '9'
+        ) {
+            int hh = (h0 - '0') * 10 + (h1 - '0');
+            if (hh > 24) {
+                return false;
+            }
+
+            int mm = (m0 - '0') * 10 + (m1 - '0');
+            if (mm > 60) {
+                return false;
+            }
+
+            int ss = (s0 - '0') * 10 + (s1 - '0');
+            if (ss > 61) {
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }

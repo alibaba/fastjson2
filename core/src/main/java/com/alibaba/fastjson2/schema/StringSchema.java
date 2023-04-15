@@ -2,15 +2,26 @@ package com.alibaba.fastjson2.schema;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.util.DateUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.Duration;
+import java.time.format.DateTimeParseException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 final class StringSchema
         extends JSONSchema {
+    static final Pattern EMAIL_PATTERN = Pattern.compile("^\\s*?(.+)@(.+?)\\s*$");
+    static final Pattern IP_DOMAIN_PATTERN = Pattern.compile("^\\[(.*)\\]$");
+    static final Pattern USER_PATTERN = Pattern.compile("^\\s*(((\\\\.)|[^\\s\\p{Cntrl}\\(\\)<>@,;:'\\\\\\\"\\.\\[\\]]|')+|(\"[^\"]*\"))(\\.(((\\\\.)|[^\\s\\p{Cntrl}\\(\\)<>@,;:'\\\\\\\"\\.\\[\\]]|')+|(\"[^\"]*\")))*$");
+
     final int maxLength;
     final int minLength;
     final String format;
@@ -68,31 +79,53 @@ final class StringSchema
         } else {
             switch (format) {
                 case "email":
-                    formatValidator = EmailValidator.INSTANCE;
+                    formatValidator = StringSchema::isEmail;
                     break;
                 case "ipv4":
-                    formatValidator = IPAddressValidator.IPV4;
+                    formatValidator = TypeUtils::validateIPv4;
                     break;
                 case "ipv6":
-                    formatValidator = IPAddressValidator.IPV6;
+                    formatValidator = TypeUtils::validateIPv6;
                     break;
                 case "uri":
-                    formatValidator = URIValidator.INSTANCE;
+                    formatValidator = url -> {
+                        if (url == null || url.isEmpty()) {
+                            return false;
+                        }
+
+                        try {
+                            new URI(url);
+                            return true;
+                        } catch (URISyntaxException ignored) {
+                            return false;
+                        }
+                    };
                     break;
                 case "date-time":
-                    formatValidator = DateTimeValidator.INSTANCE;
+                    formatValidator = DateUtils::isDate;
                     break;
                 case "date":
-                    formatValidator = DateValidator.INSTANCE;
+                    formatValidator = DateUtils::isLocalDate;
                     break;
                 case "time":
-                    formatValidator = TimeValidator.INSTANCE;
+                    formatValidator = DateUtils::isLocalTime;
                     break;
                 case "duration":
-                    formatValidator = DurationValidator.INSTANCE;
+                    formatValidator = str -> {
+                        if (str == null || str.isEmpty()) {
+                            return false;
+                        }
+
+                        try {
+                            Duration.parse(str);
+                            return true;
+                        } catch (DateTimeParseException ignored) {
+                            return false;
+                        }
+                    };
                     break;
                 case "uuid":
-                    formatValidator = UUIDValidator.INSTANCE;
+                    formatValidator = TypeUtils::isUUID;
                     break;
                 default:
                     formatValidator = null;
@@ -200,5 +233,47 @@ final class StringSchema
     @Override
     public int hashCode() {
         return Objects.hash(maxLength, minLength, format, patternFormat, pattern, typed, formatValidator);
+    }
+
+    public static boolean isEmail(String email) {
+        if (email == null) {
+            return false;
+        }
+
+        if (email.endsWith(".")) { // check this first - it's cheap!
+            return false;
+        }
+
+        // Check the whole email address structure
+        Matcher emailMatcher = EMAIL_PATTERN.matcher(email);
+        if (!emailMatcher.matches()) {
+            return false;
+        }
+
+        String user = emailMatcher.group(1);
+        if (user.length() > 64) {
+            return false;
+        }
+
+        if (!USER_PATTERN.matcher(user).matches()) {
+            return false;
+        }
+
+        String domain = emailMatcher.group(2);
+        Matcher ipDomainMatcher = IP_DOMAIN_PATTERN.matcher(domain);
+
+        boolean validDomain;
+        if (ipDomainMatcher.matches()) {
+            String inetAddress = ipDomainMatcher.group(1);
+            validDomain = TypeUtils.validateIPv4(inetAddress) || TypeUtils.validateIPv6(inetAddress);
+        } else {
+            validDomain = DomainValidator.isValid(domain) || DomainValidator.isValidTld(domain);
+        }
+
+        if (!validDomain) {
+            return false;
+        }
+
+        return true;
     }
 }
