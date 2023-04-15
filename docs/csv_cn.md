@@ -122,7 +122,7 @@ CSVWriter writer = CSVWriter.of(file, StandardCharsets.UTF_8);
 
 // 写入数据
 Object[] row = ...;
-writer.writeRow(row);
+writer.writeLine(row);
 
 writer.close();
 ```
