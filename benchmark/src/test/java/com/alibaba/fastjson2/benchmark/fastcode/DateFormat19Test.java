@@ -63,10 +63,26 @@ public class DateFormat19Test {
         }
     }
 
+    public static void simpleParseX() throws Throwable {
+        int COUNT = 1_000_000;
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < COUNT; ++i) {
+                benchmark.simpleParseX(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("DateFormat19-javaTimeDateFormatter millis : " + millis);
+            // zulu8.58.0.13 :
+            // zulu11.52.13 :
+            // zulu17.38.21 :
+        }
+    }
+
     public static void main(String[] args) throws Throwable {
 //        fastjsonFormat();
-        formatYMDHMS19();
+//        formatYMDHMS19();
 //        fastjsonFormat2();
 //        javaTimeDateFormatter();
+        simpleParseX();
     }
 }

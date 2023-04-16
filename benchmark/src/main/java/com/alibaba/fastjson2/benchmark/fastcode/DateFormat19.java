@@ -23,12 +23,13 @@ public class DateFormat19 {
     static DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
     static Date date = new Date(1340424794000L);
     static FastDateFormat fastDateFormat = FastDateFormat.getInstance(pattern);
+    static String str = new SimpleDateFormat(pattern).format(date);
 
     static ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT_LOCAL = ThreadLocal.withInitial(
             () -> new SimpleDateFormat(pattern)
     );
 
-    @Benchmark
+//    @Benchmark
     public void javaTimeFormatter(Blackhole bh) throws Throwable {
         ZoneId zonedId = DateUtils.DEFAULT_ZONE_ID;
         Instant instant = date.toInstant();
@@ -37,20 +38,20 @@ public class DateFormat19 {
         bh.consume(str);
     }
 
-    @Benchmark
+//    @Benchmark
     public void commonsFastFormat(Blackhole bh) throws Throwable {
         String str = fastDateFormat.format(date);
         bh.consume(str);
     }
 
-    @Benchmark
+//    @Benchmark
     public void simpleDateFormat(Blackhole bh) throws Throwable {
         SimpleDateFormat format = new SimpleDateFormat(pattern);
         String str = format.format(date);
         bh.consume(str);
     }
 
-    @Benchmark
+//    @Benchmark
     public void simpleDateFormatThreadLocal(Blackhole bh) throws Throwable {
         SimpleDateFormat format = SIMPLE_DATE_FORMAT_LOCAL.get();
         String str = format.format(date);
@@ -62,7 +63,7 @@ public class DateFormat19 {
         bh.consume(DateUtils.format(date, pattern));
     }
 
-    @Benchmark
+//    @Benchmark
     public void formatYMDHMS19(Blackhole bh) throws Throwable {
         bh.consume(DateUtils.formatYMDHMS19(date));
     }
@@ -70,6 +71,26 @@ public class DateFormat19 {
 //    @Benchmark
     public void fastjsonFormat2(Blackhole bh) throws Throwable {
         bh.consume(DateUtils.format(date.getTime()));
+    }
+
+    @Benchmark
+    public void simpleFormat(Blackhole bh) throws Throwable {
+        bh.consume(new SimpleDateFormat(pattern).format(date));
+    }
+
+    @Benchmark
+    public void simpleFormatX(Blackhole bh) throws Throwable {
+        bh.consume(new SimpleDateFormatX(pattern).format(date));
+    }
+
+    @Benchmark
+    public void simpleParse(Blackhole bh) throws Throwable {
+        bh.consume(new SimpleDateFormat(pattern).parse(str));
+    }
+
+    @Benchmark
+    public void simpleParseX(Blackhole bh) throws Throwable {
+        bh.consume(new SimpleDateFormatX(pattern).parse(str));
     }
 
     public static void main(String[] args) throws RunnerException {
