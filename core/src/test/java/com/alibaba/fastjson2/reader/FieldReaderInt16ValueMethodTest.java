@@ -1,9 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONSchemaValidException;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +10,7 @@ public class FieldReaderInt16ValueMethodTest {
     @Test
     public void test() {
         Bean bean = new Bean();
-        ObjectReader<Bean> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean.class);
+        ObjectReader<Bean> objectReader = ObjectReaderCreator.INSTANCE.createObjectReader(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
         assertEquals(123, bean.value);
@@ -34,6 +31,10 @@ public class FieldReaderInt16ValueMethodTest {
                         0
                 ).value
         );
+
+        byte[] jsonbBytes = JSONB.toBytes(bean);
+        Bean bean1 = objectReader.readObject(JSONReader.ofJSONB(jsonbBytes));
+        assertEquals(bean.value, bean1.value);
     }
 
     public static class Bean {
