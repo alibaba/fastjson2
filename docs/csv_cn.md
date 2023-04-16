@@ -115,6 +115,23 @@ while (true) {
 }
 ```
 
+## 5.1 使用Lambda Consumer来读取JavaBean
+```java
+File file = ...;
+
+// 构造CSVReader传入对象类型
+SVReader parser = CSVReader.of(file, Bean.clss);
+
+// 根据需要，是否要读取Header第一行
+boolean readHeader = true;
+parser.readLineObjectAll(
+        readHeader,
+        e -> {
+            处理数据 ...
+        }
+);
+```
+
 # 6. 写入CSV格式文件
 ```java
 File file = ...;
