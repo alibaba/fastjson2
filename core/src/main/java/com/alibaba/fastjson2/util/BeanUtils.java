@@ -39,6 +39,26 @@ public abstract class BeanUtils {
 
     public static final String SUPER = "$super$";
 
+    static final long[] IGNORE_CLASS_HASH_CODES = {
+            -9214723784238596577L,
+            -9030616758866828325L,
+            -8335274122997354104L,
+            -6963030519018899258L,
+            -4863137578837233966L,
+            -3653547262287832698L,
+            -2819277587813726773L,
+            -2291619803571459675L,
+            -1811306045128064037L,
+            -864440709753525476L,
+            8731803887940231L,
+            1616814008855344660L,
+            2164749833121980361L,
+            3724195282986200606L,
+            4882459834864833642L,
+            7981148566008458638L,
+            8344106065386396833L
+    };
+
     public static String[] getRecordFieldNames(Class<?> recordType) {
         if (JVM_VERSION < 14) {
             return new String[0];
@@ -1041,30 +1061,12 @@ public abstract class BeanUtils {
             return true;
         }
 
-        String name = objectClass.getName();
-        switch (name) {
-            case "javassist.CtNewClass":
-            case "javassist.CtNewNestedClass":
-            case "javassist.CtClass":
-            case "javassist.CtConstructor":
-            case "javassist.CtMethod":
-            case "org.apache.ibatis.javassist.CtNewClass":
-            case "org.apache.ibatis.javassist.CtClass":
-            case "org.apache.ibatis.javassist.CtConstructor":
-            case "org.apache.ibatis.javassist.CtMethod":
-            case "com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet":
-            case "com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl":
-            case "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl":
-            case "org.apache.wicket.util.io.DeferredFileOutputStream":
-            case "org.apache.xalan.xsltc.trax.TemplatesImpl":
-            case "org.apache.xalan.xsltc.runtime.AbstractTranslet":
-            case "org.apache.xalan.xsltc.trax.TransformerFactoryImpl":
-            case "org.apache.commons.collections.functors.ChainedTransformer":
-                return true;
-            default:
-                break;
-        }
-        return false;
+        return Arrays.binarySearch(
+                IGNORE_CLASS_HASH_CODES,
+                Fnv.hashCode64(
+                        objectClass.getName()
+                )
+        ) >= 0;
     }
 
     public static boolean isRecord(Class objectClass) {

@@ -13,6 +13,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -283,5 +284,37 @@ public class BeanUtilsTest {
         jsonArray.add(clazz);
         String str = jsonArray.toString();
         assertEquals("[{}]", str);
+    }
+
+    @Test
+    public void buildIgnores() {
+        String[] names = new String[] {
+                "javassist.CtNewClass",
+                "javassist.CtNewNestedClass",
+                "javassist.CtClass",
+                "javassist.CtConstructor",
+                "javassist.CtMethod",
+                "org.apache.ibatis.javassist.CtNewClass",
+                "org.apache.ibatis.javassist.CtClass",
+                "org.apache.ibatis.javassist.CtConstructor",
+                "org.apache.ibatis.javassist.CtMethod",
+                "com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet",
+                "com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl",
+                "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl",
+                "org.apache.wicket.util.io.DeferredFileOutputStream",
+                "org.apache.xalan.xsltc.trax.TemplatesImpl",
+                "org.apache.xalan.xsltc.runtime.AbstractTranslet",
+                "org.apache.xalan.xsltc.trax.TransformerFactoryImpl",
+                "org.apache.commons.collections.functors.ChainedTransformer"
+        };
+
+        long[] hashCodes = new long[names.length];
+        for (int i = 0; i < names.length; i++) {
+            hashCodes[i] = Fnv.hashCode64(names[i]);
+        }
+        Arrays.sort(hashCodes);
+        for (int i = 0; i < hashCodes.length; i++) {
+            // System.out.println(hashCodes[i] + "L,");
+        }
     }
 }
