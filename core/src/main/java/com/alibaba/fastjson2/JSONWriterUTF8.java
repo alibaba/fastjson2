@@ -564,7 +564,7 @@ class JSONWriterUTF8
         writeStringEscaped(value);
     }
 
-    public void writeString(final char[] chars) {
+    public final void writeString(final char[] chars) {
         if (chars == null) {
             if (isEnabled(Feature.NullAsDefaultValue.mask | Feature.WriteNullStringAsEmpty.mask)) {
                 writeString("");
@@ -729,7 +729,7 @@ class JSONWriterUTF8
         bytes[off++] = (byte) quote;
     }
 
-    public void writeString(final char[] chars, int stroff, int strlen) {
+    public final void writeString(final char[] chars, int stroff, int strlen) {
         if (chars == null) {
             if (isEnabled(Feature.NullAsDefaultValue.mask | Feature.WriteNullStringAsEmpty.mask)) {
                 writeString("");
@@ -896,7 +896,7 @@ class JSONWriterUTF8
         bytes[off++] = (byte) quote;
     }
 
-    protected void writeStringEscaped(byte[] value) {
+    protected final void writeStringEscaped(byte[] value) {
         final boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
         bytes[off++] = (byte) quote;
         for (int i = 0; i < value.length; ++i) {
@@ -1014,7 +1014,7 @@ class JSONWriterUTF8
         bytes[off++] = (byte) quote;
     }
 
-    private void writeStringEscapedRest(
+    private final void writeStringEscapedRest(
             char[] chars,
             int end,
             boolean browserSecure,
@@ -2566,7 +2566,7 @@ class JSONWriterUTF8
     }
 
     @Override
-    public void writeDecimal(BigDecimal value, long features, DecimalFormat format) {
+    public final void writeDecimal(BigDecimal value, long features, DecimalFormat format) {
         if (value == null) {
             writeNumberNull();
             return;
@@ -2600,10 +2600,15 @@ class JSONWriterUTF8
                 int scale = value.scale();
                 off += getDecimalChars(unscaleValue, scale, bytes, off);
             } else {
-                writeRaw(value.toPlainString());
+                String str = value.toPlainString();
+                str.getBytes(0, str.length(), bytes, off);
+                off += str.length();
             }
         } else {
-            writeRaw(value.toString());
+            String str = value.toString();
+            int strlen = str.length();
+            str.getBytes(0, strlen, bytes, off);
+            off += strlen;
         }
 
         if (browserCompatible) {

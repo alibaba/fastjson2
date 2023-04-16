@@ -42,10 +42,6 @@ final class JSONWriterJSONB
         this.bytes = JSONFactory.allocateByteArray(cachedIndex);
     }
 
-    public void config(Feature... features) {
-        context.config(features);
-    }
-
     @Override
     public void close() {
         JSONFactory.releaseByteArray(cachedIndex, bytes);

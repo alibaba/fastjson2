@@ -8,7 +8,7 @@ import java.util.Arrays;
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
 import static com.alibaba.fastjson2.JSONWriter.Feature.EscapeNoneAscii;
 
-public class JSONWriterUTF16JDK8UF
+public final class JSONWriterUTF16JDK8UF
         extends JSONWriterUTF16 {
     JSONWriterUTF16JDK8UF(Context ctx) {
         super(ctx);
