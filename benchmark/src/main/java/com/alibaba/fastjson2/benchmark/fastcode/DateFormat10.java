@@ -9,6 +9,7 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -18,22 +19,43 @@ public class DateFormat10 {
     static final String pattern = "yyyy-MM-dd";
     static DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
     static Date date = new Date(1673323068000L);
+    static final String str = "2023-01-10";
 
-    @Benchmark
+//    @Benchmark
     public void javaTimeDateFormatter(Blackhole bh) throws Throwable {
         LocalDateTime ldt = date.toInstant().atZone(DateUtils.DEFAULT_ZONE_ID).toLocalDateTime();
         String str = formatter.format(ldt);
         bh.consume(str);
     }
 
-    @Benchmark
+//    @Benchmark
     public void fastjson_format(Blackhole bh) throws Throwable {
         bh.consume(DateUtils.format(date, pattern));
     }
 
-    @Benchmark
+//    @Benchmark
     public void fastjson_formatYMD10(Blackhole bh) throws Throwable {
         bh.consume(DateUtils.formatYMD10(date.getTime(), DateUtils.DEFAULT_ZONE_ID));
+    }
+
+    @Benchmark
+    public void simpleFormat(Blackhole bh) throws Throwable {
+        bh.consume(new SimpleDateFormat(pattern).format(date));
+    }
+
+    @Benchmark
+    public void simpleFormatX(Blackhole bh) throws Throwable {
+        bh.consume(new SimpleDateFormatX(pattern).format(date));
+    }
+
+    @Benchmark
+    public void simpleParse(Blackhole bh) throws Throwable {
+        bh.consume(new SimpleDateFormat(pattern).parse(str));
+    }
+
+    @Benchmark
+    public void simpleParseX(Blackhole bh) throws Throwable {
+        bh.consume(new SimpleDateFormatX(pattern).parse(str));
     }
 
     public static void main(String[] args) throws RunnerException {

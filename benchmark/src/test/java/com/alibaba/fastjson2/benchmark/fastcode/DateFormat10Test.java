@@ -35,10 +35,73 @@ public class DateFormat10Test {
         }
     }
 
+    public static void simpleFormat() throws Throwable {
+        final int COUNT = 1_000_000;
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < COUNT; ++i) {
+                benchmark.simpleFormat(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("DateFormat10-simpleFormat millis : " + millis);
+            // zulu8.58.0.13 : 586
+            // zulu11.52.13 :
+            // zulu17.38.21 :
+        }
+    }
+
+    public static void simpleFormatX() throws Throwable {
+        final int COUNT = 1_000_000;
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < COUNT; ++i) {
+                benchmark.simpleFormatX(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("DateFormat10-simpleFormatX millis : " + millis);
+            // zulu8.58.0.13 : 444
+            // zulu11.52.13 :
+            // zulu17.38.21 :
+        }
+    }
+
+    public static void simpleParse() throws Throwable {
+        final int COUNT = 1_000_000;
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < COUNT; ++i) {
+                benchmark.simpleParse(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("DateFormat10-simpleParse millis : " + millis);
+            // zulu8.58.0.13 : 651
+            // zulu11.52.13 :
+            // zulu17.38.21 :
+        }
+    }
+
+    public static void simpleParseX() throws Throwable {
+        final int COUNT = 1_000_000;
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < COUNT; ++i) {
+                benchmark.simpleParseX(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("DateFormat10-simpleParseX millis : " + millis);
+            // zulu8.58.0.13 : 368
+            // zulu11.52.13 :
+            // zulu17.38.21 :
+        }
+    }
+
     public static void main(String[] args) throws Throwable {
 //        fastjson_format();
-        fastjson_formatYMD10();
+//        fastjson_formatYMD10();
 //        fastjsonFormat2();
-//        javaTimeDateFormatter();
+//        simpleFormat();
+//        simpleFormatX();
+        simpleParse();
+//        simpleParseX();
     }
 }
