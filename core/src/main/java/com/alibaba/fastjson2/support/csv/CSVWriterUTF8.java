@@ -257,20 +257,6 @@ final class CSVWriterUTF8
         bytes[off++] = '"';
     }
 
-    public void writeDecimal(BigDecimal value) {
-        if (value == null) {
-            return;
-        }
-
-        int minCapacity = off + value.precision() + 2;
-        if (minCapacity - this.bytes.length > 0) {
-            flush();
-        }
-
-        int size = IOUtils.getDecimalChars(value, bytes, off);
-        off += size;
-    }
-
     public void writeDecimal(long unscaledVal, int scale) {
         if (scale == 0) {
             writeInt64(unscaledVal);

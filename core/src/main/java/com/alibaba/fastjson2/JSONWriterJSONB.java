@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.time.*;
 import java.util.*;
 
@@ -2158,12 +2159,7 @@ final class JSONWriterJSONB
     }
 
     @Override
-    public void writeDecimal(BigDecimal value, long features) {
-        writeDecimal(value);
-    }
-
-    @Override
-    public void writeDecimal(BigDecimal value) {
+    public void writeDecimal(BigDecimal value, long features, DecimalFormat format) {
         if (value == null) {
             writeNull();
             return;

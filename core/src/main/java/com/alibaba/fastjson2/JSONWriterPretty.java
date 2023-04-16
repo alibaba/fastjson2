@@ -6,6 +6,7 @@ import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -53,8 +54,8 @@ final class JSONWriterPretty
     }
 
     @Override
-    public void writeDecimal(BigDecimal value) {
-        jsonWriter.writeDecimal(value);
+    public void writeDecimal(BigDecimal value, long features, DecimalFormat format) {
+        jsonWriter.writeDecimal(value, features, format);
     }
 
     @Override

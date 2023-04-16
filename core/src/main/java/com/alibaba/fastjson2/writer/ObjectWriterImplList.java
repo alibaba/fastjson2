@@ -318,7 +318,7 @@ final class ObjectWriterImplList
                 continue;
             } else if (itemClass == BigDecimal.class) {
                 if ((provider.userDefineMask & ObjectWriterProvider.TYPE_DECIMAL_MASK) == 0) {
-                    jsonWriter.writeDecimal((BigDecimal) item);
+                    jsonWriter.writeDecimal((BigDecimal) item, features, null);
                 } else {
                     ObjectWriter valueWriter = provider.getObjectWriter(itemClass, itemClass, false);
                     valueWriter.write(jsonWriter, item, i, BigDecimal.class, features);

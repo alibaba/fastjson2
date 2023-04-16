@@ -28,7 +28,7 @@ final class ObjectWriterImplBigDecimal
         } else {
             decimal = (BigDecimal) object;
         }
-        jsonWriter.writeDecimal(decimal);
+        jsonWriter.writeDecimal(decimal, features, format);
     }
 
     @Override
@@ -40,13 +40,7 @@ final class ObjectWriterImplBigDecimal
             decimal = (BigDecimal) object;
         }
 
-        if (format != null) {
-            String str = format.format(object);
-            jsonWriter.writeRaw(str);
-            return;
-        }
-
-        jsonWriter.writeDecimal(decimal, features);
+        jsonWriter.writeDecimal(decimal, features, format);
     }
 
     public Function getFunction() {

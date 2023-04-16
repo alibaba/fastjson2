@@ -1451,12 +1451,9 @@ public class ObjectWriterCreatorASM
                     mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeFloat", "(F)V", false);
                 } else {
                     long features = fieldWriter.features;
-                    if (fieldWriter.features == 0) {
-                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeDecimal", "(Ljava/math/BigDecimal;)V", false);
-                    } else {
-                        mw.visitLdcInsn(features);
-                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeDecimal", "(Ljava/math/BigDecimal;J)V", false);
-                    }
+                    mw.visitLdcInsn(features);
+                    mw.visitInsn(Opcodes.ACONST_NULL);
+                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeDecimal", "(Ljava/math/BigDecimal;JLjava/text/DecimalFormat;)V", false);
                 }
             }
         } else {
@@ -1912,18 +1909,15 @@ public class ObjectWriterCreatorASM
         if (fieldClass == BigDecimal.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitLdcInsn(features);
             if (fieldWriter.decimalFormat != null) {
-                mw.visitLdcInsn(features);
                 mw.visitVarInsn(Opcodes.ALOAD, THIS);
                 mw.visitFieldInsn(Opcodes.GETFIELD, mwc.classNameType, fieldWriter(i), DESC_FIELD_WRITER);
                 mw.visitFieldInsn(Opcodes.GETFIELD, TYPE_FIELD_WRITER, "decimalFormat", "Ljava/text/DecimalFormat;");
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeDecimal", "(Ljava/math/BigDecimal;JLjava/text/DecimalFormat;)V", false);
-            } else if (features == 0) {
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeDecimal", "(Ljava/math/BigDecimal;)V", false);
             } else {
-                mw.visitLdcInsn(features);
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeDecimal", "(Ljava/math/BigDecimal;J)V", false);
+                mw.visitInsn(Opcodes.ACONST_NULL);
             }
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeDecimal", "(Ljava/math/BigDecimal;JLjava/text/DecimalFormat;)V", false);
         } else if (fieldClass == BigInteger.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
