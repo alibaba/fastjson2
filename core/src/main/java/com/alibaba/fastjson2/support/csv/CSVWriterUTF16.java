@@ -265,6 +265,10 @@ final class CSVWriterUTF16
             flush();
         }
 
+        if (unscaledVal == Long.MIN_VALUE) {
+            writeDecimal(BigDecimal.valueOf(unscaledVal, scale));
+            return;
+        }
         int size = IOUtils.getDecimalChars(unscaledVal, scale, chars, off);
         off += size;
     }
