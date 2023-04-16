@@ -1322,6 +1322,10 @@ public class ObjectWriterBaseModule
                 return ObjectWriterImplStringArray.INSTANCE;
             }
 
+            if (BigDecimal[].class == clazz) {
+                return ObjectWriterImpDecimalArray.INSTANCE;
+            }
+
             if (Object[].class.isAssignableFrom(clazz)) {
                 if (clazz == Object[].class) {
                     return ObjectWriterArray.INSTANCE;

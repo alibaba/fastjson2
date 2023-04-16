@@ -94,7 +94,7 @@ public abstract class JSONWriter
         return symbolTable;
     }
 
-    public void config(Feature... features) {
+    public final void config(Feature... features) {
         context.config(features);
     }
 
@@ -780,7 +780,7 @@ public abstract class JSONWriter
         throw new JSONException("UnsupportedOperation");
     }
 
-    public void writeRaw(char[] chars) {
+    public final void writeRaw(char[] chars) {
         writeRaw(chars, 0, chars.length);
     }
 
@@ -821,7 +821,7 @@ public abstract class JSONWriter
         writeString(name);
     }
 
-    public void writeName(long name) {
+    public final void writeName(long name) {
         if (startObject) {
             startObject = false;
         } else {
@@ -835,7 +835,7 @@ public abstract class JSONWriter
         }
     }
 
-    public void writeName(int name) {
+    public final void writeName(int name) {
         if (startObject) {
             startObject = false;
         } else {
@@ -1100,8 +1100,7 @@ public abstract class JSONWriter
         writeRaw(raw);
     }
 
-    public void writeNumberNull() {
-        String raw;
+    public final void writeNumberNull() {
         if ((this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullNumberAsZero.mask)) != 0) {
             writeInt32(0);
         } else {
@@ -1109,7 +1108,7 @@ public abstract class JSONWriter
         }
     }
 
-    public void writeBooleanNull() {
+    public final void writeBooleanNull() {
         if ((this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullBooleanAsFalse.mask)) != 0) {
             writeBool(false);
         } else {
@@ -1121,7 +1120,7 @@ public abstract class JSONWriter
         writeDecimal(value, 0, null);
     }
 
-    public void writeDecimal(BigDecimal value, long features) {
+    public final void writeDecimal(BigDecimal value, long features) {
         writeDecimal(value, features, null);
     }
 
@@ -1142,7 +1141,7 @@ public abstract class JSONWriter
         }
     }
 
-    public void writeBigInt(BigInteger value) {
+    public final void writeBigInt(BigInteger value) {
         writeBigInt(value, 0);
     }
 
@@ -1150,7 +1149,7 @@ public abstract class JSONWriter
 
     public abstract void writeUUID(UUID value);
 
-    public void checkAndWriteTypeName(Object object, Class fieldClass) {
+    public final void checkAndWriteTypeName(Object object, Class fieldClass) {
         long features = context.features;
         if ((features & Feature.WriteClassName.mask) == 0) {
             return;
@@ -1186,7 +1185,7 @@ public abstract class JSONWriter
         throw new JSONException("UnsupportedOperation");
     }
 
-    public void writeString(Reader reader) {
+    public final void writeString(Reader reader) {
         writeRaw(quote);
 
         try {

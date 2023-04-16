@@ -1134,7 +1134,7 @@ class JSONWriterUTF16
     }
 
     @Override
-    public void writeDecimal(BigDecimal value, long features, DecimalFormat format) {
+    public final void writeDecimal(BigDecimal value, long features, DecimalFormat format) {
         if (value == null) {
             writeNumberNull();
             return;
@@ -1168,10 +1168,15 @@ class JSONWriterUTF16
                 int scale = value.scale();
                 off += getDecimalChars(unscaleValue, scale, chars, off);
             } else {
-                writeRaw(value.toPlainString());
+                String str = value.toPlainString();
+                str.getChars(0, str.length(), chars, off);
+                off += str.length();
             }
         } else {
-            writeRaw(value.toString());
+            String str = value.toString();
+            int strlen = str.length();
+            str.getChars(0, strlen, chars, off);
+            off += strlen;
         }
 
         if (browserCompatible) {
@@ -2711,7 +2716,7 @@ class JSONWriterUTF16
         chars[off++] = ']';
     }
 
-    public void writeString(final char[] chars) {
+    public final void writeString(final char[] chars) {
         if (chars == null) {
             writeStringNull();
             return;
@@ -2759,7 +2764,7 @@ class JSONWriterUTF16
         writeStringEscape(chars);
     }
 
-    public void writeString(char[] chars, int off, int len) {
+    public final void writeString(char[] chars, int off, int len) {
         if (chars == null) {
             writeStringNull();
             return;
