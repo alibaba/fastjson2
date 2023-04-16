@@ -533,7 +533,9 @@ public class ObjectReaderAdapter<T>
 
     protected void initStringFieldAsEmpty(Object object) {
         for (FieldReader fieldReader : fieldReaders) {
-            fieldReader.accept(object, "");
+            if (fieldReader.fieldClass == String.class) {
+                fieldReader.accept(object, "");
+            }
         }
     }
 }
