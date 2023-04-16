@@ -286,14 +286,16 @@ public class JSONBDump {
                 } else {
                     decimal = new BigDecimal(unscaledValue, scale);
                 }
-                jsonWriter.writeDecimal(decimal);
+                jsonWriter.writeDecimal(decimal, 0, null);
                 return;
             }
             case BC_DECIMAL_LONG: {
                 jsonWriter.writeDecimal(
                         BigDecimal.valueOf(
                                 readInt64Value()
-                        )
+                        ),
+                        0,
+                        null
                 );
                 return;
             }

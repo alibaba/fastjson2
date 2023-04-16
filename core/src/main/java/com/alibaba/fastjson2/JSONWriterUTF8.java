@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -19,6 +20,7 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.NotWriteDefaultValue;
 import static com.alibaba.fastjson2.util.IOUtils.*;
+import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
 
 class JSONWriterUTF8
         extends JSONWriter {
@@ -2564,22 +2566,48 @@ class JSONWriterUTF8
     }
 
     @Override
-    public final void writeDecimal(BigDecimal value) {
+    public void writeDecimal(BigDecimal value, long features, DecimalFormat format) {
         if (value == null) {
-            writeNull();
+            writeNumberNull();
             return;
         }
 
-        ensureCapacity(off + value.precision() + 2);
-        if ((context.features & Feature.BrowserCompatible.mask) != 0
-                && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0)) {
-            bytes[off++] = '"';
-            int size = getDecimalChars(value, bytes, off);
-            off += size;
-            bytes[off++] = '"';
+        if (format != null) {
+            String str = format.format(value);
+            writeRaw(str);
+            return;
+        }
+
+        features |= context.features;
+
+        int precision = value.precision();
+        boolean browserCompatible = (features & BrowserCompatible.mask) != 0
+                && precision >= 16
+                && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0);
+
+        if (browserCompatible) {
+            write0('"');
+        }
+        if ((features & Feature.WriteBigDecimalAsPlain.mask) != 0) {
+            int minCapacity = off + precision + 2;
+            ensureCapacity(minCapacity);
+
+            long unscaleValue;
+            if (precision < 19
+                    && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1
+                    && (unscaleValue = UnsafeUtils.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET)) != Long.MIN_VALUE
+            ) {
+                int scale = value.scale();
+                off += getDecimalChars(unscaleValue, scale, bytes, off);
+            } else {
+                writeRaw(value.toPlainString());
+            }
         } else {
-            int size = getDecimalChars(value, bytes, off);
-            off += size;
+            writeRaw(value.toString());
+        }
+
+        if (browserCompatible) {
+            write0('"');
         }
     }
 
@@ -2699,7 +2727,7 @@ class JSONWriterUTF8
             }
 
             if (valueClass == BigDecimal.class) {
-                writeDecimal((BigDecimal) value);
+                writeDecimal((BigDecimal) value, 0, null);
                 continue;
             }
 
@@ -2817,7 +2845,7 @@ class JSONWriterUTF8
             }
 
             if (valueClass == BigDecimal.class) {
-                writeDecimal((BigDecimal) value);
+                writeDecimal((BigDecimal) value, 0, null);
                 continue;
             }
 

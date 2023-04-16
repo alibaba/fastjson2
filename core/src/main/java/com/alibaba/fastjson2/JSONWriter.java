@@ -1117,48 +1117,15 @@ public abstract class JSONWriter
         }
     }
 
-    public abstract void writeDecimal(BigDecimal value);
-
-    public void writeDecimal(BigDecimal value, long features, DecimalFormat format) {
-        if (value == null) {
-            writeNumberNull();
-            return;
-        }
-
-        if (format != null) {
-            String str = format.format(value);
-            writeRaw(str);
-            return;
-        }
-
-        writeDecimal(value, features);
+    public final void writeDecimal(BigDecimal value) {
+        writeDecimal(value, 0, null);
     }
 
     public void writeDecimal(BigDecimal value, long features) {
-        if (value == null) {
-            writeNumberNull();
-            return;
-        }
-
-        features |= context.features;
-
-        if ((features & Feature.WriteBigDecimalAsPlain.mask) != 0) {
-            String str = value.toPlainString();
-            writeRaw(str);
-            return;
-        }
-
-        String str = value.toString();
-
-        if ((features & Feature.BrowserCompatible.mask) != 0
-                && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0)) {
-            write0('"');
-            writeRaw(str);
-            write0('"');
-        } else {
-            writeRaw(str);
-        }
+        writeDecimal(value, features, null);
     }
+
+    public abstract void writeDecimal(BigDecimal value, long features, DecimalFormat format);
 
     public void writeEnum(Enum e) {
         if (e == null) {

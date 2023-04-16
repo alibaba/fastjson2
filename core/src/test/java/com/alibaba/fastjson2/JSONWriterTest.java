@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -1135,6 +1136,28 @@ public class JSONWriterTest {
         Bean4 o = parseObject(jsonbBytes, Bean4.class, JSONReader.Feature.SupportAutoType);
         assertEquals(a.a1234567890id, o.a1234567890id);
         assertEquals(a1.a1234567890id, o.value.a1234567890id);
+    }
+
+    @Test
+    public void writeBigDecimalAsPlain() {
+        BigDecimal[] decimals = new BigDecimal[] {
+                new BigDecimal("1"),
+                new BigDecimal("1.1"),
+                new BigDecimal("-1.2"),
+                new BigDecimal("1000"),
+                new BigDecimal("-1000"),
+                new BigDecimal("9007199254740991.12345")
+        };
+        for (BigDecimal decimal : decimals) {
+            try (JSONWriter jsonWriter = JSONWriter.ofUTF8(WriteBigDecimalAsPlain)) {
+                jsonWriter.writeDecimal(decimal);
+                assertEquals(decimal.toPlainString(), jsonWriter.toString());
+            }
+            try (JSONWriter jsonWriter = JSONWriter.ofUTF16(WriteBigDecimalAsPlain)) {
+                jsonWriter.writeDecimal(decimal);
+                assertEquals(decimal.toPlainString(), jsonWriter.toString());
+            }
+        }
     }
 
     @Test

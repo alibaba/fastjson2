@@ -4,10 +4,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.util.Arrays;
-
-import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
 
 public class IOUtils {
     public static final byte[] digits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
@@ -221,38 +218,6 @@ public class IOUtils {
         if (sign != 0) {
             buf[--charPos] = sign;
         }
-    }
-
-    public static int getDecimalChars(BigDecimal value, byte[] buf, int off) {
-        int precision = value.precision();
-        if (precision < 19 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
-            long unscaleValue = UnsafeUtils.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET);
-            if (unscaleValue != Long.MIN_VALUE) {
-                int scale = value.scale();
-                return getDecimalChars(unscaleValue, scale, buf, off);
-            }
-        }
-
-        String str = value.toString();
-        final int strlen = str.length();
-        str.getBytes(0, strlen, buf, off);
-        return strlen;
-    }
-
-    public static int getDecimalChars(BigDecimal value, char[] buf, int off) {
-        int precision = value.precision();
-        if (precision < 19 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
-            long unscaleValue = UnsafeUtils.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET);
-            if (unscaleValue != Long.MIN_VALUE) {
-                int scale = value.scale();
-                return getDecimalChars(unscaleValue, scale, buf, off);
-            }
-        }
-
-        String str = value.toString();
-        final int strlen = str.length();
-        str.getChars(0, strlen, buf, off);
-        return strlen;
     }
 
     public static int getDecimalChars(long unscaledVal, int scale, byte[] buf, int off) {

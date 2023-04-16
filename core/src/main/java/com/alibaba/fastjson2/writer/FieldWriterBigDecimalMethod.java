@@ -32,11 +32,7 @@ final class FieldWriterBigDecimalMethod<T>
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
         BigDecimal value = (BigDecimal) getFieldValue(object);
-        if (features != 0 || decimalFormat != null) {
-            jsonWriter.writeDecimal(value, features, decimalFormat);
-        } else {
-            jsonWriter.writeDecimal(value);
-        }
+        jsonWriter.writeDecimal(value, features, decimalFormat);
     }
 
     @Override
@@ -59,11 +55,7 @@ final class FieldWriterBigDecimalMethod<T>
         }
 
         writeFieldName(jsonWriter);
-        if (features != 0 || decimalFormat != null) {
-            jsonWriter.writeDecimal(value, features, decimalFormat);
-        } else {
-            jsonWriter.writeDecimal(value);
-        }
+        jsonWriter.writeDecimal(value, features, decimalFormat);
         return true;
     }
 }

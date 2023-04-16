@@ -336,11 +336,15 @@ public abstract class CSVWriter
 
     public abstract void writeString(byte[] utf8);
 
-    public abstract void writeDecimal(BigDecimal value);
+    public void writeDecimal(BigDecimal value) {
+        if (value == null) {
+            return;
+        }
+
+        writeRaw(value.toString());
+    }
 
     public abstract void writeDecimal(long unscaledVal, int scale);
-
-//    protected abstract void writeRaw(byte[] strBytes);
 
     protected abstract void writeRaw(String str);
 
