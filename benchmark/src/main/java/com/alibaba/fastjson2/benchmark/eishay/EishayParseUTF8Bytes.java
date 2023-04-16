@@ -45,7 +45,7 @@ public class EishayParseUTF8Bytes {
         bh.consume(JSON.parseObject(utf8Bytes, MediaContent.class));
     }
 
-    @Benchmark
+//    @Benchmark
     public void dsljson(Blackhole bh) throws IOException {
         bh.consume(dslJson.deserialize(MediaContent.class, utf8Bytes, utf8Bytes.length));
     }
