@@ -40,5 +40,6 @@ public class ModulesTest {
         ObjectWriterModule module = new ObjectWriterModule() {};
         assertNull(module.getAnnotationProcessor());
         assertNull(module.getObjectWriter(null, null));
+        assertNull(module.getProvider());
     }
 }

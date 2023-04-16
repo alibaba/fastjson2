@@ -40,22 +40,6 @@ public abstract class FieldReader<T>
     Class itemClass;
     volatile ObjectReader itemReader;
 
-    public FieldReader(String fieldName, Type fieldType) {
-        this(
-                fieldName,
-                fieldType,
-                TypeUtils.getClass(fieldType),
-                0,
-                0L,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-    }
-
     public FieldReader(
             String fieldName,
             Type fieldType,
