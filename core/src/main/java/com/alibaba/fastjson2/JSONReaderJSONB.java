@@ -18,7 +18,6 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.DateUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
-import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 class JSONReaderJSONB
         extends JSONReader {
@@ -4820,14 +4819,14 @@ class JSONReaderJSONB
 
                 return new UUID(msb, lsb);
             case BC_STR_ASCII_FIX_32: {
-                long msb1 = parse4Nibbles(bytes, offset + 0);
-                long msb2 = parse4Nibbles(bytes, offset + 4);
-                long msb3 = parse4Nibbles(bytes, offset + 8);
-                long msb4 = parse4Nibbles(bytes, offset + 12);
-                long lsb1 = parse4Nibbles(bytes, offset + 16);
-                long lsb2 = parse4Nibbles(bytes, offset + 20);
-                long lsb3 = parse4Nibbles(bytes, offset + 24);
-                long lsb4 = parse4Nibbles(bytes, offset + 28);
+                long msb1 = TypeUtils.uuidNibbles(bytes, offset + 0);
+                long msb2 = TypeUtils.uuidNibbles(bytes, offset + 4);
+                long msb3 = TypeUtils.uuidNibbles(bytes, offset + 8);
+                long msb4 = TypeUtils.uuidNibbles(bytes, offset + 12);
+                long lsb1 = TypeUtils.uuidNibbles(bytes, offset + 16);
+                long lsb2 = TypeUtils.uuidNibbles(bytes, offset + 20);
+                long lsb3 = TypeUtils.uuidNibbles(bytes, offset + 24);
+                long lsb4 = TypeUtils.uuidNibbles(bytes, offset + 28);
                 if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
                     offset += 32;
                     return new UUID(
@@ -4842,14 +4841,14 @@ class JSONReaderJSONB
                 byte ch3 = bytes[offset + 18];
                 byte ch4 = bytes[offset + 23];
                 if (ch1 == '-' && ch2 == '-' && ch3 == '-' && ch4 == '-') {
-                    long msb1 = parse4Nibbles(bytes, offset + 0);
-                    long msb2 = parse4Nibbles(bytes, offset + 4);
-                    long msb3 = parse4Nibbles(bytes, offset + 9);
-                    long msb4 = parse4Nibbles(bytes, offset + 14);
-                    long lsb1 = parse4Nibbles(bytes, offset + 19);
-                    long lsb2 = parse4Nibbles(bytes, offset + 24);
-                    long lsb3 = parse4Nibbles(bytes, offset + 28);
-                    long lsb4 = parse4Nibbles(bytes, offset + 32);
+                    long msb1 = TypeUtils.uuidNibbles(bytes, offset + 0);
+                    long msb2 = TypeUtils.uuidNibbles(bytes, offset + 4);
+                    long msb3 = TypeUtils.uuidNibbles(bytes, offset + 9);
+                    long msb4 = TypeUtils.uuidNibbles(bytes, offset + 14);
+                    long lsb1 = TypeUtils.uuidNibbles(bytes, offset + 19);
+                    long lsb2 = TypeUtils.uuidNibbles(bytes, offset + 24);
+                    long lsb3 = TypeUtils.uuidNibbles(bytes, offset + 28);
+                    long lsb4 = TypeUtils.uuidNibbles(bytes, offset + 32);
                     if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
                         offset += 36;
                         return new UUID(
@@ -4863,14 +4862,14 @@ class JSONReaderJSONB
             case BC_STR_UTF8: {
                 int strlen = readLength();
                 if (strlen == 32) {
-                    long msb1 = parse4Nibbles(bytes, offset + 0);
-                    long msb2 = parse4Nibbles(bytes, offset + 4);
-                    long msb3 = parse4Nibbles(bytes, offset + 8);
-                    long msb4 = parse4Nibbles(bytes, offset + 12);
-                    long lsb1 = parse4Nibbles(bytes, offset + 16);
-                    long lsb2 = parse4Nibbles(bytes, offset + 20);
-                    long lsb3 = parse4Nibbles(bytes, offset + 24);
-                    long lsb4 = parse4Nibbles(bytes, offset + 28);
+                    long msb1 = TypeUtils.uuidNibbles(bytes, offset + 0);
+                    long msb2 = TypeUtils.uuidNibbles(bytes, offset + 4);
+                    long msb3 = TypeUtils.uuidNibbles(bytes, offset + 8);
+                    long msb4 = TypeUtils.uuidNibbles(bytes, offset + 12);
+                    long lsb1 = TypeUtils.uuidNibbles(bytes, offset + 16);
+                    long lsb2 = TypeUtils.uuidNibbles(bytes, offset + 20);
+                    long lsb3 = TypeUtils.uuidNibbles(bytes, offset + 24);
+                    long lsb4 = TypeUtils.uuidNibbles(bytes, offset + 28);
                     if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
                         offset += 32;
                         return new UUID(
@@ -4883,14 +4882,14 @@ class JSONReaderJSONB
                     byte ch3 = bytes[offset + 18];
                     byte ch4 = bytes[offset + 23];
                     if (ch1 == '-' && ch2 == '-' && ch3 == '-' && ch4 == '-') {
-                        long msb1 = parse4Nibbles(bytes, offset + 0);
-                        long msb2 = parse4Nibbles(bytes, offset + 4);
-                        long msb3 = parse4Nibbles(bytes, offset + 9);
-                        long msb4 = parse4Nibbles(bytes, offset + 14);
-                        long lsb1 = parse4Nibbles(bytes, offset + 19);
-                        long lsb2 = parse4Nibbles(bytes, offset + 24);
-                        long lsb3 = parse4Nibbles(bytes, offset + 28);
-                        long lsb4 = parse4Nibbles(bytes, offset + 32);
+                        long msb1 = TypeUtils.uuidNibbles(bytes, offset + 0);
+                        long msb2 = TypeUtils.uuidNibbles(bytes, offset + 4);
+                        long msb3 = TypeUtils.uuidNibbles(bytes, offset + 9);
+                        long msb4 = TypeUtils.uuidNibbles(bytes, offset + 14);
+                        long lsb1 = TypeUtils.uuidNibbles(bytes, offset + 19);
+                        long lsb2 = TypeUtils.uuidNibbles(bytes, offset + 24);
+                        long lsb3 = TypeUtils.uuidNibbles(bytes, offset + 28);
+                        long lsb4 = TypeUtils.uuidNibbles(bytes, offset + 32);
                         if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
                             offset += 36;
                             return new UUID(
