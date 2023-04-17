@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.filter.PropertyFilter;
 import com.alibaba.fastjson2.filter.PropertyPreFilter;
@@ -9,10 +10,14 @@ import com.alibaba.fastjson2.filter.ValueFilter;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.writer.*;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.security.PrivilegedAction;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.*;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DynamicClassLoader
@@ -29,14 +34,14 @@ public class DynamicClassLoader
         Class[] classes = new Class[]{
                 Object.class,
                 Type.class,
+                Field.class,
+                Method.class,
 
                 Fnv.class,
 
                 // reads
                 JSONReader.class,
-
                 FieldReader.class,
-
                 ObjectReader.class,
                 ObjectReader1.class,
                 ObjectReader2.class,
@@ -79,22 +84,57 @@ public class DynamicClassLoader
                 ObjectWriter12.class,
                 ObjectWriterAdapter.class,
                 UnsafeUtils.class,
+                TypeUtils.class,
+                DateUtils.class,
+                PropertyNamingStrategy.class,
 
-                java.util.Collection.class,
-                java.util.List.class,
-                java.util.ArrayList.class,
-                java.util.Map.class,
+                Collection.class,
+                Set.class,
+                List.class,
+                ArrayList.class,
+                LinkedList.class,
+                Map.class,
+                HashMap.class,
+                LinkedHashMap.class,
+                EnumSet.class,
+                Optional.class,
+                OptionalInt.class,
+                OptionalLong.class,
+                Date.class,
+                Calendar.class,
+                ConcurrentHashMap.class,
+
                 java.util.function.Supplier.class,
-                java.lang.Enum.class,
-                java.lang.Class.class,
-                java.lang.String.class
+                java.util.function.Consumer.class,
+                Exception.class,
+                Enum.class,
+                Class.class,
+                Boolean.class,
+                Byte.class,
+                Short.class,
+                Integer.class,
+                Long.class,
+                Float.class,
+                Double.class,
+                String.class,
+                BigInteger.class,
+                BigDecimal.class,
+                Instant.class,
+                LocalTime.class,
+                LocalDate.class,
+                LocalDateTime.class,
+                ZonedDateTime.class,
+                CharArrayValueConsumer.class,
+                ByteArrayValueConsumer.class
         };
         for (Class clazz : classes) {
             classMapping.put(clazz.getName(), clazz);
         }
 
         String[] strings = {
-                "sun.misc.Unsafe"
+                "sun.misc.Unsafe",
+                "java.sql.Timestamp",
+                "java.sql.Date"
         };
         for (String string : strings) {
             try {
