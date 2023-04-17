@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
 
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
-import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
 import static com.alibaba.fastjson2.util.BeanUtils.*;
 
 public class ObjectWriterBaseModule
@@ -82,7 +81,7 @@ public class ObjectWriterBaseModule
             Annotation[] annotations = getAnnotations(objectClass);
             for (Annotation annotation : annotations) {
                 Class annotationType = annotation.annotationType();
-                jsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
+                jsonType = findAnnotation(annotation, JSONType.class);
                 if (jsonType == annotation) {
                     continue;
                 }
@@ -180,7 +179,7 @@ public class ObjectWriterBaseModule
                     Annotation[] mixInAnnotations = getAnnotations(mixInSource);
                     for (Annotation annotation : mixInAnnotations) {
                         Class<? extends Annotation> annotationType = annotation.annotationType();
-                        jsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
+                        jsonType = findAnnotation(annotation, JSONType.class);
                         if (jsonType == annotation) {
                             continue;
                         }
@@ -326,7 +325,7 @@ public class ObjectWriterBaseModule
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
                 if (jsonField == null) {
-                    jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                    jsonField = findAnnotation(annotation, JSONField.class);
                     if (jsonField == annotation) {
                         continue;
                     }
@@ -861,7 +860,7 @@ public class ObjectWriterBaseModule
         private void processAnnotations(FieldInfo fieldInfo, Annotation[] annotations) {
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                JSONField jsonField = findAnnotation(annotation, JSONField.class);
                 if (Objects.nonNull(jsonField)) {
                     loadFieldInfo(fieldInfo, jsonField);
                     continue;

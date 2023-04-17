@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.annotation;
 
-import com.alibaba.fastjson2.util.AnnotationUtils;
+import com.alibaba.fastjson2.util.BeanUtils;
 import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.ElementType;
@@ -36,7 +36,7 @@ class JSONFieldCombinationTest {
 
     private static void assertExistJSONField(Method[] declaredMethods) {
         Optional<JSONField> jsonField = Arrays.stream(declaredMethods)
-                .map(method -> AnnotationUtils.findAnnotation(method, JSONField.class))
+                .map(method -> BeanUtils.findAnnotation(method, JSONField.class))
                 .filter(Objects::nonNull)
                 .findAny();
         assertTrue(jsonField.isPresent());

@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.annotation;
 
-import com.alibaba.fastjson2.util.AnnotationUtils;
+import com.alibaba.fastjson2.util.BeanUtils;
 import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.ElementType;
@@ -19,14 +19,14 @@ class JSONBuilderCombinationTest {
     @Test
     void testDirectlyGet() {
         Class<DirectlyJSONBuilderPojo> clazz = DirectlyJSONBuilderPojo.class;
-        JSONBuilder jsonType = AnnotationUtils.findAnnotation(clazz, JSONBuilder.class);
+        JSONBuilder jsonType = BeanUtils.findAnnotation(clazz, JSONBuilder.class);
         assertNotNull(jsonType);
     }
 
     @Test
     void testCombinationGet() {
         Class<CombinationJSONBuilderPojo> clazz = CombinationJSONBuilderPojo.class;
-        JSONBuilder jsonType = AnnotationUtils.findAnnotation(clazz, JSONBuilder.class);
+        JSONBuilder jsonType = BeanUtils.findAnnotation(clazz, JSONBuilder.class);
         assertNotNull(jsonType);
     }
 

@@ -27,7 +27,6 @@ import java.util.concurrent.atomic.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
 import static com.alibaba.fastjson2.util.BeanUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
@@ -403,7 +402,7 @@ public class ObjectReaderBaseModule
         private void getBeanInfo(BeanInfo beanInfo, Annotation[] annotations) {
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                JSONType jsonType = AnnotationUtils.findAnnotation(annotation, JSONType.class);
+                JSONType jsonType = findAnnotation(annotation, JSONType.class);
                 if (jsonType != null) {
                     getBeanInfo1x(beanInfo, annotation);
                     if (jsonType == annotation) {
@@ -554,7 +553,7 @@ public class ObjectReaderBaseModule
                                             getBeanInfo1xJSONPOJOBuilder(beanInfo, builderClass, builderAnnotation, builderAnnotationClass);
                                             break;
                                         default:
-                                            JSONBuilder jsonBuilder = AnnotationUtils.findAnnotation(builderClass, JSONBuilder.class);
+                                            JSONBuilder jsonBuilder = findAnnotation(builderClass, JSONBuilder.class);
                                             if (jsonBuilder != null) {
                                                 String buildMethodName = jsonBuilder.buildMethod();
                                                 beanInfo.buildMethod = BeanUtils.buildMethod(builderClass, buildMethodName);
@@ -766,7 +765,7 @@ public class ObjectReaderBaseModule
             Annotation[] annotations = getAnnotations(method);
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                JSONField jsonField = findAnnotation(annotation, JSONField.class);
                 if (jsonField != null) {
                     getFieldInfo(fieldInfo, jsonField);
                     jsonFieldName = jsonField.name();
@@ -886,7 +885,7 @@ public class ObjectReaderBaseModule
         private void processAnnotation(FieldInfo fieldInfo, Annotation[] annotations) {
             for (Annotation annotation : annotations) {
                 Class<? extends Annotation> annotationType = annotation.annotationType();
-                JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+                JSONField jsonField = findAnnotation(annotation, JSONField.class);
                 if (jsonField != null) {
                     getFieldInfo(fieldInfo, jsonField);
                     if (jsonField == annotation) {
@@ -1310,7 +1309,7 @@ public class ObjectReaderBaseModule
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
 
-            JSONCreator jsonCreator = AnnotationUtils.findAnnotation(annotation, JSONCreator.class);
+            JSONCreator jsonCreator = findAnnotation(annotation, JSONCreator.class);
             if (jsonCreator != null) {
                 String[] createParameterNames = jsonCreator.parameterNames();
                 if (createParameterNames.length != 0) {
@@ -1374,7 +1373,7 @@ public class ObjectReaderBaseModule
         JSONCreator jsonCreator = null;
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
-            jsonCreator = AnnotationUtils.findAnnotation(annotation, JSONCreator.class);
+            jsonCreator = findAnnotation(annotation, JSONCreator.class);
             if (jsonCreator == annotation) {
                 continue;
             }

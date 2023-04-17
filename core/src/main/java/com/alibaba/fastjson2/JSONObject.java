@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
-import static com.alibaba.fastjson2.util.AnnotationUtils.getAnnotations;
+import static com.alibaba.fastjson2.util.BeanUtils.getAnnotations;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
 public class JSONObject
@@ -1592,7 +1592,7 @@ public class JSONObject
         Annotation[] annotations = getAnnotations(method);
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
-            JSONField jsonField = AnnotationUtils.findAnnotation(annotation, JSONField.class);
+            JSONField jsonField = BeanUtils.findAnnotation(annotation, JSONField.class);
             if (Objects.nonNull(jsonField)) {
                 name = jsonField.name();
                 if (name.isEmpty()) {
