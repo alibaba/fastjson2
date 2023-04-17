@@ -14,7 +14,6 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
-import static com.alibaba.fastjson2.util.UUIDUtils.parse4Nibbles;
 
 class JSONReaderUTF16
         extends JSONReader {
@@ -4627,14 +4626,14 @@ class JSONReaderUTF16
         final char quote = ch;
 
         if (offset + 32 < chars.length && chars[offset + 32] == quote) {
-            long msb1 = parse4Nibbles(chars, offset);
-            long msb2 = parse4Nibbles(chars, offset + 4);
-            long msb3 = parse4Nibbles(chars, offset + 8);
-            long msb4 = parse4Nibbles(chars, offset + 12);
-            long lsb1 = parse4Nibbles(chars, offset + 16);
-            long lsb2 = parse4Nibbles(chars, offset + 20);
-            long lsb3 = parse4Nibbles(chars, offset + 24);
-            long lsb4 = parse4Nibbles(chars, offset + 28);
+            long msb1 = TypeUtils.uuidNibbles(chars, offset);
+            long msb2 = TypeUtils.uuidNibbles(chars, offset + 4);
+            long msb3 = TypeUtils.uuidNibbles(chars, offset + 8);
+            long msb4 = TypeUtils.uuidNibbles(chars, offset + 12);
+            long lsb1 = TypeUtils.uuidNibbles(chars, offset + 16);
+            long lsb2 = TypeUtils.uuidNibbles(chars, offset + 20);
+            long lsb3 = TypeUtils.uuidNibbles(chars, offset + 24);
+            long lsb4 = TypeUtils.uuidNibbles(chars, offset + 28);
             if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
                 offset += 33;
                 if (offset < end) {
@@ -4665,14 +4664,14 @@ class JSONReaderUTF16
             char ch3 = chars[offset + 18];
             char ch4 = chars[offset + 23];
             if (ch1 == '-' && ch2 == '-' && ch3 == '-' && ch4 == '-') {
-                long msb1 = parse4Nibbles(chars, offset);
-                long msb2 = parse4Nibbles(chars, offset + 4);
-                long msb3 = parse4Nibbles(chars, offset + 9);
-                long msb4 = parse4Nibbles(chars, offset + 14);
-                long lsb1 = parse4Nibbles(chars, offset + 19);
-                long lsb2 = parse4Nibbles(chars, offset + 24);
-                long lsb3 = parse4Nibbles(chars, offset + 28);
-                long lsb4 = parse4Nibbles(chars, offset + 32);
+                long msb1 = TypeUtils.uuidNibbles(chars, offset);
+                long msb2 = TypeUtils.uuidNibbles(chars, offset + 4);
+                long msb3 = TypeUtils.uuidNibbles(chars, offset + 9);
+                long msb4 = TypeUtils.uuidNibbles(chars, offset + 14);
+                long lsb1 = TypeUtils.uuidNibbles(chars, offset + 19);
+                long lsb2 = TypeUtils.uuidNibbles(chars, offset + 24);
+                long lsb3 = TypeUtils.uuidNibbles(chars, offset + 28);
+                long lsb4 = TypeUtils.uuidNibbles(chars, offset + 32);
                 if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
                     offset += 37;
                     if (offset < end) {
