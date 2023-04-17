@@ -89,6 +89,32 @@ public class TypeUtils {
             1e16, 1e32, 1e64, 1e128, 1e256};
     static final double[] TINY_10_POW = {
             1e-16, 1e-32, 1e-64, 1e-128, 1e-256};
+    static volatile boolean METHOD_NEW_PROXY_INSTANCE_ERROR;
+    static volatile MethodHandle METHOD_NEW_PROXY_INSTANCE;
+
+    public static <T> T newProxyInstance(Class<T> objectClass, JSONObject object) {
+        MethodHandle newProxyInstance = METHOD_NEW_PROXY_INSTANCE;
+        try {
+            if (newProxyInstance == null) {
+                Class<?> proxyClass = Class.forName("java.lang.reflect.Proxy");
+                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(proxyClass);
+                newProxyInstance = lookup.findStatic(
+                        proxyClass,
+                        "newProxyInstance",
+                        methodType(Object.class, ClassLoader.class, Class[].class, InvocationHandler.class)
+                );
+                METHOD_NEW_PROXY_INSTANCE = newProxyInstance;
+            }
+        } catch (Throwable ignored) {
+            METHOD_NEW_PROXY_INSTANCE_ERROR = true;
+        }
+
+        try {
+            return (T) newProxyInstance.invokeExact(objectClass.getClassLoader(), new Class[]{objectClass}, (InvocationHandler) object);
+        } catch (Throwable e) {
+            throw new JSONException("create proxy error : " + objectClass, e);
+        }
+    }
 
     static class X1 {
         static final Function<byte[], char[]> TO_CHARS;

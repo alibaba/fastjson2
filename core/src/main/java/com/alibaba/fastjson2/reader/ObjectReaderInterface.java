@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.util.ProxyFactory;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -94,7 +94,7 @@ public final class ObjectReaderInterface<T>
             }
         }
 
-        object = (T) ProxyFactory.newProxyInstance(objectClass, jsonObject);
+        object = (T) TypeUtils.newProxyInstance(objectClass, jsonObject);
         if (schema != null) {
             schema.assertValidate(object);
         }
@@ -210,7 +210,7 @@ public final class ObjectReaderInterface<T>
 
         jsonReader.nextIfMatch(',');
 
-        object = (T) ProxyFactory.newProxyInstance(objectClass, jsonObject);
+        object = (T) TypeUtils.newProxyInstance(objectClass, jsonObject);
         Function buildFunction = getBuildFunction();
         if (buildFunction != null) {
             object = (T) buildFunction.apply(object);
@@ -226,7 +226,7 @@ public final class ObjectReaderInterface<T>
     @Override
     public T createInstance(long features) {
         JSONObject object = new JSONObject();
-        return (T) ProxyFactory.newProxyInstance(objectClass, object);
+        return (T) TypeUtils.newProxyInstance(objectClass, object);
     }
 
     @Override
@@ -237,6 +237,6 @@ public final class ObjectReaderInterface<T>
         } else {
             object = new JSONObject(map);
         }
-        return (T) ProxyFactory.newProxyInstance(objectClass, object);
+        return (T) TypeUtils.newProxyInstance(objectClass, object);
     }
 }
