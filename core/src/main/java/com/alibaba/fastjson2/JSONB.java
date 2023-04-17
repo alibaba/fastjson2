@@ -77,6 +77,18 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
  * x7f          # symbol
  */
 public interface JSONB {
+    static void dump(byte[] jsonbBytes) {
+        System.out.println(
+                JSONB.toJSONString(jsonbBytes, true)
+        );
+    }
+
+    static void dump(byte[] jsonbBytes, SymbolTable symbolTable) {
+        JSONBDump dump = new JSONBDump(jsonbBytes, symbolTable, true);
+        String str = dump.toString();
+        System.out.println(str);
+    }
+
     interface Constants {
         byte BC_CHAR = -112;                    // 0x90
         byte BC_BINARY = -111;                  // 0x91

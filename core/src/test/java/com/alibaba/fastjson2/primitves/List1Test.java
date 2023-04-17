@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.util.JSONBDump;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2_vo.List1;
@@ -71,7 +70,7 @@ public class List1Test {
                 JSONWriter jsonWriter = JSONWriter.ofJSONB();
                 objectWriter.write(jsonWriter, vo);
                 byte[] jsonbBytes = jsonWriter.getBytes();
-                JSONBDump.dump(jsonbBytes);
+                JSONB.dump(jsonbBytes);
                 assertEquals("{\n" +
                         "\t\"v0000\":[1]\n" +
                         "}", JSONB.toJSONString(jsonbBytes));

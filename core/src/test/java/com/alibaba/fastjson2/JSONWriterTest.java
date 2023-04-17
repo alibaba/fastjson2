@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -1006,7 +1005,7 @@ public class JSONWriterTest {
                 "\t\t\t}\n" +
                 "\t\t}\n" +
                 "\t}\n" +
-                "}", new JSONBDump(jsonbBytes, true).toString());
+                "}", JSONB.toJSONString(jsonbBytes, true));
 
         A o = (A) JSONB.parseObject(jsonbBytes, Object.class, JSONReader.Feature.SupportAutoType);
         assertEquals(a.id, o.id);

@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,7 +10,7 @@ public class StringTest2 {
     public void test_true() throws Throwable {
         String str = "true";
         byte[] jsonbBytes = JSONB.toBytes(str);
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
         assertEquals(str, JSONB.parse(jsonbBytes));
         assertEquals(str, JSONB.parseObject(jsonbBytes, String.class));
     }
@@ -20,7 +19,7 @@ public class StringTest2 {
     public void test_false() throws Throwable {
         String str = "false";
         byte[] jsonbBytes = JSONB.toBytes(str);
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
         assertEquals(str, JSONB.parse(jsonbBytes));
         assertEquals(str, JSONB.parseObject(jsonbBytes, String.class));
     }
@@ -29,7 +28,7 @@ public class StringTest2 {
     public void test_0() throws Throwable {
         String str = "0";
         byte[] jsonbBytes = JSONB.toBytes(str);
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
         assertEquals(str, JSONB.parse(jsonbBytes));
         assertEquals(str, JSONB.parseObject(jsonbBytes, String.class));
     }
@@ -38,7 +37,7 @@ public class StringTest2 {
     public void test_1() throws Throwable {
         String str = "1";
         byte[] jsonbBytes = JSONB.toBytes(str);
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
         assertEquals(str, JSONB.parse(jsonbBytes));
         assertEquals(str, JSONB.parseObject(jsonbBytes, String.class));
     }
@@ -47,7 +46,7 @@ public class StringTest2 {
     public void test_name() throws Throwable {
         String str = "name";
         byte[] jsonbBytes = JSONB.toBytes(str);
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
         assertEquals(str, JSONB.parse(jsonbBytes));
         assertEquals(str, JSONB.parseObject(jsonbBytes, String.class));
     }
@@ -59,7 +58,7 @@ public class StringTest2 {
         bean.name = "true";
         bean.type = "false";
         byte[] jsonbBytes = JSONB.toBytes(bean);
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
 
         Bean bean2 = JSONB.parseObject(jsonbBytes, Bean.class);
         assertEquals(bean.id, bean2.id);

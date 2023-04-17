@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -15,7 +14,7 @@ public class Issue752 {
         Bean bean = new Bean(new Class<?>[]{int.class, int.class});
         byte[] bytes = JSONB.toBytes(bean,
                 JSONWriter.Feature.WriteClassName);
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
         assertEquals("{\n" +
                 "\t\"@type\":\"com.alibaba.fastjson2.issues.Issue752$Bean\",\n" +
                 "\t\"param\":[\n" +

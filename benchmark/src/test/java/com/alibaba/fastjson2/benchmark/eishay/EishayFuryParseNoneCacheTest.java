@@ -7,7 +7,6 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.eishay.gen.EishayClassGen;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.DynamicClassLoader;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.apache.commons.io.IOUtils;
 
 import java.io.FileOutputStream;
@@ -89,7 +88,7 @@ public class EishayFuryParseNoneCacheTest {
             jsonbBytes = JSONB.toBytes(object, writerFeatures);
         }
 
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
 //
         DynamicClassLoader classLoader = DynamicClassLoader.getInstance();
         EishayClassGen gen = new EishayClassGen();

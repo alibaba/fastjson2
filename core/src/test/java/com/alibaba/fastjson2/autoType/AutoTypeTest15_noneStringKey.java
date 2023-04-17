@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.Differ;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -35,7 +34,7 @@ public class AutoTypeTest15_noneStringKey {
 
         byte[] bytes = JSONB.toBytes(object, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased, JSONWriter.Feature.ReferenceDetection);
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         LinkedHashMap object2 = (LinkedHashMap) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased, JSONReader.Feature.SupportClassForName);
         assertNotNull(object2);
@@ -62,7 +61,7 @@ public class AutoTypeTest15_noneStringKey {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Map object2 = (Map) JSONB.parseObject(bytes,
                 Object.class,

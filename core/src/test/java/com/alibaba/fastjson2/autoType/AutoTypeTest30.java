@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.autoType;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -28,7 +27,7 @@ public class AutoTypeTest30 {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Bean1 bean2 = (Bean1) JSONB.parseObject(bytes,
                 Object.class,
@@ -75,7 +74,7 @@ public class AutoTypeTest30 {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         List list2 = (List) JSONB.parseObject(bytes,
                 Object.class,
@@ -113,7 +112,7 @@ public class AutoTypeTest30 {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         assertEquals("{\n" +
                         "\t\"@type\":\"com.alibaba.fastjson2.autoType.AutoTypeTest30$Bean2\",\n" +

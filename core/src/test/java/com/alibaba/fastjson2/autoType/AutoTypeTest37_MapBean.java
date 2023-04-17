@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.autoType;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -36,7 +35,7 @@ public class AutoTypeTest37_MapBean {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         assertEquals(144, bytes.length);
         // 142 200 202 216 141 151 144
@@ -74,7 +73,7 @@ public class AutoTypeTest37_MapBean {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Map map2 = (Map) JSONB.parseObject(
                 bytes,

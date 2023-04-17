@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.eishay.vo.Media;
 import com.alibaba.fastjson2.eishay.vo.MediaContent;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaders;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -140,7 +139,7 @@ public class ParserTest {
                 "\t\t\"#4\":\"http://javaone.com/keynote.mpg\",\n" +
                 "\t\t\"#5\":640\n" +
                 "\t}\n" +
-                "}", new JSONBDump(jsonbBytes, true).toString());
+                "}", JSONB.toJSONString(jsonbBytes, true));
 
 //        Object jsonb = JSONB.readFrom(jsonbBytes);
 
@@ -176,7 +175,7 @@ public class ParserTest {
                 );
 //        System.out.println(jw);
 
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
 
 //        Object jsonb = JSONB.readFrom(jsonbBytes);
 
@@ -204,7 +203,7 @@ public class ParserTest {
 //        System.out.println(jw);
 
         byte[] jsonbBytes = jw.getBytes();
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
 
 //        Object jsonb = JSONB.readFrom(jsonbBytes);
 
@@ -251,7 +250,7 @@ public class ParserTest {
 //        System.out.println(jsonWriter);
 
         byte[] jsonbBytes = jsonWriter.getBytes();
-        JSONBDump.dump(jsonbBytes, symbolTable);
+        JSONB.dump(jsonbBytes, symbolTable);
 
         assertEquals(276, jsonbBytes.length);
         // 260 273 277 276

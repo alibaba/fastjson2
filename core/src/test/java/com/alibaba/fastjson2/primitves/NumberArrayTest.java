@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONBTest;
 import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -75,7 +74,7 @@ public class NumberArrayTest {
             assertEquals(JSON.toJSONString(vo.getValue()),
                     JSON.toJSONString(vo2.getValue()));
 
-            JSONBDump.dump(jsonbBytes);
+            JSONB.dump(jsonbBytes);
 
             JSONObject jsonObject = JSONB.parseObject(jsonbBytes, JSONObject.class);
             assertEquals(JSON.toJSONString(vo.getValue()),

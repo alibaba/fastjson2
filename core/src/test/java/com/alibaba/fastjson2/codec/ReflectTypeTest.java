@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.util.JSONBDump;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
 import org.junit.jupiter.api.Test;
 
@@ -45,7 +44,7 @@ public class ReflectTypeTest {
         ParameterizedTypeImpl paramType = new ParameterizedTypeImpl(new Type[]{String.class, String.class}, null, Map.class);
         byte[] bytes = JSONB.toBytes(paramType);
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         ParameterizedType paramType1 = JSONB.parseObject(bytes, ParameterizedType.class, JSONReader.Feature.SupportClassForName);
         assertEquals(paramType, paramType1);

@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.TypeReference;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -38,7 +37,7 @@ public class JSONBTableTest {
         List<Org> orgs = Arrays.asList(org);
         byte[] bytes = JSONB.toBytes(orgs);
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         List<Org> list2 = JSONB.parseObject(bytes, new TypeReference<List<Org>>() {
         }.getType());

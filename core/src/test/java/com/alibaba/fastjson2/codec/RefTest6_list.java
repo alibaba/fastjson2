@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.codec;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -35,7 +34,7 @@ public class RefTest6_list {
 
         byte[] bytes = JSONB.toBytes(a, JSONWriter.Feature.ReferenceDetection);
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         B b = JSONB.parseObject(bytes, (java.lang.reflect.Type) B.class, JSONB.symbolTable(""), JSONReader.Feature.SupportAutoType);
         assertSame(b.c, b.values.get(0));

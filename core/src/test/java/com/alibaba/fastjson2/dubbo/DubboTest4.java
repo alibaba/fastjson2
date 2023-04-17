@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.dubbo;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -208,7 +207,7 @@ public class DubboTest4 {
         DateTimeParseException ex = new DateTimeParseException("msg", "input", 0);
 
         byte[] jsonbBytes = JSONB.toBytes(ex, writerFeatures);
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
         DateTimeParseException ex1 = (DateTimeParseException) JSONB.parseObject(jsonbBytes, Object.class, readerFeatures);
 
         assertEquals(ex.getMessage(), ex1.getMessage());

@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -26,7 +25,7 @@ public class JSONBTableTest2 {
         a.list2.add(Item.of(202));
 
         byte[] bytes = JSONB.toBytes(a);
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         A a1 = JSONB.parseObject(bytes, A.class);
         assertEquals(JSON.toJSONString(a), JSON.toJSONString(a1));
@@ -66,7 +65,7 @@ public class JSONBTableTest2 {
 
         byte[] bytes = JSONB.toBytes(c, JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.WriteClassName);
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         C c1 = JSONB.parseObject(bytes, C.class, JSONReader.Feature.SupportAutoType);
         assertEquals(JSON.toJSONString(c), JSON.toJSONString(c1));
