@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.eishay.vo.MediaContent;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
@@ -26,7 +25,7 @@ public class IgnoreNoneSerializableTest {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName,
                 JSONWriter.Feature.WriteNameAsSymbol);
 
-        assertEquals(jsonbDump, new JSONBDump(jsonbBytes, true).toString());
+        assertEquals(jsonbDump, JSONB.toJSONString(jsonbBytes, true));
 
         Object object2 = JSONB.parseObject(
                 jsonbBytes,

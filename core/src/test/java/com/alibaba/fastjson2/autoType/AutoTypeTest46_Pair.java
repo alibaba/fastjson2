@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.autoType;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +26,7 @@ public class AutoTypeTest46_Pair {
                 JSONWriter.Feature.WriteNameAsSymbol
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         assertEquals("{\n" +
                 "\t\"@type\":\"com.alibaba.fastjson2.autoType.AutoTypeTest46_Pair$Bean#0\",\n" +
@@ -47,7 +46,7 @@ public class AutoTypeTest46_Pair {
                 "\t\t\t}\n" +
                 "\t\t}\n" +
                 "\t}\n" +
-                "}", new JSONBDump(bytes, true).toString());
+                "}", JSONB.toJSONString(bytes, true));
 
         Bean bean2 = (Bean) JSONB.parseObject(
                 bytes,

@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.time;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import com.alibaba.fastjson2_vo.Date1;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +37,7 @@ public class DateTest {
         date.setDate(new java.util.Date(1642003200000L));
 
         byte[] bytes = JSONB.toBytes(date);
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Date1 bean2 = JSONB.parseObject(bytes, Date1.class);
         assertEquals(date.getDate(), bean2.getDate());

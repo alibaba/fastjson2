@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.autoType;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -29,7 +28,7 @@ public class AutoTypeTest21 {
 
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased, JSONWriter.Feature.ReferenceDetection);
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Bean1 bean2 = (Bean1) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         assertNotNull(bean2);
@@ -89,7 +88,7 @@ public class AutoTypeTest21 {
 
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased, JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.WriteNulls, JSONWriter.Feature.WriteNameAsSymbol);
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         assertEquals("{\n" +
                 "\t\"@type\":\"com.alibaba.fastjson2.autoType.AutoTypeTest21$Bean1#0\",\n" +
@@ -115,7 +114,7 @@ public class AutoTypeTest21 {
                 "\t\t\t}\n" +
                 "\t\t}\n" +
                 "\t}\n" +
-                "}", new JSONBDump(bytes, true).toString());
+                "}", JSONB.toJSONString(bytes, true));
 
         Bean1 bean2 = (Bean1) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         assertNotNull(bean2);
@@ -147,7 +146,7 @@ public class AutoTypeTest21 {
 
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased, JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.WriteNulls);
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Bean2 bean2 = (Bean2) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         assertNotNull(bean2);

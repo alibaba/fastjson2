@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,7 +21,7 @@ public class HSFTest {
         vo.setFshort((short) 4);
         vo.setpBaseDO(new BaseDO());
         byte[] bytes = JSONB.toBytes(vo, JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.WriteClassName);
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
         VeryComplexDO vo2 = (VeryComplexDO) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType);
         assertEquals("{\n" +
                 "\t\"@type\":\"com.alibaba.fastjson2.hsf.VeryComplexDO\",\n" +
@@ -41,7 +40,7 @@ public class HSFTest {
         VeryComplexDO vo = VeryComplexDO.getFixedComplexDO();
         vo.setpBaseDO(new BaseDO());
         byte[] bytes = JSONB.toBytes(vo, JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.WriteClassName);
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
         VeryComplexDO vo2 = (VeryComplexDO) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType);
     }
 

@@ -1,11 +1,11 @@
 package com.alibaba.fastjson2.codec;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
@@ -51,7 +51,7 @@ public class SeeAlsoTest {
 
                 byte[] jsonbBytes = jsonbWriter.getBytes();
 
-                JSONBDump.dump(jsonbBytes);
+                JSONB.dump(jsonbBytes);
 
                 Animal animal = objectReader.readObject(JSONReader.ofJSONB(jsonbBytes), 0);
                 assertEquals(Cat.class, animal.getClass());

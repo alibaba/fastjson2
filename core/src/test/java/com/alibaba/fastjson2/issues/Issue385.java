@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.PropertyNamingStrategy;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -31,7 +30,7 @@ public class Issue385 {
         bean.setItems(list);
         byte[] jsonbBytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName);
 
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
 
         Bean bean1 = JSONB.parseObject(jsonbBytes, Bean.class, JSONReader.Feature.SupportClassForName, JSONReader.Feature.SupportAutoType);
         List<PropertyNamingStrategy> list2 = bean1.items;

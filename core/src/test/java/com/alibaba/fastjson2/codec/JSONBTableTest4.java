@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -98,7 +97,7 @@ public class JSONBTableTest4 {
 
         byte[] bytes = JSONB.toBytes(a, JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.WriteClassName);
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         B10 a1 = JSONB.parseObject(bytes, B10.class, JSONReader.Feature.SupportAutoType);
         assertEquals(JSON.toJSONString(a), JSON.toJSONString(a1));

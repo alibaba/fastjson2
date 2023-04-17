@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -20,7 +19,7 @@ public class JSONBTableTest5 {
 
         byte[] bytes = JSONB.toBytes(object);
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Exception error = null;
         try {
@@ -47,7 +46,7 @@ public class JSONBTableTest5 {
 
         byte[] bytes = JSONB.toBytes(object, JSONWriter.Feature.ReferenceDetection, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.IgnoreErrorGetter);
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         JSONObject b = (JSONObject) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType);
         assertTrue(b.get("values") != null);

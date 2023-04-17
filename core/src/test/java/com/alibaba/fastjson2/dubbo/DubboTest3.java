@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.dubbo;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -30,7 +29,7 @@ public class DubboTest3 {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName,
                 JSONWriter.Feature.WriteNameAsSymbol);
 
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
 
         Object o = JSONB.parseObject(jsonbBytes, Object.class,
                 JSONReader.Feature.SupportAutoType,

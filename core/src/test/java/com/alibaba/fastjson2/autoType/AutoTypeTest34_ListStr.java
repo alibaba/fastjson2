@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.autoType;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -28,7 +27,7 @@ public class AutoTypeTest34_ListStr {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Bean bean2 = (Bean) JSONB.parseObject(
                 bytes,
@@ -57,7 +56,7 @@ public class AutoTypeTest34_ListStr {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Bean bean2 = (Bean) JSONB.parseObject(
                 bytes,
@@ -86,7 +85,7 @@ public class AutoTypeTest34_ListStr {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Bean bean2 = (Bean) JSONB.parseObject(
                 bytes,
@@ -115,7 +114,7 @@ public class AutoTypeTest34_ListStr {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Bean bean2 = (Bean) JSONB.parseObject(
                 bytes,
@@ -147,7 +146,7 @@ public class AutoTypeTest34_ListStr {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Bean bean2 = (Bean) JSONB.parseObject(
                 bytes,

@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,7 +20,7 @@ public class SkipTest {
                 JSONWriter.Feature.ReferenceDetection
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         A a = JSONB.parseObject(bytes, A.class);
         assertNotNull(a);

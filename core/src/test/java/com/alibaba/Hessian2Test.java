@@ -2,7 +2,6 @@ package com.alibaba;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import com.caucho.hessian.io.Hessian2Output;
 import org.junit.jupiter.api.Test;
 
@@ -191,7 +190,7 @@ public class Hessian2Test {
         System.out.println("h2\t\t: " + bytes.length + "\t" + Arrays.toString(bytes));
         System.out.println("jsonb\t: " + jsonbBytes.length + "\t" + Arrays.toString(jsonbBytes));
 
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
     }
     public static class Bean2
             implements Serializable {

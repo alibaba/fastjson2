@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import org.junit.jupiter.api.Assertions;
@@ -32,7 +31,7 @@ public class AutoTypeTest42_guava {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         List value2 = (List) JSONB.parseObject(
                 bytes,
@@ -73,7 +72,7 @@ public class AutoTypeTest42_guava {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Set value2 = (Set) JSONB.parseObject(
                 bytes,

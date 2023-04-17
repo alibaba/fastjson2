@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.autoType;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,7 +22,7 @@ public class AutoTypeFilterTest1 {
                 JSONWriter.Feature.WriteNameAsSymbol};
         byte[] bytes = JSONB.toBytes(e, writerFeatures);
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         JSONReader.AutoTypeBeforeHandler filter = JSONReader.autoTypeFilter(true, "com.alibaba.fastjson2.autoType.AutoTypeFilterTest1");
         RpcException e1 = (RpcException) JSONB.parseObject(bytes, Object.class, filter, JSONReader.Feature.FieldBased);

@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.autoType;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -27,7 +26,7 @@ public class AutoTypeTest31_array {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         String[] array2 = (String[]) JSONB.parseObject(
                 bytes,
@@ -56,7 +55,7 @@ public class AutoTypeTest31_array {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Long[] array2 = (Long[]) JSONB.parseObject(
                 bytes,
@@ -85,7 +84,7 @@ public class AutoTypeTest31_array {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         long[] array2 = (long[]) JSONB.parseObject(
                 bytes,
@@ -114,7 +113,7 @@ public class AutoTypeTest31_array {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         BigDecimal[] array2 = (BigDecimal[]) JSONB.parseObject(
                 bytes,
@@ -143,7 +142,7 @@ public class AutoTypeTest31_array {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         BigInteger[] array2 = (BigInteger[]) JSONB.parseObject(
                 bytes,
@@ -172,7 +171,7 @@ public class AutoTypeTest31_array {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         UUID[] array2 = (UUID[]) JSONB.parseObject(
                 bytes,
@@ -202,7 +201,7 @@ public class AutoTypeTest31_array {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         BeanLong64Array bean2 = (BeanLong64Array) JSONB.parseObject(
                 bytes,
@@ -236,7 +235,7 @@ public class AutoTypeTest31_array {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         BeanInteger64Array bean2 = (BeanInteger64Array) JSONB.parseObject(
                 bytes,

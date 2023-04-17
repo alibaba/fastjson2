@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -18,7 +17,7 @@ public class JSONPathTest5 {
         );
         byte[] jsonbBytes = JSONB.toBytes(list);
 
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
 
         JSONPath path = JSONPath.of("$[0].id");
         assertEquals(

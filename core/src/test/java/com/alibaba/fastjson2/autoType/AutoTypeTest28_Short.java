@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.autoType;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -23,7 +22,7 @@ public class AutoTypeTest28_Short {
                 JSONWriter.Feature.NotWriteDefaultValue
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Bean1 bean2 = (Bean1) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         assertNotNull(bean2);
@@ -50,7 +49,7 @@ public class AutoTypeTest28_Short {
                 JSONWriter.Feature.NotWriteDefaultValue
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Bean2 bean2 = (Bean2) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         assertNotNull(bean2);
@@ -77,7 +76,7 @@ public class AutoTypeTest28_Short {
                 JSONWriter.Feature.NotWriteDefaultValue
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Bean3 bean2 = (Bean3) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         assertNotNull(bean2);

@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
-import com.alibaba.fastjson2.util.JSONBDump;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2_vo.UUID1;
@@ -29,7 +28,7 @@ public class UUIDTest {
             vo.setId(dateTime);
             byte[] jsonbBytes = JSONB.toBytes(vo);
 
-            JSONBDump.dump(jsonbBytes);
+            JSONB.dump(jsonbBytes);
 
             UUID1 v1 = JSONB.parseObject(jsonbBytes, UUID1.class);
             assertEquals(vo.getId(), v1.getId());

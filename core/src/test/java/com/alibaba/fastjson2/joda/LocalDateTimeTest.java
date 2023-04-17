@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.joda;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.joda.time.LocalDateTime;
 import org.joda.time.chrono.GregorianChronology;
 import org.joda.time.chrono.ISOChronology;
@@ -25,7 +24,7 @@ public class LocalDateTimeTest {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         LocalDateTime date2 = (LocalDateTime) JSONB.parseObject(
                 bytes,
@@ -52,7 +51,7 @@ public class LocalDateTimeTest {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         LocalDateTime date2 = (LocalDateTime) JSONB.parseObject(
                 bytes,
@@ -79,7 +78,7 @@ public class LocalDateTimeTest {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         LocalDateTime date2 = (LocalDateTime) JSONB.parseObject(
                 bytes,

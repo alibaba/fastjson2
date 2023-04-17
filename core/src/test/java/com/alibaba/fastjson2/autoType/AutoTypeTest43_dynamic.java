@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.autoType;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Proxy;
@@ -38,7 +37,7 @@ public class AutoTypeTest43_dynamic {
                 JSONWriter.Feature.NotWriteHashMapArrayListClassName
         );
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         assertEquals("{\n" +
                 "\t\"@type\":\"com.alibaba.fastjson2.autoType.AutoTypeTest43_dynamic$Model\",\n" +

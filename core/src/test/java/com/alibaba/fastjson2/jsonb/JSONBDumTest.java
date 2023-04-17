@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.jsonb;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import com.alibaba.fastjson2_vo.Int1;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +22,7 @@ public class JSONBDumTest {
                 JSONWriter.Feature.FieldBased,
                 JSONWriter.Feature.IgnoreErrorGetter);
 
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
 
         assertEquals("{\n" +
                 "\t\"@type\":\"com.alibaba.fastjson2_vo.Int1\"\n" +
@@ -43,7 +42,7 @@ public class JSONBDumTest {
                 JSONWriter.Feature.FieldBased,
                 JSONWriter.Feature.IgnoreErrorGetter);
 
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
 
         assertEquals("{}", JSONB.toJSONString(jsonbBytes));
     }

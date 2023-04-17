@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -66,7 +65,7 @@ public class AutoTypeTest10 {
         object.put("data", list);
 
         byte[] bytes = JSONB.toBytes(object, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         com.alibaba.fastjson.JSONObject object2 = (com.alibaba.fastjson.JSONObject) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         ArrayList list2 = (ArrayList) object2.get("data");
@@ -133,7 +132,7 @@ public class AutoTypeTest10 {
 
         byte[] bytes = JSONB.toBytes(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased);
 
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         Bean3 bean2 = (Bean3) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         assertEquals(bean.params.getClass(), bean2.params.getClass());
@@ -171,7 +170,7 @@ public class AutoTypeTest10 {
         list.add(new Bean4());
 
         byte[] bytes = JSONB.toBytes(list, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.FieldBased, JSONWriter.Feature.ReferenceDetection);
-        JSONBDump.dump(bytes);
+        JSONB.dump(bytes);
 
         List list2 = (List) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
         Bean4 bean2 = (Bean4) list2.get(0);

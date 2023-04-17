@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.autoType;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,7 +41,7 @@ public class AutoTypeTest41_dupRef {
                 "\t\t\"item2#4\":{\"$ref\":\"#-1\"},\n" +
                 "\t\t\"item3#5\":{\"$ref\":\"#-1\"}\n" +
                 "\t}\n" +
-                "}", new JSONBDump(bytes, true).toString());
+                "}", JSONB.toJSONString(bytes, true));
 
         assertEquals("{\n" +
                 "\t\"@type\":\"com.alibaba.fastjson2.autoType.AutoTypeTest41_dupRef$Bean\",\n" +
@@ -52,7 +51,7 @@ public class AutoTypeTest41_dupRef {
                 "\t\"item1\":{\"$ref\":\"$.item0\"},\n" +
                 "\t\"item2\":{\"$ref\":\"#-1\"},\n" +
                 "\t\"item3\":{\"$ref\":\"#-1\"}\n" +
-                "}", new JSONBDump(bytes, false).toString());
+                "}", JSONB.toJSONString(bytes, false));
 
         Bean bean2 = (Bean) JSONB.parseObject(
                 bytes,

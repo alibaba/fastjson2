@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JSONBDump;
 import org.junit.jupiter.api.Test;
 
 import java.time.format.DateTimeParseException;
@@ -45,7 +44,7 @@ public class ExceptionTest {
         IllegalStateException ex = new IllegalStateException();
         byte[] jsonbBytes = JSONB.toBytes(ex);
 
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
 
         Object jsonObject = JSONB.parseObject(jsonbBytes, Object.class);
         assertTrue(jsonObject instanceof Map);
@@ -60,7 +59,7 @@ public class ExceptionTest {
         IllegalStateException ex = new IllegalStateException();
         byte[] jsonbBytes = JSONB.toBytes(ex, JSONWriter.Feature.FieldBased, JSONWriter.Feature.WriteClassName);
 
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
 
         Object jsonObject = JSONB.parseObject(jsonbBytes, Object.class);
         assertTrue(jsonObject instanceof Map);
@@ -75,7 +74,7 @@ public class ExceptionTest {
         DateTimeParseException ex = new DateTimeParseException("aaa", "bbb", 1);
         byte[] jsonbBytes = JSONB.toBytes(ex, JSONWriter.Feature.FieldBased, JSONWriter.Feature.WriteClassName);
 
-        JSONBDump.dump(jsonbBytes);
+        JSONB.dump(jsonbBytes);
 
         Object jsonObject = JSONB.parseObject(jsonbBytes, Object.class);
         assertTrue(jsonObject instanceof Map);

@@ -1,8 +1,7 @@
-package com.alibaba.fastjson2.util;
+package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.SymbolTable;
+import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -19,7 +18,7 @@ import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK11;
 import static com.alibaba.fastjson2.util.JDKUtils.UTF16;
 
-public class JSONBDump {
+final class JSONBDump {
     static Charset GB18030;
 
     final byte[] bytes;
@@ -34,26 +33,15 @@ public class JSONBDump {
     String lastReference;
 
     JSONWriter jsonWriter;
-    SymbolTable symbolTable;
+    final SymbolTable symbolTable;
 
-    Map<Integer, String> symbols = new HashMap<>();
-
-    public static void dump(byte[] jsonbBytes) {
-        JSONBDump dump = new JSONBDump(jsonbBytes, true);
-        String str = dump.toString();
-        System.out.println(str);
-    }
-
-    public static void dump(byte[] jsonbBytes, SymbolTable symbolTable) {
-        JSONBDump dump = new JSONBDump(jsonbBytes, symbolTable, true);
-        String str = dump.toString();
-        System.out.println(str);
-    }
+    final Map<Integer, String> symbols = new HashMap<>();
 
     public JSONBDump(byte[] bytes, boolean raw) {
         this.bytes = bytes;
         this.raw = raw;
         jsonWriter = JSONWriter.ofPretty();
+        this.symbolTable = null;
 
         dumpAny();
     }

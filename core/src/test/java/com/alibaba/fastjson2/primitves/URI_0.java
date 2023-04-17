@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaders;
-import com.alibaba.fastjson2.util.JSONBDump;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriters;
 import org.junit.jupiter.api.Test;
@@ -97,7 +96,7 @@ public class URI_0 {
             vo.setValue(value);
             byte[] jsonbBytes = JSONB.toBytes(vo);
 
-            JSONBDump.dump(jsonbBytes);
+            JSONB.dump(jsonbBytes);
 
             VO v1 = JSONB.parseObject(jsonbBytes, VO.class);
             assertEquals(vo.getValue(), v1.getValue());
