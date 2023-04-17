@@ -12,8 +12,8 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
 
-public class DoubleToBigDecimal {
-    static final double value = 0.6730586701548151D;
+public class FloatToBigDecimal {
+    static final float value = 123456.780F;
 
     @Benchmark
     public void fastjson2(Blackhole bh) {
@@ -27,7 +27,7 @@ public class DoubleToBigDecimal {
 
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
-                .include(DoubleToBigDecimal.class.getName())
+                .include(FloatToBigDecimal.class.getName())
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(1)

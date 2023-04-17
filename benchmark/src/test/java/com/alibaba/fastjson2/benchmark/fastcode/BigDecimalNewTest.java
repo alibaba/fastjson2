@@ -44,8 +44,8 @@ public class BigDecimalNewTest {
                 benchmark.string2(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("DateFormat10-string1 millis : " + millis);
-            // zulu8.58.0.13 :
+            System.out.println("DateFormat10-string2 millis : " + millis);
+            // zulu8.58.0.13 : 1116
             // zulu11.52.13 :
             // zulu17.38.21 :
             // zulu21.0.35 : 1367

@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.RyuDouble;
-import com.alibaba.fastjson2.util.RyuFloat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -191,7 +190,7 @@ final class CSVWriterUTF8
             flush();
         }
 
-        int size = RyuFloat.toString(value, this.bytes, off);
+        int size = RyuDouble.toString(value, this.bytes, off);
         off += size;
     }
 

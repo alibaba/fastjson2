@@ -66,6 +66,30 @@ public class TypeUtils {
     public static final BigInteger BIGINT_INT64_MIN = BigInteger.valueOf(Long.MIN_VALUE);
     public static final BigInteger BIGINT_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
 
+    /**
+     * All the positive powers of 10 that can be
+     * represented exactly in double/float.
+     */
+    static final double[] SMALL_10_POW = {
+            1.0e0,
+            1.0e1, 1.0e2, 1.0e3, 1.0e4, 1.0e5,
+            1.0e6, 1.0e7, 1.0e8, 1.0e9, 1.0e10,
+            1.0e11, 1.0e12, 1.0e13, 1.0e14, 1.0e15,
+            1.0e16, 1.0e17, 1.0e18, 1.0e19, 1.0e20,
+            1.0e21, 1.0e22
+    };
+
+    static final float[] SINGLE_SMALL_10_POW = {
+            1.0e0f,
+            1.0e1f, 1.0e2f, 1.0e3f, 1.0e4f, 1.0e5f,
+            1.0e6f, 1.0e7f, 1.0e8f, 1.0e9f, 1.0e10f
+    };
+
+    static final double[] BIG_10_POW = {
+            1e16, 1e32, 1e64, 1e128, 1e256};
+    static final double[] TINY_10_POW = {
+            1e-16, 1e-32, 1e-64, 1e-128, 1e-256};
+
     static class X1 {
         static final Function<byte[], char[]> TO_CHARS;
 
@@ -291,7 +315,8 @@ public class TypeUtils {
                         break expLoop; // stop parsing exponent.
                     }
                 }
-                int expLimit = FloatingDecimal.BIG_DECIMAL_EXPONENT + nDigits + nTrailZero;
+                final int BIG_DECIMAL_EXPONENT = 324;
+                int expLimit = BIG_DECIMAL_EXPONENT + nDigits + nTrailZero;
                 if (expOverflow || (expVal > expLimit)) {
                     decExp = expSign * expLimit;
                 } else {
@@ -424,7 +449,8 @@ public class TypeUtils {
                         break expLoop; // stop parsing exponent.
                     }
                 }
-                int expLimit = FloatingDecimal.BIG_DECIMAL_EXPONENT + nDigits + nTrailZero;
+                final int BIG_DECIMAL_EXPONENT = 324;
+                int expLimit = BIG_DECIMAL_EXPONENT + nDigits + nTrailZero;
                 if (expOverflow || (expVal > expLimit)) {
                     decExp = expSign * expLimit;
                 } else {
@@ -557,7 +583,8 @@ public class TypeUtils {
                         break expLoop; // stop parsing exponent.
                     }
                 }
-                int expLimit = FloatingDecimal.BIG_DECIMAL_EXPONENT + nDigits + nTrailZero;
+                final int BIG_DECIMAL_EXPONENT = 324;
+                int expLimit = BIG_DECIMAL_EXPONENT + nDigits + nTrailZero;
                 if (expOverflow || (expVal > expLimit)) {
                     decExp = expSign * expLimit;
                 } else {
@@ -690,7 +717,8 @@ public class TypeUtils {
                         break expLoop; // stop parsing exponent.
                     }
                 }
-                int expLimit = FloatingDecimal.BIG_DECIMAL_EXPONENT + nDigits + nTrailZero;
+                final int BIG_DECIMAL_EXPONENT = 324;
+                int expLimit = BIG_DECIMAL_EXPONENT + nDigits + nTrailZero;
                 if (expOverflow || (expVal > expLimit)) {
                     decExp = expSign * expLimit;
                 } else {
@@ -715,10 +743,21 @@ public class TypeUtils {
     }
 
     public static double doubleValue(boolean isNegative, int decExp, char[] digits, int nDigits) {
-        int kDigits = Math.min(nDigits, FloatingDecimal.MAX_DECIMAL_DIGITS + 1);
+        final int MAX_DECIMAL_EXPONENT = 308;
+        final int MIN_DECIMAL_EXPONENT = -324;
+        final int MAX_NDIGITS = 1100;
+        final int INT_DECIMAL_DIGITS = 9;
+        final int MAX_DECIMAL_DIGITS = 15;
+        final int DOUBLE_EXP_BIAS = 1023;
+        final int EXP_SHIFT = 53 /*DOUBLE_SIGNIFICAND_WIDTH*/ - 1;
+        final long FRACT_HOB = (1L << EXP_SHIFT); // assumed High-Order bit
+        final int MAX_SMALL_TEN = SMALL_10_POW.length - 1;
+        final int SINGLE_MAX_SMALL_TEN = SINGLE_SMALL_10_POW.length - 1;
+
+        int kDigits = Math.min(nDigits, MAX_DECIMAL_DIGITS + 1);
 
         int iValue = (int) digits[0] - (int) '0';
-        int iDigits = Math.min(kDigits, FloatingDecimal.INT_DECIMAL_DIGITS);
+        int iDigits = Math.min(kDigits, INT_DECIMAL_DIGITS);
         for (int i = 1; i < iDigits; i++) {
             iValue = iValue * 10 + (int) digits[i] - (int) '0';
         }
@@ -729,47 +768,47 @@ public class TypeUtils {
         double dValue = (double) lValue;
         int exp = decExp - kDigits;
 
-        if (nDigits <= FloatingDecimal.MAX_DECIMAL_DIGITS) {
+        if (nDigits <= MAX_DECIMAL_DIGITS) {
             if (exp == 0 || dValue == 0.0) {
                 return (isNegative) ? -dValue : dValue; // small floating integer
             } else if (exp >= 0) {
-                if (exp <= FloatingDecimal.MAX_SMALL_TEN) {
-                    double rValue = dValue * FloatingDecimal.SMALL_10_POW[exp];
+                if (exp <= MAX_SMALL_TEN) {
+                    double rValue = dValue * SMALL_10_POW[exp];
                     return (isNegative) ? -rValue : rValue;
                 }
-                int slop = FloatingDecimal.MAX_DECIMAL_DIGITS - kDigits;
-                if (exp <= FloatingDecimal.MAX_SMALL_TEN + slop) {
-                    dValue *= FloatingDecimal.SMALL_10_POW[slop];
-                    double rValue = dValue * FloatingDecimal.SMALL_10_POW[exp - slop];
+                int slop = MAX_DECIMAL_DIGITS - kDigits;
+                if (exp <= MAX_SMALL_TEN + slop) {
+                    dValue *= SMALL_10_POW[slop];
+                    double rValue = dValue * SMALL_10_POW[exp - slop];
                     return (isNegative) ? -rValue : rValue;
                 }
             } else {
-                if (exp >= -FloatingDecimal.MAX_SMALL_TEN) {
-                    double rValue = dValue / FloatingDecimal.SMALL_10_POW[-exp];
+                if (exp >= -MAX_SMALL_TEN) {
+                    double rValue = dValue / SMALL_10_POW[-exp];
                     return (isNegative) ? -rValue : rValue;
                 }
             }
         }
 
         if (exp > 0) {
-            if (decExp > FloatingDecimal.MAX_DECIMAL_EXPONENT + 1) {
+            if (decExp > MAX_DECIMAL_EXPONENT + 1) {
                 return (isNegative) ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
             }
             if ((exp & 15) != 0) {
-                dValue *= FloatingDecimal.SMALL_10_POW[exp & 15];
+                dValue *= SMALL_10_POW[exp & 15];
             }
             if ((exp >>= 4) != 0) {
                 int j;
                 for (j = 0; exp > 1; j++, exp >>= 1) {
                     if ((exp & 1) != 0) {
-                        dValue *= FloatingDecimal.BIG_10_POW[j];
+                        dValue *= BIG_10_POW[j];
                     }
                 }
 
-                double t = dValue * FloatingDecimal.BIG_10_POW[j];
+                double t = dValue * BIG_10_POW[j];
                 if (Double.isInfinite(t)) {
                     t = dValue / 2.0;
-                    t *= FloatingDecimal.BIG_10_POW[j];
+                    t *= BIG_10_POW[j];
                     if (Double.isInfinite(t)) {
                         return (isNegative) ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
                     }
@@ -779,24 +818,24 @@ public class TypeUtils {
             }
         } else if (exp < 0) {
             exp = -exp;
-            if (decExp < FloatingDecimal.MIN_DECIMAL_EXPONENT - 1) {
+            if (decExp < MIN_DECIMAL_EXPONENT - 1) {
                 return (isNegative) ? -0.0 : 0.0;
             }
             if ((exp & 15) != 0) {
-                dValue /= FloatingDecimal.SMALL_10_POW[exp & 15];
+                dValue /= SMALL_10_POW[exp & 15];
             }
             if ((exp >>= 4) != 0) {
                 int j;
                 for (j = 0; exp > 1; j++, exp >>= 1) {
                     if ((exp & 1) != 0) {
-                        dValue *= FloatingDecimal.TINY_10_POW[j];
+                        dValue *= TINY_10_POW[j];
                     }
                 }
 
-                double t = dValue * FloatingDecimal.TINY_10_POW[j];
+                double t = dValue * TINY_10_POW[j];
                 if (t == 0.0) {
                     t = dValue * 2.0;
-                    t *= FloatingDecimal.TINY_10_POW[j];
+                    t *= TINY_10_POW[j];
                     if (t == 0.0) {
                         return (isNegative) ? -0.0 : 0.0;
                     }
@@ -806,9 +845,9 @@ public class TypeUtils {
             }
         }
 
-        if (nDigits > FloatingDecimal.MAX_NDIGITS) {
-            nDigits = FloatingDecimal.MAX_NDIGITS + 1;
-            digits[FloatingDecimal.MAX_NDIGITS] = '1';
+        if (nDigits > MAX_NDIGITS) {
+            nDigits = MAX_NDIGITS + 1;
+            digits[MAX_NDIGITS] = '1';
         }
         FDBigInteger bigD0 = new FDBigInteger(lValue, digits, kDigits, nDigits);
         exp = decExp - nDigits;
@@ -824,22 +863,23 @@ public class TypeUtils {
         correctionLoop:
         while (true) {
             // here ieeeBits can't be NaN, Infinity or zero
-            int binexp = (int) (ieeeBits >>> FloatingDecimal.EXP_SHIFT);
-            long bigBbits = ieeeBits & FloatingDecimal.DOUBLE_SIGNIF_BIT_MASK;
+            int binexp = (int) (ieeeBits >>> EXP_SHIFT);
+            final long DOUBLE_SIGNIF_BIT_MASK = 0x000FFFFFFFFFFFFFL;
+            long bigBbits = ieeeBits & DOUBLE_SIGNIF_BIT_MASK;
             if (binexp > 0) {
-                bigBbits |= FloatingDecimal.FRACT_HOB;
+                bigBbits |= FRACT_HOB;
             } else { // Normalize denormalized numbers.
                 assert bigBbits != 0L : bigBbits; // doubleToBigInt(0.0)
                 int leadingZeros = Long.numberOfLeadingZeros(bigBbits);
-                int shift = leadingZeros - (63 - FloatingDecimal.EXP_SHIFT);
+                int shift = leadingZeros - (63 - EXP_SHIFT);
                 bigBbits <<= shift;
                 binexp = 1 - shift;
             }
-            binexp -= FloatingDecimal.DOUBLE_EXP_BIAS;
+            binexp -= DOUBLE_EXP_BIAS;
             int lowOrderZeros = Long.numberOfTrailingZeros(bigBbits);
             bigBbits >>>= lowOrderZeros;
-            final int bigIntExp = binexp - FloatingDecimal.EXP_SHIFT + lowOrderZeros;
-            final int bigIntNBits = FloatingDecimal.EXP_SHIFT + 1 - lowOrderZeros;
+            final int bigIntExp = binexp - EXP_SHIFT + lowOrderZeros;
+            final int bigIntNBits = EXP_SHIFT + 1 - lowOrderZeros;
 
             int B2 = B5; // powers of 2 in bigB
             int D2 = D5; // powers of 2 in bigD
@@ -853,11 +893,11 @@ public class TypeUtils {
             // shift bigB and bigD left by a number s. t.
             // halfUlp is still an integer.
             int hulpbias;
-            if (binexp <= -FloatingDecimal.DOUBLE_EXP_BIAS) {
+            if (binexp <= -DOUBLE_EXP_BIAS) {
                 // This is going to be a denormalized number
                 // (if not actually zero).
                 // half an ULP is at 2^-(EXP_BIAS+EXP_SHIFT+1)
-                hulpbias = binexp + lowOrderZeros + FloatingDecimal.DOUBLE_EXP_BIAS;
+                hulpbias = binexp + lowOrderZeros + DOUBLE_EXP_BIAS;
             } else {
                 hulpbias = 1 + lowOrderZeros;
             }
@@ -882,7 +922,7 @@ public class TypeUtils {
             if ((cmpResult = bigB.cmp(bigD)) > 0) {
                 overvalue = true; // our candidate is too big.
                 diff = bigB.leftInplaceSub(bigD); // bigB is not user further - reuse
-                if ((bigIntNBits == 1) && (bigIntExp > -FloatingDecimal.DOUBLE_EXP_BIAS + 1)) {
+                if ((bigIntNBits == 1) && (bigIntExp > -DOUBLE_EXP_BIAS + 1)) {
                     // candidate is a normalized exact power of 2 and
                     // is too big (larger than Double.MIN_NORMAL). We will be subtracting.
                     // For our purposes, ulp is the ulp of the
@@ -921,20 +961,29 @@ public class TypeUtils {
                 // halfUlp here, if we bothered to compute that difference.
                 // Most of the time ( I hope ) it is about 1 anyway.
                 ieeeBits += overvalue ? -1 : 1; // nextDown or nextUp
-                if (ieeeBits == 0 || ieeeBits == FloatingDecimal.DOUBLE_EXP_BIT_MASK) { // 0.0 or Double.POSITIVE_INFINITY
+                final long DOUBLE_EXP_BIT_MASK = 0x7FF0000000000000L;
+                if (ieeeBits == 0 || ieeeBits == DOUBLE_EXP_BIT_MASK) { // 0.0 or Double.POSITIVE_INFINITY
                     break correctionLoop; // oops. Fell off end of range.
                 }
                 continue; // try again.
             }
         }
         if (isNegative) {
-            ieeeBits |= FloatingDecimal.DOUBLE_SIGN_BIT_MASK;
+            final long DOUBLE_SIGN_BIT_MASK = 0x8000000000000000L;
+            ieeeBits |= DOUBLE_SIGN_BIT_MASK;
         }
         return Double.longBitsToDouble(ieeeBits);
     }
 
     public static float floatValue(boolean isNegative, int decExponent, char[] digits, int nDigits) {
-        int kDigits = Math.min(nDigits, FloatingDecimal.SINGLE_MAX_DECIMAL_DIGITS + 1);
+        final int SINGLE_MAX_NDIGITS = 200;
+        final int SINGLE_MAX_DECIMAL_DIGITS = 7;
+        final int MAX_DECIMAL_DIGITS = 15;
+        final int FLOAT_EXP_BIAS = 127;
+        final int SINGLE_EXP_SHIFT = 24 /*FLOAT_SIGNIFICAND_WIDTH*/ - 1;
+        final int SINGLE_MAX_SMALL_TEN = SINGLE_SMALL_10_POW.length - 1;
+
+        int kDigits = Math.min(nDigits, SINGLE_MAX_DECIMAL_DIGITS + 1);
         int iValue = (int) digits[0] - (int) '0';
         for (int i = 1; i < kDigits; i++) {
             iValue = iValue * 10 + (int) digits[i] - (int) '0';
@@ -942,75 +991,77 @@ public class TypeUtils {
         float fValue = (float) iValue;
         int exp = decExponent - kDigits;
 
-        if (nDigits <= FloatingDecimal.SINGLE_MAX_DECIMAL_DIGITS) {
+        if (nDigits <= SINGLE_MAX_DECIMAL_DIGITS) {
             if (exp == 0 || fValue == 0.0f) {
                 return (isNegative) ? -fValue : fValue; // small floating integer
             } else if (exp >= 0) {
-                if (exp <= FloatingDecimal.SINGLE_MAX_SMALL_TEN) {
-                    fValue *= FloatingDecimal.SINGLE_SMALL_10_POW[exp];
+                if (exp <= SINGLE_MAX_SMALL_TEN) {
+                    fValue *= SINGLE_SMALL_10_POW[exp];
                     return (isNegative) ? -fValue : fValue;
                 }
-                int slop = FloatingDecimal.SINGLE_MAX_DECIMAL_DIGITS - kDigits;
-                if (exp <= FloatingDecimal.SINGLE_MAX_SMALL_TEN + slop) {
-                    fValue *= FloatingDecimal.SINGLE_SMALL_10_POW[slop];
-                    fValue *= FloatingDecimal.SINGLE_SMALL_10_POW[exp - slop];
+                int slop = SINGLE_MAX_DECIMAL_DIGITS - kDigits;
+                if (exp <= SINGLE_MAX_SMALL_TEN + slop) {
+                    fValue *= SINGLE_SMALL_10_POW[slop];
+                    fValue *= SINGLE_SMALL_10_POW[exp - slop];
                     return (isNegative) ? -fValue : fValue;
                 }
             } else {
-                if (exp >= -FloatingDecimal.SINGLE_MAX_SMALL_TEN) {
-                    fValue /= FloatingDecimal.SINGLE_SMALL_10_POW[-exp];
+                if (exp >= -SINGLE_MAX_SMALL_TEN) {
+                    fValue /= SINGLE_SMALL_10_POW[-exp];
                     return (isNegative) ? -fValue : fValue;
                 }
             }
-        } else if ((decExponent >= nDigits) && (nDigits + decExponent <= FloatingDecimal.MAX_DECIMAL_DIGITS)) {
+        } else if ((decExponent >= nDigits) && (nDigits + decExponent <= MAX_DECIMAL_DIGITS)) {
             long lValue = (long) iValue;
             for (int i = kDigits; i < nDigits; i++) {
                 lValue = lValue * 10L + (long) ((int) digits[i] - (int) '0');
             }
             double dValue = (double) lValue;
             exp = decExponent - nDigits;
-            dValue *= FloatingDecimal.SMALL_10_POW[exp];
+            dValue *= SMALL_10_POW[exp];
             fValue = (float) dValue;
             return (isNegative) ? -fValue : fValue;
         }
         double dValue = fValue;
         if (exp > 0) {
-            if (decExponent > FloatingDecimal.SINGLE_MAX_DECIMAL_EXPONENT + 1) {
+            final int SINGLE_MAX_DECIMAL_EXPONENT = 38;
+            if (decExponent > SINGLE_MAX_DECIMAL_EXPONENT + 1) {
                 return (isNegative) ? Float.NEGATIVE_INFINITY : Float.POSITIVE_INFINITY;
             }
             if ((exp & 15) != 0) {
-                dValue *= FloatingDecimal.SMALL_10_POW[exp & 15];
+                dValue *= SMALL_10_POW[exp & 15];
             }
             if ((exp >>= 4) != 0) {
                 int j;
                 for (j = 0; exp > 0; j++, exp >>= 1) {
                     if ((exp & 1) != 0) {
-                        dValue *= FloatingDecimal.BIG_10_POW[j];
+                        dValue *= BIG_10_POW[j];
                     }
                 }
             }
         } else if (exp < 0) {
             exp = -exp;
-            if (decExponent < FloatingDecimal.SINGLE_MIN_DECIMAL_EXPONENT - 1) {
+            final int SINGLE_MIN_DECIMAL_EXPONENT = -45;
+            if (decExponent < SINGLE_MIN_DECIMAL_EXPONENT - 1) {
                 return (isNegative) ? -0.0f : 0.0f;
             }
             if ((exp & 15) != 0) {
-                dValue /= FloatingDecimal.SMALL_10_POW[exp & 15];
+                dValue /= SMALL_10_POW[exp & 15];
             }
             if ((exp >>= 4) != 0) {
                 int j;
                 for (j = 0; exp > 0; j++, exp >>= 1) {
                     if ((exp & 1) != 0) {
-                        dValue *= FloatingDecimal.TINY_10_POW[j];
+                        dValue *= TINY_10_POW[j];
                     }
                 }
             }
         }
         fValue = Math.max(Float.MIN_VALUE, Math.min(Float.MAX_VALUE, (float) dValue));
 
-        if (nDigits > FloatingDecimal.SINGLE_MAX_NDIGITS) {
-            nDigits = FloatingDecimal.SINGLE_MAX_NDIGITS + 1;
-            digits[FloatingDecimal.SINGLE_MAX_NDIGITS] = '1';
+        if (nDigits > SINGLE_MAX_NDIGITS) {
+            nDigits = SINGLE_MAX_NDIGITS + 1;
+            digits[SINGLE_MAX_NDIGITS] = '1';
         }
         FDBigInteger bigD0 = new FDBigInteger(iValue, digits, kDigits, nDigits);
         exp = decExponent - nDigits;
@@ -1026,22 +1077,24 @@ public class TypeUtils {
         correctionLoop:
         while (true) {
             // here ieeeBits can't be NaN, Infinity or zero
-            int binexp = ieeeBits >>> FloatingDecimal.SINGLE_EXP_SHIFT;
-            int bigBbits = ieeeBits & FloatingDecimal.FLOAT_SIGNIF_BIT_MASK;
+            int binexp = ieeeBits >>> SINGLE_EXP_SHIFT;
+            final int FLOAT_SIGNIF_BIT_MASK = 0x007FFFFF;
+            int bigBbits = ieeeBits & FLOAT_SIGNIF_BIT_MASK;
             if (binexp > 0) {
-                bigBbits |= FloatingDecimal.SINGLE_FRACT_HOB;
+                final int SINGLE_FRACT_HOB = 1 << 23;
+                bigBbits |= SINGLE_FRACT_HOB;
             } else { // Normalize denormalized numbers.
                 assert bigBbits != 0 : bigBbits; // floatToBigInt(0.0)
                 int leadingZeros = Integer.numberOfLeadingZeros(bigBbits);
-                int shift = leadingZeros - (31 - FloatingDecimal.SINGLE_EXP_SHIFT);
+                int shift = leadingZeros - (31 - SINGLE_EXP_SHIFT);
                 bigBbits <<= shift;
                 binexp = 1 - shift;
             }
-            binexp -= FloatingDecimal.FLOAT_EXP_BIAS;
+            binexp -= FLOAT_EXP_BIAS;
             int lowOrderZeros = Integer.numberOfTrailingZeros(bigBbits);
             bigBbits >>>= lowOrderZeros;
-            final int bigIntExp = binexp - FloatingDecimal.SINGLE_EXP_SHIFT + lowOrderZeros;
-            final int bigIntNBits = FloatingDecimal.SINGLE_EXP_SHIFT + 1 - lowOrderZeros;
+            final int bigIntExp = binexp - SINGLE_EXP_SHIFT + lowOrderZeros;
+            final int bigIntNBits = SINGLE_EXP_SHIFT + 1 - lowOrderZeros;
 
             int B2 = B5; // powers of 2 in bigB
             int D2 = D5; // powers of 2 in bigD
@@ -1054,8 +1107,8 @@ public class TypeUtils {
             Ulp2 = B2;
 
             int hulpbias;
-            if (binexp <= -FloatingDecimal.FLOAT_EXP_BIAS) {
-                hulpbias = binexp + lowOrderZeros + FloatingDecimal.FLOAT_EXP_BIAS;
+            if (binexp <= -FLOAT_EXP_BIAS) {
+                hulpbias = binexp + lowOrderZeros + FLOAT_EXP_BIAS;
             } else {
                 hulpbias = 1 + lowOrderZeros;
             }
@@ -1079,7 +1132,7 @@ public class TypeUtils {
             if ((cmpResult = bigB.cmp(bigD)) > 0) {
                 overvalue = true; // our candidate is too big.
                 diff = bigB.leftInplaceSub(bigD); // bigB is not user further - reuse
-                if ((bigIntNBits == 1) && (bigIntExp > -FloatingDecimal.FLOAT_EXP_BIAS + 1)) {
+                if ((bigIntNBits == 1) && (bigIntExp > -FLOAT_EXP_BIAS + 1)) {
                     Ulp2 -= 1;
                     if (Ulp2 < 0) {
                         Ulp2 = 0;
@@ -1102,14 +1155,16 @@ public class TypeUtils {
                 break correctionLoop;
             } else {
                 ieeeBits += overvalue ? -1 : 1; // nextDown or nextUp
-                if (ieeeBits == 0 || ieeeBits == FloatingDecimal.FLOAT_EXP_BIT_MASK) { // 0.0 or Float.POSITIVE_INFINITY
+                final int FLOAT_EXP_BIT_MASK = 0x7F800000;
+                if (ieeeBits == 0 || ieeeBits == FLOAT_EXP_BIT_MASK) { // 0.0 or Float.POSITIVE_INFINITY
                     break correctionLoop; // oops. Fell off end of range.
                 }
                 continue; // try again.
             }
         }
         if (isNegative) {
-            ieeeBits |= FloatingDecimal.FLOAT_SIGN_BIT_MASK;
+            final int FLOAT_SIGN_BIT_MASK = 0x80000000;
+            ieeeBits |= FLOAT_SIGN_BIT_MASK;
         }
         return Float.intBitsToFloat(ieeeBits);
     }
@@ -1754,11 +1809,15 @@ public class TypeUtils {
     }
 
     public static BigDecimal toBigDecimal(float f) {
-        return toBigDecimal(Float.toString(f));
+        byte[] bytes = new byte[15];
+        int size = RyuDouble.toString(f, bytes, 0);
+        return parseBigDecimal(bytes, 0, size);
     }
 
     public static BigDecimal toBigDecimal(double d) {
-        return toBigDecimal(Double.toString(d));
+        byte[] bytes = new byte[24];
+        int size = RyuDouble.toString(d, bytes, 0);
+        return parseBigDecimal(bytes, 0, size);
     }
 
     public static BigDecimal toBigDecimal(String str) {
@@ -1770,7 +1829,7 @@ public class TypeUtils {
             int code = JDKUtils.STRING_CODER.applyAsInt(str);
             if (code == JDKUtils.LATIN1 && JDKUtils.STRING_VALUE != null) {
                 byte[] bytes = JDKUtils.STRING_VALUE.apply(str);
-                return toBigDecimal(bytes);
+                return parseBigDecimal(bytes, 0, bytes.length);
             }
         }
 
@@ -1813,7 +1872,7 @@ public class TypeUtils {
         }
 
         int precision = decimal.precision();
-        if (precision < 19) {
+        if (precision < 20) {
             if (FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
                 long intCompact = UnsafeUtils.getLong(decimal, FIELD_DECIMAL_INT_COMPACT_OFFSET);
                 switch (scale) {
@@ -3810,14 +3869,14 @@ public class TypeUtils {
             return false;
         }
 
-        char ch = (char) str[off];
+        char ch = str[off];
         int offset;
         boolean sign = ch == '-' || ch == '+';
         if (sign) {
             if (len == 1) {
                 return false;
             }
-            ch = (char) str[off + 1];
+            ch = str[off + 1];
             offset = off + 1;
         } else {
             if (ch == '.') {
@@ -3839,7 +3898,7 @@ public class TypeUtils {
             num = true;
             for (; ; ) {
                 if (offset < end) {
-                    ch = (char) str[offset++];
+                    ch = str[offset++];
                 } else {
                     return true;
                 }
@@ -3854,7 +3913,7 @@ public class TypeUtils {
         if (ch == '.') {
             small = true;
             if (offset < end) {
-                ch = (char) str[offset++];
+                ch = str[offset++];
             } else {
                 return true;
             }
@@ -3862,7 +3921,7 @@ public class TypeUtils {
             if (ch >= '0' && ch <= '9') {
                 for (; ; ) {
                     if (offset < end) {
-                        ch = (char) str[offset++];
+                        ch = str[offset++];
                     } else {
                         return true;
                     }
@@ -3883,13 +3942,13 @@ public class TypeUtils {
                 return true;
             }
 
-            ch = (char) str[offset++];
+            ch = str[offset++];
 
             boolean eSign = false;
             if (ch == '+' || ch == '-') {
                 eSign = true;
                 if (offset < end) {
-                    ch = (char) str[offset++];
+                    ch = str[offset++];
                 } else {
                     return false;
                 }
@@ -3898,7 +3957,7 @@ public class TypeUtils {
             if (ch >= '0' && ch <= '9') {
                 for (; ; ) {
                     if (offset < end) {
-                        ch = (char) str[offset++];
+                        ch = str[offset++];
                     } else {
                         return true;
                     }
