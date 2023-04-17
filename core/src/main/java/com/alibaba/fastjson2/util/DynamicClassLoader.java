@@ -82,6 +82,7 @@ public class DynamicClassLoader
 
                 java.util.Collection.class,
                 java.util.List.class,
+                java.util.ArrayList.class,
                 java.util.Map.class,
                 java.util.function.Supplier.class,
                 java.lang.Enum.class,
@@ -90,6 +91,18 @@ public class DynamicClassLoader
         };
         for (Class clazz : classes) {
             classMapping.put(clazz.getName(), clazz);
+        }
+
+        String[] strings = {
+                "sun.misc.Unsafe"
+        };
+        for (String string : strings) {
+            try {
+                Class<?> c = Class.forName(string);
+                classMapping.put(string, c);
+            } catch (ClassNotFoundException ignored) {
+                // ignored
+            }
         }
     }
 
