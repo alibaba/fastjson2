@@ -1724,7 +1724,7 @@ class JSONWriterUTF16
             chars[off++] = '"';
         }
 
-        int len = RyuFloat.toString(value, chars, off);
+        int len = RyuDouble.toString(value, chars, off);
         off += len;
 
         if (writeNonStringValueAsString) {
@@ -1766,7 +1766,7 @@ class JSONWriterUTF16
                 chars[off + 3] = 'l';
                 off += 4;
             } else {
-                int len = RyuFloat.toString(value, chars, off);
+                int len = RyuDouble.toString(value, chars, off);
                 off += len;
             }
         }

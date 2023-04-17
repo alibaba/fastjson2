@@ -110,7 +110,8 @@ public class FloatingDecimalStr {
                         break expLoop; // stop parsing exponent.
                     }
                 }
-                int expLimit = FloatingDecimal.BIG_DECIMAL_EXPONENT + nDigits + nTrailZero;
+                final int BIG_DECIMAL_EXPONENT = 324;
+                int expLimit = BIG_DECIMAL_EXPONENT + nDigits + nTrailZero;
                 if (expOverflow || (expVal > expLimit)) {
                     decExp = expSign * expLimit;
                 } else {
@@ -244,7 +245,8 @@ public class FloatingDecimalStr {
                         break expLoop; // stop parsing exponent.
                     }
                 }
-                int expLimit = FloatingDecimal.BIG_DECIMAL_EXPONENT + nDigits + nTrailZero;
+                final int BIG_DECIMAL_EXPONENT = 324;
+                int expLimit = BIG_DECIMAL_EXPONENT + nDigits + nTrailZero;
                 if (expOverflow || (expVal > expLimit)) {
                     decExp = expSign * expLimit;
                 } else {

@@ -2,9 +2,9 @@ package com.alibaba.fastjson2.benchmark.fastcode;
 
 import org.openjdk.jmh.infra.Blackhole;
 
-public class DoubleToBigDecimalTest {
+public class FloatToBigDecimalTest {
     static final Blackhole BH = new Blackhole("Today's password is swordfish. I understand instantiating Blackholes directly is dangerous.");
-    static final DoubleToBigDecimal benchmark = new DoubleToBigDecimal();
+    static final FloatToBigDecimal benchmark = new FloatToBigDecimal();
     static final int COUNT = 10_000_000;
 
     public static void fastjson2() throws Throwable {
@@ -14,12 +14,12 @@ public class DoubleToBigDecimalTest {
                 benchmark.fastjson2(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("DoubleToBigDecimal-fastjson2 millis : " + millis);
-            // zulu8.58.0.13 : 587
-            // zulu11.52.13 :
-            // zulu17.40.19 : 528
-            // grallvm-ce-17-22.3.1 : 531
-            // grallvm-e-17-22.3.1 : 417
+            System.out.println("FloatToBigDecimal-fastjson2 millis : " + millis);
+            // zulu8.68.0.21 : 425
+            // zulu11.62.17 : 473
+            // zulu17.40.19 : 438
+            // graalvm-ce-17-22.3.1 : 391
+            // graalvm-ee-17-22.3.1 : 319
         }
     }
 
@@ -30,15 +30,17 @@ public class DoubleToBigDecimalTest {
                 benchmark.jdk(BH);
             }
             long millis = System.currentTimeMillis() - start;
-            System.out.println("DoubleToBigDecimal-jdk millis : " + millis);
-            // zulu8.58.0.13 : 635
-            // zulu11.52.13 :
-            // zulu17.40.19 : 644
+            System.out.println("FloatToBigDecimal-jdk millis : " + millis);
+            // zulu8.68.0.21 : 863
+            // zulu11.62.17 : 874
+            // zulu17.40.19 : 869
+            // graalvm-ce-17-22.3.1 : 910
+            // graalvm-ee-17-22.3.1 : 743
         }
     }
 
     public static void main(String[] args) throws Throwable {
-        fastjson2();
-//        jdk();
+//        fastjson2();
+        jdk();
     }
 }

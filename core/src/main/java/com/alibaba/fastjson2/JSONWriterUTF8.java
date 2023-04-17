@@ -2035,7 +2035,7 @@ class JSONWriterUTF8
             bytes[off++] = '"';
         }
 
-        int len = RyuFloat.toString(value, bytes, off);
+        int len = RyuDouble.toString(value, bytes, off);
         off += len;
 
         if (writeNonStringValueAsString) {

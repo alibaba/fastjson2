@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.support.csv;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.RyuDouble;
-import com.alibaba.fastjson2.util.RyuFloat;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -226,7 +225,7 @@ final class CSVWriterUTF16
             flush();
         }
 
-        int size = RyuFloat.toString(value, this.chars, off);
+        int size = RyuDouble.toString(value, this.chars, off);
         off += size;
     }
 
