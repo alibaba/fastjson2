@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.annotation;
 
-import com.alibaba.fastjson2.util.AnnotationUtils;
+import com.alibaba.fastjson2.util.BeanUtils;
 import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.*;
@@ -59,7 +59,7 @@ class JSONCreatorCombinationTest {
 
     private static void assertExistJSONCreator(Constructor<?>[] constructors) {
         Optional<JSONCreator> jsonCreator = Arrays.stream(constructors)
-                .map(constructor -> AnnotationUtils.findAnnotation(constructor, JSONCreator.class))
+                .map(constructor -> BeanUtils.findAnnotation(constructor, JSONCreator.class))
                 .filter(Objects::nonNull)
                 .findAny();
 
@@ -71,7 +71,7 @@ class JSONCreatorCombinationTest {
                 .map(annotation -> {
                     Class<? extends Annotation> annotationType = annotation.annotationType();
                     if (annotationType != JSONCreator.class) {
-                        return AnnotationUtils.findAnnotation(annotationType, JSONCreator.class);
+                        return BeanUtils.findAnnotation(annotationType, JSONCreator.class);
                     } else {
                         return (JSONCreator) annotation;
                     }
