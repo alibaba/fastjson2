@@ -11,7 +11,8 @@
 [![user repos](https://badgen.net/github/dependents-repo/alibaba/fastjson2?label=user%20repos)](https://github.com/alibaba/fastjson2/network/dependents)
 [![GitHub Contributors](https://img.shields.io/github/contributors/alibaba/fastjson2)](https://github.com/alibaba/fastjson2/graphs/contributors)
 
-##### 语言： 中文 | [English](README_EN.md)
+##### 语言： 中文 | [English](README_EN.md) 
+##### 本项目的Issues会被同步沉淀至阿里云开发者社区
 
 # FASTJSON v2
 
