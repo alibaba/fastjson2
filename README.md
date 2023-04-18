@@ -117,7 +117,15 @@ dependencies {
 ```xml
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
-    <artifactId>fastjson2-extension</artifactId>
+    <artifactId>fastjson2-extension-spring5</artifactId>
+    <version>2.0.28</version>
+</dependency>
+```
+
+```xml
+<dependency>
+    <groupId>com.alibaba.fastjson2</groupId>
+    <artifactId>fastjson2-extension-spring6</artifactId>
     <version>2.0.28</version>
 </dependency>
 ```
@@ -126,7 +134,14 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.28'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.28'
+}
+```
+
+
+```groovy
+dependencies {
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.28'
 }
 ```
 
