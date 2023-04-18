@@ -12,7 +12,7 @@
 [![GitHub Contributors](https://img.shields.io/github/contributors/alibaba/fastjson2)](https://github.com/alibaba/fastjson2/graphs/contributors)
 
 ##### 语言： 中文 | [English](README_EN.md) 
-##### 本项目的Issues会被同步沉淀至阿里云开发者社区
+##### 本项目的Issues会被同步沉淀至[阿里云开发者社区](https://developer.aliyun.com/ask/)
 
 # FASTJSON v2
 
