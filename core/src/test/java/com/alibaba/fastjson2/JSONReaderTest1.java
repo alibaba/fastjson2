@@ -2120,4 +2120,70 @@ public class JSONReaderTest1 {
         assertTrue(reader.nextIfObjectEnd());
         assertTrue(reader.isEnd());
     }
+
+    @Test
+    public void testReadTypeHashCode2() {
+        SymbolTable symbolTable = JSONB.symbolTable("abc");
+        JSONWriter.Context writeContext = JSONFactory.createWriteContext(JSONWriter.Feature.WriteNameAsSymbol);
+        JSONWriterJSONB writer = new JSONWriterJSONB(writeContext, symbolTable);
+
+        String typeName = "vip.joinsun.dto.goods.ProjectGoodsSkuDTO";
+        long typeHash = Fnv.hashCode64(typeName);
+
+        int n = 137;
+        String[] types = new String[n];
+        long[] typeHashCodes = new long[types.length];
+        for (int i = 0; i < types.length; i++) {
+            types[i] = "vip.joinsun.dto.order.ThirdOrderResponseBO" + i;
+            typeHashCodes[i] = Fnv.hashCode64(types[i]);
+        }
+        writer.startArray(n + 1);
+
+        for (int i = 0; i < n; i++) {
+            writer.writeTypeName(types[i]);
+            writer.startObject();
+            writer.endObject();
+        }
+
+        writer.writeTypeName(typeName);
+        writer.startObject();
+        writer.endObject();
+
+        writer.writeTypeName(typeName);
+        writer.startObject();
+        writer.endObject();
+
+        writer.endArray();
+
+        byte[] jsonbByte = writer.getBytes();
+
+        System.out.println(JSONB.toJSONString(jsonbByte, true));
+
+        JSONReader.Context readerContext = JSONFactory.createReadContext();
+        JSONReaderJSONB reader = new JSONReaderJSONB(readerContext, jsonbByte, 0, jsonbByte.length);
+
+        assertEquals(n + 1, reader.startArray());
+
+        for (int i = 0; i < n; i++) {
+            assertTrue(reader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY));
+            assertEquals(typeHashCodes[i], reader.readTypeHashCode());
+            assertEquals(types[i], reader.getString());
+            assertTrue(reader.nextIfObjectStart());
+            assertTrue(reader.nextIfObjectEnd());
+        }
+
+        assertTrue(reader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY));
+        assertEquals(typeHash, reader.readTypeHashCode());
+        assertEquals(typeName, reader.getString());
+        assertTrue(reader.nextIfObjectStart());
+        assertTrue(reader.nextIfObjectEnd());
+
+        assertTrue(reader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY));
+        assertEquals(typeHash, reader.readTypeHashCode());
+        assertEquals(typeName, reader.getString());
+        assertTrue(reader.nextIfObjectStart());
+        assertTrue(reader.nextIfObjectEnd());
+
+        assertTrue(reader.isEnd());
+    }
 }

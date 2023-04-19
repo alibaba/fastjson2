@@ -1572,7 +1572,7 @@ class JSONReaderJSONB
                 typeIndex = strtype;
             } else if (strtype >= BC_INT32_BYTE_MIN && strtype <= BC_INT32_BYTE_MAX) {
                 offset++;
-                return ((strtype - BC_INT32_BYTE_ZERO) << 8)
+                typeIndex = ((strtype - BC_INT32_BYTE_ZERO) << 8)
                         + (bytes[offset++] & 0xFF);
             } else {
                 typeIndex = readInt32Value();
