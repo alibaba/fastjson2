@@ -517,7 +517,15 @@ final class CSVReaderUTF8<T>
             StreamReader.ColumnStat stat = getColumnStat(column);
             stat.stat(bytes, off, len, charset);
         };
-        readAll(consumer);
+        readAll(consumer, Integer.MAX_VALUE);
+    }
+
+    public void statAll(int maxRows) {
+        ByteArrayValueConsumer consumer = (row, column, bytes, off, len, charset) -> {
+            StreamReader.ColumnStat stat = getColumnStat(column);
+            stat.stat(bytes, off, len, charset);
+        };
+        readAll(consumer, maxRows);
     }
 
     public void readAll() {
@@ -525,7 +533,15 @@ final class CSVReaderUTF8<T>
             throw new JSONException("unsupported operation, consumer is null");
         }
 
-        readAll(valueConsumer);
+        readAll(valueConsumer, Integer.MAX_VALUE);
+    }
+
+    public void readAll(int maxRows) {
+        if (valueConsumer == null) {
+            throw new JSONException("unsupported operation, consumer is null");
+        }
+
+        readAll(valueConsumer, maxRows);
     }
 
     public void readLineObjectAll(boolean readHeader, Consumer<T> consumer) {
@@ -580,7 +596,7 @@ final class CSVReaderUTF8<T>
             bytesConsumer = new ByteArrayConsumerImpl(consumer);
         }
 
-        readAll(bytesConsumer);
+        readAll(bytesConsumer, Integer.MAX_VALUE);
     }
 
     class ByteArrayConsumerImpl
@@ -617,10 +633,10 @@ final class CSVReaderUTF8<T>
         }
     }
 
-    protected void readAll(ByteArrayValueConsumer consumer) {
+    protected void readAll(ByteArrayValueConsumer consumer, int maxRows) {
         consumer.start();
 
-        while (true) {
+        for (int r = 0; r < maxRows || maxRows < 0; ++r) {
             try {
                 if (inputEnd) {
                     break;
