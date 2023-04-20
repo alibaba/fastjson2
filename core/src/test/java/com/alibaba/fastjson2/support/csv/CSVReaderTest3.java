@@ -207,6 +207,19 @@ public class CSVReaderTest3 {
         assertEquals(0, parser.errorCount());
     }
 
+    @Test
+    public void testObject6_r() throws Exception {
+        String str = "\nname,id\nDataWorks,101\n";
+        CSVReader<Bean> parser = CSVReader.of(str.getBytes(), Bean.class);
+        parser.skipLines(1);
+        parser.readHeader();
+        parser.statAll(1);
+        assertEquals(2, parser.getColumnStats().size());
+        assertEquals(Integer.class, parser.getColumnStat("id").getInferType());
+        assertEquals(String.class, parser.getColumnStat("name").getInferType());
+        assertEquals(0, parser.errorCount());
+    }
+
     @JSONType(orders = {"id", "name"})
     public static class Bean {
         public int id;

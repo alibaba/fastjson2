@@ -336,6 +336,20 @@ public class CSVReaderTest6 {
     }
 
     @Test
+    public void statAll_r() {
+        String str = "id,name,date\n101,abc,2-Feb-07";
+        char[] chars = str.toCharArray();
+        CSVReader csvReader = CSVReader.of(chars);
+        csvReader.readHeader();
+        csvReader.statAll(1);
+        List<StreamReader.ColumnStat> columns = csvReader.getColumnStats();
+        assertEquals(3, columns.size());
+        assertEquals("INT", columns.get(0).getInferSQLType());
+        assertEquals("STRING", columns.get(1).getInferSQLType());
+        assertEquals("DATETIME", columns.get(2).getInferSQLType());
+    }
+
+    @Test
     public void readAll() {
         String str = "id,name,date\n101,abc,2-Feb-07";
         char[] chars = str.toCharArray();
@@ -345,12 +359,35 @@ public class CSVReaderTest6 {
     }
 
     @Test
+    public void readRows() {
+        String str = "id,name,date\n101,abc,2-Feb-07";
+        char[] chars = str.toCharArray();
+        CSVReader csvReader = CSVReader.of(chars);
+        csvReader.readHeader();
+        assertThrows(Exception.class, () -> csvReader.readAll(100));
+    }
+
+    @Test
     public void readAllUTF8() {
         String str = "id,name,date\n101,abc,2-Feb-07";
         byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
         CSVReaderUTF8 csvReader = new CSVReaderUTF8(bytes, 0, bytes.length, new Type[0]);
         csvReader.readHeader();
         assertThrows(Exception.class, () -> csvReader.readAll());
+
+        Consumer consumer = o -> {};
+        CSVReaderUTF8.ByteArrayConsumerImpl byteArrayConsumer = csvReader.new ByteArrayConsumerImpl(consumer);
+        byteArrayConsumer.beforeRow(0);
+        byteArrayConsumer.afterRow(0);
+    }
+
+    @Test
+    public void readRowsUTF8() {
+        String str = "id,name,date\n101,abc,2-Feb-07";
+        byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+        CSVReaderUTF8 csvReader = new CSVReaderUTF8(bytes, 0, bytes.length, new Type[0]);
+        csvReader.readHeader();
+        assertThrows(Exception.class, () -> csvReader.readAll(1000));
 
         Consumer consumer = o -> {};
         CSVReaderUTF8.ByteArrayConsumerImpl byteArrayConsumer = csvReader.new ByteArrayConsumerImpl(consumer);

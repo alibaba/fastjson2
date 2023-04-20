@@ -709,5 +709,9 @@ public abstract class CSVReader<T>
 
     public abstract void statAll();
 
+    public abstract void statAll(int maxRows);
+
     public abstract void readAll();
+
+    public abstract void readAll(int maxRows);
 }
