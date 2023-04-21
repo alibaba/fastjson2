@@ -1168,6 +1168,51 @@ public abstract class BeanUtils {
         return fieldName;
     }
 
+    public static Field getField(Class objectClass, Method method) {
+        String methodName = method.getName();
+        final int len = methodName.length();
+        Class<?> returnType = method.getReturnType();
+
+        boolean is = false, get = false, set = false;
+        if (len > 2) {
+            char c0 = methodName.charAt(0);
+            char c1 = methodName.charAt(1);
+            char c2 = methodName.charAt(2);
+
+            if (c0 == 'i' && c1 == 's') {
+                is = returnType == Boolean.class || returnType == boolean.class;
+            } else if (c0 == 'g' && c1 == 'e' && c2 == 't') {
+                get = len > 3;
+            } else if (c0 == 's' && c1 == 'e' && c2 == 't') {
+                set = len > 3 && method.getParameterCount() == 1;
+            }
+        }
+
+        Field[] fields = new Field[2];
+        if (is || get || set) {
+            Class type = (is || get) ? returnType : method.getParameterTypes()[0];
+            int prefix = is ? 2 : 3;
+            char[] chars = new char[len - prefix];
+            methodName.getChars(prefix, len, chars, 0);
+            char c0 = chars[0];
+            declaredFields(objectClass, field -> {
+                String fieldName = field.getName();
+                int fieldNameLength = fieldName.length();
+                if (fieldNameLength == len - prefix && field.getType() == type) {
+                    if (c0 >= 'A' && c0 <= 'Z' && (c0 + 32) == fieldName.charAt(0)
+                            && fieldName.regionMatches(1, methodName, prefix + 1, fieldNameLength - 1)
+                    ) {
+                        fields[0] = field;
+                    } else if (fieldName.regionMatches(0, methodName, prefix, fieldNameLength)) {
+                        fields[1] = field;
+                    }
+                }
+            });
+        }
+
+        return fields[0] != null ? fields[0] : fields[1];
+    }
+
     public static String getterName(String methodName, String namingStrategy) {
         if (namingStrategy == null) {
             namingStrategy = "CamelCase";

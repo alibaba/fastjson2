@@ -8,10 +8,7 @@ import javassist.CtConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -163,12 +160,12 @@ public class BeanUtilsTest {
     @Test
     public void test5() {
         WildcardType wildcardType0 = new BeanUtils.WildcardTypeImpl(
-                new Type[] {Object.class},
-                new Type[] {Object.class}
+                new Type[]{Object.class},
+                new Type[]{Object.class}
         );
         WildcardType wildcardType1 = new BeanUtils.WildcardTypeImpl(
-                new Type[] {Object.class},
-                new Type[] {Object.class}
+                new Type[]{Object.class},
+                new Type[]{Object.class}
         );
         assertEquals(wildcardType0, wildcardType1);
 
@@ -206,8 +203,8 @@ public class BeanUtilsTest {
     @Test
     public void getRawType() {
         WildcardType wildcardType = new BeanUtils.WildcardTypeImpl(
-                new Type[] {Object.class},
-                new Type[] {Object.class}
+                new Type[]{Object.class},
+                new Type[]{Object.class}
         );
         assertEquals(Object.class, BeanUtils.getRawType(wildcardType));
     }
@@ -269,7 +266,8 @@ public class BeanUtilsTest {
 
     @Test
     public void declaredFieldsNull() {
-        BeanUtils.declaredFields(null, o -> {});
+        BeanUtils.declaredFields(null, o -> {
+        });
         BeanUtils.declaredFields(Object.class, null);
     }
 
@@ -288,7 +286,7 @@ public class BeanUtilsTest {
 
     @Test
     public void buildIgnores() {
-        String[] names = new String[] {
+        String[] names = new String[]{
                 "javassist.CtNewClass",
                 "javassist.CtNewNestedClass",
                 "javassist.CtClass",
@@ -315,6 +313,70 @@ public class BeanUtilsTest {
         Arrays.sort(hashCodes);
         for (int i = 0; i < hashCodes.length; i++) {
             // System.out.println(hashCodes[i] + "L,");
+        }
+    }
+
+    @Test
+    public void testGetField() throws Exception {
+        {
+            Method getId = Bean3.class.getMethod("getId");
+            Field field = BeanUtils.getField(Bean3.class, getId);
+            assertNotNull(field);
+        }
+        {
+            Method setId = Bean3.class.getMethod("setId", int.class);
+            Field field = BeanUtils.getField(Bean3.class, setId);
+            assertNotNull(field);
+        }
+        {
+            Method isFlag = Bean3.class.getMethod("isFlag");
+            Field field = BeanUtils.getField(Bean3.class, isFlag);
+            assertNotNull(field);
+        }
+        {
+            Method setFlag = Bean3.class.getMethod("setFlag", boolean.class);
+            Field field = BeanUtils.getField(Bean3.class, setFlag);
+            assertNotNull(field);
+        }
+        {
+            Method getName = Bean3.class.getMethod("getName");
+            Field field = BeanUtils.getField(Bean3.class, getName);
+            assertNotNull(field);
+        }
+        {
+            Method setName = Bean3.class.getMethod("setName", String.class);
+            Field field = BeanUtils.getField(Bean3.class, setName);
+            assertNotNull(field);
+        }
+    }
+
+    public static class Bean3 {
+        private int id;
+        private boolean flag;
+        private String Name;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public boolean isFlag() {
+            return flag;
+        }
+
+        public void setFlag(boolean flag) {
+            this.flag = flag;
+        }
+
+        public String getName() {
+            return Name;
+        }
+
+        public void setName(String name) {
+            Name = name;
         }
     }
 }
