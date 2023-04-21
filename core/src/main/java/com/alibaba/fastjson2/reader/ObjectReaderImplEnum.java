@@ -130,6 +130,8 @@ public final class ObjectReaderImplEnum
             }
 
             fieldValue = getEnumByOrdinal(ordinal);
+        } else if (jsonReader.nextIfNullOrEmptyString()) {
+            return null;
         } else {
             fieldValue = getEnumByHashCode(
                     jsonReader.readValueHashCode()
