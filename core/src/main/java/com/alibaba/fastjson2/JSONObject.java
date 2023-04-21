@@ -12,6 +12,9 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -1521,14 +1524,22 @@ public class JSONObject
             Object value;
             if (name == null) {
                 name = methodName;
-                if (name.startsWith("get")) {
-                    name = name.substring(3);
-                    if (name.isEmpty()) {
+                boolean with = false;
+                int prefix;
+                if ((name.startsWith("get") || (with = name.startsWith("with")))
+                        && name.length() > (prefix = with ? 4 : 3)
+                ) {
+                    char[] chars = new char[name.length() - prefix];
+                    name.getChars(prefix, name.length(), chars, 0);
+                    if (chars[0] >= 'A' && chars[0] <= 'Z') {
+                        chars[0] = (char) (chars[0] + 32);
+                    }
+                    String fieldName = new String(chars);
+                    if (fieldName.isEmpty()) {
                         throw new JSONException("This method '" + methodName + "' is an illegal getter");
                     }
-                    name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
 
-                    value = get(name);
+                    value = get(fieldName);
                     if (value == null) {
                         return null;
                     }
@@ -1559,6 +1570,21 @@ public class JSONObject
                 } else if ("size".equals(name)) {
                     return this.size();
                 } else {
+                    Class<?> declaringClass = method.getDeclaringClass();
+                    if (declaringClass.isInterface()
+                            && method.getParameterCount() == 0
+                            && !Modifier.isAbstract(method.getModifiers())
+                    ) {
+                        // interface default method
+                        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
+                        MethodHandle methodHandle = lookup.findSpecial(
+                                declaringClass,
+                                method.getName(),
+                                MethodType.methodType(returnType),
+                                declaringClass
+                        );
+                        return methodHandle.invoke(proxy);
+                    }
                     throw new JSONException("This method '" + methodName + "' is not a getter");
                 }
             } else {
@@ -1568,14 +1594,16 @@ public class JSONObject
                 }
             }
 
-            Function typeConvert = JSONFactory
-                    .getDefaultObjectReaderProvider()
-                    .getTypeConvert(
-                            value.getClass(), method.getGenericReturnType()
-                    );
+            if (value != null && !returnType.isInstance(value)) {
+                Function typeConvert = JSONFactory
+                        .getDefaultObjectReaderProvider()
+                        .getTypeConvert(
+                                value.getClass(), method.getGenericReturnType()
+                        );
 
-            if (typeConvert != null) {
-                return typeConvert.apply(value);
+                if (typeConvert != null) {
+                    value = typeConvert.apply(value);
+                }
             }
 
             return value;
@@ -1789,6 +1817,7 @@ public class JSONObject
 
     /**
      * if value instance of Map or Collection, return size, other return 0
+     *
      * @param key
      * @since 2.0.24
      */
