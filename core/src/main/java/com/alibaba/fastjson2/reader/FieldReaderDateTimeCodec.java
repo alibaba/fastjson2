@@ -214,6 +214,8 @@ abstract class FieldReaderDateTimeCodec<T>
             accept(object, ((Long) value).longValue());
         } else if (value instanceof LocalDateTime) {
             accept(object, (LocalDateTime) value);
+        } else if (value instanceof ZonedDateTime) {
+            accept(object, (ZonedDateTime) value);
         } else {
             throw new JSONException("not support value " + value.getClass());
         }
