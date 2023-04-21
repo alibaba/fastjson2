@@ -138,7 +138,11 @@ public interface ObjectReader<T> {
                 } else {
                     if (autoCast) {
                         String fieldValueJSONString = JSON.toJSONString(fieldValue);
-                        try (JSONReader jsonReader = JSONReader.of(fieldValueJSONString)) {
+                        JSONReader.Context readContext = JSONFactory.createReadContext();
+                        if ((features & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
+                            readContext.config(JSONReader.Feature.SupportSmartMatch);
+                        }
+                        try (JSONReader jsonReader = JSONReader.of(fieldValueJSONString, readContext)) {
                             ObjectReader fieldObjectReader = fieldReader.getObjectReader(jsonReader);
                             typedFieldValue = fieldObjectReader.readObject(jsonReader, null, entry.getKey(), features);
                         }

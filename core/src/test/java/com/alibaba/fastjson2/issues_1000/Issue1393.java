@@ -2,7 +2,9 @@ package com.alibaba.fastjson2.issues_1000;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.DateUtils;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -26,14 +28,14 @@ public class Issue1393 {
                 "instant", dateStr
         );
         String json = jsonObject.toString();
-        Bean bean = JSON.parseObject(json, Bean.class);
+        Bean bean = JSON.parseObject(json, Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertNotNull(bean.instant);
         assertEquals(millis, bean.date.getTime());
         assertEquals(millis, bean.ldt.atZone(DateUtils.DEFAULT_ZONE_ID).toInstant().toEpochMilli());
         assertEquals(millis, bean.zdt.toInstant().toEpochMilli());
         assertEquals(millis, bean.instant.toEpochMilli());
 
-        Bean bean1 = jsonObject.toJavaObject(Bean.class);
+        Bean bean1 = jsonObject.toJavaObject(Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(bean.date.getTime(), bean1.date.getTime());
         assertEquals(bean.ldt, bean1.ldt);
         assertEquals(bean.zdt, bean1.zdt);
@@ -52,14 +54,14 @@ public class Issue1393 {
                 "instant", dateStr
         );
         String json = jsonObject.toString();
-        Bean bean = JSON.parseObject(json, Bean.class);
+        Bean bean = JSON.parseObject(json, Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertNotNull(bean.instant);
         assertEquals(millis, bean.date.getTime());
         assertEquals(millis, bean.ldt.atZone(DateUtils.DEFAULT_ZONE_ID).toInstant().toEpochMilli());
         assertEquals(millis, bean.zdt.toInstant().toEpochMilli());
         assertEquals(millis, bean.instant.toEpochMilli());
 
-        Bean bean1 = jsonObject.toJavaObject(Bean.class);
+        Bean bean1 = jsonObject.toJavaObject(Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(bean.date.getTime(), bean1.date.getTime());
         assertEquals(bean.ldt, bean1.ldt);
         assertEquals(bean.zdt, bean1.zdt);
@@ -78,14 +80,14 @@ public class Issue1393 {
                 "instant", dateStr
         );
         String json = jsonObject.toString();
-        Bean bean = JSON.parseObject(json, Bean.class);
+        Bean bean = JSON.parseObject(json, Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertNotNull(bean.instant);
         assertEquals(millis, bean.date.getTime());
         assertEquals(millis, bean.ldt.atZone(DateUtils.DEFAULT_ZONE_ID).toInstant().toEpochMilli());
         assertEquals(millis, bean.zdt.toInstant().toEpochMilli());
         assertEquals(millis, bean.instant.toEpochMilli());
 
-        Bean bean1 = jsonObject.toJavaObject(Bean.class);
+        Bean bean1 = jsonObject.toJavaObject(Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(bean.date.getTime(), bean1.date.getTime());
         assertEquals(bean.ldt, bean1.ldt);
         assertEquals(bean.zdt, bean1.zdt);
@@ -104,14 +106,14 @@ public class Issue1393 {
                 "instant", dateStr
         );
         String json = jsonObject.toString();
-        Bean bean = JSON.parseObject(json, Bean.class);
+        Bean bean = JSON.parseObject(json, Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertNotNull(bean.instant);
         assertEquals(millis, bean.date.getTime());
         assertEquals(millis, bean.ldt.atZone(DateUtils.DEFAULT_ZONE_ID).toInstant().toEpochMilli());
         assertEquals(millis, bean.zdt.toInstant().toEpochMilli());
         assertEquals(millis, bean.instant.toEpochMilli());
 
-        Bean bean1 = jsonObject.toJavaObject(Bean.class);
+        Bean bean1 = jsonObject.toJavaObject(Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(bean.date.getTime(), bean1.date.getTime());
         assertEquals(bean.ldt, bean1.ldt);
         assertEquals(bean.zdt, bean1.zdt);
@@ -130,14 +132,14 @@ public class Issue1393 {
                 "instant", dateStr
         );
         String json = jsonObject.toString();
-        Bean bean = JSON.parseObject(json, Bean.class);
+        Bean bean = JSON.parseObject(json, Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertNotNull(bean.instant);
         assertEquals(millis, bean.date.getTime());
         assertEquals(millis, bean.ldt.atZone(DateUtils.DEFAULT_ZONE_ID).toInstant().toEpochMilli());
         assertEquals(millis, bean.zdt.toInstant().toEpochMilli());
         assertEquals(millis, bean.instant.toEpochMilli());
 
-        Bean bean1 = jsonObject.toJavaObject(Bean.class);
+        Bean bean1 = jsonObject.toJavaObject(Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(bean.date.getTime(), bean1.date.getTime());
         assertEquals(bean.ldt, bean1.ldt);
         assertEquals(bean.zdt, bean1.zdt);
@@ -156,14 +158,14 @@ public class Issue1393 {
                 "instant", dateStr
         );
         String json = jsonObject.toString();
-        Bean bean = JSON.parseObject(json, Bean.class);
+        Bean bean = JSON.parseObject(json, Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertNotNull(bean.instant);
         assertEquals(millis, bean.date.getTime());
         assertEquals(millis, bean.ldt.atZone(DateUtils.DEFAULT_ZONE_ID).toInstant().toEpochMilli());
         assertEquals(millis, bean.zdt.toInstant().toEpochMilli());
         assertEquals(millis, bean.instant.toEpochMilli());
 
-        Bean bean1 = jsonObject.toJavaObject(Bean.class);
+        Bean bean1 = jsonObject.toJavaObject(Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(bean.date.getTime(), bean1.date.getTime());
         assertEquals(bean.ldt, bean1.ldt);
         assertEquals(bean.zdt, bean1.zdt);
@@ -182,14 +184,14 @@ public class Issue1393 {
                 "instant", dateStr
         );
         String json = jsonObject.toString();
-        Bean bean = JSON.parseObject(json, Bean.class);
+        Bean bean = JSON.parseObject(json, Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertNotNull(bean.instant);
         assertEquals(millis, bean.date.getTime());
         assertEquals(millis, bean.ldt.atZone(DateUtils.DEFAULT_ZONE_ID).toInstant().toEpochMilli());
         assertEquals(millis, bean.zdt.toInstant().toEpochMilli());
         assertEquals(millis, bean.instant.toEpochMilli());
 
-        Bean bean1 = jsonObject.toJavaObject(Bean.class);
+        Bean bean1 = jsonObject.toJavaObject(Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(bean.date.getTime(), bean1.date.getTime());
         assertEquals(bean.ldt, bean1.ldt);
         assertEquals(bean.zdt, bean1.zdt);
@@ -208,14 +210,14 @@ public class Issue1393 {
                 "instant", dateStr
         );
         String json = jsonObject.toString();
-        Bean bean = JSON.parseObject(json, Bean.class);
+        Bean bean = JSON.parseObject(json, Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertNotNull(bean.instant);
         assertEquals(millis, bean.date.getTime());
         assertEquals(millis, bean.ldt.atZone(DateUtils.DEFAULT_ZONE_ID).toInstant().toEpochMilli());
         assertEquals(millis, bean.zdt.toInstant().toEpochMilli());
         assertEquals(millis, bean.instant.toEpochMilli());
 
-        Bean bean1 = jsonObject.toJavaObject(Bean.class);
+        Bean bean1 = jsonObject.toJavaObject(Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(bean.date.getTime(), bean1.date.getTime());
         assertEquals(bean.ldt, bean1.ldt);
         assertEquals(bean.zdt, bean1.zdt);
@@ -234,14 +236,14 @@ public class Issue1393 {
                 "instant", dateStr
         );
         String json = jsonObject.toString();
-        Bean bean = JSON.parseObject(json, Bean.class);
+        Bean bean = JSON.parseObject(json, Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertNotNull(bean.instant);
         assertEquals(millis, bean.date.getTime());
         assertEquals(millis, bean.ldt.atZone(DateUtils.DEFAULT_ZONE_ID).toInstant().toEpochMilli());
         assertEquals(millis, bean.zdt.toInstant().toEpochMilli());
         assertEquals(millis, bean.instant.toEpochMilli());
 
-        Bean bean1 = jsonObject.toJavaObject(Bean.class);
+        Bean bean1 = jsonObject.toJavaObject(Bean.class, JSONReader.Feature.SupportSmartMatch);
         assertEquals(bean.date.getTime(), bean1.date.getTime());
         assertEquals(bean.ldt, bean1.ldt);
         assertEquals(bean.zdt, bean1.zdt);
@@ -249,9 +251,13 @@ public class Issue1393 {
     }
 
     public static class Bean {
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         public Date date;
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         public LocalDateTime ldt;
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         public ZonedDateTime zdt;
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         public Instant instant;
     }
 }
