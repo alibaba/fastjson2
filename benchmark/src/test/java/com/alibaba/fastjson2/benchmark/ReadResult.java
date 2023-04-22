@@ -8,16 +8,16 @@ import java.util.Map;
 
 public class ReadResult {
     public static void main(String[] args) throws Exception {
-        File outFile = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.28_raw.md");
+        File outFile = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.29_raw.md");
 //        File file = new File("/Users/wenshao/Downloads/result_2.0.25.out");
 
         Map<String, String> files = new LinkedHashMap<>();
-        files.put("ecs.g7.xlarge", "/Users/wenshao/Downloads/result_2.0.28_g7.out");
-        files.put("ecs.g7a.xlarge", "/Users/wenshao/Downloads/result_2.0.28_g7a.out");
-        files.put("ecs.g8m.xlarge", "/Users/wenshao/Downloads/result_2.0.28_g8m.out");
-        files.put("OrangePI5", "/Users/wenshao/Downloads/result_2.0.28_orangepi5.out");
-        files.put("AppleM1Pro", "/Users/wenshao/Downloads/result_2.0.28_applem1pro.out");
-        files.put("MacBookPro2016", "/Users/wenshao/Downloads/result_2.0.28_mac_book_pro_2019_i9.out");
+        files.put("ecs.g7.xlarge", "/Users/wenshao/Downloads/result_2.0.29_g7.out");
+        files.put("ecs.g7a.xlarge", "/Users/wenshao/Downloads/result_2.0.29_g7a.out");
+        files.put("ecs.g8m.xlarge", "/Users/wenshao/Downloads/result_2.0.29_g8m.out");
+        files.put("OrangePI5", "/Users/wenshao/Downloads/result_2.0.29_orangepi5.out");
+        files.put("AppleM1Pro", "/Users/wenshao/Downloads/result_2.0.29_applem1pro.out");
+        files.put("MacBookPro2016", "/Users/wenshao/Downloads/result_2.0.29_mac_book_pro_2019_i9.out");
 
         PrintStream out = new PrintStream(new FileOutputStream(outFile));
         files.forEach((k, v) -> {
