@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -117,10 +118,32 @@ abstract class FieldReaderDateTimeCodec<T>
                     }
                     return apply(millis);
                 } else {
+                    boolean number = false;
+                    switch (format) {
+                        case "yyyy-MM-dd":
+                        case "yyyy-mm-dd":
+                        case "yyyy-MM-dd HH:mm:ss":
+                        case "yyyy-MM-dd'T'HH:mm:ss":
+                            int subIndex = str.indexOf('-');
+                            number = (subIndex == -1 || subIndex == 0) && TypeUtils.isInteger(str);
+                            break;
+                        default:
+                            break;
+                    }
+                    if (number) {
+                        millis = Long.parseLong(str);
+                        if (formatUnixTime) {
+                            millis *= 1000L;
+                        }
+                        return apply(millis);
+                    }
+
                     DateTimeFormatter formatter = getFormatter(jsonReader.getLocale());
                     LocalDateTime ldt;
                     if (!formatHasHour) {
-                        ldt = LocalDateTime.of(LocalDate.parse(str, formatter), LocalTime.MIN);
+                        LocalDate localDate;
+                        localDate = LocalDate.parse(str, formatter);
+                        ldt = LocalDateTime.of(localDate, LocalTime.MIN);
                     } else {
                         ldt = LocalDateTime.parse(str, formatter);
                     }
