@@ -51,6 +51,9 @@ final class ConstructorFunction<T>
             } else {
                 name = parameters[i].getName();
             }
+            if (name == null) {
+                name = "arg" + i;
+            }
             hashCodes[i] = Fnv.hashCode64(name);
         }
 
