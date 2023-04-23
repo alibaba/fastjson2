@@ -11,7 +11,7 @@
 [![user repos](https://badgen.net/github/dependents-repo/alibaba/fastjson2?label=user%20repos)](https://github.com/alibaba/fastjson2/network/dependents)
 [![GitHub Contributors](https://img.shields.io/github/contributors/alibaba/fastjson2)](https://github.com/alibaba/fastjson2/graphs/contributors)
 
-##### Language: [中文](README.md) | English
+##### 📖 English Documentation | 📖 [中文文档](README.md)
 #####  The issues of fastjson will be aslo posted on [Alibaba Cloud Developer Community](https://developer.aliyun.com/ask/)
 
 # FASTJSON v2
@@ -26,7 +26,7 @@
 - Supports `Graal Native-Image` 
 - Supports `JSON Schema` [https://alibaba.github.io/fastjson2/json_schema_cn](https://alibaba.github.io/fastjson2/json_schema_cn)
 
-![fastjson](docs/logo.jpg "fastjson")
+![fastjson logo](https://user-images.githubusercontent.com/1063891/233821110-0c912009-4de3-4664-a27e-25274f2fa9c1.jpg)
 
 Related Documents:
 
