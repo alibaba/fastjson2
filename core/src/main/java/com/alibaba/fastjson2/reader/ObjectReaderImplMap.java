@@ -324,7 +324,7 @@ public final class ObjectReaderImplMap
                     continue;
                 }
 
-                if(jsonReader.isEnd() && null == fieldName){
+                if (jsonReader.isEnd() && null == fieldName) {
                     map = null;
                     break;
                 }
