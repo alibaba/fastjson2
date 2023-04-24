@@ -248,7 +248,7 @@ public final class ObjectReaderImplMap
         if (objectReader != null && objectReader != this) {
             return objectReader.readJSONBObject(jsonReader, fieldType, fieldName1, features);
         }
-        
+
         if (jsonReader.nextIfNull()) {
             return null;
         }
