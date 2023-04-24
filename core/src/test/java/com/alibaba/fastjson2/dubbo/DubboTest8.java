@@ -7,9 +7,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DubboTest8 {
-
     @Test
-    void test(){
+    void test() {
         JSONObject json = null;
         byte[] t = JSONB.toBytes(json, JSONWriter.Feature.WriteClassName,
                 JSONWriter.Feature.FieldBased,
@@ -29,5 +28,4 @@ public class DubboTest8 {
         );
         assertEquals(json, result);
     }
-
 }
