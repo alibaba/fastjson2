@@ -249,6 +249,10 @@ public final class ObjectReaderImplMap
             return objectReader.readJSONBObject(jsonReader, fieldType, fieldName1, features);
         }
 
+        if (jsonReader.nextIfNull()) {
+            return null;
+        }
+
         boolean emptyObject = false;
         jsonReader.nextIfMatch(BC_OBJECT);
 
