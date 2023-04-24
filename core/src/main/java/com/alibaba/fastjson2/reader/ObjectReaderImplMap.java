@@ -324,6 +324,11 @@ public final class ObjectReaderImplMap
                     continue;
                 }
 
+                if(jsonReader.isEnd() && null == fieldName){
+                    map = null;
+                    break;
+                }
+
                 Object value;
                 type = jsonReader.getType();
                 if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_UTF16BE) {
