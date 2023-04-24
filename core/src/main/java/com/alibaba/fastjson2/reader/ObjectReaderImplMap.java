@@ -248,6 +248,10 @@ public final class ObjectReaderImplMap
         if (objectReader != null && objectReader != this) {
             return objectReader.readJSONBObject(jsonReader, fieldType, fieldName1, features);
         }
+        
+        if (jsonReader.nextIfNull()) {
+            return null;
+        }
 
         boolean emptyObject = false;
         jsonReader.nextIfMatch(BC_OBJECT);
@@ -322,11 +326,6 @@ public final class ObjectReaderImplMap
                         map.put(fieldName, null);
                     }
                     continue;
-                }
-
-                if (jsonReader.isEnd() && null == fieldName) {
-                    map = null;
-                    break;
                 }
 
                 Object value;
