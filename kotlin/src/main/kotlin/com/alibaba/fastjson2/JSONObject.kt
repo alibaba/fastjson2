@@ -1,3 +1,7 @@
+@file:Suppress(
+    "HasPlatformType"
+)
+
 package com.alibaba.fastjson2
 
 /**
@@ -7,12 +11,9 @@ package com.alibaba.fastjson2
  *   val user = data.to<User>()
  * ```
  *
- * @receiver JSONObject
- * @param features features to be enabled in parsing
  * @return [T]?
  * @since 2.0.3
  */
-@Suppress("HasPlatformType")
 inline fun <reified T> JSONObject.to(
     vararg features: JSONReader.Feature
 ) = to(
@@ -28,12 +29,9 @@ inline fun <reified T> JSONObject.to(
  *   val user = data.into<User>()
  * ```
  *
- * @receiver JSONObject
- * @param features features to be enabled in parsing
  * @return [T]?
  * @since 2.0.4
  */
-@Suppress("HasPlatformType")
 inline fun <reified T : Any> JSONObject.into(
     vararg features: JSONReader.Feature
 ) = to<T>(
@@ -48,13 +46,9 @@ inline fun <reified T : Any> JSONObject.into(
  *   val user = data.to<User>("key")
  * ```
  *
- * @receiver JSONObject
- * @param key the key whose associated value is to be returned
- * @param features features to be enabled in parsing
  * @return [T]?
  * @since 2.0.4
  */
-@Suppress("HasPlatformType")
 inline fun <reified T> JSONObject.to(
     key: String,
     vararg features: JSONReader.Feature
@@ -74,7 +68,6 @@ inline fun <reified T> JSONObject.to(
  * @return [T]?
  * @since 2.0.4
  */
-@Suppress("HasPlatformType")
 inline fun <reified T : Any> JSONObject.into(
     key: String,
     vararg features: JSONReader.Feature

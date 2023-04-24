@@ -1,49 +1,39 @@
-package com.alibaba.fastjson2
-
-/**
- * Serialize Boolean to JSONB [ByteArray]
- *
- * @receiver Boolean
- * @return [ByteArray]
- * @since 2.0.7
- */
-@Suppress(
+@file:Suppress(
     "HasPlatformType",
     "NOTHING_TO_INLINE"
 )
+
+package com.alibaba.fastjson2
+
+/**
+ * Serializes this boolean value to jsonb byte array
+ *
+ * @return [ByteArray]
+ * @since 2.0.7
+ */
 inline fun Boolean.toJSONB() =
     JSONB.toBytes(this)
 
 /**
- * Serialize Int to JSONB [ByteArray]
+ * Serializes this integer value to jsonb byte array
  *
- * @receiver Int
  * @return [ByteArray]
  * @since 2.0.7
  */
-@Suppress(
-    "HasPlatformType",
-    "NOTHING_TO_INLINE"
-)
 inline fun Int.toJSONB() =
     JSONB.toBytes(this)
 
 /**
- * Serialize Long to JSONB [ByteArray]
+ * Serializes this long value to jsonb byte array
  *
- * @receiver Long
  * @return [ByteArray]
  * @since 2.0.7
  */
-@Suppress(
-    "HasPlatformType",
-    "NOTHING_TO_INLINE"
-)
 inline fun Long.toJSONB() =
     JSONB.toBytes(this)
 
 /**
- * Serialize [Any]? to JSONB [ByteArray]
+ * Serializes this object to jsonb byte array
  *
  * E.g.
  * ```
@@ -51,28 +41,18 @@ inline fun Long.toJSONB() =
  *   val text = obj.toJSONB()
  * ```
  *
- * @receiver [Any]?
  * @return [ByteArray]
  * @since 2.0.7
  */
-@Suppress(
-    "HasPlatformType",
-    "NOTHING_TO_INLINE"
-)
 inline fun Any?.toJSONB() =
     JSONB.toBytes(this)
 
 /**
- * Serialize [Any]? to JSONB [ByteArray]
+ * Serializes this object to jsonb byte array with the specified symbolTable
  *
- * @receiver [Any]?
  * @return [ByteArray]
  * @since 2.0.7
  */
-@Suppress(
-    "HasPlatformType",
-    "NOTHING_TO_INLINE"
-)
 inline fun Any?.toJSONB(
     symbolTable: SymbolTable
 ) = JSONB.toBytes(
@@ -80,17 +60,11 @@ inline fun Any?.toJSONB(
 )
 
 /**
- * Serialize [Any]? to JSONB [ByteArray]
+ * Serializes this object to jsonb byte array with the specified features and symbolTable
  *
- * @param features features to be enabled in parsing
- * @receiver [Any]?
  * @return [ByteArray]
  * @since 2.0.7
  */
-@Suppress(
-    "HasPlatformType",
-    "NOTHING_TO_INLINE"
-)
 inline fun Any?.toJSONB(
     symbolTable: SymbolTable,
     vararg features: JSONWriter.Feature
