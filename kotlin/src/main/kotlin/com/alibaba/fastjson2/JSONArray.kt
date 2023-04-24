@@ -1,3 +1,7 @@
+@file:Suppress(
+    "HasPlatformType"
+)
+
 package com.alibaba.fastjson2
 
 /**
@@ -7,11 +11,9 @@ package com.alibaba.fastjson2
  *   val users = data.to<Users>()
  * ```
  *
- * @receiver JSONArray
  * @return [T]?
  * @since 2.0.3
  */
-@Suppress("HasPlatformType")
 inline fun <reified T> JSONArray.to() =
     to(T::class.java)
 
@@ -24,11 +26,9 @@ inline fun <reified T> JSONArray.to() =
  *   val users = data.into<List<User>>()
  * ```
  *
- * @receiver JSONArray
  * @return [T]?
  * @since 2.0.3
  */
-@Suppress("HasPlatformType")
 inline fun <reified T : Any> JSONArray.into() =
     to<T>(reference<T>().getType())
 
@@ -42,7 +42,6 @@ inline fun <reified T : Any> JSONArray.into() =
  * @return [T]?
  * @since 2.0.4
  */
-@Suppress("HasPlatformType")
 inline fun <reified T> JSONArray.to(
     index: Int,
     vararg features: JSONReader.Feature
@@ -62,7 +61,6 @@ inline fun <reified T> JSONArray.to(
  * @return [T]?
  * @since 2.0.4
  */
-@Suppress("HasPlatformType")
 inline fun <reified T : Any> JSONArray.into(
     index: Int,
     vararg features: JSONReader.Feature
@@ -77,12 +75,9 @@ inline fun <reified T : Any> JSONArray.into(
  *   val user = data.toList<User>()
  * ```
  *
- * @receiver JSONArray
- * @param features features to be enabled in parsing
  * @return [T]?
  * @since 2.0.3
  */
-@Suppress("HasPlatformType")
 inline fun <reified T> JSONArray.toList(
     vararg features: JSONReader.Feature
 ) = toList(
