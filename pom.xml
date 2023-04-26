@@ -41,7 +41,7 @@
         <springboot3.version>3.0.4</springboot3.version>
         <arrow.version>11.0.0</arrow.version>
 
-        <kotlin.version>1.8.20</kotlin.version>
+        <kotlin.version>1.8.21</kotlin.version>
         <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <!-- https://kotlinlang.org/docs/maven.html#specifying-compiler-options -->
