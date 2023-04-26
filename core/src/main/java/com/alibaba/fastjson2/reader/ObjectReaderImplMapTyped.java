@@ -240,6 +240,7 @@ class ObjectReaderImplMapTyped
         if (!jsonReader.nextIfMatch('{')) {
             if (jsonReader.isTypeRedirect()) {
                 index = 1;
+                jsonReader.setTypeRedirect(false);
             } else {
                 if (jsonReader.nextIfNullOrEmptyString()) {
                     return null;

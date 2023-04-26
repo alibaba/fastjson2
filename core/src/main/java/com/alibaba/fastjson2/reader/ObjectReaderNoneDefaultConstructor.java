@@ -220,11 +220,14 @@ public class ObjectReaderNoneDefaultConstructor<T>
         }
 
         boolean objectStart = jsonReader.nextIfObjectStart();
-        if (!objectStart && !jsonReader.isTypeRedirect()) {
-            if (jsonReader.nextIfNullOrEmptyString()) {
+        if (!objectStart) {
+            if (jsonReader.isTypeRedirect()) {
+                jsonReader.setTypeRedirect(false);
+            } else if (jsonReader.nextIfNullOrEmptyString()) {
                 return null;
             }
         }
+
         JSONReader.Context context = jsonReader.getContext();
         long featuresAll = this.features | features | context.getFeatures();
 
@@ -343,7 +346,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
 
         LinkedHashMap<Long, Object> valueMap = new LinkedHashMap<>();
-        for (Iterator it = collection.iterator(); it.hasNext();) {
+        for (Iterator it = collection.iterator(); it.hasNext(); ) {
             Object fieldValue = it.next();
             if (index >= fieldReaders.length) {
                 break;
