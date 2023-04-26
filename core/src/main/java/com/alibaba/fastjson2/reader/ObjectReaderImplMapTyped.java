@@ -236,13 +236,16 @@ class ObjectReaderImplMapTyped
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        boolean match = jsonReader.nextIfMatch('{');
-        if (!match) {
-            if (jsonReader.nextIfNullOrEmptyString()) {
-                return null;
+        int index = 0;
+        if (!jsonReader.nextIfMatch('{')) {
+            if (jsonReader.isTypeRedirect()) {
+                index = 1;
+            } else {
+                if (jsonReader.nextIfNullOrEmptyString()) {
+                    return null;
+                }
+                throw new JSONException(jsonReader.info("expect '{', but '" + jsonReader.current() + "'"));
             }
-
-            throw new JSONException(jsonReader.info("expect '{', but '['"));
         }
 
         JSONReader.Context context = jsonReader.getContext();
@@ -260,12 +263,12 @@ class ObjectReaderImplMapTyped
             object = (Map) createInstance(contextFeatures);
         }
 
-        for (int i = 0; ; ++i) {
+        Object name;
+        for (; ; index++) {
             if (jsonReader.nextIfMatch('}') || jsonReader.isEnd()) {
                 break;
             }
 
-            Object name;
             if (jsonReader.nextIfNull()) {
                 if (!jsonReader.nextIfMatch(':')) {
                     throw new JSONException(jsonReader.info("illegal json"));
@@ -273,7 +276,7 @@ class ObjectReaderImplMapTyped
                 name = null;
             } else if (keyType == String.class) {
                 name = jsonReader.readFieldName();
-                if (i == 0
+                if (index == 0
                         && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
                         && name.equals(getTypeKey())
                 ) {
@@ -300,7 +303,7 @@ class ObjectReaderImplMapTyped
                     }
                 }
             } else {
-                if (i == 0
+                if (index == 0
                         && jsonReader.isEnabled(JSONReader.Feature.SupportAutoType)
                         && jsonReader.current() == '"'
                         && !(keyType instanceof Class && Enum.class.isAssignableFrom((Class) keyType))
@@ -331,7 +334,7 @@ class ObjectReaderImplMapTyped
                 } else {
                     name = jsonReader.read(keyType);
                 }
-                if (i == 0
+                if (index == 0
                         && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
                         && name.equals(getTypeKey())) {
                     continue;
