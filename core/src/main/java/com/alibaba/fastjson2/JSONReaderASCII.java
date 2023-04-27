@@ -1420,39 +1420,41 @@ class JSONReaderASCII
                 str = str.trim();
             }
 
-            if (offset + 1 == end) {
-                this.offset = end;
-                this.ch = EOI;
-                this.comma = false;
-                return str;
-            }
+            clear:
+            if (++offset != end) {
+                byte e = bytes[offset++];
+                while (e <= ' ' && (1L << e & SPACE) != 0) {
+                    if (offset == end) {
+                        break clear;
+                    } else {
+                        e = bytes[offset++];
+                    }
+                }
 
-            byte b = bytes[++offset];
-            while (b <= ' ' && ((1L << b) & SPACE) != 0) {
-                b = bytes[++offset];
-            }
-
-            if (comma = (b == ',')) {
-                this.offset = offset + 1;
-
-                // inline next
-                if (this.offset >= end) {
-                    ch = EOI;
-                } else {
-                    ch = (char) bytes[this.offset++];
-                    while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                        if (this.offset >= end) {
-                            ch = EOI;
-                        } else {
-                            ch = (char) bytes[this.offset++];
+                if (comma = e == ',') {
+                    if (offset == end) {
+                        e = EOI;
+                    } else {
+                        e = bytes[offset++];
+                        while (e <= ' ' && (1L << e & SPACE) != 0) {
+                            if (offset == end) {
+                                e = EOI;
+                                break;
+                            } else {
+                                e = bytes[offset++];
+                            }
                         }
                     }
                 }
-            } else {
-                this.offset = offset + 1;
-                this.ch = (char) b;
+
+                this.ch = (char) e;
+                this.offset = offset;
+                return str;
             }
 
+            this.ch = EOI;
+            this.comma = false;
+            this.offset = offset;
             return str;
         }
 
