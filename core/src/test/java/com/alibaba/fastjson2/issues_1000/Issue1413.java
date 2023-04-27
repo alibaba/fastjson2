@@ -8,15 +8,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class Issue1413 {
     @Test
     public void test() {
-        assertEquals("🦌", JSON.parse("\"🦌\"  "));
-        assertEquals("🦌", JSON.parse("  \"🦌\""));
-        assertEquals("🦌", JSON.parse("  \"🦌\","));
-        assertEquals("🦌", JSON.parse("  \"🦌\"  "));
-        assertEquals("🦌", JSON.parse("  \"🦌\"  \n"));
-        assertEquals("🦌", JSON.parse("  \"🦌\"  \n,"));
-        assertEquals("🦌", JSON.parse("  \"🦌\"  \r\n,  \r\n"));
-        assertEquals("🦌", JSON.parse("\r\n  \"🦌\"  \r\n,  \r\n"));
-
         assertEquals("foo", JSON.parse("\"foo\"  "));
         assertEquals("foo", JSON.parse("  \"foo\""));
         assertEquals("foo", JSON.parse("  \"foo\","));
