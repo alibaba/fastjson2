@@ -1777,171 +1777,54 @@ class JSONWriterUTF8
 
     @Override
     public final void writeInt32(int i) {
-        if ((context.features & Feature.WriteNonStringValueAsString.mask) != 0) {
-            writeString(Integer.toString(i));
-            return;
-        }
+        boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         if (i == Integer.MIN_VALUE) {
-            writeRaw("-2147483648");
+            writeRaw(writeAsString ? "\"-2147483648\"" : "-2147483648");
             return;
         }
 
-        int size;
-        {
-            int x = i < 0 ? -i : i;
-            if (x <= 9) {
-                size = 1;
-            } else if (x <= 99) {
-                size = 2;
-            } else if (x <= 999) {
-                size = 3;
-            } else if (x <= 9999) {
-                size = 4;
-            } else if (x <= 99999) {
-                size = 5;
-            } else if (x <= 999999) {
-                size = 6;
-            } else if (x <= 9999999) {
-                size = 7;
-            } else if (x <= 99999999) {
-                size = 8;
-            } else if (x <= 999999999) {
-                size = 9;
-            } else {
-                size = 10;
-            }
-            if (i < 0) {
-                size++;
-            }
-        }
-
-//        int size = (i < 0) ? IOUtils.stringSize(-i) + 1 : IOUtils.stringSize(i);
-        {
-            // inline ensureCapacity
-            int minCapacity = off + size;
-            if (minCapacity - this.bytes.length > 0) {
-                int oldCapacity = this.bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                this.bytes = Arrays.copyOf(this.bytes, newCapacity);
-            }
-        }
-//        getChars(i, off + size, bytes);
-        {
-            int index = off + size;
-            int q, r, p = index;
-            byte sign = 0;
-
-            if (i < 0) {
-                sign = '-';
-                i = -i;
-            }
-
-            while (i >= 65536) {
-                q = i / 100;
-                // really: r = i - (q * 100);
-                r = i - ((q << 6) + (q << 5) + (q << 2));
-                i = q;
-                bytes[--p] = DigitOnes[r];
-                bytes[--p] = DigitTens[r];
-            }
-
-            // Fall thru to fast mode for smaller numbers
-            // assert(i <= 65536, i);
-            for (; ; ) {
-                q = (i * 52429) >>> (16 + 3);
-                r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
-                bytes[--p] = digits[r];
-                i = q;
-                if (i == 0) {
-                    break;
-                }
-            }
-            if (sign != 0) {
-                bytes[--p] = sign;
-            }
-        }
-        off += size;
-    }
-
-    @Override
-    public final void writeInt64(long i) {
-        boolean writeAsString = false;
-        if ((context.features & (Feature.WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0) {
-            writeAsString = true;
-        } else if ((context.features & Feature.BrowserCompatible.mask) != 0
-                && (i > 9007199254740991L || i < -9007199254740991L)) {
-            writeAsString = true;
-        }
-
-        if (i == Long.MIN_VALUE) {
-            writeRaw("-9223372036854775808");
-            return;
+        boolean negative = i < 0;
+        if (negative) {
+            i = -i;
         }
 
         int size;
-        {
-            long x = i < 0 ? -i : i;
-            if (x <= 9) {
-                size = 1;
-            } else if (x <= 99L) {
-                size = 2;
-            } else if (x <= 999L) {
-                size = 3;
-            } else if (x <= 9999L) {
-                size = 4;
-            } else if (x <= 99999L) {
-                size = 5;
-            } else if (x <= 999999L) {
-                size = 6;
-            } else if (x <= 9999999L) {
-                size = 7;
-            } else if (x <= 99999999L) {
-                size = 8;
-            } else if (x <= 999999999L) {
-                size = 9;
-            } else if (x <= 9999999999L) {
-                size = 10;
-            } else if (x <= 99999999999L) {
-                size = 11;
-            } else if (x <= 999999999999L) {
-                size = 12;
-            } else if (x <= 9999999999999L) {
-                size = 13;
-            } else if (x <= 99999999999999L) {
-                size = 14;
-            } else if (x <= 999999999999999L) {
-                size = 15;
-            } else if (x <= 9999999999999999L) {
-                size = 16;
-            } else if (x <= 99999999999999999L) {
-                size = 17;
-            } else if (x <= 999999999999999999L) {
-                size = 18;
-            } else {
-                size = 19;
-            }
-            if (i < 0) {
-                size++;
-            }
+        if (i <= 9) {
+            size = 1;
+        } else if (i <= 99) {
+            size = 2;
+        } else if (i <= 999) {
+            size = 3;
+        } else if (i <= 9999) {
+            size = 4;
+        } else if (i <= 99999) {
+            size = 5;
+        } else if (i <= 999999) {
+            size = 6;
+        } else if (i <= 9999999) {
+            size = 7;
+        } else if (i <= 99999999) {
+            size = 8;
+        } else if (i <= 999999999) {
+            size = 9;
+        } else {
+            size = 10;
+        }
+        if (negative) {
+            size++;
         }
 
+        // reduce getfield
+        byte[] buffer = bytes;
         {
-            // inline ensureCapacity
+            // inline code to reduce invokespecial
             int minCapacity = off + size;
             if (writeAsString) {
                 minCapacity += 2;
             }
-            if (minCapacity - this.bytes.length > 0) {
-                int oldCapacity = this.bytes.length;
+            if (minCapacity - buffer.length > 0) {
+                int oldCapacity = buffer.length;
                 int newCapacity = oldCapacity + (oldCapacity >> 1);
                 if (newCapacity - minCapacity < 0) {
                     newCapacity = minCapacity;
@@ -1949,69 +1832,168 @@ class JSONWriterUTF8
                 if (newCapacity - maxArraySize > 0) {
                     throw new OutOfMemoryError();
                 }
-
-                // minCapacity is usually close to size, so this is a win:
-                this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+                bytes = buffer = Arrays.copyOf(buffer, newCapacity);
             }
         }
 
         if (writeAsString) {
-            bytes[off++] = '"';
+            buffer[off++] = '"';
         }
 
+        int q, r;
+        int pos = off += size;
+
+        while (i >= 65536) {
+            q = i / 100;
+            // really: r = i - (q * 100);
+            r = i - ((q << 6) + (q << 5) + (q << 2));
+            i = q;
+            buffer[--pos] = DigitOnes[r];
+            buffer[--pos] = DigitTens[r];
+        }
+
+        // Fall thru to fast mode for smaller numbers
+        // assert(i <= 65536, i);
+        do {
+            q = (i * 52429) >>> (16 + 3);
+            r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
+            buffer[--pos] = digits[r];
+            i = q;
+        } while (i != 0);
+
+        if (negative) {
+            buffer[--pos] = '-';
+        }
+
+        if (writeAsString) {
+            buffer[off++] = '"';
+        }
+    }
+
+    @Override
+    public final void writeInt64(long i) {
+        boolean writeAsString = (context.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0
+                || ((context.features & BrowserCompatible.mask) != 0 && (i > 9007199254740991L || i < -9007199254740991L));
+
+        if (i == Long.MIN_VALUE) {
+            writeRaw(writeAsString ? "\"-9223372036854775808\"" : "-9223372036854775808");
+            return;
+        }
+
+        boolean negative = i < 0;
+        if (negative) {
+            i = -i;
+        }
+
+        int size;
+        if (i <= 9) {
+            size = 1;
+        } else if (i <= 99L) {
+            size = 2;
+        } else if (i <= 999L) {
+            size = 3;
+        } else if (i <= 9999L) {
+            size = 4;
+        } else if (i <= 99999L) {
+            size = 5;
+        } else if (i <= 999999L) {
+            size = 6;
+        } else if (i <= 9999999L) {
+            size = 7;
+        } else if (i <= 99999999L) {
+            size = 8;
+        } else if (i <= 999999999L) {
+            size = 9;
+        } else if (i <= 9999999999L) {
+            size = 10;
+        } else if (i <= 99999999999L) {
+            size = 11;
+        } else if (i <= 999999999999L) {
+            size = 12;
+        } else if (i <= 9999999999999L) {
+            size = 13;
+        } else if (i <= 99999999999999L) {
+            size = 14;
+        } else if (i <= 999999999999999L) {
+            size = 15;
+        } else if (i <= 9999999999999999L) {
+            size = 16;
+        } else if (i <= 99999999999999999L) {
+            size = 17;
+        } else if (i <= 999999999999999999L) {
+            size = 18;
+        } else {
+            size = 19;
+        }
+
+        if (negative) {
+            size++;
+        }
+
+        // reduce getfield
+        byte[] buffer = bytes;
         {
-            int index = off + size;
-            long q;
-            int r;
-            int charPos = index;
-            byte sign = 0;
-
-            if (i < 0) {
-                sign = '-';
-                i = -i;
+            // inline code to reduce invokespecial
+            int minCapacity = off + size;
+            if (writeAsString) {
+                minCapacity += 2;
             }
-
-            // Get 2 digits/iteration using longs until quotient fits into an int
-            while (i > Integer.MAX_VALUE) {
-                q = i / 100;
-                // really: r = i - (q * 100);
-                r = (int) (i - ((q << 6) + (q << 5) + (q << 2)));
-                i = q;
-                bytes[--charPos] = DigitOnes[r];
-                bytes[--charPos] = DigitTens[r];
-            }
-
-            // Get 2 digits/iteration using ints
-            int q2;
-            int i2 = (int) i;
-            while (i2 >= 65536) {
-                q2 = i2 / 100;
-                // really: r = i2 - (q * 100);
-                r = i2 - ((q2 << 6) + (q2 << 5) + (q2 << 2));
-                i2 = q2;
-                bytes[--charPos] = DigitOnes[r];
-                bytes[--charPos] = DigitTens[r];
-            }
-
-            // Fall thru to fast mode for smaller numbers
-            // assert(i2 <= 65536, i2);
-            for (; ; ) {
-                q2 = (i2 * 52429) >>> (16 + 3);
-                r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
-                bytes[--charPos] = digits[r];
-                i2 = q2;
-                if (i2 == 0) {
-                    break;
+            if (minCapacity - buffer.length > 0) {
+                int oldCapacity = buffer.length;
+                int newCapacity = oldCapacity + (oldCapacity >> 1);
+                if (newCapacity - minCapacity < 0) {
+                    newCapacity = minCapacity;
                 }
-            }
-            if (sign != 0) {
-                bytes[--charPos] = sign;
+                if (newCapacity - maxArraySize > 0) {
+                    throw new OutOfMemoryError();
+                }
+                bytes = buffer = Arrays.copyOf(buffer, newCapacity);
             }
         }
-        off += size;
 
         if (writeAsString) {
-            bytes[off++] = '"';
+            buffer[off++] = '"';
+        }
+
+        long q;
+        int r, pos = off += size;
+
+        // Get 2 digits/iteration using longs until quotient fits into an int
+        while (i > Integer.MAX_VALUE) {
+            q = i / 100;
+            // really: r = i - (q * 100);
+            r = (int) (i - ((q << 6) + (q << 5) + (q << 2)));
+            i = q;
+            buffer[--pos] = DigitOnes[r];
+            buffer[--pos] = DigitTens[r];
+        }
+
+        // Get 2 digits/iteration using ints
+        int q2, i2 = (int) i;
+        while (i2 >= 65536) {
+            q2 = i2 / 100;
+            // really: r = i2 - (q * 100);
+            r = i2 - ((q2 << 6) + (q2 << 5) + (q2 << 2));
+            i2 = q2;
+            buffer[--pos] = DigitOnes[r];
+            buffer[--pos] = DigitTens[r];
+        }
+
+        // Fall thru to fast mode for smaller numbers
+        // assert(i2 <= 65536, i2);
+        do {
+            q2 = (i2 * 52429) >>> (16 + 3);
+            r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
+            buffer[--pos] = digits[r];
+            i2 = q2;
+        } while (i2 != 0);
+
+        if (negative) {
+            buffer[--pos] = '-';
+        }
+
+        if (writeAsString) {
+            buffer[off++] = '"';
         }
     }
 
