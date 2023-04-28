@@ -1896,7 +1896,7 @@ public class ObjectReaderBaseModule
                 return ObjectReaderImplMap.of(null, objectClass, 0);
             }
 
-            if (List.class.isAssignableFrom(objectClass)) {
+            if (Collection.class.isAssignableFrom(objectClass)) {
                 return ObjectReaderImplList.of(objectClass, objectClass, 0);
             }
 
