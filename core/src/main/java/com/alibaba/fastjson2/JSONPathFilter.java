@@ -1045,7 +1045,7 @@ abstract class JSONPathFilter
                         if (item instanceof BigDecimal) {
                             BigDecimal decimal = (BigDecimal) item;
                             long longValue = decimal.longValue();
-                            if (value == longValue && decimal.equals(BigDecimal.valueOf(value))) {
+                            if (value == longValue && decimal.compareTo(BigDecimal.valueOf(value)) == 0) {
                                 containsItem = true;
                                 break;
                             }
@@ -1130,7 +1130,7 @@ abstract class JSONPathFilter
                 BigDecimal decimal = (BigDecimal) fieldValue;
                 long longValue = decimal.longValue();
                 for (long value : values) {
-                    if (value == longValue && decimal.equals(BigDecimal.valueOf(value))) {
+                    if (value == longValue && decimal.compareTo(BigDecimal.valueOf(value)) == 0) {
                         return !not;
                     }
                 }

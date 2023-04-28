@@ -38,7 +38,7 @@ final class NumberSchema
             this.exclusiveMinimum = false;
         }
 
-        if (this.minimum == null || !this.minimum.equals(BigDecimal.valueOf(this.minimum.longValue()))) {
+        if (this.minimum == null || !(this.minimum.compareTo(BigDecimal.valueOf(this.minimum.longValue())) == 0)) {
             minimumLongValue = Long.MIN_VALUE;
         } else {
             minimumLongValue = this.minimum.longValue();
@@ -57,7 +57,7 @@ final class NumberSchema
             this.exclusiveMaximum = false;
         }
 
-        if (this.maximum == null || !this.maximum.equals(BigDecimal.valueOf(this.maximum.longValue()))) {
+        if (this.maximum == null || !(this.maximum.compareTo(BigDecimal.valueOf(this.maximum.longValue())) == 0)) {
             maximumLongValue = Long.MIN_VALUE;
         } else {
             maximumLongValue = this.maximum.longValue();
@@ -68,7 +68,7 @@ final class NumberSchema
             this.multipleOfLongValue = Long.MIN_VALUE;
         } else {
             long longValue = multipleOf.longValue();
-            if (multipleOf.equals(BigDecimal.valueOf(longValue))) {
+            if (multipleOf.compareTo(BigDecimal.valueOf(longValue)) == 0) {
                 this.multipleOfLongValue = longValue;
             } else {
                 this.multipleOfLongValue = Long.MIN_VALUE;
@@ -283,11 +283,11 @@ final class NumberSchema
         com.alibaba.fastjson2.schema.NumberSchema that = (com.alibaba.fastjson2.schema.NumberSchema) o;
         return Objects.equals(title, that.title)
                 && Objects.equals(description, that.description)
-                && Objects.equals(minimum, that.minimum)
                 && Objects.equals(exclusiveMinimum, that.exclusiveMinimum)
-                && Objects.equals(maximum, that.maximum)
                 && Objects.equals(exclusiveMaximum, that.exclusiveMaximum)
-                && Objects.equals(multipleOf, that.multipleOf);
+                && (minimum == null ? that.minimum == null : minimum.compareTo(that.minimum) == 0)
+                && (maximum == null ? that.maximum == null : maximum.compareTo(that.maximum) == 0)
+                && (multipleOf == null ? that.multipleOf == null : multipleOf.compareTo(that.multipleOf) == 0);
     }
 
     @Override
