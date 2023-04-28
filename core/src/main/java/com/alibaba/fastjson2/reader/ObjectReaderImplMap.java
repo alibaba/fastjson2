@@ -74,6 +74,18 @@ public final class ObjectReaderImplMap
                     instanceType = HashMap.class;
                     builder = GuavaSupport.singletonBiMapConverter();
                     break;
+                case "java.util.Collections$SynchronizedMap":
+                    instanceType = HashMap.class;
+                    builder = (Function<Map, Map>) Collections::synchronizedMap;
+                    break;
+                case "java.util.Collections$SynchronizedNavigableMap":
+                    instanceType = TreeMap.class;
+                    builder = (Function<NavigableMap, NavigableMap>) Collections::synchronizedNavigableMap;
+                    break;
+                case "java.util.Collections$SynchronizedSortedMap":
+                    instanceType = TreeMap.class;
+                    builder = (Function<SortedMap, SortedMap>) Collections::synchronizedSortedMap;
+                    break;
                 default:
                     break;
             }

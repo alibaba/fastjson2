@@ -141,6 +141,26 @@ public final class ObjectReaderImplList
                 case "com.google.common.collect.Lists.TransformingSequentialList":
                     instanceClass = LinkedList.class;
                     break;
+                case "java.util.Collections$SynchronizedRandomAccessList":
+                    instanceClass = ArrayList.class;
+                    builder = (Function<List, List>) Collections::synchronizedList;
+                    break;
+                case "java.util.Collections$SynchronizedCollection":
+                    instanceClass = ArrayList.class;
+                    builder = (Function<Collection, Collection>) Collections::synchronizedCollection;
+                    break;
+                case "java.util.Collections$SynchronizedSet":
+                    instanceClass = HashSet.class;
+                    builder = (Function<Set, Set>) Collections::synchronizedSet;
+                    break;
+                case "java.util.Collections$SynchronizedSortedSet":
+                    instanceClass = TreeSet.class;
+                    builder = (Function<SortedSet, SortedSet>) Collections::synchronizedSortedSet;
+                    break;
+                case "java.util.Collections$SynchronizedNavigableSet":
+                    instanceClass = TreeSet.class;
+                    builder = (Function<NavigableSet, NavigableSet>) Collections::synchronizedNavigableSet;
+                    break;
                 default:
                     instanceClass = listClass;
                     break;
