@@ -3139,9 +3139,9 @@ public class TypeUtils {
             } else if (typeB == Long.class) {
                 b = new BigDecimal((Long) b);
             } else if (typeB == Float.class) {
-                b = new BigDecimal((Float) b);
+                b = BigDecimal.valueOf((Float) b);
             } else if (typeB == Double.class) {
-                b = new BigDecimal((Double) b);
+                b = BigDecimal.valueOf((Double) b);
             } else if (typeB == BigInteger.class) {
                 b = new BigDecimal((BigInteger) b);
             }
@@ -3151,10 +3151,10 @@ public class TypeUtils {
             } else if (typeB == Long.class) {
                 b = BigInteger.valueOf((Long) b);
             } else if (typeB == Float.class) {
-                b = new BigDecimal((Float) b);
+                b = BigDecimal.valueOf((Float) b);
                 a = new BigDecimal((BigInteger) a);
             } else if (typeB == Double.class) {
-                b = new BigDecimal((Double) b);
+                b = BigDecimal.valueOf((Double) b);
                 a = new BigDecimal((BigInteger) a);
             } else if (typeB == BigDecimal.class) {
                 a = new BigDecimal((BigInteger) a);
