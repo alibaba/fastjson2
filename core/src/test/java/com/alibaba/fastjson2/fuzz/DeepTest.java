@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.util.JDKUtils;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,7 +22,13 @@ public class DeepTest {
         }
 
         String str = buf.toString();
-        assertThrows(JSONException.class, () -> JSON.parse(str));
+        {
+            JSONReader.Context context = JSONFactory.createReadContext();
+            if (JDKUtils.JVM_VERSION == 8) {
+                context.setMaxLevel(512);
+            }
+            assertThrows(JSONException.class, () -> JSON.parse(str, context));
+        }
 
         JSONReader.Context context = JSONFactory.createReadContext();
         assertEquals(2048, context.getMaxLevel());
@@ -74,6 +81,13 @@ public class DeepTest {
         }
 
         String str = buf.toString();
-        assertThrows(JSONException.class, () -> JSON.parse(str));
+
+        {
+            JSONReader.Context context = JSONFactory.createReadContext();
+            if (JDKUtils.JVM_VERSION == 8) {
+                context.setMaxLevel(512);
+            }
+            assertThrows(JSONException.class, () -> JSON.parse(str, context));
+        }
     }
 }
