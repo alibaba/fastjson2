@@ -269,19 +269,62 @@ public final class JSONFactory {
         JSONFactory.useJacksonAnnotation = useJacksonAnnotation;
     }
 
-    static final int CACHE_SIZE = 4;
+    static final int CACHE_SIZE = 8;
     private static final int CACHE_THRESHOLD = 1024 * 1024;
-    private static final byte[][] BYTE_ARRAY_CACHE = new byte[CACHE_SIZE][];
-    private static final char[][] CHAR_ARRAY_CACHE = new char[CACHE_SIZE][];
+    private static final CacheItem CACHE_ITEM_0 = new CacheItem();
+    private static final CacheItem CACHE_ITEM_1 = new CacheItem();
+    private static final CacheItem CACHE_ITEM_2 = new CacheItem();
+    private static final CacheItem CACHE_ITEM_3 = new CacheItem();
+    private static final CacheItem CACHE_ITEM_4 = new CacheItem();
+    private static final CacheItem CACHE_ITEM_5 = new CacheItem();
+    private static final CacheItem CACHE_ITEM_6 = new CacheItem();
+    private static final CacheItem CACHE_ITEM_7 = new CacheItem();
+
+    static class CacheItem {
+        char[] chars;
+        byte[] bytes;
+    }
 
     static char[] allocateCharArray(int cacheIndex) {
         char[] chars;
-        synchronized (CHAR_ARRAY_CACHE) {
-            chars = CHAR_ARRAY_CACHE[cacheIndex];
+
+        final CacheItem cacheItem;
+        switch (cacheIndex) {
+            case 0:
+                cacheItem = CACHE_ITEM_0;
+                break;
+            case 1:
+                cacheItem = CACHE_ITEM_1;
+                break;
+            case 2:
+                cacheItem = CACHE_ITEM_2;
+                break;
+            case 3:
+                cacheItem = CACHE_ITEM_3;
+                break;
+            case 4:
+                cacheItem = CACHE_ITEM_4;
+                break;
+            case 5:
+                cacheItem = CACHE_ITEM_5;
+                break;
+            case 6:
+                cacheItem = CACHE_ITEM_6;
+                break;
+            case 7:
+                cacheItem = CACHE_ITEM_7;
+                break;
+            default:
+                throw new IllegalStateException("illegal cacheIndex " + cacheIndex);
+        }
+
+        synchronized (cacheItem) {
+            chars = cacheItem.chars;
             if (chars != null) {
-                CHAR_ARRAY_CACHE[cacheIndex] = null;
+                cacheItem.chars = null;
             }
         }
+
         if (chars == null) {
             chars = new char[8192];
         }
@@ -292,31 +335,125 @@ public final class JSONFactory {
         if (chars == null || chars.length > CACHE_THRESHOLD) {
             return;
         }
-        synchronized (CHAR_ARRAY_CACHE) {
-            CHAR_ARRAY_CACHE[cacheIndex] = chars;
+
+        final CacheItem cacheItem;
+        switch (cacheIndex) {
+            case 0:
+                cacheItem = CACHE_ITEM_0;
+                break;
+            case 1:
+                cacheItem = CACHE_ITEM_1;
+                break;
+            case 2:
+                cacheItem = CACHE_ITEM_2;
+                break;
+            case 3:
+                cacheItem = CACHE_ITEM_3;
+                break;
+            case 4:
+                cacheItem = CACHE_ITEM_4;
+                break;
+            case 5:
+                cacheItem = CACHE_ITEM_5;
+                break;
+            case 6:
+                cacheItem = CACHE_ITEM_6;
+                break;
+            case 7:
+                cacheItem = CACHE_ITEM_7;
+                break;
+            default:
+                throw new IllegalStateException("illegal cacheIndex " + cacheIndex);
+        }
+
+        synchronized (cacheItem) {
+            cacheItem.chars = chars;
         }
     }
 
     static byte[] allocateByteArray(int cacheIndex) {
         byte[] bytes;
-        synchronized (BYTE_ARRAY_CACHE) {
-            bytes = BYTE_ARRAY_CACHE[cacheIndex];
+
+        final CacheItem cacheItem;
+        switch (cacheIndex) {
+            case 0:
+                cacheItem = CACHE_ITEM_0;
+                break;
+            case 1:
+                cacheItem = CACHE_ITEM_1;
+                break;
+            case 2:
+                cacheItem = CACHE_ITEM_2;
+                break;
+            case 3:
+                cacheItem = CACHE_ITEM_3;
+                break;
+            case 4:
+                cacheItem = CACHE_ITEM_4;
+                break;
+            case 5:
+                cacheItem = CACHE_ITEM_5;
+                break;
+            case 6:
+                cacheItem = CACHE_ITEM_6;
+                break;
+            case 7:
+                cacheItem = CACHE_ITEM_7;
+                break;
+            default:
+                throw new IllegalStateException("illegal cacheIndex " + cacheIndex);
+        }
+
+        synchronized (cacheItem) {
+            bytes = cacheItem.bytes;
             if (bytes != null) {
-                BYTE_ARRAY_CACHE[cacheIndex] = null;
+                cacheItem.bytes = null;
             }
         }
+
         if (bytes == null) {
             bytes = new byte[8192];
         }
         return bytes;
     }
 
-    static void releaseByteArray(int cacheIndex, byte[] chars) {
-        if (chars == null || chars.length > CACHE_THRESHOLD) {
+    static void releaseByteArray(int cacheIndex, byte[] bytes) {
+        if (bytes == null || bytes.length > CACHE_THRESHOLD) {
             return;
         }
-        synchronized (BYTE_ARRAY_CACHE) {
-            BYTE_ARRAY_CACHE[cacheIndex] = chars;
+
+        final CacheItem cacheItem;
+        switch (cacheIndex) {
+            case 0:
+                cacheItem = CACHE_ITEM_0;
+                break;
+            case 1:
+                cacheItem = CACHE_ITEM_1;
+                break;
+            case 2:
+                cacheItem = CACHE_ITEM_2;
+                break;
+            case 3:
+                cacheItem = CACHE_ITEM_3;
+                break;
+            case 4:
+                cacheItem = CACHE_ITEM_4;
+                break;
+            case 5:
+                cacheItem = CACHE_ITEM_5;
+                break;
+            case 6:
+                cacheItem = CACHE_ITEM_6;
+                break;
+            case 7:
+                cacheItem = CACHE_ITEM_7;
+                break;
+            default:
+                throw new IllegalStateException("illegal cacheIndex " + cacheIndex);
+        }
+
+        synchronized (cacheItem) {
+            cacheItem.bytes = bytes;
         }
     }
 
