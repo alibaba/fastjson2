@@ -768,6 +768,18 @@ public class ObjectWriterBaseModule
             Class mixInSource = provider.mixInCache.get(objectClass);
             String methodName = method.getName();
 
+            switch (methodName) {
+                case "getTargetSql":
+                    if (objectClass != null
+                            && objectClass.getName().startsWith("com.baomidou.mybatisplus.")
+                    ) {
+                        fieldInfo.features |= JSONWriter.Feature.IgnoreErrorGetter.mask;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
             if (mixInSource != null && mixInSource != objectClass) {
                 Method mixInMethod = null;
                 try {

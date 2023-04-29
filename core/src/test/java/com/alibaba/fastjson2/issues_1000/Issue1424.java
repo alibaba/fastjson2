@@ -1,7 +1,10 @@
 package com.alibaba.fastjson2.issues_1000;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.util.TypeUtils;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Constructor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -31,5 +34,18 @@ public class Issue1424 {
 
     public interface AbstractWrapper1 {
         void setValue(String value);
+    }
+
+    @Test
+    public void test2() throws Exception {
+        Class wrapperClass = TypeUtils.loadClass("com.baomidou.mybatisplus.core.toolkit.Wrappers$EmptyWrapper");
+        if (wrapperClass == null) {
+            return;
+        }
+
+        Constructor constructor = wrapperClass.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        Object wrapper = constructor.newInstance();
+        String json = JSON.toJSONString(wrapper);
     }
 }

@@ -40,7 +40,7 @@ final class FieldWriterStringFunc<T>
         try {
             value = function.apply(object);
         } catch (RuntimeException error) {
-            if (jsonWriter.isIgnoreErrorGetter()) {
+            if ((jsonWriter.getFeatures(features) | JSONWriter.Feature.IgnoreNonFieldGetter.mask) != 0) {
                 return false;
             }
             throw error;
