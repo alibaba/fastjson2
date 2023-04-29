@@ -547,6 +547,10 @@ public class ObjectReaderCreator {
                 }
             });
 
+            if (fieldName == null || fieldName.isEmpty()) {
+                fieldName = "arg" + i;
+            }
+
             Type paramType = parameter.getParameterizedType();
             ObjectReader initReader = getInitReader(provider, paramType, paramClass, fieldInfo);
             FieldReader fieldReaderParam = createFieldReaderParam(
