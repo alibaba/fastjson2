@@ -2597,8 +2597,12 @@ public abstract class JSONReader
             return Long.parseLong(val);
         }
 
-        if (val.length() == 19) {
-            return DateUtils.parseMillis(val, context.zoneId);
+        if (val != null && val.length() > 10 && val.length() < 40) {
+            try {
+                return DateUtils.parseMillis(val, context.zoneId);
+            } catch (DateTimeException | JSONException ignored) {
+                // ignored
+            }
         }
 
         throw new JSONException("parseLong error, value : " + val);
