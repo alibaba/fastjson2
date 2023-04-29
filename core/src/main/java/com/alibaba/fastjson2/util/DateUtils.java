@@ -256,6 +256,9 @@ public class DateUtils {
             }
             case 11: {
                 LocalDate localDate = parseLocalDate11(str, off);
+                if (localDate == null) {
+                    return null;
+                }
                 return LocalDateTime.of(localDate, LocalTime.MIN);
             }
             case 12:
@@ -1356,6 +1359,12 @@ public class DateUtils {
             ) {
                 ldt = LocalDateTime.of(1970, 1, 1, 0, 0, 0);
             }
+
+            if (ldt == null) {
+                String input = new String(chars, off, len - off);
+                throw new DateTimeParseException("illegal input " + input, input, 0);
+            }
+
             ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, zoneId, null);
             long seconds = zdt.toEpochSecond();
             int nanos = ldt.getNano();
