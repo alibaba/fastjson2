@@ -37,6 +37,7 @@ public abstract class JSONReader
     static final int MAX_EXP = 1023;
     static final long SHANGHAI_ZONE_ID_HASH = Fnv.hashCode64("Asia/Shanghai");
     static final long LONG_MASK = 0XFFFFFFFFL;
+    static final int MAX_LEVEL = 2048;
 
     static final byte JSON_TYPE_INT = 1;
     static final byte JSON_TYPE_DEC = 2;
@@ -77,6 +78,8 @@ public abstract class JSONReader
     protected int mag1;
     protected int mag2;
     protected int mag3;
+
+    protected int level;
 
     protected String stringValue;
     protected Object complex; // Map | List
@@ -1715,6 +1718,12 @@ public abstract class JSONReader
 
     public Map<String, Object> readObject() {
         nextIfObjectStart();
+
+        level++;
+        if (level >= context.maxLevel) {
+            throw new JSONException("level too large : " + level);
+        }
+
         Map object;
         if (context.objectSupplier == null) {
             if ((context.features & Feature.UseNativeObject.mask) != 0) {
@@ -1804,6 +1813,8 @@ public abstract class JSONReader
         if (comma = (ch == ',')) {
             next();
         }
+
+        level--;
 
         return object;
     }
@@ -2075,6 +2086,11 @@ public abstract class JSONReader
     public List readArray() {
         next();
 
+        level++;
+        if (level >= context.maxLevel) {
+            throw new JSONException("level too large : " + level);
+        }
+
         int i = 0;
         List<Object> list = null;
         Object first = null, second = null;
@@ -2172,6 +2188,8 @@ public abstract class JSONReader
         if (comma = (ch == ',')) {
             next();
         }
+
+        level--;
 
         return list;
     }
@@ -3467,6 +3485,7 @@ public abstract class JSONReader
         boolean formatHasDay;
         boolean formatHasHour;
         boolean useSimpleFormatter;
+        int maxLevel = 2048;
         DateTimeFormatter dateFormatter;
         ZoneId zoneId;
         long features;
@@ -3731,6 +3750,14 @@ public abstract class JSONReader
 
         public void setZoneId(ZoneId zoneId) {
             this.zoneId = zoneId;
+        }
+
+        public int getMaxLevel() {
+            return maxLevel;
+        }
+
+        public void setMaxLevel(int maxLevel) {
+            this.maxLevel = maxLevel;
         }
 
         public Locale getLocale() {
