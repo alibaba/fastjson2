@@ -27,16 +27,20 @@ public class LargeFile2MTest {
 
     @Test
     public void test() {
-        JSON.parseObject(str);
+        JSONReader.Context context = JSONFactory.createReadContext();
+        JSON.parseObject(str, context);
     }
 
     @Test
     public void test1() {
-        JSON.parseObject(str, 0, str.length());
+        JSONReader.Context context = JSONFactory.createReadContext();
+
+        JSON.parseObject(str, 0, str.length(), context);
     }
 
     @Test
     public void test2() {
-        JSON.parseObject(str, JSONObject.class, JSONFactory.createReadContext());
+        JSONReader.Context context = JSONFactory.createReadContext();
+        JSON.parseObject(str, JSONObject.class, context);
     }
 }

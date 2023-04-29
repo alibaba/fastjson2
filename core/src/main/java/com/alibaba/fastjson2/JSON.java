@@ -287,6 +287,37 @@ public interface JSON {
     /**
      * Parse JSON {@link String} into {@link JSONObject}
      *
+     * @since 2.0.30
+     * @param text the JSON {@link String} to be parsed
+     * @param offset the index of the first byte to parse
+     * @param length the number of bytes to parse
+     * @param context context to be enabled in parsing
+     * @return JSONObject
+     */
+    static JSONObject parseObject(String text, int offset, int length, JSONReader.Context context) {
+        if (text == null || text.isEmpty() || length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(text, offset, length, context)) {
+            if (reader.nextIfNull()) {
+                return null;
+            }
+            JSONObject object = new JSONObject();
+            reader.read(object, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parse JSON {@link String} into {@link JSONObject}
+     *
      * @param text the JSON {@link String} to be parsed
      * @param context specify the context use by JSONReader
      * @return JSONObject
