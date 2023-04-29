@@ -1245,6 +1245,11 @@ public class ObjectWriterCreator {
             return null;
         }
 
+        String objectClassName = objectClass.getName();
+        if (objectClassName.indexOf('$') != -1 && objectClassName.contains("$$")) {
+            return null;
+        }
+
         Object lambda = lambdaGetter(objectClass, fieldClass, method);
 
         if (fieldClass == int.class) {
