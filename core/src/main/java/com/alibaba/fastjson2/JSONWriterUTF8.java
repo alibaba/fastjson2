@@ -26,13 +26,17 @@ class JSONWriterUTF8
         extends JSONWriter {
     static final byte[] REF_PREF = "{\"$ref\":".getBytes(StandardCharsets.ISO_8859_1);
 
-    private final int cachedIndex;
+    final CacheItem cacheItem;
     protected byte[] bytes;
 
     JSONWriterUTF8(Context ctx) {
         super(ctx, null, false, StandardCharsets.UTF_8);
-        cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
-        bytes = JSONFactory.allocateByteArray(cachedIndex);
+        int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+        cacheItem = CACHE_ITEMS[cacheIndex];
+        bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
+        if (bytes == null) {
+            bytes = new byte[8192];
+        }
     }
 
     @Override
@@ -112,7 +116,11 @@ class JSONWriterUTF8
 
     @Override
     public final void close() {
-        JSONFactory.releaseByteArray(cachedIndex, bytes);
+        if (bytes.length > CACHE_THRESHOLD) {
+            return;
+        }
+
+        BYTES_UPDATER.lazySet(cacheItem, bytes);
     }
 
     public final int size() {

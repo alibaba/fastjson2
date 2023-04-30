@@ -28,15 +28,15 @@ class JSONWriterUTF16
     static final char[] REF_PREF = "{\"$ref\":".toCharArray();
 
     protected char[] chars;
-    private final int cachedIndex;
+    final CacheItem cacheItem;
 
     JSONWriterUTF16(Context ctx) {
         super(ctx, null, false, StandardCharsets.UTF_16);
-
-        cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
-        chars = JSONFactory.allocateCharArray(cachedIndex);
+        int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+        cacheItem = CACHE_ITEMS[cacheIndex];
+        chars = CHARS_UPDATER.getAndSet(cacheItem, null);
         if (chars == null) {
-            chars = new char[1024];
+            chars = new char[8192];
         }
     }
 
@@ -54,7 +54,11 @@ class JSONWriterUTF16
 
     @Override
     public final void close() {
-        JSONFactory.releaseCharArray(cachedIndex, chars);
+        if (chars.length > CACHE_THRESHOLD) {
+            return;
+        }
+
+        CHARS_UPDATER.lazySet(cacheItem, chars);
     }
 
     @Override

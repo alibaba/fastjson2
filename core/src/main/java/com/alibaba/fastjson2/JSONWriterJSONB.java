@@ -18,7 +18,7 @@ import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.JSONFactory.CACHE_SIZE;
+import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNameAsSymbol;
 import static com.alibaba.fastjson2.util.DateUtils.SHANGHAI_ZONE_ID_NAME;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
@@ -29,7 +29,7 @@ final class JSONWriterJSONB
     // optimize for write ZonedDateTime
     static final byte[] SHANGHAI_ZONE_ID_NAME_BYTES = JSONB.toBytes(SHANGHAI_ZONE_ID_NAME);
 
-    private final int cachedIndex;
+    private final CacheItem cacheItem;
     private byte[] bytes;
     private TLongIntHashMap symbols;
     private int symbolIndex;
@@ -38,13 +38,19 @@ final class JSONWriterJSONB
 
     JSONWriterJSONB(Context ctx, SymbolTable symbolTable) {
         super(ctx, symbolTable, true, StandardCharsets.UTF_8);
-        this.cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
-        this.bytes = JSONFactory.allocateByteArray(cachedIndex);
+        int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+        cacheItem = CACHE_ITEMS[cachedIndex];
+        bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
+        if (bytes == null) {
+            bytes = new byte[8192];
+        }
     }
 
     @Override
     public void close() {
-        JSONFactory.releaseByteArray(cachedIndex, bytes);
+        if (bytes.length < CACHE_THRESHOLD) {
+            BYTES_UPDATER.lazySet(cacheItem, bytes);
+        }
     }
 
     @Override

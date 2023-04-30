@@ -1734,8 +1734,12 @@ public interface JSON {
             Consumer<T> consumer,
             JSONReader.Feature... features
     ) {
-        int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
-        byte[] bytes = JSONFactory.allocateByteArray(cachedIndex);
+        int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+        final CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
+        byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
+        if (bytes == null) {
+            bytes = new byte[8192];
+        }
 
         int offset = 0, start = 0, end;
         ObjectReader<? extends T> objectReader = null;
@@ -1791,7 +1795,7 @@ public interface JSON {
         } catch (IOException e) {
             throw new JSONException("JSON#parseObject cannot parse the 'InputStream' to '" + type + "'", e);
         } finally {
-            JSONFactory.releaseByteArray(cachedIndex, bytes);
+            BYTES_UPDATER.lazySet(cacheItem, bytes);
         }
     }
 
@@ -1807,8 +1811,12 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> void parseObject(Reader input, char delimiter, Type type, Consumer<T> consumer) {
-        final int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
-        char[] chars = JSONFactory.allocateCharArray(cachedIndex);
+        final int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+        final CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
+        char[] chars = CHARS_UPDATER.getAndSet(cacheItem, null);
+        if (chars == null) {
+            chars = new char[8192];
+        }
 
         int offset = 0, start = 0, end;
         ObjectReader<? extends T> objectReader = null;
@@ -1855,7 +1863,7 @@ public interface JSON {
         } catch (IOException e) {
             throw new JSONException("JSON#parseObject cannot parse the 'Reader' to '" + type + "'", e);
         } finally {
-            JSONFactory.releaseCharArray(cachedIndex, chars);
+            CHARS_UPDATER.lazySet(cacheItem, chars);
         }
     }
 
