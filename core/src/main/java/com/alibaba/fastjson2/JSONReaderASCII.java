@@ -73,7 +73,7 @@ class JSONReaderASCII
     }
 
     @Override
-    public boolean nextIfNullOrEmptyString() {
+    public final boolean nextIfNullOrEmptyString() {
         final char first = this.ch;
         if (first == 'n' && offset + 2 < end && bytes[offset] == 'u') {
             this.readNull();
@@ -123,7 +123,7 @@ class JSONReaderASCII
     }
 
     @Override
-    public long readFieldNameHashCode() {
+    public final long readFieldNameHashCode() {
         if (ch != '"' && ch != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameHashCodeUnquote();
@@ -416,7 +416,7 @@ class JSONReaderASCII
     }
 
     @Override
-    public long readValueHashCode() {
+    public final long readValueHashCode() {
         if (ch != '"' && ch != '\'') {
             return -1;
         }
@@ -591,7 +591,7 @@ class JSONReaderASCII
     }
 
     @Override
-    public long getNameHashCodeLCase() {
+    public final long getNameHashCodeLCase() {
         int offset = nameBegin;
 
         if (MIXED_HASH_ALGORITHM) {
@@ -729,7 +729,7 @@ class JSONReaderASCII
     }
 
     @Override
-    public String getFieldName() {
+    public final String getFieldName() {
         int length = nameEnd - nameBegin;
         if (!nameEscape) {
             if (this.str != null) {
@@ -851,7 +851,7 @@ class JSONReaderASCII
     }
 
     @Override
-    public String readFieldName() {
+    public final String readFieldName() {
         if (ch != '"' && ch != '\'') {
             return null;
         }
@@ -1169,7 +1169,7 @@ class JSONReaderASCII
     }
 
     @Override
-    protected void readString0() {
+    protected final void readString0() {
         char quote = this.ch;
         int start = offset;
         int valueLength;

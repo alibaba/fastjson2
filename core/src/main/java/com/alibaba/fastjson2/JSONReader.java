@@ -106,7 +106,7 @@ public abstract class JSONReader
 
     public abstract boolean isNull();
 
-    public boolean hasComma() {
+    public final boolean hasComma() {
         return comma;
     }
 
@@ -118,34 +118,34 @@ public abstract class JSONReader
         this.context = context;
     }
 
-    public Context getContext() {
+    public final Context getContext() {
         return context;
     }
 
-    public void errorOnNoneSerializable(Class objectClass) {
+    public final void errorOnNoneSerializable(Class objectClass) {
         if ((context.features & Feature.ErrorOnNoneSerializable.mask) != 0
                 && !Serializable.class.isAssignableFrom(objectClass)) {
             throw new JSONException("not support none-Serializable, class " + objectClass.getName());
         }
     }
 
-    public boolean isEnabled(Feature feature) {
+    public final boolean isEnabled(Feature feature) {
         return (context.features & feature.mask) != 0;
     }
 
-    public Locale getLocale() {
+    public final Locale getLocale() {
         return context.getLocale();
     }
 
-    public ZoneId getZoneId() {
+    public final ZoneId getZoneId() {
         return context.getZoneId();
     }
 
-    public long features(long features) {
+    public final long features(long features) {
         return context.features | features;
     }
 
-    public void handleResolveTasks(Object root) {
+    public final void handleResolveTasks(Object root) {
         if (resolveTasks == null) {
             return;
         }
@@ -245,32 +245,32 @@ public abstract class JSONReader
         }
     }
 
-    public ObjectReader getObjectReader(Type type) {
+    public final ObjectReader getObjectReader(Type type) {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         return context.provider.getObjectReader(type, fieldBased);
     }
 
-    public boolean isSupportSmartMatch() {
+    public final boolean isSupportSmartMatch() {
         return (context.features & Feature.SupportSmartMatch.mask) != 0;
     }
 
-    public boolean isInitStringFieldAsEmpty() {
+    public final boolean isInitStringFieldAsEmpty() {
         return (context.features & Feature.InitStringFieldAsEmpty.mask) != 0;
     }
 
-    public boolean isSupportSmartMatch(long features) {
+    public final boolean isSupportSmartMatch(long features) {
         return ((context.features | features) & Feature.SupportSmartMatch.mask) != 0;
     }
 
-    public boolean isSupportBeanArray() {
+    public final boolean isSupportBeanArray() {
         return (context.features & Feature.SupportArrayToBean.mask) != 0;
     }
 
-    public boolean isSupportBeanArray(long features) {
+    public final boolean isSupportBeanArray(long features) {
         return ((context.features | features) & Feature.SupportArrayToBean.mask) != 0;
     }
 
-    public boolean isSupportAutoType(long features) {
+    public final boolean isSupportAutoType(long features) {
         return ((context.features | features) & Feature.SupportAutoType.mask) != 0;
     }
 
@@ -278,7 +278,7 @@ public abstract class JSONReader
         return false;
     }
 
-    public boolean isIgnoreNoneSerializable() {
+    public final boolean isIgnoreNoneSerializable() {
         return (context.features & Feature.IgnoreNoneSerializable.mask) != 0;
     }
 
@@ -376,14 +376,14 @@ public abstract class JSONReader
 
     public abstract String readReference();
 
-    public void addResolveTask(FieldReader fieldReader, Object object, JSONPath path) {
+    public final void addResolveTask(FieldReader fieldReader, Object object, JSONPath path) {
         if (resolveTasks == null) {
             resolveTasks = new ArrayList<>();
         }
         resolveTasks.add(new ResolveTask(fieldReader, object, fieldReader.fieldName, path));
     }
 
-    public void addResolveTask(Map object, Object key, JSONPath reference) {
+    public final void addResolveTask(Map object, Object key, JSONPath reference) {
         if (resolveTasks == null) {
             resolveTasks = new ArrayList<>();
         }
@@ -393,14 +393,14 @@ public abstract class JSONReader
         resolveTasks.add(new ResolveTask(null, object, key, reference));
     }
 
-    public void addResolveTask(Collection object, int i, JSONPath reference) {
+    public final void addResolveTask(Collection object, int i, JSONPath reference) {
         if (resolveTasks == null) {
             resolveTasks = new ArrayList<>();
         }
         resolveTasks.add(new ResolveTask(null, object, i, reference));
     }
 
-    public void addResolveTask(Object[] object, int i, JSONPath reference) {
+    public final void addResolveTask(Object[] object, int i, JSONPath reference) {
         if (resolveTasks == null) {
             resolveTasks = new ArrayList<>();
         }
@@ -471,17 +471,17 @@ public abstract class JSONReader
 
     public abstract String getFieldName();
 
-    public void setTypeRedirect(boolean typeRedirect) {
+    public final void setTypeRedirect(boolean typeRedirect) {
         this.typeRedirect = typeRedirect;
     }
 
-    public boolean isTypeRedirect() {
+    public final boolean isTypeRedirect() {
         return typeRedirect;
     }
 
     public abstract long readFieldNameHashCodeUnquote();
 
-    public String readFieldNameUnquote() {
+    public final String readFieldNameUnquote() {
         readFieldNameHashCodeUnquote();
         return getFieldName();
     }
@@ -552,7 +552,7 @@ public abstract class JSONReader
 
     public abstract Integer readInt32();
 
-    public int getInt32Value() {
+    public final int getInt32Value() {
         switch (valueType) {
             case JSON_TYPE_INT:
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
@@ -594,7 +594,7 @@ public abstract class JSONReader
         }
     }
 
-    public long getInt64Value() {
+    public final long getInt64Value() {
         switch (valueType) {
             case JSON_TYPE_INT:
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
@@ -624,7 +624,7 @@ public abstract class JSONReader
         }
     }
 
-    protected Long getInt64() {
+    protected final Long getInt64() {
         switch (valueType) {
             case JSON_TYPE_INT:
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
@@ -682,7 +682,7 @@ public abstract class JSONReader
 
     public abstract float readFloatValue();
 
-    public Float readFloat() {
+    public final Float readFloat() {
         if (nextIfNull()) {
             return null;
         }
@@ -697,7 +697,7 @@ public abstract class JSONReader
 
     public abstract double readDoubleValue();
 
-    public Double readDouble() {
+    public final Double readDouble() {
         if (nextIfNull()) {
             return null;
         }
@@ -727,7 +727,7 @@ public abstract class JSONReader
 
     public abstract UUID readUUID();
 
-    public boolean isLocalDate() {
+    public final boolean isLocalDate() {
         if (!isString()) {
             return false;
         }
@@ -836,7 +836,7 @@ public abstract class JSONReader
         throw new JSONException("not support input : " + str);
     }
 
-    public boolean isLocalDateTime() {
+    public final boolean isLocalDateTime() {
         if (!isString()) {
             return false;
         }
@@ -1192,7 +1192,7 @@ public abstract class JSONReader
                 zdt.toLocalTime().getNano());
     }
 
-    public long readMillisFromString() {
+    public final long readMillisFromString() {
         wasNull = false;
         String format = context.dateFormat;
         if (format == null
@@ -1443,13 +1443,19 @@ public abstract class JSONReader
         return (T) objectReader.readObject(this, null, null, 0);
     }
 
-    public void read(List list) {
+    public final void read(List list) {
         if (!nextIfMatch('[')) {
             throw new JSONException("illegal input, offset " + offset + ", char " + ch);
         }
 
+        level++;
+        if (level >= context.maxLevel) {
+            throw new JSONException("level too large : " + level);
+        }
+
         for (; ; ) {
             if (nextIfMatch(']')) {
+                level--;
                 break;
             }
 
@@ -1464,13 +1470,19 @@ public abstract class JSONReader
         nextIfMatch(',');
     }
 
-    public void read(Collection list) {
+    public final void read(Collection list) {
         if (!nextIfMatch('[')) {
             throw new JSONException("illegal input, offset " + offset + ", char " + ch);
         }
 
+        level++;
+        if (level >= context.maxLevel) {
+            throw new JSONException("level too large : " + level);
+        }
+
         for (; ; ) {
             if (nextIfMatch(']')) {
+                level--;
                 break;
             }
             Object item = readAny();
@@ -1484,7 +1496,7 @@ public abstract class JSONReader
         nextIfMatch(',');
     }
 
-    public void readObject(Object object, Feature... features) {
+    public final void readObject(Object object, Feature... features) {
         long featuresLong = 0;
         for (Feature feature : features) {
             featuresLong |= feature.mask;
@@ -1492,7 +1504,7 @@ public abstract class JSONReader
         readObject(object, featuresLong);
     }
 
-    public void readObject(Object object, long features) {
+    public final void readObject(Object object, long features) {
         if (object == null) {
             throw new JSONException("object is null");
         }
@@ -1659,7 +1671,7 @@ public abstract class JSONReader
         nextIfMatch(',');
     }
 
-    public void read(Map object, Type keyType, Type valueType, long features) {
+    public final void read(Map object, Type keyType, Type valueType, long features) {
         boolean match = nextIfMatch('{');
         if (!match) {
             throw new JSONException("illegal input， offset " + offset + ", char " + ch);
@@ -1821,7 +1833,7 @@ public abstract class JSONReader
 
     public abstract void skipLineComment();
 
-    public Boolean readBool() {
+    public final Boolean readBool() {
         if (isNull()) {
             readNull();
             return null;
@@ -1993,7 +2005,7 @@ public abstract class JSONReader
         return list;
     }
 
-    public Object[] readArray(Type[] types) {
+    public final Object[] readArray(Type[] types) {
         if (nextIfNull()) {
             return null;
         }
@@ -2029,11 +2041,11 @@ public abstract class JSONReader
         return list;
     }
 
-    public void readArray(List list, Type itemType) {
+    public final void readArray(List list, Type itemType) {
         readArray((Collection) list, itemType);
     }
 
-    public void readArray(Collection list, Type itemType) {
+    public final void readArray(Collection list, Type itemType) {
         if (nextIfMatch('[')) {
             for (; ; ) {
                 if (nextIfMatch(']')) {
@@ -2194,7 +2206,7 @@ public abstract class JSONReader
         return list;
     }
 
-    public BigInteger getBigInteger() {
+    public final BigInteger getBigInteger() {
         Number number = getNumber();
 
         if (number == null) {
@@ -2207,7 +2219,7 @@ public abstract class JSONReader
         return BigInteger.valueOf(number.longValue());
     }
 
-    public BigDecimal getBigDecimal() {
+    public final BigDecimal getBigDecimal() {
         if (wasNull) {
             return null;
         }
@@ -2308,7 +2320,7 @@ public abstract class JSONReader
         }
     }
 
-    public Number getNumber() {
+    public final Number getNumber() {
         if (wasNull) {
             return null;
         }
@@ -3175,7 +3187,7 @@ public abstract class JSONReader
         return new JSONReaderUTF16(context, str, chars, offset, length);
     }
 
-    void bigInt(char[] chars, int off, int len) {
+    final void bigInt(char[] chars, int off, int len) {
         int cursor = off, numDigits;
 
         numDigits = len - cursor;
@@ -3312,7 +3324,7 @@ public abstract class JSONReader
         }
     }
 
-    void bigInt(byte[] chars, int off, int len) {
+    final void bigInt(byte[] chars, int off, int len) {
         int cursor = off, numDigits;
 
         numDigits = len - cursor;
@@ -3926,7 +3938,7 @@ public abstract class JSONReader
         this.ch = (char) savePoint.current;
     }
 
-    public String info() {
+    public final String info() {
         return info(null);
     }
 
