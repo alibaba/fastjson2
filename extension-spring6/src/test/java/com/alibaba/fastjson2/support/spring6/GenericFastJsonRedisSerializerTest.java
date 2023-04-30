@@ -69,7 +69,7 @@ public class GenericFastJsonRedisSerializerTest {
         assertEquals(baseResult2.getData().size(), 3);
 
         String json = "{\n" +
-                "\"@type\": \"com.alibaba.fastjson2.spring.GenericFastJsonRedisSerializerTest$BaseResult\",\n" +
+                "\"@type\": \"com.alibaba.fastjson2.support.spring6.GenericFastJsonRedisSerializerTest$BaseResult\",\n" +
                 "\"code\": \"1000\",\n" +
                 "\"data\": [\n" +
                 "\"按手动控制按钮\",\n" +
