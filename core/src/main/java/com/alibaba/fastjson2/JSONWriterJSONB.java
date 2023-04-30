@@ -70,18 +70,7 @@ final class JSONWriterJSONB
     public void startObject() {
         level++;
         if (off == bytes.length) {
-            int minCapacity = off + 1;
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(off + 1);
         }
         bytes[off++] = BC_OBJECT;
     }
@@ -90,18 +79,7 @@ final class JSONWriterJSONB
     public void endObject() {
         level--;
         if (off == bytes.length) {
-            int minCapacity = off + 1;
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(off + 1);
         }
         bytes[off++] = BC_OBJECT_END;
     }
@@ -119,18 +97,7 @@ final class JSONWriterJSONB
 
         level++;
         if (off == bytes.length) {
-            int minCapacity = off + 1;
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(off + 1);
         }
 
         if (size <= ARRAY_FIX_LEN) {
@@ -144,18 +111,7 @@ final class JSONWriterJSONB
     @Override
     public void startArray(int size) {
         if (off == bytes.length) {
-            int minCapacity = off + 1;
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(off + 1);
         }
 
         if (size <= ARRAY_FIX_LEN) {
@@ -169,18 +125,7 @@ final class JSONWriterJSONB
     @Override
     public void writeRaw(byte b) {
         if (off == bytes.length) {
-            int minCapacity = off + 1;
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(off + 1);
         }
         bytes[off++] = b;
     }
@@ -188,18 +133,7 @@ final class JSONWriterJSONB
     @Override
     public void writeChar(char ch) {
         if (off == bytes.length) {
-            int minCapacity = off + 1;
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(off + 1);
         }
         bytes[off++] = BC_CHAR;
         writeInt32(ch);
@@ -213,18 +147,7 @@ final class JSONWriterJSONB
     @Override
     public void writeNull() {
         if (off == bytes.length) {
-            int minCapacity = off + 1;
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(off + 1);
         }
         bytes[off++] = BC_NULL;
     }
@@ -232,18 +155,7 @@ final class JSONWriterJSONB
     @Override
     public void writeStringNull() {
         if (off == bytes.length) {
-            int minCapacity = off + 1;
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(off + 1);
         }
         bytes[off++] = BC_NULL;
     }
@@ -307,17 +219,7 @@ final class JSONWriterJSONB
                 + 1;
 
         if (minCapacity - bytes.length > 0) {
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(minCapacity);
         }
 
         if (strlen <= STR_ASCII_FIX_LEN) {
@@ -348,17 +250,7 @@ final class JSONWriterJSONB
 
             int minCapacity = off + 1 + strlen;
             if (minCapacity - bytes.length > 0) {
-                int oldCapacity = bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                bytes = Arrays.copyOf(bytes, newCapacity);
+                ensureCapacity(minCapacity);
             }
 
             bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
@@ -407,17 +299,7 @@ final class JSONWriterJSONB
                 + 1;
 
         if (minCapacity - bytes.length > 0) {
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(minCapacity);
         }
 
         if (ascii) {
@@ -472,17 +354,7 @@ final class JSONWriterJSONB
 
             int minCapacity = this.off + 1 + len;
             if (minCapacity - bytes.length > 0) {
-                int oldCapacity = bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                bytes = Arrays.copyOf(bytes, newCapacity);
+                ensureCapacity(minCapacity);
             }
 
             bytes[this.off++] = (byte) (len + BC_STR_ASCII_FIX_MIN);
@@ -531,17 +403,7 @@ final class JSONWriterJSONB
                 + 1;
 
         if (minCapacity - bytes.length > 0) {
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(minCapacity);
         }
 
         if (ascii) {
@@ -604,18 +466,7 @@ final class JSONWriterJSONB
     @Override
     public void writeTypeName(String typeName) {
         if (off == bytes.length) {
-            int minCapacity = off + 1;
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(off + 1);
         }
         this.bytes[off++] = BC_TYPED_ANY;
 
@@ -638,18 +489,7 @@ final class JSONWriterJSONB
             symbols.put(hash, symbol = symbolIndex++);
         } else {
             if (off == bytes.length) {
-                int minCapacity = off + 1;
-                int oldCapacity = bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                bytes = Arrays.copyOf(bytes, newCapacity);
+                ensureCapacity(off + 1);
             }
 
             writeInt32(symbol);
@@ -665,19 +505,8 @@ final class JSONWriterJSONB
         if (symbolTable != null) {
             int symbol = symbolTable.getOrdinalByHashCode(hash);
             if (symbol != -1) {
-                int minCapacity = off + 2;
-                if (minCapacity - bytes.length > 0) {
-                    int oldCapacity = bytes.length;
-                    int newCapacity = oldCapacity + (oldCapacity >> 1);
-                    if (newCapacity - minCapacity < 0) {
-                        newCapacity = minCapacity;
-                    }
-                    if (newCapacity - maxArraySize > 0) {
-                        throw new OutOfMemoryError();
-                    }
-
-                    // minCapacity is usually close to size, so this is a win:
-                    bytes = Arrays.copyOf(bytes, newCapacity);
+                if (off + 2 > bytes.length) {
+                    ensureCapacity(off + 2);
                 }
 
                 this.bytes[off++] = BC_TYPED_ANY;
@@ -710,18 +539,7 @@ final class JSONWriterJSONB
 
         if (symbolExists) {
             if (off == bytes.length) {
-                int minCapacity = off + 1;
-                int oldCapacity = bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                bytes = Arrays.copyOf(bytes, newCapacity);
+                ensureCapacity(off + 1);
             }
 
             this.bytes[off++] = BC_TYPED_ANY;
@@ -731,17 +549,7 @@ final class JSONWriterJSONB
 
         int minCapacity = off + 2 + typeName.length;
         if (minCapacity - bytes.length > 0) {
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(minCapacity);
         }
 
         this.bytes[off++] = BC_TYPED_ANY;
@@ -925,17 +733,7 @@ final class JSONWriterJSONB
 
             int minCapacity = off + 1 + strlen;
             if (minCapacity - bytes.length > 0) {
-                int oldCapacity = bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                bytes = Arrays.copyOf(bytes, newCapacity);
+                ensureCapacity(minCapacity);
             }
 
             bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
@@ -984,17 +782,7 @@ final class JSONWriterJSONB
                 + 1;
 
         if (minCapacity - bytes.length > 0) {
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(minCapacity);
         }
 
         if (ascii) {
@@ -1060,17 +848,7 @@ final class JSONWriterJSONB
 
                 int minCapacity = off + 5;
                 if (minCapacity - bytes.length > 0) {
-                    int oldCapacity = bytes.length;
-                    int newCapacity = oldCapacity + (oldCapacity >> 1);
-                    if (newCapacity - minCapacity < 0) {
-                        newCapacity = minCapacity;
-                    }
-                    if (newCapacity - maxArraySize > 0) {
-                        throw new OutOfMemoryError();
-                    }
-
-                    // minCapacity is usually close to size, so this is a win:
-                    bytes = Arrays.copyOf(bytes, newCapacity);
+                    ensureCapacity(minCapacity);
                 }
 
                 bytes[off++] = BC_TIMESTAMP_SECONDS;
@@ -1088,17 +866,7 @@ final class JSONWriterJSONB
 
                     int minCapacity = off + 5;
                     if (minCapacity - bytes.length > 0) {
-                        int oldCapacity = bytes.length;
-                        int newCapacity = oldCapacity + (oldCapacity >> 1);
-                        if (newCapacity - minCapacity < 0) {
-                            newCapacity = minCapacity;
-                        }
-                        if (newCapacity - maxArraySize > 0) {
-                            throw new OutOfMemoryError();
-                        }
-
-                        // minCapacity is usually close to size, so this is a win:
-                        bytes = Arrays.copyOf(bytes, newCapacity);
+                        ensureCapacity(minCapacity);
                     }
 
                     bytes[off++] = BC_TIMESTAMP_MINUTES;
@@ -1113,17 +881,7 @@ final class JSONWriterJSONB
 
         int minCapacity = off + 9;
         if (minCapacity - bytes.length > 0) {
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(minCapacity);
         }
 
         bytes[off++] = BC_TIMESTAMP_MILLIS;
@@ -1142,19 +900,7 @@ final class JSONWriterJSONB
         if (val >= INT64_NUM_LOW_VALUE && val <= INT64_NUM_HIGH_VALUE) {
             // inline ensureCapacity(off + 1);
             if (off == bytes.length) {
-                int minCapacity = off + 1;
-
-                int oldCapacity = bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                bytes = Arrays.copyOf(bytes, newCapacity);
+                ensureCapacity(off + 1);
             }
 
             bytes[off++] = (byte) (BC_INT64_NUM_MIN + (val - INT64_NUM_LOW_VALUE));
@@ -1164,17 +910,7 @@ final class JSONWriterJSONB
         if (val >= INT64_BYTE_MIN && val <= INT64_BYTE_MAX) {
             int minCapacity = off + 2;
             if (minCapacity - bytes.length > 0) {
-                int oldCapacity = bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                bytes = Arrays.copyOf(bytes, newCapacity);
+                ensureCapacity(minCapacity);
             }
 
             bytes[off++] = (byte) (BC_INT64_BYTE_ZERO + (val >> 8));
@@ -1185,17 +921,7 @@ final class JSONWriterJSONB
         if (val >= INT64_SHORT_MIN && val <= INT64_SHORT_MAX) {
             int minCapacity = off + 3;
             if (minCapacity - bytes.length > 0) {
-                int oldCapacity = bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                bytes = Arrays.copyOf(bytes, newCapacity);
+                ensureCapacity(minCapacity);
             }
 
             bytes[off++] = (byte) (BC_INT64_SHORT_ZERO + (val >> 16));
@@ -1207,17 +933,7 @@ final class JSONWriterJSONB
         if (val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE) {
             int minCapacity = off + 5;
             if (minCapacity - bytes.length > 0) {
-                int oldCapacity = bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                bytes = Arrays.copyOf(bytes, newCapacity);
+                ensureCapacity(minCapacity);
             }
 
             bytes[off++] = BC_INT64_INT;
@@ -1230,17 +946,7 @@ final class JSONWriterJSONB
 
         int minCapacity = off + 9;
         if (minCapacity - bytes.length > 0) {
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(minCapacity);
         }
         bytes[off++] = BC_INT64;
         bytes[off++] = (byte) (val >>> 56);
@@ -1264,18 +970,7 @@ final class JSONWriterJSONB
         int size = value.length;
         level++;
         if (off == bytes.length) {
-            int minCapacity = off + 1;
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(off + 1);
         }
 
         if (size <= ARRAY_FIX_LEN) {
@@ -1290,19 +985,7 @@ final class JSONWriterJSONB
             if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
                 // inline ensureCapacity(off + 1);
                 if (off == bytes.length) {
-                    int minCapacity = off + 1;
-
-                    int oldCapacity = bytes.length;
-                    int newCapacity = oldCapacity + (oldCapacity >> 1);
-                    if (newCapacity - minCapacity < 0) {
-                        newCapacity = minCapacity;
-                    }
-                    if (newCapacity - maxArraySize > 0) {
-                        throw new OutOfMemoryError();
-                    }
-
-                    // minCapacity is usually close to size, so this is a win:
-                    bytes = Arrays.copyOf(bytes, newCapacity);
+                    ensureCapacity(off + 1);
                 }
 
                 bytes[off++] = (byte) val;
@@ -1312,17 +995,7 @@ final class JSONWriterJSONB
             if (val >= INT64_BYTE_MIN && val <= INT64_BYTE_MAX) {
                 int minCapacity = off + 2;
                 if (minCapacity - bytes.length > 0) {
-                    int oldCapacity = bytes.length;
-                    int newCapacity = oldCapacity + (oldCapacity >> 1);
-                    if (newCapacity - minCapacity < 0) {
-                        newCapacity = minCapacity;
-                    }
-                    if (newCapacity - maxArraySize > 0) {
-                        throw new OutOfMemoryError();
-                    }
-
-                    // minCapacity is usually close to size, so this is a win:
-                    bytes = Arrays.copyOf(bytes, newCapacity);
+                    ensureCapacity(minCapacity);
                 }
 
                 bytes[off++] = (byte) (BC_INT64_BYTE_ZERO + (val >> 8));
@@ -1333,17 +1006,7 @@ final class JSONWriterJSONB
             if (val >= INT64_SHORT_MIN && val <= INT64_SHORT_MAX) {
                 int minCapacity = off + 3;
                 if (minCapacity - bytes.length > 0) {
-                    int oldCapacity = bytes.length;
-                    int newCapacity = oldCapacity + (oldCapacity >> 1);
-                    if (newCapacity - minCapacity < 0) {
-                        newCapacity = minCapacity;
-                    }
-                    if (newCapacity - maxArraySize > 0) {
-                        throw new OutOfMemoryError();
-                    }
-
-                    // minCapacity is usually close to size, so this is a win:
-                    bytes = Arrays.copyOf(bytes, newCapacity);
+                    ensureCapacity(minCapacity);
                 }
 
                 bytes[off++] = (byte) (BC_INT64_SHORT_ZERO + (val >> 16));
@@ -1354,17 +1017,7 @@ final class JSONWriterJSONB
 
             int minCapacity = off + 9;
             if (minCapacity - bytes.length > 0) {
-                int oldCapacity = bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                bytes = Arrays.copyOf(bytes, newCapacity);
+                ensureCapacity(minCapacity);
             }
             bytes[off++] = BC_INT64;
             bytes[off++] = (byte) (val >>> 56);
@@ -1489,18 +1142,7 @@ final class JSONWriterJSONB
         int size = values.length;
         level++;
         if (off == bytes.length) {
-            int minCapacity = off + 1;
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(off + 1);
         }
 
         if (size <= ARRAY_FIX_LEN) {
@@ -1515,19 +1157,7 @@ final class JSONWriterJSONB
 
             if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
                 if (off == bytes.length) {
-                    int minCapacity = off + 1;
-
-                    int oldCapacity = bytes.length;
-                    int newCapacity = oldCapacity + (oldCapacity >> 1);
-                    if (newCapacity - minCapacity < 0) {
-                        newCapacity = minCapacity;
-                    }
-                    if (newCapacity - maxArraySize > 0) {
-                        throw new OutOfMemoryError();
-                    }
-
-                    // minCapacity is usually close to size, so this is a win:
-                    bytes = Arrays.copyOf(bytes, newCapacity);
+                    ensureCapacity(off + 1);
                 }
 
                 bytes[off++] = (byte) val;
@@ -1537,17 +1167,7 @@ final class JSONWriterJSONB
             if (val >= INT32_BYTE_MIN && val <= INT32_BYTE_MAX) {
                 int minCapacity = off + 2;
                 if (minCapacity - bytes.length > 0) {
-                    int oldCapacity = bytes.length;
-                    int newCapacity = oldCapacity + (oldCapacity >> 1);
-                    if (newCapacity - minCapacity < 0) {
-                        newCapacity = minCapacity;
-                    }
-                    if (newCapacity - maxArraySize > 0) {
-                        throw new OutOfMemoryError();
-                    }
-
-                    // minCapacity is usually close to size, so this is a win:
-                    bytes = Arrays.copyOf(bytes, newCapacity);
+                    ensureCapacity(minCapacity);
                 }
 
                 bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (val >> 8));
@@ -1558,17 +1178,7 @@ final class JSONWriterJSONB
             if (val >= INT32_SHORT_MIN && val <= INT32_SHORT_MAX) {
                 int minCapacity = off + 3;
                 if (minCapacity - bytes.length > 0) {
-                    int oldCapacity = bytes.length;
-                    int newCapacity = oldCapacity + (oldCapacity >> 1);
-                    if (newCapacity - minCapacity < 0) {
-                        newCapacity = minCapacity;
-                    }
-                    if (newCapacity - maxArraySize > 0) {
-                        throw new OutOfMemoryError();
-                    }
-
-                    // minCapacity is usually close to size, so this is a win:
-                    bytes = Arrays.copyOf(bytes, newCapacity);
+                    ensureCapacity(minCapacity);
                 }
 
                 bytes[off++] = (byte) (BC_INT32_SHORT_ZERO + (val >> 16));
@@ -1579,17 +1189,7 @@ final class JSONWriterJSONB
 
             int minCapacity = off + 5;
             if (minCapacity - bytes.length > 0) {
-                int oldCapacity = bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                bytes = Arrays.copyOf(bytes, newCapacity);
+                ensureCapacity(minCapacity);
             }
 
             bytes[off++] = BC_INT32;
@@ -1607,17 +1207,7 @@ final class JSONWriterJSONB
     public void writeInt8(byte val) {
         int minCapacity = off + 2;
         if (minCapacity - bytes.length > 0) {
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(minCapacity);
         }
 
         bytes[off++] = BC_INT8;
@@ -1628,17 +1218,7 @@ final class JSONWriterJSONB
     public void writeInt16(short val) {
         int minCapacity = off + 3;
         if (minCapacity - bytes.length > 0) {
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(minCapacity);
         }
 
         bytes[off++] = BC_INT16;
@@ -1661,19 +1241,7 @@ final class JSONWriterJSONB
             int val = e.ordinal();
             if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
                 if (off == bytes.length) {
-                    int minCapacity = off + 1;
-
-                    int oldCapacity = bytes.length;
-                    int newCapacity = oldCapacity + (oldCapacity >> 1);
-                    if (newCapacity - minCapacity < 0) {
-                        newCapacity = minCapacity;
-                    }
-                    if (newCapacity - maxArraySize > 0) {
-                        throw new OutOfMemoryError();
-                    }
-
-                    // minCapacity is usually close to size, so this is a win:
-                    bytes = Arrays.copyOf(bytes, newCapacity);
+                    ensureCapacity(off + 1);
                 }
 
                 bytes[off++] = (byte) val;
@@ -1687,19 +1255,7 @@ final class JSONWriterJSONB
     public void writeInt32(int val) {
         if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
             if (off == bytes.length) {
-                int minCapacity = off + 1;
-
-                int oldCapacity = bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                bytes = Arrays.copyOf(bytes, newCapacity);
+                ensureCapacity(off + 1);
             }
 
             bytes[off++] = (byte) val;
@@ -1709,17 +1265,7 @@ final class JSONWriterJSONB
         if (val >= INT32_BYTE_MIN && val <= INT32_BYTE_MAX) {
             int minCapacity = off + 2;
             if (minCapacity - bytes.length > 0) {
-                int oldCapacity = bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                bytes = Arrays.copyOf(bytes, newCapacity);
+                ensureCapacity(minCapacity);
             }
 
             bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (val >> 8));
@@ -1730,17 +1276,7 @@ final class JSONWriterJSONB
         if (val >= INT32_SHORT_MIN && val <= INT32_SHORT_MAX) {
             int minCapacity = off + 3;
             if (minCapacity - bytes.length > 0) {
-                int oldCapacity = bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                bytes = Arrays.copyOf(bytes, newCapacity);
+                ensureCapacity(minCapacity);
             }
 
             bytes[off++] = (byte) (BC_INT32_SHORT_ZERO + (val >> 16));
@@ -1751,17 +1287,7 @@ final class JSONWriterJSONB
 
         int minCapacity = off + 5;
         if (minCapacity - bytes.length > 0) {
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(minCapacity);
         }
 
         bytes[off++] = BC_INT32;
@@ -1774,18 +1300,7 @@ final class JSONWriterJSONB
     @Override
     public void writeArrayNull() {
         if (off == bytes.length) {
-            int minCapacity = off + 1;
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(off + 1);
         }
 
         if ((this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullListAsEmpty.mask)) != 0) {
@@ -1804,17 +1319,7 @@ final class JSONWriterJSONB
     public void writeRaw(byte[] bytes) {
         int minCapacity = this.off + bytes.length;
         if (minCapacity - this.bytes.length > 0) {
-            int oldCapacity = this.bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+            ensureCapacity(minCapacity);
         }
         System.arraycopy(bytes, 0, this.bytes, off, bytes.length);
         off += bytes.length;
@@ -1823,17 +1328,7 @@ final class JSONWriterJSONB
     public void writeSymbol(int symbol) {
         int minCapacity = off + 3;
         if (minCapacity - bytes.length > 0) {
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(minCapacity);
         }
 
         this.bytes[off++] = BC_SYMBOL;
@@ -1859,17 +1354,7 @@ final class JSONWriterJSONB
             if (symbol != -1) {
                 int minCapacity = off + 2;
                 if (minCapacity - bytes.length > 0) {
-                    int oldCapacity = bytes.length;
-                    int newCapacity = oldCapacity + (oldCapacity >> 1);
-                    if (newCapacity - minCapacity < 0) {
-                        newCapacity = minCapacity;
-                    }
-                    if (newCapacity - maxArraySize > 0) {
-                        throw new OutOfMemoryError();
-                    }
-
-                    // minCapacity is usually close to size, so this is a win:
-                    bytes = Arrays.copyOf(bytes, newCapacity);
+                    ensureCapacity(minCapacity);
                 }
 
                 this.bytes[off++] = BC_SYMBOL;
@@ -1881,17 +1366,7 @@ final class JSONWriterJSONB
         if ((context.features & WriteNameAsSymbol.mask) == 0) {
             int minCapacity = this.off + name.length;
             if (minCapacity - this.bytes.length > 0) {
-                int oldCapacity = this.bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+                ensureCapacity(minCapacity);
             }
 
             System.arraycopy(name, 0, this.bytes, off, name.length);
@@ -1916,17 +1391,7 @@ final class JSONWriterJSONB
         if (symbolExists) {
             int minCapacity = this.off + 2;
             if (minCapacity - this.bytes.length > 0) {
-                int oldCapacity = this.bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+                ensureCapacity(minCapacity);
             }
             this.bytes[off++] = BC_SYMBOL;
             if (symbol >= BC_INT32_NUM_MIN && symbol <= BC_INT32_NUM_MAX) {
@@ -1939,17 +1404,7 @@ final class JSONWriterJSONB
 
         int minCapacity = this.off + 2 + name.length;
         if (minCapacity - this.bytes.length > 0) {
-            int oldCapacity = this.bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+            ensureCapacity(minCapacity);
         }
         this.bytes[off++] = BC_SYMBOL;
         System.arraycopy(name, 0, this.bytes, off, name.length);
@@ -2111,18 +1566,7 @@ final class JSONWriterJSONB
 
         if (isInt64(value)) {
             if (off == bytes.length) {
-                int minCapacity = off + 1;
-                int oldCapacity = bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                bytes = Arrays.copyOf(bytes, newCapacity);
+                ensureCapacity(off + 1);
             }
             bytes[off++] = BC_BIGINT_LONG;
             long int64Value = value.longValue();
@@ -2213,18 +1657,7 @@ final class JSONWriterJSONB
     @Override
     public void writeBool(boolean value) {
         if (off == bytes.length) {
-            int minCapacity = off + 1;
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(off + 1);
         }
         this.bytes[off++] = value ? BC_TRUE : BC_FALSE;
     }
@@ -2246,18 +1679,7 @@ final class JSONWriterJSONB
     @Override
     public void writeReference(String path) {
         if (off == bytes.length) {
-            int minCapacity = off + 1;
-            int oldCapacity = bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            bytes = Arrays.copyOf(bytes, newCapacity);
+            ensureCapacity(off + 1);
         }
         bytes[off++] = BC_REFERENCE;
 

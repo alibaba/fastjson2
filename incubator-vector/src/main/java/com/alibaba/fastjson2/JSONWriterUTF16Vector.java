@@ -4,7 +4,6 @@ import jdk.incubator.vector.ByteVector;
 import jdk.incubator.vector.ShortVector;
 import jdk.incubator.vector.Vector;
 
-import java.util.Arrays;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
@@ -61,17 +60,7 @@ final class JSONWriterUTF16Vector
                 byte[] value = STRING_VALUE.apply(str);
                 int minCapacity = off + value.length + 2;
                 if (minCapacity - chars.length > 0) {
-                    int oldCapacity = chars.length;
-                    int newCapacity = oldCapacity + (oldCapacity >> 1);
-                    if (newCapacity - minCapacity < 0) {
-                        newCapacity = minCapacity;
-                    }
-                    if (newCapacity - maxArraySize > 0) {
-                        throw new OutOfMemoryError();
-                    }
-
-                    // minCapacity is usually close to size, so this is a win:
-                    chars = Arrays.copyOf(chars, newCapacity);
+                    ensureCapacity(minCapacity);
                 }
 
                 final int mark = off;
@@ -266,17 +255,7 @@ final class JSONWriterUTF16Vector
             // inline ensureCapacity(off + strlen + 2);
             int minCapacity = off + strlen + 2;
             if (minCapacity - chars.length > 0) {
-                int oldCapacity = chars.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                chars = Arrays.copyOf(chars, newCapacity);
+                ensureCapacity(minCapacity);
             }
 
             chars[off++] = quote;
@@ -306,17 +285,7 @@ final class JSONWriterUTF16Vector
 
         int minCapacity = off + value.length + 2;
         if (minCapacity - chars.length > 0) {
-            int oldCapacity = chars.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            chars = Arrays.copyOf(chars, newCapacity);
+            ensureCapacity(minCapacity);
         }
 
         final int mark = off;

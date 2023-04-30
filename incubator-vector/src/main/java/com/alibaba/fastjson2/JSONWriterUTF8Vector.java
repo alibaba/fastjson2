@@ -3,7 +3,6 @@ package com.alibaba.fastjson2;
 import jdk.incubator.vector.ByteVector;
 import jdk.incubator.vector.Vector;
 
-import java.util.Arrays;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
@@ -114,17 +113,7 @@ final class JSONWriterUTF8Vector
                     + (escape ? value.length * 4 : value.length)
                     + 2;
             if (minCapacity - this.bytes.length > 0) {
-                int oldCapacity = this.bytes.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+                ensureCapacity(minCapacity);
             }
 
             if (!escape) {
@@ -148,17 +137,7 @@ final class JSONWriterUTF8Vector
         }
 
         if (minCapacity - this.bytes.length > 0) {
-            int oldCapacity = this.bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+            ensureCapacity(minCapacity);
         }
 
         bytes[off++] = (byte) quote;
@@ -409,17 +388,7 @@ final class JSONWriterUTF8Vector
                 + (escape ? value.length * 4 : value.length)
                 + 2;
         if (minCapacity - this.bytes.length > 0) {
-            int oldCapacity = this.bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+            ensureCapacity(minCapacity);
         }
 
         if (!escape) {
