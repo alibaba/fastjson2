@@ -34,7 +34,7 @@ class JSONReaderJSONB
     protected int strBegin;
 
     protected byte[] valueBytes;
-    protected final int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
+    protected final CacheItem cacheItem = CACHE_ITEMS[System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1)];
 
     protected final SymbolTable symbolTable;
 
@@ -524,7 +524,10 @@ class JSONReaderJSONB
 
                 if (STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
                     if (valueBytes == null) {
-                        valueBytes = JSONFactory.allocateByteArray(cachedIndex);
+                        valueBytes = BYTES_UPDATER.getAndSet(cacheItem, null);
+                        if (valueBytes == null) {
+                            valueBytes = new byte[8192];
+                        }
                     }
 
                     int minCapacity = strlen << 1;
@@ -2725,7 +2728,10 @@ class JSONReaderJSONB
 
             if (STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
                 if (valueBytes == null) {
-                    valueBytes = JSONFactory.allocateByteArray(cachedIndex);
+                    valueBytes = BYTES_UPDATER.getAndSet(cacheItem, null);
+                    if (valueBytes == null) {
+                        valueBytes = new byte[8192];
+                    }
                 }
 
                 int minCapacity = strlen << 1;
@@ -2905,7 +2911,10 @@ class JSONReaderJSONB
 
             if (STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
                 if (valueBytes == null) {
-                    valueBytes = JSONFactory.allocateByteArray(cachedIndex);
+                    valueBytes = BYTES_UPDATER.getAndSet(cacheItem, null);
+                    if (valueBytes == null) {
+                        valueBytes = new byte[8192];
+                    }
                 }
 
                 int minCapacity = strlen << 1;
@@ -3155,13 +3164,19 @@ class JSONReaderJSONB
 
         char[] chars = null;
         if (JVM_VERSION == 8 && strtype == BC_STR_UTF8 && strlen < 8192) {
-            final int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
-            chars = allocateCharArray(cachedIndex);
+            final int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+            final CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
+            chars = CHARS_UPDATER.getAndSet(cacheItem, null);
+            if (chars == null) {
+                chars = new char[8192];
+            }
         }
         if (chars != null) {
             int len = IOUtils.decodeUTF8(bytes, offset, strlen, chars);
             str = new String(chars, 0, len);
-            releaseCharArray(cachedIndex, chars);
+            if (chars.length < CACHE_THRESHOLD) {
+                CHARS_UPDATER.lazySet(cacheItem, chars);
+            }
         } else {
             str = new String(bytes, offset, strlen, charset);
         }
@@ -6142,8 +6157,8 @@ class JSONReaderJSONB
 
     @Override
     public final void close() {
-        if (valueBytes != null) {
-            JSONFactory.releaseByteArray(cachedIndex, valueBytes);
+        if (valueBytes != null && valueBytes.length < CACHE_THRESHOLD) {
+            BYTES_UPDATER.lazySet(cacheItem, valueBytes);
         }
     }
 

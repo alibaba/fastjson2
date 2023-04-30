@@ -279,12 +279,13 @@ class JSONReaderUTF16
         super(ctx);
         this.input = input;
 
-        cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
-        char[] chars = JSONFactory.allocateCharArray(cacheIndex);
-
+        cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+        final CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
+        char[] chars = CHARS_UPDATER.getAndSet(cacheItem, null);
         if (chars == null) {
             chars = new char[8192];
         }
+
         int off = 0;
         try {
             for (; ; ) {
@@ -390,8 +391,12 @@ class JSONReaderUTF16
     JSONReaderUTF16(Context ctx, InputStream input) {
         super(ctx);
         this.input = input;
-        final int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
-        byte[] bytes = JSONFactory.allocateByteArray(cacheIndex);
+        final int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+        final CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
+        byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
+        if (bytes == null) {
+            bytes = new byte[8192];
+        }
 
         char[] chars;
         try {
@@ -421,7 +426,7 @@ class JSONReaderUTF16
         } catch (IOException ioe) {
             throw new JSONException("read error", ioe);
         } finally {
-            JSONFactory.releaseByteArray(cacheIndex, bytes);
+            BYTES_UPDATER.lazySet(cacheItem, bytes);
         }
 
         this.str = null;
@@ -5471,7 +5476,8 @@ class JSONReaderUTF16
     @Override
     public final void close() {
         if (cacheIndex != -1) {
-            JSONFactory.releaseCharArray(cacheIndex, chars);
+            final CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
+            CHARS_UPDATER.lazySet(cacheItem, chars);
         }
 
         if (input != null) {

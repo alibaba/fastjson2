@@ -30,16 +30,18 @@ class JSONReaderUTF8
 
     protected final InputStream in;
 
-    protected final int cacheIndex;
+    protected final CacheItem cacheItem;
 
     JSONReaderUTF8(Context ctx, InputStream is) {
         super(ctx);
 
-        cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
-        byte[] bytes = JSONFactory.allocateByteArray(cacheIndex);
+        int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+        cacheItem = CACHE_ITEMS[cacheIndex];
+        byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
         if (bytes == null) {
             bytes = new byte[8192];
         }
+
         int off = 0;
         try {
             for (; ; ) {
@@ -78,8 +80,9 @@ class JSONReaderUTF8
     JSONReaderUTF8(Context ctx, ByteBuffer buffer) {
         super(ctx);
 
-        cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
-        byte[] bytes = JSONFactory.allocateByteArray(cacheIndex);
+        int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+        cacheItem = CACHE_ITEMS[cacheIndex];
+        byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
         final int remaining = buffer.remaining();
         if (bytes == null || bytes.length < remaining) {
             bytes = new byte[remaining];
@@ -113,7 +116,7 @@ class JSONReaderUTF8
         this.in = null;
         this.start = offset;
         this.end = offset + length;
-        this.cacheIndex = -1;
+        this.cacheItem = null;
         next();
 
         while (ch == '/') {
@@ -5894,8 +5897,8 @@ class JSONReaderUTF8
 
     @Override
     public final void close() {
-        if (cacheIndex != -1) {
-            JSONFactory.releaseByteArray(cacheIndex, bytes);
+        if (cacheItem != null) {
+            BYTES_UPDATER.lazySet(cacheItem, bytes);
         }
 
         if (in != null) {

@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.JSONFactory.CACHE_SIZE;
+import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 /**
@@ -611,8 +611,13 @@ public interface JSONB {
             Type objectType,
             JSONReader.Context context
     ) throws IOException {
-        int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
-        byte[] bytes = JSONFactory.allocateByteArray(cachedIndex);
+        int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+        final JSONFactory.CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
+        byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
+        if (bytes == null) {
+            bytes = new byte[8192];
+        }
+
         try {
             if (bytes.length < length) {
                 bytes = new byte[length];
@@ -624,7 +629,7 @@ public interface JSONB {
 
             return parseObject(bytes, 0, length, objectType, context);
         } finally {
-            JSONFactory.releaseByteArray(cachedIndex, bytes);
+            BYTES_UPDATER.lazySet(cacheItem, bytes);
         }
     }
 
@@ -634,8 +639,12 @@ public interface JSONB {
             Type objectType,
             JSONReader.Feature... features
     ) throws IOException {
-        int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
-        byte[] bytes = JSONFactory.allocateByteArray(cachedIndex);
+        int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+        final JSONFactory.CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
+        byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
+        if (bytes == null) {
+            bytes = new byte[8192];
+        }
         try {
             if (bytes.length < length) {
                 bytes = new byte[length];
@@ -647,7 +656,7 @@ public interface JSONB {
 
             return parseObject(bytes, 0, length, objectType, features);
         } finally {
-            JSONFactory.releaseByteArray(cachedIndex, bytes);
+            BYTES_UPDATER.lazySet(cacheItem, bytes);
         }
     }
 

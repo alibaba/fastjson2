@@ -235,7 +235,10 @@ final class JSONReaderJSONBUF
 
             if (STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
                 if (valueBytes == null) {
-                    valueBytes = JSONFactory.allocateByteArray(cachedIndex);
+                    valueBytes = BYTES_UPDATER.getAndSet(cacheItem, null);
+                    if (valueBytes == null) {
+                        valueBytes = new byte[8192];
+                    }
                 }
 
                 int minCapacity = strlen << 1;
