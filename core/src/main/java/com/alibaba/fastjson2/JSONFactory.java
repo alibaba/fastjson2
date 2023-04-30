@@ -15,6 +15,7 @@ import java.math.BigInteger;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -269,7 +270,7 @@ public final class JSONFactory {
         JSONFactory.useJacksonAnnotation = useJacksonAnnotation;
     }
 
-    static final int CACHE_SIZE = 8;
+    static final int CACHE_SIZE = 16;
     private static final int CACHE_THRESHOLD = 1024 * 1024;
     private static final CacheItem CACHE_ITEM_0 = new CacheItem();
     private static final CacheItem CACHE_ITEM_1 = new CacheItem();
@@ -279,10 +280,23 @@ public final class JSONFactory {
     private static final CacheItem CACHE_ITEM_5 = new CacheItem();
     private static final CacheItem CACHE_ITEM_6 = new CacheItem();
     private static final CacheItem CACHE_ITEM_7 = new CacheItem();
+    private static final CacheItem CACHE_ITEM_8 = new CacheItem();
+    private static final CacheItem CACHE_ITEM_9 = new CacheItem();
+    private static final CacheItem CACHE_ITEM_10 = new CacheItem();
+    private static final CacheItem CACHE_ITEM_11 = new CacheItem();
+    private static final CacheItem CACHE_ITEM_12 = new CacheItem();
+    private static final CacheItem CACHE_ITEM_13 = new CacheItem();
+    private static final CacheItem CACHE_ITEM_14 = new CacheItem();
+    private static final CacheItem CACHE_ITEM_15 = new CacheItem();
+
+    static final AtomicReferenceFieldUpdater<CacheItem, char[]> CHARS_UPDATER
+            = AtomicReferenceFieldUpdater.newUpdater(CacheItem.class, char[].class, "chars");
+    static final AtomicReferenceFieldUpdater<CacheItem, byte[]> BYTES_UPDATER
+            = AtomicReferenceFieldUpdater.newUpdater(CacheItem.class, byte[].class, "bytes");
 
     static class CacheItem {
-        char[] chars;
-        byte[] bytes;
+        volatile char[] chars;
+        volatile byte[] bytes;
     }
 
     static char[] allocateCharArray(int cacheIndex) {
@@ -314,17 +328,35 @@ public final class JSONFactory {
             case 7:
                 cacheItem = CACHE_ITEM_7;
                 break;
+            case 8:
+                cacheItem = CACHE_ITEM_8;
+                break;
+            case 9:
+                cacheItem = CACHE_ITEM_9;
+                break;
+            case 10:
+                cacheItem = CACHE_ITEM_10;
+                break;
+            case 11:
+                cacheItem = CACHE_ITEM_11;
+                break;
+            case 12:
+                cacheItem = CACHE_ITEM_12;
+                break;
+            case 13:
+                cacheItem = CACHE_ITEM_13;
+                break;
+            case 14:
+                cacheItem = CACHE_ITEM_14;
+                break;
+            case 15:
+                cacheItem = CACHE_ITEM_15;
+                break;
             default:
                 throw new IllegalStateException("illegal cacheIndex " + cacheIndex);
         }
 
-        synchronized (cacheItem) {
-            chars = cacheItem.chars;
-            if (chars != null) {
-                cacheItem.chars = null;
-            }
-        }
-
+        chars = CHARS_UPDATER.getAndSet(cacheItem, null);
         if (chars == null) {
             chars = new char[8192];
         }
@@ -362,13 +394,35 @@ public final class JSONFactory {
             case 7:
                 cacheItem = CACHE_ITEM_7;
                 break;
+            case 8:
+                cacheItem = CACHE_ITEM_8;
+                break;
+            case 9:
+                cacheItem = CACHE_ITEM_9;
+                break;
+            case 10:
+                cacheItem = CACHE_ITEM_10;
+                break;
+            case 11:
+                cacheItem = CACHE_ITEM_11;
+                break;
+            case 12:
+                cacheItem = CACHE_ITEM_12;
+                break;
+            case 13:
+                cacheItem = CACHE_ITEM_13;
+                break;
+            case 14:
+                cacheItem = CACHE_ITEM_14;
+                break;
+            case 15:
+                cacheItem = CACHE_ITEM_15;
+                break;
             default:
                 throw new IllegalStateException("illegal cacheIndex " + cacheIndex);
         }
 
-        synchronized (cacheItem) {
-            cacheItem.chars = chars;
-        }
+        CHARS_UPDATER.lazySet(cacheItem, chars);
     }
 
     static byte[] allocateByteArray(int cacheIndex) {
@@ -400,17 +454,35 @@ public final class JSONFactory {
             case 7:
                 cacheItem = CACHE_ITEM_7;
                 break;
+            case 8:
+                cacheItem = CACHE_ITEM_8;
+                break;
+            case 9:
+                cacheItem = CACHE_ITEM_9;
+                break;
+            case 10:
+                cacheItem = CACHE_ITEM_10;
+                break;
+            case 11:
+                cacheItem = CACHE_ITEM_11;
+                break;
+            case 12:
+                cacheItem = CACHE_ITEM_12;
+                break;
+            case 13:
+                cacheItem = CACHE_ITEM_13;
+                break;
+            case 14:
+                cacheItem = CACHE_ITEM_14;
+                break;
+            case 15:
+                cacheItem = CACHE_ITEM_15;
+                break;
             default:
                 throw new IllegalStateException("illegal cacheIndex " + cacheIndex);
         }
 
-        synchronized (cacheItem) {
-            bytes = cacheItem.bytes;
-            if (bytes != null) {
-                cacheItem.bytes = null;
-            }
-        }
-
+        bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
         if (bytes == null) {
             bytes = new byte[8192];
         }
@@ -448,13 +520,35 @@ public final class JSONFactory {
             case 7:
                 cacheItem = CACHE_ITEM_7;
                 break;
+            case 8:
+                cacheItem = CACHE_ITEM_8;
+                break;
+            case 9:
+                cacheItem = CACHE_ITEM_9;
+                break;
+            case 10:
+                cacheItem = CACHE_ITEM_10;
+                break;
+            case 11:
+                cacheItem = CACHE_ITEM_11;
+                break;
+            case 12:
+                cacheItem = CACHE_ITEM_12;
+                break;
+            case 13:
+                cacheItem = CACHE_ITEM_13;
+                break;
+            case 14:
+                cacheItem = CACHE_ITEM_14;
+                break;
+            case 15:
+                cacheItem = CACHE_ITEM_15;
+                break;
             default:
                 throw new IllegalStateException("illegal cacheIndex " + cacheIndex);
         }
 
-        synchronized (cacheItem) {
-            cacheItem.bytes = bytes;
-        }
+        BYTES_UPDATER.lazySet(cacheItem, bytes);
     }
 
     static final class SymbolTableImpl
