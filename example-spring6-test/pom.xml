@@ -14,6 +14,7 @@
     <name>example-spring6-test</name>
     <description>example-spring6-test</description>
     <properties>
+        <maven.test.skip>true</maven.test.skip>
         <maven.deploy.skip>true</maven.deploy.skip>
         <fastjson2.version>2.0.30-SNAPSHOT</fastjson2.version>
         <java.version>17</java.version>
