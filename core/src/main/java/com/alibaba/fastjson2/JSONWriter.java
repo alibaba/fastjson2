@@ -1367,8 +1367,7 @@ public abstract class JSONWriter
     public abstract void writeReference(String path);
 
     @Override
-    public void close() {
-    }
+    public abstract void close();
 
     public abstract int size();
 

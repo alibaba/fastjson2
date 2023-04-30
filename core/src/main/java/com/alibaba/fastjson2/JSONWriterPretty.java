@@ -34,6 +34,11 @@ final class JSONWriterPretty
     }
 
     @Override
+    public void close() {
+        jsonWriter.close();
+    }
+
+    @Override
     public void writeInt32(int value) {
         jsonWriter.writeInt32(value);
     }

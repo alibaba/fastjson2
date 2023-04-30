@@ -35,32 +35,34 @@ public class JSONFactoryTest {
 
     @Test
     public void testCache() throws Exception {
-        final int THREAD_CNT = 256;
-        final CountDownLatch latch = new CountDownLatch(THREAD_CNT);
+        final int THREAD_CNT = 1024;
+        for (int j = 0; j < 10; j++) {
+            final CountDownLatch latch = new CountDownLatch(THREAD_CNT);
 
-        Runnable task = () -> {
-            int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
+            Runnable task = () -> {
+                int cachedIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_SIZE - 1);
 
-            char[] chars = JSONFactory.allocateCharArray(cachedIndex);
-            JSONFactory.releaseCharArray(cachedIndex, chars);
-            char[] chars1 = JSONFactory.allocateCharArray(cachedIndex);
-            JSONFactory.releaseCharArray(cachedIndex, chars1);
+                char[] chars = JSONFactory.allocateCharArray(cachedIndex);
+                JSONFactory.releaseCharArray(cachedIndex, chars);
+                char[] chars1 = JSONFactory.allocateCharArray(cachedIndex);
+                JSONFactory.releaseCharArray(cachedIndex, chars1);
 
-            byte[] bytes = JSONFactory.allocateByteArray(cachedIndex);
-            JSONFactory.releaseByteArray(cachedIndex, bytes);
-            byte[] bytes1 = JSONFactory.allocateByteArray(cachedIndex);
-            JSONFactory.releaseByteArray(cachedIndex, bytes1);
+                byte[] bytes = JSONFactory.allocateByteArray(cachedIndex);
+                JSONFactory.releaseByteArray(cachedIndex, bytes);
+                byte[] bytes1 = JSONFactory.allocateByteArray(cachedIndex);
+                JSONFactory.releaseByteArray(cachedIndex, bytes1);
 
-            latch.countDown();
-        };
+                latch.countDown();
+            };
 
-        Thread[] threads = new Thread[THREAD_CNT];
-        for (int i = 0; i < threads.length; i++) {
-            threads[i] = new Thread(task);
+            Thread[] threads = new Thread[THREAD_CNT];
+            for (int i = 0; i < threads.length; i++) {
+                threads[i] = new Thread(task);
+            }
+            for (Thread thread : threads) {
+                thread.start();
+            }
+            latch.await();
         }
-        for (Thread thread : threads) {
-            thread.start();
-        }
-        latch.await();
     }
 }
