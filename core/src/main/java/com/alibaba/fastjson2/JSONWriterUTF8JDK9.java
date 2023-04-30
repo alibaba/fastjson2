@@ -1,7 +1,5 @@
 package com.alibaba.fastjson2;
 
-import java.util.Arrays;
-
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class JSONWriterUTF8JDK9
@@ -44,17 +42,7 @@ final class JSONWriterUTF8JDK9
         }
 
         if (minCapacity - this.bytes.length > 0) {
-            int oldCapacity = this.bytes.length;
-            int newCapacity = oldCapacity + (oldCapacity >> 1);
-            if (newCapacity - minCapacity < 0) {
-                newCapacity = minCapacity;
-            }
-            if (newCapacity - maxArraySize > 0) {
-                throw new OutOfMemoryError();
-            }
-
-            // minCapacity is usually close to size, so this is a win:
-            this.bytes = Arrays.copyOf(this.bytes, newCapacity);
+            ensureCapacity(minCapacity);
         }
 
         bytes[off++] = (byte) quote;

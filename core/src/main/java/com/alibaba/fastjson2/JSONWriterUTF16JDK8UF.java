@@ -3,8 +3,6 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 
-import java.util.Arrays;
-
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
 import static com.alibaba.fastjson2.JSONWriter.Feature.EscapeNoneAscii;
 
@@ -154,17 +152,7 @@ public final class JSONWriterUTF16JDK8UF
             // inline ensureCapacity(off + strlen + 2);
             int minCapacity = off + strlen + 2;
             if (minCapacity - chars.length > 0) {
-                int oldCapacity = chars.length;
-                int newCapacity = oldCapacity + (oldCapacity >> 1);
-                if (newCapacity - minCapacity < 0) {
-                    newCapacity = minCapacity;
-                }
-                if (newCapacity - maxArraySize > 0) {
-                    throw new OutOfMemoryError();
-                }
-
-                // minCapacity is usually close to size, so this is a win:
-                chars = Arrays.copyOf(chars, newCapacity);
+                ensureCapacity(minCapacity);
             }
 
             chars[off++] = quote;
