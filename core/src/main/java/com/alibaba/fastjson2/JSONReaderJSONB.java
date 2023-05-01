@@ -34,7 +34,7 @@ class JSONReaderJSONB
     protected int strBegin;
 
     protected byte[] valueBytes;
-    protected final CacheItem cacheItem = CACHE_ITEMS[System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1)];
+    protected final CacheItem cacheItem;
 
     protected final SymbolTable symbolTable;
 
@@ -52,6 +52,7 @@ class JSONReaderJSONB
         this.length = length;
         this.end = off + length;
         this.symbolTable = ctx.symbolTable;
+        this.cacheItem = CACHE_ITEMS[System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1)];
     }
 
     @Override
