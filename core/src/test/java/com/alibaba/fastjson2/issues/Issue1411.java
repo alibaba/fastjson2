@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +18,12 @@ public class Issue1411 {
         Object result = JSON.parse(text, JSONReader.Feature.SupportAutoType);
         assertInstanceOf(HashMap.class, result);
         assertEquals("{}", JSON.toJSONString(result));
+
+        assertEquals(
+                "java.util.HashMap",
+                ((JSONObject) JSON.parse(text))
+                        .get("@type")
+        );
     }
 
     @Test
@@ -25,6 +32,12 @@ public class Issue1411 {
         Object result = JSON.parse(text, JSONReader.Feature.SupportAutoType);
         assertInstanceOf(TreeMap.class, result);
         assertEquals("{}", JSON.toJSONString(result));
+
+        assertEquals(
+                "java.util.TreeMap",
+                ((JSONObject) JSON.parse(text))
+                        .get("@type")
+        );
     }
 
     @Test
@@ -33,6 +46,12 @@ public class Issue1411 {
         Object result = JSON.parse(text, JSONReader.Feature.SupportAutoType);
         assertInstanceOf(Issue1411.class, result);
         assertEquals("{}", JSON.toJSONString(result));
+
+        assertEquals(
+                "com.alibaba.fastjson2.issues.Issue1411",
+                ((JSONObject) JSON.parse(text))
+                        .get("@type")
+        );
     }
 
     @Test
@@ -41,6 +60,12 @@ public class Issue1411 {
         Object result = JSON.parse(text, JSONReader.Feature.SupportAutoType);
         assertInstanceOf(ConcurrentHashMap.class, result);
         assertEquals("{}", JSON.toJSONString(result));
+
+        assertEquals(
+                "java.util.concurrent.ConcurrentHashMap",
+                ((JSONObject) JSON.parse(text))
+                        .get("@type")
+        );
     }
 
     @Test
@@ -49,5 +74,10 @@ public class Issue1411 {
         Object result = JSON.parse(text, JSONReader.Feature.SupportAutoType);
         assertInstanceOf(ConcurrentHashMap.class, result);
         assertEquals("{\"name\":\"fastjson\",\"id\":2}", JSON.toJSONString(result));
+
+        JSONObject jsonObject = (JSONObject) JSON.parse(text);
+        assertEquals("java.util.concurrent.ConcurrentHashMap", jsonObject.get("@type"));
+        assertEquals(2, jsonObject.get("id"));
+        assertEquals("fastjson", jsonObject.get("name"));
     }
 }
