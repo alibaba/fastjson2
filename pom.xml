@@ -39,7 +39,7 @@
         <springframework6.version>6.0.8</springframework6.version>
         <springboot2.version>2.7.11</springboot2.version>
         <springboot3.version>3.0.6</springboot3.version>
-        <arrow.version>11.0.0</arrow.version>
+        <arrow.version>12.0.0</arrow.version>
 
         <kotlin.version>1.8.21</kotlin.version>
         <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
