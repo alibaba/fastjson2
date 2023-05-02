@@ -244,7 +244,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test</artifactId>
-            <version>3.0.1</version>
+            <version>${springboot3.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
