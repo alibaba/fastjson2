@@ -54,13 +54,16 @@ $['store']['book'][0]['title']
 | abs           | number   | 返回对数值类型的绝对值      |
 | lower         | string   | 将字符串转换小写         |
 | upper         | string   | 将字符串转换成大写        |
+| index(x)      | int      | 其中参数x支持数值和字符串    |
 
 ### 1.2 聚合函数
-| Function | 返回类型   | Description |
-|----------|--------|-------------|
-| min      |        |             |
-| max      |        |             |
-| avg      | double |             |
+| Function | 返回类型   | Description   |
+|----------|--------|---------------|
+| min      |        |               |
+| max      |        |               |
+| first    |        | 返回集合中的第一个元素   |
+| last     |        | 返回集合中的最后一个个元素 |
+| avg      | double |               |
 
 ### 1.3 Filter Operators
 | Operator        | Description  |
