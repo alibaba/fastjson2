@@ -1,8 +1,10 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -318,6 +320,7 @@ class JSONPathParser {
             }
 
             if (jsonReader.ch == '(') {
+                jsonReader.next();
                 switch (name) {
                     case "length":
                     case "size":
@@ -375,10 +378,41 @@ class JSONPathParser {
                     case "last":
                         segment = JSONPathFunction.FUNC_LAST;
                         break;
+                    case "index":
+                        if (jsonReader.isNumber()) {
+                            Number number = jsonReader.readNumber();
+                            if (number instanceof BigDecimal) {
+                                BigDecimal decimal = (BigDecimal) number;
+                                decimal = decimal.stripTrailingZeros();
+                                if (decimal.scale() != 0) {
+                                    segment = new JSONPathFunction(new JSONPathFunction.IndexDecimal(decimal));
+                                    break;
+                                }
+                                BigInteger unscaledValue = decimal.unscaledValue();
+                                if (unscaledValue.compareTo(TypeUtils.BIGINT_INT64_MIN) >= 0
+                                        && unscaledValue.compareTo(TypeUtils.BIGINT_INT64_MAX) <= 0) {
+                                    number = unscaledValue.longValue();
+                                } else {
+                                    number = unscaledValue;
+                                }
+                            }
+
+                            if (number instanceof Integer
+                                    || number instanceof Long
+                            ) {
+                                long longValue = number.longValue();
+                                segment = new JSONPathFunction(new JSONPathFunction.IndexInt(longValue));
+                                break;
+                            }
+                        } else if (jsonReader.isString()) {
+                            String indexValue = jsonReader.readString();
+                            segment = new JSONPathFunction(new JSONPathFunction.IndexString(indexValue));
+                            break;
+                        }
+                        throw new JSONException("not support syntax, path : " + path);
                     default:
                         throw new JSONException("not support syntax, path : " + path);
                 }
-                jsonReader.next();
                 if (!jsonReader.nextIfMatch(')')) {
                     throw new JSONException("not support syntax, path : " + path);
                 }
