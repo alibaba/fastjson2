@@ -6,10 +6,7 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -26,6 +23,8 @@ final class JSONPathFunction
     static JSONPathFunction FUNC_LOWER = new JSONPathFunction(JSONPathFunction::lower);
     static JSONPathFunction FUNC_UPPER = new JSONPathFunction(JSONPathFunction::upper);
     static JSONPathFunction FUNC_TRIM = new JSONPathFunction(JSONPathFunction::trim);
+    static JSONPathFunction FUNC_FIRST = new JSONPathFunction(JSONPathFunction::first);
+    static JSONPathFunction FUNC_LAST = new JSONPathFunction(JSONPathFunction::last);
 
     final Function function;
 
@@ -161,6 +160,85 @@ final class JSONPathFunction
                 values.add(negativeItem);
             }
             return values;
+        }
+
+        return value;
+    }
+
+    static Object first(Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof JSONPath.Sequence) {
+            value = ((JSONPath.Sequence) value).values;
+        }
+
+        if (value instanceof List) {
+            if (((List<?>) value).isEmpty()) {
+                return null;
+            }
+
+            return ((List<?>) value).get(0);
+        }
+
+        if (value instanceof Collection) {
+            Collection<?> collection = (Collection<?>) value;
+            if (collection.isEmpty()) {
+                return null;
+            }
+
+            return collection.iterator().next();
+        }
+
+        if (value.getClass().isArray()) {
+            int len = Array.getLength(value);
+            if (len == 0) {
+                return null;
+            }
+            return Array.get(value, 0);
+        }
+
+        return value;
+    }
+
+    static Object last(Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof JSONPath.Sequence) {
+            value = ((JSONPath.Sequence) value).values;
+        }
+
+        if (value instanceof List) {
+            List list = (List) value;
+            int size = list.size();
+            if (size == 0) {
+                return null;
+            }
+            return list.get(size - 1);
+        }
+
+        if (value instanceof Collection) {
+            Collection<?> collection = (Collection<?>) value;
+            if (collection.isEmpty()) {
+                return null;
+            }
+
+            Object last = null;
+            for (Iterator<?> it = collection.iterator(); it.hasNext();) {
+                last = it.next();
+            }
+            return last;
+        }
+
+        if (value.getClass().isArray()) {
+            int len = Array.getLength(value);
+            if (len == 0) {
+                return null;
+            }
+            return Array.get(value, len - 1);
         }
 
         return value;

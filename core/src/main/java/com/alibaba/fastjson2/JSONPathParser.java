@@ -369,6 +369,12 @@ class JSONPathParser {
                     case "negative":
                         segment = JSONPathFunction.FUNC_NEGATIVE;
                         break;
+                    case "first":
+                        segment = JSONPathFunction.FUNC_FIRST;
+                        break;
+                    case "last":
+                        segment = JSONPathFunction.FUNC_LAST;
+                        break;
                     default:
                         throw new JSONException("not support syntax, path : " + path);
                 }
