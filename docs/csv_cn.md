@@ -21,7 +21,7 @@ parser.readHeader();
 parser.statAll();
 
 // 获取各个列的分析结果
-List<StreamReader.ColumnStat> columns = csvReader.getColumnStats();
+List<StreamReader.ColumnStat> columns = parser.getColumnStats();
 
 // 根据列的统计信息生成建表语句
 StringBuilder sql = new StringBuilder();
