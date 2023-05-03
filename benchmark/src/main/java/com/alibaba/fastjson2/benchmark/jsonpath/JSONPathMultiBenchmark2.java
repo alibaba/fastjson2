@@ -58,7 +58,7 @@ public class JSONPathMultiBenchmark2 {
 
     static {
         try {
-            InputStream is = JSONPathPerf.class.getClassLoader().getResourceAsStream("data/eishay.json");
+            InputStream is = BookStore.class.getClassLoader().getResourceAsStream("data/eishay.json");
             str = IOUtils.toString(is, "UTF-8");
         } catch (Exception ex) {
             ex.printStackTrace();
