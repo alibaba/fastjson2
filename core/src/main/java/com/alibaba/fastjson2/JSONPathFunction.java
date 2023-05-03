@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.function.impl.ToDouble;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
@@ -227,7 +228,7 @@ final class JSONPathFunction
             }
 
             Object last = null;
-            for (Iterator<?> it = collection.iterator(); it.hasNext();) {
+            for (Iterator<?> it = collection.iterator(); it.hasNext(); ) {
                 last = it.next();
             }
             return last;
@@ -456,6 +457,137 @@ final class JSONPathFunction
         @Override
         public Object apply(Object o1, Object o2) {
             return function.apply(o2);
+        }
+    }
+
+    abstract static class Index
+            implements Function {
+        protected abstract boolean eq(Object item);
+
+        @Override
+        public final Object apply(Object o) {
+            if (o == null) {
+                return null;
+            }
+
+            if (o instanceof List) {
+                List list = (List) o;
+                for (int i = 0; i < list.size(); i++) {
+                    if (eq(list.get(i))) {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+
+            if (o.getClass().isArray()) {
+                int len = Array.getLength(o);
+                for (int i = 0; i < len; i++) {
+                    Object item = Array.get(o, i);
+                    if (eq(item)) {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+
+            if (eq(o)) {
+                return 0;
+            }
+
+            return null;
+        }
+    }
+
+    static final class IndexInt
+            extends Index {
+        final long value;
+        transient BigDecimal decimalValue;
+
+        public IndexInt(long value) {
+            this.value = value;
+        }
+
+        protected boolean eq(Object item) {
+            if (item instanceof Integer
+                    || item instanceof Long
+                    || item instanceof Byte
+                    || item instanceof Short
+            ) {
+                if (((Number) item).longValue() == value) {
+                    return true;
+                }
+            } else if (item instanceof Float || item instanceof Double) {
+                double doubleValue = ((Number) item).doubleValue();
+                if (doubleValue == value) {
+                    return true;
+                }
+            } else if (item instanceof BigDecimal) {
+                BigDecimal decimal = (BigDecimal) item;
+                decimal = decimal.stripTrailingZeros();
+                if (decimalValue == null) {
+                    decimalValue = BigDecimal.valueOf(value);
+                }
+                if (decimalValue.equals(decimal)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    static final class IndexDecimal
+            extends Index {
+        final BigDecimal value;
+
+        public IndexDecimal(BigDecimal value) {
+            this.value = value;
+        }
+
+        @Override
+        protected boolean eq(Object item) {
+            if (item == null) {
+                return false;
+            }
+
+            if (item instanceof BigDecimal) {
+                BigDecimal decimal = (BigDecimal) item;
+                decimal = decimal.stripTrailingZeros();
+                return value.equals(decimal);
+            }
+
+            if (item instanceof Float || item instanceof Double) {
+                double doubleValue = ((Number) item).doubleValue();
+                BigDecimal decimal = new BigDecimal(doubleValue).stripTrailingZeros();
+                return value.equals(decimal);
+            }
+
+            if (item instanceof String) {
+                String str = (String) item;
+                if (TypeUtils.isNumber(str)) {
+                    BigDecimal decimal = new BigDecimal(str).stripTrailingZeros();
+                    return value.equals(decimal);
+                }
+            }
+
+            return false;
+        }
+    }
+
+    static final class IndexString
+            extends Index {
+        final String value;
+
+        public IndexString(String value) {
+            this.value = value;
+        }
+
+        @Override
+        protected boolean eq(Object item) {
+            if (item == null) {
+                return false;
+            }
+            return value.equals(item.toString());
         }
     }
 }

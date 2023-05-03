@@ -1,4 +1,4 @@
-package com.alibaba.fastjson2.jsonpath;
+package com.alibaba.fastjson2.jsonpath.function;
 
 import com.alibaba.fastjson2.JSONPath;
 import org.junit.jupiter.api.Test;
