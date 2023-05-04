@@ -38,7 +38,11 @@ public class ObjectWriterException
 
         jsonWriter.startObject();
 
-        writeTypeInfo(jsonWriter);
+        if ((jsonWriter.getFeatures(features)
+                & (JSONWriter.Feature.WriteClassName.mask | JSONWriter.Feature.WriteThrowableClassName.mask)) != 0
+        ) {
+            writeTypeInfo(jsonWriter);
+        }
 
         for (int i = 0, size = fieldWriters.size(); i < size; ++i) {
             FieldWriter fieldWriter = fieldWriters.get(i);

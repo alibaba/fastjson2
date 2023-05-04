@@ -1180,6 +1180,7 @@ public abstract class JSON {
         }
 
         context.config(JSONWriter.Feature.WriteByteArrayAsBase64);
+        context.config(JSONWriter.Feature.WriteThrowableClassName);
 
         return context;
     }
