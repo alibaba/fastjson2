@@ -285,7 +285,7 @@ public final class JSONFactory {
     static final AtomicReferenceFieldUpdater<CacheItem, byte[]> BYTES_UPDATER
             = AtomicReferenceFieldUpdater.newUpdater(CacheItem.class, byte[].class, "bytes");
 
-    static class CacheItem {
+    static final class CacheItem {
         volatile char[] chars;
         volatile byte[] bytes;
     }
