@@ -692,6 +692,7 @@ public class JSONReaderTest1 {
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
+        assertEquals(localTime, JSONB.parseObject(JSONB.toBytes("12:13:14.1"), LocalTime.class));
     }
 
     @Test
@@ -707,6 +708,7 @@ public class JSONReaderTest1 {
             assertEquals('1', jsonReader.ch);
             assertTrue(jsonReader.comma);
         }
+        assertEquals(localTime, JSONB.parseObject(JSONB.toBytes("12:13:14.01"), LocalTime.class));
     }
 
     @Test

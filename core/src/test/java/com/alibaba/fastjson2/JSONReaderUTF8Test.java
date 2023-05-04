@@ -22,5 +22,13 @@ public class JSONReaderUTF8Test {
             JSONReader jsonReader = JSONReader.of(chars, 0, chars.length);
             assertEquals(localDate, jsonReader.readLocalDate11());
         }
+        {
+            byte[] bytes = JSONB.toBytes((String) JSON.parse(str));
+            assertEquals(localDate, JSONB.parseObject(bytes, LocalDate.class));
+        }
+        {
+            byte[] bytes = JSONB.toBytes((String) JSON.parse(str), StandardCharsets.UTF_8);
+            assertEquals(localDate, JSONB.parseObject(bytes, LocalDate.class));
+        }
     }
 }

@@ -576,6 +576,9 @@ public class JSONWriterUTF8Test {
         Bean3 bean2 = JSON.parseObject(bytes2, Bean3.class);
         assertEquals(bean.dateTime, bean1.dateTime);
         assertEquals(bean.dateTime, bean2.dateTime);
+
+        Bean3 bean3 = JSONB.parseObject(JSON.parseObject(bytes).toJSONBBytes(), Bean3.class);
+        assertEquals(bean.dateTime, bean3.dateTime);
     }
 
     public static class Bean3 {
