@@ -15,7 +15,7 @@ public class ExceptionTest {
     @Test
     public void test_exception() throws Exception {
         IllegalStateException ex = new IllegalStateException();
-        String str = JSON.toJSONString(ex);
+        String str = JSON.toJSONString(ex, JSONWriter.Feature.WriteThrowableClassName);
 
         Object jsonObject = JSON.parseObject(str, Object.class);
         assertTrue(jsonObject instanceof Map);
