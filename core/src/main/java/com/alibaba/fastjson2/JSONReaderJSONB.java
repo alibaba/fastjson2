@@ -56,12 +56,12 @@ class JSONReaderJSONB
     }
 
     @Override
-    public boolean isJSONB() {
+    public final boolean isJSONB() {
         return true;
     }
 
     @Override
-    public String getString() {
+    public final String getString() {
         if (strtype == BC_NULL) {
             return null;
         }
@@ -109,7 +109,7 @@ class JSONReaderJSONB
         return new String(bytes, strBegin, strlen, charset);
     }
 
-    public int readLength() {
+    public final int readLength() {
         byte type = bytes[offset++];
         if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
             return type;
@@ -156,24 +156,24 @@ class JSONReaderJSONB
     }
 
     @Override
-    public boolean isNumber() {
+    public final boolean isNumber() {
         byte type = bytes[offset];
         return type >= BC_DOUBLE_NUM_0 && type <= BC_INT32;
     }
 
     @Override
-    public boolean isString() {
+    public final boolean isString() {
         return offset < bytes.length
                 && (type = bytes[offset]) >= BC_STR_ASCII_FIX_MIN;
     }
 
     @Override
-    public boolean nextIfMatch(char ch) {
+    public final boolean nextIfMatch(char ch) {
         throw new JSONException("UnsupportedOperation");
     }
 
     @Override
-    public boolean nextIfObjectStart() {
+    public final boolean nextIfObjectStart() {
         if (bytes[offset] != BC_OBJECT) {
             return false;
         }
@@ -205,21 +205,21 @@ class JSONReaderJSONB
     }
 
     @Override
-    public <T> T read(Type type) {
+    public final <T> T read(Type type) {
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = context.provider.getObjectReader(type, fieldBased);
         return (T) objectReader.readJSONBObject(this, null, null, 0);
     }
 
     @Override
-    public <T> T read(Class<T> type) {
+    public final <T> T read(Class<T> type) {
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = context.provider.getObjectReader(type, fieldBased);
         return (T) objectReader.readJSONBObject(this, null, null, 0);
     }
 
     @Override
-    public Map<String, Object> readObject() {
+    public final Map<String, Object> readObject() {
         type = bytes[offset++];
         if (type == BC_NULL) {
             return null;
@@ -382,7 +382,7 @@ class JSONReaderJSONB
         throw new JSONException("object not support input " + error(type));
     }
 
-    public void read(final Map map, long features) {
+    public final void read(final Map map, long features) {
         if (bytes[offset] != BC_OBJECT) {
             throw new JSONException("object not support input " + error(type));
         }
@@ -436,7 +436,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public Object readAny() {
+    public final Object readAny() {
         if (offset >= bytes.length) {
             throw new JSONException("readAny overflow : " + offset + "/" + bytes.length);
         }
@@ -982,12 +982,12 @@ class JSONReaderJSONB
     }
 
     @Override
-    public byte getType() {
+    public final byte getType() {
         return bytes[offset];
     }
 
     @Override
-    public List readArray() {
+    public final List readArray() {
         int entryCnt = startArray();
         JSONArray array = new JSONArray(entryCnt);
         for (int i = 0; i < entryCnt; i++) {
@@ -1104,7 +1104,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public List readArray(Type itemType) {
+    public final List readArray(Type itemType) {
         if (nextIfNull()) {
             return null;
         }
@@ -1118,7 +1118,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public List readList(Type[] types) {
+    public final List readList(Type[] types) {
         if (nextIfNull()) {
             return null;
         }
@@ -1133,7 +1133,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public byte[] readHex() {
+    public final byte[] readHex() {
         String str = readString();
         byte[] bytes = new byte[str.length() / 2];
         for (int i = 0; i < bytes.length; ++i) {
@@ -1248,7 +1248,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public int startArray() {
+    public final int startArray() {
         type = bytes[offset++];
 
         if (type == BC_NULL) {
@@ -1271,7 +1271,7 @@ class JSONReaderJSONB
         return readInt32Value();
     }
 
-    public String error(byte type) {
+    public final String error(byte type) {
         StringBuilder buf = new StringBuilder();
 
         buf.append(typeName(type));
@@ -1480,7 +1480,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public boolean isInt() {
+    public final boolean isInt() {
         int type = bytes[offset];
         return (type >= BC_BIGINT_LONG && type <= BC_INT32)
                 || type == BC_TIMESTAMP_SECONDS
@@ -1489,17 +1489,17 @@ class JSONReaderJSONB
     }
 
     @Override
-    public boolean isNull() {
+    public final boolean isNull() {
         return bytes[offset] == BC_NULL;
     }
 
     @Override
-    public Date readNullOrNewDate() {
+    public final Date readNullOrNewDate() {
         throw new JSONException("UnsupportedOperation");
     }
 
     @Override
-    public boolean nextIfNull() {
+    public final boolean nextIfNull() {
         if (bytes[offset] == BC_NULL) {
             offset++;
             return true;
@@ -1508,7 +1508,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public void readNull() {
+    public final void readNull() {
         type = bytes[offset++];
         if (type != BC_NULL) {
             throw new JSONException("null not match, " + type);
@@ -1516,7 +1516,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public boolean readIfNull() {
+    public final boolean readIfNull() {
         if (bytes[offset] == BC_NULL) {
             offset++;
             return true;
@@ -1525,7 +1525,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public long readTypeHashCode() {
+    public final long readTypeHashCode() {
         strtype = bytes[offset];
 
         boolean typeSymbol = strtype == BC_SYMBOL;
@@ -1788,7 +1788,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public long readValueHashCode() {
+    public final long readValueHashCode() {
         strtype = bytes[offset];
 
         offset++;
@@ -2108,7 +2108,7 @@ class JSONReaderJSONB
         return hashCode;
     }
 
-    protected long getNameHashCode() {
+    protected final long getNameHashCode() {
         int offset = strBegin;
 
         if (MIXED_HASH_ALGORITHM) {
@@ -2167,7 +2167,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public long getNameHashCodeLCase() {
+    public final long getNameHashCodeLCase() {
         int offset = strBegin;
 
         if (MIXED_HASH_ALGORITHM) {
@@ -2379,7 +2379,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public boolean skipName() {
+    public final boolean skipName() {
         strtype = bytes[offset++];
         if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII_FIX_MAX) {
             offset += (strtype - BC_STR_ASCII_FIX_MIN);
@@ -2825,12 +2825,12 @@ class JSONReaderJSONB
     }
 
     @Override
-    public String getFieldName() {
+    public final String getFieldName() {
         return getString();
     }
 
     @Override
-    public String readString() {
+    public final String readString() {
         strtype = bytes[offset++];
         if (strtype == BC_NULL) {
             return null;
@@ -3191,7 +3191,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public char readCharValue() {
+    public final char readCharValue() {
         byte type = bytes[offset];
         if (type == BC_CHAR) {
             offset++;
@@ -3212,7 +3212,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public long readInt64Value() {
+    public final long readInt64Value() {
         wasNull = false;
 
         byte type = bytes[offset++];
@@ -3384,7 +3384,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public int readInt32Value() {
+    public final int readInt32Value() {
         byte type = bytes[offset++];
         if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
             return type;
@@ -3539,12 +3539,12 @@ class JSONReaderJSONB
     }
 
     @Override
-    public boolean isBinary() {
+    public final boolean isBinary() {
         return bytes[offset] == BC_BINARY;
     }
 
     @Override
-    public byte[] readBinary() {
+    public final byte[] readBinary() {
         byte type = bytes[offset++];
         if (type != BC_BINARY) {
             throw new JSONException("not support input : " + typeName(type));
@@ -3558,7 +3558,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public Integer readInt32() {
+    public final Integer readInt32() {
         if (bytes[offset] == BC_NULL) {
             offset++;
             wasNull = true;
@@ -3574,7 +3574,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public Long readInt64() {
+    public final Long readInt64() {
         if (bytes[offset] == BC_NULL) {
             offset++;
             wasNull = true;
@@ -3611,7 +3611,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public float readFloatValue() {
+    public final float readFloatValue() {
         byte type = bytes[offset++];
 
         switch (type) {
@@ -3776,7 +3776,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public double readDoubleValue() {
+    public final double readDoubleValue() {
         byte type = bytes[offset++];
         switch (type) {
             case BC_NULL:
@@ -3937,12 +3937,12 @@ class JSONReaderJSONB
     }
 
     @Override
-    protected void readNumber0() {
+    protected final void readNumber0() {
         throw new JSONException("UnsupportedOperation");
     }
 
     @Override
-    public Number readNumber() {
+    public final Number readNumber() {
         byte type = bytes[offset++];
         if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
             return (int) type;
@@ -4104,7 +4104,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public BigDecimal readBigDecimal() {
+    public final BigDecimal readBigDecimal() {
         byte type = bytes[offset++];
         switch (type) {
             case BC_NULL:
@@ -4297,7 +4297,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public BigInteger readBigInteger() {
+    public final BigInteger readBigInteger() {
         byte type = bytes[offset++];
         switch (type) {
             case BC_NULL:
@@ -4476,7 +4476,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public LocalDate readLocalDate() {
+    public final LocalDate readLocalDate() {
         int type = bytes[offset];
         if (type == BC_LOCAL_DATE) {
             offset++;
@@ -4493,9 +4493,8 @@ class JSONReaderJSONB
                     return readLocalDate8();
                 case 9:
                     return readLocalDate9();
-                case 10: {
+                case 10:
                     return readLocalDate10();
-                }
                 case 11:
                     return readLocalDate11();
                 default:
@@ -4527,7 +4526,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public LocalDateTime readLocalDateTime() {
+    public final LocalDateTime readLocalDateTime() {
         int type = bytes[offset];
         if (type == BC_LOCAL_DATETIME) {
             offset++;
@@ -4598,52 +4597,102 @@ class JSONReaderJSONB
     }
 
     @Override
-    protected LocalDateTime readLocalDateTime12() {
+    protected final LocalDateTime readLocalDateTime12() {
+        LocalDateTime ldt;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 12
+                || (ldt = DateUtils.parseLocalDateTime12(bytes, offset + 1)) == null
+        ) {
+            throw new JSONException("date only support string input");
+        }
+        offset += 13;
+        return ldt;
+    }
+
+    @Override
+    protected final LocalDateTime readLocalDateTime14() {
+        LocalDateTime ldt;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 14
+                || (ldt = DateUtils.parseLocalDateTime14(bytes, offset + 1)) == null
+        ) {
+            throw new JSONException("date only support string input");
+        }
+        offset += 15;
+        return ldt;
+    }
+
+    @Override
+    protected final LocalDateTime readLocalDateTime16() {
+        LocalDateTime ldt;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 16
+                || (ldt = DateUtils.parseLocalDateTime16(bytes, offset + 1)) == null
+        ) {
+            throw new JSONException("date only support string input");
+        }
+        offset += 17;
+        return ldt;
+    }
+
+    @Override
+    protected final LocalDateTime readLocalDateTime17() {
+        LocalDateTime ldt;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 17
+                || (ldt = DateUtils.parseLocalDateTime17(bytes, offset + 1)) == null
+        ) {
+            throw new JSONException("date only support string input");
+        }
+        offset += 18;
+        return ldt;
+    }
+
+    @Override
+    protected final LocalTime readLocalTime10() {
+        LocalTime time;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 10
+                || (time = DateUtils.parseLocalTime10(bytes, offset + 1)) == null
+        ) {
+            throw new JSONException("date only support string input");
+        }
+        offset += 11;
+        return time;
+    }
+
+    @Override
+    protected final LocalTime readLocalTime11() {
+        LocalTime time;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 11
+                || (time = DateUtils.parseLocalTime11(bytes, offset + 1)) == null
+        ) {
+            throw new JSONException("date only support string input");
+        }
+        offset += 12;
+        return time;
+    }
+
+    @Override
+    protected final ZonedDateTime readZonedDateTimeX(int len) {
+        type = bytes[offset];
+        if (type < BC_STR_ASCII_FIX_MIN || type > BC_STR_ASCII_FIX_MAX) {
+            throw new JSONException("date only support string input");
+        }
+
+        ZonedDateTime ldt;
+        if (len < 19
+                || (ldt = DateUtils.parseZonedDateTime(bytes, offset + 1, len, context.zoneId)) == null
+        ) {
+            throw new JSONException("illegal LocalDateTime string : " + readString());
+        }
+
+        offset += (len + 1);
+        return ldt;
+    }
+
+    @Override
+    public final void skipLineComment() {
         throw new JSONException("UnsupportedOperation");
     }
 
     @Override
-    protected LocalDateTime readLocalDateTime14() {
-        throw new JSONException("UnsupportedOperation");
-    }
-
-    @Override
-    protected LocalDateTime readLocalDateTime16() {
-        throw new JSONException("UnsupportedOperation");
-    }
-
-    @Override
-    protected LocalDateTime readLocalDateTime17() {
-        throw new JSONException("UnsupportedOperation");
-    }
-
-    @Override
-    protected LocalTime readLocalTime10() {
-        throw new JSONException("UnsupportedOperation");
-    }
-
-    @Override
-    protected LocalTime readLocalTime11() {
-        throw new JSONException("UnsupportedOperation");
-    }
-
-    @Override
-    protected LocalDate readLocalDate11() {
-        throw new JSONException("UnsupportedOperation");
-    }
-
-    @Override
-    protected ZonedDateTime readZonedDateTimeX(int len) {
-        throw new JSONException("UnsupportedOperation");
-    }
-
-    @Override
-    public void skipLineComment() {
-        throw new JSONException("UnsupportedOperation");
-    }
-
-    @Override
-    public LocalTime readLocalTime() {
+    public final LocalTime readLocalTime() {
         int type = bytes[offset];
         if (type == BC_LOCAL_TIME) {
             offset++;
@@ -4679,7 +4728,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public Instant readInstant() {
+    public final Instant readInstant() {
         int type = bytes[offset++];
         switch (type) {
             case BC_TIMESTAMP: {
@@ -4726,7 +4775,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public ZonedDateTime readZonedDateTime() {
+    public final ZonedDateTime readZonedDateTime() {
         int type = bytes[offset++];
         switch (type) {
             case BC_TIMESTAMP: {
@@ -4786,22 +4835,26 @@ class JSONReaderJSONB
                     zoneId = SHANGHAI_ZONE_ID;
                 } else {
                     String zoneIdStr = getString();
-                    ZoneId contextZondId = context.getZoneId();
-                    if (contextZondId.getId().equals(zoneIdStr)) {
-                        zoneId = contextZondId;
+                    ZoneId contextZoneId = context.getZoneId();
+                    if (contextZoneId.getId().equals(zoneIdStr)) {
+                        zoneId = contextZoneId;
                     } else {
                         zoneId = DateUtils.getZoneId(zoneIdStr, SHANGHAI_ZONE_ID);
                     }
                 }
                 return ZonedDateTime.ofLocal(ldt, zoneId, null);
             default:
+                if (type >= BC_STR_ASCII_FIX_0 && type <= BC_STR_ASCII_FIX_MAX) {
+                    offset--;
+                    return readZonedDateTimeX(type - BC_STR_ASCII_FIX_MIN);
+                }
                 break;
         }
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public UUID readUUID() {
+    public final UUID readUUID() {
         byte type = bytes[offset++];
         switch (type) {
             case BC_NULL:
@@ -4924,7 +4977,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public boolean readBoolValue() {
+    public final boolean readBoolValue() {
         wasNull = false;
         byte type = bytes[offset++];
         switch (type) {
@@ -5061,7 +5114,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public boolean nextIfMatch(byte type) {
+    public final boolean nextIfMatch(byte type) {
         if (bytes[offset] == type) {
             offset++;
             return true;
@@ -5070,7 +5123,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    protected int getStringLength() {
+    protected final int getStringLength() {
         type = bytes[offset];
         if (type >= BC_STR_ASCII_FIX_MIN && type < BC_STR_ASCII_FIX_MAX) {
             return type - BC_STR_ASCII_FIX_MIN;
@@ -5079,7 +5132,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public LocalDate readLocalDate8() {
+    public final LocalDate readLocalDate8() {
         LocalDate ldt;
         if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 8
                 || (ldt = DateUtils.parseLocalDate8(bytes, offset + 1)) == null
@@ -5092,7 +5145,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public LocalDate readLocalDate9() {
+    public final LocalDate readLocalDate9() {
         LocalDate ldt;
         if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 9
                 || (ldt = DateUtils.parseLocalDate9(bytes, offset + 1)) == null
@@ -5105,7 +5158,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    protected LocalDate readLocalDate10() {
+    protected final LocalDate readLocalDate10() {
         LocalDate ldt;
         if ((strtype == BC_STR_ASCII || strtype == BC_STR_UTF8) && strlen == 10) {
             ldt = DateUtils.parseLocalDate10(bytes, offset);
@@ -5120,7 +5173,22 @@ class JSONReaderJSONB
     }
 
     @Override
-    protected LocalTime readLocalTime5() {
+    protected final LocalDate readLocalDate11() {
+        LocalDate ldt;
+        if ((strtype == BC_STR_ASCII || strtype == BC_STR_UTF8) && strlen == 11) {
+            ldt = DateUtils.parseLocalDate11(bytes, offset);
+        } else if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 11
+                || (ldt = DateUtils.parseLocalDate11(bytes, offset + 1)) == null
+        ) {
+            throw new JSONException("date only support string input");
+        }
+
+        offset += 12;
+        return ldt;
+    }
+
+    @Override
+    protected final LocalTime readLocalTime5() {
         LocalTime time;
         if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 5
                 || (time = DateUtils.parseLocalTime5(bytes, offset + 1)) == null
@@ -5132,11 +5200,9 @@ class JSONReaderJSONB
     }
 
     @Override
-    protected LocalTime readLocalTime8() {
-        type = bytes[offset];
-
+    protected final LocalTime readLocalTime8() {
         LocalTime time;
-        if (type != BC_STR_ASCII_FIX_MIN + 8
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 8
                 || (time = DateUtils.parseLocalTime8(bytes, offset + 1)) == null
         ) {
             throw new JSONException("date only support string input");
@@ -5146,7 +5212,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    protected LocalTime readLocalTime12() {
+    protected final LocalTime readLocalTime12() {
         LocalTime time;
         if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 12
                 || (time = DateUtils.parseLocalTime12(bytes, offset + 1)) == null
@@ -5158,7 +5224,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    protected LocalTime readLocalTime18() {
+    protected final LocalTime readLocalTime18() {
         LocalTime time;
         if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 18
                 || (time = DateUtils.parseLocalTime18(bytes, offset + 1)) == null
@@ -5170,7 +5236,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    protected LocalDateTime readLocalDateTime18() {
+    protected final LocalDateTime readLocalDateTime18() {
         LocalDateTime ldt;
         if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 18
                 || (ldt = DateUtils.parseLocalDateTime18(bytes, offset + 1)) == null
@@ -5182,10 +5248,10 @@ class JSONReaderJSONB
     }
 
     @Override
-    protected LocalDateTime readLocalDateTime20() {
+    protected final LocalDateTime readLocalDateTime20() {
         LocalDateTime ldt;
         if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 20
-                || (ldt = DateUtils.parseLocalDateTime18(bytes, offset + 1)) == null
+                || (ldt = DateUtils.parseLocalDateTime20(bytes, offset + 1)) == null
         ) {
             throw new JSONException("date only support string input");
         }
@@ -5194,7 +5260,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    public long readMillis19() {
+    public final long readMillis19() {
         if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 19) {
             throw new JSONException("date only support string input");
         }
@@ -5205,7 +5271,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    protected LocalDateTime readLocalDateTime19() {
+    protected final LocalDateTime readLocalDateTime19() {
         type = bytes[offset];
         if (type != BC_STR_ASCII_FIX_MIN + 19) {
             throw new JSONException("date only support string input");
@@ -5221,7 +5287,7 @@ class JSONReaderJSONB
     }
 
     @Override
-    protected LocalDateTime readLocalDateTimeX(int len) {
+    protected final LocalDateTime readLocalDateTimeX(int len) {
         type = bytes[offset];
         if (type < BC_STR_ASCII_FIX_MIN || type > BC_STR_ASCII_FIX_MAX) {
             throw new JSONException("date only support string input");
@@ -5240,52 +5306,52 @@ class JSONReaderJSONB
     }
 
     @Override
-    public String readPattern() {
+    public final String readPattern() {
         throw new JSONException("UnsupportedOperation");
     }
 
     @Override
-    public boolean nextIfMatchIdent(char c0, char c1, char c2) {
+    public final boolean nextIfMatchIdent(char c0, char c1, char c2) {
         throw new JSONException("UnsupportedOperation");
     }
 
     @Override
-    public long readFieldNameHashCodeUnquote() {
+    public final long readFieldNameHashCodeUnquote() {
         return readFieldNameHashCode();
     }
 
     @Override
-    public boolean nextIfSet() {
+    public final boolean nextIfSet() {
         return false;
     }
 
     @Override
-    public boolean nextIfInfinity() {
+    public final boolean nextIfInfinity() {
         return false;
     }
 
     @Override
-    public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3) {
+    public final boolean nextIfMatchIdent(char c0, char c1, char c2, char c3) {
         throw new JSONException("UnsupportedOperation");
     }
 
     @Override
-    public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4) {
+    public final boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4) {
         throw new JSONException("UnsupportedOperation");
     }
 
     @Override
-    public boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5) {
+    public final boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5) {
         throw new JSONException("UnsupportedOperation");
     }
 
     @Override
-    public SavePoint mark() {
+    public final SavePoint mark() {
         return new SavePoint(this.offset, this.type);
     }
 
     @Override
-    public void reset(SavePoint savePoint) {
+    public final void reset(SavePoint savePoint) {
         this.offset = savePoint.offset;
         this.type = (byte) savePoint.current;
     }

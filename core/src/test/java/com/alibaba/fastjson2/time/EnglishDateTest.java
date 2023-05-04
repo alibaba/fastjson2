@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.time;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.util.DateUtils;
 import org.junit.jupiter.api.Test;
 
@@ -38,6 +39,17 @@ public class EnglishDateTest {
         }
         {
             Date date = JSON.parseObject(str.getBytes(), Date.class);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
+            assertEquals(2008, zdt.getYear());
+            assertEquals(6, zdt.getMonthValue());
+            assertEquals(3, zdt.getDayOfMonth());
+            assertEquals(11, zdt.getHour());
+            assertEquals(5, zdt.getMinute());
+            assertEquals(0, zdt.getSecond());
+        }
+        {
+            byte[] bytes = JSONB.toBytes(JSON.parse(str));
+            Date date = JSONB.parseObject(bytes, Date.class);
             ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
@@ -132,6 +144,17 @@ public class EnglishDateTest {
         }
         {
             Date date = JSON.parseObject(str.getBytes(), Date.class);
+            ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
+            assertEquals(2008, zdt.getYear());
+            assertEquals(6, zdt.getMonthValue());
+            assertEquals(13, zdt.getDayOfMonth());
+            assertEquals(11, zdt.getHour());
+            assertEquals(5, zdt.getMinute());
+            assertEquals(30, zdt.getSecond());
+        }
+        {
+            byte[] bytes = JSONB.toBytes(JSON.parse(str));
+            Date date = JSONB.parseObject(bytes, Date.class);
             ZonedDateTime zdt = date.toInstant().atZone(DateUtils.SHANGHAI_ZONE_ID);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
