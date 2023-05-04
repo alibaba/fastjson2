@@ -4831,37 +4831,8 @@ class JSONReaderUTF16
             throw new JSONException("localTime only support string input");
         }
 
-        char c0 = chars[offset];
-        char c1 = chars[offset + 1];
-        char c2 = chars[offset + 2];
-        char c3 = chars[offset + 3];
-        char c4 = chars[offset + 4];
-
-        char h0, h1, i0, i1;
-        if (c2 == ':') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
+        LocalTime time = DateUtils.parseLocalTime5(chars, offset);
+        if (time == null) {
             return null;
         }
 
@@ -4871,7 +4842,7 @@ class JSONReaderUTF16
             next();
         }
 
-        return LocalTime.of(hour, minute);
+        return time;
     }
 
     @Override
@@ -4880,51 +4851,8 @@ class JSONReaderUTF16
             throw new JSONException("localTime only support string input");
         }
 
-        char c0 = chars[offset];
-        char c1 = chars[offset + 1];
-        char c2 = chars[offset + 2];
-        char c3 = chars[offset + 3];
-        char c4 = chars[offset + 4];
-        char c5 = chars[offset + 5];
-        char c6 = chars[offset + 6];
-        char c7 = chars[offset + 7];
-
-        char h0, h1, i0, i1, s0, s1;
-        if (c2 == ':' && c5 == ':') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
+        LocalTime time = DateUtils.parseLocalTime8(chars, offset);
+        if (time == null) {
             return null;
         }
 
@@ -4934,7 +4862,7 @@ class JSONReaderUTF16
             next();
         }
 
-        return LocalTime.of(hour, minute, second);
+        return time;
     }
 
     @Override

@@ -4835,7 +4835,7 @@ class JSONReaderUTF8
 
     @Override
     protected final LocalTime readLocalTime5() {
-        if (!isString()) {
+        if (ch != '"' && ch != '\'') {
             throw new JSONException("localTime only support string input");
         }
 
