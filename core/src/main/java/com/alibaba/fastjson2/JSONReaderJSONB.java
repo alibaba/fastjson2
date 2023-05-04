@@ -696,7 +696,7 @@ class JSONReaderJSONB
                 LocalDateTime ldt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
                 return ZonedDateTime.of(ldt, zoneId);
             }
-            case BC_TIMESTAMP : {
+            case BC_TIMESTAMP: {
                 long epochSeconds = readInt64Value();
                 int nano = readInt32Value();
                 return Instant.ofEpochSecond(epochSeconds, nano);
@@ -3141,7 +3141,7 @@ class JSONReaderJSONB
                 case BC_TYPED_ANY: {
                     offset--;
                     Object typedAny = readAny();
-                    return typedAny == null ? null : JSON.toJSONString(typedAny);
+                    return typedAny == null ? null : JSON.toJSONString(typedAny, JSONWriter.Feature.WriteThrowableClassName);
                 }
                 case BC_DECIMAL_LONG:
                 case BC_BIGINT_LONG: {
@@ -5080,75 +5080,12 @@ class JSONReaderJSONB
 
     @Override
     public LocalDate readLocalDate8() {
-        type = bytes[offset];
-        if (type != BC_STR_ASCII_FIX_MIN + 8) {
+        LocalDate ldt;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 8
+                || (ldt = DateUtils.parseLocalDate8(bytes, offset + 1)) == null
+        ) {
             throw new JSONException("date only support string input");
         }
-
-        byte c0 = bytes[offset + 1];
-        byte c1 = bytes[offset + 2];
-        byte c2 = bytes[offset + 3];
-        byte c3 = bytes[offset + 4];
-        byte c4 = bytes[offset + 5];
-        byte c5 = bytes[offset + 6];
-        byte c6 = bytes[offset + 7];
-        byte c7 = bytes[offset + 8];
-
-        char y0, y1, y2, y3, m0, m1, d0, d1;
-        if (c4 == '-' && c6 == '-') {
-            y0 = (char) c0;
-            y1 = (char) c1;
-            y2 = (char) c2;
-            y3 = (char) c3;
-
-            m0 = '0';
-            m1 = (char) c5;
-
-            d0 = '0';
-            d1 = (char) c7;
-        } else {
-            y0 = (char) c0;
-            y1 = (char) c1;
-            y2 = (char) c2;
-            y3 = (char) c3;
-
-            m0 = (char) c4;
-            m1 = (char) c5;
-
-            d0 = (char) c6;
-            d1 = (char) c7;
-        }
-
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        LocalDate ldt = LocalDate.of(year, month, dom);
 
         offset += 9;
         return ldt;
@@ -5156,78 +5093,12 @@ class JSONReaderJSONB
 
     @Override
     public LocalDate readLocalDate9() {
-        type = bytes[offset];
-        if (type != BC_STR_ASCII_FIX_MIN + 9) {
+        LocalDate ldt;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 9
+                || (ldt = DateUtils.parseLocalDate9(bytes, offset + 1)) == null
+        ) {
             throw new JSONException("date only support string input");
         }
-
-        byte c0 = bytes[offset + 1];
-        byte c1 = bytes[offset + 2];
-        byte c2 = bytes[offset + 3];
-        byte c3 = bytes[offset + 4];
-        byte c4 = bytes[offset + 5];
-        byte c5 = bytes[offset + 6];
-        byte c6 = bytes[offset + 7];
-        byte c7 = bytes[offset + 8];
-        byte c8 = bytes[offset + 9];
-
-        char y0, y1, y2, y3, m0, m1, d0, d1;
-        if (c4 == '-' && c6 == '-') {
-            y0 = (char) c0;
-            y1 = (char) c1;
-            y2 = (char) c2;
-            y3 = (char) c3;
-
-            m0 = '0';
-            m1 = (char) c5;
-
-            d0 = (char) c7;
-            d1 = (char) c8;
-        } else if (c4 == '-' && c7 == '-') {
-            y0 = (char) c0;
-            y1 = (char) c1;
-            y2 = (char) c2;
-            y3 = (char) c3;
-
-            m0 = (char) c5;
-            m1 = (char) c6;
-
-            d0 = '0';
-            d1 = (char) c8;
-        } else {
-            return null;
-        }
-
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        LocalDate ldt = LocalDate.of(year, month, dom);
 
         offset += 10;
         return ldt;
@@ -5235,116 +5106,14 @@ class JSONReaderJSONB
 
     @Override
     protected LocalDate readLocalDate10() {
-        byte c0, c1, c2, c3, c4, c5, c6, c7, c8, c9;
-        if (bytes[offset] == BC_STR_ASCII_FIX_MIN + 10) {
-            c0 = bytes[offset + 1];
-            c1 = bytes[offset + 2];
-            c2 = bytes[offset + 3];
-            c3 = bytes[offset + 4];
-            c4 = bytes[offset + 5];
-            c5 = bytes[offset + 6];
-            c6 = bytes[offset + 7];
-            c7 = bytes[offset + 8];
-            c8 = bytes[offset + 9];
-            c9 = bytes[offset + 10];
-        } else if ((strtype == BC_STR_UTF8 || strtype == BC_STR_ASCII) && strlen == 10) {
-            c0 = bytes[offset + 0];
-            c1 = bytes[offset + 1];
-            c2 = bytes[offset + 2];
-            c3 = bytes[offset + 3];
-            c4 = bytes[offset + 4];
-            c5 = bytes[offset + 5];
-            c6 = bytes[offset + 6];
-            c7 = bytes[offset + 7];
-            c8 = bytes[offset + 8];
-            c9 = bytes[offset + 9];
-        } else {
+        LocalDate ldt;
+        if ((strtype == BC_STR_ASCII || strtype == BC_STR_UTF8) && strlen == 10) {
+            ldt = DateUtils.parseLocalDate10(bytes, offset);
+        } else if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 10
+                || (ldt = DateUtils.parseLocalDate10(bytes, offset + 1)) == null
+        ) {
             throw new JSONException("date only support string input");
         }
-
-        byte y0, y1, y2, y3, m0, m1, d0, d1;
-        if (c4 == '-' && c7 == '-') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-        } else if (c4 == '/' && c7 == '/') { // tw : yyyy/mm/dd
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-        } else if (c2 == '.' && c5 == '.') {
-            d0 = c0;
-            d1 = c1;
-
-            m0 = c3;
-            m1 = c4;
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-        } else if (c2 == '-' && c5 == '-') {
-            d0 = c0;
-            d1 = c1;
-
-            m0 = c3;
-            m1 = c4;
-
-            y0 = c6;
-            y1 = c7;
-            y2 = c8;
-            y3 = c9;
-        } else {
-            return null;
-        }
-
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        if (year == 0 && month == 0 && dom == 0) {
-            return null;
-        }
-
-        LocalDate ldt = LocalDate.of(year, month, dom);
 
         offset += 11;
         return ldt;
@@ -5352,299 +5121,76 @@ class JSONReaderJSONB
 
     @Override
     protected LocalTime readLocalTime5() {
-        type = bytes[offset];
-        if (type != BC_STR_ASCII_FIX_MIN + 5) {
+        LocalTime time;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 5
+                || (time = DateUtils.parseLocalTime5(bytes, offset + 1)) == null
+        ) {
             throw new JSONException("date only support string input");
         }
-
-        byte c0 = bytes[offset + 1];
-        byte c1 = bytes[offset + 2];
-        byte c2 = bytes[offset + 3];
-        byte c3 = bytes[offset + 4];
-        byte c4 = bytes[offset + 5];
-
-        byte h0, h1, i0, i1, s0, s1;
-        if (c2 == ':') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
         offset += 6;
-
-        return LocalTime.of(hour, minute);
+        return time;
     }
 
     @Override
     protected LocalTime readLocalTime8() {
         type = bytes[offset];
-        if (type != BC_STR_ASCII_FIX_MIN + 8) {
+
+        LocalTime time;
+        if (type != BC_STR_ASCII_FIX_MIN + 8
+                || (time = DateUtils.parseLocalTime8(bytes, offset + 1)) == null
+        ) {
             throw new JSONException("date only support string input");
         }
-
-        byte c0 = bytes[offset + 1];
-        byte c1 = bytes[offset + 2];
-        byte c2 = bytes[offset + 3];
-        byte c3 = bytes[offset + 4];
-        byte c4 = bytes[offset + 5];
-        byte c5 = bytes[offset + 6];
-        byte c6 = bytes[offset + 7];
-        byte c7 = bytes[offset + 8];
-
-        byte h0, h1, i0, i1, s0, s1;
-        if (c2 == ':' && c5 == ':') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int seccond;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
         offset += 9;
-
-        return LocalTime.of(hour, minute, seccond);
+        return time;
     }
 
     @Override
     protected LocalTime readLocalTime12() {
-        byte c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11;
-        if (bytes[offset] == BC_STR_ASCII_FIX_MIN + 12) {
-            c0 = bytes[offset + 1];
-            c1 = bytes[offset + 2];
-            c2 = bytes[offset + 3];
-            c3 = bytes[offset + 4];
-            c4 = bytes[offset + 5];
-            c5 = bytes[offset + 6];
-            c6 = bytes[offset + 7];
-            c7 = bytes[offset + 8];
-            c8 = bytes[offset + 9];
-            c9 = bytes[offset + 10];
-            c10 = bytes[offset + 11];
-            c11 = bytes[offset + 12];
-        } else {
+        LocalTime time;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 12
+                || (time = DateUtils.parseLocalTime12(bytes, offset + 1)) == null
+        ) {
             throw new JSONException("date only support string input");
         }
-
-        byte h0, h1, i0, i1, s0, s1, m0, m1, m2;
-        if (c2 == ':' && c5 == ':' && c8 == '.') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-            m0 = c9;
-            m1 = c10;
-            m2 = c11;
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int seccond;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int millis;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-                && m2 >= '0' && m2 <= '9'
-        ) {
-            millis = (m0 - '0') * 100 + (m1 - '0') * 10 + (m2 - '0');
-            millis *= 1000_000;
-        } else {
-            return null;
-        }
-
         offset += 13;
-
-        return LocalTime.of(hour, minute, seccond, millis);
+        return time;
     }
 
     @Override
     protected LocalTime readLocalTime18() {
-        byte c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17;
-        if (bytes[offset] == BC_STR_ASCII_FIX_MIN + 18) {
-            c0 = bytes[offset + 1];
-            c1 = bytes[offset + 2];
-            c2 = bytes[offset + 3];
-            c3 = bytes[offset + 4];
-            c4 = bytes[offset + 5];
-            c5 = bytes[offset + 6];
-            c6 = bytes[offset + 7];
-            c7 = bytes[offset + 8];
-            c8 = bytes[offset + 9];
-            c9 = bytes[offset + 10];
-            c10 = bytes[offset + 11];
-            c11 = bytes[offset + 12];
-            c12 = bytes[offset + 13];
-            c13 = bytes[offset + 14];
-            c14 = bytes[offset + 15];
-            c15 = bytes[offset + 16];
-            c16 = bytes[offset + 17];
-            c17 = bytes[offset + 18];
-        } else {
+        LocalTime time;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 18
+                || (time = DateUtils.parseLocalTime18(bytes, offset + 1)) == null
+        ) {
             throw new JSONException("date only support string input");
         }
-
-        byte h0, h1, i0, i1, s0, s1, m0, m1, m2, m3, m4, m5, m6, m7, m8;
-        if (c2 == ':' && c5 == ':' && c8 == '.') {
-            h0 = c0;
-            h1 = c1;
-            i0 = c3;
-            i1 = c4;
-            s0 = c6;
-            s1 = c7;
-            m0 = c9;
-            m1 = c10;
-            m2 = c11;
-            m3 = c12;
-            m4 = c13;
-            m5 = c14;
-            m6 = c15;
-            m7 = c16;
-            m8 = c17;
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int seccond;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int millis;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-                && m2 >= '0' && m2 <= '9'
-                && m3 >= '0' && m3 <= '9'
-                && m4 >= '0' && m4 <= '9'
-                && m5 >= '0' && m5 <= '9'
-                && m6 >= '0' && m6 <= '9'
-                && m7 >= '0' && m7 <= '9'
-                && m8 >= '0' && m8 <= '9'
-        ) {
-            millis = (m0 - '0') * 1000_000_00
-                    + (m1 - '0') * 1000_000_0
-                    + (m2 - '0') * 1000_000
-                    + (m3 - '0') * 1000_00
-                    + (m4 - '0') * 1000_0
-                    + (m5 - '0') * 1000
-                    + (m6 - '0') * 100
-                    + (m7 - '0') * 10
-                    + (m8 - '0');
-        } else {
-            return null;
-        }
-
         offset += 19;
-
-        return LocalTime.of(hour, minute, seccond, millis);
+        return time;
     }
 
     @Override
     protected LocalDateTime readLocalDateTime18() {
-        throw new JSONException("UnsupportedOperation");
+        LocalDateTime ldt;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 18
+                || (ldt = DateUtils.parseLocalDateTime18(bytes, offset + 1)) == null
+        ) {
+            throw new JSONException("date only support string input");
+        }
+        offset += 19;
+        return ldt;
     }
 
     @Override
     protected LocalDateTime readLocalDateTime20() {
-        throw new JSONException("UnsupportedOperation");
+        LocalDateTime ldt;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 20
+                || (ldt = DateUtils.parseLocalDateTime18(bytes, offset + 1)) == null
+        ) {
+            throw new JSONException("date only support string input");
+        }
+        offset += 21;
+        return ldt;
     }
 
     @Override
@@ -5815,149 +5361,10 @@ class JSONReaderJSONB
             throw new JSONException("date only support string input");
         }
 
-        char c0 = (char) bytes[offset + 1];
-        char c1 = (char) bytes[offset + 2];
-        char c2 = (char) bytes[offset + 3];
-        char c3 = (char) bytes[offset + 4];
-        char c4 = (char) bytes[offset + 5];
-        char c5 = (char) bytes[offset + 6];
-        char c6 = (char) bytes[offset + 7];
-        char c7 = (char) bytes[offset + 8];
-        char c8 = (char) bytes[offset + 9];
-        char c9 = (char) bytes[offset + 10];
-        char c10 = (char) bytes[offset + 11];
-        char c11 = (char) bytes[offset + 12];
-        char c12 = (char) bytes[offset + 13];
-        char c13 = (char) bytes[offset + 14];
-        char c14 = (char) bytes[offset + 15];
-        char c15 = (char) bytes[offset + 16];
-        char c16 = (char) bytes[offset + 17];
-        char c17 = (char) bytes[offset + 18];
-        char c18 = (char) bytes[offset + 19];
-
-        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2;
-        if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = c17;
-            s1 = c18;
-
-            S0 = '0';
-            S1 = '0';
-            S2 = '0';
-        } else if (c4 == '/' && c7 == '/' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
-            y0 = c0;
-            y1 = c1;
-            y2 = c2;
-            y3 = c3;
-
-            m0 = c5;
-            m1 = c6;
-
-            d0 = c8;
-            d1 = c9;
-
-            h0 = c11;
-            h1 = c12;
-
-            i0 = c14;
-            i1 = c15;
-
-            s0 = c17;
-            s1 = c18;
-
-            S0 = '0';
-            S1 = '0';
-            S2 = '0';
-        } else {
-            return null;
+        LocalDateTime ldt = DateUtils.parseLocalDateTime19(bytes, offset + 1);
+        if (ldt == null) {
+            throw new JSONException("date only support string input");
         }
-
-        int year;
-        if (y0 >= '0' && y0 <= '9'
-                && y1 >= '0' && y1 <= '9'
-                && y2 >= '0' && y2 <= '9'
-                && y3 >= '0' && y3 <= '9'
-        ) {
-            year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-        } else {
-            return null;
-        }
-
-        int month;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-        ) {
-            month = (m0 - '0') * 10 + (m1 - '0');
-        } else {
-            return null;
-        }
-
-        int dom;
-        if (d0 >= '0' && d0 <= '9'
-                && d1 >= '0' && d1 <= '9'
-        ) {
-            dom = (d0 - '0') * 10 + (d1 - '0');
-        } else {
-            return null;
-        }
-
-        int hour;
-        if (h0 >= '0' && h0 <= '9'
-                && h1 >= '0' && h1 <= '9'
-        ) {
-            hour = (h0 - '0') * 10 + (h1 - '0');
-        } else {
-            return null;
-        }
-
-        int minute;
-        if (i0 >= '0' && i0 <= '9'
-                && i1 >= '0' && i1 <= '9'
-        ) {
-            minute = (i0 - '0') * 10 + (i1 - '0');
-        } else {
-            return null;
-        }
-
-        int second;
-        if (s0 >= '0' && s0 <= '9'
-                && s1 >= '0' && s1 <= '9'
-        ) {
-            second = (s0 - '0') * 10 + (s1 - '0');
-        } else {
-            return null;
-        }
-
-        int millis;
-        if (S0 >= '0' && S0 <= '9'
-                && S1 >= '0' && S1 <= '9'
-                && S2 >= '0' && S2 <= '9'
-        ) {
-            millis = (S0 - '0') * 100
-                    + (S1 - '0') * 10
-                    + (S2 - '0');
-            millis *= 1000_000;
-        } else {
-            return null;
-        }
-
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, second, millis);
 
         offset += 20;
         return ldt;
@@ -5970,135 +5377,12 @@ class JSONReaderJSONB
             throw new JSONException("date only support string input");
         }
 
-        if (len < 21 || len > 29) {
-            throw new JSONException("illeal localdatetime string : " + readString());
-        }
-
-        byte c0 = bytes[offset + 1];
-        byte c1 = bytes[offset + 2];
-        byte c2 = bytes[offset + 3];
-        byte c3 = bytes[offset + 4];
-        byte c4 = bytes[offset + 5];
-        byte c5 = bytes[offset + 6];
-        byte c6 = bytes[offset + 7];
-        byte c7 = bytes[offset + 8];
-        byte c8 = bytes[offset + 9];
-        byte c9 = bytes[offset + 10];
-        byte c10 = bytes[offset + 11];
-        byte c11 = bytes[offset + 12];
-        byte c12 = bytes[offset + 13];
-        byte c13 = bytes[offset + 14];
-        byte c14 = bytes[offset + 15];
-        byte c15 = bytes[offset + 16];
-        byte c16 = bytes[offset + 17];
-        byte c17 = bytes[offset + 18];
-        byte c18 = bytes[offset + 19];
-        byte c19 = bytes[offset + 20];
-        byte c20, c21 = '0', c22 = '0', c23 = '0', c24 = '0', c25 = '0', c26 = '0', c27 = '0', c28 = '0';
-        switch (len) {
-            case 21:
-                c20 = bytes[offset + 21];
-                break;
-            case 22:
-                c20 = bytes[offset + 21];
-                c21 = bytes[offset + 22];
-                break;
-            case 23:
-                c20 = bytes[offset + 21];
-                c21 = bytes[offset + 22];
-                c22 = bytes[offset + 23];
-                break;
-            case 24:
-                c20 = bytes[offset + 21];
-                c21 = bytes[offset + 22];
-                c22 = bytes[offset + 23];
-                c23 = bytes[offset + 24];
-                break;
-            case 25:
-                c20 = bytes[offset + 21];
-                c21 = bytes[offset + 22];
-                c22 = bytes[offset + 23];
-                c23 = bytes[offset + 24];
-                c24 = bytes[offset + 25];
-                break;
-            case 26:
-                c20 = bytes[offset + 21];
-                c21 = bytes[offset + 22];
-                c22 = bytes[offset + 23];
-                c23 = bytes[offset + 24];
-                c24 = bytes[offset + 25];
-                c25 = bytes[offset + 26];
-                break;
-            case 27:
-                c20 = bytes[offset + 21];
-                c21 = bytes[offset + 22];
-                c22 = bytes[offset + 23];
-                c23 = bytes[offset + 24];
-                c24 = bytes[offset + 25];
-                c25 = bytes[offset + 26];
-                c26 = bytes[offset + 27];
-                break;
-            case 28:
-                c20 = bytes[offset + 21];
-                c21 = bytes[offset + 22];
-                c22 = bytes[offset + 23];
-                c23 = bytes[offset + 24];
-                c24 = bytes[offset + 25];
-                c25 = bytes[offset + 26];
-                c26 = bytes[offset + 27];
-                c27 = bytes[offset + 28];
-                break;
-            default:
-                c20 = bytes[offset + 21];
-                c21 = bytes[offset + 22];
-                c22 = bytes[offset + 23];
-                c23 = bytes[offset + 24];
-                c24 = bytes[offset + 25];
-                c25 = bytes[offset + 26];
-                c26 = bytes[offset + 27];
-                c27 = bytes[offset + 28];
-                c28 = bytes[offset + 29];
-                break;
-        }
-
-        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2, S3, S4, S5, S6, S7, S8;
-        if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.') {
-            y0 = (char) c0;
-            y1 = (char) c1;
-            y2 = (char) c2;
-            y3 = (char) c3;
-
-            m0 = (char) c5;
-            m1 = (char) c6;
-
-            d0 = (char) c8;
-            d1 = (char) c9;
-
-            h0 = (char) c11;
-            h1 = (char) c12;
-
-            i0 = (char) c14;
-            i1 = (char) c15;
-
-            s0 = (char) c17;
-            s1 = (char) c18;
-
-            S0 = (char) c20;
-            S1 = (char) c21;
-            S2 = (char) c22;
-            S3 = (char) c23;
-            S4 = (char) c24;
-            S5 = (char) c25;
-            S6 = (char) c26;
-            S7 = (char) c27;
-            S8 = (char) c28;
-        } else {
-            return null;
-        }
-
-        LocalDateTime ldt = localDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1, S0, S1, S2, S3, S4, S5, S6, S7, S8);
-        if (ldt == null) {
-            return null;
+        LocalDateTime ldt;
+        if (len < 21
+                || len > 29
+                || (ldt = DateUtils.parseLocalDateTimeX(bytes, offset + 1, len)) == null
+        ) {
+            throw new JSONException("illegal LocalDateTime string : " + readString());
         }
 
         offset += (len + 1);

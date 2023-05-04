@@ -2606,6 +2606,9 @@ public class DateUtils {
         return LocalDateTime.of(year, month, dom, hour, minute, 0);
     }
 
+    /**
+     * parseLocalDateTime use format 'yyyyMMddHHmm'
+     */
     public static LocalDateTime parseLocalDateTime12(byte[] str, int off) {
         if (off + 12 > str.length) {
             String input = new String(str, off, str.length - off);
