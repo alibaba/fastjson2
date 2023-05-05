@@ -2452,12 +2452,13 @@ class JSONReaderJSONB
         }
 
         strBegin = offset;
-        Charset charset = null;
+        Charset charset;
         String str = null;
         if (strtype == BC_STR_ASCII_FIX_MIN + 1) {
             str = TypeUtils.toString((char) (bytes[offset] & 0xff));
             strlen = 1;
             offset++;
+            charset = StandardCharsets.ISO_8859_1;
         } else if (strtype == BC_STR_ASCII_FIX_MIN + 2) {
             str = TypeUtils.toString(
                     (char) (bytes[offset] & 0xff),
@@ -2465,6 +2466,7 @@ class JSONReaderJSONB
             );
             strlen = 2;
             offset += 2;
+            charset = StandardCharsets.ISO_8859_1;
         } else if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII) {
             long nameValue0 = -1, nameValue1 = -1;
 
@@ -2789,6 +2791,8 @@ class JSONReaderJSONB
                 GB18030 = Charset.forName("GB18030");
             }
             charset = GB18030;
+        } else {
+            charset = StandardCharsets.UTF_8;
         }
 
         if (strlen < 0) {
