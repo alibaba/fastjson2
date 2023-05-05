@@ -1,8 +1,10 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.util.Fnv;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -17,6 +19,7 @@ import java.util.zip.GZIPInputStream;
 class ObjectReaderImplInt8Array
         extends ObjectReaderPrimitive {
     static final ObjectReaderImplInt8Array INSTANCE = new ObjectReaderImplInt8Array(null);
+    static final long HASH_TYPE = Fnv.hashCode64("[Byte");
 
     final String format;
 
@@ -110,6 +113,13 @@ class ObjectReaderImplInt8Array
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
+            long typeHashCode = jsonReader.readTypeHashCode();
+            if (typeHashCode != HASH_TYPE) {
+                throw new JSONException("not support autoType : " + jsonReader.getString());
+            }
+        }
+
         if (jsonReader.isString() && "hex".equals(format)) {
             return jsonReader.readHex();
         }

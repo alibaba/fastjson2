@@ -14,7 +14,7 @@ import java.util.function.Function;
 final class ObjectReaderImplInt32ValueArray
         extends ObjectReaderPrimitive {
     static final ObjectReaderImplInt32ValueArray INSTANCE = new ObjectReaderImplInt32ValueArray(int[].class, null);
-    static final long TYPE_HASH = Fnv.hashCode64("[I");
+    static final long HASH_TYPE = Fnv.hashCode64("[I");
 
     final Function<int[], Object> builder;
 
@@ -83,7 +83,7 @@ final class ObjectReaderImplInt32ValueArray
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
             long typeHashCode = jsonReader.readTypeHashCode();
-            if (typeHashCode != TYPE_HASH) {
+            if (typeHashCode != HASH_TYPE && typeHashCode != ObjectReaderImplInt32Array.HASH_TYPE) {
                 throw new JSONException("not support autoType : " + jsonReader.getString());
             }
         }
