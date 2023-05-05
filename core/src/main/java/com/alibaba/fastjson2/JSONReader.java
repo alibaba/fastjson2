@@ -3486,7 +3486,7 @@ public abstract class JSONReader
         return new ContextAutoTypeBeforeHandler(includeBasic, types);
     }
 
-    public static class Context {
+    public static final class Context {
         String dateFormat;
         boolean formatyyyyMMddhhmmss19;
         boolean formatyyyyMMddhhmmssT19;
@@ -3517,6 +3517,11 @@ public abstract class JSONReader
             this.objectSupplier = JSONFactory.defaultObjectSupplier;
             this.arraySupplier = JSONFactory.defaultArraySupplier;
             this.symbolTable = null;
+
+            String format = defaultReaderFormat;
+            if (format != null) {
+                setDateFormat(format);
+            }
         }
 
         public Context(ObjectReaderProvider provider, long features) {
@@ -3525,6 +3530,11 @@ public abstract class JSONReader
             this.objectSupplier = JSONFactory.defaultObjectSupplier;
             this.arraySupplier = JSONFactory.defaultArraySupplier;
             this.symbolTable = null;
+
+            String format = defaultReaderFormat;
+            if (format != null) {
+                setDateFormat(format);
+            }
         }
 
         public Context(Feature... features) {
@@ -3533,6 +3543,11 @@ public abstract class JSONReader
             this.objectSupplier = JSONFactory.defaultObjectSupplier;
             this.arraySupplier = JSONFactory.defaultArraySupplier;
             this.symbolTable = null;
+
+            String format = defaultReaderFormat;
+            if (format != null) {
+                setDateFormat(format);
+            }
 
             for (Feature feature : features) {
                 this.features |= feature.mask;
@@ -3545,6 +3560,11 @@ public abstract class JSONReader
             this.objectSupplier = JSONFactory.defaultObjectSupplier;
             this.arraySupplier = JSONFactory.defaultArraySupplier;
             this.symbolTable = null;
+
+            String format = defaultReaderFormat;
+            if (format != null) {
+                setDateFormat(format);
+            }
 
             for (Feature feature : features) {
                 this.features |= feature.mask;
@@ -3559,6 +3579,11 @@ public abstract class JSONReader
             this.arraySupplier = JSONFactory.defaultArraySupplier;
             this.symbolTable = null;
 
+            String format = defaultReaderFormat;
+            if (format != null) {
+                setDateFormat(format);
+            }
+
             for (Feature feature : features) {
                 this.features |= feature.mask;
             }
@@ -3568,12 +3593,23 @@ public abstract class JSONReader
             this.features = defaultReaderFeatures;
             this.provider = provider;
             this.symbolTable = symbolTable;
+
+            String format = defaultReaderFormat;
+            if (format != null) {
+                setDateFormat(format);
+            }
         }
 
         public Context(ObjectReaderProvider provider, SymbolTable symbolTable, Feature... features) {
             this.features = defaultReaderFeatures;
             this.provider = provider;
             this.symbolTable = symbolTable;
+
+            String format = defaultReaderFormat;
+            if (format != null) {
+                setDateFormat(format);
+            }
+
             for (Feature feature : features) {
                 this.features |= feature.mask;
             }
