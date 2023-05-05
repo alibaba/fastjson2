@@ -30,7 +30,7 @@ public class Issue1401 {
     @Test
     public void test() {
         Bean bean = new Bean();
-        assertEquals("{\"map\":{0:\"Test\",\"null\":-1,\"-9223372036854775808\":\"-9223372036854775808\",\"9223372036854775807\":\"9223372036854775807\",2020:2021,2022:2023}}", JSON.toJSONString(bean, JSONWriter.Feature.BrowserCompatible));
+        assertEquals("{\"map\":{\"0\":\"Test\",\"null\":-1,\"-9223372036854775808\":\"-9223372036854775808\",\"9223372036854775807\":\"9223372036854775807\",\"2020\":2021,\"2022\":2023}}", JSON.toJSONString(bean, JSONWriter.Feature.BrowserCompatible));
         assertEquals("{\"map\":{\"0\":\"Test\",\"null\":-1,\"-9223372036854775808\":-9223372036854775808,\"9223372036854775807\":9223372036854775807,\"2020\":2021,\"2022\":2023}}", JSON.toJSONString(bean, JSONWriter.Feature.WriteNonStringKeyAsString));
     }
 }

@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserCompatible;
+import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringKeyAsString;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
@@ -426,7 +428,7 @@ public final class ObjectWriterImplMap
                     } else if (key instanceof String) {
                         jsonWriter.writeName((String) key);
                     } else {
-                        if ((features & JSONWriter.Feature.WriteNonStringKeyAsString.mask) != 0) {
+                        if ((features & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0) {
                             jsonWriter.writeName(key.toString());
                         } else {
                             if (key instanceof Integer) {
@@ -459,7 +461,7 @@ public final class ObjectWriterImplMap
             } else if (key instanceof String) {
                 jsonWriter.writeName(strKey = (String) key);
             } else {
-                if ((features & JSONWriter.Feature.WriteNonStringKeyAsString.mask) != 0) {
+                if ((features & (WriteNonStringKeyAsString.mask | BrowserCompatible.mask)) != 0) {
                     jsonWriter.writeName(strKey = key.toString());
                 } else {
                     if (key instanceof Integer) {
