@@ -70,7 +70,7 @@ public @interface JSONField {
     Class serializeUsing() default Void.class;
 
     /**
-     * Specifies that {@link com.alibaba.fastjson2.writer.ObjectWriter} is used when serializing
+     * Specifies that {@link com.alibaba.fastjson2.reader.ObjectReader} is used when deserializing
      */
     @SuppressWarnings("rawtypes")
     Class deserializeUsing() default Void.class;
