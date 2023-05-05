@@ -1,8 +1,10 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -12,6 +14,7 @@ import java.util.function.Function;
 final class ObjectReaderImplFloatArray
         extends ObjectReaderPrimitive {
     static final ObjectReaderImplFloatArray INSTANCE = new ObjectReaderImplFloatArray();
+    static final long HASH_TYPE = Fnv.hashCode64("[Float");
 
     ObjectReaderImplFloatArray() {
         super(Float[].class);
@@ -67,6 +70,13 @@ final class ObjectReaderImplFloatArray
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
+            long typeHashCode = jsonReader.readTypeHashCode();
+            if (typeHashCode != HASH_TYPE) {
+                throw new JSONException("not support autoType : " + jsonReader.getString());
+            }
+        }
+
         int entryCnt = jsonReader.startArray();
         if (entryCnt == -1) {
             return null;

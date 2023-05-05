@@ -84,7 +84,11 @@ final class ObjectReaderImplInt64ValueArray
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
             long typeHash = jsonReader.readTypeHashCode();
-            if (typeHash != HASH_TYPE) {
+            if (typeHash != HASH_TYPE
+                    && typeHash != ObjectReaderImplInt64Array.HASH_TYPE
+                    && typeHash != ObjectReaderImplInt32Array.HASH_TYPE
+                    && typeHash != ObjectReaderImplInt32ValueArray.HASH_TYPE
+            ) {
                 throw new JSONException(jsonReader.info("not support " + jsonReader.getString()));
             }
         }
