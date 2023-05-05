@@ -3184,6 +3184,23 @@ public interface JSON {
     }
 
     /**
+     * config default reader dateFormat
+     * @since 2.0.30
+     * @param dateFormat
+     */
+    static void configReaderDateFormat(String dateFormat) {
+        defaultReaderFormat = dateFormat;
+    }
+
+    /**
+     * config default reader dateFormat
+     * @param dateFormat
+     */
+    static void configWriterDateFormat(String dateFormat) {
+        defaultWriterFormat = dateFormat;
+    }
+
+    /**
      * Enable the specified features in default writer
      *
      * @param features the specified features to be used

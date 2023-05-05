@@ -40,7 +40,10 @@ public final class JSONFactory {
     }
 
     static long defaultReaderFeatures;
+    static String defaultReaderFormat;
+
     static long defaultWriterFeatures;
+    static String defaultWriterFormat;
 
     static Supplier<Map> defaultObjectSupplier;
     static Supplier<List> defaultArraySupplier;

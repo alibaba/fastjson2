@@ -1130,4 +1130,30 @@ public class JSONTest {
         assertNotNull(map);
         assertTrue(map.isEmpty());
     }
+
+    @Test
+    public void configReaderDateFormat() {
+        try {
+            String format = "yyyy-MM-dd HH:mm:ss";
+            JSON.configReaderDateFormat(format);
+            JSONReader.Context context = JSONFactory.createReadContext();
+            assertEquals(format, context.getDateFormat());
+        } finally {
+            JSON.configReaderDateFormat(null);
+            assertNull(JSONFactory.createReadContext().getDateFormat());
+        }
+    }
+
+    @Test
+    public void configWriterDateFormat() {
+        try {
+            String format = "yyyy-MM-dd HH:mm:ss";
+            JSON.configWriterDateFormat(format);
+            JSONWriter.Context context = JSONFactory.createWriteContext();
+            assertEquals(format, context.getDateFormat());
+        } finally {
+            JSON.configWriterDateFormat(null);
+            assertNull(JSONFactory.createWriteContext().getDateFormat());
+        }
+    }
 }

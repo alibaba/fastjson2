@@ -1389,7 +1389,7 @@ public abstract class JSONWriter
 
     public abstract int flushTo(OutputStream out, Charset charset) throws IOException;
 
-    public static class Context {
+    public static final class Context {
         static ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
 
         public final ObjectWriterProvider provider;
@@ -1423,11 +1423,21 @@ public abstract class JSONWriter
 
             this.features = defaultWriterFeatures;
             this.provider = provider;
+
+            String format = defaultWriterFormat;
+            if (format != null) {
+                setDateFormat(format);
+            }
         }
 
         public Context(Feature... features) {
             this.features = defaultWriterFeatures;
             this.provider = JSONFactory.getDefaultObjectWriterProvider();
+
+            String format = defaultWriterFormat;
+            if (format != null) {
+                setDateFormat(format);
+            }
 
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;
@@ -1441,7 +1451,13 @@ public abstract class JSONWriter
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;
             }
-            setDateFormat(format);
+
+            if (format == null) {
+                format = defaultWriterFormat;
+            }
+            if (format != null) {
+                setDateFormat(format);
+            }
         }
 
         public Context(ObjectWriterProvider provider, Feature... features) {
@@ -1454,6 +1470,11 @@ public abstract class JSONWriter
 
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;
+            }
+
+            String format = defaultWriterFormat;
+            if (format != null) {
+                setDateFormat(format);
             }
         }
 
