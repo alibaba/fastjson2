@@ -22,6 +22,8 @@ public final class ObjectReaderImplEnum
     protected final Enum[] enums;
     protected final Enum[] ordinalEnums;
     protected long[] enumNameHashCodes;
+    protected String[] stringValues;
+    protected long[] intValues;
 
     public ObjectReaderImplEnum(
             Class enumClass,
@@ -29,7 +31,8 @@ public final class ObjectReaderImplEnum
             Member valueField,
             Enum[] enums,
             Enum[] ordinalEnums,
-            long[] enumNameHashCodes) {
+            long[] enumNameHashCodes
+    ) {
         this.enumClass = enumClass;
         this.createMethod = createMethod;
         this.valueField = valueField;
@@ -40,6 +43,34 @@ public final class ObjectReaderImplEnum
             valueFieldType = ((Method) valueField).getReturnType();
         }
         this.valueFieldType = valueFieldType;
+
+        if (valueFieldType != null) {
+            if (valueFieldType == String.class) {
+                stringValues = new String[enums.length];
+            } else {
+                intValues = new long[enums.length];
+            }
+
+            for (int i = 0; i < enums.length; i++) {
+                Enum e = enums[i];
+                try {
+                    Object fieldValue;
+                    if (valueField instanceof Field) {
+                        fieldValue = ((Field) valueField).get(e);
+                    } else {
+                        fieldValue = ((Method) valueField).invoke(e);
+                    }
+
+                    if (valueFieldType == String.class) {
+                        stringValues[i] = (String) fieldValue;
+                    } else if (fieldValue instanceof Number) {
+                        intValues[i] = ((Number) fieldValue).longValue();
+                    }
+                } catch (Exception ignored) {
+                    // ignored
+                }
+            }
+        }
 
         Type createMethodParamType = null;
         if (createMethod != null && createMethod.getParameterCount() == 1) {
@@ -169,26 +200,15 @@ public final class ObjectReaderImplEnum
             if (valueField == null) {
                 fieldValue = getEnumByOrdinal(intValue);
             } else {
-                try {
-                    if (valueField instanceof Field) {
-                        for (Enum e : enums) {
-                            if (((Field) valueField).getInt(e) == intValue) {
-                                fieldValue = e;
-                                break;
-                            }
-                        }
-                    } else {
-                        Method valueMethod = (Method) valueField;
-                        for (Enum e : enums) {
-                            if (((Number) valueMethod.invoke(e)).intValue() == intValue) {
-                                fieldValue = e;
-                                break;
-                            }
+                if (intValues != null) {
+                    for (int i = 0; i < intValues.length; i++) {
+                        if (intValues[i] == intValue) {
+                            fieldValue = enums[i];
+                            break;
                         }
                     }
-                } catch (Exception error) {
-                    throw new JSONException(jsonReader.info("parse enum error, class " + enumClass.getName() + ", value " + intValue), error);
                 }
+
                 if (fieldValue == null && jsonReader.isEnabled(JSONReader.Feature.ErrorOnEnumNotMatch)) {
                     throw new JSONException(jsonReader.info("parse enum error, class " + enumClass.getName() + ", " + valueField.getName() + " " + intValue));
                 }
@@ -197,27 +217,11 @@ public final class ObjectReaderImplEnum
             fieldValue = null;
         } else if (valueFieldType != null && valueFieldType == String.class && jsonReader.isString()) {
             String str = jsonReader.readString();
-            try {
-                if (valueField instanceof Field) {
-                    for (Enum e : enums) {
-                        Object itemValue = ((Field) valueField).get(e);
-                        if (str.equals(itemValue)) {
-                            fieldValue = e;
-                            break;
-                        }
-                    }
-                } else {
-                    Method valueMethod = (Method) valueField;
-                    for (Enum e : enums) {
-                        Object itemValue = valueMethod.invoke(e);
-                        if (str.equals(itemValue)) {
-                            fieldValue = e;
-                            break;
-                        }
-                    }
+            for (int i = 0; i < stringValues.length; i++) {
+                if (str.equals(stringValues[i])) {
+                    fieldValue = enums[i];
+                    break;
                 }
-            } catch (Exception error) {
-                throw new JSONException(jsonReader.info("parse enum error, class " + enumClass.getName() + ", value " + str), error);
             }
         } else {
             long hashCode = jsonReader.readValueHashCode();
