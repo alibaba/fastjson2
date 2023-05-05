@@ -15,6 +15,7 @@ public final class ObjectReaderImplEnum
     final Method createMethod;
     final Type createMethodParamType;
     final Member valueField;
+    final Type valueFieldType;
 
     final Class enumClass;
     final long typeNameHash;
@@ -32,6 +33,13 @@ public final class ObjectReaderImplEnum
         this.enumClass = enumClass;
         this.createMethod = createMethod;
         this.valueField = valueField;
+        Type valueFieldType = null;
+        if (valueField instanceof Field) {
+            valueFieldType = ((Field) valueField).getType();
+        } else if (valueField instanceof Method) {
+            valueFieldType = ((Method) valueField).getReturnType();
+        }
+        this.valueFieldType = valueFieldType;
 
         Type createMethodParamType = null;
         if (createMethod != null && createMethod.getParameterCount() == 1) {
@@ -187,6 +195,30 @@ public final class ObjectReaderImplEnum
             }
         } else if (jsonReader.nextIfNullOrEmptyString()) {
             fieldValue = null;
+        } else if (valueFieldType != null && valueFieldType == String.class && jsonReader.isString()) {
+            String str = jsonReader.readString();
+            try {
+                if (valueField instanceof Field) {
+                    for (Enum e : enums) {
+                        Object itemValue = ((Field) valueField).get(e);
+                        if (str.equals(itemValue)) {
+                            fieldValue = e;
+                            break;
+                        }
+                    }
+                } else {
+                    Method valueMethod = (Method) valueField;
+                    for (Enum e : enums) {
+                        Object itemValue = valueMethod.invoke(e);
+                        if (str.equals(itemValue)) {
+                            fieldValue = e;
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception error) {
+                throw new JSONException(jsonReader.info("parse enum error, class " + enumClass.getName() + ", value " + str), error);
+            }
         } else {
             long hashCode = jsonReader.readValueHashCode();
             fieldValue = getEnumByHashCode(hashCode);
