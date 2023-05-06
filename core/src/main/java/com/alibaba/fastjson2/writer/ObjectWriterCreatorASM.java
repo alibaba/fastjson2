@@ -13,6 +13,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLong;
@@ -1932,10 +1933,20 @@ public class ObjectWriterCreatorASM
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeUUID", "(Ljava/util/UUID;)V", false);
-        } else if (fieldClass == LocalDate.class && fieldWriter.format == null && features == 0) {
+        } else if (fieldClass == LocalDate.class
+                && fieldWriter.format == null
+                && mwc.provider.getObjectWriter(LocalDate.class) == ObjectWriterImplLocalDate.INSTANCE
+        ) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeLocalDate", "(Ljava/time/LocalDate;)V", false);
+        } else if (fieldClass == OffsetDateTime.class
+                && fieldWriter.format == null
+                && mwc.provider.getObjectWriter(OffsetDateTime.class) == ObjectWriterImplOffsetDateTime.INSTANCE
+        ) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeOffsetDateTime", "(Ljava/time/OffsetDateTime;)V", false);
         } else {
             // fw.getObjectWriter(w, value.getClass());
             mw.visitVarInsn(Opcodes.ALOAD, THIS);

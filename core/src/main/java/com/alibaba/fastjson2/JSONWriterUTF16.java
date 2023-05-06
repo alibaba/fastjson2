@@ -999,7 +999,9 @@ class JSONWriterUTF16
                 && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0);
 
         int minCapacity = off + precision + 4;
-        ensureCapacity(minCapacity);
+        if (minCapacity > chars.length) {
+            ensureCapacity(minCapacity);
+        }
 
         if (browserCompatible) {
             chars[off++] = '"';
@@ -1040,7 +1042,11 @@ class JSONWriterUTF16
         long msb = value.getMostSignificantBits();
         long lsb = value.getLeastSignificantBits();
 
-        ensureCapacity(off + 38);
+        int minCapacity = off + 38;
+        if (minCapacity > chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
         chars[off++] = '"';
         formatUnsignedLong0(lsb, chars, off + 24, 12);
         formatUnsignedLong0(lsb >>> 48, chars, off + 19, 4);
@@ -1529,7 +1535,10 @@ class JSONWriterUTF16
             minCapacity += 2;
         }
 
-        ensureCapacity(minCapacity);
+        if (minCapacity > chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
         if (writeNonStringValueAsString) {
             chars[off++] = '"';
         }
@@ -1682,34 +1691,36 @@ class JSONWriterUTF16
             return;
         }
 
-        if (context.isDateFormatUnixTime()) {
-            LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
-            long millis = dateTime.atZone(context.getZoneId())
-                    .toInstant()
-                    .toEpochMilli();
-            writeInt64(millis / 1000);
-            return;
-        }
-
-        if (context.isDateFormatMillis()) {
-            LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
-            long millis = dateTime.atZone(context.getZoneId())
-                    .toInstant()
-                    .toEpochMilli();
-            writeInt64(millis);
-            return;
-        }
-
-        DateTimeFormatter formatter = context.getDateFormatter();
-        if (formatter != null) {
-            String str;
-            if (context.isDateFormatHasHour()) {
-                str = formatter.format(LocalDateTime.of(date, LocalTime.MIN));
-            } else {
-                str = formatter.format(date);
+        if (context.dateFormat != null) {
+            if (context.dateFormatUnixTime) {
+                LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
+                long millis = dateTime.atZone(context.getZoneId())
+                        .toInstant()
+                        .toEpochMilli();
+                writeInt64(millis / 1000);
+                return;
             }
-            writeString(str);
-            return;
+
+            if (context.dateFormatMillis) {
+                LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
+                long millis = dateTime.atZone(context.getZoneId())
+                        .toInstant()
+                        .toEpochMilli();
+                writeInt64(millis);
+                return;
+            }
+
+            DateTimeFormatter formatter = context.getDateFormatter();
+            if (formatter != null) {
+                String str;
+                if (context.isDateFormatHasHour()) {
+                    str = formatter.format(LocalDateTime.of(date, LocalTime.MIN));
+                } else {
+                    str = formatter.format(date);
+                }
+                writeString(str);
+                return;
+            }
         }
 
         int year = date.getYear();
@@ -1718,15 +1729,18 @@ class JSONWriterUTF16
 
         int yearSize = IOUtils.stringSize(year);
         int len = 8 + yearSize;
-        ensureCapacity(off + len);
+        int minCapacity = off + len;
+        if (minCapacity > chars.length) {
+            ensureCapacity(minCapacity);
+        }
         chars[off] = quote;
-        Arrays.fill(chars, off + 1, off + len - 1, '0');
+        Arrays.fill(chars, off + 1, minCapacity - 1, '0');
         IOUtils.getChars(year, off + yearSize + 1, chars);
         chars[off + yearSize + 1] = '-';
         IOUtils.getChars(month, off + yearSize + 4, chars);
         chars[off + yearSize + 4] = '-';
         IOUtils.getChars(dayOfMonth, off + yearSize + 7, chars);
-        chars[off + len - 1] = quote;
+        chars[minCapacity - 1] = quote;
         off += len;
     }
 
@@ -2163,9 +2177,13 @@ class JSONWriterUTF16
             small = nano;
         }
 
-        ensureCapacity(off + len);
+        int minCapacity = off + len;
+        if (minCapacity > chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
         chars[off] = quote;
-        Arrays.fill(chars, off + 1, off + len - 1, '0');
+        Arrays.fill(chars, off + 1, minCapacity - 1, '0');
         IOUtils.getChars(year, off + yearSize + 1, chars);
         chars[off + yearSize + 1] = '-';
         IOUtils.getChars(month, off + yearSize + 4, chars);
@@ -2179,18 +2197,18 @@ class JSONWriterUTF16
         IOUtils.getChars(second, off + yearSize + 16, chars);
         if (small != 0) {
             chars[off + yearSize + 16] = '.';
-            IOUtils.getChars(small, off + len - 1 - zoneSize, chars);
+            IOUtils.getChars(small, minCapacity - 1 - zoneSize, chars);
         }
         if (zoneSize == 1) {
-            chars[off + len - 2] = 'Z';
+            chars[minCapacity - 2] = 'Z';
         } else if (firstZoneChar == '+' || firstZoneChar == '-') {
-            zoneId.getChars(0, zoneId.length(), chars, off + len - zoneSize - 1);
+            zoneId.getChars(0, zoneId.length(), chars, minCapacity - zoneSize - 1);
         } else {
-            chars[off + len - zoneSize - 1] = '[';
-            zoneId.getChars(0, zoneId.length(), chars, off + len - zoneSize);
-            chars[off + len - 2] = ']';
+            chars[(minCapacity) - zoneSize - 1] = '[';
+            zoneId.getChars(0, zoneId.length(), chars, minCapacity - zoneSize);
+            chars[minCapacity - 2] = ']';
         }
-        chars[off + len - 1] = quote;
+        chars[minCapacity - 1] = quote;
         off += len;
     }
 

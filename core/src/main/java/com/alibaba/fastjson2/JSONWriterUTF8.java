@@ -1409,7 +1409,10 @@ class JSONWriterUTF8
         long msb = value.getMostSignificantBits();
         long lsb = value.getLeastSignificantBits();
 
-        ensureCapacity(off + 38);
+        int minCapacity = off + 38;
+        if (minCapacity > bytes.length) {
+            ensureCapacity(minCapacity);
+        }
         bytes[off++] = '"';
         formatUnsignedLong0(lsb, bytes, off + 24, 12);
         formatUnsignedLong0(lsb >>> 48, bytes, off + 19, 4);
@@ -1795,7 +1798,9 @@ class JSONWriterUTF8
             minCapacity += 2;
         }
 
-        ensureCapacity(minCapacity);
+        if (minCapacity > bytes.length) {
+            ensureCapacity(minCapacity);
+        }
 
         if (writeNonStringValueAsString) {
             bytes[off++] = '"';
@@ -1881,34 +1886,36 @@ class JSONWriterUTF8
             return;
         }
 
-        if (context.isDateFormatUnixTime()) {
-            LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
-            long millis = dateTime.atZone(context.getZoneId())
-                    .toInstant()
-                    .toEpochMilli();
-            writeInt64(millis / 1000);
-            return;
-        }
-
-        if (context.isDateFormatMillis()) {
-            LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
-            long millis = dateTime.atZone(context.getZoneId())
-                    .toInstant()
-                    .toEpochMilli();
-            writeInt64(millis);
-            return;
-        }
-
-        DateTimeFormatter formatter = context.getDateFormatter();
-        if (formatter != null) {
-            String str;
-            if (context.isDateFormatHasHour()) {
-                str = formatter.format(LocalDateTime.of(date, LocalTime.MIN));
-            } else {
-                str = formatter.format(date);
+        if (context.dateFormat != null) {
+            if (context.dateFormatUnixTime) {
+                LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
+                long millis = dateTime.atZone(context.getZoneId())
+                        .toInstant()
+                        .toEpochMilli();
+                writeInt64(millis / 1000);
+                return;
             }
-            writeString(str);
-            return;
+
+            if (context.dateFormatMillis) {
+                LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
+                long millis = dateTime.atZone(context.getZoneId())
+                        .toInstant()
+                        .toEpochMilli();
+                writeInt64(millis);
+                return;
+            }
+
+            DateTimeFormatter formatter = context.getDateFormatter();
+            if (formatter != null) {
+                String str;
+                if (context.isDateFormatHasHour()) {
+                    str = formatter.format(LocalDateTime.of(date, LocalTime.MIN));
+                } else {
+                    str = formatter.format(date);
+                }
+                writeString(str);
+                return;
+            }
         }
 
         int year = date.getYear();
@@ -1917,15 +1924,18 @@ class JSONWriterUTF8
 
         int yearSize = IOUtils.stringSize(year);
         int len = 8 + yearSize;
-        ensureCapacity(off + len);
+        int minCapacity = off + len;
+        if (minCapacity > bytes.length) {
+            ensureCapacity(minCapacity);
+        }
         bytes[off] = (byte) quote;
-        Arrays.fill(bytes, off + 1, off + len - 1, (byte) '0');
+        Arrays.fill(bytes, off + 1, minCapacity - 1, (byte) '0');
         IOUtils.getChars(year, off + yearSize + 1, bytes);
         bytes[off + yearSize + 1] = '-';
         IOUtils.getChars(month, off + yearSize + 4, bytes);
         bytes[off + yearSize + 4] = '-';
         IOUtils.getChars(dayOfMonth, off + yearSize + 7, bytes);
-        bytes[off + len - 1] = (byte) quote;
+        bytes[minCapacity - 1] = (byte) quote;
         off += len;
     }
 
@@ -2267,9 +2277,12 @@ class JSONWriterUTF8
             small = nano;
         }
 
-        ensureCapacity(off + len);
+        int minCapacity = off + len;
+        if (minCapacity > bytes.length) {
+            ensureCapacity(minCapacity);
+        }
         bytes[off] = (byte) quote;
-        Arrays.fill(bytes, off + 1, off + len - 1, (byte) '0');
+        Arrays.fill(bytes, off + 1, minCapacity - 1, (byte) '0');
         IOUtils.getChars(year, off + yearSize + 1, bytes);
         bytes[off + yearSize + 1] = '-';
         IOUtils.getChars(month, off + yearSize + 4, bytes);
@@ -2283,18 +2296,18 @@ class JSONWriterUTF8
         IOUtils.getChars(second, off + yearSize + 16, bytes);
         if (small != 0) {
             bytes[off + yearSize + 16] = '.';
-            IOUtils.getChars(small, off + len - 1 - zoneSize, bytes);
+            IOUtils.getChars(small, minCapacity - 1 - zoneSize, bytes);
         }
         if (zoneSize == 1) {
-            bytes[off + len - 2] = 'Z';
+            bytes[minCapacity - 2] = 'Z';
         } else if (firstZoneChar == '+' || firstZoneChar == '-') {
-            zoneId.getBytes(0, zoneId.length(), bytes, off + len - zoneSize - 1);
+            zoneId.getBytes(0, zoneId.length(), bytes, minCapacity - zoneSize - 1);
         } else {
-            bytes[off + len - zoneSize - 1] = '[';
-            zoneId.getBytes(0, zoneId.length(), bytes, off + len - zoneSize);
-            bytes[off + len - 2] = ']';
+            bytes[(minCapacity) - zoneSize - 1] = '[';
+            zoneId.getBytes(0, zoneId.length(), bytes, minCapacity - zoneSize);
+            bytes[minCapacity - 2] = ']';
         }
-        bytes[off + len - 1] = (byte) quote;
+        bytes[minCapacity - 1] = (byte) quote;
         off += len;
     }
 
@@ -2444,7 +2457,9 @@ class JSONWriterUTF8
                 && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0);
 
         int minCapacity = off + precision + 4;
-        ensureCapacity(minCapacity);
+        if (minCapacity > bytes.length) {
+            ensureCapacity(minCapacity);
+        }
 
         if (browserCompatible) {
             bytes[off++] = '"';
