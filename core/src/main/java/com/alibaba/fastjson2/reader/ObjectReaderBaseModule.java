@@ -1683,6 +1683,10 @@ public class ObjectReaderBaseModule
             return ObjectReaderImplZonedDateTime.INSTANCE;
         }
 
+        if (type == OffsetDateTime.class) {
+            return ObjectReaderImplOffsetDateTime.INSTANCE;
+        }
+
         if (type == Instant.class) {
             return ObjectReaderImplInstant.INSTANCE;
         }
