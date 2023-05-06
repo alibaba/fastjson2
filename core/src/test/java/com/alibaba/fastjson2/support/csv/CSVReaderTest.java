@@ -46,6 +46,19 @@ public class CSVReaderTest {
     }
 
     @Test
+    public void testReadAllLines() {
+        CSVReader parser = CSVReader.of(str);
+        List<String> columns = parser.readHeader();
+        assertEquals(5, columns.size());
+
+        List<String[]> lines = parser.readLineAll();
+        assertEquals(this.lines.length, lines.size());
+        for (int i = 0; i < lines.size(); i++) {
+            assertArrayEquals(this.lines[i], lines.get(i));
+        }
+    }
+
+    @Test
     public void test0Chars() {
         CSVReader parser = CSVReader.of(str.toCharArray());
         List<String> columns = parser.readHeader();
@@ -162,6 +175,40 @@ public class CSVReaderTest {
                 if (item == null) {
                     break;
                 }
+                String[] line = new String[] {item.year, item.make, item.model, item.description, item.price.toString()};
+                assertArrayEquals(lines[i], line);
+            }
+
+            parser.close();
+        }
+    }
+
+    @Test
+    public void testFileObject1() throws Exception {
+        Charset[] charsets = new Charset[] {
+                StandardCharsets.UTF_8,
+                StandardCharsets.ISO_8859_1,
+                StandardCharsets.US_ASCII,
+                StandardCharsets.UTF_16,
+                StandardCharsets.UTF_16LE,
+                StandardCharsets.UTF_16BE
+        };
+
+        for (Charset charset : charsets) {
+            File file = File.createTempFile("abc", "txt");
+            FileOutputStream out = new FileOutputStream(file);
+            out.write(str.getBytes(charset));
+            out.flush();
+            out.close();
+
+            CSVReader<Item> parser = CSVReader.of(file, charset, Item.class);
+            List<String> columns = parser.readHeader();
+            assertEquals(5, columns.size());
+
+            List<Item> items = parser.readLineObjectAll();
+            assertEquals(4, items.size());
+            for (int i = 0; i < items.size(); i++) {
+                Item item = items.get(i);
                 String[] line = new String[] {item.year, item.make, item.model, item.description, item.price.toString()};
                 assertArrayEquals(lines[i], line);
             }
