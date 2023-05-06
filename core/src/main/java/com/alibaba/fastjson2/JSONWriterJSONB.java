@@ -20,6 +20,7 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNameAsSymbol;
+import static com.alibaba.fastjson2.util.DateUtils.OFFSET_8_ZONE_ID_NAME;
 import static com.alibaba.fastjson2.util.DateUtils.SHANGHAI_ZONE_ID_NAME;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
@@ -28,6 +29,7 @@ final class JSONWriterJSONB
         extends JSONWriter {
     // optimize for write ZonedDateTime
     static final byte[] SHANGHAI_ZONE_ID_NAME_BYTES = JSONB.toBytes(SHANGHAI_ZONE_ID_NAME);
+    static final byte[] OFFSET_8_ZONE_ID_NAME_BYTES = JSONB.toBytes(OFFSET_8_ZONE_ID_NAME);
 
     private final CacheItem cacheItem;
     private byte[] bytes;
@@ -1508,6 +1510,40 @@ final class JSONWriterJSONB
         switch (zoneIdStr) {
             case SHANGHAI_ZONE_ID_NAME:
                 writeRaw(SHANGHAI_ZONE_ID_NAME_BYTES);
+                break;
+            default:
+                writeString(zoneIdStr);
+                break;
+        }
+    }
+
+    @Override
+    public void writeOffsetDateTime(OffsetDateTime dateTime) {
+        if (dateTime == null) {
+            writeNull();
+            return;
+        }
+
+        ensureCapacity(off + 8);
+
+        bytes[off++] = BC_TIMESTAMP_WITH_TIMEZONE;
+        int year = dateTime.getYear();
+        bytes[off++] = (byte) (year >>> 8);
+        bytes[off++] = (byte) year;
+        bytes[off++] = (byte) dateTime.getMonthValue();
+        bytes[off++] = (byte) dateTime.getDayOfMonth();
+        bytes[off++] = (byte) dateTime.getHour();
+        bytes[off++] = (byte) dateTime.getMinute();
+        bytes[off++] = (byte) dateTime.getSecond();
+
+        int nano = dateTime.getNano();
+        writeInt32(nano);
+
+        ZoneId zoneId = dateTime.getOffset();
+        String zoneIdStr = zoneId.getId();
+        switch (zoneIdStr) {
+            case OFFSET_8_ZONE_ID_NAME:
+                writeRaw(OFFSET_8_ZONE_ID_NAME_BYTES);
                 break;
             default:
                 writeString(zoneIdStr);

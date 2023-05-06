@@ -7,10 +7,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.UUID;
 
 final class JSONWriterPretty
@@ -146,6 +143,11 @@ final class JSONWriterPretty
     @Override
     public void writeZonedDateTime(ZonedDateTime dateTime) {
         jsonWriter.writeZonedDateTime(dateTime);
+    }
+
+    @Override
+    public void writeOffsetDateTime(OffsetDateTime dateTime) {
+        jsonWriter.writeOffsetDateTime(dateTime);
     }
 
     @Override

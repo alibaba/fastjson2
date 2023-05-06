@@ -10,10 +10,7 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
@@ -1991,7 +1988,102 @@ class JSONWriterUTF16
 
         char firstZoneChar = '\0';
         int zoneSize;
-        if ("UTC".equals(zoneId)) {
+        if ("UTC".equals(zoneId) || "Z".equals(zoneId)) {
+            zoneId = "Z";
+            zoneSize = 1;
+        } else if (zoneId.length() != 0 && ((firstZoneChar = zoneId.charAt(0)) == '+' || firstZoneChar == '-')) {
+            zoneSize = zoneId.length();
+        } else {
+            zoneSize = 2 + zoneId.length();
+        }
+        len += zoneSize;
+
+        int yearSize = IOUtils.stringSize(year);
+        len += yearSize;
+        int small;
+        if (nano % 1000_000_000 == 0) {
+            small = 0;
+        } else if (nano % 1000_000_00 == 0) {
+            len += 2;
+            small = nano / 1000_000_00;
+        } else if (nano % 1000_000_0 == 0) {
+            len += 3;
+            small = nano / 1000_000_0;
+        } else if (nano % 1000_000 == 0) {
+            len += 4;
+            small = nano / 1000_000;
+        } else if (nano % 1000_00 == 0) {
+            len += 5;
+            small = nano / 1000_00;
+        } else if (nano % 1000_0 == 0) {
+            len += 6;
+            small = nano / 1000_0;
+        } else if (nano % 1000 == 0) {
+            len += 7;
+            small = nano / 1000;
+        } else if (nano % 100 == 0) {
+            len += 8;
+            small = nano / 100;
+        } else if (nano % 10 == 0) {
+            len += 9;
+            small = nano / 10;
+        } else {
+            len += 10;
+            small = nano;
+        }
+
+        ensureCapacity(off + len);
+        chars[off] = quote;
+        Arrays.fill(chars, off + 1, off + len - 1, '0');
+        IOUtils.getChars(year, off + yearSize + 1, chars);
+        chars[off + yearSize + 1] = '-';
+        IOUtils.getChars(month, off + yearSize + 4, chars);
+        chars[off + yearSize + 4] = '-';
+        IOUtils.getChars(dayOfMonth, off + yearSize + 7, chars);
+        chars[off + yearSize + 7] = 'T';
+        IOUtils.getChars(hour, off + yearSize + 10, chars);
+        chars[off + yearSize + 10] = ':';
+        IOUtils.getChars(minute, off + yearSize + 13, chars);
+        chars[off + yearSize + 13] = ':';
+        IOUtils.getChars(second, off + yearSize + 16, chars);
+        if (small != 0) {
+            chars[off + yearSize + 16] = '.';
+            IOUtils.getChars(small, off + len - 1 - zoneSize, chars);
+        }
+        if (zoneSize == 1) {
+            chars[off + len - 2] = 'Z';
+        } else if (firstZoneChar == '+' || firstZoneChar == '-') {
+            zoneId.getChars(0, zoneId.length(), chars, off + len - zoneSize - 1);
+        } else {
+            chars[off + len - zoneSize - 1] = '[';
+            zoneId.getChars(0, zoneId.length(), chars, off + len - zoneSize);
+            chars[off + len - 2] = ']';
+        }
+        chars[off + len - 1] = quote;
+        off += len;
+    }
+
+    @Override
+    public final void writeOffsetDateTime(OffsetDateTime dateTime) {
+        if (dateTime == null) {
+            writeNull();
+            return;
+        }
+
+        int year = dateTime.getYear();
+        int month = dateTime.getMonthValue();
+        int dayOfMonth = dateTime.getDayOfMonth();
+        int hour = dateTime.getHour();
+        int minute = dateTime.getMinute();
+        int second = dateTime.getSecond();
+        int nano = dateTime.getNano();
+        String zoneId = dateTime.getOffset().getId();
+
+        int len = 17;
+
+        char firstZoneChar = '\0';
+        int zoneSize;
+        if ("UTC".equals(zoneId) || "Z".equals(zoneId)) {
             zoneId = "Z";
             zoneSize = 1;
         } else if (zoneId.length() != 0 && ((firstZoneChar = zoneId.charAt(0)) == '+' || firstZoneChar == '-')) {
