@@ -72,7 +72,17 @@ public class DateTest {
 
         jw.writeAny(
                 OffsetDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.ofHours(0)));
-        assertEquals("\"1970-01-01T00:00Z\"", jw.toString());
+        assertEquals("\"1970-01-01T00:00:00Z\"", jw.toString());
+    }
+
+    @Test
+    public void testOffsetDateTimeUTF8() throws Exception {
+        JSONWriter jw = JSONWriter.ofUTF8();
+        jw.getContext().setZoneId(ZoneId.of("UTC+0"));
+
+        jw.writeAny(
+                OffsetDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.ofHours(0)));
+        assertEquals("\"1970-01-01T00:00:00Z\"", jw.toString());
     }
 
     @Test

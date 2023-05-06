@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.codec.DateTimeCodec;
 
 import java.lang.reflect.Type;
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
@@ -92,8 +91,7 @@ final class ObjectWriterImplOffsetDateTime
         }
 
         if (formatter == null) {
-            ZonedDateTime zdt = odt.toZonedDateTime();
-            jsonWriter.writeZonedDateTime(zdt);
+            jsonWriter.writeOffsetDateTime(odt);
             return;
         }
 

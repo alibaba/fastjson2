@@ -31,7 +31,7 @@ final class ObjectReaderImplOffsetDateTime
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        return jsonReader.readZonedDateTime();
+        return readObject(jsonReader, fieldType, fieldName, features);
     }
 
     @Override
