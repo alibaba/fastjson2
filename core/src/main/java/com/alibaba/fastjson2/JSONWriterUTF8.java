@@ -11,6 +11,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
@@ -1875,6 +1876,41 @@ class JSONWriterUTF8
 
     @Override
     public final void writeLocalDate(LocalDate date) {
+        if (date == null) {
+            writeNull();
+            return;
+        }
+
+        if (context.isDateFormatUnixTime()) {
+            LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
+            long millis = dateTime.atZone(context.getZoneId())
+                    .toInstant()
+                    .toEpochMilli();
+            writeInt64(millis / 1000);
+            return;
+        }
+
+        if (context.isDateFormatMillis()) {
+            LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
+            long millis = dateTime.atZone(context.getZoneId())
+                    .toInstant()
+                    .toEpochMilli();
+            writeInt64(millis);
+            return;
+        }
+
+        DateTimeFormatter formatter = context.getDateFormatter();
+        if (formatter != null) {
+            String str;
+            if (context.isDateFormatHasHour()) {
+                str = formatter.format(LocalDateTime.of(date, LocalTime.MIN));
+            } else {
+                str = formatter.format(date);
+            }
+            writeString(str);
+            return;
+        }
+
         int year = date.getYear();
         int month = date.getMonthValue();
         int dayOfMonth = date.getDayOfMonth();
