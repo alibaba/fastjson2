@@ -15,9 +15,9 @@ public class EishayFuryCompatibleWriteTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayFuryCompatibleWrite-jsonb millis : " + millis);
-            // zulu8.68.0.21_AppleM1Max : 3839 3798
-            // zulu11.62.17_AppleM1Max : 3327 3244
-            // zulu17.40.19_AppleM1Max : 3287 3256
+            // zulu8.68.0.21_AppleM1Max : 3839 3798 3763
+            // zulu11.62.17_AppleM1Max : 3327 3244 3310
+            // zulu17.40.19_AppleM1Max : 3287 3256 3321
 
             // jdk1.8.0_361_x86_i9 6372
             // jdk17.0.6_x86_i9 4674
@@ -33,9 +33,9 @@ public class EishayFuryCompatibleWriteTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayFuryCompatibleWrite-fury millis : " + millis);
-            // zulu8.68.0.21_AppleM1Max : 2644
-            // zulu11.62.17_AppleM1Max : 2270
-            // zulu17.40.19_AppleM1Max : 2296
+            // zulu8.68.0.21_AppleM1Max : 2644 3018
+            // zulu11.62.17_AppleM1Max : 2270 2510
+            // zulu17.40.19_AppleM1Max : 2296 2319
 
             // jdk1.8.0_361_x86_i9 5279
             // jdk17.0.6_x86_i9 5910
