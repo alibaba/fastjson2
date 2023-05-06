@@ -601,8 +601,93 @@ public interface JSONB {
         }
     }
 
+    /**
+     * @since 2.0.30
+     */
+    static <T> T copy(T object, JSONWriter.Feature... features) {
+        return JSON.copy(object, features);
+    }
+
     static <T> T parseObject(byte[] jsonbBytes, TypeReference typeReference, JSONReader.Feature... features) {
         return parseObject(jsonbBytes, typeReference.getType(), features);
+    }
+
+    /**
+     * @since 2.0.30
+     */
+    static <T> T parseObject(
+            InputStream in,
+            Class objectClass,
+            JSONReader.Feature... features
+    ) throws IOException {
+        JSONReader.Context context = JSONFactory.createReadContext(features);
+        return parseObject(in, objectClass, context);
+    }
+
+    /**
+     * @since 2.0.30
+     */
+    static <T> T parseObject(
+            InputStream in,
+            Type objectType,
+            JSONReader.Feature... features
+    ) throws IOException {
+        JSONReader.Context context = JSONFactory.createReadContext(features);
+        return parseObject(in, objectType, context);
+    }
+
+    /**
+     * @since 2.0.30
+     */
+    static <T> T parseObject(
+            InputStream in,
+            Type objectType,
+            JSONReader.Context ctx
+    ) throws IOException {
+        try (JSONReader jsonReader = UNSAFE_SUPPORT
+                ? new JSONReaderJSONBUF(ctx, in)
+                : new JSONReaderJSONB(ctx, in)
+        ) {
+            Object object;
+            if (objectType == Object.class) {
+                object = jsonReader.readAny();
+            } else {
+                ObjectReader objectReader = ctx.getObjectReader(objectType);
+                object = objectReader.readJSONBObject(jsonReader, objectType, null, 0);
+            }
+
+            if (jsonReader.resolveTasks != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            return (T) object;
+        }
+    }
+
+    /**
+     * @since 2.0.30
+     */
+    static <T> T parseObject(
+            InputStream in,
+            Class objectClass,
+            JSONReader.Context ctx
+    ) throws IOException {
+        try (JSONReader jsonReader = UNSAFE_SUPPORT
+                ? new JSONReaderJSONBUF(ctx, in)
+                : new JSONReaderJSONB(ctx, in)
+        ) {
+            Object object;
+            if (objectClass == Object.class) {
+                object = jsonReader.readAny();
+            } else {
+                ObjectReader objectReader = ctx.getObjectReader(objectClass);
+                object = objectReader.readJSONBObject(jsonReader, objectClass, null, 0);
+            }
+
+            if (jsonReader.resolveTasks != null) {
+                jsonReader.handleResolveTasks(object);
+            }
+            return (T) object;
+        }
     }
 
     static <T> T parseObject(

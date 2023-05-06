@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.*;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -44,6 +46,40 @@ class JSONReaderJSONB
     protected byte symbol0StrType;
 
     protected long[] symbols;
+
+    JSONReaderJSONB(Context ctx, InputStream is) {
+        super(ctx);
+
+        int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
+        cacheItem = CACHE_ITEMS[cacheIndex];
+        byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
+        if (bytes == null) {
+            bytes = new byte[8192];
+        }
+
+        int off = 0;
+        try {
+            for (; ; ) {
+                int n = is.read(bytes, off, bytes.length - off);
+                if (n == -1) {
+                    break;
+                }
+                off += n;
+
+                if (off == bytes.length) {
+                    bytes = Arrays.copyOf(bytes, bytes.length + 8192);
+                }
+            }
+        } catch (IOException ioe) {
+            throw new JSONException("read error", ioe);
+        }
+
+        this.bytes = bytes;
+        this.offset = 0;
+        this.length = off;
+        this.end = length;
+        this.symbolTable = ctx.symbolTable;
+    }
 
     JSONReaderJSONB(Context ctx, byte[] bytes, int off, int length) {
         super(ctx);

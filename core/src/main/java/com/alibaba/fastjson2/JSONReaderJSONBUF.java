@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -21,6 +22,10 @@ final class JSONReaderJSONBUF
 
     JSONReaderJSONBUF(Context ctx, byte[] bytes, int off, int length) {
         super(ctx, bytes, off, length);
+    }
+
+    JSONReaderJSONBUF(Context ctx, InputStream in) {
+        super(ctx, in);
     }
 
     @Override
