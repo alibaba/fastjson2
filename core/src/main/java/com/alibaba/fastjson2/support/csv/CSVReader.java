@@ -707,6 +707,36 @@ public abstract class CSVReader<T>
         return stat;
     }
 
+    /**
+     * @since 2.0.30
+     */
+    public List<String[]> readLineAll() {
+        List<String[]> lines = new ArrayList();
+        while (true) {
+            String[] line = readLine();
+            if (line == null) {
+                break;
+            }
+            lines.add(line);
+        }
+        return lines;
+    }
+
+    /**
+     * @since 2.0.30
+     */
+    public List<T> readLineObjectAll() {
+        List<T> objects = new ArrayList();
+        while (true) {
+            T object = readLineObject();
+            if (object == null) {
+                break;
+            }
+            objects.add(object);
+        }
+        return objects;
+    }
+
     public abstract void statAll();
 
     public abstract void statAll(int maxRows);
