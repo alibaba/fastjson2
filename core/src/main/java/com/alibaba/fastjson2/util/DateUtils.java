@@ -20,12 +20,13 @@ import static java.time.ZoneOffset.UTC;
 public class DateUtils {
     public static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
     public static final String SHANGHAI_ZONE_ID_NAME = "Asia/Shanghai";
-    public static final String OFFSET_8_ZONE_ID_NAME = "+08:00";
     public static final ZoneId SHANGHAI_ZONE_ID
             = SHANGHAI_ZONE_ID_NAME.equals(DEFAULT_ZONE_ID.getId())
             ? DEFAULT_ZONE_ID
             : ZoneId.of(SHANGHAI_ZONE_ID_NAME);
     public static final ZoneRules SHANGHAI_ZONE_RULES = SHANGHAI_ZONE_ID.getRules();
+    public static final String OFFSET_8_ZONE_ID_NAME = "+08:00";
+    public static final ZoneId OFFSET_8_ZONE_ID = ZoneId.of(OFFSET_8_ZONE_ID_NAME);
 
     static DateTimeFormatter DATE_TIME_FORMATTER_34;
     static DateTimeFormatter DATE_TIME_FORMATTER_COOKIE;
@@ -7745,15 +7746,27 @@ public class DateUtils {
 
         ZoneId zoneId;
         int p0, p1;
-        if ("000".equals(zoneIdStr)) {
-            zoneId = ZoneOffset.UTC;
-        } else if ("CST".equals(zoneIdStr)) {
-            zoneId = SHANGHAI_ZONE_ID;
-        } else if ((p0 = zoneIdStr.indexOf('[')) > 0 && (p1 = zoneIdStr.indexOf(']', p0)) > 0) {
-            String str = zoneIdStr.substring(p0 + 1, p1);
-            zoneId = ZoneId.of(str);
-        } else {
-            zoneId = ZoneId.of(zoneIdStr);
+        switch (zoneIdStr) {
+            case "000":
+                zoneId = ZoneOffset.UTC;
+                break;
+            case "+08:00":
+                zoneId = OFFSET_8_ZONE_ID;
+                break;
+            case "CST":
+                zoneId = SHANGHAI_ZONE_ID;
+                break;
+            default:
+                char c0;
+                if (zoneIdStr.length() > 0 && ((c0 = zoneIdStr.charAt(0)) == '+' || c0 == '-') && zoneIdStr.charAt(zoneIdStr.length() - 1) != ']') {
+                    zoneId = ZoneOffset.of(zoneIdStr);
+                } else if ((p0 = zoneIdStr.indexOf('[')) > 0 && (p1 = zoneIdStr.indexOf(']', p0)) > 0) {
+                    String str = zoneIdStr.substring(p0 + 1, p1);
+                    zoneId = ZoneId.of(str);
+                } else {
+                    zoneId = ZoneId.of(zoneIdStr);
+                }
+                break;
         }
         return zoneId;
     }
