@@ -17,6 +17,46 @@ public class LocalDateTest {
         assertEquals("{\"date\":\"2017-09-11 00:00:00\"}", str);
     }
 
+    @Test
+    public void test0_utf8() {
+        Bean bean = new Bean();
+        bean.date = LocalDate.of(2017, 9, 11);
+        String str = new String(JSON.toJSONBytes(bean, "yyyy-MM-dd HH:mm:ss"));
+        assertEquals("{\"date\":\"2017-09-11 00:00:00\"}", str);
+    }
+
+    @Test
+    public void test0_x() {
+        Bean bean = new Bean();
+        bean.date = LocalDate.of(2017, 9, 11);
+        String str = JSON.toJSONString(bean);
+        assertEquals("{\"date\":\"2017-09-11\"}", str);
+    }
+
+    @Test
+    public void test0_x_utf8() {
+        Bean bean = new Bean();
+        bean.date = LocalDate.of(2017, 9, 11);
+        String str = new String(JSON.toJSONBytes(bean));
+        assertEquals("{\"date\":\"2017-09-11\"}", str);
+    }
+
+    @Test
+    public void test0_x1() {
+        Bean bean = new Bean();
+        bean.date = LocalDate.of(2017, 9, 11);
+        String str = JSON.toJSONString(bean, "yyyy-MM-dd");
+        assertEquals("{\"date\":\"2017-09-11\"}", str);
+    }
+
+    @Test
+    public void test0_x1_utf8() {
+        Bean bean = new Bean();
+        bean.date = LocalDate.of(2017, 9, 11);
+        String str = new String(JSON.toJSONBytes(bean, "yyyy-MM-dd"));
+        assertEquals("{\"date\":\"2017-09-11\"}", str);
+    }
+
     public static class Bean {
         public LocalDate date;
     }

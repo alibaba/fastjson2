@@ -2589,6 +2589,32 @@ public interface JSON {
      * Serialize Java Object to JSON byte array
      *
      * @param object Java Object to be serialized into JSON byte array
+     * @param format the specified date format
+     * @param features features to be enabled in serialization
+     */
+    static byte[] toJSONBytes(Object object, String format, JSONWriter.Feature... features) {
+        try (JSONWriter writer = JSONWriter.ofUTF8(features)) {
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
+                if (format != null && !format.isEmpty()) {
+                    writer.context.setDateFormat(format);
+                }
+
+                Class<?> valueClass = object.getClass();
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+            return writer.getBytes();
+        }
+    }
+
+    /**
+     * Serialize Java Object to JSON byte array
+     *
+     * @param object Java Object to be serialized into JSON byte array
      * @param filters specifies the filter to use in serialization
      */
     static byte[] toJSONBytes(Object object, Filter... filters) {

@@ -12,6 +12,7 @@ import java.lang.reflect.*;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLong;
@@ -1927,6 +1928,14 @@ public class ObjectWriterCreatorASM
                 mw.visitLdcInsn(features);
                 mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeBigInt", "(Ljava/math/BigInteger;J)V", false);
             }
+        } else if (fieldClass == UUID.class) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeUUID", "(Ljava/util/UUID;)V", false);
+        } else if (fieldClass == LocalDate.class && fieldWriter.format == null && features == 0) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeLocalDate", "(Ljava/time/LocalDate;)V", false);
         } else {
             // fw.getObjectWriter(w, value.getClass());
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
