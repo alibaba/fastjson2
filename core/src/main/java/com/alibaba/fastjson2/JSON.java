@@ -34,15 +34,17 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public interface JSON {
     /**
-     * FASTJSON2 version name
+     * fastjson2 version name
      */
     String VERSION = "2.0.32";
 
     /**
-     * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject}
+     * Parses the json string as a {@link JSONArray} or {@link JSONObject}.
+     * Returns {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @return Object
+     * @param text the specified text to be parsed
+     * @return either {@link JSONArray} or {@link JSONObject} or null
+     * @throws JSONException If a parsing error occurs
      */
     static Object parse(String text) {
         if (text == null || text.isEmpty()) {
@@ -51,7 +53,7 @@ public interface JSON {
 
         try (JSONReader reader = JSONReader.of(text)) {
             Object object;
-            int ch = reader.current();
+            char ch = reader.current();
 
             if (reader.context.objectSupplier == null
                     && (reader.context.features & UseNativeObject.mask) == 0
@@ -81,11 +83,13 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
+     * Parses the json string as a {@link JSONArray} or {@link JSONObject}.
+     * Returns {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param features features to be enabled in parsing
-     * @return Object
+     * @param text the specified text to be parsed
+     * @param features the specified features is applied to parsing
+     * @return either {@link JSONArray} or {@link JSONObject} or null
+     * @throws JSONException If a parsing error occurs
      */
     static Object parse(String text, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
@@ -104,13 +108,15 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
+     * Parses the json string as a {@link JSONArray} or {@link JSONObject}.
+     * Returns {@code null} if received {@link String} is {@code null} or empty or length is 0.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param offset the index of the first byte to parse
-     * @param length the number of bytes to parse
-     * @param features features to be enabled in parsing
-     * @return Object
+     * @param text the specified text to be parsed
+     * @param offset the starting index of string
+     * @param length the specified length of string
+     * @param features the specified features is applied to parsing
+     * @return either {@link JSONArray} or {@link JSONObject} or null
+     * @throws JSONException If a parsing error occurs
      */
     static Object parse(String text, int offset, int length, JSONReader.Feature... features) {
         if (text == null || text.isEmpty() || length == 0) {
@@ -129,11 +135,14 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
+     * Parses the json string as a {@link JSONArray} or {@link JSONObject}.
+     * Returns {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param context specify the context use by JSONReader
-     * @return Object
+     * @param text the specified text to be parsed
+     * @param context the specified custom context
+     * @return either {@link JSONArray} or {@link JSONObject} or null
+     * @throws JSONException If a parsing error occurs
+     * @throws NullPointerException If received context is null
      */
     static Object parse(String text, JSONReader.Context context) {
         if (text == null || text.isEmpty()) {
@@ -151,11 +160,13 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
+     * Parses the json byte array as a {@link JSONArray} or {@link JSONObject}.
+     * Returns {@code null} if received byte array is {@code null} or empty.
      *
-     * @param bytes the UTF8 Bytes to be parsed
-     * @param features features to be enabled in parsing
-     * @return Object
+     * @param bytes the specified UTF8 text to be parsed
+     * @param features the specified features is applied to parsing
+     * @return either {@link JSONArray} or {@link JSONObject} or null
+     * @throws JSONException If a parsing error occurs
      */
     static Object parse(byte[] bytes, JSONReader.Feature... features) {
         if (bytes == null || bytes.length == 0) {
@@ -174,11 +185,13 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON char array into {@link JSONArray} or {@link JSONObject} with specified {@link JSONReader.Feature}s enabled
+     * Parses the json char array as a {@link JSONArray} or {@link JSONObject}.
+     * Returns {@code null} if received char array is {@code null} or empty.
      *
-     * @param chars the char array to be parsed
-     * @param features features to be enabled in parsing
-     * @return Object
+     * @param chars the specified char array to be parsed
+     * @param features the specified features is applied to parsing
+     * @return either {@link JSONArray} or {@link JSONObject} or null
+     * @throws JSONException If a parsing error occurs
      */
     static Object parse(char[] chars, JSONReader.Feature... features) {
         if (chars == null || chars.length == 0) {
@@ -197,10 +210,12 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONObject}
+     * Parses the json string as a {@link JSONObject}. Returns {@code null}
+     * if received {@link String} is {@code null} or empty or its content is null.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @return JSONObject
+     * @param text the specified string to be parsed
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     static JSONObject parseObject(String text) {
         if (text == null || text.isEmpty()) {
@@ -224,11 +239,13 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONObject}
+     * Parses the json string as a {@link JSONObject}. Returns {@code null}
+     * if received {@link String} is {@code null} or empty or its content is null.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param features features to be enabled in parsing
-     * @return JSONObject
+     * @param text the specified string to be parsed
+     * @param features the specified features is applied to parsing
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     static JSONObject parseObject(String text, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
@@ -254,13 +271,15 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONObject}
+     * Parses the json string as a {@link JSONObject}. Returns {@code null} if received
+     * {@link String} is {@code null} or empty or length is 0 or its content is null.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param offset the index of the first byte to parse
-     * @param length the number of bytes to parse
-     * @param features features to be enabled in parsing
-     * @return JSONObject
+     * @param text the specified text to be parsed
+     * @param offset the starting index of string
+     * @param length the specified length of string
+     * @param features the specified features is applied to parsing
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     static JSONObject parseObject(String text, int offset, int length, JSONReader.Feature... features) {
         if (text == null || text.isEmpty() || length == 0) {
@@ -285,14 +304,17 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONObject}
+     * Parses the json string as a {@link JSONObject}. Returns {@code null} if received
+     * {@link String} is {@code null} or empty or length is 0 or its content is null.
      *
+     * @param text the specified text to be parsed
+     * @param offset the starting index of string
+     * @param length the specified length of string
+     * @param context the specified custom context
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     * @throws NullPointerException If received context is null
      * @since 2.0.30
-     * @param text the JSON {@link String} to be parsed
-     * @param offset the index of the first byte to parse
-     * @param length the number of bytes to parse
-     * @param context context to be enabled in parsing
-     * @return JSONObject
      */
     static JSONObject parseObject(String text, int offset, int length, JSONReader.Context context) {
         if (text == null || text.isEmpty() || length == 0) {
@@ -316,11 +338,14 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONObject}
+     * Parses the json string as a {@link JSONObject}. Returns {@code null} if
+     * received {@link String} is {@code null} or empty or its content is null.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param context specify the context use by JSONReader
-     * @return JSONObject
+     * @param text the specified string to be parsed
+     * @param context the specified custom context
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     * @throws NullPointerException If received context is null
      */
     static JSONObject parseObject(String text, JSONReader.Context context) {
         if (text == null || text.isEmpty()) {
@@ -344,11 +369,13 @@ public interface JSON {
     }
 
     /**
-     * Parse Reader into into {@link JSONObject}
+     * Parses the json reader as a {@link JSONObject}. Returns {@code null}
+     * if received {@link Reader} is {@code null} or its content is null.
      *
-     * @param input the JSON {@link InputStream} to be parsed
-     * @param features features to be enabled in parsing
-     * @return JSONObject
+     * @param input the specified reader to be parsed
+     * @param features the specified features is applied to parsing
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     static JSONObject parseObject(Reader input, JSONReader.Feature... features) {
         if (input == null) {
@@ -374,11 +401,13 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 inputStream into into {@link JSONObject}
+     * Parses the json stream as a {@link JSONObject}. Returns {@code null} if
+     * received {@link InputStream} is {@code null} or closed or its content is null.
      *
-     * @param input the JSON {@link InputStream} to be parsed
-     * @param features features to be enabled in parsing
-     * @return JSONObject
+     * @param input the specified stream to be parsed
+     * @param features the specified features is applied to parsing
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     static JSONObject parseObject(InputStream input, JSONReader.Feature... features) {
         if (input == null) {
@@ -404,10 +433,12 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into {@link JSONObject}
+     * Parses the json byte array as a {@link JSONObject}. Returns {@code null}
+     * if received byte array is {@code null} or empty or its content is null.
      *
-     * @param bytes UTF8 encoded JSON byte array to parse
-     * @return JSONObject
+     * @param bytes the specified UTF8 text to be parsed
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     static JSONObject parseObject(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
@@ -432,10 +463,12 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON char array into {@link JSONObject}
+     * Parses the json char array as a {@link JSONObject}. Returns {@code null}
+     * if received char array is {@code null} or empty or its content is null.
      *
-     * @param chars JSON char array to parse
-     * @return JSONObject
+     * @param chars the specified char array to be parsed
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     static JSONObject parseObject(char[] chars) {
         if (chars == null || chars.length == 0) {
@@ -460,10 +493,13 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into {@link JSONObject}
+     * Parses the json stream as a {@link JSONObject}. Returns {@code null}
+     * if received {@link InputStream} is {@code null} or its content is null.
      *
-     * @param in the JSON {@link InputStream} to be parsed
-     * @return JSONObject
+     * @param in the specified stream to be parsed
+     * @param charset the specified charset of the stream
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     static JSONObject parseObject(InputStream in, Charset charset) {
         if (in == null) {
@@ -487,30 +523,15 @@ public interface JSON {
         }
     }
 
-    static <T> T parseObject(ByteBuffer buffer, Class<T> objectClass) {
-        if (buffer == null) {
-            return null;
-        }
-
-        try (JSONReader reader = JSONReader.of(buffer, null)) {
-            ObjectReader<T> objectReader = reader.getObjectReader(objectClass);
-
-            T object = objectReader.readObject(reader, objectClass, null, 0);
-            if (reader.resolveTasks != null) {
-                reader.handleResolveTasks(object);
-            }
-            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
-                throw new JSONException(reader.info("input not end"));
-            }
-            return object;
-        }
-    }
-
     /**
-     * Parse UTF8 encoded JSON byte array into {@link JSONObject}
+     * Parses the json stream of the url as a {@link JSONObject}.
+     * Returns {@code null} if received {@link URL} is {@code null}.
      *
-     * @param url the JSON {@link URL} to be parsed
-     * @return JSONObject
+     * @param url the specified url to be parsed
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If an I/O error or parsing error occurs
+     * @see URL#openStream()
+     * @see JSON#parseObject(InputStream, Charset)
      */
     static JSONObject parseObject(URL url) {
         if (url == null) {
@@ -525,11 +546,13 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into {@link JSONObject}
+     * Parses the json byte array as a {@link JSONObject}. Returns {@code null}
+     * if received byte array is {@code null} or empty or its content is null.
      *
-     * @param bytes UTF8 encoded JSON byte array to parse
-     * @param features features to be enabled in parsing
-     * @return JSONObject
+     * @param bytes the specified UTF8 text to be parsed
+     * @param features the specified features is applied to parsing
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     static JSONObject parseObject(byte[] bytes, JSONReader.Feature... features) {
         if (bytes == null || bytes.length == 0) {
@@ -554,13 +577,15 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into {@link JSONObject}
+     * Parses the json byte array as a {@link JSONObject}. Returns {@code null} if
+     * received byte array is {@code null} or empty or length is 0 or its content is null.
      *
-     * @param bytes UTF8 encoded JSON byte array to parse
-     * @param offset the index of the first byte to parse
-     * @param length the number of bytes to parse
-     * @param features features to be enabled in parsing
-     * @return JSONObject
+     * @param bytes the specified UTF8 text to be parsed
+     * @param offset the starting index of array
+     * @param length the specified length of array
+     * @param features the specified features is applied to parsing
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     static JSONObject parseObject(byte[] bytes, int offset, int length, JSONReader.Feature... features) {
         if (bytes == null || bytes.length == 0 || length == 0) {
@@ -585,13 +610,15 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON char array into {@link JSONObject}
+     * Parses the json chars array as a {@link JSONObject}. Returns {@code null} if
+     * received chars array is {@code null} or empty or length is 0 or its content is null.
      *
-     * @param chars JSON char array to parse
-     * @param offset the index of the first byte to parse
-     * @param length the number of chars to parse
-     * @param features features to be enabled in parsing
-     * @return JSONObject
+     * @param chars the specified chars array to be parsed
+     * @param offset the starting index of array
+     * @param length the specified length of array
+     * @param features the specified features is applied to parsing
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     static JSONObject parseObject(char[] chars, int offset, int length, JSONReader.Feature... features) {
         if (chars == null || chars.length == 0 || length == 0) {
@@ -616,14 +643,17 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into {@link JSONObject}
+     * Parses the json byte array as a {@link JSONObject}. Returns {@code null} if
+     * received byte array is {@code null} or empty or length is 0 or its content is null.
      *
-     * @param bytes UTF8 encoded JSON byte array to parse
-     * @param offset the index of the first byte to parse
-     * @param length the number of bytes to parse
-     * @param charset specify {@link Charset} to parse
-     * @param features features to be enabled in parsing
-     * @return JSONObject
+     * @param bytes the specified UTF8 text to be parsed
+     * @param offset the starting index of array
+     * @param length the specified length of array
+     * @param charset the specified charset of the stream
+     * @param features the specified features is applied to parsing
+     * @return {@link JSONObject} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     * @see JSON#parseObject(byte[], int, int, JSONReader.Feature...)
      */
     static JSONObject parseObject(
             byte[] bytes,
@@ -654,11 +684,13 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into Java Object
+     * Parses the json string as {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param clazz specify the Class to be converted
-     * @return Class
+     * @param text the specified string to be parsed
+     * @param clazz the specified class of {@link T}
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz) {
@@ -684,13 +716,15 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into Java Object
+     * Parses the json string as {@link T}. Returns {@code null}
+     * if received {@link String} is {@code null} or empty or its content is null.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param clazz specify the Class to be converted
-     * @param filter specify filter to be enabled
-     * @param features features to be enabled in parsing
-     * @return Class
+     * @param text the specified string to be parsed
+     * @param clazz the specified class of {@link T}
+     * @param filter the specified filter is applied to parsing
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(
@@ -726,14 +760,16 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into Java Object
+     * Parses the json string as {@link T}. Returns {@code null}
+     * if received {@link String} is {@code null} or empty or its content is null.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param type specify the {@link Type} to be converted
+     * @param text the specified string to be parsed
+     * @param type the specified actual type of {@link T}
      * @param format the specified date format
-     * @param filters specify filters to be enabled
-     * @param features features to be enabled in parsing
-     * @return Class
+     * @param filters the specified filters is applied to parsing
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(
@@ -770,10 +806,13 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into Java Object
+     * Parses the json string as {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param type specify the {@link Type} to be converted
+     * @param text the specified string to be parsed
+     * @param type the specified actual type of {@link T}
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Type type) {
@@ -795,17 +834,32 @@ public interface JSON {
         }
     }
 
+    /**
+     * Parses the json string as {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
+     *
+     * @param text the specified string to be parsed
+     * @param types the specified actual parameter types
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     * @see MultiType
+     * @see JSON#parseObject(String, Type)
+     */
     static <T> T parseObject(String text, Type... types) {
         return parseObject(text, new MultiType(types));
     }
 
     /**
-     * Parse JSON {@link String} into Java Object
+     * Parses the json string as {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param typeReference specify the {@link TypeReference} to be converted
+     * @param text the specified string to be parsed
+     * @param typeReference the specified actual type
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, TypeReference<T> typeReference, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
             return null;
@@ -830,13 +884,17 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into Java Object
+     * Parses the json string as {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param typeReference specify the {@link TypeReference} to be converted
-     * @param filter specify filters to be enabled
+     * @param text the specified string to be parsed
+     * @param typeReference the specified actual type
+     * @param filter the specified filter is applied to parsing
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings("unchecked")
     static <T> T parseObject(
             String text,
             TypeReference<T> typeReference,
@@ -866,11 +924,14 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json string as {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param clazz specify the Class to be converted
-     * @param features features to be enabled in parsing
+     * @param text the specified string to be parsed
+     * @param clazz the specified class of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz, JSONReader.Feature... features) {
@@ -897,13 +958,16 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json string as {@link T}. Returns {@code null}
+     * if received {@link String} is {@code null} or empty or length is 0.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param offset the index of the first byte to parse
-     * @param length the number of bytes to parse
-     * @param clazz specify the Class to be converted
-     * @param features features to be enabled in parsing
+     * @param text the specified string to be parsed
+     * @param offset the starting index of string
+     * @param length the specified length of string
+     * @param clazz the specified class of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, int offset, int length, Class<T> clazz, JSONReader.Feature... features) {
@@ -930,10 +994,15 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json string as {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param clazz specify the Class to be converted
+     * @param text the specified string to be parsed
+     * @param clazz the specified class of {@link T}
+     * @param context the specified custom context
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     * @throws NullPointerException If received context is null
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz, JSONReader.Context context) {
@@ -958,12 +1027,15 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json string as {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param clazz specify the Class to be converted
+     * @param text the specified string to be parsed
+     * @param clazz the specified class of {@link T}
      * @param format the specified date format
-     * @param features features to be enabled in parsing
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Class<T> clazz, String format, JSONReader.Feature... features) {
@@ -993,11 +1065,14 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json string as {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param type specify the {@link Type} to be converted
-     * @param features features to be enabled in parsing
+     * @param text the specified string to be parsed
+     * @param type the specified actual type
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Type type, JSONReader.Feature... features) {
@@ -1021,12 +1096,15 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json string as {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param type specify the {@link Type} to be converted
-     * @param filter specify filters to be enabled
-     * @param features features to be enabled in parsing
+     * @param text the specified string to be parsed
+     * @param type the specified actual type
+     * @param filter the specified filter is applied to parsing
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Type type, Filter filter, JSONReader.Feature... features) {
@@ -1050,12 +1128,15 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json string as {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param type specify the {@link Type} to be converted
+     * @param text the specified string to be parsed
+     * @param type the specified actual type
      * @param format the specified date format
-     * @param features features to be enabled in parsing
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Type type, String format, JSONReader.Feature... features) {
@@ -1083,18 +1164,21 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON char array into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json char array as {@link T}. Returns {@code null}
+     * if received char array is {@code null} or empty or length is 0.
      *
-     * @param chars JSON char array to parse
-     * @param offset the index of the first byte to parse
-     * @param length the number of bytes to parse
-     * @param type specify the {@link Type} to be converted
-     * @param features features to be enabled in parsing
+     * @param chars the specified char array to be parsed
+     * @param type the specified actual type
+     * @param offset the starting index of array
+     * @param length the specified length of array
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      * @since 2.0.13
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(char[] chars, int offset, int length, Type type, JSONReader.Feature... features) {
-        if (chars == null || chars.length == 0) {
+        if (chars == null || chars.length == 0 || length == 0) {
             return null;
         }
 
@@ -1113,11 +1197,13 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON char array into a Java object
+     * Parses the json char array as {@link T}. Returns
+     * {@code null} if received char array is {@code null} or empty.
      *
-     * @param chars JSON char array to parse
-     * @param clazz specify the Class to be converted
-     * @since 2.0.13
+     * @param chars the specified char array to be parsed
+     * @param clazz the specified class of {@link T}
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(char[] chars, Class<T> clazz) {
@@ -1140,18 +1226,21 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into a Java object
+     * Parses the json byte array as {@link T}. Returns {@code null}
+     * if received byte array is {@code null} or empty or length is 0.
      *
-     * @param bytes UTF8 encoded JSON byte array to parse
-     * @param offset the index of the first byte to parse
-     * @param length the number of bytes to parse
-     * @param type specify the {@link Type} to be converted
-     * @param features features to be enabled in parsing
+     * @param bytes the specified UTF8 text to be parsed
+     * @param offset the starting index of array
+     * @param length the specified length of array
+     * @param type the specified actual type
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      * @since 2.0.13
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, int offset, int length, Type type, JSONReader.Feature... features) {
-        if (bytes == null || bytes.length == 0) {
+        if (bytes == null || bytes.length == 0 || length == 0) {
             return null;
         }
 
@@ -1170,10 +1259,13 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into a Java object
+     * Parses the json byte array as {@link T}. Returns
+     * {@code null} if received byte array is {@code null} or empty.
      *
-     * @param bytes UTF8 encoded JSON byte array to parse
-     * @param type specify the {@link Type} to be converted
+     * @param bytes the specified UTF8 text to be parsed
+     * @param type the specified actual type of {@link T}
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Type type) {
@@ -1181,23 +1273,27 @@ public interface JSON {
             return null;
         }
 
-        JSONReader reader = JSONReader.of(bytes);
-        ObjectReader<T> objectReader = reader.getObjectReader(type);
-        T object = objectReader.readObject(reader, type, null, 0);
-        if (reader.resolveTasks != null) {
-            reader.handleResolveTasks(object);
+        try (JSONReader reader = JSONReader.of(bytes)) {
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            T object = objectReader.readObject(reader, type, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
         }
-        if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
-            throw new JSONException(reader.info("input not end"));
-        }
-        return object;
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into a Java object
+     * Parses the json byte array as {@link T}. Returns
+     * {@code null} if received byte array is {@code null} or empty.
      *
-     * @param bytes UTF8 encoded JSON byte array to parse
-     * @param clazz specify the Class to be converted
+     * @param bytes the specified UTF8 text to be parsed
+     * @param clazz the specified class of {@link T}
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Class<T> clazz) {
@@ -1220,26 +1316,28 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into a Java object
+     * Parses the json byte array as {@link T}. Returns
+     * {@code null} if received byte array is {@code null} or empty.
      *
-     * @param utf8Bytes UTF8 encoded JSON byte array to parse
-     * @param clazz specify the Class to be converted
-     * @param filter specify filter to be enabled
-     * @param features features to be enabled in parsing
-     * @return Class
+     * @param bytes the specified UTF8 text to be parsed
+     * @param clazz the specified class of {@link T}
+     * @param filter the specified filter is applied to parsing
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(
-            byte[] utf8Bytes,
+            byte[] bytes,
             Class<T> clazz,
             Filter filter,
             JSONReader.Feature... features
     ) {
-        if (utf8Bytes == null || utf8Bytes.length == 0) {
+        if (bytes == null || bytes.length == 0) {
             return null;
         }
 
-        try (JSONReader reader = JSONReader.of(utf8Bytes)) {
+        try (JSONReader reader = JSONReader.of(bytes)) {
             JSONReader.Context context = reader.context;
             reader.context.config(filter, features);
 
@@ -1258,24 +1356,27 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into a Java object
+     * Parses the json byte array as {@link T}. Returns
+     * {@code null} if received byte array is {@code null} or empty.
      *
-     * @param utf8Bytes UTF8 encoded JSON byte array to parse
-     * @param clazz specify the Class to be converted
-     * @param context specify the context use by JSONReader
-     * @return Class
+     * @param bytes the specified UTF8 text to be parsed
+     * @param clazz the specified class of {@link T}
+     * @param context the specified custom context
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     * @throws NullPointerException If received context is null
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(
-            byte[] utf8Bytes,
+            byte[] bytes,
             Class<T> clazz,
             JSONReader.Context context
     ) {
-        if (utf8Bytes == null || utf8Bytes.length == 0) {
+        if (bytes == null || bytes.length == 0) {
             return null;
         }
 
-        try (JSONReader reader = JSONReader.of(utf8Bytes, context)) {
+        try (JSONReader reader = JSONReader.of(bytes, context)) {
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
             ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
 
@@ -1291,28 +1392,30 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into a Java object
+     * Parses the json byte array as {@link T}. Returns
+     * {@code null} if received byte array is {@code null} or empty.
      *
-     * @param utf8Bytes UTF8 encoded JSON byte array to parse
-     * @param type specify the {@link Type} to be converted
+     * @param bytes the specified UTF8 text to be parsed
+     * @param type the specified actual type
      * @param format the specified date format
-     * @param filters specify filters to be enabled
-     * @param features features to be enabled in parsing
-     * @return Class
+     * @param filters the specified filters is applied to parsing
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(
-            byte[] utf8Bytes,
+            byte[] bytes,
             Type type,
             String format,
             Filter[] filters,
             JSONReader.Feature... features
     ) {
-        if (utf8Bytes == null || utf8Bytes.length == 0) {
+        if (bytes == null || bytes.length == 0) {
             return null;
         }
 
-        try (JSONReader reader = JSONReader.of(utf8Bytes)) {
+        try (JSONReader reader = JSONReader.of(bytes)) {
             JSONReader.Context context = reader.context;
             context.setDateFormat(format);
             context.config(filters, features);
@@ -1332,11 +1435,14 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json byte array as {@link T}. Returns
+     * {@code null} if received byte array is {@code null} or empty.
      *
-     * @param bytes UTF8 encoded JSON byte array to parse
-     * @param clazz specify the Class to be converted
-     * @param features features to be enabled in parsing
+     * @param bytes the specified UTF8 text to be parsed
+     * @param clazz the specified class of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Class<T> clazz, JSONReader.Feature... features) {
@@ -1359,11 +1465,14 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json byte array as {@link T}. Returns
+     * {@code null} if received byte array is {@code null} or empty.
      *
-     * @param bytes UTF8 encoded JSON byte array to parse
-     * @param type specify the {@link Type} to be converted
-     * @param features features to be enabled in parsing
+     * @param bytes the specified UTF8 text to be parsed
+     * @param type the specified actual type of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Type type, JSONReader.Feature... features) {
@@ -1386,12 +1495,15 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json byte array as {@link T}. Returns
+     * {@code null} if received byte array is {@code null} or empty.
      *
-     * @param bytes UTF8 encoded JSON byte array to parse
-     * @param type specify the {@link Type} to be converted
-     * @param filter specify filters to be enabled
-     * @param features features to be enabled in parsing
+     * @param bytes the specified UTF8 text to be parsed
+     * @param type the specified actual type of {@link T}
+     * @param filter the specified filter is applied to parsing
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Type type, Filter filter, JSONReader.Feature... features) {
@@ -1414,12 +1526,15 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json byte array as {@link T}. Returns
+     * {@code null} if received byte array is {@code null} or empty.
      *
-     * @param bytes UTF8 encoded JSON byte array to parse
-     * @param type specify the {@link Type} to be converted
+     * @param bytes the specified UTF8 text to be parsed
+     * @param type the specified actual type of {@link T}
      * @param format the specified date format
-     * @param features features to be enabled in parsing
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, Type type, String format, JSONReader.Feature... features) {
@@ -1448,11 +1563,43 @@ public interface JSON {
     }
 
     /**
-     * Parse Reader into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json byte buffer as a {@link T}. Returns
+     * {@code null} if received {@link ByteBuffer} is {@code null}.
      *
-     * @param input the JSON {@link InputStream} to be parsed
-     * @param type specify the {@link Type} to be converted
-     * @param features features to be enabled in parsing
+     * @param buffer the specified buffer to be parsed
+     * @param objectClass the specified class of {@link T}
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(ByteBuffer buffer, Class<T> objectClass) {
+        if (buffer == null) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(buffer, null)) {
+            ObjectReader<T> objectReader = reader.getObjectReader(objectClass);
+
+            T object = objectReader.readObject(reader, objectClass, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parses the json reader as a {@link T}. Returns {@code null}
+     * if received {@link Reader} is {@code null} or its content is null.
+     *
+     * @param input the specified reader to be parsed
+     * @param type the specified actual type of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(Reader input, Type type, JSONReader.Feature... features) {
@@ -1480,11 +1627,14 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 inputStream into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json stream as a {@link T}. Returns {@code null}
+     * if received {@link InputStream} is {@code null} or its content is null.
      *
-     * @param input the JSON {@link InputStream} to be parsed
-     * @param type specify the {@link Type} to be converted
-     * @param features features to be enabled in parsing
+     * @param input the specified stream to be parsed
+     * @param type the specified actual type of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(InputStream input, Type type, JSONReader.Feature... features) {
@@ -1512,12 +1662,16 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 URL Resource into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json stream of the url as {@link T}.
+     * Returns {@code null} if received {@link URL} is {@code null}.
      *
-     * @param url the JSON {@link URL} to be parsed
-     * @param type specify the {@link Type} to be converted
-     * @param features features to be enabled in parsing
-     * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
+     * @param url the specified url to be parsed
+     * @param type the specified actual type of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If an I/O error or parsing error occurs
+     * @see URL#openStream()
+     * @see JSON#parseObject(InputStream, Type, JSONReader.Feature...)
      * @since 2.0.4
      */
     static <T> T parseObject(URL url, Type type, JSONReader.Feature... features) {
@@ -1533,12 +1687,16 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 URL Resource into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json stream of the url as {@link T}.
+     * Returns {@code null} if received {@link URL} is {@code null}.
      *
-     * @param url the JSON {@link URL} to be parsed
-     * @param objectClass specify the {@link Class} to be converted
-     * @param features features to be enabled in parsing
-     * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
+     * @param url the specified url to be parsed
+     * @param objectClass the specified class of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If an I/O error or parsing error occurs
+     * @see URL#openStream()
+     * @see JSON#parseObject(InputStream, Type, JSONReader.Feature...)
      * @since 2.0.9
      */
     static <T> T parseObject(URL url, Class<T> objectClass, JSONReader.Feature... features) {
@@ -1554,12 +1712,16 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 URL Resource into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json stream of the url as a {@link JSONObject} and call the function
+     * to convert it to {@link T}. Returns {@code null} if received {@link URL} is {@code null}.
      *
-     * @param url the JSON {@link URL} to be parsed
-     * @param function specify the {@link Function} to be converted
-     * @param features features to be enabled in parsing
-     * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
+     * @param url the specified url to be parsed
+     * @param function the specified converter
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If an I/O error or parsing error occurs
+     * @see URL#openStream()
+     * @see JSON#parseObject(InputStream, JSONReader.Feature...)
      * @since 2.0.4
      */
     static <T> T parseObject(URL url, Function<JSONObject, T> function, JSONReader.Feature... features) {
@@ -1579,15 +1741,22 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 inputStream into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json stream as a {@link T}. Returns {@code null}
+     * if received {@link InputStream} is {@code null} or its content is null.
      *
-     * @param input the JSON {@link InputStream} to be parsed
-     * @param type specify the {@link Type} to be converted
+     * @param input the specified stream to be parsed
+     * @param type the specified actual type of {@link T}
      * @param format the specified date format
-     * @param features features to be enabled in parsing
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(InputStream input, Type type, String format, JSONReader.Feature... features) {
+        if (input == null) {
+            return null;
+        }
+
         try (JSONReader reader = JSONReader.of(input, StandardCharsets.UTF_8)) {
             JSONReader.Context context = reader.context;
             if (format != null && !format.isEmpty()) {
@@ -1608,15 +1777,22 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 inputStream into a Java object with specified {@link JSONReader.Feature}s enabled
+     * Parses the json stream as a {@link T}. Returns {@code null}
+     * if received {@link InputStream} is {@code null} or its content is null.
      *
-     * @param input the JSON {@link InputStream} to be parsed
-     * @param charset inputStream charset
-     * @param type specify the {@link Type} to be converted
-     * @param features features to be enabled in parsing
+     * @param input the specified stream to be parsed
+     * @param charset the specified charset of the stream
+     * @param type the specified actual type of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(InputStream input, Charset charset, Type type, JSONReader.Feature... features) {
+        if (input == null) {
+            return null;
+        }
+
         try (JSONReader reader = JSONReader.of(input, charset)) {
             reader.context.config(features);
             ObjectReader<T> objectReader = reader.getObjectReader(type);
@@ -1632,18 +1808,20 @@ public interface JSON {
     }
 
     /**
-     * Parses the JSON byte array of the specified {@link Charset} into a Java Object
+     * Parses the json byte array as {@link T}. Returns {@code null}
+     * if received byte array is {@code null} or empty or length is 0.
      *
-     * @param bytes JSON byte array to parse
-     * @param offset the index of the first byte to parse
-     * @param length the number of bytes to parse
-     * @param charset specify {@link Charset} to parse
-     * @param type specify the {@link Type} to be converted
-     * @throws IndexOutOfBoundsException If the offset and the length arguments index characters outside the bounds of the bytes array
+     * @param bytes the specified UTF8 text to be parsed
+     * @param offset the starting index of array
+     * @param length the specified length of array
+     * @param charset the specified charset of the stream
+     * @param type the specified actual type of {@link T}
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(byte[] bytes, int offset, int length, Charset charset, Type type) {
-        if (bytes == null || bytes.length == 0) {
+        if (bytes == null || bytes.length == 0 || length == 0) {
             return null;
         }
 
@@ -1661,15 +1839,16 @@ public interface JSON {
     }
 
     /**
-     * Parses the JSON byte array of the specified {@link Charset} into a Java Object
+     * Parses the json byte array as {@link T}. Returns {@code null}
+     * if received byte array is {@code null} or empty or length is 0.
      *
-     * @param bytes JSON byte array to parse
-     * @param offset the index of the first byte to parse
-     * @param length the number of bytes to parse
-     * @param charset specify {@link Charset} to parse
-     * @param type specify the {@link Class} to be converted
-     * @param features features to be enabled in parsing
-     * @throws IndexOutOfBoundsException If the offset and the length arguments index characters outside the bounds of the bytes array
+     * @param bytes the specified UTF8 text to be parsed
+     * @param offset the starting index of array
+     * @param length the specified length of array
+     * @param charset the specified charset of the stream
+     * @param type the specified actual class of {@link T}
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(
@@ -1680,7 +1859,7 @@ public interface JSON {
             Class<T> type,
             JSONReader.Feature... features
     ) {
-        if (bytes == null || bytes.length == 0) {
+        if (bytes == null || bytes.length == 0 || length == 0) {
             return null;
         }
 
@@ -1699,14 +1878,15 @@ public interface JSON {
     }
 
     /**
-     * Parse {@link InputStream} into a Java object with specified {@link JSONReader.Feature}s enabled and consume it
+     * Parses the json stream through the specified delimiter as
+     * {@link T} objects and call the specified consumer to consume it
      *
-     * @param input the JSON {@link InputStream} to be parsed
-     * @param type specify the {@link Type} to be converted
-     * @param consumer the consumer of the parsing result object
-     * @param features features to be enabled in parsing
-     * @throws JSONException If the first byte cannot be read for any reason other than end of file, or if the input stream has been closed, or if some other I/O error occurs
-     * @see JSON#parseObject(InputStream, Charset, char, Type, Consumer, JSONReader.Feature...)
+     * @param input the specified stream to be parsed
+     * @param type the specified actual class of {@link T}
+     * @param consumer the specified consumer is called multiple times
+     * @param features the specified features is applied to parsing
+     * @throws JSONException If an I/O error or parsing error occurs
+     * @throws NullPointerException If the specified stream is null
      * @since 2.0.2
      */
     static <T> void parseObject(InputStream input, Type type, Consumer<T> consumer, JSONReader.Feature... features) {
@@ -1714,15 +1894,17 @@ public interface JSON {
     }
 
     /**
-     * Parse {@link InputStream} into a Java object with specified {@link JSONReader.Feature}s enabled and consume it
+     * Parses the json stream through the specified delimiter as
+     * {@link T} objects and call the specified consumer to consume it
      *
-     * @param input the JSON {@link InputStream} to be parsed
-     * @param charset specify {@link Charset} to parse
-     * @param delimiter specify the delimiter
-     * @param type specify the {@link Type} to be converted
-     * @param consumer the consumer of the parsing result object
-     * @param features features to be enabled in parsing
-     * @throws JSONException If the first byte cannot be read for any reason other than end of file, or if the input stream has been closed, or if some other I/O error occurs
+     * @param input the specified stream to be parsed
+     * @param charset the specified charset of the stream
+     * @param type the specified actual class of {@link T}
+     * @param delimiter the specified delimiter for the stream
+     * @param consumer the specified consumer is called multiple times
+     * @param features the specified features is applied to parsing
+     * @throws JSONException If an I/O error or parsing error occurs
+     * @throws NullPointerException If the specified stream is null
      * @since 2.0.2
      */
     @SuppressWarnings("unchecked")
@@ -1800,13 +1982,15 @@ public interface JSON {
     }
 
     /**
-     * Parse {@link Reader} into a Java object with specified {@link JSONReader.Feature}s enabled and consume it
+     * Parses the json reader through the specified delimiter as
+     * {@link T} objects and call the specified consumer to consume it
      *
-     * @param input the JSON {@link Reader} to be parsed
-     * @param delimiter specify the delimiter
-     * @param type specify the {@link Type} to be converted
-     * @param consumer the consumer of the parsing result object
-     * @throws JSONException If the first byte cannot be read for any reason other than end of file, or if the input stream has been closed, or if some other I/O error occurs
+     * @param input the specified reader to be parsed
+     * @param type the specified actual class of {@link T}
+     * @param delimiter the specified delimiter for the stream
+     * @param consumer the specified consumer is called multiple times
+     * @throws JSONException If an I/O error or parsing error occurs
+     * @throws NullPointerException If the specified reader is null
      * @since 2.0.2
      */
     @SuppressWarnings("unchecked")
@@ -1868,9 +2052,12 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONArray}
+     * Parses the json string as a {@link JSONArray}. Returns {@code null} if
+     * received {@link String} is {@code null} or empty or its content is null.
      *
-     * @param text the JSON {@link String} to be parsed
+     * @param text the specified string to be parsed
+     * @return {@link JSONArray} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     static JSONArray parseArray(String text) {
         if (text == null || text.isEmpty()) {
@@ -1894,9 +2081,12 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONArray}
+     * Parses the json byte array as a {@link JSONArray}. Returns {@code null}
+     * if received byte array is {@code null} or empty or its content is null.
      *
-     * @param bytes the JSON {@link String} to be parsed
+     * @param bytes the specified UTF8 text to be parsed
+     * @return {@link JSONArray} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     static JSONArray parseArray(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
@@ -1920,16 +2110,18 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONArray}
+     * Parses the json byte array as a {@link JSONArray}. Returns {@code null}
+     * if received byte array is {@code null} or empty or length is 0 or its content is null.
      *
-     * @param bytes the JSON {@link String} to be parsed
-     * @param offset the index of the first byte to validate
-     * @param length the number of bytes to validate
-     * @param charset specify {@link Charset} to validate
+     * @param bytes the specified byte array to be parsed
+     * @param offset the starting index of array
+     * @param length the specified length of array
+     * @param charset the specified charset of the stream
+     * @throws JSONException If a parsing error occurs
      * @since 2.0.13
      */
     static JSONArray parseArray(byte[] bytes, int offset, int length, Charset charset) {
-        if (bytes == null || bytes.length == 0) {
+        if (bytes == null || bytes.length == 0 || length == 0) {
             return null;
         }
 
@@ -1950,9 +2142,12 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONArray}
+     * Parses the json char array as a {@link JSONArray}. Returns {@code null}
+     * if received byte array is {@code null} or empty or its content is null.
      *
-     * @param chars the JSON {@link String} to be parsed
+     * @param chars the specified char array to be parsed
+     * @return {@link JSONArray} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     static JSONArray parseArray(char[] chars) {
         if (chars == null || chars.length == 0) {
@@ -1976,10 +2171,13 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link JSONArray}
+     * Parses the json string as a {@link JSONArray}. Returns {@code null}
+     * if received {@link String} is {@code null} or empty or its content is null.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param features features to be enabled in parsing
+     * @param text the specified string to be parsed
+     * @param features the specified features is applied to parsing
+     * @return {@link JSONArray} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     static JSONArray parseArray(String text, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
@@ -2004,10 +2202,15 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link InputStream} into {@link JSONArray}
+     * Parses the json stream of the url as a {@link JSONArray}.
+     * Returns {@code null} if received {@link URL} is {@code null}.
      *
-     * @param url the JSON {@link URL} to be parsed
-     * @param features features to be enabled in parsing
+     * @param url the specified url to be parsed
+     * @param features the specified features is applied to parsing
+     * @return {@link JSONArray} or {@code null}
+     * @throws JSONException If an I/O error or parsing error occurs
+     * @see URL#openStream()
+     * @see JSON#parseArray(InputStream, JSONReader.Feature...)
      */
     static JSONArray parseArray(URL url, JSONReader.Feature... features) {
         if (url == null) {
@@ -2022,12 +2225,19 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link InputStream} into {@link JSONArray}
+     * Parses the json stream as a {@link JSONArray}. Returns {@code null}
+     * if received {@link InputStream} is {@code null} or its content is null.
      *
-     * @param in the JSON {@link InputStream} to be parsed
-     * @param features features to be enabled in parsing
+     * @param in the specified stream to be parsed
+     * @param features the specified features is applied to parsing
+     * @return {@link JSONArray} or {@code null}
+     * @throws JSONException If an I/O error or parsing error occurs
      */
     static JSONArray parseArray(InputStream in, JSONReader.Feature... features) {
+        if (in == null) {
+            return null;
+        }
+
         try (JSONReader reader = JSONReader.of(in, StandardCharsets.UTF_8)) {
             if (reader.nextIfNull()) {
                 return null;
@@ -2046,11 +2256,14 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link List}
+     * Parses the json string as a list of {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param type specify the {@link Type} to be converted
-     * @param features features to be enabled in parsing
+     * @param text the specified string to be parsed
+     * @param type the specified actual type of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link List} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(String text, Type type, JSONReader.Feature... features) {
@@ -2072,11 +2285,15 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link List}
+     * Parses the json string as a list of {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param type specify the {@link Type} to be converted
+     * @param text the specified string to be parsed
+     * @param type the specified actual type of {@link T}
+     * @return {@link List} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
+    @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(String text, Type type) {
         if (text == null || text.isEmpty()) {
             return null;
@@ -2095,12 +2312,15 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link List}
+     * Parses the json string as a list of {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param type specify the {@link Class} to be converted
-     * @since 2.0.21
+     * @param text the specified string to be parsed
+     * @param type the specified actual class of {@link T}
+     * @return {@link List} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
+    @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(String text, Class<T> type) {
         if (text == null || text.isEmpty()) {
             return null;
@@ -2119,11 +2339,15 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link List}
+     * Parses the json string as a list of {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param types specify the {@link Type} to be converted
+     * @param text the specified string to be parsed
+     * @param types the specified actual parameter type
+     * @return {@link List} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
+    @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(String text, Type... types) {
         if (text == null || text.isEmpty()) {
             return null;
@@ -2142,11 +2366,14 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link List}
+     * Parses the json string as a list of {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param type specify the {@link Class} to be converted
-     * @param features features to be enabled in parsing
+     * @param text the specified string to be parsed
+     * @param type the specified actual class of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link List} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(String text, Class<T> type, JSONReader.Feature... features) {
@@ -2168,12 +2395,14 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link List}
+     * Parses the json char array as a list of {@link T}. Returns
+     * {@code null} if received char array is {@code null} or empty.
      *
-     * @param chars the JSON {@link String} to be parsed
-     * @param type specify the {@link Class} to be converted
-     * @param features features to be enabled in parsing
-     * @since 2.0.13
+     * @param chars the specified char array to be parsed
+     * @param type the specified actual class of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link List} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(char[] chars, Class<T> type, JSONReader.Feature... features) {
@@ -2195,18 +2424,19 @@ public interface JSON {
     }
 
     /**
-     * Parse JSON {@link String} into {@link List}
+     * Parses the json string as a list of {@link T}. Returns {@code null}
+     * if received {@link String} is {@code null} or empty or its content is null.
      *
-     * @param text the JSON {@link String} to be parsed
-     * @param types specify some {@link Type}s to be converted
-     * @param features features to be enabled in parsing
+     * @param text the specified string to be parsed
+     * @param types the specified actual parameter type
+     * @param features the specified features is applied to parsing
+     * @return {@link List} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     static <T> List<T> parseArray(String text, Type[] types, JSONReader.Feature... features) {
         if (text == null || text.isEmpty()) {
             return null;
         }
-
-        List<T> array = new ArrayList<>(types.length);
 
         try (JSONReader reader = JSONReader.of(text)) {
             if (reader.nextIfNull()) {
@@ -2214,8 +2444,8 @@ public interface JSON {
             }
 
             reader.context.config(features);
-
             reader.startArray();
+            List<T> array = new ArrayList<>(types.length);
             for (Type itemType : types) {
                 array.add(
                         reader.read(itemType)
@@ -2233,11 +2463,14 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into {@link List} with specified {@link JSONReader.Feature}s enabled
+     * Parses the json byte array as a list of {@link T}. Returns
+     * {@code null} if received byte array is {@code null} or empty.
      *
-     * @param bytes UTF8 encoded JSON byte array to parse
-     * @param type specify the {@link Type} to be converted
-     * @param features features to be enabled in parsing
+     * @param bytes the specified UTF8 text to be parsed
+     * @param type the specified actual type of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link List} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(byte[] bytes, Type type, JSONReader.Feature... features) {
@@ -2259,11 +2492,14 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into {@link List} with specified {@link JSONReader.Feature}s enabled
+     * Parses the json byte array as a list of {@link T}. Returns
+     * {@code null} if received byte array is {@code null} or empty.
      *
-     * @param bytes UTF8 encoded JSON byte array to parse
-     * @param type specify the {@link Class} to be converted
-     * @param features features to be enabled in parsing
+     * @param bytes the specified UTF8 text to be parsed
+     * @param type the specified actual class of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link List} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(byte[] bytes, Class<T> type, JSONReader.Feature... features) {
@@ -2285,14 +2521,17 @@ public interface JSON {
     }
 
     /**
-     * Parse UTF8 encoded JSON byte array into {@link List} with specified {@link JSONReader.Feature}s enabled
+     * Parses the json byte array as a list of {@link T}. Returns {@code null}
+     * if received byte array is {@code null} or empty or the specified length is 0.
      *
-     * @param bytes UTF8 encoded JSON byte array to parse
-     * @param offset the index of the first byte to validate
-     * @param length the number of bytes to validate
-     * @param charset specify {@link Charset} to validate
-     * @param type specify the {@link Class} to be converted
-     * @param features features to be enabled in parsing
+     * @param bytes the specified UTF8 text to be parsed
+     * @param offset the starting index of array
+     * @param length the specified length of array
+     * @param charset the specified charset of the stream
+     * @param type the specified actual class of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link List} or {@code null}
+     * @throws JSONException If a parsing error occurs
      */
     @SuppressWarnings("unchecked")
     static <T> List<T> parseArray(
@@ -2303,7 +2542,7 @@ public interface JSON {
             Class<T> type,
             JSONReader.Feature... features
     ) {
-        if (bytes == null || bytes.length == 0) {
+        if (bytes == null || bytes.length == 0 || length == 0) {
             return null;
         }
 
@@ -2321,9 +2560,11 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java Object to JSON {@link String}
+     * Serializes the specified object to the json string
      *
-     * @param object Java Object to be serialized into JSON {@link String}
+     * @param object the specified object will be serialized
+     * @return {@link String} that is not null
+     * @throws JSONException If a serialization error occurs
      */
     static String toJSONString(Object object) {
         JSONWriter.Context writeContext = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider);
@@ -2380,10 +2621,12 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java Object to JSON {@link String}
+     * Serializes the specified object to the json string
      *
-     * @param object Java Object to be serialized into JSON {@link String}
-     * @param context
+     * @param object the specified object will be serialized
+     * @param context the specified custom context
+     * @return {@link String} that is not null
+     * @throws JSONException If a serialization error occurs
      */
     static String toJSONString(Object object, JSONWriter.Context context) {
         try (JSONWriter writer = JSONWriter.of(context)) {
@@ -2404,10 +2647,12 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
+     * Serializes the specified object to the json string
      *
-     * @param object Java Object to be serialized into JSON {@link String}
-     * @param features features to be enabled in serialization
+     * @param object the specified object will be serialized
+     * @param features the specified features is applied to serialization
+     * @return {@link String} that is not null
+     * @throws JSONException If a serialization error occurs
      */
     static String toJSONString(Object object, JSONWriter.Feature... features) {
         JSONWriter.Context writeContext = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
@@ -2457,11 +2702,13 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
+     * Serializes the specified object to the json string
      *
-     * @param object Java Object to be serialized into JSON {@link String}
-     * @param filter specify a filter to use in serialization
-     * @param features features to be enabled in serialization
+     * @param object the specified object will be serialized
+     * @param filter the specified filter is applied to serialization
+     * @param features the specified features is applied to serialization
+     * @return {@link String} that is not null
+     * @throws JSONException If a serialization error occurs
      */
     static String toJSONString(Object object, Filter filter, JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.of(features)) {
@@ -2483,11 +2730,13 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
+     * Serializes the specified object to the json string
      *
-     * @param object Java Object to be serialized into JSON {@link String}
-     * @param filters specifies the filter to use in serialization
-     * @param features features to be enabled in serialization
+     * @param object the specified object will be serialized
+     * @param filters the specified filters is applied to serialization
+     * @param features the specified features is applied to serialization
+     * @return {@link String} that is not null
+     * @throws JSONException If a serialization error occurs
      */
     static String toJSONString(Object object, Filter[] filters, JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.of(features)) {
@@ -2509,11 +2758,13 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
+     * Serializes the specified object to the json string
      *
-     * @param object Java Object to be serialized into JSON {@link String}
+     * @param object the specified object will be serialized
      * @param format the specified date format
-     * @param features features to be enabled in serialization
+     * @param features the specified features is applied to serialization
+     * @return {@link String} that is not null
+     * @throws JSONException If a serialization error occurs
      */
     static String toJSONString(Object object, String format, JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.of(features)) {
@@ -2535,12 +2786,14 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java Object to JSON {@link String} with specified {@link JSONReader.Feature}s enabled
+     * Serializes the specified object to the json string
      *
-     * @param object Java Object to be serialized into JSON {@link String}
+     * @param object the specified object will be serialized
      * @param format the specified date format
-     * @param filters specifies the filter to use in serialization
-     * @param features features to be enabled in serialization
+     * @param filters the specified filters is applied to serialization
+     * @param features the specified features is applied to serialization
+     * @return {@link String} that is not null
+     * @throws JSONException If a serialization error occurs
      */
     static String toJSONString(Object object, String format, Filter[] filters, JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.of(features)) {
@@ -2564,10 +2817,13 @@ public interface JSON {
         }
     }
 
+
     /**
-     * Serialize Java Object to JSON byte array
+     * Serializes the specified object to the json byte array
      *
-     * @param object Java Object to be serialized into JSON byte array
+     * @param object the specified object will be serialized
+     * @return {@code byte[]} that is not null
+     * @throws JSONException If a serialization error occurs
      */
     static byte[] toJSONBytes(Object object) {
         try (JSONWriter writer = JSONWriter.ofUTF8()) {
@@ -2586,11 +2842,13 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java Object to JSON byte array
+     * Serializes the specified object to the json byte array
      *
-     * @param object Java Object to be serialized into JSON byte array
+     * @param object the specified object will be serialized
      * @param format the specified date format
-     * @param features features to be enabled in serialization
+     * @param features the specified features is applied to serialization
+     * @return {@code byte[]} that is not null
+     * @throws JSONException If a serialization error occurs
      */
     static byte[] toJSONBytes(Object object, String format, JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.ofUTF8(features)) {
@@ -2612,10 +2870,12 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java Object to JSON byte array
+     * Serializes the specified object to the json byte array
      *
-     * @param object Java Object to be serialized into JSON byte array
-     * @param filters specifies the filter to use in serialization
+     * @param object the specified object will be serialized
+     * @param filters the specified filters is applied to serialization
+     * @return {@code byte[]} that is not null
+     * @throws JSONException If a serialization error occurs
      */
     static byte[] toJSONBytes(Object object, Filter... filters) {
         try (JSONWriter writer = JSONWriter.ofUTF8()) {
@@ -2638,10 +2898,12 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java Object to JSON byte array with specified {@link JSONReader.Feature}s enabled
+     * Serializes the specified object to the json byte array
      *
-     * @param object Java Object to be serialized into JSON byte array
-     * @param features features to be enabled in serialization
+     * @param object the specified object will be serialized
+     * @param features the specified features is applied to serialization
+     * @return {@code byte[]} that is not null
+     * @throws JSONException If a serialization error occurs
      */
     static byte[] toJSONBytes(Object object, JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.ofUTF8(features)) {
@@ -2660,11 +2922,13 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java Object to JSON byte array with specified {@link JSONReader.Feature}s enabled
+     * Serializes the specified object to the json byte array
      *
-     * @param object Java Object to be serialized into JSON byte array
-     * @param filters specifies the filter to use in serialization
-     * @param features features to be enabled in serialization
+     * @param object the specified object will be serialized
+     * @param filters the specified filters is applied to serialization
+     * @param features the specified features is applied to serialization
+     * @return {@code byte[]} that is not null
+     * @throws JSONException If a serialization error occurs
      */
     static byte[] toJSONBytes(Object object, Filter[] filters, JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.ofUTF8(features)) {
@@ -2686,12 +2950,14 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java Object to JSON byte array with specified {@link JSONReader.Feature}s enabled
+     * Serializes the specified object to the json byte array
      *
-     * @param object Java Object to be serialized into JSON byte array
+     * @param object the specified object will be serialized
      * @param format the specified date format
-     * @param filters specifies the filter to use in serialization
-     * @param features features to be enabled in serialization
+     * @param filters the specified filters is applied to serialization
+     * @param features the specified features is applied to serialization
+     * @return {@code byte[]} that is not null
+     * @throws JSONException If a serialization error occurs
      */
     static byte[] toJSONBytes(Object object, String format, Filter[] filters, JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.ofUTF8(features)) {
@@ -2716,11 +2982,12 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java Object to JSON and write to {@link OutputStream}
+     * Serializes the specified object to the json byte array and write it to {@link OutputStream}
      *
-     * @param out {@link OutputStream} to be written
-     * @param object Java Object to be serialized into JSON
-     * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
+     * @param out the specified output stream to be written
+     * @param object the specified object will be serialized
+     * @return the length of byte stream
+     * @throws JSONException If an I/O error or serialization error occurs
      */
     static int writeTo(OutputStream out, Object object) {
         try (JSONWriter writer = JSONWriter.ofUTF8()) {
@@ -2742,12 +3009,13 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java Object to JSON and write to {@link OutputStream} with specified {@link JSONReader.Feature}s enabled
+     * Serializes the specified object to the json byte array and write it to {@link OutputStream}
      *
-     * @param out {@link OutputStream} to be written
-     * @param object Java Object to be serialized into JSON
-     * @param features features to be enabled in serialization
-     * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
+     * @param out the specified output stream to be written
+     * @param object the specified object will be serialized
+     * @param features the specified features is applied to serialization
+     * @return the length of byte stream
+     * @throws JSONException If an I/O error or serialization error occurs
      */
     static int writeTo(OutputStream out, Object object, JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.ofUTF8(features)) {
@@ -2769,13 +3037,14 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java Object to JSON and write to {@link OutputStream} with specified {@link JSONReader.Feature}s enabled
+     * Serializes the specified object to the json byte array and write it to {@link OutputStream}
      *
-     * @param out {@link OutputStream} to be written
-     * @param object Java Object to be serialized into JSON
-     * @param filters specifies the filter to use in serialization
-     * @param features features to be enabled in serialization
-     * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
+     * @param out the specified output stream to be written
+     * @param object the specified object will be serialized
+     * @param filters the specified filters is applied to serialization
+     * @param features the specified features is applied to serialization
+     * @return the length of byte stream
+     * @throws JSONException If an I/O error or serialization error occurs
      */
     static int writeTo(OutputStream out, Object object, Filter[] filters, JSONWriter.Feature... features) {
         try (JSONWriter writer = JSONWriter.ofUTF8(features)) {
@@ -2800,14 +3069,15 @@ public interface JSON {
     }
 
     /**
-     * Serialize Java Object to JSON and write to {@link OutputStream} with specified {@link JSONReader.Feature}s enabled
+     * Serializes the specified object to the json byte array and write it to {@link OutputStream}
      *
-     * @param out {@link OutputStream} to be written
-     * @param object Java Object to be serialized into JSON
+     * @param out the specified output stream to be written
+     * @param object the specified object will be serialized
      * @param format the specified date format
-     * @param filters specifies the filter to use in serialization
-     * @param features features to be enabled in serialization
-     * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
+     * @param filters the specified filters is applied to serialization
+     * @param features the specified features is applied to serialization
+     * @return the length of byte stream
+     * @throws JSONException If an I/O error or serialization error occurs
      */
     static int writeTo(
             OutputStream out,
@@ -2841,9 +3111,9 @@ public interface JSON {
     }
 
     /**
-     * Verify the {@link String} is JSON
+     * Verify that the json string is legal json text
      *
-     * @param text the {@link String} to validate
+     * @param text the specified string will be validated
      * @return {@code true} or {@code false}
      */
     static boolean isValid(String text) {
@@ -2860,9 +3130,9 @@ public interface JSON {
     }
 
     /**
-     * Verify the char array is JSON
+     * Verify that the json char array is legal json text
      *
-     * @param chars the {@link String} to validate
+     * @param chars the specified array will be validated
      * @return {@code true} or {@code false}
      */
     static boolean isValid(char[] chars) {
@@ -2879,9 +3149,9 @@ public interface JSON {
     }
 
     /**
-     * Verify the {@link String} is JSON Object
+     * Verify that the json string is a legal JsonObject
      *
-     * @param text the {@link String} to validate
+     * @param text the specified string will be validated
      * @return {@code true} or {@code false}
      */
     static boolean isValidObject(String text) {
@@ -2901,9 +3171,9 @@ public interface JSON {
     }
 
     /**
-     * Verify the byte array is JSON Object
+     * Verify that the json byte array is a legal JsonObject
      *
-     * @param bytes the byte array to validate
+     * @param bytes the specified array will be validated
      * @return {@code true} or {@code false}
      */
     static boolean isValidObject(byte[] bytes) {
@@ -2945,9 +3215,9 @@ public interface JSON {
     }
 
     /**
-     * Verify the byte array is JSON Object
+     * Verify that the json byte array is legal json text
      *
-     * @param bytes the byte array to validate
+     * @param bytes the specified array will be validated
      * @return {@code true} or {@code false}
      */
     static boolean isValid(byte[] bytes) {
@@ -2964,9 +3234,9 @@ public interface JSON {
     }
 
     /**
-     * Verify the byte array is JSON Array
+     * Verify that the json byte array is a legal JsonArray
      *
-     * @param bytes the byte array to validate
+     * @param bytes the specified array will be validated
      * @return {@code true} or {@code false}
      */
     static boolean isValidArray(byte[] bytes) {
@@ -2986,16 +3256,16 @@ public interface JSON {
     }
 
     /**
-     * Verify the byte array is JSON Object
+     * Verify that the json byte array is legal json text
      *
-     * @param bytes the byte array to validate
-     * @param offset the index of the first byte to validate
-     * @param length the number of bytes to validate
-     * @param charset specify {@link Charset} to validate
+     * @param bytes the specified array will be validated
+     * @param offset the starting index of array
+     * @param length the specified length of array
+     * @param charset the specified charset of the stream
      * @return {@code true} or {@code false}
      */
     static boolean isValid(byte[] bytes, int offset, int length, Charset charset) {
-        if (bytes == null || bytes.length == 0) {
+        if (bytes == null || bytes.length == 0 || length == 0) {
             return false;
         }
 
@@ -3008,20 +3278,23 @@ public interface JSON {
     }
 
     /**
-     * Convert Java object order to {@link JSONArray} or {@link JSONObject}
+     * Converts the specified object to a {@link JSONArray} or
+     * {@link JSONObject}. Returns {@code null} if received object is {@code null}
      *
-     * @param object Java Object to be converted
-     * @return Java Object
+     * @param object the specified object to be converted
+     * @return {@link JSONArray} or {@link JSONObject} or {@link null}
      */
     static Object toJSON(Object object) {
-        return toJSON(object, new JSONWriter.Feature[0]);
+        return toJSON(object, (JSONWriter.Feature[]) null);
     }
 
     /**
-     * Convert Java object order to {@link JSONArray} or {@link JSONObject}
+     * Converts the specified object to a {@link JSONArray} or
+     * {@link JSONObject}. Returns {@code null} if received object is {@code null}
      *
-     * @param object Java Object to be converted
-     * @return Java Object
+     * @param object the specified object to be converted
+     * @param features the specified features is applied to serialization
+     * @return {@link JSONArray} or {@link JSONObject} or {@link null}
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     static Object toJSON(Object object, JSONWriter.Feature... features) {
@@ -3032,7 +3305,8 @@ public interface JSON {
             return object;
         }
 
-        JSONWriter.Context writeContext = JSONFactory.createWriteContext(features);
+        JSONWriter.Context writeContext = features == null ?
+                JSONFactory.createWriteContext() : JSONFactory.createWriteContext(features);
         Class<?> valueClass = object.getClass();
         ObjectWriter<?> objectWriter = writeContext.getObjectWriter(valueClass, valueClass);
         if (objectWriter instanceof ObjectWriterAdapter && !writeContext.isEnabled(JSONWriter.Feature.ReferenceDetection)) {
@@ -3052,10 +3326,10 @@ public interface JSON {
     }
 
     /**
-     * Convert the Object to the target type
+     * Converts the specified object to an object of the specified goal type
      *
-     * @param clazz converted goal class
-     * @param object Java Object to be converted
+     * @param clazz the specified goal class
+     * @param object the specified object to be converted
      * @since 2.0.4
      */
     static <T> T to(Class<T> clazz, Object object) {
@@ -3071,10 +3345,10 @@ public interface JSON {
     }
 
     /**
-     * Convert the Object to the target type
+     * Converts the specified object to an object of the specified goal type
      *
-     * @param object Java Object to be converted
-     * @param clazz converted goal class
+     * @param clazz the specified goal class
+     * @param object the specified object to be converted
      * @deprecated since 2.0.4, please use {@link #to(Class, Object)}
      */
     static <T> T toJavaObject(Object object, Class<T> clazz) {
@@ -3237,8 +3511,9 @@ public interface JSON {
 
     /**
      * config default reader dateFormat
-     * @since 2.0.30
+     *
      * @param dateFormat
+     * @since 2.0.30
      */
     static void configReaderDateFormat(String dateFormat) {
         defaultReaderFormat = dateFormat;
@@ -3246,6 +3521,7 @@ public interface JSON {
 
     /**
      * config default reader dateFormat
+     *
      * @param dateFormat
      */
     static void configWriterDateFormat(String dateFormat) {
@@ -3290,10 +3566,10 @@ public interface JSON {
     }
 
     /**
-     * use ObjectWriter and ObjectReader copy java object
+     * Builds a new {@link T} using the properties of the specified object
      *
-     * @param object the object to be copy
-     * @param features the specified features
+     * @param object the specified object will be copied
+     * @param features the specified features is applied to serialization
      * @since 2.0.12
      */
     static <T> T copy(T object, JSONWriter.Feature... features) {
@@ -3365,11 +3641,11 @@ public interface JSON {
     }
 
     /**
-     * use ObjectWriter and ObjectReader copy java object
+     * Builds a new instance of targetClass using the properties of the specified object
      *
-     * @param object the object to be copy
-     * @param targetClass target class
-     * @param features the specified features
+     * @param object the specified object will be copied
+     * @param targetClass the specified target class
+     * @param features the specified features is applied to serialization
      * @since 2.0.16
      */
     static <T> T copyTo(Object object, Class<T> targetClass, JSONWriter.Feature... features) {
