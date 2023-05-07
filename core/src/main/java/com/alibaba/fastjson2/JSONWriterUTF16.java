@@ -2583,7 +2583,7 @@ class JSONWriterUTF16
         boolean special = false;
         for (int i = 0; i < chars.length; ++i) {
             char c = chars[i];
-            if (c == '\\' || c == quote) {
+            if (c == '\\' || c == quote || c < ' ') {
                 special = true;
                 break;
             }
