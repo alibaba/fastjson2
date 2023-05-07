@@ -154,14 +154,13 @@ class JSONReaderASCII
 
             if ((c0 = bytes[offset]) == quote) {
                 nameValue = 0;
-            } else if ((c1 = bytes[offset + 1]) == quote && c0 != 0 && c0 != '\\' && c0 <= 0xFF) {
+            } else if ((c1 = bytes[offset + 1]) == quote && c0 != 0 && c0 != '\\') {
                 nameValue = c0;
                 this.nameLength = 1;
                 this.nameEnd = offset + 1;
                 offset += 2;
             } else if ((c2 = bytes[offset + 2]) == quote && c1 != 0
                     && c0 != '\\' && c1 != '\\'
-                    && c0 <= 0xFF && c1 <= 0xFF
             ) {
                 nameValue = (c1 << 8)
                         + (c0 & 0xFF);
@@ -170,7 +169,6 @@ class JSONReaderASCII
                 offset += 3;
             } else if ((c3 = bytes[offset + 3]) == quote && c2 != 0
                     && c0 != '\\' && c1 != '\\' && c2 != '\\'
-                    && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF
             ) {
                 nameValue
                         = (c2 << 16)
@@ -181,7 +179,6 @@ class JSONReaderASCII
                 offset += 4;
             } else if ((c4 = bytes[offset + 4]) == quote && c3 != 0
                     && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\'
-                    && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF
             ) {
                 nameValue
                         = (c3 << 24)
@@ -193,7 +190,6 @@ class JSONReaderASCII
                 offset += 5;
             } else if ((c5 = bytes[offset + 5]) == quote && c4 != 0
                     && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\'
-                    && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF
             ) {
                 nameValue
                         = (((long) c4) << 32)
@@ -206,7 +202,6 @@ class JSONReaderASCII
                 offset += 6;
             } else if ((c6 = bytes[offset + 6]) == quote && c5 != 0
                     && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\' && c5 != '\\'
-                    && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF && c5 <= 0xFF
             ) {
                 nameValue
                         = (((long) c5) << 40)
@@ -220,7 +215,6 @@ class JSONReaderASCII
                 offset += 7;
             } else if ((c7 = bytes[offset + 7]) == quote && c6 != 0
                     && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\' && c5 != '\\' && c6 != '\\'
-                    && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF && c5 <= 0xFF && c6 <= 0xFF
             ) {
                 nameValue
                         = (((long) c6) << 48)
@@ -235,7 +229,6 @@ class JSONReaderASCII
                 offset += 8;
             } else if (bytes[offset + 8] == quote && c7 != 0
                     && c0 != '\\' && c1 != '\\' && c2 != '\\' && c3 != '\\' && c4 != '\\' && c5 != '\\' && c6 != '\\' && c7 != '\\'
-                    && c0 <= 0xFF && c1 <= 0xFF && c2 <= 0xFF && c3 <= 0xFF && c4 <= 0xFF && c5 <= 0xFF && c6 <= 0xFF && c7 <= 0xFF
             ) {
                 nameValue
                         = (((long) c7) << 56)

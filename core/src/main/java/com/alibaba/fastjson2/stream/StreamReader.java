@@ -141,7 +141,7 @@ public abstract class StreamReader {
             boolean nonAscii = false;
             for (int i = off; i < end; i++) {
                 char b = bytes[i];
-                if (b < 0) {
+                if (b > 0x7F) {
                     nonAscii = true;
                     break;
                 }
@@ -157,7 +157,7 @@ public abstract class StreamReader {
 
             int precision = len;
             if (TypeUtils.isNumber(bytes, off, len)) {
-                char ch = (char) bytes[off];
+                char ch = bytes[off];
                 if (ch == '+' || ch == '-') {
                     precision--;
                 }
