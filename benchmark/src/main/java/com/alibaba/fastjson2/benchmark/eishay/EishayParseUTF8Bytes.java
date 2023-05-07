@@ -18,7 +18,6 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 public class EishayParseUTF8Bytes {
@@ -60,7 +59,7 @@ public class EishayParseUTF8Bytes {
         bh.consume(gson
                 .fromJson(
                         new String(utf8Bytes, 0, utf8Bytes.length, StandardCharsets.UTF_8),
-                        HashMap.class)
+                        MediaContent.class)
         );
     }
 
