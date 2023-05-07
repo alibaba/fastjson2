@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2.primitves;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
@@ -72,5 +74,20 @@ public class LongValueArrayField1Test {
                 assertEquals(0, vo.values[0]);
             }
         }
+    }
+
+    @Test
+    public void test_write_0() throws Exception {
+        LongValueArrayField1 bean = new LongValueArrayField1();
+        bean.values = new long[] {101, 102, 103};
+        assertEquals("{\"values\":[101,102,103]}", JSON.toJSONString(bean));
+        assertEquals("{\"values\":[101,102,103]}", new String(JSON.toJSONBytes(bean)));
+
+        assertEquals("{\n" +
+                "\t\"values\":[101,102,103]\n" +
+                "}", JSON.toJSONString(bean, JSONWriter.Feature.PrettyFormat));
+        assertEquals("{\n" +
+                "\t\"values\":[101,102,103]\n" +
+                "}", new String(JSON.toJSONBytes(bean, JSONWriter.Feature.PrettyFormat)));
     }
 }

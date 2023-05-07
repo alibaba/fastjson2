@@ -898,20 +898,7 @@ public abstract class JSONWriter
         writeInt32(value);
     }
 
-    public void writeInt32(int[] value) {
-        if (value == null) {
-            writeNull();
-            return;
-        }
-        startArray();
-        for (int i = 0; i < value.length; i++) {
-            if (i != 0) {
-                writeComma();
-            }
-            writeInt32(value[i]);
-        }
-        endArray();
-    }
+    public abstract void writeInt32(int[] value);
 
     public abstract void writeInt32(int value);
 
@@ -921,20 +908,7 @@ public abstract class JSONWriter
         writeInt64(i);
     }
 
-    public void writeInt64(long[] value) {
-        if (value == null) {
-            writeNull();
-            return;
-        }
-        startArray();
-        for (int i = 0; i < value.length; i++) {
-            if (i != 0) {
-                writeComma();
-            }
-            writeInt64(value[i]);
-        }
-        endArray();
-    }
+    public abstract void writeInt64(long[] value);
 
     public abstract void writeFloat(float value);
 
@@ -1208,7 +1182,7 @@ public abstract class JSONWriter
     }
 
     public abstract void writeString(String str);
-    public abstract void writeStringLatin1(byte[] value);
+    protected abstract void writeStringLatin1(byte[] value);
 
     public void writeString(List<String> list) {
         startArray();

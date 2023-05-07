@@ -772,10 +772,7 @@ public abstract class JSONReader
         return getBigInteger();
     }
 
-    public BigDecimal readBigDecimal() {
-        readNumber0();
-        return getBigDecimal();
-    }
+    public abstract BigDecimal readBigDecimal();
 
     public abstract UUID readUUID();
 

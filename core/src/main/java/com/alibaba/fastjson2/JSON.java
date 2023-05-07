@@ -2716,6 +2716,32 @@ public interface JSON {
     }
 
     /**
+     * Serialize Java Object to JSON and write to {@link OutputStream}
+     *
+     * @param out {@link OutputStream} to be written
+     * @param object Java Object to be serialized into JSON
+     * @throws JSONException if an I/O error occurs. In particular, a {@link JSONException} may be thrown if the output stream has been closed
+     */
+    static int writeTo(OutputStream out, Object object) {
+        try (JSONWriter writer = JSONWriter.ofUTF8()) {
+            if (object == null) {
+                writer.writeNull();
+            } else {
+                writer.rootObject = object;
+                writer.path = JSONWriter.Path.ROOT;
+
+                Class<?> valueClass = object.getClass();
+                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                objectWriter.write(writer, object, null, null, 0);
+            }
+
+            return writer.flushTo(out);
+        } catch (Exception e) {
+            throw new JSONException(e.getMessage(), e);
+        }
+    }
+
+    /**
      * Serialize Java Object to JSON and write to {@link OutputStream} with specified {@link JSONReader.Feature}s enabled
      *
      * @param out {@link OutputStream} to be written

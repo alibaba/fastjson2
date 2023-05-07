@@ -302,7 +302,7 @@ final class JSONWriterUTF8Vector
     }
 
     @Override
-    public void writeStringLatin1(byte[] value) {
+    protected void writeStringLatin1(byte[] value) {
         if (value == null) {
             if (isEnabled(JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) {
                 writeString("");

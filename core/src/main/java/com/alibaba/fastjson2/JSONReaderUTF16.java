@@ -8,6 +8,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.*;
 import java.util.*;
@@ -4621,6 +4622,11 @@ class JSONReaderUTF16
                 }
             }
         }
+    }
+
+    public final BigDecimal readBigDecimal() {
+        readNumber0();
+        return getBigDecimal();
     }
 
     @Override
