@@ -156,6 +156,14 @@ final class ObjectWriterImplCollection
             Object item = it.next();
             if (item == null) {
                 jsonWriter.writeNull();
+                i++;
+                continue;
+            }
+            
+            Class<?> itemClass = item.getClass();
+            ObjectWriter itemObjectWriter;
+            if (itemClass == previousClass) {
+                itemObjectWriter = previousObjectWriter;
             } else {
                 Class<?> itemClass = item.getClass();
                 ObjectWriter itemObjectWriter;
