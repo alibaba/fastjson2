@@ -11,10 +11,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
-final class ObjectReaderImplInt32ValueArray
+public final class ObjectReaderImplInt32ValueArray
         extends ObjectReaderPrimitive {
     static final ObjectReaderImplInt32ValueArray INSTANCE = new ObjectReaderImplInt32ValueArray(int[].class, null);
-    static final long HASH_TYPE = Fnv.hashCode64("[I");
+    public static final long HASH_TYPE = Fnv.hashCode64("[I");
 
     final Function<int[], Object> builder;
 

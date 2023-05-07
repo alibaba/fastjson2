@@ -16,6 +16,7 @@ import java.lang.reflect.*;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.*;
@@ -2036,6 +2037,9 @@ public class ObjectReaderCreatorASM
         } else if (fieldClass == UUID.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readUUID", "()Ljava/util/UUID;", false);
+        } else if (fieldClass == LocalDate.class && fieldReader.format == null) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readLocalDate", "()Ljava/time/LocalDate;", false);
         } else {
             Label endObject_ = new Label();
 
@@ -2404,55 +2408,63 @@ public class ObjectReaderCreatorASM
 
                 mw.visitLabel(valueNotNull_);
 
-                // object.<setMethod>(this.objectReader_<i>.readObject(jsonReader))
-                Label notNull_ = new Label();
+                if (fieldClass == String[].class) {
+                    mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readStringArray", "()[Ljava/lang/String;", false);
+                } else if (fieldClass == long[].class) {
+                    mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readInt64ValueArray", "()[J", false);
+                } else {
+                    // object.<setMethod>(this.objectReader_<i>.readObject(jsonReader))
+                    Label notNull_ = new Label();
 
-                mw.visitVarInsn(Opcodes.ALOAD, THIS);
-                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, FIELD_OBJECT_READER, DESC_OBJECT_READER);
-                mw.visitJumpInsn(Opcodes.IFNONNULL, notNull_);
+                    mw.visitVarInsn(Opcodes.ALOAD, THIS);
+                    mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, FIELD_OBJECT_READER, DESC_OBJECT_READER);
+                    mw.visitJumpInsn(Opcodes.IFNONNULL, notNull_);
 
-                mw.visitVarInsn(Opcodes.ALOAD, THIS);
-                mw.visitVarInsn(Opcodes.ALOAD, THIS);
-                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
-                mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_READE, "getObjectReader", METHOD_DESC_GET_OBJECT_READER_1, false);
-                mw.visitFieldInsn(PUTFIELD, classNameType, FIELD_OBJECT_READER, DESC_OBJECT_READER);
+                    mw.visitVarInsn(Opcodes.ALOAD, THIS);
+                    mw.visitVarInsn(Opcodes.ALOAD, THIS);
+                    mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
+                    mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_READE, "getObjectReader", METHOD_DESC_GET_OBJECT_READER_1, false);
+                    mw.visitFieldInsn(PUTFIELD, classNameType, FIELD_OBJECT_READER, DESC_OBJECT_READER);
 
-                mw.visitLabel(notNull_);
-                mw.visitVarInsn(Opcodes.ALOAD, THIS);
-                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, FIELD_OBJECT_READER, DESC_OBJECT_READER);
+                    mw.visitLabel(notNull_);
+                    mw.visitVarInsn(Opcodes.ALOAD, THIS);
+                    mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, FIELD_OBJECT_READER, DESC_OBJECT_READER);
 
-                mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                gwGetFieldType(classNameType, mw, THIS, i, fieldType);
-                mw.visitLdcInsn(fieldReader.fieldName);
-                mw.visitLdcInsn(fieldFeatures);
-                mw.visitMethodInsn(Opcodes.INVOKEINTERFACE,
-                        TYPE_OBJECT_READER,
-                        jsonb ? "readJSONBObject" : "readObject",
-                        METHOD_DESC_READ_OBJECT,
-                        true);
+                    mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                    gwGetFieldType(classNameType, mw, THIS, i, fieldType);
+                    mw.visitLdcInsn(fieldReader.fieldName);
+                    mw.visitLdcInsn(fieldFeatures);
+                    mw.visitMethodInsn(Opcodes.INVOKEINTERFACE,
+                            TYPE_OBJECT_READER,
+                            jsonb ? "readJSONBObject" : "readObject",
+                            METHOD_DESC_READ_OBJECT,
+                            true);
 
-                if (method != null || (Modifier.isPublic(objectClass.getModifiers())
-                        && Modifier.isPublic(fieldModifier)
-                        && !Modifier.isFinal(fieldModifier)
-                        && !classLoader.isExternalClass(objectClass))
-                ) {
-                    mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_FIELD_CLASS); // cast
-                }
+                    if (method != null || (Modifier.isPublic(objectClass.getModifiers())
+                            && Modifier.isPublic(fieldModifier)
+                            && !Modifier.isFinal(fieldModifier)
+                            && !classLoader.isExternalClass(objectClass))
+                    ) {
+                        mw.visitTypeInsn(Opcodes.CHECKCAST, TYPE_FIELD_CLASS); // cast
+                    }
 
-                if (fieldReader.noneStaticMemberClass) {
-                    try {
-                        Field this0 = fieldClass.getDeclaredField("this$0");
-                        long fieldOffset = UnsafeUtils.objectFieldOffset(this0);
+                    if (fieldReader.noneStaticMemberClass) {
+                        try {
+                            Field this0 = fieldClass.getDeclaredField("this$0");
+                            long fieldOffset = UnsafeUtils.objectFieldOffset(this0);
 
-                        mw.visitInsn(Opcodes.DUP);
-                        mw.visitFieldInsn(Opcodes.GETSTATIC, TYPE_UNSAFE_UTILS, "UNSAFE", "Lsun/misc/Unsafe;");
-                        mw.visitInsn(Opcodes.SWAP);
-                        mw.visitLdcInsn(fieldOffset);
-                        mw.visitVarInsn(ALOAD, OBJECT);
-                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "sun/misc/Unsafe", "putObject", "(Ljava/lang/Object;JLjava/lang/Object;)V", false);
-                    } catch (NoSuchFieldException e) {
-                        // ignored
+                            mw.visitInsn(Opcodes.DUP);
+                            mw.visitFieldInsn(Opcodes.GETSTATIC, TYPE_UNSAFE_UTILS, "UNSAFE", "Lsun/misc/Unsafe;");
+                            mw.visitInsn(Opcodes.SWAP);
+                            mw.visitLdcInsn(fieldOffset);
+                            mw.visitVarInsn(ALOAD, OBJECT);
+                            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "sun/misc/Unsafe", "putObject", "(Ljava/lang/Object;JLjava/lang/Object;)V", false);
+                        } catch (NoSuchFieldException e) {
+                            // ignored
+                        }
                     }
                 }
             }

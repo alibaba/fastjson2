@@ -38,7 +38,6 @@ final class ObjectReaderImplOffsetDateTime
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         JSONReader.Context context = jsonReader.getContext();
 
-        ZoneId zoneId = context.getZoneId();
         if (jsonReader.isInt()) {
             long millis = jsonReader.readInt64Value();
             if (formatUnixTime) {
@@ -46,6 +45,7 @@ final class ObjectReaderImplOffsetDateTime
             }
 
             Instant instant = Instant.ofEpochMilli(millis);
+            ZoneId zoneId = context.getZoneId();
             LocalDateTime ldt = LocalDateTime.ofInstant(instant, zoneId);
             return OffsetDateTime.of(ldt, zoneId.getRules().getOffset(instant));
         }
@@ -60,7 +60,7 @@ final class ObjectReaderImplOffsetDateTime
         }
 
         String str = jsonReader.readString();
-
+        ZoneId zoneId = context.getZoneId();
         if (formatMillis || formatUnixTime) {
             long millis = Long.parseLong(str);
             if (formatUnixTime) {

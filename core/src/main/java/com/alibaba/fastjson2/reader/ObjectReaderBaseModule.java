@@ -1769,6 +1769,10 @@ public class ObjectReaderBaseModule
             return ObjectReaderImplNumberArray.INSTANCE;
         }
 
+        if (type == String[].class) {
+            return ObjectReaderImplStringArray.INSTANCE;
+        }
+
         if (type == AtomicInteger.class) {
             return new ObjectReaderImplFromInt(AtomicInteger.class, AtomicInteger::new);
         }
@@ -1905,7 +1909,8 @@ public class ObjectReaderBaseModule
             }
 
             if (objectClass.isArray()) {
-                if (objectClass.getComponentType() == Object.class) {
+                Class componentType = objectClass.getComponentType();
+                if (componentType == Object.class) {
                     return ObjectArrayReader.INSTANCE;
                 }
                 return new ObjectArrayTypedReader(objectClass);
