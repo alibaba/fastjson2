@@ -1848,6 +1848,14 @@ public class TypeUtils {
                 break;
         }
 
+        int index = typeName.indexOf('$');
+        if (index != -1 && TypeUtils.isInteger(typeName.substring(index + 1))) {
+            Class superclass = type.getSuperclass();
+            if (Map.class.isAssignableFrom(superclass)) {
+                return getTypeName(superclass);
+            }
+        }
+
         return typeName;
     }
 

@@ -5,6 +5,9 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -200,5 +203,17 @@ public class Dubbo12209 {
         double[] array = {123D};
         double[] values = JSONB.parseObject(JSONB.toBytes(array, writerFeatures), double[].class, readerFeatures);
         assertArrayEquals(array, values);
+    }
+
+    @Test
+    public void testMap() {
+        HashMap obj = new HashMap<String, Object>() {
+            {
+                put("a", "a");
+            }
+        };
+        Map parsed = JSONB.parseObject(JSONB.toBytes(obj, writerFeatures), HashMap.class, readerFeatures);
+        assertEquals(obj.size(), parsed.size());
+        assertEquals(obj.get("a"), parsed.get("a"));
     }
 }
