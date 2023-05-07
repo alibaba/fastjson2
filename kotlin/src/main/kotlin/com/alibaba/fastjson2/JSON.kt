@@ -497,7 +497,7 @@ inline fun <reified T> String?.parseArray() =
 /**
  * Parses the json string as a list of [T] with the specified features
  *
- * @param features the specified consumer is applied to parsing
+ * @param features the specified features is applied to parsing
  * @return [List]?
  * @since 2.0.3
  */
@@ -510,7 +510,7 @@ inline fun <reified T> String?.parseArray(
 /**
  * Parses the json byte array as a list of [T] with the specified features
  *
- * @param features the specified consumer is applied to parsing
+ * @param features the specified features is applied to parsing
  * @return [List]?
  * @since 2.0.3
  */
@@ -539,7 +539,7 @@ inline fun Any?.toJSONString() =
 /**
  * Serializes this object to the json string with the specified filters
  *
- * @param filters the specified filters is applied to parsing
+ * @param filters the specified filters is applied to serialization
  * @return [String]
  * @since 2.0.3
  */
@@ -552,7 +552,7 @@ inline fun Any?.toJSONString(
 /**
  * Serializes this object to the json string with the specified features
  *
- * @param features the specified features is applied to parsing
+ * @param features the specified features is applied to serialization
  * @return [String]
  * @since 2.0.3
  */
@@ -565,8 +565,8 @@ inline fun Any?.toJSONString(
 /**
  * Serializes this object to the json string with the specified filter and features
  *
- * @param filter the specified filter is applied to parsing
- * @param features the specified features is applied to parsing
+ * @param filter the specified filter is applied to serialization
+ * @param features the specified features is applied to serialization
  * @return [String]
  * @since 2.0.3
  */
@@ -580,8 +580,8 @@ inline fun Any?.toJSONString(
 /**
  * Serializes this object to the json string with the specified filters and features
  *
- * @param filters the specified filters is applied to parsing
- * @param features the specified features is applied to parsing
+ * @param filters the specified filters is applied to serialization
+ * @param features the specified features is applied to serialization
  * @return [String]
  * @since 2.0.3
  */
@@ -611,7 +611,7 @@ inline fun Any?.toJSONByteArray() =
 /**
  * Serializes this object to the json byte array with the specified filters
  *
- * @param filters the specified filters is applied to parsing
+ * @param filters the specified filters is applied to serialization
  * @return [ByteArray]
  * @since 2.0.3
  */
@@ -624,7 +624,7 @@ inline fun Any?.toJSONByteArray(
 /**
  * Serializes this object to the json byte array with the specified features
  *
- * @param features the specified features is applied to parsing
+ * @param features the specified features is applied to serialization
  * @return [ByteArray]
  * @since 2.0.3
  */
@@ -637,8 +637,8 @@ inline fun Any?.toJSONByteArray(
 /**
  * Serializes this object to the json byte array with the specified filters and features
  *
- * @param filters the specified filters is applied to parsing
- * @param features the specified features is applied to parsing
+ * @param filters the specified filters is applied to serialization
+ * @param features the specified features is applied to serialization
  * @return [ByteArray]
  * @since 2.0.3
  */
