@@ -3169,7 +3169,7 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(String str, Context context) {
-        if (str == null) {
+        if (str == null || context == null) {
             throw new NullPointerException();
         }
 
@@ -3253,7 +3253,7 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(String str, int offset, int length, Context context) {
-        if (str == null) {
+        if (str == null || context == null) {
             throw new NullPointerException();
         }
 
