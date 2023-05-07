@@ -3281,7 +3281,7 @@ public interface JSON {
      * {@link JSONObject}. Returns {@code null} if received object is {@code null}
      *
      * @param object the specified object to be converted
-     * @return {@link JSONArray} or {@link JSONObject} or {@link null}
+     * @return {@link JSONArray} or {@link JSONObject} or {@code null}
      */
     static Object toJSON(Object object) {
         return toJSON(object, (JSONWriter.Feature[]) null);
@@ -3293,7 +3293,7 @@ public interface JSON {
      *
      * @param object the specified object to be converted
      * @param features the specified features is applied to serialization
-     * @return {@link JSONArray} or {@link JSONObject} or {@link null}
+     * @return {@link JSONArray} or {@link JSONObject} or {@code null}
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     static Object toJSON(Object object, JSONWriter.Feature... features) {
