@@ -37,7 +37,6 @@ public abstract class JSONReader
     static final int MAX_EXP = 1023;
     static final long SHANGHAI_ZONE_ID_HASH = Fnv.hashCode64("Asia/Shanghai");
     static final long LONG_MASK = 0XFFFFFFFFL;
-    static final int MAX_LEVEL = 2048;
 
     static final byte JSON_TYPE_INT = 1;
     static final byte JSON_TYPE_DEC = 2;
@@ -674,6 +673,59 @@ public abstract class JSONReader
             default:
                 throw new JSONException("TODO");
         }
+    }
+
+    public long[] readInt64ValueArray() {
+        if (nextIfNull()) {
+            return null;
+        }
+
+        if (nextIfMatch('[')) {
+            long[] values = new long[8];
+            int size = 0;
+            for (; ; ) {
+                if (nextIfMatch(']')) {
+                    break;
+                }
+
+                if (isEnd()) {
+                    throw new JSONException(info("input end"));
+                }
+
+                int minCapacity = size + 1;
+                if (minCapacity - values.length > 0) {
+                    int oldCapacity = values.length;
+                    int newCapacity = oldCapacity + (oldCapacity >> 1);
+                    if (newCapacity - minCapacity < 0) {
+                        newCapacity = minCapacity;
+                    }
+
+                    values = Arrays.copyOf(values, newCapacity);
+                }
+
+                values[size++] = readInt64Value();
+            }
+            nextIfMatch(',');
+
+            long[] array;
+            if (size == values.length) {
+                array = values;
+            } else {
+                array = Arrays.copyOf(values, size);
+            }
+            return array;
+        }
+
+        if (isString()) {
+            String str = readString();
+            if (str.isEmpty()) {
+                return null;
+            }
+
+            throw new JSONException(info("not support input " + str));
+        }
+
+        throw new JSONException(info("TODO"));
     }
 
     public abstract long readInt64Value();
@@ -1417,6 +1469,63 @@ public abstract class JSONReader
     protected abstract void readNumber0();
 
     public abstract String readString();
+
+    public String[] readStringArray() {
+        if (readIfNull()) {
+            return null;
+        }
+
+        if (nextIfMatch('[')) {
+            String[] values = null;
+            int size = 0;
+            for (; ; ) {
+                if (nextIfMatch(']')) {
+                    if (values == null) {
+                        values = new String[0];
+                    }
+                    break;
+                }
+
+                if (isEnd()) {
+                    throw new JSONException(info("input end"));
+                }
+
+                if (values == null) {
+                    values = new String[16];
+                } else {
+                    int minCapacity = size + 1;
+                    if (minCapacity - values.length > 0) {
+                        int oldCapacity = values.length;
+                        int newCapacity = oldCapacity + (oldCapacity >> 1);
+                        if (newCapacity - minCapacity < 0) {
+                            newCapacity = minCapacity;
+                        }
+
+                        values = Arrays.copyOf(values, newCapacity);
+                    }
+                }
+
+                values[size++] = readString();
+            }
+            nextIfMatch(',');
+
+            if (values.length == size) {
+                return values;
+            }
+            return Arrays.copyOf(values, size);
+        }
+
+        if (isString()) {
+            String str = readString();
+            if (str.isEmpty()) {
+                return null;
+            }
+
+            throw new JSONException(info("not support input " + str));
+        }
+
+        throw new JSONException(info("TODO"));
+    }
 
     public char readCharValue() {
         String str = readString();

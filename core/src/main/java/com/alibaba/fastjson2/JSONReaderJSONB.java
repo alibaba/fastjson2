@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.IOException;
@@ -3230,6 +3229,25 @@ class JSONReaderJSONB
         return str;
     }
 
+    public final String[] readStringArray() {
+        if (nextIfMatch(BC_TYPED_ANY)) {
+            long typeHash = readTypeHashCode();
+            if (typeHash != ObjectReaderImplStringArray.HASH_TYPE) {
+                throw new JSONException(info("not support type " + getString()));
+            }
+        }
+
+        int entryCnt = startArray();
+        if (entryCnt == -1) {
+            return null;
+        }
+        String[] array = new String[entryCnt];
+        for (int i = 0; i < entryCnt; i++) {
+            array[i] = readString();
+        }
+        return array;
+    }
+
     @Override
     public final char readCharValue() {
         byte type = bytes[offset];
@@ -3249,6 +3267,30 @@ class JSONReaderJSONB
             return '\0';
         }
         return str.charAt(0);
+    }
+
+    public long[] readInt64ValueArray() {
+        if (nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
+            long typeHash = readTypeHashCode();
+            if (typeHash != ObjectReaderImplInt64ValueArray.HASH_TYPE
+                    && typeHash != ObjectReaderImplInt64Array.HASH_TYPE
+                    && typeHash != ObjectReaderImplInt32Array.HASH_TYPE
+                    && typeHash != ObjectReaderImplInt32ValueArray.HASH_TYPE
+            ) {
+                throw new JSONException(info("not support " + getString()));
+            }
+        }
+
+        int entryCnt = startArray();
+        if (entryCnt == -1) {
+            return null;
+        }
+
+        long[] array = new long[entryCnt];
+        for (int i = 0; i < entryCnt; i++) {
+            array[i] = readInt64Value();
+        }
+        return array;
     }
 
     @Override

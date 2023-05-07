@@ -12,10 +12,10 @@ import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
 
-final class ObjectReaderImplInt64Array
+public final class ObjectReaderImplInt64Array
         extends ObjectReaderPrimitive {
     static final ObjectReaderImplInt64Array INSTANCE = new ObjectReaderImplInt64Array();
-    static final long HASH_TYPE = Fnv.hashCode64("[Long");
+    public static final long HASH_TYPE = Fnv.hashCode64("[Long");
 
     ObjectReaderImplInt64Array() {
         super(Long[].class);
