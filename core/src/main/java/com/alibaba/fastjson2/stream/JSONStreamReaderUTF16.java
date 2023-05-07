@@ -38,13 +38,6 @@ public class JSONStreamReaderUTF16
                     return false;
                 }
                 this.end = cnt;
-
-                if (end > 3) {
-                    if (buf[0] == -17 && buf[1] == -69 && buf[2] == -65) {
-                        off = 3;
-                        lineNextStart = off;
-                    }
-                }
             }
         }
 
