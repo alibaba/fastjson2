@@ -31,6 +31,7 @@ public final class ObjectReaderImplMap
 
     final Type fieldType;
     final Class mapType;
+    final long mapTypeHash;
     final Class instanceType;
     final long features;
     final Function builder;
@@ -161,6 +162,7 @@ public final class ObjectReaderImplMap
     ObjectReaderImplMap(Type fieldType, Class mapType, Class instanceType, long features, Function builder) {
         this.fieldType = fieldType;
         this.mapType = mapType;
+        this.mapTypeHash = Fnv.hashCode64(TypeUtils.getTypeName(mapType));
         this.instanceType = instanceType;
         this.features = features;
         this.builder = builder;
@@ -256,7 +258,7 @@ public final class ObjectReaderImplMap
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName1, long features) {
-        ObjectReader objectReader = jsonReader.checkAutoType(mapType, 0, this.features | features);
+        ObjectReader objectReader = jsonReader.checkAutoType(mapType, mapTypeHash, this.features | features);
         if (objectReader != null && objectReader != this) {
             return objectReader.readJSONBObject(jsonReader, fieldType, fieldName1, features);
         }
