@@ -159,14 +159,12 @@ final class ObjectWriterImplCollection
                 i++;
                 continue;
             }
-            
+
             Class<?> itemClass = item.getClass();
             ObjectWriter itemObjectWriter;
             if (itemClass == previousClass) {
                 itemObjectWriter = previousObjectWriter;
             } else {
-                Class<?> itemClass = item.getClass();
-                ObjectWriter itemObjectWriter;
                 if (itemClass == previousClass) {
                     itemObjectWriter = previousObjectWriter;
                 } else {
