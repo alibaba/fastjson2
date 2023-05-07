@@ -2817,7 +2817,6 @@ public interface JSON {
         }
     }
 
-
     /**
      * Serializes the specified object to the json byte array
      *
