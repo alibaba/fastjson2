@@ -146,7 +146,7 @@ class JSONWriterUTF16
         chars[off++] = ']';
     }
 
-    public void writeStringLatin1(byte[] value) {
+    protected void writeStringLatin1(byte[] value) {
         if (value == null) {
             writeStringNull();
             return;
@@ -1255,6 +1255,33 @@ class JSONWriterUTF16
         }
     }
 
+    public final void writeInt32(int[] value) {
+        if (value == null) {
+            writeNull();
+            return;
+        }
+
+        if (off == chars.length) {
+            ensureCapacity(off + 1);
+        }
+        chars[off++] = '[';
+
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                if (off == chars.length) {
+                    ensureCapacity(off + 1);
+                }
+                chars[off++] = ',';
+            }
+            writeInt32(value[i]);
+        }
+
+        if (off == chars.length) {
+            ensureCapacity(off + 1);
+        }
+        chars[off++] = ']';
+    }
+
     @Override
     public final void writeInt32(int i) {
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
@@ -1341,6 +1368,32 @@ class JSONWriterUTF16
         if (writeAsString) {
             buffer[off++] = '"';
         }
+    }
+
+    public final void writeInt64(long[] value) {
+        if (value == null) {
+            writeNull();
+            return;
+        }
+
+        if (off == chars.length) {
+            ensureCapacity(off + 1);
+        }
+        chars[off++] = '[';
+
+        for (int i = 0; i < value.length; i++) {
+            if (i != 0) {
+                if (off == chars.length) {
+                    ensureCapacity(off + 1);
+                }
+                chars[off++] = ',';
+            }
+            writeInt64(value[i]);
+        }
+        if (off == chars.length) {
+            ensureCapacity(off + 1);
+        }
+        chars[off++] = (byte) ']';
     }
 
     @Override

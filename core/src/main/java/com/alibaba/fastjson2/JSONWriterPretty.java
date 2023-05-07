@@ -35,6 +35,10 @@ final class JSONWriterPretty
         jsonWriter.close();
     }
 
+    public void writeInt32(int[] value) {
+        jsonWriter.writeInt32(value);
+    }
+
     @Override
     public void writeInt32(int value) {
         jsonWriter.writeInt32(value);
@@ -43,6 +47,10 @@ final class JSONWriterPretty
     @Override
     public void writeInt64(long i) {
         jsonWriter.writeInt64(i);
+    }
+
+    public void writeInt64(long[] value) {
+        jsonWriter.writeInt64(value);
     }
 
     @Override
@@ -76,7 +84,7 @@ final class JSONWriterPretty
     }
 
     @Override
-    public void writeStringLatin1(byte[] str) {
+    protected void writeStringLatin1(byte[] str) {
         jsonWriter.writeStringLatin1(str);
     }
 

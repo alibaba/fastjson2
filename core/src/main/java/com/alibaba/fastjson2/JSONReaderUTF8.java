@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.util.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -5103,6 +5104,11 @@ class JSONReaderUTF8
             next();
         }
         return ldt;
+    }
+
+    public final BigDecimal readBigDecimal() {
+        readNumber0();
+        return getBigDecimal();
     }
 
     @Override

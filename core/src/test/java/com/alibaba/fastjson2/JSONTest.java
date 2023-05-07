@@ -669,6 +669,13 @@ public class JSONTest {
         assertEquals("[1]",
                 new String(out.toByteArray()));
     }
+    @Test
+    public void test_writeTo_0_f() {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        JSON.writeTo(out, Collections.singleton(1), JSONWriter.Feature.WriteNulls);
+        assertEquals("[1]",
+                new String(out.toByteArray()));
+    }
 
     @Test
     public void test_writeTo_1() {
@@ -1020,6 +1027,8 @@ public class JSONTest {
             };
             assertThrows(JSONException.class, () ->
                     JSON.writeTo(out, JSONObject.of("id", 123)));
+            assertThrows(JSONException.class, () ->
+                    JSON.writeTo(out, JSONObject.of("id", 123), JSONWriter.Feature.PrettyFormat));
         }
         {
             ByteArrayOutputStream out = new ByteArrayOutputStream();

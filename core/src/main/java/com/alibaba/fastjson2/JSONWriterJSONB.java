@@ -214,7 +214,7 @@ final class JSONWriterJSONB
         writeString(new String(chars, off, len));
     }
 
-    public void writeStringLatin1(final byte[] str) {
+    protected void writeStringLatin1(final byte[] str) {
         if (str == null) {
             writeStringNull();
             return;
