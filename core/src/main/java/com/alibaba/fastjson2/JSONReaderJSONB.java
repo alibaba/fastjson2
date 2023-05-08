@@ -283,7 +283,12 @@ class JSONReaderJSONB
                     break;
                 }
 
-                String name = readFieldName();
+                Object name;
+                if (isString()) {
+                    name = readFieldName();
+                } else {
+                    name = readAny();
+                }
 
                 if (offset < bytes.length && bytes[offset] == BC_REFERENCE) {
                     String reference = readReference();
