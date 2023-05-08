@@ -14,28 +14,34 @@ import java.io.Serializable;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class Issue1450 {
-    public interface Bean<K extends Serializable> extends Serializable {
+    public interface Bean<K extends Serializable>
+            extends Serializable {
         K getId();
     }
 
-    public interface Member extends Bean<Long> {
+    public interface Member
+            extends Bean<Long> {
     }
 
     @Getter
     @Setter
-    public static class AbstractEntity implements Bean<Long> {
+    public static class AbstractEntity
+            implements Bean<Long> {
         protected Long id;
     }
 
     @Getter
     @Setter
-    public static class AbstractMember extends AbstractEntity implements Member {
+    public static class AbstractMember
+            extends AbstractEntity
+            implements Member {
         protected String name;
     }
 
     @Getter
     @Setter
-    public static class Student extends AbstractMember {
+    public static class Student
+            extends AbstractMember {
         Integer age;
     }
 
