@@ -500,6 +500,11 @@ class JSONReaderUTF16
             this.ch = chars[offset];
         }
         offset++;
+
+        while (this.ch == '/' && offset < chars.length && chars[offset] == '/') {
+            skipLineComment();
+        }
+
         return true;
     }
 
@@ -790,6 +795,10 @@ class JSONReaderUTF16
             ch = chars[offset];
         }
         offset++;
+
+        while (ch == '/' && offset < chars.length && chars[offset] == '/') {
+            skipLineComment();
+        }
     }
 
     @Override
@@ -1040,6 +1049,10 @@ class JSONReaderUTF16
 
     @Override
     public final long readFieldNameHashCode() {
+        while (ch == '/' && offset < chars.length && chars[offset] == '/') {
+            skipLineComment();
+        }
+
         if (ch != '"' && ch != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameHashCodeUnquote();

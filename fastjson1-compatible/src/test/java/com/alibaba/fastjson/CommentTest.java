@@ -1,8 +1,5 @@
-package com.alibaba.fastjson2.read;
+package com.alibaba.fastjson;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -19,15 +16,12 @@ public class CommentTest {
     @Test
     public void test1() {
         String str = "[\n" +
-                "//aaaa\n" +
+                "// aaaa\n" +
                 "1,\n" +
                 "2\n" +
                 "]";
         JSONArray array = JSON.parseArray(str);
         assertEquals("[1,2]", array.toString());
-
-        JSONArray array2 = JSON.parseArray(str.getBytes());
-        assertEquals("[1,2]", array2.toString());
     }
 
     @Test
@@ -44,11 +38,14 @@ public class CommentTest {
     @Test
     public void test3() {
         String str = "[\n" +
-                "//aaaa\n" +
-                "{\"id\":123}\n" +
+                "  //�1�7�1�7�1�7�0�7�1�7�1�7�1�7: " +
+                " // aaaa\n" +
+                "{\"id\":101},\n" +
+                " // aaaa\n" +
+                "{\"id\":102}\n" +
                 "]";
         List<Bean3> array = JSON.parseArray(str, Bean3.class);
-        assertEquals("[{\"id\":123}]", JSON.toJSONString(array));
+        assertEquals("[{\"id\":101},{\"id\":102}]", JSON.toJSONString(array));
     }
 
     public static class Bean3 {
