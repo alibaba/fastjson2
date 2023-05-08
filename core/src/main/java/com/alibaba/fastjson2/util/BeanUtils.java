@@ -1631,7 +1631,12 @@ public abstract class BeanUtils {
             if (declaringClass == raw) {
                 return resolve(type, declaringClass, fieldType);
             }
-            typeReference = TypeReference.get(resolve(type, raw, raw.getGenericSuperclass()));
+            Type superType = raw.getGenericSuperclass();
+            // interface has no generic super class
+            if (superType == null) {
+                break;
+            }
+            typeReference = TypeReference.get(resolve(type, raw, superType));
             raw = typeReference.getRawType();
         }
         return null;
