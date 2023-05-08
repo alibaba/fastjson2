@@ -35,7 +35,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Supplier;
 
-public abstract class JSON {
+public abstract class JSON
+        implements JSONAware {
     private static TimeZone DEFAULT_TIME_ZONE = TimeZone.getDefault();
     public static final String VERSION = com.alibaba.fastjson2.JSON.VERSION;
     static final Cache CACHE = new Cache();

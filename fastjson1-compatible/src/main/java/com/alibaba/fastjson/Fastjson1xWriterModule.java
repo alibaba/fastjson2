@@ -17,7 +17,11 @@ public class Fastjson1xWriterModule
 
     @Override
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass) {
-        if (objectClass != null && JSONAware.class.isAssignableFrom(objectClass)) {
+        if (objectClass != null
+                && JSONAware.class.isAssignableFrom(objectClass)
+                && JSONArray.class != objectClass
+                && JSONObject.class != objectClass
+        ) {
             return JSONAwareWriter.INSTANCE;
         }
 
