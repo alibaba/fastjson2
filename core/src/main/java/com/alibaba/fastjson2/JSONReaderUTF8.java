@@ -198,6 +198,11 @@ class JSONReaderUTF8
                 /* 10xx xxxx,  1111 xxxx */
                 throw new JSONException("malformed input around byte " + offset);
         }
+
+        while (this.ch == '/' && offset < bytes.length && bytes[offset] == '/') {
+            skipLineComment();
+        }
+
         return true;
     }
 
@@ -309,6 +314,10 @@ class JSONReaderUTF8
             default:
                 /* 10xx xxxx,  1111 xxxx */
                 throw new JSONException("malformed input around byte " + offset);
+        }
+
+        while (ch == '/' && offset < bytes.length && bytes[offset] == '/') {
+            skipLineComment();
         }
     }
 
@@ -561,6 +570,10 @@ class JSONReaderUTF8
 
     @Override
     public long readFieldNameHashCode() {
+        while (ch == '/' && offset < bytes.length && bytes[offset] == '/') {
+            skipLineComment();
+        }
+
         if (ch != '"' && ch != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameHashCodeUnquote();

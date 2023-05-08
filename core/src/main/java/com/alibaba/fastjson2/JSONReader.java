@@ -2066,6 +2066,7 @@ public abstract class JSONReader
             if (nextIfMatch(']')) {
                 break;
             }
+
             Object item = objectReader.readObject(this, null, null, 0);
             list.add(item);
 

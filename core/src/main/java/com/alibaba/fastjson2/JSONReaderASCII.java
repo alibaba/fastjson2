@@ -37,6 +37,10 @@ class JSONReaderASCII
             ch = (char) (bytes[offset] & 0xFF);
         }
         offset++;
+
+        while (ch == '/' && offset < bytes.length && bytes[offset] == '/') {
+            skipLineComment();
+        }
     }
 
     @Override
@@ -69,6 +73,11 @@ class JSONReaderASCII
             this.ch = (char) (bytes[offset] & 0xFF);
         }
         offset++;
+
+        while (this.ch == '/' && offset < bytes.length && bytes[offset] == '/') {
+            skipLineComment();
+        }
+
         return true;
     }
 
@@ -124,6 +133,10 @@ class JSONReaderASCII
 
     @Override
     public final long readFieldNameHashCode() {
+        while (ch == '/' && offset < bytes.length && bytes[offset] == '/') {
+            skipLineComment();
+        }
+
         if (ch != '"' && ch != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameHashCodeUnquote();

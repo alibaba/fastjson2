@@ -246,8 +246,14 @@ public final class ObjectReaderImplObject
             return object;
         }
 
+        char ch = jsonReader.current();
+        if (ch == '/') {
+            jsonReader.skipLineComment();
+            ch = jsonReader.current();
+        }
+
         Object value;
-        switch (jsonReader.current()) {
+        switch (ch) {
             case '-':
             case '+':
             case '0':
