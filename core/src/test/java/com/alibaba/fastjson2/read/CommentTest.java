@@ -47,8 +47,24 @@ public class CommentTest {
                 "//aaaa\n" +
                 "{\"id\":123}\n" +
                 "]";
-        List<Bean3> array = JSON.parseArray(str, Bean3.class);
-        assertEquals("[{\"id\":123}]", JSON.toJSONString(array));
+        assertEquals("[{\"id\":123}]", JSON.toJSONString(JSON.parseArray(str, Bean3.class)));
+        assertEquals("[{\"id\":123}]", JSON.toJSONString(JSON.parseArray(str.toCharArray(), Bean3.class)));
+        assertEquals("[{\"id\":123}]", JSON.toJSONString(JSON.parseArray(str.getBytes(), Bean3.class)));
+    }
+
+    @Test
+    public void test4() {
+        String str = "[\n" +
+                "//aaaa\n" +
+                "//中国\n" +
+                "{\n" +
+                "//id\n" +
+                "\"id\":123\n" +
+                "}\n" +
+                "]";
+        assertEquals("[{\"id\":123}]", JSON.toJSONString(JSON.parseArray(str, Bean3.class)));
+        assertEquals("[{\"id\":123}]", JSON.toJSONString(JSON.parseArray(str.toCharArray(), Bean3.class)));
+        assertEquals("[{\"id\":123}]", JSON.toJSONString(JSON.parseArray(str.getBytes(), Bean3.class)));
     }
 
     public static class Bean3 {
