@@ -16,7 +16,7 @@ public class Issue3689 {
 
     @Test
     public void test_without_type_1_meaningles_char() {
-        assertThrows(com.alibaba.fastjson2.JSONException.class, () -> {
+        assertThrows(com.alibaba.fastjson.JSONException.class, () -> {
             JSONArray.parseArray("/dfdfdf");
         });
     }

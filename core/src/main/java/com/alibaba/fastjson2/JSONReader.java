@@ -285,7 +285,7 @@ public abstract class JSONReader
         return null;
     }
 
-    static char char1(int c) {
+    final char char1(int c) {
         switch (c) {
             case '0':
                 return '\0';
@@ -328,9 +328,10 @@ public abstract class JSONReader
             case '@':
             case '(':
             case ')':
+            case '_':
                 return (char) c;
             default:
-                throw new JSONException("unclosed.str.lit " + (char) c);
+                throw new JSONException(info("unclosed.str '\\" + (char) c));
         }
     }
 
@@ -1667,7 +1668,11 @@ public abstract class JSONReader
 
             Object name;
             if (match || typeRedirect) {
-                name = readFieldName();
+                if (ch >= '1' && ch <= '9') {
+                    name = null;
+                } else {
+                    name = readFieldName();
+                }
             } else {
                 name = getFieldName();
                 match = true;

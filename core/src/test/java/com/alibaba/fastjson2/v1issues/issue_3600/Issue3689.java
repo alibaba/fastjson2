@@ -19,12 +19,24 @@ public class Issue3689 {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("/dfdfdf");
         });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("/dfdfdf".getBytes());
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("/dfdfdf".toCharArray());
+        });
     }
 
     @Test
     public void test_without_type_2_meaningles_char() {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("//dfdfdf");
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("//dfdfdf".getBytes());
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("//dfdfdf".toCharArray());
         });
     }
 
@@ -33,12 +45,24 @@ public class Issue3689 {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("///dfdfdf");
         });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("///dfdfdf".getBytes());
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("///dfdfdf".toCharArray());
+        });
     }
 
     @Test
     public void test_without_type_4_meaningles_char() {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("////dfdfdf");
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("////dfdfdf".getBytes());
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("////dfdfdf".toCharArray());
         });
     }
 
@@ -47,12 +71,24 @@ public class Issue3689 {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("/////dfdfdf");
         });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("/////dfdfdf".getBytes());
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("/////dfdfdf".toCharArray());
+        });
     }
 
     @Test
     public void test_without_type_6_meaningles_char() {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("//////dfdfdf");
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("//////dfdfdf".getBytes());
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("//////dfdfdf".toCharArray());
         });
     }
 
@@ -61,12 +97,24 @@ public class Issue3689 {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("dfdfdf", String.class);
         });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("dfdfdf".getBytes(), String.class);
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("dfdfdf".toCharArray(), String.class);
+        });
     }
 
     @Test
     public void test_with_type_1_meaningles_char() {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("/dfdfdf", String.class);
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("/dfdfdf".getBytes(), String.class);
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("/dfdfdf".toCharArray(), String.class);
         });
     }
 
@@ -75,12 +123,24 @@ public class Issue3689 {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("//dfdfdf", String.class);
         });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("//dfdfdf".getBytes(), String.class);
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("//dfdfdf".toCharArray(), String.class);
+        });
     }
 
     @Test
     public void test_with_type_3_meaningles_char() {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("///dfdfdf", String.class);
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("///dfdfdf".getBytes(), String.class);
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("///dfdfdf".toCharArray(), String.class);
         });
     }
 
@@ -89,12 +149,24 @@ public class Issue3689 {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("////dfdfdf", String.class);
         });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("////dfdfdf".getBytes(), String.class);
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("////dfdfdf".toCharArray(), String.class);
+        });
     }
 
     @Test
     public void test_with_type_5_meaningles_char() {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("/////dfdfdf", String.class);
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("/////dfdfdf".getBytes(), String.class);
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("/////dfdfdf".toCharArray(), String.class);
         });
     }
 
@@ -103,11 +175,21 @@ public class Issue3689 {
         assertThrows(JSONException.class, () -> {
             JSON.parseArray("//////dfdfdf", String.class);
         });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("//////dfdfdf".getBytes(), String.class);
+        });
+        assertThrows(JSONException.class, () -> {
+            JSON.parseArray("//////dfdfdf".toCharArray(), String.class);
+        });
     }
 
     @Test
     public void test_for_issue() {
         JSON.parseArray("[\"////dfdfdf\"]"); //不会抛异常
+        JSON.parseArray("[\"////dfdfdf\"]".getBytes()); //不会抛异常
+        JSON.parseArray("[\"////dfdfdf\"]".toCharArray()); //不会抛异常
         JSON.parse("[\"dfdfdf\"]"); //不会抛异常
+        JSON.parse("[\"dfdfdf\"]".getBytes()); //不会抛异常
+        JSON.parse("[\"dfdfdf\"]".toCharArray()); //不会抛异常
     }
 }
