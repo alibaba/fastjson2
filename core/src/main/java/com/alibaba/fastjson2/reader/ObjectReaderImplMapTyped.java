@@ -326,21 +326,21 @@ class ObjectReaderImplMapTyped
                         }
                         continue;
                     } else {
-                        throw new JSONException("not support name " + name);
+                        name = TypeUtils.cast(name, keyType);
                     }
-                }
-
-                if (keyObjectReader != null) {
-                    name = keyObjectReader.readObject(jsonReader, null, null, 0);
                 } else {
-                    name = jsonReader.read(keyType);
+                    if (keyObjectReader != null) {
+                        name = keyObjectReader.readObject(jsonReader, null, null, 0);
+                    } else {
+                        name = jsonReader.read(keyType);
+                    }
+                    if (index == 0
+                            && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
+                            && name.equals(getTypeKey())) {
+                        continue;
+                    }
+                    jsonReader.nextIfMatch(':');
                 }
-                if (index == 0
-                        && (contextFeatures & JSONReader.Feature.SupportAutoType.mask) != 0
-                        && name.equals(getTypeKey())) {
-                    continue;
-                }
-                jsonReader.nextIfMatch(':');
             }
             if (valueObjectReader == null) {
                 valueObjectReader = jsonReader.getObjectReader(valueType);
