@@ -164,7 +164,6 @@ class JSONReaderUTF8
             offset++;
             ch = (char) c;
         } else {
-
             c &= 0xFF;
             switch (c >> 4) {
                 case 12:
