@@ -217,7 +217,7 @@ final class JSONReaderUTF16Vector
                 return null;
             }
             default:
-                throw new JSONException("TODO : " + ch);
+                throw new JSONException(info("illegal input : " + ch));
         }
     }
 

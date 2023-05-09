@@ -68,13 +68,8 @@ class JSONReaderUTF8
         this.end = length;
         next();
 
-        while (ch == '/') {
-            next();
-            if (ch == '/') {
-                skipLineComment();
-            } else {
-                throw new JSONException("input not support " + ch + ", offset " + offset);
-            }
+        while (ch == '/' && this.offset < this.bytes.length && this.bytes[this.offset] == '/') {
+            skipLineComment();
         }
     }
 
@@ -98,13 +93,8 @@ class JSONReaderUTF8
         this.end = length;
         next();
 
-        while (ch == '/') {
-            next();
-            if (ch == '/') {
-                skipLineComment();
-            } else {
-                throw new JSONException("input not support " + ch + ", offset " + offset);
-            }
+        while (ch == '/' && this.offset < this.bytes.length && this.bytes[this.offset] == '/') {
+            skipLineComment();
         }
     }
 
@@ -120,13 +110,8 @@ class JSONReaderUTF8
         this.cacheItem = null;
         next();
 
-        while (ch == '/') {
-            next();
-            if (ch == '/') {
-                skipLineComment();
-            } else {
-                throw new JSONException("input not support " + ch + ", offset " + offset);
-            }
+        while (ch == '/' && this.offset < this.bytes.length && this.bytes[this.offset] == '/') {
+            skipLineComment();
         }
     }
 
@@ -1448,6 +1433,10 @@ class JSONReaderUTF8
     @Override
     public String readFieldName() {
         if (ch != '"' && ch != '\'') {
+            if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
+                return readFieldNameUnquote();
+            }
+
             return null;
         }
 
@@ -4029,7 +4018,7 @@ class JSONReaderUTF8
                 return null;
             }
             default:
-                throw new JSONException("TODO : " + ch);
+                throw new JSONException(info("illegal input : " + ch));
         }
     }
 

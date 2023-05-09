@@ -378,13 +378,8 @@ class JSONReaderUTF16
             next();
         }
 
-        while (ch == '/') {
-            next();
-            if (ch == '/') {
-                skipLineComment();
-            } else {
-                throw new JSONException("input not support " + ch + ", offset " + offset);
-            }
+        while (ch == '/' && this.offset < this.chars.length && this.chars[this.offset] == '/') {
+            skipLineComment();
         }
     }
 
@@ -1731,6 +1726,10 @@ class JSONReaderUTF16
         }
 
         if (ch != '"' && ch != '\'') {
+            if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
+                return readFieldNameUnquote();
+            }
+
             return null;
         }
 
@@ -3828,7 +3827,7 @@ class JSONReaderUTF16
                 return null;
             }
             default:
-                throw new JSONException("TODO : " + ch);
+                throw new JSONException(info("illegal input : " + ch));
         }
     }
 

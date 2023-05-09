@@ -1498,6 +1498,66 @@ public interface JSON {
      * Parses the json byte array as {@link T}. Returns
      * {@code null} if received byte array is {@code null} or empty.
      *
+     * @param chars the specified chars
+     * @param objectClass the specified actual type of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(char[] chars, Class<T> objectClass, JSONReader.Feature... features) {
+        if (chars == null || chars.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(chars)) {
+            reader.context.config(features);
+            ObjectReader<T> objectReader = reader.getObjectReader(objectClass);
+            T object = objectReader.readObject(reader, objectClass, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parses the json byte array as {@link T}. Returns
+     * {@code null} if received byte array is {@code null} or empty.
+     *
+     * @param chars the specified chars
+     * @param type the specified actual type of {@link T}
+     * @param features the specified features is applied to parsing
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(char[] chars, Type type, JSONReader.Feature... features) {
+        if (chars == null || chars.length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(chars)) {
+            reader.context.config(features);
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            T object = objectReader.readObject(reader, type, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parses the json byte array as {@link T}. Returns
+     * {@code null} if received byte array is {@code null} or empty.
+     *
      * @param bytes the specified UTF8 text to be parsed
      * @param type the specified actual type of {@link T}
      * @param filter the specified filter is applied to parsing

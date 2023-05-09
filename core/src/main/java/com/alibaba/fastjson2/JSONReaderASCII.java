@@ -859,6 +859,10 @@ class JSONReaderASCII
     @Override
     public final String readFieldName() {
         if (ch != '"' && ch != '\'') {
+            if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
+                return readFieldNameUnquote();
+            }
+
             return null;
         }
 
@@ -1495,7 +1499,7 @@ class JSONReaderASCII
                 return null;
             }
             default:
-                throw new JSONException("TODO : " + ch);
+                throw new JSONException(info("illegal input : " + ch));
         }
     }
 }
