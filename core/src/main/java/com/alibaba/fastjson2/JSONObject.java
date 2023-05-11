@@ -19,6 +19,7 @@ import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -319,7 +320,8 @@ public class JSONObject
                 || value instanceof Character
                 || value instanceof Number
                 || value instanceof UUID
-                || value instanceof Enum) {
+                || value instanceof Enum
+                || value instanceof TemporalAccessor) {
             return value.toString();
         }
 
