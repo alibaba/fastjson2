@@ -970,6 +970,11 @@ public class ObjectWriterBaseModule
             if (jsonField.jsonDirect()) {
                 fieldInfo.features |= FieldInfo.RAW_VALUE_MASK;
             }
+
+            Class serializeUsing = jsonField.serializeUsing();
+            if (ObjectWriter.class.isAssignableFrom(serializeUsing)) {
+                fieldInfo.writeUsing = serializeUsing;
+            }
         }
 
         /**
