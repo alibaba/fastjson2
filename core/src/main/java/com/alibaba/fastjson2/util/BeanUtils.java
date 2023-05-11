@@ -1198,7 +1198,8 @@ public abstract class BeanUtils {
             declaredFields(objectClass, field -> {
                 String fieldName = field.getName();
                 int fieldNameLength = fieldName.length();
-                if (fieldNameLength == len - prefix && field.getType() == type) {
+                if (fieldNameLength == len - prefix
+                        && (field.getType() == type || type.isAssignableFrom(field.getType()))) {
                     if (c0 >= 'A' && c0 <= 'Z' && (c0 + 32) == fieldName.charAt(0)
                             && fieldName.regionMatches(1, methodName, prefix + 1, fieldNameLength - 1)
                     ) {
