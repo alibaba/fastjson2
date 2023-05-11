@@ -281,9 +281,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
             if (fieldReader == null && (featuresAll & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
                 long hashCodeLCase = jsonReader.getNameHashCodeLCase();
-                if (hashCodeLCase != hashCode) {
-                    fieldReader = getFieldReaderLCase(hashCodeLCase);
-                }
+                fieldReader = getFieldReaderLCase(hashCodeLCase);
             }
 
             if (fieldReader == null) {

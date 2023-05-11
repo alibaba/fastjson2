@@ -287,10 +287,7 @@ public interface ObjectReader<T> {
             FieldReader fieldReader = getFieldReader(hash);
             if (fieldReader == null && jsonReader.isSupportSmartMatch(features | getFeatures())) {
                 long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
-
-                if (nameHashCodeLCase != hash) {
-                    fieldReader = getFieldReaderLCase(nameHashCodeLCase);
-                }
+                fieldReader = getFieldReaderLCase(nameHashCodeLCase);
             }
 
             if (fieldReader == null) {

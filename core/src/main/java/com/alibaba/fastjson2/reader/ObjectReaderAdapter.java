@@ -477,9 +477,7 @@ public class ObjectReaderAdapter<T>
             FieldReader fieldReader = getFieldReader(hash);
             if (fieldReader == null && jsonReader.isSupportSmartMatch(features | this.features)) {
                 long nameHashCodeLCase = jsonReader.getNameHashCodeLCase();
-                if (nameHashCodeLCase != hash) {
-                    fieldReader = getFieldReaderLCase(nameHashCodeLCase);
-                }
+                fieldReader = getFieldReaderLCase(nameHashCodeLCase);
             }
             if (fieldReader == null) {
                 processExtra(jsonReader, object);
