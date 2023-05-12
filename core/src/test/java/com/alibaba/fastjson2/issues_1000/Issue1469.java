@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues_1000;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,23 @@ public class Issue1469 {
 
         assertEquals(
                 "{\"posts\":[{\"id\":1,\"title\":\"XXX\"},{\"id\":2,\"title\":\"DEF\"}]}",
+                posts.toJSONString()
+        );
+    }
+
+    @Test
+    public void test1() {
+        JSONObject posts = JSON.parseObject(STR);
+
+        JSONPath jsonPath = JSONPath.of("$.posts[?(@.id == 1)]");
+        jsonPath.setCallback(posts, (parent, value) -> {
+            JSONArray array = (JSONArray) parent;
+            array.add(JSONObject.of("id", 3));
+            return value;
+        });
+
+        assertEquals(
+                "{\"posts\":[{\"id\":1,\"title\":\"ABC\"},{\"id\":2,\"title\":\"DEF\"},{\"id\":3}]}",
                 posts.toJSONString()
         );
     }
