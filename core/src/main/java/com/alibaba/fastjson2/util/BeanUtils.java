@@ -847,6 +847,10 @@ public abstract class BeanUtils {
     }
 
     public static void getters(Class objectClass, Consumer<Method> methodConsumer) {
+        getters(objectClass, null, methodConsumer);
+    }
+
+    public static void getters(Class objectClass, Class mixinSource, Consumer<Method> methodConsumer) {
         if (objectClass == null) {
             return;
         }
@@ -919,6 +923,11 @@ public abstract class BeanUtils {
                     break;
                 case "equals":
                 case "hashCode":
+                case "wait":
+                case "notify":
+                case "notifyAll":
+                case "toString":
+                case "getClass":
                     methodSkip = true;
                     break;
                 default:
@@ -1017,6 +1026,21 @@ public abstract class BeanUtils {
                             break;
                         default:
                             break;
+                    }
+                }
+            }
+
+            if (!nameMatch && mixinSource != null) {
+                Method mixinMethod = getMethod(mixinSource, method);
+                if (mixinMethod != null) {
+                    Annotation[] annotations = getAnnotations(mixinMethod);
+                    for (Annotation annotation : annotations) {
+                        if (annotation.annotationType() == JSONField.class) {
+                            JSONField jsonField = (JSONField) annotation;
+                            if (jsonField != null && jsonField.serialize()) {
+                                nameMatch = true;
+                            }
+                        }
                     }
                 }
             }

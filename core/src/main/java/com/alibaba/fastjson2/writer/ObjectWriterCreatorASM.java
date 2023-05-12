@@ -165,6 +165,7 @@ public class ObjectWriterCreatorASM
 
         BeanInfo beanInfo = new BeanInfo();
         provider.getBeanInfo(beanInfo, objectClass);
+        Class mixIn = provider.getMixIn(objectClass);
 
         if (beanInfo.serializer != null && ObjectWriter.class.isAssignableFrom(beanInfo.serializer)) {
             try {
@@ -251,7 +252,7 @@ public class ObjectWriterCreatorASM
                     });
                 }
 
-                BeanUtils.getters(objectClass, method -> {
+                BeanUtils.getters(objectClass, mixIn, method -> {
                     fieldInfo.init();
                     fieldInfo.features |= writerFieldFeatures;
                     fieldInfo.format = beanInfo.format;
