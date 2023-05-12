@@ -488,6 +488,10 @@ public abstract class BeanUtils {
     }
 
     public static void setters(Class objectClass, Consumer<Method> methodConsumer) {
+        setters(objectClass, null, methodConsumer);
+    }
+
+    public static void setters(Class objectClass, Class mixin, Consumer<Method> methodConsumer) {
         if (ignore(objectClass)) {
             return;
         }
@@ -499,6 +503,11 @@ public abstract class BeanUtils {
         }
 
         for (Method method : methods) {
+            int mods = method.getModifiers();
+            if (Modifier.isStatic(mods)) {
+                continue;
+            }
+
             int paramCount = method.getParameterCount();
 
             // read only getter
@@ -533,7 +542,7 @@ public abstract class BeanUtils {
                 for (Annotation annotation : annotations) {
                     Class<? extends Annotation> annotationType = annotation.annotationType();
                     JSONField jsonField = findAnnotation(annotation, JSONField.class);
-                    if (Objects.nonNull(jsonField)) {
+                    if (jsonField != null) {
                         if (jsonField.unwrapped()) {
                             unwrapped = true;
                             break;
@@ -563,14 +572,41 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            int mods = method.getModifiers();
-            if (Modifier.isStatic(mods)) {
-                continue;
-            }
-
             String methodName = method.getName();
             final int methodNameLength = methodName.length();
-            if (methodNameLength <= 3 || !methodName.startsWith("set")) {
+            boolean nameMatch = methodNameLength > 3 && methodName.startsWith("set");
+            if (!nameMatch) {
+                if (mixin != null) {
+                    Method mixinMethod = getMethod(mixin, method);
+                    if (mixinMethod != null) {
+                        Annotation[] annotations = getAnnotations(mixinMethod);
+                        for (Annotation annotation : annotations) {
+                            if (annotation.annotationType() == JSONField.class) {
+                                JSONField jsonField = (JSONField) annotation;
+                                if (!jsonField.unwrapped()) {
+                                    nameMatch = true;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!nameMatch) {
+                Annotation[] annotations = getAnnotations(method);
+                for (Annotation annotation : annotations) {
+                    if (annotation.annotationType() == JSONField.class) {
+                        JSONField jsonField = (JSONField) annotation;
+                        if (!jsonField.unwrapped()) {
+                            nameMatch = true;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (!nameMatch) {
                 continue;
             }
 
@@ -751,14 +787,14 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            if (isJSONField(getAnnotations(method))) {
+            if (isJSONField(method)) {
                 return method;
             }
 
             if (methodName.startsWith("get")) {
                 String fieldName = BeanUtils.getterName(methodName, null);
                 Field field = BeanUtils.getDeclaredField(enumClass, fieldName);
-                if (field != null && isJSONField(getAnnotations(field))) {
+                if (field != null && isJSONField(field)) {
                     return method;
                 }
             }
@@ -768,7 +804,7 @@ public abstract class BeanUtils {
                 for (Class enumInterface : interfaces) {
                     getters(enumInterface, e -> {
                         if (e.getName().equals(methodName)) {
-                            if (isJSONField(getAnnotations(e))) {
+                            if (isJSONField(e)) {
                                 memberRef.set(method);
                             }
                         }
@@ -784,7 +820,7 @@ public abstract class BeanUtils {
                     if (mixIn != null) {
                         getters(mixIn, e -> {
                             if (e.getName().equals(methodName)) {
-                                if (isJSONField(getAnnotations(e))) {
+                                if (isJSONField(e)) {
                                     memberRef.set(method);
                                 }
                             }
@@ -817,8 +853,7 @@ public abstract class BeanUtils {
                 }
             }
 
-            Annotation[] annotations = getAnnotations(field);
-            if (isJSONField(annotations)) {
+            if (isJSONField(field)) {
                 if (!found) {
                     member = field;
                     break;
@@ -827,23 +862,6 @@ public abstract class BeanUtils {
         }
 
         return member;
-    }
-
-    private static boolean isJSONField(Annotation[] annotations) {
-        for (Annotation annotation : annotations) {
-            Class<? extends Annotation> annotationType = annotation.annotationType();
-            switch (annotationType.getName()) {
-                case "com.alibaba.fastjson.annotation.JSONField":
-                case "com.alibaba.fastjson2.annotation.JSONField":
-                    return true;
-                case "com.fasterxml.jackson.annotation.JsonValue":
-                case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonValue":
-                    return JSONFactory.isUseJacksonAnnotation();
-                default:
-                    break;
-            }
-        }
-        return false;
     }
 
     public static void getters(Class objectClass, Consumer<Method> methodConsumer) {
@@ -1006,41 +1024,16 @@ public abstract class BeanUtils {
             }
 
             if (!nameMatch) {
-                Annotation[] annotations = getAnnotations(method);
-                for (Annotation annotation : annotations) {
-                    Class<? extends Annotation> annotationType = annotation.annotationType();
-                    String annotationTypeName = annotationType.getName();
-                    switch (annotationTypeName) {
-                        case "com.alibaba.fastjson.annotation.JSONField":
-                        case "com.alibaba.fastjson2.annotation.JSONField":
-                            nameMatch = true;
-                            break;
-                        case "com.fasterxml.jackson.annotation.JsonValue":
-                        case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonValue":
-                        case "com.fasterxml.jackson.annotation.JsonRawValue":
-                        case "com.fasterxml.jackson.annotation.JsonProperty":
-                        case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
-                            if (JSONFactory.isUseJacksonAnnotation()) {
-                                nameMatch = true;
-                            }
-                            break;
-                        default:
-                            break;
-                    }
+                if (isJSONField(method)) {
+                    nameMatch = true;
                 }
             }
 
             if (!nameMatch && mixinSource != null) {
                 Method mixinMethod = getMethod(mixinSource, method);
                 if (mixinMethod != null) {
-                    Annotation[] annotations = getAnnotations(mixinMethod);
-                    for (Annotation annotation : annotations) {
-                        if (annotation.annotationType() == JSONField.class) {
-                            JSONField jsonField = (JSONField) annotation;
-                            if (jsonField != null && jsonField.serialize()) {
-                                nameMatch = true;
-                            }
-                        }
+                    if (isJSONField(mixinMethod)) {
+                        nameMatch = true;
                     }
                 }
             }
@@ -1078,6 +1071,30 @@ public abstract class BeanUtils {
 
             methodConsumer.accept(method);
         }
+    }
+
+    private static boolean isJSONField(AnnotatedElement element) {
+        Annotation[] annotations = element.getAnnotations();
+        for (Annotation annotation : annotations) {
+            String annotationTypeName = annotation.annotationType().getName();
+            switch (annotationTypeName) {
+                case "com.alibaba.fastjson.annotation.JSONField":
+                case "com.alibaba.fastjson2.annotation.JSONField":
+                    return true;
+                case "com.fasterxml.jackson.annotation.JsonValue":
+                case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonValue":
+                case "com.fasterxml.jackson.annotation.JsonRawValue":
+                case "com.fasterxml.jackson.annotation.JsonProperty":
+                case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
+                    if (JSONFactory.isUseJacksonAnnotation()) {
+                        return true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        return false;
     }
 
     static boolean ignore(Class objectClass) {
@@ -1254,6 +1271,10 @@ public abstract class BeanUtils {
             prefixLength = 3;
         } else {
             prefixLength = 0;
+        }
+
+        if (methodNameLength == prefixLength) {
+            return methodName;
         }
 
         switch (namingStrategy) {

@@ -1561,7 +1561,8 @@ public class ObjectReaderCreator {
                 });
             }
 
-            BeanUtils.setters(objectClass, method -> {
+            Class mixIn = provider.getMixIn(objectClass);
+            BeanUtils.setters(objectClass, mixIn, method -> {
                 fieldInfo.init();
                 fieldInfo.features |= beanFeatures;
                 fieldInfo.format = beanFormat;
