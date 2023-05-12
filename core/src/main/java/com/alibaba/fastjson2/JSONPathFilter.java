@@ -10,6 +10,7 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -177,6 +178,28 @@ abstract class JSONPathFilter
                     Object item = list.get(i);
                     if (apply(context, item)) {
                         list.set(i, value);
+                    }
+                }
+                return;
+            }
+
+            throw new JSONException("UnsupportedOperation ");
+        }
+
+        public void setCallback(JSONPath.Context context, BiFunction callback) {
+            Object object = context.parent == null
+                    ? context.root
+                    : context.parent.value;
+
+            if (object instanceof List) {
+                List list = (List) object;
+                for (int i = 0; i < list.size(); i++) {
+                    Object item = list.get(i);
+                    if (apply(context, item)) {
+                        Object value = callback.apply(list, item);
+                        if (value != item) {
+                            list.set(i, value);
+                        }
                     }
                 }
                 return;
