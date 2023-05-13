@@ -508,11 +508,31 @@ public abstract class BeanUtils {
                 continue;
             }
 
+            if (method.getDeclaringClass() == Object.class) {
+                continue;
+            }
+
+            String methodName = method.getName();
+
+            boolean methodSkip = false;
+            switch (methodName) {
+                case "equals":
+                case "hashCode":
+                case "toString":
+                    methodSkip = true;
+                    break;
+                default:
+                    break;
+            }
+
+            if (methodSkip) {
+                continue;
+            }
+
             int paramCount = method.getParameterCount();
 
             // read only getter
             if (paramCount == 0) {
-                String methodName = method.getName();
                 if (methodName.length() <= 3 || !methodName.startsWith("get")) {
                     continue;
                 }
@@ -572,7 +592,6 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            String methodName = method.getName();
             final int methodNameLength = methodName.length();
             boolean nameMatch = methodNameLength > 3 && methodName.startsWith("set");
             if (!nameMatch) {
@@ -679,15 +698,15 @@ public abstract class BeanUtils {
             if (method.getParameterCount() != 0) {
                 continue;
             }
+            Class<?> declaringClass = method.getDeclaringClass();
+            if (declaringClass == Object.class) {
+                continue;
+            }
 
             switch (method.getName()) {
                 case "toString":
                 case "hashCode":
                 case "annotationType":
-                case "wait":
-                case "notify":
-                case "notifyAll":
-                case "getClass":
                     continue for_;
                 default:
                     break;
@@ -924,7 +943,7 @@ public abstract class BeanUtils {
             }
 
             Class<?> declaringClass = method.getDeclaringClass();
-            if (declaringClass == Enum.class) {
+            if (declaringClass == Enum.class || declaringClass == Object.class) {
                 continue;
             }
 
@@ -941,11 +960,7 @@ public abstract class BeanUtils {
                     break;
                 case "equals":
                 case "hashCode":
-                case "wait":
-                case "notify":
-                case "notifyAll":
                 case "toString":
-                case "getClass":
                     methodSkip = true;
                     break;
                 default:
@@ -1039,10 +1054,6 @@ public abstract class BeanUtils {
             }
 
             if (!nameMatch) {
-                continue;
-            }
-
-            if (returnClass == Class.class && "getClass".equals(methodName)) {
                 continue;
             }
 
@@ -2197,7 +2208,7 @@ public abstract class BeanUtils {
 
     public static Annotation[] getAnnotations(AnnotatedElement element) {
         try {
-            return element.getAnnotations();
+            return element.getDeclaredAnnotations();
         } catch (Throwable ignored) {
             return new Annotation[0];
         }

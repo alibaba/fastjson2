@@ -229,7 +229,7 @@ public class ObjectReaderBaseModule
 
             Class seeAlsoClass = null;
             for (Class superClass = objectClass.getSuperclass(); ; superClass = superClass.getSuperclass()) {
-                if (superClass == null || superClass == Object.class) {
+                if (superClass == null || superClass == Object.class || superClass == Enum.class) {
                     break;
                 }
 
@@ -1303,6 +1303,10 @@ public class ObjectReaderBaseModule
     }
 
     private void getCreator(BeanInfo beanInfo, Class<?> objectClass, Constructor constructor) {
+        if (objectClass.isEnum()) {
+            return;
+        }
+
         Annotation[] annotations = getAnnotations(constructor);
 
         boolean creatorMethod = false;
@@ -1367,6 +1371,20 @@ public class ObjectReaderBaseModule
     }
 
     private void getCreator(BeanInfo beanInfo, Class<?> objectClass, Method method) {
+        if (method.getDeclaringClass() == Enum.class) {
+            return;
+        }
+
+        String methodName = method.getName();
+        if (objectClass.isEnum()) {
+            switch (methodName) {
+                case "values":
+                    return;
+                default:
+                    break;
+            }
+        }
+
         Annotation[] annotations = getAnnotations(method);
 
         boolean creatorMethod = false;
@@ -1438,7 +1456,7 @@ public class ObjectReaderBaseModule
 
         Method targetMethod = null;
         try {
-            targetMethod = objectClass.getDeclaredMethod(method.getName(), method.getParameterTypes());
+            targetMethod = objectClass.getDeclaredMethod(methodName, method.getParameterTypes());
         } catch (NoSuchMethodException ignored) {
         }
 

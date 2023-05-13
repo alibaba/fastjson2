@@ -91,11 +91,11 @@ public class EishayParseStringTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2();
+        fastjson2();
 //        fastjson2Mixin();
 //        jackson();
 //        fastjson1();
 //        gson();
-        wastjson();
+//        wastjson();
     }
 }
