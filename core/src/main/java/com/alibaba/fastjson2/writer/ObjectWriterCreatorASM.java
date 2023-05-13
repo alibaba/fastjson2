@@ -251,7 +251,8 @@ public class ObjectWriterCreatorASM
                     });
                 }
 
-                BeanUtils.getters(objectClass, method -> {
+                Class mixIn = provider.getMixIn(objectClass);
+                BeanUtils.getters(objectClass, mixIn, method -> {
                     fieldInfo.init();
                     fieldInfo.features |= writerFieldFeatures;
                     fieldInfo.format = beanInfo.format;

@@ -251,8 +251,15 @@ public class ObjectWriterProvider
     }
 
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass, boolean fieldBased) {
+        Class superclass = objectClass.getSuperclass();
+        if (!objectClass.isEnum()
+                && superclass != null
+                && superclass.isEnum()
+        ) {
+            return getObjectWriter(superclass, superclass, fieldBased);
+        }
+
         if (fieldBased) {
-            Class superclass = objectClass.getSuperclass();
             if (superclass != null
                     && superclass != Object.class
                     && superclass.getName().equals("com.google.protobuf.GeneratedMessageV3")) {
@@ -275,7 +282,6 @@ public class ObjectWriterProvider
         }
 
         if (TypeUtils.isProxy(objectClass)) {
-            Class superclass = objectClass.getSuperclass();
             if (objectClass == objectType) {
                 objectType = superclass;
             }
