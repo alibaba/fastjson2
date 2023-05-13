@@ -1927,6 +1927,13 @@ public abstract class JSONReader
                     } else {
                         throw new JSONException(info("illegal input " + ch));
                     }
+                case 'S':
+                    if (nextIfSet()) {
+                        val = read(Set.class);
+                        break;
+                    } else {
+                        throw new JSONException(info("illegal input " + ch));
+                    }
                 default:
                     throw new JSONException(info("illegal input " + ch));
             }
