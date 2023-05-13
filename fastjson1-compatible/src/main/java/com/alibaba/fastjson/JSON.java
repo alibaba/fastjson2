@@ -5,6 +5,7 @@ import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.parser.deserializer.ParseProcess;
 import com.alibaba.fastjson.serializer.*;
 import com.alibaba.fastjson.util.IOUtils;
+import com.alibaba.fastjson.util.TypeUtils;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
@@ -1068,7 +1069,10 @@ public abstract class JSON
             featuresValue |= feature.mask;
         }
 
-        JSONWriter.Context context = new JSONWriter.Context(config.getProvider());
+        ObjectWriterProvider provider = config.getProvider();
+        provider.setCompatibleWithFieldName(TypeUtils.compatibleWithFieldName);
+
+        JSONWriter.Context context = new JSONWriter.Context(provider);
 
         if (config.fieldBased) {
             context.config(JSONWriter.Feature.FieldBased);
