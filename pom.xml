@@ -649,7 +649,8 @@
                                 com/alibaba/fastjson2/issues_1000/Issue1246.java,
                                 com/alibaba/fastjson/issues_compatible/Issue1303.java,
                                 com/alibaba/fastjson2/util/BeanUtilsTest.java,
-                                com/alibaba/fastjson2/issues_1000/Issue1395.java
+                                com/alibaba/fastjson2/issues_1000/Issue1395.java,
+                                com/alibaba/fastjson/v2issues/Issue1432.java
                             </excludes>
                         </configuration>
                     </execution>

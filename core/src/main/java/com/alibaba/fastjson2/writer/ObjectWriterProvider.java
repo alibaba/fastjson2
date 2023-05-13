@@ -29,6 +29,7 @@ public class ObjectWriterProvider
     static final int TYPE_DECIMAL_MASK = 1 << 3;
     static final int TYPE_DATE_MASK = 1 << 4;
     static final int TYPE_ENUM_MASK = 1 << 5;
+    static final int NAME_COMPATIBLE_WITH_FILED = 1 << 6; // compatibleWithFieldName 1.x
 
     final ConcurrentMap<Type, ObjectWriter> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectWriter> cacheFieldBased = new ConcurrentHashMap<>();
@@ -77,6 +78,17 @@ public class ObjectWriterProvider
 
     public PropertyNamingStrategy getNamingStrategy() {
         return namingStrategy;
+    }
+
+    /**
+     * @deprecated only use compatible with fastjson 1.x
+     */
+    public void setCompatibleWithFieldName(boolean stat) {
+        if (stat) {
+            userDefineMask |= NAME_COMPATIBLE_WITH_FILED;
+        } else {
+            userDefineMask &= ~NAME_COMPATIBLE_WITH_FILED;
+        }
     }
 
     public void setNamingStrategy(PropertyNamingStrategy namingStrategy) {
