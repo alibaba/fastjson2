@@ -76,7 +76,7 @@ public class EishayWriteStringTree1x {
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)
                 .forks(1)
-                .threads(8)
+                .threads(2)
                 .build();
         new Runner(options).run();
     }
