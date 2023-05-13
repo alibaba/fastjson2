@@ -1099,7 +1099,6 @@ public class JSONObject
      * @param key the key whose associated value is to be returned
      * @param value value to be associated with the specified key
      * @return {@link Object}
-     * @since 2.0.32
      */
     public Object put(String key, Object value) {
         return super.put(key, value);
