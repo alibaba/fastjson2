@@ -77,6 +77,7 @@ public class EishayFuryCompatibleWrite {
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)
                 .forks(1)
+                .threads(8)
                 .build();
         new Runner(options).run();
     }
