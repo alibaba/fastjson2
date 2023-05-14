@@ -122,6 +122,23 @@ public class Int64_1 {
     }
 
     @Test
+    public void test_reflect_utf8() throws Exception {
+        ObjectWriter<VO> ow = ObjectWriters.ofReflect(VO.class);
+        ObjectReader<VO> oc = ObjectReaders.ofReflect(VO.class);
+        for (int i = 0; i < off; i++) {
+            VO vo = new VO();
+            vo.value = values[i];
+            JSONWriter w = JSONWriter.ofUTF8();
+            ow.write(w, vo);
+
+            String json = w.toString();
+            JSONReader jr = JSONReader.of(json);
+            VO o = oc.readObject(jr, 0);
+            assertEquals(vo.value, o.value);
+        }
+    }
+
+    @Test
     public void test_lambda() throws Exception {
         ObjectWriter<VO> ow = ObjectWriters.objectWriter(VO.class);
         ObjectReader<VO> oc = ObjectReaders.of(VO.class);

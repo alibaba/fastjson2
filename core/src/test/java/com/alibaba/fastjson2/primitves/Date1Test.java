@@ -320,13 +320,14 @@ public class Date1Test {
 
     @Test
     public void test_str() {
-        for (Date id : dates) {
+        for (int i = 0; i < dates.length; i++) {
+            Date date = dates[i];
             Date1 vo = new Date1();
-            vo.setDate(id);
+            vo.setDate(date);
             String str = JSON.toJSONString(vo);
 
             Date1 v1 = JSON.parseObject(str, Date1.class);
-            assertEquals(vo.getDate(), v1.getDate());
+            assertEquals(vo.getDate(), v1.getDate(), i + " : " + (date == null ? "null" : Long.toString(date.getTime())) + " " + str);
         }
     }
 

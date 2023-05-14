@@ -1286,233 +1286,79 @@ class JSONWriterUTF16
     public final void writeInt32(int i) {
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
-        if (i == Integer.MIN_VALUE) {
-            writeRaw(writeAsString ? "\"-2147483648\"" : "-2147483648");
-            return;
+        int minCapacity = off + 13;
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
         }
 
-        boolean negative = i < 0;
-        if (negative) {
-            i = -i;
-        }
-
-        int size;
-        if (i <= 9) {
-            size = 1;
-        } else if (i <= 99) {
-            size = 2;
-        } else if (i <= 999) {
-            size = 3;
-        } else if (i <= 9999) {
-            size = 4;
-        } else if (i <= 99999) {
-            size = 5;
-        } else if (i <= 999999) {
-            size = 6;
-        } else if (i <= 9999999) {
-            size = 7;
-        } else if (i <= 99999999) {
-            size = 8;
-        } else if (i <= 999999999) {
-            size = 9;
+        if (writeAsString) {
+            chars[off++] = '"';
+            off = IOUtils.writeInt32(chars, off, i);
+            chars[off++] = '"';
         } else {
-            size = 10;
-        }
-        if (negative) {
-            size++;
-        }
-
-        // reduce getfield
-        char[] buffer = chars;
-        {
-            // inline code to reduce invokespecial
-            int minCapacity = off + size;
-            if (writeAsString) {
-                minCapacity += 2;
-            }
-            if (minCapacity - buffer.length > 0) {
-                ensureCapacity(minCapacity);
-                buffer = chars;
-            }
-        }
-
-        if (writeAsString) {
-            buffer[off++] = '"';
-        }
-
-        int q, r;
-        int pos = off += size;
-
-        while (i >= 65536) {
-            q = i / 100;
-            // really: r = i - (q * 100);
-            r = i - ((q << 6) + (q << 5) + (q << 2));
-            i = q;
-            buffer[--pos] = (char) DigitOnes[r];
-            buffer[--pos] = (char) DigitTens[r];
-        }
-
-        // Fall thru to fast mode for smaller numbers
-        // assert(i <= 65536, i);
-        do {
-            q = (i * 52429) >>> (16 + 3);
-            r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
-            buffer[--pos] = (char) digits[r];
-            i = q;
-        } while (i != 0);
-
-        if (negative) {
-            buffer[--pos] = '-';
-        }
-
-        if (writeAsString) {
-            buffer[off++] = '"';
+            off = IOUtils.writeInt32(chars, off, i);
         }
     }
 
-    public final void writeInt64(long[] value) {
-        if (value == null) {
+    public final void writeInt64(long[] values) {
+        if (values == null) {
             writeNull();
             return;
         }
 
-        if (off == chars.length) {
-            ensureCapacity(off + 1);
-        }
-        chars[off++] = '[';
+        boolean browserCompatible = (context.features & BrowserCompatible.mask) != 0;
+        boolean noneStringAsString = (context.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
+        boolean writeAsString = noneStringAsString || browserCompatible;
 
-        for (int i = 0; i < value.length; i++) {
-            if (i != 0) {
-                if (off == chars.length) {
-                    ensureCapacity(off + 1);
+        int minCapacity = off + 2 + values.length * (writeAsString ? 23 : 21);
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        chars[off++] = '[';
+        if (writeAsString) {
+            for (int i = 0; i < values.length; i++) {
+                if (i != 0) {
+                    chars[off++] = ',';
                 }
-                chars[off++] = ',';
+                long v = values[i];
+
+                if (!noneStringAsString && browserCompatible && v <= 9007199254740991L && v >= -9007199254740991L) {
+                    off = IOUtils.writeInt64(chars, off, v);
+                } else {
+                    chars[off++] = '"';
+                    off = IOUtils.writeInt64(chars, off, v);
+                    chars[off++] = '"';
+                }
             }
-            writeInt64(value[i]);
+        } else {
+            for (int i = 0; i < values.length; i++) {
+                if (i != 0) {
+                    chars[off++] = ',';
+                }
+                long v = values[i];
+                off = IOUtils.writeInt64(chars, off, v);
+            }
         }
-        if (off == chars.length) {
-            ensureCapacity(off + 1);
-        }
-        chars[off++] = (byte) ']';
+
+        chars[off++] = ']';
     }
 
     @Override
     public final void writeInt64(long i) {
         boolean writeAsString = (context.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0
                 || ((context.features & BrowserCompatible.mask) != 0 && (i > 9007199254740991L || i < -9007199254740991L));
-
-        if (i == Long.MIN_VALUE) {
-            writeRaw(writeAsString ? "\"-9223372036854775808\"" : "-9223372036854775808");
-            return;
+        int minCapacity = off + 23;
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
         }
 
-        boolean negative = i < 0;
-        if (negative) {
-            i = -i;
-        }
-
-        int size;
-        if (i <= 9) {
-            size = 1;
-        } else if (i <= 99L) {
-            size = 2;
-        } else if (i <= 999L) {
-            size = 3;
-        } else if (i <= 9999L) {
-            size = 4;
-        } else if (i <= 99999L) {
-            size = 5;
-        } else if (i <= 999999L) {
-            size = 6;
-        } else if (i <= 9999999L) {
-            size = 7;
-        } else if (i <= 99999999L) {
-            size = 8;
-        } else if (i <= 999999999L) {
-            size = 9;
-        } else if (i <= 9999999999L) {
-            size = 10;
-        } else if (i <= 99999999999L) {
-            size = 11;
-        } else if (i <= 999999999999L) {
-            size = 12;
-        } else if (i <= 9999999999999L) {
-            size = 13;
-        } else if (i <= 99999999999999L) {
-            size = 14;
-        } else if (i <= 999999999999999L) {
-            size = 15;
-        } else if (i <= 9999999999999999L) {
-            size = 16;
-        } else if (i <= 99999999999999999L) {
-            size = 17;
-        } else if (i <= 999999999999999999L) {
-            size = 18;
+        if (writeAsString) {
+            chars[off++] = '"';
+            off = IOUtils.writeInt64(chars, off, i);
+            chars[off++] = '"';
         } else {
-            size = 19;
-        }
-
-        if (negative) {
-            size++;
-        }
-
-        // reduce getfield
-        char[] buffer = chars;
-        {
-            // inline code to reduce invokespecial
-            int minCapacity = off + size;
-            if (writeAsString) {
-                minCapacity += 2;
-            }
-            if (minCapacity - buffer.length > 0) {
-                ensureCapacity(minCapacity);
-                buffer = chars;
-            }
-        }
-
-        if (writeAsString) {
-            buffer[off++] = '"';
-        }
-
-        long q;
-        int r, pos = off += size;
-
-        // Get 2 digits/iteration using longs until quotient fits into an int
-        while (i > Integer.MAX_VALUE) {
-            q = i / 100;
-            // really: r = i - (q * 100);
-            r = (int) (i - ((q << 6) + (q << 5) + (q << 2)));
-            i = q;
-            buffer[--pos] = (char) DigitOnes[r];
-            buffer[--pos] = (char) DigitTens[r];
-        }
-
-        // Get 2 digits/iteration using ints
-        int q2, i2 = (int) i;
-        while (i2 >= 65536) {
-            q2 = i2 / 100;
-            // really: r = i2 - (q * 100);
-            r = i2 - ((q2 << 6) + (q2 << 5) + (q2 << 2));
-            i2 = q2;
-            buffer[--pos] = (char) DigitOnes[r];
-            buffer[--pos] = (char) DigitTens[r];
-        }
-
-        // Fall thru to fast mode for smaller numbers
-        // assert(i2 <= 65536, i2);
-        do {
-            q2 = (i2 * 52429) >>> (16 + 3);
-            r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
-            buffer[--pos] = (char) digits[r];
-            i2 = q2;
-        } while (i2 != 0);
-
-        if (negative) {
-            buffer[--pos] = '-';
-        }
-
-        if (writeAsString) {
-            buffer[off++] = '"';
+            off = IOUtils.writeInt64(chars, off, i);
         }
     }
 
@@ -1684,12 +1530,10 @@ class JSONWriterUTF16
 
         chars[off++] = quote;
 
-        chars[off++] = (char) (year / 1000 + '0');
-        chars[off++] = (char) ((year / 100) % 10 + '0');
-        chars[off++] = (char) ((year / 10) % 10 + '0');
-        chars[off++] = (char) (year % 10 + '0');
-        chars[off++] = (char) (month / 10 + '0');
-        chars[off++] = (char) (month % 10 + '0');
+        IOUtils.write4(year, chars, off);
+        off += 4;
+        IOUtils.write2(month, chars, off);
+        off += 2;
         chars[off++] = (char) (dayOfMonth / 10 + '0');
         chars[off++] = (char) (dayOfMonth % 10 + '0');
         chars[off++] = (char) (hour / 10 + '0');
@@ -1714,13 +1558,11 @@ class JSONWriterUTF16
 
         chars[off++] = quote;
 
-        chars[off++] = (char) (year / 1000 + '0');
-        chars[off++] = (char) ((year / 100) % 10 + '0');
-        chars[off++] = (char) ((year / 10) % 10 + '0');
-        chars[off++] = (char) (year % 10 + '0');
+        IOUtils.write4(year, chars, off);
+        off += 4;
         chars[off++] = '-';
-        chars[off++] = (char) (month / 10 + '0');
-        chars[off++] = (char) (month % 10 + '0');
+        IOUtils.write2(month, chars, off);
+        off += 2;
         chars[off++] = '-';
         chars[off++] = (char) (dayOfMonth / 10 + '0');
         chars[off++] = (char) (dayOfMonth % 10 + '0');
@@ -1811,143 +1653,128 @@ class JSONWriterUTF16
             int offsetSeconds,
             boolean timeZone
     ) {
-        int millislen;
-        if (millis == 0) {
-            millislen = 0;
-        } else if (millis < 10) {
-            millislen = 4;
-        } else {
-            if (millis % 100 == 0) {
-                millislen = 2;
-            } else if (millis % 10 == 0) {
-                millislen = 3;
-            } else {
-                millislen = 4;
-            }
-        }
         int zonelen;
         if (timeZone) {
             zonelen = offsetSeconds == 0 ? 1 : 6;
         } else {
             zonelen = 0;
         }
-        int offset = offsetSeconds / 3600;
-        int len = 21 + millislen + zonelen;
-        ensureCapacity(off + len);
 
-        chars[off + 0] = quote;
-        chars[off + 1] = (char) (year / 1000 + '0');
-        chars[off + 2] = (char) ((year / 100) % 10 + '0');
-        chars[off + 3] = (char) ((year / 10) % 10 + '0');
-        chars[off + 4] = (char) (year % 10 + '0');
-        chars[off + 5] = '-';
-        chars[off + 6] = (char) (month / 10 + '0');
-        chars[off + 7] = (char) (month % 10 + '0');
-        chars[off + 8] = '-';
-        chars[off + 9] = (char) (dayOfMonth / 10 + '0');
-        chars[off + 10] = (char) (dayOfMonth % 10 + '0');
-        chars[off + 11] = timeZone ? 'T' : ' ';
-        chars[off + 12] = (char) (hour / 10 + '0');
-        chars[off + 13] = (char) (hour % 10 + '0');
-        chars[off + 14] = ':';
-        chars[off + 15] = (char) (minute / 10 + '0');
-        chars[off + 16] = (char) (minute % 10 + '0');
-        chars[off + 17] = ':';
-        chars[off + 18] = (char) (second / 10 + '0');
-        chars[off + 19] = (char) (second % 10 + '0');
-        if (millislen > 0) {
-            chars[off + 20] = '.';
-            Arrays.fill(chars, off + 21, off + 20 + millislen, '0');
-            if (millis < 10) {
-                IOUtils.getChars(millis, off + 20 + millislen, chars);
+        int minCapacity = off + 25 + zonelen;
+        if (off + minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        chars[off++] = quote;
+        IOUtils.write4(year, chars, off);
+        off += 4;
+        chars[off++] = '-';
+        IOUtils.write2(month, chars, off);
+        off += 2;
+        chars[off++] = '-';
+        IOUtils.write2(dayOfMonth, chars, off);
+        off += 2;
+        chars[off++] = timeZone ? 'T' : ' ';
+        IOUtils.write2(hour, chars, off);
+        off += 2;
+        chars[off++] = ':';
+        IOUtils.write2(minute, chars, off);
+        off += 2;
+        chars[off++] = ':';
+        IOUtils.write2(second, chars, off);
+        off += 2;
+
+        if (millis > 0) {
+            chars[off++] = '.';
+            int div = millis / 10;
+            int div2 = div / 10;
+            final int rem1 = millis - div * 10;
+
+            if (rem1 != 0) {
+                IOUtils.write3(millis, chars, off);
+                off += 3;
             } else {
-                if (millis % 100 == 0) {
-                    IOUtils.getChars(millis / 100, off + 20 + millislen, chars);
-                } else if (millis % 10 == 0) {
-                    IOUtils.getChars(millis / 10, off + 20 + millislen, chars);
+                final int rem2 = div - div2 * 10;
+                if (rem2 != 0) {
+                    IOUtils.write2(div, chars, off);
+                    off += 2;
                 } else {
-                    IOUtils.getChars(millis, off + 20 + millislen, chars);
+                    chars[off++] = (char) (div2 + '0');
                 }
             }
         }
+
         if (timeZone) {
+            int offset = offsetSeconds / 3600;
             if (offsetSeconds == 0) {
-                chars[off + 20 + millislen] = 'Z';
+                chars[off++] = 'Z';
             } else {
                 int offsetAbs = Math.abs(offset);
 
                 if (offset >= 0) {
-                    chars[off + 20 + millislen] = '+';
+                    chars[off++] = '+';
                 } else {
-                    chars[off + 20 + millislen] = '-';
+                    chars[off++] = '-';
                 }
-                chars[off + 20 + millislen + 1] = '0';
-                IOUtils.getChars(offsetAbs, off + 20 + millislen + 3, chars);
-                chars[off + 20 + millislen + 3] = ':';
-                chars[off + 20 + millislen + 4] = '0';
+                IOUtils.write2(offsetAbs, chars, off);
+                off += 2;
+
+                chars[off++] = ':';
                 int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
                 if (offsetMinutes < 0) {
                     offsetMinutes = -offsetMinutes;
                 }
-                IOUtils.getChars(offsetMinutes, off + 20 + millislen + zonelen, chars);
+                IOUtils.write2(offsetMinutes, chars, off);
+                off += 2;
             }
         }
-        chars[off + len - 1] = quote;
-        off += len;
+        chars[off++] = quote;
     }
 
     @Override
     public final void writeDateYYYMMDD8(int year, int month, int dayOfMonth) {
         ensureCapacity(off + 10);
 
-        chars[off] = quote;
-        chars[off + 1] = (char) (year / 1000 + '0');
-        chars[off + 2] = (char) ((year / 100) % 10 + '0');
-        chars[off + 3] = (char) ((year / 10) % 10 + '0');
-        chars[off + 4] = (char) (year % 10 + '0');
-        chars[off + 5] = (char) (month / 10 + '0');
-        chars[off + 6] = (char) (month % 10 + '0');
-        chars[off + 7] = (char) (dayOfMonth / 10 + '0');
-        chars[off + 8] = (char) (dayOfMonth % 10 + '0');
-        chars[off + 9] = quote;
-        off += 10;
+        chars[off++] = quote;
+        IOUtils.write4(year, chars, off);
+        off += 4;
+        IOUtils.write2(month, chars, off);
+        off += 2;
+        IOUtils.write2(dayOfMonth, chars, off);
+        off += 2;
+        chars[off++] = quote;
     }
 
     @Override
     public final void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
         ensureCapacity(off + 12);
 
-        chars[off] = quote;
-        chars[off + 1] = (char) (year / 1000 + '0');
-        chars[off + 2] = (char) ((year / 100) % 10 + '0');
-        chars[off + 3] = (char) ((year / 10) % 10 + '0');
-        chars[off + 4] = (char) (year % 10 + '0');
-        chars[off + 5] = '-';
-        chars[off + 6] = (char) (month / 10 + '0');
-        chars[off + 7] = (char) (month % 10 + '0');
-        chars[off + 8] = '-';
-        chars[off + 9] = (char) (dayOfMonth / 10 + '0');
-        chars[off + 10] = (char) (dayOfMonth % 10 + '0');
-        chars[off + 11] = quote;
-        off += 12;
+        chars[off++] = quote;
+        IOUtils.write4(year, chars, off);
+        off += 4;
+        chars[off++] = '-';
+        IOUtils.write2(month, chars, off);
+        off += 2;
+        chars[off++] = '-';
+        IOUtils.write2(dayOfMonth, chars, off);
+        off += 2;
+        chars[off++] = quote;
     }
 
     @Override
     public final void writeTimeHHMMSS8(int hour, int minute, int second) {
         ensureCapacity(off + 10);
 
-        chars[off] = quote;
-        chars[off + 1] = (char) (hour / 10 + '0');
-        chars[off + 2] = (char) (hour % 10 + '0');
-        chars[off + 3] = ':';
-        chars[off + 4] = (char) (minute / 10 + '0');
-        chars[off + 5] = (char) (minute % 10 + '0');
-        chars[off + 6] = ':';
-        chars[off + 7] = (char) (second / 10 + '0');
-        chars[off + 8] = (char) (second % 10 + '0');
-        chars[off + 9] = quote;
-
-        off += 10;
+        chars[off++] = quote;
+        IOUtils.write2(hour, chars, off);
+        off += 2;
+        chars[off++] = ':';
+        IOUtils.write2(minute, chars, off);
+        off += 2;
+        chars[off++] = ':';
+        IOUtils.write2(second, chars, off);
+        off += 2;
+        chars[off++] = quote;
     }
 
     @Override
@@ -2050,11 +1877,9 @@ class JSONWriterUTF16
 
     final void writeLocalDate0(LocalDate localDate) {
         int year = localDate.getYear();
-        if (year >= 1000 && year < 10000) {
-            chars[off++] = (char) (year / 1000 + '0');
-            chars[off++] = (char) ((year / 100) % 10 + '0');
-            chars[off++] = (char) ((year / 10) % 10 + '0');
-            chars[off++] = (char) (year % 10 + '0');
+        if (year >= 0 && year < 10000) {
+            IOUtils.write4(year, chars, off);
+            off += 4;
         } else {
             int yearSize = year > 0 ? IOUtils.stringSize(year) : IOUtils.stringSize(-year) + 1;
             IOUtils.getChars(year, off + yearSize, chars);
@@ -2063,97 +1888,53 @@ class JSONWriterUTF16
         chars[off++] = '-';
 
         int month = localDate.getMonthValue();
-        if (month < 10) {
-            chars[off++] = '0';
-            chars[off++] = (char) (month + '0');
-        } else {
-            int m0 = month / 10;
-            int m1 = month % 10;
-            chars[off++] = (char) (m0 + '0');
-            chars[off++] = (char) (m1 + '0');
-        }
+        IOUtils.write2(month, chars, off);
+        off += 2;
         chars[off++] = '-';
-
         int dayOfMonth = localDate.getDayOfMonth();
-        if (dayOfMonth < 10) {
-            chars[off++] = '0';
-            chars[off++] = (char) (dayOfMonth + '0');
-        } else {
-            int d0 = dayOfMonth / 10;
-            int d1 = dayOfMonth % 10;
-            chars[off++] = (char) (d0 + '0');
-            chars[off++] = (char) (d1 + '0');
-        }
+        IOUtils.write2(dayOfMonth, chars, off);
+        off += 2;
     }
 
     final void writeLocalTime0(LocalTime time) {
         int hour = time.getHour();
-        if (hour < 10) {
-            chars[off++] = '0';
-            chars[off++] = (char) (hour + '0');
-        } else {
-            int h0 = hour / 10;
-            int h1 = hour % 10;
-            chars[off++] = (char) (h0 + '0');
-            chars[off++] = (char) (h1 + '0');
-        }
+        IOUtils.write2(hour, chars, off);
+        off += 2;
+
         chars[off++] = ':';
 
         int minute = time.getMinute();
-        if (minute < 10) {
-            chars[off++] = '0';
-            chars[off++] = (char) (minute + '0');
-        } else {
-            int i0 = minute / 10;
-            int i1 = minute % 10;
-            chars[off++] = (char) (i0 + '0');
-            chars[off++] = (char) (i1 + '0');
-        }
+        IOUtils.write2(minute, chars, off);
+        off += 2;
+
         chars[off++] = ':';
 
         int second = time.getSecond();
-        if (second < 10) {
-            chars[off++] = '0';
-            chars[off++] = (char) (second + '0');
-        } else {
-            int s0 = second / 10;
-            int s1 = second % 10;
-            chars[off++] = (char) (s0 + '0');
-            chars[off++] = (char) (s1 + '0');
-        }
+        IOUtils.write2(second, chars, off);
+        off += 2;
 
         int nano = time.getNano();
         if (nano != 0) {
-            int small, size;
-            int m0 = nano % 1000_000;
-            if (m0 == 0) {
-                small = nano / 1000_000 + 1000;
-                size = 4;
-                IOUtils.getChars(small, off + size, chars);
-                chars[off] = '.';
-                off += size;
-                return;
-            }
+            final int div = nano / 1000;
+            final int div2 = div / 1000;
+            final int rem1 = nano - div * 1000;
 
-            if (m0 % 1000 == 0) {
-                small = nano / 1000 + 1000_000;
-                size = 7;
-                IOUtils.getChars(small, off + size, chars);
-                chars[off] = '.';
-                off += size;
-                return;
-            }
-
-            if (nano >= 100_000_000) {
-                chars[off++] = '.';
-                IOUtils.getChars(nano, off + 9, chars);
+            chars[off++] = '.';
+            if (rem1 != 0) {
+                IOUtils.write3(div2, chars, off);
+                IOUtils.write3(div - div2 * 1000, chars, off + 3);
+                IOUtils.write3(rem1, chars, off + 6);
                 off += 9;
             } else {
-                small = nano + 1000_000_000;
-                size = 10;
-                IOUtils.getChars(small, off + size, chars);
-                chars[off] = '.';
-                off += size;
+                final int rem2 = div - div2 * 1000;
+                if (rem2 != 0) {
+                    IOUtils.write3(div2, chars, off);
+                    IOUtils.write3(rem2, chars, off + 3);
+                    off += 6;
+                } else {
+                    IOUtils.write3(div2, chars, off);
+                    off += 3;
+                }
             }
         }
     }
