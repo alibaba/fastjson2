@@ -13,7 +13,7 @@ public class ClientsParseUTF8BytesTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
-            // zulu17.40.19 : 2850
+            // zulu17.40.19 : 2850 2815
             // oracle-jdk-17.0.6 :
             // oracle-jdk-17.0.6_vec :
         }
@@ -43,8 +43,8 @@ public class ClientsParseUTF8BytesTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2();
-        dsljson();
+        fastjson2();
+//        dsljson();
 //        jackson();
     }
 }

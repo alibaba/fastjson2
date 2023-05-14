@@ -1971,98 +1971,35 @@ class JSONWriterUTF8
             }
         }
 
-        int year = date.getYear();
-        int month = date.getMonthValue();
-        int dayOfMonth = date.getDayOfMonth();
-
-        int yearSize = IOUtils.stringSize(year);
-        int len = 8 + yearSize;
-        int minCapacity = off + len;
+        int minCapacity = off + 18;
         if (minCapacity > bytes.length) {
             ensureCapacity(minCapacity);
         }
-        bytes[off] = (byte) quote;
-        Arrays.fill(bytes, off + 1, minCapacity - 1, (byte) '0');
-        IOUtils.getChars(year, off + yearSize + 1, bytes);
-        bytes[off + yearSize + 1] = '-';
-        IOUtils.getChars(month, off + yearSize + 4, bytes);
-        bytes[off + yearSize + 4] = '-';
-        IOUtils.getChars(dayOfMonth, off + yearSize + 7, bytes);
-        bytes[minCapacity - 1] = (byte) quote;
-        off += len;
+        bytes[off++] = (byte) quote;
+        writeLocalDate0(date);
+        bytes[off++] = (byte) quote;
     }
 
     @Override
     public final void writeLocalDateTime(LocalDateTime dateTime) {
-        int year = dateTime.getYear();
-        int month = dateTime.getMonthValue();
-        int dayOfMonth = dateTime.getDayOfMonth();
-        int hour = dateTime.getHour();
-        int minute = dateTime.getMinute();
-        int second = dateTime.getSecond();
-        int nano = dateTime.getNano();
-
-        int yearSize = IOUtils.stringSize(year);
-        int len = 17 + yearSize;
-        int small;
-        if (nano % 1000_000_000 == 0) {
-            small = 0;
-        } else if (nano % 1000_000_00 == 0) {
-            len += 2;
-            small = nano / 1000_000_00;
-        } else if (nano % 1000_000_0 == 0) {
-            len += 3;
-            small = nano / 1000_000_0;
-        } else if (nano % 1000_000 == 0) {
-            len += 4;
-            small = nano / 1000_000;
-        } else if (nano % 1000_00 == 0) {
-            len += 5;
-            small = nano / 1000_00;
-        } else if (nano % 1000_0 == 0) {
-            len += 6;
-            small = nano / 1000_0;
-        } else if (nano % 1000 == 0) {
-            len += 7;
-            small = nano / 1000;
-        } else if (nano % 100 == 0) {
-            len += 8;
-            small = nano / 100;
-        } else if (nano % 10 == 0) {
-            len += 9;
-            small = nano / 10;
-        } else {
-            len += 10;
-            small = nano;
+        int minCapacity = off + 38;
+        if (minCapacity >= bytes.length) {
+            ensureCapacity(minCapacity);
         }
 
-        ensureCapacity(off + len);
-
-        bytes[off] = (byte) quote;
-        Arrays.fill(bytes, off + 1, off + len - 1, (byte) '0');
-        IOUtils.getChars(year, off + yearSize + 1, bytes);
-        bytes[off + yearSize + 1] = '-';
-        IOUtils.getChars(month, off + yearSize + 4, bytes);
-        bytes[off + yearSize + 4] = '-';
-        IOUtils.getChars(dayOfMonth, off + yearSize + 7, bytes);
-        bytes[off + yearSize + 7] = ' ';
-        IOUtils.getChars(hour, off + yearSize + 10, bytes);
-        bytes[off + yearSize + 10] = ':';
-        IOUtils.getChars(minute, off + yearSize + 13, bytes);
-        bytes[off + yearSize + 13] = ':';
-        IOUtils.getChars(second, off + yearSize + 16, bytes);
-        if (small != 0) {
-            bytes[off + yearSize + 16] = '.';
-            IOUtils.getChars(small, off + len - 1, bytes);
-        }
-        bytes[off + len - 1] = (byte) quote;
-
-        off += len;
+        bytes[off++] = (byte) quote;
+        writeLocalDate0(dateTime.toLocalDate());
+        bytes[off++] = ' ';
+        writeLocalTime0(dateTime.toLocalTime());
+        bytes[off++] = (byte) quote;
     }
 
     @Override
     public final void writeDateYYYMMDD8(int year, int month, int dayOfMonth) {
-        ensureCapacity(off + 10);
+        int minCapacity = off + 10;
+        if (minCapacity >= bytes.length) {
+            ensureCapacity(minCapacity);
+        }
 
         bytes[off] = (byte) quote;
         bytes[off + 1] = (byte) (year / 1000 + '0');
@@ -2079,7 +2016,10 @@ class JSONWriterUTF8
 
     @Override
     public final void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
-        ensureCapacity(off + 12);
+        int minCapacity = off + 12;
+        if (minCapacity >= bytes.length) {
+            ensureCapacity(minCapacity);
+        }
 
         bytes[off] = (byte) quote;
         bytes[off + 1] = (byte) (year / 1000 + '0');
@@ -2098,7 +2038,10 @@ class JSONWriterUTF8
 
     @Override
     public final void writeTimeHHMMSS8(int hour, int minute, int second) {
-        ensureCapacity(off + 10);
+        int minCapacity = off + 10;
+        if (minCapacity >= bytes.length) {
+            ensureCapacity(minCapacity);
+        }
 
         bytes[off] = (byte) quote;
         bytes[off + 1] = (byte) (hour / 10 + '0');
@@ -2116,59 +2059,13 @@ class JSONWriterUTF8
 
     @Override
     public final void writeLocalTime(LocalTime time) {
-        int hour = time.getHour();
-        int minute = time.getMinute();
-        int second = time.getSecond();
-        int nano = time.getNano();
-
-        int len = 10;
-        int small;
-        if (nano % 1000_000_000 == 0) {
-            small = 0;
-        } else if (nano % 1000_000_00 == 0) {
-            len += 2;
-            small = nano / 1000_000_00;
-        } else if (nano % 1000_000_0 == 0) {
-            len += 3;
-            small = nano / 1000_000_0;
-        } else if (nano % 1000_000 == 0) {
-            len += 4;
-            small = nano / 1000_000;
-        } else if (nano % 1000_00 == 0) {
-            len += 5;
-            small = nano / 1000_00;
-        } else if (nano % 1000_0 == 0) {
-            len += 6;
-            small = nano / 1000_0;
-        } else if (nano % 1000 == 0) {
-            len += 7;
-            small = nano / 1000;
-        } else if (nano % 100 == 0) {
-            len += 8;
-            small = nano / 100;
-        } else if (nano % 10 == 0) {
-            len += 9;
-            small = nano / 10;
-        } else {
-            len += 10;
-            small = nano;
+        int minCapacity = off + 20;
+        if (minCapacity >= bytes.length) {
+            ensureCapacity(minCapacity);
         }
-
-        ensureCapacity(off + len);
-        bytes[off] = (byte) quote;
-        Arrays.fill(bytes, off + 1, off + len - 1, (byte) '0');
-        IOUtils.getChars(hour, off + 3, bytes);
-        bytes[off + 3] = ':';
-        IOUtils.getChars(minute, off + 6, bytes);
-        bytes[off + 6] = ':';
-        IOUtils.getChars(second, off + 9, bytes);
-        if (small != 0) {
-            bytes[off + 9] = '.';
-            IOUtils.getChars(small, off + len - 1, bytes);
-        }
-        bytes[off + len - 1] = (byte) quote;
-
-        off += len;
+        bytes[off++] = (byte) quote;
+        writeLocalTime0(time);
+        bytes[off++] = (byte) quote;
     }
 
     @Override
@@ -2178,20 +2075,11 @@ class JSONWriterUTF8
             return;
         }
 
-        int year = dateTime.getYear();
-        int month = dateTime.getMonthValue();
-        int dayOfMonth = dateTime.getDayOfMonth();
-        int hour = dateTime.getHour();
-        int minute = dateTime.getMinute();
-        int second = dateTime.getSecond();
-        int nano = dateTime.getNano();
-        String zoneId = dateTime.getZone().getId();
-
-        int len = 17;
-
+        ZoneId zone = dateTime.getZone();
+        String zoneId = zone.getId();
         char firstZoneChar = '\0';
         int zoneSize;
-        if ("UTC".equals(zoneId) || "Z".equals(zoneId)) {
+        if (ZoneOffset.UTC == zone || (zoneId.length() <= 3 && ("UTC".equals(zoneId) || "Z".equals(zoneId)))) {
             zoneId = "Z";
             zoneSize = 1;
         } else if (zoneId.length() != 0 && ((firstZoneChar = zoneId.charAt(0)) == '+' || firstZoneChar == '-')) {
@@ -2199,71 +2087,28 @@ class JSONWriterUTF8
         } else {
             zoneSize = 2 + zoneId.length();
         }
-        len += zoneSize;
 
-        int yearSize = IOUtils.stringSize(year);
-        len += yearSize;
-        int small;
-        if (nano % 1000_000_000 == 0) {
-            small = 0;
-        } else if (nano % 1000_000_00 == 0) {
-            len += 2;
-            small = nano / 1000_000_00;
-        } else if (nano % 1000_000_0 == 0) {
-            len += 3;
-            small = nano / 1000_000_0;
-        } else if (nano % 1000_000 == 0) {
-            len += 4;
-            small = nano / 1000_000;
-        } else if (nano % 1000_00 == 0) {
-            len += 5;
-            small = nano / 1000_00;
-        } else if (nano % 1000_0 == 0) {
-            len += 6;
-            small = nano / 1000_0;
-        } else if (nano % 1000 == 0) {
-            len += 7;
-            small = nano / 1000;
-        } else if (nano % 100 == 0) {
-            len += 8;
-            small = nano / 100;
-        } else if (nano % 10 == 0) {
-            len += 9;
-            small = nano / 10;
-        } else {
-            len += 10;
-            small = nano;
+        int minCapacity = off + zoneSize + 38;
+        if (minCapacity > bytes.length) {
+            ensureCapacity(minCapacity);
         }
 
-        ensureCapacity(off + len);
-        bytes[off] = (byte) quote;
-        Arrays.fill(bytes, off + 1, off + len - 1, (byte) '0');
-        IOUtils.getChars(year, off + yearSize + 1, bytes);
-        bytes[off + yearSize + 1] = '-';
-        IOUtils.getChars(month, off + yearSize + 4, bytes);
-        bytes[off + yearSize + 4] = '-';
-        IOUtils.getChars(dayOfMonth, off + yearSize + 7, bytes);
-        bytes[off + yearSize + 7] = 'T';
-        IOUtils.getChars(hour, off + yearSize + 10, bytes);
-        bytes[off + yearSize + 10] = ':';
-        IOUtils.getChars(minute, off + yearSize + 13, bytes);
-        bytes[off + yearSize + 13] = ':';
-        IOUtils.getChars(second, off + yearSize + 16, bytes);
-        if (small != 0) {
-            bytes[off + yearSize + 16] = '.';
-            IOUtils.getChars(small, off + len - 1 - zoneSize, bytes);
-        }
+        bytes[off++] = (byte) quote;
+        writeLocalDate0(dateTime.toLocalDate());
+        bytes[off++] = 'T';
+        writeLocalTime0(dateTime.toLocalTime());
         if (zoneSize == 1) {
-            bytes[off + len - 2] = 'Z';
+            bytes[off++] = 'Z';
         } else if (firstZoneChar == '+' || firstZoneChar == '-') {
-            zoneId.getBytes(0, zoneId.length(), bytes, off + len - zoneSize - 1);
+            zoneId.getBytes(0, zoneId.length(), bytes, off);
+            off += zoneId.length();
         } else {
-            bytes[off + len - zoneSize - 1] = '[';
-            zoneId.getBytes(0, zoneId.length(), bytes, off + len - zoneSize);
-            bytes[off + len - 2] = ']';
+            bytes[off++] = '[';
+            zoneId.getBytes(0, zoneId.length(), bytes, off);
+            off += zoneId.length();
+            bytes[off++] = ']';
         }
-        bytes[off + len - 1] = (byte) quote;
-        off += len;
+        bytes[off++] = (byte) quote;
     }
 
     @Override
@@ -2273,20 +2118,11 @@ class JSONWriterUTF8
             return;
         }
 
-        int year = dateTime.getYear();
-        int month = dateTime.getMonthValue();
-        int dayOfMonth = dateTime.getDayOfMonth();
-        int hour = dateTime.getHour();
-        int minute = dateTime.getMinute();
-        int second = dateTime.getSecond();
-        int nano = dateTime.getNano();
-        String zoneId = dateTime.getOffset().getId();
-
-        int len = 17;
-
+        ZoneOffset offset = dateTime.getOffset();
+        String zoneId = offset.getId();
         char firstZoneChar = '\0';
         int zoneSize;
-        if ("UTC".equals(zoneId) || "Z".equals(zoneId)) {
+        if (ZoneOffset.UTC == offset || (zoneId.length() <= 3 && ("UTC".equals(zoneId) || "Z".equals(zoneId)))) {
             zoneId = "Z";
             zoneSize = 1;
         } else if (zoneId.length() != 0 && ((firstZoneChar = zoneId.charAt(0)) == '+' || firstZoneChar == '-')) {
@@ -2294,74 +2130,139 @@ class JSONWriterUTF8
         } else {
             zoneSize = 2 + zoneId.length();
         }
-        len += zoneSize;
 
-        int yearSize = IOUtils.stringSize(year);
-        len += yearSize;
-        int small;
-        if (nano % 1000_000_000 == 0) {
-            small = 0;
-        } else if (nano % 1000_000_00 == 0) {
-            len += 2;
-            small = nano / 1000_000_00;
-        } else if (nano % 1000_000_0 == 0) {
-            len += 3;
-            small = nano / 1000_000_0;
-        } else if (nano % 1000_000 == 0) {
-            len += 4;
-            small = nano / 1000_000;
-        } else if (nano % 1000_00 == 0) {
-            len += 5;
-            small = nano / 1000_00;
-        } else if (nano % 1000_0 == 0) {
-            len += 6;
-            small = nano / 1000_0;
-        } else if (nano % 1000 == 0) {
-            len += 7;
-            small = nano / 1000;
-        } else if (nano % 100 == 0) {
-            len += 8;
-            small = nano / 100;
-        } else if (nano % 10 == 0) {
-            len += 9;
-            small = nano / 10;
-        } else {
-            len += 10;
-            small = nano;
-        }
-
-        int minCapacity = off + len;
+        int minCapacity = off + zoneSize + 38;
         if (minCapacity > bytes.length) {
             ensureCapacity(minCapacity);
         }
-        bytes[off] = (byte) quote;
-        Arrays.fill(bytes, off + 1, minCapacity - 1, (byte) '0');
-        IOUtils.getChars(year, off + yearSize + 1, bytes);
-        bytes[off + yearSize + 1] = '-';
-        IOUtils.getChars(month, off + yearSize + 4, bytes);
-        bytes[off + yearSize + 4] = '-';
-        IOUtils.getChars(dayOfMonth, off + yearSize + 7, bytes);
-        bytes[off + yearSize + 7] = 'T';
-        IOUtils.getChars(hour, off + yearSize + 10, bytes);
-        bytes[off + yearSize + 10] = ':';
-        IOUtils.getChars(minute, off + yearSize + 13, bytes);
-        bytes[off + yearSize + 13] = ':';
-        IOUtils.getChars(second, off + yearSize + 16, bytes);
-        if (small != 0) {
-            bytes[off + yearSize + 16] = '.';
-            IOUtils.getChars(small, minCapacity - 1 - zoneSize, bytes);
-        }
+
+        bytes[off++] = (byte) quote;
+        LocalDateTime ldt = dateTime.toLocalDateTime();
+        writeLocalDate0(ldt.toLocalDate());
+        bytes[off++] = 'T';
+        writeLocalTime0(ldt.toLocalTime());
         if (zoneSize == 1) {
-            bytes[minCapacity - 2] = 'Z';
+            bytes[off++] = 'Z';
         } else if (firstZoneChar == '+' || firstZoneChar == '-') {
-            zoneId.getBytes(0, zoneId.length(), bytes, minCapacity - zoneSize - 1);
+            zoneId.getBytes(0, zoneId.length(), bytes, off);
+            off += zoneId.length();
         } else {
-            bytes[(minCapacity) - zoneSize - 1] = '[';
-            zoneId.getBytes(0, zoneId.length(), bytes, minCapacity - zoneSize);
-            bytes[minCapacity - 2] = ']';
+            bytes[off++] = '[';
+            zoneId.getBytes(0, zoneId.length(), bytes, off);
+            off += zoneId.length();
+            bytes[off++] = ']';
         }
-        bytes[minCapacity - 1] = (byte) quote;
-        off += len;
+        bytes[off++] = (byte) quote;
+    }
+
+    final void writeLocalDate0(LocalDate localDate) {
+        int year = localDate.getYear();
+        if (year >= 1000 && year < 10000) {
+            bytes[off++] = (byte) (year / 1000 + '0');
+            bytes[off++] = (byte) ((year / 100) % 10 + '0');
+            bytes[off++] = (byte) ((year / 10) % 10 + '0');
+            bytes[off++] = (byte) (year % 10 + '0');
+        } else {
+            int yearSize = year > 0 ? IOUtils.stringSize(year) : IOUtils.stringSize(-year) + 1;
+            IOUtils.getChars(year, off + yearSize, bytes);
+            off += yearSize;
+        }
+        bytes[off++] = '-';
+
+        int month = localDate.getMonthValue();
+        if (month < 10) {
+            bytes[off++] = '0';
+            bytes[off++] = (byte) (month + '0');
+        } else {
+            int m0 = month / 10;
+            int m1 = month % 10;
+            bytes[off++] = (byte) (m0 + '0');
+            bytes[off++] = (byte) (m1 + '0');
+        }
+        bytes[off++] = '-';
+
+        int dayOfMonth = localDate.getDayOfMonth();
+        if (dayOfMonth < 10) {
+            bytes[off++] = '0';
+            bytes[off++] = (byte) (dayOfMonth + '0');
+        } else {
+            int d0 = dayOfMonth / 10;
+            int d1 = dayOfMonth % 10;
+            bytes[off++] = (byte) (d0 + '0');
+            bytes[off++] = (byte) (d1 + '0');
+        }
+    }
+
+    final void writeLocalTime0(LocalTime time) {
+        int hour = time.getHour();
+        if (hour < 10) {
+            bytes[off++] = '0';
+            bytes[off++] = (byte) (hour + '0');
+        } else {
+            int h0 = hour / 10;
+            int h1 = hour % 10;
+            bytes[off++] = (byte) (h0 + '0');
+            bytes[off++] = (byte) (h1 + '0');
+        }
+        bytes[off++] = ':';
+
+        int minute = time.getMinute();
+        if (minute < 10) {
+            bytes[off++] = '0';
+            bytes[off++] = (byte) (minute + '0');
+        } else {
+            int i0 = minute / 10;
+            int i1 = minute % 10;
+            bytes[off++] = (byte) (i0 + '0');
+            bytes[off++] = (byte) (i1 + '0');
+        }
+        bytes[off++] = ':';
+
+        int second = time.getSecond();
+        if (second < 10) {
+            bytes[off++] = '0';
+            bytes[off++] = (byte) (second + '0');
+        } else {
+            int s0 = second / 10;
+            int s1 = second % 10;
+            bytes[off++] = (byte) (s0 + '0');
+            bytes[off++] = (byte) (s1 + '0');
+        }
+
+        int nano = time.getNano();
+        if (nano != 0) {
+            int small, size;
+            int m0 = nano % 1000_000;
+            if (m0 == 0) {
+                small = nano / 1000_000 + 1000;
+                size = 4;
+                IOUtils.getChars(small, off + size, bytes);
+                bytes[off] = '.';
+                off += size;
+                return;
+            }
+
+            if (m0 % 1000 == 0) {
+                small = nano / 1000 + 1000_000;
+                size = 7;
+                IOUtils.getChars(small, off + size, bytes);
+                bytes[off] = '.';
+                off += size;
+                return;
+            }
+
+            if (nano >= 100_000_000) {
+                bytes[off++] = '.';
+                IOUtils.getChars(nano, off + 9, bytes);
+                off += 9;
+            } else {
+                small = nano + 1000_000_000;
+                size = 10;
+                IOUtils.getChars(small, off + size, bytes);
+                bytes[off] = '.';
+                off += size;
+            }
+        }
     }
 
     @Override
