@@ -71,20 +71,12 @@ final class CSVWriterUTF8
     }
 
     public void writeInt64(long longValue) {
-        if (longValue == Long.MIN_VALUE) {
-            writeRaw(BYTES_LONG_MIN);
-            return;
-        }
-
-        int size = (longValue < 0) ? IOUtils.stringSize(-longValue) + 1 : IOUtils.stringSize(longValue);
-
-        int minCapacity = off + size;
+        int minCapacity = off + 21;
         if (minCapacity - this.bytes.length > 0) {
             flush();
         }
 
-        IOUtils.getChars(longValue, off + size, bytes);
-        off += size;
+        off = IOUtils.writeInt64(bytes, off, longValue);
     }
 
     public void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
@@ -92,16 +84,14 @@ final class CSVWriterUTF8
             flush();
         }
 
-        bytes[off++] = (byte) (year / 1000 + '0');
-        bytes[off++] = (byte) ((year / 100) % 10 + '0');
-        bytes[off++] = (byte) ((year / 10) % 10 + '0');
-        bytes[off++] = (byte) (year % 10 + '0');
+        IOUtils.write4(year, bytes, off);
+        off += 4;
         bytes[off++] = '-';
-        bytes[off++] = (byte) (month / 10 + '0');
-        bytes[off++] = (byte) (month % 10 + '0');
+        IOUtils.write2(month, bytes, off);
+        off += 2;
         bytes[off++] = '-';
-        bytes[off++] = (byte) (dayOfMonth / 10 + '0');
-        bytes[off++] = (byte) (dayOfMonth % 10 + '0');
+        IOUtils.write2(dayOfMonth, bytes, off);
+        off += 2;
     }
 
     public void writeDateTime19(
@@ -115,25 +105,23 @@ final class CSVWriterUTF8
             flush();
         }
 
-        bytes[off++] = (byte) (year / 1000 + '0');
-        bytes[off++] = (byte) ((year / 100) % 10 + '0');
-        bytes[off++] = (byte) ((year / 10) % 10 + '0');
-        bytes[off++] = (byte) (year % 10 + '0');
+        IOUtils.write4(year, bytes, off);
+        off += 4;
         bytes[off++] = '-';
-        bytes[off++] = (byte) (month / 10 + '0');
-        bytes[off++] = (byte) (month % 10 + '0');
+        IOUtils.write2(month, bytes, off);
+        off += 2;
         bytes[off++] = '-';
-        bytes[off++] = (byte) (dayOfMonth / 10 + '0');
-        bytes[off++] = (byte) (dayOfMonth % 10 + '0');
+        IOUtils.write2(dayOfMonth, bytes, off);
+        off += 2;
         bytes[off++] = ' ';
-        bytes[off++] = (byte) (hour / 10 + '0');
-        bytes[off++] = (byte) (hour % 10 + '0');
+        IOUtils.write2(hour, bytes, off);
+        off += 2;
         bytes[off++] = ':';
-        bytes[off++] = (byte) (minute / 10 + '0');
-        bytes[off++] = (byte) (minute % 10 + '0');
+        IOUtils.write2(minute, bytes, off);
+        off += 2;
         bytes[off++] = ':';
-        bytes[off++] = (byte) (second / 10 + '0');
-        bytes[off++] = (byte) (second % 10 + '0');
+        IOUtils.write2(second, bytes, off);
+        off += 2;
     }
 
     public void writeString(String value) {
@@ -150,20 +138,12 @@ final class CSVWriterUTF8
     }
 
     public void writeInt32(int intValue) {
-        if (intValue == Integer.MIN_VALUE) {
-            writeRaw("-2147483648");
-            return;
-        }
-
-        int size = (intValue < 0) ? IOUtils.stringSize(-intValue) + 1 : IOUtils.stringSize(intValue);
-
-        int minCapacity = off + size;
+        int minCapacity = off + 11;
         if (minCapacity - this.bytes.length > 0) {
             flush();
         }
 
-        IOUtils.getChars(intValue, off + size, bytes);
-        off += size;
+        off = IOUtils.writeInt32(bytes, off, intValue);
     }
 
     public void writeDouble(double value) {
