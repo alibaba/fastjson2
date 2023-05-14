@@ -4861,6 +4861,10 @@ class JSONReaderJSONB
         throw new UnsupportedOperationException();
     }
 
+    public final OffsetDateTime readOffsetDateTime() {
+        return readZonedDateTime().toOffsetDateTime();
+    }
+
     @Override
     public final ZonedDateTime readZonedDateTime() {
         int type = bytes[offset++];
