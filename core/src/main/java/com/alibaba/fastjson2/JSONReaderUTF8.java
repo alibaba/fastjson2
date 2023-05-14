@@ -4690,15 +4690,95 @@ class JSONReaderUTF8
         if (ch != '"' && ch != '\'') {
             throw new JSONException("date only support string input");
         }
-        char quote = ch;
+        final char quote = ch;
 
         int len = 0;
-        for (int i = offset; i < end; ++i, ++len) {
+        int i = offset;
+
+        int i8 = i + 8;
+        if (i8 < end && i8 < bytes.length) {
+            if (bytes[i] != quote
+                    && bytes[i + 1] != quote
+                    && bytes[i + 2] != quote
+                    && bytes[i + 3] != quote
+                    && bytes[i + 4] != quote
+                    && bytes[i + 5] != quote
+                    && bytes[i + 6] != quote
+                    && bytes[i + 7] != quote
+            ) {
+                i += 8;
+                len += 8;
+            }
+        }
+
+        for (; i < end; ++i, ++len) {
             if (bytes[i] == quote) {
                 break;
             }
         }
         return len;
+    }
+
+    public final OffsetDateTime readOffsetDateTime() {
+        if (this.ch == '"' || this.ch == '\'') {
+            if (context.dateFormat == null
+                    || context.formatyyyyMMddhhmmss19
+                    || context.formatyyyyMMddhhmmssT19
+                    || context.formatyyyyMMdd8
+                    || context.formatISO8601
+            ) {
+                char quote = this.ch;
+                int len = 0;
+                int i = offset;
+
+                int i8 = i + 8;
+                if (i8 < end && i8 < bytes.length) {
+                    if (bytes[i] != quote
+                            && bytes[i + 1] != quote
+                            && bytes[i + 2] != quote
+                            && bytes[i + 3] != quote
+                            && bytes[i + 4] != quote
+                            && bytes[i + 5] != quote
+                            && bytes[i + 6] != quote
+                            && bytes[i + 7] != quote
+                    ) {
+                        i += 8;
+                        len += 8;
+                    }
+                }
+
+                for (; i < end; ++i, ++len) {
+                    if (bytes[i] == quote) {
+                        break;
+                    }
+                }
+
+                OffsetDateTime oft = null;
+                if (len == 30 && bytes[offset + 29] == 'Z') {
+                    LocalDateTime ldt = DateUtils.parseLocalDateTime29(bytes, offset);
+                    oft = OffsetDateTime.of(ldt, ZoneOffset.UTC);
+                } else if (len == 29 && bytes[offset + 28] == 'Z') {
+                    LocalDateTime ldt = DateUtils.parseLocalDateTime28(bytes, offset);
+                    oft = OffsetDateTime.of(ldt, ZoneOffset.UTC);
+                } else if (len == 28 && bytes[offset + 27] == 'Z') {
+                    LocalDateTime ldt = DateUtils.parseLocalDateTime27(bytes, offset);
+                    oft = OffsetDateTime.of(ldt, ZoneOffset.UTC);
+                } else if (len == 27 && bytes[offset + 26] == 'Z') {
+                    LocalDateTime ldt = DateUtils.parseLocalDateTime26(bytes, offset);
+                    oft = OffsetDateTime.of(ldt, ZoneOffset.UTC);
+                }
+
+                if (oft != null) {
+                    offset += (len + 1);
+                    next();
+                    if (comma = (ch == ',')) {
+                        next();
+                    }
+                    return oft;
+                }
+            }
+        }
+        return readZonedDateTime().toOffsetDateTime();
     }
 
     @Override

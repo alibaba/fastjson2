@@ -1061,6 +1061,8 @@ public abstract class JSONReader
         }
     }
 
+    public abstract OffsetDateTime readOffsetDateTime();
+
     public ZonedDateTime readZonedDateTime() {
         if (isInt()) {
             long millis = readInt64Value();

@@ -17,6 +17,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.*;
@@ -2040,6 +2041,9 @@ public class ObjectReaderCreatorASM
         } else if (fieldClass == LocalDate.class && fieldReader.format == null) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readLocalDate", "()Ljava/time/LocalDate;", false);
+        } else if (fieldClass == OffsetDateTime.class && fieldReader.format == null) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readOffsetDateTime", "()Ljava/time/OffsetDateTime;", false);
         } else {
             Label endObject_ = new Label();
 
