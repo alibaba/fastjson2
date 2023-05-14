@@ -4711,7 +4711,23 @@ class JSONReaderUTF8
             return null;
         }
 
-        ZonedDateTime zdt = DateUtils.parseZonedDateTime(bytes, offset, len, context.zoneId);
+        ZonedDateTime zdt;
+        if (len == 30 && bytes[offset + 29] == 'Z') {
+            LocalDateTime ldt = DateUtils.parseLocalDateTime29(bytes, offset);
+            zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
+        } else if (len == 29 && bytes[offset + 28] == 'Z') {
+            LocalDateTime ldt = DateUtils.parseLocalDateTime28(bytes, offset);
+            zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
+        } else if (len == 28 && bytes[offset + 27] == 'Z') {
+            LocalDateTime ldt = DateUtils.parseLocalDateTime27(bytes, offset);
+            zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
+        } else if (len == 27 && bytes[offset + 26] == 'Z') {
+            LocalDateTime ldt = DateUtils.parseLocalDateTime26(bytes, offset);
+            zdt = ZonedDateTime.of(ldt, ZoneOffset.UTC);
+        } else {
+            zdt = DateUtils.parseZonedDateTime(bytes, offset, len, context.zoneId);
+        }
+
         if (zdt == null) {
             return null;
         }

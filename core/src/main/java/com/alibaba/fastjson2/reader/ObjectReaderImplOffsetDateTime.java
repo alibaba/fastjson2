@@ -55,8 +55,7 @@ final class ObjectReaderImplOffsetDateTime
         }
 
         if (format == null || yyyyMMddhhmmss19 || formatISO8601) {
-            ZonedDateTime zdt = jsonReader.readZonedDateTime();
-            return zdt.toOffsetDateTime();
+            return jsonReader.readZonedDateTime().toOffsetDateTime();
         }
 
         String str = jsonReader.readString();

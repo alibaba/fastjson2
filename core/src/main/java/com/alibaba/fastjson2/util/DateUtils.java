@@ -5147,6 +5147,622 @@ public class DateUtils {
         );
     }
 
+    public static LocalDateTime parseLocalDateTime26(byte[] str, int off) {
+        if (off + 26 > str.length) {
+            return null;
+        }
+
+        char c0 = (char) str[off + 0];
+        char c1 = (char) str[off + 1];
+        char c2 = (char) str[off + 2];
+        char c3 = (char) str[off + 3];
+        char c4 = (char) str[off + 4];
+        char c5 = (char) str[off + 5];
+        char c6 = (char) str[off + 6];
+        char c7 = (char) str[off + 7];
+        char c8 = (char) str[off + 8];
+        char c9 = (char) str[off + 9];
+        char c10 = (char) str[off + 10];
+        char c11 = (char) str[off + 11];
+        char c12 = (char) str[off + 12];
+        char c13 = (char) str[off + 13];
+        char c14 = (char) str[off + 14];
+        char c15 = (char) str[off + 15];
+        char c16 = (char) str[off + 16];
+        char c17 = (char) str[off + 17];
+        char c18 = (char) str[off + 18];
+        char c19 = (char) str[off + 19];
+        char c20 = (char) str[off + 20];
+        char c21 = (char) str[off + 21];
+        char c22 = (char) str[off + 22];
+        char c23 = (char) str[off + 23];
+        char c24 = (char) str[off + 24];
+        char c25 = (char) str[off + 25];
+
+        if (c4 != '-' || c7 != '-' || (c10 != ' ' && c10 != 'T') || c13 != ':' || c16 != ':' || c19 != '.') {
+            return null;
+        }
+
+        char y0 = c0;
+        char y1 = c1;
+        char y2 = c2;
+        char y3 = c3;
+
+        char m0 = c5;
+        char m1 = c6;
+
+        char d0 = c8;
+        char d1 = c9;
+
+        char h0 = c11;
+        char h1 = c12;
+
+        char i0 = c14;
+        char i1 = c15;
+
+        char s0 = c17;
+        char s1 = c18;
+
+        char S0 = c20;
+        char S1 = c21;
+        char S2 = c22;
+        char S3 = c23;
+        char S4 = c24;
+        char S5 = c25;
+
+        return localDateTime(
+                y0, y1, y2, y3,
+                m0, m1,
+                d0, d1,
+                h0, h1,
+                i0, i1,
+                s0, s1,
+                S0, S1, S2, S3, S4, S5, '0', '0', '0'
+        );
+    }
+
+    public static LocalDateTime parseLocalDateTime26(char[] str, int off) {
+        if (off + 26 > str.length) {
+            return null;
+        }
+
+        char c0 = str[off + 0];
+        char c1 = str[off + 1];
+        char c2 = str[off + 2];
+        char c3 = str[off + 3];
+        char c4 = str[off + 4];
+        char c5 = str[off + 5];
+        char c6 = str[off + 6];
+        char c7 = str[off + 7];
+        char c8 = str[off + 8];
+        char c9 = str[off + 9];
+        char c10 = str[off + 10];
+        char c11 = str[off + 11];
+        char c12 = str[off + 12];
+        char c13 = str[off + 13];
+        char c14 = str[off + 14];
+        char c15 = str[off + 15];
+        char c16 = str[off + 16];
+        char c17 = str[off + 17];
+        char c18 = str[off + 18];
+        char c19 = str[off + 19];
+        char c20 = str[off + 20];
+        char c21 = str[off + 21];
+        char c22 = str[off + 22];
+        char c23 = str[off + 23];
+        char c24 = str[off + 24];
+        char c25 = str[off + 25];
+
+        if (c4 != '-' || c7 != '-' || (c10 != ' ' && c10 != 'T') || c13 != ':' || c16 != ':' || c19 != '.') {
+            return null;
+        }
+
+        char y0 = c0;
+        char y1 = c1;
+        char y2 = c2;
+        char y3 = c3;
+
+        char m0 = c5;
+        char m1 = c6;
+
+        char d0 = c8;
+        char d1 = c9;
+
+        char h0 = c11;
+        char h1 = c12;
+
+        char i0 = c14;
+        char i1 = c15;
+
+        char s0 = c17;
+        char s1 = c18;
+
+        char S0 = c20;
+        char S1 = c21;
+        char S2 = c22;
+        char S3 = c23;
+        char S4 = c24;
+        char S5 = c25;
+
+        return localDateTime(
+                y0, y1, y2, y3,
+                m0, m1,
+                d0, d1,
+                h0, h1,
+                i0, i1,
+                s0, s1,
+                S0, S1, S2, S3, S4, S5, '0', '0', '0'
+        );
+    }
+
+    public static LocalDateTime parseLocalDateTime27(byte[] str, int off) {
+        if (off + 27 > str.length) {
+            return null;
+        }
+
+        char c0 = (char) str[off + 0];
+        char c1 = (char) str[off + 1];
+        char c2 = (char) str[off + 2];
+        char c3 = (char) str[off + 3];
+        char c4 = (char) str[off + 4];
+        char c5 = (char) str[off + 5];
+        char c6 = (char) str[off + 6];
+        char c7 = (char) str[off + 7];
+        char c8 = (char) str[off + 8];
+        char c9 = (char) str[off + 9];
+        char c10 = (char) str[off + 10];
+        char c11 = (char) str[off + 11];
+        char c12 = (char) str[off + 12];
+        char c13 = (char) str[off + 13];
+        char c14 = (char) str[off + 14];
+        char c15 = (char) str[off + 15];
+        char c16 = (char) str[off + 16];
+        char c17 = (char) str[off + 17];
+        char c18 = (char) str[off + 18];
+        char c19 = (char) str[off + 19];
+        char c20 = (char) str[off + 20];
+        char c21 = (char) str[off + 21];
+        char c22 = (char) str[off + 22];
+        char c23 = (char) str[off + 23];
+        char c24 = (char) str[off + 24];
+        char c25 = (char) str[off + 25];
+        char c26 = (char) str[off + 26];
+
+        if (c4 != '-' || c7 != '-' || (c10 != ' ' && c10 != 'T') || c13 != ':' || c16 != ':' || c19 != '.') {
+            return null;
+        }
+
+        char y0 = c0;
+        char y1 = c1;
+        char y2 = c2;
+        char y3 = c3;
+
+        char m0 = c5;
+        char m1 = c6;
+
+        char d0 = c8;
+        char d1 = c9;
+
+        char h0 = c11;
+        char h1 = c12;
+
+        char i0 = c14;
+        char i1 = c15;
+
+        char s0 = c17;
+        char s1 = c18;
+
+        char S0 = c20;
+        char S1 = c21;
+        char S2 = c22;
+        char S3 = c23;
+        char S4 = c24;
+        char S5 = c25;
+        char S6 = c26;
+
+        return localDateTime(
+                y0, y1, y2, y3,
+                m0, m1,
+                d0, d1,
+                h0, h1,
+                i0, i1,
+                s0, s1,
+                S0, S1, S2, S3, S4, S5, S6, '0', '0'
+        );
+    }
+
+    public static LocalDateTime parseLocalDateTime27(char[] str, int off) {
+        if (off + 27 > str.length) {
+            return null;
+        }
+
+        char c0 = str[off + 0];
+        char c1 = str[off + 1];
+        char c2 = str[off + 2];
+        char c3 = str[off + 3];
+        char c4 = str[off + 4];
+        char c5 = str[off + 5];
+        char c6 = str[off + 6];
+        char c7 = str[off + 7];
+        char c8 = str[off + 8];
+        char c9 = str[off + 9];
+        char c10 = str[off + 10];
+        char c11 = str[off + 11];
+        char c12 = str[off + 12];
+        char c13 = str[off + 13];
+        char c14 = str[off + 14];
+        char c15 = str[off + 15];
+        char c16 = str[off + 16];
+        char c17 = str[off + 17];
+        char c18 = str[off + 18];
+        char c19 = str[off + 19];
+        char c20 = str[off + 20];
+        char c21 = str[off + 21];
+        char c22 = str[off + 22];
+        char c23 = str[off + 23];
+        char c24 = str[off + 24];
+        char c25 = str[off + 25];
+        char c26 = str[off + 26];
+
+        if (c4 != '-' || c7 != '-' || (c10 != ' ' && c10 != 'T') || c13 != ':' || c16 != ':' || c19 != '.') {
+            return null;
+        }
+
+        char y0 = c0;
+        char y1 = c1;
+        char y2 = c2;
+        char y3 = c3;
+
+        char m0 = c5;
+        char m1 = c6;
+
+        char d0 = c8;
+        char d1 = c9;
+
+        char h0 = c11;
+        char h1 = c12;
+
+        char i0 = c14;
+        char i1 = c15;
+
+        char s0 = c17;
+        char s1 = c18;
+
+        char S0 = c20;
+        char S1 = c21;
+        char S2 = c22;
+        char S3 = c23;
+        char S4 = c24;
+        char S5 = c25;
+        char S6 = c26;
+
+        return localDateTime(
+                y0, y1, y2, y3,
+                m0, m1,
+                d0, d1,
+                h0, h1,
+                i0, i1,
+                s0, s1,
+                S0, S1, S2, S3, S4, S5, S6, '0', '0'
+        );
+    }
+
+    public static LocalDateTime parseLocalDateTime28(char[] str, int off) {
+        if (off + 28 > str.length) {
+            return null;
+        }
+
+        char c0 = str[off + 0];
+        char c1 = str[off + 1];
+        char c2 = str[off + 2];
+        char c3 = str[off + 3];
+        char c4 = str[off + 4];
+        char c5 = str[off + 5];
+        char c6 = str[off + 6];
+        char c7 = str[off + 7];
+        char c8 = str[off + 8];
+        char c9 = str[off + 9];
+        char c10 = str[off + 10];
+        char c11 = str[off + 11];
+        char c12 = str[off + 12];
+        char c13 = str[off + 13];
+        char c14 = str[off + 14];
+        char c15 = str[off + 15];
+        char c16 = str[off + 16];
+        char c17 = str[off + 17];
+        char c18 = str[off + 18];
+        char c19 = str[off + 19];
+        char c20 = str[off + 20];
+        char c21 = str[off + 21];
+        char c22 = str[off + 22];
+        char c23 = str[off + 23];
+        char c24 = str[off + 24];
+        char c25 = str[off + 25];
+        char c26 = str[off + 26];
+        char c27 = str[off + 27];
+
+        if (c4 != '-' || c7 != '-' || (c10 != ' ' && c10 != 'T') || c13 != ':' || c16 != ':' || c19 != '.') {
+            return null;
+        }
+
+        char y0 = c0;
+        char y1 = c1;
+        char y2 = c2;
+        char y3 = c3;
+
+        char m0 = c5;
+        char m1 = c6;
+
+        char d0 = c8;
+        char d1 = c9;
+
+        char h0 = c11;
+        char h1 = c12;
+
+        char i0 = c14;
+        char i1 = c15;
+
+        char s0 = c17;
+        char s1 = c18;
+
+        char S0 = c20;
+        char S1 = c21;
+        char S2 = c22;
+        char S3 = c23;
+        char S4 = c24;
+        char S5 = c25;
+        char S6 = c26;
+        char S7 = c27;
+
+        return localDateTime(
+                y0, y1, y2, y3,
+                m0, m1,
+                d0, d1,
+                h0, h1,
+                i0, i1,
+                s0, s1,
+                S0, S1, S2, S3, S4, S5, S6, S7, '0'
+        );
+    }
+
+    public static LocalDateTime parseLocalDateTime28(byte[] str, int off) {
+        if (off + 28 > str.length) {
+            return null;
+        }
+
+        char c0 = (char) str[off + 0];
+        char c1 = (char) str[off + 1];
+        char c2 = (char) str[off + 2];
+        char c3 = (char) str[off + 3];
+        char c4 = (char) str[off + 4];
+        char c5 = (char) str[off + 5];
+        char c6 = (char) str[off + 6];
+        char c7 = (char) str[off + 7];
+        char c8 = (char) str[off + 8];
+        char c9 = (char) str[off + 9];
+        char c10 = (char) str[off + 10];
+        char c11 = (char) str[off + 11];
+        char c12 = (char) str[off + 12];
+        char c13 = (char) str[off + 13];
+        char c14 = (char) str[off + 14];
+        char c15 = (char) str[off + 15];
+        char c16 = (char) str[off + 16];
+        char c17 = (char) str[off + 17];
+        char c18 = (char) str[off + 18];
+        char c19 = (char) str[off + 19];
+        char c20 = (char) str[off + 20];
+        char c21 = (char) str[off + 21];
+        char c22 = (char) str[off + 22];
+        char c23 = (char) str[off + 23];
+        char c24 = (char) str[off + 24];
+        char c25 = (char) str[off + 25];
+        char c26 = (char) str[off + 26];
+        char c27 = (char) str[off + 27];
+
+        if (c4 != '-' || c7 != '-' || (c10 != ' ' && c10 != 'T') || c13 != ':' || c16 != ':' || c19 != '.') {
+            return null;
+        }
+
+        char y0 = c0;
+        char y1 = c1;
+        char y2 = c2;
+        char y3 = c3;
+
+        char m0 = c5;
+        char m1 = c6;
+
+        char d0 = c8;
+        char d1 = c9;
+
+        char h0 = c11;
+        char h1 = c12;
+
+        char i0 = c14;
+        char i1 = c15;
+
+        char s0 = c17;
+        char s1 = c18;
+
+        char S0 = c20;
+        char S1 = c21;
+        char S2 = c22;
+        char S3 = c23;
+        char S4 = c24;
+        char S5 = c25;
+        char S6 = c26;
+        char S7 = c27;
+
+        return localDateTime(
+                y0, y1, y2, y3,
+                m0, m1,
+                d0, d1,
+                h0, h1,
+                i0, i1,
+                s0, s1,
+                S0, S1, S2, S3, S4, S5, S6, S7, '0'
+        );
+    }
+
+    public static LocalDateTime parseLocalDateTime29(byte[] str, int off) {
+        if (off + 29 > str.length) {
+            return null;
+        }
+
+        char c0 = (char) str[off + 0];
+        char c1 = (char) str[off + 1];
+        char c2 = (char) str[off + 2];
+        char c3 = (char) str[off + 3];
+        char c4 = (char) str[off + 4];
+        char c5 = (char) str[off + 5];
+        char c6 = (char) str[off + 6];
+        char c7 = (char) str[off + 7];
+        char c8 = (char) str[off + 8];
+        char c9 = (char) str[off + 9];
+        char c10 = (char) str[off + 10];
+        char c11 = (char) str[off + 11];
+        char c12 = (char) str[off + 12];
+        char c13 = (char) str[off + 13];
+        char c14 = (char) str[off + 14];
+        char c15 = (char) str[off + 15];
+        char c16 = (char) str[off + 16];
+        char c17 = (char) str[off + 17];
+        char c18 = (char) str[off + 18];
+        char c19 = (char) str[off + 19];
+        char c20 = (char) str[off + 20];
+        char c21 = (char) str[off + 21];
+        char c22 = (char) str[off + 22];
+        char c23 = (char) str[off + 23];
+        char c24 = (char) str[off + 24];
+        char c25 = (char) str[off + 25];
+        char c26 = (char) str[off + 26];
+        char c27 = (char) str[off + 27];
+        char c28 = (char) str[off + 28];
+
+        if (c4 != '-' || c7 != '-' || (c10 != ' ' && c10 != 'T') || c13 != ':' || c16 != ':' || c19 != '.') {
+            return null;
+        }
+
+        char y0 = c0;
+        char y1 = c1;
+        char y2 = c2;
+        char y3 = c3;
+
+        char m0 = c5;
+        char m1 = c6;
+
+        char d0 = c8;
+        char d1 = c9;
+
+        char h0 = c11;
+        char h1 = c12;
+
+        char i0 = c14;
+        char i1 = c15;
+
+        char s0 = c17;
+        char s1 = c18;
+
+        char S0 = c20;
+        char S1 = c21;
+        char S2 = c22;
+        char S3 = c23;
+        char S4 = c24;
+        char S5 = c25;
+        char S6 = c26;
+        char S7 = c27;
+        char S8 = c28;
+
+        return localDateTime(
+                y0, y1, y2, y3,
+                m0, m1,
+                d0, d1,
+                h0, h1,
+                i0, i1,
+                s0, s1,
+                S0, S1, S2, S3, S4, S5, S6, S7, S8
+        );
+    }
+
+    public static LocalDateTime parseLocalDateTime29(char[] str, int off) {
+        if (off + 29 > str.length) {
+            return null;
+        }
+
+        char c0 = str[off + 0];
+        char c1 = str[off + 1];
+        char c2 = str[off + 2];
+        char c3 = str[off + 3];
+        char c4 = str[off + 4];
+        char c5 = str[off + 5];
+        char c6 = str[off + 6];
+        char c7 = str[off + 7];
+        char c8 = str[off + 8];
+        char c9 = str[off + 9];
+        char c10 = str[off + 10];
+        char c11 = str[off + 11];
+        char c12 = str[off + 12];
+        char c13 = str[off + 13];
+        char c14 = str[off + 14];
+        char c15 = str[off + 15];
+        char c16 = str[off + 16];
+        char c17 = str[off + 17];
+        char c18 = str[off + 18];
+        char c19 = str[off + 19];
+        char c20 = str[off + 20];
+        char c21 = str[off + 21];
+        char c22 = str[off + 22];
+        char c23 = str[off + 23];
+        char c24 = str[off + 24];
+        char c25 = str[off + 25];
+        char c26 = str[off + 26];
+        char c27 = str[off + 27];
+        char c28 = str[off + 28];
+
+        if (c4 != '-' || c7 != '-' || (c10 != ' ' && c10 != 'T') || c13 != ':' || c16 != ':' || c19 != '.') {
+            return null;
+        }
+
+        char y0 = c0;
+        char y1 = c1;
+        char y2 = c2;
+        char y3 = c3;
+
+        char m0 = c5;
+        char m1 = c6;
+
+        char d0 = c8;
+        char d1 = c9;
+
+        char h0 = c11;
+        char h1 = c12;
+
+        char i0 = c14;
+        char i1 = c15;
+
+        char s0 = c17;
+        char s1 = c18;
+
+        char S0 = c20;
+        char S1 = c21;
+        char S2 = c22;
+        char S3 = c23;
+        char S4 = c24;
+        char S5 = c25;
+        char S6 = c26;
+        char S7 = c27;
+        char S8 = c28;
+
+        return localDateTime(
+                y0, y1, y2, y3,
+                m0, m1,
+                d0, d1,
+                h0, h1,
+                i0, i1,
+                s0, s1,
+                S0, S1, S2, S3, S4, S5, S6, S7, S8
+        );
+    }
+
     public static LocalDateTime parseLocalDateTimeX(char[] str, int offset, int len) {
         if (str == null || len == 0) {
             return null;
@@ -11711,5 +12327,36 @@ public class DateUtils {
         }
 
         return false;
+    }
+
+    public static int nanoToSmall(int nano) {
+        if (nano == 0) {
+            return 0;
+        }
+        if (nano % 1000_000_00 == 0) {
+            return nano / 1000_000_00;
+        }
+        if (nano % 1000_000_0 == 0) {
+            return nano / 1000_000_0;
+        }
+        if (nano % 1000_000 == 0) {
+            return nano / 1000_000;
+        }
+        if (nano % 1000_00 == 0) {
+            return nano / 1000_00;
+        }
+        if (nano % 1000_0 == 0) {
+            return nano / 1000_0;
+        }
+        if (nano % 1000 == 0) {
+            return nano / 1000;
+        }
+        if (nano % 100 == 0) {
+            return nano / 100;
+        }
+        if (nano % 10 == 0) {
+            return nano / 10;
+        }
+        return nano;
     }
 }
