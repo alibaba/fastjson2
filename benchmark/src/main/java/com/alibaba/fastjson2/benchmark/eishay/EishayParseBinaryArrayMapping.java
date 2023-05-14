@@ -29,10 +29,22 @@ public class EishayParseBinaryArrayMapping {
     static MediaContent mc;
     static byte[] fastjson2UTF8Bytes;
     static byte[] fastjson2JSONBBytes;
-    static Kryo kryo;
     static byte[] kryoBytes;
 
     static byte[] protobufBytes;
+
+    private static final ThreadLocal<Kryo> kryos = new ThreadLocal<Kryo>() {
+        protected Kryo initialValue() {
+            Kryo kryo = new Kryo();
+            kryo.register(MediaContent.class);
+            kryo.register(ArrayList.class);
+            kryo.register(Image.class);
+            kryo.register(Image.Size.class);
+            kryo.register(Media.class);
+            kryo.register(Media.Player.class);
+            return kryo;
+        }
+    };
 
     static {
         try {
@@ -44,7 +56,7 @@ public class EishayParseBinaryArrayMapping {
             fastjson2UTF8Bytes = JSON.toJSONBytes(mc, JSONWriter.Feature.BeanToArray);
             fastjson2JSONBBytes = JSONB.toBytes(mc, JSONWriter.Feature.BeanToArray);
 
-            kryo = new Kryo();
+            Kryo kryo = new Kryo();
             kryo.register(MediaContent.class);
             kryo.register(ArrayList.class);
             kryo.register(Image.class);
@@ -88,7 +100,7 @@ public class EishayParseBinaryArrayMapping {
     public void kryo(Blackhole bh) throws Exception {
         Input input = new Input(kryoBytes);
         bh.consume(
-                kryo.readObject(input, MediaContent.class)
+                kryos.get().readObject(input, MediaContent.class)
         );
     }
 

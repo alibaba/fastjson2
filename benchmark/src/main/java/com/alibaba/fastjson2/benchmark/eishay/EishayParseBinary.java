@@ -29,7 +29,18 @@ public class EishayParseBinary {
     static byte[] fastjson2JSONBBytes;
     static byte[] hessianBytes;
     static byte[] javaSerializeBytes;
-    static Kryo kryo;
+    private static final ThreadLocal<Kryo> kryos = new ThreadLocal<Kryo>() {
+        protected Kryo initialValue() {
+            Kryo kryo = new Kryo();
+            kryo.register(MediaContent.class);
+            kryo.register(ArrayList.class);
+            kryo.register(Image.class);
+            kryo.register(Image.Size.class);
+            kryo.register(Media.class);
+            kryo.register(Media.Player.class);
+            return kryo;
+        }
+    };
     static byte[] kryoBytes;
 
     static {
@@ -57,7 +68,7 @@ public class EishayParseBinary {
                 javaSerializeBytes = byteArrayOutputStream.toByteArray();
             }
 
-            kryo = new Kryo();
+            Kryo kryo = new Kryo();
             kryo.register(MediaContent.class);
             kryo.register(ArrayList.class);
             kryo.register(Image.class);
@@ -103,7 +114,7 @@ public class EishayParseBinary {
 
     public void kryo(Blackhole bh) throws Exception {
         Input input = new Input(kryoBytes);
-        MediaContent object = kryo.readObject(input, MediaContent.class);
+        MediaContent object = kryos.get().readObject(input, MediaContent.class);
         bh.consume(object);
     }
 
