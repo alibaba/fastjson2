@@ -26,7 +26,18 @@ import java.util.concurrent.TimeUnit;
 
 public class EishayWriteBinaryArrayMapping {
     static MediaContent mc;
-    static Kryo kryo;
+    private static final ThreadLocal<Kryo> kryos = new ThreadLocal<Kryo>() {
+        protected Kryo initialValue() {
+            Kryo kryo = new Kryo();
+            kryo.register(MediaContent.class);
+            kryo.register(ArrayList.class);
+            kryo.register(Image.class);
+            kryo.register(Image.Size.class);
+            kryo.register(Media.class);
+            kryo.register(Media.Player.class);
+            return kryo;
+        }
+    };
     static Output output = new Output(1024, -1);
 
     static {
@@ -36,7 +47,7 @@ public class EishayWriteBinaryArrayMapping {
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
 
-            kryo = new Kryo();
+            Kryo kryo = new Kryo();
             kryo.register(MediaContent.class);
             kryo.register(ArrayList.class);
             kryo.register(Image.class);
@@ -69,14 +80,14 @@ public class EishayWriteBinaryArrayMapping {
 
     public int kryoSize() {
         output.reset();
-        kryo.writeObject(output, mc);
+        kryos.get().writeObject(output, mc);
         return output.toBytes().length;
     }
 
     @Benchmark
     public void kryo(Blackhole bh) throws Exception {
         output.reset();
-        kryo.writeObject(output, mc);
+        kryos.get().writeObject(output, mc);
         bh.consume(output.toBytes());
     }
 
