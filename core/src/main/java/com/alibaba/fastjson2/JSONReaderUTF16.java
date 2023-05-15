@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.DateUtils;
-import com.alibaba.fastjson2.util.FDBigInteger;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -3101,40 +3100,15 @@ class JSONReaderUTF16
                     if (negative) {
                         doubleValue = -doubleValue;
                     }
-                    value = true;
                 } else if (longValue < (1L << 52) && scale < SMALL_10_POW.length) {
                     doubleValue = (double) longValue / SMALL_10_POW[scale];
                     if (negative) {
                         doubleValue = -doubleValue;
                     }
-                    value = true;
                 } else {
-                    long longValue1 = longValue / 10;
-                    int scale1 = scale - 1;
-                    if (scale1 != 0
-                            && dotIndex != numStart
-                            && dotIndex != numStart + 1
-                            && longValue1 < (1L << 52)
-                            && scale1 < SMALL_10_POW.length
-                    ) {
-                        int nDigits = offset - numStart - 2;
-                        int decExpr = dotIndex - numStart;
-                        doubleValue = TypeUtils.doubleValue(
-                                negative,
-                                decExpr,
-                                nDigits,
-                                longValue1,
-                                new FDBigInteger(
-                                        new int[]{
-                                                (int) longValue,
-                                                (int) (longValue >>> 32)
-                                        },
-                                        0
-                                )
-                        );
-                        value = true;
-                    }
+                    doubleValue = TypeUtils.fullDoubleValue(negative ? -1 : 1, longValue, scale);
                 }
+                value = true;
             }
 
             if (!value) {
