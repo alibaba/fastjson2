@@ -2358,8 +2358,6 @@ class JSONReaderUTF8
             }
         }
 
-        final int numStart = offset - 1;
-
         valueType = JSON_TYPE_INT;
         boolean overflow = false;
         long longValue = 0;
@@ -2381,10 +2379,8 @@ class JSONReaderUTF8
             ch = (char) bytes[offset++];
         }
 
-        int dotIndex = -1;
         this.scale = 0;
         if (ch == '.') {
-            dotIndex = offset - 1;
             valueType = JSON_TYPE_DEC;
             ch = (char) bytes[offset++];
             while (ch >= '0' && ch <= '9') {
@@ -2536,7 +2532,7 @@ class JSONReaderUTF8
                         doubleValue = -doubleValue;
                     }
                 } else {
-                    doubleValue = TypeUtils.fullDoubleValue(negative ? -1 : 1, longValue, scale);
+                    doubleValue = TypeUtils.doubleValue(negative ? -1 : 1, longValue, scale);
                 }
                 value = true;
             }
@@ -4952,8 +4948,8 @@ class JSONReaderUTF8
                             break;
                         }
                     }
-                    if (nanoSize != -1) {
-                        int nano = nanoSize == 0 ? 0 : DateUtils.readNanos(bytes, nanoSize, offset + 20);
+                    if (nanoSize != -1 || len == 21) {
+                        int nano = nanoSize <= 0 ? 0 : DateUtils.readNanos(bytes, nanoSize, offset + 20);
                         LocalTime localTime = LocalTime.of(hour, minute, second, nano);
                         LocalDateTime ldt = LocalDateTime.of(localDate, localTime);
                         OffsetDateTime oft = OffsetDateTime.of(ldt, ZoneOffset.UTC);

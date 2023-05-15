@@ -1133,32 +1133,4 @@ public class IOUtils {
         buf[pos + 1] = (char) (byte) (v >> 8);
         buf[pos + 2] = (char) (byte) v;
     }
-
-    public static int read2(final byte[] buf, final int pos) {
-        final int v1 = buf[pos] - 48;
-        return (v1 << 3) + (v1 << 1) + buf[pos + 1] - 48;
-    }
-
-    public static int read2(final char[] buf, final int pos) {
-        final int v1 = buf[pos] - 48;
-        return (v1 << 3) + (v1 << 1) + buf[pos + 1] - 48;
-    }
-
-    public static int read4(final char[] buf, final int pos) {
-        final int v2 = buf[pos + 1] - 48;
-        final int v3 = buf[pos + 2] - 48;
-        return (buf[pos] - 48) * 1000
-                + (v2 << 6) + (v2 << 5) + (v2 << 2)
-                + (v3 << 3) + (v3 << 1)
-                + buf[pos + 3] - 48;
-    }
-
-    public static int read4(final byte[] buf, final int pos) {
-        final int v2 = buf[pos + 1] - 48;
-        final int v3 = buf[pos + 2] - 48;
-        return (buf[pos] - 48) * 1000
-                + (v2 << 6) + (v2 << 5) + (v2 << 2)
-                + (v3 << 3) + (v3 << 1)
-                + buf[pos + 3] - 48;
-    }
 }
