@@ -4979,21 +4979,17 @@ class JSONReaderJSONB
 
                 return new UUID(msb, lsb);
             case BC_STR_ASCII_FIX_32: {
-                long msb1 = TypeUtils.uuidNibbles(bytes, offset + 0);
-                long msb2 = TypeUtils.uuidNibbles(bytes, offset + 4);
-                long msb3 = TypeUtils.uuidNibbles(bytes, offset + 8);
-                long msb4 = TypeUtils.uuidNibbles(bytes, offset + 12);
-                long lsb1 = TypeUtils.uuidNibbles(bytes, offset + 16);
-                long lsb2 = TypeUtils.uuidNibbles(bytes, offset + 20);
-                long lsb3 = TypeUtils.uuidNibbles(bytes, offset + 24);
-                long lsb4 = TypeUtils.uuidNibbles(bytes, offset + 28);
-                if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
-                    offset += 32;
-                    return new UUID(
-                            msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
-                            lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
+                long hi = 0;
+                for (int i = 0; i < 16; i++) {
+                    hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
                 }
-                throw new JSONException("Invalid UUID string:  " + new String(bytes, offset, 32, StandardCharsets.ISO_8859_1));
+                long lo = 0;
+                for (int i = 16; i < 32; i++) {
+                    lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                }
+
+                offset += 32;
+                return new UUID(hi, lo);
             }
             case BC_STR_ASCII_FIX_36: {
                 byte ch1 = bytes[offset + 8];
@@ -5001,20 +4997,27 @@ class JSONReaderJSONB
                 byte ch3 = bytes[offset + 18];
                 byte ch4 = bytes[offset + 23];
                 if (ch1 == '-' && ch2 == '-' && ch3 == '-' && ch4 == '-') {
-                    long msb1 = TypeUtils.uuidNibbles(bytes, offset + 0);
-                    long msb2 = TypeUtils.uuidNibbles(bytes, offset + 4);
-                    long msb3 = TypeUtils.uuidNibbles(bytes, offset + 9);
-                    long msb4 = TypeUtils.uuidNibbles(bytes, offset + 14);
-                    long lsb1 = TypeUtils.uuidNibbles(bytes, offset + 19);
-                    long lsb2 = TypeUtils.uuidNibbles(bytes, offset + 24);
-                    long lsb3 = TypeUtils.uuidNibbles(bytes, offset + 28);
-                    long lsb4 = TypeUtils.uuidNibbles(bytes, offset + 32);
-                    if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
-                        offset += 36;
-                        return new UUID(
-                                msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
-                                lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
+                    long hi = 0;
+                    for (int i = 0; i < 8; i++) {
+                        hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
                     }
+                    for (int i = 9; i < 13; i++) {
+                        hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                    }
+                    for (int i = 14; i < 18; i++) {
+                        hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                    }
+
+                    long lo = 0;
+                    for (int i = 19; i < 23; i++) {
+                        lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                    }
+                    for (int i = 24; i < 36; i++) {
+                        lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                    }
+
+                    offset += 36;
+                    return new UUID(hi, lo);
                 }
                 throw new JSONException("Invalid UUID string:  " + new String(bytes, offset, 36, StandardCharsets.ISO_8859_1));
             }
@@ -5022,40 +5025,44 @@ class JSONReaderJSONB
             case BC_STR_UTF8: {
                 int strlen = readLength();
                 if (strlen == 32) {
-                    long msb1 = TypeUtils.uuidNibbles(bytes, offset + 0);
-                    long msb2 = TypeUtils.uuidNibbles(bytes, offset + 4);
-                    long msb3 = TypeUtils.uuidNibbles(bytes, offset + 8);
-                    long msb4 = TypeUtils.uuidNibbles(bytes, offset + 12);
-                    long lsb1 = TypeUtils.uuidNibbles(bytes, offset + 16);
-                    long lsb2 = TypeUtils.uuidNibbles(bytes, offset + 20);
-                    long lsb3 = TypeUtils.uuidNibbles(bytes, offset + 24);
-                    long lsb4 = TypeUtils.uuidNibbles(bytes, offset + 28);
-                    if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
-                        offset += 32;
-                        return new UUID(
-                                msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
-                                lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
+                    long hi = 0;
+                    for (int i = 0; i < 16; i++) {
+                        hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
                     }
+                    long lo = 0;
+                    for (int i = 16; i < 32; i++) {
+                        lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                    }
+
+                    offset += 32;
+                    return new UUID(hi, lo);
                 } else if (strlen == 36) {
                     byte ch1 = bytes[offset + 8];
                     byte ch2 = bytes[offset + 13];
                     byte ch3 = bytes[offset + 18];
                     byte ch4 = bytes[offset + 23];
                     if (ch1 == '-' && ch2 == '-' && ch3 == '-' && ch4 == '-') {
-                        long msb1 = TypeUtils.uuidNibbles(bytes, offset + 0);
-                        long msb2 = TypeUtils.uuidNibbles(bytes, offset + 4);
-                        long msb3 = TypeUtils.uuidNibbles(bytes, offset + 9);
-                        long msb4 = TypeUtils.uuidNibbles(bytes, offset + 14);
-                        long lsb1 = TypeUtils.uuidNibbles(bytes, offset + 19);
-                        long lsb2 = TypeUtils.uuidNibbles(bytes, offset + 24);
-                        long lsb3 = TypeUtils.uuidNibbles(bytes, offset + 28);
-                        long lsb4 = TypeUtils.uuidNibbles(bytes, offset + 32);
-                        if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
-                            offset += 36;
-                            return new UUID(
-                                    msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
-                                    lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
+                        long hi = 0;
+                        for (int i = 0; i < 8; i++) {
+                            hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
                         }
+                        for (int i = 9; i < 13; i++) {
+                            hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                        }
+                        for (int i = 14; i < 18; i++) {
+                            hi = (hi << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                        }
+
+                        long lo = 0;
+                        for (int i = 19; i < 23; i++) {
+                            lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                        }
+                        for (int i = 24; i < 36; i++) {
+                            lo = (lo << 4) + UUID_VALUES[bytes[offset + i] - '0'];
+                        }
+
+                        offset += 36;
+                        return new UUID(hi, lo);
                     }
                 }
                 String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);

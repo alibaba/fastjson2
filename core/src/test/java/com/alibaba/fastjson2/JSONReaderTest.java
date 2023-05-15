@@ -410,14 +410,14 @@ public class JSONReaderTest {
             );
         }
 
-        for (JSONReader jsonReader : TestUtils.createJSONReaders4("{}")) {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("{\"id\":123}")) {
             assertThrows(
                     Exception.class,
                     () -> jsonReader.readBigDecimal()
             );
         }
 
-        for (JSONReader jsonReader : TestUtils.createJSONReaders4("[]")) {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("[1]")) {
             assertThrows(
                     Exception.class,
                     () -> jsonReader.readBigDecimal()

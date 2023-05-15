@@ -2338,7 +2338,7 @@ public class ObjectWriterCreatorASM
 
         mw.visitLabel(notNull_);
 
-        if (jsonb) {
+        if (jsonb || (fieldWriter.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask | BrowserCompatible.mask)) == 0) {
             gwFieldName(mwc, i);
 
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -2972,25 +2972,27 @@ public class ObjectWriterCreatorASM
         mw.visitJumpInsn(Opcodes.GOTO, endWriteValue_);
 
         mw.visitLabel(notDefaultValue_);
-        if (jsonb) {
-            gwFieldName(mwc, i);
-
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitVarInsn(Opcodes.LLOAD, FIELD_VALUE);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeInt64", "(J)V", false);
-        } else {
-            // Int32FieldWriter.writeInt64(JSONWriter w, long value);
+        boolean iso8601 = "iso8601".equals(format);
+        if (iso8601 || (fieldWriter.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask | BrowserCompatible.mask)) != 0) {
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldWriter(i), DESC_FIELD_WRITER);
 
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
             mw.visitVarInsn(Opcodes.LLOAD, FIELD_VALUE);
 
-            if ("iso8601".equals(format)) {
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_WRITER, "writeDate", METHOD_DESC_WRITE_J, false);
-            } else {
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_WRITER, "writeInt64", METHOD_DESC_WRITE_J, false);
-            }
+            mw.visitMethodInsn(
+                    Opcodes.INVOKEVIRTUAL,
+                    TYPE_FIELD_WRITER,
+                    iso8601 ? "writeDate" : "writeInt64",
+                    METHOD_DESC_WRITE_J,
+                    false
+            );
+        } else {
+            gwFieldName(mwc, i);
+
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.LLOAD, FIELD_VALUE);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeInt64", "(J)V", false);
         }
 
         mw.visitLabel(endWriteValue_);

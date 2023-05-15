@@ -1406,25 +1406,88 @@ class JSONWriterUTF8
             return;
         }
 
-        long msb = value.getMostSignificantBits();
-        long lsb = value.getLeastSignificantBits();
+        long hi = value.getMostSignificantBits();
+        long lo = value.getLeastSignificantBits();
+
+        final int hi1 = (int) (hi >> 32);
+        final int hi2 = (int) hi;
+        final int lo1 = (int) (lo >> 32);
+        final int lo2 = (int) lo;
 
         int minCapacity = off + 38;
         if (minCapacity > bytes.length) {
             ensureCapacity(minCapacity);
         }
-        bytes[off++] = '"';
-        formatUnsignedLong0(lsb, bytes, off + 24, 12);
-        formatUnsignedLong0(lsb >>> 48, bytes, off + 19, 4);
-        formatUnsignedLong0(msb, bytes, off + 14, 4);
-        formatUnsignedLong0(msb >>> 16, bytes, off + 9, 4);
-        formatUnsignedLong0(msb >>> 32, bytes, off + 0, 8);
 
-        bytes[off + 23] = '-';
-        bytes[off + 18] = '-';
-        bytes[off + 13] = '-';
-        bytes[off + 8] = '-';
-        off += 36;
+        bytes[off++] = '"';
+        int v = (hi1 >> 24) & 255;
+        int l = UUID_LOOKUP[v];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        v = (hi1 >> 16) & 255;
+        l = UUID_LOOKUP[v];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        v = (hi1 >> 8) & 255;
+        l = UUID_LOOKUP[v];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        v = hi1 & 255;
+        l = UUID_LOOKUP[v];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        bytes[off++] = '-';
+        v = (hi2 >> 24) & 255;
+        l = UUID_LOOKUP[v];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        v = (hi2 >> 16) & 255;
+        l = UUID_LOOKUP[v];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        bytes[off++] = '-';
+        v = (hi2 >> 8) & 255;
+        l = UUID_LOOKUP[v];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        v = hi2 & 255;
+        l = UUID_LOOKUP[v];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        bytes[off++] = '-';
+        v = (lo1 >> 24) & 255;
+        l = UUID_LOOKUP[v];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        v = (lo1 >> 16) & 255;
+        l = UUID_LOOKUP[v];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        bytes[off++] = '-';
+        v = (lo1 >> 8) & 255;
+        l = UUID_LOOKUP[v];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        v = lo1 & 255;
+        l = UUID_LOOKUP[v];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        v = (lo2 >> 24) & 255;
+        l = UUID_LOOKUP[v];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        v = (lo2 >> 16) & 255;
+        l = UUID_LOOKUP[v];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        v = (lo2 >> 8) & 255;
+        l = UUID_LOOKUP[v];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        v = lo2 & 255;
+        l = UUID_LOOKUP[v];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
         bytes[off++] = '"';
     }
 
@@ -2423,16 +2486,6 @@ class JSONWriterUTF8
     @Override
     public final String toString() {
         return new String(bytes, 0, off, StandardCharsets.UTF_8);
-    }
-
-    static void formatUnsignedLong0(long val, byte[] buf, int offset, int len) { // for uuid
-        int charPos = offset + len;
-        int radix = 16;
-        int mask = radix - 1;
-        do {
-            buf[--charPos] = (byte) DIGITS[((int) val) & mask];
-            val >>>= 4;
-        } while (charPos > offset);
     }
 
     @Override
