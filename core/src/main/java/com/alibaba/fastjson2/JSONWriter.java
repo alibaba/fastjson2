@@ -1480,7 +1480,7 @@ public abstract class JSONWriter
             }
         }
 
-        protected void configFilter(Filter... filters) {
+        public void configFilter(Filter... filters) {
             for (Filter filter : filters) {
                 if (filter instanceof NameFilter) {
                     if (this.nameFilter == null) {
