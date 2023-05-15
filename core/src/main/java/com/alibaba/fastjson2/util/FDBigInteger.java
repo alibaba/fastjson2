@@ -48,7 +48,7 @@ public final class FDBigInteger {
     private int nWords;  // data[nWords-1]!=0, all values above are zero
     private boolean isImmutable;
 
-    public FDBigInteger(int[] data, int offset) {
+    private FDBigInteger(int[] data, int offset) {
         this.data = data;
         this.offset = offset;
         this.nWords = data.length;
