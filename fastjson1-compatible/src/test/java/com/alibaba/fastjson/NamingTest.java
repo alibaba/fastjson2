@@ -1,5 +1,6 @@
 package com.alibaba.fastjson;
 
+import com.alibaba.fastjson.util.TypeUtils;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,6 +11,7 @@ public class NamingTest {
         Bean bean = new Bean();
         bean.oAuth = "abc";
 
+        TypeUtils.compatibleWithFieldName = false;
         assertEquals("{\"oAuth\":\"abc\"}", JSON.toJSONString(bean));
     }
 

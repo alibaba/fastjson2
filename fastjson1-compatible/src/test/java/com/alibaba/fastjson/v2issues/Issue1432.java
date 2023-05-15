@@ -1,6 +1,7 @@
 package com.alibaba.fastjson.v2issues;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.util.TypeUtils;
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +19,9 @@ public class Issue1432 {
             assertEquals("{\"OrderActualAmount\":12.34}", JSON.toJSONString(bean));
         } finally {
             TypeUtils.compatibleWithFieldName = false;
+            SerializeConfig.DEFAULT_PROVIDER.setNamingStrategy(
+                    com.alibaba.fastjson2.PropertyNamingStrategy.CamelCase1x
+            );
         }
     }
 
