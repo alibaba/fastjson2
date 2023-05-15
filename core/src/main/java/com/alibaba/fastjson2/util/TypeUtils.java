@@ -4267,7 +4267,7 @@ public class TypeUtils {
             BigInteger.valueOf(1000000000000000000L).multiply(BigInteger.valueOf(100))
     };
 
-    public static double fullDoubleValue(int signum, long intCompact, int scale) {
+    public static double doubleValue(int signNum, long intCompact, int scale) {
         final int P_D = 53; // Double.PRECISION
         final int Q_MIN_D = -1074; //(Double.MIN_EXPONENT - (P_D - 1));
         final int Q_MAX_D = 971; // (Double.MAX_EXPONENT - (P_D - 1));
@@ -4277,15 +4277,15 @@ public class TypeUtils {
         int bitLength = 64 - Long.numberOfLeadingZeros(intCompact);
         long qb = bitLength - (long) Math.ceil(scale * L);
         if (qb < Q_MIN_D - 2) {  // qb < -1_076
-            return signum * 0.0;
+            return signNum * 0.0;
         }
         if (qb > Q_MAX_D + P_D + 1) {  // qb > 1_025
             /* If s <= -309 then qb >= 1_027, so these cases all end up here. */
-            return signum * Double.POSITIVE_INFINITY;
+            return signNum * Double.POSITIVE_INFINITY;
         }
 
         if (scale == 0) {
-            return signum * (double) intCompact;
+            return signNum * (double) intCompact;
         }
 
         int ql = (int) qb - (P_D + 3);  // narrowing qb to an int is safe
@@ -4305,12 +4305,12 @@ public class TypeUtils {
         int dq = (Long.SIZE - (P_D + 2)) - Long.numberOfLeadingZeros(i);
         int eq = (Q_MIN_D - 2) - ql;
         if (dq >= eq) {
-            return signum * Math.scalb((double) (i | sb), ql);
+            return signNum * Math.scalb((double) (i | sb), ql);
         }
 
         /* Subnormal */
         long mask = (1L << eq) - 1;
         long j = i >> eq | Long.signum(i & mask) | sb;
-        return signum * Math.scalb((double) j, Q_MIN_D - 2);
+        return signNum * Math.scalb((double) j, Q_MIN_D - 2);
     }
 }

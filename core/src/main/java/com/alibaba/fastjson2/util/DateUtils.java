@@ -12329,39 +12329,8 @@ public class DateUtils {
         return false;
     }
 
-    public static int nanoToSmall(int nano) {
-        if (nano == 0) {
-            return 0;
-        }
-        if (nano % 1000_000_00 == 0) {
-            return nano / 1000_000_00;
-        }
-        if (nano % 1000_000_0 == 0) {
-            return nano / 1000_000_0;
-        }
-        if (nano % 1000_000 == 0) {
-            return nano / 1000_000;
-        }
-        if (nano % 1000_00 == 0) {
-            return nano / 1000_00;
-        }
-        if (nano % 1000_0 == 0) {
-            return nano / 1000_0;
-        }
-        if (nano % 1000 == 0) {
-            return nano / 1000;
-        }
-        if (nano % 100 == 0) {
-            return nano / 100;
-        }
-        if (nano % 10 == 0) {
-            return nano / 10;
-        }
-        return nano;
-    }
-
     public static int readNanos(final char[] chars, final int len, final int offset) {
-        switch (len - offset) {
+        switch (len) {
             case 1:
                 return 100000000 * (chars[offset] - 48);
             case 2:
