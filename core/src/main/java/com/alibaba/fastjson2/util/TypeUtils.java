@@ -70,19 +70,18 @@ public class TypeUtils {
      * All the positive powers of 10 that can be
      * represented exactly in double/float.
      */
-    static final double[] SMALL_10_POW = {
-            1.0e0,
-            1.0e1, 1.0e2, 1.0e3, 1.0e4, 1.0e5,
-            1.0e6, 1.0e7, 1.0e8, 1.0e9, 1.0e10,
-            1.0e11, 1.0e12, 1.0e13, 1.0e14, 1.0e15,
-            1.0e16, 1.0e17, 1.0e18, 1.0e19, 1.0e20,
-            1.0e21, 1.0e22
+    public static final double[] SMALL_10_POW = {
+            1.0e0, 1.0e1, 1.0e2, 1.0e3, 1.0e4,
+            1.0e5, 1.0e6, 1.0e7, 1.0e8, 1.0e9,
+            1.0e10, 1.0e11, 1.0e12, 1.0e13, 1.0e14,
+            1.0e15, 1.0e16, 1.0e17, 1.0e18, 1.0e19,
+            1.0e20, 1.0e21, 1.0e22
     };
 
     static final float[] SINGLE_SMALL_10_POW = {
-            1.0e0f,
-            1.0e1f, 1.0e2f, 1.0e3f, 1.0e4f, 1.0e5f,
-            1.0e6f, 1.0e7f, 1.0e8f, 1.0e9f, 1.0e10f
+            1.0e0f, 1.0e1f, 1.0e2f, 1.0e3f, 1.0e4f,
+            1.0e5f, 1.0e6f, 1.0e7f, 1.0e8f, 1.0e9f,
+            1.0e10f
     };
 
     static final double[] BIG_10_POW = {
@@ -132,24 +131,6 @@ public class TypeUtils {
         } catch (Throwable e) {
             throw new JSONException("create proxy error : " + objectClass, e);
         }
-    }
-
-    public static long uuidNibbles(byte[] name, int pos) {
-        byte ch1 = name[pos];
-        byte ch2 = name[pos + 1];
-        byte ch3 = name[pos + 2];
-        byte ch4 = name[pos + 3];
-        return (ch1 | ch2 | ch3 | ch4) > 0xff ? -1 :
-                UUID_NIBBLES[ch1] << 12 | UUID_NIBBLES[ch2] << 8 | UUID_NIBBLES[ch3] << 4 | UUID_NIBBLES[ch4];
-    }
-
-    public static long uuidNibbles(char[] name, int pos) {
-        char ch1 = name[pos];
-        char ch2 = name[pos + 1];
-        char ch3 = name[pos + 2];
-        char ch4 = name[pos + 3];
-        return (ch1 | ch2 | ch3 | ch4) > 0xFF ? -1 :
-                UUID_NIBBLES[ch1] << 12 | UUID_NIBBLES[ch2] << 8 | UUID_NIBBLES[ch3] << 4 | UUID_NIBBLES[ch4];
     }
 
     public static long uuidNibbles(String name, int pos) {
@@ -954,6 +935,164 @@ public class TypeUtils {
 
             int B2 = B5; // powers of 2 in bigB
             int D2 = D5; // powers of 2 in bigD
+            int Ulp2;   // powers of 2 in halfUlp.
+            if (bigIntExp >= 0) {
+                B2 += bigIntExp;
+            } else {
+                D2 -= bigIntExp;
+            }
+            Ulp2 = B2;
+            // shift bigB and bigD left by a number s. t.
+            // halfUlp is still an integer.
+            int hulpbias;
+            if (binexp <= -DOUBLE_EXP_BIAS) {
+                // This is going to be a denormalized number
+                // (if not actually zero).
+                // half an ULP is at 2^-(EXP_BIAS+EXP_SHIFT+1)
+                hulpbias = binexp + lowOrderZeros + DOUBLE_EXP_BIAS;
+            } else {
+                hulpbias = 1 + lowOrderZeros;
+            }
+            B2 += hulpbias;
+            D2 += hulpbias;
+            // if there are common factors of 2, we might just as well
+            // factor them out, as they add nothing useful.
+            int common2 = Math.min(B2, Math.min(D2, Ulp2));
+            B2 -= common2;
+            D2 -= common2;
+            Ulp2 -= common2;
+            // do multiplications by powers of 5 and 2
+            FDBigInteger bigB = FDBigInteger.valueOfMulPow52(bigBbits, B5, B2);
+            if (bigD == null || prevD2 != D2) {
+                bigD = bigD0.leftShift(D2);
+                prevD2 = D2;
+            }
+
+            FDBigInteger diff;
+            int cmpResult;
+            boolean overvalue;
+            if ((cmpResult = bigB.cmp(bigD)) > 0) {
+                overvalue = true; // our candidate is too big.
+                diff = bigB.leftInplaceSub(bigD); // bigB is not user further - reuse
+                if ((bigIntNBits == 1) && (bigIntExp > -DOUBLE_EXP_BIAS + 1)) {
+                    // candidate is a normalized exact power of 2 and
+                    // is too big (larger than Double.MIN_NORMAL). We will be subtracting.
+                    // For our purposes, ulp is the ulp of the
+                    // next smaller range.
+                    Ulp2 -= 1;
+                    if (Ulp2 < 0) {
+                        // rats. Cannot de-scale ulp this far.
+                        // must scale diff in other direction.
+                        Ulp2 = 0;
+                        diff = diff.leftShift(1);
+                    }
+                }
+            } else if (cmpResult < 0) {
+                overvalue = false; // our candidate is too small.
+                diff = bigD.rightInplaceSub(bigB); // bigB is not user further - reuse
+            } else {
+                // the candidate is exactly right!
+                // this happens with surprising frequency
+                break correctionLoop;
+            }
+            cmpResult = diff.cmpPow52(B5, Ulp2);
+            if ((cmpResult) < 0) {
+                // difference is small.
+                // this is close enough
+                break correctionLoop;
+            } else if (cmpResult == 0) {
+                // difference is exactly half an ULP
+                // round to some other value maybe, then finish
+                if ((ieeeBits & 1) != 0) { // half ties to even
+                    ieeeBits += overvalue ? -1 : 1; // nextDown or nextUp
+                }
+                break correctionLoop;
+            } else {
+                // difference is non-trivial.
+                // could scale addend by ratio of difference to
+                // halfUlp here, if we bothered to compute that difference.
+                // Most of the time ( I hope ) it is about 1 anyway.
+                ieeeBits += overvalue ? -1 : 1; // nextDown or nextUp
+                final long DOUBLE_EXP_BIT_MASK = 0x7FF0000000000000L;
+                if (ieeeBits == 0 || ieeeBits == DOUBLE_EXP_BIT_MASK) { // 0.0 or Double.POSITIVE_INFINITY
+                    break correctionLoop; // oops. Fell off end of range.
+                }
+                continue; // try again.
+            }
+        }
+        if (isNegative) {
+            final long DOUBLE_SIGN_BIT_MASK = 0x8000000000000000L;
+            ieeeBits |= DOUBLE_SIGN_BIT_MASK;
+        }
+        return Double.longBitsToDouble(ieeeBits);
+    }
+
+    public static double doubleValue(boolean isNegative, int decExp, int nDigits, long lValue, FDBigInteger bigD0) {
+        final int MAX_DECIMAL_DIGITS = 15;
+        final int DOUBLE_EXP_BIAS = 1023;
+        final int EXP_SHIFT = 53 /*DOUBLE_SIGNIFICAND_WIDTH*/ - 1;
+        final long FRACT_HOB = (1L << EXP_SHIFT); // assumed High-Order bit
+
+        int kDigits = Math.min(nDigits, MAX_DECIMAL_DIGITS + 1);
+        double dValue = (double) lValue;
+        int exp = kDigits - decExp;
+
+        {
+            if ((exp & 15) != 0) {
+                dValue /= SMALL_10_POW[exp & 15];
+            }
+            if ((exp >>= 4) != 0) {
+                int j;
+                for (j = 0; exp > 1; j++, exp >>= 1) {
+                    if ((exp & 1) != 0) {
+                        dValue *= TINY_10_POW[j];
+                    }
+                }
+
+                double t = dValue * TINY_10_POW[j];
+                if (t == 0.0) {
+                    t = dValue * 2.0;
+                    t *= TINY_10_POW[j];
+                    if (t == 0.0) {
+                        return (isNegative) ? -0.0 : 0.0;
+                    }
+                    t = Double.MIN_VALUE;
+                }
+                dValue = t;
+            }
+        }
+
+        exp = decExp - nDigits;
+
+        long ieeeBits = Double.doubleToRawLongBits(dValue); // IEEE-754 bits of double candidate
+        final int B5 = Math.max(0, -exp); // powers of 5 in bigB, value is not modified inside correctionLoop
+        bigD0.makeImmutable();   // prevent bigD0 modification inside correctionLoop
+        FDBigInteger bigD = null;
+        int prevD2 = 0;
+
+        correctionLoop:
+        while (true) {
+            // here ieeeBits can't be NaN, Infinity or zero
+            int binexp = (int) (ieeeBits >>> EXP_SHIFT);
+            final long DOUBLE_SIGNIF_BIT_MASK = 0x000FFFFFFFFFFFFFL;
+            long bigBbits = ieeeBits & DOUBLE_SIGNIF_BIT_MASK;
+            if (binexp > 0) {
+                bigBbits |= FRACT_HOB;
+            } else { // Normalize denormalized numbers.
+                assert bigBbits != 0L : bigBbits; // doubleToBigInt(0.0)
+                int leadingZeros = Long.numberOfLeadingZeros(bigBbits);
+                int shift = leadingZeros - (63 - EXP_SHIFT);
+                bigBbits <<= shift;
+                binexp = 1 - shift;
+            }
+            binexp -= DOUBLE_EXP_BIAS;
+            int lowOrderZeros = Long.numberOfTrailingZeros(bigBbits);
+            bigBbits >>>= lowOrderZeros;
+            final int bigIntExp = binexp - EXP_SHIFT + lowOrderZeros;
+            final int bigIntNBits = EXP_SHIFT + 1 - lowOrderZeros;
+
+            int B2 = B5; // powers of 2 in bigB
+            int D2 = 0; // powers of 2 in bigD
             int Ulp2;   // powers of 2 in halfUlp.
             if (bigIntExp >= 0) {
                 B2 += bigIntExp;

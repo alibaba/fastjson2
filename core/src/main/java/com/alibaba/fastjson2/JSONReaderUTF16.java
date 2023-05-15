@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.DateUtils;
+import com.alibaba.fastjson2.util.FDBigInteger;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -2921,13 +2922,27 @@ class JSONReaderUTF16
             negative = true;
             ch = chars[offset++];
         } else {
+            negative = false;
             if (ch == '+') {
                 ch = chars[offset++];
             }
         }
 
+        final int numStart = offset - 1;
+
         valueType = JSON_TYPE_INT;
+        boolean overflow = false;
+        long longValue = 0;
         while (ch >= '0' && ch <= '9') {
+            if (!overflow) {
+                long intValue10 = longValue * 10 + (ch - '0');
+                if (intValue10 < longValue) {
+                    overflow = true;
+                } else {
+                    longValue = intValue10;
+                }
+            }
+
             if (offset == end) {
                 ch = EOI;
                 offset++;
@@ -2936,11 +2951,23 @@ class JSONReaderUTF16
             ch = chars[offset++];
         }
 
+        int dotIndex = -1;
+        this.scale = 0;
         if (ch == '.') {
+            dotIndex = offset - 1;
             valueType = JSON_TYPE_DEC;
             ch = chars[offset++];
             while (ch >= '0' && ch <= '9') {
                 this.scale++;
+                if (!overflow) {
+                    long intValue10 = longValue * 10 + (ch - '0');
+                    if (intValue10 < longValue) {
+                        overflow = true;
+                    } else {
+                        longValue = intValue10;
+                    }
+                }
+
                 if (offset == end) {
                     ch = EOI;
                     offset++;
@@ -2950,9 +2977,9 @@ class JSONReaderUTF16
             }
         }
 
+        int expValue = 0;
         if (ch == 'e' || ch == 'E') {
             boolean negativeExp = false;
-            int expValue = 0;
             ch = chars[offset++];
 
             if (ch == '-') {
@@ -2994,6 +3021,7 @@ class JSONReaderUTF16
                     if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
                         throw new JSONException(info("long value not support input null"));
                     }
+
                     wasNull = true;
                     value = true;
                     if (offset == end) {
@@ -3057,24 +3085,68 @@ class JSONReaderUTF16
                 this.offset -= 1;
                 this.ch = quote;
                 str = readString();
+            }
+
+            if (offset >= end) {
+                ch = EOI;
             } else {
-                if (offset >= end) {
-                    ch = EOI;
-                } else {
-                    ch = chars[offset++];
-                }
+                ch = chars[offset++];
             }
         }
 
         if (!value) {
-            if (str != null) {
-                try {
-                    doubleValue = Double.parseDouble(str);
-                } catch (NumberFormatException ex) {
-                    throw new JSONException(info(), ex);
+            if (expValue == 0 && !overflow && longValue != 0) {
+                if (scale == 0) {
+                    doubleValue = (double) longValue;
+                    if (negative) {
+                        doubleValue = -doubleValue;
+                    }
+                    value = true;
+                } else if (longValue < (1L << 52) && scale < SMALL_10_POW.length) {
+                    doubleValue = (double) longValue / SMALL_10_POW[scale];
+                    if (negative) {
+                        doubleValue = -doubleValue;
+                    }
+                    value = true;
+                } else {
+                    long longValue1 = longValue / 10;
+                    int scale1 = scale - 1;
+                    if (scale1 != 0
+                            && dotIndex != numStart
+                            && dotIndex != numStart + 1
+                            && longValue1 < (1L << 52)
+                            && scale1 < SMALL_10_POW.length
+                    ) {
+                        int nDigits = offset - numStart - 2;
+                        int decExpr = dotIndex - numStart;
+                        doubleValue = TypeUtils.doubleValue(
+                                negative,
+                                decExpr,
+                                nDigits,
+                                longValue1,
+                                new FDBigInteger(
+                                        new int[]{
+                                                (int) longValue,
+                                                (int) (longValue >>> 32)
+                                        },
+                                        0
+                                )
+                        );
+                        value = true;
+                    }
                 }
-            } else {
-                doubleValue = TypeUtils.parseDouble(chars, start - 1, len);
+            }
+
+            if (!value) {
+                if (str != null) {
+                    try {
+                        doubleValue = Double.parseDouble(str);
+                    } catch (NumberFormatException ex) {
+                        throw new JSONException(info(), ex);
+                    }
+                } else {
+                    doubleValue = TypeUtils.parseDouble(chars, start - 1, len);
+                }
             }
 
             if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
@@ -4614,8 +4686,263 @@ class JSONReaderUTF16
     }
 
     public final BigDecimal readBigDecimal() {
-        readNumber0();
-        return getBigDecimal();
+        boolean value = false;
+
+        BigDecimal decimal = null;
+        char quote = '\0';
+        if (ch == '"' || ch == '\'') {
+            quote = ch;
+            ch = chars[offset++];
+
+            if (ch == quote) {
+                if (offset == end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+                nextIfMatch(',');
+                return null;
+            }
+        }
+
+        final int start = offset;
+        if (ch == '-') {
+            negative = true;
+            ch = chars[offset++];
+        } else {
+            negative = false;
+            if (ch == '+') {
+                ch = chars[offset++];
+            }
+        }
+
+        valueType = JSON_TYPE_INT;
+        boolean overflow = false;
+        long longValue = 0;
+        while (ch >= '0' && ch <= '9') {
+            if (!overflow) {
+                long intValue10 = longValue * 10 + (ch - '0');
+                if (intValue10 < longValue) {
+                    overflow = true;
+                } else {
+                    longValue = intValue10;
+                }
+            }
+
+            if (offset == end) {
+                ch = EOI;
+                offset++;
+                break;
+            }
+            ch = chars[offset++];
+        }
+
+        this.scale = 0;
+        if (ch == '.') {
+            valueType = JSON_TYPE_DEC;
+            ch = chars[offset++];
+            while (ch >= '0' && ch <= '9') {
+                this.scale++;
+                if (!overflow) {
+                    long intValue10 = longValue * 10 + (ch - '0');
+                    if (intValue10 < longValue) {
+                        overflow = true;
+                    } else {
+                        longValue = intValue10;
+                    }
+                }
+
+                if (offset == end) {
+                    ch = EOI;
+                    offset++;
+                    break;
+                }
+                ch = chars[offset++];
+            }
+        }
+
+        int expValue = 0;
+        if (ch == 'e' || ch == 'E') {
+            boolean negativeExp = false;
+            ch = chars[offset++];
+
+            if (ch == '-') {
+                negativeExp = true;
+                ch = chars[offset++];
+            } else if (ch == '+') {
+                ch = chars[offset++];
+            }
+
+            while (ch >= '0' && ch <= '9') {
+                int byteVal = (ch - '0');
+                expValue = expValue * 10 + byteVal;
+                if (expValue > MAX_EXP) {
+                    throw new JSONException("too large exp value : " + expValue);
+                }
+
+                if (offset == end) {
+                    ch = EOI;
+                    offset++;
+                    break;
+                }
+                ch = chars[offset++];
+            }
+
+            if (negativeExp) {
+                expValue = -expValue;
+            }
+
+            this.exponent = (short) expValue;
+            valueType = JSON_TYPE_DEC;
+        }
+
+        if (offset == start) {
+            if (ch == 'n') {
+                if (chars[offset++] == 'u'
+                        && chars[offset++] == 'l'
+                        && chars[offset++] == 'l'
+                ) {
+                    if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                        throw new JSONException(info("long value not support input null"));
+                    }
+
+                    wasNull = true;
+                    value = true;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            } else if (ch == 't') {
+                if (chars[offset++] == 'r'
+                        && chars[offset++] == 'u'
+                        && chars[offset++] == 'e'
+                ) {
+                    value = true;
+                    decimal = BigDecimal.ONE;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            } else if (ch == 'f') {
+                if (chars[offset++] == 'a'
+                        && chars[offset++] == 'l'
+                        && chars[offset++] == 's'
+                        && chars[offset++] == 'e'
+                ) {
+                    decimal = BigDecimal.ZERO;
+                    value = true;
+                    if (offset == end) {
+                        ch = EOI;
+                        offset++;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            } else if (ch == '{' && quote == 0) {
+                JSONObject jsonObject = new JSONObject();
+                readObject(jsonObject, 0);
+                decimal = decimal(jsonObject);
+                value = true;
+                wasNull = true;
+            } else if (ch == '[' && quote == 0) {
+                List array = readArray();
+                if (!array.isEmpty()) {
+                    throw new JSONException(info());
+                }
+                value = true;
+                wasNull = true;
+            }
+        }
+
+        int len = offset - start;
+
+        if (quote != 0) {
+            if (ch != quote) {
+                this.offset -= 1;
+                this.ch = quote;
+                String str = readString();
+                try {
+                    return TypeUtils.toBigDecimal(str);
+                } catch (NumberFormatException e) {
+                    throw new JSONException(info(e.getMessage()), e);
+                }
+            } else {
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+            }
+        }
+        if (!value) {
+            if (expValue == 0 && !overflow && longValue != 0) {
+                decimal = BigDecimal.valueOf(negative ? -longValue : longValue, scale);
+                value = true;
+            }
+
+            if (!value) {
+                decimal = TypeUtils.parseBigDecimal(chars, start - 1, len);
+            }
+
+            if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
+                switch (ch) {
+                    case 'B':
+                        valueType = JSON_TYPE_INT8;
+                        break;
+                    case 'S':
+                        valueType = JSON_TYPE_INT16;
+                        break;
+                    case 'L':
+                        valueType = JSON_TYPE_INT64;
+                        break;
+                    case 'F':
+                        valueType = JSON_TYPE_FLOAT;
+                        break;
+                    case 'D':
+                        valueType = JSON_TYPE_DOUBLE;
+                        break;
+                    default:
+                        break;
+                }
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
+                }
+            }
+        }
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
+        }
+
+        if (comma = (ch == ',')) {
+            // next inline
+            if (this.offset >= end) {
+                this.ch = EOI;
+            } else {
+                this.ch = chars[this.offset++];
+                while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                    if (offset >= end) {
+                        ch = EOI;
+                    } else {
+                        ch = chars[offset++];
+                    }
+                }
+            }
+        }
+
+        return decimal;
     }
 
     @Override
@@ -4630,21 +4957,37 @@ class JSONReaderUTF16
         }
         final char quote = ch;
 
-        if (offset + 32 < chars.length && chars[offset + 32] == quote) {
-            long msb1 = TypeUtils.uuidNibbles(chars, offset);
-            long msb2 = TypeUtils.uuidNibbles(chars, offset + 4);
-            long msb3 = TypeUtils.uuidNibbles(chars, offset + 8);
-            long msb4 = TypeUtils.uuidNibbles(chars, offset + 12);
-            long lsb1 = TypeUtils.uuidNibbles(chars, offset + 16);
-            long lsb2 = TypeUtils.uuidNibbles(chars, offset + 20);
-            long lsb3 = TypeUtils.uuidNibbles(chars, offset + 24);
-            long lsb4 = TypeUtils.uuidNibbles(chars, offset + 28);
-            if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
-                offset += 33;
-                if (offset < end) {
-                    ch = chars[offset++];
-                } else {
+        if (offset + 36 < chars.length && chars[offset + 36] == quote) {
+            char ch1 = chars[offset + 8];
+            char ch2 = chars[offset + 13];
+            char ch3 = chars[offset + 18];
+            char ch4 = chars[offset + 23];
+            if (ch1 == '-' && ch2 == '-' && ch3 == '-' && ch4 == '-') {
+                long hi = 0;
+                for (int i = 0; i < 8; i++) {
+                    hi = (hi << 4) + UUID_VALUES[chars[offset + i] - '0'];
+                }
+                for (int i = 9; i < 13; i++) {
+                    hi = (hi << 4) + UUID_VALUES[chars[offset + i] - '0'];
+                }
+                for (int i = 14; i < 18; i++) {
+                    hi = (hi << 4) + UUID_VALUES[chars[offset + i] - '0'];
+                }
+
+                long lo = 0;
+                for (int i = 19; i < 23; i++) {
+                    lo = (lo << 4) + UUID_VALUES[chars[offset + i] - '0'];
+                }
+                for (int i = 24; i < 36; i++) {
+                    lo = (lo << 4) + UUID_VALUES[chars[offset + i] - '0'];
+                }
+
+                UUID uuid = new UUID(hi, lo);
+                offset += 37;
+                if (offset == end) {
                     ch = EOI;
+                } else {
+                    ch = chars[offset++];
                 }
 
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
@@ -4659,49 +5002,37 @@ class JSONReaderUTF16
                     next();
                 }
 
-                return new UUID(
-                        msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
-                        lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
+                return uuid;
             }
-        } else if (offset + 36 < chars.length && chars[offset + 36] == quote) {
-            char ch1 = chars[offset + 8];
-            char ch2 = chars[offset + 13];
-            char ch3 = chars[offset + 18];
-            char ch4 = chars[offset + 23];
-            if (ch1 == '-' && ch2 == '-' && ch3 == '-' && ch4 == '-') {
-                long msb1 = TypeUtils.uuidNibbles(chars, offset);
-                long msb2 = TypeUtils.uuidNibbles(chars, offset + 4);
-                long msb3 = TypeUtils.uuidNibbles(chars, offset + 9);
-                long msb4 = TypeUtils.uuidNibbles(chars, offset + 14);
-                long lsb1 = TypeUtils.uuidNibbles(chars, offset + 19);
-                long lsb2 = TypeUtils.uuidNibbles(chars, offset + 24);
-                long lsb3 = TypeUtils.uuidNibbles(chars, offset + 28);
-                long lsb4 = TypeUtils.uuidNibbles(chars, offset + 32);
-                if ((msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0) {
-                    offset += 37;
-                    if (offset < end) {
-                        ch = chars[offset++];
-                    } else {
-                        ch = EOI;
-                    }
+        } else if (offset + 32 < chars.length && chars[offset + 32] == quote) {
+            long hi = 0;
+            for (int i = 0; i < 16; i++) {
+                hi = (hi << 4) + UUID_VALUES[chars[offset + i] - '0'];
+            }
+            long lo = 0;
+            for (int i = 16; i < 32; i++) {
+                lo = (lo << 4) + UUID_VALUES[chars[offset + i] - '0'];
+            }
+            UUID uuid = new UUID(hi, lo);
+            offset += 33;
+            if (offset == end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
 
-                    while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                        if (offset >= end) {
-                            ch = EOI;
-                        } else {
-                            ch = chars[offset++];
-                        }
-                    }
-
-                    if (comma = (ch == ',')) {
-                        next();
-                    }
-
-                    return new UUID(
-                            msb1 << 48 | msb2 << 32 | msb3 << 16 | msb4,
-                            lsb1 << 48 | lsb2 << 32 | lsb3 << 16 | lsb4);
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = chars[offset++];
                 }
             }
+
+            if (comma = (ch == ',')) {
+                next();
+            }
+            return uuid;
         }
 
         String str = readString();
@@ -4963,6 +5294,85 @@ class JSONReaderUTF16
         return ldt;
     }
 
+    public final LocalDate readLocalDate() {
+        if (this.ch == '"' || this.ch == '\'') {
+            if (context.dateFormat == null
+                    || context.formatyyyyMMddhhmmss19
+                    || context.formatyyyyMMddhhmmssT19
+                    || context.formatyyyyMMdd8
+                    || context.formatISO8601
+            ) {
+                char quote = this.ch;
+                int c10 = offset + 10;
+                if (c10 < chars.length
+                        && c10 < end
+                        && chars[offset + 4] == '-'
+                        && chars[offset + 7] == '-'
+                        && chars[offset + 10] == quote
+                ) {
+                    char y0 = chars[offset];
+                    char y1 = chars[offset + 1];
+                    char y2 = chars[offset + 2];
+                    char y3 = chars[offset + 3];
+
+                    char m0 = chars[offset + 5];
+                    char m1 = chars[offset + 6];
+
+                    char d0 = chars[offset + 8];
+                    char d1 = chars[offset + 9];
+
+                    int year;
+                    if (y0 >= '0' && y0 <= '9'
+                            && y1 >= '0' && y1 <= '9'
+                            && y2 >= '0' && y2 <= '9'
+                            && y3 >= '0' && y3 <= '9'
+                    ) {
+                        year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+                    } else {
+                        return super.readLocalDate();
+                    }
+
+                    int month;
+                    if (m0 >= '0' && m0 <= '9'
+                            && m1 >= '0' && m1 <= '9'
+                    ) {
+                        month = (m0 - '0') * 10 + (m1 - '0');
+                    } else {
+                        return super.readLocalDate();
+                    }
+
+                    int dom;
+                    if (d0 >= '0' && d0 <= '9'
+                            && d1 >= '0' && d1 <= '9'
+                    ) {
+                        dom = (d0 - '0') * 10 + (d1 - '0');
+                    } else {
+                        return super.readLocalDate();
+                    }
+
+                    LocalDate ldt;
+                    try {
+                        if (year == 0 && month == 0 && dom == 0) {
+                            ldt = null;
+                        } else {
+                            ldt = LocalDate.of(year, month, dom);
+                        }
+                    } catch (DateTimeException ex) {
+                        throw new JSONException(info("read date error"), ex);
+                    }
+
+                    offset += 11;
+                    next();
+                    if (comma = (ch == ',')) {
+                        next();
+                    }
+                    return ldt;
+                }
+            }
+        }
+        return super.readLocalDate();
+    }
+
     public final OffsetDateTime readOffsetDateTime() {
         if (this.ch == '"' || this.ch == '\'') {
             if (context.dateFormat == null
@@ -4972,53 +5382,119 @@ class JSONReaderUTF16
                     || context.formatISO8601
             ) {
                 char quote = this.ch;
-                int len = 0;
-                int i = offset;
+                char c10;
+                int off21 = offset + 19;
+                if (off21 < chars.length
+                        && off21 < end
+                        && chars[offset + 4] == '-'
+                        && chars[offset + 7] == '-'
+                        && ((c10 = chars[offset + 10]) == ' ' || c10 == 'T')
+                        && chars[offset + 13] == ':'
+                        && chars[offset + 16] == ':'
+                ) {
+                    char y0 = chars[offset];
+                    char y1 = chars[offset + 1];
+                    char y2 = chars[offset + 2];
+                    char y3 = chars[offset + 3];
+                    char m0 = chars[offset + 5];
+                    char m1 = chars[offset + 6];
+                    char d0 = chars[offset + 8];
+                    char d1 = chars[offset + 9];
+                    char h0 = chars[offset + 11];
+                    char h1 = chars[offset + 12];
+                    char i0 = chars[offset + 14];
+                    char i1 = chars[offset + 15];
+                    char s0 = chars[offset + 17];
+                    char s1 = chars[offset + 18];
 
-                int i8 = i + 8;
-                if (i8 < end && i8 < chars.length) {
-                    if (chars[i] != quote
-                            && chars[i + 1] != quote
-                            && chars[i + 2] != quote
-                            && chars[i + 3] != quote
-                            && chars[i + 4] != quote
-                            && chars[i + 5] != quote
-                            && chars[i + 6] != quote
-                            && chars[i + 7] != quote
+                    int year;
+                    int month;
+                    if (y0 >= '0' && y0 <= '9'
+                            && y1 >= '0' && y1 <= '9'
+                            && y2 >= '0' && y2 <= '9'
+                            && y3 >= '0' && y3 <= '9'
                     ) {
-                        i += 8;
-                        len += 8;
+                        year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
+                    } else {
+                        return readZonedDateTime().toOffsetDateTime();
                     }
-                }
 
-                for (; i < end; ++i, ++len) {
-                    if (chars[i] == quote) {
-                        break;
+                    if (m0 >= '0' && m0 <= '9'
+                            && m1 >= '0' && m1 <= '9'
+                    ) {
+                        month = (m0 - '0') * 10 + (m1 - '0');
+                    } else {
+                        return readZonedDateTime().toOffsetDateTime();
                     }
-                }
 
-                OffsetDateTime oft = null;
-                if (len == 30 && chars[offset + 29] == 'Z') {
-                    LocalDateTime ldt = DateUtils.parseLocalDateTime29(chars, offset);
-                    oft = OffsetDateTime.of(ldt, ZoneOffset.UTC);
-                } else if (len == 29 && chars[offset + 28] == 'Z') {
-                    LocalDateTime ldt = DateUtils.parseLocalDateTime28(chars, offset);
-                    oft = OffsetDateTime.of(ldt, ZoneOffset.UTC);
-                } else if (len == 28 && chars[offset + 27] == 'Z') {
-                    LocalDateTime ldt = DateUtils.parseLocalDateTime27(chars, offset);
-                    oft = OffsetDateTime.of(ldt, ZoneOffset.UTC);
-                } else if (len == 27 && chars[offset + 26] == 'Z') {
-                    LocalDateTime ldt = DateUtils.parseLocalDateTime26(chars, offset);
-                    oft = OffsetDateTime.of(ldt, ZoneOffset.UTC);
-                }
+                    int dom;
+                    if (d0 >= '0' && d0 <= '9'
+                            && d1 >= '0' && d1 <= '9'
+                    ) {
+                        dom = (d0 - '0') * 10 + (d1 - '0');
+                    } else {
+                        return readZonedDateTime().toOffsetDateTime();
+                    }
 
-                if (oft != null) {
-                    offset += (len + 1);
-                    next();
-                    if (comma = (ch == ',')) {
+                    int hour;
+                    if (h0 >= '0' && h0 <= '9'
+                            && h1 >= '0' && h1 <= '9'
+                    ) {
+                        hour = (h0 - '0') * 10 + (h1 - '0');
+                    } else {
+                        return readZonedDateTime().toOffsetDateTime();
+                    }
+
+                    int minute;
+                    if (i0 >= '0' && i0 <= '9'
+                            && i1 >= '0' && i1 <= '9'
+                    ) {
+                        minute = (i0 - '0') * 10 + (i1 - '0');
+                    } else {
+                        return readZonedDateTime().toOffsetDateTime();
+                    }
+
+                    int second;
+                    if (s0 >= '0' && s0 <= '9'
+                            && s1 >= '0' && s1 <= '9'
+                    ) {
+                        second = (s0 - '0') * 10 + (s1 - '0');
+                    } else {
+                        return readZonedDateTime().toOffsetDateTime();
+                    }
+
+                    LocalDate localDate;
+                    try {
+                        if (year == 0 && month == 0 && dom == 0) {
+                            localDate = null;
+                        } else {
+                            localDate = LocalDate.of(year, month, dom);
+                        }
+                    } catch (DateTimeException ex) {
+                        throw new JSONException(info("read date error"), ex);
+                    }
+
+                    int nanoSize = -1;
+                    int len = 0;
+                    for (int start = offset + 19, i = start, end = offset + 31; i < end && i < this.end && i < chars.length; ++i) {
+                        if (chars[i] == quote && chars[i - 1] == 'Z') {
+                            nanoSize = i - start - 2;
+                            len = i - offset + 1;
+                            break;
+                        }
+                    }
+                    if (nanoSize != -1) {
+                        int nano = nanoSize == 0 ? 0 : DateUtils.readNanos(chars, nanoSize, offset + 20);
+                        LocalTime localTime = LocalTime.of(hour, minute, second, nano);
+                        LocalDateTime ldt = LocalDateTime.of(localDate, localTime);
+                        OffsetDateTime oft = OffsetDateTime.of(ldt, ZoneOffset.UTC);
+                        this.offset += len;
                         next();
+                        if (comma = (ch == ',')) {
+                            next();
+                        }
+                        return oft;
                     }
-                    return oft;
                 }
             }
         }

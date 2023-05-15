@@ -2,7 +2,7 @@ package com.alibaba.fastjson2.util;
 
 import java.util.Arrays;
 
-final class FDBigInteger {
+public final class FDBigInteger {
     private static final long LONG_MASK = 0XFFFFFFFFL;
 
     private static final int[] SMALL_5_POW = {
@@ -48,7 +48,7 @@ final class FDBigInteger {
     private int nWords;  // data[nWords-1]!=0, all values above are zero
     private boolean isImmutable;
 
-    private FDBigInteger(int[] data, int offset) {
+    public FDBigInteger(int[] data, int offset) {
         this.data = data;
         this.offset = offset;
         this.nWords = data.length;

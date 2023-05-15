@@ -693,15 +693,8 @@ public abstract class JSONReader
                     throw new JSONException(info("input end"));
                 }
 
-                int minCapacity = size + 1;
-                if (minCapacity - values.length > 0) {
-                    int oldCapacity = values.length;
-                    int newCapacity = oldCapacity + (oldCapacity >> 1);
-                    if (newCapacity - minCapacity < 0) {
-                        newCapacity = minCapacity;
-                    }
-
-                    values = Arrays.copyOf(values, newCapacity);
+                if (size == values.length) {
+                    values = Arrays.copyOf(values, values.length << 1);
                 }
 
                 values[size++] = readInt64Value();
@@ -1493,15 +1486,8 @@ public abstract class JSONReader
                 if (values == null) {
                     values = new String[16];
                 } else {
-                    int minCapacity = size + 1;
-                    if (minCapacity - values.length > 0) {
-                        int oldCapacity = values.length;
-                        int newCapacity = oldCapacity + (oldCapacity >> 1);
-                        if (newCapacity - minCapacity < 0) {
-                            newCapacity = minCapacity;
-                        }
-
-                        values = Arrays.copyOf(values, newCapacity);
+                    if (size == values.length) {
+                        values = Arrays.copyOf(values, values.length << 1);
                     }
                 }
 
@@ -2787,6 +2773,17 @@ public abstract class JSONReader
             return (Number) val;
         }
         return null;
+    }
+
+    protected final BigDecimal decimal(JSONObject object) {
+        BigDecimal decimal = object.getBigDecimal("value");
+        if (decimal == null) {
+            decimal = object.getBigDecimal("$numberDecimal");
+        }
+        if (decimal != null) {
+            return decimal;
+        }
+        throw new JSONException("can not cast to decimal " + object);
     }
 
     protected final Number toNumber(List list) {

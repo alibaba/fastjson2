@@ -637,6 +637,30 @@ public class JSONReaderFloatTest {
     }
 
     @Test
+    public void test_x16_1() {
+        String str = "0.0000000000100001";
+        double d = Double.parseDouble(str);
+
+        double v = JSONReader.of(str.getBytes()).readDoubleValue();
+        assertEquals(d, v);
+
+        double v1 = JSONReader.of(str.toCharArray()).readDoubleValue();
+        assertEquals(d, v1);
+    }
+
+    @Test
+    public void test_x16_2() {
+        String str = ".0000000000100001";
+        double d = Double.parseDouble(str);
+
+        double v = JSONReader.of(str.getBytes()).readDoubleValue();
+        assertEquals(d, v);
+
+        double v1 = JSONReader.of(str.toCharArray()).readDoubleValue();
+        assertEquals(d, v1);
+    }
+
+    @Test
     public void test_bug_0() {
         {
             String str = "[-122.422003528252475, 37.808480096967251,-122.42082593937107, 37.808631474146033,-122.420825939371]";
