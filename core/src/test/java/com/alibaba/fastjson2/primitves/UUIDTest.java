@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2_vo.UUID1;
@@ -13,13 +14,36 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UUIDTest {
     static UUID[] values = new UUID[]{
             UUID.randomUUID(),
             null
     };
+
+    @Test
+    public void isUUID() {
+        assertTrue(TypeUtils.isUUID("2626c7cc-8466-45a4-aa93-2638546f56e1"));
+        assertTrue(TypeUtils.isUUID("2626c7cc846645a4aa932638546f56e1"));
+
+        assertFalse(TypeUtils.isUUID("abc"));
+
+        assertFalse(TypeUtils.isUUID("2626c7cc+8466-45a4-aa93-2638546f56e1"));
+        assertFalse(TypeUtils.isUUID("2626c7cc-8466+45a4-aa93-2638546f56e1"));
+        assertFalse(TypeUtils.isUUID("2626c7cc-8466-45a4+aa93-2638546f56e1"));
+        assertFalse(TypeUtils.isUUID("2626c7cc-8466-45a4-aa93+2638546f56e1"));
+
+        assertFalse(TypeUtils.isUUID("M626c7cc-8466-45a4-aa93-2638546f56e1"));
+        assertFalse(TypeUtils.isUUID("#M626c7cc-8466-45a4-aa93-2638546f56e1"));
+        assertFalse(TypeUtils.isUUID("2626c7cc-8466-45a4-aa93-2638546f56em"));
+        assertFalse(TypeUtils.isUUID("2626c7cc-8466-45a4-aa93-2638546f56e#"));
+
+        assertFalse(TypeUtils.isUUID("M626c7cc846645a4aa932638546f56e1"));
+        assertFalse(TypeUtils.isUUID("2626c7cc846645a4aa932638546f56eM"));
+        assertFalse(TypeUtils.isUUID("#626c7cc846645a4aa932638546f56e1"));
+        assertFalse(TypeUtils.isUUID("2626c7cc846645a4aa932638546f56e#"));
+    }
 
     @Test
     public void test_jsonb() {
