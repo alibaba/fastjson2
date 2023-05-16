@@ -8,14 +8,14 @@ import java.util.Map;
 
 public class ReadResult {
     public static void main(String[] args) throws Exception {
-        File outFile = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.31_raw.md");
+        File outFile = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/benchmark_2.0.32_raw.md");
 //        File file = new File("/Users/wenshao/Downloads/result_2.0.25.out");
 
         Map<String, String> files = new LinkedHashMap<>();
-        files.put("ecs.g8i.xlarge", "/Users/wenshao/Downloads/result_2.0.31_g8.out");
-        files.put("ecs.g7.xlarge", "/Users/wenshao/Downloads/result_2.0.31_g7.out");
-        files.put("ecs.g8m.xlarge", "/Users/wenshao/Downloads/result_2.0.31_g8m.out");
-        files.put("OrangePI5", "/Users/wenshao/Downloads/result_2.0.31_orangepi5.out");
+        files.put("ecs.g8i.xlarge", "/Users/wenshao/Downloads/result_2.0.32_g8.out");
+        files.put("ecs.g7.xlarge", "/Users/wenshao/Downloads/result_2.0.32_g7.out");
+        files.put("ecs.g8m.xlarge", "/Users/wenshao/Downloads/result_2.0.32_g8m.out");
+//        files.put("OrangePI5", "/Users/wenshao/Downloads/result_2.0.31_orangepi5.out");
 
         PrintStream out = new PrintStream(new FileOutputStream(outFile));
         files.forEach((k, v) -> {
