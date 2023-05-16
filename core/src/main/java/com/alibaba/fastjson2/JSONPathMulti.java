@@ -3,6 +3,7 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -99,6 +100,44 @@ final class JSONPathMulti
         }
 
         return false;
+    }
+
+    @Override
+    public JSONPath getParent() {
+        int size = segments.size();
+        if (size == 0) {
+            return null;
+        }
+
+        if (size == 1) {
+            return RootPath.INSTANCE;
+        }
+
+        if (size == 2) {
+            return JSONPathSingle.of(segments.get(0));
+        }
+
+        StringBuilder buf = new StringBuilder();
+        buf.append('$');
+        List<JSONPathSegment> parentSegments = new ArrayList<>(size - 1);
+        for (int i = 0, end = size - 1; i < end; i++) {
+            JSONPathSegment segment = segments.get(i);
+            parentSegments.add(segment);
+            boolean array = segment instanceof JSONPathSegmentIndex
+                    || segment instanceof JSONPathSegment.MultiIndexSegment
+                    || segment instanceof JSONPathFilter;
+            if (!array) {
+                buf.append('.');
+            }
+            buf.append(segment);
+        }
+
+        String parentPath = buf.toString();
+        if (size == 3) {
+            new JSONPathTwoSegment(parentPath, segments.get(0), segments.get(1));
+        }
+
+        return new JSONPathMulti(parentPath, parentSegments);
     }
 
     @Override

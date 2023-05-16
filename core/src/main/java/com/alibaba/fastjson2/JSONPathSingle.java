@@ -102,4 +102,9 @@ class JSONPathSingle
         segment.accept(jsonReader, context);
         return JSON.toJSONString(context.value);
     }
+
+    @Override
+    public final JSONPath getParent() {
+        return RootPath.INSTANCE;
+    }
 }

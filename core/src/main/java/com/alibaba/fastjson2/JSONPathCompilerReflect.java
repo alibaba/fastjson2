@@ -222,6 +222,11 @@ public class JSONPathCompilerReflect
         }
 
         @Override
+        public JSONPath getParent() {
+            return null;
+        }
+
+        @Override
         public boolean isRef() {
             return true;
         }

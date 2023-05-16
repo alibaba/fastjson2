@@ -41,7 +41,50 @@ abstract class JSONPathFilter
         STARTS_WITH,
         ENDS_WITH,
         CONTAINS,
-        NOT_CONTAINS
+        NOT_CONTAINS;
+
+        public String toString() {
+            switch (this) {
+                case EQ:
+                    return "==";
+                case NE:
+                    return "!=";
+                case GT:
+                    return ">";
+                case GE:
+                    return ">=";
+                case LT:
+                    return "<";
+                case LE:
+                    return "<=";
+                case LIKE:
+                    return "like";
+                case NOT_LIKE:
+                    return "not like";
+                case RLIKE:
+                    return "rlike";
+                case NOT_RLIKE:
+                    return "not rlike";
+                case BETWEEN:
+                    return "between";
+                case NOT_BETWEEN:
+                    return "not between";
+                case AND:
+                    return "and";
+                case OR:
+                    return "or";
+                case STARTS_WITH:
+                    return "starts with";
+                case ENDS_WITH:
+                    return "ends with";
+                case CONTAINS:
+                    return "contains";
+                case NOT_CONTAINS:
+                    return "not contains";
+                default:
+                    return name();
+            }
+        }
     }
 
     static final class NameIsNull
@@ -206,6 +249,15 @@ abstract class JSONPathFilter
             }
 
             throw new JSONException("UnsupportedOperation ");
+        }
+
+        @Override
+        public String toString() {
+            return "[?("
+                    + (fieldName2 == null ? "@" : fieldName2)
+                    + '.'
+                    + fieldName + ' ' + operator + ' ' + value
+                    + ")]";
         }
     }
 

@@ -33,6 +33,11 @@ class JSONPathTypedMulti
     }
 
     @Override
+    public JSONPath getParent() {
+        return null;
+    }
+
+    @Override
     public boolean isRef() {
         for (JSONPath jsonPath : paths) {
             if (!jsonPath.isRef()) {
