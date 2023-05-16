@@ -7,8 +7,8 @@ import java.util.*;
 public class GenReport {
     public void gen() throws Exception {
         File dir = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/");
-        File file = new File(dir, "benchmark_2.0.31_raw.md");
-        File outFile = new File(dir, "benchmark_2.0.31.md");
+        File file = new File(dir, "benchmark_2.0.32_raw.md");
+        File outFile = new File(dir, "benchmark_2.0.32.md");
 
         Map<String, BenchmarkResult> benchResults = new LinkedHashMap<>();
 
@@ -159,7 +159,7 @@ public class GenReport {
                     Double score = libResult.scores.get(jdk);
                     out.print("\t|\t");
                     out.print(score);
-                    if (i != 0) {
+                    if (i != 0 && score != null) {
                         double percent = score / firstScore;
                         out.print(" (" + new DecimalFormat("#,##0.##%").format(percent) + ")");
                     }
