@@ -35,6 +35,11 @@ class JSONPathTwoSegment
     }
 
     @Override
+    public JSONPath getParent() {
+        return JSONPathSingle.of(first);
+    }
+
+    @Override
     public boolean remove(Object root) {
         Context context0 = new Context(this, null, first, second, 0);
         context0.root = root;

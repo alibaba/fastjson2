@@ -35,6 +35,8 @@ public abstract class JSONPath {
         this.features = features;
     }
 
+    public abstract JSONPath getParent();
+
     public boolean isPrevious() {
         return false;
     }
@@ -423,6 +425,21 @@ public abstract class JSONPath {
         JSONPath path = of(strPath);
         JSONFactory.JSONPathCompiler compiler = JSONFactory.getDefaultJSONPathCompiler();
         return compiler.compile(objectClass, path);
+    }
+
+    static JSONPathSingle of(JSONPathSegment segment) {
+        String prefix;
+        if (segment instanceof JSONPathSegment.MultiIndexSegment || segment instanceof JSONPathSegmentIndex) {
+            prefix = "$";
+        } else {
+            prefix = "$.";
+        }
+        String path = prefix + segment.toString();
+
+        if (segment instanceof JSONPathSegmentName) {
+            return new JSONPathSingleName(path, (JSONPathSegmentName) segment);
+        }
+        return new JSONPathSingle(segment, path);
     }
 
     public static JSONPath of(String path) {
@@ -1030,6 +1047,11 @@ public abstract class JSONPath {
         }
 
         @Override
+        public JSONPath getParent() {
+            throw new JSONException("unsupported operation");
+        }
+
+        @Override
         public void setInt(Object rootObject, int value) {
             throw new JSONException("unsupported operation");
         }
@@ -1110,6 +1132,11 @@ public abstract class JSONPath {
         @Override
         public boolean remove(Object object) {
             return false;
+        }
+
+        @Override
+        public JSONPath getParent() {
+            return null;
         }
     }
 

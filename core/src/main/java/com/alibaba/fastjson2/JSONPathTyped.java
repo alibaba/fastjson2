@@ -15,6 +15,12 @@ class JSONPathTyped
         this.type = type;
         this.jsonPath = jsonPath;
     }
+
+    @Override
+    public JSONPath getParent() {
+        return jsonPath.getParent();
+    }
+
     @Override
     public boolean isRef() {
         return jsonPath.isRef();
