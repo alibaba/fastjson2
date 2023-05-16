@@ -88,24 +88,6 @@ public class TypeUtils {
             1e16, 1e32, 1e64, 1e128, 1e256};
     static final double[] TINY_10_POW = {
             1e-16, 1e-32, 1e-64, 1e-128, 1e-256};
-    private static final byte[] UUID_NIBBLES = new byte[]{
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            +0, +1, +2, +3, +4, +5, +6, +7, +8, +9, -1, -1, -1, -1, -1, -1,
-            -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
-    };
     static volatile boolean METHOD_NEW_PROXY_INSTANCE_ERROR;
     static volatile MethodHandle METHOD_NEW_PROXY_INSTANCE;
 
@@ -131,15 +113,6 @@ public class TypeUtils {
         } catch (Throwable e) {
             throw new JSONException("create proxy error : " + objectClass, e);
         }
-    }
-
-    public static long uuidNibbles(String name, int pos) {
-        char ch1 = name.charAt(pos);
-        char ch2 = name.charAt(pos + 1);
-        char ch3 = name.charAt(pos + 2);
-        char ch4 = name.charAt(pos + 3);
-        return (ch1 | ch2 | ch3 | ch4) > 0xFF ? -1 :
-                UUID_NIBBLES[ch1] << 12 | UUID_NIBBLES[ch2] << 8 | UUID_NIBBLES[ch3] << 4 | UUID_NIBBLES[ch4];
     }
 
     static class X1 {
@@ -4040,34 +4013,33 @@ public class TypeUtils {
         }
 
         if (str.length() == 32) {
-            long msb1 = uuidNibbles(str, 0);
-            long msb2 = uuidNibbles(str, 4);
-            long msb3 = uuidNibbles(str, 8);
-            long msb4 = uuidNibbles(str, 12);
-            long lsb1 = uuidNibbles(str, 16);
-            long lsb2 = uuidNibbles(str, 20);
-            long lsb3 = uuidNibbles(str, 24);
-            long lsb4 = uuidNibbles(str, 28);
-
-            return (msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0;
+            for (int i = 0; i < 32; i++) {
+                char ch = str.charAt(i);
+                boolean valid = (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f');
+                if (!valid) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         if (str.length() == 36) {
-            char ch1 = str.charAt(8);
-            char ch2 = str.charAt(13);
-            char ch3 = str.charAt(18);
-            char ch4 = str.charAt(23);
-            if (ch1 == '-' && ch2 == '-' && ch3 == '-' && ch4 == '-') {
-                long msb1 = uuidNibbles(str, 0);
-                long msb2 = uuidNibbles(str, 4);
-                long msb3 = uuidNibbles(str, 9);
-                long msb4 = uuidNibbles(str, 14);
-                long lsb1 = uuidNibbles(str, 19);
-                long lsb2 = uuidNibbles(str, 24);
-                long lsb3 = uuidNibbles(str, 28);
-                long lsb4 = uuidNibbles(str, 32);
-                return (msb1 | msb2 | msb3 | msb4 | lsb1 | lsb2 | lsb3 | lsb4) >= 0;
+            for (int i = 0; i < 36; i++) {
+                char ch = str.charAt(i);
+
+                if (i == 8 || i == 13 || i == 18 || i == 23) {
+                    if (ch != '-') {
+                        return false;
+                    }
+                    continue;
+                }
+
+                boolean valid = (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f');
+                if (!valid) {
+                    return false;
+                }
             }
+            return true;
         }
         return false;
     }
