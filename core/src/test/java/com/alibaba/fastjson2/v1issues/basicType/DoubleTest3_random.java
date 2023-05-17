@@ -110,7 +110,7 @@ public class DoubleTest3_random {
         char[] chars = new char[64];
         for (int i = 0; i < loopCount; ++i) {
             double val = rand.nextDouble();
-            int len = DoubleToDecimal.toString(val, chars, 0);
+            int len = DoubleToDecimal.toString(val, chars, 0, false);
             JSONReader jsonReader = JSONReader.of(chars, 0, len);
             assertEquals(val, jsonReader.readDoubleValue());
         }
