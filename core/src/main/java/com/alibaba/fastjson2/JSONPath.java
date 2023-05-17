@@ -37,6 +37,10 @@ public abstract class JSONPath {
 
     public abstract JSONPath getParent();
 
+    public boolean endsWithFilter() {
+        return false;
+    }
+
     public boolean isPrevious() {
         return false;
     }

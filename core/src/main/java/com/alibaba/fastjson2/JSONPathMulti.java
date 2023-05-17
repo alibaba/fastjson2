@@ -103,6 +103,13 @@ final class JSONPathMulti
     }
 
     @Override
+    public boolean endsWithFilter() {
+        int size = segments.size();
+        JSONPathSegment last = segments.get(size - 1);
+        return last instanceof JSONPathFilter;
+    }
+
+    @Override
     public JSONPath getParent() {
         int size = segments.size();
         if (size == 0) {
