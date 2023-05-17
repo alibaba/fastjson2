@@ -1,9 +1,7 @@
 package com.alibaba.fastjson2.support.csv;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.RyuDouble;
+import com.alibaba.fastjson2.util.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -147,30 +145,22 @@ final class CSVWriterUTF8
     }
 
     public void writeDouble(double value) {
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
-            return;
-        }
-
         int minCapacity = off + 24;
         if (minCapacity - this.bytes.length > 0) {
             flush();
         }
 
-        int size = RyuDouble.toString(value, this.bytes, off);
+        int size = DoubleToDecimal.toString(value, this.bytes, off, true);
         off += size;
     }
 
     public void writeFloat(float value) {
-        if (Float.isNaN(value) || Float.isInfinite(value)) {
-            return;
-        }
-
         int minCapacity = off + 15;
         if (minCapacity - this.bytes.length > 0) {
             flush();
         }
 
-        int size = RyuDouble.toString(value, this.bytes, off);
+        int size = DoubleToDecimal.toString(value, this.bytes, off, true);
         off += size;
     }
 

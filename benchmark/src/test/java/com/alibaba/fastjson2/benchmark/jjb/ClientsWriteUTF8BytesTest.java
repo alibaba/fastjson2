@@ -13,7 +13,7 @@ public class ClientsWriteUTF8BytesTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("ClientsWriteUTF8Bytes-fastjson2 millis : " + millis);
-            // zulu17.40.19 : 1925 1852 1793 1774 1765 1777 1708 1699 1520 1506 1498 1485 1474
+            // zulu17.40.19 : 1925 1852 1793 1774 1765 1777 1708 1699 1520 1506 1498 1485 1474 1450
             // oracle-jdk-17.0.6 :
             // oracle-jdk-17.0.6_vec :
         }

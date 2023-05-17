@@ -1364,27 +1364,22 @@ class JSONWriterUTF16
 
     @Override
     public final void writeFloat(float value) {
-        if (Float.isNaN(value) || Float.isInfinite(value)) {
-            writeNull();
-            return;
-        }
-
-        boolean writeNonStringValueAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
 
         int minCapacity = off + 15;
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             minCapacity += 2;
         }
 
         ensureCapacity(minCapacity);
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             chars[off++] = '"';
         }
 
-        int len = RyuDouble.toString(value, chars, off);
+        int len = DoubleToDecimal.toString(value, chars, off, true);
         off += len;
 
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             chars[off++] = '"';
         }
     }
@@ -1396,25 +1391,29 @@ class JSONWriterUTF16
             return;
         }
 
-        int minCapacity = off + values.length * 16 + 1;
+        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
+        int minCapacity = off + values.length * (writeAsString ? 16 : 18) + 1;
         if (minCapacity - chars.length > 0) {
             ensureCapacity(minCapacity);
         }
+
         chars[off++] = '[';
         for (int i = 0; i < values.length; i++) {
             if (i != 0) {
                 chars[off++] = ',';
             }
+
+            if (writeAsString) {
+                chars[off++] = '"';
+            }
+
             float value = values[i];
-            if (Float.isNaN(value) || Float.isInfinite(value)) {
-                chars[off] = 'n';
-                chars[off + 1] = 'u';
-                chars[off + 2] = 'l';
-                chars[off + 3] = 'l';
-                off += 4;
-            } else {
-                int len = RyuDouble.toString(value, chars, off);
-                off += len;
+            int len = DoubleToDecimal.toString(value, chars, off, true);
+            off += len;
+
+            if (writeAsString) {
+                chars[off++] = '"';
             }
         }
         chars[off++] = ']';
@@ -1422,15 +1421,10 @@ class JSONWriterUTF16
 
     @Override
     public final void writeDouble(double value) {
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
-            writeNull();
-            return;
-        }
-
-        boolean writeNonStringValueAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
 
         int minCapacity = off + 24;
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             minCapacity += 2;
         }
 
@@ -1438,24 +1432,24 @@ class JSONWriterUTF16
             ensureCapacity(minCapacity);
         }
 
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             chars[off++] = '"';
         }
 
-        int len = RyuDouble.toString(value, chars, off);
+        int len = DoubleToDecimal.toString(value, chars, off, true);
         off += len;
 
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             chars[off++] = '"';
         }
     }
 
     @Override
     public final void writeDoubleArray(double value0, double value1) {
-        boolean writeNonStringValueAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
 
         int minCapacity = off + 48 + 3;
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             minCapacity += 2;
         }
 
@@ -1463,23 +1457,23 @@ class JSONWriterUTF16
 
         chars[off++] = '[';
 
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             chars[off++] = '"';
         }
-        int len0 = RyuDouble.toString(value0, chars, off);
+        int len0 = DoubleToDecimal.toString(value0, chars, off, true);
         off += len0;
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             chars[off++] = '"';
         }
 
         chars[off++] = ',';
 
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             chars[off++] = '"';
         }
-        int len1 = RyuDouble.toString(value1, chars, off);
+        int len1 = DoubleToDecimal.toString(value1, chars, off, true);
         off += len1;
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             chars[off++] = '"';
         }
 
@@ -1493,7 +1487,9 @@ class JSONWriterUTF16
             return;
         }
 
-        int minCapacity = off + values.length * 25 + 1;
+        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
+        int minCapacity = off + values.length * (writeAsString ? 25 : 27) + 1;
         if (minCapacity - chars.length > 0) {
             ensureCapacity(minCapacity);
         }
@@ -1503,16 +1499,16 @@ class JSONWriterUTF16
                 chars[off++] = ',';
             }
 
+            if (writeAsString) {
+                chars[off++] = '"';
+            }
+
             double value = values[i];
-            if (Double.isNaN(value) || Double.isInfinite(value)) {
-                chars[off] = 'n';
-                chars[off + 1] = 'u';
-                chars[off + 2] = 'l';
-                chars[off + 3] = 'l';
-                off += 4;
-            } else {
-                int len = RyuDouble.toString(value, chars, off);
-                off += len;
+            int len = DoubleToDecimal.toString(value, chars, off, true);
+            off += len;
+
+            if (writeAsString) {
+                chars[off++] = '"';
             }
         }
         chars[off++] = ']';

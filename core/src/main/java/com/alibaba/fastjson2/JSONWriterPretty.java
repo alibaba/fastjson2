@@ -64,6 +64,11 @@ final class JSONWriterPretty
     }
 
     @Override
+    public void writeDouble(double[] values) {
+        jsonWriter.writeDouble(values);
+    }
+
+    @Override
     public void writeDecimal(BigDecimal value, long features, DecimalFormat format) {
         jsonWriter.writeDecimal(value, features, format);
     }

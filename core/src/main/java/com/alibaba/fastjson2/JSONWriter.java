@@ -1010,21 +1010,7 @@ public abstract class JSONWriter
         endArray();
     }
 
-    public void writeDouble(double[] value) {
-        if (value == null) {
-            writeNull();
-            return;
-        }
-
-        startArray();
-        for (int i = 0; i < value.length; i++) {
-            if (i != 0) {
-                writeComma();
-            }
-            writeDouble(value[i]);
-        }
-        endArray();
-    }
+    public abstract void writeDouble(double[] value);
 
     public void writeBool(boolean value) {
         if ((context.features & Feature.WriteBooleanAsNumber.mask) != 0) {

@@ -1843,13 +1843,13 @@ public class TypeUtils {
 
     public static BigDecimal toBigDecimal(float f) {
         byte[] bytes = new byte[15];
-        int size = RyuDouble.toString(f, bytes, 0);
+        int size = DoubleToDecimal.toString(f, bytes, 0, true);
         return parseBigDecimal(bytes, 0, size);
     }
 
     public static BigDecimal toBigDecimal(double d) {
         byte[] bytes = new byte[24];
-        int size = RyuDouble.toString(d, bytes, 0);
+        int size = DoubleToDecimal.toString(d, bytes, 0, true);
         return parseBigDecimal(bytes, 0, size);
     }
 
