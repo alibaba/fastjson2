@@ -4513,8 +4513,8 @@ class JSONReaderUTF8
             }
 
             if (mag1 == 0 && mag1 == 0) {
-                long v3 = mag3 & LONG_MASK;
-                long v2 = mag2 & LONG_MASK;
+                long v3 = mag3 & 0XFFFFFFFFL;
+                long v2 = mag2 & 0XFFFFFFFFL;
 
                 if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
                     long v23 = (v2 << 32) + (v3);
