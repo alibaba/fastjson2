@@ -50,20 +50,8 @@ final class SymbolTable {
      */
     String className;
 
-    /**
-     * The total number of {@link Entry} instances in {@link #entries}. This includes entries that are
-     * accessible (recursively) via {@link Entry#next}.
-     */
     private int entryCount;
-
-    /**
-     * A hash set of all the entries in this SymbolTable (this includes the constant pool entries, the
-     * bootstrap method entries and the type table entries). Each {@link Entry} instance is stored at
-     * the array index given by its hash code modulo the array size. If several entries must be stored
-     * at the same array index, they are linked together via their {@link Entry#next} field. The
-     * factory methods of this class make sure that this table does not contain duplicated entries.
-     */
-    private Entry[] entries;
+    private Symbol[] entries;
 
     /**
      * The number of constant pool items in {@link #constantPool}, plus 1. The first constant pool
@@ -82,7 +70,7 @@ final class SymbolTable {
      * typeCount (excluded). The other array entries are empty.
      */
     private int typeCount;
-    Entry[] typeTable;
+    Symbol[] typeTable;
 
     /**
      * Constructs a new, empty SymbolTable for the given ClassWriter.
@@ -91,7 +79,7 @@ final class SymbolTable {
      */
     SymbolTable(final ClassWriter classWriter) {
         this.classWriter = classWriter;
-        this.entries = new Entry[256];
+        this.entries = new Symbol[256];
         this.constantPoolCount = 1;
         this.constantPool = new ByteVector(4096);
     }
@@ -181,16 +169,16 @@ final class SymbolTable {
      * @param entry an Entry (which must not already be contained in {@link #entries}).
      * @return the given entry
      */
-    private Entry put(final Entry entry) {
+    private Symbol put(final Symbol entry) {
         if (entryCount > (entries.length * 3) / 4) {
             int currentCapacity = entries.length;
             int newCapacity = currentCapacity * 2 + 1;
-            Entry[] newEntries = new Entry[newCapacity];
+            Symbol[] newEntries = new Symbol[newCapacity];
             for (int i = currentCapacity - 1; i >= 0; --i) {
-                Entry currentEntry = entries[i];
+                Symbol currentEntry = entries[i];
                 while (currentEntry != null) {
                     int newCurrentEntryIndex = currentEntry.hashCode % newCapacity;
-                    Entry nextEntry = currentEntry.next;
+                    Symbol nextEntry = currentEntry.next;
                     currentEntry.next = newEntries[newCurrentEntryIndex];
                     newEntries[newCurrentEntryIndex] = currentEntry;
                     currentEntry = nextEntry;
@@ -299,11 +287,11 @@ final class SymbolTable {
 //        );
 //    }
 
-    Entry addConstantMemberReference(
+    Symbol addConstantMemberReference(
             final int tag, final String owner, final String name, final String descriptor) {
 //    int hashCode = hash(tag, owner, name, descriptor);
         int hashCode = 0x7FFFFFFF & (tag + owner.hashCode() * name.hashCode() * descriptor.hashCode());
-        Entry entry = entries[hashCode % entries.length];
+        Symbol entry = entries[hashCode % entries.length];
         while (entry != null) {
             if (entry.tag == tag
                     && entry.hashCode == hashCode
@@ -316,12 +304,12 @@ final class SymbolTable {
         }
         constantPool.put122(
                 tag, addConstantUtf8Reference(/*CONSTANT_CLASS_TAG*/ 7, owner).index, addConstantNameAndType(name, descriptor));
-        return put(new Entry(constantPoolCount++, tag, owner, name, descriptor, 0, hashCode));
+        return put(new Symbol(constantPoolCount++, tag, owner, name, descriptor, 0, hashCode));
     }
 
     Symbol addConstantIntegerOrFloat(final int tag, final int value) {
         int hashCode = 0x7FFFFFFF & (tag + value);
-        Entry entry = entries[hashCode % entries.length];
+        Symbol entry = entries[hashCode % entries.length];
         while (entry != null) {
             if (entry.tag == tag && entry.hashCode == hashCode && entry.data == value) {
                 return entry;
@@ -329,12 +317,12 @@ final class SymbolTable {
             entry = entry.next;
         }
         constantPool.putByte(tag).putInt(value);
-        return put(new Entry(constantPoolCount++, tag, value, hashCode));
+        return put(new Symbol(constantPoolCount++, tag, null, null, null, value, hashCode));
     }
 
     Symbol addConstantLongOrDouble(final int tag, final long value) {
         int hashCode = 0x7FFFFFFF & (tag + (int) value + (int) (value >>> 32));
-        Entry entry = entries[hashCode % entries.length];
+        Symbol entry = entries[hashCode % entries.length];
         while (entry != null) {
             if (entry.tag == tag && entry.hashCode == hashCode && entry.data == value) {
                 return entry;
@@ -344,7 +332,7 @@ final class SymbolTable {
         int index = constantPoolCount;
         constantPool.putByte(tag).putLong(value);
         constantPoolCount += 2;
-        return put(new Entry(index, tag, value, hashCode));
+        return put(new Symbol(index, tag, null, null, null, value, hashCode));
     }
 
     /**
@@ -359,7 +347,7 @@ final class SymbolTable {
         final int CONSTANT_NAME_AND_TYPE_TAG = 12;
         final int tag = CONSTANT_NAME_AND_TYPE_TAG;
         int hashCode = 0x7FFFFFFF & (tag + name.hashCode() * descriptor.hashCode());
-        Entry entry = entries[hashCode % entries.length];
+        Symbol entry = entries[hashCode % entries.length];
         while (entry != null) {
             if (entry.tag == tag
                     && entry.hashCode == hashCode
@@ -370,7 +358,7 @@ final class SymbolTable {
             entry = entry.next;
         }
         constantPool.put122(tag, addConstantUtf8(name), addConstantUtf8(descriptor));
-        return put(new Entry(constantPoolCount++, tag, name, descriptor, hashCode)).index;
+        return put(new Symbol(constantPoolCount++, tag, null, name, descriptor, 0, hashCode)).index;
     }
 
     /**
@@ -384,7 +372,7 @@ final class SymbolTable {
         final int CONSTANT_UTF8_TAG = 1;
 
         int hashCode = 0x7FFFFFFF & (CONSTANT_UTF8_TAG + value.hashCode());
-        Entry entry = entries[hashCode % entries.length];
+        Symbol entry = entries[hashCode % entries.length];
         while (entry != null) {
             if (entry.tag == CONSTANT_UTF8_TAG
                     && entry.hashCode == hashCode
@@ -394,12 +382,12 @@ final class SymbolTable {
             entry = entry.next;
         }
         constantPool.putByte(CONSTANT_UTF8_TAG).putUTF8(value);
-        return put(new Entry(constantPoolCount++, CONSTANT_UTF8_TAG, value, hashCode)).index;
+        return put(new Symbol(constantPoolCount++, CONSTANT_UTF8_TAG, null, null, value, 0, hashCode)).index;
     }
 
     Symbol addConstantUtf8Reference(final int tag, final String value) {
         int hashCode = 0x7FFFFFFF & (tag + value.hashCode());
-        Entry entry = entries[hashCode % entries.length];
+        Symbol entry = entries[hashCode % entries.length];
         while (entry != null) {
             if (entry.tag == tag && entry.hashCode == hashCode && entry.value.equals(value)) {
                 return entry;
@@ -407,7 +395,7 @@ final class SymbolTable {
             entry = entry.next;
         }
         constantPool.put12(tag, addConstantUtf8(value));
-        return put(new Entry(constantPoolCount++, tag, value, hashCode));
+        return put(new Symbol(constantPoolCount++, tag, null, null, value, 0, hashCode));
     }
 //
 //    /**
@@ -431,14 +419,14 @@ final class SymbolTable {
         final int TYPE_TAG = 128;
 
         int hashCode = 0x7FFFFFFF & (TYPE_TAG + value.hashCode());
-        Entry entry = entries[hashCode % entries.length];
+        Symbol entry = entries[hashCode % entries.length];
         while (entry != null) {
             if (entry.tag == TYPE_TAG && entry.hashCode == hashCode && entry.value.equals(value)) {
                 return entry.index;
             }
             entry = entry.next;
         }
-        return addTypeInternal(new Entry(typeCount, TYPE_TAG, value, hashCode));
+        return addTypeInternal(new Symbol(typeCount, TYPE_TAG, null, null, value, 0, hashCode));
     }
 
     /**
@@ -454,7 +442,7 @@ final class SymbolTable {
         final int UNINITIALIZED_TYPE_TAG = 129;
 
         int hashCode = 0x7FFFFFFF & (UNINITIALIZED_TYPE_TAG + value.hashCode() + bytecodeOffset);
-        Entry entry = entries[hashCode % entries.length];
+        Symbol entry = entries[hashCode % entries.length];
         while (entry != null) {
             if (entry.tag == UNINITIALIZED_TYPE_TAG
                     && entry.hashCode == hashCode
@@ -465,7 +453,7 @@ final class SymbolTable {
             entry = entry.next;
         }
         return addTypeInternal(
-                new Entry(typeCount, UNINITIALIZED_TYPE_TAG, value, bytecodeOffset, hashCode));
+                new Symbol(typeCount, UNINITIALIZED_TYPE_TAG, null, null, value, bytecodeOffset, hashCode));
     }
 
     int addMergedType(final int typeTableIndex1, final int typeTableIndex2) {
@@ -476,7 +464,7 @@ final class SymbolTable {
                         ? typeTableIndex1 | (((long) typeTableIndex2) << 32)
                         : typeTableIndex2 | (((long) typeTableIndex1) << 32);
         int hashCode = 0x7FFFFFFF & (MERGED_TYPE_TAG + typeTableIndex1 + typeTableIndex2);
-        Entry entry = entries[hashCode % entries.length];
+        Symbol entry = entries[hashCode % entries.length];
         while (entry != null) {
             if (entry.tag == MERGED_TYPE_TAG && entry.hashCode == hashCode && entry.data == data) {
                 return entry.info;
@@ -486,74 +474,20 @@ final class SymbolTable {
         String type1 = typeTable[typeTableIndex1].value;
         String type2 = typeTable[typeTableIndex2].value;
         int commonSuperTypeIndex = addType(classWriter.getCommonSuperClass(type1, type2));
-        put(new Entry(typeCount, MERGED_TYPE_TAG, data, hashCode)).info = commonSuperTypeIndex;
+        put(new Symbol(typeCount, MERGED_TYPE_TAG, null, null, null, data, hashCode)).info = commonSuperTypeIndex;
         return commonSuperTypeIndex;
     }
 
-    private int addTypeInternal(final Entry entry) {
+    private int addTypeInternal(final Symbol entry) {
         if (typeTable == null) {
-            typeTable = new Entry[16];
+            typeTable = new Symbol[16];
         }
         if (typeCount == typeTable.length) {
-            Entry[] newTypeTable = new Entry[2 * typeTable.length];
+            Symbol[] newTypeTable = new Symbol[2 * typeTable.length];
             System.arraycopy(typeTable, 0, newTypeTable, 0, typeTable.length);
             typeTable = newTypeTable;
         }
         typeTable[typeCount++] = entry;
         return put(entry).index;
-    }
-
-    /**
-     * An entry of a SymbolTable. This concrete and private subclass of {@link Symbol} adds two fields
-     * which are only used inside SymbolTable, to implement hash sets of symbols (in order to avoid
-     * duplicate symbols). See {@link #entries}.
-     *
-     * @author Eric Bruneton
-     */
-    static class Entry
-            extends Symbol {
-        /**
-         * The hash code of this entry.
-         */
-        final int hashCode;
-
-        /**
-         * Another entry (and so on recursively) having the same hash code (modulo the size of {@link
-         * #entries}) as this one.
-         */
-        Entry next;
-
-        Entry(
-                final int index,
-                final int tag,
-                final String owner,
-                final String name,
-                final String value,
-                final long data,
-                final int hashCode) {
-            super(index, tag, owner, name, value, data);
-            this.hashCode = hashCode;
-        }
-
-        Entry(final int index, final int tag, final String value, final int hashCode) {
-            super(index, tag, /* owner = */ null, /* name = */ null, value, /* data = */ 0);
-            this.hashCode = hashCode;
-        }
-
-        Entry(final int index, final int tag, final String value, final long data, final int hashCode) {
-            super(index, tag, /* owner = */ null, /* name = */ null, value, data);
-            this.hashCode = hashCode;
-        }
-
-        Entry(
-                final int index, final int tag, final String name, final String value, final int hashCode) {
-            super(index, tag, /* owner = */ null, name, value, /* data = */ 0);
-            this.hashCode = hashCode;
-        }
-
-        Entry(final int index, final int tag, final long data, final int hashCode) {
-            super(index, tag, /* owner = */ null, /* name = */ null, /* value = */ null, data);
-            this.hashCode = hashCode;
-        }
     }
 }
