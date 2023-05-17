@@ -36,7 +36,7 @@ public class DoubleToString {
 //    @Benchmark
     public void ryuFloat(Blackhole bh) throws Throwable {
         byte[] bytes = new byte[15];
-        int size = DoubleToDecimal.toString(f, bytes, 0);
+        int size = DoubleToDecimal.toString(f, bytes, 0, false);
         String str = new String(bytes, 0, 0, size);
         bh.consume(str);
     }

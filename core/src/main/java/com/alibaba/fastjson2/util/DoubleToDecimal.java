@@ -46,23 +46,6 @@ public final class DoubleToDecimal {
      * that do not provide specific machine instructions or where they are slow.
      * This is discussed in section 10 of [1].
      */
-
-    public static int toString(double v, byte[] bytes, int off) {
-        return toString(v, bytes, off, false);
-    }
-
-    public static int toString(double v, char[] bytes, int off) {
-        return toString(v, bytes, off, false);
-    }
-
-    public static int toString(float v, byte[] bytes, int off) {
-        return toString(v, bytes, off, false);
-    }
-
-    public static int toString(float v, char[] bytes, int off) {
-        return toString(v, bytes, off, false);
-    }
-
     public static int toString(double v, byte[] bytes, int off, boolean json) {
         final long C_TINY = 3;
         final long C_MIN = 4503599627370496L;

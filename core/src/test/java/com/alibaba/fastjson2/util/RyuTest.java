@@ -17,13 +17,13 @@ public class RyuTest {
 
     static String toString(double value) {
         byte[] bytes = new byte[24];
-        int len = DoubleToDecimal.toString(value, bytes, 0);
+        int len = DoubleToDecimal.toString(value, bytes, 0, false);
         return new String(bytes, 0, len);
     }
 
     static String toString(float value) {
         byte[] bytes = new byte[15];
-        int len = DoubleToDecimal.toString(value, bytes, 0);
+        int len = DoubleToDecimal.toString(value, bytes, 0, false);
         return new String(bytes, 0, len);
     }
 }

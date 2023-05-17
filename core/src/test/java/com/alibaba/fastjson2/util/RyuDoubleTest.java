@@ -25,7 +25,7 @@ public class RyuDoubleTest {
         for (int i = 0; i < 1_000_000; i++) {
             double d = r.nextDouble();
             String s0 = Double.toString(d);
-            int size = DoubleToDecimal.toString(d, bytes, 0);
+            int size = DoubleToDecimal.toString(d, bytes, 0, false);
             String s1 = new String(bytes, 0, size, StandardCharsets.US_ASCII);
             boolean eq = s0.equals(s1);
             if (!eq) {
@@ -44,7 +44,7 @@ public class RyuDoubleTest {
 
     static String toString(double value) {
         byte[] bytes = new byte[24];
-        int len = DoubleToDecimal.toString(value, bytes, 0);
+        int len = DoubleToDecimal.toString(value, bytes, 0, false);
         return new String(bytes, 0, len);
     }
 }

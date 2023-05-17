@@ -24,7 +24,7 @@ public class DoubleToDecimalTest {
 
         for (int i = 0; i < doubles.length; i++) {
             double d = doubles[i];
-            int size = DoubleToDecimal.toString(d, bytes, 0);
+            int size = DoubleToDecimal.toString(d, bytes, 0, false);
             String str = new String(bytes, 0, 0, size);
             assertEquals(Double.toString(d), str);
         }
@@ -36,7 +36,7 @@ public class DoubleToDecimalTest {
             double d = doubles[i];
             byte[] bytes = new byte[25];
             bytes[0] = '[';
-            int size = DoubleToDecimal.toString(d, bytes, 1);
+            int size = DoubleToDecimal.toString(d, bytes, 1, false);
             String str = new String(bytes, 1, size);
             assertEquals(Double.toString(d), str);
         }
@@ -48,7 +48,7 @@ public class DoubleToDecimalTest {
             double d = doubles[i];
             char[] bytes = new char[25];
             bytes[0] = '[';
-            int size = DoubleToDecimal.toString(d, bytes, 1);
+            int size = DoubleToDecimal.toString(d, bytes, 1, false);
             String str = new String(bytes, 1, size);
             assertEquals(Double.toString(d), str);
         }
