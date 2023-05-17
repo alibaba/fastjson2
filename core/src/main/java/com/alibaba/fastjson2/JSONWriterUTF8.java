@@ -1730,43 +1730,33 @@ class JSONWriterUTF8
 
     @Override
     public final void writeFloat(float value) {
-        if (Float.isNaN(value) || Float.isInfinite(value)) {
-            writeNull();
-            return;
-        }
-
-        boolean writeNonStringValueAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
 
         int minCapacity = off + 15;
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             minCapacity += 2;
         }
 
         ensureCapacity(minCapacity);
 
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             bytes[off++] = '"';
         }
 
-        int len = RyuDouble.toString(value, bytes, off);
+        int len = DoubleToDecimal.toString(value, bytes, off, true);
         off += len;
 
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             bytes[off++] = '"';
         }
     }
 
     @Override
     public final void writeDouble(double value) {
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
-            writeNull();
-            return;
-        }
-
-        boolean writeNonStringValueAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
 
         int minCapacity = off + 24;
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             minCapacity += 2;
         }
 
@@ -1774,16 +1764,85 @@ class JSONWriterUTF8
             ensureCapacity(minCapacity);
         }
 
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             bytes[off++] = '"';
         }
 
-        int len = RyuDouble.toString(value, bytes, off);
+        int len = DoubleToDecimal.toString(value, bytes, off, true);
         off += len;
 
-        if (writeNonStringValueAsString) {
+        if (writeAsString) {
             bytes[off++] = '"';
         }
+    }
+
+    @Override
+    public final void writeFloat(float[] values) {
+        if (values == null) {
+            writeArrayNull();
+            return;
+        }
+
+        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
+        int minCapacity = off + values.length * (writeAsString ? 16 : 18) + 1;
+        if (minCapacity - bytes.length > 0) {
+            ensureCapacity(minCapacity);
+        }
+
+        bytes[off++] = '[';
+        for (int i = 0; i < values.length; i++) {
+            if (i != 0) {
+                bytes[off++] = ',';
+            }
+
+            if (writeAsString) {
+                bytes[off++] = '"';
+            }
+
+            float value = values[i];
+            int len = DoubleToDecimal.toString(value, bytes, off, true);
+            off += len;
+
+            if (writeAsString) {
+                bytes[off++] = '"';
+            }
+        }
+        bytes[off++] = ']';
+    }
+
+    @Override
+    public final void writeDouble(double[] values) {
+        if (values == null) {
+            writeNull();
+            return;
+        }
+
+        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+
+        int minCapacity = off + values.length * (writeAsString ? 25 : 27) + 1;
+        if (minCapacity - bytes.length > 0) {
+            ensureCapacity(minCapacity);
+        }
+        bytes[off++] = '[';
+        for (int i = 0; i < values.length; i++) {
+            if (i != 0) {
+                bytes[off++] = ',';
+            }
+
+            if (writeAsString) {
+                bytes[off++] = '"';
+            }
+
+            double value = values[i];
+            int len = DoubleToDecimal.toString(value, bytes, off, true);
+            off += len;
+
+            if (writeAsString) {
+                bytes[off++] = '"';
+            }
+        }
+        bytes[off++] = ']';
     }
 
     @Override
