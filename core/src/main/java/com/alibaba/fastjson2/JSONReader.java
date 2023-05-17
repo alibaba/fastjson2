@@ -36,7 +36,6 @@ public abstract class JSONReader
         implements Closeable {
     static final int MAX_EXP = 1023;
     static final long SHANGHAI_ZONE_ID_HASH = Fnv.hashCode64("Asia/Shanghai");
-    static final long LONG_MASK = 0XFFFFFFFFL;
 
     static final byte JSON_TYPE_INT = 1;
     static final byte JSON_TYPE_DEC = 2;
@@ -637,8 +636,8 @@ public abstract class JSONReader
                             return Long.MIN_VALUE;
                         }
 
-                        long v3 = mag3 & LONG_MASK;
-                        long v2 = mag2 & LONG_MASK;
+                        long v3 = mag3 & 0XFFFFFFFFL;
+                        long v2 = mag2 & 0XFFFFFFFFL;
 
                         if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
                             long v23 = (v2 << 32) + (v3);
@@ -2339,8 +2338,8 @@ public abstract class JSONReader
                 int[] mag;
                 if (mag0 == 0) {
                     if (mag1 == 0) {
-                        long v3 = mag3 & LONG_MASK;
-                        long v2 = mag2 & LONG_MASK;
+                        long v3 = mag3 & 0XFFFFFFFFL;
+                        long v2 = mag2 & 0XFFFFFFFFL;
 
                         if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
                             long v23 = (v2 << 32) + (v3);
@@ -2366,8 +2365,8 @@ public abstract class JSONReader
                         int unscaledVal = negative ? -mag3 : mag3;
                         decimal = BigDecimal.valueOf(unscaledVal, scale);
                     } else {
-                        long v3 = mag3 & LONG_MASK;
-                        long v2 = mag2 & LONG_MASK;
+                        long v3 = mag3 & 0XFFFFFFFFL;
+                        long v2 = mag2 & 0XFFFFFFFFL;
 
                         if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
                             long v23 = (v2 << 32) + (v3);
@@ -2456,8 +2455,8 @@ public abstract class JSONReader
                 int[] mag;
                 if (mag0 == 0) {
                     if (mag1 == 0) {
-                        long v3 = mag3 & LONG_MASK;
-                        long v2 = mag2 & LONG_MASK;
+                        long v3 = mag3 & 0XFFFFFFFFL;
+                        long v2 = mag2 & 0XFFFFFFFFL;
 
                         if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
                             long v23 = (v2 << 32) + (v3);
@@ -2541,8 +2540,8 @@ public abstract class JSONReader
                         }
                         decimal = BigDecimal.valueOf(unscaledVal, scale);
                     } else {
-                        long v3 = mag3 & LONG_MASK;
-                        long v2 = mag2 & LONG_MASK;
+                        long v3 = mag3 & 0XFFFFFFFFL;
+                        long v2 = mag2 & 0XFFFFFFFFL;
 
                         if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
                             long v23 = (v2 << 32) + (v3);
@@ -3382,26 +3381,26 @@ public abstract class JSONReader
             }
 
             // destructiveMulAdd
-            long ylong = 1000000000 & LONG_MASK;
+            long ylong = 1000000000 & 0XFFFFFFFFL;
 
             long product = 0;
             long carry = 0;
             for (int i = 3; i >= 0; i--) {
                 switch (i) {
                     case 0:
-                        product = ylong * (mag0 & LONG_MASK) + carry;
+                        product = ylong * (mag0 & 0XFFFFFFFFL) + carry;
                         mag0 = (int) product;
                         break;
                     case 1:
-                        product = ylong * (mag1 & LONG_MASK) + carry;
+                        product = ylong * (mag1 & 0XFFFFFFFFL) + carry;
                         mag1 = (int) product;
                         break;
                     case 2:
-                        product = ylong * (mag2 & LONG_MASK) + carry;
+                        product = ylong * (mag2 & 0XFFFFFFFFL) + carry;
                         mag2 = (int) product;
                         break;
                     case 3:
-                        product = ylong * (mag3 & LONG_MASK) + carry;
+                        product = ylong * (mag3 & 0XFFFFFFFFL) + carry;
                         mag3 = (int) product;
                         break;
                     default:
@@ -3410,8 +3409,8 @@ public abstract class JSONReader
                 carry = product >>> 32;
             }
 
-            long zlong = groupVal & LONG_MASK;
-            long sum = (mag3 & LONG_MASK) + zlong;
+            long zlong = groupVal & 0XFFFFFFFFL;
+            long sum = (mag3 & 0XFFFFFFFFL) + zlong;
             mag3 = (int) sum;
 
             // Perform the addition
@@ -3419,19 +3418,19 @@ public abstract class JSONReader
             for (int i = 2; i >= 0; i--) {
                 switch (i) {
                     case 0:
-                        sum = (mag0 & LONG_MASK) + carry;
+                        sum = (mag0 & 0XFFFFFFFFL) + carry;
                         mag0 = (int) sum;
                         break;
                     case 1:
-                        sum = (mag1 & LONG_MASK) + carry;
+                        sum = (mag1 & 0XFFFFFFFFL) + carry;
                         mag1 = (int) sum;
                         break;
                     case 2:
-                        sum = (mag2 & LONG_MASK) + carry;
+                        sum = (mag2 & 0XFFFFFFFFL) + carry;
                         mag2 = (int) sum;
                         break;
                     case 3:
-                        sum = (mag3 & LONG_MASK) + carry;
+                        sum = (mag3 & 0XFFFFFFFFL) + carry;
                         mag3 = (int) sum;
                         break;
                     default:
@@ -3519,27 +3518,27 @@ public abstract class JSONReader
             }
 
             // destructiveMulAdd
-            long ylong = 1000000000 & LONG_MASK;
-            long zlong = groupVal & LONG_MASK;
+            long ylong = 1000000000 & 0XFFFFFFFFL;
+            long zlong = groupVal & 0XFFFFFFFFL;
 
             long product = 0;
             long carry = 0;
             for (int i = 3; i >= 0; i--) {
                 switch (i) {
                     case 0:
-                        product = ylong * (mag0 & LONG_MASK) + carry;
+                        product = ylong * (mag0 & 0XFFFFFFFFL) + carry;
                         mag0 = (int) product;
                         break;
                     case 1:
-                        product = ylong * (mag1 & LONG_MASK) + carry;
+                        product = ylong * (mag1 & 0XFFFFFFFFL) + carry;
                         mag1 = (int) product;
                         break;
                     case 2:
-                        product = ylong * (mag2 & LONG_MASK) + carry;
+                        product = ylong * (mag2 & 0XFFFFFFFFL) + carry;
                         mag2 = (int) product;
                         break;
                     case 3:
-                        product = ylong * (mag3 & LONG_MASK) + carry;
+                        product = ylong * (mag3 & 0XFFFFFFFFL) + carry;
                         mag3 = (int) product;
                         break;
                     default:
@@ -3548,7 +3547,7 @@ public abstract class JSONReader
                 carry = product >>> 32;
             }
 
-            long sum = (mag3 & LONG_MASK) + zlong;
+            long sum = (mag3 & 0XFFFFFFFFL) + zlong;
             mag3 = (int) sum;
 
             // Perform the addition
@@ -3556,19 +3555,19 @@ public abstract class JSONReader
             for (int i = 2; i >= 0; i--) {
                 switch (i) {
                     case 0:
-                        sum = (mag0 & LONG_MASK) + carry;
+                        sum = (mag0 & 0XFFFFFFFFL) + carry;
                         mag0 = (int) sum;
                         break;
                     case 1:
-                        sum = (mag1 & LONG_MASK) + carry;
+                        sum = (mag1 & 0XFFFFFFFFL) + carry;
                         mag1 = (int) sum;
                         break;
                     case 2:
-                        sum = (mag2 & LONG_MASK) + carry;
+                        sum = (mag2 & 0XFFFFFFFFL) + carry;
                         mag2 = (int) sum;
                         break;
                     case 3:
-                        sum = (mag3 & LONG_MASK) + carry;
+                        sum = (mag3 & 0XFFFFFFFFL) + carry;
                         mag3 = (int) sum;
                         break;
                     default:

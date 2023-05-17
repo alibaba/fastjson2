@@ -3,8 +3,6 @@ package com.alibaba.fastjson2.util;
 import java.util.Arrays;
 
 public final class FDBigInteger {
-    private static final long LONG_MASK = 0XFFFFFFFFL;
-
     private static final int[] SMALL_5_POW = {
             1,
             5,
@@ -90,13 +88,13 @@ public final class FDBigInteger {
     }
 
     private void multAddMe(int iv, int addend) {
-        long v = iv & LONG_MASK;
+        long v = iv & 0XFFFFFFFFL;
         // unroll 0th iteration, doing addition.
-        long p = v * (data[0] & LONG_MASK) + (addend & LONG_MASK);
+        long p = v * (data[0] & 0XFFFFFFFFL) + (addend & 0XFFFFFFFFL);
         data[0] = (int) p;
         p >>>= 32;
         for (int i = 1; i < nWords; i++) {
-            p += v * (data[i] & LONG_MASK);
+            p += v * (data[i] & 0XFFFFFFFFL);
             data[i] = (int) p;
             p >>>= 32;
         }
@@ -181,10 +179,10 @@ public final class FDBigInteger {
     }
 
     private static void mult(int[] src, int srcLen, int value, int[] dst) {
-        long val = value & LONG_MASK;
+        long val = value & 0XFFFFFFFFL;
         long carry = 0;
         for (int i = 0; i < srcLen; i++) {
-            long product = (src[i] & LONG_MASK) * val + carry;
+            long product = (src[i] & 0XFFFFFFFFL) * val + carry;
             dst[i] = (int) product;
             carry = product >>> 32;
         }
@@ -193,10 +191,10 @@ public final class FDBigInteger {
 
     private static void mult(int[] s1, int s1Len, int[] s2, int s2Len, int[] dst) {
         for (int i = 0; i < s1Len; i++) {
-            long v = s1[i] & LONG_MASK;
+            long v = s1[i] & 0XFFFFFFFFL;
             long p = 0L;
             for (int j = 0; j < s2Len; j++) {
-                p += (dst[i + j] & LONG_MASK) + v * (s2[j] & LONG_MASK);
+                p += (dst[i + j] & 0XFFFFFFFFL) + v * (s2[j] & 0XFFFFFFFFL);
                 dst[i + j] = (int) p;
                 p >>>= 32;
             }
@@ -205,18 +203,18 @@ public final class FDBigInteger {
     }
 
     private static void mult(int[] src, int srcLen, int v0, int v1, int[] dst) {
-        long v = v0 & LONG_MASK;
+        long v = v0 & 0XFFFFFFFFL;
         long carry = 0;
         for (int j = 0; j < srcLen; j++) {
-            long product = v * (src[j] & LONG_MASK) + carry;
+            long product = v * (src[j] & 0XFFFFFFFFL) + carry;
             dst[j] = (int) product;
             carry = product >>> 32;
         }
         dst[srcLen] = (int) carry;
-        v = v1 & LONG_MASK;
+        v = v1 & 0XFFFFFFFFL;
         carry = 0;
         for (int j = 0; j < srcLen; j++) {
-            long product = (dst[j + 1] & LONG_MASK) + v * (src[j] & LONG_MASK) + carry;
+            long product = (dst[j + 1] & 0XFFFFFFFFL) + v * (src[j] & 0XFFFFFFFFL) + carry;
             dst[j + 1] = (int) product;
             carry = product >>> 32;
         }
@@ -326,11 +324,11 @@ public final class FDBigInteger {
         int bitcount = p2 & 0x1f;
         if (p5 != 0) {
             if (p5 < SMALL_5_POW.length) {
-                long pow5 = SMALL_5_POW[p5] & LONG_MASK;
-                long carry = (v0 & LONG_MASK) * pow5;
+                long pow5 = SMALL_5_POW[p5] & 0XFFFFFFFFL;
+                long carry = (v0 & 0XFFFFFFFFL) * pow5;
                 v0 = (int) carry;
                 carry >>>= 32;
-                carry = (v1 & LONG_MASK) * pow5 + carry;
+                carry = (v1 & 0XFFFFFFFFL) * pow5 + carry;
                 v1 = (int) carry;
                 int v2 = (int) (carry >>> 32);
                 if (bitcount == 0) {
@@ -383,7 +381,7 @@ public final class FDBigInteger {
             int a = data[--aLen];
             int b = other.data[--bLen];
             if (a != b) {
-                return ((a & LONG_MASK) < (b & LONG_MASK)) ? -1 : 1;
+                return ((a & 0XFFFFFFFFL) < (b & 0XFFFFFFFFL)) ? -1 : 1;
             }
         }
         if (aLen > 0) {
@@ -435,12 +433,12 @@ public final class FDBigInteger {
         long borrow = 0L;
         int mIndex = offsetDiff;
         for (int sIndex = 0; sIndex < subLen && mIndex < minLen; sIndex++, mIndex++) {
-            long diff = (mData[mIndex] & LONG_MASK) - (sData[sIndex] & LONG_MASK) + borrow;
+            long diff = (mData[mIndex] & 0XFFFFFFFFL) - (sData[sIndex] & 0XFFFFFFFFL) + borrow;
             mData[mIndex] = (int) diff;
             borrow = diff >> 32; // signed shift
         }
         for (; borrow != 0 && mIndex < minLen; mIndex++) {
-            long diff = (mData[mIndex] & LONG_MASK) + borrow;
+            long diff = (mData[mIndex] & 0XFFFFFFFFL) + borrow;
             mData[mIndex] = (int) diff;
             borrow = diff >> 32; // signed shift
         }
@@ -484,13 +482,13 @@ public final class FDBigInteger {
         int sIndex = 0;
         long borrow = 0L;
         for (; sIndex < offsetDiff; sIndex++) {
-            long diff = 0L - (sData[sIndex] & LONG_MASK) + borrow;
+            long diff = 0L - (sData[sIndex] & 0XFFFFFFFFL) + borrow;
             sData[sIndex] = (int) diff;
             borrow = diff >> 32; // signed shift
         }
 
         for (int mIndex = 0; mIndex < minLen; sIndex++, mIndex++) {
-            long diff = (mData[mIndex] & LONG_MASK) - (sData[sIndex] & LONG_MASK) + borrow;
+            long diff = (mData[mIndex] & 0XFFFFFFFFL) - (sData[sIndex] & 0XFFFFFFFFL) + borrow;
             sData[sIndex] = (int) diff;
             borrow = diff >> 32; // signed shift
         }
@@ -514,7 +512,7 @@ public final class FDBigInteger {
             int a = this.data[this.nWords - 1];
             int b = 1 << bitcount;
             if (a != b) {
-                return ((a & LONG_MASK) < (b & LONG_MASK)) ? -1 : 1;
+                return ((a & 0XFFFFFFFFL) < (b & 0XFFFFFFFFL)) ? -1 : 1;
             }
             return checkZeroTail(this.data, this.nWords - 1);
         }
