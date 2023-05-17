@@ -3,22 +3,27 @@ package com.alibaba.fastjson2.jsonpath;
 import com.alibaba.fastjson2.JSONPath;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ParentTest {
     @Test
     public void test() {
         JSONPath path = JSONPath.of("$.posts[?(@.id == 1)].id");
 
+        assertFalse(path.endsWithFilter());
+
         JSONPath p0 = path.getParent();
         assertEquals("$.posts[?(@.id == 1)]", p0.toString());
 
+        assertTrue(p0.endsWithFilter());
+
         JSONPath p1 = p0.getParent();
         assertEquals("$.posts", p1.toString());
+        assertFalse(p1.endsWithFilter());
 
         JSONPath p2 = p1.getParent();
         assertEquals("$", p2.toString());
+        assertFalse(p2.endsWithFilter());
 
         JSONPath p3 = p2.getParent();
         assertNull(p3);
