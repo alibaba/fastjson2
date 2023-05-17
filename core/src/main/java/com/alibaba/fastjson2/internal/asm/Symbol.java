@@ -37,7 +37,7 @@ package com.alibaba.fastjson2.internal.asm;
  * @see <a href="https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.7.23">JVMS
  * 4.7.23</a>
  */
-abstract class Symbol {
+final class Symbol {
     final int index;
     final int tag;
     final String owner;
@@ -45,20 +45,25 @@ abstract class Symbol {
     final String value;
     final long data;
     int info;
+    final int hashCode;
+    Symbol next;
 
     Symbol(
-            final int index,
-            final int tag,
-            final String owner,
-            final String name,
-            final String value,
-            final long data) {
+            int index,
+            int tag,
+            String owner,
+            String name,
+            String value,
+            long data,
+            int hashCode
+    ) {
         this.index = index;
         this.tag = tag;
         this.owner = owner;
         this.name = name;
         this.value = value;
         this.data = data;
+        this.hashCode = hashCode;
     }
 
     int getArgumentsAndReturnSizes() {
