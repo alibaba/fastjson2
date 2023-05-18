@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -154,8 +155,15 @@ final class ObjectReaderSeeAlso<T>
                     && ((((features3 = (features | getFeatures() | context.getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0) || autoTypeFilter != null)
             ) {
                 ObjectReader reader = null;
-
                 long typeHash = jsonReader.readTypeHashCode();
+
+                Number typeNumber = null;
+                String typeNumberStr = null;
+                if (typeHash == -1 && jsonReader.isNumber()) {
+                    typeNumber = jsonReader.readNumber();
+                    typeNumberStr = typeNumber.toString();
+                    typeHash = Fnv.hashCode64(typeNumberStr);
+                }
                 if (autoTypeFilter != null) {
                     Class<?> filterClass = autoTypeFilter.apply(typeHash, objectClass, features3);
                     if (filterClass == null) {
@@ -192,7 +200,11 @@ final class ObjectReaderSeeAlso<T>
 
                 FieldReader fieldReader = reader.getFieldReader(hash);
                 if (fieldReader != null && typeName == null) {
-                    typeName = jsonReader.getString();
+                    if (typeNumberStr != null) {
+                        typeName = typeNumberStr;
+                    } else {
+                        typeName = jsonReader.getString();
+                    }
                 }
 
                 if (i != 0) {
@@ -204,7 +216,11 @@ final class ObjectReaderSeeAlso<T>
                 );
 
                 if (fieldReader != null) {
-                    fieldReader.accept(object, typeName);
+                    if (typeNumber != null) {
+                        fieldReader.accept(object, typeNumber);
+                    } else {
+                        fieldReader.accept(object, typeName);
+                    }
                 }
 
                 return object;
