@@ -14,7 +14,6 @@ final class ObjectReaderImplCurrency
     static final ObjectReaderImplCurrency INSTANCE = new ObjectReaderImplCurrency();
 
     static final long TYPE_HASH = Fnv.hashCode64("Currency");
-    static final long TYPE_HASH_FULL = -7860540621745740270L; // Fnv.hashCode64("java.util.Currency");
 
     ObjectReaderImplCurrency() {
         super(Currency.class);
@@ -25,6 +24,7 @@ final class ObjectReaderImplCurrency
         if (jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY) {
             jsonReader.next();
             long typeHash = jsonReader.readTypeHashCode();
+            final long TYPE_HASH_FULL = -7860540621745740270L; // Fnv.hashCode64("java.util.Currency");
             if (typeHash != TYPE_HASH && typeHash != TYPE_HASH_FULL) {
                 throw new JSONException(jsonReader.info("currency not support input autoTypeClass " + jsonReader.getString()));
             }

@@ -28,10 +28,6 @@ public interface ApacheLang3Support {
         static final long LEFT = Fnv.hashCode64("left");
         static final long RIGHT = Fnv.hashCode64("right");
 
-        static final long PAIR = 4645080105124911238L; // Fnv.hashCode64("org.apache.commons.lang3.tuple.Pair");
-        static final long MUTABLE_PAIR = 8310287657375596772L; // Fnv.hashCode64("org.apache.commons.lang3.tuple.MutablePair");
-        static final long IMMUTABLE_PAIR = -2802985644706367574L; // Fnv.hashCode64("org.apache.commons.lang3.tuple.ImmutablePair");
-
         final Class objectClass;
         final Type leftType;
         final Type rightType;
@@ -60,6 +56,11 @@ public interface ApacheLang3Support {
 
             if (jsonReader.nextIfMatch(BC_TYPED_ANY)) {
                 long typeHash = jsonReader.readTypeHashCode();
+
+                final long PAIR = 4645080105124911238L; // Fnv.hashCode64("org.apache.commons.lang3.tuple.Pair");
+                final long MUTABLE_PAIR = 8310287657375596772L; // Fnv.hashCode64("org.apache.commons.lang3.tuple.MutablePair");
+                final long IMMUTABLE_PAIR = -2802985644706367574L; // Fnv.hashCode64("org.apache.commons.lang3.tuple.ImmutablePair");
+
                 if (typeHash != PAIR && typeHash != IMMUTABLE_PAIR && typeHash != MUTABLE_PAIR) {
                     throw new JSONException("not support inputType : " + jsonReader.getString());
                 }
