@@ -4922,6 +4922,7 @@ class JSONReaderJSONB
 
                 ZoneId zoneId;
                 long zoneIdHash = readValueHashCode();
+                final long SHANGHAI_ZONE_ID_HASH = -4800907791268808639L; // Fnv.hashCode64("Asia/Shanghai");
                 if (zoneIdHash == SHANGHAI_ZONE_ID_HASH) {
                     zoneId = SHANGHAI_ZONE_ID;
                 } else {
