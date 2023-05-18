@@ -11,7 +11,7 @@ final class ObjectWriterImplAtomicLong
         extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplAtomicLong INSTANCE = new ObjectWriterImplAtomicLong(null);
     static final byte[] JSONB_TYPE_NAME_BYTES = JSONB.toBytes("AtomicLong");
-    static final long JSONB_TYPE_HASH = Fnv.hashCode64("AtomicLong");
+    static final long JSONB_TYPE_HASH = -1591858996898070466L; // Fnv.hashCode64("AtomicLong");
 
     final Class defineClass;
 

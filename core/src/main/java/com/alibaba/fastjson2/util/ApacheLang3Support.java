@@ -28,9 +28,9 @@ public interface ApacheLang3Support {
         static final long LEFT = Fnv.hashCode64("left");
         static final long RIGHT = Fnv.hashCode64("right");
 
-        static final long PAIR = Fnv.hashCode64("org.apache.commons.lang3.tuple.Pair");
-        static final long MUTABLE_PAIR = Fnv.hashCode64("org.apache.commons.lang3.tuple.MutablePair");
-        static final long IMMUTABLE_PAIR = Fnv.hashCode64("org.apache.commons.lang3.tuple.ImmutablePair");
+        static final long PAIR = 4645080105124911238L; // Fnv.hashCode64("org.apache.commons.lang3.tuple.Pair");
+        static final long MUTABLE_PAIR = 8310287657375596772L; // Fnv.hashCode64("org.apache.commons.lang3.tuple.MutablePair");
+        static final long IMMUTABLE_PAIR = -2802985644706367574L; // Fnv.hashCode64("org.apache.commons.lang3.tuple.ImmutablePair");
 
         final Class objectClass;
         final Type leftType;

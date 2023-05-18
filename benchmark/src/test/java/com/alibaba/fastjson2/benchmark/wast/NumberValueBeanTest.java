@@ -15,7 +15,7 @@ public class NumberValueBeanTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("NumberValueBeanCase-fastjson2 : " + millis);
 
-            // zulu8.62.0.19 : 993
+            // zulu8.62.0.21 :  672
             // zulu11.52.13 :
             // zulu17.32.13 :
             // zulu18.28.13 :
@@ -38,7 +38,7 @@ public class NumberValueBeanTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("NumberValueBeanCase-wastjson : " + millis);
 
-            // zulu8.62.0.19 : 387
+            // zulu8.62.0.19 : 380
             // zulu11.52.13 :
             // zulu17.32.13 :
             // zulu18.28.13 :

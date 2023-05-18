@@ -3090,21 +3090,42 @@ class JSONReaderUTF16
         }
 
         if (!value) {
-            if (expValue == 0 && !overflow && longValue != 0) {
-                if (scale == 0) {
-                    doubleValue = (double) longValue;
-                    if (negative) {
-                        doubleValue = -doubleValue;
-                    }
-                } else if (longValue < (1L << 52) && scale < SMALL_10_POW.length) {
-                    doubleValue = (double) longValue / SMALL_10_POW[scale];
-                    if (negative) {
-                        doubleValue = -doubleValue;
+            if (!overflow) {
+                if (longValue == 0) {
+                    if (scale == 1) {
+                        doubleValue = 0;
+                        value = true;
                     }
                 } else {
-                    doubleValue = TypeUtils.doubleValue(negative ? -1 : 1, longValue, scale);
+                    int scale = this.scale - expValue;
+                    double v = longValue;
+                    if (scale == 0) {
+                        doubleValue = v;
+                        if (negative) {
+                            doubleValue = -doubleValue;
+                        }
+                        value = true;
+                    } else if ((long) v == longValue) {
+                        if (0 < scale && scale < DOUBLE_10_POW.length) {
+                            doubleValue = v / DOUBLE_10_POW[scale];
+                            if (negative) {
+                                doubleValue = -doubleValue;
+                            }
+                            value = true;
+                        } else if (0 > scale && scale > -DOUBLE_10_POW.length) {
+                            doubleValue = v * DOUBLE_10_POW[-scale];
+                            if (negative) {
+                                doubleValue = -doubleValue;
+                            }
+                            value = true;
+                        }
+                    }
+
+                    if (!value && scale > -128 && scale < 128) {
+                        doubleValue = TypeUtils.doubleValue(negative ? -1 : 1, longValue, scale);
+                        value = true;
+                    }
                 }
-                value = true;
             }
 
             if (!value) {
@@ -3203,13 +3224,26 @@ class JSONReaderUTF16
             negative = true;
             ch = chars[offset++];
         } else {
+            negative = false;
             if (ch == '+') {
                 ch = chars[offset++];
             }
         }
 
         valueType = JSON_TYPE_INT;
+        boolean overflow = false;
+        long longValue = 0;
+
         while (ch >= '0' && ch <= '9') {
+            if (!overflow) {
+                long intValue10 = longValue * 10 + (ch - '0');
+                if (intValue10 < longValue) {
+                    overflow = true;
+                } else {
+                    longValue = intValue10;
+                }
+            }
+
             if (offset == end) {
                 ch = EOI;
                 offset++;
@@ -3218,11 +3252,21 @@ class JSONReaderUTF16
             ch = chars[offset++];
         }
 
+        this.scale = 0;
         if (ch == '.') {
             valueType = JSON_TYPE_DEC;
             ch = chars[offset++];
             while (ch >= '0' && ch <= '9') {
                 this.scale++;
+                if (!overflow) {
+                    long intValue10 = longValue * 10 + (ch - '0');
+                    if (intValue10 < longValue) {
+                        overflow = true;
+                    } else {
+                        longValue = intValue10;
+                    }
+                }
+
                 if (offset == end) {
                     ch = EOI;
                     offset++;
@@ -3232,9 +3276,9 @@ class JSONReaderUTF16
             }
         }
 
+        int expValue = 0;
         if (ch == 'e' || ch == 'E') {
             boolean negativeExp = false;
-            int expValue = 0;
             ch = chars[offset++];
 
             if (ch == '-') {
@@ -3276,7 +3320,6 @@ class JSONReaderUTF16
                     if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
                         throw new JSONException(info("long value not support input null"));
                     }
-
                     wasNull = true;
                     value = true;
                     if (offset == end) {
@@ -3337,27 +3380,59 @@ class JSONReaderUTF16
         String str = null;
         if (quote != 0) {
             if (ch != quote) {
+                overflow = true;
                 this.offset -= 1;
                 this.ch = quote;
                 str = readString();
+            }
+
+            if (offset >= end) {
+                ch = EOI;
             } else {
-                if (offset >= end) {
-                    ch = EOI;
-                } else {
-                    ch = chars[offset++];
-                }
+                ch = chars[offset++];
             }
         }
 
         if (!value) {
-            if (str != null) {
-                try {
-                    floatValue = Float.parseFloat(str);
-                } catch (NumberFormatException ex) {
-                    throw new JSONException(info(), ex);
+            if (!overflow) {
+                int scale = this.scale - expValue;
+                float v = longValue;
+                if (scale == 0) {
+                    floatValue = (float) longValue;
+                    if (negative) {
+                        floatValue = -floatValue;
+                    }
+                    value = true;
+                } else if ((long) v == longValue) {
+                    if (0 < scale && scale < FLOAT_10_POW.length) {
+                        floatValue = v / FLOAT_10_POW[scale];
+                        if (negative) {
+                            floatValue = -floatValue;
+                        }
+                    } else if (0 > scale && scale > -FLOAT_10_POW.length) {
+                        floatValue = v * FLOAT_10_POW[-scale];
+                        if (negative) {
+                            floatValue = -floatValue;
+                        }
+                    }
                 }
-            } else {
-                floatValue = TypeUtils.parseFloat(chars, start - 1, len);
+
+                if (!value && scale > -128 && scale < 128) {
+                    floatValue = TypeUtils.floatValue(negative ? -1 : 1, longValue, scale);
+                    value = true;
+                }
+            }
+
+            if (!value) {
+                if (str != null) {
+                    try {
+                        floatValue = Float.parseFloat(str);
+                    } catch (NumberFormatException ex) {
+                        throw new JSONException(info(), ex);
+                    }
+                } else {
+                    floatValue = TypeUtils.parseFloat(chars, start - 1, len);
+                }
             }
 
             if (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S') {
@@ -3396,7 +3471,7 @@ class JSONReaderUTF16
             }
         }
 
-        if (comma = (ch == ',')) {
+        if (this.comma = ch == ',') {
             // next inline
             if (this.offset >= end) {
                 this.ch = EOI;

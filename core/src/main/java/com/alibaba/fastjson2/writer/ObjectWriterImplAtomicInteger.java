@@ -11,7 +11,7 @@ final class ObjectWriterImplAtomicInteger
         extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplAtomicInteger INSTANCE = new ObjectWriterImplAtomicInteger(null);
     static final byte[] JSONB_TYPE_NAME_BYTES = JSONB.toBytes("AtomicInteger");
-    static final long JSONB_TYPE_HASH = Fnv.hashCode64("AtomicInteger");
+    static final long JSONB_TYPE_HASH = 7576651708426282938L; // Fnv.hashCode64("AtomicInteger");
 
     final Class defineClass;
 

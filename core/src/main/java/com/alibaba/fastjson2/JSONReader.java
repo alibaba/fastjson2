@@ -35,7 +35,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 public abstract class JSONReader
         implements Closeable {
     static final int MAX_EXP = 1023;
-    static final long SHANGHAI_ZONE_ID_HASH = Fnv.hashCode64("Asia/Shanghai");
+    static final long SHANGHAI_ZONE_ID_HASH = -4800907791268808639L; // Fnv.hashCode64("Asia/Shanghai");
 
     static final byte JSON_TYPE_INT = 1;
     static final byte JSON_TYPE_DEC = 2;
@@ -2507,7 +2507,7 @@ public abstract class JSONReader
                                     case 8:
                                     case 9:
                                     case 10:
-                                        return (float) (unscaledVal / SMALL_10_POW[scale]);
+                                        return (float) (unscaledVal / DOUBLE_10_POW[scale]);
                                     default:
                                         break;
                                 }
@@ -2532,7 +2532,7 @@ public abstract class JSONReader
                                     case 13:
                                     case 14:
                                     case 15:
-                                        return unscaledVal / SMALL_10_POW[scale];
+                                        return unscaledVal / DOUBLE_10_POW[scale];
                                     default:
                                         break;
                                 }
@@ -2565,7 +2565,7 @@ public abstract class JSONReader
                                      * multiply or divide to compute the (properly
                                      * rounded) result.
                                      */
-                                    if (unscaledVal != INFLATED && unsignedUnscaledVal < 1L << 22) {
+                                    if (unscaledVal != Long.MIN_VALUE && unsignedUnscaledVal < 1L << 22) {
                                         // Don't have too guard against
                                         // Math.abs(MIN_VALUE) because of outer check
                                         // against INFLATED.
@@ -2599,7 +2599,7 @@ public abstract class JSONReader
                                      * double multiply or divide to compute the (properly
                                      * rounded) result.
                                      */
-                                    if (unscaledVal != INFLATED && unsignedUnscaledVal < 1L << 52) {
+                                    if (unscaledVal != Long.MIN_VALUE && unsignedUnscaledVal < 1L << 52) {
                                         // Don't have too guard against
                                         // Math.abs(MIN_VALUE) because of outer check
                                         // against INFLATED.

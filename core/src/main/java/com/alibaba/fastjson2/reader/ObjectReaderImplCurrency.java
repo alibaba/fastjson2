@@ -14,7 +14,7 @@ final class ObjectReaderImplCurrency
     static final ObjectReaderImplCurrency INSTANCE = new ObjectReaderImplCurrency();
 
     static final long TYPE_HASH = Fnv.hashCode64("Currency");
-    static final long TYPE_HASH_FULL = Fnv.hashCode64("java.util.Currency");
+    static final long TYPE_HASH_FULL = -7860540621745740270L; // Fnv.hashCode64("java.util.Currency");
 
     ObjectReaderImplCurrency() {
         super(Currency.class);
