@@ -25,6 +25,8 @@
 
 package com.alibaba.fastjson2.util;
 
+import java.lang.invoke.*;
+
 import static java.lang.Float.floatToRawIntBits;
 import static java.lang.Integer.numberOfLeadingZeros;
 
@@ -132,28 +134,28 @@ public final class DoubleToDecimal {
                 long vb;
                 {
                     long cp = cb << h;
-                    long z = ((g1 * cp) >>> 1) + multiplyHigh(g0, cp);
-                    long vbp = multiplyHigh(g1, cp) + (z >>> 63);
+                    long z = ((g1 * cp) >>> 1) + MULTIPLY_HIGH.multiplyHigh(g0, cp);
+                    long vbp = MULTIPLY_HIGH.multiplyHigh(g1, cp) + (z >>> 63);
                     vb = vbp | (z & 9223372036854775807L) + 9223372036854775807L >>> 63;
                 }
                 long vbl;
                 {
                     long cp = cbl << h;
-                    long z = ((g1 * cp) >>> 1) + multiplyHigh(g0, cp);
-                    long vbp = multiplyHigh(g1, cp) + (z >>> 63);
+                    long z = ((g1 * cp) >>> 1) + MULTIPLY_HIGH.multiplyHigh(g0, cp);
+                    long vbp = MULTIPLY_HIGH.multiplyHigh(g1, cp) + (z >>> 63);
                     vbl = vbp | (z & 9223372036854775807L) + 9223372036854775807L >>> 63;
                 }
                 long vbr;
                 {
                     long cp = cbr << h;
-                    long z = ((g1 * cp) >>> 1) + multiplyHigh(g0, cp);
-                    long vbp = multiplyHigh(g1, cp) + (z >>> 63);
+                    long z = ((g1 * cp) >>> 1) + MULTIPLY_HIGH.multiplyHigh(g0, cp);
+                    long vbp = MULTIPLY_HIGH.multiplyHigh(g1, cp) + (z >>> 63);
                     vbr = vbp | (z & 9223372036854775807L) + 9223372036854775807L >>> 63;
                 }
 
                 long s = vb >> 2;
                 if (s >= 100) {
-                    long sp10 = 10 * multiplyHigh(s, 115_292_150_460_684_698L << 4);
+                    long sp10 = 10 * MULTIPLY_HIGH.multiplyHigh(s, 115_292_150_460_684_698L << 4);
                     long tp10 = sp10 + 10;
                     boolean upin = vbl + out <= sp10 << 2;
                     boolean wpin = (tp10 << 2) + out <= vbr;
@@ -189,7 +191,7 @@ public final class DoubleToDecimal {
             f *= pow10[H - len];
             e += len;
 
-            long hm = multiplyHigh(f, 193_428_131_138_340_668L) >>> 20;
+            long hm = MULTIPLY_HIGH.multiplyHigh(f, 193_428_131_138_340_668L) >>> 20;
             int l = (int) (f - 100_000_000L * hm);
             int h = (int) (hm * 1_441_151_881L >>> 57);
             int m = (int) (hm - 100_000_000 * h);
@@ -198,7 +200,7 @@ public final class DoubleToDecimal {
                 final int MASK_28 = 268435455;
                 {
                     bytes[++index] = (byte) ('0' + h);
-                    int y = (int) (multiplyHigh(
+                    int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                             (long) (m + 1) << 28,
                             193_428_131_138_340_668L) >>> 20) - 1;
                     int t1;
@@ -222,7 +224,7 @@ public final class DoubleToDecimal {
                      * Left-to-right digits extraction:
                      * algorithm 1 in [3], with b = 10, k = 8, n = 28.
                      */
-                    int y = (int) (multiplyHigh(
+                    int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                             (long) (l + 1) << 28,
                             193_428_131_138_340_668L) >>> 20) - 1;
                     for (int i = 0; i < 8; ++i) {
@@ -253,7 +255,7 @@ public final class DoubleToDecimal {
 
                 final int MASK_28 = 268435455;
                 {
-                    int y = (int) (multiplyHigh(
+                    int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                             (long) (m + 1) << 28,
                             193_428_131_138_340_668L) >>> 20) - 1;
                     for (int i = 0; i < 8; ++i) {
@@ -264,7 +266,7 @@ public final class DoubleToDecimal {
                 }
 
                 if (l != 0) {
-                    int y = (int) (multiplyHigh(
+                    int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                             (long) (l + 1) << 28,
                             193_428_131_138_340_668L) >>> 20) - 1;
                     for (int i = 0; i < 8; ++i) {
@@ -287,7 +289,7 @@ public final class DoubleToDecimal {
 
             final int MASK_28 = 268435455;
             {
-                int y = (int) (multiplyHigh(
+                int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                         (long) (m + 1) << 28,
                         193_428_131_138_340_668L) >>> 20) - 1;
                 for (int i = 0; i < 8; ++i) {
@@ -303,7 +305,7 @@ public final class DoubleToDecimal {
                  * Left-to-right digits extraction:
                  * algorithm 1 in [3], with b = 10, k = 8, n = 28.
                  */
-                int y = (int) (multiplyHigh(
+                int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                         (long) (l + 1) << 28,
                         193_428_131_138_340_668L) >>> 20) - 1;
                 for (int i = 0; i < 8; ++i) {
@@ -467,28 +469,28 @@ public final class DoubleToDecimal {
                 long vb;
                 {
                     long cp = cb << h;
-                    long z = ((g1 * cp) >>> 1) + multiplyHigh(g0, cp);
-                    long vbp = multiplyHigh(g1, cp) + (z >>> 63);
+                    long z = ((g1 * cp) >>> 1) + MULTIPLY_HIGH.multiplyHigh(g0, cp);
+                    long vbp = MULTIPLY_HIGH.multiplyHigh(g1, cp) + (z >>> 63);
                     vb = vbp | (z & 9223372036854775807L) + 9223372036854775807L >>> 63;
                 }
                 long vbl;
                 {
                     long cp = cbl << h;
-                    long z = ((g1 * cp) >>> 1) + multiplyHigh(g0, cp);
-                    long vbp = multiplyHigh(g1, cp) + (z >>> 63);
+                    long z = ((g1 * cp) >>> 1) + MULTIPLY_HIGH.multiplyHigh(g0, cp);
+                    long vbp = MULTIPLY_HIGH.multiplyHigh(g1, cp) + (z >>> 63);
                     vbl = vbp | (z & 9223372036854775807L) + 9223372036854775807L >>> 63;
                 }
                 long vbr;
                 {
                     long cp = cbr << h;
-                    long z = ((g1 * cp) >>> 1) + multiplyHigh(g0, cp);
-                    long vbp = multiplyHigh(g1, cp) + (z >>> 63);
+                    long z = ((g1 * cp) >>> 1) + MULTIPLY_HIGH.multiplyHigh(g0, cp);
+                    long vbp = MULTIPLY_HIGH.multiplyHigh(g1, cp) + (z >>> 63);
                     vbr = vbp | (z & 9223372036854775807L) + 9223372036854775807L >>> 63;
                 }
 
                 long s = vb >> 2;
                 if (s >= 100) {
-                    long sp10 = 10 * multiplyHigh(s, 115_292_150_460_684_698L << 4);
+                    long sp10 = 10 * MULTIPLY_HIGH.multiplyHigh(s, 115_292_150_460_684_698L << 4);
                     long tp10 = sp10 + 10;
                     boolean upin = vbl + out <= sp10 << 2;
                     boolean wpin = (tp10 << 2) + out <= vbr;
@@ -524,7 +526,7 @@ public final class DoubleToDecimal {
             f *= pow10[H - len];
             e += len;
 
-            long hm = multiplyHigh(f, 193_428_131_138_340_668L) >>> 20;
+            long hm = MULTIPLY_HIGH.multiplyHigh(f, 193_428_131_138_340_668L) >>> 20;
             int l = (int) (f - 100_000_000L * hm);
             int h = (int) (hm * 1_441_151_881L >>> 57);
             int m = (int) (hm - 100_000_000 * h);
@@ -533,7 +535,7 @@ public final class DoubleToDecimal {
                 final int MASK_28 = 268435455;
                 {
                     bytes[++index] = (char) ('0' + h);
-                    int y = (int) (multiplyHigh(
+                    int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                             (long) (m + 1) << 28,
                             193_428_131_138_340_668L) >>> 20) - 1;
                     int t1;
@@ -557,7 +559,7 @@ public final class DoubleToDecimal {
                      * Left-to-right digits extraction:
                      * algorithm 1 in [3], with b = 10, k = 8, n = 28.
                      */
-                    int y = (int) (multiplyHigh(
+                    int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                             (long) (l + 1) << 28,
                             193_428_131_138_340_668L) >>> 20) - 1;
                     for (int i = 0; i < 8; ++i) {
@@ -588,7 +590,7 @@ public final class DoubleToDecimal {
 
                 final int MASK_28 = 268435455;
                 {
-                    int y = (int) (multiplyHigh(
+                    int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                             (long) (m + 1) << 28,
                             193_428_131_138_340_668L) >>> 20) - 1;
                     for (int i = 0; i < 8; ++i) {
@@ -599,7 +601,7 @@ public final class DoubleToDecimal {
                 }
 
                 if (l != 0) {
-                    int y = (int) (multiplyHigh(
+                    int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                             (long) (l + 1) << 28,
                             193_428_131_138_340_668L) >>> 20) - 1;
                     for (int i = 0; i < 8; ++i) {
@@ -622,7 +624,7 @@ public final class DoubleToDecimal {
 
             final int MASK_28 = 268435455;
             {
-                int y = (int) (multiplyHigh(
+                int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                         (long) (m + 1) << 28,
                         193_428_131_138_340_668L) >>> 20) - 1;
                 for (int i = 0; i < 8; ++i) {
@@ -638,7 +640,7 @@ public final class DoubleToDecimal {
                  * Left-to-right digits extraction:
                  * algorithm 1 in [3], with b = 10, k = 8, n = 28.
                  */
-                int y = (int) (multiplyHigh(
+                int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                         (long) (l + 1) << 28,
                         193_428_131_138_340_668L) >>> 20) - 1;
                 for (int i = 0; i < 8; ++i) {
@@ -799,20 +801,20 @@ public final class DoubleToDecimal {
 
                 int vb;
                 {
-                    long x1 = multiplyHigh(g, cb << h);
+                    long x1 = MULTIPLY_HIGH.multiplyHigh(g, cb << h);
                     long vbp = x1 >>> 31;
                     vb = (int) (vbp | (x1 & MASK_32) + MASK_32 >>> 32);
                 }
                 int vbl;
                 {
-                    long x1 = multiplyHigh(g, cbl << h);
+                    long x1 = MULTIPLY_HIGH.multiplyHigh(g, cbl << h);
                     long vbp = x1 >>> 31;
                     vbl = (int) (vbp | (x1 & MASK_32) + MASK_32 >>> 32);
                 }
 
                 int vbr;
                 {
-                    long x1 = multiplyHigh(g, cbr << h);
+                    long x1 = MULTIPLY_HIGH.multiplyHigh(g, cbr << h);
                     long vbp = x1 >>> 31;
                     vbr = (int) (vbp | (x1 & MASK_32) + MASK_32 >>> 32);
                 }
@@ -859,7 +861,7 @@ public final class DoubleToDecimal {
 
             if (0 < e && e <= 7) {
                 bytes[++index] = (byte) ('0' + h1);
-                int y = (int) (multiplyHigh(
+                int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                         (long) (l + 1) << 28,
                         193_428_131_138_340_668L) >>> 20) - 1;
                 int t1;
@@ -893,7 +895,7 @@ public final class DoubleToDecimal {
                 bytes[++index] = (byte) ('0' + h1);
 
                 // append8Digits(l);
-                int y = (int) (multiplyHigh(
+                int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                         (long) (l + 1) << 28,
                         193_428_131_138_340_668L) >>> 20) - 1;
                 for (int i = 0; i < 8; ++i) {
@@ -915,7 +917,7 @@ public final class DoubleToDecimal {
                 bytes[++index] = '.';
 
                 // append8Digits(l);
-                int y = (int) (multiplyHigh(
+                int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                         (long) (l + 1) << 28,
                         193_428_131_138_340_668L) >>> 20) - 1;
                 for (int i = 0; i < 8; ++i) {
@@ -1061,20 +1063,20 @@ public final class DoubleToDecimal {
 
                 int vb;
                 {
-                    long x1 = multiplyHigh(g, cb << h);
+                    long x1 = MULTIPLY_HIGH.multiplyHigh(g, cb << h);
                     long vbp = x1 >>> 31;
                     vb = (int) (vbp | (x1 & MASK_32) + MASK_32 >>> 32);
                 }
                 int vbl;
                 {
-                    long x1 = multiplyHigh(g, cbl << h);
+                    long x1 = MULTIPLY_HIGH.multiplyHigh(g, cbl << h);
                     long vbp = x1 >>> 31;
                     vbl = (int) (vbp | (x1 & MASK_32) + MASK_32 >>> 32);
                 }
 
                 int vbr;
                 {
-                    long x1 = multiplyHigh(g, cbr << h);
+                    long x1 = MULTIPLY_HIGH.multiplyHigh(g, cbr << h);
                     long vbp = x1 >>> 31;
                     vbr = (int) (vbp | (x1 & MASK_32) + MASK_32 >>> 32);
                 }
@@ -1121,7 +1123,7 @@ public final class DoubleToDecimal {
 
             if (0 < e && e <= 7) {
                 bytes[++index] = (char) ('0' + h1);
-                int y = (int) (multiplyHigh(
+                int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                         (long) (l + 1) << 28,
                         193_428_131_138_340_668L) >>> 20) - 1;
                 int t1;
@@ -1155,7 +1157,7 @@ public final class DoubleToDecimal {
                 bytes[++index] = (char) ('0' + h1);
 
                 // append8Digits(l);
-                int y = (int) (multiplyHigh(
+                int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                         (long) (l + 1) << 28,
                         193_428_131_138_340_668L) >>> 20) - 1;
                 for (int i = 0; i < 8; ++i) {
@@ -1177,7 +1179,7 @@ public final class DoubleToDecimal {
                 bytes[++index] = '.';
 
                 // append8Digits(l);
-                int y = (int) (multiplyHigh(
+                int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                         (long) (l + 1) << 28,
                         193_428_131_138_340_668L) >>> 20) - 1;
                 for (int i = 0; i < 8; ++i) {
@@ -1237,21 +1239,6 @@ public final class DoubleToDecimal {
             bytes[++index] = 'y';
         }
         return index + 1 - off;
-    }
-
-    static long multiplyHigh(long x, long y) {
-        long x1 = x >> 32;
-        long x2 = x & 0xFFFFFFFFL;
-        long y1 = y >> 32;
-        long y2 = y & 0xFFFFFFFFL;
-
-        long z2 = x2 * y2;
-        long t = x1 * y2 + (z2 >>> 32);
-        long z1 = t & 0xFFFFFFFFL;
-        long z0 = t >> 32;
-        z1 += x2 * y1;
-
-        return x1 * y1 + z0 + (z1 >> 32);
     }
 
     private static final long[] G = {
@@ -1894,4 +1881,53 @@ public final class DoubleToDecimal {
             10_000_000_000_000_000L,
             100_000_000_000_000_000L,
     };
+
+    static final LongBiFunction MULTIPLY_HIGH;
+    static {
+        LongBiFunction function = null;
+        if (JDKUtils.JVM_VERSION > 8) {
+            try {
+                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(DoubleToDecimal.class);
+                MethodType methodType = MethodType.methodType(long.class, long.class, long.class);
+                MethodHandle methodHandle = lookup.findStatic(Math.class, "multiplyHigh", methodType);
+                MethodType instantiatedMethodType = methodType;
+                CallSite callSite = LambdaMetafactory.metafactory(
+                        lookup,
+                        "multiplyHigh",
+                        MethodType.methodType(LongBiFunction.class),
+                        methodType,
+                        methodHandle,
+                        instantiatedMethodType
+                );
+                function = (LongBiFunction) callSite.getTarget().invokeExact();
+            } catch (Throwable ignored) {
+                ignored.printStackTrace();
+                // ignored
+            }
+        }
+        if (function == null) {
+            function = DoubleToDecimal::multiplyHigh;
+        }
+        MULTIPLY_HIGH = function;
+    }
+
+    @FunctionalInterface
+    interface LongBiFunction {
+        long multiplyHigh(long x, long y);
+    }
+
+    static long multiplyHigh(long x, long y) {
+        long x1 = x >> 32;
+        long x2 = x & 0xFFFFFFFFL;
+        long y1 = y >> 32;
+        long y2 = y & 0xFFFFFFFFL;
+
+        long z2 = x2 * y2;
+        long t = x1 * y2 + (z2 >>> 32);
+        long z1 = t & 0xFFFFFFFFL;
+        long z0 = t >> 32;
+        z1 += x2 * y1;
+
+        return x1 * y1 + z0 + (z1 >> 32);
+    }
 }
