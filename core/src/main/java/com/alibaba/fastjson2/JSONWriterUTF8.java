@@ -2317,7 +2317,7 @@ class JSONWriterUTF8
                 && precision >= 16
                 && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0);
 
-        int minCapacity = off + precision + 4;
+        int minCapacity = off + precision + 7;
         if (minCapacity > bytes.length) {
             ensureCapacity(minCapacity);
         }
@@ -2329,6 +2329,7 @@ class JSONWriterUTF8
         long unscaleValue;
         if ((features & Feature.WriteBigDecimalAsPlain.mask) != 0) {
             if (precision < 19
+                    && value.scale() >= 0
                     && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1
                     && (unscaleValue = UnsafeUtils.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET)) != Long.MIN_VALUE
             ) {

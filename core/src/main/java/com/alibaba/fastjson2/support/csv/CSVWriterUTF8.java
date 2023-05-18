@@ -243,7 +243,7 @@ final class CSVWriterUTF8
             return;
         }
 
-        if (unscaledVal == Long.MIN_VALUE || scale >= 20) {
+        if (unscaledVal == Long.MIN_VALUE || scale >= 20 || scale < 0) {
             writeDecimal(BigDecimal.valueOf(unscaledVal, scale));
             return;
         }
