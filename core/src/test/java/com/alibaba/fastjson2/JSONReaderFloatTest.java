@@ -380,6 +380,16 @@ public class JSONReaderFloatTest {
     }
 
     @Test
+    public void test25_x1() {
+        String str = "0.012345678901234567890";
+        double d = Double.parseDouble(str);
+        double d1 = JSONReader.of(str.getBytes()).readDoubleValue();
+        double d2 = JSONReader.of(str.toCharArray()).readDoubleValue();
+        assertEquals(d, d1);
+        assertEquals(d, d2);
+    }
+
+    @Test
     public void test30() {
         char[] chars = new char[]{
                 '0', '.',

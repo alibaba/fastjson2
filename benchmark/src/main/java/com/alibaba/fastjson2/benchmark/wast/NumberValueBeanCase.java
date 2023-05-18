@@ -11,26 +11,24 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class NumberValueBeanCase {
     static String result;
-    static Random random = new Random();
     static ObjectMapper mapper = new ObjectMapper();
 
     static {
         NumberValueBean numberValueBean = new NumberValueBean();
-        numberValueBean.setValue1(random.nextInt());
-        numberValueBean.setValue2(random.nextInt());
-        numberValueBean.setValue3(random.nextLong());
-        numberValueBean.setValue4(random.nextLong());
-        numberValueBean.setValue5(random.nextFloat());
-        numberValueBean.setValue6(random.nextFloat());
-        numberValueBean.setValue7(random.nextDouble());
-        numberValueBean.setValue8(random.nextDouble());
-        numberValueBean.setValue9(123456.789e102);
-        numberValueBean.setValue10(123456.789e-102);
+        numberValueBean.setValue1(-1547783865);
+        numberValueBean.setValue2(-764506995);
+        numberValueBean.setValue3(-3476207302658863324L);
+        numberValueBean.setValue4(-1673529357825104963L);
+        numberValueBean.setValue5(0.36136854F);
+        numberValueBean.setValue6(0.9946881F);
+        numberValueBean.setValue7(0.194469629135542);
+        numberValueBean.setValue8(0.18867346119788797);
+        numberValueBean.setValue9(1.23456789E107);
+        numberValueBean.setValue10(1.23456789E-97);
 
         result = io.github.wycst.wast.json.JSON.toJsonString(numberValueBean);
     }

@@ -4215,29 +4215,24 @@ public class TypeUtils {
         return colonCount > 0 && colonCount < 8;
     }
 
-    private static BigInteger[] BIG_TEN_POWERS_TABLE = {
-            BigInteger.ONE,
-            BigInteger.valueOf(10),
-            BigInteger.valueOf(100),
-            BigInteger.valueOf(1000),
-            BigInteger.valueOf(10000),
-            BigInteger.valueOf(100000),
-            BigInteger.valueOf(1000000),
-            BigInteger.valueOf(10000000),
-            BigInteger.valueOf(100000000),
-            BigInteger.valueOf(1000000000),
-            BigInteger.valueOf(10000000000L),
-            BigInteger.valueOf(100000000000L),
-            BigInteger.valueOf(1000000000000L),
-            BigInteger.valueOf(10000000000000L),
-            BigInteger.valueOf(100000000000000L),
-            BigInteger.valueOf(1000000000000000L),
-            BigInteger.valueOf(10000000000000000L),
-            BigInteger.valueOf(100000000000000000L),
-            BigInteger.valueOf(1000000000000000000L),
-            BigInteger.valueOf(1000000000000000000L).multiply(BigInteger.TEN),
-            BigInteger.valueOf(1000000000000000000L).multiply(BigInteger.valueOf(100))
-    };
+    private static final BigInteger[] BIG_TEN_POWERS_TABLE;
+
+    static {
+        BigInteger[] bigInts = new BigInteger[128];
+        bigInts[0] = BigInteger.ONE;
+        bigInts[1] = BigInteger.TEN;
+        long longValue = 10;
+        for (int i = 2; i < 19; ++i) {
+            longValue *= 10;
+            bigInts[i] = BigInteger.valueOf(longValue);
+        }
+        BigInteger bigInt = bigInts[18];
+        for (int i = 19; i < 128; ++i) {
+            bigInt = bigInt.multiply(BigInteger.TEN);
+            bigInts[i] = bigInt;
+        }
+        BIG_TEN_POWERS_TABLE = bigInts;
+    }
 
     public static double doubleValue(int signNum, long intCompact, int scale) {
         final int P_D = 53; // Double.PRECISION
@@ -4245,7 +4240,6 @@ public class TypeUtils {
         final int Q_MAX_D = 971; // (Double.MAX_EXPONENT - (P_D - 1));
         final double L = 3.321928094887362;
 
-        BigInteger w = BigInteger.valueOf(intCompact);
         int bitLength = 64 - Long.numberOfLeadingZeros(intCompact);
         long qb = bitLength - (long) Math.ceil(scale * L);
         if (qb < Q_MIN_D - 2) {  // qb < -1_076
@@ -4256,10 +4250,16 @@ public class TypeUtils {
             return signNum * Double.POSITIVE_INFINITY;
         }
 
+        if (scale < 0) {
+            BigInteger pow10 = BIG_TEN_POWERS_TABLE[-scale];
+            BigInteger w = BigInteger.valueOf(intCompact);
+            return signNum * w.multiply(pow10).doubleValue();
+        }
         if (scale == 0) {
             return signNum * (double) intCompact;
         }
 
+        BigInteger w = BigInteger.valueOf(intCompact);
         int ql = (int) qb - (P_D + 3);  // narrowing qb to an int is safe
         BigInteger pow10 = BIG_TEN_POWERS_TABLE[scale];
         BigInteger m, n;
@@ -4284,5 +4284,48 @@ public class TypeUtils {
         long mask = (1L << eq) - 1;
         long j = i >> eq | Long.signum(i & mask) | sb;
         return signNum * Math.scalb((double) j, Q_MIN_D - 2);
+    }
+
+    public static float floatValue(int signNum, long intCompact, int scale) {
+        final int P_F = 24;
+        final int Q_MIN_F = -149;
+        final int Q_MAX_F = 104;
+        final double L = 3.321928094887362;
+
+        int bitLength = 64 - Long.numberOfLeadingZeros(intCompact);
+        long qb = bitLength - (long) Math.ceil(scale * L);
+        if (qb < Q_MIN_F - 2) {  // qb < -151
+            return signNum * 0.0f;
+        }
+        if (qb > Q_MAX_F + P_F + 1) {  // qb > 129
+            return signNum * Float.POSITIVE_INFINITY;
+        }
+        if (scale < 0) {
+            BigInteger w = BigInteger.valueOf(intCompact);
+            return signNum * w.multiply(BIG_TEN_POWERS_TABLE[-scale]).floatValue();
+        }
+
+        BigInteger w = BigInteger.valueOf(intCompact);
+        int ql = (int) qb - (P_F + 3);
+        BigInteger pow10 = BIG_TEN_POWERS_TABLE[scale];
+        BigInteger m, n;
+        if (ql <= 0) {
+            m = w.shiftLeft(-ql);
+            n = pow10;
+        } else {
+            m = w;
+            n = pow10.shiftLeft(ql);
+        }
+        BigInteger[] qr = m.divideAndRemainder(n);
+        int i = qr[0].intValue();
+        int sb = qr[1].signum();
+        int dq = (Integer.SIZE - (P_F + 2)) - Integer.numberOfLeadingZeros(i);
+        int eq = (Q_MIN_F - 2) - ql;
+        if (dq >= eq) {
+            return signNum * Math.scalb((float) (i | sb), ql);
+        }
+        int mask = (1 << eq) - 1;
+        int j = i >> eq | (Integer.signum(i & mask)) | sb;
+        return signNum * Math.scalb((float) j, Q_MIN_F - 2);
     }
 }

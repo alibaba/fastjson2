@@ -143,7 +143,6 @@ public class JodaSupport {
 
     static class ChronologyReader
             implements ObjectReader {
-        static final long HASH_MINIMUM_DAYS_IN_FIRST_WEEK = Fnv.hashCode64("minimumDaysInFirstWeek");
         static final long HASH_ZONE_ID = Fnv.hashCode64("zoneId");
 
         final Class objectClass;
@@ -191,6 +190,7 @@ public class JodaSupport {
                 if (jsonReader.nextIfObjectEnd()) {
                     break;
                 }
+                final long HASH_MINIMUM_DAYS_IN_FIRST_WEEK = 8244232525129275563L; // Fnv.hashCode64("minimumDaysInFirstWeek");
                 long fieldNameHashCode = jsonReader.readFieldNameHashCode();
                 if (fieldNameHashCode == HASH_MINIMUM_DAYS_IN_FIRST_WEEK) {
                     minimumDaysInFirstWeek = jsonReader.readInt32Value();

@@ -344,7 +344,8 @@ public class ObjectReaderProvider
         acceptHashCodes = hashCodes;
 
         hashCache.put(ObjectArrayReader.TYPE_HASH_CODE, ObjectArrayReader.INSTANCE);
-        hashCache.put(Fnv.hashCode64(String.class.getName()), ObjectReaderImplString.INSTANCE);
+        final long STRING_CLASS_NAME_HASH = -4834614249632438472L; // Fnv.hashCode64(String.class.getName());
+        hashCache.put(STRING_CLASS_NAME_HASH, ObjectReaderImplString.INSTANCE);
         hashCache.put(Fnv.hashCode64(TypeUtils.getTypeName(HashMap.class)), ObjectReaderImplMap.INSTANCE);
     }
 

@@ -14,7 +14,7 @@ final class ObjectWriterImpDecimalArray
         extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImpDecimalArray INSTANCE = new ObjectWriterImpDecimalArray();
     static final byte[] JSONB_TYPE_NAME_BYTES = JSONB.toBytes("[BigDecimal");
-    static final long JSONB_TYPE_HASH = Fnv.hashCode64("[BigDecimal");
+    static final long JSONB_TYPE_HASH = -2138534155605614069L; // Fnv.hashCode64("[BigDecimal");
 
     @Override
     public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {

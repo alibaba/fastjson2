@@ -305,4 +305,20 @@ public class FloatValueTest {
             assertEquals(values[i], id2[i]);
         }
     }
+
+    @Test
+    public void test_v3() {
+        float f = values[3];
+        byte[] utf8Bytes = JSON.toJSONBytes(f);
+        float f1 = JSONReader.of(utf8Bytes).readFloatValue();
+        assertEquals(f, f1);
+    }
+
+    @Test
+    public void test0() {
+        float f = 0.37172526f;
+        byte[] utf8Bytes = JSON.toJSONBytes(f);
+        float f1 = JSONReader.of(utf8Bytes).readFloatValue();
+        assertEquals(f, f1);
+    }
 }
