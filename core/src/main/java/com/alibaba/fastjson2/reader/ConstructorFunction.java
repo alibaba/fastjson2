@@ -159,31 +159,29 @@ final class ConstructorFunction<T>
             return (T) biFunction.apply(arg0, arg1);
         }
 
-        Object[] args;
         final int size = parameters.length;
+        Object[] args = new Object[constructor.getParameterCount()];
 
         if (kotlinMaker) {
-            final int part = size / 32;
-            args = new Object[size + part + 2];
-            for (int i = 0, n = 0; n <= part; n++) {
-                int flag = 0;
-                int mark = n == part ? size : i + 32;
-                for (; i < mark; i++) {
-                    Object arg = values.get(hashCodes[i]);
-                    if (arg != null) {
-                        args[i] = arg;
-                    } else {
-                        flag |= (1 << i);
-                        Class<?> paramType = parameters[i].getType();
-                        if (paramType.isPrimitive()) {
-                            args[i] = TypeUtils.getDefaultValue(paramType);
-                        }
+            int i = 0, flag = 0;
+            for (int n; i < size; i = n) {
+                Object arg = values.get(hashCodes[i]);
+                if (arg != null) {
+                    args[i] = arg;
+                } else {
+                    flag |= (1 << i);
+                    Class<?> paramType = parameters[i].getType();
+                    if (paramType.isPrimitive()) {
+                        args[i] = TypeUtils.getDefaultValue(paramType);
                     }
                 }
-                args[size + n] = flag;
+                n = i + 1;
+                if (n % 32 == 0 || n == size) {
+                    args[size + i / 32] = flag;
+                    flag = 0;
+                }
             }
         } else {
-            args = new Object[size];
             for (int i = 0; i < size; i++) {
                 Class<?> paramType = parameters[i].getType();
                 Object arg = values.get(hashCodes[i]);
@@ -200,7 +198,8 @@ final class ConstructorFunction<T>
 
         try {
             return (T) constructor.newInstance(args);
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException |
+                 InvocationTargetException e) {
             throw new JSONException("invoke constructor error, " + constructor, e);
         }
     }
