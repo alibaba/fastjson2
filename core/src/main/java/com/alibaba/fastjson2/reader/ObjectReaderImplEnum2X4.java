@@ -53,15 +53,20 @@ public final class ObjectReaderImplEnum2X4
     }
 
     public Enum getEnumByHashCode(long hashCode) {
-        if (hashCode == enumNameHashCode00) {
+        if (enumNameHashCode00 == hashCode || enumNameHashCode01 == hashCode) {
             return enum0;
-        }
-
-        if (hashCode == enumNameHashCode01) {
+        } else if (enumNameHashCode10 == hashCode || enumNameHashCode11 == hashCode) {
             return enum1;
         }
 
         return null;
+    }
+
+    public Enum getEnum(String name) {
+        if (name == null) {
+            return null;
+        }
+        return getEnumByHashCode(Fnv.hashCode64(name));
     }
 
     public Enum getEnumByOrdinal(int ordinal) {
