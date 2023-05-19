@@ -20,6 +20,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
+import static com.alibaba.fastjson2.util.JDKUtils.VECTOR_BIT_LENGTH;
 
 public final class JSONFactory {
     static volatile Throwable initErrorLast;
@@ -210,44 +211,48 @@ public final class JSONFactory {
         JSONReaderUTF8Creator readerCreatorUTF8 = null;
         JSONReaderUTF16Creator readerCreatorUTF16 = null;
         if (JDKUtils.VECTOR_SUPPORT) {
-            try {
-                Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONWriterUTF8Vector$Factory");
-                incubatorVectorCreatorUTF8 = (Function<JSONWriter.Context, JSONWriter>) factoryClass.newInstance();
-            } catch (Throwable ignored) {
-                // skip
-                initErrorLast = ignored;
+            if (VECTOR_BIT_LENGTH >= 64) {
+                try {
+                    Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONWriterUTF8Vector$Factory");
+                    incubatorVectorCreatorUTF8 = (Function<JSONWriter.Context, JSONWriter>) factoryClass.newInstance();
+                } catch (Throwable ignored) {
+                    // skip
+                    initErrorLast = ignored;
+                }
+
+                try {
+                    Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONWriterUTF16Vector$Factory");
+                    incubatorVectorCreatorUTF16 = (Function<JSONWriter.Context, JSONWriter>) factoryClass.newInstance();
+                } catch (Throwable ignored) {
+                    // skip
+                    initErrorLast = ignored;
+                }
+
+                try {
+                    Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderASCIIVector$Factory");
+                    readerCreatorASCII = (JSONReaderUTF8Creator) factoryClass.newInstance();
+                } catch (Throwable ignored) {
+                    // skip
+                    initErrorLast = ignored;
+                }
+
+                try {
+                    Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderUTF8Vector$Factory");
+                    readerCreatorUTF8 = (JSONReaderUTF8Creator) factoryClass.newInstance();
+                } catch (Throwable ignored) {
+                    // skip
+                    initErrorLast = ignored;
+                }
             }
 
-            try {
-                Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONWriterUTF16Vector$Factory");
-                incubatorVectorCreatorUTF16 = (Function<JSONWriter.Context, JSONWriter>) factoryClass.newInstance();
-            } catch (Throwable ignored) {
-                // skip
-                initErrorLast = ignored;
-            }
-
-            try {
-                Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderASCIIVector$Factory");
-                readerCreatorASCII = (JSONReaderUTF8Creator) factoryClass.newInstance();
-            } catch (Throwable ignored) {
-                // skip
-                initErrorLast = ignored;
-            }
-
-            try {
-                Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderUTF8Vector$Factory");
-                readerCreatorUTF8 = (JSONReaderUTF8Creator) factoryClass.newInstance();
-            } catch (Throwable ignored) {
-                // skip
-                initErrorLast = ignored;
-            }
-
-            try {
-                Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderUTF16Vector$Factory");
-                readerCreatorUTF16 = (JSONReaderUTF16Creator) factoryClass.newInstance();
-            } catch (Throwable ignored) {
-                // skip
-                initErrorLast = ignored;
+            if (VECTOR_BIT_LENGTH >= 128) {
+                try {
+                    Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderUTF16Vector$Factory");
+                    readerCreatorUTF16 = (JSONReaderUTF16Creator) factoryClass.newInstance();
+                } catch (Throwable ignored) {
+                    // skip
+                    initErrorLast = ignored;
+                }
             }
         }
         INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 = incubatorVectorCreatorUTF8;

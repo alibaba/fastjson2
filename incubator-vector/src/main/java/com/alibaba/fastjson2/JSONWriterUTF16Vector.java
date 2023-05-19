@@ -25,15 +25,6 @@ final class JSONWriterUTF16Vector
     static final Vector<Short> V_SHORT_128_DOUBLE_QUOTE = ShortVector.SPECIES_128.broadcast('"');
     static final Vector<Short> V_SHORT_128_SINGLE_QUOTE = ShortVector.SPECIES_128.broadcast('\'');
 
-    static final Vector<Short> V_SHORT_64_SPACE = ShortVector.SPECIES_64.broadcast(' ');
-    static final Vector<Short> V_SHORT_64_SLASH = ShortVector.SPECIES_64.broadcast('\\');
-    static final Vector<Short> V_SHORT_64_DOUBLE_QUOTE = ShortVector.SPECIES_64.broadcast('"');
-    static final Vector<Short> V_SHORT_64_SINGLE_QUOTE = ShortVector.SPECIES_64.broadcast('\'');
-    static final Vector<Short> V_SHORT_64_LT = ShortVector.SPECIES_64.broadcast('<');
-    static final Vector<Short> V_SHORT_64_GT = ShortVector.SPECIES_64.broadcast('>');
-    static final Vector<Short> V_SHORT_64_LB = ShortVector.SPECIES_64.broadcast('(');
-    static final Vector<Short> V_SHORT_64_RB = ShortVector.SPECIES_64.broadcast(')');
-
     JSONWriterUTF16Vector(Context ctx) {
         super(ctx);
     }
