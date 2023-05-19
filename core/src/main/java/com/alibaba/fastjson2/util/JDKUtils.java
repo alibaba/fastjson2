@@ -39,6 +39,7 @@ public class JDKUtils {
 
     public static final boolean UNSAFE_SUPPORT;
     public static final boolean VECTOR_SUPPORT;
+    public static final int VECTOR_BIT_LENGTH;
 
     // GraalVM not support
     // Android not support
@@ -150,6 +151,7 @@ public class JDKUtils {
             FIELD_STRING_CODER = fieldCode;
         }
 
+        int vector_bit_length = -1;
         boolean vector_support = false;
         try {
             if (JVM_VERSION >= 11) {
@@ -160,11 +162,21 @@ public class JDKUtils {
                 Method getInputArguments = runtimeMXBeanClass.getMethod("getInputArguments");
                 List<String> inputArguments = (List<String>) getInputArguments.invoke(runtimeMXBean);
                 vector_support = inputArguments.contains("--add-modules=jdk.incubator.vector");
+
+                if (vector_support) {
+                    Class<?> byteVectorClass = Class.forName("jdk.incubator.vector.ByteVector");
+                    Field speciesMax = byteVectorClass.getField("SPECIES_MAX");
+                    Object species = speciesMax.get(null);
+                    Method lengthMethod = species.getClass().getMethod("length");
+                    int length = (Integer) lengthMethod.invoke(species);
+                    vector_bit_length = length * 8;
+                }
             }
         } catch (Throwable ignored) {
             initErrorLast = ignored;
         }
         VECTOR_SUPPORT = vector_support;
+        VECTOR_BIT_LENGTH = vector_bit_length;
 
         boolean unsafeSupport;
         unsafeSupport = ((Predicate) o -> {
