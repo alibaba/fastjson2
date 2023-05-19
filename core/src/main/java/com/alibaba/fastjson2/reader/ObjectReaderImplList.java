@@ -247,6 +247,18 @@ public final class ObjectReaderImplList
                     value = itemObjectReader.createInstance((Collection) value);
                 } else if (itemClass.isInstance(value)) {
                     // skip
+                } else if (Enum.class.isAssignableFrom(itemClass)) {
+                    if (itemObjectReader == null) {
+                        itemObjectReader = provider.getObjectReader(itemType);
+                    }
+
+                    if (itemObjectReader instanceof ObjectReaderImplEnum) {
+                        value = ((ObjectReaderImplEnum) itemObjectReader).getEnum((String) value);
+                    } else if (itemObjectReader instanceof ObjectReaderImplEnum2X4) {
+                        value = ((ObjectReaderImplEnum2X4) itemObjectReader).getEnum((String) value);
+                    } else {
+                        throw new JSONException("can not convert from " + valueClass + " to " + itemType);
+                    }
                 } else {
                     throw new JSONException("can not convert from " + valueClass + " to " + itemType);
                 }

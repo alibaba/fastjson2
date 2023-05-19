@@ -103,6 +103,13 @@ public final class ObjectReaderImplEnum
         return enums[enumIndex];
     }
 
+    public Enum getEnum(String name) {
+        if (name == null) {
+            return null;
+        }
+        return getEnumByHashCode(Fnv.hashCode64(name));
+    }
+
     public Enum getEnumByOrdinal(int ordinal) {
         if (ordinal < 0 || ordinal >= ordinalEnums.length) {
             throw new JSONException("No enum ordinal " + enumClass.getCanonicalName() + "." + ordinal);

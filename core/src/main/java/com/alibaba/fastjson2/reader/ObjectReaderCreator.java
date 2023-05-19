@@ -2753,7 +2753,7 @@ public class ObjectReaderCreator {
 
         Enum[] ordinalEnums = (Enum[]) objectClass.getEnumConstants();
 
-        Map<Long, Enum> enumMap = new HashMap();
+        Map<Long, Enum> enumMap = new LinkedHashMap<>();
         for (int i = 0; ordinalEnums != null && i < ordinalEnums.length; ++i) {
             Enum e = ordinalEnums[i];
             String name = e.name();
