@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2.benchmark.sonic;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.util.List;
 
@@ -37,6 +40,16 @@ public class EishayTest {
                 "  }\n" +
                 "}";
 
+        System.out.println("JDKUtils_vector_bit_length : " + JDKUtils.VECTOR_BIT_LENGTH);
+
+        JSONReader reader = JSONReader.of(str);
+        reader.close();
+        System.out.println("reader class : " + reader.getClass().getName());
+
+        JSONWriter writer = JSONWriter.of();
+        writer.close();
+        System.out.println("writer class : " + writer.getClass().getName());
+
         MediaContent mediaContent = JSON.parseObject(str, MediaContent.class);
 
         int LOOP_COUNT = 1000000;
@@ -56,9 +69,15 @@ public class EishayTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 eishay parseObject time : " + millis);
         }
+
+        // write 325
+        // parse 599
+
+        // write_vec : 266
+        // parse_vec : 572
     }
 
-    public class MediaContent
+    public static class MediaContent
             implements java.io.Serializable {
         public Media media;
         public List<Image> images;
