@@ -27,6 +27,7 @@ package com.alibaba.fastjson2.util;
 
 import java.lang.invoke.*;
 
+import static com.alibaba.fastjson2.util.JDKUtils.ANDROID;
 import static java.lang.Float.floatToRawIntBits;
 import static java.lang.Integer.numberOfLeadingZeros;
 
@@ -1885,7 +1886,7 @@ public final class DoubleToDecimal {
     static final LongBiFunction MULTIPLY_HIGH;
     static {
         LongBiFunction function = null;
-        if (JDKUtils.JVM_VERSION > 8) {
+        if (JDKUtils.JVM_VERSION > 8 && !ANDROID) {
             try {
                 MethodHandles.Lookup lookup = JDKUtils.trustedLookup(DoubleToDecimal.class);
                 MethodType methodType = MethodType.methodType(long.class, long.class, long.class);
