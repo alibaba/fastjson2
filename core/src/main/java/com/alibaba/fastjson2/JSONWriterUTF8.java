@@ -1990,10 +1990,10 @@ class JSONWriterUTF8
         bytes[off++] = (byte) quote;
         write4(year, bytes, off);
         off += 4;
-        bytes[off + 5] = '-';
+        bytes[off++] = '-';
         write2(month, bytes, off);
         off += 2;
-        bytes[off + 8] = '-';
+        bytes[off++] = '-';
         write2(dayOfMonth, bytes, off);
         off += 2;
         bytes[off++] = (byte) quote;
