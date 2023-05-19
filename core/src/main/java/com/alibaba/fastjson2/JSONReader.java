@@ -1851,13 +1851,18 @@ public abstract class JSONReader
                 break;
             }
 
-            String name = readFieldName();
+            Object name = readFieldName();
             if (name == null) {
                 if (ch == EOI) {
                     throw new JSONException("input end");
                 }
 
-                name = readFieldNameUnquote();
+                if (ch == '-' || (ch >= '0' && ch <= '9')) {
+                    readNumber0();
+                    name = getNumber();
+                } else {
+                    name = readFieldNameUnquote();
+                }
                 nextIfMatch(':');
             }
 

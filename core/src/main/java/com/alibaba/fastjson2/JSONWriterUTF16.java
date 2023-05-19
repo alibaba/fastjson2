@@ -2088,7 +2088,7 @@ class JSONWriterUTF16
 
         boolean first = true;
         for (Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<String, Object> next = it.next();
+            Map.Entry next = it.next();
             Object value = next.getValue();
             if (value == null && (context.features & Feature.WriteMapNullValue.mask) == 0) {
                 continue;
@@ -2102,7 +2102,12 @@ class JSONWriterUTF16
             }
 
             first = false;
-            writeString(next.getKey());
+            Object key = next.getKey();
+            if (key instanceof String) {
+                writeString((String) key);
+            } else {
+                writeAny(key);
+            }
 
             if (off == chars.length) {
                 ensureCapacity(off + 1);
