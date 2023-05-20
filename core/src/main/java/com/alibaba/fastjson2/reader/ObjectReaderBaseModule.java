@@ -1938,6 +1938,10 @@ public class ObjectReaderBaseModule
                 return new ObjectArrayTypedReader(objectClass);
             }
 
+            if (JSONPObject.class.isAssignableFrom(objectClass)) {
+                return new ObjectReaderImplJSONP(objectClass);
+            }
+
             ObjectReaderCreator creator = JSONFactory
                     .getDefaultObjectReaderProvider()
                     .getCreator();
