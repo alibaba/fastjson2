@@ -188,4 +188,23 @@ public class IOUtils {
     public static int decodeUTF8(byte[] sa, int sp, int len, char[] da) {
         return com.alibaba.fastjson2.util.IOUtils.decodeUTF8(sa, sp, len, da);
     }
+
+    public static boolean isIdent(char ch) {
+        return ch < identifierFlags.length && identifierFlags[ch];
+    }
+
+    public static boolean isValidJsonpQueryParam(String value) {
+        if (value == null || value.length() == 0) {
+            return false;
+        }
+
+        for (int i = 0, len = value.length(); i < len; ++i) {
+            char ch = value.charAt(i);
+            if (ch != '.' && !IOUtils.isIdent(ch)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
