@@ -1120,6 +1120,10 @@ public abstract class JSON
             context.config(JSONWriter.Feature.BrowserCompatible);
         }
 
+        if ((featuresValue & SerializerFeature.BrowserSecure.mask) != 0) {
+            context.config(JSONWriter.Feature.BrowserSecure);
+        }
+
         if ((featuresValue & SerializerFeature.WriteClassName.mask) != 0) {
             context.config(JSONWriter.Feature.WriteClassName);
         }
