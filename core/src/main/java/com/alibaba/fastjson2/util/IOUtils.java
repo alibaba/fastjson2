@@ -4,10 +4,11 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.time.LocalTime;
 import java.util.Arrays;
 
 public class IOUtils {
-    static final byte[] digits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
+    static final byte[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
             'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
 
     static final byte[] DigitTens = {'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '1',
@@ -27,7 +28,7 @@ public class IOUtils {
     static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
     static final int[] IA = new int[256];
 
-    private static final int[] DIGITS = new int[1000];
+    private static final int[] DIGITS_K = new int[1000];
     private static final byte MINUS = '-';
     private static final byte[] MIN_INT = "-2147483648".getBytes();
     private static final byte[] MIN_LONG = "-9223372036854775808".getBytes();
@@ -39,8 +40,8 @@ public class IOUtils {
         }
         IA['='] = 0;
 
-        for (int i = 0; i < DIGITS.length; i++) {
-            DIGITS[i] = (i < 10 ? (2 << 24) : i < 100 ? (1 << 24) : 0)
+        for (int i = 0; i < DIGITS_K.length; i++) {
+            DIGITS_K[i] = (i < 10 ? (2 << 24) : i < 100 ? (1 << 24) : 0)
                     + (((i / 100) + '0') << 16)
                     + ((((i / 10) % 10) + '0') << 8)
                     + i % 10 + '0';
@@ -89,7 +90,7 @@ public class IOUtils {
         for (; ; ) {
             q = (i * 52429) >>> (16 + 3);
             r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
-            buf[--p] = digits[r];
+            buf[--p] = DIGITS[r];
             i = q;
             if (i == 0) {
                 break;
@@ -123,7 +124,7 @@ public class IOUtils {
         for (; ; ) {
             q = (i * 52429) >>> (16 + 3);
             r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
-            buf[--p] = (char) digits[r];
+            buf[--p] = (char) DIGITS[r];
             i = q;
             if (i == 0) {
                 break;
@@ -172,7 +173,7 @@ public class IOUtils {
         for (; ; ) {
             q2 = (i2 * 52429) >>> (16 + 3);
             r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
-            buf[--charPos] = digits[r];
+            buf[--charPos] = DIGITS[r];
             i2 = q2;
             if (i2 == 0) {
                 break;
@@ -221,7 +222,7 @@ public class IOUtils {
         for (; ; ) {
             q2 = (i2 * 52429) >>> (16 + 3);
             r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
-            buf[--charPos] = (char) digits[r];
+            buf[--charPos] = (char) DIGITS[r];
             i2 = q2;
             if (i2 == 0) {
                 break;
@@ -783,7 +784,7 @@ public class IOUtils {
             throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + value);
         }
         final int q = value / 1000;
-        final int v = DIGITS[value - q * 1000];
+        final int v = DIGITS_K[value - q * 1000];
         buf[pos] = (byte) (q + '0');
         buf[pos + 1] = (byte) (v >> 16);
         buf[pos + 2] = (byte) (v >> 8);
@@ -795,7 +796,7 @@ public class IOUtils {
             throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + value);
         }
         final int q = value / 1000;
-        final int v = DIGITS[value - q * 1000];
+        final int v = DIGITS_K[value - q * 1000];
         buf[pos] = (char) (byte) (q + '0');
         buf[pos + 1] = (char) (byte) (v >> 16);
         buf[pos + 2] = (char) (byte) (v >> 8);
@@ -803,29 +804,191 @@ public class IOUtils {
     }
 
     public static void write3(final int number, final byte[] buf, int pos) {
-        final int v = DIGITS[number];
+        final int v = DIGITS_K[number];
         buf[pos] = (byte) (v >> 16);
         buf[pos + 1] = (byte) (v >> 8);
         buf[pos + 2] = (byte) v;
     }
 
     public static void write3(final int number, final char[] buf, int pos) {
-        final int v = DIGITS[number];
+        final int v = DIGITS_K[number];
         buf[pos] = (char) (byte) (v >> 16);
         buf[pos + 1] = (char) (byte) (v >> 8);
         buf[pos + 2] = (char) (byte) v;
     }
 
     public static void write2(final int number, final byte[] buf, int pos) {
-        final int v = DIGITS[number];
+        final int v = DIGITS_K[number];
         buf[pos] = (byte) (v >> 8);
         buf[pos + 1] = (byte) v;
     }
 
     public static void write2(final int number, final char[] buf, int pos) {
-        final int v = DIGITS[number];
+        final int v = DIGITS_K[number];
         buf[pos] = (char) (byte) (v >> 8);
         buf[pos + 1] = (char) (byte) v;
+    }
+
+    public static int writeLocalDate(byte[] bytes, int off, int year, int month, int dayOfMonth) {
+        if (year >= 1000 && year < 10000) {
+            if (year < 3000) {
+                int yyy;
+                byte y0;
+                if (year < 2000) {
+                    yyy = year - 1000;
+                    y0 = '1';
+                } else {
+                    yyy = year - 2000;
+                    y0 = '2';
+                }
+                bytes[off] = y0;
+                IOUtils.write3(yyy, bytes, off + 1);
+            } else {
+                IOUtils.write4(year, bytes, off);
+            }
+            off += 4;
+        } else {
+            off = IOUtils.writeInt32(bytes, off, year);
+        }
+        bytes[off] = '-';
+        {
+            int v = DIGITS_K[month];
+            bytes[off + 1] = (byte) (v >> 8);
+            bytes[off + 2] = (byte) (v);
+        }
+        bytes[off + 3] = '-';
+        {
+            int v = DIGITS_K[dayOfMonth];
+            bytes[off + 4] = (byte) (v >> 8);
+            bytes[off + 5] = (byte) (v);
+        }
+        off += 6;
+
+        return off;
+    }
+
+    public static int writeLocalDate(char[] bytes, int off, int year, int month, int dayOfMonth) {
+        if (year >= 1000 && year < 10000) {
+            if (year < 3000) {
+                int yyy;
+                char y0;
+                if (year < 2000) {
+                    yyy = year - 1000;
+                    y0 = '1';
+                } else {
+                    yyy = year - 2000;
+                    y0 = '2';
+                }
+                bytes[off] = y0;
+                IOUtils.write3(yyy, bytes, off + 1);
+            } else {
+                IOUtils.write4(year, bytes, off);
+            }
+            off += 4;
+        } else {
+            off = IOUtils.writeInt32(bytes, off, year);
+        }
+        bytes[off] = '-';
+        {
+            int v = DIGITS_K[month];
+            bytes[off + 1] = (char) (byte) (v >> 8);
+            bytes[off + 2] = (char) (byte) (v);
+        }
+        bytes[off + 3] = '-';
+        {
+            int v = DIGITS_K[dayOfMonth];
+            bytes[off + 4] = (char) (byte) (v >> 8);
+            bytes[off + 5] = (char) (byte) (v);
+        }
+        off += 6;
+
+        return off;
+    }
+
+    public static int writeLocalTime(byte[] bytes, int off, LocalTime time) {
+        int hour = time.getHour();
+        IOUtils.write2(hour, bytes, off);
+        off += 2;
+
+        bytes[off++] = ':';
+
+        int minute = time.getMinute();
+        IOUtils.write2(minute, bytes, off);
+        off += 2;
+
+        bytes[off++] = ':';
+
+        int second = time.getSecond();
+        IOUtils.write2(second, bytes, off);
+        off += 2;
+
+        int nano = time.getNano();
+        if (nano != 0) {
+            final int div = nano / 1000;
+            final int div2 = div / 1000;
+            final int rem1 = nano - div * 1000;
+
+            bytes[off++] = '.';
+            IOUtils.write3(div2, bytes, off);
+            if (rem1 != 0) {
+                IOUtils.write3(div - div2 * 1000, bytes, off + 3);
+                IOUtils.write3(rem1, bytes, off + 6);
+                off += 9;
+            } else {
+                final int rem2 = div - div2 * 1000;
+                if (rem2 != 0) {
+                    IOUtils.write3(rem2, bytes, off + 3);
+                    off += 6;
+                } else {
+                    off += 3;
+                }
+            }
+        }
+
+        return off;
+    }
+
+    public static int writeLocalTime(char[] bytes, int off, LocalTime time) {
+        int hour = time.getHour();
+        IOUtils.write2(hour, bytes, off);
+        off += 2;
+
+        bytes[off++] = ':';
+
+        int minute = time.getMinute();
+        IOUtils.write2(minute, bytes, off);
+        off += 2;
+
+        bytes[off++] = ':';
+
+        int second = time.getSecond();
+        IOUtils.write2(second, bytes, off);
+        off += 2;
+
+        int nano = time.getNano();
+        if (nano != 0) {
+            final int div = nano / 1000;
+            final int div2 = div / 1000;
+            final int rem1 = nano - div * 1000;
+
+            bytes[off++] = '.';
+            IOUtils.write3(div2, bytes, off);
+            if (rem1 != 0) {
+                IOUtils.write3(div - div2 * 1000, bytes, off + 3);
+                IOUtils.write3(rem1, bytes, off + 6);
+                off += 9;
+            } else {
+                final int rem2 = div - div2 * 1000;
+                if (rem2 != 0) {
+                    IOUtils.write3(rem2, bytes, off + 3);
+                    off += 6;
+                } else {
+                    off += 3;
+                }
+            }
+        }
+
+        return off;
     }
 
     public static int writeInt64(final byte[] buf, int pos, final long value) {
@@ -844,14 +1007,14 @@ public class IOUtils {
         }
         final long q1 = i / 1000;
         if (q1 == 0) {
-            pos += writeFirstBuf(buf, DIGITS[(int) i], pos);
+            pos += writeFirstBuf(buf, DIGITS_K[(int) i], pos);
             return pos;
         }
         final int r1 = (int) (i - q1 * 1000);
         final long q2 = q1 / 1000;
         if (q2 == 0) {
-            final int v1 = DIGITS[r1];
-            final int v2 = DIGITS[(int) q1];
+            final int v1 = DIGITS_K[r1];
+            final int v2 = DIGITS_K[(int) q1];
             int off = writeFirstBuf(buf, v2, pos);
             writeBuf(buf, v1, pos + off);
             return pos + 3 + off;
@@ -859,9 +1022,9 @@ public class IOUtils {
         final int r2 = (int) (q1 - q2 * 1000);
         final long q3 = q2 / 1000;
         if (q3 == 0) {
-            final int v1 = DIGITS[r1];
-            final int v2 = DIGITS[r2];
-            final int v3 = DIGITS[(int) q2];
+            final int v1 = DIGITS_K[r1];
+            final int v2 = DIGITS_K[r2];
+            final int v3 = DIGITS_K[(int) q2];
             pos += writeFirstBuf(buf, v3, pos);
             writeBuf(buf, v2, pos);
             writeBuf(buf, v1, pos + 3);
@@ -870,10 +1033,10 @@ public class IOUtils {
         final int r3 = (int) (q2 - q3 * 1000);
         final int q4 = (int) (q3 / 1000);
         if (q4 == 0) {
-            final int v1 = DIGITS[r1];
-            final int v2 = DIGITS[r2];
-            final int v3 = DIGITS[r3];
-            final int v4 = DIGITS[(int) q3];
+            final int v1 = DIGITS_K[r1];
+            final int v2 = DIGITS_K[r2];
+            final int v3 = DIGITS_K[r3];
+            final int v4 = DIGITS_K[(int) q3];
             pos += writeFirstBuf(buf, v4, pos);
             writeBuf(buf, v3, pos);
             writeBuf(buf, v2, pos + 3);
@@ -883,11 +1046,11 @@ public class IOUtils {
         final int r4 = (int) (q3 - q4 * 1000);
         final int q5 = q4 / 1000;
         if (q5 == 0) {
-            final int v1 = DIGITS[r1];
-            final int v2 = DIGITS[r2];
-            final int v3 = DIGITS[r3];
-            final int v4 = DIGITS[r4];
-            final int v5 = DIGITS[q4];
+            final int v1 = DIGITS_K[r1];
+            final int v2 = DIGITS_K[r2];
+            final int v3 = DIGITS_K[r3];
+            final int v4 = DIGITS_K[r4];
+            final int v5 = DIGITS_K[q4];
             pos += writeFirstBuf(buf, v5, pos);
             writeBuf(buf, v4, pos);
             writeBuf(buf, v3, pos + 3);
@@ -897,17 +1060,17 @@ public class IOUtils {
         }
         final int r5 = q4 - q5 * 1000;
         final int q6 = q5 / 1000;
-        final int v1 = DIGITS[r1];
-        final int v2 = DIGITS[r2];
-        final int v3 = DIGITS[r3];
-        final int v4 = DIGITS[r4];
-        final int v5 = DIGITS[r5];
+        final int v1 = DIGITS_K[r1];
+        final int v2 = DIGITS_K[r2];
+        final int v3 = DIGITS_K[r3];
+        final int v4 = DIGITS_K[r4];
+        final int v5 = DIGITS_K[r5];
         if (q6 == 0) {
-            pos += writeFirstBuf(buf, DIGITS[q5], pos);
+            pos += writeFirstBuf(buf, DIGITS_K[q5], pos);
         } else {
             final int r6 = q5 - q6 * 1000;
             buf[pos++] = (byte) (q6 + '0');
-            writeBuf(buf, DIGITS[r6], pos);
+            writeBuf(buf, DIGITS_K[r6], pos);
             pos += 3;
         }
         writeBuf(buf, v5, pos);
@@ -934,14 +1097,14 @@ public class IOUtils {
         }
         final long q1 = i / 1000;
         if (q1 == 0) {
-            pos += writeFirstBuf(buf, DIGITS[(int) i], pos);
+            pos += writeFirstBuf(buf, DIGITS_K[(int) i], pos);
             return pos;
         }
         final int r1 = (int) (i - q1 * 1000);
         final long q2 = q1 / 1000;
         if (q2 == 0) {
-            final int v1 = DIGITS[r1];
-            final int v2 = DIGITS[(int) q1];
+            final int v1 = DIGITS_K[r1];
+            final int v2 = DIGITS_K[(int) q1];
             int off = writeFirstBuf(buf, v2, pos);
             writeBuf(buf, v1, pos + off);
             return pos + 3 + off;
@@ -949,9 +1112,9 @@ public class IOUtils {
         final int r2 = (int) (q1 - q2 * 1000);
         final long q3 = q2 / 1000;
         if (q3 == 0) {
-            final int v1 = DIGITS[r1];
-            final int v2 = DIGITS[r2];
-            final int v3 = DIGITS[(int) q2];
+            final int v1 = DIGITS_K[r1];
+            final int v2 = DIGITS_K[r2];
+            final int v3 = DIGITS_K[(int) q2];
             pos += writeFirstBuf(buf, v3, pos);
             writeBuf(buf, v2, pos);
             writeBuf(buf, v1, pos + 3);
@@ -960,10 +1123,10 @@ public class IOUtils {
         final int r3 = (int) (q2 - q3 * 1000);
         final int q4 = (int) (q3 / 1000);
         if (q4 == 0) {
-            final int v1 = DIGITS[r1];
-            final int v2 = DIGITS[r2];
-            final int v3 = DIGITS[r3];
-            final int v4 = DIGITS[(int) q3];
+            final int v1 = DIGITS_K[r1];
+            final int v2 = DIGITS_K[r2];
+            final int v3 = DIGITS_K[r3];
+            final int v4 = DIGITS_K[(int) q3];
             pos += writeFirstBuf(buf, v4, pos);
             writeBuf(buf, v3, pos);
             writeBuf(buf, v2, pos + 3);
@@ -973,11 +1136,11 @@ public class IOUtils {
         final int r4 = (int) (q3 - q4 * 1000);
         final int q5 = q4 / 1000;
         if (q5 == 0) {
-            final int v1 = DIGITS[r1];
-            final int v2 = DIGITS[r2];
-            final int v3 = DIGITS[r3];
-            final int v4 = DIGITS[r4];
-            final int v5 = DIGITS[q4];
+            final int v1 = DIGITS_K[r1];
+            final int v2 = DIGITS_K[r2];
+            final int v3 = DIGITS_K[r3];
+            final int v4 = DIGITS_K[r4];
+            final int v5 = DIGITS_K[q4];
             pos += writeFirstBuf(buf, v5, pos);
             writeBuf(buf, v4, pos);
             writeBuf(buf, v3, pos + 3);
@@ -987,17 +1150,17 @@ public class IOUtils {
         }
         final int r5 = q4 - q5 * 1000;
         final int q6 = q5 / 1000;
-        final int v1 = DIGITS[r1];
-        final int v2 = DIGITS[r2];
-        final int v3 = DIGITS[r3];
-        final int v4 = DIGITS[r4];
-        final int v5 = DIGITS[r5];
+        final int v1 = DIGITS_K[r1];
+        final int v2 = DIGITS_K[r2];
+        final int v3 = DIGITS_K[r3];
+        final int v4 = DIGITS_K[r4];
+        final int v5 = DIGITS_K[r5];
         if (q6 == 0) {
-            pos += writeFirstBuf(buf, DIGITS[q5], pos);
+            pos += writeFirstBuf(buf, DIGITS_K[q5], pos);
         } else {
             final int r6 = q5 - q6 * 1000;
             buf[pos++] = (char) (byte) (q6 + '0');
-            writeBuf(buf, DIGITS[r6], pos);
+            writeBuf(buf, DIGITS_K[r6], pos);
             pos += 3;
         }
         writeBuf(buf, v5, pos);
@@ -1024,28 +1187,28 @@ public class IOUtils {
         }
         final int q1 = i / 1000;
         if (q1 == 0) {
-            pos += writeFirstBuf(buf, DIGITS[i], pos);
+            pos += writeFirstBuf(buf, DIGITS_K[i], pos);
             return pos;
         }
         final int r1 = i - q1 * 1000;
         final int q2 = q1 / 1000;
         if (q2 == 0) {
-            final int v1 = DIGITS[r1];
-            final int v2 = DIGITS[q1];
+            final int v1 = DIGITS_K[r1];
+            final int v2 = DIGITS_K[q1];
             int off = writeFirstBuf(buf, v2, pos);
             writeBuf(buf, v1, pos + off);
             return pos + 3 + off;
         }
         final int r2 = q1 - q2 * 1000;
         final int q3 = q2 / 1000;
-        final int v1 = DIGITS[r1];
-        final int v2 = DIGITS[r2];
+        final int v1 = DIGITS_K[r1];
+        final int v2 = DIGITS_K[r2];
         if (q3 == 0) {
-            pos += writeFirstBuf(buf, DIGITS[q2], pos);
+            pos += writeFirstBuf(buf, DIGITS_K[q2], pos);
         } else {
             final int r3 = q2 - q3 * 1000;
             buf[pos++] = (byte) (q3 + '0');
-            writeBuf(buf, DIGITS[r3], pos);
+            writeBuf(buf, DIGITS_K[r3], pos);
             pos += 3;
         }
         writeBuf(buf, v2, pos);
@@ -1069,28 +1232,28 @@ public class IOUtils {
         }
         final int q1 = i / 1000;
         if (q1 == 0) {
-            pos += writeFirstBuf(buf, DIGITS[i], pos);
+            pos += writeFirstBuf(buf, DIGITS_K[i], pos);
             return pos;
         }
         final int r1 = i - q1 * 1000;
         final int q2 = q1 / 1000;
         if (q2 == 0) {
-            final int v1 = DIGITS[r1];
-            final int v2 = DIGITS[q1];
+            final int v1 = DIGITS_K[r1];
+            final int v2 = DIGITS_K[q1];
             int off = writeFirstBuf(buf, v2, pos);
             writeBuf(buf, v1, pos + off);
             return pos + 3 + off;
         }
         final int r2 = q1 - q2 * 1000;
         final int q3 = q2 / 1000;
-        final int v1 = DIGITS[r1];
-        final int v2 = DIGITS[r2];
+        final int v1 = DIGITS_K[r1];
+        final int v2 = DIGITS_K[r2];
         if (q3 == 0) {
-            pos += writeFirstBuf(buf, DIGITS[q2], pos);
+            pos += writeFirstBuf(buf, DIGITS_K[q2], pos);
         } else {
             final int r3 = q2 - q3 * 1000;
             buf[pos++] = (char) (byte) (q3 + '0');
-            writeBuf(buf, DIGITS[r3], pos);
+            writeBuf(buf, DIGITS_K[r3], pos);
             pos += 3;
         }
         writeBuf(buf, v2, pos);
