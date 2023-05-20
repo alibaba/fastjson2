@@ -1620,7 +1620,7 @@ class JSONWriterUTF16
             ensureCapacity(minCapacity);
         }
         chars[off++] = quote;
-        writeLocalDate0(date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+        off = IOUtils.writeLocalDate(chars, off, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
         chars[off++] = quote;
     }
 
@@ -1633,9 +1633,9 @@ class JSONWriterUTF16
 
         chars[off++] = quote;
         LocalDate localDate = dateTime.toLocalDate();
-        writeLocalDate0(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
+        off = IOUtils.writeLocalDate(chars, off, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
         chars[off++] = ' ';
-        writeLocalTime0(dateTime.toLocalTime());
+        off = IOUtils.writeLocalTime(chars, off, dateTime.toLocalTime());
         chars[off++] = quote;
     }
 
@@ -1751,7 +1751,7 @@ class JSONWriterUTF16
         }
 
         chars[off++] = quote;
-        writeLocalDate0(year, month, dayOfMonth);
+        off = IOUtils.writeLocalDate(chars, off, year, month, dayOfMonth);
         chars[off++] = quote;
     }
 
@@ -1778,7 +1778,7 @@ class JSONWriterUTF16
             ensureCapacity(minCapacity);
         }
         chars[off++] = quote;
-        writeLocalTime0(time);
+        off = IOUtils.writeLocalTime(chars, off, time);
         chars[off++] = quote;
     }
 
@@ -1809,9 +1809,9 @@ class JSONWriterUTF16
 
         chars[off++] = quote;
         LocalDate localDate = dateTime.toLocalDate();
-        writeLocalDate0(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
+        off = IOUtils.writeLocalDate(chars, off, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
         chars[off++] = 'T';
-        writeLocalTime0(dateTime.toLocalTime());
+        off = IOUtils.writeLocalTime(chars, off, dateTime.toLocalTime());
         if (zoneSize == 1) {
             chars[off++] = 'Z';
         } else if (firstZoneChar == '+' || firstZoneChar == '-') {
@@ -1854,9 +1854,9 @@ class JSONWriterUTF16
 
         chars[off++] = quote;
         LocalDate localDate = dateTime.toLocalDate();
-        writeLocalDate0(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
+        off = IOUtils.writeLocalDate(chars, off, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
         chars[off++] = 'T';
-        writeLocalTime0(dateTime.toLocalTime());
+        off = IOUtils.writeLocalTime(chars, off, dateTime.toLocalTime());
         if (zoneSize == 1) {
             chars[off++] = 'Z';
         } else if (firstZoneChar == '+' || firstZoneChar == '-') {
@@ -1869,77 +1869,6 @@ class JSONWriterUTF16
             chars[off++] = ']';
         }
         chars[off++] = quote;
-    }
-
-    final void writeLocalDate0(int year, int month, int dayOfMonth) {
-        if (year >= 1000 && year < 10000) {
-            if (year < 2000) {
-                int yyy = year - 1000;
-                chars[off++] = '1';
-                IOUtils.write3(yyy, chars, off);
-                off += 3;
-            } else if (year < 3000) {
-                int yyy = year - 2000;
-                chars[off++] = '2';
-                IOUtils.write3(yyy, chars, off);
-                off += 3;
-            } else {
-                IOUtils.write4(year, chars, off);
-                off += 4;
-            }
-        } else {
-            off = IOUtils.writeInt32(chars, off, year);
-        }
-        chars[off++] = '-';
-
-        IOUtils.write2(month, chars, off);
-        off += 2;
-        chars[off++] = '-';
-        IOUtils.write2(dayOfMonth, chars, off);
-        off += 2;
-    }
-
-    final void writeLocalTime0(LocalTime time) {
-        int hour = time.getHour();
-        IOUtils.write2(hour, chars, off);
-        off += 2;
-
-        chars[off++] = ':';
-
-        int minute = time.getMinute();
-        IOUtils.write2(minute, chars, off);
-        off += 2;
-
-        chars[off++] = ':';
-
-        int second = time.getSecond();
-        IOUtils.write2(second, chars, off);
-        off += 2;
-
-        int nano = time.getNano();
-        if (nano != 0) {
-            final int div = nano / 1000;
-            final int div2 = div / 1000;
-            final int rem1 = nano - div * 1000;
-
-            chars[off++] = '.';
-            if (rem1 != 0) {
-                IOUtils.write3(div2, chars, off);
-                IOUtils.write3(div - div2 * 1000, chars, off + 3);
-                IOUtils.write3(rem1, chars, off + 6);
-                off += 9;
-            } else {
-                final int rem2 = div - div2 * 1000;
-                if (rem2 != 0) {
-                    IOUtils.write3(div2, chars, off);
-                    IOUtils.write3(rem2, chars, off + 3);
-                    off += 6;
-                } else {
-                    IOUtils.write3(div2, chars, off);
-                    off += 3;
-                }
-            }
-        }
     }
 
     @Override

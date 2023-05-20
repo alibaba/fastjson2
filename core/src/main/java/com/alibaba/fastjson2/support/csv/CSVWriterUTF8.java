@@ -78,18 +78,11 @@ final class CSVWriterUTF8
     }
 
     public void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
-        if (off + 10 >= this.bytes.length) {
+        if (off + 11 >= this.bytes.length) {
             flush();
         }
 
-        IOUtils.write4(year, bytes, off);
-        off += 4;
-        bytes[off++] = '-';
-        IOUtils.write2(month, bytes, off);
-        off += 2;
-        bytes[off++] = '-';
-        IOUtils.write2(dayOfMonth, bytes, off);
-        off += 2;
+        off = IOUtils.writeLocalDate(bytes, off, year, month, dayOfMonth);
     }
 
     public void writeDateTime19(
@@ -99,18 +92,11 @@ final class CSVWriterUTF8
             int hour,
             int minute,
             int second) {
-        if (off + 19 >= this.bytes.length) {
+        if (off + 20 >= this.bytes.length) {
             flush();
         }
 
-        IOUtils.write4(year, bytes, off);
-        off += 4;
-        bytes[off++] = '-';
-        IOUtils.write2(month, bytes, off);
-        off += 2;
-        bytes[off++] = '-';
-        IOUtils.write2(dayOfMonth, bytes, off);
-        off += 2;
+        off = IOUtils.writeLocalDate(bytes, off, year, month, dayOfMonth);
         bytes[off++] = ' ';
         IOUtils.write2(hour, bytes, off);
         off += 2;
@@ -297,30 +283,9 @@ final class CSVWriterUTF8
             return;
         }
 
-        writeDateTime19(
-                ldt.getYear(),
-                ldt.getMonthValue(),
-                ldt.getDayOfMonth(),
-                ldt.getHour(),
-                ldt.getMinute(),
-                ldt.getSecond()
-        );
-        int nanoValue = ldt.getNano();
-        if (nanoValue == 0) {
-            return;
-        }
-
-        int value;
-        if (nanoValue % 1000_000 == 0) {
-            value = (nanoValue / 1000_000) + 1000;
-        } else if (nanoValue % 1000 == 0) {
-            value = (nanoValue / 1000) + 1000_000;
-        } else {
-            value = (nanoValue) + 1000_000_000;
-        }
-        int off = this.off;
-        writeInt32(value);
-        bytes[off] = '.';
+        off = IOUtils.writeLocalDate(bytes, off, ldt.getYear(), ldt.getMonthValue(), ldt.getDayOfMonth());
+        bytes[off++] = ' ';
+        off = IOUtils.writeLocalTime(bytes, off, ldt.toLocalTime());
     }
 
     @Override
