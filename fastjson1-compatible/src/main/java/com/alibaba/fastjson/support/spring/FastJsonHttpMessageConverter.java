@@ -3,6 +3,7 @@ package com.alibaba.fastjson.support.spring;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
+import com.alibaba.fastjson2.JSONPObject;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -34,6 +35,8 @@ import java.lang.reflect.TypeVariable;
 public class FastJsonHttpMessageConverter
         extends AbstractHttpMessageConverter<Object>
         implements GenericHttpMessageConverter<Object> {
+    public static final MediaType APPLICATION_JAVASCRIPT = new MediaType("application", "javascript");
+
     /**
      * with fastJson config
      */
@@ -146,6 +149,10 @@ public class FastJsonHttpMessageConverter
                 contentLength = strBytes.length;
                 outputMessage.getBody().write(strBytes, 0, strBytes.length);
             } else {
+                if (object instanceof JSONPObject) {
+                    headers.setContentType(APPLICATION_JAVASCRIPT);
+                }
+
                 contentLength = JSON.writeJSONString(
                         baos, object,
                         fastJsonConfig.getSerializeFilters(),
