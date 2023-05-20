@@ -1620,7 +1620,7 @@ class JSONWriterUTF16
             ensureCapacity(minCapacity);
         }
         chars[off++] = quote;
-        writeLocalDate0(date);
+        writeLocalDate0(date.getYear(), date.getMonthValue(), date.getDayOfMonth());
         chars[off++] = quote;
     }
 
@@ -1632,7 +1632,8 @@ class JSONWriterUTF16
         }
 
         chars[off++] = quote;
-        writeLocalDate0(dateTime.toLocalDate());
+        LocalDate localDate = dateTime.toLocalDate();
+        writeLocalDate0(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
         chars[off++] = ' ';
         writeLocalTime0(dateTime.toLocalTime());
         chars[off++] = quote;
@@ -1744,17 +1745,13 @@ class JSONWriterUTF16
 
     @Override
     public final void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
-        ensureCapacity(off + 12);
+        int minCapacity = off + 13;
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
+        }
 
         chars[off++] = quote;
-        IOUtils.write4(year, chars, off);
-        off += 4;
-        chars[off++] = '-';
-        IOUtils.write2(month, chars, off);
-        off += 2;
-        chars[off++] = '-';
-        IOUtils.write2(dayOfMonth, chars, off);
-        off += 2;
+        writeLocalDate0(year, month, dayOfMonth);
         chars[off++] = quote;
     }
 
@@ -1811,7 +1808,8 @@ class JSONWriterUTF16
         }
 
         chars[off++] = quote;
-        writeLocalDate0(dateTime.toLocalDate());
+        LocalDate localDate = dateTime.toLocalDate();
+        writeLocalDate0(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
         chars[off++] = 'T';
         writeLocalTime0(dateTime.toLocalTime());
         if (zoneSize == 1) {
@@ -1855,7 +1853,8 @@ class JSONWriterUTF16
         }
 
         chars[off++] = quote;
-        writeLocalDate0(dateTime.toLocalDate());
+        LocalDate localDate = dateTime.toLocalDate();
+        writeLocalDate0(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
         chars[off++] = 'T';
         writeLocalTime0(dateTime.toLocalTime());
         if (zoneSize == 1) {
@@ -1872,23 +1871,30 @@ class JSONWriterUTF16
         chars[off++] = quote;
     }
 
-    final void writeLocalDate0(LocalDate localDate) {
-        int year = localDate.getYear();
-        if (year >= 0 && year < 10000) {
-            IOUtils.write4(year, chars, off);
-            off += 4;
+    final void writeLocalDate0(int year, int month, int dayOfMonth) {
+        if (year >= 1000 && year < 10000) {
+            if (year < 2000) {
+                int yyy = year - 1000;
+                chars[off++] = '1';
+                IOUtils.write3(yyy, chars, off);
+                off += 3;
+            } else if (year < 3000) {
+                int yyy = year - 2000;
+                chars[off++] = '2';
+                IOUtils.write3(yyy, chars, off);
+                off += 3;
+            } else {
+                IOUtils.write4(year, chars, off);
+                off += 4;
+            }
         } else {
-            int yearSize = year > 0 ? IOUtils.stringSize(year) : IOUtils.stringSize(-year) + 1;
-            IOUtils.getChars(year, off + yearSize, chars);
-            off += yearSize;
+            off = IOUtils.writeInt32(chars, off, year);
         }
         chars[off++] = '-';
 
-        int month = localDate.getMonthValue();
         IOUtils.write2(month, chars, off);
         off += 2;
         chars[off++] = '-';
-        int dayOfMonth = localDate.getDayOfMonth();
         IOUtils.write2(dayOfMonth, chars, off);
         off += 2;
     }
