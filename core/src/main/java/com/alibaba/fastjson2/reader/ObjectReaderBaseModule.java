@@ -1544,6 +1544,10 @@ public class ObjectReaderBaseModule
             return ObjectReaderImplUUID.INSTANCE;
         }
 
+        if (type == Duration.class) {
+            return new ObjectReaderImplFromString(Duration.class, (Function<String, Duration>) Duration::parse);
+        }
+
         if (type == AtomicBoolean.class) {
             return new ObjectReaderImplFromBoolean(
                     AtomicBoolean.class,

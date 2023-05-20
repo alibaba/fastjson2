@@ -1440,6 +1440,10 @@ public class ObjectWriterBaseModule
                 return ObjectWriterImplInstant.INSTANCE;
             }
 
+            if (Duration.class == clazz) {
+                return ObjectWriterImplToString.INSTANCE;
+            }
+
             if (StackTraceElement.class == clazz) {
                 if (STACK_TRACE_ELEMENT_WRITER == null) {
                     STACK_TRACE_ELEMENT_WRITER = new ObjectWriterAdapter(
