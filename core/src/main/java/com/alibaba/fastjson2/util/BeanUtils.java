@@ -232,7 +232,7 @@ public abstract class BeanUtils {
     public static Method getMethod(Class objectClass, String methodName) {
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
-            methods = objectClass.getMethods();
+            methods = getMethods(objectClass);
             methodCache.putIfAbsent(objectClass, methods);
         }
 
@@ -252,7 +252,7 @@ public abstract class BeanUtils {
 
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
-            methods = objectClass.getMethods();
+            methods = getMethods(objectClass);
             methodCache.putIfAbsent(objectClass, methods);
         }
 
@@ -390,7 +390,7 @@ public abstract class BeanUtils {
     public static void staticMethod(Class objectClass, Consumer<Method> methodConsumer) {
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
-            methods = objectClass.getMethods();
+            methods = getMethods(objectClass);
             methodCache.putIfAbsent(objectClass, methods);
         }
 
@@ -407,7 +407,7 @@ public abstract class BeanUtils {
     public static Method buildMethod(Class objectClass, String methodName) {
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
-            methods = objectClass.getMethods();
+            methods = getMethods(objectClass);
             methodCache.putIfAbsent(objectClass, methods);
         }
 
@@ -498,7 +498,7 @@ public abstract class BeanUtils {
 
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
-            methods = objectClass.getMethods();
+            methods = getMethods(objectClass);
             methodCache.putIfAbsent(objectClass, methods);
         }
 
@@ -640,7 +640,7 @@ public abstract class BeanUtils {
 
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
-            methods = objectClass.getMethods();
+            methods = getMethods(objectClass);
             methodCache.putIfAbsent(objectClass, methods);
         }
 
@@ -689,7 +689,7 @@ public abstract class BeanUtils {
     public static void annotationMethods(Class objectClass, Consumer<Method> methodConsumer) {
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
-            methods = objectClass.getMethods();
+            methods = getMethods(objectClass);
             methodCache.putIfAbsent(objectClass, methods);
         }
 
@@ -920,7 +920,7 @@ public abstract class BeanUtils {
 
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
-            methods = objectClass.getMethods();
+            methods = getMethods(objectClass);
             methodCache.putIfAbsent(objectClass, methods);
         }
 
@@ -1082,6 +1082,16 @@ public abstract class BeanUtils {
 
             methodConsumer.accept(method);
         }
+    }
+
+    private static Method[] getMethods(Class objectClass) {
+        Method[] methods;
+        try {
+            methods = objectClass.getMethods();
+        } catch (NoClassDefFoundError ignored) {
+            methods = new Method[0];
+        }
+        return methods;
     }
 
     private static boolean isJSONField(AnnotatedElement element) {
