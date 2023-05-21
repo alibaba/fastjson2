@@ -26,6 +26,7 @@ public class ClientsWriteUTF8Bytes {
     static final ObjectMapper mapper = new ObjectMapper();
     static final Gson gson = new Gson();
     static final DslJson<Object> dslJson = new DslJson<>(Settings.withRuntime().includeServiceLoader());
+    static final ThreadLocal<ByteArrayOutputStream> bytesOutLocal = ThreadLocal.withInitial(() -> new ByteArrayOutputStream());
 
     static {
         try {
@@ -45,7 +46,8 @@ public class ClientsWriteUTF8Bytes {
 
     @Benchmark
     public void dsljson(Blackhole bh) throws IOException {
-        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        ByteArrayOutputStream bytesOut = bytesOutLocal.get();
+        bytesOut.reset();
         dslJson.serialize(clients, bytesOut);
         byte[] bytes = bytesOut.toByteArray();
         bh.consume(bytes);
