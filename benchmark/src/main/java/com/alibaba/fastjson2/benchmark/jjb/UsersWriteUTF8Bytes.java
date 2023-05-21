@@ -26,7 +26,6 @@ public class UsersWriteUTF8Bytes {
     static final ObjectMapper mapper = new ObjectMapper();
     static final Gson gson = new Gson();
     static final DslJson<Object> dslJson = new DslJson<>(Settings.withRuntime().includeServiceLoader());
-    static ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
 
     static {
         try {
@@ -46,7 +45,7 @@ public class UsersWriteUTF8Bytes {
 
     @Benchmark
     public void dsljson(Blackhole bh) throws IOException {
-        bytesOut.reset();
+        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
         dslJson.serialize(users, bytesOut);
         byte[] bytes = bytesOut.toByteArray();
         bh.consume(bytes);
