@@ -16,6 +16,7 @@
     <packaging>jar</packaging>
 
     <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
         <maven.test.skip>true</maven.test.skip>
         <uberjar.name>fastjson2-benchmarks</uberjar.name>
     </properties>
