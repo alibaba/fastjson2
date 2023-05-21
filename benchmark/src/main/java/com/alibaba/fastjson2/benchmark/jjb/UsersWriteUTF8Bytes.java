@@ -73,7 +73,7 @@ public class UsersWriteUTF8Bytes {
                 .mode(Mode.Throughput)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)
-                .forks(1)
+                .forks(2)
                 .threads(16)
                 .build();
         new Runner(options).run();
