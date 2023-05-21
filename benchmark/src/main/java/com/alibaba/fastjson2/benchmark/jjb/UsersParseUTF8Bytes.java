@@ -37,11 +37,14 @@ public class UsersParseUTF8Bytes {
     @Benchmark
     public void fastjson2(Blackhole bh) {
         bh.consume(JSON.parseObject(utf8Bytes, Users.class));
+        // zulu17.40.19 : 3515
+        // zulu17.40.19_vec : 338
     }
 
-    @Benchmark
+//    @Benchmark
     public void dsljson(Blackhole bh) throws IOException {
         bh.consume(dslJson.deserialize(Users.class, utf8Bytes, utf8Bytes.length));
+        // zulu17.40.19 : 3560
     }
 
 //    @Benchmark

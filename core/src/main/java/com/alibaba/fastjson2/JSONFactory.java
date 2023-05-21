@@ -205,6 +205,21 @@ public final class JSONFactory {
             useJacksonAnnotation = !"false".equals(property);
         }
 
+        boolean readerVector = false;
+        {
+            String property = System.getProperty("fastjson2.readerVector");
+            if (property != null) {
+                property = property.trim();
+                if (property == null || property.isEmpty()) {
+                    property = properties.getProperty("fastjson2.readerVector");
+                    if (property != null) {
+                        property = property.trim();
+                    }
+                }
+                readerVector = !"false".equals(property);
+            }
+        }
+
         Function<JSONWriter.Context, JSONWriter> incubatorVectorCreatorUTF8 = null;
         Function<JSONWriter.Context, JSONWriter> incubatorVectorCreatorUTF16 = null;
         JSONReaderUTF8Creator readerCreatorASCII = null;
@@ -228,24 +243,26 @@ public final class JSONFactory {
                     initErrorLast = ignored;
                 }
 
-                try {
-                    Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderASCIIVector$Factory");
-                    readerCreatorASCII = (JSONReaderUTF8Creator) factoryClass.newInstance();
-                } catch (Throwable ignored) {
-                    // skip
-                    initErrorLast = ignored;
-                }
+                if (readerVector) {
+                    try {
+                        Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderASCIIVector$Factory");
+                        readerCreatorASCII = (JSONReaderUTF8Creator) factoryClass.newInstance();
+                    } catch (Throwable ignored) {
+                        // skip
+                        initErrorLast = ignored;
+                    }
 
-                try {
-                    Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderUTF8Vector$Factory");
-                    readerCreatorUTF8 = (JSONReaderUTF8Creator) factoryClass.newInstance();
-                } catch (Throwable ignored) {
-                    // skip
-                    initErrorLast = ignored;
+                    try {
+                        Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderUTF8Vector$Factory");
+                        readerCreatorUTF8 = (JSONReaderUTF8Creator) factoryClass.newInstance();
+                    } catch (Throwable ignored) {
+                        // skip
+                        initErrorLast = ignored;
+                    }
                 }
             }
 
-            if (VECTOR_BIT_LENGTH >= 128) {
+            if (VECTOR_BIT_LENGTH >= 128 && readerVector) {
                 try {
                     Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderUTF16Vector$Factory");
                     readerCreatorUTF16 = (JSONReaderUTF16Creator) factoryClass.newInstance();
@@ -271,6 +288,7 @@ public final class JSONFactory {
     }
 
     static final CacheItem[] CACHE_ITEMS;
+
     static {
         final CacheItem[] items = new CacheItem[16];
         for (int i = 0; i < items.length; i++) {
