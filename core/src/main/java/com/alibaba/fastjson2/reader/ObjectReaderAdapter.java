@@ -209,13 +209,21 @@ public class ObjectReaderAdapter<T>
     public Object auoType(JSONReader jsonReader, Class expectClass, long features) {
         long typeHash = jsonReader.readTypeHashCode();
         JSONReader.Context context = jsonReader.getContext();
-        ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+
+        ObjectReader autoTypeObjectReader = null;
+        if (jsonReader.isSupportAutoTypeOrHandler(features)) {
+            autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+        }
         if (autoTypeObjectReader == null) {
             String typeName = jsonReader.getString();
             autoTypeObjectReader = context.getObjectReaderAutoType(typeName, expectClass, this.features | features | context.getFeatures());
 
             if (autoTypeObjectReader == null) {
-                throw new JSONException(jsonReader.info("auotype not support : " + typeName));
+                if (expectClass == objectClass) {
+                    autoTypeObjectReader = this;
+                } else {
+                    throw new JSONException(jsonReader.info("auotype not support : " + typeName));
+                }
             }
         }
 
