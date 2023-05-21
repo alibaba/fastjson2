@@ -26,10 +26,6 @@ final class JSONReaderUTF16Vector
             _for:
             {
                 int i = 0;
-                char c0 = 0, c1 = 0, c2 = 0, c3 = 0;
-
-                // vector optimize
-                boolean quoted = false;
                 final Vector<Short> v_quote = quote == '"' ? V_SHORT_128_DOUBLE_QUOTE : V_SHORT_128_SINGLE_QUOTE;
                 for (; offset + 8 < end; offset += 8, i += 8) {
                     ShortVector v = ShortVector.fromCharArray(ShortVector.SPECIES_128, chars, offset);
@@ -38,52 +34,36 @@ final class JSONReaderUTF16Vector
                     }
                 }
 
-                if (quoted) {
-                    if (c0 == quote) {
-                        // skip
-                    } else if (c1 == quote) {
-                        offset++;
-                        i++;
-                    } else if (c2 == quote) {
-                        offset += 2;
-                        i += 2;
-                    } else if (c3 == quote) {
-                        offset += 3;
-                        i += 3;
+                for (; ; ++i) {
+                    if (offset >= end) {
+                        throw new JSONException(info("invalid escape character EOI"));
                     }
-                    valueLength = i;
-                } else {
-                    for (; ; ++i) {
-                        if (offset >= end) {
-                            throw new JSONException(info("invalid escape character EOI"));
-                        }
-                        char c = chars[offset];
-                        if (c == '\\') {
-                            valueEscape = true;
-                            c = chars[++offset];
-                            switch (c) {
-                                case 'u': {
-                                    offset += 4;
-                                    break;
-                                }
-                                case 'x': {
-                                    offset += 2;
-                                    break;
-                                }
-                                default:
-                                    // skip
-                                    break;
+                    char c = chars[offset];
+                    if (c == '\\') {
+                        valueEscape = true;
+                        c = chars[++offset];
+                        switch (c) {
+                            case 'u': {
+                                offset += 4;
+                                break;
                             }
-                            offset++;
-                            continue;
-                        }
-
-                        if (c == quote) {
-                            valueLength = i;
-                            break _for;
+                            case 'x': {
+                                offset += 2;
+                                break;
+                            }
+                            default:
+                                // skip
+                                break;
                         }
                         offset++;
+                        continue;
                     }
+
+                    if (c == quote) {
+                        valueLength = i;
+                        break _for;
+                    }
+                    offset++;
                 }
             }
 
