@@ -271,6 +271,10 @@ public abstract class JSONReader
         return ((context.features | features) & Feature.SupportAutoType.mask) != 0;
     }
 
+    public final boolean isSupportAutoTypeOrHandler(long features) {
+        return ((context.features | features) & Feature.SupportAutoType.mask) != 0 || context.autoTypeBeforeHandler != null;
+    }
+
     public boolean isJSONB() {
         return false;
     }
@@ -3778,7 +3782,7 @@ public abstract class JSONReader
         }
 
         public ObjectReader getObjectReaderAutoType(String typeName, Class expectClass) {
-            if (autoTypeBeforeHandler != null && !ObjectReaderProvider.SAFE_MODE) {
+            if (autoTypeBeforeHandler != null) {
                 Class<?> autoTypeClass = autoTypeBeforeHandler.apply(typeName, expectClass, features);
                 if (autoTypeClass != null) {
                     boolean fieldBased = (features & Feature.FieldBased.mask) != 0;
@@ -3794,7 +3798,7 @@ public abstract class JSONReader
         }
 
         public ObjectReader getObjectReaderAutoType(String typeName, Class expectClass, long features) {
-            if (autoTypeBeforeHandler != null && !ObjectReaderProvider.SAFE_MODE) {
+            if (autoTypeBeforeHandler != null) {
                 Class<?> autoTypeClass = autoTypeBeforeHandler.apply(typeName, expectClass, features);
                 if (autoTypeClass != null) {
                     boolean fieldBased = (features & Feature.FieldBased.mask) != 0;

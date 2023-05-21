@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
@@ -389,6 +390,26 @@ public class ObjectReaderNoneDefaultConstructor<T>
     @Override
     public T createInstance(Map map, long features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        Object typeKey = map.get(getTypeKey());
+
+        if (typeKey instanceof String) {
+            String typeName = (String) typeKey;
+            long typeHash = Fnv.hashCode64(typeName);
+            ObjectReader<T> reader = null;
+            if ((features & JSONReader.Feature.SupportAutoType.mask) != 0) {
+                reader = autoType(provider, typeHash);
+            }
+
+            if (reader == null) {
+                reader = provider.getObjectReader(
+                        typeName, getObjectClass(), features | getFeatures()
+                );
+            }
+
+            if (reader != this && reader != null) {
+                return reader.createInstance(map, features);
+            }
+        }
 
         LinkedHashMap<Long, Object> valueMap = null;
 

@@ -68,13 +68,9 @@ public interface ObjectReader<T> {
                 reader = provider.getObjectReader(
                         typeName, getObjectClass(), features | getFeatures()
                 );
-
-                if (reader == null) {
-                    throw new JSONException("No suitable ObjectReader found for" + typeName);
-                }
             }
 
-            if (reader != this) {
+            if (reader != this && reader != null) {
                 return reader.createInstance(map, features);
             }
         }

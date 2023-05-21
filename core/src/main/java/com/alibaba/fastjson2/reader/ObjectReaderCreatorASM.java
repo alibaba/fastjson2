@@ -1625,7 +1625,7 @@ public class ObjectReaderCreatorASM
         if ((readerFeatures & JSONReader.Feature.SupportAutoType.mask) == 0) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isSupportAutoType", "(J)Z", false);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isSupportAutoTypeOrHandler", "(J)Z", false);
             mw.visitJumpInsn(Opcodes.IFEQ, noneAutoType_);
         }
 
