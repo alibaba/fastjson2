@@ -202,7 +202,7 @@ public abstract class FieldWriter<T>
             return;
         }
 
-        if (!jsonWriter.useSingleQuote) {
+        if (!jsonWriter.useSingleQuote && (jsonWriter.context.getFeatures() & UnquoteFieldName.mask) == 0) {
             if (jsonWriter.utf8) {
                 jsonWriter.writeNameRaw(nameWithColonUTF8);
                 return;

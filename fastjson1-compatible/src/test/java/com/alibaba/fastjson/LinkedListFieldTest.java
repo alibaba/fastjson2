@@ -32,7 +32,7 @@ public class LinkedListFieldTest {
         mapping.setAsmEnable(false);
 
         assertEquals("{\"value\":[]}", JSON.toJSONString(v, mapping, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullListAsEmpty));
-        assertEquals("{\"value\":[]}", JSON.toJSONStringZ(v, mapping, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullListAsEmpty));
+        assertEquals("{value:[]}", JSON.toJSONStringZ(v, mapping, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullListAsEmpty));
         assertEquals("{'value':[]}", JSON.toJSONStringZ(v, mapping, SerializerFeature.UseSingleQuotes, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullListAsEmpty));
         assertEquals("{'value':[]}", JSON.toJSONStringZ(v, mapping, SerializerFeature.UseSingleQuotes, SerializerFeature.QuoteFieldNames, SerializerFeature.WriteMapNullValue, SerializerFeature.WriteNullListAsEmpty));
     }

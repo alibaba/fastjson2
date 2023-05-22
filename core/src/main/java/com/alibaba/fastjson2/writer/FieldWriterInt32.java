@@ -41,10 +41,11 @@ abstract class FieldWriterInt32<T>
             return;
         }
 
-        long jsonWriterFeatures = jsonWriter.getFeatures();
+        long jsonWriterFeatures = jsonWriter.getFeatures() | features;
         boolean writeNonStringValueAsString = (jsonWriterFeatures & (WriteNonStringValueAsString.mask | UseSingleQuotes.mask)) != 0;
+        boolean unquote = (jsonWriterFeatures & JSONWriter.Feature.UnquoteFieldName.mask) != 0;
 
-        if (jsonWriter.utf8 && !writeNonStringValueAsString) {
+        if (jsonWriter.utf8 && !writeNonStringValueAsString && !unquote) {
             if (value >= -1 && value < 1039) {
                 byte[] bytes = null;
                 if (utf8ValueCache == null) {
@@ -63,7 +64,7 @@ abstract class FieldWriterInt32<T>
                 jsonWriter.writeNameRaw(bytes);
                 return;
             }
-        } else if (jsonWriter.utf16 && !writeNonStringValueAsString) {
+        } else if (jsonWriter.utf16 && !writeNonStringValueAsString && !unquote) {
             if (value >= -1 && value < 1039) {
                 char[] chars = null;
                 if (utf16ValueCache == null) {

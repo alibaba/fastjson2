@@ -1184,6 +1184,12 @@ public abstract class JSON
             context.config(JSONWriter.Feature.WriteBigDecimalAsPlain);
         }
 
+        if ((featuresValue & SerializerFeature.QuoteFieldNames.mask) == 0
+                && (featuresValue & SerializerFeature.UseSingleQuotes.mask) == 0
+        ) {
+            context.config(JSONWriter.Feature.UnquoteFieldName);
+        }
+
         if (defaultTimeZone != null && defaultTimeZone != DEFAULT_TIME_ZONE) {
             context.setZoneId(defaultTimeZone.toZoneId());
         }
