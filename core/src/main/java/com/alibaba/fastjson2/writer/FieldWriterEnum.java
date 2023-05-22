@@ -202,12 +202,13 @@ class FieldWriterEnum
         }
 
         final boolean usingOrdinal = (features & JSONWriter.Feature.WriteEnumUsingOrdinal.mask) != 0;
+        boolean unquoteName = (features & JSONWriter.Feature.UnquoteFieldName.mask) != 0;
         final boolean utf8 = jsonWriter.utf8;
         final boolean utf16 = utf8 ? false : jsonWriter.utf16;
         final int ordinal = e.ordinal();
 
         if (usingOrdinal) {
-            if (utf8) {
+            if (utf8 && !unquoteName) {
                 byte[] bytes = utf8ValueCache[ordinal];
                 if (bytes == null) {
                     int size = IOUtils.stringSize(ordinal);
@@ -220,7 +221,7 @@ class FieldWriterEnum
                 return;
             }
 
-            if (utf16) {
+            if (utf16 && !unquoteName) {
                 char[] bytes = utf16ValueCache[ordinal];
                 if (bytes == null) {
                     int size = IOUtils.stringSize(ordinal);
@@ -238,7 +239,7 @@ class FieldWriterEnum
             return;
         }
 
-        if (utf8) {
+        if (utf8 && !unquoteName) {
             byte[] bytes = valueNameCacheUTF8[ordinal];
 
             if (bytes == null) {
@@ -256,7 +257,7 @@ class FieldWriterEnum
             return;
         }
 
-        if (utf16) {
+        if (utf16 && !unquoteName) {
             char[] chars = valueNameCacheUTF16[ordinal];
 
             if (chars == null) {

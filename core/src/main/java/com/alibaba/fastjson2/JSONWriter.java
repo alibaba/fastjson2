@@ -818,6 +818,16 @@ public abstract class JSONWriter
             writeComma();
         }
 
+        boolean unquote = (context.features & UnquoteFieldName.mask) != 0;
+        if (unquote && (name.indexOf(quote) >= 0 || name.indexOf('\\') >= 0)) {
+            unquote = false;
+        }
+
+        if (unquote) {
+            writeRaw(name);
+            return;
+        }
+
         writeString(name);
     }
 
@@ -1821,7 +1831,12 @@ public abstract class JSONWriter
         /**
          * @since 2.0.30
          */
-        WriteThrowableClassName(1L << 37);
+        WriteThrowableClassName(1L << 37),
+
+        /**
+         * @since 2.0.33
+         */
+        UnquoteFieldName(1L << 38);
 
         public final long mask;
 
