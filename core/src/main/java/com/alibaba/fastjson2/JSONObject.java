@@ -26,6 +26,8 @@ import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.BeanUtils.getAnnotations;
+import static com.alibaba.fastjson2.util.JDKUtils.ANDROID;
+import static com.alibaba.fastjson2.util.JDKUtils.GRAAL;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
 public class JSONObject
@@ -1576,6 +1578,8 @@ public class JSONObject
                     if (declaringClass.isInterface()
                             && method.getParameterCount() == 0
                             && !Modifier.isAbstract(method.getModifiers())
+                            && !ANDROID
+                            && !GRAAL
                     ) {
                         // interface default method
                         MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
