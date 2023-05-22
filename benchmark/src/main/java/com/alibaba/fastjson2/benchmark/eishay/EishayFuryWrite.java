@@ -70,7 +70,7 @@ public class EishayFuryWrite {
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .warmupIterations(3)
                 .forks(1)
-                .threads(2)
+                .threads(16)
                 .build();
         new Runner(options).run();
     }
