@@ -1419,73 +1419,59 @@ class JSONWriterUTF8
             ensureCapacity(minCapacity);
         }
 
+        final char[] UUID_LOOKUP = JSONFactory.UUID_LOOKUP;
+        final byte[] bytes = this.bytes;
         bytes[off++] = '"';
-        int v = (hi1 >> 24) & 255;
-        int l = UUID_LOOKUP[v];
+        int l = UUID_LOOKUP[(hi1 >> 24) & 255];
         bytes[off++] = (byte) (l >> 8);
         bytes[off++] = (byte) l;
-        v = (hi1 >> 16) & 255;
-        l = UUID_LOOKUP[v];
+        l = UUID_LOOKUP[(hi1 >> 16) & 255];
         bytes[off++] = (byte) (l >> 8);
         bytes[off++] = (byte) l;
-        v = (hi1 >> 8) & 255;
-        l = UUID_LOOKUP[v];
+        l = UUID_LOOKUP[(hi1 >> 8) & 255];
         bytes[off++] = (byte) (l >> 8);
         bytes[off++] = (byte) l;
-        v = hi1 & 255;
-        l = UUID_LOOKUP[v];
+        l = UUID_LOOKUP[hi1 & 255];
         bytes[off++] = (byte) (l >> 8);
         bytes[off++] = (byte) l;
         bytes[off++] = '-';
-        v = (hi2 >> 24) & 255;
-        l = UUID_LOOKUP[v];
+        l = UUID_LOOKUP[(hi2 >> 24) & 255];
         bytes[off++] = (byte) (l >> 8);
         bytes[off++] = (byte) l;
-        v = (hi2 >> 16) & 255;
-        l = UUID_LOOKUP[v];
-        bytes[off++] = (byte) (l >> 8);
-        bytes[off++] = (byte) l;
-        bytes[off++] = '-';
-        v = (hi2 >> 8) & 255;
-        l = UUID_LOOKUP[v];
-        bytes[off++] = (byte) (l >> 8);
-        bytes[off++] = (byte) l;
-        v = hi2 & 255;
-        l = UUID_LOOKUP[v];
+        l = UUID_LOOKUP[(hi2 >> 16) & 255];
         bytes[off++] = (byte) (l >> 8);
         bytes[off++] = (byte) l;
         bytes[off++] = '-';
-        v = (lo1 >> 24) & 255;
-        l = UUID_LOOKUP[v];
+        l = UUID_LOOKUP[(hi2 >> 8) & 255];
         bytes[off++] = (byte) (l >> 8);
         bytes[off++] = (byte) l;
-        v = (lo1 >> 16) & 255;
-        l = UUID_LOOKUP[v];
+        l = UUID_LOOKUP[hi2 & 255];
         bytes[off++] = (byte) (l >> 8);
         bytes[off++] = (byte) l;
         bytes[off++] = '-';
-        v = (lo1 >> 8) & 255;
-        l = UUID_LOOKUP[v];
+        l = UUID_LOOKUP[(lo1 >> 24) & 255];
         bytes[off++] = (byte) (l >> 8);
         bytes[off++] = (byte) l;
-        v = lo1 & 255;
-        l = UUID_LOOKUP[v];
+        l = UUID_LOOKUP[(lo1 >> 16) & 255];
         bytes[off++] = (byte) (l >> 8);
         bytes[off++] = (byte) l;
-        v = (lo2 >> 24) & 255;
-        l = UUID_LOOKUP[v];
+        bytes[off++] = '-';
+        l = UUID_LOOKUP[(lo1 >> 8) & 255];
         bytes[off++] = (byte) (l >> 8);
         bytes[off++] = (byte) l;
-        v = (lo2 >> 16) & 255;
-        l = UUID_LOOKUP[v];
+        l = UUID_LOOKUP[lo1 & 255];
         bytes[off++] = (byte) (l >> 8);
         bytes[off++] = (byte) l;
-        v = (lo2 >> 8) & 255;
-        l = UUID_LOOKUP[v];
+        l = UUID_LOOKUP[(lo2 >> 24) & 255];
         bytes[off++] = (byte) (l >> 8);
         bytes[off++] = (byte) l;
-        v = lo2 & 255;
-        l = UUID_LOOKUP[v];
+        l = UUID_LOOKUP[(lo2 >> 16) & 255];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        l = UUID_LOOKUP[(lo2 >> 8) & 255];
+        bytes[off++] = (byte) (l >> 8);
+        bytes[off++] = (byte) l;
+        l = UUID_LOOKUP[lo2 & 255];
         bytes[off++] = (byte) (l >> 8);
         bytes[off++] = (byte) l;
         bytes[off++] = '"';
@@ -1532,12 +1518,9 @@ class JSONWriterUTF8
 
     @Override
     public final void writeNameRaw(byte[] bytes) {
-        {
-            // inline ensureCapacity
-            int minCapacity = off + bytes.length + (startObject ? 0 : 1);
-            if (minCapacity - this.bytes.length > 0) {
-                ensureCapacity(minCapacity);
-            }
+        int minCapacity = off + bytes.length + 1;
+        if (minCapacity - this.bytes.length > 0) {
+            ensureCapacity(minCapacity);
         }
         if (startObject) {
             startObject = false;
@@ -1578,12 +1561,9 @@ class JSONWriterUTF8
 
     @Override
     public final void writeNameRaw(byte[] bytes, int off, int len) {
-        {
-            // inline ensureCapacity
-            int minCapacity = this.off + len + (startObject ? 0 : 1);
-            if (minCapacity - this.bytes.length > 0) {
-                ensureCapacity(minCapacity);
-            }
+        int minCapacity = this.off + len + 1;
+        if (minCapacity - this.bytes.length > 0) {
+            ensureCapacity(minCapacity);
         }
 
         if (startObject) {
@@ -1617,35 +1597,30 @@ class JSONWriterUTF8
             return;
         }
 
-        boolean writeAsString = (context.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
+        boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
-        int minCapacity = off + 2 + values.length * (writeAsString ? 23 : 21);
+        int minCapacity = off + values.length * 13 + 2;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
 
-        bytes[off++] = (byte) '[';
-        if (writeAsString) {
-            for (int i = 0; i < values.length; i++) {
-                if (i != 0) {
-                    bytes[off++] = (byte) ',';
-                }
-                int v = values[i];
-                bytes[off++] = (byte) '"';
-                off = IOUtils.writeInt32(bytes, off, v);
-                bytes[off++] = (byte) '"';
+        final byte[] bytes = this.bytes;
+        bytes[off++] = '[';
+
+        for (int i = 0; i < values.length; i++) {
+            if (i != 0) {
+                bytes[off++] = ',';
             }
-        } else {
-            for (int i = 0; i < values.length; i++) {
-                if (i != 0) {
-                    bytes[off++] = (byte) ',';
-                }
-                int v = values[i];
-                off = IOUtils.writeInt32(bytes, off, v);
+            if (writeAsString) {
+                bytes[off++] = (byte) quote;
+            }
+            off = IOUtils.writeInt32(bytes, off, values[i]);
+            if (writeAsString) {
+                bytes[off++] = (byte) quote;
             }
         }
 
-        bytes[off++] = (byte) ']';
+        bytes[off++] = ']';
     }
 
     @Override
@@ -1657,12 +1632,13 @@ class JSONWriterUTF8
             ensureCapacity(minCapacity);
         }
 
+        final byte[] bytes = this.bytes;
         if (writeAsString) {
-            bytes[off++] = '"';
-            off = IOUtils.writeInt32(bytes, off, i);
-            bytes[off++] = '"';
-        } else {
-            off = IOUtils.writeInt32(bytes, off, i);
+            bytes[off++] = (byte) quote;
+        }
+        off = IOUtils.writeInt32(bytes, off, i);
+        if (writeAsString) {
+            bytes[off++] = (byte) quote;
         }
     }
 
@@ -1674,36 +1650,27 @@ class JSONWriterUTF8
 
         boolean browserCompatible = (context.features & BrowserCompatible.mask) != 0;
         boolean noneStringAsString = (context.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
-        boolean writeAsString = noneStringAsString || browserCompatible;
-
-        int minCapacity = off + 2 + values.length * (writeAsString ? 23 : 21);
+        int minCapacity = off + 2 + values.length * 23;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
 
+        final byte[] bytes = this.bytes;
         bytes[off++] = (byte) '[';
-        if (writeAsString) {
-            for (int i = 0; i < values.length; i++) {
-                if (i != 0) {
-                    bytes[off++] = (byte) ',';
-                }
-                long v = values[i];
 
-                if (!noneStringAsString && browserCompatible && v <= 9007199254740991L && v >= -9007199254740991L) {
-                    off = IOUtils.writeInt64(bytes, off, v);
-                } else {
-                    bytes[off++] = (byte) '"';
-                    off = IOUtils.writeInt64(bytes, off, v);
-                    bytes[off++] = (byte) '"';
-                }
+        for (int i = 0; i < values.length; i++) {
+            if (i != 0) {
+                bytes[off++] = (byte) ',';
             }
-        } else {
-            for (int i = 0; i < values.length; i++) {
-                if (i != 0) {
-                    bytes[off++] = (byte) ',';
-                }
-                long v = values[i];
-                off = IOUtils.writeInt64(bytes, off, v);
+            long v = values[i];
+            boolean writeAsString = noneStringAsString
+                    || (browserCompatible && v <= 9007199254740991L && v >= -9007199254740991L);
+            if (writeAsString) {
+                bytes[off++] = (byte) this.quote;
+            }
+            off = IOUtils.writeInt64(bytes, off, v);
+            if (writeAsString) {
+                bytes[off++] = (byte) this.quote;
             }
         }
 
@@ -1720,11 +1687,11 @@ class JSONWriterUTF8
         }
 
         if (writeAsString) {
-            bytes[off++] = '"';
-            off = IOUtils.writeInt64(bytes, off, i);
-            bytes[off++] = '"';
-        } else {
-            off = IOUtils.writeInt64(bytes, off, i);
+            bytes[off++] = (byte) quote;
+        }
+        off = IOUtils.writeInt64(bytes, off, i);
+        if (writeAsString) {
+            bytes[off++] = (byte) quote;
         }
     }
 
@@ -1764,6 +1731,7 @@ class JSONWriterUTF8
             ensureCapacity(minCapacity);
         }
 
+        final byte[] bytes = this.bytes;
         if (writeAsString) {
             bytes[off++] = '"';
         }
@@ -1820,10 +1788,11 @@ class JSONWriterUTF8
 
         boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
 
-        int minCapacity = off + values.length * (writeAsString ? 25 : 27) + 1;
+        int minCapacity = off + values.length * 27 + 1;
         if (minCapacity - bytes.length > 0) {
             ensureCapacity(minCapacity);
         }
+        final byte[] bytes = this.bytes;
         bytes[off++] = '[';
         for (int i = 0; i < values.length; i++) {
             if (i != 0) {
@@ -1908,22 +1877,14 @@ class JSONWriterUTF8
             return;
         }
 
+        final Context context = this.context;
         if (context.dateFormat != null) {
-            if (context.dateFormatUnixTime) {
+            if (context.dateFormatUnixTime || context.dateFormatMillis) {
                 LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
                 long millis = dateTime.atZone(context.getZoneId())
                         .toInstant()
                         .toEpochMilli();
-                writeInt64(millis / 1000);
-                return;
-            }
-
-            if (context.dateFormatMillis) {
-                LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
-                long millis = dateTime.atZone(context.getZoneId())
-                        .toInstant()
-                        .toEpochMilli();
-                writeInt64(millis);
+                writeInt64(context.dateFormatMillis ? millis : millis / 1000);
                 return;
             }
 
@@ -1944,8 +1905,8 @@ class JSONWriterUTF8
         if (minCapacity > bytes.length) {
             ensureCapacity(minCapacity);
         }
+        final byte[] bytes = this.bytes;
         bytes[off++] = (byte) quote;
-//        writeLocalDate0(date.getYear(), date.getMonthValue(), date.getDayOfMonth());
         off = IOUtils.writeLocalDate(bytes, off, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
         bytes[off++] = (byte) quote;
     }
@@ -2019,6 +1980,8 @@ class JSONWriterUTF8
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
+
+        final byte[] bytes = this.bytes;
         bytes[off++] = (byte) quote;
         off = IOUtils.writeLocalTime(bytes, off, time);
         bytes[off++] = (byte) quote;
@@ -2033,15 +1996,16 @@ class JSONWriterUTF8
 
         ZoneId zone = dateTime.getZone();
         String zoneId = zone.getId();
+        int zoneIdLength = zoneId.length();
         char firstZoneChar = '\0';
         int zoneSize;
-        if (ZoneOffset.UTC == zone || (zoneId.length() <= 3 && ("UTC".equals(zoneId) || "Z".equals(zoneId)))) {
+        if (ZoneOffset.UTC == zone || (zoneIdLength <= 3 && ("UTC".equals(zoneId) || "Z".equals(zoneId)))) {
             zoneId = "Z";
             zoneSize = 1;
-        } else if (zoneId.length() != 0 && ((firstZoneChar = zoneId.charAt(0)) == '+' || firstZoneChar == '-')) {
-            zoneSize = zoneId.length();
+        } else if (zoneIdLength != 0 && ((firstZoneChar = zoneId.charAt(0)) == '+' || firstZoneChar == '-')) {
+            zoneSize = zoneIdLength;
         } else {
-            zoneSize = 2 + zoneId.length();
+            zoneSize = 2 + zoneIdLength;
         }
 
         int minCapacity = off + zoneSize + 38;
@@ -2049,6 +2013,7 @@ class JSONWriterUTF8
             ensureCapacity(minCapacity);
         }
 
+        final byte[] bytes = this.bytes;
         bytes[off++] = (byte) quote;
         LocalDate localDate = dateTime.toLocalDate();
         off = IOUtils.writeLocalDate(bytes, off, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
@@ -2057,12 +2022,12 @@ class JSONWriterUTF8
         if (zoneSize == 1) {
             bytes[off++] = 'Z';
         } else if (firstZoneChar == '+' || firstZoneChar == '-') {
-            zoneId.getBytes(0, zoneId.length(), bytes, off);
-            off += zoneId.length();
+            zoneId.getBytes(0, zoneIdLength, bytes, off);
+            off += zoneIdLength;
         } else {
             bytes[off++] = '[';
-            zoneId.getBytes(0, zoneId.length(), bytes, off);
-            off += zoneId.length();
+            zoneId.getBytes(0, zoneIdLength, bytes, off);
+            off += zoneIdLength;
             bytes[off++] = ']';
         }
         bytes[off++] = (byte) quote;
@@ -2077,22 +2042,19 @@ class JSONWriterUTF8
 
         ZoneOffset offset = dateTime.getOffset();
         String zoneId = offset.getId();
-        char firstZoneChar = '\0';
-        int zoneSize;
-        if (ZoneOffset.UTC == offset || (zoneId.length() <= 3 && ("UTC".equals(zoneId) || "Z".equals(zoneId)))) {
+        int zoneIdLength = zoneId.length();
+        boolean utc = ZoneOffset.UTC == offset
+                || (zoneIdLength <= 3 && ("UTC".equals(zoneId) || "Z".equals(zoneId)));
+        if (utc) {
             zoneId = "Z";
-            zoneSize = 1;
-        } else if (zoneId.length() != 0 && ((firstZoneChar = zoneId.charAt(0)) == '+' || firstZoneChar == '-')) {
-            zoneSize = zoneId.length();
-        } else {
-            zoneSize = 2 + zoneId.length();
         }
 
-        int minCapacity = off + zoneSize + 38;
+        int minCapacity = off + zoneIdLength + 40;
         if (minCapacity > bytes.length) {
             ensureCapacity(minCapacity);
         }
 
+        final byte[] bytes = this.bytes;
         bytes[off++] = (byte) quote;
         LocalDateTime ldt = dateTime.toLocalDateTime();
         LocalDate date = ldt.toLocalDate();
@@ -2101,16 +2063,10 @@ class JSONWriterUTF8
         bytes[off++] = 'T';
         LocalTime time = ldt.toLocalTime();
         off = IOUtils.writeLocalTime(bytes, off, time);
-        if (zoneSize == 1) {
+        if (utc) {
             bytes[off++] = 'Z';
-        } else if (firstZoneChar == '+' || firstZoneChar == '-') {
-            zoneId.getBytes(0, zoneId.length(), bytes, off);
-            off += zoneId.length();
         } else {
-            bytes[off++] = '[';
-            zoneId.getBytes(0, zoneId.length(), bytes, off);
-            off += zoneId.length();
-            bytes[off++] = ']';
+            zoneId.getBytes(0, zoneIdLength, bytes, off);
         }
         bytes[off++] = (byte) quote;
     }
@@ -2257,29 +2213,25 @@ class JSONWriterUTF8
             ensureCapacity(minCapacity);
         }
 
+        final byte[] bytes = this.bytes;
         if (browserCompatible) {
             bytes[off++] = '"';
         }
 
+        boolean asPlain = (features & WriteBigDecimalAsPlain.mask) != 0;
         long unscaleValue;
-        if ((features & Feature.WriteBigDecimalAsPlain.mask) != 0) {
-            if (precision < 19
-                    && value.scale() >= 0
-                    && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1
-                    && (unscaleValue = UnsafeUtils.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET)) != Long.MIN_VALUE
-            ) {
-                int scale = value.scale();
-                off += getDecimalChars(unscaleValue, scale, bytes, off);
-            } else {
-                String str = value.toPlainString();
-                str.getBytes(0, str.length(), bytes, off);
-                off += str.length();
-            }
+        int scale;
+        if (precision < 19
+                && (scale = value.scale()) >= 0
+                && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1
+                && (unscaleValue = UnsafeUtils.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET)) != Long.MIN_VALUE
+                && !asPlain
+        ) {
+            off += getDecimalChars(unscaleValue, scale, bytes, off);
         } else {
-            String str = value.toString();
-            int strlen = str.length();
-            str.getBytes(0, strlen, bytes, off);
-            off += strlen;
+            String str = asPlain ? value.toPlainString() : value.toString();
+            str.getBytes(0, str.length(), bytes, off);
+            off += str.length();
         }
 
         if (browserCompatible) {

@@ -294,6 +294,17 @@ public class JSONReaderTest1 {
 
     @Test
     public void testNextIfEmptyString() {
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("null,1")) {
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
+            assertEquals('1', jsonReader.ch);
+            assertTrue(jsonReader.comma);
+        }
+
+        for (JSONReader jsonReader : TestUtils.createJSONReaders4("null")) {
+            assertTrue(jsonReader.nextIfNullOrEmptyString());
+            assertTrue(jsonReader.isEnd());
+        }
+
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\'\',1")) {
             assertTrue(jsonReader.nextIfNullOrEmptyString());
             assertEquals('1', jsonReader.ch);

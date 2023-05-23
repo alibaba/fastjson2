@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.benchmark.jjb;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.dslplatform.json.CompiledJson;
 import com.dslplatform.json.JsonAttribute;
 
@@ -26,6 +27,7 @@ public class Clients {
         private long id;
         private int index;
         private UUID guid;
+        @JSONField(name = "isActive")
         private boolean isActive;
         private BigDecimal balance;
         private String picture;
@@ -70,11 +72,11 @@ public class Clients {
             this.guid = guid;
         }
 
-        public boolean isActive() {
+        public boolean getIsActive() {
             return isActive;
         }
 
-        public void setActive(boolean active) {
+        public void setIsActive(boolean active) {
             isActive = active;
         }
 

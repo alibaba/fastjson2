@@ -188,92 +188,107 @@ class FieldWriterEnum
 
     @Override
     public final void writeEnum(JSONWriter jsonWriter, Enum e) {
-        long features = this.features | jsonWriter.getFeatures();
+        long features = jsonWriter.getFeatures(this.features);
 
-        if ((features & JSONWriter.Feature.WriteEnumUsingToString.mask) != 0) {
-            writeFieldName(jsonWriter);
-            jsonWriter.writeString(e.toString());
-            return;
-        }
+        if ((features & JSONWriter.Feature.WriteEnumUsingToString.mask) == 0) {
+            if (jsonWriter.jsonb) {
+                writeEnumJSONB(jsonWriter, e);
+                return;
+            }
 
-        if (jsonWriter.jsonb) {
-            writeEnumJSONB(jsonWriter, e);
-            return;
-        }
+            final boolean usingOrdinal = (features & JSONWriter.Feature.WriteEnumUsingOrdinal.mask) != 0;
+            boolean unquoteName = (features & JSONWriter.Feature.UnquoteFieldName.mask) != 0;
+            final boolean utf8 = jsonWriter.utf8;
+            final boolean utf16 = jsonWriter.utf8 ? false : jsonWriter.utf16;
+            final int ordinal = e.ordinal();
 
-        final boolean usingOrdinal = (features & JSONWriter.Feature.WriteEnumUsingOrdinal.mask) != 0;
-        boolean unquoteName = (features & JSONWriter.Feature.UnquoteFieldName.mask) != 0;
-        final boolean utf8 = jsonWriter.utf8;
-        final boolean utf16 = utf8 ? false : jsonWriter.utf16;
-        final int ordinal = e.ordinal();
+            if (usingOrdinal) {
+                if (utf8 && !unquoteName) {
+                    byte[] bytes = utf8ValueCache[ordinal];
+                    if (bytes == null) {
+                        utf8ValueCache[ordinal] = bytes = getBytes(ordinal);
+                    }
+                    jsonWriter.writeNameRaw(bytes);
+                    return;
+                }
 
-        if (usingOrdinal) {
+                if (utf16 && !unquoteName) {
+                    char[] chars = utf16ValueCache[ordinal];
+                    if (chars == null) {
+                        utf16ValueCache[ordinal] = chars = getChars(ordinal);
+                    }
+                    jsonWriter.writeNameRaw(chars);
+                    return;
+                }
+
+                writeFieldName(jsonWriter);
+                jsonWriter.writeInt32(ordinal);
+                return;
+            }
+
             if (utf8 && !unquoteName) {
-                byte[] bytes = utf8ValueCache[ordinal];
+                byte[] bytes = valueNameCacheUTF8[ordinal];
+
                 if (bytes == null) {
-                    int size = IOUtils.stringSize(ordinal);
-                    byte[] original = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + size);
-                    bytes = Arrays.copyOf(original, original.length);
-                    IOUtils.getChars(ordinal, bytes.length, bytes);
-                    utf8ValueCache[ordinal] = bytes;
+                    valueNameCacheUTF8[ordinal] = bytes = getNameBytes(ordinal);
                 }
                 jsonWriter.writeNameRaw(bytes);
                 return;
             }
 
             if (utf16 && !unquoteName) {
-                char[] bytes = utf16ValueCache[ordinal];
-                if (bytes == null) {
-                    int size = IOUtils.stringSize(ordinal);
-                    char[] original = Arrays.copyOf(nameWithColonUTF16, nameWithColonUTF16.length + size);
-                    bytes = Arrays.copyOf(original, original.length);
-                    IOUtils.getChars(ordinal, bytes.length, bytes);
-                    utf16ValueCache[ordinal] = bytes;
+                char[] chars = valueNameCacheUTF16[ordinal];
+                if (chars == null) {
+                    valueNameCacheUTF16[ordinal] = chars = getNameChars(ordinal);
                 }
-                jsonWriter.writeNameRaw(bytes);
+                jsonWriter.writeNameRaw(chars);
                 return;
             }
-
-            writeFieldName(jsonWriter);
-            jsonWriter.writeInt32(ordinal);
-            return;
-        }
-
-        if (utf8 && !unquoteName) {
-            byte[] bytes = valueNameCacheUTF8[ordinal];
-
-            if (bytes == null) {
-                byte[] nameUft8Bytes = enumConstants[ordinal].name().getBytes(StandardCharsets.UTF_8);
-                bytes = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + nameUft8Bytes.length + 2);
-                bytes[nameWithColonUTF8.length] = '"';
-                int index = nameWithColonUTF8.length + 1;
-                for (byte b : nameUft8Bytes) {
-                    bytes[index++] = b;
-                }
-                bytes[bytes.length - 1] = '"';
-                valueNameCacheUTF8[ordinal] = bytes;
-            }
-            jsonWriter.writeNameRaw(bytes);
-            return;
-        }
-
-        if (utf16 && !unquoteName) {
-            char[] chars = valueNameCacheUTF16[ordinal];
-
-            if (chars == null) {
-                String name = enumConstants[ordinal].name();
-                chars = Arrays.copyOf(nameWithColonUTF16, nameWithColonUTF16.length + name.length() + 2);
-                chars[nameWithColonUTF16.length] = '"';
-                name.getChars(0, name.length(), chars, nameWithColonUTF16.length + 1);
-                chars[chars.length - 1] = '"';
-                valueNameCacheUTF16[ordinal] = chars;
-            }
-            jsonWriter.writeNameRaw(chars);
-            return;
         }
 
         writeFieldName(jsonWriter);
         jsonWriter.writeString(e.toString());
+    }
+
+    private char[] getNameChars(int ordinal) {
+        char[] chars;
+        String name = enumConstants[ordinal].name();
+        chars = Arrays.copyOf(nameWithColonUTF16, nameWithColonUTF16.length + name.length() + 2);
+        chars[nameWithColonUTF16.length] = '"';
+        name.getChars(0, name.length(), chars, nameWithColonUTF16.length + 1);
+        chars[chars.length - 1] = '"';
+        return chars;
+    }
+
+    private byte[] getNameBytes(int ordinal) {
+        byte[] bytes;
+        byte[] nameUft8Bytes = enumConstants[ordinal].name().getBytes(StandardCharsets.UTF_8);
+        bytes = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + nameUft8Bytes.length + 2);
+        bytes[nameWithColonUTF8.length] = '"';
+        int index = nameWithColonUTF8.length + 1;
+        for (byte b : nameUft8Bytes) {
+            bytes[index++] = b;
+        }
+        bytes[bytes.length - 1] = '"';
+        return bytes;
+    }
+
+    private char[] getChars(int ordinal) {
+        char[] chars;
+        int size = IOUtils.stringSize(ordinal);
+        char[] original = Arrays.copyOf(nameWithColonUTF16, nameWithColonUTF16.length + size);
+        chars = Arrays.copyOf(original, original.length);
+        IOUtils.getChars(ordinal, chars.length, chars);
+        return chars;
+    }
+
+    private byte[] getBytes(int ordinal) {
+        byte[] bytes;
+        int size = IOUtils.stringSize(ordinal);
+        byte[] original = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + size);
+        bytes = Arrays.copyOf(original, original.length);
+        IOUtils.getChars(ordinal, bytes.length, bytes);
+        return bytes;
     }
 
     @Override
