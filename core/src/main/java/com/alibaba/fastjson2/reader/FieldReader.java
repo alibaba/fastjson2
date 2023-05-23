@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.*;
@@ -188,7 +189,10 @@ public abstract class FieldReader<T>
         if (thisMember != null && otherMember != null && thisMember.getClass() != otherMember.getClass()) {
             Class otherDeclaringClass = otherMember.getDeclaringClass();
             Class thisDeclaringClass = thisMember.getDeclaringClass();
-            if (thisDeclaringClass != otherDeclaringClass && thisDeclaringClass != null && otherDeclaringClass != null) {
+            if (thisDeclaringClass != otherDeclaringClass
+                    && thisDeclaringClass != null
+                    && otherDeclaringClass != null
+            ) {
                 if (thisDeclaringClass.isAssignableFrom(otherDeclaringClass)) {
                     return 1;
                 } else if (otherDeclaringClass.isAssignableFrom(thisDeclaringClass)) {
@@ -198,34 +202,34 @@ public abstract class FieldReader<T>
         }
 
         if (this.field != null && o.field != null) {
-            Class<?> thisFieldDeclaringClass = this.field.getDeclaringClass();
-            Class<?> otherFieldDeclaringClass = o.field.getDeclaringClass();
+            Class<?> thisDeclaringClass = this.field.getDeclaringClass();
+            Class<?> otherDeclaringClass = o.field.getDeclaringClass();
 
-            for (Class superClass = thisFieldDeclaringClass.getSuperclass(); superClass != null && superClass != Object.class; superClass = superClass.getSuperclass()) {
-                if (superClass == otherFieldDeclaringClass) {
+            for (Class s = thisDeclaringClass.getSuperclass(); s != null && s != Object.class; s = s.getSuperclass()) {
+                if (s == otherDeclaringClass) {
                     return 1;
                 }
             }
 
-            for (Class superClass = otherFieldDeclaringClass.getSuperclass(); superClass != null && superClass != Object.class; superClass = superClass.getSuperclass()) {
-                if (superClass == thisFieldDeclaringClass) {
+            for (Class s = otherDeclaringClass.getSuperclass(); s != null && s != Object.class; s = s.getSuperclass()) {
+                if (s == thisDeclaringClass) {
                     return -1;
                 }
             }
         }
 
         if (this.method != null && o.method != null) {
-            Class<?> thisMethodDeclaringClass = this.method.getDeclaringClass();
-            Class<?> otherMethodDeclaringClass = o.method.getDeclaringClass();
+            Class<?> thisDeclaringClass = this.method.getDeclaringClass();
+            Class<?> otherDeclaringClass = o.method.getDeclaringClass();
 
-            for (Class superClass = thisMethodDeclaringClass.getSuperclass(); superClass != null && superClass != Object.class; superClass = superClass.getSuperclass()) {
-                if (superClass == otherMethodDeclaringClass) {
+            for (Class s = thisDeclaringClass.getSuperclass(); s != null && s != Object.class; s = s.getSuperclass()) {
+                if (s == otherDeclaringClass) {
                     return -1;
                 }
             }
 
-            for (Class superClass = otherMethodDeclaringClass.getSuperclass(); superClass != null && superClass != Object.class; superClass = superClass.getSuperclass()) {
-                if (superClass == thisMethodDeclaringClass) {
+            for (Class s = otherDeclaringClass.getSuperclass(); s != null && s != Object.class; s = s.getSuperclass()) {
+                if (s == thisDeclaringClass) {
                     return 1;
                 }
             }
@@ -249,6 +253,17 @@ public abstract class FieldReader<T>
 
                     if (otherParamType.isEnum() && (thisParamType == Integer.class || thisParamType == int.class)) {
                         return -1;
+                    }
+
+                    JSONField thisAnnotation = BeanUtils.findAnnotation(this.method, JSONField.class);
+                    JSONField otherAnnotation = BeanUtils.findAnnotation(o.method, JSONField.class);
+
+                    if (thisAnnotation != null && otherAnnotation == null) {
+                        return -1;
+                    }
+
+                    if (thisAnnotation == null && otherAnnotation != null) {
+                        return 1;
                     }
                 }
             }
