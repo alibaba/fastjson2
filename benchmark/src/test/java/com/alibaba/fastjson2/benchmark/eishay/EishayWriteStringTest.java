@@ -4,25 +4,25 @@ import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
 public class EishayWriteStringTest {
     static final EishayWriteString benchmark = new EishayWriteString();
-    static final int LOOP = 1_000_000;
+    static final int LOOP = 10_000_000;
 
     public static void fastjson2() {
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < LOOP; ++i) {
                 benchmark.fastjson2(BH);
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
-            // zulu8.58.0.13 : 325 344 342 293
-            // zulu11.52.13 : 347 369 344 353 338 347
-            // zulu17.32.13 : 335 342 353 327 340
+            // zulu8.70.0.23 : 3001
+            // zulu11.62.17 : 3288
+            // zulu17.32.13 : 3305
             // zulu17.40.91_vec : 272
         }
     }
 
     public static void fastjson2Mixin() {
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < LOOP; ++i) {
                 benchmark.fastjson2Mixin(BH);
@@ -40,7 +40,7 @@ public class EishayWriteStringTest {
     }
 
     public static void jackson() throws Exception {
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < LOOP; ++i) {
                 benchmark.jackson(BH);
@@ -54,7 +54,7 @@ public class EishayWriteStringTest {
     }
 
     public static void wastjson() throws Exception {
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 1000 * 1000; ++i) {
                 benchmark.wastjson(BH);
@@ -68,7 +68,7 @@ public class EishayWriteStringTest {
     }
 
     public static void gson() throws Exception {
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 1000 * 1000; ++i) {
                 benchmark.gson(BH);

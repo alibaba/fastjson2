@@ -16,7 +16,7 @@ public class EishayParseStringTest {
             System.out.println("fastjson2 millis : " + millis);
             // zulu8.70.0.23 : 5569
             // zulu11.64.19 : 5022
-            // zulu17.42.19 : 5377
+            // zulu17.42.19 : 5377 5193
         }
     }
 
