@@ -1466,7 +1466,7 @@ public abstract class JSONReader
     public abstract String readString();
 
     public String[] readStringArray() {
-        if (readIfNull()) {
+        if ((ch == 'n') && nextIfNull()) {
             return null;
         }
 
@@ -1503,7 +1503,7 @@ public abstract class JSONReader
             return Arrays.copyOf(values, size);
         }
 
-        if (isString()) {
+        if (this.ch == '"' || this.ch == '\'') {
             String str = readString();
             if (str.isEmpty()) {
                 return null;
@@ -1512,7 +1512,7 @@ public abstract class JSONReader
             throw new JSONException(info("not support input " + str));
         }
 
-        throw new JSONException(info("TODO"));
+        throw new JSONException(info("not support input"));
     }
 
     public char readCharValue() {
@@ -1959,98 +1959,7 @@ public abstract class JSONReader
         return boolValue;
     }
 
-    public boolean readBoolValue() {
-        wasNull = false;
-        boolean val;
-        if (ch == 't') {
-            next();
-            char c1 = ch;
-            next();
-            char c2 = ch;
-            next();
-            char c3 = ch;
-            if (c1 == 'r' && c2 == 'u' || c3 == 'e') {
-                val = true;
-            } else {
-                throw new JSONException("syntax error : " + ch);
-            }
-        } else if (ch == 'f') {
-            next();
-            char c1 = ch;
-            next();
-            char c2 = ch;
-            next();
-            char c3 = ch;
-            next();
-            char c4 = ch;
-            if (c1 == 'a' && c2 == 'l' || c3 == 's' || c4 == 'e') {
-                val = false;
-            } else {
-                throw new JSONException("syntax error : " + ch);
-            }
-        } else if (ch == '-' || (ch >= '0' && ch <= '9')) {
-            readNumber();
-            if (valueType == JSON_TYPE_INT) {
-                if ((context.features & Feature.NonZeroNumberCastToBooleanAsTrue.mask) != 0) {
-                    return mag0 != 0 || mag1 != 0 || mag2 != 0 || mag3 != 0;
-                } else {
-                    return mag0 == 0
-                            && mag1 == 0
-                            && mag2 == 0
-                            && mag3 == 1;
-                }
-            }
-            return false;
-        } else if (ch == 'n') {
-            if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
-                throw new JSONException(info("boolean value not support input null"));
-            }
-
-            wasNull = true;
-            readNull();
-            return false;
-        } else if (ch == '"') {
-            int len = getStringLength();
-            if (len == 1) {
-                next();
-                if (ch == '0' || ch == 'N') {
-                    next();
-                    next();
-                    nextIfMatch(',');
-                    return false;
-                } else if (ch == '1' || ch == 'Y') {
-                    next();
-                    next();
-                    nextIfMatch(',');
-                    return true;
-                }
-                throw new JSONException("can not convert to boolean : " + ch);
-            }
-            String str = readString();
-            if ("true".equalsIgnoreCase(str)) {
-                return true;
-            }
-
-            if ("false".equalsIgnoreCase(str)) {
-                return false;
-            }
-
-            if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
-                wasNull = true;
-                return false;
-            }
-
-            throw new JSONException("can not convert to boolean : " + str);
-        } else {
-            throw new JSONException("syntax error : " + ch);
-        }
-
-        next();
-
-        nextIfMatch(',');
-
-        return val;
-    }
+    public abstract boolean readBoolValue();
 
     public Object readAny() {
         return read(Object.class);
@@ -3150,16 +3059,18 @@ public abstract class JSONReader
         }
 
         Context context = JSONFactory.createReadContext();
-        if (STRING_VALUE != null && STRING_CODER != null) {
+        if (STRING_VALUE != null && STRING_CODER != null && PREDICATE_IS_ASCII != null) {
             try {
                 final int LATIN1 = 0;
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder == LATIN1) {
                     byte[] bytes = STRING_VALUE.apply(str);
-                    if (INCUBATOR_VECTOR_READER_CREATOR_ASCII != null) {
-                        return INCUBATOR_VECTOR_READER_CREATOR_ASCII.create(context, str, bytes, 0, bytes.length);
-                    } else {
-                        return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
+                    if (PREDICATE_IS_ASCII.test(bytes)) {
+                        if (INCUBATOR_VECTOR_READER_CREATOR_ASCII != null) {
+                            return INCUBATOR_VECTOR_READER_CREATOR_ASCII.create(context, str, bytes, 0, bytes.length);
+                        } else {
+                            return new JSONReaderASCII(context, str, bytes, 0, bytes.length);
+                        }
                     }
                 }
             } catch (Exception e) {

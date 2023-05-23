@@ -27,14 +27,15 @@ class JSONReaderASCII
             return;
         }
 
-        ch = (char) (bytes[offset] & 0xFF);
+        final byte[] bytes = this.bytes;
+        ch = (char) bytes[offset];
         while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
                 ch = EOI;
                 return;
             }
-            ch = (char) (bytes[offset] & 0xFF);
+            ch = (char) bytes[offset];
         }
         offset++;
 
@@ -84,25 +85,32 @@ class JSONReaderASCII
     @Override
     public final boolean nextIfNullOrEmptyString() {
         final char first = this.ch;
-        if (first == 'n' && offset + 2 < end && bytes[offset] == 'u') {
-            this.readNull();
-            return true;
-        }
-
-        if ((first != '"' && first != '\'') || offset >= end || bytes[offset] != first) {
+        final int end = this.end;
+        int offset = this.offset;
+        byte[] bytes = this.bytes;
+        if (first == 'n'
+                && offset + 2 < end
+                && bytes[offset] == 'u'
+                && bytes[offset + 1] == 'l'
+                && bytes[offset + 2] == 'l'
+        ) {
+            offset += 3;
+        } else if ((first == '"' || first == '\'') && offset < end && bytes[offset] == first) {
+            offset++;
+        } else {
             return false;
         }
 
-        offset++;
-        this.ch = offset == end ? EOI : (char) bytes[offset];
+        char ch = offset == end ? EOI : (char) bytes[offset];
 
-        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             offset++;
             if (offset >= end) {
                 this.ch = EOI;
+                this.offset = offset;
                 return true;
             }
-            this.ch = (char) bytes[offset];
+            ch = (char) bytes[offset];
         }
 
         if (comma = (ch == ',')) {
@@ -116,23 +124,26 @@ class JSONReaderASCII
 
         if (offset >= end) {
             this.ch = EOI;
+            this.offset = offset;
             return true;
         }
 
-        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             offset++;
             if (offset >= end) {
                 this.ch = EOI;
                 return true;
             }
-            this.ch = (char) bytes[offset];
+            ch = (char) bytes[offset];
         }
-        offset++;
+        this.offset = offset + 1;
+        this.ch = ch;
         return true;
     }
 
     @Override
     public final long readFieldNameHashCode() {
+        final byte[] bytes = this.bytes;
         while (ch == '/' && offset < bytes.length && bytes[offset] == '/') {
             skipLineComment();
         }

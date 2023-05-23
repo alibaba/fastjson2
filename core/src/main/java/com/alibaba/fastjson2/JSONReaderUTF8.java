@@ -251,6 +251,7 @@ class JSONReaderUTF8
             return;
         }
 
+        final byte[] bytes = this.bytes;
         int c = bytes[offset];
         while (c == '\0' || (c <= ' ' && ((1L << c) & SPACE) != 0)) {
             offset++;
@@ -554,6 +555,7 @@ class JSONReaderUTF8
 
     @Override
     public long readFieldNameHashCode() {
+        final byte[] bytes = this.bytes;
         while (ch == '/' && offset < bytes.length && bytes[offset] == '/') {
             skipLineComment();
         }
@@ -1791,12 +1793,13 @@ class JSONReaderUTF8
     public final int readInt32Value() {
         boolean negative = false;
         int firstOffset = offset;
-        char firstChar = ch;
+        final char firstChar = ch;
+        final byte[] bytes = this.bytes;
 
         int intValue = 0;
 
         char quote = '\0';
-        if (ch == '"' || ch == '\'') {
+        if (firstChar == '"' || firstChar == '\'') {
             quote = ch;
             ch = (char) bytes[offset++];
         }
@@ -2054,8 +2057,9 @@ class JSONReaderUTF8
     @Override
     public final long readInt64Value() {
         boolean negative = false;
-        int firstOffset = offset;
-        char firstChar = ch;
+        final int firstOffset = offset;
+        final char firstChar = ch;
+        final byte[] bytes = this.bytes;
 
         long longValue = 0;
 
@@ -2330,6 +2334,7 @@ class JSONReaderUTF8
         boolean value = false;
         double doubleValue = 0;
 
+        final byte[] bytes = this.bytes;
         char quote = '\0';
         if (ch == '"' || ch == '\'') {
             quote = ch;
@@ -4810,6 +4815,7 @@ class JSONReaderUTF8
 
         int len = 0;
         int i = offset;
+        byte[] bytes = this.bytes;
 
         int i8 = i + 8;
         if (i8 < end && i8 < bytes.length) {
@@ -4836,14 +4842,17 @@ class JSONReaderUTF8
     }
 
     public final LocalDate readLocalDate() {
-        if (this.ch == '"' || this.ch == '\'') {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        if (ch == '"' || ch == '\'') {
+            Context context = this.context;
             if (context.dateFormat == null
                     || context.formatyyyyMMddhhmmss19
                     || context.formatyyyyMMddhhmmssT19
                     || context.formatyyyyMMdd8
                     || context.formatISO8601
             ) {
-                char quote = this.ch;
+                char quote = ch;
                 int c10 = offset + 10;
                 if (c10 < bytes.length
                         && c10 < end
@@ -4855,10 +4864,8 @@ class JSONReaderUTF8
                     byte y1 = bytes[offset + 1];
                     byte y2 = bytes[offset + 2];
                     byte y3 = bytes[offset + 3];
-
                     byte m0 = bytes[offset + 5];
                     byte m1 = bytes[offset + 6];
-
                     byte d0 = bytes[offset + 8];
                     byte d1 = bytes[offset + 9];
 
@@ -4870,44 +4877,32 @@ class JSONReaderUTF8
                             && y3 >= '0' && y3 <= '9'
                     ) {
                         year = (y0 - '0') * 1000 + (y1 - '0') * 100 + (y2 - '0') * 10 + (y3 - '0');
-                    } else {
-                        return super.readLocalDate();
-                    }
+                        if (m0 >= '0' && m0 <= '9' && m1 >= '0' && m1 <= '9') {
+                            month = (m0 - '0') * 10 + (m1 - '0');
+                            int dom;
+                            if (d0 >= '0' && d0 <= '9' && d1 >= '0' && d1 <= '9') {
+                                dom = (d0 - '0') * 10 + (d1 - '0');
 
-                    if (m0 >= '0' && m0 <= '9'
-                            && m1 >= '0' && m1 <= '9'
-                    ) {
-                        month = (m0 - '0') * 10 + (m1 - '0');
-                    } else {
-                        return super.readLocalDate();
-                    }
+                                LocalDate ldt;
+                                try {
+                                    if (year == 0 && month == 0 && dom == 0) {
+                                        ldt = null;
+                                    } else {
+                                        ldt = LocalDate.of(year, month, dom);
+                                    }
+                                } catch (DateTimeException ex) {
+                                    throw new JSONException(info("read date error"), ex);
+                                }
 
-                    int dom;
-                    if (d0 >= '0' && d0 <= '9'
-                            && d1 >= '0' && d1 <= '9'
-                    ) {
-                        dom = (d0 - '0') * 10 + (d1 - '0');
-                    } else {
-                        return super.readLocalDate();
-                    }
-
-                    LocalDate ldt;
-                    try {
-                        if (year == 0 && month == 0 && dom == 0) {
-                            ldt = null;
-                        } else {
-                            ldt = LocalDate.of(year, month, dom);
+                                this.offset = offset + 11;
+                                next();
+                                if (comma = (this.ch == ',')) {
+                                    next();
+                                }
+                                return ldt;
+                            }
                         }
-                    } catch (DateTimeException ex) {
-                        throw new JSONException(info("read date error"), ex);
                     }
-
-                    offset += 11;
-                    next();
-                    if (comma = (ch == ',')) {
-                        next();
-                    }
-                    return ldt;
                 }
             }
         }
@@ -4915,6 +4910,7 @@ class JSONReaderUTF8
     }
 
     public final OffsetDateTime readOffsetDateTime() {
+        final byte[] bytes = this.bytes;
         if (this.ch == '"' || this.ch == '\'') {
             if (context.dateFormat == null
                     || context.formatyyyyMMddhhmmss19
@@ -5465,6 +5461,8 @@ class JSONReaderUTF8
     }
 
     public final BigDecimal readBigDecimal() {
+        final byte[] bytes = this.bytes;
+
         boolean value = false;
 
         BigDecimal decimal = null;
@@ -5726,6 +5724,7 @@ class JSONReaderUTF8
 
     @Override
     public final UUID readUUID() {
+        char ch = this.ch;
         if (ch == 'n') {
             readNull();
             return null;
@@ -5735,7 +5734,8 @@ class JSONReaderUTF8
             throw new JSONException(info("syntax error, can not read uuid"));
         }
         final char quote = ch;
-
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
         if (offset + 36 < bytes.length && bytes[offset + 36] == quote) {
             char ch1 = (char) bytes[offset + 8];
             char ch2 = (char) bytes[offset + 13];
@@ -5777,8 +5777,11 @@ class JSONReaderUTF8
                     }
                 }
 
+                this.offset = offset;
                 if (comma = (ch == ',')) {
                     next();
+                } else {
+                    this.ch = ch;
                 }
 
                 return uuid;
@@ -5808,8 +5811,11 @@ class JSONReaderUTF8
                 }
             }
 
+            this.offset = offset;
             if (comma = (ch == ',')) {
                 next();
+            } else {
+                this.ch = ch;
             }
             return uuid;
         }
@@ -5872,61 +5878,66 @@ class JSONReaderUTF8
     @Override
     public boolean nextIfNullOrEmptyString() {
         final char first = this.ch;
-        if (first == 'n' && offset + 2 < end && bytes[offset] == 'u') {
-            this.readNull();
-            return true;
-        }
-
-        if ((first != '"' && first != '\'') || offset >= end || this.bytes[offset] != first) {
+        final int end = this.end;
+        int offset = this.offset;
+        byte[] bytes = this.bytes;
+        if (first == 'n'
+                && offset + 2 < end
+                && bytes[offset] == 'u'
+                && bytes[offset + 1] == 'l'
+                && bytes[offset + 2] == 'l'
+        ) {
+            offset += 3;
+        } else if ((first == '"' || first == '\'') && offset < end && bytes[offset] == first) {
+            offset++;
+        } else {
             return false;
         }
-        offset++;
-        this.ch = offset == end ? EOI : (char) bytes[offset];
 
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+        int ch = offset == end ? EOI : (char) bytes[offset];
+
+        while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             offset++;
             if (offset >= end) {
-                ch = EOI;
+                this.ch = EOI;
+                this.offset = offset;
                 return true;
             }
-            ch = (char) bytes[offset];
+            ch = bytes[offset];
         }
 
         if (comma = (ch == ',')) {
-            ch = (char) bytes[offset++];
-
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                if (offset >= end) {
-                    ch = EOI;
-                } else {
-                    ch = (char) bytes[offset++];
-                }
+            offset++;
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = bytes[offset];
             }
         }
 
         if (offset >= end) {
-            ch = EOI;
+            this.ch = EOI;
+            this.offset = offset;
             return true;
         }
 
-        int c = bytes[offset];
-        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+        while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             offset++;
             if (offset >= end) {
-                ch = EOI;
+                this.ch = EOI;
                 return true;
             }
-            c = bytes[offset];
+            ch = bytes[offset];
         }
 
-        if (c >= 0) {
-            offset++;
-            ch = (char) c;
+        if (ch >= 0) {
+            this.offset = offset + 1;
+            this.ch = (char) ch;
             return true;
         }
 
-        c &= 0xFF;
-        switch (c >> 4) {
+        ch &= 0xFF;
+        switch (ch >> 4) {
             case 12:
             case 13: {
                 /* 110x xxxx   10xx xxxx*/
@@ -5936,7 +5947,7 @@ class JSONReaderUTF8
                     throw new JSONException(
                             "malformed input around byte " + offset);
                 }
-                ch = (char) (((c & 0x1F) << 6) | (char2 & 0x3F));
+                ch = (char) (((ch & 0x1F) << 6) | (char2 & 0x3F));
                 break;
             }
             case 14: {
@@ -5948,7 +5959,7 @@ class JSONReaderUTF8
                     throw new JSONException("malformed input around byte " + (offset - 1));
                 }
                 ch = (char)
-                        (((c & 0x0F) << 12) |
+                        (((ch & 0x0F) << 12) |
                                 ((char2 & 0x3F) << 6) |
                                 ((char3 & 0x3F) << 0));
                 break;
@@ -5957,6 +5968,8 @@ class JSONReaderUTF8
                 /* 10xx xxxx,  1111 xxxx */
                 throw new JSONException("malformed input around byte " + offset);
         }
+        this.offset = offset;
+        this.ch = (char) ch;
         return true;
     }
 
@@ -6170,27 +6183,30 @@ class JSONReaderUTF8
 
     @Override
     public final boolean isReference() {
+        // should be codeSize <= FreqInlineSize 325
+        final byte[] bytes = this.bytes;
+        int ch = this.ch;
+        int offset = this.offset;
+
         if (ch != '{') {
             return false;
         }
 
-        final int start = this.offset;
-
-        ch = (char) bytes[this.offset];
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            offset++;
-            if (offset >= length) {
-                this.offset = start;
-                this.ch = '{';
-                return false;
-            }
-            ch = (char) bytes[offset];
+        if (offset == end) {
+            return false;
         }
 
-        char quote = ch;
+        ch = bytes[offset];
+        while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            offset++;
+            if (offset >= end) {
+                return false;
+            }
+            ch = bytes[offset];
+        }
+
+        int quote = ch;
         if (quote != '"' && quote != '\'' || this.offset + 5 >= end) {
-            this.offset = start;
-            this.ch = '{';
             return false;
         }
 
@@ -6199,50 +6215,39 @@ class JSONReaderUTF8
                 || bytes[offset + 3] != 'e'
                 || bytes[offset + 4] != 'f'
                 || bytes[offset + 5] != quote
+                || offset + 6 >= end
         ) {
-            this.offset = start;
-            this.ch = '{';
             return false;
         }
 
         offset += 6;
-        ch = (char) bytes[this.offset];
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+        ch = bytes[offset];
+        while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             offset++;
-            if (offset >= length) {
-                this.offset = start;
-                this.ch = '{';
+            if (offset >= end) {
                 return false;
             }
-            ch = (char) bytes[offset];
+            ch = bytes[offset];
         }
 
-        if (ch != ':') {
-            this.offset = start;
-            this.ch = '{';
+        if (ch != ':' || offset + 1 >= end) {
             return false;
         }
 
-        ch = (char) bytes[++this.offset];
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+        ch = bytes[++offset];
+        while (ch >= 0 && ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             offset++;
-            if (offset >= length) {
-                this.offset = start;
-                this.ch = '{';
+            if (offset >= end) {
                 return false;
             }
-            ch = (char) bytes[offset];
+            ch = bytes[offset];
         }
 
         if (ch != quote) {
-            this.offset = start;
-            this.ch = '{';
             return false;
         }
 
         this.referenceBegin = offset;
-        this.offset = start;
-        this.ch = '{';
         return true;
     }
 
@@ -6299,6 +6304,114 @@ class JSONReaderUTF8
         }
 
         return reference;
+    }
+
+    public final boolean readBoolValue() {
+        wasNull = false;
+        boolean val;
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        char ch = this.ch;
+        if (ch == 't'
+                && offset + 2 < bytes.length
+                && bytes[offset] == 'r'
+                && bytes[offset + 1] == 'u'
+                && bytes[offset + 2] == 'e'
+        ) {
+            offset += 3;
+            val = true;
+        } else if (ch == 'f'
+                && offset + 3 < bytes.length
+                && bytes[offset] == 'a'
+                && bytes[offset + 1] == 'l'
+                && bytes[offset + 2] == 's'
+                && bytes[offset + 3] == 'e'
+        ) {
+            offset += 4;
+            val = false;
+        } else if (ch == '-' || (ch >= '0' && ch <= '9')) {
+            readNumber();
+            if (valueType == JSON_TYPE_INT) {
+                if ((context.features & Feature.NonZeroNumberCastToBooleanAsTrue.mask) != 0) {
+                    return mag0 != 0 || mag1 != 0 || mag2 != 0 || mag3 != 0;
+                } else {
+                    return mag0 == 0
+                            && mag1 == 0
+                            && mag2 == 0
+                            && mag3 == 1;
+                }
+            }
+            return false;
+        } else if (ch == 'n' && offset + 2 < bytes.length
+                && bytes[offset] == 'u'
+                && bytes[offset + 1] == 'l'
+                && bytes[offset + 2] == 'l'
+        ) {
+            if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
+                throw new JSONException(info("boolean value not support input null"));
+            }
+
+            wasNull = true;
+            offset += 3;
+            val = false;
+        } else if (ch == '"') {
+            if (offset + 1 < bytes.length
+                    && bytes[offset + 1] == '"'
+            ) {
+                byte c0 = bytes[offset];
+                offset += 2;
+                if (c0 == '0' || c0 == 'N') {
+                    val = false;
+                } else if (c0 == '1' || c0 == 'Y') {
+                    val = true;
+                } else {
+                    throw new JSONException("can not convert to boolean : " + c0);
+                }
+            } else {
+                String str = readString();
+                if ("true".equalsIgnoreCase(str)) {
+                    return true;
+                }
+
+                if ("false".equalsIgnoreCase(str)) {
+                    return false;
+                }
+
+                if (str.isEmpty() || "null".equalsIgnoreCase(str)) {
+                    wasNull = true;
+                    return false;
+                }
+                throw new JSONException("can not convert to boolean : " + str);
+            }
+        } else {
+            throw new JSONException("syntax error : " + ch);
+        }
+
+        ch = offset == end ? EOI : (char) bytes[offset++];
+
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = (char) bytes[offset++];
+            }
+        }
+
+        if (comma = (ch == ',')) {
+            ch = offset == end ? EOI : (char) bytes[offset++];
+            // next inline
+            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+                if (offset >= end) {
+                    ch = EOI;
+                } else {
+                    ch = (char) bytes[offset++];
+                }
+            }
+        }
+        this.offset = offset;
+        this.ch = ch;
+
+        return val;
     }
 
     @Override

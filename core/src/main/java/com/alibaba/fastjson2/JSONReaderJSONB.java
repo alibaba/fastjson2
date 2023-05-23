@@ -5078,6 +5078,7 @@ class JSONReaderJSONB
     @Override
     public final boolean readBoolValue() {
         wasNull = false;
+        final byte[] bytes = this.bytes;
         byte type = bytes[offset++];
         switch (type) {
             case BC_INT32_NUM_1:

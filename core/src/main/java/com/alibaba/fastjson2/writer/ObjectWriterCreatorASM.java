@@ -2278,25 +2278,14 @@ public class ObjectWriterCreatorASM
 
         mw.visitLabel(notNull_);
 
-        if (jsonb) {
-            gwFieldName(mwc, i);
+        gwFieldName(mwc, i);
 
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+        mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
 
-            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I", false);
+        mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I", false);
 
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeInt32", "(I)V", false);
-        } else {
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
-            mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldWriter(i), DESC_FIELD_WRITER);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-
-            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I", false);
-
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_WRITER, "writeInt32", METHOD_DESC_WRITE_I, false);
-        }
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeInt32", "(I)V", false);
         mw.visitLabel(endIfNull_);
     }
 
@@ -3071,28 +3060,16 @@ public class ObjectWriterCreatorASM
 
         mw.visitLabel(notDefaultValue_);
 
+        gwFieldName(mwc, i);
         if ("string".equals(format)) {
-            gwFieldName(mwc, i);
-
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
             mw.visitVarInsn(Opcodes.ILOAD, FIELD_VALUE);
             mw.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "toString", "(I)Ljava/lang/String;", false);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeString", "(Ljava/lang/String;)V", false);
         } else {
-            if (jsonb) {
-                gwFieldName(mwc, i);
-
-                mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-                mw.visitVarInsn(Opcodes.ILOAD, FIELD_VALUE);
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeInt32", "(I)V", false);
-            } else {
-                mw.visitVarInsn(Opcodes.ALOAD, THIS);
-                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldWriter(i), DESC_FIELD_WRITER);
-
-                mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-                mw.visitVarInsn(Opcodes.ILOAD, FIELD_VALUE);
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_WRITER, "writeInt32", METHOD_DESC_WRITE_I, false);
-            }
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
+            mw.visitVarInsn(Opcodes.ILOAD, FIELD_VALUE);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeInt32", "(I)V", false);
         }
 
         mw.visitLabel(endWriteValue_);
