@@ -12,11 +12,11 @@ public class ReadResult {
 //        File file = new File("/Users/wenshao/Downloads/result_2.0.25.out");
 
         Map<String, String> files = new LinkedHashMap<>();
-        files.put("aliyun_ecs.g8i.large", "/Users/wenshao/Downloads/result_2.0.33_g8.out");
-        files.put("aliyun_ecs.g7.large", "/Users/wenshao/Downloads/result_2.0.33_g7.out");
-        files.put("aliyun_ecs.g8m.large", "/Users/wenshao/Downloads/result_2.0.33_g8m.out");
+        files.put("aliyun_ecs.g8i.large", "/Users/wenshao/Downloads/result_2.0.33_g8i.out");
+//        files.put("aliyun_ecs.g7.large", "/Users/wenshao/Downloads/result_2.0.33_g7.out");
+        files.put("aliyun_ecs.g8y.large", "/Users/wenshao/Downloads/result_2.0.33_g8y.out");
 //        files.put("aws_ecs.c6g.large", "/Users/wenshao/Downloads/result_2.0.33_aws_c6g.out");
-        files.put("aws_ecs.c7g.large", "/Users/wenshao/Downloads/result_2.0.33_aws_c7g.out");
+//        files.put("aws_ecs.c7g.large", "/Users/wenshao/Downloads/result_2.0.33_aws_c7g.out");
 //        files.put("OrangePI5", "/Users/wenshao/Downloads/result_2.0.31_orangepi5.out");
 
         PrintStream out = new PrintStream(new FileOutputStream(outFile));
