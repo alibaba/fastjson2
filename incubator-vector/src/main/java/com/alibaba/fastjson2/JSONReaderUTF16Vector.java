@@ -77,16 +77,18 @@ final class JSONReaderUTF16Vector
                         c = this.chars[++offset];
                         switch (c) {
                             case 'u': {
-                                char c1 = this.chars[++offset];
-                                char c2 = this.chars[++offset];
-                                char c3 = this.chars[++offset];
-                                char c4 = this.chars[++offset];
+                                char c1 = this.chars[1 + offset];
+                                char c2 = this.chars[2 + offset];
+                                char c3 = this.chars[3 + offset];
+                                char c4 = this.chars[4 + offset];
+                                offset += 4;
                                 c = char4(c1, c2, c3, c4);
                                 break;
                             }
                             case 'x': {
-                                char c1 = this.chars[++offset];
-                                char c2 = this.chars[++offset];
+                                char c1 = this.chars[1 + offset];
+                                char c2 = this.chars[2 + offset];
+                                offset += 2;
                                 c = char2(c1, c2);
                                 break;
                             }

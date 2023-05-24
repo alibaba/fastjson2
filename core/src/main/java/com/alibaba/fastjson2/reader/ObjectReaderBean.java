@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
+import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreAutoTypeNotMatch;
+import static com.alibaba.fastjson2.JSONReader.Feature.SupportAutoType;
 
 public abstract class ObjectReaderBean<T>
         implements ObjectReader<T> {
@@ -124,10 +125,11 @@ public abstract class ObjectReaderBean<T>
         extraFieldReader.acceptExtra(object, fieldName, fieldValue);
     }
 
-    public ObjectReader checkAutoType(JSONReader jsonReader, Class expectClass, long features) {
-        if (jsonReader.nextIfMatch(BC_TYPED_ANY)) {
+    public final ObjectReader checkAutoType(JSONReader jsonReader, Class expectClass, long features) {
+        if (jsonReader.nextIfMatchTypedAny()) {
             long typeHash = jsonReader.readTypeHashCode();
             JSONReader.Context context = jsonReader.getContext();
+            long features3 = jsonReader.features(features | this.features);
             JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
             if (autoTypeFilter != null) {
                 Class<?> filterClass = autoTypeFilter.apply(typeHash, expectClass, features);
@@ -136,7 +138,7 @@ public abstract class ObjectReaderBean<T>
                     filterClass = autoTypeFilter.apply(typeName, expectClass, features);
 
                     if (!expectClass.isAssignableFrom(filterClass)) {
-                        if ((jsonReader.features(features) & JSONReader.Feature.IgnoreAutoTypeNotMatch.mask) == 0) {
+                        if ((jsonReader.features(features) & IgnoreAutoTypeNotMatch.mask) == 0) {
                             throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
                         }
 
@@ -149,35 +151,29 @@ public abstract class ObjectReaderBean<T>
                 }
             }
 
-            ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
-            if (autoTypeObjectReader == null) {
-                String typeName = jsonReader.getString();
-                autoTypeObjectReader = context.getObjectReaderAutoType(typeName, expectClass, features);
-            }
+            ObjectReader autoTypeObjectReader = jsonReader.getObjectReaderAutoType(typeHash, expectClass, features);
 
             if (autoTypeObjectReader == null) {
                 throw new JSONException(jsonReader.info("auotype not support"));
-            } else {
-                Class autoTypeObjectReaderClass = autoTypeObjectReader.getObjectClass();
-                if (expectClass != null
-                        && autoTypeObjectReaderClass != null
-                        && !expectClass.isAssignableFrom(autoTypeObjectReaderClass)) {
-                    if ((jsonReader.features(features | this.features) & JSONReader.Feature.IgnoreAutoTypeNotMatch.mask) != 0) {
-                        return context.getObjectReader(expectClass);
-                    }
+            }
 
-                    throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
+            Class autoTypeObjectReaderClass = autoTypeObjectReader.getObjectClass();
+            if (expectClass != null
+                    && autoTypeObjectReaderClass != null
+                    && !expectClass.isAssignableFrom(autoTypeObjectReaderClass)) {
+                if ((features3 & IgnoreAutoTypeNotMatch.mask) != 0) {
+                    return context.getObjectReader(expectClass);
                 }
+
+                throw new JSONException("type not match. " + typeName + " -> " + expectClass.getName());
             }
 
             if (typeHash == this.typeNameHash) {
                 return this;
             }
 
-            boolean isSupportAutoType = ((context.getFeatures() | features) & JSONReader.Feature.SupportAutoType.mask) != 0;
-            if (!isSupportAutoType) {
+            if ((features3 & SupportAutoType.mask) == 0) {
                 return null;
-//                throw new JSONException("autoType not support input " + jsonReader.getString());
             }
 
             return autoTypeObjectReader;
@@ -281,7 +277,7 @@ public abstract class ObjectReaderBean<T>
 
             if (i == 0
                     && hash == getTypeKeyHash()
-                    && ((((features3 = (features | getFeatures() | context.getFeatures())) & JSONReader.Feature.SupportAutoType.mask) != 0) || autoTypeFilter != null)
+                    && ((((features3 = (features | getFeatures() | context.getFeatures())) & SupportAutoType.mask) != 0) || autoTypeFilter != null)
             ) {
                 ObjectReader reader = null;
 

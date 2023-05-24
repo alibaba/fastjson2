@@ -83,16 +83,18 @@ final class JSONReaderASCIIVector
                         c = (char) (bytes[++offset] & 0xff);
                         switch (c) {
                             case 'u': {
-                                char c1 = (char) this.bytes[++offset];
-                                char c2 = (char) this.bytes[++offset];
-                                char c3 = (char) this.bytes[++offset];
-                                char c4 = (char) this.bytes[++offset];
+                                char c1 = (char) this.bytes[1 + offset];
+                                char c2 = (char) this.bytes[2 + offset];
+                                char c3 = (char) this.bytes[3 + offset];
+                                char c4 = (char) this.bytes[4 + offset];
+                                offset += 4;
                                 c = char4(c1, c2, c3, c4);
                                 break;
                             }
                             case 'x': {
-                                char c1 = (char) this.bytes[++offset];
-                                char c2 = (char) this.bytes[++offset];
+                                char c1 = (char) this.bytes[1 + offset];
+                                char c2 = (char) this.bytes[2 + offset];
+                                offset += 2;
                                 c = char2(c1, c2);
                                 break;
                             }

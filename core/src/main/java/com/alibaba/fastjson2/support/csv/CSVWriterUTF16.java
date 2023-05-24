@@ -12,6 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+import static com.alibaba.fastjson2.util.IOUtils.DIGITS_K;
+
 final class CSVWriterUTF16
         extends CSVWriter {
     static final char[] BYTES_TRUE = "true".toCharArray();
@@ -93,16 +95,22 @@ final class CSVWriterUTF16
             flush();
         }
 
+        final char[] chars = this.chars;
+        int off = this.off;
         off = IOUtils.writeLocalDate(chars, off, year, month, dayOfMonth);
-        chars[off++] = ' ';
-        IOUtils.write2(hour, chars, off);
-        off += 2;
-        chars[off++] = ':';
-        IOUtils.write2(minute, chars, off);
-        off += 2;
-        chars[off++] = ':';
-        IOUtils.write2(second, chars, off);
-        off += 2;
+        chars[off] = ' ';
+        int v = DIGITS_K[hour];
+        chars[off + 1] = (char) (byte) (v >> 8);
+        chars[off + 2] = (char) (byte) v;
+        chars[off + 3] = ':';
+        v = DIGITS_K[minute];
+        chars[off + 4] = (char) (byte) (v >> 8);
+        chars[off + 5] = (char) (byte) v;
+        chars[off + 6] = ':';
+        v = DIGITS_K[second];
+        chars[off + 7] = (char) (byte) (v >> 8);
+        chars[off + 8] = (char) (byte) v;
+        this.off = off + 9;
     }
 
     public void writeString(String str) {
@@ -233,8 +241,7 @@ final class CSVWriterUTF16
             flush();
         }
 
-        int size = IOUtils.getDecimalChars(unscaledVal, scale, chars, off);
-        off += size;
+        off = IOUtils.writeDecimal(chars, off, unscaledVal, scale);
     }
 
     void writeRaw(char[] chars) {

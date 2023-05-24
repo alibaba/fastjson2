@@ -20,26 +20,8 @@ final class ObjectWriterImplStringArray
             return;
         }
 
-        String[] list = (String[]) object;
-
-        jsonWriter.startArray();
-        for (int i = 0; i < list.length; i++) {
-            if (i != 0) {
-                jsonWriter.writeComma();
-            }
-
-            String item = list[i];
-            if (item == null) {
-                if (jsonWriter.isEnabled(JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) {
-                    jsonWriter.writeString("");
-                } else {
-                    jsonWriter.writeNull();
-                }
-                continue;
-            }
-            jsonWriter.writeString(item);
-        }
-        jsonWriter.endArray();
+        String[] strings = (String[]) object;
+        jsonWriter.writeString(strings);
     }
 
     @Override

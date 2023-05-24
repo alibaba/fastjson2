@@ -36,7 +36,7 @@ public class ObjectWriterAdapter<T>
     protected final String typeName;
     protected final long typeNameHash;
     protected long typeNameSymbolCache;
-    protected byte[] typeNameJSONB;
+    protected final byte[] typeNameJSONB;
 
     byte[] nameWithColonUTF8;
     char[] nameWithColonUTF16;
@@ -74,6 +74,7 @@ public class ObjectWriterAdapter<T>
         this.typeKey = typeKey == null || typeKey.isEmpty() ? TYPE : typeKey;
         this.typeName = typeName;
         this.typeNameHash = typeName != null ? Fnv.hashCode64(typeName) : 0;
+        this.typeNameJSONB = JSONB.toBytes(typeName);
         this.features = features;
         this.fieldWriters = fieldWriters;
         this.serializable = objectClass == null || java.io.Serializable.class.isAssignableFrom(objectClass);
@@ -207,40 +208,44 @@ public class ObjectWriterAdapter<T>
         jsonWriter.endObject();
     }
 
-    protected void writeClassInfo(JSONWriter jsonWriter) {
+    protected final void writeClassInfo(JSONWriter jsonWriter) {
         SymbolTable symbolTable = jsonWriter.symbolTable;
         if (symbolTable != null) {
-            int symbolTableIdentity = System.identityHashCode(symbolTable);
-
-            int symbol;
-            if (typeNameSymbolCache == 0) {
-                symbol = symbolTable.getOrdinalByHashCode(typeNameHash);
-                if (symbol != -1) {
-                    typeNameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
-                }
-            } else {
-                int identity = (int) typeNameSymbolCache;
-                if (identity == symbolTableIdentity) {
-                    symbol = (int) (typeNameSymbolCache >> 32);
-                } else {
-                    symbol = symbolTable.getOrdinalByHashCode(typeNameHash);
-                    if (symbol != -1) {
-                        typeNameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
-                    }
-                }
-            }
-
-            if (symbol != -1) {
-                jsonWriter.writeRaw(BC_TYPED_ANY);
-                jsonWriter.writeInt32(-symbol);
+            if (writeClassInfoSymbol(jsonWriter, symbolTable)) {
                 return;
             }
         }
 
-        if (typeNameJSONB == null) {
-            typeNameJSONB = JSONB.toBytes(typeName);
-        }
         jsonWriter.writeTypeName(typeNameJSONB, typeNameHash);
+    }
+
+    private boolean writeClassInfoSymbol(JSONWriter jsonWriter, SymbolTable symbolTable) {
+        int symbolTableIdentity = System.identityHashCode(symbolTable);
+
+        int symbol;
+        if (typeNameSymbolCache == 0) {
+            symbol = symbolTable.getOrdinalByHashCode(typeNameHash);
+            if (symbol != -1) {
+                typeNameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
+            }
+        } else {
+            int identity = (int) typeNameSymbolCache;
+            if (identity == symbolTableIdentity) {
+                symbol = (int) (typeNameSymbolCache >> 32);
+            } else {
+                symbol = symbolTable.getOrdinalByHashCode(typeNameHash);
+                if (symbol != -1) {
+                    typeNameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
+                }
+            }
+        }
+
+        if (symbol != -1) {
+            jsonWriter.writeRaw(BC_TYPED_ANY);
+            jsonWriter.writeInt32(-symbol);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -358,10 +363,6 @@ public class ObjectWriterAdapter<T>
             jsonWriter.writeNameRaw(nameWithColonUTF16);
             return true;
         } else if (jsonWriter.jsonb) {
-            if (typeNameJSONB == null) {
-                typeNameJSONB = JSONB.toBytes(typeName);
-            }
-
             if (typeKeyJSONB == null) {
                 typeKeyJSONB = JSONB.toBytes(typeKey);
             }

@@ -925,7 +925,7 @@ public class JSONWriterTest {
             assertEquals("\"5\"", jsonWriter.toString());
         }
         {
-            JSONWriter jsonWriter = new JSONWriterPretty(JSONWriter.ofUTF16());
+            JSONWriter jsonWriter = JSONWriter.ofUTF16(JSONWriter.Feature.PrettyFormat);
             jsonWriter.writeString(chars, 5, 1);
             assertEquals("\"5\"", jsonWriter.toString());
         }

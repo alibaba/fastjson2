@@ -35,7 +35,7 @@ public abstract class FieldWriter<T>
     final long hashCode;
     final byte[] nameWithColonUTF8;
     final char[] nameWithColonUTF16;
-    byte[] nameJSONB;
+    final byte[] nameJSONB;
     long nameSymbolCache;
 
     final boolean fieldClassSerializable;
@@ -73,6 +73,8 @@ public abstract class FieldWriter<T>
         this.fieldClassSerializable = fieldClass != null && (Serializable.class.isAssignableFrom(fieldClass) || !Modifier.isFinal(fieldClass.getModifiers()));
         this.field = field;
         this.method = method;
+
+        this.nameJSONB = JSONB.toBytes(fieldName);
 
         DecimalFormat decimalFormat = null;
         if (format != null
@@ -133,15 +135,15 @@ public abstract class FieldWriter<T>
             }
         }
         bytes[off++] = '"';
-        bytes[off++] = ':';
-
+        bytes[off] = ':';
         nameWithColonUTF8 = bytes;
 
-        nameWithColonUTF16 = new char[nameLength + 3];
-        nameWithColonUTF16[0] = '"';
-        name.getChars(0, name.length(), nameWithColonUTF16, 1);
-        nameWithColonUTF16[nameWithColonUTF16.length - 2] = '"';
-        nameWithColonUTF16[nameWithColonUTF16.length - 1] = ':';
+        char[] chars = new char[nameLength + 3];
+        chars[0] = '"';
+        name.getChars(0, name.length(), chars, 1);
+        chars[chars.length - 2] = '"';
+        chars[chars.length - 1] = ':';
+        nameWithColonUTF16 = chars;
     }
 
     public boolean isFieldClassSerializable() {
@@ -170,34 +172,12 @@ public abstract class FieldWriter<T>
 
     public final void writeFieldName(JSONWriter jsonWriter) {
         if (jsonWriter.jsonb) {
-            if (nameJSONB == null) {
-                nameJSONB = JSONB.toBytes(fieldName);
-            }
-
             SymbolTable symbolTable = jsonWriter.symbolTable;
             if (symbolTable != null) {
-                int symbolTableIdentity = System.identityHashCode(symbolTable);
-
-                int symbol;
-                if (nameSymbolCache == 0) {
-                    symbol = symbolTable.getOrdinalByHashCode(hashCode);
-                    nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
-                } else {
-                    int identity = (int) nameSymbolCache;
-                    if (identity == symbolTableIdentity) {
-                        symbol = (int) (nameSymbolCache >> 32);
-                    } else {
-                        symbol = symbolTable.getOrdinalByHashCode(hashCode);
-                        nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
-                    }
-                }
-
-                if (symbol != -1) {
-                    jsonWriter.writeSymbol(-symbol);
+                if (writeFieldNameSymbol(jsonWriter, symbolTable)) {
                     return;
                 }
             }
-
             jsonWriter.writeNameRaw(nameJSONB, hashCode);
             return;
         }
@@ -216,6 +196,29 @@ public abstract class FieldWriter<T>
 
         jsonWriter.writeName(fieldName);
         jsonWriter.writeColon();
+    }
+
+    private boolean writeFieldNameSymbol(JSONWriter jsonWriter, SymbolTable symbolTable) {
+        int symbolTableIdentity = System.identityHashCode(symbolTable);
+
+        int symbol;
+        if (nameSymbolCache == 0) {
+            symbol = symbolTable.getOrdinalByHashCode(hashCode);
+            nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
+        } else {
+            if ((int) nameSymbolCache == symbolTableIdentity) {
+                symbol = (int) (nameSymbolCache >> 32);
+            } else {
+                symbol = symbolTable.getOrdinalByHashCode(hashCode);
+                nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
+            }
+        }
+
+        if (symbol != -1) {
+            jsonWriter.writeSymbol(-symbol);
+            return true;
+        }
+        return false;
     }
 
     public final JSONWriter.Path getRootParentPath() {

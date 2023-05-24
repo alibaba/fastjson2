@@ -179,4 +179,21 @@ public class StringTest {
                         .getObjectClass()
         );
     }
+
+    @Test
+    public void test_utf16_bean() {
+        Bean bean = new Bean();
+        bean.value = "中国";
+        byte[] bytes = JSON.toJSONBytes(bean);
+        Bean bean1 = JSON.parseObject(bytes, Bean.class);
+        assertEquals(bean.value, bean1.value);
+
+        String str = JSON.toJSONString(bean);
+        Bean bean2 = JSON.parseObject(str, Bean.class);
+        assertEquals(bean.value, bean2.value);
+    }
+
+    public static class Bean {
+        public String value;
+    }
 }

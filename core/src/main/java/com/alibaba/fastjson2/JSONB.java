@@ -1263,7 +1263,7 @@ public interface JSONB {
     }
 
     static SymbolTable symbolTable(String... names) {
-        return new JSONFactory.SymbolTableImpl(names);
+        return new SymbolTable(names);
     }
 
     static String toJSONString(byte[] jsonbBytes) {

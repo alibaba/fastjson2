@@ -47,6 +47,8 @@ public abstract class JSONWriter
     protected IdentityHashMap<Object, Path> refs;
     protected Path path;
     protected String lastReference;
+    protected boolean pretty;
+    protected int indent;
 
     protected JSONWriter(
             Context context,
@@ -66,6 +68,7 @@ public abstract class JSONWriter
 
         // 64M or 1G
         maxArraySize = (context.features & LargeObject.mask) != 0 ? 1073741824 : 67108864;
+        pretty = (context.features & PrettyFormat.mask) != 0;
     }
 
     public final Charset getCharset() {
@@ -327,11 +330,9 @@ public abstract class JSONWriter
 
     public final boolean isWriteTypeInfo(Object object, Type fieldType) {
         long features = context.features;
-        if ((features & Feature.WriteClassName.mask) == 0) {
-            return false;
-        }
-
-        if (object == null) {
+        if ((features & Feature.WriteClassName.mask) == 0
+                || object == null
+        ) {
             return false;
         }
 
@@ -340,15 +341,8 @@ public abstract class JSONWriter
         if (fieldType instanceof Class) {
             fieldClass = (Class) fieldType;
         } else if (fieldType instanceof GenericArrayType) {
-            GenericArrayType genericArrayType = (GenericArrayType) fieldType;
-            Type componentType = genericArrayType.getGenericComponentType();
-            if (componentType instanceof ParameterizedType) {
-                componentType = ((ParameterizedType) componentType).getRawType();
-            }
-            if (objectClass.isArray()) {
-                if (objectClass.getComponentType().equals(componentType)) {
-                    return false;
-                }
+            if (isWriteTypeInfoGenericArray((GenericArrayType) fieldType, objectClass)) {
+                return false;
             }
         } else if (fieldType instanceof ParameterizedType) {
             Type rawType = ((ParameterizedType) fieldType).getRawType();
@@ -368,6 +362,20 @@ public abstract class JSONWriter
 
         return (features & Feature.NotWriteRootClassName.mask) == 0
                 || object != this.rootObject;
+    }
+
+    private static boolean isWriteTypeInfoGenericArray(GenericArrayType fieldType, Class objectClass) {
+        GenericArrayType genericArrayType = fieldType;
+        Type componentType = genericArrayType.getGenericComponentType();
+        if (componentType instanceof ParameterizedType) {
+            componentType = ((ParameterizedType) componentType).getRawType();
+        }
+        if (objectClass.isArray()) {
+            if (objectClass.getComponentType().equals(componentType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public final boolean isWriteTypeInfo(Object object) {
@@ -513,8 +521,7 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter of() {
-        Context writeContext = createWriteContext();
-
+        JSONWriter.Context writeContext = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider);
         JSONWriter jsonWriter;
         if (JVM_VERSION == 8) {
             if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
@@ -535,6 +542,8 @@ public abstract class JSONWriter
         } else {
             if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
                 jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
+            } else if (FIELD_STRING_VALUE != null && STRING_CODER != null && STRING_VALUE != null && UNSAFE_SUPPORT) {
+                jsonWriter = new JSONWriterUTF16JDK9UF(writeContext);
             } else {
                 jsonWriter = new JSONWriterUTF16(writeContext);
             }
@@ -578,9 +587,6 @@ public abstract class JSONWriter
             }
         }
 
-        if (writeContext.isEnabled(Feature.PrettyFormat)) {
-            jsonWriter = new JSONWriterPretty(jsonWriter);
-        }
         return jsonWriter;
     }
 
@@ -611,11 +617,6 @@ public abstract class JSONWriter
             }
         }
 
-        for (int i = 0; i < features.length; i++) {
-            if (features[i] == Feature.PrettyFormat) {
-                return new JSONWriterPretty(jsonWriter);
-            }
-        }
         return jsonWriter;
     }
 
@@ -636,11 +637,6 @@ public abstract class JSONWriter
             }
         }
 
-        for (int i = 0; i < features.length; i++) {
-            if (features[i] == Feature.PrettyFormat) {
-                return new JSONWriterPretty(jsonWriter);
-            }
-        }
         return jsonWriter;
     }
 
@@ -674,12 +670,15 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter ofPretty() {
-        return ofPretty(
-                of());
+        return of(PrettyFormat);
     }
 
     public static JSONWriter ofPretty(JSONWriter writer) {
-        return new JSONWriterPretty(writer);
+        if (!writer.pretty) {
+            writer.pretty = true;
+            writer.context.features |= PrettyFormat.mask;
+        }
+        return writer;
     }
 
     public static JSONWriter ofUTF8() {
@@ -695,10 +694,6 @@ public abstract class JSONWriter
             jsonWriter = new JSONWriterUTF8(context);
         }
 
-        if ((context.features & JSONWriter.Feature.PrettyFormat.mask) != 0) {
-            jsonWriter = new JSONWriterPretty(jsonWriter);
-        }
-
         return jsonWriter;
     }
 
@@ -712,10 +707,6 @@ public abstract class JSONWriter
             }
         } else {
             jsonWriter = new JSONWriterUTF8(context);
-        }
-
-        if ((context.features & JSONWriter.Feature.PrettyFormat.mask) != 0) {
-            jsonWriter = new JSONWriterPretty(jsonWriter);
         }
 
         return jsonWriter;
@@ -735,9 +726,6 @@ public abstract class JSONWriter
             jsonWriter = new JSONWriterUTF8(context);
         }
 
-        if ((context.features & JSONWriter.Feature.PrettyFormat.mask) != 0) {
-            jsonWriter = new JSONWriterPretty(jsonWriter);
-        }
         return jsonWriter;
     }
 
@@ -900,13 +888,9 @@ public abstract class JSONWriter
         endArray();
     }
 
-    public void writeInt8(byte value) {
-        writeInt32(value);
-    }
+    public abstract void writeInt8(byte value);
 
-    public void writeInt16(short value) {
-        writeInt32(value);
-    }
+    public abstract void writeInt16(short value);
 
     public abstract void writeInt32(int[] value);
 
@@ -1178,7 +1162,8 @@ public abstract class JSONWriter
     }
 
     public abstract void writeString(String str);
-    protected abstract void writeStringLatin1(byte[] value);
+    public abstract void writeStringLatin1(byte[] value);
+    public abstract void writeStringUTF16(byte[] value);
 
     public void writeString(List<String> list) {
         startArray();
@@ -1193,6 +1178,8 @@ public abstract class JSONWriter
         endArray();
     }
 
+    public abstract void writeString(String[] strings);
+
     public void writeSymbol(String string) {
         writeString(string);
     }
@@ -1204,6 +1191,30 @@ public abstract class JSONWriter
     public abstract void writeString(char[] chars, int off, int len, boolean quote);
 
     public abstract void writeLocalDate(LocalDate date);
+
+    protected final boolean writeLocalDateWithFormat(LocalDate date, Context context) {
+        if (context.dateFormatUnixTime || context.dateFormatMillis) {
+            LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
+            long millis = dateTime.atZone(context.getZoneId())
+                    .toInstant()
+                    .toEpochMilli();
+            writeInt64(context.dateFormatMillis ? millis : millis / 1000);
+            return true;
+        }
+
+        DateTimeFormatter formatter = context.getDateFormatter();
+        if (formatter != null) {
+            String str;
+            if (context.isDateFormatHasHour()) {
+                str = formatter.format(LocalDateTime.of(date, LocalTime.MIN));
+            } else {
+                str = formatter.format(date);
+            }
+            writeString(str);
+            return true;
+        }
+        return false;
+    }
 
     public abstract void writeLocalDateTime(LocalDateTime dateTime);
 

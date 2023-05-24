@@ -2,6 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
+import sun.misc.Unsafe;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11,7 +12,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
@@ -20,6 +20,7 @@ import static com.alibaba.fastjson2.JSONWriter.Feature.NotWriteDefaultValue;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
+import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
 
 class JSONWriterUTF16
         extends JSONWriter {
@@ -32,18 +33,20 @@ class JSONWriterUTF16
         super(ctx, null, false, StandardCharsets.UTF_16);
         int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
         cacheItem = CACHE_ITEMS[cacheIndex];
-        chars = CHARS_UPDATER.getAndSet(cacheItem, null);
+        char[] chars = CHARS_UPDATER.getAndSet(cacheItem, null);
         if (chars == null) {
             chars = new char[8192];
         }
+        this.chars = chars;
     }
 
     @Override
     public final void flushTo(java.io.Writer to) {
         try {
+            int off = this.off;
             if (off > 0) {
                 to.write(chars, 0, off);
-                off = 0;
+                this.off = 0;
             }
         } catch (IOException e) {
             throw new JSONException("flushTo error", e);
@@ -52,6 +55,7 @@ class JSONWriterUTF16
 
     @Override
     public final void close() {
+        char[] chars = this.chars;
         if (chars.length > CACHE_THRESHOLD) {
             return;
         }
@@ -61,64 +65,132 @@ class JSONWriterUTF16
 
     @Override
     protected final void write0(char c) {
+        int off = this.off;
         if (off == chars.length) {
             ensureCapacity(off + 1);
         }
-        chars[off++] = c;
+        chars[off] = c;
+        this.off = off + 1;
     }
 
     @Override
     public final void writeColon() {
+        int off = this.off;
         if (off == chars.length) {
             ensureCapacity(off + 1);
         }
-        chars[off++] = ':';
+        chars[off] = ':';
+        this.off = off + 1;
     }
 
     @Override
     public final void startObject() {
         level++;
         startObject = true;
-        if (off == chars.length) {
-            ensureCapacity(off + 1);
+
+        int off = this.off;
+        int minCapacity = off + (pretty ? 2 + indent : 1);
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
         }
-        chars[off++] = '{';
+
+        final char[] chars = this.chars;
+        chars[off++] = (byte) '{';
+
+        if (pretty) {
+            indent++;
+            chars[off++] = (byte) '\n';
+            for (int i = 0; i < indent; ++i) {
+                chars[off++] = (byte) '\t';
+            }
+        }
+        this.off = off;
     }
 
     @Override
     public final void endObject() {
         level--;
-        if (off == chars.length) {
-            ensureCapacity(off + 1);
+        int off = this.off;
+        int minCapacity = off + (pretty ? 2 + indent : 1);
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
         }
-        chars[off++] = '}';
+
+        final char[] chars = this.chars;
+        if (pretty) {
+            indent--;
+            chars[off++] = (byte) '\n';
+            for (int i = 0; i < indent; ++i) {
+                chars[off++] = (byte) '\t';
+            }
+        }
+
+        chars[off++] = (byte) '}';
+        this.off = off;
         startObject = false;
     }
 
     @Override
     public final void writeComma() {
-        if (off == chars.length) {
-            ensureCapacity(off + 1);
+        startObject = false;
+        int off = this.off;
+        int minCapacity = off + (pretty ? 2 + indent : 1);
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
         }
-        chars[off++] = ',';
+
+        final char[] chars = this.chars;
+        chars[off++] = (byte) ',';
+        if (pretty) {
+            chars[off++] = (byte) '\n';
+            for (int i = 0; i < indent; ++i) {
+                chars[off++] = (byte) '\t';
+            }
+        }
+        this.off = off;
     }
 
     @Override
     public final void startArray() {
         level++;
-        if (off == chars.length) {
-            ensureCapacity(off + 1);
+        int off = this.off;
+        int minCapacity = off + (pretty ? 2 + indent : 1);
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
         }
-        chars[off++] = '[';
+
+        final char[] chars = this.chars;
+        chars[off++] = (byte) '[';
+        if (pretty) {
+            indent++;
+            chars[off++] = (byte) '\n';
+            for (int i = 0; i < indent; ++i) {
+                chars[off++] = (byte) '\t';
+            }
+        }
+        this.off = off;
     }
 
     @Override
     public final void endArray() {
         level--;
-        if (off == chars.length) {
-            ensureCapacity(off + 1);
+        int off = this.off;
+        int minCapacity = off + (pretty ? 2 + indent : 1);
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
         }
-        chars[off++] = ']';
+
+        final char[] chars = this.chars;
+        if (pretty) {
+            indent--;
+            chars[off++] = (byte) '\n';
+            for (int i = 0; i < indent; ++i) {
+                chars[off++] = (byte) '\t';
+            }
+        }
+        chars[off++] = (byte) ']';
+        this.off = off;
+        startObject = false;
     }
 
     public final void writeString(List<String> list) {
@@ -146,7 +218,7 @@ class JSONWriterUTF16
         chars[off++] = ']';
     }
 
-    protected void writeStringLatin1(byte[] value) {
+    public void writeStringLatin1(byte[] value) {
         if (value == null) {
             writeStringNull();
             return;
@@ -154,12 +226,14 @@ class JSONWriterUTF16
 
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
         boolean escape = false;
+        int off = this.off;
         int minCapacity = off + value.length + 2;
-        if (minCapacity - chars.length > 0) {
+        if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
 
-        final int mark = off;
+        final int start = off;
+        final char[] chars = this.chars;
         chars[off++] = quote;
 
         for (int i = 0; i < value.length; i++) {
@@ -179,179 +253,96 @@ class JSONWriterUTF16
 
         if (!escape) {
             chars[off++] = quote;
+            this.off = off;
             return;
         }
-        off = mark;
 
+        this.off = start;
         writeStringEscape(value);
+    }
+
+    public void writeStringUTF16(final byte[] value) {
+        if (value == null) {
+            writeStringNull();
+            return;
+        }
+
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+        boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
+
+        boolean escape = false;
+        int off = this.off;
+        int minCapacity = off + value.length + 2;
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final char[] chars = this.chars;
+        chars[off++] = quote;
+
+        for (int i = 0; i < value.length; i += 2) {
+            char c = UNSAFE.getChar(value, (long) Unsafe.ARRAY_BYTE_BASE_OFFSET + i);
+            if (c == '\\'
+                    || c == quote
+                    || c < ' '
+                    || (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')'))
+                    || (escapeNoneAscii && c > 0x007F)
+            ) {
+                escape = true;
+                break;
+            }
+
+            chars[off++] = c;
+        }
+
+        if (!escape) {
+            chars[off++] = quote;
+            this.off = off;
+            return;
+        }
+
+        writeStringEscapeUTF16(value);
     }
 
     @Override
     public void writeString(String str) {
         if (str == null) {
-            if (isEnabled(Feature.NullAsDefaultValue.mask | Feature.WriteNullStringAsEmpty.mask)) {
-                writeString("");
-                return;
-            }
-
-            writeNull();
+            writeStringNull();
             return;
         }
 
         boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
         boolean escape = false;
-
-        if (STRING_VALUE != null) {
-            int coder = STRING_CODER.applyAsInt(str);
-            if (coder == 0) {
-                byte[] value = STRING_VALUE.apply(str);
-                int minCapacity = off + value.length + 2;
-                if (minCapacity - chars.length > 0) {
-                    ensureCapacity(minCapacity);
-                }
-
-                final int mark = off;
-                chars[off++] = quote;
-
-                for (int i = 0; i < value.length; i++) {
-                    byte c = value[i];
-                    if (c == '\\' || c == quote || c < ' ') {
-                        escape = true;
-                        break;
-                    }
-
-                    if (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')')) {
-                        escape = true;
-                        break;
-                    }
-
-                    chars[off++] = (char) c;
-                }
-
-                if (!escape) {
-                    chars[off++] = quote;
-                    return;
-                }
-                off = mark;
-            }
-        }
+        final char quote = this.quote;
 
         final int strlen = str.length();
-        {
-            int i = 0;
-            // vector optimize 8
-            while (i + 8 <= strlen) {
-                char c0 = str.charAt(i);
-                char c1 = str.charAt(i + 1);
-                char c2 = str.charAt(i + 2);
-                char c3 = str.charAt(i + 3);
-                char c4 = str.charAt(i + 4);
-                char c5 = str.charAt(i + 5);
-                char c6 = str.charAt(i + 6);
-                char c7 = str.charAt(i + 7);
+        int minCapacity = off + strlen + 2;
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
+        }
 
-                if (c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\' || c4 == '\\' || c5 == '\\' || c6 == '\\' || c7 == '\\'
-                        || c0 == quote || c1 == quote || c2 == quote || c3 == quote || c4 == quote || c5 == quote || c6 == quote || c7 == quote
-                        || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' ' || c4 < ' ' || c5 < ' ' || c6 < ' ' || c7 < ' ') {
-                    escape = true;
-                    break;
-                }
-
-                if (browserSecure) {
-                    if (c0 == '<' || c1 == '<' || c2 == '<' || c3 == '<' || c4 == '<' || c5 == '<' || c6 == '<' || c7 == '<'
-                            || c0 == '>' || c1 == '>' || c2 == '>' || c3 == '>' || c4 == '>' || c5 == '>' || c6 == '>' || c7 == '>'
-                            || c0 == '(' || c1 == '(' || c2 == '(' || c3 == '(' || c4 == '(' || c5 == '(' || c6 == '(' || c7 == '('
-                            || c0 == ')' || c1 == ')' || c2 == ')' || c3 == ')' || c4 == ')' || c5 == ')' || c6 == ')' || c7 == ')'
-                    ) {
-                        escape = true;
-                        break;
-                    }
-                }
-
-                if (escapeNoneAscii) {
-                    if (c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F || c4 > 0x007F || c5 > 0x007F || c6 > 0x007F || c7 > 0x007F) {
-                        escape = true;
-                        break;
-                    }
-                }
-
-                i += 8;
-            }
-
-            if (!escape) {
-                // vector optimize 4
-                while (i + 4 <= strlen) {
-                    char c0 = str.charAt(i);
-                    char c1 = str.charAt(i + 1);
-                    char c2 = str.charAt(i + 2);
-                    char c3 = str.charAt(i + 3);
-                    if (c0 == quote || c1 == quote || c2 == quote || c3 == quote
-                            || c0 == '\\' || c1 == '\\' || c2 == '\\' || c3 == '\\'
-                            || c0 < ' ' || c1 < ' ' || c2 < ' ' || c3 < ' '
-                    ) {
-                        escape = true;
-                        break;
-                    }
-
-                    if (browserSecure) {
-                        if (c0 == '<' || c1 == '<' || c2 == '<' || c3 == '<'
-                                || c0 == '>' || c1 == '>' || c2 == '>' || c3 == '>'
-                                || c0 == '(' || c1 == '(' || c2 == '(' || c3 == '('
-                                || c0 == ')' || c1 == ')' || c2 == ')' || c3 == ')'
-                        ) {
-                            escape = true;
-                            break;
-                        }
-                    }
-
-                    if (escapeNoneAscii) {
-                        if (c0 > 0x007F || c1 > 0x007F || c2 > 0x007F || c3 > 0x007F) {
-                            escape = true;
-                            break;
-                        }
-                    }
-
-                    i += 4;
-                }
-            }
-
-            if (!escape && i + 2 <= strlen) {
-                char c0 = str.charAt(i);
-                char c1 = str.charAt(i + 1);
-                if (c0 == quote || c1 == quote || c0 == '\\' || c1 == '\\' || c0 < ' ' || c1 < ' ') {
-                    escape = true;
-                } else if (browserSecure
-                        && (c0 == '<' || c1 == '<'
-                        || c0 == '>' || c1 == '>'
-                        || c0 == '(' || c1 == '(')
-                        || c0 == ')' || c1 == ')') {
-                    escape = true;
-                } else if (escapeNoneAscii && (c0 > 0x007F || c1 > 0x007F)) {
-                    escape = true;
-                } else {
-                    i += 2;
-                }
-            }
-            if (!escape && i + 1 == strlen) {
-                char c0 = str.charAt(i);
-                escape = c0 == '"' || c0 == '\\' || c0 < ' '
-                        || (escapeNoneAscii && c0 > 0x007F)
-                        || (browserSecure && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'));
+        for (int i = 0; i < strlen; i++) {
+            char c = str.charAt(i);
+            if (c == '\\'
+                    || c == quote
+                    || c < ' '
+                    || (browserSecure && (c == '<' || c == '>' || c == '(' || c == ')'))
+                    || (escapeNoneAscii && c > 0x007F)
+            ) {
+                escape = true;
+                break;
             }
         }
 
         if (!escape) {
-            // inline ensureCapacity(off + strlen + 2);
-            int minCapacity = off + strlen + 2;
-            if (minCapacity - chars.length > 0) {
-                ensureCapacity(minCapacity);
-            }
-
+            int off = this.off;
+            final char[] chars = this.chars;
             chars[off++] = quote;
             str.getChars(0, strlen, chars, off);
             off += strlen;
-            chars[off++] = quote;
+            chars[off] = quote;
+            this.off = off + 1;
             return;
         }
 
@@ -360,11 +351,14 @@ class JSONWriterUTF16
 
     protected final void writeStringEscape(String str) {
         final int strlen = str.length();
+        final char quote = this.quote;
         boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
 
+        int off = this.off;
         ensureCapacity(off + strlen * 6 + 2);
 
+        final char[] chars = this.chars;
         chars[off++] = quote;
         for (int i = 0; i < strlen; ++i) {
             char ch = str.charAt(i);
@@ -377,28 +371,34 @@ class JSONWriterUTF16
                     chars[off++] = ch;
                     break;
                 case '\\':
-                    chars[off++] = '\\';
-                    chars[off++] = ch;
+                    chars[off] = '\\';
+                    chars[off + 1] = ch;
+                    off += 2;
                     break;
                 case '\r':
-                    chars[off++] = '\\';
-                    chars[off++] = 'r';
+                    chars[off] = '\\';
+                    chars[off + 1] = 'r';
+                    off += 2;
                     break;
                 case '\n':
-                    chars[off++] = '\\';
-                    chars[off++] = 'n';
+                    chars[off] = '\\';
+                    chars[off + 1] = 'n';
+                    off += 2;
                     break;
                 case '\b':
-                    chars[off++] = '\\';
-                    chars[off++] = 'b';
+                    chars[off] = '\\';
+                    chars[off + 1] = 'b';
+                    off += 2;
                     break;
                 case '\f':
-                    chars[off++] = '\\';
-                    chars[off++] = 'f';
+                    chars[off] = '\\';
+                    chars[off + 1] = 'f';
+                    off += 2;
                     break;
                 case '\t':
-                    chars[off++] = '\\';
-                    chars[off++] = 't';
+                    chars[off] = '\\';
+                    chars[off + 1] = 't';
+                    off += 2;
                     break;
                 case 0:
                 case 1:
@@ -408,22 +408,24 @@ class JSONWriterUTF16
                 case 5:
                 case 6:
                 case 7:
-                    chars[off++] = '\\';
-                    chars[off++] = 'u';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = (char) ('0' + (int) ch);
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '0';
+                    chars[off + 5] = (char) ('0' + (int) ch);
+                    off += 6;
                     break;
                 case 11:
                 case 14:
                 case 15:
-                    chars[off++] = '\\';
-                    chars[off++] = 'u';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = (char) ('a' + (ch - 10));
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '0';
+                    chars[off + 5] = (char) ('a' + (ch - 10));
+                    off += 6;
                     break;
                 case 16:
                 case 17:
@@ -435,12 +437,13 @@ class JSONWriterUTF16
                 case 23:
                 case 24:
                 case 25:
-                    chars[off++] = '\\';
-                    chars[off++] = 'u';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = '1';
-                    chars[off++] = (char) ('0' + (ch - 16));
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '1';
+                    chars[off + 5] = (char) ('0' + (ch - 16));
+                    off += 6;
                     break;
                 case 26:
                 case 27:
@@ -448,52 +451,204 @@ class JSONWriterUTF16
                 case 29:
                 case 30:
                 case 31:
-                    chars[off++] = '\\';
-                    chars[off++] = 'u';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = '1';
-                    chars[off++] = (char) ('a' + (ch - 26));
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '1';
+                    chars[off + 5] = (char) ('a' + (ch - 26));
+                    off += 6;
                     break;
                 case '<':
                 case '>':
                 case '(':
                 case ')':
                     if (browserSecure && (ch == '<' || ch == '>' || ch == '(' || ch == ')')) {
-                        chars[off++] = '\\';
-                        chars[off++] = 'u';
-                        chars[off++] = DIGITS[(ch >>> 12) & 15];
-                        chars[off++] = DIGITS[(ch >>> 8) & 15];
-                        chars[off++] = DIGITS[(ch >>> 4) & 15];
-                        chars[off++] = DIGITS[ch & 15];
+                        chars[off] = '\\';
+                        chars[off + 1] = 'u';
+                        chars[off + 2] = DIGITS[(ch >>> 12) & 15];
+                        chars[off + 3] = DIGITS[(ch >>> 8) & 15];
+                        chars[off + 4] = DIGITS[(ch >>> 4) & 15];
+                        chars[off + 5] = DIGITS[ch & 15];
+                        off += 6;
                     } else {
                         chars[off++] = ch;
                     }
                     break;
                 default:
                     if (escapeNoneAscii && ch > 0x007F) {
-                        chars[off++] = '\\';
-                        chars[off++] = 'u';
-                        chars[off++] = DIGITS[(ch >>> 12) & 15];
-                        chars[off++] = DIGITS[(ch >>> 8) & 15];
-                        chars[off++] = DIGITS[(ch >>> 4) & 15];
-                        chars[off++] = DIGITS[ch & 15];
+                        chars[off] = '\\';
+                        chars[off + 1] = 'u';
+                        chars[off + 2] = DIGITS[(ch >>> 12) & 15];
+                        chars[off + 3] = DIGITS[(ch >>> 8) & 15];
+                        chars[off + 4] = DIGITS[(ch >>> 4) & 15];
+                        chars[off + 5] = DIGITS[ch & 15];
+                        off += 6;
                     } else {
                         chars[off++] = ch;
                     }
                     break;
             }
         }
+        chars[off] = quote;
+        this.off = off + 1;
+    }
+
+    protected final void writeStringEscapeUTF16(byte[] str) {
+        final int strlen = str.length;
+        final char quote = this.quote;
+        boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
+        boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
+
+        int off = this.off;
+        ensureCapacity(off + strlen * 6 + 2);
+
+        final char[] chars = this.chars;
         chars[off++] = quote;
+        for (int i = 0; i < strlen; i += 2) {
+            char ch = UNSAFE.getChar(str, (long) Unsafe.ARRAY_CHAR_BASE_OFFSET + i);
+            switch (ch) {
+                case '"':
+                case '\'':
+                    if (ch == quote) {
+                        chars[off++] = '\\';
+                    }
+                    chars[off++] = ch;
+                    break;
+                case '\\':
+                    chars[off] = '\\';
+                    chars[off + 1] = ch;
+                    off += 2;
+                    break;
+                case '\r':
+                    chars[off] = '\\';
+                    chars[off + 1] = 'r';
+                    off += 2;
+                    break;
+                case '\n':
+                    chars[off] = '\\';
+                    chars[off + 1] = 'n';
+                    off += 2;
+                    break;
+                case '\b':
+                    chars[off] = '\\';
+                    chars[off + 1] = 'b';
+                    off += 2;
+                    break;
+                case '\f':
+                    chars[off] = '\\';
+                    chars[off + 1] = 'f';
+                    off += 2;
+                    break;
+                case '\t':
+                    chars[off] = '\\';
+                    chars[off + 1] = 't';
+                    off += 2;
+                    break;
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '0';
+                    chars[off + 5] = (char) ('0' + (int) ch);
+                    off += 6;
+                    break;
+                case 11:
+                case 14:
+                case 15:
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '0';
+                    chars[off + 5] = (char) ('a' + (ch - 10));
+                    off += 6;
+                    break;
+                case 16:
+                case 17:
+                case 18:
+                case 19:
+                case 20:
+                case 21:
+                case 22:
+                case 23:
+                case 24:
+                case 25:
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '1';
+                    chars[off + 5] = (char) ('0' + (ch - 16));
+                    off += 6;
+                    break;
+                case 26:
+                case 27:
+                case 28:
+                case 29:
+                case 30:
+                case 31:
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '1';
+                    chars[off + 5] = (char) ('a' + (ch - 26));
+                    off += 6;
+                    break;
+                case '<':
+                case '>':
+                case '(':
+                case ')':
+                    if (browserSecure && (ch == '<' || ch == '>' || ch == '(' || ch == ')')) {
+                        chars[off] = '\\';
+                        chars[off + 1] = 'u';
+                        chars[off + 2] = DIGITS[(ch >>> 12) & 15];
+                        chars[off + 3] = DIGITS[(ch >>> 8) & 15];
+                        chars[off + 4] = DIGITS[(ch >>> 4) & 15];
+                        chars[off + 5] = DIGITS[ch & 15];
+                        off += 6;
+                    } else {
+                        chars[off++] = ch;
+                    }
+                    break;
+                default:
+                    if (escapeNoneAscii && ch > 0x007F) {
+                        chars[off] = '\\';
+                        chars[off + 1] = 'u';
+                        chars[off + 2] = DIGITS[(ch >>> 12) & 15];
+                        chars[off + 3] = DIGITS[(ch >>> 8) & 15];
+                        chars[off + 4] = DIGITS[(ch >>> 4) & 15];
+                        chars[off + 5] = DIGITS[ch & 15];
+                        off += 6;
+                    } else {
+                        chars[off++] = ch;
+                    }
+                    break;
+            }
+        }
+        chars[off] = quote;
+        this.off = off + 1;
     }
 
     protected final void writeStringEscape(char[] str) {
         final int strlen = str.length;
+        final char quote = this.quote;
         boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
 
+        int off = this.off;
         ensureCapacity(off + strlen * 6 + 2);
 
+        final char[] chars = this.chars;
         chars[off++] = quote;
         for (int i = 0; i < strlen; ++i) {
             char ch = str[i];
@@ -506,28 +661,34 @@ class JSONWriterUTF16
                     chars[off++] = ch;
                     break;
                 case '\\':
-                    chars[off++] = '\\';
-                    chars[off++] = ch;
+                    chars[off] = '\\';
+                    chars[off + 1] = ch;
+                    off += 2;
                     break;
                 case '\r':
-                    chars[off++] = '\\';
-                    chars[off++] = 'r';
+                    chars[off] = '\\';
+                    chars[off + 1] = 'r';
+                    off += 2;
                     break;
                 case '\n':
-                    chars[off++] = '\\';
-                    chars[off++] = 'n';
+                    chars[off] = '\\';
+                    chars[off + 1] = 'n';
+                    off += 2;
                     break;
                 case '\b':
-                    chars[off++] = '\\';
-                    chars[off++] = 'b';
+                    chars[off] = '\\';
+                    chars[off + 1] = 'b';
+                    off += 2;
                     break;
                 case '\f':
-                    chars[off++] = '\\';
-                    chars[off++] = 'f';
+                    chars[off] = '\\';
+                    chars[off + 1] = 'f';
+                    off += 2;
                     break;
                 case '\t':
-                    chars[off++] = '\\';
-                    chars[off++] = 't';
+                    chars[off] = '\\';
+                    chars[off + 1] = 't';
+                    off += 2;
                     break;
                 case 0:
                 case 1:
@@ -537,22 +698,24 @@ class JSONWriterUTF16
                 case 5:
                 case 6:
                 case 7:
-                    chars[off++] = '\\';
-                    chars[off++] = 'u';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = (char) ('0' + (int) ch);
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '0';
+                    chars[off + 5] = (char) ('0' + (int) ch);
+                    off += 6;
                     break;
                 case 11:
                 case 14:
                 case 15:
-                    chars[off++] = '\\';
-                    chars[off++] = 'u';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = (char) ('a' + (ch - 10));
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '0';
+                    chars[off + 5] = (char) ('a' + (ch - 10));
+                    off += 6;
                     break;
                 case 16:
                 case 17:
@@ -564,12 +727,13 @@ class JSONWriterUTF16
                 case 23:
                 case 24:
                 case 25:
-                    chars[off++] = '\\';
-                    chars[off++] = 'u';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = '1';
-                    chars[off++] = (char) ('0' + (ch - 16));
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '1';
+                    chars[off + 5] = (char) ('0' + (ch - 16));
+                    off += 6;
                     break;
                 case 26:
                 case 27:
@@ -577,52 +741,59 @@ class JSONWriterUTF16
                 case 29:
                 case 30:
                 case 31:
-                    chars[off++] = '\\';
-                    chars[off++] = 'u';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = '1';
-                    chars[off++] = (char) ('a' + (ch - 26));
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '1';
+                    chars[off + 5] = (char) ('a' + (ch - 26));
+                    off += 6;
                     break;
                 case '<':
                 case '>':
                 case '(':
                 case ')':
                     if (browserSecure && (ch == '<' || ch == '>' || ch == '(' || ch == ')')) {
-                        chars[off++] = '\\';
-                        chars[off++] = 'u';
-                        chars[off++] = DIGITS[(ch >>> 12) & 15];
-                        chars[off++] = DIGITS[(ch >>> 8) & 15];
-                        chars[off++] = DIGITS[(ch >>> 4) & 15];
-                        chars[off++] = DIGITS[ch & 15];
+                        chars[off] = '\\';
+                        chars[off + 1] = 'u';
+                        chars[off + 2] = DIGITS[(ch >>> 12) & 15];
+                        chars[off + 3] = DIGITS[(ch >>> 8) & 15];
+                        chars[off + 4] = DIGITS[(ch >>> 4) & 15];
+                        chars[off + 5] = DIGITS[ch & 15];
+                        off += 6;
                     } else {
                         chars[off++] = ch;
                     }
                     break;
                 default:
                     if (escapeNoneAscii && ch > 0x007F) {
-                        chars[off++] = '\\';
-                        chars[off++] = 'u';
-                        chars[off++] = DIGITS[(ch >>> 12) & 15];
-                        chars[off++] = DIGITS[(ch >>> 8) & 15];
-                        chars[off++] = DIGITS[(ch >>> 4) & 15];
-                        chars[off++] = DIGITS[ch & 15];
+                        chars[off] = '\\';
+                        chars[off + 1] = 'u';
+                        chars[off + 2] = DIGITS[(ch >>> 12) & 15];
+                        chars[off + 3] = DIGITS[(ch >>> 8) & 15];
+                        chars[off + 4] = DIGITS[(ch >>> 4) & 15];
+                        chars[off + 5] = DIGITS[ch & 15];
+                        off += 6;
                     } else {
                         chars[off++] = ch;
                     }
                     break;
             }
         }
-        chars[off++] = quote;
+        chars[off] = quote;
+        this.off = off + 1;
     }
 
     protected final void writeStringEscape(byte[] str) {
         final int strlen = str.length;
+        final char quote = this.quote;
         boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
 
+        int off = this.off;
         ensureCapacity(off + strlen * 6 + 2);
 
+        final char[] chars = this.chars;
         chars[off++] = quote;
         for (int i = 0; i < strlen; ++i) {
             char ch = (char) (str[i] & 0xff);
@@ -635,28 +806,34 @@ class JSONWriterUTF16
                     chars[off++] = ch;
                     break;
                 case '\\':
-                    chars[off++] = '\\';
-                    chars[off++] = ch;
+                    chars[off] = '\\';
+                    chars[off + 1] = ch;
+                    off += 2;
                     break;
                 case '\r':
-                    chars[off++] = '\\';
-                    chars[off++] = 'r';
+                    chars[off] = '\\';
+                    chars[off + 1] = 'r';
+                    off += 2;
                     break;
                 case '\n':
-                    chars[off++] = '\\';
-                    chars[off++] = 'n';
+                    chars[off] = '\\';
+                    chars[off + 1] = 'n';
+                    off += 2;
                     break;
                 case '\b':
-                    chars[off++] = '\\';
-                    chars[off++] = 'b';
+                    chars[off] = '\\';
+                    chars[off + 1] = 'b';
+                    off += 2;
                     break;
                 case '\f':
-                    chars[off++] = '\\';
-                    chars[off++] = 'f';
+                    chars[off] = '\\';
+                    chars[off + 1] = 'f';
+                    off += 2;
                     break;
                 case '\t':
-                    chars[off++] = '\\';
-                    chars[off++] = 't';
+                    chars[off] = '\\';
+                    chars[off + 1] = 't';
+                    off += 2;
                     break;
                 case 0:
                 case 1:
@@ -666,22 +843,24 @@ class JSONWriterUTF16
                 case 5:
                 case 6:
                 case 7:
-                    chars[off++] = '\\';
-                    chars[off++] = 'u';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = (char) ('0' + (int) ch);
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '0';
+                    chars[off + 5] = (char) ('0' + (int) ch);
+                    off += 6;
                     break;
                 case 11:
                 case 14:
                 case 15:
-                    chars[off++] = '\\';
-                    chars[off++] = 'u';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = (char) ('a' + (ch - 10));
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '0';
+                    chars[off + 5] = (char) ('a' + (ch - 10));
+                    off += 6;
                     break;
                 case 16:
                 case 17:
@@ -693,12 +872,13 @@ class JSONWriterUTF16
                 case 23:
                 case 24:
                 case 25:
-                    chars[off++] = '\\';
-                    chars[off++] = 'u';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = '1';
-                    chars[off++] = (char) ('0' + (ch - 16));
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '1';
+                    chars[off + 5] = (char) ('0' + (ch - 16));
+                    off += 6;
                     break;
                 case 26:
                 case 27:
@@ -706,50 +886,56 @@ class JSONWriterUTF16
                 case 29:
                 case 30:
                 case 31:
-                    chars[off++] = '\\';
-                    chars[off++] = 'u';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = '1';
-                    chars[off++] = (char) ('a' + (ch - 26));
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '1';
+                    chars[off + 5] = (char) ('a' + (ch - 26));
+                    off += 6;
                     break;
                 case '<':
                 case '>':
                 case '(':
                 case ')':
                     if (browserSecure && (ch == '<' || ch == '>' || ch == '(' || ch == ')')) {
-                        chars[off++] = '\\';
-                        chars[off++] = 'u';
-                        chars[off++] = DIGITS[(ch >>> 12) & 15];
-                        chars[off++] = DIGITS[(ch >>> 8) & 15];
-                        chars[off++] = DIGITS[(ch >>> 4) & 15];
-                        chars[off++] = DIGITS[ch & 15];
+                        chars[off] = '\\';
+                        chars[off + 1] = 'u';
+                        chars[off + 2] = DIGITS[(ch >>> 12) & 15];
+                        chars[off + 3] = DIGITS[(ch >>> 8) & 15];
+                        chars[off + 4] = DIGITS[(ch >>> 4) & 15];
+                        chars[off + 5] = DIGITS[ch & 15];
+                        off += 6;
                     } else {
                         chars[off++] = ch;
                     }
                     break;
                 default:
                     if (escapeNoneAscii && ch > 0x007F) {
-                        chars[off++] = '\\';
-                        chars[off++] = 'u';
-                        chars[off++] = DIGITS[(ch >>> 12) & 15];
-                        chars[off++] = DIGITS[(ch >>> 8) & 15];
-                        chars[off++] = DIGITS[(ch >>> 4) & 15];
-                        chars[off++] = DIGITS[ch & 15];
+                        chars[off] = '\\';
+                        chars[off + 1] = 'u';
+                        chars[off + 2] = DIGITS[(ch >>> 12) & 15];
+                        chars[off + 3] = DIGITS[(ch >>> 8) & 15];
+                        chars[off + 4] = DIGITS[(ch >>> 4) & 15];
+                        chars[off + 5] = DIGITS[ch & 15];
+                        off += 6;
                     } else {
                         chars[off++] = ch;
                     }
                     break;
             }
         }
-        chars[off++] = quote;
+        chars[off] = quote;
+        this.off = off + 1;
     }
 
     @Override
-    public final void writeString(char[] str, int offset, int len, boolean quote) {
+    public final void writeString(char[] str, int offset, int len, boolean quoted) {
         boolean escapeNoneAscii = (context.features & Feature.EscapeNoneAscii.mask) != 0;
 
-        int minCapacity = quote ? this.off + 2 : this.off;
+        final char quote = this.quote;
+        int off = this.off;
+        int minCapacity = quoted ? off + 2 : off;
         if (escapeNoneAscii) {
             minCapacity += len * 6;
         } else {
@@ -760,8 +946,9 @@ class JSONWriterUTF16
             ensureCapacity(minCapacity);
         }
 
-        if (quote) {
-            chars[off++] = this.quote;
+        final char[] chars = this.chars;
+        if (quoted) {
+            chars[off++] = quote;
         }
 
         for (int i = offset; i < len; ++i) {
@@ -769,34 +956,40 @@ class JSONWriterUTF16
             switch (ch) {
                 case '"':
                 case '\'':
-                    if (ch == this.quote) {
+                    if (ch == quote) {
                         chars[off++] = '\\';
                     }
                     chars[off++] = ch;
                     break;
                 case '\\':
-                    chars[off++] = '\\';
-                    chars[off++] = ch;
+                    chars[off] = '\\';
+                    chars[off + 1] = ch;
+                    off += 2;
                     break;
                 case '\r':
-                    chars[off++] = '\\';
-                    chars[off++] = 'r';
+                    chars[off] = '\\';
+                    chars[off + 1] = 'r';
+                    off += 2;
                     break;
                 case '\n':
-                    chars[off++] = '\\';
-                    chars[off++] = 'n';
+                    chars[off] = '\\';
+                    chars[off + 1] = 'n';
+                    off += 2;
                     break;
                 case '\b':
-                    chars[off++] = '\\';
-                    chars[off++] = 'b';
+                    chars[off] = '\\';
+                    chars[off + 1] = 'b';
+                    off += 2;
                     break;
                 case '\f':
-                    chars[off++] = '\\';
-                    chars[off++] = 'f';
+                    chars[off] = '\\';
+                    chars[off + 1] = 'f';
+                    off += 2;
                     break;
                 case '\t':
-                    chars[off++] = '\\';
-                    chars[off++] = 't';
+                    chars[off] = '\\';
+                    chars[off + 1] = 't';
+                    off += 2;
                     break;
                 case 0:
                 case 1:
@@ -806,22 +999,24 @@ class JSONWriterUTF16
                 case 5:
                 case 6:
                 case 7:
-                    chars[off++] = '\\';
-                    chars[off++] = 'u';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = (char) ('0' + (int) ch);
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '0';
+                    chars[off + 5] = (char) ('0' + (int) ch);
+                    off += 6;
                     break;
                 case 11:
                 case 14:
                 case 15:
-                    chars[off++] = '\\';
-                    chars[off++] = 'u';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = (char) ('a' + (ch - 10));
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '0';
+                    chars[off + 5] = (char) ('a' + (ch - 10));
+                    off += 6;
                     break;
                 case 16:
                 case 17:
@@ -833,12 +1028,13 @@ class JSONWriterUTF16
                 case 23:
                 case 24:
                 case 25:
-                    chars[off++] = '\\';
-                    chars[off++] = 'u';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = '1';
-                    chars[off++] = (char) ('0' + (ch - 16));
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '1';
+                    chars[off + 5] = (char) ('0' + (ch - 16));
+                    off += 6;
                     break;
                 case 26:
                 case 27:
@@ -846,21 +1042,23 @@ class JSONWriterUTF16
                 case 29:
                 case 30:
                 case 31:
-                    chars[off++] = '\\';
-                    chars[off++] = 'u';
-                    chars[off++] = '0';
-                    chars[off++] = '0';
-                    chars[off++] = '1';
-                    chars[off++] = (char) ('a' + (ch - 26));
+                    chars[off] = '\\';
+                    chars[off + 1] = 'u';
+                    chars[off + 2] = '0';
+                    chars[off + 3] = '0';
+                    chars[off + 4] = '1';
+                    chars[off + 5] = (char) ('a' + (ch - 26));
+                    off += 6;
                     break;
                 default:
                     if (escapeNoneAscii && ch > 0x007F) {
-                        chars[off++] = '\\';
-                        chars[off++] = 'u';
-                        chars[off++] = DIGITS[(ch >>> 12) & 15];
-                        chars[off++] = DIGITS[(ch >>> 8) & 15];
-                        chars[off++] = DIGITS[(ch >>> 4) & 15];
-                        chars[off++] = DIGITS[ch & 15];
+                        chars[off] = '\\';
+                        chars[off + 1] = 'u';
+                        chars[off + 2] = DIGITS[(ch >>> 12) & 15];
+                        chars[off + 3] = DIGITS[(ch >>> 8) & 15];
+                        chars[off + 4] = DIGITS[(ch >>> 4) & 15];
+                        chars[off + 5] = DIGITS[ch & 15];
+                        off += 6;
                     } else {
                         chars[off++] = ch;
                     }
@@ -868,9 +1066,36 @@ class JSONWriterUTF16
             }
         }
 
-        if (quote) {
-            chars[off++] = this.quote;
+        if (quoted) {
+            chars[off++] = quote;
         }
+        this.off = off;
+    }
+
+    public final void writeString(String[] strings) {
+        if (strings == null) {
+            writeArrayNull();
+            return;
+        }
+
+        startArray();
+        for (int i = 0; i < strings.length; i++) {
+            if (i != 0) {
+                writeComma();
+            }
+
+            String item = strings[i];
+            if (item == null) {
+                if (isEnabled(JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) {
+                    writeString("");
+                } else {
+                    writeNull();
+                }
+                continue;
+            }
+            writeString(item);
+        }
+        endArray();
     }
 
     @Override
@@ -879,10 +1104,12 @@ class JSONWriterUTF16
 
         writeRaw(REF_PREF, 0, REF_PREF.length);
         writeString(path);
+        int off = this.off;
         if (off == chars.length) {
             ensureCapacity(off + 1);
         }
-        chars[off++] = (byte) '}';
+        chars[off] = '}';
+        this.off = off + 1;
     }
 
     @Override
@@ -894,7 +1121,10 @@ class JSONWriterUTF16
 
         int charsLen = ((bytes.length - 1) / 3 + 1) << 2; // base64 character count
 
+        int off = this.off;
         ensureCapacity(off + charsLen + 2);
+
+        final char[] chars = this.chars;
         chars[off++] = quote;
 
         int eLen = (bytes.length / 3) * 3; // Length of even 24-bits.
@@ -904,10 +1134,11 @@ class JSONWriterUTF16
             int i = (bytes[s++] & 0xff) << 16 | (bytes[s++] & 0xff) << 8 | (bytes[s++] & 0xff);
 
             // Encode the int into four chars
-            chars[off++] = CA[(i >>> 18) & 0x3f];
-            chars[off++] = CA[(i >>> 12) & 0x3f];
-            chars[off++] = CA[(i >>> 6) & 0x3f];
-            chars[off++] = CA[i & 0x3f];
+            chars[off] = CA[(i >>> 18) & 0x3f];
+            chars[off + 1] = CA[(i >>> 12) & 0x3f];
+            chars[off + 2] = CA[(i >>> 6) & 0x3f];
+            chars[off + 3] = CA[i & 0x3f];
+            off += 4;
         }
 
         // Pad and encode last bits if source isn't even 24 bits.
@@ -917,13 +1148,15 @@ class JSONWriterUTF16
             int i = ((bytes[eLen] & 0xff) << 10) | (left == 2 ? ((bytes[bytes.length - 1] & 0xff) << 2) : 0);
 
             // Set last four chars
-            chars[off++] = CA[i >> 12];
-            chars[off++] = CA[(i >>> 6) & 0x3f];
-            chars[off++] = left == 2 ? CA[i & 0x3f] : '=';
-            chars[off++] = '=';
+            chars[off] = CA[i >> 12];
+            chars[off + 1] = CA[(i >>> 6) & 0x3f];
+            chars[off + 2] = left == 2 ? CA[i & 0x3f] : '=';
+            chars[off + 3] = '=';
+            off += 4;
         }
 
         chars[off++] = quote;
+        this.off = off;
     }
 
     @Override
@@ -935,9 +1168,12 @@ class JSONWriterUTF16
 
         int charsLen = bytes.length * 2 + 3;
 
+        int off = this.off;
         ensureCapacity(off + charsLen + 2);
-        chars[off++] = 'x';
-        chars[off++] = '\'';
+        final char[] chars = this.chars;
+        chars[off] = 'x';
+        chars[off + 1] = '\'';
+        off += 2;
 
         for (int i = 0; i < bytes.length; ++i) {
             byte b = bytes[i];
@@ -946,11 +1182,13 @@ class JSONWriterUTF16
             int b0 = a >> 4;
             int b1 = a & 0xf;
 
-            chars[off++] = (char) (b0 + (b0 < 10 ? 48 : 55));
-            chars[off++] = (char) (b1 + (b1 < 10 ? 48 : 55));
+            chars[off] = (char) (b0 + (b0 < 10 ? 48 : 55));
+            chars[off + 1] = (char) (b1 + (b1 < 10 ? 48 : 55));
+            off += 2;
         }
 
-        chars[off++] = '\'';
+        chars[off] = '\'';
+        this.off = off + 1;
     }
 
     @Override
@@ -963,19 +1201,20 @@ class JSONWriterUTF16
         String str = value.toString(10);
 
         boolean browserCompatible = ((context.features | features) & Feature.BrowserCompatible.mask) != 0;
+        final int strlen = str.length();
+        ensureCapacity(off + strlen + 2);
+        final char[] chars = this.chars;
+        int off = this.off;
         if (browserCompatible && (value.compareTo(LOW_BIGINT) < 0 || value.compareTo(HIGH_BIGINT) > 0)) {
-            final int strlen = str.length();
-            ensureCapacity(off + strlen + 2);
             chars[off++] = '"';
             str.getChars(0, strlen, chars, off);
             off += strlen;
             chars[off++] = '"';
         } else {
-            final int strlen = str.length();
-            ensureCapacity(off + strlen);
             str.getChars(0, strlen, chars, off);
             off += strlen;
         }
+        this.off = off;
     }
 
     @Override
@@ -999,7 +1238,7 @@ class JSONWriterUTF16
                 && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0);
 
         int minCapacity = off + precision + 7;
-        if (minCapacity > chars.length) {
+        if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
 
@@ -1017,7 +1256,7 @@ class JSONWriterUTF16
                 && (unscaleValue = UnsafeUtils.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET)) != Long.MIN_VALUE
                 && !asPlain
         ) {
-            off += getDecimalChars(unscaleValue, scale, chars, off);
+            off = IOUtils.writeDecimal(chars, off, unscaleValue, scale);
         } else {
             String str = asPlain ? value.toPlainString() : value.toString();
             str.getChars(0, str.length(), chars, off);
@@ -1045,66 +1284,68 @@ class JSONWriterUTF16
         final int lo2 = (int) lo;
 
         int minCapacity = off + 38;
-        if (minCapacity > chars.length) {
+        if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
 
         final char[] UUID_LOOKUP = JSONFactory.UUID_LOOKUP;
         final char[] chars = this.chars;
-        chars[off++] = '"';
+        final int off = this.off;
+        chars[off] = '"';
         int l = UUID_LOOKUP[(hi1 >> 24) & 255];
-        chars[off++] = (char) (byte) (l >> 8);
-        chars[off++] = (char) (byte) l;
+        chars[off + 1] = (char) (byte) (l >> 8);
+        chars[off + 2] = (char) (byte) l;
         l = UUID_LOOKUP[(hi1 >> 16) & 255];
-        chars[off++] = (char) (byte) (l >> 8);
-        chars[off++] = (char) (byte) l;
+        chars[off + 3] = (char) (byte) (l >> 8);
+        chars[off + 4] = (char) (byte) l;
         l = UUID_LOOKUP[(hi1 >> 8) & 255];
-        chars[off++] = (char) (byte) (l >> 8);
-        chars[off++] = (char) (byte) l;
+        chars[off + 5] = (char) (byte) (l >> 8);
+        chars[off + 6] = (char) (byte) l;
         l = UUID_LOOKUP[hi1 & 255];
-        chars[off++] = (char) (byte) (l >> 8);
-        chars[off++] = (char) (byte) l;
-        chars[off++] = '-';
+        chars[off + 7] = (char) (byte) (l >> 8);
+        chars[off + 8] = (char) (byte) l;
+        chars[off + 9] = '-';
         l = UUID_LOOKUP[(hi2 >> 24) & 255];
-        chars[off++] = (char) (byte) (l >> 8);
-        chars[off++] = (char) (byte) l;
+        chars[off + 10] = (char) (byte) (l >> 8);
+        chars[off + 11] = (char) (byte) l;
         l = UUID_LOOKUP[(hi2 >> 16) & 255];
-        chars[off++] = (char) (byte) (l >> 8);
-        chars[off++] = (char) (byte) l;
-        chars[off++] = '-';
+        chars[off + 12] = (char) (byte) (l >> 8);
+        chars[off + 13] = (char) (byte) l;
+        chars[off + 14] = '-';
         l = UUID_LOOKUP[(hi2 >> 8) & 255];
-        chars[off++] = (char) (byte) (l >> 8);
-        chars[off++] = (char) (byte) l;
+        chars[off + 15] = (char) (byte) (l >> 8);
+        chars[off + 16] = (char) (byte) l;
         l = UUID_LOOKUP[hi2 & 255];
-        chars[off++] = (char) (byte) (l >> 8);
-        chars[off++] = (char) (byte) l;
-        chars[off++] = '-';
+        chars[off + 17] = (char) (byte) (l >> 8);
+        chars[off + 18] = (char) (byte) l;
+        chars[off + 19] = '-';
         l = UUID_LOOKUP[(lo1 >> 24) & 255];
-        chars[off++] = (char) (byte) (l >> 8);
-        chars[off++] = (char) (byte) l;
+        chars[off + 20] = (char) (byte) (l >> 8);
+        chars[off + 21] = (char) (byte) l;
         l = UUID_LOOKUP[(lo1 >> 16) & 255];
-        chars[off++] = (char) (byte) (l >> 8);
-        chars[off++] = (char) (byte) l;
-        chars[off++] = '-';
+        chars[off + 22] = (char) (byte) (l >> 8);
+        chars[off + 23] = (char) (byte) l;
+        chars[off + 24] = '-';
         l = UUID_LOOKUP[(lo1 >> 8) & 255];
-        chars[off++] = (char) (byte) (l >> 8);
-        chars[off++] = (char) (byte) l;
+        chars[off + 25] = (char) (byte) (l >> 8);
+        chars[off + 26] = (char) (byte) l;
         l = UUID_LOOKUP[lo1 & 255];
-        chars[off++] = (char) (byte) (l >> 8);
-        chars[off++] = (char) (byte) l;
+        chars[off + 27] = (char) (byte) (l >> 8);
+        chars[off + 28] = (char) (byte) l;
         l = UUID_LOOKUP[(lo2 >> 24) & 255];
-        chars[off++] = (char) (byte) (l >> 8);
-        chars[off++] = (char) (byte) l;
+        chars[off + 29] = (char) (byte) (l >> 8);
+        chars[off + 30] = (char) (byte) l;
         l = UUID_LOOKUP[(lo2 >> 16) & 255];
-        chars[off++] = (char) (byte) (l >> 8);
-        chars[off++] = (char) (byte) l;
+        chars[off + 31] = (char) (byte) (l >> 8);
+        chars[off + 32] = (char) (byte) l;
         l = UUID_LOOKUP[(lo2 >> 8) & 255];
-        chars[off++] = (char) (byte) (l >> 8);
-        chars[off++] = (char) (byte) l;
+        chars[off + 33] = (char) (byte) (l >> 8);
+        chars[off + 34] = (char) (byte) l;
         l = UUID_LOOKUP[lo2 & 255];
-        chars[off++] = (char) (byte) (l >> 8);
-        chars[off++] = (char) (byte) l;
-        chars[off++] = '"';
+        chars[off + 35] = (char) (byte) (l >> 8);
+        chars[off + 36] = (char) (byte) l;
+        chars[off + 37] = '"';
+        this.off += 38;
     }
 
     @Override
@@ -1119,7 +1360,7 @@ class JSONWriterUTF16
         {
             // inline ensureCapacity
             int minCapacity = this.off + charslen;
-            if (minCapacity - this.chars.length > 0) {
+            if (minCapacity >= this.chars.length) {
                 ensureCapacity(minCapacity);
             }
         }
@@ -1129,11 +1370,13 @@ class JSONWriterUTF16
 
     @Override
     public final void writeChar(char ch) {
-        int minCapacity = this.off + 8;
-        if (minCapacity - chars.length > 0) {
+        int off = this.off;
+        int minCapacity = off + 8;
+        if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
 
+        final char[] chars = this.chars;
         chars[off++] = quote;
         switch (ch) {
             case '"':
@@ -1144,28 +1387,34 @@ class JSONWriterUTF16
                 chars[off++] = ch;
                 break;
             case '\\':
-                chars[off++] = '\\';
-                chars[off++] = ch;
+                chars[off] = '\\';
+                chars[off + 1] = ch;
+                off += 2;
                 break;
             case '\r':
-                chars[off++] = '\\';
-                chars[off++] = 'r';
+                chars[off] = '\\';
+                chars[off + 1] = 'r';
+                off += 2;
                 break;
             case '\n':
-                chars[off++] = '\\';
-                chars[off++] = 'n';
+                chars[off] = '\\';
+                chars[off + 1] = 'n';
+                off += 2;
                 break;
             case '\b':
-                chars[off++] = '\\';
-                chars[off++] = 'b';
+                chars[off] = '\\';
+                chars[off + 1] = 'b';
+                off += 2;
                 break;
             case '\f':
-                chars[off++] = '\\';
-                chars[off++] = 'f';
+                chars[off] = '\\';
+                chars[off + 1] = 'f';
+                off += 2;
                 break;
             case '\t':
-                chars[off++] = '\\';
-                chars[off++] = 't';
+                chars[off] = '\\';
+                chars[off + 1] = 't';
+                off += 2;
                 break;
             case 0:
             case 1:
@@ -1175,22 +1424,24 @@ class JSONWriterUTF16
             case 5:
             case 6:
             case 7:
-                chars[off++] = '\\';
-                chars[off++] = 'u';
-                chars[off++] = '0';
-                chars[off++] = '0';
-                chars[off++] = '0';
-                chars[off++] = (char) ('0' + (int) ch);
+                chars[off] = '\\';
+                chars[off + 1] = 'u';
+                chars[off + 2] = '0';
+                chars[off + 3] = '0';
+                chars[off + 4] = '0';
+                chars[off + 5] = (char) ('0' + (int) ch);
+                off += 6;
                 break;
             case 11:
             case 14:
             case 15:
-                chars[off++] = '\\';
-                chars[off++] = 'u';
-                chars[off++] = '0';
-                chars[off++] = '0';
-                chars[off++] = '0';
-                chars[off++] = (char) ('a' + (ch - 10));
+                chars[off] = '\\';
+                chars[off + 1] = 'u';
+                chars[off + 2] = '0';
+                chars[off + 3] = '0';
+                chars[off + 4] = '0';
+                chars[off + 5] = (char) ('a' + (ch - 10));
+                off += 6;
                 break;
             case 16:
             case 17:
@@ -1202,12 +1453,13 @@ class JSONWriterUTF16
             case 23:
             case 24:
             case 25:
-                chars[off++] = '\\';
-                chars[off++] = 'u';
-                chars[off++] = '0';
-                chars[off++] = '0';
-                chars[off++] = '1';
-                chars[off++] = (char) ('0' + (ch - 16));
+                chars[off] = '\\';
+                chars[off + 1] = 'u';
+                chars[off + 2] = '0';
+                chars[off + 3] = '0';
+                chars[off + 4] = '1';
+                chars[off + 5] = (char) ('0' + (ch - 16));
+                off += 6;
                 break;
             case 26:
             case 27:
@@ -1215,18 +1467,20 @@ class JSONWriterUTF16
             case 29:
             case 30:
             case 31:
-                chars[off++] = '\\';
-                chars[off++] = 'u';
-                chars[off++] = '0';
-                chars[off++] = '0';
-                chars[off++] = '1';
-                chars[off++] = (char) ('a' + (ch - 26));
+                chars[off] = '\\';
+                chars[off + 1] = 'u';
+                chars[off + 2] = '0';
+                chars[off + 3] = '0';
+                chars[off + 4] = '1';
+                chars[off + 5] = (char) ('a' + (ch - 26));
+                off += 6;
                 break;
             default:
                 chars[off++] = ch;
                 break;
         }
-        chars[off++] = quote;
+        chars[off] = quote;
+        this.off = off + 1;
     }
 
     @Override
@@ -1239,24 +1493,32 @@ class JSONWriterUTF16
 
     @Override
     public final void writeRaw(char c0, char c1) {
+        int off = this.off;
         if (off + 1 >= chars.length) {
             ensureCapacity(off + 2);
         }
-        chars[off++] = c0;
-        chars[off++] = c1;
+        chars[off] = c0;
+        chars[off + 1] = c1;
+        this.off = off + 2;
     }
 
     @Override
     public final void writeNameRaw(char[] chars) {
         int minCapacity = off + chars.length + 1;
-        if (minCapacity - this.chars.length > 0) {
+        if (minCapacity >= this.chars.length) {
             ensureCapacity(minCapacity);
         }
 
         if (startObject) {
             startObject = false;
         } else {
-            this.chars[off++] = ',';
+            this.chars[off++] = (byte) ',';
+            if (pretty) {
+                this.chars[off++] = (byte) '\n';
+                for (int i = 0; i < indent; ++i) {
+                    this.chars[off++] = (byte) '\t';
+                }
+            }
         }
         System.arraycopy(chars, 0, this.chars, this.off, chars.length);
         off += chars.length;
@@ -1265,7 +1527,7 @@ class JSONWriterUTF16
     @Override
     public final void writeNameRaw(char[] chars, int off, int len) {
         int minCapacity = this.off + len + 1;
-        if (minCapacity - this.chars.length > 0) {
+        if (minCapacity >= this.chars.length) {
             ensureCapacity(minCapacity);
         }
 
@@ -1302,6 +1564,7 @@ class JSONWriterUTF16
 
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
+        int off = this.off;
         int minCapacity = off + value.length * 13 + 2;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
@@ -1324,12 +1587,56 @@ class JSONWriterUTF16
         }
 
         chars[off++] = ']';
+        this.off = off;
+    }
+
+    @Override
+    public final void writeInt8(byte i) {
+        boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
+
+        int off = this.off;
+        int minCapacity = off + 7;
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final char[] chars = this.chars;
+        if (writeAsString) {
+            chars[off++] = quote;
+        }
+        off = IOUtils.writeInt32(chars, off, i);
+        if (writeAsString) {
+            chars[off++] = quote;
+        }
+        this.off = off;
+    }
+
+    @Override
+    public final void writeInt16(short i) {
+        boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
+
+        int off = this.off;
+        int minCapacity = off + 7;
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final char[] chars = this.chars;
+        if (writeAsString) {
+            chars[off++] = quote;
+        }
+        off = IOUtils.writeInt32(chars, off, i);
+        if (writeAsString) {
+            chars[off++] = quote;
+        }
+        this.off = off;
     }
 
     @Override
     public final void writeInt32(int i) {
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
+        int off = this.off;
         int minCapacity = off + 13;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
@@ -1343,6 +1650,7 @@ class JSONWriterUTF16
         if (writeAsString) {
             chars[off++] = quote;
         }
+        this.off = off;
     }
 
     public final void writeInt64(long[] values) {
@@ -1353,6 +1661,8 @@ class JSONWriterUTF16
 
         boolean browserCompatible = (context.features & BrowserCompatible.mask) != 0;
         boolean noneStringAsString = (context.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
+
+        int off = this.off;
         int minCapacity = off + 2 + values.length * 23;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
@@ -1378,17 +1688,21 @@ class JSONWriterUTF16
         }
 
         chars[off++] = ']';
+        this.off = off;
     }
 
     @Override
     public final void writeInt64(long i) {
         boolean writeAsString = (context.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0
                 || ((context.features & BrowserCompatible.mask) != 0 && (i > 9007199254740991L || i < -9007199254740991L));
+
+        int off = this.off;
         int minCapacity = off + 23;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
 
+        final char[] chars = this.chars;
         if (writeAsString) {
             chars[off++] = quote;
         }
@@ -1396,18 +1710,22 @@ class JSONWriterUTF16
         if (writeAsString) {
             chars[off++] = quote;
         }
+        this.off = off;
     }
 
     @Override
     public final void writeFloat(float value) {
         boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
 
+        int off = this.off;
         int minCapacity = off + 15;
         if (writeAsString) {
             minCapacity += 2;
         }
 
         ensureCapacity(minCapacity);
+
+        final char[] chars = this.chars;
         if (writeAsString) {
             chars[off++] = '"';
         }
@@ -1418,6 +1736,7 @@ class JSONWriterUTF16
         if (writeAsString) {
             chars[off++] = '"';
         }
+        this.off = off;
     }
 
     @Override
@@ -1429,11 +1748,13 @@ class JSONWriterUTF16
 
         boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
 
+        int off = this.off;
         int minCapacity = off + values.length * (writeAsString ? 16 : 18) + 1;
-        if (minCapacity - chars.length > 0) {
+        if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
 
+        final char[] chars = this.chars;
         chars[off++] = '[';
         for (int i = 0; i < values.length; i++) {
             if (i != 0) {
@@ -1452,19 +1773,21 @@ class JSONWriterUTF16
                 chars[off++] = '"';
             }
         }
-        chars[off++] = ']';
+        chars[off] = ']';
+        this.off = off + 1;
     }
 
     @Override
     public final void writeDouble(double value) {
         boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
 
+        int off = this.off;
         int minCapacity = off + 24;
         if (writeAsString) {
             minCapacity += 2;
         }
 
-        if (minCapacity > chars.length) {
+        if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
 
@@ -1479,12 +1802,14 @@ class JSONWriterUTF16
         if (writeAsString) {
             chars[off++] = '"';
         }
+        this.off = off;
     }
 
     @Override
     public final void writeDoubleArray(double value0, double value1) {
         boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
 
+        int off = this.off;
         int minCapacity = off + 48 + 3;
         if (writeAsString) {
             minCapacity += 2;
@@ -1492,6 +1817,7 @@ class JSONWriterUTF16
 
         ensureCapacity(minCapacity);
 
+        final char[] chars = this.chars;
         chars[off++] = '[';
 
         if (writeAsString) {
@@ -1514,7 +1840,8 @@ class JSONWriterUTF16
             chars[off++] = '"';
         }
 
-        chars[off++] = ']';
+        chars[off] = ']';
+        this.off = off + 1;
     }
 
     @Override
@@ -1526,8 +1853,9 @@ class JSONWriterUTF16
 
         boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
 
+        int off = this.off;
         int minCapacity = off + values.length * 27 + 1;
-        if (minCapacity - chars.length > 0) {
+        if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
 
@@ -1550,7 +1878,8 @@ class JSONWriterUTF16
                 chars[off++] = '"';
             }
         }
-        chars[off++] = ']';
+        chars[off] = ']';
+        this.off = off + 1;
     }
 
     @Override
@@ -1560,25 +1889,42 @@ class JSONWriterUTF16
             int dayOfMonth,
             int hour,
             int minute,
-            int second) {
-        ensureCapacity(off + 16);
+            int second
+    ) {
+        int off = this.off;
+        int minCapacity = off + 16;
+        if (minCapacity >= this.chars.length) {
+            ensureCapacity(minCapacity);
+        }
 
-        chars[off++] = quote;
-
-        IOUtils.write4(year, chars, off);
-        off += 4;
-        IOUtils.write2(month, chars, off);
-        off += 2;
-        chars[off++] = (char) (dayOfMonth / 10 + '0');
-        chars[off++] = (char) (dayOfMonth % 10 + '0');
-        chars[off++] = (char) (hour / 10 + '0');
-        chars[off++] = (char) (hour % 10 + '0');
-        chars[off++] = (char) (minute / 10 + '0');
-        chars[off++] = (char) (minute % 10 + '0');
-        chars[off++] = (char) (second / 10 + '0');
-        chars[off++] = (char) (second % 10 + '0');
-
-        chars[off++] = quote;
+        final char[] bytes = this.chars;
+        bytes[off] = quote;
+        if (year < 0 || year > 9999) {
+            throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
+        }
+        final int q = year / 1000;
+        int v = DIGITS_K[year - q * 1000];
+        bytes[off + 1] = (char) (byte) (q + '0');
+        bytes[off + 2] = (char) (byte) (v >> 16);
+        bytes[off + 3] = (char) (byte) (v >> 8);
+        bytes[off + 4] = (char) (byte) v;
+        v = DIGITS_K[month];
+        bytes[off + 5] = (char) (byte) (v >> 8);
+        bytes[off + 6] = (char) (byte) v;
+        v = DIGITS_K[dayOfMonth];
+        bytes[off + 7] = (char) (byte) (v >> 8);
+        bytes[off + 8] = (char) (byte) v;
+        v = DIGITS_K[hour];
+        bytes[off + 9] = (char) (byte) (v >> 8);
+        bytes[off + 10] = (char) (byte) v;
+        v = DIGITS_K[minute];
+        bytes[off + 11] = (char) (byte) (v >> 8);
+        bytes[off + 12] = (char) (byte) v;
+        v = DIGITS_K[second];
+        bytes[off + 13] = (char) (byte) (v >> 8);
+        bytes[off + 14] = (char) (byte) v;
+        bytes[off + 15] = quote;
+        this.off = off + 16;
     }
 
     @Override
@@ -1591,27 +1937,40 @@ class JSONWriterUTF16
             int second) {
         ensureCapacity(off + 21);
 
-        chars[off++] = quote;
-
-        IOUtils.write4(year, chars, off);
-        off += 4;
-        chars[off++] = '-';
-        IOUtils.write2(month, chars, off);
-        off += 2;
-        chars[off++] = '-';
-        chars[off++] = (char) (dayOfMonth / 10 + '0');
-        chars[off++] = (char) (dayOfMonth % 10 + '0');
-        chars[off++] = ' ';
-        chars[off++] = (char) (hour / 10 + '0');
-        chars[off++] = (char) (hour % 10 + '0');
-        chars[off++] = ':';
-        chars[off++] = (char) (minute / 10 + '0');
-        chars[off++] = (char) (minute % 10 + '0');
-        chars[off++] = ':';
-        chars[off++] = (char) (second / 10 + '0');
-        chars[off++] = (char) (second % 10 + '0');
-
-        chars[off++] = quote;
+        final char[] chars = this.chars;
+        int off = this.off;
+        chars[off] = quote;
+        if (year < 0 || year > 9999) {
+            throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
+        }
+        final int q = year / 1000;
+        int v = DIGITS_K[year - q * 1000];
+        chars[off + 1] = (char) (byte) (q + '0');
+        chars[off + 2] = (char) (byte) (v >> 16);
+        chars[off + 3] = (char) (byte) (v >> 8);
+        chars[off + 4] = (char) (byte) v;
+        chars[off + 5] = '-';
+        v = DIGITS_K[month];
+        chars[off + 6] = (char) (byte) (v >> 8);
+        chars[off + 7] = (char) (byte) v;
+        chars[off + 8] = '-';
+        v = DIGITS_K[dayOfMonth];
+        chars[off + 9] = (char) (byte) (v >> 8);
+        chars[off + 10] = (char) (byte) v;
+        chars[off + 11] = ' ';
+        v = DIGITS_K[hour];
+        chars[off + 12] = (char) (byte) (v >> 8);
+        chars[off + 13] = (char) (byte) v;
+        chars[off + 14] = ':';
+        v = DIGITS_K[minute];
+        chars[off + 15] = (char) (byte) (v >> 8);
+        chars[off + 16] = (char) (byte) v;
+        chars[off + 17] = ':';
+        v = DIGITS_K[second];
+        chars[off + 18] = (char) (byte) (v >> 8);
+        chars[off + 19] = (char) (byte) v;
+        chars[off + 20] = (char) (byte) quote;
+        this.off = off + 21;
     }
 
     @Override
@@ -1623,51 +1982,39 @@ class JSONWriterUTF16
 
         final Context context = this.context;
         if (context.dateFormat != null) {
-            if (context.dateFormatUnixTime || context.dateFormatMillis) {
-                LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
-                long millis = dateTime.atZone(context.getZoneId())
-                        .toInstant()
-                        .toEpochMilli();
-                writeInt64(context.dateFormatMillis ? millis : millis / 1000);
-                return;
-            }
-
-            DateTimeFormatter formatter = context.getDateFormatter();
-            if (formatter != null) {
-                String str;
-                if (context.isDateFormatHasHour()) {
-                    str = formatter.format(LocalDateTime.of(date, LocalTime.MIN));
-                } else {
-                    str = formatter.format(date);
-                }
-                writeString(str);
+            if (writeLocalDateWithFormat(date, context)) {
                 return;
             }
         }
 
+        int off = this.off;
         int minCapacity = off + 18;
-        if (minCapacity > chars.length) {
+        if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
         final char[] chars = this.chars;
         chars[off++] = quote;
         off = IOUtils.writeLocalDate(chars, off, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
         chars[off++] = quote;
+        this.off = off;
     }
 
     @Override
     public final void writeLocalDateTime(LocalDateTime dateTime) {
+        int off = this.off;
         int minCapacity = off + 38;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
 
+        final char[] chars = this.chars;
         chars[off++] = quote;
         LocalDate localDate = dateTime.toLocalDate();
         off = IOUtils.writeLocalDate(chars, off, localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
         chars[off++] = ' ';
         off = IOUtils.writeLocalTime(chars, off, dateTime.toLocalTime());
-        chars[off++] = quote;
+        chars[off] = quote;
+        this.off = off + 1;
     }
 
     @Override
@@ -1689,46 +2036,58 @@ class JSONWriterUTF16
             zonelen = 0;
         }
 
+        int off = this.off;
         int minCapacity = off + 25 + zonelen;
         if (off + minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
 
-        chars[off++] = quote;
-        IOUtils.write4(year, chars, off);
-        off += 4;
-        chars[off++] = '-';
-        IOUtils.write2(month, chars, off);
-        off += 2;
-        chars[off++] = '-';
-        IOUtils.write2(dayOfMonth, chars, off);
-        off += 2;
-        chars[off++] = timeZone ? 'T' : ' ';
-        IOUtils.write2(hour, chars, off);
-        off += 2;
-        chars[off++] = ':';
-        IOUtils.write2(minute, chars, off);
-        off += 2;
-        chars[off++] = ':';
-        IOUtils.write2(second, chars, off);
-        off += 2;
+        final char[] bytes = this.chars;
+        bytes[off] = quote;
+        off = IOUtils.writeInt32(bytes, off + 1, year);
+        bytes[off] = '-';
+        int v = DIGITS_K[month];
+        bytes[off + 1] = (char) (byte) (v >> 8);
+        bytes[off + 2] = (char) (byte) v;
+        bytes[off + 3] = '-';
+        v = DIGITS_K[dayOfMonth];
+        bytes[off + 4] = (char) (byte) (v >> 8);
+        bytes[off + 5] = (char) (byte) v;
+        bytes[off + 6] = (char) (byte) (timeZone ? 'T' : ' ');
+        v = DIGITS_K[hour];
+        bytes[off + 7] = (char) (byte) (v >> 8);
+        bytes[off + 8] = (char) (byte) v;
+        bytes[off + 9] = ':';
+        v = DIGITS_K[minute];
+        bytes[off + 10] = (char) (byte) (v >> 8);
+        bytes[off + 11] = (char) (byte) v;
+        bytes[off + 12] = ':';
+        v = DIGITS_K[second];
+        bytes[off + 13] = (char) (byte) (v >> 8);
+        bytes[off + 14] = (char) (byte) v;
+        off += 15;
 
         if (millis > 0) {
-            chars[off++] = '.';
+            bytes[off++] = '.';
             int div = millis / 10;
             int div2 = div / 10;
             final int rem1 = millis - div * 10;
 
             if (rem1 != 0) {
-                IOUtils.write3(millis, chars, off);
+                v = DIGITS_K[millis];
+                bytes[off] = (char) (byte) (v >> 16);
+                bytes[off + 1] = (char) (byte) (v >> 8);
+                bytes[off + 2] = (char) (byte) v;
                 off += 3;
             } else {
                 final int rem2 = div - div2 * 10;
                 if (rem2 != 0) {
-                    IOUtils.write2(div, chars, off);
+                    v = DIGITS_K[div];
+                    bytes[off] = (char) (byte) (v >> 8);
+                    bytes[off + 1] = (char) (byte) v;
                     off += 2;
                 } else {
-                    chars[off++] = (char) (div2 + '0');
+                    bytes[off++] = (char) (byte) (div2 + '0');
                 }
             }
         }
@@ -1736,74 +2095,107 @@ class JSONWriterUTF16
         if (timeZone) {
             int offset = offsetSeconds / 3600;
             if (offsetSeconds == 0) {
-                chars[off++] = 'Z';
+                bytes[off++] = 'Z';
             } else {
                 int offsetAbs = Math.abs(offset);
 
                 if (offset >= 0) {
-                    chars[off++] = '+';
+                    bytes[off++] = '+';
                 } else {
-                    chars[off++] = '-';
+                    bytes[off++] = '-';
                 }
-                IOUtils.write2(offsetAbs, chars, off);
+                v = DIGITS_K[offsetAbs];
+                bytes[off] = (char) (byte) (v >> 8);
+                bytes[off + 1] = (char) (byte) v;
                 off += 2;
 
-                chars[off++] = ':';
+                bytes[off++] = ':';
                 int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
                 if (offsetMinutes < 0) {
                     offsetMinutes = -offsetMinutes;
                 }
-                IOUtils.write2(offsetMinutes, chars, off);
+                v = DIGITS_K[offsetMinutes];
+                bytes[off] = (char) (byte) (v >> 8);
+                bytes[off + 1] = (char) (byte) v;
                 off += 2;
             }
         }
-        chars[off++] = quote;
+        bytes[off] = quote;
+        this.off = off + 1;
     }
 
     @Override
     public final void writeDateYYYMMDD8(int year, int month, int dayOfMonth) {
-        ensureCapacity(off + 10);
+        int off = this.off;
+        int minCapacity = off + 10;
+        if (minCapacity >= this.chars.length) {
+            ensureCapacity(minCapacity);
+        }
 
-        chars[off++] = quote;
-        IOUtils.write4(year, chars, off);
-        off += 4;
-        IOUtils.write2(month, chars, off);
-        off += 2;
-        IOUtils.write2(dayOfMonth, chars, off);
-        off += 2;
-        chars[off++] = quote;
+        final char[] chars = this.chars;
+        chars[off] = quote;
+        if (year < 0 || year > 9999) {
+            throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
+        }
+        final int q = year / 1000;
+        int v = DIGITS_K[year - q * 1000];
+        chars[off + 1] = (char) (byte) (q + '0');
+        chars[off + 2] = (char) (byte) (v >> 16);
+        chars[off + 3] = (char) (byte) (v >> 8);
+        chars[off + 4] = (char) (byte) v;
+        v = DIGITS_K[month];
+        chars[off + 5] = (char) (byte) (v >> 8);
+        chars[off + 6] = (char) (byte) v;
+        v = DIGITS_K[dayOfMonth];
+        chars[off + 7] = (char) (byte) (v >> 8);
+        chars[off + 8] = (char) (byte) v;
+        chars[off + 9] = quote;
+        this.off = off + 10;
     }
 
     @Override
     public final void writeDateYYYMMDD10(int year, int month, int dayOfMonth) {
+        int off = this.off;
         int minCapacity = off + 13;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
 
+        final char[] chars = this.chars;
         chars[off++] = quote;
         off = IOUtils.writeLocalDate(chars, off, year, month, dayOfMonth);
-        chars[off++] = quote;
+        chars[off] = quote;
+        this.off = off + 1;
     }
 
     @Override
     public final void writeTimeHHMMSS8(int hour, int minute, int second) {
-        ensureCapacity(off + 10);
+        int off = this.off;
+        int minCapacity = off + 10;
+        if (minCapacity >= this.chars.length) {
+            ensureCapacity(minCapacity);
+        }
 
-        chars[off++] = quote;
-        IOUtils.write2(hour, chars, off);
-        off += 2;
-        chars[off++] = ':';
-        IOUtils.write2(minute, chars, off);
-        off += 2;
-        chars[off++] = ':';
-        IOUtils.write2(second, chars, off);
-        off += 2;
-        chars[off++] = quote;
+        final char[] chars = this.chars;
+        chars[off] = (char) (byte) quote;
+        int v = DIGITS_K[hour];
+        chars[off + 1] = (char) (byte) (v >> 8);
+        chars[off + 2] = (char) (byte) v;
+        chars[off + 3] = ':';
+        v = DIGITS_K[minute];
+        chars[off + 4] = (char) (byte) (v >> 8);
+        chars[off + 5] = (char) (byte) v;
+        chars[off + 6] = ':';
+        v = DIGITS_K[second];
+        chars[off + 7] = (char) (byte) (v >> 8);
+        chars[off + 8] = (char) (byte) v;
+        chars[off + 9] = (char) (byte) quote;
+        this.off = off + 10;
     }
 
     @Override
     public final void writeLocalTime(LocalTime time) {
+        int off = this.off;
         int minCapacity = off + 20;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
@@ -1812,7 +2204,8 @@ class JSONWriterUTF16
         final char[] chars = this.chars;
         chars[off++] = quote;
         off = IOUtils.writeLocalTime(chars, off, time);
-        chars[off++] = quote;
+        chars[off] = quote;
+        this.off = off + 1;
     }
 
     @Override
@@ -1836,8 +2229,9 @@ class JSONWriterUTF16
             zoneSize = 2 + zoneIdLength;
         }
 
+        int off = this.off;
         int minCapacity = off + zoneSize + 38;
-        if (minCapacity > chars.length) {
+        if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
 
@@ -1858,7 +2252,8 @@ class JSONWriterUTF16
             off += zoneIdLength;
             chars[off++] = ']';
         }
-        chars[off++] = quote;
+        chars[off] = quote;
+        this.off = off + 1;
     }
 
     @Override
@@ -1877,8 +2272,9 @@ class JSONWriterUTF16
             zoneId = "Z";
         }
 
+        int off = this.off;
         int minCapacity = off + zoneIdLength + 40;
-        if (minCapacity > chars.length) {
+        if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
 
@@ -1886,7 +2282,6 @@ class JSONWriterUTF16
         chars[off++] = quote;
         LocalDateTime ldt = dateTime.toLocalDateTime();
         LocalDate date = ldt.toLocalDate();
-        // writeLocalDate0(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth());
         off = IOUtils.writeLocalDate(chars, off, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
         chars[off++] = 'T';
         LocalTime time = ldt.toLocalTime();
@@ -1896,7 +2291,8 @@ class JSONWriterUTF16
         } else {
             zoneId.getChars(0, zoneIdLength, chars, off);
         }
-        chars[off++] = quote;
+        chars[off] = quote;
+        this.off = off + 1;
     }
 
     @Override
@@ -2228,7 +2624,7 @@ class JSONWriterUTF16
         if (!special) {
             // inline ensureCapacity
             int minCapacity = this.off + chars.length + 2;
-            if (minCapacity - this.chars.length > 0) {
+            if (minCapacity > this.chars.length) {
                 ensureCapacity(minCapacity);
             }
 
@@ -2259,7 +2655,7 @@ class JSONWriterUTF16
         if (!special) {
             // inline ensureCapacity
             int minCapacity = this.off + len + 2;
-            if (minCapacity - this.chars.length > 0) {
+            if (minCapacity >= this.chars.length) {
                 ensureCapacity(minCapacity);
             }
 

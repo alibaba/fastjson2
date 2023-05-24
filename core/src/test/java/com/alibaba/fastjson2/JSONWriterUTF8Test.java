@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.NullAsDefaultValue;
+import static com.alibaba.fastjson2.JSONWriter.Feature.PrettyFormat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -493,7 +494,7 @@ public class JSONWriterUTF8Test {
             assertEquals("12", writer.toString());
         }
         {
-            JSONWriter writer = JSONWriter.ofUTF8(JSONWriter.Feature.PrettyFormat);
+            JSONWriter writer = JSONWriter.ofUTF8(PrettyFormat);
             writer.writeRaw('1', '2');
             assertEquals("12", writer.toString());
             assertEquals(
@@ -521,7 +522,7 @@ public class JSONWriterUTF8Test {
         Bean bean = new Bean();
         bean.date = new Date(1679826319000L);
         byte[] bytes = JSON.toJSONBytes(bean);
-        byte[] bytes2 = JSON.toJSONBytes(bean, JSONWriter.Feature.PrettyFormat);
+        byte[] bytes2 = JSON.toJSONBytes(bean, PrettyFormat);
         Bean bean1 = JSON.parseObject(bytes, Bean.class);
         Bean bean2 = JSON.parseObject(bytes2, Bean.class);
         assertEquals(bean.date.getTime(), bean1.date.getTime());
@@ -538,7 +539,7 @@ public class JSONWriterUTF8Test {
         Bean1 bean = new Bean1();
         bean.date = new Date(1679760000000L);
         byte[] bytes = JSON.toJSONBytes(bean);
-        byte[] bytes2 = JSON.toJSONBytes(bean, JSONWriter.Feature.PrettyFormat);
+        byte[] bytes2 = JSON.toJSONBytes(bean, PrettyFormat);
         Bean1 bean1 = JSON.parseObject(bytes, Bean1.class);
         Bean1 bean2 = JSON.parseObject(bytes2, Bean1.class);
         assertEquals(bean.date.getTime(), bean1.date.getTime());
@@ -555,7 +556,7 @@ public class JSONWriterUTF8Test {
         Bean2 bean = new Bean2();
         bean.dateTime = LocalDateTime.now();
         byte[] bytes = JSON.toJSONBytes(bean);
-        byte[] bytes2 = JSON.toJSONBytes(bean, JSONWriter.Feature.PrettyFormat);
+        byte[] bytes2 = JSON.toJSONBytes(bean, PrettyFormat);
         Bean2 bean1 = JSON.parseObject(bytes, Bean2.class);
         Bean2 bean2 = JSON.parseObject(bytes2, Bean2.class);
         assertEquals(bean.dateTime, bean1.dateTime);
@@ -571,7 +572,7 @@ public class JSONWriterUTF8Test {
         Bean3 bean = new Bean3();
         bean.dateTime = ZonedDateTime.now();
         byte[] bytes = JSON.toJSONBytes(bean);
-        byte[] bytes2 = JSON.toJSONBytes(bean, JSONWriter.Feature.PrettyFormat);
+        byte[] bytes2 = JSON.toJSONBytes(bean, PrettyFormat);
         Bean3 bean1 = JSON.parseObject(bytes, Bean3.class);
         Bean3 bean2 = JSON.parseObject(bytes2, Bean3.class);
         assertEquals(bean.dateTime, bean1.dateTime);
@@ -590,7 +591,7 @@ public class JSONWriterUTF8Test {
         Bean4 bean = new Bean4();
         bean.time = LocalTime.of(18, 38, 1, 423000000);
         byte[] bytes = JSON.toJSONBytes(bean);
-        byte[] bytes2 = JSON.toJSONBytes(bean, JSONWriter.Feature.PrettyFormat);
+        byte[] bytes2 = JSON.toJSONBytes(bean, PrettyFormat);
         assertEquals("{\"time\":\"18:38:01.423\"}", new String(bytes));
         Bean4 bean1 = JSON.parseObject(bytes, Bean4.class);
         Bean4 bean2 = JSON.parseObject(bytes2, Bean4.class);
@@ -636,11 +637,9 @@ public class JSONWriterUTF8Test {
 
     @Test
     public void writeCharsNull1() {
-        JSONWriter jsonWriter = new JSONWriterPretty(
-                new JSONWriterUTF8(
-                        JSONFactory.createWriteContext(NullAsDefaultValue)
-                )
-        );
+        JSONWriter jsonWriter = new JSONWriterUTF8(
+                        JSONFactory.createWriteContext(NullAsDefaultValue, PrettyFormat)
+                );
         jsonWriter.writeString((char[]) null);
         assertEquals("\"\"", jsonWriter.toString());
     }
@@ -663,7 +662,7 @@ public class JSONWriterUTF8Test {
     public void writeStringLatin1Pretty() {
         byte[] bytes = new byte[1024 * 128];
         Arrays.fill(bytes, (byte) '\\');
-        JSONWriter jsonWriter = new JSONWriterPretty(new JSONWriterUTF8(JSONFactory.createWriteContext()));
+        JSONWriter jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext(JSONWriter.Feature.PrettyFormat));
         jsonWriter.writeStringLatin1(bytes);
         String json = jsonWriter.toString();
         String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);

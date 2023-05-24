@@ -17,7 +17,7 @@ public class EishayFuryParseTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayFuryParse-jsonb millis : " + millis);
-            // zulu8.62.0.19 : 2513
+            // zulu8.62.0.19 : 2513 2541
             // zulu11.52.13 : 2352
             // zulu17.38.21 : 2336
         }

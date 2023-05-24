@@ -1531,8 +1531,9 @@ public abstract class BeanUtils {
                     } else if (ch == '_' && i + 1 < methodNameLength
                             && (c1 = methodName.charAt(i + 1)) >= 'a'
                             && c1 <= 'z') {
-                        buf[off++] = ch;
-                        buf[off++] = (char) (c1 - 32);
+                        buf[off] = ch;
+                        buf[off + 1] = (char) (c1 - 32);
+                        off += 2;
                         ++i;
                     } else {
                         buf[off++] = ch;

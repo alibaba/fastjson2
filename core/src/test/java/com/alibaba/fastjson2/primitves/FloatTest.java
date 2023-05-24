@@ -79,7 +79,8 @@ public class FloatTest {
 
     @Test
     public void test_jsonb_value() {
-        for (Float id : values) {
+        for (int i = 0; i < values.length; i++) {
+            Float id = values[i];
             byte[] jsonbBytes = JSONB.toBytes(id);
             Float id2 = JSONB.parseObject(jsonbBytes, Float.class);
             assertEquals(id, id2);

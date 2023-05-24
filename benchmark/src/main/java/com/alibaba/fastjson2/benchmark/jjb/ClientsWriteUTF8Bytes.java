@@ -44,6 +44,10 @@ public class ClientsWriteUTF8Bytes {
         bh.consume(JSON.toJSONBytes(clients));
     }
 
+    public void fastjson2_str(Blackhole bh) {
+        bh.consume(JSON.toJSONString(clients));
+    }
+
     @Benchmark
     public void dsljson(Blackhole bh) throws IOException {
         ByteArrayOutputStream bytesOut = bytesOutLocal.get();

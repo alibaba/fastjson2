@@ -59,93 +59,20 @@ class FieldWriterEnum
             return;
         }
 
-        long features = this.features | jsonWriter.getFeatures();
+        long features = jsonWriter.getFeatures(this.features);
         boolean usingOrdinal = (features & (JSONWriter.Feature.WriteEnumUsingToString.mask | JSONWriter.Feature.WriteEnumsUsingName.mask)) == 0;
         boolean usingToString = (features & JSONWriter.Feature.WriteEnumUsingToString.mask) != 0;
 
         int ordinal = e.ordinal();
         SymbolTable symbolTable = jsonWriter.symbolTable;
         if (symbolTable != null && usingOrdinal && !usingToString) {
-            int symbolTableIdentity = System.identityHashCode(symbolTable);
-            long enumNameCache = hashCodesSymbolCache[ordinal];
-            int enumSymbol;
-            if (enumNameCache == 0) {
-                enumSymbol = symbolTable.getOrdinalByHashCode(hashCodes[ordinal]);
-                hashCodesSymbolCache[ordinal] = ((long) enumSymbol << 32) | symbolTableIdentity;
-            } else {
-                int identity = (int) enumNameCache;
-                if (identity == symbolTableIdentity) {
-                    enumSymbol = (int) (enumNameCache >> 32);
-                } else {
-                    enumSymbol = symbolTable.getOrdinalByHashCode(hashCodes[ordinal]);
-                    hashCodesSymbolCache[ordinal] = ((long) enumSymbol << 32) | symbolTableIdentity;
-                }
-            }
-
-            int namingOrdinal = enumSymbol;
-            if (namingOrdinal >= 0) {
-                int symbol;
-                if (nameSymbolCache == 0) {
-                    symbol = symbolTable.getOrdinalByHashCode(hashCode);
-                    if (symbol != -1) {
-                        nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
-                    }
-                } else {
-                    int identity = (int) nameSymbolCache;
-                    if (identity == symbolTableIdentity) {
-                        symbol = (int) (nameSymbolCache >> 32);
-                    } else {
-                        symbol = symbolTable.getOrdinalByHashCode(hashCode);
-                        nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
-                    }
-                }
-
-                if (symbol != -1) {
-                    jsonWriter.writeSymbol(-symbol);
-                } else {
-                    if (nameJSONB == null) {
-                        nameJSONB = JSONB.toBytes(fieldName);
-                    }
-                    jsonWriter.writeNameRaw(nameJSONB, hashCode);
-                }
-
-                jsonWriter.writeRaw(JSONB.Constants.BC_STR_ASCII);
-                jsonWriter.writeInt32(-namingOrdinal);
+            if (writeSymbolNameOrdinal(jsonWriter, ordinal, symbolTable)) {
                 return;
             }
         }
 
         if (usingToString) {
-            int symbol;
-            if (symbolTable != null) {
-                int symbolTableIdentity = System.identityHashCode(symbolTable);
-
-                if (nameSymbolCache == 0) {
-                    symbol = symbolTable.getOrdinalByHashCode(hashCode);
-                    nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
-                } else {
-                    int identity = (int) nameSymbolCache;
-                    if (identity == symbolTableIdentity) {
-                        symbol = (int) (nameSymbolCache >> 32);
-                    } else {
-                        symbol = symbolTable.getOrdinalByHashCode(hashCode);
-                        nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
-                    }
-                }
-            } else {
-                symbol = -1;
-            }
-
-            if (symbol != -1) {
-                jsonWriter.writeSymbol(-symbol);
-            } else {
-                if (nameJSONB == null) {
-                    nameJSONB = JSONB.toBytes(fieldName);
-                }
-                jsonWriter.writeNameRaw(nameJSONB, hashCode);
-            }
-
-            jsonWriter.writeString(e.toString());
+            writeJSONBToString(jsonWriter, e, symbolTable);
             return;
         }
 
@@ -172,9 +99,6 @@ class FieldWriterEnum
             if (symbol != -1) {
                 jsonWriter.writeSymbol(-symbol);
             } else {
-                if (nameJSONB == null) {
-                    nameJSONB = JSONB.toBytes(fieldName);
-                }
                 jsonWriter.writeNameRaw(nameJSONB, hashCode);
             }
 
@@ -184,6 +108,84 @@ class FieldWriterEnum
 
         writeFieldName(jsonWriter);
         jsonWriter.writeString(e.name());
+    }
+
+    private boolean writeSymbolNameOrdinal(JSONWriter jsonWriter, int ordinal, SymbolTable symbolTable) {
+        int symbolTableIdentity = System.identityHashCode(symbolTable);
+        long enumNameCache = hashCodesSymbolCache[ordinal];
+        int enumSymbol;
+        if (enumNameCache == 0) {
+            enumSymbol = symbolTable.getOrdinalByHashCode(hashCodes[ordinal]);
+            hashCodesSymbolCache[ordinal] = ((long) enumSymbol << 32) | symbolTableIdentity;
+        } else {
+            int identity = (int) enumNameCache;
+            if (identity == symbolTableIdentity) {
+                enumSymbol = (int) (enumNameCache >> 32);
+            } else {
+                enumSymbol = symbolTable.getOrdinalByHashCode(hashCodes[ordinal]);
+                hashCodesSymbolCache[ordinal] = ((long) enumSymbol << 32) | symbolTableIdentity;
+            }
+        }
+
+        int namingOrdinal = enumSymbol;
+        if (namingOrdinal >= 0) {
+            int symbol;
+            if (nameSymbolCache == 0) {
+                symbol = symbolTable.getOrdinalByHashCode(hashCode);
+                if (symbol != -1) {
+                    nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
+                }
+            } else {
+                int identity = (int) nameSymbolCache;
+                if (identity == symbolTableIdentity) {
+                    symbol = (int) (nameSymbolCache >> 32);
+                } else {
+                    symbol = symbolTable.getOrdinalByHashCode(hashCode);
+                    nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
+                }
+            }
+
+            if (symbol != -1) {
+                jsonWriter.writeSymbol(-symbol);
+            } else {
+                jsonWriter.writeNameRaw(nameJSONB, hashCode);
+            }
+
+            jsonWriter.writeRaw(JSONB.Constants.BC_STR_ASCII);
+            jsonWriter.writeInt32(-namingOrdinal);
+            return true;
+        }
+        return false;
+    }
+
+    private void writeJSONBToString(JSONWriter jsonWriter, Enum e, SymbolTable symbolTable) {
+        int symbol;
+        if (symbolTable != null) {
+            int symbolTableIdentity = System.identityHashCode(symbolTable);
+
+            if (nameSymbolCache == 0) {
+                symbol = symbolTable.getOrdinalByHashCode(hashCode);
+                nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
+            } else {
+                int identity = (int) nameSymbolCache;
+                if (identity == symbolTableIdentity) {
+                    symbol = (int) (nameSymbolCache >> 32);
+                } else {
+                    symbol = symbolTable.getOrdinalByHashCode(hashCode);
+                    nameSymbolCache = ((long) symbol << 32) | symbolTableIdentity;
+                }
+            }
+        } else {
+            symbol = -1;
+        }
+
+        if (symbol != -1) {
+            jsonWriter.writeSymbol(-symbol);
+        } else {
+            jsonWriter.writeNameRaw(nameJSONB, hashCode);
+        }
+
+        jsonWriter.writeString(e.toString());
     }
 
     @Override

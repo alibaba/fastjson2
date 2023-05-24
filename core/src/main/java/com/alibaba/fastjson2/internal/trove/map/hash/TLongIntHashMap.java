@@ -30,7 +30,7 @@ import java.util.function.BiFunction;
  * @author Rob Eden
  * @author Jeff Randall
  */
-public class TLongIntHashMap {
+public final class TLongIntHashMap {
     static final int largestPrime;
     static final int[] primeCapacities = {
             //chunk #1
@@ -117,27 +117,24 @@ public class TLongIntHashMap {
     public TLongIntHashMap() {
         int capacity = 37;
         maxSize = 18;
-        free = capacity; // reset the free element count
+        free = 37; // reset the free element count
 
         set = new long[capacity];
         values = new int[capacity];
     }
 
     public TLongIntHashMap(long key, int value) {
-        int capacity = 37;
+        // int capacity = 37;
         maxSize = 18;
-
-        set = new long[capacity];
-        values = new int[capacity];
-
-        int hash = ((int) (key ^ (key >>> 32))) & 0x7fffffff;
-        int index = hash % set.length;
+        set = new long[37];
+        values = new int[37];
         consumeFreeSlot = true;
+
+        // int hash = ((int) (key ^ (key >>> 32))) & 0x7fffffff;
+        int index = (((int) (key ^ (key >>> 32))) & 0x7fffffff) % set.length;
         set[index] = key;
-
         values[index] = value;
-
-        free = capacity - 1;
+        free = 36; // capacity - 1;
         size = 1;
     }
 
@@ -262,17 +259,17 @@ public class TLongIntHashMap {
 //                index = insertKeyRehash(key, index, hash);
                 {
                     // compute the double hash
-                    final int length = set.length;
-                    int probe = 1 + (hash % (length - 2));
                     final int loopIndex = index;
 
                     /**
                      * Look until FREE slot or we start to loop
                      */
                     do {
-                        index -= probe;
+//                        int probe = 1 + (hash % (set.length - 2));
+//                        index -= (probe);
+                        index -= (1 + (hash % (set.length - 2)));
                         if (index < 0) {
-                            index += length;
+                            index += set.length;
                         }
                         setKey = set[index];
 
@@ -317,25 +314,8 @@ public class TLongIntHashMap {
                 // if we've exhausted the free spots, rehash to the same capacity,
                 // which will free up any stale removed slots for reuse.
                 int capacity = set.length;
-                int newCapacity = size > maxSize ? nextPrime(capacity << 1) : capacity;
 //                rehash(newCapacity);
-                {
-                    int oldCapacity = set.length;
-
-                    long[] oldKeys = set;
-                    int[] oldVals = values;
-
-                    set = new long[newCapacity];
-                    values = new int[newCapacity];
-
-                    for (int i = oldCapacity; i-- > 0; ) {
-                        if (oldKeys[i] != 0) {
-                            long o = oldKeys[i];
-                            index = insertKey(o);
-                            values[index] = oldVals[i];
-                        }
-                    }
-                }
+                rehash(capacity);
 
                 capacity = set.length;
                 // computeMaxSize(capacity);
@@ -345,6 +325,25 @@ public class TLongIntHashMap {
         }
 
         return value;
+    }
+
+    private void rehash(int capacity) {
+        int newCapacity = size > maxSize ? nextPrime(capacity << 1) : capacity;
+
+        int oldCapacity = set.length;
+
+        long[] oldKeys = set;
+        int[] oldVals = values;
+
+        set = new long[newCapacity];
+        values = new int[newCapacity];
+
+        for (int i = oldCapacity; i-- > 0; ) {
+            long key = oldKeys[i];
+            if (key != 0) {
+                values[insertKey(key)] = oldVals[i];
+            }
+        }
     }
 
     public int get(long key) {
