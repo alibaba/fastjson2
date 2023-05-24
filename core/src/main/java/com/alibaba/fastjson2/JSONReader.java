@@ -544,6 +544,10 @@ public abstract class JSONReader
         throw new JSONException("UnsupportedOperation");
     }
 
+    public boolean nextIfMatchTypedAny() {
+        throw new JSONException("UnsupportedOperation");
+    }
+
     public abstract boolean nextIfMatchIdent(char c0, char c1, char c2);
 
     public abstract boolean nextIfMatchIdent(char c0, char c1, char c2, char c3);
@@ -2741,6 +2745,7 @@ public abstract class JSONReader
             if (INCUBATOR_VECTOR_READER_CREATOR_ASCII != null) {
                 return INCUBATOR_VECTOR_READER_CREATOR_ASCII.create(context, null, utf8Bytes, 0, utf8Bytes.length);
             }
+
             return new JSONReaderASCII(context, null, utf8Bytes, 0, utf8Bytes.length);
         }
 
@@ -4131,5 +4136,23 @@ public abstract class JSONReader
 
             return new BigInteger(bytes);
         }
+    }
+
+    public ObjectReader getObjectReaderAutoType(long typeHash, Class expectClass, long features) {
+        ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
+        if (autoTypeObjectReader != null) {
+            return autoTypeObjectReader;
+        }
+
+        String typeName = getString();
+        if (context.autoTypeBeforeHandler != null) {
+            Class<?> autoTypeClass = context.autoTypeBeforeHandler.apply(typeName, expectClass, features);
+            if (autoTypeClass != null) {
+                boolean fieldBased = (features & Feature.FieldBased.mask) != 0;
+                return context.provider.getObjectReader(autoTypeClass, fieldBased);
+            }
+        }
+
+        return context.provider.getObjectReader(typeName, expectClass, context.features | features);
     }
 }

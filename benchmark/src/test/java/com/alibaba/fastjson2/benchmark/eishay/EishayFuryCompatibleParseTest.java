@@ -17,9 +17,9 @@ public class EishayFuryCompatibleParseTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayFuryParse-fastjson2_jsonb millis : " + millis);
-            // zulu8.68.0.21_AppleM1Max : 3824 3849
-            // zulu11.62.17_AppleM1Max : 3023 3196 3174
-            // zulu17.40.19_AppleM1Max : 3109 3074 3140
+            // zulu8.68.0.21_AppleM1Max : 3824 3849 3678
+            // zulu11.62.17_AppleM1Max : 3023 3196 3174 2888
+            // zulu17.40.19_AppleM1Max : 3109 3074 3140 2875
             // oracle-jdk-17.0.6 3052
 
             // jdk1.8.0_361_x86_i9 7343

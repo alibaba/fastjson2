@@ -60,12 +60,17 @@ public class Base64 {
         int d = 0;
         for (int cc = 0, eLen = (len / 3) * 3; d < eLen; ) {
             // Assemble three bytes into an int from four "valid" characters.
-            int i = IA[chars[sIx++]] << 18 | IA[chars[sIx++]] << 12 | IA[chars[sIx++]] << 6 | IA[chars[sIx++]];
+            int i = IA[chars[sIx]] << 18
+                    | IA[chars[sIx + 1]] << 12
+                    | IA[chars[sIx + 2]] << 6
+                    | IA[chars[sIx + 3]];
+            sIx += 4;
 
             // Add the bytes
-            bytes[d++] = (byte) (i >> 16);
-            bytes[d++] = (byte) (i >> 8);
-            bytes[d++] = (byte) i;
+            bytes[d] = (byte) (i >> 16);
+            bytes[d + 1] = (byte) (i >> 8);
+            bytes[d + 2] = (byte) i;
+            d += 3;
 
             // If line separator, jump over it.
             if (sepCnt > 0 && ++cc == 19) {
@@ -119,12 +124,17 @@ public class Base64 {
         int d = 0;
         for (int cc = 0, eLen = (len / 3) * 3; d < eLen; ) {
             // Assemble three bytes into an int from four "valid" characters.
-            int i = IA[chars.charAt(sIx++)] << 18 | IA[chars.charAt(sIx++)] << 12 | IA[chars.charAt(sIx++)] << 6 | IA[chars.charAt(sIx++)];
+            int i = IA[chars.charAt(sIx)] << 18
+                    | IA[chars.charAt(sIx + 1)] << 12
+                    | IA[chars.charAt(sIx + 2)] << 6
+                    | IA[chars.charAt(sIx + 3)];
+            sIx += 4;
 
             // Add the bytes
-            bytes[d++] = (byte) (i >> 16);
-            bytes[d++] = (byte) (i >> 8);
-            bytes[d++] = (byte) i;
+            bytes[d] = (byte) (i >> 16);
+            bytes[d + 1] = (byte) (i >> 8);
+            bytes[d + 2] = (byte) i;
+            d += 3;
 
             // If line separator, jump over it.
             if (sepCnt > 0 && ++cc == 19) {
@@ -190,13 +200,17 @@ public class Base64 {
         int d = 0;
         for (int cc = 0, eLen = (len / 3) * 3; d < eLen; ) {
             // Assemble three bytes into an int from four "valid" characters.
-            int i = IA[s.charAt(sIx++)] << 18 | IA[s.charAt(sIx++)] << 12 | IA[s.charAt(sIx++)] << 6
-                    | IA[s.charAt(sIx++)];
+            int i = IA[s.charAt(sIx)] << 18
+                    | IA[s.charAt(sIx + 1)] << 12
+                    | IA[s.charAt(sIx + 2)] << 6
+                    | IA[s.charAt(sIx + 3)];
+            sIx += 4;
 
             // Add the bytes
-            dArr[d++] = (byte) (i >> 16);
-            dArr[d++] = (byte) (i >> 8);
-            dArr[d++] = (byte) i;
+            dArr[d] = (byte) (i >> 16);
+            dArr[d + 1] = (byte) (i >> 8);
+            dArr[d + 2] = (byte) i;
+            d += 3;
 
             // If line separator, jump over it.
             if (sepCnt > 0 && ++cc == 19) {

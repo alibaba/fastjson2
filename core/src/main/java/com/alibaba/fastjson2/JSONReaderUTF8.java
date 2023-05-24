@@ -6182,7 +6182,7 @@ class JSONReaderUTF8
     }
 
     @Override
-    public final boolean isReference() {
+    public boolean isReference() {
         // should be codeSize <= FreqInlineSize 325
         final byte[] bytes = this.bytes;
         int ch = this.ch;
@@ -6206,16 +6206,14 @@ class JSONReaderUTF8
         }
 
         int quote = ch;
-        if (quote != '"' && quote != '\'' || this.offset + 5 >= end) {
-            return false;
-        }
-
-        if (bytes[offset + 1] != '$'
+        if ((quote != '"' && quote != '\'')
+                || this.offset + 5 >= end
+                || (bytes[offset + 1] != '$'
                 || bytes[offset + 2] != 'r'
                 || bytes[offset + 3] != 'e'
                 || bytes[offset + 4] != 'f'
                 || bytes[offset + 5] != quote
-                || offset + 6 >= end
+                || offset + 6 >= end)
         ) {
             return false;
         }

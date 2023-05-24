@@ -2627,48 +2627,18 @@ public interface JSON {
      * @throws JSONException If a serialization error occurs
      */
     static String toJSONString(Object object) {
-        JSONWriter.Context writeContext = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider);
-
-        boolean pretty = (writeContext.features & JSONWriter.Feature.PrettyFormat.mask) != 0;
-
-        JSONWriter jsonWriter;
-        if (JVM_VERSION == 8) {
-            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
-                jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
-            } else {
-                jsonWriter = new JSONWriterUTF16JDK8(writeContext);
-            }
-        } else if ((writeContext.features & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
-            if (STRING_VALUE != null) {
-                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
-                } else {
-                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
-                }
-            } else {
-                jsonWriter = new JSONWriterUTF8(writeContext);
-            }
-        } else {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
-            } else {
-                jsonWriter = new JSONWriterUTF16(writeContext);
-            }
-        }
-
-        try (JSONWriter writer = pretty ?
-                new JSONWriterPretty(jsonWriter) : jsonWriter) {
+        try (JSONWriter writer = JSONWriter.of()) {
             if (object == null) {
                 writer.writeNull();
             } else {
                 writer.rootObject = object;
                 writer.path = JSONWriter.Path.ROOT;
 
+                JSONWriter.Context context = writer.context;
                 Class<?> valueClass = object.getClass();
-                if (valueClass == JSONObject.class) {
+                if (valueClass == JSONObject.class && context.features == 0) {
                     writer.write((JSONObject) object);
                 } else {
-                    JSONWriter.Context context = writer.context;
                     boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
                     ObjectWriter<?> objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
                     objectWriter.write(writer, object, null, null, 0);
@@ -2715,37 +2685,7 @@ public interface JSON {
      * @throws JSONException If a serialization error occurs
      */
     static String toJSONString(Object object, JSONWriter.Feature... features) {
-        JSONWriter.Context writeContext = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features);
-
-        boolean pretty = (writeContext.features & JSONWriter.Feature.PrettyFormat.mask) != 0;
-
-        JSONWriter jsonWriter;
-        if (JVM_VERSION == 8) {
-            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
-                jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
-            } else {
-                jsonWriter = new JSONWriterUTF16JDK8(writeContext);
-            }
-        } else if ((writeContext.features & JSONWriter.Feature.OptimizedForAscii.mask) != 0) {
-            if (STRING_VALUE != null) {
-                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
-                } else {
-                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
-                }
-            } else {
-                jsonWriter = new JSONWriterUTF8(writeContext);
-            }
-        } else {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
-            } else {
-                jsonWriter = new JSONWriterUTF16(writeContext);
-            }
-        }
-
-        try (JSONWriter writer = pretty ?
-                new JSONWriterPretty(jsonWriter) : jsonWriter) {
+        try (JSONWriter writer = JSONWriter.of(features)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -2753,8 +2693,8 @@ public interface JSON {
                 writer.path = JSONWriter.Path.ROOT;
                 Class<?> valueClass = object.getClass();
 
-                boolean fieldBased = (writeContext.features & JSONWriter.Feature.FieldBased.mask) != 0;
-                ObjectWriter<?> objectWriter = writeContext.provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                boolean fieldBased = (writer.context.features & JSONWriter.Feature.FieldBased.mask) != 0;
+                ObjectWriter<?> objectWriter = writer.context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
                 objectWriter.write(writer, object, null, null, 0);
             }
             return writer.toString();
@@ -2893,8 +2833,12 @@ public interface JSON {
                 writer.path = JSONWriter.Path.ROOT;
 
                 Class<?> valueClass = object.getClass();
-                ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
-                objectWriter.write(writer, object, null, null, 0);
+                if (valueClass == JSONObject.class && writer.context.features == 0) {
+                    writer.write((JSONObject) object);
+                } else {
+                    ObjectWriter<?> objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                    objectWriter.write(writer, object, null, null, 0);
+                }
             }
             return writer.getBytes();
         }

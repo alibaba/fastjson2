@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLongArray;
@@ -74,122 +75,143 @@ public class FieldWriterObject<T>
 
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
+        final Class initValueClass = this.initValueClass;
         if (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
-            ObjectWriter formattedWriter = null;
-            if (BeanUtils.isExtendedMap(valueClass) && SUPER.equals(fieldName)) {
-                JSONWriter.Context context = jsonWriter.context;
-                boolean fieldBased = ((features | context.getFeatures()) & JSONWriter.Feature.FieldBased.mask) != 0;
-                formattedWriter = context.provider.getObjectWriter(fieldType, fieldClass, fieldBased);
-                if (initObjectWriter == null) {
-                    boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
-                    if (success) {
-                        initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
-                    }
-                }
-                return formattedWriter;
-            }
-
-            if (format == null) {
-                JSONWriter.Context context = jsonWriter.context;
-                boolean fieldBased = ((features | context.getFeatures()) & JSONWriter.Feature.FieldBased.mask) != 0;
-                formattedWriter = context.provider.getObjectWriterFromCache(valueClass, valueClass, fieldBased);
-            }
-
-            if (valueClass == Float[].class) {
-                if (decimalFormat != null) {
-                    formattedWriter = new ObjectWriterArrayFinal(Float.class, decimalFormat);
-                } else {
-                    formattedWriter = ObjectWriterArrayFinal.FLOAT_ARRAY;
-                }
-            } else if (valueClass == Double[].class) {
-                if (decimalFormat != null) {
-                    formattedWriter = new ObjectWriterArrayFinal(Double.class, decimalFormat);
-                } else {
-                    formattedWriter = ObjectWriterArrayFinal.DOUBLE_ARRAY;
-                }
-            } else if (valueClass == float[].class) {
-                if (decimalFormat != null) {
-                    formattedWriter = new ObjectWriterImplFloatValueArray(decimalFormat);
-                } else {
-                    formattedWriter = ObjectWriterImplFloatValueArray.INSTANCE;
-                }
-            } else if (valueClass == double[].class) {
-                if (decimalFormat != null) {
-                    formattedWriter = new ObjectWriterImplDoubleValueArray(decimalFormat);
-                } else {
-                    formattedWriter = ObjectWriterImplDoubleValueArray.INSTANCE;
-                }
-            }
-
-            if (formattedWriter == null) {
-                formattedWriter = FieldWriter.getObjectWriter(fieldType, fieldClass, format, null, valueClass);
-            }
-
-            if (formattedWriter == null) {
-                boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
-                formattedWriter = jsonWriter.getObjectWriter(valueClass);
-                if (success) {
-                    initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
-                }
-                return formattedWriter;
-            } else {
-                if (initObjectWriter == null) {
-                    boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
-                    if (success) {
-                        initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
-                    }
-                }
-                return formattedWriter;
-            }
+            return getObjectWriterVoid(jsonWriter, valueClass);
         } else {
-            boolean typeMatch = initValueClass == valueClass || (initValueClass == Map.class && initValueClass.isAssignableFrom(valueClass));
+            boolean typeMatch = initValueClass == valueClass
+                    || (initValueClass == Map.class && initValueClass.isAssignableFrom(valueClass));
             if (!typeMatch && initValueClass.isPrimitive()) {
-                typeMatch = (initValueClass == int.class && valueClass == Integer.class)
-                        || (initValueClass == long.class && valueClass == Long.class)
-                        || (initValueClass == boolean.class && valueClass == Boolean.class)
-                        || (initValueClass == short.class && valueClass == Short.class)
-                        || (initValueClass == byte.class && valueClass == Byte.class)
-                        || (initValueClass == float.class && valueClass == Float.class)
-                        || (initValueClass == double.class && valueClass == Double.class)
-                        || (initValueClass == char.class && valueClass == Character.class);
+                typeMatch = typeMatch(initValueClass, valueClass);
             }
 
             if (typeMatch) {
                 ObjectWriter objectWriter;
                 if (initObjectWriter == null) {
-                    if (Map.class.isAssignableFrom(valueClass)) {
-                        if (fieldClass.isAssignableFrom(valueClass)) {
-                            objectWriter = ObjectWriterImplMap.of(fieldType, valueClass);
-                        } else {
-                            objectWriter = ObjectWriterImplMap.of(valueClass);
-                        }
-                    } else {
-                        objectWriter = jsonWriter.getObjectWriter(valueClass);
-                    }
-                    initObjectWriterUpdater.compareAndSet(this, null, objectWriter);
+                    objectWriter = getObjectWriterTypeMatch(jsonWriter, valueClass);
                 } else {
                     objectWriter = initObjectWriter;
                 }
                 return objectWriter;
             } else {
-                if (Map.class.isAssignableFrom(valueClass)) {
-                    if (fieldClass.isAssignableFrom(valueClass)) {
-                        return ObjectWriterImplMap.of(fieldType, valueClass);
-                    } else {
-                        return ObjectWriterImplMap.of(valueClass);
-                    }
-                } else {
-                    ObjectWriter objectWriter = null;
-                    if (format != null) {
-                        objectWriter = FieldWriter.getObjectWriter(fieldType, fieldClass, format, null, valueClass);
-                    }
-                    if (objectWriter == null) {
-                        objectWriter = jsonWriter.getObjectWriter(valueClass);
-                    }
-                    return objectWriter;
-                }
+                return getObjectWriterTypeNotMatch(jsonWriter, valueClass);
             }
         }
+    }
+
+    private ObjectWriter getObjectWriterVoid(JSONWriter jsonWriter, Class valueClass) {
+        ObjectWriter formattedWriter = null;
+        if (BeanUtils.isExtendedMap(valueClass) && SUPER.equals(fieldName)) {
+            JSONWriter.Context context = jsonWriter.context;
+            boolean fieldBased = ((features | context.getFeatures()) & JSONWriter.Feature.FieldBased.mask) != 0;
+            formattedWriter = context.provider.getObjectWriter(fieldType, fieldClass, fieldBased);
+            if (initObjectWriter == null) {
+                boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
+                if (success) {
+                    initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
+                }
+            }
+            return formattedWriter;
+        }
+
+        if (format == null) {
+            JSONWriter.Context context = jsonWriter.context;
+            boolean fieldBased = ((features | context.getFeatures()) & JSONWriter.Feature.FieldBased.mask) != 0;
+            formattedWriter = context.provider.getObjectWriterFromCache(valueClass, valueClass, fieldBased);
+        }
+
+        final DecimalFormat decimalFormat = this.decimalFormat;
+        if (valueClass == Float[].class) {
+            if (decimalFormat != null) {
+                formattedWriter = new ObjectWriterArrayFinal(Float.class, decimalFormat);
+            } else {
+                formattedWriter = ObjectWriterArrayFinal.FLOAT_ARRAY;
+            }
+        } else if (valueClass == Double[].class) {
+            if (decimalFormat != null) {
+                formattedWriter = new ObjectWriterArrayFinal(Double.class, decimalFormat);
+            } else {
+                formattedWriter = ObjectWriterArrayFinal.DOUBLE_ARRAY;
+            }
+        } else if (valueClass == float[].class) {
+            if (decimalFormat != null) {
+                formattedWriter = new ObjectWriterImplFloatValueArray(decimalFormat);
+            } else {
+                formattedWriter = ObjectWriterImplFloatValueArray.INSTANCE;
+            }
+        } else if (valueClass == double[].class) {
+            if (decimalFormat != null) {
+                formattedWriter = new ObjectWriterImplDoubleValueArray(decimalFormat);
+            } else {
+                formattedWriter = ObjectWriterImplDoubleValueArray.INSTANCE;
+            }
+        }
+
+        if (formattedWriter == null) {
+            formattedWriter = FieldWriter.getObjectWriter(fieldType, fieldClass, format, null, valueClass);
+        }
+
+        if (formattedWriter == null) {
+            boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
+            formattedWriter = jsonWriter.getObjectWriter(valueClass);
+            if (success) {
+                initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
+            }
+            return formattedWriter;
+        } else {
+            if (initObjectWriter == null) {
+                boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
+                if (success) {
+                    initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
+                }
+            }
+            return formattedWriter;
+        }
+    }
+
+    static boolean typeMatch(Class initValueClass, Class valueClass) {
+        return (initValueClass == int.class && valueClass == Integer.class)
+                || (initValueClass == long.class && valueClass == Long.class)
+                || (initValueClass == boolean.class && valueClass == Boolean.class)
+                || (initValueClass == short.class && valueClass == Short.class)
+                || (initValueClass == byte.class && valueClass == Byte.class)
+                || (initValueClass == float.class && valueClass == Float.class)
+                || (initValueClass == double.class && valueClass == Double.class)
+                || (initValueClass == char.class && valueClass == Character.class);
+    }
+
+    private ObjectWriter getObjectWriterTypeNotMatch(JSONWriter jsonWriter, Class valueClass) {
+        if (Map.class.isAssignableFrom(valueClass)) {
+            if (fieldClass.isAssignableFrom(valueClass)) {
+                return ObjectWriterImplMap.of(fieldType, valueClass);
+            } else {
+                return ObjectWriterImplMap.of(valueClass);
+            }
+        } else {
+            ObjectWriter objectWriter = null;
+            if (format != null) {
+                objectWriter = FieldWriter.getObjectWriter(fieldType, fieldClass, format, null, valueClass);
+            }
+            if (objectWriter == null) {
+                objectWriter = jsonWriter.getObjectWriter(valueClass);
+            }
+            return objectWriter;
+        }
+    }
+
+    private ObjectWriter getObjectWriterTypeMatch(JSONWriter jsonWriter, Class valueClass) {
+        ObjectWriter objectWriter;
+        if (Map.class.isAssignableFrom(valueClass)) {
+            if (fieldClass.isAssignableFrom(valueClass)) {
+                objectWriter = ObjectWriterImplMap.of(fieldType, valueClass);
+            } else {
+                objectWriter = ObjectWriterImplMap.of(valueClass);
+            }
+        } else {
+            objectWriter = jsonWriter.getObjectWriter(valueClass);
+        }
+        initObjectWriterUpdater.compareAndSet(this, null, objectWriter);
+        return objectWriter;
     }
 
     @Override

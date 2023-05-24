@@ -282,11 +282,7 @@ class ObjectReaderImplMapTyped
                         && name.equals(getTypeKey())
                 ) {
                     long typeHashCode = jsonReader.readTypeHashCode();
-                    ObjectReader objectReaderAutoType = context.getObjectReaderAutoType(typeHashCode);
-                    if (objectReaderAutoType == null) {
-                        String typeName = jsonReader.getString();
-                        objectReaderAutoType = context.getObjectReaderAutoType(typeName, mapType, features);
-                    }
+                    ObjectReader objectReaderAutoType = jsonReader.getObjectReaderAutoType(typeHashCode, mapType, features);
                     if (objectReaderAutoType != null) {
                         if (objectReaderAutoType instanceof ObjectReaderImplMap) {
                             if (!object.getClass().equals(((ObjectReaderImplMap) objectReaderAutoType).instanceType)) {
@@ -312,11 +308,7 @@ class ObjectReaderImplMapTyped
                     name = jsonReader.readFieldName();
                     if (name.equals(getTypeKey())) {
                         long typeHashCode = jsonReader.readTypeHashCode();
-                        ObjectReader objectReaderAutoType = context.getObjectReaderAutoType(typeHashCode);
-                        if (objectReaderAutoType == null) {
-                            String typeName = jsonReader.getString();
-                            objectReaderAutoType = context.getObjectReaderAutoType(typeName, mapType, features);
-                        }
+                        ObjectReader objectReaderAutoType = jsonReader.getObjectReaderAutoType(typeHashCode, mapType, features);
                         if (objectReaderAutoType != null) {
                             if (objectReaderAutoType instanceof ObjectReaderImplMap) {
                                 if (!object.getClass().equals(((ObjectReaderImplMap) objectReaderAutoType).instanceType)) {

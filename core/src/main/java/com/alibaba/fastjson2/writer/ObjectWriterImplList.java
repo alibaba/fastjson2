@@ -101,7 +101,6 @@ final class ObjectWriterImplList
             return;
         }
 
-        Type fieldItemType = null;
         Class fieldItemClass = null;
         Class fieldClass = null;
         if (fieldType instanceof Class) {
@@ -112,17 +111,16 @@ final class ObjectWriterImplList
             ParameterizedType parameterizedType = (ParameterizedType) fieldType;
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
             if (actualTypeArguments.length == 1) {
-                fieldItemType = actualTypeArguments[0];
+                Type fieldItemType = actualTypeArguments[0];
+                if (fieldItemType instanceof Class) {
+                    fieldItemClass = (Class) fieldItemType;
+                }
             }
 
             Type rawType = parameterizedType.getRawType();
             if (rawType instanceof Class) {
                 fieldClass = (Class) rawType;
             }
-        }
-
-        if (fieldItemType instanceof Class) {
-            fieldItemClass = (Class) fieldItemType;
         }
 
         Class<?> objectClass = object.getClass();

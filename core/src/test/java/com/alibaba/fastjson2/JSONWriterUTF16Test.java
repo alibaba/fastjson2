@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.NullAsDefaultValue;
+import static com.alibaba.fastjson2.JSONWriter.Feature.PrettyFormat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -418,7 +419,7 @@ public class JSONWriterUTF16Test {
             assertEquals("12", writer.toString());
         }
         {
-            JSONWriter writer = JSONWriter.ofUTF16(JSONWriter.Feature.PrettyFormat);
+            JSONWriter writer = JSONWriter.ofUTF16(PrettyFormat);
             writer.writeRaw('1', '2');
             assertEquals("12", writer.toString());
             assertEquals(
@@ -452,7 +453,7 @@ public class JSONWriterUTF16Test {
         assertFalse(jsonWriter.isUseSingleQuotes());
 
         String str2;
-        JSONWriter jsonWriter1 = JSONWriter.ofUTF16(JSONWriter.Feature.PrettyFormat);
+        JSONWriter jsonWriter1 = JSONWriter.ofUTF16(PrettyFormat);
         jsonWriter1.writeAny(bean);
         str2 = jsonWriter1.toString();
 
@@ -501,11 +502,10 @@ public class JSONWriterUTF16Test {
 
     @Test
     public void writeCharsNull1() {
-        JSONWriter jsonWriter = new JSONWriterPretty(
+        JSONWriter jsonWriter =
                 new JSONWriterUTF16(
-                        JSONFactory.createWriteContext(NullAsDefaultValue)
-                )
-        );
+                        JSONFactory.createWriteContext(NullAsDefaultValue, PrettyFormat)
+                );
         jsonWriter.writeString((char[]) null);
         assertEquals("\"\"", jsonWriter.toString());
     }
@@ -528,7 +528,7 @@ public class JSONWriterUTF16Test {
     public void writeStringLatin1Pretty() {
         byte[] bytes = new byte[1024 * 128];
         Arrays.fill(bytes, (byte) '\\');
-        JSONWriter jsonWriter = new JSONWriterPretty(new JSONWriterUTF16(JSONFactory.createWriteContext()));
+        JSONWriter jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext(JSONWriter.Feature.PrettyFormat));
         jsonWriter.writeStringLatin1(bytes);
         String json = jsonWriter.toString();
         String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);

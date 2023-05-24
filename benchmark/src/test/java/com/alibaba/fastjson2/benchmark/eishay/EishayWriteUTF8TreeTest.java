@@ -2,27 +2,27 @@ package com.alibaba.fastjson2.benchmark.eishay;
 
 import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
-public class EishayWriteStringTreeTest {
-    static final EishayWriteStringTree benchmark = new EishayWriteStringTree();
+public class EishayWriteUTF8TreeTest {
+    static final EishayWriteUTF8BytesTree benchmark = new EishayWriteUTF8BytesTree();
     static final int LOOP = 1_000_000;
 
     public static void fastjson2() {
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < LOOP; ++i) {
                 benchmark.fastjson2(BH);
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
-            // zulu8.62.0.19 : 507 479
-            // zulu11.52.13 : 523
-            // zulu17.40.19 : 539 518 428 420
-            // zulu17.40.19_vec : 461
+            // zulu8.62.0.19 :
+            // zulu11.52.13 :
+            // zulu17.40.19 :
+            // zulu17.40.19_vec :
         }
     }
 
     public static void fastjson2_ReferenceDetection() {
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < LOOP; ++i) {
                 benchmark.fastjson2_ReferenceDetection(BH);
@@ -36,7 +36,7 @@ public class EishayWriteStringTreeTest {
     }
 
     public static void fastjson2_jsonb() {
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < LOOP; ++i) {
                 benchmark.fastjson2_jsonb(BH);
@@ -50,7 +50,7 @@ public class EishayWriteStringTreeTest {
     }
 
     public static void jackson() throws Exception {
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < LOOP; ++i) {
                 benchmark.jackson(BH);
@@ -64,7 +64,7 @@ public class EishayWriteStringTreeTest {
     }
 
     public static void wastjson() throws Exception {
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 1000 * 1000; ++i) {
                 benchmark.wastjson(BH);
@@ -74,20 +74,6 @@ public class EishayWriteStringTreeTest {
             // zulu8.62.0.19 : 452
             // zulu11.52.13 : 475
             // zulu17.32.13 : 528
-        }
-    }
-
-    public static void gson() throws Exception {
-        for (int j = 0; j < 10; j++) {
-            long start = System.currentTimeMillis();
-            for (int i = 0; i < 1000 * 1000; ++i) {
-                benchmark.gson(BH);
-            }
-            long millis = System.currentTimeMillis() - start;
-            System.out.println("jackson millis : " + millis);
-            // zulu8.62.0.19 :
-            // zulu11.52.13 : 1408
-            // zulu17.32.13 :
         }
     }
 

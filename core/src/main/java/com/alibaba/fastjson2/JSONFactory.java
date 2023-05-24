@@ -3,7 +3,6 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
@@ -306,107 +305,6 @@ public final class JSONFactory {
     static final class CacheItem {
         volatile char[] chars;
         volatile byte[] bytes;
-    }
-
-    static final class SymbolTableImpl
-            implements SymbolTable {
-        private final String[] names;
-        private final long hashCode64;
-        private final short[] mapping;
-
-        private final long[] hashCodes;
-        private final long[] hashCodesOrigin;
-
-        SymbolTableImpl(String... input) {
-            Set<String> set = new TreeSet<>();
-            for (String name : input) {
-                set.add(name);
-            }
-            names = new String[set.size()];
-            Iterator<String> it = set.iterator();
-
-            for (int i = 0; i < names.length; i++) {
-                if (it.hasNext()) {
-                    names[i] = it.next();
-                }
-            }
-
-            long[] hashCodes = new long[names.length];
-            for (int i = 0; i < names.length; i++) {
-                long hashCode = Fnv.hashCode64(names[i]);
-                hashCodes[i] = hashCode;
-            }
-            this.hashCodesOrigin = hashCodes;
-
-            this.hashCodes = Arrays.copyOf(hashCodes, hashCodes.length);
-            Arrays.sort(this.hashCodes);
-
-            mapping = new short[this.hashCodes.length];
-            for (int i = 0; i < hashCodes.length; i++) {
-                long hashCode = hashCodes[i];
-                int index = Arrays.binarySearch(this.hashCodes, hashCode);
-                mapping[index] = (short) i;
-            }
-
-            long hashCode64 = Fnv.MAGIC_HASH_CODE;
-            for (long hashCode : hashCodes) {
-                hashCode64 ^= hashCode;
-                hashCode64 *= Fnv.MAGIC_PRIME;
-            }
-            this.hashCode64 = hashCode64;
-        }
-
-        @Override
-        public int size() {
-            return names.length;
-        }
-
-        @Override
-        public long hashCode64() {
-            return hashCode64;
-        }
-
-        @Override
-        public String getNameByHashCode(long hashCode) {
-            int m = Arrays.binarySearch(hashCodes, hashCode);
-            if (m < 0) {
-                return null;
-            }
-
-            int index = this.mapping[m];
-            return names[index];
-        }
-
-        @Override
-        public int getOrdinalByHashCode(long hashCode) {
-            int m = Arrays.binarySearch(hashCodes, hashCode);
-            if (m < 0) {
-                return -1;
-            }
-
-            return this.mapping[m] + 1;
-        }
-
-        @Override
-        public int getOrdinal(String name) {
-            long hashCode = Fnv.hashCode64(name);
-            int m = Arrays.binarySearch(hashCodes, hashCode);
-            if (m < 0) {
-                return -1;
-            }
-
-            return this.mapping[m] + 1;
-        }
-
-        @Override
-        public String getName(int ordinal) {
-            return names[ordinal - 1];
-        }
-
-        @Override
-        public long getHashCode(int ordinal) {
-            return hashCodesOrigin[ordinal - 1];
-        }
     }
 
     static final Properties DEFAULT_PROPERTIES;

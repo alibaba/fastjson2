@@ -17,6 +17,8 @@ import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.DateUtils.*;
+import static com.alibaba.fastjson2.util.IOUtils.getInt;
+import static com.alibaba.fastjson2.util.IOUtils.getLong;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
@@ -156,16 +158,14 @@ class JSONReaderJSONB
         }
 
         if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-            return ((type - BC_INT32_SHORT_ZERO) << 16)
-                    + ((bytes[offset++] & 0xFF) << 8)
-                    + (bytes[offset++] & 0xFF);
+            int len = getInt3(bytes, offset, type);
+            offset += 2;
+            return len;
         }
 
         if (type == BC_INT32) {
-            int len = (bytes[offset++] << 24)
-                    + ((bytes[offset++] & 0xFF) << 16)
-                    + ((bytes[offset++] & 0xFF) << 8)
-                    + (bytes[offset++] & 0xFF);
+            int len = getInt(bytes, offset);
+            offset += 4;
             if (len > 1024 * 1024 * 256) {
                 throw new JSONException("input length overflow");
             }
@@ -173,6 +173,12 @@ class JSONReaderJSONB
         }
 
         throw new JSONException("not support length type : " + typeName(type));
+    }
+
+    static int getInt3(byte[] bytes, int offset, int type) {
+        return ((type - BC_INT32_SHORT_ZERO) << 16)
+                + ((bytes[offset] & 0xFF) << 8)
+                + (bytes[offset + 1] & 0xFF);
     }
 
     @Override
@@ -318,14 +324,7 @@ class JSONReaderJSONB
                 } else if (valueType == BC_INT64) {
                     offset++;
                     long int64Value =
-                            ((bytes[offset + 7] & 0xFFL)) +
-                                    ((bytes[offset + 6] & 0xFFL) << 8) +
-                                    ((bytes[offset + 5] & 0xFFL) << 16) +
-                                    ((bytes[offset + 4] & 0xFFL) << 24) +
-                                    ((bytes[offset + 3] & 0xFFL) << 32) +
-                                    ((bytes[offset + 2] & 0xFFL) << 40) +
-                                    ((bytes[offset + 1] & 0xFFL) << 48) +
-                                    ((long) (bytes[offset]) << 56);
+                            getLong(bytes, offset);
                     offset += 8;
                     value = int64Value;
                 } else if (valueType >= BC_ARRAY_FIX_MIN && valueType <= BC_ARRAY) {
@@ -387,23 +386,16 @@ class JSONReaderJSONB
                         value = list;
                     }
                 } else if (valueType >= BC_INT32_BYTE_MIN && valueType <= BC_INT32_BYTE_MAX) {
-                    offset++;
                     value = ((valueType - BC_INT32_BYTE_ZERO) << 8)
-                            + (bytes[offset++] & 0xFF);
+                            + (bytes[offset + 1] & 0xFF);
+                    offset += 2;
                 } else if (valueType >= BC_INT32_SHORT_MIN && valueType <= BC_INT32_SHORT_MAX) {
-                    offset++;
-                    int int32Value = ((valueType - BC_INT32_SHORT_ZERO) << 16)
-                            + ((bytes[offset++] & 0xFF) << 8)
-                            + (bytes[offset++] & 0xFF);
+                    int int32Value = getInt3(bytes, offset + 1, valueType);
+                    offset += 3;
                     value = new Integer(int32Value);
                 } else if (valueType == BC_INT32) {
-                    offset++;
-                    int int32Value =
-                            ((bytes[offset + 3] & 0xFF)) +
-                                    ((bytes[offset + 2] & 0xFF) << 8) +
-                                    ((bytes[offset + 1] & 0xFF) << 16) +
-                                    ((bytes[offset]) << 24);
-                    offset += 4;
+                    int int32Value = getInt(bytes, offset + 1);
+                    offset += 5;
                     value = new Integer(int32Value);
                 } else {
                     value = readAny();
@@ -495,33 +487,18 @@ class JSONReaderJSONB
                 return (short) ((bytes[offset++] << 8)
                         + (bytes[offset++] & 0xFF));
             case BC_INT32: {
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 return new Integer(int32Value);
             }
             case BC_INT64_INT: {
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 return new Long(int32Value);
             }
             case BC_INT64: {
                 long int64Value =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 return Long.valueOf(int64Value);
             }
@@ -533,11 +510,7 @@ class JSONReaderJSONB
                 return new BigInteger(bytes);
             }
             case BC_FLOAT: {
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 return Float.intBitsToFloat(int32Value);
             }
@@ -546,14 +519,7 @@ class JSONReaderJSONB
             }
             case BC_DOUBLE: {
                 long int64Value =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 return Double.longBitsToDouble(int64Value);
             }
@@ -662,20 +628,12 @@ class JSONReaderJSONB
                 return binary;
             }
             case BC_TIMESTAMP_MINUTES: {
-                long minutes =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                long minutes = getInt(bytes, offset);
                 offset += 4;
                 return new Date(minutes * 60L * 1000L);
             }
             case BC_TIMESTAMP_SECONDS: {
-                long seconds =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                long seconds = getInt(bytes, offset);
                 offset += 4;
                 return new Date(seconds * 1000);
             }
@@ -743,14 +701,7 @@ class JSONReaderJSONB
             }
             case BC_TIMESTAMP_MILLIS: {
                 long millis =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 return new Date(millis);
             }
@@ -905,9 +856,9 @@ class JSONReaderJSONB
                 }
 
                 if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-                    return ((type - BC_INT32_SHORT_ZERO) << 16)
-                            + ((bytes[offset++] & 0xFF) << 8)
-                            + (bytes[offset++] & 0xFF);
+                    int int3 = getInt3(bytes, offset, type);
+                    offset += 2;
+                    return int3;
                 }
 
                 if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
@@ -1049,14 +1000,7 @@ class JSONReaderJSONB
             } else if (valueType == BC_INT64) {
                 offset++;
                 long int64Value =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 value = int64Value;
             } else if (valueType >= BC_ARRAY_FIX_MIN && valueType <= BC_ARRAY) {
@@ -1109,23 +1053,16 @@ class JSONReaderJSONB
                     value = list;
                 }
             } else if (valueType >= BC_INT32_BYTE_MIN && valueType <= BC_INT32_BYTE_MAX) {
-                offset++;
                 value = ((valueType - BC_INT32_BYTE_ZERO) << 8)
-                        + (bytes[offset++] & 0xFF);
+                        + (bytes[offset + 1] & 0xFF);
+                offset += 2;
             } else if (valueType >= BC_INT32_SHORT_MIN && valueType <= BC_INT32_SHORT_MAX) {
-                offset++;
-                int int32Value = ((valueType - BC_INT32_SHORT_ZERO) << 16)
-                        + ((bytes[offset++] & 0xFF) << 8)
-                        + (bytes[offset++] & 0xFF);
-                value = new Integer(int32Value);
+                int int3 = getInt3(bytes, offset + 1, valueType);
+                offset += 3;
+                value = new Integer(int3);
             } else if (valueType == BC_INT32) {
-                offset++;
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
-                offset += 4;
+                int int32Value = getInt(bytes, offset + 1);
+                offset += 5;
                 value = new Integer(int32Value);
             } else if (valueType == BC_REFERENCE) {
                 String reference = readReference();
@@ -1208,26 +1145,27 @@ class JSONReaderJSONB
     @Override
     public final ObjectReader checkAutoType(Class expectClass, long expectClassHash, long features) {
         ObjectReader autoTypeObjectReader = null;
-        type = bytes[offset];
+        byte type = bytes[offset];
         if (type == BC_TYPED_ANY) {
             offset++;
 
-            long typeHash = readTypeHashCode();
+            final long typeHash = readTypeHashCode();
+            ObjectReaderProvider provider = context.provider;
 
             if (expectClassHash == typeHash) {
                 ObjectReader objectReader = context.getObjectReader(expectClass);
                 Class objectClass = objectReader.getObjectClass();
                 if (objectClass != null && objectClass == expectClass) {
-                    context.getProvider().registerIfAbsent(typeHash, objectReader);
+                    provider.registerIfAbsent(typeHash, objectReader);
                     return objectReader;
                 }
             }
 
-            if (context.autoTypeBeforeHandler != null) {
-                Class<?> objectClass = context.autoTypeBeforeHandler.apply(typeHash, expectClass, features);
+            AutoTypeBeforeHandler autoTypeBeforeHandler = context.autoTypeBeforeHandler;
+            if (autoTypeBeforeHandler != null) {
+                Class<?> objectClass = autoTypeBeforeHandler.apply(typeHash, expectClass, features);
                 if (objectClass == null) {
-                    String typeName = getString();
-                    objectClass = context.autoTypeBeforeHandler.apply(typeName, expectClass, features);
+                    objectClass = autoTypeBeforeHandler.apply(getString(), expectClass, features);
                 }
                 if (objectClass != null) {
                     ObjectReader objectReader = context.getObjectReader(objectClass);
@@ -1237,59 +1175,69 @@ class JSONReaderJSONB
                 }
             }
 
-            boolean isSupportAutoType = ((context.features | features) & Feature.SupportAutoType.mask) != 0;
+            final long features2 = context.features | features;
+            boolean isSupportAutoType = (features2 & Feature.SupportAutoType.mask) != 0;
             if (!isSupportAutoType) {
-                String typeName = getString();
-                throw new JSONException("autoType not support input " + typeName);
+                autoTypeError();
             }
 
-            ObjectReaderProvider provider = context.provider;
             autoTypeObjectReader = provider.getObjectReader(typeHash);
 
             if (autoTypeObjectReader != null) {
                 Class objectClass = autoTypeObjectReader.getObjectClass();
                 if (objectClass != null) {
-                    ClassLoader objectClassLoader = objectClass.getClassLoader();
-                    if (objectClassLoader != null) {
-                        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-                        if (objectClassLoader != contextClassLoader) {
-                            String typeName = getString();
-                            Class contextClass = TypeUtils.getMapping(typeName);
-                            if (contextClass == null) {
-                                try {
-                                    if (contextClassLoader == null) {
-                                        contextClassLoader = JSON.class.getClassLoader();
-                                    }
-                                    contextClass = contextClassLoader.loadClass(typeName);
-                                } catch (ClassNotFoundException ignored) {
-                                }
-                            }
-
-                            if (contextClass != null && !objectClass.equals(contextClass)) {
-                                autoTypeObjectReader = getObjectReader(contextClass);
-                            }
+                    ClassLoader classLoader = objectClass.getClassLoader();
+                    if (classLoader != null) {
+                        ClassLoader tcl = Thread.currentThread().getContextClassLoader();
+                        if (classLoader != tcl) {
+                            autoTypeObjectReader = getObjectReaderContext(autoTypeObjectReader, objectClass, tcl);
                         }
                     }
                 }
             }
 
             if (autoTypeObjectReader == null) {
-                String typeName = getString();
-                autoTypeObjectReader = provider.getObjectReader(typeName, expectClass, context.features | features);
+                autoTypeObjectReader = provider.getObjectReader(getString(), expectClass, features2);
+                if (autoTypeObjectReader == null) {
+                    autoTypeError();
+                }
             }
 
-            if (autoTypeObjectReader == null) {
-                throw new JSONException("auotype not support : " + getString());
-            }
+            this.type = bytes[offset];
+        }
+        return autoTypeObjectReader;
+    }
 
-            type = bytes[offset];
+    final void autoTypeError() {
+        throw new JSONException("auotype not support : " + getString());
+    }
+
+    private ObjectReader getObjectReaderContext(
+            ObjectReader autoTypeObjectReader,
+            Class objectClass,
+            ClassLoader contextClassLoader
+    ) {
+        String typeName = getString();
+        Class contextClass = TypeUtils.getMapping(typeName);
+        if (contextClass == null) {
+            try {
+                if (contextClassLoader == null) {
+                    contextClassLoader = JSON.class.getClassLoader();
+                }
+                contextClass = contextClassLoader.loadClass(typeName);
+            } catch (ClassNotFoundException ignored) {
+            }
+        }
+
+        if (contextClass != null && !objectClass.equals(contextClass)) {
+            autoTypeObjectReader = getObjectReader(contextClass);
         }
         return autoTypeObjectReader;
     }
 
     @Override
     public final int startArray() {
-        type = bytes[offset++];
+        final byte type = this.type = bytes[offset++];
 
         if (type == BC_NULL) {
             return -1;
@@ -1568,6 +1516,7 @@ class JSONReaderJSONB
     public final long readTypeHashCode() {
         strtype = bytes[offset];
 
+        final byte[] bytes = this.bytes;
         boolean typeSymbol = strtype == BC_SYMBOL;
         if (typeSymbol) {
             offset++;
@@ -2875,24 +2824,23 @@ class JSONReaderJSONB
 
     @Override
     public final String readString() {
-        strtype = bytes[offset++];
+        final byte strtype = bytes[offset++];
+        this.strtype = strtype;
         if (strtype == BC_NULL) {
             return null;
         }
 
         strBegin = offset;
-        Charset charset;
-        String str;
+        String str = null;
+        boolean ascii = false;
         if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII) {
+            ascii = true;
+            final int strlen;
             if (strtype == BC_STR_ASCII) {
                 byte strType = bytes[offset];
                 if (strType >= BC_INT32_NUM_MIN && strType <= BC_INT32_NUM_MAX) {
                     offset++;
                     strlen = strType;
-                } else if (strType >= BC_INT32_BYTE_MIN && strType <= BC_INT32_BYTE_MAX) {
-                    offset++;
-                    strlen = ((strType - BC_INT32_BYTE_ZERO) << 8)
-                            + (bytes[offset++] & 0xFF);
                 } else {
                     strlen = readLength();
                 }
@@ -2900,309 +2848,74 @@ class JSONReaderJSONB
             } else {
                 strlen = strtype - BC_STR_ASCII_FIX_MIN;
             }
+            this.strlen = strlen;
 
             if (strlen >= 0) {
-                if (strlen == 1) {
-                    str = TypeUtils.toString((char) (bytes[offset] & 0xff));
-                    offset++;
-                    return str;
-                } else if (strlen == 2) {
-                    str = TypeUtils.toString(
-                            (char) (bytes[offset] & 0xff),
-                            (char) (bytes[offset + 1] & 0xff)
-                    );
-                    offset += 2;
-                    return str;
-                } else if (STRING_CREATOR_JDK8 != null) {
+                if (STRING_CREATOR_JDK8 != null) {
                     char[] chars = new char[strlen];
                     for (int i = 0; i < strlen; ++i) {
                         chars[i] = (char) (bytes[offset + i] & 0xff);
                     }
                     offset += strlen;
                     str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                    if ((context.features & Feature.TrimString.mask) != 0) {
-                        str = str.trim();
-                    }
-
-                    return str;
                 } else if (STRING_CREATOR_JDK11 != null) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
                     str = STRING_CREATOR_JDK11.apply(chars, LATIN1);
                     offset += strlen;
-
-                    if ((context.features & Feature.TrimString.mask) != 0) {
-                        str = str.trim();
-                    }
-
-                    return str;
                 }
             }
 
+            if (str != null) {
+                if ((context.features & Feature.TrimString.mask) != 0) {
+                    str = str.trim();
+                }
+                return str;
+            }
+        }
+
+        return readStringNonAscii(str, ascii);
+    }
+
+    private String readStringNonAscii(String str, boolean ascii) {
+        Charset charset;
+        if (ascii) {
             charset = StandardCharsets.ISO_8859_1;
         } else if (strtype == BC_STR_UTF8) {
-            byte strType = bytes[offset];
-            if (strType >= BC_INT32_NUM_MIN && strType <= BC_INT32_NUM_MAX) {
-                offset++;
-                strlen = strType;
-            } else if (strType >= BC_INT32_BYTE_MIN && strType <= BC_INT32_BYTE_MAX) {
-                offset++;
-                strlen = ((strType - BC_INT32_BYTE_ZERO) << 8)
-                        + (bytes[offset++] & 0xFF);
-            } else {
-                strlen = readLength();
-            }
-            strBegin = offset;
-
-            if (STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
-                if (valueBytes == null) {
-                    valueBytes = BYTES_UPDATER.getAndSet(cacheItem, null);
-                    if (valueBytes == null) {
-                        valueBytes = new byte[8192];
-                    }
-                }
-
-                int minCapacity = strlen << 1;
-                if (valueBytes == null) {
-                    valueBytes = new byte[minCapacity];
-                } else {
-                    if (minCapacity > valueBytes.length) {
-                        valueBytes = new byte[minCapacity];
-                    }
-                }
-
-                int utf16_len = IOUtils.decodeUTF8(bytes, offset, strlen, valueBytes);
-                if (utf16_len != -1) {
-                    byte[] value = new byte[utf16_len];
-                    System.arraycopy(valueBytes, 0, value, 0, utf16_len);
-                    str = STRING_CREATOR_JDK11.apply(value, UTF16);
-                    offset += strlen;
-
-                    if ((context.features & Feature.TrimString.mask) != 0) {
-                        str = str.trim();
-                    }
-
-                    return str;
-                }
-            }
-
+            str = readStringUTF8();
             charset = StandardCharsets.UTF_8;
         } else if (strtype == BC_STR_UTF16) {
             strlen = readLength();
             strBegin = offset;
             charset = StandardCharsets.UTF_16;
         } else if (strtype == BC_STR_UTF16LE) {
-            byte strType = bytes[offset];
-            if (strType >= BC_INT32_NUM_MIN && strType <= BC_INT32_NUM_MAX) {
-                offset++;
-                strlen = strType;
-            } else if (strType >= BC_INT32_BYTE_MIN && strType <= BC_INT32_BYTE_MAX) {
-                offset++;
-                strlen = ((strType - BC_INT32_BYTE_ZERO) << 8)
-                        + (bytes[offset++] & 0xFF);
-            } else {
-                strlen = readLength();
-            }
-            strBegin = offset;
-
-            if (strlen == 0) {
-                return "";
-            }
-
-            if (STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
-                byte[] chars = new byte[strlen];
-                System.arraycopy(bytes, offset, chars, 0, strlen);
-                str = STRING_CREATOR_JDK11.apply(chars, UTF16);
-                offset += strlen;
-
-                if ((context.features & Feature.TrimString.mask) != 0) {
-                    str = str.trim();
-                }
-                return str;
-            }
-
+            str = readUTF16LE();
             charset = StandardCharsets.UTF_16LE;
         } else if (strtype == BC_STR_UTF16BE) {
-            strlen = readLength();
-            strBegin = offset;
-
-            if (STRING_CREATOR_JDK11 != null && JDKUtils.BIG_ENDIAN) {
-                byte[] chars = new byte[strlen];
-                System.arraycopy(bytes, offset, chars, 0, strlen);
-                str = STRING_CREATOR_JDK11.apply(chars, UTF16);
-                offset += strlen;
-
-                if ((context.features & Feature.TrimString.mask) != 0) {
-                    str = str.trim();
-                }
-
+            str = readUTF16BE();
+            if (str != null) {
                 return str;
             }
-
             charset = StandardCharsets.UTF_16BE;
         } else if (strtype == BC_STR_GB18030) {
-            strlen = readLength();
-            strBegin = offset;
-
-            if (GB18030 == null) {
-                GB18030 = Charset.forName("GB18030");
-            }
+            readGB18030();
             charset = GB18030;
-        } else if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
-            return Byte.toString(strtype);
-        } else if (strtype >= BC_INT32_BYTE_MIN && strtype <= BC_INT32_BYTE_MAX) {
-            int intValue = ((strtype - BC_INT32_BYTE_ZERO) << 8)
-                    + (bytes[offset++] & 0xFF);
-            return Integer.toString(intValue);
-        } else if (strtype >= BC_INT32_SHORT_MIN && strtype <= BC_INT32_SHORT_MAX) {
-            int intValue = ((strtype - BC_INT32_SHORT_ZERO) << 16)
-                    + ((bytes[offset++] & 0xFF) << 8)
-                    + (bytes[offset++] & 0xFF);
-            return Integer.toString(intValue);
-        } else if (strtype >= BC_INT64_NUM_MIN && strtype <= BC_INT64_NUM_MAX) {
-            int intValue = INT64_NUM_LOW_VALUE + (strtype - BC_INT64_NUM_MIN);
-            return Integer.toString(intValue);
-        } else if (strtype >= BC_INT64_BYTE_MIN && strtype <= BC_INT64_BYTE_MAX) {
-            int intValue = ((strtype - BC_INT64_BYTE_ZERO) << 8)
-                    + (bytes[offset++] & 0xFF);
-            return Integer.toString(intValue);
-        } else if (strtype >= BC_INT64_SHORT_MIN && strtype <= BC_INT64_SHORT_MAX) {
-            int intValue = ((strtype - BC_INT64_SHORT_ZERO) << 16)
-                    + ((bytes[offset++] & 0xFF) << 8)
-                    + (bytes[offset++] & 0xFF);
-            return Integer.toString(intValue);
         } else {
-            switch (strtype) {
-                case BC_NULL:
-                    return null;
-                case BC_DOUBLE_NUM_0:
-                    return "0.0";
-                case BC_DOUBLE_NUM_1:
-                    return "1.0";
-                case BC_INT64_INT:
-                case BC_INT32: {
-                    long int32Value =
-                            ((bytes[offset + 3] & 0xFF)) +
-                                    ((bytes[offset + 2] & 0xFF) << 8) +
-                                    ((bytes[offset + 1] & 0xFF) << 16) +
-                                    ((bytes[offset]) << 24);
-                    offset += 4;
-                    return Long.toString(int32Value);
-                }
-                case BC_FLOAT_INT:
-                    return Float.toString(
-                            readInt32Value());
-                case BC_FLOAT: {
-                    int int32Value =
-                            ((bytes[offset + 3] & 0xFF)) +
-                                    ((bytes[offset + 2] & 0xFF) << 8) +
-                                    ((bytes[offset + 1] & 0xFF) << 16) +
-                                    ((bytes[offset]) << 24);
-                    offset += 4;
-                    float floatValue = Float.intBitsToFloat(int32Value);
-                    return Float.toString(floatValue);
-                }
-                case BC_DOUBLE: {
-                    long int64Value =
-                            ((bytes[offset + 7] & 0xFFL)) +
-                                    ((bytes[offset + 6] & 0xFFL) << 8) +
-                                    ((bytes[offset + 5] & 0xFFL) << 16) +
-                                    ((bytes[offset + 4] & 0xFFL) << 24) +
-                                    ((bytes[offset + 3] & 0xFFL) << 32) +
-                                    ((bytes[offset + 2] & 0xFFL) << 40) +
-                                    ((bytes[offset + 1] & 0xFFL) << 48) +
-                                    ((long) (bytes[offset]) << 56);
-                    offset += 8;
-                    double doubleValue = Double.longBitsToDouble(int64Value);
-                    return Double.toString(doubleValue);
-                }
-                case BC_TIMESTAMP_SECONDS: {
-                    long seconds =
-                            ((bytes[offset + 3] & 0xFF)) +
-                                    ((bytes[offset + 2] & 0xFF) << 8) +
-                                    ((bytes[offset + 1] & 0xFF) << 16) +
-                                    ((bytes[offset]) << 24);
-                    offset += 4;
-                    long millis = seconds * 1000;
-                    Date date = new Date(millis);
-                    return DateUtils.toString(date);
-                }
-                case BC_TIMESTAMP_MINUTES: {
-                    long minutes =
-                            ((bytes[offset + 3] & 0xFF)) +
-                                    ((bytes[offset + 2] & 0xFF) << 8) +
-                                    ((bytes[offset + 1] & 0xFF) << 16) +
-                                    ((bytes[offset]) << 24);
-                    offset += 4;
-                    long millis = minutes * 60 * 1000;
-                    Date date = new Date(millis);
-                    return DateUtils.toString(date);
-                }
-                case BC_TIMESTAMP_MILLIS: {
-                    long millis =
-                            ((bytes[offset + 7] & 0xFFL)) +
-                                    ((bytes[offset + 6] & 0xFFL) << 8) +
-                                    ((bytes[offset + 5] & 0xFFL) << 16) +
-                                    ((bytes[offset + 4] & 0xFFL) << 24) +
-                                    ((bytes[offset + 3] & 0xFFL) << 32) +
-                                    ((bytes[offset + 2] & 0xFFL) << 40) +
-                                    ((bytes[offset + 1] & 0xFFL) << 48) +
-                                    ((long) (bytes[offset]) << 56);
-                    offset += 8;
-                    Date date = new Date(millis);
-                    return DateUtils.toString(date);
-                }
-                case BC_INT64:
-                    long int64Value =
-                            ((bytes[offset + 7] & 0xFFL)) +
-                                    ((bytes[offset + 6] & 0xFFL) << 8) +
-                                    ((bytes[offset + 5] & 0xFFL) << 16) +
-                                    ((bytes[offset + 4] & 0xFFL) << 24) +
-                                    ((bytes[offset + 3] & 0xFFL) << 32) +
-                                    ((bytes[offset + 2] & 0xFFL) << 40) +
-                                    ((bytes[offset + 1] & 0xFFL) << 48) +
-                                    ((long) (bytes[offset]) << 56);
-                    offset += 8;
-                    return Long.toString(int64Value);
-                case BC_BIGINT: {
-                    int len = readInt32Value();
-                    byte[] bytes = new byte[len];
-                    System.arraycopy(this.bytes, offset, bytes, 0, len);
-                    offset += len;
-                    return new BigInteger(bytes).toString();
-                }
-                case BC_DECIMAL: {
-                    int scale = readInt32Value();
-                    BigInteger unscaledValue = readBigInteger();
-                    BigDecimal decimal;
-                    if (scale == 0) {
-                        decimal = new BigDecimal(unscaledValue);
-                    } else {
-                        decimal = new BigDecimal(unscaledValue, scale);
-                    }
-                    return decimal.toString();
-                }
-                case BC_TYPED_ANY: {
-                    offset--;
-                    Object typedAny = readAny();
-                    return typedAny == null ? null : JSON.toJSONString(typedAny, JSONWriter.Feature.WriteThrowableClassName);
-                }
-                case BC_DECIMAL_LONG:
-                case BC_BIGINT_LONG: {
-                    return Long.toString(
-                            readInt64Value()
-                    );
-                }
-                case BC_DOUBLE_LONG: {
-                    double doubleValue = readInt64Value();
-                    return Double.toString(doubleValue);
-                }
-                default:
-                    break;
-            }
-            throw new JSONException("readString not support type " + typeName(strtype) + ", offset " + offset + "/" + bytes.length);
+            return readStringTypeNotMatch();
         }
 
+        if (str != null) {
+            if ((context.features & Feature.TrimString.mask) != 0) {
+                str = str.trim();
+            }
+            return str;
+        }
+
+        return readString(charset);
+    }
+
+    private String readString(Charset charset) {
+        String str;
         if (strlen < 0) {
             return symbolTable.getName(-strlen);
         }
@@ -3232,6 +2945,235 @@ class JSONReaderJSONB
         }
 
         return str;
+    }
+
+    private String readGB18030() {
+        strlen = readLength();
+        strBegin = offset;
+
+        if (GB18030 == null) {
+            GB18030 = Charset.forName("GB18030");
+        }
+        return null;
+    }
+
+    private String readUTF16BE() {
+        strlen = readLength();
+        strBegin = offset;
+
+        if (STRING_CREATOR_JDK11 != null && JDKUtils.BIG_ENDIAN) {
+            byte[] chars = new byte[strlen];
+            System.arraycopy(bytes, offset, chars, 0, strlen);
+            String str = STRING_CREATOR_JDK11.apply(chars, UTF16);
+            offset += strlen;
+
+            if ((context.features & Feature.TrimString.mask) != 0) {
+                str = str.trim();
+            }
+
+            return str;
+        }
+
+        return null;
+    }
+
+    private String readUTF16LE() {
+        byte strType = bytes[offset];
+        if (strType >= BC_INT32_NUM_MIN && strType <= BC_INT32_NUM_MAX) {
+            offset++;
+            strlen = strType;
+        } else if (strType >= BC_INT32_BYTE_MIN && strType <= BC_INT32_BYTE_MAX) {
+            offset++;
+            strlen = ((strType - BC_INT32_BYTE_ZERO) << 8)
+                    + (bytes[offset++] & 0xFF);
+        } else {
+            strlen = readLength();
+        }
+        strBegin = offset;
+
+        if (strlen == 0) {
+            return "";
+        }
+
+        if (STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
+            byte[] chars = new byte[strlen];
+            System.arraycopy(bytes, offset, chars, 0, strlen);
+            String str = STRING_CREATOR_JDK11.apply(chars, UTF16);
+            offset += strlen;
+
+            if ((context.features & Feature.TrimString.mask) != 0) {
+                str = str.trim();
+            }
+            return str;
+        }
+        return null;
+    }
+
+    private String readStringUTF8() {
+        byte strType = bytes[offset];
+        if (strType >= BC_INT32_NUM_MIN && strType <= BC_INT32_NUM_MAX) {
+            offset++;
+            strlen = strType;
+        } else if (strType >= BC_INT32_BYTE_MIN && strType <= BC_INT32_BYTE_MAX) {
+            offset++;
+            strlen = ((strType - BC_INT32_BYTE_ZERO) << 8)
+                    + (bytes[offset++] & 0xFF);
+        } else {
+            strlen = readLength();
+        }
+        strBegin = offset;
+
+        if (STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
+            if (valueBytes == null) {
+                valueBytes = BYTES_UPDATER.getAndSet(cacheItem, null);
+                if (valueBytes == null) {
+                    valueBytes = new byte[8192];
+                }
+            }
+
+            int minCapacity = strlen << 1;
+            if (valueBytes == null) {
+                valueBytes = new byte[minCapacity];
+            } else {
+                if (minCapacity > valueBytes.length) {
+                    valueBytes = new byte[minCapacity];
+                }
+            }
+
+            int utf16_len = IOUtils.decodeUTF8(bytes, offset, strlen, valueBytes);
+            if (utf16_len != -1) {
+                byte[] value = new byte[utf16_len];
+                System.arraycopy(valueBytes, 0, value, 0, utf16_len);
+                String str = STRING_CREATOR_JDK11.apply(value, UTF16);
+                offset += strlen;
+
+                if ((context.features & Feature.TrimString.mask) != 0) {
+                    str = str.trim();
+                }
+
+                return str;
+            }
+        }
+        return null;
+    }
+
+    private String readStringTypeNotMatch() {
+        if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
+            return Byte.toString(strtype);
+        } else if (strtype >= BC_INT32_BYTE_MIN && strtype <= BC_INT32_BYTE_MAX) {
+            int intValue = ((strtype - BC_INT32_BYTE_ZERO) << 8)
+                    + (bytes[offset++] & 0xFF);
+            return Integer.toString(intValue);
+        } else if (strtype >= BC_INT32_SHORT_MIN && strtype <= BC_INT32_SHORT_MAX) {
+            int int3 = getInt3(bytes, offset, strtype);
+            offset += 2;
+            return Integer.toString(int3);
+        } else if (strtype >= BC_INT64_NUM_MIN && strtype <= BC_INT64_NUM_MAX) {
+            int intValue = INT64_NUM_LOW_VALUE + (strtype - BC_INT64_NUM_MIN);
+            return Integer.toString(intValue);
+        } else if (strtype >= BC_INT64_BYTE_MIN && strtype <= BC_INT64_BYTE_MAX) {
+            int intValue = ((strtype - BC_INT64_BYTE_ZERO) << 8)
+                    + (bytes[offset++] & 0xFF);
+            return Integer.toString(intValue);
+        } else if (strtype >= BC_INT64_SHORT_MIN && strtype <= BC_INT64_SHORT_MAX) {
+            int intValue = ((strtype - BC_INT64_SHORT_ZERO) << 16)
+                    + ((bytes[offset++] & 0xFF) << 8)
+                    + (bytes[offset++] & 0xFF);
+            return Integer.toString(intValue);
+        }
+
+        switch (strtype) {
+            case BC_NULL:
+                return null;
+            case BC_DOUBLE_NUM_0:
+                return "0.0";
+            case BC_DOUBLE_NUM_1:
+                return "1.0";
+            case BC_INT64_INT:
+            case BC_INT32: {
+                long int32Value = getInt(bytes, offset);
+                offset += 4;
+                return Long.toString(int32Value);
+            }
+            case BC_FLOAT_INT:
+                return Float.toString(
+                        readInt32Value());
+            case BC_FLOAT: {
+                int int32Value = getInt(bytes, offset);
+                offset += 4;
+                float floatValue = Float.intBitsToFloat(int32Value);
+                return Float.toString(floatValue);
+            }
+            case BC_DOUBLE: {
+                long int64Value =
+                        getLong(bytes, offset);
+                offset += 8;
+                double doubleValue = Double.longBitsToDouble(int64Value);
+                return Double.toString(doubleValue);
+            }
+            case BC_TIMESTAMP_SECONDS: {
+                long seconds = getInt(bytes, offset);
+                offset += 4;
+                long millis = seconds * 1000;
+                Date date = new Date(millis);
+                return DateUtils.toString(date);
+            }
+            case BC_TIMESTAMP_MINUTES: {
+                long minutes = getInt(bytes, offset);
+                offset += 4;
+                long millis = minutes * 60 * 1000;
+                Date date = new Date(millis);
+                return DateUtils.toString(date);
+            }
+            case BC_TIMESTAMP_MILLIS: {
+                long millis =
+                        getLong(bytes, offset);
+                offset += 8;
+                Date date = new Date(millis);
+                return DateUtils.toString(date);
+            }
+            case BC_INT64:
+                long int64Value =
+                        getLong(bytes, offset);
+                offset += 8;
+                return Long.toString(int64Value);
+            case BC_BIGINT: {
+                int len = readInt32Value();
+                byte[] bytes = new byte[len];
+                System.arraycopy(this.bytes, offset, bytes, 0, len);
+                offset += len;
+                return new BigInteger(bytes).toString();
+            }
+            case BC_DECIMAL: {
+                int scale = readInt32Value();
+                BigInteger unscaledValue = readBigInteger();
+                BigDecimal decimal;
+                if (scale == 0) {
+                    decimal = new BigDecimal(unscaledValue);
+                } else {
+                    decimal = new BigDecimal(unscaledValue, scale);
+                }
+                return decimal.toString();
+            }
+            case BC_TYPED_ANY: {
+                offset--;
+                Object typedAny = readAny();
+                return typedAny == null ? null : JSON.toJSONString(typedAny, JSONWriter.Feature.WriteThrowableClassName);
+            }
+            case BC_DECIMAL_LONG:
+            case BC_BIGINT_LONG: {
+                return Long.toString(
+                        readInt64Value()
+                );
+            }
+            case BC_DOUBLE_LONG: {
+                double doubleValue = readInt64Value();
+                return Double.toString(doubleValue);
+            }
+            default:
+                break;
+        }
+        throw new JSONException("readString not support type " + typeName(strtype) + ", offset " + offset + "/" + bytes.length);
     }
 
     public final String[] readStringArray() {
@@ -3302,35 +3244,50 @@ class JSONReaderJSONB
     public final long readInt64Value() {
         wasNull = false;
 
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
         byte type = bytes[offset++];
-        if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
-            return type;
-        }
 
+        long int64Value;
         if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
-            return (long) INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
+            int64Value = INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
+        } else if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
+            int64Value = ((type - BC_INT64_BYTE_ZERO) << 8)
+                    + (bytes[offset] & 0xFF);
+            offset += 1;
+        } else if (type >= BC_INT64_SHORT_MIN && type <= BC_INT64_SHORT_MAX) {
+            int64Value = ((type - BC_INT64_SHORT_ZERO) << 16)
+                    + ((bytes[offset] & 0xFF) << 8)
+                    + (bytes[offset + 1] & 0xFF);
+            offset += 2;
+        } else if (type == BC_INT64_INT) {
+            int64Value = getInt(bytes, offset);
+            offset += 4;
+        } else if (type == BC_INT64) {
+            int64Value = getLong(bytes, offset);
+            offset += 8;
+        } else {
+            this.offset = offset;
+            return readInt64ValueTypeNotMatch(bytes, type);
         }
+        this.offset = offset;
+        return int64Value;
+    }
 
+    private long readInt64ValueTypeNotMatch(byte[] bytes, byte type) {
         if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
             return ((type - BC_INT32_BYTE_ZERO) << 8)
                     + (bytes[offset++] & 0xFF);
         }
 
-        if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
-            return ((type - BC_INT64_BYTE_ZERO) << 8)
-                    + (bytes[offset++] & 0xFF);
-        }
-
-        if (type >= BC_INT64_SHORT_MIN && type <= BC_INT64_SHORT_MAX) {
-            return ((type - BC_INT64_SHORT_ZERO) << 16)
-                    + ((bytes[offset++] & 0xFF) << 8)
-                    + (bytes[offset++] & 0xFF);
+        if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
+            return type;
         }
 
         if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-            return ((type - BC_INT32_SHORT_ZERO) << 16)
-                    + ((bytes[offset++] & 0xFF) << 8)
-                    + (bytes[offset++] & 0xFF);
+            int int3 = getInt3(bytes, offset, type);
+            offset += 2;
+            return int3;
         }
 
         switch (type) {
@@ -3354,22 +3311,13 @@ class JSONReaderJSONB
                                 (bytes[offset] << 8));
                 offset += 2;
                 return int16Value;
-            case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 return int32Value;
             }
             case BC_FLOAT: {
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 float floatValue = Float.intBitsToFloat(int32Value);
                 return (long) floatValue;
@@ -3383,34 +3331,18 @@ class JSONReaderJSONB
             case BC_DOUBLE_LONG:
                 return (long) ((double) readInt64Value());
             case BC_TIMESTAMP_MINUTES: {
-                long minutes =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                long minutes = getInt(bytes, offset);
                 offset += 4;
                 return minutes * 60 * 1000;
             }
             case BC_TIMESTAMP_SECONDS: {
-                long seconds =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                long seconds = getInt(bytes, offset);
                 offset += 4;
                 return seconds * 1000;
             }
             case BC_TIMESTAMP_MILLIS:
-            case BC_INT64:
                 long int64Value =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 return int64Value;
             case BC_DECIMAL: {
@@ -3472,24 +3404,34 @@ class JSONReaderJSONB
 
     @Override
     public final int readInt32Value() {
-        byte type = bytes[offset++];
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        final byte type = bytes[offset++];
+
+        int int32Value;
         if (type >= BC_INT32_NUM_MIN && type <= BC_INT32_NUM_MAX) {
-            return type;
+            int32Value = type;
+        } else if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
+            int32Value = ((type - BC_INT32_BYTE_ZERO) << 8)
+                    + (bytes[offset] & 0xFF);
+            offset += 1;
+        } else if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
+            int32Value = getInt3(bytes, offset, type);
+            offset += 2;
+        } else if (type == BC_INT32) {
+            int32Value = getInt(bytes, offset);
+            offset += 4;
+        } else {
+            this.offset = offset;
+            return readInt32ValueNotMatchType(bytes, type);
         }
+        this.offset = offset;
+        return int32Value;
+    }
 
-        if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-            return ((type - BC_INT32_BYTE_ZERO) << 8)
-                    + (bytes[offset++] & 0xFF);
-        }
-
-        if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-            return ((type - BC_INT32_SHORT_ZERO) << 16)
-                    + ((bytes[offset++] & 0xFF) << 8)
-                    + (bytes[offset++] & 0xFF);
-        }
-
+    private int readInt32ValueNotMatchType(byte[] bytes, byte type) {
         if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
-            return (int) INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
+            return INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
         }
 
         if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
@@ -3529,26 +3471,14 @@ class JSONReaderJSONB
                 return (int) readInt64Value();
             }
             case BC_INT64: {
-                long int64Value =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                long int64Value = getLong(bytes, offset);
                 offset += 8;
                 return (int) int64Value;
             }
             case BC_FLOAT_INT:
                 return (int) (float) readInt32Value();
             case BC_FLOAT: {
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 float floatValue = Float.intBitsToFloat(int32Value);
                 return (int) floatValue;
@@ -3559,13 +3489,8 @@ class JSONReaderJSONB
             }
             case BC_TIMESTAMP_MINUTES:
             case BC_TIMESTAMP_SECONDS:
-            case BC_INT32:
             case BC_INT64_INT:
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 return int32Value;
             case BC_STR_ASCII: {
@@ -3718,46 +3643,24 @@ class JSONReaderJSONB
                 return int16Value;
             case BC_INT64: {
                 long int64Value =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 return (float) int64Value;
             }
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 return int32Value;
             }
             case BC_FLOAT: {
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 return Float.intBitsToFloat(int32Value);
             }
             case BC_DOUBLE: {
                 long int64Value =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 return (float) Double.longBitsToDouble(int64Value);
             }
@@ -3827,9 +3730,9 @@ class JSONReaderJSONB
                 }
 
                 if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-                    return ((type - BC_INT32_SHORT_ZERO) << 16)
-                            + ((bytes[offset++] & 0xFF) << 8)
-                            + (bytes[offset++] & 0xFF);
+                    int int3 = getInt3(bytes, offset, type);
+                    this.offset = offset + 2;
+                    return int3;
                 }
 
                 if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
@@ -3882,33 +3785,18 @@ class JSONReaderJSONB
                 return int16Value;
             case BC_INT64: {
                 long int64Value =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 return (double) int64Value;
             }
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 return int32Value;
             }
             case BC_FLOAT:
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 return Float.intBitsToFloat(int32Value);
             case BC_FLOAT_INT: {
@@ -3916,14 +3804,7 @@ class JSONReaderJSONB
             }
             case BC_DOUBLE:
                 long int64Value =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 return Double.longBitsToDouble(int64Value);
             case BC_DOUBLE_LONG:
@@ -3988,9 +3869,9 @@ class JSONReaderJSONB
                 }
 
                 if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-                    return ((type - BC_INT32_SHORT_ZERO) << 16)
-                            + ((bytes[offset++] & 0xFF) << 8)
-                            + (bytes[offset++] & 0xFF);
+                    int int3 = getInt3(bytes, offset, type);
+                    this.offset = offset + 2;
+                    return int3;
                 }
 
                 if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
@@ -4041,9 +3922,9 @@ class JSONReaderJSONB
         }
 
         if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-            return ((type - BC_INT32_SHORT_ZERO) << 16)
-                    + ((bytes[offset++] & 0xFF) << 8)
-                    + (bytes[offset++] & 0xFF);
+            int int3 = getInt3(bytes, offset, type);
+            this.offset = offset + 2;
+            return int3;
         }
 
         if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
@@ -4080,33 +3961,18 @@ class JSONReaderJSONB
                 return (short) int16Value;
             }
             case BC_INT32: {
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 return int32Value;
             }
             case BC_INT64_INT: {
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 return (long) int32Value;
             }
             case BC_INT64: {
                 long int64Value =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 return int64Value;
             }
@@ -4123,11 +3989,7 @@ class JSONReaderJSONB
                 );
             }
             case BC_FLOAT: {
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 return Float.intBitsToFloat(int32Value);
             }
@@ -4136,14 +3998,7 @@ class JSONReaderJSONB
             }
             case BC_DOUBLE:
                 long int64Value =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 return Double.longBitsToDouble(int64Value);
             case BC_DOUBLE_LONG:
@@ -4212,11 +4067,7 @@ class JSONReaderJSONB
                 return BigDecimal.valueOf(int16Value);
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 return BigDecimal.valueOf(int32Value);
             }
@@ -4225,25 +4076,14 @@ class JSONReaderJSONB
                 return BigDecimal.valueOf((long) floatValue);
             }
             case BC_FLOAT: {
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 float floatValue = Float.intBitsToFloat(int32Value);
                 return BigDecimal.valueOf((long) floatValue);
             }
             case BC_DOUBLE: {
                 long int64Value =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 double doubleValue = Double.longBitsToDouble(int64Value);
                 return BigDecimal.valueOf(
@@ -4251,14 +4091,7 @@ class JSONReaderJSONB
             }
             case BC_INT64: {
                 long int64Value =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 return BigDecimal.valueOf(int64Value);
             }
@@ -4278,11 +4111,7 @@ class JSONReaderJSONB
 
                 if (bytes[offset] == BC_INT32) {
                     offset++;
-                    int unscaledValue =
-                            ((bytes[offset + 3] & 0xFF)) +
-                                    ((bytes[offset + 2] & 0xFF) << 8) +
-                                    ((bytes[offset + 1] & 0xFF) << 16) +
-                                    ((bytes[offset]) << 24);
+                    int unscaledValue = getInt(bytes, offset);
                     offset += 4;
                     return BigDecimal.valueOf(unscaledValue, scale);
                 }
@@ -4290,14 +4119,7 @@ class JSONReaderJSONB
                 if (bytes[offset] == BC_INT64) {
                     offset++;
                     long unscaledValue =
-                            ((bytes[offset + 7] & 0xFFL)) +
-                                    ((bytes[offset + 6] & 0xFFL) << 8) +
-                                    ((bytes[offset + 5] & 0xFFL) << 16) +
-                                    ((bytes[offset + 4] & 0xFFL) << 24) +
-                                    ((bytes[offset + 3] & 0xFFL) << 32) +
-                                    ((bytes[offset + 2] & 0xFFL) << 40) +
-                                    ((bytes[offset + 1] & 0xFFL) << 48) +
-                                    ((long) (bytes[offset]) << 56);
+                            getLong(bytes, offset);
                     offset += 8;
                     return BigDecimal.valueOf(unscaledValue, scale);
                 }
@@ -4348,10 +4170,9 @@ class JSONReaderJSONB
                 }
 
                 if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-                    int intValue = ((type - BC_INT32_SHORT_ZERO) << 16)
-                            + ((bytes[offset++] & 0xFF) << 8)
-                            + (bytes[offset++] & 0xFF);
-                    return BigDecimal.valueOf(intValue);
+                    int int3 = getInt3(bytes, offset, type);
+                    this.offset = offset + 2;
+                    return BigDecimal.valueOf(int3);
                 }
 
                 if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
@@ -4405,11 +4226,7 @@ class JSONReaderJSONB
                 return BigInteger.valueOf(int16Value);
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 return BigInteger.valueOf(int32Value);
             }
@@ -4419,11 +4236,7 @@ class JSONReaderJSONB
                         (long) floatValue);
             }
             case BC_FLOAT: {
-                int int32Value =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                int int32Value = getInt(bytes, offset);
                 offset += 4;
                 float floatValue = Float.intBitsToFloat(int32Value);
                 return BigInteger.valueOf(
@@ -4431,14 +4244,7 @@ class JSONReaderJSONB
             }
             case BC_DOUBLE: {
                 long int64Value =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 double doubleValue = Double.longBitsToDouble(int64Value);
                 return BigInteger.valueOf(
@@ -4446,14 +4252,7 @@ class JSONReaderJSONB
             }
             case BC_INT64: {
                 long int64Value =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 return BigInteger.valueOf(int64Value);
             }
@@ -4527,10 +4326,9 @@ class JSONReaderJSONB
                 }
 
                 if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-                    int intValue = ((type - BC_INT32_SHORT_ZERO) << 16)
-                            + ((bytes[offset++] & 0xFF) << 8)
-                            + (bytes[offset++] & 0xFF);
-                    return BigInteger.valueOf(intValue);
+                    int int3 = getInt3(bytes, offset, type);
+                    this.offset = offset + 2;
+                    return BigInteger.valueOf(int3);
                 }
 
                 if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
@@ -4824,34 +4622,19 @@ class JSONReaderJSONB
                 return Instant.ofEpochSecond(second, nano);
             }
             case BC_TIMESTAMP_MINUTES: {
-                long minutes =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                long minutes = getInt(bytes, offset);
                 offset += 4;
                 return Instant.ofEpochSecond(minutes * 60, 0);
             }
             case BC_TIMESTAMP_SECONDS: {
-                long seconds =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                long seconds = getInt(bytes, offset);
                 offset += 4;
                 return Instant.ofEpochSecond(seconds, 0);
             }
             case BC_INT64:
             case BC_TIMESTAMP_MILLIS: {
                 long millis =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 return Instant.ofEpochMilli(millis);
             }
@@ -4876,21 +4659,13 @@ class JSONReaderJSONB
                 return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
             }
             case BC_TIMESTAMP_MINUTES: {
-                long minutes =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                long minutes = getInt(bytes, offset);
                 offset += 4;
                 Instant instant = Instant.ofEpochSecond(minutes * 60);
                 return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
             }
             case BC_TIMESTAMP_SECONDS: {
-                long seconds =
-                        ((bytes[offset + 3] & 0xFF)) +
-                                ((bytes[offset + 2] & 0xFF) << 8) +
-                                ((bytes[offset + 1] & 0xFF) << 16) +
-                                ((bytes[offset]) << 24);
+                long seconds = getInt(bytes, offset);
                 offset += 4;
                 Instant instant = Instant.ofEpochSecond(seconds);
                 return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
@@ -4898,14 +4673,7 @@ class JSONReaderJSONB
             case BC_INT64:
             case BC_TIMESTAMP_MILLIS: {
                 long millis =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
                 Instant instant = Instant.ofEpochMilli(millis);
                 return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
@@ -4957,25 +4725,11 @@ class JSONReaderJSONB
                     throw new JSONException("uuid not support " + len);
                 }
                 long msb =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
 
                 long lsb =
-                        ((bytes[offset + 7] & 0xFFL)) +
-                                ((bytes[offset + 6] & 0xFFL) << 8) +
-                                ((bytes[offset + 5] & 0xFFL) << 16) +
-                                ((bytes[offset + 4] & 0xFFL) << 24) +
-                                ((bytes[offset + 3] & 0xFFL) << 32) +
-                                ((bytes[offset + 2] & 0xFFL) << 40) +
-                                ((bytes[offset + 1] & 0xFFL) << 48) +
-                                ((long) (bytes[offset]) << 56);
+                        getLong(bytes, offset);
                 offset += 8;
 
                 return new UUID(msb, lsb);
@@ -5222,6 +4976,14 @@ class JSONReaderJSONB
         return false;
     }
 
+    public boolean nextIfMatchTypedAny() {
+        if (bytes[offset] == BC_TYPED_ANY) {
+            offset++;
+            return true;
+        }
+        return false;
+    }
+
     @Override
     protected final int getStringLength() {
         type = bytes[offset];
@@ -5458,6 +5220,7 @@ class JSONReaderJSONB
 
     @Override
     public final void close() {
+        byte[] valueBytes = this.valueBytes;
         if (valueBytes != null && valueBytes.length < CACHE_THRESHOLD) {
             BYTES_UPDATER.lazySet(cacheItem, valueBytes);
         }

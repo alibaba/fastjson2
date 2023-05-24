@@ -108,16 +108,18 @@ final class JSONReaderUTF8Vector
                         c = bytes[++offset];
                         switch (c) {
                             case 'u': {
-                                int c1 = bytes[++offset];
-                                int c2 = bytes[++offset];
-                                int c3 = bytes[++offset];
-                                int c4 = bytes[++offset];
+                                int c1 = bytes[offset + 1];
+                                int c2 = bytes[offset + 2];
+                                int c3 = bytes[offset + 3];
+                                int c4 = bytes[offset + 4];
+                                offset += 4;
                                 c = char4(c1, c2, c3, c4);
                                 break;
                             }
                             case 'x': {
-                                int c1 = bytes[++offset];
-                                int c2 = bytes[++offset];
+                                int c1 = bytes[offset + 1];
+                                int c2 = bytes[offset + 2];
+                                offset += 2;
                                 c = char2(c1, c2);
                                 break;
                             }
@@ -149,8 +151,9 @@ final class JSONReaderUTF8Vector
                                 }
                                 case 14: {
                                     offset++;
-                                    int c2 = bytes[offset++];
-                                    int c3 = bytes[offset++];
+                                    int c2 = bytes[offset];
+                                    int c3 = bytes[offset + 1];
+                                    offset += 2;
                                     chars[i] = (char)
                                             (((c & 0x0F) << 12) |
                                                     ((c2 & 0x3F) << 6) |
@@ -161,9 +164,10 @@ final class JSONReaderUTF8Vector
                                     /* 10xx xxxx,  1111 xxxx */
                                     if ((c >> 3) == -2) {
                                         offset++;
-                                        int c2 = bytes[offset++];
-                                        int c3 = bytes[offset++];
-                                        int c4 = bytes[offset++];
+                                        int c2 = bytes[offset];
+                                        int c3 = bytes[offset + 1];
+                                        int c4 = bytes[offset + 2];
+                                        offset += 3;
                                         int uc = ((c << 18) ^
                                                 (c2 << 12) ^
                                                 (c3 << 6) ^

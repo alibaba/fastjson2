@@ -74,10 +74,10 @@ public final class DoubleToDecimal {
                     bytes[++index] = '-';
                 }
 
-                bytes[++index] = '0';
-                bytes[++index] = '.';
-                bytes[++index] = '0';
-                return index + 1 - off;
+                bytes[index + 1] = '0';
+                bytes[index + 2] = '.';
+                bytes[index + 3] = '0';
+                return index + 4 - off;
             }
 
             boolean _stat = false;
@@ -247,8 +247,9 @@ public final class DoubleToDecimal {
                 return index + 1 - off;
             } else if (-3 < e && e <= 0) {
                 /* -3 < e <= 0: plain format with leading zeroes */
-                bytes[++index] = (byte) ('0');
-                bytes[++index] = '.';
+                bytes[1 + index] = (byte) ('0');
+                bytes[2 + index] = '.';
+                index += 2;
                 for (; e < 0; ++e) {
                     bytes[++index] = (byte) ('0');
                 }
@@ -285,8 +286,9 @@ public final class DoubleToDecimal {
                 return index + 1 - off;
             }
 
-            bytes[++index] = (byte) ('0' + h);
-            bytes[++index] = '.';
+            bytes[1 + index] = (byte) ('0' + h);
+            bytes[2 + index] = '.';
+            index += 2;
 
             final int MASK_28 = 268435455;
             {
@@ -349,8 +351,9 @@ public final class DoubleToDecimal {
                      *     floor(e1 / 10) = floor(103 e1 / 2^10)
                      */
                     d = e1 * 103 >>> 10;
-                    bytes[++index] = (byte) ('0' + d);
-                    bytes[++index] = (byte) ('0' + (e1 - 10 * d));
+                    bytes[1 + index] = (byte) ('0' + d);
+                    bytes[2 + index] = (byte) ('0' + (e1 - 10 * d));
+                    index += 2;
                 }
             }
             return index + 1 - off;
@@ -358,26 +361,29 @@ public final class DoubleToDecimal {
 
         int index = off - 1;
         if (json) {
-            bytes[++index] = 'n';
-            bytes[++index] = 'u';
-            bytes[++index] = 'l';
-            bytes[++index] = 'l';
+            bytes[1 + index] = 'n';
+            bytes[2 + index] = 'u';
+            bytes[3 + index] = 'l';
+            bytes[4 + index] = 'l';
+            index += 4;
         } else if (t != 0) {
-            bytes[++index] = 'N';
-            bytes[++index] = 'a';
-            bytes[++index] = 'N';
+            bytes[1 + index] = 'N';
+            bytes[2 + index] = 'a';
+            bytes[3 + index] = 'N';
+            index += 3;
         } else {
             if (bits <= 0) {
                 bytes[++index] = '-';
             }
-            bytes[++index] = 'I';
-            bytes[++index] = 'n';
-            bytes[++index] = 'f';
-            bytes[++index] = 'i';
-            bytes[++index] = 'n';
-            bytes[++index] = 'i';
-            bytes[++index] = 't';
-            bytes[++index] = 'y';
+            bytes[1 + index] = 'I';
+            bytes[2 + index] = 'n';
+            bytes[3 + index] = 'f';
+            bytes[4 + index] = 'i';
+            bytes[5 + index] = 'n';
+            bytes[6 + index] = 'i';
+            bytes[7 + index] = 't';
+            bytes[8 + index] = 'y';
+            index += 8;
         }
         return index + 1 - off;
     }
@@ -409,10 +415,10 @@ public final class DoubleToDecimal {
                     bytes[++index] = '-';
                 }
 
-                bytes[++index] = '0';
-                bytes[++index] = '.';
-                bytes[++index] = '0';
-                return index + 1 - off;
+                bytes[1 + index] = '0';
+                bytes[2 + index] = '.';
+                bytes[3 + index] = '0';
+                return index + 4 - off;
             }
 
             boolean _stat = false;
@@ -582,8 +588,9 @@ public final class DoubleToDecimal {
                 return index + 1 - off;
             } else if (-3 < e && e <= 0) {
                 /* -3 < e <= 0: plain format with leading zeroes */
-                bytes[++index] = (byte) ('0');
-                bytes[++index] = '.';
+                bytes[1 + index] = (byte) ('0');
+                bytes[2 + index] = '.';
+                index += 2;
                 for (; e < 0; ++e) {
                     bytes[++index] = (byte) ('0');
                 }
@@ -620,8 +627,9 @@ public final class DoubleToDecimal {
                 return index + 1 - off;
             }
 
-            bytes[++index] = (char) ('0' + h);
-            bytes[++index] = '.';
+            bytes[1 + index] = (char) ('0' + h);
+            bytes[2 + index] = '.';
+            index += 2;
 
             final int MASK_28 = 268435455;
             {
@@ -684,8 +692,9 @@ public final class DoubleToDecimal {
                      *     floor(e1 / 10) = floor(103 e1 / 2^10)
                      */
                     d = e1 * 103 >>> 10;
-                    bytes[++index] = (char) ('0' + d);
-                    bytes[++index] = (char) ('0' + (e1 - 10 * d));
+                    bytes[1 + index] = (char) ('0' + d);
+                    bytes[2 + index] = (char) ('0' + (e1 - 10 * d));
+                    index += 2;
                 }
             }
             return index + 1 - off;
@@ -693,26 +702,29 @@ public final class DoubleToDecimal {
 
         int index = off - 1;
         if (json) {
-            bytes[++index] = 'n';
-            bytes[++index] = 'u';
-            bytes[++index] = 'l';
-            bytes[++index] = 'l';
+            bytes[1 + index] = 'n';
+            bytes[2 + index] = 'u';
+            bytes[3 + index] = 'l';
+            bytes[4 + index] = 'l';
+            index += 4;
         } else if (t != 0) {
-            bytes[++index] = 'N';
-            bytes[++index] = 'a';
-            bytes[++index] = 'N';
+            bytes[1 + index] = 'N';
+            bytes[2 + index] = 'a';
+            bytes[3 + index] = 'N';
+            index += 3;
         } else {
             if (bits <= 0) {
                 bytes[++index] = '-';
             }
-            bytes[++index] = 'I';
-            bytes[++index] = 'n';
-            bytes[++index] = 'f';
-            bytes[++index] = 'i';
-            bytes[++index] = 'n';
-            bytes[++index] = 'i';
-            bytes[++index] = 't';
-            bytes[++index] = 'y';
+            bytes[1 + index] = 'I';
+            bytes[2 + index] = 'n';
+            bytes[3 + index] = 'f';
+            bytes[4 + index] = 'i';
+            bytes[5 + index] = 'n';
+            bytes[6 + index] = 'i';
+            bytes[7 + index] = 't';
+            bytes[8 + index] = 'y';
+            index += 8;
         }
         return index + 1 - off;
     }
@@ -745,10 +757,10 @@ public final class DoubleToDecimal {
                     bytes[++index] = '-';
                 }
 
-                bytes[++index] = '0';
-                bytes[++index] = '.';
-                bytes[++index] = '0';
-                return index + 1 - off;
+                bytes[1 + index] = '0';
+                bytes[2 + index] = '.';
+                bytes[3 + index] = '0';
+                return index + 4 - off;
             }
 
             boolean _stat = false;
@@ -888,8 +900,9 @@ public final class DoubleToDecimal {
                     ++index;
                 }
             } else if (-3 < e && e <= 0) {
-                bytes[++index] = '0';
-                bytes[++index] = '.';
+                bytes[1 + index] = '0';
+                bytes[2 + index] = '.';
+                index += 2;
                 for (; e < 0; ++e) {
                     bytes[++index] = '0';
                 }
@@ -914,8 +927,9 @@ public final class DoubleToDecimal {
                     ++index;
                 }
             } else {
-                bytes[++index] = (byte) ('0' + h1);
-                bytes[++index] = '.';
+                bytes[1 + index] = (byte) ('0' + h1);
+                bytes[2 + index] = '.';
+                index += 2;
 
                 // append8Digits(l);
                 int y = (int) (MULTIPLY_HIGH.multiplyHigh(
@@ -946,8 +960,9 @@ public final class DoubleToDecimal {
                     bytes[++index] = (byte) ('0' + e1);
                 } else {
                     int d = e1 * 103 >>> 10;
-                    bytes[++index] = (byte) ('0' + d);
-                    bytes[++index] = (byte) ('0' + (e1 - 10 * d));
+                    bytes[1 + index] = (byte) ('0' + d);
+                    bytes[2 + index] = (byte) ('0' + (e1 - 10 * d));
+                    index += 2;
                 }
             }
 
@@ -956,26 +971,29 @@ public final class DoubleToDecimal {
 
         int index = off - 1;
         if (json) {
-            bytes[++index] = 'n';
-            bytes[++index] = 'u';
-            bytes[++index] = 'l';
-            bytes[++index] = 'l';
+            bytes[1 + index] = 'n';
+            bytes[2 + index] = 'u';
+            bytes[3 + index] = 'l';
+            bytes[4 + index] = 'l';
+            index += 4;
         } else if (t != 0) {
-            bytes[++index] = 'N';
-            bytes[++index] = 'a';
-            bytes[++index] = 'N';
+            bytes[1 + index] = 'N';
+            bytes[2 + index] = 'a';
+            bytes[3 + index] = 'N';
+            index += 3;
         } else {
             if (bits <= 0) {
                 bytes[++index] = '-';
             }
-            bytes[++index] = 'I';
-            bytes[++index] = 'n';
-            bytes[++index] = 'f';
-            bytes[++index] = 'i';
-            bytes[++index] = 'n';
-            bytes[++index] = 'i';
-            bytes[++index] = 't';
-            bytes[++index] = 'y';
+            bytes[1 + index] = 'I';
+            bytes[2 + index] = 'n';
+            bytes[3 + index] = 'f';
+            bytes[4 + index] = 'i';
+            bytes[5 + index] = 'n';
+            bytes[6 + index] = 'i';
+            bytes[7 + index] = 't';
+            bytes[8 + index] = 'y';
+            index += 8;
         }
         return index + 1 - off;
     }
@@ -1008,9 +1026,10 @@ public final class DoubleToDecimal {
                     bytes[++index] = '-';
                 }
 
-                bytes[++index] = '0';
-                bytes[++index] = '.';
-                bytes[++index] = '0';
+                bytes[1 + index] = '0';
+                bytes[2 + index] = '.';
+                bytes[3 + index] = '0';
+                index += 3;
                 return index + 1 - off;
             }
 
@@ -1150,8 +1169,9 @@ public final class DoubleToDecimal {
                     ++index;
                 }
             } else if (-3 < e && e <= 0) {
-                bytes[++index] = '0';
-                bytes[++index] = '.';
+                bytes[1 + index] = '0';
+                bytes[2 + index] = '.';
+                index += 2;
                 for (; e < 0; ++e) {
                     bytes[++index] = '0';
                 }
@@ -1176,8 +1196,9 @@ public final class DoubleToDecimal {
                     ++index;
                 }
             } else {
-                bytes[++index] = (char) ('0' + h1);
-                bytes[++index] = '.';
+                bytes[1 + index] = (char) ('0' + h1);
+                bytes[2 + index] = '.';
+                index += 2;
 
                 // append8Digits(l);
                 int y = (int) (MULTIPLY_HIGH.multiplyHigh(
@@ -1208,8 +1229,9 @@ public final class DoubleToDecimal {
                     bytes[++index] = (char) ('0' + e1);
                 } else {
                     int d = e1 * 103 >>> 10;
-                    bytes[++index] = (char) ('0' + d);
-                    bytes[++index] = (char) ('0' + (e1 - 10 * d));
+                    bytes[1 + index] = (char) ('0' + d);
+                    bytes[2 + index] = (char) ('0' + (e1 - 10 * d));
+                    index += 2;
                 }
             }
 
@@ -1218,26 +1240,29 @@ public final class DoubleToDecimal {
 
         int index = off - 1;
         if (json) {
-            bytes[++index] = 'n';
-            bytes[++index] = 'u';
-            bytes[++index] = 'l';
-            bytes[++index] = 'l';
+            bytes[1 + index] = 'n';
+            bytes[2 + index] = 'u';
+            bytes[3 + index] = 'l';
+            bytes[4 + index] = 'l';
+            index += 4;
         } else if (t != 0) {
-            bytes[++index] = 'N';
-            bytes[++index] = 'a';
-            bytes[++index] = 'N';
+            bytes[1 + index] = 'N';
+            bytes[2 + index] = 'a';
+            bytes[3 + index] = 'N';
+            index += 3;
         } else {
             if (bits <= 0) {
                 bytes[++index] = '-';
             }
-            bytes[++index] = 'I';
-            bytes[++index] = 'n';
-            bytes[++index] = 'f';
-            bytes[++index] = 'i';
-            bytes[++index] = 'n';
-            bytes[++index] = 'i';
-            bytes[++index] = 't';
-            bytes[++index] = 'y';
+            bytes[1 + index] = 'I';
+            bytes[2 + index] = 'n';
+            bytes[3 + index] = 'f';
+            bytes[4 + index] = 'i';
+            bytes[5 + index] = 'n';
+            bytes[6 + index] = 'i';
+            bytes[7 + index] = 't';
+            bytes[8 + index] = 'y';
+            index += 8;
         }
         return index + 1 - off;
     }
@@ -1884,6 +1909,7 @@ public final class DoubleToDecimal {
     };
 
     static final LongBiFunction MULTIPLY_HIGH;
+
     static {
         LongBiFunction function = null;
         if (JDKUtils.JVM_VERSION > 8 && !ANDROID) {

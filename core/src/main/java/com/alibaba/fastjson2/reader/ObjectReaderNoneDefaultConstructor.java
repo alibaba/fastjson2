@@ -254,12 +254,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 ObjectReader autoTypeObjectReader;
 
                 if (supportAutoType) {
-                    autoTypeObjectReader = autoType(context, typeHash);
-
-                    if (autoTypeObjectReader == null) {
-                        String typeName = jsonReader.getString();
-                        autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass, this.features);
-                    }
+                    autoTypeObjectReader = jsonReader.getObjectReaderAutoType(typeHash, objectClass, this.features);
                 } else {
                     String typeName = jsonReader.getString();
                     autoTypeObjectReader = context.getObjectReaderAutoType(typeName, objectClass);

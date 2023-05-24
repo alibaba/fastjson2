@@ -1070,18 +1070,15 @@ class Frame {
         }
     }
 
-    final boolean merge(
-            final SymbolTable symbolTable, final Frame dstFrame) {
-        boolean frameChanged = false;
-
+    final boolean merge(final SymbolTable symbolTable, final Frame dstFrame) {
         // Compute the concrete types of the local variables at the end of the basic block corresponding
         // to this frame, by resolving its abstract output types, and merge these concrete types with
         // those of the local variables in the input frame of dstFrame.
         int numLocal = inputLocals.length;
         int numStack = inputStack.length;
-        if (dstFrame.inputLocals == null) {
+        boolean frameChanged;
+        if (frameChanged = (dstFrame.inputLocals == null)) {
             dstFrame.inputLocals = new int[numLocal];
-            frameChanged = true;
         }
         for (int i = 0; i < numLocal; ++i) {
             int concreteOutputType;

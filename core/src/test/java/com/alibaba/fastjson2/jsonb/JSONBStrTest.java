@@ -52,13 +52,24 @@ public class JSONBStrTest {
 
     @Test
     public void test_1() {
-        {
-            String str = "1234中";
-            byte[] bytes = JSONB.toBytes((Object) str);
-            String str1 = (String) JSONB.parse(bytes);
-            assertEquals(str, str1);
-            String str2 = JSONB.parseObject(bytes, String.class);
-            assertEquals(str, str2);
-        }
+        String str = "1234中";
+        byte[] bytes = JSONB.toBytes((Object) str);
+        String str1 = (String) JSONB.parse(bytes);
+        assertEquals(str, str1);
+        String str2 = JSONB.parseObject(bytes, String.class);
+        assertEquals(str, str2);
+    }
+
+    @Test
+    public void test_utf16_bean() {
+        Bean bean = new Bean();
+        bean.value = "中国";
+        byte[] bytes = JSONB.toBytes(bean);
+        Bean bean1 = JSONB.parseObject(bytes, Bean.class);
+        assertEquals(bean.value, bean1.value);
+    }
+
+    public static class Bean {
+        public String value;
     }
 }

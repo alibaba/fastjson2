@@ -40,50 +40,64 @@ public class JSONWriterPrettyTest {
 
     @Test
     public void writeRaw() {
-        JSONWriterPretty jsonWriter = new JSONWriterPretty(new JSONWriterUTF16(JSONFactory.createWriteContext()));
+        JSONWriter jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext(JSONWriter.Feature.PrettyFormat));
         jsonWriter.writeRaw(new char[] {'A'});
         assertEquals("A", jsonWriter.toString());
     }
 
     @Test
     public void writeRaw1() {
-        JSONWriterPretty jsonWriter = new JSONWriterPretty(new JSONWriterUTF8(JSONFactory.createWriteContext()));
+        JSONWriter jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext(JSONWriter.Feature.PrettyFormat));
         jsonWriter.writeRaw(new byte[] {'A'});
         assertEquals("A", jsonWriter.toString());
     }
 
     @Test
     public void writeRaw2() {
-        JSONWriterPretty jsonWriter = new JSONWriterPretty(new JSONWriterUTF16(JSONFactory.createWriteContext()));
+        JSONWriter jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext(JSONWriter.Feature.PrettyFormat));
         jsonWriter.writeNameRaw(new char[] {'A'}, 0, 1);
         assertEquals(",A", jsonWriter.toString());
     }
 
     @Test
     public void writeRaw3() throws Exception {
-        JSONWriterPretty jsonWriter = new JSONWriterPretty(new JSONWriterUTF8(JSONFactory.createWriteContext()));
+        JSONWriter jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext(JSONWriter.Feature.PrettyFormat));
+        jsonWriter.startObject();
         jsonWriter.writeNameRaw(new byte[] {'A'}, 0, 1);
-        assertEquals(",A", jsonWriter.toString());
+        jsonWriter.writeColon();
+        jsonWriter.writeInt32(1);
+        jsonWriter.endObject();
+        assertEquals("{\n" +
+                "\tA:1\n" +
+                "}", jsonWriter.toString());
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         jsonWriter.flushTo(out, StandardCharsets.UTF_8);
-        assertEquals(",A", new String(out.toByteArray()));
+        assertEquals("{\n" +
+                "\tA:1\n" +
+                "}", new String(out.toByteArray()));
     }
 
     @Test
     public void writeInt16() throws Exception {
-        JSONWriterPretty jsonWriter = new JSONWriterPretty(new JSONWriterUTF8(JSONFactory.createWriteContext()));
+        JSONWriter jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext(JSONWriter.Feature.PrettyFormat));
         jsonWriter.writeInt16(new short[]{1, 2});
-        assertEquals("[1,2]", jsonWriter.toString());
+        assertEquals("[\n" +
+                "\t1,\n" +
+                "\t2\n" +
+                "]", jsonWriter.toString());
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         jsonWriter.flushTo(out);
-        assertEquals("[1,2]", new String(out.toByteArray()));
+        assertEquals("[\n" +
+                "\t1,\n" +
+                "\t2\n" +
+                "]", new String(out.toByteArray()));
     }
 
     @Test
     public void writeRaw4() {
-        JSONWriterPretty jsonWriter = new JSONWriterPretty(new JSONWriterUTF8(JSONFactory.createWriteContext()));
+        JSONWriter jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext(JSONWriter.Feature.PrettyFormat));
         jsonWriter.writeRaw('A');
         assertEquals("A", jsonWriter.toString());
     }
