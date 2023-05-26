@@ -1518,24 +1518,26 @@ class JSONWriterUTF8
     }
 
     @Override
-    public final void writeNameRaw(byte[] bytes) {
-        int minCapacity = off + bytes.length + (pretty ? 2 + indent : 1);
+    public final void writeNameRaw(byte[] name) {
+        int off = this.off;
+        int minCapacity = off + name.length + (pretty ? 2 + indent : 1);
         if (minCapacity >= this.bytes.length) {
             ensureCapacity(minCapacity);
         }
         if (startObject) {
             startObject = false;
         } else {
-            this.bytes[off++] = (byte) ',';
+            final byte[] bytes = this.bytes;
+            bytes[off++] = ',';
             if (pretty) {
-                this.bytes[off++] = (byte) '\n';
+                bytes[off++] = '\n';
                 for (int i = 0; i < indent; ++i) {
-                    this.bytes[off++] = (byte) '\t';
+                    bytes[off++] = '\t';
                 }
             }
         }
-        System.arraycopy(bytes, 0, this.bytes, this.off, bytes.length);
-        off += bytes.length;
+        System.arraycopy(name, 0, bytes, off, name.length);
+        this.off = off + name.length;
     }
 
     @Override
