@@ -253,6 +253,10 @@ public abstract class JSONWriter
         return context.hasFilter || (context.features & feature) != 0;
     }
 
+    public final boolean hasFilter(boolean containsNoneFieldGetter) {
+        return context.hasFilter || containsNoneFieldGetter && (context.features & IgnoreNonFieldGetter.mask) != 0;
+    }
+
     public final boolean isWriteNulls() {
         return (context.features & Feature.WriteNulls.mask) != 0;
     }

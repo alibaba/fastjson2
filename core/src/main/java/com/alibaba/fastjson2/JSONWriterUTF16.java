@@ -1503,8 +1503,9 @@ class JSONWriterUTF16
     }
 
     @Override
-    public final void writeNameRaw(char[] chars) {
-        int minCapacity = off + chars.length + 1;
+    public final void writeNameRaw(char[] name) {
+        int off = this.off;
+        int minCapacity = off + name.length + 1;
         if (minCapacity >= this.chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -1512,16 +1513,17 @@ class JSONWriterUTF16
         if (startObject) {
             startObject = false;
         } else {
-            this.chars[off++] = (byte) ',';
+            final char[] chars = this.chars;
+            chars[off++] = ',';
             if (pretty) {
-                this.chars[off++] = (byte) '\n';
+                chars[off++] = (byte) '\n';
                 for (int i = 0; i < indent; ++i) {
-                    this.chars[off++] = (byte) '\t';
+                    chars[off++] = (byte) '\t';
                 }
             }
         }
-        System.arraycopy(chars, 0, this.chars, this.off, chars.length);
-        off += chars.length;
+        System.arraycopy(name, 0, chars, off, name.length);
+        this.off = off + name.length;
     }
 
     @Override
