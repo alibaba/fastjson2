@@ -2039,7 +2039,10 @@ public class JSONReaderTest1 {
             Object v1 = object.get(s1);
             assertEquals(s1, v1, Integer.toString(i));
         }
+    }
 
+    @Test
+    public void testUTF16_2() {
         for (char i = 0; i < 512; i++) {
             for (char j = 0; j < 512; j++) {
                 String s2 = new String(new char[]{i, j});
@@ -2049,7 +2052,25 @@ public class JSONReaderTest1 {
                 JSONReaderUTF16 jsonReader = new JSONReaderUTF16(ctx, json, chars, 0, chars.length);
                 JSONObject object = (JSONObject) jsonReader.readObject();
                 Object v1 = object.get(s2);
-                assertEquals(s2, v1);
+                assertEquals(s2, v1, Arrays.toString(new int[]{i, j}));
+            }
+        }
+    }
+
+    @Test
+    public void testUTF16_3() {
+        for (char i = 0; i < 512; i += 3) {
+            for (char j = 0; j < 512; j += 3) {
+                for (char k = 0; k < 512; k += 3) {
+                    String s2 = new String(new char[]{i, j, k});
+                    String json = JSON.toJSONString(JSONObject.of(s2, s2));
+                    char[] chars = json.toCharArray();
+                    JSONReader.Context ctx = JSONFactory.createReadContext();
+                    JSONReaderUTF16 jsonReader = new JSONReaderUTF16(ctx, json, chars, 0, chars.length);
+                    JSONObject object = (JSONObject) jsonReader.readObject();
+                    Object v1 = object.get(s2);
+                    assertEquals(s2, v1, Arrays.toString(new int[]{i, j, k}));
+                }
             }
         }
     }
