@@ -38,14 +38,12 @@ final class JSONWriterUTF16JDK9UF
         final char[] chars = this.chars;
         chars[off++] = quote;
 
-        for (int i = 0; i < strlen; ) {
+        for (int i = 0; i < strlen; ++i) {
             int c;
             if (coder == 0) {
                 c = value[i];
-                i++;
             } else {
-                c = UNSAFE.getChar(str, (long) Unsafe.ARRAY_CHAR_BASE_OFFSET + i);
-                i += 2;
+                c = UNSAFE.getChar(str, (long) Unsafe.ARRAY_CHAR_BASE_OFFSET + i * 2);
             }
             if (c == '\\'
                     || c == quote
