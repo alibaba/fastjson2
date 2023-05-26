@@ -10,11 +10,6 @@ class JSONWriterUTF8JDK9
 
     @Override
     public void writeString(String str) {
-        if (STRING_VALUE == null) {
-            super.writeString(str);
-            return;
-        }
-
         if (str == null) {
             writeStringNull();
             return;
