@@ -80,9 +80,11 @@ final class CSVReaderUTF16<T>
     }
 
     protected boolean seekLine() throws IOException {
+        char[] buf = this.buf;
+        int off = this.off;
         if (buf == null) {
             if (input != null) {
-                buf = new char[SIZE_512K];
+                buf = this.buf = new char[SIZE_512K];
                 int cnt = input.read(buf);
                 if (cnt == -1) {
                     inputEnd = true;
@@ -187,6 +189,7 @@ final class CSVReaderUTF16<T>
                     if (cnt == -1) {
                         inputEnd = true;
                         if (off == end) {
+                            this.off = off;
                             return false;
                         }
                     } else {
@@ -206,6 +209,7 @@ final class CSVReaderUTF16<T>
             break;
         }
 
+        this.off = off;
         return true;
     }
 
