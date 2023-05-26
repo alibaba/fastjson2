@@ -835,7 +835,7 @@ public class JSONObject
             return (byte[]) value;
         }
         if (value instanceof String) {
-            return IOUtils.decodeBase64((String) value);
+            return Base64.getDecoder().decode((String) value);
         }
         throw new JSONException("can not cast to byte[], value : " + value);
     }

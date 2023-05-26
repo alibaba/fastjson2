@@ -4,6 +4,7 @@ import com.alibaba.fastjson.util.IOUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
+import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
@@ -36,9 +37,61 @@ public class TestUtils {
     }
 
     public static JSONWriter[] createJSONWriters() {
-        return new JSONWriter[] {
-                new JSONWriterUTF8(JSONFactory.createWriteContext()),
-                new JSONWriterUTF8JDK9(JSONFactory.createWriteContext()),
+        if (JDKUtils.STRING_VALUE == null) {
+            if (JDKUtils.JVM_VERSION == 8) {
+                if (JDKUtils.UNSAFE_SUPPORT) {
+                    return new JSONWriter[]{
+                            new JSONWriterUTF8(JSONFactory.createWriteContext()),
+                            new JSONWriterUTF16(JSONFactory.createWriteContext()),
+                            new JSONWriterUTF16JDK8(JSONFactory.createWriteContext()),
+                            new JSONWriterUTF16JDK8UF(JSONFactory.createWriteContext())
+                    };
+                }
+                return new JSONWriter[]{
+                        new JSONWriterUTF8(JSONFactory.createWriteContext()),
+                        new JSONWriterUTF16(JSONFactory.createWriteContext()),
+                        new JSONWriterUTF16JDK8(JSONFactory.createWriteContext())
+                };
+            } else {
+                if (JDKUtils.UNSAFE_SUPPORT) {
+                    return new JSONWriter[]{
+                            new JSONWriterUTF8(JSONFactory.createWriteContext()),
+                            new JSONWriterUTF16(JSONFactory.createWriteContext())
+                    };
+                }
+                return new JSONWriter[]{
+                        new JSONWriterUTF8(JSONFactory.createWriteContext()),
+                        new JSONWriterUTF16(JSONFactory.createWriteContext())
+                };
+            }
+        }
+
+        if (JDKUtils.JVM_VERSION == 8) {
+            if (JDKUtils.UNSAFE_SUPPORT) {
+                return new JSONWriter[]{
+                        new JSONWriterUTF8(JSONFactory.createWriteContext()),
+                        new JSONWriterUTF16(JSONFactory.createWriteContext()),
+                        new JSONWriterUTF16JDK8(JSONFactory.createWriteContext()),
+                        new JSONWriterUTF16JDK8UF(JSONFactory.createWriteContext())
+                };
+            }
+
+            return new JSONWriter[]{
+                    new JSONWriterUTF8(JSONFactory.createWriteContext()),
+                    new JSONWriterUTF16(JSONFactory.createWriteContext()),
+                    new JSONWriterUTF16JDK8(JSONFactory.createWriteContext())
+            };
+        }
+
+        if (JDKUtils.UNSAFE_SUPPORT) {
+            return new JSONWriter[]{
+                    new JSONWriterUTF8JDK9(JSONFactory.createWriteContext()),
+                    new JSONWriterUTF16(JSONFactory.createWriteContext()),
+                    new JSONWriterUTF16JDK9UF(JSONFactory.createWriteContext())
+            };
+        }
+
+        return new JSONWriter[]{
                 new JSONWriterUTF16(JSONFactory.createWriteContext()),
                 new JSONWriterUTF16JDK8(JSONFactory.createWriteContext())
         };

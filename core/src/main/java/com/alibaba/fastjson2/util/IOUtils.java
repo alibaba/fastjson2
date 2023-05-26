@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.time.LocalTime;
-import java.util.Arrays;
 
 public class IOUtils {
     static final byte[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
@@ -24,22 +23,12 @@ public class IOUtils {
             '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
     static final int[] sizeTable = {9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999, Integer.MAX_VALUE};
-
-    static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
-    static final int[] IA = new int[256];
-
     public static final int[] DIGITS_K = new int[1000];
     private static final byte[] MIN_INT_BYTES = "-2147483648".getBytes();
     private static final char[] MIN_INT_CHARS = "-2147483648".toCharArray();
     private static final byte[] MIN_LONG = "-9223372036854775808".getBytes();
 
     static {
-        Arrays.fill(IA, -1);
-        for (int i = 0, iS = CA.length; i < iS; i++) {
-            IA[CA[i]] = i;
-        }
-        IA['='] = 0;
-
         for (int i = 0; i < DIGITS_K.length; i++) {
             DIGITS_K[i] = (i < 10 ? (2 << 24) : i < 100 ? (1 << 24) : 0)
                     + (((i / 100) + '0') << 16)
@@ -628,8 +617,9 @@ public class IOUtils {
             } else if ((b1 >> 4) == -2) {
                 // 3 bytes, 16 bits: 1110xxxx 10xxxxxx 10xxxxxx
                 if (off + 1 < sl) {
-                    int b2 = src[off++];
-                    int b3 = src[off++];
+                    int b2 = src[off];
+                    int b3 = src[off + 1];
+                    off += 2;
                     if ((b1 == (byte) 0xe0 && (b2 & 0xe0) == 0x80) //
                             || (b2 & 0xc0) != 0x80 //
                             || (b3 & 0xc0) != 0x80) { // isMalformed3(b1, b2, b3)
@@ -654,9 +644,10 @@ public class IOUtils {
             } else if ((b1 >> 3) == -2) {
                 // 4 bytes, 21 bits: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
                 if (off + 2 < sl) {
-                    int b2 = src[off++];
-                    int b3 = src[off++];
-                    int b4 = src[off++];
+                    int b2 = src[off];
+                    int b3 = src[off + 1];
+                    int b4 = src[off + 2];
+                    off += 3;
                     int uc = ((b1 << 18) ^
                             (b2 << 12) ^
                             (b3 << 6) ^
@@ -672,8 +663,9 @@ public class IOUtils {
                     ) {
                         return -1;
                     } else {
-                        dst[dp++] = (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
-                        dst[dp++] = (char) ((uc & 0x3ff) + '\uDC00'); // Character.lowSurrogate(uc);
+                        dst[dp] = (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
+                        dst[dp + 1] = (char) ((uc & 0x3ff) + '\uDC00'); // Character.lowSurrogate(uc);
+                        dp += 2;
                     }
                     continue;
                 }
@@ -683,67 +675,6 @@ public class IOUtils {
             }
         }
         return dp;
-    }
-
-    public static byte[] decodeBase64(String s) {
-        // Check special case
-        int sLen = s.length();
-        if (sLen == 0) {
-            return new byte[0];
-        }
-
-        int sIx = 0, eIx = sLen - 1; // Start and end index after trimming.
-
-        // Trim illegal chars from start
-        while (sIx < eIx && IA[s.charAt(sIx) & 0xff] < 0) {
-            sIx++;
-        }
-
-        // Trim illegal chars from end
-        while (eIx > 0 && IA[s.charAt(eIx) & 0xff] < 0) {
-            eIx--;
-        }
-
-        // get the padding count (=) (0, 1 or 2)
-        int pad = s.charAt(eIx) == '=' ? (s.charAt(eIx - 1) == '=' ? 2 : 1) : 0; // Count '=' at end.
-        int cCnt = eIx - sIx + 1; // Content count including possible separators
-        int sepCnt = sLen > 76 ? (s.charAt(76) == '\r' ? cCnt / 78 : 0) << 1 : 0;
-
-        int len = ((cCnt - sepCnt) * 6 >> 3) - pad; // The number of decoded bytes
-        byte[] dArr = new byte[len]; // Preallocate byte[] of exact length
-
-        // Decode all but the last 0 - 2 bytes.
-        int d = 0;
-        for (int cc = 0, eLen = (len / 3) * 3; d < eLen; ) {
-            // Assemble three bytes into an int from four "valid" characters.
-            int i = IA[s.charAt(sIx++)] << 18 | IA[s.charAt(sIx++)] << 12 | IA[s.charAt(sIx++)] << 6
-                    | IA[s.charAt(sIx++)];
-
-            // Add the bytes
-            dArr[d++] = (byte) (i >> 16);
-            dArr[d++] = (byte) (i >> 8);
-            dArr[d++] = (byte) i;
-
-            // If line separator, jump over it.
-            if (sepCnt > 0 && ++cc == 19) {
-                sIx += 2;
-                cc = 0;
-            }
-        }
-
-        if (d < len) {
-            // Decode last 1-3 bytes (incl '=') into 1-3 bytes
-            int i = 0;
-            for (int j = 0; sIx <= eIx - pad; j++) {
-                i |= IA[s.charAt(sIx++)] << (18 - j * 6);
-            }
-
-            for (int r = 16; d < len; r -= 8) {
-                dArr[d++] = (byte) (i >> r);
-            }
-        }
-
-        return dArr;
     }
 
     public static long lines(File file) throws Exception {
