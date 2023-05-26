@@ -41,7 +41,7 @@ public class UsersParseUTF8Bytes {
         // zulu17.40.19_vec : 338
     }
 
-//    @Benchmark
+    @Benchmark
     public void dsljson(Blackhole bh) throws IOException {
         bh.consume(dslJson.deserialize(Users.class, utf8Bytes, utf8Bytes.length));
         // zulu17.40.19 : 3560
