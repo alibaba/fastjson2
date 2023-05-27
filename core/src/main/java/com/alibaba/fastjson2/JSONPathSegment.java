@@ -671,6 +671,23 @@ abstract class JSONPathSegment {
             }
 
             if (object instanceof Collection) {
+                if (context.next == null) {
+                    Collection collection = (Collection) object;
+                    JSONArray collectionArray = new JSONArray(collection.size());
+                    for (Object item : collection) {
+                        if (item instanceof Map) {
+                            Map map = (Map) item;
+                            JSONArray array = new JSONArray(names.length);
+                            for (String name : names) {
+                                Object value = map.get(name);
+                                array.add(value);
+                            }
+                            collectionArray.add(array);
+                        }
+                    }
+                    context.value = collectionArray;
+                    return;
+                }
                 // skip
                 context.value = object;
                 return;
