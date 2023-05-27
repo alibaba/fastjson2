@@ -64,6 +64,8 @@ abstract class FieldWriterObjectFinal<T>
 
                 if (fieldClass.isArray()) {
                     jsonWriter.writeArrayNull();
+                } else if (fieldClass == StringBuffer.class || fieldClass == StringBuilder.class) {
+                    jsonWriter.writeStringNull();
                 } else {
                     jsonWriter.writeNull();
                 }

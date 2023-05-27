@@ -201,8 +201,7 @@ abstract class FieldWriterList<T>
             return;
         }
 
-        boolean refDetect = (features & ReferenceDetection.mask) != 0;
-        boolean previousItemRefDetect = refDetect;
+        boolean previousItemRefDetect = (features & ReferenceDetection.mask) != 0;
 
         if (writeFieldName) {
             writeFieldName(jsonWriter);

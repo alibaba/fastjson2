@@ -433,11 +433,7 @@ public abstract class FieldReader<T>
                     }
 
                     if (fieldClass == LocalDate.class) {
-                        if (format == null) {
-                            return ObjectReaderImplLocalDate.INSTANCE;
-                        }
-
-                        return new ObjectReaderImplLocalDate(format, locale);
+                        return ObjectReaderImplLocalDate.of(format, locale);
                     }
 
                     if (fieldClass == LocalTime.class) {

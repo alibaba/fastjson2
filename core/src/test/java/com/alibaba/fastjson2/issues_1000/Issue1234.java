@@ -138,6 +138,9 @@ public class Issue1234 {
     public static class RelationShipDTO {
         private Integer point;
 
+        public RelationShipDTO() {
+        }
+
         public Integer getPoint() {
             return point;
         }

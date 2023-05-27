@@ -4886,6 +4886,26 @@ public class DateUtils {
         return localDateTime(y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1);
     }
 
+    public static LocalDateTime parseLocalDateTime19(String str, int off) {
+        if (off + 19 > str.length()) {
+            return null;
+        }
+
+        LocalDateTime ldt;
+        if (STRING_CODER != null && STRING_VALUE != null && STRING_CODER.applyAsInt(str) == 0) {
+            byte[] bytes = JDKUtils.STRING_VALUE.apply(str);
+            ldt = parseLocalDateTime19(bytes, off);
+        } else if (JVM_VERSION == 8 && !FIELD_STRING_VALUE_ERROR) {
+            char[] chars = JDKUtils.getCharArray(str);
+            ldt = parseLocalDateTime19(chars, off);
+        } else {
+            char[] chars = new char[19];
+            str.getChars(off, off + 19, chars, 0);
+            ldt = parseLocalDateTime19(chars, off);
+        }
+        return ldt;
+    }
+
     /**
      * yyyy-MM-ddTHH:mm:ss
      * yyyy-MM-dd HH:mm:ss

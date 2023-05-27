@@ -36,9 +36,9 @@ final class FieldWriterListFunc<T>
 
     @Override
     public boolean write(JSONWriter jsonWriter, T object) {
-        List list;
+        List value;
         try {
-            list = function.apply(object);
+            value = function.apply(object);
         } catch (RuntimeException error) {
             if (jsonWriter.isIgnoreErrorGetter()) {
                 return false;
@@ -46,7 +46,7 @@ final class FieldWriterListFunc<T>
             throw error;
         }
 
-        if (list == null) {
+        if (value == null) {
             long features = this.features | jsonWriter.getFeatures();
             if ((features & (WriteNulls.mask | NullAsDefaultValue.mask | WriteNullListAsEmpty.mask)) == 0) {
                 return false;
@@ -56,65 +56,24 @@ final class FieldWriterListFunc<T>
             return true;
         }
 
-        if ((features & NotWriteEmptyArray.mask) != 0 && list.isEmpty()) {
+        if ((features & NotWriteEmptyArray.mask) != 0 && value.isEmpty()) {
             return false;
         }
 
-        Class previousClass = null;
-        ObjectWriter previousObjectWriter = null;
-
-        writeFieldName(jsonWriter);
-
-        if (jsonWriter.jsonb) {
-            int size = list.size();
-            jsonWriter.startArray(size);
-
-            for (int i = 0; i < size; i++) {
-                Object item = list.get(i);
-                if (item == null) {
-                    jsonWriter.writeNull();
-                    continue;
-                }
-                Class<?> itemClass = item.getClass();
-                ObjectWriter itemObjectWriter;
-                if (itemClass == previousClass) {
-                    itemObjectWriter = previousObjectWriter;
-                } else {
-                    itemObjectWriter = getItemWriter(jsonWriter, itemClass);
-                    previousClass = itemClass;
-                    previousObjectWriter = itemObjectWriter;
-                }
-
-                itemObjectWriter.writeJSONB(jsonWriter, item, null, itemType, 0);
-            }
+        String refPath = jsonWriter.setPath(this, value);
+        if (refPath != null) {
+            writeFieldName(jsonWriter);
+            jsonWriter.writeReference(refPath);
+            jsonWriter.popPath(value);
             return true;
         }
 
-        jsonWriter.startArray();
-        for (int i = 0; i < list.size(); i++) {
-            if (i != 0) {
-                jsonWriter.writeComma();
-            }
-
-            Object item = list.get(i);
-            if (item == null) {
-                jsonWriter.writeNull();
-                continue;
-            }
-            Class<?> itemClass = item.getClass();
-            ObjectWriter itemObjectWriter;
-            if (itemClass == previousClass) {
-                itemObjectWriter = previousObjectWriter;
-            } else {
-                itemObjectWriter = getItemWriter(jsonWriter, itemClass);
-                previousClass = itemClass;
-                previousObjectWriter = itemObjectWriter;
-            }
-
-            itemObjectWriter.write(jsonWriter, item);
+        if (itemType == String.class) {
+            writeListStr(jsonWriter, true, value);
+        } else {
+            writeList(jsonWriter, true, value);
         }
-        jsonWriter.endArray();
-
+        jsonWriter.popPath(value);
         return true;
     }
 

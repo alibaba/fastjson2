@@ -36,7 +36,7 @@ public class WriteClassNameBasicTypeTest {
         BeanLong bean = new BeanLong();
         bean.value = 1L;
         String str = JSON.toJSONString(bean, JSONWriter.Feature.WriteClassName, JSONWriter.Feature.NotWriteRootClassName);
-        assertEquals("{\"value\":1}", str);
+        assertEquals("{\"value\":1L}", str);
     }
 
     @Test

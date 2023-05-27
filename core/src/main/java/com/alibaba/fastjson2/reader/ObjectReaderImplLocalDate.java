@@ -19,6 +19,14 @@ class ObjectReaderImplLocalDate
         super(format, locale);
     }
 
+    public static ObjectReaderImplLocalDate of(String format, Locale locale) {
+        if (format == null) {
+            return INSTANCE;
+        }
+
+        return new ObjectReaderImplLocalDate(format, locale);
+    }
+
     @Override
     public Class getObjectClass() {
         return LocalDate.class;

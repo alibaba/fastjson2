@@ -18,6 +18,8 @@ import java.lang.invoke.*;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,8 +28,8 @@ import java.util.function.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName;
 import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
-import static com.alibaba.fastjson2.util.TypeUtils.METHOD_TYPE_FUNCTION;
-import static com.alibaba.fastjson2.util.TypeUtils.METHOD_TYPE_OBJECT_OBJECT;
+import static com.alibaba.fastjson2.util.TypeUtils.*;
+import static com.alibaba.fastjson2.writer.ObjectWriterProvider.NAME_COMPATIBLE_WITH_FILED;
 
 public class ObjectWriterCreator {
     public static final ObjectWriterCreator INSTANCE = new ObjectWriterCreator();
@@ -137,7 +139,7 @@ public class ObjectWriterCreator {
         fieldInfo.features = writerFeatures;
         provider.getFieldInfo(beanInfo, fieldInfo, objectClass, field);
 
-        if (fieldInfo.ignore) {
+        if (fieldInfo.ignore || isFunction(field.getType())) {
             return null;
         }
 
@@ -392,35 +394,7 @@ public class ObjectWriterCreator {
                         return;
                     }
 
-                    String fieldName;
-                    if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
-                        fieldName = BeanUtils.getterName(method, beanInfo.namingStrategy);
-
-                        char c0 = '\0', c1;
-                        int len = fieldName.length();
-                        if (len > 0) {
-                            c0 = fieldName.charAt(0);
-                        }
-
-                        if ((len == 1 && c0 >= 'a' && c0 <= 'z')
-                                || (len > 2 && c0 >= 'A' && c0 <= 'Z' && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z')
-                        ) {
-                            char[] chars = fieldName.toCharArray();
-                            if (c0 >= 'a' && c0 <= 'z') {
-                                chars[0] = (char) (chars[0] - 32);
-                            } else {
-                                chars[0] = (char) (chars[0] + 32);
-                            }
-                            String fieldName1 = new String(chars);
-                            Field field = BeanUtils.getDeclaredField(objectClass, fieldName1);
-
-                            if (field != null && (len == 1 || Modifier.isPublic(field.getModifiers()))) {
-                                fieldName = field.getName();
-                            }
-                        }
-                    } else {
-                        fieldName = fieldInfo.fieldName;
-                    }
+                    String fieldName = getFieldName(objectClass, provider, beanInfo, record, fieldInfo, method);
 
                     if (beanInfo.includes != null && beanInfo.includes.length > 0) {
                         boolean match = false;
@@ -454,6 +428,12 @@ public class ObjectWriterCreator {
                                 fieldInfo.ordinal = beanInfo.orders.length;
                             }
                         }
+                    }
+
+                    Class<?> returnType = method.getReturnType();
+                    // skip function
+                    if (isFunction(returnType)) {
+                        return;
                     }
 
                     ObjectWriter writeUsingWriter = null;
@@ -602,6 +582,56 @@ public class ObjectWriterCreator {
         return writerAdapter;
     }
 
+    protected static String getFieldName(
+            Class objectClass,
+            ObjectWriterProvider provider,
+            BeanInfo beanInfo,
+            boolean record,
+            FieldInfo fieldInfo,
+            Method method
+    ) {
+        String fieldName;
+        if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
+            if (record) {
+                fieldName = method.getName();
+            } else {
+                fieldName = BeanUtils.getterName(method, beanInfo.namingStrategy);
+
+                Field field = null;
+                if ((provider.userDefineMask & NAME_COMPATIBLE_WITH_FILED) != 0
+                        && (field = BeanUtils.getField(objectClass, method)) != null) {
+                    fieldName = field.getName();
+                } else {
+                    char c0 = '\0', c1;
+                    int len = fieldName.length();
+                    if (len > 0) {
+                        c0 = fieldName.charAt(0);
+                    }
+
+                    if ((len == 1 && c0 >= 'a' && c0 <= 'z')
+                            || (len > 2 && c0 >= 'A' && c0 <= 'Z' && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z')
+                    ) {
+                        char[] chars = fieldName.toCharArray();
+                        if (c0 >= 'a' && c0 <= 'z') {
+                            chars[0] = (char) (chars[0] - 32);
+                        } else {
+                            chars[0] = (char) (chars[0] + 32);
+                        }
+                        String fieldName1 = new String(chars);
+                        field = BeanUtils.getDeclaredField(objectClass, fieldName1);
+
+                        if (field != null && (len == 1 || Modifier.isPublic(field.getModifiers()))) {
+                            fieldName = field.getName();
+                        }
+                    }
+                }
+            }
+        } else {
+            fieldName = fieldInfo.fieldName;
+        }
+        return fieldName;
+    }
+
     protected static void configSerializeFilters(BeanInfo beanInfo, ObjectWriterAdapter writerAdapter) {
         for (Class<? extends Filter> filterClass : beanInfo.serializeFilters) {
             if (!Filter.class.isAssignableFrom(filterClass)) {
@@ -724,21 +754,21 @@ public class ObjectWriterCreator {
         Type fieldType = field.getGenericType();
 
         if (initObjectWriter != null) {
-            if (fieldClass == byte.class) {
-                fieldType = fieldClass = Byte.class;
-            } else if (fieldClass == short.class) {
-                fieldType = fieldClass = Short.class;
-            } else if (fieldClass == int.class) {
-                fieldType = fieldClass = Integer.class;
-            } else if (fieldClass == long.class) {
-                fieldType = fieldClass = Long.class;
-            } else if (fieldClass == float.class) {
-                fieldType = fieldClass = Float.class;
-            } else if (fieldClass == double.class) {
-                fieldType = fieldClass = Double.class;
-            } else if (fieldClass == boolean.class) {
-                fieldType = fieldClass = Boolean.class;
-            }
+//            if (fieldClass == byte.class) {
+//                fieldType = fieldClass = Byte.class;
+//            } else if (fieldClass == short.class) {
+//                fieldType = fieldClass = Short.class;
+//            } else if (fieldClass == int.class) {
+//                fieldType = fieldClass = Integer.class;
+//            } else if (fieldClass == long.class) {
+//                fieldType = fieldClass = Long.class;
+//            } else if (fieldClass == float.class) {
+//                fieldType = fieldClass = Float.class;
+//            } else if (fieldClass == double.class) {
+//                fieldType = fieldClass = Double.class;
+//            } else if (fieldClass == boolean.class) {
+//                fieldType = fieldClass = Boolean.class;
+//            }
 
             FieldWriterObject objImp = new FieldWriterObject(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, null);
             objImp.initValueClass = fieldClass;
@@ -765,7 +795,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass == long.class) {
-            if (format == null || format.isEmpty()) {
+            if (format == null || format.isEmpty() || "string".equals(format)) {
                 return new FieldWriterInt64ValField(fieldName, ordinal, features, format, label, field);
             }
             return new FieldWriterMillisField(fieldName, ordinal, features, format, label, field);
@@ -1082,6 +1112,18 @@ public class ObjectWriterCreator {
 
         if (fieldClass == Date.class) {
             return new FieldWriterDateFunc(fieldName, ordinal, features, format, label, method, function);
+        }
+
+        if (fieldClass == LocalDate.class) {
+            return new FieldWriterLocalDateFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, method, function);
+        }
+
+        if (fieldClass == OffsetDateTime.class) {
+            return new FieldWriterOffsetDateTimeFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, method, function);
+        }
+
+        if (fieldClass == UUID.class) {
+            return new FieldWriterUUIDFunc(fieldName, ordinal, features, format, label, fieldType, fieldClass, method, function);
         }
 
         if (Calendar.class.isAssignableFrom(fieldClass)) {

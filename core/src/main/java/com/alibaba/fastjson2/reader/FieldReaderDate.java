@@ -17,7 +17,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 
-class FieldReaderDate<T>
+final class FieldReaderDate<T>
         extends FieldReaderDateTimeCodec<T> {
     final BiConsumer<T, Date> function;
 
@@ -35,13 +35,31 @@ class FieldReaderDate<T>
             Method method,
             BiConsumer<T, Date> function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field);
+        super(
+                fieldName,
+                fieldType,
+                fieldClass,
+                ordinal,
+                features,
+                format,
+                locale,
+                defaultValue,
+                schema, method,
+                field,
+                ObjectReaderImplDate.of(format, locale)
+        );
         this.function = function;
     }
 
     @Override
     protected void acceptNull(T object) {
         accept(object, (Date) null);
+    }
+
+    @Override
+    public void readFieldValue(JSONReader jsonReader, T object) {
+        Date date = (Date) dateReader.readObject(jsonReader, fieldType, fieldName, features);
+        accept(object, date);
     }
 
     @Override
@@ -128,24 +146,5 @@ class FieldReaderDate<T>
     @Override
     protected Object apply(long millis) {
         return new Date(millis);
-    }
-
-    @Override
-    public ObjectReader getObjectReader(JSONReader jsonReader) {
-        if (dateReader == null) {
-            dateReader = format == null
-                    ? ObjectReaderImplDate.INSTANCE
-                    : new ObjectReaderImplDate(format, locale);
-        }
-        return dateReader;
-    }
-
-    public ObjectReader getObjectReader(JSONReader.Context context) {
-        if (dateReader == null) {
-            dateReader = format == null
-                    ? ObjectReaderImplDate.INSTANCE
-                    : new ObjectReaderImplDate(format, locale);
-        }
-        return dateReader;
     }
 }

@@ -63,6 +63,11 @@ public class FieldReaderList<T, V>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
+        if (jsonReader.isJSONB()) {
+            readFieldValueJSONB(jsonReader, object);
+            return;
+        }
+
         if (jsonReader.nextIfNull()) {
             accept(object, null);
             return;
@@ -81,52 +86,6 @@ public class FieldReaderList<T, V>
             }
         }
 
-        if (jsonReader.isJSONB()) {
-            Class fieldClass = this.fieldClass;
-            ObjectReader autoTypeReader;
-
-            if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
-                long typeHash = jsonReader.readTypeHashCode();
-                if (typeHash != this.fieldClassHash && jsonReader.isSupportAutoType(features)) {
-                    autoTypeReader = jsonReader.getObjectReaderAutoType(typeHash, fieldClass, fieldClassHash);
-                    objectReader = autoTypeReader;
-                    builder = autoTypeReader.getBuildFunction();
-                }
-            }
-
-            if (jsonReader.isReference()) {
-                String reference = jsonReader.readReference();
-                if ("..".equals(reference)) {
-                    accept(object, object);
-                    return;
-                }
-                addResolveTask(jsonReader, object, reference);
-                return;
-            }
-
-            int entryCnt = jsonReader.startArray();
-
-            Object[] array = new Object[entryCnt];
-            ObjectReader itemObjectReader = getItemObjectReader(context);
-            for (int i = 0; i < entryCnt; ++i) {
-                autoTypeReader = jsonReader.checkAutoType(getItemClass(), getItemClassHash(), features);
-                if (autoTypeReader != null) {
-                    array[i] = autoTypeReader.readJSONBObject(jsonReader, fieldType, fieldName, 0);
-                } else {
-                    array[i] = itemObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, 0);
-                }
-            }
-            Collection list = (Collection) objectReader.createInstance(features);
-            for (Object item : array) {
-                list.add(item);
-            }
-            if (builder != null) {
-                list = (Collection) builder.apply(list);
-            }
-            accept(object, list);
-            return;
-        }
-
         char current = jsonReader.current();
         if (current == '[') {
             JSONReader.Context ctx = context;
@@ -134,14 +93,25 @@ public class FieldReaderList<T, V>
 
             Collection list = createList(ctx);
             jsonReader.next();
-            for (; ; ) {
+            for (int i = 0; ; ++i) {
                 if (jsonReader.nextIfMatch(']')) {
                     break;
                 }
 
-                list.add(
-                        itemObjectReader.readObject(jsonReader, null, null, 0)
-                );
+                Object item;
+                if (jsonReader.isReference()) {
+                    String path = jsonReader.readReference();
+                    if ("..".equals(path)) {
+                        item = list;
+                    } else {
+                        addResolveTask(jsonReader, (List) list, i, path);
+                        continue;
+                    }
+                } else {
+                    item = itemObjectReader.readObject(jsonReader, null, null, 0);
+                }
+
+                list.add(item);
 
                 if (jsonReader.nextIfMatch(',')) {
                     continue;

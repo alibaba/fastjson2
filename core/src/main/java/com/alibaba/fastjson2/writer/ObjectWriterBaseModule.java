@@ -1398,11 +1398,7 @@ public class ObjectWriterBaseModule
             }
 
             if (OffsetDateTime.class == clazz) {
-                if (beanInfo.format != null || beanInfo.locale != null) {
-                    return new ObjectWriterImplOffsetDateTime(beanInfo.format, beanInfo.locale);
-                }
-
-                return ObjectWriterImplOffsetDateTime.INSTANCE;
+                return ObjectWriterImplOffsetDateTime.of(beanInfo.format, beanInfo.locale);
             }
 
             if (LocalDateTime.class == clazz) {
@@ -1414,11 +1410,7 @@ public class ObjectWriterBaseModule
             }
 
             if (LocalDate.class == clazz) {
-                if (beanInfo.format != null || beanInfo.locale != null) {
-                    return new ObjectWriterImplLocalDate(beanInfo.format, beanInfo.locale);
-                }
-
-                return ObjectWriterImplLocalDate.INSTANCE;
+                return ObjectWriterImplLocalDate.of(beanInfo.format, beanInfo.locale);
             }
 
             if (LocalTime.class == clazz) {

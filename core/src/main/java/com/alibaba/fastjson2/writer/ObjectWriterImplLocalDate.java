@@ -15,8 +15,15 @@ final class ObjectWriterImplLocalDate
         implements ObjectWriter {
     static final ObjectWriterImplLocalDate INSTANCE = new ObjectWriterImplLocalDate(null, null);
 
-    public ObjectWriterImplLocalDate(String format, Locale locale) {
+    private ObjectWriterImplLocalDate(String format, Locale locale) {
         super(format, locale);
+    }
+
+    public static ObjectWriterImplLocalDate of(String format, Locale locale) {
+        if (format == null) {
+            return INSTANCE;
+        }
+        return new ObjectWriterImplLocalDate(format, locale);
     }
 
     @Override

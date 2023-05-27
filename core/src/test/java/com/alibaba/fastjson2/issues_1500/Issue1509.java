@@ -35,6 +35,9 @@ public class Issue1509 {
                 "java.util.Collections$UnmodifiableSet",
                 "com.alibaba.fastjson2.issues_1500"
         );
+
+        System.out.println(JSONB.toJSONString(asd, true));
+
         LoginUser user1 = JSONB.parseObject(asd, LoginUser.class, contextAutoTypeBeforeHandler,
                 JSONReader.Feature.UseDefaultConstructorAsPossible,
                 JSONReader.Feature.ErrorOnNoneSerializable,

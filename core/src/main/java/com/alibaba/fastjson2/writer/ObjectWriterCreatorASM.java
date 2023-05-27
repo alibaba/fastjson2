@@ -23,7 +23,6 @@ import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.internal.asm.ASMUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.isFunction;
-import static com.alibaba.fastjson2.writer.ObjectWriterProvider.NAME_COMPATIBLE_WITH_FILED;
 import static com.alibaba.fastjson2.writer.ObjectWriterProvider.TYPE_INT64_MASK;
 
 public class ObjectWriterCreatorASM
@@ -263,45 +262,7 @@ public class ObjectWriterCreatorASM
                         return;
                     }
 
-                    String fieldName;
-                    if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
-                        if (record) {
-                            fieldName = method.getName();
-                        } else {
-                            fieldName = BeanUtils.getterName(method, beanInfo.namingStrategy);
-
-                            Field field = null;
-                            if ((provider.userDefineMask & NAME_COMPATIBLE_WITH_FILED) != 0
-                                    && (field = BeanUtils.getField(objectClass, method)) != null) {
-                                fieldName = field.getName();
-                            } else {
-                                char c0 = '\0', c1;
-                                int len = fieldName.length();
-                                if (len > 0) {
-                                    c0 = fieldName.charAt(0);
-                                }
-
-                                if ((len == 1 && c0 >= 'a' && c0 <= 'z')
-                                        || (len > 2 && c0 >= 'A' && c0 <= 'Z' && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z')
-                                ) {
-                                    char[] chars = fieldName.toCharArray();
-                                    if (c0 >= 'a' && c0 <= 'z') {
-                                        chars[0] = (char) (chars[0] - 32);
-                                    } else {
-                                        chars[0] = (char) (chars[0] + 32);
-                                    }
-                                    String fieldName1 = new String(chars);
-                                    field = BeanUtils.getDeclaredField(objectClass, fieldName1);
-
-                                    if (field != null && (len == 1 || Modifier.isPublic(field.getModifiers()))) {
-                                        fieldName = field.getName();
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        fieldName = fieldInfo.fieldName;
-                    }
+                    String fieldName = getFieldName(objectClass, provider, beanInfo, record, fieldInfo, method);
 
                     if (beanInfo.orders != null) {
                         boolean match = false;

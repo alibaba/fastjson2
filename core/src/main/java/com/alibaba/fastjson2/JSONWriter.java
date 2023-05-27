@@ -827,10 +827,6 @@ public abstract class JSONWriter
         }
 
         writeInt64(name);
-
-        if (name >= Integer.MIN_VALUE && name <= Integer.MAX_VALUE && (context.features & Feature.WriteClassName.mask) != 0) {
-            writeRaw('L');
-        }
     }
 
     public final void writeName(int name) {

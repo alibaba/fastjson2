@@ -16,6 +16,7 @@ public class ClientsWriteUTF8BytesTest {
             // zulu8.70.0.23 : 1533 1493
             // zulu17.40.19 : 1419 1361 1356
             // zulu17.40.19_vec : 1116
+            // zulu17.40.19_reflect : 1427
         }
     }
 

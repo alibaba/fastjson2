@@ -90,7 +90,11 @@ class ObjectReaderImplMapTyped
                     if (valueObjectReader == null) {
                         valueObjectReader = provider.getObjectReader(valueType);
                     }
-                    value = valueObjectReader.createInstance(map, features);
+                    try {
+                        value = valueObjectReader.createInstance(map, features);
+                    } catch (Exception ignored) {
+                        // ignored
+                    }
                 } else if (value instanceof Collection) {
                     if (valueObjectReader == null) {
                         valueObjectReader = provider.getObjectReader(valueType);

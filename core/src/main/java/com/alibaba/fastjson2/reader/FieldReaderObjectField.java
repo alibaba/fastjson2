@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.DateUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
@@ -203,7 +204,11 @@ class FieldReaderObjectField<T>
                 return;
             }
 
-            if (fieldType != fieldClass && Map.class.isAssignableFrom(fieldClass) && value instanceof Map) {
+            if (fieldType != fieldClass
+                    && Map.class.isAssignableFrom(fieldClass)
+                    && value instanceof Map
+                    && fieldClass != Map.class
+            ) {
                 ObjectReader objectReader = getObjectReader(JSONFactory.createReadContext());
                 value = objectReader.createInstance((Map) value);
             } else if (!fieldClass.isInstance(value)) {
@@ -225,7 +230,7 @@ class FieldReaderObjectField<T>
                 }
 
                 if (!fieldClass.isInstance(value)) {
-                    throw new JSONException("set " + fieldName + " error, not support type " + value.getClass());
+                    value = TypeUtils.cast(value, fieldType);
                 }
             }
         }

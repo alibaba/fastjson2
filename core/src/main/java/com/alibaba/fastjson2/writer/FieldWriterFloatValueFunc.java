@@ -51,9 +51,9 @@ final class FieldWriterFloatValueFunc
 
         writeFieldName(jsonWriter);
         if (decimalFormat != null) {
-            jsonWriter.writeDouble(value, decimalFormat);
+            jsonWriter.writeFloat(value, decimalFormat);
         } else {
-            jsonWriter.writeDouble(value);
+            jsonWriter.writeFloat(value);
         }
         return true;
     }
