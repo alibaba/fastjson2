@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.function.Function;
 
 public final class ObjectReaderImplListInt64
         implements ObjectReader {
@@ -74,11 +75,7 @@ public final class ObjectReaderImplListInt64
         } else if (listType == JSONArray.class) {
             list = new JSONArray();
         } else if (listType != null && listType != this.listType) {
-            try {
-                list = (Collection) listType.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new JSONException(jsonReader.info("create instance error " + listType), e);
-            }
+            list = (Collection) objectReader.createInstance(features);
         } else {
             list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
         }
@@ -86,6 +83,13 @@ public final class ObjectReaderImplListInt64
         int entryCnt = jsonReader.startArray();
         for (int i = 0; i < entryCnt; ++i) {
             list.add(jsonReader.readInt64());
+        }
+
+        if (objectReader != null) {
+            Function buildFunction = objectReader.getBuildFunction();
+            if (buildFunction != null) {
+                list = (Collection) buildFunction.apply(list);
+            }
         }
 
         return list;

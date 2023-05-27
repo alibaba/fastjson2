@@ -1086,6 +1086,17 @@ class JSONReaderJSONB
             return null;
         }
 
+        if (bytes[offset] == BC_TYPED_ANY) {
+            Object obj = readAny();
+            if (obj instanceof List) {
+                return (List) obj;
+            }
+            if (obj instanceof Collection) {
+                return new JSONArray((Collection) obj);
+            }
+            throw new JSONException("not support class " + obj.getClass());
+        }
+
         int entryCnt = startArray();
         JSONArray array = new JSONArray(entryCnt);
         for (int i = 0; i < entryCnt; i++) {

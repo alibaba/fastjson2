@@ -46,6 +46,10 @@ public class FieldReaderObject<T>
 
     @Override
     public ObjectReader getObjectReader(JSONReader jsonReader) {
+        if (initReader != null) {
+            return initReader;
+        }
+
         if (reader != null) {
             return reader;
         }
