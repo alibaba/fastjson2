@@ -349,23 +349,9 @@ public abstract class JSONReader
                 + DIGITS2[c4]);
     }
 
-    public boolean nextIfObjectStart() {
-        if (this.ch != '{') {
-            return false;
-        }
-        next();
-        return true;
-    }
-
+    public abstract boolean nextIfObjectStart();
     public abstract boolean nextIfNullOrEmptyString();
-
-    public boolean nextIfObjectEnd() {
-        if (this.ch != '}') {
-            return false;
-        }
-        next();
-        return true;
-    }
+    public abstract boolean nextIfObjectEnd();
 
     public int startArray() {
         if (!nextIfMatch('[')) {

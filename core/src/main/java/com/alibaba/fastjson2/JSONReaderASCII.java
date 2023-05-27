@@ -24,60 +24,132 @@ class JSONReaderASCII
 
     @Override
     public final void next() {
+        int offset = this.offset;
         if (offset >= end) {
             ch = EOI;
             return;
         }
 
         final byte[] bytes = this.bytes;
-        ch = (char) bytes[offset];
+        byte ch = bytes[offset];
         while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
-                ch = EOI;
+                this.offset = offset;
+                this.ch = EOI;
                 return;
             }
-            ch = (char) bytes[offset];
+            ch = bytes[offset];
         }
-        offset++;
+        this.offset = offset + 1;
+        this.ch = (char) (ch & 0xFF);
 
-        while (ch == '/' && offset < bytes.length && bytes[offset] == '/') {
+        while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
             skipLineComment();
         }
     }
 
-    @Override
-    public final boolean nextIfMatch(char ch) {
-        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
-            if (offset >= end) {
-                this.ch = EOI;
-            } else {
-                this.ch = (char) bytes[offset++];
+    public final boolean nextIfObjectStart() {
+        if (this.ch != '{') {
+            return false;
+        }
+
+        int offset = this.offset;
+        if (offset >= end) {
+            ch = EOI;
+        } else {
+            final byte[] bytes = this.bytes;
+            byte ch = bytes[offset];
+            while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                offset++;
+                if (offset >= end) {
+                    this.offset = offset;
+                    this.ch = EOI;
+                    return true;
+                }
+                ch = bytes[offset];
+            }
+            this.offset = offset + 1;
+            this.ch = (char) (ch & 0xFF);
+
+            while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
+                skipLineComment();
             }
         }
 
-        if (this.ch != ch) {
+        return true;
+    }
+
+    public final boolean nextIfObjectEnd() {
+        if (this.ch != '}') {
             return false;
         }
-        comma = ch == ',';
+
+        int offset = this.offset;
+        if (offset >= end) {
+            ch = EOI;
+        } else {
+            final byte[] bytes = this.bytes;
+            byte ch = bytes[offset];
+            while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                offset++;
+                if (offset >= end) {
+                    this.offset = offset;
+                    this.ch = EOI;
+                    return true;
+                }
+                ch = bytes[offset];
+            }
+            this.offset = offset + 1;
+            this.ch = (char) (ch & 0xFF);
+
+            while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
+                skipLineComment();
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfMatch(char m) {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch = this.ch;
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = bytes[offset++];
+            }
+        }
+
+        if (ch != m) {
+            return false;
+        }
+        comma = m == ',';
 
         if (offset >= end) {
+            this.offset = offset;
             this.ch = EOI;
             return true;
         }
 
-        this.ch = (char) (bytes[offset] & 0xFF);
-        while (this.ch == '\0' || (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0)) {
+        ch = bytes[offset];
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
+                this.offset = offset;
                 this.ch = EOI;
                 return true;
             }
-            this.ch = (char) (bytes[offset] & 0xFF);
+            ch = bytes[offset];
         }
-        offset++;
 
-        while (this.ch == '/' && offset < bytes.length && bytes[offset] == '/') {
+        this.offset = offset + 1;
+        this.ch = (char) (ch & 0xFF);
+
+        while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
             skipLineComment();
         }
 

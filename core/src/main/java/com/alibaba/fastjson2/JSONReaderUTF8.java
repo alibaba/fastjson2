@@ -117,40 +117,44 @@ class JSONReaderUTF8
 
     @Override
     public boolean nextIfMatch(char e) {
-        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch = this.ch;
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             if (offset >= end) {
-                this.ch = EOI;
+                ch = EOI;
             } else {
-                this.ch = (char) bytes[offset++];
+                ch = bytes[offset++];
             }
         }
 
-        if (this.ch != e) {
+        if (ch != e) {
             return false;
         }
         comma = (ch == ',');
 
         if (offset >= end) {
-            ch = EOI;
+            this.offset = offset;
+            this.ch = EOI;
             return true;
         }
 
-        int c = bytes[offset];
-        while (c == '\0' || (c <= ' ' && ((1L << c) & SPACE) != 0)) {
+        ch = bytes[offset];
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
-                ch = EOI;
+                this.offset = offset;
+                this.ch = EOI;
                 return true;
             }
-            c = bytes[offset];
+            ch = bytes[offset];
         }
 
-        if (c >= 0) {
+        if (ch >= 0) {
             offset++;
-            ch = (char) c;
         } else {
-            c &= 0xFF;
-            switch (c >> 4) {
+            ch &= 0xFF;
+            switch (ch >> 4) {
                 case 12:
                 case 13: {
                     /* 110x xxxx   10xx xxxx*/
@@ -160,7 +164,7 @@ class JSONReaderUTF8
                         throw new JSONException(
                                 "malformed input around byte " + offset);
                     }
-                    ch = (char) (((c & 0x1F) << 6) | (char2 & 0x3F));
+                    ch = ((ch & 0x1F) << 6) | (char2 & 0x3F);
                     break;
                 }
                 case 14: {
@@ -171,10 +175,9 @@ class JSONReaderUTF8
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
                         throw new JSONException("malformed input around byte " + (offset - 1));
                     }
-                    ch = (char)
-                            (((c & 0x0F) << 12) |
-                                    ((char2 & 0x3F) << 6) |
-                                    ((char3 & 0x3F) << 0));
+                    ch = (((ch & 0x0F) << 12) |
+                            ((char2 & 0x3F) << 6) |
+                            ((char3 & 0x3F) << 0));
                     break;
                 }
                 default:
@@ -183,6 +186,8 @@ class JSONReaderUTF8
             }
         }
 
+        this.offset = offset;
+        this.ch = (char) ch;
         while (this.ch == '/' && offset < bytes.length && bytes[offset] == '/') {
             skipLineComment();
         }
@@ -192,23 +197,29 @@ class JSONReaderUTF8
 
     @Override
     public final boolean nextIfSet() {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        byte ch = (byte) this.ch;
         if (ch == 'S'
                 && offset + 1 < end
                 && bytes[offset] == 'e'
                 && bytes[offset + 1] == 't') {
             offset += 2;
             if (offset >= end) {
-                this.ch = EOI;
+                ch = EOI;
             } else {
-                this.ch = (char) bytes[offset++];
+                ch = bytes[offset++];
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset == end) {
                         ch = EOI;
                         break;
                     }
-                    ch = (char) bytes[offset++];
+                    ch = bytes[offset++];
                 }
             }
+
+            this.offset = offset;
+            this.ch = (char) ch;
             return true;
         }
         return false;
@@ -216,6 +227,9 @@ class JSONReaderUTF8
 
     @Override
     public final boolean nextIfInfinity() {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        byte ch = (byte) this.ch;
         if (ch == 'I'
                 && offset + 6 < end
                 && bytes[offset] == 'n'
@@ -228,48 +242,68 @@ class JSONReaderUTF8
         ) {
             offset += 7;
             if (offset >= end) {
-                this.ch = EOI;
+                ch = EOI;
             } else {
-                this.ch = (char) bytes[offset++];
+                ch = bytes[offset++];
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset == end) {
                         ch = EOI;
                         break;
                     }
-                    ch = (char) bytes[offset++];
+                    ch = bytes[offset++];
                 }
             }
+
+            this.offset = offset;
+            this.ch = (char) ch;
             return true;
         }
         return false;
     }
 
+    public boolean nextIfObjectStart() {
+        if (this.ch != '{') {
+            return false;
+        }
+        next();
+        return true;
+    }
+
+    public boolean nextIfObjectEnd() {
+        if (this.ch != '}') {
+            return false;
+        }
+        next();
+        return true;
+    }
+
     @Override
     public void next() {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
         if (offset >= end) {
             ch = EOI;
             return;
         }
 
-        final byte[] bytes = this.bytes;
-        int c = bytes[offset];
-        while (c == '\0' || (c <= ' ' && ((1L << c) & SPACE) != 0)) {
+        int ch = bytes[offset];
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
-                ch = EOI;
+                this.ch = EOI;
                 return;
             }
-            c = bytes[offset];
+            ch = bytes[offset];
         }
 
-        if (c >= 0) {
-            offset++;
-            ch = (char) c;
+        if (ch >= 0) {
+            this.offset = offset + 1;
+            this.ch = (char) ch;
             return;
         }
 
-        c &= 0xFF;
-        switch (c >> 4) {
+        ch &= 0xFF;
+        switch (ch >> 4) {
             case 12:
             case 13: {
                 /* 110x xxxx   10xx xxxx*/
@@ -279,7 +313,7 @@ class JSONReaderUTF8
                     throw new JSONException(
                             "malformed input around byte " + offset);
                 }
-                ch = (char) (((c & 0x1F) << 6) | (char2 & 0x3F));
+                ch = ((ch & 0x1F) << 6) | (char2 & 0x3F);
                 break;
             }
             case 14: {
@@ -290,10 +324,9 @@ class JSONReaderUTF8
                 if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
                     throw new JSONException("malformed input around byte " + (offset - 1));
                 }
-                ch = (char)
-                        (((c & 0x0F) << 12) |
-                                ((char2 & 0x3F) << 6) |
-                                ((char3 & 0x3F) << 0));
+                ch = ((ch & 0x0F) << 12)
+                        | ((char2 & 0x3F) << 6)
+                        | ((char3 & 0x3F) << 0);
                 break;
             }
             default:
@@ -301,6 +334,8 @@ class JSONReaderUTF8
                 throw new JSONException("malformed input around byte " + offset);
         }
 
+        this.offset = offset;
+        this.ch = (char) ch;
         while (ch == '/' && offset < bytes.length && bytes[offset] == '/') {
             skipLineComment();
         }
@@ -4911,6 +4946,8 @@ class JSONReaderUTF8
 
     public final OffsetDateTime readOffsetDateTime() {
         final byte[] bytes = this.bytes;
+        final int offset = this.offset;
+        final Context context = this.context;
         if (this.ch == '"' || this.ch == '\'') {
             if (context.dateFormat == null
                     || context.formatyyyyMMddhhmmss19
@@ -5025,9 +5062,9 @@ class JSONReaderUTF8
                         LocalTime localTime = LocalTime.of(hour, minute, second, nano);
                         LocalDateTime ldt = LocalDateTime.of(localDate, localTime);
                         OffsetDateTime oft = OffsetDateTime.of(ldt, ZoneOffset.UTC);
-                        offset += len;
+                        this.offset += len;
                         next();
-                        if (comma = (ch == ',')) {
+                        if (comma = (this.ch == ',')) {
                             next();
                         }
                         return oft;
