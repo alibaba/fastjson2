@@ -412,39 +412,39 @@ class JSONReaderUTF16
             BYTES_UPDATER.lazySet(cacheItem, bytes);
         }
 
+        int length = chars.length;
         this.str = null;
         this.chars = chars;
         this.offset = 0;
-        this.length = chars.length;
+        this.length = length;
         this.start = 0;
         this.end = length;
 
-        // inline next();
-        {
-            if (this.offset >= end) {
-                ch = EOI;
+        if (end == 0) {
+            ch = EOI;
+            return;
+        }
+
+        int offset = 0;
+        char ch = chars[offset];
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            offset++;
+            if (offset >= length) {
+                this.ch = EOI;
                 return;
             }
-
-            ch = chars[this.offset];
-            while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-                this.offset++;
-                if (this.offset >= length) {
-                    ch = EOI;
-                    return;
-                }
-                ch = chars[this.offset];
-            }
-            this.offset++;
+            ch = chars[offset];
         }
+        this.ch = ch;
+        this.offset++;
 
         if (ch == '\uFFFE' || ch == '\uFEFF') {
             next();
         }
 
-        while (ch == '/') {
+        while (this.ch == '/') {
             next();
-            if (ch == '/') {
+            if (this.ch == '/') {
                 skipLineComment();
             } else {
                 throw new JSONException("input not support " + ch + ", offset " + offset);
@@ -453,40 +453,44 @@ class JSONReaderUTF16
     }
 
     @Override
-    public final boolean nextIfMatch(char ch) {
-        while (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0) {
+    public final boolean nextIfMatch(char m) {
+        final char[] chars = this.chars;
+        int offset = this.offset;
+        char ch = this.ch;
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
             if (offset >= end) {
-                this.ch = EOI;
+                ch = EOI;
             } else {
-                this.ch = chars[offset++];
+                ch = chars[offset++];
             }
         }
 
-        if (this.ch != ch) {
+        if (ch != m) {
             return false;
         }
-        comma = ch == ',';
+        comma = m == ',';
 
         if (offset >= end) {
+            this.offset = offset;
             this.ch = EOI;
             return true;
         }
 
-        this.ch = chars[offset];
-        while (this.ch == '\0' || (this.ch <= ' ' && ((1L << this.ch) & SPACE) != 0)) {
+        ch = chars[offset];
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
+                this.offset = offset;
                 this.ch = EOI;
                 return true;
             }
-            this.ch = chars[offset];
+            ch = chars[offset];
         }
-        offset++;
-
-        while (this.ch == '/' && offset < chars.length && chars[offset] == '/') {
+        this.offset = offset + 1;
+        this.ch = ch;
+        while (this.ch == '/' && this.offset < chars.length && chars[this.offset] == '/') {
             skipLineComment();
         }
-
         return true;
     }
 
@@ -714,15 +718,18 @@ class JSONReaderUTF16
 
     @Override
     public final boolean nextIfSet() {
+        final char[] chars = this.chars;
+        int offset = this.offset;
+        char ch = this.ch;
         if (ch == 'S'
                 && offset + 1 < end
                 && chars[offset] == 'e'
                 && chars[offset + 1] == 't') {
             offset += 2;
             if (offset >= end) {
-                this.ch = EOI;
+                ch = EOI;
             } else {
-                this.ch = chars[offset++];
+                ch = chars[offset++];
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset == end) {
                         ch = EOI;
@@ -731,6 +738,9 @@ class JSONReaderUTF16
                     ch = chars[offset++];
                 }
             }
+
+            this.offset = offset;
+            this.ch = ch;
             return true;
         }
         return false;
@@ -738,6 +748,9 @@ class JSONReaderUTF16
 
     @Override
     public final boolean nextIfInfinity() {
+        final char[] chars = this.chars;
+        int offset = this.offset;
+        char ch = this.ch;
         if (ch == 'I'
                 && offset + 6 < end
                 && chars[offset] == 'n'
@@ -750,9 +763,9 @@ class JSONReaderUTF16
         ) {
             offset += 7;
             if (offset >= end) {
-                this.ch = EOI;
+                ch = EOI;
             } else {
-                this.ch = chars[offset++];
+                ch = chars[offset++];
                 while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                     if (offset == end) {
                         ch = EOI;
@@ -761,31 +774,97 @@ class JSONReaderUTF16
                     ch = chars[offset++];
                 }
             }
+            this.offset = offset;
+            this.ch = ch;
             return true;
         }
         return false;
     }
 
+    public final boolean nextIfObjectStart() {
+        if (this.ch != '{') {
+            return false;
+        }
+
+        int offset = this.offset;
+        if (offset >= end) {
+            ch = EOI;
+        } else {
+            final char[] chars = this.chars;
+            char ch = chars[offset];
+            while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                offset++;
+                if (offset >= end) {
+                    this.offset = offset;
+                    this.ch = EOI;
+                    return true;
+                }
+                ch = chars[offset];
+            }
+            this.offset = offset + 1;
+            this.ch = ch;
+
+            while (this.ch == '/' && this.offset < chars.length && chars[this.offset] == '/') {
+                skipLineComment();
+            }
+        }
+
+        return true;
+    }
+
+    public final boolean nextIfObjectEnd() {
+        if (this.ch != '}') {
+            return false;
+        }
+
+        int offset = this.offset;
+        if (offset >= end) {
+            ch = EOI;
+        } else {
+            final char[] chars = this.chars;
+            char ch = chars[offset];
+            while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                offset++;
+                if (offset >= end) {
+                    this.offset = offset;
+                    this.ch = EOI;
+                    return true;
+                }
+                ch = chars[offset];
+            }
+            this.offset = offset + 1;
+            this.ch = ch;
+
+            while (this.ch == '/' && this.offset < chars.length && chars[this.offset] == '/') {
+                skipLineComment();
+            }
+        }
+
+        return true;
+    }
+
     @Override
     public final void next() {
+        int offset = this.offset;
         if (offset >= end) {
             ch = EOI;
             return;
         }
 
         final char[] chars = this.chars;
-        ch = chars[offset];
+        char ch = chars[offset];
         while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
             offset++;
             if (offset >= end) {
-                ch = EOI;
+                this.offset = offset;
+                this.ch = EOI;
                 return;
             }
             ch = chars[offset];
         }
-        offset++;
-
-        while (ch == '/' && offset < chars.length && chars[offset] == '/') {
+        this.offset = offset + 1;
+        this.ch = ch;
+        while (this.ch == '/' && this.offset < chars.length && chars[this.offset] == '/') {
             skipLineComment();
         }
     }
@@ -5430,6 +5509,8 @@ class JSONReaderUTF16
 
     public final OffsetDateTime readOffsetDateTime() {
         final char[] chars = this.chars;
+        final int offset = this.offset;
+        final Context context = this.context;
         if (this.ch == '"' || this.ch == '\'') {
             if (context.dateFormat == null
                     || context.formatyyyyMMddhhmmss19

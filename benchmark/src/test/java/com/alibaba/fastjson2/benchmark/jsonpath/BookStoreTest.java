@@ -35,8 +35,8 @@ public class BookStoreTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2();
+        fastjson2();
 //        fastjson2Compile();
-        jayway();
+//        jayway();
     }
 }
