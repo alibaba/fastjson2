@@ -17,7 +17,7 @@ public class ReadResult {
         files.put("aliyun_ecs.g8y.large", "/Users/wenshao/Downloads/result_2.0.33_g8y.out");
 //        files.put("aws_ecs.c6g.large", "/Users/wenshao/Downloads/result_2.0.33_aws_c6g.out");
 //        files.put("aws_ecs.c7g.large", "/Users/wenshao/Downloads/result_2.0.33_aws_c7g.out");
-//        files.put("OrangePI5", "/Users/wenshao/Downloads/result_2.0.31_orangepi5.out");
+//        files.put("OrangePI5", "/Users/wenshao/Downloads/result_2.0.33_orangepi5.out");
 
         PrintStream out = new PrintStream(new FileOutputStream(outFile));
         files.forEach((k, v) -> {
