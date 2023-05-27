@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.JSONWriter;
 
 import java.lang.reflect.Type;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+
 final class ObjectWriterImplInt64
         extends ObjectWriterPrimitiveImpl {
     static final ObjectWriterImplInt64 INSTANCE = new ObjectWriterImplInt64(null);
@@ -31,13 +33,20 @@ final class ObjectWriterImplInt64
             jsonWriter.writeNumberNull();
             return;
         }
-        long longValue = ((Number) object).longValue();
-        jsonWriter.writeInt64(longValue);
+        long i = ((Number) object).longValue();
+        jsonWriter.writeInt64(i);
 
-        if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
-            if (((jsonWriter.getFeatures() | features) & JSONWriter.Feature.WriteClassName.mask) != 0
-                    && fieldType != Short.class && fieldType != short.class) {
-                jsonWriter.writeRaw('L');
+        if (i >= Integer.MIN_VALUE
+                && i <= Integer.MAX_VALUE
+                && (features & WriteClassName.mask) != 0
+        ) {
+            long contextFeatures = jsonWriter.getFeatures();
+            if ((contextFeatures & WriteClassName.mask) == 0) {
+                boolean writeAsString = (contextFeatures & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0
+                        || ((contextFeatures & BrowserCompatible.mask) != 0 && (i > 9007199254740991L || i < -9007199254740991L));
+                if (!writeAsString) {
+                    jsonWriter.writeRaw('L');
+                }
             }
         }
     }

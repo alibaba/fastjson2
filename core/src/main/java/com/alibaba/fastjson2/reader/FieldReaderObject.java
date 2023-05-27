@@ -263,28 +263,16 @@ public class FieldReaderObject<T>
             value = TypeUtils.cast(value, fieldType);
         }
 
-        if (function != null) {
-            try {
+        try {
+            if (function != null) {
                 function.accept(object, value);
-            } catch (Exception e) {
-                throw new JSONException("set " + super.toString() + " error", e);
-            }
-            return;
-        }
-
-        try {
-            if (method != null) {
+            } else if (method != null) {
                 method.invoke(object, value);
-                return;
+            } else {
+                field.set(object, value);
             }
         } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
-        }
-
-        try {
-            field.set(object, value);
-        } catch (Exception e) {
-            throw new JSONException("set " + fieldName + " error", e);
+            throw new JSONException("set " + (function != null ? super.toString() : fieldName) + " error", e);
         }
     }
 

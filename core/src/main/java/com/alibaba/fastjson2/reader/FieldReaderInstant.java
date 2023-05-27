@@ -17,7 +17,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 
-public class FieldReaderInstant<T>
+public final class FieldReaderInstant<T>
         extends FieldReaderDateTimeCodec<T> {
     final BiConsumer<T, Instant> function;
 
@@ -35,8 +35,33 @@ public class FieldReaderInstant<T>
             Method method,
             BiConsumer<T, Instant> function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field);
+        super(
+                fieldName,
+                fieldType,
+                fieldClass,
+                ordinal,
+                features,
+                format,
+                locale,
+                defaultValue,
+                schema,
+                method,
+                field,
+                ObjectReaderImplInstant.of(format, locale)
+        );
         this.function = function;
+    }
+
+    @Override
+    public final void readFieldValue(JSONReader jsonReader, T object) {
+        Instant date = (Instant) dateReader.readObject(jsonReader, fieldType, fieldName, features);
+        accept(object, date);
+    }
+
+    @Override
+    public final void readFieldValueJSONB(JSONReader jsonReader, T object) {
+        Instant instant = jsonReader.readInstant();
+        accept(object, instant);
     }
 
     @Override
@@ -130,24 +155,5 @@ public class FieldReaderInstant<T>
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }
-    }
-
-    @Override
-    public ObjectReader getObjectReader(JSONReader jsonReader) {
-        if (dateReader == null) {
-            dateReader = format == null
-                    ? ObjectReaderImplInstant.INSTANCE
-                    : new ObjectReaderImplInstant(format, locale);
-        }
-        return dateReader;
-    }
-
-    public ObjectReader getObjectReader(JSONReader.Context context) {
-        if (dateReader == null) {
-            dateReader = format == null
-                    ? ObjectReaderImplInstant.INSTANCE
-                    : new ObjectReaderImplInstant(format, locale);
-        }
-        return dateReader;
     }
 }

@@ -45,7 +45,7 @@ public class TestExternal4 {
             currentThread.setContextClassLoader(classLoader);
 
             String text = JSON.toJSONString(obj, SerializerFeature.WriteClassName);
-            assertEquals("{\"@type\":\"external.VO2\",\"id\":0,\"name\":\"jobs\",\"value\":{\"$ref\":\"..\"}}", text);
+            assertEquals("{\"@type\":\"external.VO2\",\"id\":0L,\"name\":\"jobs\",\"value\":{\"$ref\":\"..\"}}", text);
             Object o1 = JSON.parseObject(text, clazz, config);
             assertEquals(obj.getClass(), o1.getClass());
             Object o2 = JSON.parse(text, config, Feature.SupportAutoType);

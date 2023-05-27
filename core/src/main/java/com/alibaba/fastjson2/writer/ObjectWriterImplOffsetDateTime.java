@@ -12,8 +12,15 @@ final class ObjectWriterImplOffsetDateTime
         extends DateTimeCodec implements ObjectWriter {
     static final ObjectWriterImplOffsetDateTime INSTANCE = new ObjectWriterImplOffsetDateTime(null, null);
 
-    public ObjectWriterImplOffsetDateTime(String format, Locale locale) {
+    private ObjectWriterImplOffsetDateTime(String format, Locale locale) {
         super(format, locale);
+    }
+
+    public static ObjectWriterImplOffsetDateTime of(String format, Locale locale) {
+        if (format == null) {
+            return INSTANCE;
+        }
+        return new ObjectWriterImplOffsetDateTime(format, locale);
     }
 
     @Override

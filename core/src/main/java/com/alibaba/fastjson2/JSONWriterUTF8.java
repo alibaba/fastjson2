@@ -1753,6 +1753,10 @@ class JSONWriterUTF8
         off = IOUtils.writeInt64(bytes, off, i);
         if (writeAsString) {
             bytes[off++] = (byte) quote;
+        } else if ((context.features & WriteClassName.mask) != 0
+                && i >= Integer.MIN_VALUE && i <= Integer.MAX_VALUE
+        ) {
+            bytes[off++] = 'L';
         }
         this.off = off;
     }

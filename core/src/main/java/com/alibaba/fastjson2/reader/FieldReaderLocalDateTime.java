@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 
-public class FieldReaderLocalDateTime<T>
+public final class FieldReaderLocalDateTime<T>
         extends FieldReaderDateTimeCodec<T> {
     final BiConsumer<T, ZonedDateTime> function;
 
@@ -34,12 +34,31 @@ public class FieldReaderLocalDateTime<T>
             Method method,
             BiConsumer<T, ZonedDateTime> function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field);
+        super(
+                fieldName,
+                fieldType,
+                fieldClass,
+                ordinal,
+                features,
+                format,
+                locale,
+                defaultValue,
+                schema,
+                method,
+                field,
+                format != null ? new ObjectReaderImplLocalDateTime(format, locale) : ObjectReaderImplLocalDateTime.INSTANCE
+        );
         this.function = function;
     }
 
     public boolean supportAcceptType(Class valueClass) {
         return fieldClass == Instant.class || fieldClass == Long.class;
+    }
+
+    @Override
+    public final void readFieldValue(JSONReader jsonReader, Object object) {
+        LocalDateTime date = (LocalDateTime) dateReader.readObject(jsonReader, fieldType, fieldName, features);
+        accept(object, date);
     }
 
     @Override
@@ -129,24 +148,5 @@ public class FieldReaderLocalDateTime<T>
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }
-    }
-
-    @Override
-    public ObjectReader getObjectReader(JSONReader jsonReader) {
-        if (dateReader == null) {
-            dateReader = format == null
-                    ? ObjectReaderImplLocalDateTime.INSTANCE
-                    : new ObjectReaderImplLocalDateTime(format, locale);
-        }
-        return dateReader;
-    }
-
-    public ObjectReader getObjectReader(JSONReader.Context context) {
-        if (dateReader == null) {
-            dateReader = format == null
-                    ? ObjectReaderImplLocalDateTime.INSTANCE
-                    : new ObjectReaderImplLocalDateTime(format, locale);
-        }
-        return dateReader;
     }
 }

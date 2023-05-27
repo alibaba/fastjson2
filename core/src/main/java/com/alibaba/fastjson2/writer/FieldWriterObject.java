@@ -11,16 +11,17 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
+import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
 
 public class FieldWriterObject<T>
         extends FieldWriter<T> {
     volatile Class initValueClass;
-    volatile ObjectWriter initObjectWriter;
     final boolean unwrapped;
     final boolean array;
     final boolean number;
@@ -29,12 +30,6 @@ public class FieldWriterObject<T>
             FieldWriterObject.class,
             Class.class,
             "initValueClass"
-    );
-
-    static final AtomicReferenceFieldUpdater<FieldWriterObject, ObjectWriter> initObjectWriterUpdater = AtomicReferenceFieldUpdater.newUpdater(
-            FieldWriterObject.class,
-            ObjectWriter.class,
-            "initObjectWriter"
     );
 
     protected FieldWriterObject(
@@ -232,10 +227,9 @@ public class FieldWriterObject<T>
             throw error;
         }
 
+        // (features & JSONWriter.Feature.WriteNullNumberAsZero.mask) != 0
         if (value == null) {
-            if ((features & JSONWriter.Feature.WriteNulls.mask) != 0
-                    && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) == 0
-            ) {
+            if ((features & WriteNulls.mask) != 0 && (features & NotWriteDefaultValue.mask) == 0) {
                 writeFieldName(jsonWriter);
                 if (array) {
                     jsonWriter.writeArrayNull();
@@ -250,6 +244,17 @@ public class FieldWriterObject<T>
                 }
                 return true;
             } else {
+                if ((features & (WriteNullNumberAsZero.mask | NullAsDefaultValue.mask)) != 0 && number) {
+                    writeFieldName(jsonWriter);
+                    jsonWriter.writeInt32(0);
+                    return true;
+                } else if ((features & (WriteNullBooleanAsFalse.mask | NullAsDefaultValue.mask)) != 0
+                        && (fieldClass == Boolean.class || fieldClass == AtomicBoolean.class)
+                ) {
+                    writeFieldName(jsonWriter);
+                    jsonWriter.writeBool(false);
+                    return true;
+                }
                 return false;
             }
         }
@@ -302,7 +307,7 @@ public class FieldWriterObject<T>
                     String entryKey = entry.getKey().toString();
                     Object entryValue = entry.getValue();
                     if (entryValue == null) {
-                        if ((features & JSONWriter.Feature.WriteNulls.mask) == 0) {
+                        if ((features & WriteNulls.mask) == 0) {
                             continue;
                         }
                     }

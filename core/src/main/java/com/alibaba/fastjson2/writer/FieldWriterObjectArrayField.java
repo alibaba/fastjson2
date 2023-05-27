@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
@@ -40,8 +41,18 @@ final class FieldWriterObjectArrayField<T>
             if (itemObjectWriter != null) {
                 return itemObjectWriter;
             }
-            return itemObjectWriter = jsonWriter
-                    .getObjectWriter(this.itemType, itemClass);
+
+            if (itemType == Double.class) {
+                itemObjectWriter = new ObjectWriterImplDouble(new DecimalFormat(format));
+            } else if (itemType == Float.class) {
+                itemObjectWriter = new ObjectWriterImplFloat(new DecimalFormat(format));
+            } else if (itemType == BigDecimal.class && decimalFormat != null) {
+                itemObjectWriter = new ObjectWriterImplBigDecimal(decimalFormat, null);
+            } else {
+                itemObjectWriter = jsonWriter
+                        .getObjectWriter(this.itemType, itemClass);
+            }
+            return itemObjectWriter;
         }
         return jsonWriter
                 .getObjectWriter(itemType, TypeUtils.getClass(itemType));

@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.zip.GZIPOutputStream;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
@@ -31,6 +32,7 @@ public abstract class FieldWriter<T>
     public final Field field;
     public final Method method;
     protected long fieldOffset;
+    protected final boolean primitive;
 
     final long hashCode;
     final byte[] nameWithColonUTF8;
@@ -46,6 +48,14 @@ public abstract class FieldWriter<T>
     final boolean raw;
 
     transient JSONWriter.Path path;
+    volatile ObjectWriter initObjectWriter;
+
+    static final AtomicReferenceFieldUpdater<FieldWriter, ObjectWriter>
+            initObjectWriterUpdater = AtomicReferenceFieldUpdater.newUpdater(
+            FieldWriter.class,
+            ObjectWriter.class,
+            "initObjectWriter"
+    );
 
     FieldWriter(
             String name,
@@ -73,6 +83,7 @@ public abstract class FieldWriter<T>
         this.fieldClassSerializable = fieldClass != null && (Serializable.class.isAssignableFrom(fieldClass) || !Modifier.isFinal(fieldClass.getModifiers()));
         this.field = field;
         this.method = method;
+        this.primitive = fieldClass.isPrimitive();
 
         this.nameJSONB = JSONB.toBytes(fieldName);
 
@@ -258,7 +269,7 @@ public abstract class FieldWriter<T>
         if (field != null) {
             try {
                 Object value;
-                if (fieldOffset != -1 && !fieldClass.isPrimitive()) {
+                if (fieldOffset != -1 && !primitive) {
                     value = UnsafeUtils.getObject(object, fieldOffset);
                 } else {
                     value = field.get(object);
@@ -713,7 +724,13 @@ public abstract class FieldWriter<T>
         throw new UnsupportedOperationException();
     }
 
-    static ObjectWriter getObjectWriter(Type fieldType, Class fieldClass, String format, Locale locale, Class valueClass) {
+    static ObjectWriter getObjectWriter(
+            Type fieldType,
+            Class fieldClass,
+            String format,
+            Locale locale,
+            Class valueClass
+    ) {
         if (Map.class.isAssignableFrom(valueClass)) {
             if (fieldClass.isAssignableFrom(valueClass)) {
                 return ObjectWriterImplMap.of(fieldType, valueClass);
@@ -755,11 +772,7 @@ public abstract class FieldWriter<T>
                     return objectWriter;
                 }
 
-                if (format == null || format.isEmpty()) {
-                    return ObjectWriterImplLocalDate.INSTANCE;
-                } else {
-                    return new ObjectWriterImplLocalDate(format, locale);
-                }
+                return ObjectWriterImplLocalDate.of(format, locale);
             }
 
             if (LocalTime.class.isAssignableFrom(valueClass)) {

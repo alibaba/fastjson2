@@ -35,8 +35,33 @@ public class FieldReaderZonedDateTime<T>
             Method method,
             BiConsumer<T, ZonedDateTime> function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field);
+        super(
+                fieldName,
+                fieldType,
+                fieldClass,
+                ordinal,
+                features,
+                format,
+                locale,
+                defaultValue,
+                schema,
+                method,
+                field,
+                ObjectReaderImplZonedDateTime.of(format, locale)
+        );
         this.function = function;
+    }
+
+    @Override
+    public final void readFieldValue(JSONReader jsonReader, T object) {
+        ZonedDateTime date = (ZonedDateTime) dateReader.readObject(jsonReader, fieldType, fieldName, features);
+        accept(object, date);
+    }
+
+    @Override
+    public final void readFieldValueJSONB(JSONReader jsonReader, T object) {
+        ZonedDateTime date = jsonReader.readZonedDateTime();
+        accept(object, date);
     }
 
     @Override
@@ -135,24 +160,5 @@ public class FieldReaderZonedDateTime<T>
         } catch (Exception e) {
             throw new JSONException("set " + fieldName + " error", e);
         }
-    }
-
-    @Override
-    public ObjectReader getObjectReader(JSONReader jsonReader) {
-        if (dateReader == null) {
-            dateReader = format == null
-                    ? ObjectReaderImplZonedDateTime.INSTANCE
-                    : new ObjectReaderImplZonedDateTime(format, locale);
-        }
-        return dateReader;
-    }
-
-    public ObjectReader getObjectReader(JSONReader.Context context) {
-        if (dateReader == null) {
-            dateReader = format == null
-                    ? ObjectReaderImplZonedDateTime.INSTANCE
-                    : new ObjectReaderImplZonedDateTime(format, locale);
-        }
-        return dateReader;
     }
 }

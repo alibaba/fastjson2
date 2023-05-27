@@ -16,6 +16,7 @@ public class ClientsParseUTF8BytesTest {
             // zulu17.40.19 : 2850 2815 2777 2770 2730 2704 2717 2661 2638 2603 2587 2662
             // oracle-jdk-17.0.6 :
             // oracle-jdk-17.0.6_vec :
+            // oracle-jdk-17.0.6_reflect : 3566 3513 3476
         }
     }
 

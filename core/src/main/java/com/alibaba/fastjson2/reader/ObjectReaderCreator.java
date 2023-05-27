@@ -19,9 +19,7 @@ import java.lang.invoke.*;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
@@ -2123,6 +2121,74 @@ public class ObjectReaderCreator {
 
         if (fieldType == String.class) {
             return new FieldReaderStringMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (String) defaultValue, jsonSchema, method);
+        }
+
+        if (fieldType == LocalDate.class) {
+            return new FieldReaderLocalDate(
+                    fieldName,
+                    fieldType,
+                    fieldClass,
+                    ordinal,
+                    features,
+                    format,
+                    locale,
+                    defaultValue,
+                    jsonSchema,
+                    method,
+                    null,
+                    null
+            );
+        }
+
+        if (fieldType == OffsetDateTime.class) {
+            return new FieldReaderOffsetDateTime(
+                    fieldName,
+                    fieldType,
+                    fieldClass,
+                    ordinal,
+                    features,
+                    format,
+                    locale,
+                    defaultValue,
+                    jsonSchema,
+                    method,
+                    null,
+                    null
+            );
+        }
+
+        if (fieldType == UUID.class) {
+            return new FieldReaderUUID(
+                    fieldName,
+                    fieldType,
+                    fieldClass,
+                    ordinal,
+                    features,
+                    format,
+                    locale,
+                    defaultValue,
+                    jsonSchema,
+                    method,
+                    null,
+                    null
+            );
+        }
+
+        if (fieldType == String[].class) {
+            return new FieldReaderStringArray(
+                    fieldName,
+                    fieldType,
+                    fieldClass,
+                    ordinal,
+                    features,
+                    format,
+                    locale,
+                    defaultValue,
+                    jsonSchema,
+                    method,
+                    null,
+                    null
+            );
         }
 
         if (method.getParameterCount() == 0) {
