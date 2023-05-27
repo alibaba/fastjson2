@@ -1155,7 +1155,8 @@ class Frame {
             final SymbolTable symbolTable,
             final int sourceType,
             final int[] dstTypes,
-            final int dstIndex) {
+            final int dstIndex
+    ) {
         int dstType = dstTypes[dstIndex];
         if (dstType == sourceType) {
             // If the types are equal, merge(sourceType, dstType) = dstType, so there is no change.

@@ -230,15 +230,11 @@ public abstract class JSONWriter
     }
 
     public final void popPath(Object object) {
-        if (this.path == null) {
-            return;
-        }
-
-        if ((context.features & Feature.ReferenceDetection.mask) == 0) {
-            return;
-        }
-
-        if (object == Collections.EMPTY_LIST || object == Collections.EMPTY_SET) {
+        if (this.path == null
+                || (context.features & Feature.ReferenceDetection.mask) == 0
+                || object == Collections.EMPTY_LIST
+                || object == Collections.EMPTY_SET
+        ) {
             return;
         }
 
