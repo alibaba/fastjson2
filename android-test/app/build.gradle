@@ -35,8 +35,8 @@ android {
 
 dependencies {
     implementation 'com.alibaba:fastjson:1.1.73.android'
-    implementation 'com.alibaba.fastjson2:fastjson2:2.0.33'
-    implementation 'com.alibaba.fastjson2:fastjson2-kotlin:2.0.33'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.33-SNAPSHOT'
+    implementation 'com.alibaba.fastjson2:fastjson2-kotlin:2.0.33-SNAPSHOT'
     implementation 'org.jetbrains.kotlin:kotlin-reflect:1.8.10'
 
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.14.2'
