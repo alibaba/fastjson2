@@ -30,6 +30,10 @@ final class FieldReaderDoubleField<T>
             schema.assertValidate(fieldValue);
         }
 
+        if (fieldValue == null && defaultValue != null) {
+            return;
+        }
+
         try {
             field.set(object, fieldValue);
         } catch (Exception e) {

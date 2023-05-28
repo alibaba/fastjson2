@@ -716,6 +716,11 @@ public class LambdaMiscCodec {
         } catch (Throwable ignored) {
             errorLast = ignored;
         }
+
+        if (!Modifier.isStatic(method.getModifiers())) {
+            return new GetterFunction(method);
+        }
+
         return new FactoryFunction(method);
     }
 
@@ -775,6 +780,24 @@ public class LambdaMiscCodec {
         public Object apply(Object arg) {
             try {
                 return method.invoke(null, arg);
+            } catch (Exception e) {
+                throw new JSONException("createInstance error", e);
+            }
+        }
+    }
+
+    static final class GetterFunction
+            implements Function {
+        final Method method;
+
+        GetterFunction(Method method) {
+            this.method = method;
+        }
+
+        @Override
+        public Object apply(Object arg) {
+            try {
+                return method.invoke(arg);
             } catch (Exception e) {
                 throw new JSONException("createInstance error", e);
             }

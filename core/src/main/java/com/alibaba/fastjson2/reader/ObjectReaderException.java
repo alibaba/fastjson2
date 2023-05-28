@@ -1,14 +1,13 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONPath;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.internal.asm.ASMUtils;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -104,7 +103,22 @@ final class ObjectReaderException<T>
             String[] parameterNames = null;
             if (paramCount > 0) {
                 parameterNames = ASMUtils.lookupParameterNames(constructor);
+
+                Parameter[] parameters = constructor.getParameters();
+                FieldInfo fieldInfo = new FieldInfo();
+                for (int i = 0; i < parameters.length && i < parameterNames.length; i++) {
+                    fieldInfo.init();
+
+                    Parameter parameter = parameters[i];
+
+                    ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+                    provider.getFieldInfo(fieldInfo, objectClass, constructor, i, parameter);
+                    if (fieldInfo.fieldName != null) {
+                        parameterNames[i] = fieldInfo.fieldName;
+                    }
+                }
             }
+
             constructorParameters.add(parameterNames);
         }
 

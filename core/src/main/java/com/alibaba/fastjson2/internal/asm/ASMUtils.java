@@ -17,9 +17,12 @@ import java.io.InputStream;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
 
@@ -78,10 +81,55 @@ public class ASMUtils {
     public static final String DESC_SUPPLIER = "Ljava/util/function/Supplier;";
     public static final String DESC_JSONSCHEMA = 'L' + JSONSchema.class.getName().replace('.', '/') + ';';
 
+    static final Map<MethodInfo, String[]> paramMapping = new HashMap<>();
+
     static Map<Class, String> descMapping = new HashMap<>();
     static Map<Class, String> typeMapping = new HashMap<>();
 
     static {
+        paramMapping.put(
+                new MethodInfo(
+                        "com.alibaba.fastjson2.util.ParameterizedTypeImpl",
+                        "<init>",
+                        new String[]{"[Ljava.lang.reflect.Type;", "java.lang.reflect.Type", "java.lang.reflect.Type"}
+                ),
+                new String[]{"actualTypeArguments", "ownerType", "rawType"}
+        );
+
+        paramMapping.put(
+                new MethodInfo(
+                        "org.apache.commons.lang3.tuple.Triple",
+                        "of",
+                        new String[]{"java.lang.Object", "java.lang.Object", "java.lang.Object"}
+                ),
+                new String[]{"left", "middle", "right"}
+        );
+        paramMapping.put(
+                new MethodInfo(
+                        "org.apache.commons.lang3.tuple.MutableTriple",
+                        "<init>",
+                        new String[]{"java.lang.Object", "java.lang.Object", "java.lang.Object"}
+                ),
+                new String[]{"left", "middle", "right"}
+        );
+
+        paramMapping.put(
+                new MethodInfo(
+                        "org.javamoney.moneta.Money",
+                        "<init>",
+                        new String[]{"java.math.BigDecimal", "javax.money.CurrencyUnit", "javax.money.MonetaryContext"}
+                ),
+                new String[]{"number", "currency", "monetaryContext"}
+        );
+        paramMapping.put(
+                new MethodInfo(
+                        "org.javamoney.moneta.Money",
+                        "<init>",
+                        new String[]{"java.math.BigDecimal", "javax.money.CurrencyUnit"}
+                ),
+                new String[]{"number", "currency"}
+        );
+
         descMapping.put(int.class, "I");
         descMapping.put(void.class, "V");
         descMapping.put(boolean.class, "Z");
@@ -279,6 +327,11 @@ public class ASMUtils {
             return new String[paramCount];
         }
 
+        String[] paramNames = paramMapping.get(new MethodInfo(declaringClass.getName(), name, types));
+        if (paramNames != null) {
+            return paramNames;
+        }
+
         ClassLoader classLoader = declaringClass.getClassLoader();
         if (classLoader == null) {
             classLoader = ClassLoader.getSystemClassLoader();
@@ -288,30 +341,86 @@ public class ASMUtils {
         String resourceName = className.replace('.', '/') + ".class";
         InputStream is = classLoader.getResourceAsStream(resourceName);
 
-        if (is == null) {
-            return new String[paramCount];
+        if (is != null) {
+            try {
+                ClassReader reader = new ClassReader(is);
+                TypeCollector visitor = new TypeCollector(name, types);
+                reader.accept(visitor);
+
+                paramNames = visitor.getParameterNamesForMethod();
+                if (paramNames != null && paramNames.length == paramCount - 1) {
+                    Class<?> dd = declaringClass.getDeclaringClass();
+                    if (dd != null && dd.equals(types[0])) {
+                        String[] strings = new String[paramCount];
+                        strings[0] = "this$0";
+                        System.arraycopy(paramNames, 0, strings, 1, paramNames.length);
+                        paramNames = strings;
+                    }
+                }
+                return paramNames;
+            } catch (IOException ignored) {
+                // ignored
+            } finally {
+                IOUtils.close(is);
+            }
         }
 
-        try {
-            ClassReader reader = new ClassReader(is);
-            TypeCollector visitor = new TypeCollector(name, types);
-            reader.accept(visitor);
+        paramNames = new String[paramCount];
+        int i;
+        if (types[0] == declaringClass.getDeclaringClass()
+                && !Modifier.isStatic(declaringClass.getModifiers())) {
+            paramNames[0] = "this.$0";
+            i = 1;
+        } else {
+            i = 0;
+        }
+        for (; i < paramNames.length; i++) {
+            paramNames[i] = "arg" + i;
+        }
+        return paramNames;
+    }
 
-            String[] params = visitor.getParameterNamesForMethod();
-            if (params != null && params.length == paramCount - 1) {
-                Class<?> dd = declaringClass.getDeclaringClass();
-                if (dd != null && dd.equals(types[0])) {
-                    String[] strings = new String[paramCount];
-                    strings[0] = "this$0";
-                    System.arraycopy(params, 0, strings, 1, params.length);
-                    params = strings;
-                }
+    static class MethodInfo {
+        final String className;
+        final String methodName;
+        final String[] paramTypeNames;
+        int hash;
+
+        public MethodInfo(String className, String methodName, String[] paramTypeNames) {
+            this.className = className;
+            this.methodName = methodName;
+            this.paramTypeNames = paramTypeNames;
+        }
+
+        public MethodInfo(String className, String methodName, Class[] paramTypes) {
+            this.className = className;
+            this.methodName = methodName;
+            this.paramTypeNames = new String[paramTypes.length];
+            for (int i = 0; i < paramTypes.length; i++) {
+                paramTypeNames[i] = paramTypes[i].getName();
             }
-            return params;
-        } catch (IOException e) {
-            return new String[paramCount];
-        } finally {
-            IOUtils.close(is);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            MethodInfo that = (MethodInfo) o;
+            return Objects.equals(className, that.className) && Objects.equals(methodName, that.methodName) && Arrays.equals(paramTypeNames, that.paramTypeNames);
+        }
+
+        @Override
+        public int hashCode() {
+            if (hash == 0) {
+                int result = Objects.hash(className, methodName);
+                result = 31 * result + Arrays.hashCode(paramTypeNames);
+                hash = result;
+            }
+            return hash;
         }
     }
 }

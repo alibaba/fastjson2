@@ -29,6 +29,10 @@ final class FieldReaderDoubleMethod<T>
             schema.assertValidate(fieldValue);
         }
 
+        if (fieldValue == null && defaultValue != null) {
+            return;
+        }
+
         try {
             method.invoke(object, fieldValue);
         } catch (Exception e) {
