@@ -1,6 +1,8 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.internal.asm.ASMUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -68,6 +70,20 @@ final class ConstructorFunction<T>
                 alternateConstructor.setAccessible(true);
 
                 String[] parameterNames = ASMUtils.lookupParameterNames(alternateConstructor);
+
+                Parameter[] parameters = alternateConstructor.getParameters();
+                FieldInfo fieldInfo = new FieldInfo();
+                ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+                for (int i = 0; i < parameters.length && i < parameterNames.length; i++) {
+                    fieldInfo.init();
+
+                    Parameter parameter = parameters[i];
+                    provider.getFieldInfo(fieldInfo, alternateConstructor.getDeclaringClass(), alternateConstructor, i, parameter);
+                    if (fieldInfo.fieldName != null) {
+                        parameterNames[i] = fieldInfo.fieldName;
+                    }
+                }
+
                 long[] parameterNameHashCodes = new long[parameterNames.length];
                 Type[] parameterTypes = alternateConstructor.getGenericParameterTypes();
                 Set<Long> paramHashCodes = new HashSet<>(parameterNames.length);

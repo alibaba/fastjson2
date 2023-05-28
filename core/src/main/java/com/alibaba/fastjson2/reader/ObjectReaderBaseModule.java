@@ -668,14 +668,28 @@ public class ObjectReaderBaseModule
                 }
             }
 
+            boolean staticClass = Modifier.isStatic(constructor.getDeclaringClass().getModifiers());
             Annotation[] annotations = null;
-            try {
-                annotations = getAnnotations(parameter);
-            } catch (ArrayIndexOutOfBoundsException ignored) {
-                // ignored
+            if (staticClass) {
+                try {
+                    annotations = getAnnotations(parameter);
+                } catch (ArrayIndexOutOfBoundsException ignored) {
+                    // ignored
+                }
+            } else {
+                Annotation[][] parameterAnnotations = constructor.getParameterAnnotations();
+                int paIndex;
+                if (parameterAnnotations.length == constructor.getParameterCount()) {
+                    paIndex = paramIndex;
+                } else {
+                    paIndex = paramIndex - 1;
+                }
+                if (paIndex >= 0 && paIndex < parameterAnnotations.length) {
+                    annotations = parameterAnnotations[paIndex];
+                }
             }
 
-            if (annotations != null) {
+            if (annotations != null && annotations.length > 0) {
                 processAnnotation(fieldInfo, annotations);
             }
         }

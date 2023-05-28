@@ -53,7 +53,7 @@ final class FieldWriterStringMethod<T>
         try {
             value = (String) getFieldValue(object);
         } catch (JSONException error) {
-            if (jsonWriter.isIgnoreErrorGetter()) {
+            if ((jsonWriter.getFeatures(features) | JSONWriter.Feature.IgnoreNonFieldGetter.mask) != 0) {
                 return false;
             }
             throw error;

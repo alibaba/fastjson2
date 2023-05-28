@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.util.GuavaSupport;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -128,10 +129,29 @@ public final class ObjectReaderImplListStr
             list = new ArrayList();
             builder = (Function<Collection, Collection>) ((Collection collection) -> Collections.singletonList(collection.iterator().next()));
         } else if (instanceType != null && instanceType != this.listType) {
-            try {
-                list = (Collection) instanceType.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new JSONException(jsonReader.info("create instance error " + instanceType), e);
+            String typeName = instanceType.getTypeName();
+            switch (typeName) {
+                case "com.google.common.collect.ImmutableList":
+                    list = new ArrayList();
+                    builder = GuavaSupport.immutableListConverter();
+                    break;
+                case "com.google.common.collect.ImmutableSet":
+                    list = new ArrayList();
+                    builder = GuavaSupport.immutableSetConverter();
+                    break;
+                case "com.google.common.collect.Lists$TransformingRandomAccessList":
+                    list = new ArrayList();
+                    break;
+                case "com.google.common.collect.Lists.TransformingSequentialList":
+                    list = new LinkedList();
+                    break;
+                default:
+                    try {
+                        list = (Collection) instanceType.newInstance();
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new JSONException(jsonReader.info("create instance error " + instanceType), e);
+                    }
+                    break;
             }
         } else {
             list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);

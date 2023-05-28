@@ -170,6 +170,13 @@ abstract class FieldWriterBoolean
             return true;
         }
 
+        if (fieldClass == boolean.class
+                && !value.booleanValue()
+                && (jsonWriter.getFeatures(features) & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0
+        ) {
+            return false;
+        }
+
         writeBool(jsonWriter, value);
         return true;
     }

@@ -1019,6 +1019,19 @@ public class ObjectReaderCreator {
 
             if (parameterNames == null || parameterNames.length == 0) {
                 parameterNames = ASMUtils.lookupParameterNames(creatorConstructor);
+
+                Parameter[] parameters = creatorConstructor.getParameters();
+                FieldInfo fieldInfo = new FieldInfo();
+                for (int i = 0; i < parameters.length && i < parameterNames.length; i++) {
+                    fieldInfo.init();
+
+                    Parameter parameter = parameters[i];
+
+                    provider.getFieldInfo(fieldInfo, objectClass, creatorConstructor, i, parameter);
+                    if (fieldInfo.fieldName != null) {
+                        parameterNames[i] = fieldInfo.fieldName;
+                    }
+                }
             }
 
             int matchCount = 0;

@@ -52,6 +52,10 @@ final class FieldReaderDoubleFunc<T>
             }
         }
 
+        if (fieldValue == null && defaultValue != null) {
+            return;
+        }
+
         if (schema != null) {
             schema.assertValidate(fieldValue);
         }
