@@ -32,11 +32,7 @@ class ObjectReaderImplDoubleValueArray
         if (jsonReader.nextIfMatch('[')) {
             double[] values = new double[16];
             int size = 0;
-            for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
-                    break;
-                }
-
+            while (!jsonReader.nextIfMatch(']')) {
                 if (jsonReader.isEnd()) {
                     throw new JSONException(jsonReader.info("input end"));
                 }

@@ -197,12 +197,8 @@ public class ObjectWriterBaseModule
                         }
 
                         String annotationTypeName = annotationType.getName();
-                        switch (annotationTypeName) {
-                            case "com.alibaba.fastjson.annotation.JSONType":
-                                jsonType1x = annotation;
-                                break;
-                            default:
-                                break;
+                        if (annotationTypeName.equals("com.alibaba.fastjson.annotation.JSONType")) {
+                            jsonType1x = annotation;
                         }
                     }
                 }
@@ -428,21 +424,16 @@ public class ObjectWriterBaseModule
                 String name = m.getName();
                 try {
                     Object result = m.invoke(annotation);
-                    switch (name) {
-                        case "value": {
-                            Annotation[] value = (Annotation[]) result;
-                            if (value.length != 0) {
-                                beanInfo.seeAlso = new Class[value.length];
-                                beanInfo.seeAlsoNames = new String[value.length];
-                                for (int i = 0; i < value.length; i++) {
-                                    Annotation item = value[i];
-                                    processJacksonJsonSubTypesType(beanInfo, i, item);
-                                }
+                    if (name.equals("value")) {
+                        Annotation[] value = (Annotation[]) result;
+                        if (value.length != 0) {
+                            beanInfo.seeAlso = new Class[value.length];
+                            beanInfo.seeAlsoNames = new String[value.length];
+                            for (int i = 0; i < value.length; i++) {
+                                Annotation item = value[i];
+                                processJacksonJsonSubTypesType(beanInfo, i, item);
                             }
-                            break;
                         }
-                        default:
-                            break;
                     }
                 } catch (Throwable ignored) {
                     // ignored
@@ -480,15 +471,14 @@ public class ObjectWriterBaseModule
         }
 
         private Class processUsing(Class result) {
-            Class writeUsing = result;
-            String usingName = writeUsing.getName();
+            String usingName = result.getName();
             String noneClassName0 = "com.alibaba.fastjson2.adapter.jackson.databind.JsonSerializer$None";
             String noneClassName1 = "com.fasterxml.jackson.databind.JsonSerializer$None";
             if (!noneClassName0.equals(usingName)
                     && !noneClassName1.equals(usingName)
-                    && ObjectWriter.class.isAssignableFrom(writeUsing)
+                    && ObjectWriter.class.isAssignableFrom(result)
             ) {
-                return writeUsing;
+                return result;
             }
 
             if ("com.fasterxml.jackson.databind.ser.std.ToStringSerializer".equals(usingName)) {
@@ -503,17 +493,12 @@ public class ObjectWriterBaseModule
                 String name = m.getName();
                 try {
                     Object result = m.invoke(annotation);
-                    switch (name) {
-                        case "property": {
-                            String value = (String) result;
-                            if (!value.isEmpty()) {
-                                beanInfo.typeKey = value;
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteClassName.mask;
-                            }
-                            break;
+                    if (name.equals("property")) {
+                        String value = (String) result;
+                        if (!value.isEmpty()) {
+                            beanInfo.typeKey = value;
+                            beanInfo.writerFeatures |= JSONWriter.Feature.WriteClassName.mask;
                         }
-                        default:
-                            break;
                     }
                 } catch (Throwable ignored) {
                     // ignored
@@ -527,16 +512,11 @@ public class ObjectWriterBaseModule
                 String name = m.getName();
                 try {
                     Object result = m.invoke(annotation);
-                    switch (name) {
-                        case "value": {
-                            String[] value = (String[]) result;
-                            if (value.length != 0) {
-                                beanInfo.orders = value;
-                            }
-                            break;
+                    if (name.equals("value")) {
+                        String[] value = (String[]) result;
+                        if (value.length != 0) {
+                            beanInfo.orders = value;
                         }
-                        default:
-                            break;
                     }
                 } catch (Throwable ignored) {
                     // ignored
@@ -593,13 +573,10 @@ public class ObjectWriterBaseModule
                             break;
                         case "access": {
                             String access = ((Enum) result).name();
-                            switch (access) {
-                                case "WRITE_ONLY":
-                                    fieldInfo.ignore = true;
-                                    break;
-                                default:
-                                    fieldInfo.ignore = false;
-                                    break;
+                            if (access.equals("WRITE_ONLY")) {
+                                fieldInfo.ignore = true;
+                            } else {
+                                fieldInfo.ignore = false;
                             }
                             break;
                         }
@@ -618,16 +595,11 @@ public class ObjectWriterBaseModule
                 String name = m.getName();
                 try {
                     Object result = m.invoke(annotation);
-                    switch (name) {
-                        case "value": {
-                            String[] value = (String[]) result;
-                            if (value.length != 0) {
-                                beanInfo.ignores = value;
-                            }
-                            break;
+                    if (name.equals("value")) {
+                        String[] value = (String[]) result;
+                        if (value.length != 0) {
+                            beanInfo.ignores = value;
                         }
-                        default:
-                            break;
                     }
                 } catch (Throwable ignored) {
                     // ignored
@@ -668,22 +640,21 @@ public class ObjectWriterBaseModule
                             break;
                         }
                         case "ordinal": {
-                            Integer ordinal = (Integer) result;
-                            if (ordinal.intValue() != 0) {
+                            int ordinal = (Integer) result;
+                            if (ordinal != 0) {
                                 fieldInfo.ordinal = ordinal;
                             }
                             break;
                         }
                         case "serialize": {
-                            Boolean serialize = (Boolean) result;
-                            if (!serialize.booleanValue()) {
+                            boolean serialize = (Boolean) result;
+                            if (!serialize) {
                                 fieldInfo.ignore = true;
                             }
                             break;
                         }
                         case "unwrapped": {
-                            Boolean unwrapped = (Boolean) result;
-                            if (unwrapped.booleanValue()) {
+                            if ((Boolean) result) {
                                 fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
                             }
                             break;
@@ -769,16 +740,12 @@ public class ObjectWriterBaseModule
             Class mixInSource = provider.mixInCache.get(objectClass);
             String methodName = method.getName();
 
-            switch (methodName) {
-                case "getTargetSql":
-                    if (objectClass != null
-                            && objectClass.getName().startsWith("com.baomidou.mybatisplus.")
-                    ) {
-                        fieldInfo.features |= JSONWriter.Feature.IgnoreErrorGetter.mask;
-                    }
-                    break;
-                default:
-                    break;
+            if (methodName.equals("getTargetSql")) {
+                if (objectClass != null
+                        && objectClass.getName().startsWith("com.baomidou.mybatisplus.")
+                ) {
+                    fieldInfo.features |= JSONWriter.Feature.IgnoreErrorGetter.mask;
+                }
             }
 
             if (mixInSource != null && mixInSource != objectClass) {
@@ -810,8 +777,8 @@ public class ObjectWriterBaseModule
                 }
 
                 Class[] interfaces = objectClass.getInterfaces();
-                for (int i = 0; i < interfaces.length; i++) {
-                    Method interfaceMethod = BeanUtils.getMethod(interfaces[i], method);
+                for (Class anInterface : interfaces) {
+                    Method interfaceMethod = BeanUtils.getMethod(anInterface, method);
                     if (interfaceMethod != null) {
                         getFieldInfo(beanInfo, fieldInfo, superclass, interfaceMethod);
                     }
@@ -1449,13 +1416,12 @@ public class ObjectWriterBaseModule
                             null,
                             0,
                             Arrays.asList(
-                                    new FieldWriter[]{
-                                            ObjectWriters.fieldWriter("fileName", String.class, StackTraceElement::getFileName),
-                                            ObjectWriters.fieldWriter("lineNumber", StackTraceElement::getLineNumber),
-                                            ObjectWriters.fieldWriter("className", String.class, StackTraceElement::getClassName),
-                                            ObjectWriters.fieldWriter("methodName", String.class, StackTraceElement::getMethodName),
-                                    }
-                            ));
+                                    ObjectWriters.fieldWriter("fileName", String.class, StackTraceElement::getFileName),
+                                    ObjectWriters.fieldWriter("lineNumber", StackTraceElement::getLineNumber),
+                                    ObjectWriters.fieldWriter("className", String.class, StackTraceElement::getClassName),
+                                    ObjectWriters.fieldWriter("methodName", String.class, StackTraceElement::getMethodName)
+                            )
+                    );
                 }
                 return STACK_TRACE_ELEMENT_WRITER;
             }

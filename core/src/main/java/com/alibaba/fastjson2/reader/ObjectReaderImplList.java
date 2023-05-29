@@ -169,7 +169,6 @@ public final class ObjectReaderImplList
 
         if (type == ObjectReaderImplList.CLASS_EMPTY_SET
                 || type == ObjectReaderImplList.CLASS_EMPTY_LIST
-                || type == ObjectReaderImplList.CLASS_EMPTY_LIST
         ) {
             return new ObjectReaderImplList(type, (Class) type, (Class) type, Object.class, null);
         }
@@ -392,7 +391,7 @@ public final class ObjectReaderImplList
                         item = list;
                     } else {
                         item = null;
-                        jsonReader.addResolveTask((List) list, i, JSONPath.of(reference));
+                        jsonReader.addResolveTask(list, i, JSONPath.of(reference));
                     }
                 } else {
                     item = itemObjectReader.readJSONBObject(jsonReader, itemType, i, features);
@@ -423,7 +422,7 @@ public final class ObjectReaderImplList
             builder = (Function<Collection, Collection>) ((Collection items) -> Collections.singletonList(items.iterator().next()));
         } else if (listType == CLASS_UNMODIFIABLE_LIST) {
             list = new ArrayList();
-            builder = (Function<List, List>) ((List items) -> Collections.unmodifiableList(items));
+            builder = (Function<List, List>) (Collections::unmodifiableList);
         } else if (listType != null && EnumSet.class.isAssignableFrom(listType)) {
             // maybe listType is java.util.RegularEnumSet or java.util.JumboEnumSet
             list = new HashSet();
@@ -440,7 +439,7 @@ public final class ObjectReaderImplList
 
         ObjectReader itemObjectReader = this.itemObjectReader;
         Type itemType = this.itemType;
-        if (fieldType != null && fieldType != listType && fieldType instanceof ParameterizedType) {
+        if (fieldType instanceof ParameterizedType) {
             Type[] actualTypeArguments = ((ParameterizedType) fieldType).getActualTypeArguments();
             if (actualTypeArguments.length == 1) {
                 itemType = actualTypeArguments[0];
@@ -545,7 +544,7 @@ public final class ObjectReaderImplList
 
         ObjectReader itemObjectReader = this.itemObjectReader;
         Type itemType = this.itemType;
-        if (fieldType != null && fieldType != listType && fieldType instanceof ParameterizedType) {
+        if ((fieldType != listType) && (fieldType instanceof ParameterizedType)) {
             Type[] actualTypeArguments = ((ParameterizedType) fieldType).getActualTypeArguments();
             if (actualTypeArguments.length == 1) {
                 itemType = actualTypeArguments[0];
@@ -581,9 +580,7 @@ public final class ObjectReaderImplList
 
             list.add(item);
 
-            if (jsonReader.nextIfMatch(',')) {
-                continue;
-            }
+            jsonReader.nextIfMatch(',');
         }
 
         jsonReader.nextIfMatch(',');

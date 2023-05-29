@@ -39,11 +39,7 @@ final class ObjectReaderImplCharValueArray
         if (jsonReader.nextIfMatch('[')) {
             char[] values = new char[16];
             int size = 0;
-            for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
-                    break;
-                }
-
+            while (!jsonReader.nextIfMatch(']')) {
                 int minCapacity = size + 1;
                 if (minCapacity - values.length > 0) {
                     int oldCapacity = values.length;

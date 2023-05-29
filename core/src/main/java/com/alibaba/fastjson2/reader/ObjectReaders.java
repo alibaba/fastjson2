@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -98,11 +97,11 @@ public class ObjectReaders {
     }
 
     public static FieldReader fieldReader(String fieldName, Class fieldClass) {
-        return ObjectReaderCreator.INSTANCE.createFieldReader(null, fieldName, fieldClass, fieldClass, (Method) null);
+        return ObjectReaderCreator.INSTANCE.createFieldReader(null, fieldName, fieldClass, fieldClass, null);
     }
 
     public static FieldReader fieldReader(String fieldName, Type fieldType, Class fieldClass) {
-        return ObjectReaderCreator.INSTANCE.createFieldReader(null, fieldName, fieldType, fieldClass, (Method) null);
+        return ObjectReaderCreator.INSTANCE.createFieldReader(null, fieldName, fieldType, fieldClass, null);
     }
 
     public static <T> FieldReader fieldReaderBool(String fieldName, ObjBoolConsumer<T> function) {

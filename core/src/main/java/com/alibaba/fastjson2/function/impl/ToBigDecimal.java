@@ -19,7 +19,7 @@ public class ToBigDecimal
         }
 
         if (o instanceof Boolean) {
-            return ((Boolean) o).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
+            return (Boolean) o ? BigDecimal.ONE : BigDecimal.ZERO;
         }
 
         if (o instanceof Byte

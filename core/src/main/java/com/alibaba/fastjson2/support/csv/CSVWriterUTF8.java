@@ -22,7 +22,7 @@ final class CSVWriterUTF8
 
     final OutputStream out;
     final Charset charset;
-    byte[] bytes;
+    final byte[] bytes;
 
     CSVWriterUTF8(
             OutputStream out,
@@ -36,7 +36,7 @@ final class CSVWriterUTF8
         this.bytes = new byte[1024 * 64];
     }
 
-    protected void writeDirect(byte[] bytes, int off, int len) {
+    void writeDirect(byte[] bytes, int off, int len) {
         try {
             out.write(bytes, off, len);
         } catch (IOException e) {
@@ -118,14 +118,13 @@ final class CSVWriterUTF8
     }
 
     public void writeString(String value) {
-        String str = value;
         byte[] bytes;
         if (JDKUtils.STRING_CODER != null
                 && JDKUtils.STRING_VALUE != null
-                && JDKUtils.STRING_CODER.applyAsInt(str) == JDKUtils.LATIN1) {
-            bytes = JDKUtils.STRING_VALUE.apply(str);
+                && JDKUtils.STRING_CODER.applyAsInt(value) == JDKUtils.LATIN1) {
+            bytes = JDKUtils.STRING_VALUE.apply(value);
         } else {
-            bytes = str.getBytes(charset);
+            bytes = value.getBytes(charset);
         }
         writeString(bytes);
     }
@@ -179,15 +178,13 @@ final class CSVWriterUTF8
         boolean comma = false;
 
         if (utf8[0] == '"') {
-            for (int i = 0; i < len; i++) {
-                byte ch = utf8[i];
+            for (byte ch : utf8) {
                 if (ch == '"') {
                     escapeCount++;
                 }
             }
         } else {
-            for (int i = 0; i < len; i++) {
-                byte ch = utf8[i];
+            for (byte ch : utf8) {
                 if (ch == ',') {
                     comma = true;
                 } else if (ch == '"') {
@@ -209,8 +206,7 @@ final class CSVWriterUTF8
         }
 
         bytes[off++] = '"';
-        for (int i = 0; i < utf8.length; i++) {
-            byte ch = utf8[i];
+        for (byte ch : utf8) {
             if (ch == '"') {
                 bytes[off++] = '"';
                 bytes[off++] = '"';
@@ -251,7 +247,7 @@ final class CSVWriterUTF8
         off = IOUtils.writeDecimal(bytes, off, unscaledVal, scale);
     }
 
-    protected void writeRaw(byte[] strBytes) {
+    private void writeRaw(byte[] strBytes) {
         if (strBytes.length + off < bytes.length) {
             System.arraycopy(strBytes, 0, bytes, off, strBytes.length);
             off += strBytes.length;

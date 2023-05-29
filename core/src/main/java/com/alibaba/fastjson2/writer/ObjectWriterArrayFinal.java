@@ -20,13 +20,13 @@ final class ObjectWriterArrayFinal
     final Class itemClass;
     volatile ObjectWriter itemObjectWriter;
     public final DecimalFormat format;
-    public boolean refDetect;
+    public final boolean refDetect;
 
     public ObjectWriterArrayFinal(Class itemClass, DecimalFormat format) {
         this.itemClass = itemClass;
         this.format = format;
 
-        String typeName = '[' + TypeUtils.getTypeName((Class) itemClass);
+        String typeName = '[' + TypeUtils.getTypeName(itemClass);
         typeNameBytes = JSONB.toBytes(typeName);
         typeNameHash = Fnv.hashCode64(typeName);
         refDetect = !ObjectWriterProvider.isNotReferenceDetect(itemClass);

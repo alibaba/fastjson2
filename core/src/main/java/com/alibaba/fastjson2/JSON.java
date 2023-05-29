@@ -30,7 +30,6 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONReader.EOI;
 import static com.alibaba.fastjson2.JSONReader.Feature.IgnoreCheckClose;
 import static com.alibaba.fastjson2.JSONReader.Feature.UseNativeObject;
-import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public interface JSON {
     /**
@@ -879,7 +878,7 @@ public interface JSON {
             if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
             }
-            return (T) object;
+            return object;
         }
     }
 

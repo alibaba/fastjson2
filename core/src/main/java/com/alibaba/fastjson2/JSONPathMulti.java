@@ -20,8 +20,7 @@ final class JSONPathMulti
 
         boolean extractSupport = true;
         boolean ref = true;
-        for (int i = 0, l = segments.size(); i < l; i++) {
-            JSONPathSegment segment = segments.get(i);
+        for (JSONPathSegment segment : segments) {
             if (segment instanceof JSONPathSegmentIndex) {
                 if (((JSONPathSegmentIndex) segment).index < 0) {
                     extractSupport = false;

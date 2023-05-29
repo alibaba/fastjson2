@@ -92,7 +92,7 @@ public final class ObjectReaderInterface<T>
             }
         }
 
-        object = (T) TypeUtils.newProxyInstance(objectClass, jsonObject);
+        object = TypeUtils.newProxyInstance(objectClass, jsonObject);
         if (schema != null) {
             schema.assertValidate(object);
         }

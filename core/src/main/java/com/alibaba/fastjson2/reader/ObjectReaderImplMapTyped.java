@@ -9,7 +9,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -68,8 +67,7 @@ class ObjectReaderImplMapTyped
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
 
         Map object = (Map<String, Object>) createInstance();
-        for (Iterator<Map.Entry> it = input.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = it.next();
+        for (Map.Entry entry : (Iterable<Map.Entry>) input.entrySet()) {
             Object key = entry.getKey();
             Object fieldValue = entry.getValue();
             Object fieldName;
@@ -201,7 +199,7 @@ class ObjectReaderImplMapTyped
                 if ("..".equals(reference)) {
                     object.put(name, object);
                 } else {
-                    jsonReader.addResolveTask((Map) object, name, JSONPath.of(reference));
+                    jsonReader.addResolveTask(object, name, JSONPath.of(reference));
                     if (!(object instanceof ConcurrentMap)) {
                         object.put(name, null);
                     }

@@ -8,18 +8,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 abstract class FieldWriterDate<T>
         extends FieldWriter<T> {
-    volatile byte[] cacheFormat19UTF8;
-    static AtomicReferenceFieldUpdater<FieldWriterDate, byte[]> CACHE_UTF8_UPDATER
-            = AtomicReferenceFieldUpdater.newUpdater(FieldWriterDate.class, byte[].class, "cacheFormat19UTF8");
-
-    volatile char[] cacheFormat19UTF16;
-    static AtomicReferenceFieldUpdater<FieldWriterDate, char[]> CACHE_UTF16_UPDATER
-            = AtomicReferenceFieldUpdater.newUpdater(FieldWriterDate.class, char[].class, "cacheFormat19UTF16");
-
     protected DateTimeFormatter formatter;
     final boolean formatMillis;
     final boolean formatISO8601;

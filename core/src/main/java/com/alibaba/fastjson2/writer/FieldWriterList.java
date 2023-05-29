@@ -51,7 +51,7 @@ abstract class FieldWriterList<T>
         } else {
             itemClass = TypeUtils.getMapping(itemType);
         }
-        this.itemClassNotReferenceDetect = itemClass == null ? false : ObjectWriterProvider.isNotReferenceDetect(itemClass);
+        this.itemClassNotReferenceDetect = itemClass != null && ObjectWriterProvider.isNotReferenceDetect(itemClass);
 
         if (format != null) {
             if (itemClass == Date.class) {

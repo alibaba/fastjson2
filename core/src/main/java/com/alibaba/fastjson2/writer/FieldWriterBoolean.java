@@ -171,7 +171,7 @@ abstract class FieldWriterBoolean
         }
 
         if (fieldClass == boolean.class
-                && !value.booleanValue()
+                && !value
                 && (jsonWriter.getFeatures(features) & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0
         ) {
             return false;

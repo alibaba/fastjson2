@@ -52,11 +52,7 @@ public final class ObjectReaderImplInt32Array
         if (jsonReader.nextIfMatch('[')) {
             Integer[] values = new Integer[16];
             int size = 0;
-            for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
-                    break;
-                }
-
+            while (!jsonReader.nextIfMatch(']')) {
                 if (jsonReader.isEnd()) {
                     throw new JSONException(jsonReader.info("input end"));
                 }

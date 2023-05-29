@@ -231,9 +231,7 @@ public abstract class JSONPath {
 
         if (result instanceof Collection) {
             Collection collection = (Collection) result;
-            for (Object value : values) {
-                collection.add(value);
-            }
+            collection.addAll(Arrays.asList(values));
         }
     }
 
@@ -392,7 +390,7 @@ public abstract class JSONPath {
             throw new JSONException("can not convert to long : " + object);
         }
         Object converted = typeConvert.apply(object);
-        return ((Long) converted).longValue();
+        return (Long) converted;
     }
 
     public Integer extractInt32(JSONReader jsonReader) {
@@ -416,8 +414,7 @@ public abstract class JSONPath {
         if (typeConvert == null) {
             throw new JSONException("can not convert to int : " + object);
         }
-        Object converted = typeConvert.apply(object);
-        return ((Integer) converted).intValue();
+        return (Integer) typeConvert.apply(object);
     }
 
     @Deprecated
@@ -1075,7 +1072,7 @@ public abstract class JSONPath {
             extends JSONPath {
         static final RootPath INSTANCE = new RootPath();
 
-        protected RootPath() {
+        private RootPath() {
             super("$");
         }
 

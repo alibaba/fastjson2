@@ -271,10 +271,6 @@ final class StringSchema
             validDomain = DomainValidator.isValid(domain) || DomainValidator.isValidTld(domain);
         }
 
-        if (!validDomain) {
-            return false;
-        }
-
-        return true;
+        return validDomain;
     }
 }

@@ -643,7 +643,7 @@ public interface JSONB {
             InputStream in,
             Type objectType,
             JSONReader.Context ctx
-    ) throws IOException {
+    ) {
         try (JSONReader jsonReader = UNSAFE_SUPPORT
                 ? new JSONReaderJSONBUF(ctx, in)
                 : new JSONReaderJSONB(ctx, in)
@@ -670,7 +670,7 @@ public interface JSONB {
             InputStream in,
             Class objectClass,
             JSONReader.Context ctx
-    ) throws IOException {
+    ) {
         try (JSONReader jsonReader = UNSAFE_SUPPORT
                 ? new JSONReaderJSONBUF(ctx, in)
                 : new JSONReaderJSONB(ctx, in)
@@ -1301,8 +1301,7 @@ public interface JSONB {
                 objectWriter.writeJSONB(writer, object, null, null, 0);
             }
 
-            int len = writer.flushTo(out);
-            return len;
+            return writer.flushTo(out);
         } catch (IOException e) {
             throw new JSONException("writeJSONString error", e);
         }

@@ -13,9 +13,9 @@ import java.nio.charset.Charset;
 class JSONStreamReaderUTF8
         extends JSONStreamReader {
     byte[] buf;
-    InputStream input;
+    final InputStream input;
     final Charset charset;
-    JSONReader.Context context;
+    final JSONReader.Context context;
 
     JSONStreamReaderUTF8(InputStream input, Charset charset, Type[] types) {
         super(types);

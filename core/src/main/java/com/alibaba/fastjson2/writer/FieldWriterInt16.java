@@ -65,7 +65,7 @@ abstract class FieldWriterInt16<T>
             jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeInt32(value.shortValue());
+        jsonWriter.writeInt32(value);
     }
 
     @Override

@@ -78,8 +78,8 @@ public class JDKUtils {
             if (javaSpecVer.indexOf('.') == -1) {
                 jvmVersion = Integer.parseInt(javaSpecVer);
             }
-        } catch (Throwable ignored) {
-            initErrorLast = ignored;
+        } catch (Throwable e) {
+            initErrorLast = e;
         }
 
         OPENJ9 = openj9;
@@ -219,8 +219,8 @@ public class JDKUtils {
                     vector_bit_length = length * 8;
                 }
             }
-        } catch (Throwable ignored) {
-            initErrorLast = ignored;
+        } catch (Throwable e) {
+            initErrorLast = e;
         }
         VECTOR_SUPPORT = vector_support;
         VECTOR_BIT_LENGTH = vector_bit_length;
@@ -237,8 +237,8 @@ public class JDKUtils {
                             "isASCII",
                             MethodType.methodType(boolean.class, byte[].class)
                     );
-                } catch (Throwable ignored) {
-                    initErrorLast = ignored;
+                } catch (Throwable e) {
+                    initErrorLast = e;
                 }
             }
 
@@ -250,8 +250,8 @@ public class JDKUtils {
                             "isASCII",
                             MethodType.methodType(boolean.class, byte[].class)
                     );
-                } catch (Throwable ignored) {
-                    initErrorLast = ignored;
+                } catch (Throwable e) {
+                    initErrorLast = e;
                 }
             }
 
@@ -267,8 +267,8 @@ public class JDKUtils {
                             methodType(boolean.class, byte[].class)
                     );
                     isAscii = (Predicate<byte[]>) callSite.getTarget().invokeExact();
-                } catch (Throwable ignored) {
-                    initErrorLast = ignored;
+                } catch (Throwable e) {
+                    initErrorLast = e;
                 }
             }
 
@@ -285,8 +285,8 @@ public class JDKUtils {
                             "hasNegatives",
                             MethodType.methodType(boolean.class, byte[].class, int.class, int.class)
                     );
-                } catch (Throwable ignored) {
-                    initErrorLast = ignored;
+                } catch (Throwable e) {
+                    initErrorLast = e;
                 }
             }
             METHOD_HANDLE_HAS_NEGATIVE = handle;
@@ -325,10 +325,10 @@ public class JDKUtils {
                             compact_strings = (Boolean) compact_strings_field.get(null);
                         }
                     }
-                } catch (Throwable ignored) {
-                    initErrorLast = ignored;
+                } catch (Throwable e) {
+                    initErrorLast = e;
                 }
-                lookupLambda = compact_strings != null && compact_strings.booleanValue();
+                lookupLambda = compact_strings != null && compact_strings;
             }
 
             if (lookupLambda) {
@@ -378,8 +378,8 @@ public class JDKUtils {
                 );
                 stringValue = (Function<String, byte[]>) apply.getTarget().invokeExact();
             }
-        } catch (Throwable ignored) {
-            initErrorLast = ignored;
+        } catch (Throwable e) {
+            initErrorLast = e;
         }
 
         if (stringCoder == null) {

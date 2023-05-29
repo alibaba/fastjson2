@@ -5868,7 +5868,6 @@ public class DateUtils {
         char c10 = (char) str[off + 10];
         char c13 = (char) str[off + 13];
 
-
         char y0, y1, y2, y3, m0, m1, d0, d1;
         if (c4 == '-' && c7 == '-' && (c10 == '+' || c10 == '-') && c13 == ':') {
             y0 = c0;
@@ -10346,7 +10345,7 @@ public class DateUtils {
 
             long zeroDay = localEpochDay + DAYS_0000_TO_1970;
             // find the march-based year
-            zeroDay -= 60;  // adjust to 0000-03-01 so leap day is at end of four year cycle
+            zeroDay -= 60;  // adjust to 0000-03-01 so leap day is at end of four-year cycle
             long adjust = 0;
             if (zeroDay < 0) {
                 // adjust negative years to positive for calculation
@@ -10510,7 +10509,7 @@ public class DateUtils {
 
             long zeroDay = localEpochDay + DAYS_0000_TO_1970;
             // find the march-based year
-            zeroDay -= 60;  // adjust to 0000-03-01 so leap day is at end of four year cycle
+            zeroDay -= 60;  // adjust to 0000-03-01 so leap day is at end of four-year cycle
             long adjust = 0;
             if (zeroDay < 0) {
                 // adjust negative years to positive for calculation

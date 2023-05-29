@@ -33,7 +33,7 @@ public class ObjectReaderCreator {
     public static final boolean JIT = !JDKUtils.ANDROID && !JDKUtils.GRAAL;
     public static final ObjectReaderCreator INSTANCE = new ObjectReaderCreator();
 
-    protected AtomicInteger jitErrorCount = new AtomicInteger();
+    protected final AtomicInteger jitErrorCount = new AtomicInteger();
     protected volatile Throwable jitErrorLast;
 
     protected static final Map<Class, LambdaSetterInfo> methodTypeMapping = new HashMap<>();
@@ -966,9 +966,7 @@ public class ObjectReaderCreator {
         Constructor creatorConstructor = beanInfo.creatorConstructor;
 
         final List<Constructor> alternateConstructors = new ArrayList<>();
-        BeanUtils.constructor(objectClass, constructor -> {
-            alternateConstructors.add(constructor);
-        });
+        BeanUtils.constructor(objectClass, alternateConstructors::add);
 
         if (Throwable.class.isAssignableFrom(objectClass)) {
             return new ObjectReaderException<>(objectClass, alternateConstructors, fieldReaderArray);
@@ -1036,14 +1034,12 @@ public class ObjectReaderCreator {
 
             int matchCount = 0;
             if (defaultConstructor != null) {
-                for (int i = 0; i < parameterNames.length; i++) {
-                    String parameterName = parameterNames[i];
+                for (String parameterName : parameterNames) {
                     if (parameterName == null) {
                         continue;
                     }
 
-                    for (int j = 0; j < fieldReaderArray.length; j++) {
-                        FieldReader fieldReader = fieldReaderArray[j];
+                    for (FieldReader fieldReader : fieldReaderArray) {
                         if (fieldReader != null) {
                             if (parameterName.equals(fieldReader.fieldName)) {
                                 matchCount++;
@@ -1600,8 +1596,8 @@ public class ObjectReaderCreator {
                         Map thisMap = (Map) o;
                         Map superMap = (Map) f;
                         // avoid putAll oom
-                        for (Iterator it = superMap.entrySet().iterator(); it.hasNext(); ) {
-                            Map.Entry entry = (Map.Entry) it.next();
+                        for (Object value : superMap.entrySet()) {
+                            Map.Entry entry = (Map.Entry) value;
                             thisMap.put(entry.getKey(), entry.getValue());
                         }
                     }
@@ -1695,14 +1691,13 @@ public class ObjectReaderCreator {
         try {
             MethodType methodType = MethodType.methodType(factoryMethod.getReturnType(), int.class);
             MethodHandle handle = lookup.findStatic(declaringClass, factoryMethod.getName(), methodType);
-            MethodType instantiatedMethodType = methodType;
             CallSite callSite = LambdaMetafactory.metafactory(
                     lookup,
                     "apply",
                     METHOD_TYPE_INT_FUNCTION,
                     METHOD_TYPE_OBJECT_INT,
                     handle,
-                    instantiatedMethodType
+                    methodType
             );
             return (IntFunction) callSite.getTarget().invokeExact();
         } catch (Throwable e) {
@@ -1742,14 +1737,13 @@ public class ObjectReaderCreator {
         try {
             MethodType methodType = MethodType.methodType(factoryMethod.getReturnType(), String.class);
             MethodHandle handle = lookup.findStatic(declaringClass, factoryMethod.getName(), methodType);
-            MethodType instantiatedMethodType = methodType;
             CallSite callSite = LambdaMetafactory.metafactory(
                     lookup,
                     "apply",
                     METHOD_TYPE_FUNCTION,
                     METHOD_TYPE_OBJECT_OBJECT,
                     handle,
-                    instantiatedMethodType
+                    methodType
             );
             return (Function<String, T>) callSite.getTarget().invokeExact();
         } catch (Throwable e) {
@@ -1790,14 +1784,13 @@ public class ObjectReaderCreator {
         try {
             MethodType methodType = MethodType.methodType(factoryMethod.getReturnType(), valueClass);
             MethodHandle handle = lookup.findStatic(declaringClass, factoryMethod.getName(), methodType);
-            MethodType instantiatedMethodType = methodType;
             CallSite callSite = LambdaMetafactory.metafactory(
                     lookup,
                     "apply",
                     METHOD_TYPE_FUNCTION,
                     METHOD_TYPE_OBJECT_OBJECT,
                     handle,
-                    instantiatedMethodType
+                    methodType
             );
             return (Function<I, T>) callSite.getTarget().invokeExact();
         } catch (Throwable e) {
@@ -1829,7 +1822,6 @@ public class ObjectReaderCreator {
 
     <T, R> Function<T, R> createBuildFunctionLambda(Method builderMethod) {
         MethodHandles.Lookup lookup = JDKUtils.trustedLookup(builderMethod.getDeclaringClass());
-        MethodType invokedType = METHOD_TYPE_FUNCTION;
         try {
             MethodHandle target = lookup.findVirtual(builderMethod.getDeclaringClass(),
                     builderMethod.getName(),
@@ -1840,7 +1832,7 @@ public class ObjectReaderCreator {
             CallSite callSite = LambdaMetafactory.metafactory(
                     lookup,
                     "apply",
-                    invokedType,
+                    METHOD_TYPE_FUNCTION,
                     func.erase(),
                     target,
                     func
@@ -2575,7 +2567,7 @@ public class ObjectReaderCreator {
                         );
                     }
 
-                    return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, itemType, itemClass, ordinal, features, format, locale, (Collection) defaultValue, jsonSchema, null, field, null);
+                    return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, itemType, itemClass, ordinal, features, format, locale, defaultValue, jsonSchema, null, field, null);
                 }
             }
 
@@ -2618,7 +2610,7 @@ public class ObjectReaderCreator {
                     features,
                     format,
                     locale,
-                    (Collection) defaultValue,
+                    defaultValue,
                     jsonSchema,
                     null,
                     field,
@@ -2780,7 +2772,7 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == Date.class) {
-            return new FieldReaderDate(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Date) defaultValue, schema, null, method, function);
+            return new FieldReaderDate(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, null, method, function);
         }
 
         Type fieldTypeResolved = null;
@@ -2910,8 +2902,8 @@ public class ObjectReaderCreator {
                 Enum first = ordinalEnums[0];
 
                 int matchCount = 0;
-                for (int i = 0; i < enums.length; i++) {
-                    if (enums[i] == first) {
+                for (Enum anEnum : enums) {
+                    if (anEnum == first) {
                         matchCount++;
                     }
                 }

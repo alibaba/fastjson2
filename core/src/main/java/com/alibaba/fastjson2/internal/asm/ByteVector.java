@@ -43,13 +43,6 @@ public class ByteVector {
      * The actual number of bytes in this vector.
      */
     int length;
-//
-//    /**
-//     * Constructs a new {@link ByteVector} with a default initial capacity.
-//     */
-//    public ByteVector() {
-//        data = new byte[64];
-//    }
 
     /**
      * Constructs a new {@link ByteVector} with the given initial capacity.
@@ -81,9 +74,8 @@ public class ByteVector {
      *
      * @param byteValue1 a byte.
      * @param byteValue2 another byte.
-     * @return this byte vector.
      */
-    final ByteVector put11(final int byteValue1, final int byteValue2) {
+    final void put11(final int byteValue1, final int byteValue2) {
         int currentLength = length;
         if (currentLength + 2 > data.length) {
             enlarge(2);
@@ -92,7 +84,6 @@ public class ByteVector {
         currentData[currentLength++] = (byte) byteValue1;
         currentData[currentLength++] = (byte) byteValue2;
         length = currentLength;
-        return this;
     }
 
     /**
@@ -158,12 +149,11 @@ public class ByteVector {
      * Puts one byte and two shorts into this byte vector. The byte vector is automatically enlarged
      * if necessary.
      *
-     * @param byteValue   a byte.
+     * @param byteValue a byte.
      * @param shortValue1 a short.
      * @param shortValue2 another short.
-     * @return this byte vector.
      */
-    final ByteVector put122(final int byteValue, final int shortValue1, final int shortValue2) {
+    final void put122(final int byteValue, final int shortValue1, final int shortValue2) {
         int currentLength = length;
         if (currentLength + 5 > data.length) {
             enlarge(5);
@@ -175,16 +165,14 @@ public class ByteVector {
         currentData[currentLength++] = (byte) (shortValue2 >>> 8);
         currentData[currentLength++] = (byte) shortValue2;
         length = currentLength;
-        return this;
     }
 
     /**
      * Puts a long into this byte vector. The byte vector is automatically enlarged if necessary.
      *
      * @param longValue a long.
-     * @return this byte vector.
      */
-    public ByteVector putLong(final long longValue) {
+    public void putLong(final long longValue) {
         int currentLength = length;
         if (currentLength + 8 > data.length) {
             enlarge(8);
@@ -201,7 +189,6 @@ public class ByteVector {
         currentData[currentLength++] = (byte) (intValue >>> 8);
         currentData[currentLength++] = (byte) intValue;
         length = currentLength;
-        return this;
     }
 
     /**
@@ -209,10 +196,9 @@ public class ByteVector {
      * necessary.
      *
      * @param stringValue a String whose UTF8 encoded length must be less than 65536.
-     * @return this byte vector.
      */
     // DontCheck(AbbreviationAsWordInName): can't be renamed (for backward binary compatibility).
-    public ByteVector putUTF8(final String stringValue) {
+    public void putUTF8(final String stringValue) {
         int charLength = stringValue.length();
         if (charLength > 65535) {
             throw new IllegalArgumentException("UTF8 string too large");
@@ -234,11 +220,11 @@ public class ByteVector {
                 currentData[currentLength++] = (byte) charValue;
             } else {
                 length = currentLength;
-                return encodeUtf8(stringValue, i, 65535);
+                encodeUtf8(stringValue, i);
+                return;
             }
         }
         length = currentLength;
-        return this;
     }
 
     /**
@@ -246,14 +232,12 @@ public class ByteVector {
      * necessary. The string length is encoded in two bytes before the encoded characters, if there is
      * space for that (i.e. if this.length - offset - 2 &gt;= 0).
      *
-     * @param stringValue   the String to encode.
-     * @param offset        the index of the first character to encode. The previous characters are supposed
-     *                      to have already been encoded, using only one byte per character.
-     * @param maxByteLength the maximum byte length of the encoded string, including the already
-     *                      encoded characters.
+     * @param stringValue the String to encode.
+     * @param offset the index of the first character to encode. The previous characters are supposed
+     * to have already been encoded, using only one byte per character.
      * @return this byte vector.
      */
-    final ByteVector encodeUtf8(final String stringValue, final int offset, final int maxByteLength) {
+    final ByteVector encodeUtf8(final String stringValue, final int offset) {
         int charLength = stringValue.length();
         int byteLength = offset;
         for (int i = offset; i < charLength; ++i) {
@@ -266,7 +250,7 @@ public class ByteVector {
                 byteLength += 3;
             }
         }
-        if (byteLength > maxByteLength) {
+        if (byteLength > 65535) {
             throw new IllegalArgumentException("UTF8 string too large");
         }
         // Compute where 'byteLength' must be stored in 'data', and store it at this location.
@@ -301,12 +285,11 @@ public class ByteVector {
      * necessary.
      *
      * @param byteArrayValue an array of bytes. May be {@literal null} to put {@code byteLength} null
-     *                       bytes into this byte vector.
-     * @param byteOffset     index of the first byte of byteArrayValue that must be copied.
-     * @param byteLength     number of bytes of byteArrayValue that must be copied.
-     * @return this byte vector.
+     * bytes into this byte vector.
+     * @param byteOffset index of the first byte of byteArrayValue that must be copied.
+     * @param byteLength number of bytes of byteArrayValue that must be copied.
      */
-    public ByteVector putByteArray(
+    public void putByteArray(
             final byte[] byteArrayValue, final int byteOffset, final int byteLength) {
         if (length + byteLength > data.length) {
             enlarge(byteLength);
@@ -315,7 +298,6 @@ public class ByteVector {
             System.arraycopy(byteArrayValue, byteOffset, data, length, byteLength);
         }
         length += byteLength;
-        return this;
     }
 
     /**
@@ -326,7 +308,7 @@ public class ByteVector {
     private void enlarge(final int size) {
         int doubleCapacity = 2 * data.length;
         int minimalCapacity = length + size;
-        byte[] newData = new byte[doubleCapacity > minimalCapacity ? doubleCapacity : minimalCapacity];
+        byte[] newData = new byte[Math.max(doubleCapacity, minimalCapacity)];
         System.arraycopy(data, 0, newData, 0, length);
         data = newData;
     }

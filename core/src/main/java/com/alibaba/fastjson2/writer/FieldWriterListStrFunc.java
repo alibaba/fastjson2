@@ -13,7 +13,7 @@ final class FieldWriterListStrFunc<T>
         extends FieldWriter<T> {
     final Function<T, List> function;
 
-    protected FieldWriterListStrFunc(
+    FieldWriterListStrFunc(
             String fieldName,
             int ordinal,
             long features,

@@ -19,7 +19,7 @@ class ObjectReaderImplOptionalDouble
         if (value == null) {
             return OptionalDouble.empty();
         }
-        return OptionalDouble.of(value.doubleValue());
+        return OptionalDouble.of(value);
     }
 
     @Override
@@ -28,6 +28,6 @@ class ObjectReaderImplOptionalDouble
         if (value == null) {
             return OptionalDouble.empty();
         }
-        return OptionalDouble.of(value.doubleValue());
+        return OptionalDouble.of(value);
     }
 }

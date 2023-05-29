@@ -29,8 +29,7 @@ final class JSONWriterUTF16JDK8
         final int strlen = value.length;
 
         boolean escape = false;
-        for (int i = 0; i < strlen; i++) {
-            char c0 = value[i];
+        for (char c0 : value) {
             if (c0 == quote || c0 == '\\' || c0 < ' '
                     || (browserSecure && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'))
                     || (escapeNoneAscii && c0 > 0x007F)

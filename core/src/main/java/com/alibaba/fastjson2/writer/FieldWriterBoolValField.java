@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
 
 final class FieldWriterBoolValField
         extends FieldWriterBoolVal {
-    protected FieldWriterBoolValField(
+    FieldWriterBoolValField(
             String fieldName,
             int ordinal,
             long features,

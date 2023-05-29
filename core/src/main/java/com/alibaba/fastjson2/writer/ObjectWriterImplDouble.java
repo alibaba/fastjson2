@@ -21,7 +21,7 @@ final class ObjectWriterImplDouble
             jsonWriter.writeNull();
             return;
         }
-        jsonWriter.writeDouble(((Double) object).doubleValue());
+        jsonWriter.writeDouble((Double) object);
     }
 
     @Override
@@ -37,7 +37,7 @@ final class ObjectWriterImplDouble
             return;
         }
 
-        jsonWriter.writeDouble(((Double) object).doubleValue());
+        jsonWriter.writeDouble((Double) object);
         if (((jsonWriter.getFeatures() | features) & JSONWriter.Feature.WriteClassName.mask) != 0
                 && fieldType != Double.class && fieldType != double.class) {
             jsonWriter.writeRaw('D');

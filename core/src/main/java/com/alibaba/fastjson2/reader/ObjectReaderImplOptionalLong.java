@@ -19,7 +19,7 @@ class ObjectReaderImplOptionalLong
         if (integer == null) {
             return OptionalLong.empty();
         }
-        return OptionalLong.of(integer.longValue());
+        return OptionalLong.of(integer);
     }
 
     @Override
@@ -28,6 +28,6 @@ class ObjectReaderImplOptionalLong
         if (integer == null) {
             return OptionalLong.empty();
         }
-        return OptionalLong.of(integer.longValue());
+        return OptionalLong.of(integer);
     }
 }

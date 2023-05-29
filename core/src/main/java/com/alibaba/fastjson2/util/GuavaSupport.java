@@ -207,32 +207,31 @@ public class GuavaSupport {
 
     public static Function createConvertFunction(Class objectClass) {
         String instanceTypeName = objectClass.getName();
-        switch (instanceTypeName) {
-            case "com.google.common.collect.ArrayListMultimap":
-                if (CLASS_ARRAYLIST_MULTI_MAP == null) {
-                    CLASS_ARRAYLIST_MULTI_MAP = objectClass;
-                }
+        if (instanceTypeName.equals("com.google.common.collect.ArrayListMultimap")) {
+            if (CLASS_ARRAYLIST_MULTI_MAP == null) {
+                CLASS_ARRAYLIST_MULTI_MAP = objectClass;
+            }
 
-                if (!METHOD_ARRAYLIST_MULTI_MAP_ERROR && FUNC_ARRAYLIST_MULTI_MAP_CREATE == null) {
-                    try {
-                        Method method = CLASS_ARRAYLIST_MULTI_MAP.getMethod("create");
-                        FUNC_ARRAYLIST_MULTI_MAP_CREATE = LambdaMiscCodec.createSupplier(method);
-                    } catch (Throwable ignored) {
-                        METHOD_ARRAYLIST_MULTI_MAP_ERROR = true;
-                    }
+            if (!METHOD_ARRAYLIST_MULTI_MAP_ERROR && FUNC_ARRAYLIST_MULTI_MAP_CREATE == null) {
+                try {
+                    Method method = CLASS_ARRAYLIST_MULTI_MAP.getMethod("create");
+                    FUNC_ARRAYLIST_MULTI_MAP_CREATE = LambdaMiscCodec.createSupplier(method);
+                } catch (Throwable ignored) {
+                    METHOD_ARRAYLIST_MULTI_MAP_ERROR = true;
                 }
+            }
 
-                if (!METHOD_ARRAYLIST_MULTI_MAP_ERROR && METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL == null) {
-                    try {
-                        METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL = CLASS_ARRAYLIST_MULTI_MAP.getMethod("putAll", Object.class, Iterable.class);
-                    } catch (Throwable ignored) {
-                        METHOD_ARRAYLIST_MULTI_MAP_ERROR = true;
-                    }
+            if (!METHOD_ARRAYLIST_MULTI_MAP_ERROR && METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL == null) {
+                try {
+                    METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL = CLASS_ARRAYLIST_MULTI_MAP.getMethod("putAll", Object.class, Iterable.class);
+                } catch (Throwable ignored) {
+                    METHOD_ARRAYLIST_MULTI_MAP_ERROR = true;
                 }
+            }
 
-                if (FUNC_ARRAYLIST_MULTI_MAP_CREATE != null && METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL != null) {
-                    return new ArrayListMultimapConvertFunction(FUNC_ARRAYLIST_MULTI_MAP_CREATE, METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL);
-                }
+            if (FUNC_ARRAYLIST_MULTI_MAP_CREATE != null && METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL != null) {
+                return new ArrayListMultimapConvertFunction(FUNC_ARRAYLIST_MULTI_MAP_CREATE, METHOD_ARRAYLIST_MULTI_MAP_PUT_ALL);
+            }
         }
 
         throw new JSONException("create map error : " + objectClass);
@@ -254,8 +253,7 @@ public class GuavaSupport {
 
             Object multiMap = method.get();
 
-            for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext();) {
-                Map.Entry entry = it.next();
+            for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
                 Object key = entry.getKey();
                 Iterable item = (Iterable) entry.getValue();
 

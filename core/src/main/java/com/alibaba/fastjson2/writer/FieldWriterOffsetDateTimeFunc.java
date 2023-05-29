@@ -11,7 +11,7 @@ final class FieldWriterOffsetDateTimeFunc<T>
         extends FieldWriterObjectFinal<T> {
     final Function function;
 
-    protected FieldWriterOffsetDateTimeFunc(
+    FieldWriterOffsetDateTimeFunc(
             String name,
             int ordinal,
             long features,

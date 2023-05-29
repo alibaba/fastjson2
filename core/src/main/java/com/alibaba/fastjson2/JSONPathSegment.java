@@ -43,11 +43,11 @@ abstract class JSONPathSegment {
     }
 
     public void setInt(JSONPath.Context context, int value) {
-        set(context, Integer.valueOf(value));
+        set(context, value);
     }
 
     public void setLong(JSONPath.Context context, long value) {
-        set(context, Long.valueOf(value));
+        set(context, value);
     }
 
     interface EvalSegment {
@@ -846,8 +846,8 @@ abstract class JSONPathSegment {
 
             if (object instanceof Map) {
                 Map map = (Map) object;
-                for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
-                    Map.Entry entry = (Map.Entry) it.next();
+                for (Object o : map.entrySet()) {
+                    Map.Entry entry = (Map.Entry) o;
                     entry.setValue(value);
                 }
 
@@ -856,9 +856,7 @@ abstract class JSONPathSegment {
 
             if (object instanceof List) {
                 List list = (List) object;
-                for (int i = 0; i < list.size(); i++) {
-                    list.set(i, value);
-                }
+                list.replaceAll(e -> value);
                 return;
             }
 
@@ -880,8 +878,8 @@ abstract class JSONPathSegment {
 
             if (object instanceof Map) {
                 Map map = (Map) object;
-                for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
-                    Map.Entry entry = (Map.Entry) it.next();
+                for (Object o : map.entrySet()) {
+                    Map.Entry entry = (Map.Entry) o;
                     Object value = entry.getValue();
                     Object apply = callback.apply(object, value);
                     if (apply != value) {
@@ -1062,7 +1060,7 @@ abstract class JSONPathSegment {
             extends JSONPathSegment {
         static final SelfSegment INSTANCE = new SelfSegment();
 
-        protected SelfSegment() {
+        private SelfSegment() {
         }
 
         @Override
@@ -1083,7 +1081,7 @@ abstract class JSONPathSegment {
             extends JSONPathSegment {
         static final RootSegment INSTANCE = new RootSegment();
 
-        protected RootSegment() {
+        private RootSegment() {
         }
 
         @Override
@@ -1097,10 +1095,9 @@ abstract class JSONPathSegment {
 
         @Override
         public void eval(JSONPath.Context context) {
-            Object object = context.parent == null
+            context.value = context.parent == null
                     ? context.root
                     : context.parent.root;
-            context.value = object;
         }
     }
 
@@ -1393,7 +1390,6 @@ abstract class JSONPathSegment {
 
             if (jsonReader.ch == '{') {
                 jsonReader.next();
-                _for:
                 for (; ; ) {
                     if (jsonReader.ch == '}') {
                         jsonReader.next();
@@ -1433,7 +1429,7 @@ abstract class JSONPathSegment {
                                 break;
                             }
                             accept(jsonReader, context, values);
-                            continue _for;
+                            continue;
                         case '"':
                         case '\'':
                             val = jsonReader.readString();
@@ -1830,8 +1826,7 @@ abstract class JSONPathSegment {
             if (object instanceof Map) {
                 Map map = (Map) object;
                 JSONArray array = new JSONArray(map.size());
-                for (Iterator<Map.Entry> it = ((Map) object).entrySet().iterator(); it.hasNext(); ) {
-                    Map.Entry entry = it.next();
+                for (Map.Entry entry : (Iterable<Map.Entry>) ((Map) object).entrySet()) {
                     array.add(
                             JSONObject.of("key", entry.getKey(), "value", entry.getValue())
                     );

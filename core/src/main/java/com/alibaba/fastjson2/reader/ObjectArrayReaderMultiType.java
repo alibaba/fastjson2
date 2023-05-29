@@ -104,7 +104,6 @@ final class ObjectArrayReaderMultiType
 
     @Override
     public Object createInstance(Collection collection) {
-        Object[] array = new Object[types.length];
-        return array;
+        return new Object[types.length];
     }
 }

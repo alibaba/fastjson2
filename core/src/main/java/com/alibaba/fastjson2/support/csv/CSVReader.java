@@ -13,8 +13,10 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
@@ -79,7 +81,7 @@ public abstract class CSVReader<T>
     }
 
     public static CSVReader of(File file, Type... types) throws IOException {
-        return new CSVReaderUTF8(new FileInputStream(file), StandardCharsets.UTF_8, types);
+        return new CSVReaderUTF8(Files.newInputStream(file.toPath()), StandardCharsets.UTF_8, types);
     }
 
     public static CSVReader of(File file, ByteArrayValueConsumer consumer) throws IOException {
@@ -93,7 +95,7 @@ public abstract class CSVReader<T>
         ) {
             throw new JSONException("not support charset : " + charset);
         }
-        return new CSVReaderUTF8(new FileInputStream(file), charset, consumer);
+        return new CSVReaderUTF8(Files.newInputStream(file.toPath()), charset, consumer);
     }
 
     public static CSVReader of(File file, CharArrayValueConsumer consumer) throws IOException {
@@ -101,7 +103,7 @@ public abstract class CSVReader<T>
     }
 
     public static CSVReader of(File file, Charset charset, CharArrayValueConsumer consumer) throws IOException {
-        return new CSVReaderUTF16(new InputStreamReader(new FileInputStream(file), charset), consumer);
+        return new CSVReaderUTF16(new InputStreamReader(Files.newInputStream(file.toPath()), charset), consumer);
     }
 
     public static CSVReader of(File file, Charset charset, Type... types) throws IOException {
@@ -111,11 +113,11 @@ public abstract class CSVReader<T>
                 || charset == StandardCharsets.UTF_16BE
         ) {
             return new CSVReaderUTF16(
-                    new InputStreamReader(new FileInputStream(file), charset), types
+                    new InputStreamReader(Files.newInputStream(file.toPath()), charset), types
             );
         }
 
-        return new CSVReaderUTF8(new FileInputStream(file), charset, types);
+        return new CSVReaderUTF8(Files.newInputStream(file.toPath()), charset, types);
     }
 
     public static <T> CSVReader<T> of(File file, Class<T> objectClass) throws IOException {
@@ -129,14 +131,14 @@ public abstract class CSVReader<T>
                 || charset == StandardCharsets.UTF_16BE) {
             return new CSVReaderUTF16(
                     new InputStreamReader(
-                            new FileInputStream(file),
+                            Files.newInputStream(file.toPath()),
                             charset
                     ),
                     objectClass
             );
         }
 
-        return new CSVReaderUTF8(new FileInputStream(file), charset, objectClass);
+        return new CSVReaderUTF8(Files.newInputStream(file.toPath()), charset, objectClass);
     }
 
     public static CSVReader of(InputStream in, Type... types) throws IOException {
@@ -162,7 +164,7 @@ public abstract class CSVReader<T>
         return new CSVReaderUTF8(in, charset, objectClass);
     }
 
-    public static CSVReader of(InputStream in, Charset charset, Type... types) throws IOException {
+    public static CSVReader of(InputStream in, Charset charset, Type... types) {
         if (JDKUtils.JVM_VERSION == 8
                 || charset == StandardCharsets.UTF_16
                 || charset == StandardCharsets.UTF_16LE
@@ -175,7 +177,7 @@ public abstract class CSVReader<T>
         return new CSVReaderUTF8(in, charset, types);
     }
 
-    public static CSVReader of(Reader in, Type... types) throws IOException {
+    public static CSVReader of(Reader in, Type... types) {
         return new CSVReaderUTF16(in, types);
     }
 
@@ -298,9 +300,9 @@ public abstract class CSVReader<T>
 
         this.columns = Arrays.asList(columns);
         this.columnStats = new ArrayList<>();
-        for (int i = 0; i < columns.length; i++) {
-            this.columnStats.add(new ColumnStat(columns[i]));
-        }
+        IntStream.range(0, columns.length).forEach(
+                i -> this.columnStats.add(new ColumnStat(columns[i]))
+        );
 
         if (rowCount == 1) {
             rowCount = lineTerminated ? 0 : -1;

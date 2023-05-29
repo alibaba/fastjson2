@@ -43,11 +43,7 @@ final class ObjectArrayTypedReader
         if (jsonReader.nextIfMatch('[')) {
             Object[] values = (Object[]) Array.newInstance(componentType, 16);
             int size = 0;
-            for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
-                    break;
-                }
-
+            while (!jsonReader.nextIfMatch(']')) {
                 int minCapacity = size + 1;
                 if (minCapacity - values.length > 0) {
                     int oldCapacity = values.length;
@@ -147,9 +143,7 @@ final class ObjectArrayTypedReader
                 }
             }
 
-            if (componentType.isInstance(item)) {
-                values[index++] = item;
-            } else {
+            if (!componentType.isInstance(item)) {
                 ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(componentType);
                 if (item instanceof Map) {
                     item = objectReader.createInstance((Map) item);
@@ -170,8 +164,8 @@ final class ObjectArrayTypedReader
                         throw new JSONException("component type not match, expect " + componentType.getName() + ", but " + itemClass);
                     }
                 }
-                values[index++] = item;
             }
+            values[index++] = item;
         }
         return values;
     }

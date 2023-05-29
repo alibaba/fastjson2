@@ -9,7 +9,7 @@ final class FieldWriterInt8ValFunc
         extends FieldWriterInt8 {
     final ToByteFunction function;
 
-    protected FieldWriterInt8ValFunc(
+    FieldWriterInt8ValFunc(
             String fieldName,
             int ordinal,
             long features,

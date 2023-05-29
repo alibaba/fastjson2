@@ -200,18 +200,7 @@ public class ObjectWriterCreatorASM
         boolean record = BeanUtils.isRecord(objectClass);
 
         List<FieldWriter> fieldWriters;
-        if (fieldBased && !record) {
-            Map<String, FieldWriter> fieldWriterMap = new LinkedHashMap<>();
-            final FieldInfo fieldInfo = new FieldInfo();
-            BeanUtils.declaredFields(objectClass, field -> {
-                fieldInfo.init();
-                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
-                if (fieldWriter != null) {
-                    fieldWriterMap.put(fieldWriter.fieldName, fieldWriter);
-                }
-            });
-            fieldWriters = new ArrayList<>(fieldWriterMap.values());
-        } else {
+        if (!fieldBased || record) {
             Map<String, FieldWriter> fieldWriterMap = new LinkedHashMap<>();
             List<FieldWriter> fieldWriterList = new ArrayList<>();
             boolean fieldWritersCreated = false;
@@ -339,9 +328,9 @@ public class ObjectWriterCreatorASM
                                     method,
                                     writeUsingWriter
                             );
-                        } catch (Throwable ignored) {
+                        } catch (Throwable e) {
                             jitErrorCount.incrementAndGet();
-                            jitErrorLast = ignored;
+                            jitErrorLast = e;
                         }
                     }
                     if (fieldWriter == null) {
@@ -365,6 +354,17 @@ public class ObjectWriterCreatorASM
                     }
                 });
             }
+            fieldWriters = new ArrayList<>(fieldWriterMap.values());
+        } else {
+            Map<String, FieldWriter> fieldWriterMap = new LinkedHashMap<>();
+            final FieldInfo fieldInfo = new FieldInfo();
+            BeanUtils.declaredFields(objectClass, field -> {
+                fieldInfo.init();
+                FieldWriter fieldWriter = creteFieldWriter(objectClass, writerFieldFeatures, provider, beanInfo, fieldInfo, field);
+                if (fieldWriter != null) {
+                    fieldWriterMap.put(fieldWriter.fieldName, fieldWriter);
+                }
+            });
             fieldWriters = new ArrayList<>(fieldWriterMap.values());
         }
 
@@ -2618,12 +2618,11 @@ public class ObjectWriterCreatorASM
             );
         }
 
-        int LIST = FIELD_VALUE;
         int LIST_SIZE = mwc.var("LIST_SIZE");
         int LIST_ITEM = mwc.var("LIST_ITEM");
         int J = mwc.var("J");
 
-        mw.visitVarInsn(Opcodes.ALOAD, LIST);
+        mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
         mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/List", "size", "()I", true);
         mw.visitVarInsn(Opcodes.ISTORE, LIST_SIZE);
 
@@ -2654,7 +2653,7 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(notFirst_);
         }
 
-        mw.visitVarInsn(Opcodes.ALOAD, LIST);
+        mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
         mw.visitVarInsn(Opcodes.ILOAD, J);
         mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/List", "get", "(I)Ljava/lang/Object;", true);
         mw.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/String"); // cast
@@ -3243,7 +3242,7 @@ public class ObjectWriterCreatorASM
                     Opcodes.ACC_PUBLIC,
                     fieldWriter(i),
                     DESC_FIELD_WRITER
-            ).visitEnd();
+            );
         }
     }
 

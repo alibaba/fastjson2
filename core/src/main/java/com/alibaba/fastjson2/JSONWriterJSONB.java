@@ -36,7 +36,7 @@ final class JSONWriterJSONB
     private TLongIntHashMap symbols;
     private int symbolIndex;
 
-    protected long rootTypeNameHash;
+    private long rootTypeNameHash;
 
     JSONWriterJSONB(Context ctx, SymbolTable symbolTable) {
         super(ctx, symbolTable, true, StandardCharsets.UTF_8);
@@ -293,8 +293,7 @@ final class JSONWriterJSONB
             }
 
             bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
-            for (int i = 0; i < chars.length; i++) {
-                char ch = chars[i];
+            for (char ch : chars) {
                 if (ch > 0x00FF) {
                     ascii = false;
                     break;
@@ -351,8 +350,8 @@ final class JSONWriterJSONB
             } else {
                 off += putStringSizeLarge(bytes, off, strlen);
             }
-            for (int i = 0; i < chars.length; i++) {
-                bytes[off++] = (byte) chars[i];
+            for (char aChar : chars) {
+                bytes[off++] = (byte) aChar;
             }
         } else {
             int maxSize = chars.length * 3;
@@ -456,8 +455,8 @@ final class JSONWriterJSONB
                 bytes[this.off++] = BC_STR_ASCII;
                 writeInt32(len);
             }
-            for (int i = 0; i < chars.length; i++) {
-                bytes[this.off++] = (byte) chars[i];
+            for (char aChar : chars) {
+                bytes[this.off++] = (byte) aChar;
             }
         } else {
             int maxSize = chars.length * 3;
@@ -490,10 +489,9 @@ final class JSONWriterJSONB
         }
 
         startArray(strings.length);
-        for (int i = 0; i < strings.length; i++) {
-            String item = strings[i];
+        for (String item : strings) {
             if (item == null) {
-                if (isEnabled(JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) {
+                if (isEnabled(Feature.NullAsDefaultValue.mask | Feature.WriteNullStringAsEmpty.mask)) {
                     writeString("");
                 } else {
                     writeNull();
@@ -961,8 +959,7 @@ final class JSONWriterJSONB
             off += writeInt32(bytes, off + 1, size) + 1;
         }
 
-        for (int i = 0; i < value.length; i++) {
-            long val = value[i];
+        for (long val : value) {
             if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
                 bytes[off++] = (byte) val;
                 continue;
@@ -1042,8 +1039,8 @@ final class JSONWriterJSONB
             return;
         }
         startArray(value.length);
-        for (int i = 0; i < value.length; i++) {
-            writeFloat(value[i]);
+        for (float v : value) {
+            writeFloat(v);
         }
         endArray();
     }
@@ -1092,8 +1089,8 @@ final class JSONWriterJSONB
             return;
         }
         startArray(value.length);
-        for (int i = 0; i < value.length; i++) {
-            writeDouble(value[i]);
+        for (double v : value) {
+            writeDouble(v);
         }
         endArray();
     }
@@ -1105,8 +1102,8 @@ final class JSONWriterJSONB
             return;
         }
         startArray(value.length);
-        for (int i = 0; i < value.length; i++) {
-            writeInt32(value[i]);
+        for (short item : value) {
+            writeInt32(item);
         }
         endArray();
     }
@@ -1136,9 +1133,7 @@ final class JSONWriterJSONB
             ensureCapacity(minCapacity);
         }
 
-        for (int i = 0; i < values.length; i++) {
-            int val = values[i];
-
+        for (int val : values) {
             if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
                 bytes[off++] = (byte) val;
                 continue;
@@ -1463,13 +1458,10 @@ final class JSONWriterJSONB
 
         ZoneId zoneId = dateTime.getZone();
         String zoneIdStr = zoneId.getId();
-        switch (zoneIdStr) {
-            case SHANGHAI_ZONE_ID_NAME:
-                writeRaw(SHANGHAI_ZONE_ID_NAME_BYTES);
-                break;
-            default:
-                writeString(zoneIdStr);
-                break;
+        if (zoneIdStr.equals(SHANGHAI_ZONE_ID_NAME)) {
+            writeRaw(SHANGHAI_ZONE_ID_NAME_BYTES);
+        } else {
+            writeString(zoneIdStr);
         }
     }
 
@@ -1500,13 +1492,10 @@ final class JSONWriterJSONB
 
         ZoneId zoneId = dateTime.getOffset();
         String zoneIdStr = zoneId.getId();
-        switch (zoneIdStr) {
-            case OFFSET_8_ZONE_ID_NAME:
-                writeRaw(OFFSET_8_ZONE_ID_NAME_BYTES);
-                break;
-            default:
-                writeString(zoneIdStr);
-                break;
+        if (zoneIdStr.equals(OFFSET_8_ZONE_ID_NAME)) {
+            writeRaw(OFFSET_8_ZONE_ID_NAME_BYTES);
+        } else {
+            writeString(zoneIdStr);
         }
     }
 
@@ -1616,8 +1605,7 @@ final class JSONWriterJSONB
             if (scale == 0) {
                 ensureCapacity(off + 1);
                 this.bytes[off++] = BC_DECIMAL_LONG;
-                long longValue = intCompact;
-                writeInt64(longValue);
+                writeInt64(intCompact);
                 return;
             }
 
@@ -1673,8 +1661,8 @@ final class JSONWriterJSONB
         }
 
         startArray(value.length);
-        for (int i = 0; i < value.length; i++) {
-            writeBool(value[i]);
+        for (boolean b : value) {
+            writeBool(b);
         }
         endArray();
     }
@@ -1843,8 +1831,7 @@ final class JSONWriterJSONB
         }
 
         startObject();
-        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = it.next();
+        for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             writeAny(entry.getKey());
             writeAny(entry.getValue());
         }
@@ -1859,8 +1846,7 @@ final class JSONWriterJSONB
         }
 
         startObject();
-        for (Iterator<Map.Entry<String, Object>> it = object.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = it.next();
+        for (Map.Entry entry : object.entrySet()) {
             writeAny(entry.getKey());
             writeAny(entry.getValue());
         }
@@ -1891,7 +1877,7 @@ final class JSONWriterJSONB
     }
 
     @Override
-    public int flushTo(OutputStream out, Charset charset) throws IOException {
+    public int flushTo(OutputStream out, Charset charset) {
         throw new JSONException("UnsupportedOperation");
     }
 

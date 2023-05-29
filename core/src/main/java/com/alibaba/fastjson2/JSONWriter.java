@@ -22,7 +22,6 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
-import static com.alibaba.fastjson2.JSONWriter.Feature.NotWriteDefaultValue;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public abstract class JSONWriter
@@ -365,15 +364,12 @@ public abstract class JSONWriter
     }
 
     private static boolean isWriteTypeInfoGenericArray(GenericArrayType fieldType, Class objectClass) {
-        GenericArrayType genericArrayType = fieldType;
-        Type componentType = genericArrayType.getGenericComponentType();
+        Type componentType = fieldType.getGenericComponentType();
         if (componentType instanceof ParameterizedType) {
             componentType = ((ParameterizedType) componentType).getRawType();
         }
         if (objectClass.isArray()) {
-            if (objectClass.getComponentType().equals(componentType)) {
-                return true;
-            }
+            return objectClass.getComponentType().equals(componentType);
         }
         return false;
     }
@@ -953,7 +949,7 @@ public abstract class JSONWriter
         if (value == null) {
             writeNumberNull();
         } else {
-            writeDouble(value.floatValue());
+            writeDouble(value);
         }
     }
 
@@ -1311,12 +1307,12 @@ public abstract class JSONWriter
 
         write0('{');
         boolean first = true;
-        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
+        for (Map.Entry o : (Iterable<Map.Entry>) map.entrySet()) {
             if (!first) {
                 write0(',');
             }
 
-            Map.Entry next = it.next();
+            Map.Entry next = o;
             writeAny(
                     next.getKey());
             write0(':');
@@ -1369,7 +1365,7 @@ public abstract class JSONWriter
     public abstract int flushTo(OutputStream out, Charset charset) throws IOException;
 
     public static final class Context {
-        static ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
+        static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
 
         public final ObjectWriterProvider provider;
         DateTimeFormatter dateFormatter;
@@ -1418,8 +1414,8 @@ public abstract class JSONWriter
                 setDateFormat(format);
             }
 
-            for (int i = 0; i < features.length; i++) {
-                this.features |= features[i].mask;
+            for (Feature feature : features) {
+                this.features |= feature.mask;
             }
         }
 
@@ -1427,8 +1423,8 @@ public abstract class JSONWriter
             this.features = defaultWriterFeatures;
             this.provider = JSONFactory.getDefaultObjectWriterProvider();
 
-            for (int i = 0; i < features.length; i++) {
-                this.features |= features[i].mask;
+            for (Feature feature : features) {
+                this.features |= feature.mask;
             }
 
             if (format == null) {
@@ -1447,8 +1443,8 @@ public abstract class JSONWriter
             this.features = defaultWriterFeatures;
             this.provider = provider;
 
-            for (int i = 0; i < features.length; i++) {
-                this.features |= features[i].mask;
+            for (Feature feature : features) {
+                this.features |= feature.mask;
             }
 
             String format = defaultWriterFormat;
@@ -1470,8 +1466,8 @@ public abstract class JSONWriter
         }
 
         public void config(Feature... features) {
-            for (int i = 0; i < features.length; i++) {
-                this.features |= features[i].mask;
+            for (Feature feature : features) {
+                this.features |= feature.mask;
             }
         }
 
@@ -2036,7 +2032,7 @@ public abstract class JSONWriter
 
                                         buf[off++] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
                                         buf[off++] = (byte) (0x80 | ((ch >> 6) & 0x3F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+                                        buf[off++] = (byte) (0x80 | ((ch) & 0x3F));
                                     } else {
                                         if (off + 1 >= buf.length) {
                                             int newCapacity = buf.length + (buf.length >> 1);
@@ -2045,7 +2041,7 @@ public abstract class JSONWriter
                                         ascii = false;
 
                                         buf[off++] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+                                        buf[off++] = (byte) (0x80 | ((ch) & 0x3F));
                                     }
                                     break;
                             }
@@ -2147,7 +2143,7 @@ public abstract class JSONWriter
 
                                         buf[off++] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
                                         buf[off++] = (byte) (0x80 | ((ch >> 6) & 0x3F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+                                        buf[off++] = (byte) (0x80 | ((ch) & 0x3F));
                                     } else {
                                         if (off + 1 >= buf.length) {
                                             int newCapacity = buf.length + (buf.length >> 1);
@@ -2156,7 +2152,7 @@ public abstract class JSONWriter
                                         ascii = false;
 
                                         buf[off++] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+                                        buf[off++] = (byte) (0x80 | ((ch) & 0x3F));
                                     }
                                     break;
                             }

@@ -30,10 +30,7 @@ public class ObjectReaderMisc
             int port = 0;
 
             jsonReader.nextIfObjectStart();
-            for (;;) {
-                if (jsonReader.nextIfObjectEnd()) {
-                    break;
-                }
+            while (!jsonReader.nextIfObjectEnd()) {
                 long nameHashCode = jsonReader.readFieldNameHashCode();
                 if (nameHashCode == HASH_ADDRESS) {
                     inetAddress = jsonReader.read(InetAddress.class);

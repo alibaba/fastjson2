@@ -14,7 +14,7 @@ final class ObjectWriterImplInt32
             jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeInt32(((Integer) object).intValue());
+        jsonWriter.writeInt32((Integer) object);
     }
 
     @Override
@@ -23,6 +23,6 @@ final class ObjectWriterImplInt32
             jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeInt32(((Integer) object).intValue());
+        jsonWriter.writeInt32((Integer) object);
     }
 }

@@ -76,15 +76,12 @@ public class IOUtils {
 
         // Fall thru to fast mode for smaller numbers
         // assert(i <= 65536, i);
-        for (; ; ) {
+        do {
             q = (i * 52429) >>> (16 + 3);
             r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
             buf[--p] = DIGITS[r];
             i = q;
-            if (i == 0) {
-                break;
-            }
-        }
+        } while (i != 0);
         if (sign != 0) {
             buf[--p] = sign;
         }
@@ -110,15 +107,12 @@ public class IOUtils {
 
         // Fall thru to fast mode for smaller numbers
         // assert(i <= 65536, i);
-        for (; ; ) {
+        do {
             q = (i * 52429) >>> (16 + 3);
             r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
             buf[--p] = (char) DIGITS[r];
             i = q;
-            if (i == 0) {
-                break;
-            }
-        }
+        } while (i != 0);
         if (sign != 0) {
             buf[--p] = sign;
         }
@@ -159,15 +153,12 @@ public class IOUtils {
 
         // Fall thru to fast mode for smaller numbers
         // assert(i2 <= 65536, i2);
-        for (; ; ) {
+        do {
             q2 = (i2 * 52429) >>> (16 + 3);
             r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
             buf[--charPos] = DIGITS[r];
             i2 = q2;
-            if (i2 == 0) {
-                break;
-            }
-        }
+        } while (i2 != 0);
         if (sign != 0) {
             buf[--charPos] = sign;
         }
@@ -208,15 +199,12 @@ public class IOUtils {
 
         // Fall thru to fast mode for smaller numbers
         // assert(i2 <= 65536, i2);
-        for (; ; ) {
+        do {
             q2 = (i2 * 52429) >>> (16 + 3);
             r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
             buf[--charPos] = (char) DIGITS[r];
             i2 = q2;
-            if (i2 == 0) {
-                break;
-            }
-        }
+        } while (i2 != 0);
         if (sign != 0) {
             buf[--charPos] = sign;
         }
@@ -306,7 +294,7 @@ public class IOUtils {
             if (b1 == 0 && b0 >= 0) {
                 dst[dp++] = b0;
             } else {
-                char c = (char) (((b0 & 0xff) << 0) | ((b1 & 0xff) << 8));
+                char c = (char) (((b0 & 0xff)) | ((b1 & 0xff) << 8));
                 if (c < 0x800) {
                     // 2 bytes, 11 bits
                     dst[dp] = (byte) (0xc0 | (c >> 6));
@@ -321,7 +309,7 @@ public class IOUtils {
                         } else {
                             b0 = src[ip + 1];
                             b1 = src[ip + 2];
-                            char d = (char) (((b0 & 0xff) << 0) | ((b1 & 0xff) << 8));
+                            char d = (char) (((b0 & 0xff)) | ((b1 & 0xff) << 8));
                             // d >= '\uDC00' && d < ('\uDFFF' + 1)
                             if (d >= '\uDC00' && d < ('\uDFFF' + 1)) { // Character.isLowSurrogate(d)
                                 offset += 2;
@@ -502,7 +490,7 @@ public class IOUtils {
                     } else {
                         char c = (char) (((b0 << 6) ^ b1) ^
                                 (((byte) 0xC0 << 6) ^
-                                        ((byte) 0x80 << 0)));
+                                        ((byte) 0x80)));
                         dst[dp] = (byte) c;
                         dst[dp + 1] = (byte) (c >> 8);
                         dp += 2;
@@ -529,7 +517,7 @@ public class IOUtils {
                                         (b1 << 6) ^
                                         (b2 ^ (((byte) 0xE0 << 12) ^
                                                 ((byte) 0x80 << 6) ^
-                                                ((byte) 0x80 << 0)))
+                                                ((byte) 0x80)))
                                 );
                         boolean isSurrogate = c >= '\uD800' && c < ('\uDFFF' + 1);
                         if (isSurrogate) {
@@ -557,7 +545,7 @@ public class IOUtils {
                                     (((byte) 0xF0 << 18) ^
                                             ((byte) 0x80 << 12) ^
                                             ((byte) 0x80 << 6) ^
-                                            ((byte) 0x80 << 0))));
+                                            ((byte) 0x80))));
                     if (((b2 & 0xc0) != 0x80 || (b3 & 0xc0) != 0x80 || (b4 & 0xc0) != 0x80) // isMalformed4
                             ||
                             // shortest form check
@@ -609,7 +597,7 @@ public class IOUtils {
                     } else {
                         dst[dp++] = (char) (((b1 << 6) ^ b2) ^
                                 (((byte) 0xC0 << 6) ^
-                                        ((byte) 0x80 << 0)));
+                                        ((byte) 0x80)));
                     }
                     continue;
                 }
@@ -630,7 +618,7 @@ public class IOUtils {
                                 (b3 ^
                                         (((byte) 0xE0 << 12) ^
                                                 ((byte) 0x80 << 6) ^
-                                                ((byte) 0x80 << 0))));
+                                                ((byte) 0x80))));
                         boolean isSurrogate = c >= '\uD800' && c < ('\uDFFF' + 1);
                         if (isSurrogate) {
                             return -1;
@@ -655,7 +643,7 @@ public class IOUtils {
                                     (((byte) 0xF0 << 18) ^
                                             ((byte) 0x80 << 12) ^
                                             ((byte) 0x80 << 6) ^
-                                            ((byte) 0x80 << 0))));
+                                            ((byte) 0x80))));
                     if (((b2 & 0xc0) != 0x80 || (b3 & 0xc0) != 0x80 || (b4 & 0xc0) != 0x80) // isMalformed4
                             ||
                             // shortest form check
@@ -897,9 +885,7 @@ public class IOUtils {
         long i;
         if (value < 0) {
             if (value == Long.MIN_VALUE) {
-                for (int x = 0; x < MIN_LONG.length; x++) {
-                    buf[pos + x] = MIN_LONG[x];
-                }
+                System.arraycopy(MIN_LONG, 0, buf, pos + 0, MIN_LONG.length);
                 return pos + MIN_LONG.length;
             }
             i = -value;

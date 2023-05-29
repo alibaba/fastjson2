@@ -286,13 +286,13 @@ class FieldReaderObjectField<T>
             }
         } else if (fieldClass == char.class) {
             if (value instanceof Character) {
-                char charValue = ((Character) value).charValue();
+                char charValue = (Character) value;
                 accept(object, charValue);
                 return;
             }
         } else if (fieldClass == boolean.class) {
             if (value instanceof Boolean) {
-                boolean booleanValue = ((Boolean) value).booleanValue();
+                boolean booleanValue = (Boolean) value;
                 accept(object, booleanValue);
                 return;
             }

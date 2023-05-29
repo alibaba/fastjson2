@@ -31,7 +31,7 @@ public abstract class FieldWriter<T>
     public final String label;
     public final Field field;
     public final Method method;
-    protected long fieldOffset;
+    protected final long fieldOffset;
     protected final boolean primitive;
 
     final long hashCode;
@@ -139,10 +139,10 @@ public abstract class FieldWriter<T>
                 // 2 bytes, 11 bits
                 bytes[off++] = (byte) (0xE0 | ((c >> 12) & 0x0F));
                 bytes[off++] = (byte) (0x80 | ((c >> 6) & 0x3F));
-                bytes[off++] = (byte) (0x80 | ((c >> 0) & 0x3F));
+                bytes[off++] = (byte) (0x80 | ((c) & 0x3F));
             } else {
                 bytes[off++] = (byte) (0xC0 | ((c >> 6) & 0x1F));
-                bytes[off++] = (byte) (0x80 | ((c >> 0) & 0x3F));
+                bytes[off++] = (byte) (0x80 | ((c) & 0x3F));
             }
         }
         bytes[off++] = '"';
@@ -296,9 +296,7 @@ public abstract class FieldWriter<T>
             return 1;
         }
 
-        String thisName = this.fieldName;
-        String otherName = other.fieldName;
-        int nameCompare = thisName.compareTo(otherName);
+        int nameCompare = this.fieldName.compareTo(other.fieldName);
 
         if (nameCompare != 0) {
             return nameCompare;
@@ -545,7 +543,7 @@ public abstract class FieldWriter<T>
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeDouble(value.doubleValue());
+        jsonWriter.writeDouble(value);
     }
 
     public void writeDate(JSONWriter jsonWriter, boolean writeFieldName, Date value) {

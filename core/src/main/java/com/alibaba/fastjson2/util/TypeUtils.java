@@ -261,7 +261,6 @@ public class TypeUtils {
             int nLeadZero = 0;
             int nTrailZero = 0;
 
-            skipLeadingZerosLoop:
             while (i < end) {
                 c = in[i];
                 if (c == '0') {
@@ -276,11 +275,11 @@ public class TypeUtils {
                     }
                     decSeen = true;
                 } else {
-                    break skipLeadingZerosLoop;
+                    break;
                 }
                 i++;
             }
-            digitLoop:
+
             while (i < end) {
                 c = in[i];
                 if (c >= '1' && c <= '9') {
@@ -299,7 +298,7 @@ public class TypeUtils {
                     }
                     decSeen = true;
                 } else {
-                    break digitLoop;
+                    break;
                 }
                 i++;
             }
@@ -327,7 +326,6 @@ public class TypeUtils {
                         i++;
                 }
                 int expAt = i;
-                expLoop:
                 while (i < end) {
                     if (expVal >= reallyBig) {
                         expOverflow = true;
@@ -337,7 +335,7 @@ public class TypeUtils {
                         expVal = expVal * 10 + ((int) c - (int) '0');
                     } else {
                         i--;           // back up.
-                        break expLoop; // stop parsing exponent.
+                        break; // stop parsing exponent.
                     }
                 }
                 final int BIG_DECIMAL_EXPONENT = 324;
@@ -360,7 +358,8 @@ public class TypeUtils {
                 return 0;
             }
             return doubleValue(isNegative, decExp, digits, nDigits);
-        } catch (StringIndexOutOfBoundsException e) {
+        } catch (StringIndexOutOfBoundsException ignored) {
+            // ignored
         }
         throw new NumberFormatException("For input string: \"" + new String(in, off, len) + "\"");
     }
@@ -395,7 +394,6 @@ public class TypeUtils {
             int nLeadZero = 0;
             int nTrailZero = 0;
 
-            skipLeadingZerosLoop:
             while (i < end) {
                 c = in[i];
                 if (c == '0') {
@@ -410,11 +408,11 @@ public class TypeUtils {
                     }
                     decSeen = true;
                 } else {
-                    break skipLeadingZerosLoop;
+                    break;
                 }
                 i++;
             }
-            digitLoop:
+
             while (i < end) {
                 c = in[i];
                 if (c >= '1' && c <= '9') {
@@ -433,7 +431,7 @@ public class TypeUtils {
                     }
                     decSeen = true;
                 } else {
-                    break digitLoop;
+                    break;
                 }
                 i++;
             }
@@ -461,7 +459,7 @@ public class TypeUtils {
                         i++;
                 }
                 int expAt = i;
-                expLoop:
+
                 while (i < end) {
                     if (expVal >= reallyBig) {
                         expOverflow = true;
@@ -471,7 +469,7 @@ public class TypeUtils {
                         expVal = expVal * 10 + ((int) c - (int) '0');
                     } else {
                         i--;           // back up.
-                        break expLoop; // stop parsing exponent.
+                        break; // stop parsing exponent.
                     }
                 }
                 final int BIG_DECIMAL_EXPONENT = 324;
@@ -494,7 +492,8 @@ public class TypeUtils {
                 return 0;
             }
             return doubleValue(isNegative, decExp, digits, nDigits);
-        } catch (StringIndexOutOfBoundsException e) {
+        } catch (StringIndexOutOfBoundsException ignored) {
+            // ignored
         }
         throw new NumberFormatException("For input string: \"" + new String(in, off, len) + "\"");
     }
@@ -529,7 +528,6 @@ public class TypeUtils {
             int nLeadZero = 0;
             int nTrailZero = 0;
 
-            skipLeadingZerosLoop:
             while (i < end) {
                 c = in[i];
                 if (c == '0') {
@@ -544,11 +542,11 @@ public class TypeUtils {
                     }
                     decSeen = true;
                 } else {
-                    break skipLeadingZerosLoop;
+                    break;
                 }
                 i++;
             }
-            digitLoop:
+
             while (i < end) {
                 c = in[i];
                 if (c >= '1' && c <= '9') {
@@ -567,7 +565,7 @@ public class TypeUtils {
                     }
                     decSeen = true;
                 } else {
-                    break digitLoop;
+                    break;
                 }
                 i++;
             }
@@ -595,7 +593,7 @@ public class TypeUtils {
                         i++;
                 }
                 int expAt = i;
-                expLoop:
+
                 while (i < end) {
                     if (expVal >= reallyBig) {
                         expOverflow = true;
@@ -605,7 +603,7 @@ public class TypeUtils {
                         expVal = expVal * 10 + ((int) c - (int) '0');
                     } else {
                         i--;           // back up.
-                        break expLoop; // stop parsing exponent.
+                        break; // stop parsing exponent.
                     }
                 }
                 final int BIG_DECIMAL_EXPONENT = 324;
@@ -628,7 +626,8 @@ public class TypeUtils {
                 return 0;
             }
             return floatValue(isNegative, decExp, digits, nDigits);
-        } catch (StringIndexOutOfBoundsException e) {
+        } catch (StringIndexOutOfBoundsException ignored) {
+            // ignored
         }
         throw new NumberFormatException("For input string: \"" + new String(in, off, len) + "\"");
     }
@@ -663,7 +662,6 @@ public class TypeUtils {
             int nLeadZero = 0;
             int nTrailZero = 0;
 
-            skipLeadingZerosLoop:
             while (i < end) {
                 c = in[i];
                 if (c == '0') {
@@ -678,11 +676,11 @@ public class TypeUtils {
                     }
                     decSeen = true;
                 } else {
-                    break skipLeadingZerosLoop;
+                    break;
                 }
                 i++;
             }
-            digitLoop:
+
             while (i < end) {
                 c = in[i];
                 if (c >= '1' && c <= '9') {
@@ -701,7 +699,7 @@ public class TypeUtils {
                     }
                     decSeen = true;
                 } else {
-                    break digitLoop;
+                    break;
                 }
                 i++;
             }
@@ -729,7 +727,6 @@ public class TypeUtils {
                         i++;
                 }
                 int expAt = i;
-                expLoop:
                 while (i < end) {
                     if (expVal >= reallyBig) {
                         expOverflow = true;
@@ -739,7 +736,7 @@ public class TypeUtils {
                         expVal = expVal * 10 + ((int) c - (int) '0');
                     } else {
                         i--;           // back up.
-                        break expLoop; // stop parsing exponent.
+                        break; // stop parsing exponent.
                     }
                 }
                 final int BIG_DECIMAL_EXPONENT = 324;
@@ -762,7 +759,8 @@ public class TypeUtils {
                 return 0;
             }
             return floatValue(isNegative, decExp, digits, nDigits);
-        } catch (StringIndexOutOfBoundsException e) {
+        } catch (StringIndexOutOfBoundsException ignored) {
+            // ignored
         }
         throw new NumberFormatException("For input string: \"" + new String(in, off, len) + "\"");
     }
@@ -786,7 +784,7 @@ public class TypeUtils {
         for (int i = 1; i < iDigits; i++) {
             iValue = iValue * 10 + (int) digits[i] - (int) '0';
         }
-        long lValue = (long) iValue;
+        long lValue = iValue;
         for (int i = iDigits; i < kDigits; i++) {
             lValue = lValue * 10L + (long) ((int) digits[i] - (int) '0');
         }
@@ -885,7 +883,6 @@ public class TypeUtils {
         FDBigInteger bigD = null;
         int prevD2 = 0;
 
-        correctionLoop:
         while (true) {
             // here ieeeBits can't be NaN, Infinity or zero
             int binexp = (int) (ieeeBits >>> EXP_SHIFT);
@@ -966,20 +963,20 @@ public class TypeUtils {
             } else {
                 // the candidate is exactly right!
                 // this happens with surprising frequency
-                break correctionLoop;
+                break;
             }
             cmpResult = diff.cmpPow52(B5, Ulp2);
             if ((cmpResult) < 0) {
                 // difference is small.
                 // this is close enough
-                break correctionLoop;
+                break;
             } else if (cmpResult == 0) {
                 // difference is exactly half an ULP
                 // round to some other value maybe, then finish
                 if ((ieeeBits & 1) != 0) { // half ties to even
                     ieeeBits += overvalue ? -1 : 1; // nextDown or nextUp
                 }
-                break correctionLoop;
+                break;
             } else {
                 // difference is non-trivial.
                 // could scale addend by ratio of difference to
@@ -988,7 +985,7 @@ public class TypeUtils {
                 ieeeBits += overvalue ? -1 : 1; // nextDown or nextUp
                 final long DOUBLE_EXP_BIT_MASK = 0x7FF0000000000000L;
                 if (ieeeBits == 0 || ieeeBits == DOUBLE_EXP_BIT_MASK) { // 0.0 or Double.POSITIVE_INFINITY
-                    break correctionLoop; // oops. Fell off end of range.
+                    break; // oops. Fell off end of range.
                 }
                 continue; // try again.
             }
@@ -1037,7 +1034,7 @@ public class TypeUtils {
                 }
             }
         } else if ((decExponent >= nDigits) && (nDigits + decExponent <= MAX_DECIMAL_DIGITS)) {
-            long lValue = (long) iValue;
+            long lValue = iValue;
             for (int i = kDigits; i < nDigits; i++) {
                 lValue = lValue * 10L + (long) ((int) digits[i] - (int) '0');
             }
@@ -1099,7 +1096,6 @@ public class TypeUtils {
         FDBigInteger bigD = null;
         int prevD2 = 0;
 
-        correctionLoop:
         while (true) {
             // here ieeeBits can't be NaN, Infinity or zero
             int binexp = ieeeBits >>> SINGLE_EXP_SHIFT;
@@ -1168,23 +1164,22 @@ public class TypeUtils {
                 overvalue = false; // our candidate is too small.
                 diff = bigD.rightInplaceSub(bigB); // bigB is not user further - reuse
             } else {
-                break correctionLoop;
+                break;
             }
             cmpResult = diff.cmpPow52(B5, Ulp2);
             if ((cmpResult) < 0) {
-                break correctionLoop;
+                break;
             } else if (cmpResult == 0) {
                 if ((ieeeBits & 1) != 0) { // half ties to even
                     ieeeBits += overvalue ? -1 : 1; // nextDown or nextUp
                 }
-                break correctionLoop;
+                break;
             } else {
                 ieeeBits += overvalue ? -1 : 1; // nextDown or nextUp
                 final int FLOAT_EXP_BIT_MASK = 0x7F800000;
                 if (ieeeBits == 0 || ieeeBits == FLOAT_EXP_BIT_MASK) { // 0.0 or Float.POSITIVE_INFINITY
-                    break correctionLoop; // oops. Fell off end of range.
+                    break; // oops. Fell off end of range.
                 }
-                continue; // try again.
             }
         }
         if (isNegative) {
@@ -1479,7 +1474,7 @@ public class TypeUtils {
 
         if (targetClass.isEnum()) {
             if (obj instanceof Integer) {
-                int intValue = ((Integer) obj).intValue();
+                int intValue = (Integer) obj;
                 ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(targetClass);
                 if (objectReader instanceof ObjectReaderImplEnum) {
                     return (T) ((ObjectReaderImplEnum) objectReader).of(intValue);
@@ -1962,7 +1957,7 @@ public class TypeUtils {
         }
 
         if (value instanceof Number) {
-            return Long.valueOf(((Number) value).longValue());
+            return ((Number) value).longValue();
         }
 
         if (value instanceof String) {
@@ -2387,7 +2382,7 @@ public class TypeUtils {
             case 1: {
                 byte b0 = bytes[off];
                 if (b0 >= '0' && b0 <= '9') {
-                    return (long) (b0 - '0');
+                    return b0 - '0';
                 }
                 break;
             }
@@ -2541,7 +2536,7 @@ public class TypeUtils {
             case 1: {
                 char b0 = bytes[off];
                 if (b0 >= '0' && b0 <= '9') {
-                    return (long) (b0 - '0');
+                    return b0 - '0';
                 }
                 break;
             }
@@ -2800,7 +2795,7 @@ public class TypeUtils {
         }
 
         if (value instanceof Number) {
-            return Integer.valueOf(((Number) value).intValue());
+            return ((Number) value).intValue();
         }
 
         if (value instanceof String) {
@@ -2816,7 +2811,7 @@ public class TypeUtils {
         }
 
         if (value instanceof Boolean) {
-            return ((Boolean) value).booleanValue() ? 1 : 0;
+            return (Boolean) value ? 1 : 0;
         }
 
         throw new JSONException("can not cast to integer");
@@ -2920,7 +2915,7 @@ public class TypeUtils {
         }
 
         if (value instanceof Number) {
-            return Integer.valueOf(((Number) value).intValue());
+            return ((Number) value).intValue();
         }
 
         if (value instanceof String) {
@@ -2945,7 +2940,7 @@ public class TypeUtils {
         }
 
         if (value instanceof Boolean) {
-            return ((Boolean) value).booleanValue();
+            return (Boolean) value;
         }
 
         if (value instanceof String) {
@@ -2975,7 +2970,7 @@ public class TypeUtils {
         }
 
         if (value instanceof Boolean) {
-            return ((Boolean) value).booleanValue();
+            return (Boolean) value;
         }
 
         if (value instanceof String) {
@@ -3576,7 +3571,7 @@ public class TypeUtils {
     }
 
     public static Map getInnerMap(Map object) {
-        if (object == null || CLASS_JSON_OBJECT_1x == null || !CLASS_JSON_OBJECT_1x.isInstance(object) || FIELD_JSON_OBJECT_1x_map == null) {
+        if (CLASS_JSON_OBJECT_1x == null || !CLASS_JSON_OBJECT_1x.isInstance(object) || FIELD_JSON_OBJECT_1x_map == null) {
             return object;
         }
 
@@ -3596,9 +3591,7 @@ public class TypeUtils {
                 return true;
             }
 
-            if (type.isAnnotationPresent(FunctionalInterface.class)) {
-                return true;
-            }
+            return type.isAnnotationPresent(FunctionalInterface.class);
         }
 
         return false;
@@ -3658,7 +3651,7 @@ public class TypeUtils {
             return false;
         }
 
-        char ch = (char) str[off];
+        char ch = str[off];
         boolean sign = ch == '-' || ch == '+';
         if (sign) {
             if (len == 1) {
@@ -3670,7 +3663,7 @@ public class TypeUtils {
 
         final int end = off + len;
         for (int i = off + 1; i < end; ++i) {
-            ch = (char) str[i];
+            ch = str[i];
             if (ch < '0' || ch > '9') {
                 return false;
             }
@@ -3709,17 +3702,13 @@ public class TypeUtils {
         boolean num = false;
         if (!dot && (ch >= '0' && ch <= '9')) {
             num = true;
-            for (; ; ) {
+            do {
                 if (offset < end) {
                     ch = str.charAt(offset++);
                 } else {
                     return true;
                 }
-
-                if (space || ch < '0' || ch > '9') {
-                    break;
-                }
-            }
+            } while (!space && ch >= '0' && ch <= '9');
         }
 
         boolean small = false;
@@ -3732,17 +3721,13 @@ public class TypeUtils {
             }
 
             if (ch >= '0' && ch <= '9') {
-                for (; ; ) {
+                do {
                     if (offset < end) {
                         ch = str.charAt(offset++);
                     } else {
                         return true;
                     }
-
-                    if (space || ch < '0' || ch > '9') {
-                        break;
-                    }
-                }
+                } while (!space && ch >= '0' && ch <= '9');
             }
         }
 
@@ -3768,17 +3753,13 @@ public class TypeUtils {
             }
 
             if (ch >= '0' && ch <= '9') {
-                for (; ; ) {
+                do {
                     if (offset < end) {
                         ch = str.charAt(offset++);
                     } else {
                         return true;
                     }
-
-                    if (ch < '0' || ch > '9') {
-                        break;
-                    }
-                }
+                } while (ch >= '0' && ch <= '9');
             } else if (eSign) {
                 return false;
             }
@@ -3819,17 +3800,13 @@ public class TypeUtils {
         boolean num = false;
         if (!dot && (ch >= '0' && ch <= '9')) {
             num = true;
-            for (; ; ) {
+            do {
                 if (offset < end) {
                     ch = (char) str[offset++];
                 } else {
                     return true;
                 }
-
-                if (space || ch < '0' || ch > '9') {
-                    break;
-                }
-            }
+            } while (!space && ch >= '0' && ch <= '9');
         }
 
         boolean small = false;
@@ -3842,17 +3819,13 @@ public class TypeUtils {
             }
 
             if (ch >= '0' && ch <= '9') {
-                for (; ; ) {
+                do {
                     if (offset < end) {
                         ch = (char) str[offset++];
                     } else {
                         return true;
                     }
-
-                    if (space || ch < '0' || ch > '9') {
-                        break;
-                    }
-                }
+                } while (!space && ch >= '0' && ch <= '9');
             }
         }
 
@@ -3878,17 +3851,13 @@ public class TypeUtils {
             }
 
             if (ch >= '0' && ch <= '9') {
-                for (; ; ) {
+                do {
                     if (offset < end) {
                         ch = (char) str[offset++];
                     } else {
                         return true;
                     }
-
-                    if (ch < '0' || ch > '9') {
-                        break;
-                    }
-                }
+                } while (ch >= '0' && ch <= '9');
             } else if (eSign) {
                 return false;
             }
@@ -3929,17 +3898,13 @@ public class TypeUtils {
         boolean num = false;
         if (!dot && (ch >= '0' && ch <= '9')) {
             num = true;
-            for (; ; ) {
+            do {
                 if (offset < end) {
                     ch = str[offset++];
                 } else {
                     return true;
                 }
-
-                if (space || ch < '0' || ch > '9') {
-                    break;
-                }
-            }
+            } while (!space && ch >= '0' && ch <= '9');
         }
 
         boolean small = false;
@@ -3952,17 +3917,13 @@ public class TypeUtils {
             }
 
             if (ch >= '0' && ch <= '9') {
-                for (; ; ) {
+                do {
                     if (offset < end) {
                         ch = str[offset++];
                     } else {
                         return true;
                     }
-
-                    if (space || ch < '0' || ch > '9') {
-                        break;
-                    }
-                }
+                } while (!space && ch >= '0' && ch <= '9');
             }
         }
 
@@ -3988,17 +3949,13 @@ public class TypeUtils {
             }
 
             if (ch >= '0' && ch <= '9') {
-                for (; ; ) {
+                do {
                     if (offset < end) {
                         ch = str[offset++];
                     } else {
                         return true;
                     }
-
-                    if (ch < '0' || ch > '9') {
-                        break;
-                    }
-                }
+                } while (ch >= '0' && ch <= '9');
             } else if (eSign) {
                 return false;
             }

@@ -27,7 +27,7 @@ final class AllOf
 
             Object item = items.get(i);
             if (item instanceof Boolean) {
-                itemSchema = ((Boolean) item).booleanValue() ? Any.INSTANCE : Any.NOT_ANY;
+                itemSchema = (Boolean) item ? Any.INSTANCE : Any.NOT_ANY;
             } else {
                 JSONObject itemObject = (JSONObject) item;
                 if (!itemObject.containsKey("type") && type != null) {
@@ -71,8 +71,7 @@ final class AllOf
 
     @Override
     public ValidateResult validate(Object value) {
-        for (int i = 0; i < items.length; i++) {
-            JSONSchema item = items[i];
+        for (JSONSchema item : items) {
             ValidateResult result = item.validate(value);
             if (!result.isSuccess()) {
                 return result;

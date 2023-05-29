@@ -68,7 +68,7 @@ public class ObjectReader1<T>
             return (T) autoTypeReader.readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
-        Object object = creator.get();
+        T object = creator.get();
 
         int entryCnt = jsonReader.startArray();
         if (entryCnt > 0) {
@@ -82,7 +82,7 @@ public class ObjectReader1<T>
             return (T) buildFunction.apply(object);
         }
 
-        return (T) object;
+        return object;
     }
 
     @Override
@@ -97,7 +97,7 @@ public class ObjectReader1<T>
         }
 
         if (jsonReader.isArray()) {
-            Object object = creator.get();
+            T object = creator.get();
             int entryCnt = jsonReader.startArray();
             if (entryCnt > 0) {
                 fieldReader0.readFieldValue(jsonReader, object);
@@ -109,7 +109,7 @@ public class ObjectReader1<T>
             if (buildFunction != null) {
                 return (T) buildFunction.apply(object);
             }
-            return (T) object;
+            return object;
         }
 
         if (!jsonReader.nextIfMatch(BC_OBJECT)) {
@@ -214,7 +214,7 @@ public class ObjectReader1<T>
         if (jsonReader.isArray()) {
             if ((featuresAll & JSONReader.Feature.SupportArrayToBean.mask) != 0) {
                 jsonReader.next();
-                Object object = creator.get();
+                T object = creator.get();
 
                 fieldReader0.readFieldValue(jsonReader, object);
                 if (!jsonReader.nextIfMatch(']')) {
@@ -226,7 +226,7 @@ public class ObjectReader1<T>
                 if (buildFunction != null) {
                     return (T) buildFunction.apply(object);
                 }
-                return (T) object;
+                return object;
             }
 
             return processObjectInputSingleItemArray(jsonReader, fieldType, fieldName, featuresAll);

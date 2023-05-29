@@ -19,7 +19,7 @@ public final class ToNumber
         }
 
         if (o instanceof Boolean) {
-            return ((Boolean) o).booleanValue() ? 1 : 0;
+            return (Boolean) o ? 1 : 0;
         }
 
         if (o instanceof Number) {

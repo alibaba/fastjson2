@@ -189,9 +189,7 @@ public class ContextAutoTypeBeforeHandler
                     "javax.validation.ValidationException",
                     "javax.validation.NoProviderFoundException"
             };
-            for (String basicType : basicTypeNames) {
-                nameSet.add(basicType);
-            }
+            nameSet.addAll(Arrays.asList(basicTypeNames));
         }
 
         for (String name : acceptNames) {

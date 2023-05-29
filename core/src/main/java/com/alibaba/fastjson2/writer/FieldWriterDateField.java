@@ -7,7 +7,7 @@ import java.util.Date;
 
 final class FieldWriterDateField<T>
         extends FieldWriterDate<T> {
-    protected FieldWriterDateField(
+    FieldWriterDateField(
             String fieldName,
             int ordinal,
             long features,

@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class ClassWriter {
-    private Function<String, Class> typeProvider;
+    private final Function<String, Class> typeProvider;
     /**
      * The minor_version and major_version fields of the JVMS ClassFile structure. minor_version is
      * stored in the 16 most significant bits, and major_version in the 16 least significant bits.
@@ -155,14 +155,14 @@ public class ClassWriter {
         while (fieldWriter != null) {
             ++fieldsCount;
             size += 8;
-            fieldWriter = (FieldWriter) fieldWriter.fv;
+            fieldWriter = fieldWriter.fv;
         }
         int methodsCount = 0;
         MethodWriter methodWriter = firstMethod;
         while (methodWriter != null) {
             ++methodsCount;
             size += methodWriter.computeMethodInfoSize();
-            methodWriter = (MethodWriter) methodWriter.mv;
+            methodWriter = methodWriter.mv;
         }
 
         // For ease of reference, we use here the same attribute order as in Section 4.7 of the JVMS.
@@ -200,7 +200,7 @@ public class ClassWriter {
         fieldWriter = firstField;
         while (fieldWriter != null) {
             fieldWriter.putFieldInfo(result);
-            fieldWriter = (FieldWriter) fieldWriter.fv;
+            fieldWriter = fieldWriter.fv;
         }
         result.putShort(methodsCount);
         boolean hasFrames = false;
@@ -210,7 +210,7 @@ public class ClassWriter {
             hasFrames |= methodWriter.stackMapTableNumberOfEntries > 0;
             hasAsmInstructions |= methodWriter.hasAsmInstructions;
             methodWriter.putMethodInfo(result);
-            methodWriter = (MethodWriter) methodWriter.mv;
+            methodWriter = methodWriter.mv;
         }
         // For ease of reference, we use here the same attribute order as in Section 4.7 of the JVMS.
         result.putShort(attributesCount);

@@ -24,7 +24,7 @@ final class ObjectWriterImplEnum<E extends Enum<E>>
     final long[] hashCodes;
 
     byte[][] jsonbNames;
-    String[] annotationNames;
+    final String[] annotationNames;
 
     public ObjectWriterImplEnum(
             Class defineClass,

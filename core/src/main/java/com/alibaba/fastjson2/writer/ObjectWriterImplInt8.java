@@ -15,7 +15,7 @@ final class ObjectWriterImplInt8
             return;
         }
 
-        byte byteValue = ((Byte) object).byteValue();
+        byte byteValue = (Byte) object;
         jsonWriter.writeInt8(byteValue);
     }
 

@@ -275,7 +275,7 @@ public class JdbcSupport {
     static class TimeWriter
             extends DateTimeCodec
             implements ObjectWriter {
-        public static TimeWriter INSTANCE = new TimeWriter(null);
+        public static final TimeWriter INSTANCE = new TimeWriter(null);
 
         public TimeWriter(String format) {
             super(format);

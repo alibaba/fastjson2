@@ -12,7 +12,7 @@ final class FieldWriterObjectFunc<T>
     final Function function;
     final boolean isArray;
 
-    protected FieldWriterObjectFunc(
+    FieldWriterObjectFunc(
             String name,
             int ordinal,
             long features,

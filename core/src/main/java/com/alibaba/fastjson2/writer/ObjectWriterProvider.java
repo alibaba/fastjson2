@@ -277,11 +277,8 @@ public class ObjectWriterProvider
                     && superclass.getName().equals("com.google.protobuf.GeneratedMessageV3")) {
                 fieldBased = false;
             }
-            switch (objectClass.getName()) {
-                case "springfox.documentation.spring.web.json.Json":
-                    fieldBased = false;
-                default:
-                    break;
+            if (objectClass.getName().equals("springfox.documentation.spring.web.json.Json")) {
+                fieldBased = false;
             }
         }
 
@@ -316,8 +313,7 @@ public class ObjectWriterProvider
         }
 
         if (useModules) {
-            for (int i = 0; i < modules.size(); i++) {
-                ObjectWriterModule module = modules.get(i);
+            for (ObjectWriterModule module : modules) {
                 objectWriter = module.getObjectWriter(objectType, objectClass);
                 if (objectWriter != null) {
                     ObjectWriter previous = fieldBased
@@ -476,19 +472,13 @@ public class ObjectWriterProvider
                 return true;
             }
             Class keyClass = TypeUtils.getClass(mapTyped.keyType);
-            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
-                return true;
-            }
+            return keyClass != null && keyClass.getClassLoader() == classLoader;
         } else if (objectWriter instanceof ObjectWriterImplCollection) {
             Class itemClass = TypeUtils.getClass(((ObjectWriterImplCollection) objectWriter).itemType);
-            if (itemClass != null && itemClass.getClassLoader() == classLoader) {
-                return true;
-            }
+            return itemClass != null && itemClass.getClassLoader() == classLoader;
         } else if (objectWriter instanceof ObjectWriterImplOptional) {
             Class itemClass = TypeUtils.getClass(((ObjectWriterImplOptional) objectWriter).valueType);
-            if (itemClass != null && itemClass.getClassLoader() == classLoader) {
-                return true;
-            }
+            return itemClass != null && itemClass.getClassLoader() == classLoader;
         } else if (objectWriter instanceof ObjectWriterAdapter) {
             checkedMap.put(objectWriter, null);
             List<FieldWriter> fieldWriters = ((ObjectWriterAdapter<?>) objectWriter).fieldWriters;
@@ -506,28 +496,19 @@ public class ObjectWriterProvider
     }
 
     public void cleanup(ClassLoader classLoader) {
-        for (Iterator<Map.Entry<Class, Class>> it = mixInCache.entrySet().iterator(); it.hasNext();) {
-            Map.Entry<Class, Class> entry = it.next();
-            if (entry.getKey().getClassLoader() == classLoader) {
-                it.remove();
-            }
-        }
+        mixInCache.entrySet().removeIf
+                (entry -> entry.getKey().getClassLoader() == classLoader
+                );
 
         IdentityHashMap<ObjectWriter, Object> checkedMap = new IdentityHashMap();
 
-        for (Iterator<Map.Entry<Type, ObjectWriter>> it = cache.entrySet().iterator(); it.hasNext();) {
-            Map.Entry<Type, ObjectWriter> entry = it.next();
-            if (match(entry.getKey(), entry.getValue(), classLoader, checkedMap)) {
-                it.remove();
-            }
-        }
+        cache.entrySet().removeIf(
+                entry -> match(entry.getKey(), entry.getValue(), classLoader, checkedMap)
+        );
 
-        for (Iterator<Map.Entry<Type, ObjectWriter>> it = cacheFieldBased.entrySet().iterator(); it.hasNext();) {
-            Map.Entry<Type, ObjectWriter> entry = it.next();
-            if (match(entry.getKey(), entry.getValue(), classLoader, checkedMap)) {
-                it.remove();
-            }
-        }
+        cacheFieldBased.entrySet().removeIf(
+                entry -> match(entry.getKey(), entry.getValue(), classLoader, checkedMap)
+        );
 
         BeanUtils.cleanupCache(classLoader);
     }

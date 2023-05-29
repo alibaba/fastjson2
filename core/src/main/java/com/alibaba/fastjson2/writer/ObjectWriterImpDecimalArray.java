@@ -54,8 +54,8 @@ final class ObjectWriterImpDecimalArray
         BigDecimal[] array = (BigDecimal[]) object;
 
         jsonWriter.startArray(array.length);
-        for (int i = 0; i < array.length; i++) {
-            jsonWriter.writeDecimal(array[i], 0, null);
+        for (BigDecimal bigDecimal : array) {
+            jsonWriter.writeDecimal(bigDecimal, 0, null);
         }
     }
 }

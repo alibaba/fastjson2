@@ -17,9 +17,7 @@ public final class SymbolTable {
 
     public SymbolTable(String... input) {
         Set<String> set = new TreeSet<>();
-        for (String name : input) {
-            set.add(name);
-        }
+        set.addAll(Arrays.asList(input));
         names = new String[set.size()];
         Iterator<String> it = set.iterator();
 

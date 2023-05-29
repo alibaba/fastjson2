@@ -8,7 +8,7 @@ final class FieldWriterEnumFunc
         extends FieldWriterEnum {
     final Function function;
 
-    protected FieldWriterEnumFunc(
+    FieldWriterEnumFunc(
             String name,
             int ordinal,
             long features,

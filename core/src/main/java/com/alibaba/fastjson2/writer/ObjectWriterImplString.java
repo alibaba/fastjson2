@@ -6,7 +6,7 @@ import java.lang.reflect.Type;
 
 final class ObjectWriterImplString
         extends ObjectWriterPrimitiveImpl {
-    static ObjectWriterImplString INSTANCE = new ObjectWriterImplString();
+    static final ObjectWriterImplString INSTANCE = new ObjectWriterImplString();
 
     @Override
     public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {

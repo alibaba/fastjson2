@@ -74,8 +74,8 @@ public final class Fnv {
 
         long hashCode = MAGIC_HASH_CODE;
 
-        for (int i = 0; i < names.length; ++i) {
-            long h = hashCode64(names[i]);
+        for (String name : names) {
+            long h = hashCode64(name);
             hashCode ^= h;
             hashCode *= MAGIC_PRIME;
         }

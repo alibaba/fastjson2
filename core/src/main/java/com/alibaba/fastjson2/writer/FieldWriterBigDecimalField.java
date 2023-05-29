@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 final class FieldWriterBigDecimalField<T>
         extends FieldWriter<T> {
-    protected FieldWriterBigDecimalField(
+    FieldWriterBigDecimalField(
             String name,
             int ordinal,
             long features,

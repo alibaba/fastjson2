@@ -15,7 +15,7 @@ final class FieldWriterObjectArrayField<T>
     final Type itemType;
     final Class itemClass;
     ObjectWriter itemObjectWriter;
-    protected FieldWriterObjectArrayField(
+    FieldWriterObjectArrayField(
             String fieldName,
             Type itemType,
             int ordinal,

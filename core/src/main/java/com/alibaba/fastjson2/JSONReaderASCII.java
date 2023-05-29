@@ -795,7 +795,7 @@ class JSONReaderASCII
         }
 
         long hashCode = Fnv.MAGIC_HASH_CODE;
-        for (; offset < end; ) {
+        while (offset < end) {
             int c = bytes[offset];
 
             if (c == '\\') {
@@ -1294,7 +1294,6 @@ class JSONReaderASCII
         int valueLength;
         valueEscape = false;
 
-        _for:
         for (int i = 0; ; ++i) {
             int c = bytes[offset];
             if (c == '\\') {
@@ -1318,7 +1317,7 @@ class JSONReaderASCII
 
             if (c == quote) {
                 valueLength = i;
-                break _for;
+                break;
             }
             offset++;
         }

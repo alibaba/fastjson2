@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 import java.util.function.*;
 
 import static com.alibaba.fastjson2.util.TypeUtils.*;
-import static com.alibaba.fastjson2.util.TypeUtils.METHOD_TYPE_OBJECT_LONG;
 
 public class LambdaMiscCodec {
     static volatile boolean hppcError;

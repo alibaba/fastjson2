@@ -175,16 +175,16 @@ public abstract class CSVWriter
         }
 
         if (value instanceof Integer) {
-            this.writeInt32(((Integer) value).intValue());
+            this.writeInt32((Integer) value);
         } else if (value instanceof Long) {
-            this.writeInt64(((Long) value).longValue());
+            this.writeInt64((Long) value);
         } else if (value instanceof String) {
             writeString((String) value);
         } else if (value instanceof Boolean) {
-            boolean booleanValue = ((Boolean) value).booleanValue();
+            boolean booleanValue = (Boolean) value;
             writeBoolean(booleanValue);
         } else if (value instanceof Float) {
-            float floatValue = ((Float) value).floatValue();
+            float floatValue = (Float) value;
             writeFloat(floatValue);
         } else if (value instanceof Double) {
             writeDouble((Double) value);
@@ -246,7 +246,7 @@ public abstract class CSVWriter
 
             long zeroDay = localEpochDay + DAYS_0000_TO_1970;
             // find the march-based year
-            zeroDay -= 60;  // adjust to 0000-03-01 so leap day is at end of four year cycle
+            zeroDay -= 60;  // adjust to 0000-03-01 so leap day is at end of four-year cycle
             long adjust = 0;
             if (zeroDay < 0) {
                 // adjust negative years to positive for calculation

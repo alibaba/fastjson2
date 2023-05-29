@@ -31,7 +31,7 @@ package com.alibaba.fastjson2.internal.asm;
  * @author Eric Bruneton
  */
 public final class FieldWriter {
-    protected FieldWriter fv;
+    FieldWriter fv;
 
     /**
      * Where the constants used in this FieldWriter must be stored.
@@ -70,9 +70,6 @@ public final class FieldWriter {
         this.accessFlags = access;
         this.nameIndex = symbolTable.addConstantUtf8(name);
         this.descriptorIndex = symbolTable.addConstantUtf8(descriptor);
-    }
-
-    public void visitEnd() {
     }
 
     /**

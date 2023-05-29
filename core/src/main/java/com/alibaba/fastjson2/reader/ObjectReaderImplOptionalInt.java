@@ -19,7 +19,7 @@ final class ObjectReaderImplOptionalInt
         if (integer == null) {
             return OptionalInt.empty();
         }
-        return OptionalInt.of(integer.intValue());
+        return OptionalInt.of(integer);
     }
 
     @Override
@@ -28,6 +28,6 @@ final class ObjectReaderImplOptionalInt
         if (integer == null) {
             return OptionalInt.empty();
         }
-        return OptionalInt.of(integer.intValue());
+        return OptionalInt.of(integer);
     }
 }

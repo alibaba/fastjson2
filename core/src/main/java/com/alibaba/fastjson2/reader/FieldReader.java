@@ -87,8 +87,8 @@ public abstract class FieldReader<T>
         if (fieldOffset == -1 && field != null && method == null) {
             try {
                 field.setAccessible(true);
-            } catch (Throwable ignored) {
-                JDKUtils.setReflectErrorLast(ignored);
+            } catch (Throwable e) {
+                JDKUtils.setReflectErrorLast(e);
             }
         }
 

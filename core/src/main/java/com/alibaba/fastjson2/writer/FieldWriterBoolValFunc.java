@@ -7,7 +7,7 @@ final class FieldWriterBoolValFunc
         extends FieldWriterBoolVal {
     final Predicate function;
 
-    protected FieldWriterBoolValFunc(
+    FieldWriterBoolValFunc(
             String fieldName,
             int ordinal,
             long features,

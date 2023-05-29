@@ -64,6 +64,6 @@ abstract class FieldWriterInt8<T>
             jsonWriter.writeNumberNull();
             return;
         }
-        jsonWriter.writeInt32(value.byteValue());
+        jsonWriter.writeInt32(value);
     }
 }

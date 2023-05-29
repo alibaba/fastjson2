@@ -637,7 +637,7 @@ final class CSVReaderUTF8<T>
         }
     }
 
-    protected void readAll(ByteArrayValueConsumer consumer, int maxRows) {
+    private void readAll(ByteArrayValueConsumer consumer, int maxRows) {
         consumer.start();
 
         for (int r = 0; r < maxRows || maxRows < 0; ++r) {

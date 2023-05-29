@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 
 final class FieldWriterInt16Method<T>
         extends FieldWriterInt16<T> {
-    protected FieldWriterInt16Method(
+    FieldWriterInt16Method(
             String fieldName,
             int ordinal,
             long features,

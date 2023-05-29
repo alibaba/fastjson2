@@ -11,7 +11,7 @@ final class FieldWriterLocalDateFunc<T>
         extends FieldWriterObjectFinal<T> {
     final Function function;
 
-    protected FieldWriterLocalDateFunc(
+    FieldWriterLocalDateFunc(
             String name,
             int ordinal,
             long features,

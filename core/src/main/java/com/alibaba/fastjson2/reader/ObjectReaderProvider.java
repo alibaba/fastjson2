@@ -151,7 +151,7 @@ public class ObjectReaderProvider
 
     final LRUAutoTypeCache autoTypeList = new LRUAutoTypeCache(1024);
 
-    private ConcurrentMap<Type, Map<Type, Function>> typeConverts = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Type, Map<Type, Function>> typeConverts = new ConcurrentHashMap<>();
 
     final ObjectReaderCreator creator;
     final List<ObjectReaderModule> modules = new ArrayList<>();
@@ -521,19 +521,13 @@ public class ObjectReaderProvider
                 return true;
             }
             Class keyClass = TypeUtils.getClass(mapTyped.keyType);
-            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
-                return true;
-            }
+            return keyClass != null && keyClass.getClassLoader() == classLoader;
         } else if (objectReader instanceof ObjectReaderImplList) {
             ObjectReaderImplList list = (ObjectReaderImplList) objectReader;
-            if (list.itemClass != null && list.itemClass.getClassLoader() == classLoader) {
-                return true;
-            }
+            return list.itemClass != null && list.itemClass.getClassLoader() == classLoader;
         } else if (objectReader instanceof ObjectReaderImplOptional) {
             Class itemClass = ((ObjectReaderImplOptional) objectReader).itemClass;
-            if (itemClass != null && itemClass.getClassLoader() == classLoader) {
-                return true;
-            }
+            return itemClass != null && itemClass.getClassLoader() == classLoader;
         } else if (objectReader instanceof ObjectReaderAdapter) {
             FieldReader[] fieldReaders = ((ObjectReaderAdapter<?>) objectReader).fieldReaders;
             for (FieldReader fieldReader : fieldReaders) {
@@ -553,26 +547,17 @@ public class ObjectReaderProvider
     }
 
     public void cleanup(ClassLoader classLoader) {
-        for (Iterator<Map.Entry<Class, Class>> it = mixInCache.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<Class, Class> entry = it.next();
-            if (entry.getKey().getClassLoader() == classLoader) {
-                it.remove();
-            }
-        }
+        mixInCache.entrySet().removeIf(
+                entry -> entry.getKey().getClassLoader() == classLoader
+        );
 
-        for (Iterator<Map.Entry<Type, ObjectReader>> it = cache.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<Type, ObjectReader> entry = it.next();
-            if (match(entry.getKey(), entry.getValue(), classLoader)) {
-                it.remove();
-            }
-        }
+        cache.entrySet().removeIf(
+                entry -> match(entry.getKey(), entry.getValue(), classLoader)
+        );
 
-        for (Iterator<Map.Entry<Type, ObjectReader>> it = cacheFieldBased.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<Type, ObjectReader> entry = it.next();
-            if (match(entry.getKey(), entry.getValue(), classLoader)) {
-                it.remove();
-            }
-        }
+        cacheFieldBased.entrySet().removeIf(
+                entry -> match(entry.getKey(), entry.getValue(), classLoader)
+        );
 
         int tclHash = System.identityHashCode(classLoader);
         tclHashCaches.remove(tclHash);
@@ -979,12 +964,8 @@ public class ObjectReaderProvider
 
         String className = objectClass.getName();
         if (objectReader == null && !fieldBased) {
-            switch (className) {
-                case "com.google.common.collect.ArrayListMultimap":
-                    objectReader = ObjectReaderImplMap.of(null, objectClass, 0);
-                    break;
-                default:
-                    break;
+            if (className.equals("com.google.common.collect.ArrayListMultimap")) {
+                objectReader = ObjectReaderImplMap.of(null, objectClass, 0);
             }
         }
 

@@ -33,7 +33,7 @@ final class CSVWriterUTF16
         this.chars = new char[1024 * 64];
     }
 
-    protected void writeDirect(char[] bytes, int off, int len) {
+    void writeDirect(char[] bytes, int off, int len) {
         try {
             out.write(bytes, off, len);
         } catch (IOException e) {

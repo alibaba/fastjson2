@@ -201,7 +201,7 @@ class FieldWriterEnum
             final boolean usingOrdinal = (features & JSONWriter.Feature.WriteEnumUsingOrdinal.mask) != 0;
             boolean unquoteName = (features & JSONWriter.Feature.UnquoteFieldName.mask) != 0;
             final boolean utf8 = jsonWriter.utf8;
-            final boolean utf16 = jsonWriter.utf8 ? false : jsonWriter.utf16;
+            final boolean utf16 = !jsonWriter.utf8 && jsonWriter.utf16;
             final int ordinal = e.ordinal();
 
             if (usingOrdinal) {

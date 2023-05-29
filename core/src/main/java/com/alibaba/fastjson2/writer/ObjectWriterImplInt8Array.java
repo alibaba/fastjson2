@@ -49,8 +49,7 @@ final class ObjectWriterImplInt8Array
 
         Byte[] array = (Byte[]) object;
         jsonWriter.startArray(array.length);
-        for (int i = 0; i < array.length; i++) {
-            Byte value = array[i];
+        for (Byte value : array) {
             if (value == null) {
                 jsonWriter.writeNull();
             } else {

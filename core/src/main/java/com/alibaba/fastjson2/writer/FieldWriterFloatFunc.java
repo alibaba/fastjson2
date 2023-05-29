@@ -9,7 +9,7 @@ final class FieldWriterFloatFunc<T>
         extends FieldWriter<T> {
     final Function<T, Float> function;
 
-    protected FieldWriterFloatFunc(
+    FieldWriterFloatFunc(
             String fieldName,
             int ordinal,
             long features,
@@ -33,7 +33,7 @@ final class FieldWriterFloatFunc<T>
         if (value == null) {
             jsonWriter.writeNumberNull();
         } else {
-            float floatValue = value.floatValue();
+            float floatValue = value;
             if (decimalFormat != null) {
                 jsonWriter.writeFloat(floatValue, decimalFormat);
             } else {
@@ -67,7 +67,7 @@ final class FieldWriterFloatFunc<T>
         }
 
         writeFieldName(jsonWriter);
-        float floatValue = value.floatValue();
+        float floatValue = value;
         if (decimalFormat != null) {
             jsonWriter.writeFloat(floatValue, decimalFormat);
         } else {

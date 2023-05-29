@@ -620,7 +620,7 @@ public abstract class JSONReader
         switch (valueType) {
             case JSON_TYPE_INT:
                 if (mag1 == 0 && mag2 == 0 && mag3 != Integer.MIN_VALUE) {
-                    return Long.valueOf(negative ? -mag3 : mag3);
+                    return (long) (negative ? -mag3 : mag3);
                 }
                 int[] mag;
                 if (mag0 == 0) {
@@ -650,7 +650,7 @@ public abstract class JSONReader
             case JSON_TYPE_DEC:
                 return getNumber().longValue();
             case JSON_TYPE_BOOL:
-                return Long.valueOf(boolValue ? 1 : 0);
+                return (long) (boolValue ? 1 : 0);
             case JSON_TYPE_NULL:
                 return null;
             case JSON_TYPE_STRING: {
@@ -676,11 +676,7 @@ public abstract class JSONReader
         if (nextIfMatch('[')) {
             long[] values = new long[8];
             int size = 0;
-            for (; ; ) {
-                if (nextIfMatch(']')) {
-                    break;
-                }
-
+            while (!nextIfMatch(']')) {
                 if (isEnd()) {
                     throw new JSONException(info("input end"));
                 }
@@ -1037,13 +1033,11 @@ public abstract class JSONReader
             return LocalDateTime.ofInstant(instant, context.getZoneId());
         }
 
-        switch (str) {
-            case "0000-00-00 00:00:00":
-                wasNull = true;
-                return null;
-            default:
-                throw new JSONException(info("read LocalDateTime error " + str));
+        if (str.equals("0000-00-00 00:00:00")) {
+            wasNull = true;
+            return null;
         }
+        throw new JSONException(info("read LocalDateTime error " + str));
     }
 
     public abstract OffsetDateTime readOffsetDateTime();
@@ -1575,9 +1569,7 @@ public abstract class JSONReader
             Object item = readAny();
             list.add(item);
 
-            if (nextIfMatch(',')) {
-                continue;
-            }
+            nextIfMatch(',');
         }
 
         nextIfMatch(',');
@@ -1632,7 +1624,6 @@ public abstract class JSONReader
             map = object;
         }
 
-        for_:
         for (int i = 0; ; ++i) {
             if (ch == '/') {
                 skipLineComment();
@@ -1722,7 +1713,7 @@ public abstract class JSONReader
                     } else {
                         throw new JSONException("FASTJSON" + JSON.VERSION + "input not support " + ch + ", offset " + offset);
                     }
-                    continue for_;
+                    continue;
                 case 'S':
                     if (nextIfSet()) {
                         value = read(HashSet.class);
@@ -1771,7 +1762,6 @@ public abstract class JSONReader
         ObjectReader keyReader = context.getObjectReader(keyType);
         ObjectReader valueReader = context.getObjectReader(valueType);
 
-        for_:
         for (int i = 0; ; ++i) {
             if (ch == '/') {
                 skipLineComment();
@@ -1838,7 +1828,6 @@ public abstract class JSONReader
             object = (Map) context.objectSupplier.get();
         }
 
-        for_:
         for (int i = 0; ; ++i) {
             if (ch == '}') {
                 next();
@@ -1904,7 +1893,7 @@ public abstract class JSONReader
                     if (ch == '/') {
                         skipLineComment();
                     }
-                    continue for_;
+                    continue;
                 case 'I':
                     if (nextIfInfinity()) {
                         val = Double.POSITIVE_INFINITY;
@@ -1968,11 +1957,7 @@ public abstract class JSONReader
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = context.provider.getObjectReader(itemType, fieldBased);
 
-        for (; ; ) {
-            if (nextIfMatch(']')) {
-                break;
-            }
-
+        while (!nextIfMatch(']')) {
             Object item = objectReader.readObject(this, null, null, 0);
             list.add(item);
 
@@ -2060,10 +2045,7 @@ public abstract class JSONReader
 
     public final void readArray(Collection list, Type itemType) {
         if (nextIfMatch('[')) {
-            for (; ; ) {
-                if (nextIfMatch(']')) {
-                    break;
-                }
+            while (!nextIfMatch(']')) {
                 Object item = read(itemType);
                 list.add(item);
 
@@ -2167,7 +2149,7 @@ public abstract class JSONReader
                 }
                 case '/':
                     skipLineComment();
-                    continue _for;
+                    continue;
                 default:
                     throw new JSONException("TODO : " + ch);
             }
@@ -2355,9 +2337,9 @@ public abstract class JSONReader
                         intVlaue = mag3;
                     }
                     if (valueType == JSON_TYPE_INT64) {
-                        return Long.valueOf(intVlaue);
+                        return (long) intVlaue;
                     }
-                    return Integer.valueOf(intVlaue);
+                    return intVlaue;
                 }
                 int[] mag;
                 if (mag0 == 0) {
@@ -2383,14 +2365,14 @@ public abstract class JSONReader
             case JSON_TYPE_INT16: {
                 if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
                     int intValue = negative ? -mag3 : mag3;
-                    return Short.valueOf((short) intValue);
+                    return (short) intValue;
                 }
                 throw new JSONException(info("shortValue overflow"));
             }
             case JSON_TYPE_INT8: {
                 if (mag0 == 0 && mag1 == 0 && mag2 == 0 && mag3 >= 0) {
                     int intValue = negative ? -mag3 : mag3;
-                    return Byte.valueOf((byte) intValue);
+                    return (byte) intValue;
                 }
                 throw new JSONException(info("shortValue overflow"));
             }
@@ -2557,7 +2539,7 @@ public abstract class JSONReader
                     String decimalStr = decimal.toPlainString();
                     double doubleValue = Double.parseDouble(
                             decimalStr + "E" + exponent);
-                    return Double.valueOf(doubleValue);
+                    return doubleValue;
                 }
 
                 if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
@@ -2594,7 +2576,7 @@ public abstract class JSONReader
                     if (exponent != 0) {
                         float floatValueValue = Float.parseFloat(
                                 decimal + "E" + exponent);
-                        return Float.valueOf(floatValueValue);
+                        return floatValueValue;
                     }
 
                     return decimal.floatValue();
@@ -2603,7 +2585,7 @@ public abstract class JSONReader
                 if (exponent != 0) {
                     double doubleValue = Double.parseDouble(
                             decimal + "E" + exponent);
-                    return Double.valueOf(doubleValue);
+                    return doubleValue;
                 }
                 return decimal.doubleValue();
             }
@@ -3535,8 +3517,8 @@ public abstract class JSONReader
         AutoTypeBeforeHandler autoTypeBeforeHandler;
         ExtraProcessor extraProcessor;
 
-        protected final ObjectReaderProvider provider;
-        protected final SymbolTable symbolTable;
+        final ObjectReaderProvider provider;
+        final SymbolTable symbolTable;
 
         public Context(ObjectReaderProvider provider) {
             this.features = defaultReaderFeatures;
@@ -4059,7 +4041,7 @@ public abstract class JSONReader
 
         @Override
         public BigInteger apply(Integer integer, int[] mag) {
-            int signum = integer.intValue();
+            int signum = integer;
             final int bitLength;
             if (mag.length == 0) {
                 bitLength = 0; // offset by one to initialize

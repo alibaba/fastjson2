@@ -48,7 +48,7 @@ class FieldWriterDoubleMethod<T>
         if (value == null) {
             jsonWriter.writeNumberNull();
         } else {
-            double doubleValue = value.doubleValue();
+            double doubleValue = value;
             if (decimalFormat != null) {
                 jsonWriter.writeDouble(doubleValue, decimalFormat);
             } else {
@@ -66,7 +66,7 @@ class FieldWriterDoubleMethod<T>
         if (value == null) {
             jsonWriter.writeNumberNull();
         } else {
-            double doubleValue = value.doubleValue();
+            double doubleValue = value;
             if (decimalFormat != null) {
                 jsonWriter.writeDouble(doubleValue, decimalFormat);
             } else {

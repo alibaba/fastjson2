@@ -37,11 +37,7 @@ class ObjectReaderImplInt8Array
         if (jsonReader.nextIfMatch('[')) {
             Byte[] values = new Byte[16];
             int size = 0;
-            for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
-                    break;
-                }
-
+            while (!jsonReader.nextIfMatch(']')) {
                 if (jsonReader.isEnd()) {
                     throw new JSONException(jsonReader.info("input end"));
                 }

@@ -14,18 +14,18 @@ import java.util.function.Function;
 final class JSONPathFunction
         extends JSONPathSegment
         implements JSONPathSegment.EvalSegment {
-    static JSONPathFunction FUNC_TYPE = new JSONPathFunction(JSONPathFunction::type);
-    static JSONPathFunction FUNC_DOUBLE = new JSONPathFunction(new ToDouble(null));
-    static JSONPathFunction FUNC_FLOOR = new JSONPathFunction(JSONPathFunction::floor);
-    static JSONPathFunction FUNC_CEIL = new JSONPathFunction(JSONPathFunction::ceil);
-    static JSONPathFunction FUNC_ABS = new JSONPathFunction(JSONPathFunction::abs);
-    static JSONPathFunction FUNC_NEGATIVE = new JSONPathFunction(JSONPathFunction::negative);
-    static JSONPathFunction FUNC_EXISTS = new JSONPathFunction(JSONPathFunction::exists);
-    static JSONPathFunction FUNC_LOWER = new JSONPathFunction(JSONPathFunction::lower);
-    static JSONPathFunction FUNC_UPPER = new JSONPathFunction(JSONPathFunction::upper);
-    static JSONPathFunction FUNC_TRIM = new JSONPathFunction(JSONPathFunction::trim);
-    static JSONPathFunction FUNC_FIRST = new JSONPathFunction(JSONPathFunction::first);
-    static JSONPathFunction FUNC_LAST = new JSONPathFunction(JSONPathFunction::last);
+    static final JSONPathFunction FUNC_TYPE = new JSONPathFunction(JSONPathFunction::type);
+    static final JSONPathFunction FUNC_DOUBLE = new JSONPathFunction(new ToDouble(null));
+    static final JSONPathFunction FUNC_FLOOR = new JSONPathFunction(JSONPathFunction::floor);
+    static final JSONPathFunction FUNC_CEIL = new JSONPathFunction(JSONPathFunction::ceil);
+    static final JSONPathFunction FUNC_ABS = new JSONPathFunction(JSONPathFunction::abs);
+    static final JSONPathFunction FUNC_NEGATIVE = new JSONPathFunction(JSONPathFunction::negative);
+    static final JSONPathFunction FUNC_EXISTS = new JSONPathFunction(JSONPathFunction::exists);
+    static final JSONPathFunction FUNC_LOWER = new JSONPathFunction(JSONPathFunction::lower);
+    static final JSONPathFunction FUNC_UPPER = new JSONPathFunction(JSONPathFunction::upper);
+    static final JSONPathFunction FUNC_TRIM = new JSONPathFunction(JSONPathFunction::trim);
+    static final JSONPathFunction FUNC_FIRST = new JSONPathFunction(JSONPathFunction::first);
+    static final JSONPathFunction FUNC_LAST = new JSONPathFunction(JSONPathFunction::last);
 
     final Function function;
 
@@ -103,7 +103,7 @@ final class JSONPathFunction
         }
 
         if (value instanceof Integer) {
-            int intValue = ((Integer) value).intValue();
+            int intValue = (Integer) value;
             if (intValue == Integer.MIN_VALUE) {
                 return -(long) intValue;
             }
@@ -111,7 +111,7 @@ final class JSONPathFunction
         }
 
         if (value instanceof Long) {
-            long longValue = ((Long) value).longValue();
+            long longValue = (Long) value;
             if (longValue == Long.MIN_VALUE) {
                 return BigInteger.valueOf(longValue).negate();
             }
@@ -119,7 +119,7 @@ final class JSONPathFunction
         }
 
         if (value instanceof Byte) {
-            byte byteValue = ((Byte) value).byteValue();
+            byte byteValue = (Byte) value;
             if (byteValue == Byte.MIN_VALUE) {
                 return -(short) byteValue;
             }
@@ -128,7 +128,7 @@ final class JSONPathFunction
         }
 
         if (value instanceof Short) {
-            short shortValue = ((Short) value).shortValue();
+            short shortValue = (Short) value;
             if (shortValue == Short.MIN_VALUE) {
                 return -(int) shortValue;
             }
@@ -137,11 +137,11 @@ final class JSONPathFunction
         }
 
         if (value instanceof Double) {
-            return -((Double) value).doubleValue();
+            return -(Double) value;
         }
 
         if (value instanceof Float) {
-            return -((Float) value).floatValue();
+            return -(Float) value;
         }
 
         if (value instanceof BigDecimal) {
@@ -155,8 +155,7 @@ final class JSONPathFunction
         if (value instanceof List) {
             List list = (List) value;
             JSONArray values = new JSONArray(list.size());
-            for (int i = 0, l = list.size(); i < l; i++) {
-                Object item = list.get(i);
+            for (Object item : list) {
                 Object negativeItem = negative(item);
                 values.add(negativeItem);
             }
@@ -228,8 +227,8 @@ final class JSONPathFunction
             }
 
             Object last = null;
-            for (Iterator<?> it = collection.iterator(); it.hasNext(); ) {
-                last = it.next();
+            for (Object o : collection) {
+                last = o;
             }
             return last;
         }
@@ -251,7 +250,7 @@ final class JSONPathFunction
         }
 
         if (value instanceof Integer) {
-            int intValue = ((Integer) value).intValue();
+            int intValue = (Integer) value;
             if (intValue < 0) {
                 return -intValue;
             }
@@ -259,7 +258,7 @@ final class JSONPathFunction
         }
 
         if (value instanceof Long) {
-            long longValue = ((Long) value).longValue();
+            long longValue = (Long) value;
             if (longValue < 0) {
                 return -longValue;
             }
@@ -267,7 +266,7 @@ final class JSONPathFunction
         }
 
         if (value instanceof Byte) {
-            byte byteValue = ((Byte) value).byteValue();
+            byte byteValue = (Byte) value;
             if (byteValue < 0) {
                 return (byte) -byteValue;
             }
@@ -276,7 +275,7 @@ final class JSONPathFunction
         }
 
         if (value instanceof Short) {
-            short shortValue = ((Short) value).shortValue();
+            short shortValue = (Short) value;
             if (shortValue < 0) {
                 return (short) -shortValue;
             }
@@ -285,7 +284,7 @@ final class JSONPathFunction
         }
 
         if (value instanceof Double) {
-            double doubleValue = ((Double) value).doubleValue();
+            double doubleValue = (Double) value;
             if (doubleValue < 0) {
                 return -doubleValue;
             }
@@ -294,7 +293,7 @@ final class JSONPathFunction
         }
 
         if (value instanceof Float) {
-            float floatValue = ((Float) value).floatValue();
+            float floatValue = (Float) value;
             if (floatValue < 0) {
                 return -floatValue;
             }
@@ -313,8 +312,7 @@ final class JSONPathFunction
         if (value instanceof List) {
             List list = (List) value;
             JSONArray values = new JSONArray(list.size());
-            for (int i = 0, l = list.size(); i < l; i++) {
-                Object item = list.get(i);
+            for (Object item : list) {
                 values.add(abs(item));
             }
             return values;
@@ -514,23 +512,16 @@ final class JSONPathFunction
                     || item instanceof Byte
                     || item instanceof Short
             ) {
-                if (((Number) item).longValue() == value) {
-                    return true;
-                }
+                return ((Number) item).longValue() == value;
             } else if (item instanceof Float || item instanceof Double) {
-                double doubleValue = ((Number) item).doubleValue();
-                if (doubleValue == value) {
-                    return true;
-                }
+                return ((Number) item).doubleValue() == value;
             } else if (item instanceof BigDecimal) {
                 BigDecimal decimal = (BigDecimal) item;
                 decimal = decimal.stripTrailingZeros();
                 if (decimalValue == null) {
                     decimalValue = BigDecimal.valueOf(value);
                 }
-                if (decimalValue.equals(decimal)) {
-                    return true;
-                }
+                return decimalValue.equals(decimal);
             }
             return false;
         }

@@ -109,7 +109,7 @@ public class ObjectReader4<T>
         }
 
         if (jsonReader.isArray()) {
-            Object object = creator.get();
+            T object = creator.get();
 
             int entryCnt = jsonReader.startArray();
             if (entryCnt > 0) {
@@ -132,7 +132,7 @@ public class ObjectReader4<T>
             if (buildFunction != null) {
                 return (T) buildFunction.apply(object);
             }
-            return (T) object;
+            return object;
         }
 
         ObjectReader autoTypeReader = jsonReader.checkAutoType(this.objectClass, this.typeNameHash, this.features | features);
@@ -161,11 +161,7 @@ public class ObjectReader4<T>
             initDefaultValue(object);
         }
 
-        for (; ; ) {
-            if (jsonReader.nextIfMatch(BC_OBJECT_END)) {
-                break;
-            }
-
+        while (!jsonReader.nextIfMatch(BC_OBJECT_END)) {
             long hashCode = jsonReader.readFieldNameHashCode();
             if (hashCode == 0) {
                 continue;
@@ -223,7 +219,7 @@ public class ObjectReader4<T>
         }
 
         int entryCnt = jsonReader.startArray();
-        Object object = creator.get();
+        T object = creator.get();
 
         if (entryCnt > 0) {
             fieldReader0.readFieldValue(jsonReader, object);
@@ -246,7 +242,7 @@ public class ObjectReader4<T>
             return (T) buildFunction.apply(object);
         }
 
-        return (T) object;
+        return object;
     }
 
     @Override
@@ -286,7 +282,7 @@ public class ObjectReader4<T>
                 if (buildFunction != null) {
                     return (T) buildFunction.apply(object);
                 }
-                return (T) object;
+                return object;
             }
 
             return processObjectInputSingleItemArray(jsonReader, fieldType, fieldName, featuresAll);
