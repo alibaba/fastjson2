@@ -1905,6 +1905,37 @@ public interface JSON {
      * @param offset the starting index of array
      * @param length the specified length of array
      * @param charset the specified charset of the stream
+     * @param type the specified actual type of {@link T}
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     */
+    @SuppressWarnings("unchecked")
+    static <T> T parseObject(byte[] bytes, int offset, int length, Charset charset, Class<T> type) {
+        if (bytes == null || bytes.length == 0 || length == 0) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(bytes, offset, length, charset)) {
+            ObjectReader<T> objectReader = reader.getObjectReader(type);
+            T object = objectReader.readObject(reader, type, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parses the json byte array as {@link T}. Returns {@code null}
+     * if received byte array is {@code null} or empty or length is 0.
+     *
+     * @param bytes the specified UTF8 text to be parsed
+     * @param offset the starting index of array
+     * @param length the specified length of array
+     * @param charset the specified charset of the stream
      * @param type the specified actual class of {@link T}
      * @return {@link T} or {@code null}
      * @throws JSONException If a parsing error occurs

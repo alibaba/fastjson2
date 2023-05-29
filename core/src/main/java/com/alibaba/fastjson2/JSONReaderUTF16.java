@@ -4093,6 +4093,10 @@ class JSONReaderUTF16
                     } while (!space && ch >= '0' && ch <= '9');
                 }
 
+                if (num && (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S')) {
+                    ch = chars[offset++];
+                }
+
                 boolean small = false;
                 if (ch == '.') {
                     small = true;
