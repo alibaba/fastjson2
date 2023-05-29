@@ -34,7 +34,7 @@ import static com.alibaba.fastjson2.writer.ObjectWriterProvider.NAME_COMPATIBLE_
 public class ObjectWriterCreator {
     public static final ObjectWriterCreator INSTANCE = new ObjectWriterCreator();
 
-    static Map<Class, LambdaInfo> lambdaMapping = new HashMap<>();
+    static final Map<Class, LambdaInfo> lambdaMapping = new HashMap<>();
 
     static {
         lambdaMapping.put(boolean.class, new LambdaInfo(boolean.class, Predicate.class, "test"));
@@ -47,7 +47,7 @@ public class ObjectWriterCreator {
         lambdaMapping.put(double.class, new LambdaInfo(double.class, ToDoubleFunction.class, "applyAsDouble"));
     }
 
-    protected AtomicInteger jitErrorCount = new AtomicInteger();
+    protected final AtomicInteger jitErrorCount = new AtomicInteger();
     protected volatile Throwable jitErrorLast;
 
     public ObjectWriterCreator() {

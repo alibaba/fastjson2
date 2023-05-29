@@ -6,7 +6,7 @@ import java.util.List;
 public class JSONPObject {
     private String function;
 
-    private final List<Object> parameters = new ArrayList<Object>();
+    private final List<Object> parameters = new ArrayList<>();
 
     public JSONPObject() {
     }

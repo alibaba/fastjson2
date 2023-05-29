@@ -107,10 +107,6 @@ public abstract class JSONSchema {
             return new ArraySchema(input, null);
         }
 
-        if (Map.class.isAssignableFrom(objectClass)) {
-            return new ObjectSchema(input, null);
-        }
-
         return new ObjectSchema(input, null);
     }
 
@@ -173,8 +169,8 @@ public abstract class JSONSchema {
             Object[] enums = input.getObject("enum", Object[].class);
             if (enums != null) {
                 boolean nonString = false;
-                for (int i = 0; i < enums.length; i++) {
-                    if (!(enums[i] instanceof String)) {
+                for (Object anEnum : enums) {
+                    if (!(anEnum instanceof String)) {
                         nonString = true;
                         break;
                     }
@@ -232,8 +228,7 @@ public abstract class JSONSchema {
                         if (ref.startsWith("#/definitions/")) {
                             final int PREFIX_LEN = 14; // "#/definitions/".length();
                             String refName = ref.substring(PREFIX_LEN);
-                            JSONSchema refSchema = definitions.get(refName);
-                            return refSchema;
+                            return definitions.get(refName);
                         }
                     }
 
@@ -254,16 +249,14 @@ public abstract class JSONSchema {
                         if (ref.startsWith("#/properties/")) {
                             final int PREFIX_LEN = 13; // "#/properties/".length();
                             String refName = ref.substring(PREFIX_LEN);
-                            JSONSchema refSchema = properties.get(refName);
-                            return refSchema;
+                            return properties.get(refName);
                         }
                     }
 
                     if (ref.startsWith("#/prefixItems/") && parent instanceof ArraySchema) {
                         final int PREFIX_LEN = 14; // "#/properties/".length();
                         int index = Integer.parseInt(ref.substring(PREFIX_LEN));
-                        JSONSchema refSchema = ((ArraySchema) parent).prefixItems[index];
-                        return refSchema;
+                        return ((ArraySchema) parent).prefixItems[index];
                     }
                 }
 
@@ -436,9 +429,8 @@ public abstract class JSONSchema {
         for (int i = 0; i < items.length; i++) {
             items[i] = JSONSchema.of(array.getJSONObject(i), type);
         }
-        AnyOf anyOf = new AnyOf(items);
 
-        return anyOf;
+        return new AnyOf(items);
     }
 
     static AnyOf anyOf(JSONArray array, Class type) {
@@ -449,9 +441,8 @@ public abstract class JSONSchema {
         for (int i = 0; i < items.length; i++) {
             items[i] = JSONSchema.of(array.getJSONObject(i), type);
         }
-        AnyOf anyOf = new AnyOf(items);
 
-        return anyOf;
+        return new AnyOf(items);
     }
 
     static AllOf allOf(JSONObject input, Class type) {
@@ -545,11 +536,11 @@ public abstract class JSONSchema {
     }
 
     public ValidateResult validate(long value) {
-        return validate((Object) Long.valueOf(value));
+        return validate((Object) value);
     }
 
     public ValidateResult validate(double value) {
-        return validate((Object) Double.valueOf(value));
+        return validate((Object) value);
     }
 
     public ValidateResult validate(Float value) {

@@ -19,7 +19,7 @@ public class ToLong
         }
 
         if (o instanceof Boolean) {
-            return ((Boolean) o).booleanValue() ? 1L : 0L;
+            return (Boolean) o ? 1L : 0L;
         }
 
         if (o instanceof Number) {

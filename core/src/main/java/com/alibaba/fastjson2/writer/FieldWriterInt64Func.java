@@ -7,7 +7,7 @@ final class FieldWriterInt64Func<T>
         extends FieldWriterInt64<T> {
     final Function<T, Long> function;
 
-    protected FieldWriterInt64Func(
+    FieldWriterInt64Func(
             String fieldName,
             int ordinal,
             long features,

@@ -101,7 +101,7 @@ final class IntegerSchema
 
             if (multipleOf != 0) {
                 if (longValue % multipleOf != 0) {
-                    return new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, (Number) value);
+                    return new ValidateResult(false, "multipleOf not match, expect multipleOf %s, but %s", multipleOf, value);
                 }
             }
 
@@ -139,12 +139,12 @@ final class IntegerSchema
 
         if (constValue != null) {
             if (value instanceof Float) {
-                float floatValue = ((Float) value).floatValue();
+                float floatValue = (Float) value;
                 if (this.constValue != floatValue) {
                     return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
                 }
             } else if (value instanceof Double) {
-                double doubleValue = ((Double) value).doubleValue();
+                double doubleValue = (Double) value;
                 if (this.constValue != doubleValue) {
                     return new ValidateResult(false, "const not match, expect %s, but %s", this.constValue, value);
                 }
@@ -203,7 +203,7 @@ final class IntegerSchema
             return typed ? FAIL_INPUT_NULL : SUCCESS;
         }
 
-        long longValue = value.longValue();
+        long longValue = value;
         if (minimum != Long.MIN_VALUE) {
             if (exclusiveMinimum ? longValue <= minimum : longValue < minimum) {
                 return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);

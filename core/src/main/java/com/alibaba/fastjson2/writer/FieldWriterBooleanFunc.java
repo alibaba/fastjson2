@@ -7,7 +7,7 @@ final class FieldWriterBooleanFunc
         extends FieldWriterBoolean {
     final Function function;
 
-    protected FieldWriterBooleanFunc(
+    FieldWriterBooleanFunc(
             String fieldName,
             int ordinal,
             long features,

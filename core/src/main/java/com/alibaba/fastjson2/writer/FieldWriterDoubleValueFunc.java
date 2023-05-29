@@ -9,7 +9,7 @@ final class FieldWriterDoubleValueFunc
         extends FieldWriter {
     final ToDoubleFunction function;
 
-    protected FieldWriterDoubleValueFunc(
+    FieldWriterDoubleValueFunc(
             String fieldName,
             int ordinal,
             long features,

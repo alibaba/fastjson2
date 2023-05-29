@@ -43,7 +43,7 @@ public interface Opcodes {
     // Java ClassFile versions (the minor version is stored in the 16 most significant bits, and the
     // major version in the 16 least significant bits).
 
-    int V1_8 = 0 << 16 | 52;
+    int V1_8 = 52;
 
     // Access flags values, defined in
     int ACC_PUBLIC = 0x0001; // class, field, method

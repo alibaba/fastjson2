@@ -9,7 +9,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.*;
 
 final class EnumSchema
         extends JSONSchema {
-    Set<Object> items;
+    final Set<Object> items;
 
     EnumSchema(Object... items) {
         super(null, null);
@@ -59,7 +59,7 @@ final class EnumSchema
         }
 
         if (value instanceof Long) {
-            long longValue = ((Long) value).longValue();
+            long longValue = (Long) value;
             if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
                 value = (int) longValue;
             }

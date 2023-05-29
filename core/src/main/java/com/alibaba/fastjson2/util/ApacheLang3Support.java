@@ -162,8 +162,8 @@ public interface ApacheLang3Support {
 
         byte[] typeNameJSONB;
 
-        static byte[] leftName = JSONB.toBytes("left");
-        static byte[] rightName = JSONB.toBytes("right");
+        static final byte[] leftName = JSONB.toBytes("left");
+        static final byte[] rightName = JSONB.toBytes("right");
 
         public PairWriter(Class objectClass) {
             this.objectClass = objectClass;
@@ -215,13 +215,11 @@ public interface ApacheLang3Support {
                 jsonWriter.writeAny(left);
 
                 jsonWriter.writeName("right");
-                jsonWriter.writeColon();
-                jsonWriter.writeAny(right);
             } else {
                 jsonWriter.writeNameAny(left);
-                jsonWriter.writeColon();
-                jsonWriter.writeAny(right);
             }
+            jsonWriter.writeColon();
+            jsonWriter.writeAny(right);
 
             jsonWriter.endObject();
         }

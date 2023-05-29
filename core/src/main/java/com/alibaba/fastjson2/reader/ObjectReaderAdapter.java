@@ -273,7 +273,7 @@ public class ObjectReaderAdapter<T>
         }
 
         int entryCnt = jsonReader.startArray();
-        Object object = createInstance(0);
+        T object = createInstance(0);
 
         for (int i = 0; i < fieldReaders.length; i++) {
             if (i >= entryCnt) {
@@ -291,10 +291,10 @@ public class ObjectReaderAdapter<T>
             return (T) buildFunction.apply(object);
         }
 
-        return (T) object;
+        return object;
     }
 
-    protected Object createInstance0(long features) throws InstantiationException {
+    protected Object createInstance0(long features) {
         if ((features & JSONReader.Feature.UseDefaultConstructorAsPossible.mask) != 0
                 && constructor != null
                 && constructor.getParameterCount() == 0) {
@@ -331,8 +331,7 @@ public class ObjectReaderAdapter<T>
     public T createInstance(Collection collection) {
         T object = createInstance(0L);
         int index = 0;
-        for (Iterator it = collection.iterator(); it.hasNext(); ) {
-            Object fieldValue = it.next();
+        for (Object fieldValue : collection) {
             if (index >= fieldReaders.length) {
                 break;
             }
@@ -360,14 +359,14 @@ public class ObjectReaderAdapter<T>
             return object;
         }
 
-        InstantiationException error;
+        Exception error;
         try {
             T object = (T) createInstance0(features);
             if (hasDefaultValue) {
                 initDefaultValue(object);
             }
             return object;
-        } catch (InstantiationException ex) {
+        } catch (Exception ex) {
             error = ex;
         }
         instantiationError = true;
@@ -450,7 +449,7 @@ public class ObjectReaderAdapter<T>
 
         boolean objectStart = jsonReader.nextIfObjectStart();
 
-        Object object = null;
+        T object = null;
         for (int i = 0; ; ++i) {
             if (jsonReader.nextIfObjectEnd()) {
                 break;
@@ -507,7 +506,7 @@ public class ObjectReaderAdapter<T>
             schema.assertValidate(object);
         }
 
-        return (T) object;
+        return object;
     }
 
     @Override

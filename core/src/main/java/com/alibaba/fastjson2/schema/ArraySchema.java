@@ -39,8 +39,7 @@ public final class ArraySchema
 
         JSONObject definitions = input.getJSONObject("definitions");
         if (definitions != null) {
-            for (Iterator<Map.Entry<String, Object>> it = definitions.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry<String, Object> entry = it.next();
+            for (Map.Entry<String, Object> entry : definitions.entrySet()) {
                 String entryKey = entry.getKey();
                 JSONObject entryValue = (JSONObject) entry.getValue();
                 JSONSchema schema = JSONSchema.of(entryValue, root == null ? this : root);
@@ -50,8 +49,7 @@ public final class ArraySchema
 
         JSONObject defs = input.getJSONObject("$defs");
         if (defs != null) {
-            for (Iterator<Map.Entry<String, Object>> it = defs.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry<String, Object> entry = it.next();
+            for (Map.Entry<String, Object> entry : defs.entrySet()) {
                 String entryKey = entry.getKey();
                 JSONObject entryValue = (JSONObject) entry.getValue();
                 JSONSchema schema = JSONSchema.of(entryValue, root == null ? this : root);
@@ -71,7 +69,11 @@ public final class ArraySchema
             additionalItemsSupport = true;
             this.itemSchema = null;
         } else if (items instanceof Boolean) {
-            additionalItemsSupport = ((Boolean) items).booleanValue();
+            if ((Boolean) items) {
+                additionalItemsSupport = true;
+            } else {
+                additionalItemsSupport = false;
+            }
             this.itemSchema = null;
         } else if (items instanceof JSONArray) {
             if (prefixItems == null) {
@@ -90,7 +92,7 @@ public final class ArraySchema
             additionalItem = JSONSchema.of((JSONObject) additionalItems, root == null ? this : root);
             additionalItemsSupport = true;
         } else if (additionalItems instanceof Boolean) {
-            additionalItemsSupport = ((Boolean) additionalItems).booleanValue();
+            additionalItemsSupport = (Boolean) additionalItems;
             this.additionalItem = null;
         } else {
             this.additionalItem = null;
@@ -113,7 +115,7 @@ public final class ArraySchema
 
                 Object prefixItem = prefixItems.get(i);
                 if (prefixItem instanceof Boolean) {
-                    schema = ((Boolean) prefixItem).booleanValue() ? Any.INSTANCE : Any.NOT_ANY;
+                    schema = (Boolean) prefixItem ? Any.INSTANCE : Any.NOT_ANY;
                 } else {
                     JSONObject jsonObject = (JSONObject) prefixItem;
                     schema = JSONSchema.of(jsonObject, root == null ? this : root);

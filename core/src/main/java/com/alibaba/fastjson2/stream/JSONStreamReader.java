@@ -7,6 +7,7 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 
 public abstract class JSONStreamReader
@@ -22,7 +23,7 @@ public abstract class JSONStreamReader
     }
 
     public static JSONStreamReader of(File file) throws IOException {
-        return of(new FileInputStream(file), StandardCharsets.UTF_8);
+        return of(Files.newInputStream(file.toPath()), StandardCharsets.UTF_8);
     }
 
     public static JSONStreamReader of(InputStream in) throws IOException {
@@ -33,7 +34,7 @@ public abstract class JSONStreamReader
         return of(in, StandardCharsets.UTF_8, types);
     }
 
-    public static JSONStreamReader of(InputStream in, Charset charset, Type... types) throws IOException {
+    public static JSONStreamReader of(InputStream in, Charset charset, Type... types) {
         if (charset == StandardCharsets.UTF_16 || charset == StandardCharsets.UTF_16LE || charset == StandardCharsets.UTF_16BE) {
             return new JSONStreamReaderUTF16(new InputStreamReader(in, charset), types);
         }
@@ -169,8 +170,8 @@ public abstract class JSONStreamReader
             return;
         }
 
-        for (Iterator it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry) it.next();
+        for (Object o : map.entrySet()) {
+            Map.Entry entry = (Map.Entry) o;
             Object key = entry.getKey();
             if (key instanceof String) {
                 String strKey = parentKey == null ? (String) key : parentKey + "." + key;

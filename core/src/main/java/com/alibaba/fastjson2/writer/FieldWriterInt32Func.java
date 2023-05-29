@@ -7,7 +7,7 @@ final class FieldWriterInt32Func<T>
         extends FieldWriterInt32<T> {
     final Function<T, Integer> function;
 
-    protected FieldWriterInt32Func(
+    FieldWriterInt32Func(
             String fieldName,
             int ordinal,
             long features,

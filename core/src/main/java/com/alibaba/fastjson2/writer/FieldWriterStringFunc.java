@@ -8,12 +8,12 @@ import java.util.function.Function;
 
 final class FieldWriterStringFunc<T>
         extends FieldWriter<T> {
-    Function<T, String> function;
+    final Function<T, String> function;
     final boolean symbol;
     final boolean trim;
     final boolean raw;
 
-    protected FieldWriterStringFunc(
+    FieldWriterStringFunc(
             String fieldName,
             int ordinal,
             long features,

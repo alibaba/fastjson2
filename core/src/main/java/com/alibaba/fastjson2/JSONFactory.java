@@ -33,7 +33,7 @@ public final class JSONFactory {
 
     public static final boolean MIXED_HASH_ALGORITHM;
 
-    protected static boolean useJacksonAnnotation;
+    static boolean useJacksonAnnotation;
 
     public static String getProperty(String key) {
         return DEFAULT_PROPERTIES.getProperty(key);
@@ -126,7 +126,7 @@ public final class JSONFactory {
             1.0e20, 1.0e21, 1.0e22
     };
 
-    static final Double DOUBLE_ZERO = Double.valueOf(0);
+    static final Double DOUBLE_ZERO = (double) 0;
 
     static {
         Properties properties = new Properties();
@@ -229,34 +229,30 @@ public final class JSONFactory {
                 try {
                     Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONWriterUTF8Vector$Factory");
                     incubatorVectorCreatorUTF8 = (Function<JSONWriter.Context, JSONWriter>) factoryClass.newInstance();
-                } catch (Throwable ignored) {
-                    // skip
-                    initErrorLast = ignored;
+                } catch (Throwable e) {
+                    initErrorLast = e;
                 }
 
                 try {
                     Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONWriterUTF16Vector$Factory");
                     incubatorVectorCreatorUTF16 = (Function<JSONWriter.Context, JSONWriter>) factoryClass.newInstance();
-                } catch (Throwable ignored) {
-                    // skip
-                    initErrorLast = ignored;
+                } catch (Throwable e) {
+                    initErrorLast = e;
                 }
 
                 if (readerVector) {
                     try {
                         Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderASCIIVector$Factory");
                         readerCreatorASCII = (JSONReaderUTF8Creator) factoryClass.newInstance();
-                    } catch (Throwable ignored) {
-                        // skip
-                        initErrorLast = ignored;
+                    } catch (Throwable e) {
+                        initErrorLast = e;
                     }
 
                     try {
                         Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderUTF8Vector$Factory");
                         readerCreatorUTF8 = (JSONReaderUTF8Creator) factoryClass.newInstance();
-                    } catch (Throwable ignored) {
-                        // skip
-                        initErrorLast = ignored;
+                    } catch (Throwable e) {
+                        initErrorLast = e;
                     }
                 }
             }
@@ -265,9 +261,8 @@ public final class JSONFactory {
                 try {
                     Class<?> factoryClass = Class.forName("com.alibaba.fastjson2.JSONReaderUTF16Vector$Factory");
                     readerCreatorUTF16 = (JSONReaderUTF16Creator) factoryClass.newInstance();
-                } catch (Throwable ignored) {
-                    // skip
-                    initErrorLast = ignored;
+                } catch (Throwable e) {
+                    initErrorLast = e;
                 }
             }
         }
@@ -309,8 +304,8 @@ public final class JSONFactory {
 
     static final Properties DEFAULT_PROPERTIES;
 
-    static ObjectWriterProvider defaultObjectWriterProvider = new ObjectWriterProvider();
-    static ObjectReaderProvider defaultObjectReaderProvider = new ObjectReaderProvider();
+    static final ObjectWriterProvider defaultObjectWriterProvider = new ObjectWriterProvider();
+    static final ObjectReaderProvider defaultObjectReaderProvider = new ObjectReaderProvider();
 
     static final JSONPathCompiler defaultJSONPathCompiler;
 

@@ -11,7 +11,7 @@ final class FieldWriterUUIDFunc<T>
         extends FieldWriterObjectFinal<T> {
     final Function function;
 
-    protected FieldWriterUUIDFunc(
+    FieldWriterUUIDFunc(
             String name,
             int ordinal,
             long features,

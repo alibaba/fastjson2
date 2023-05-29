@@ -19,11 +19,11 @@ public final class ObjectReaderImplEnum
 
     final Class enumClass;
     final long typeNameHash;
-    protected final Enum[] enums;
-    protected final Enum[] ordinalEnums;
-    protected long[] enumNameHashCodes;
-    protected String[] stringValues;
-    protected long[] intValues;
+    private final Enum[] enums;
+    private final Enum[] ordinalEnums;
+    private final long[] enumNameHashCodes;
+    private String[] stringValues;
+    private long[] intValues;
 
     public ObjectReaderImplEnum(
             Class enumClass,

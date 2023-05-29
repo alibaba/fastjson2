@@ -17,7 +17,7 @@ public class ToBigInteger
         }
 
         if (o instanceof Boolean) {
-            return ((Boolean) o).booleanValue() ? BigInteger.ONE : BigInteger.ZERO;
+            return (Boolean) o ? BigInteger.ONE : BigInteger.ZERO;
         }
 
         if (o instanceof Byte

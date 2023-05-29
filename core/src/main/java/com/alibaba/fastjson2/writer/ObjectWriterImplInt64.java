@@ -23,7 +23,7 @@ final class ObjectWriterImplInt64
             return;
         }
 
-        long longValue = ((Long) object).longValue();
+        long longValue = (Long) object;
         jsonWriter.writeInt64(longValue);
     }
 

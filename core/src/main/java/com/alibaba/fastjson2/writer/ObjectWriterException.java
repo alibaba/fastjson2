@@ -44,8 +44,7 @@ public class ObjectWriterException
             writeTypeInfo(jsonWriter);
         }
 
-        for (int i = 0, size = fieldWriters.size(); i < size; ++i) {
-            FieldWriter fieldWriter = fieldWriters.get(i);
+        for (FieldWriter fieldWriter : fieldWriters) {
             fieldWriter.write(jsonWriter, object);
         }
 

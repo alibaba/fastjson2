@@ -80,7 +80,7 @@ public class ObjectReader2<T>
             return (T) autoTypeReader.readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
-        Object object = creator.get();
+        T object = creator.get();
 
         int entryCnt = jsonReader.startArray();
         if (entryCnt > 0) {
@@ -97,7 +97,7 @@ public class ObjectReader2<T>
             return (T) buildFunction.apply(object);
         }
 
-        return (T) object;
+        return object;
     }
 
     @Override
@@ -131,7 +131,7 @@ public class ObjectReader2<T>
             if (buildFunction != null) {
                 return (T) buildFunction.apply(object);
             }
-            return (T) object;
+            return object;
         }
 
         if (!jsonReader.nextIfMatch(BC_OBJECT)) {
@@ -158,11 +158,7 @@ public class ObjectReader2<T>
             initStringFieldAsEmpty(object);
         }
 
-        for (; ; ) {
-            if (jsonReader.nextIfMatch(BC_OBJECT_END)) {
-                break;
-            }
-
+        while (!jsonReader.nextIfMatch(BC_OBJECT_END)) {
             long hashCode = jsonReader.readFieldNameHashCode();
             if (hashCode == 0) {
                 continue;

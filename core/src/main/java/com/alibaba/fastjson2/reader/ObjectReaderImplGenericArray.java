@@ -117,11 +117,7 @@ class ObjectReaderImplGenericArray
         }
         jsonReader.next();
 
-        for (; ; ) {
-            if (jsonReader.nextIfMatch(']')) {
-                break;
-            }
-
+        while (!jsonReader.nextIfMatch(']')) {
             Object item;
             if (itemObjectReader != null) {
                 item = itemObjectReader.readObject(jsonReader, itemType, null, 0);
@@ -135,9 +131,7 @@ class ObjectReaderImplGenericArray
 
             list.add(item);
 
-            if (jsonReader.nextIfMatch(',')) {
-                continue;
-            }
+            jsonReader.nextIfMatch(',');
         }
 
         jsonReader.nextIfMatch(',');

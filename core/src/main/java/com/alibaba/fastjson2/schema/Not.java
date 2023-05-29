@@ -35,8 +35,7 @@ final class Not
         }
 
         if (types != null) {
-            for (int i = 0; i < types.length; i++) {
-                Type type = types[i];
+            for (Type type : types) {
                 switch (type) {
                     case String:
                         if (value instanceof String) {
@@ -92,7 +91,7 @@ final class Not
         }
 
         if (result != null) {
-            return result.booleanValue() ? FAIL_NOT : SUCCESS;
+            return result ? FAIL_NOT : SUCCESS;
         }
 
         return SUCCESS;

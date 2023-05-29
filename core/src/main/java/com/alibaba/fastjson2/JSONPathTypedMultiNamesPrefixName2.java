@@ -98,11 +98,7 @@ public class JSONPathTypedMultiNamesPrefixName2
         }
 
         Object[] values = new Object[paths.length];
-        while (true) {
-            if (jsonReader.nextIfObjectEnd()) {
-                break;
-            }
-
+        while (!jsonReader.nextIfObjectEnd()) {
             if (jsonReader.isEnd()) {
                 throw new JSONException(jsonReader.info("illegal input, expect '[', but " + jsonReader.current()));
             }

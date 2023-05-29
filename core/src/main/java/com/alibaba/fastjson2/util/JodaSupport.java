@@ -186,10 +186,7 @@ public class JodaSupport {
             Integer minimumDaysInFirstWeek = null;
             String zoneId = null;
             jsonReader.nextIfObjectStart();
-            for (; ; ) {
-                if (jsonReader.nextIfObjectEnd()) {
-                    break;
-                }
+            while (!jsonReader.nextIfObjectEnd()) {
                 final long HASH_MINIMUM_DAYS_IN_FIRST_WEEK = 8244232525129275563L; // Fnv.hashCode64("minimumDaysInFirstWeek");
                 long fieldNameHashCode = jsonReader.readFieldNameHashCode();
                 if (fieldNameHashCode == HASH_MINIMUM_DAYS_IN_FIRST_WEEK) {
@@ -244,19 +241,14 @@ public class JodaSupport {
 
             int minDaysInFirstWeek = getMinimumDaysInFirstWeek.applyAsInt(object);
 
-            if (minDaysInFirstWeek == 4) {
-                jsonWriter.startObject();
-                jsonWriter.writeName("zoneId");
-                jsonWriter.writeString(zoneId);
-                jsonWriter.endObject();
-            } else {
-                jsonWriter.startObject();
+            jsonWriter.startObject();
+            if (minDaysInFirstWeek != 4) {
                 jsonWriter.writeName("minimumDaysInFirstWeek");
                 jsonWriter.writeInt32(minDaysInFirstWeek);
-                jsonWriter.writeName("zoneId");
-                jsonWriter.writeString(zoneId);
-                jsonWriter.endObject();
             }
+            jsonWriter.writeName("zoneId");
+            jsonWriter.writeString(zoneId);
+            jsonWriter.endObject();
         }
 
         @Override
@@ -264,7 +256,7 @@ public class JodaSupport {
             Object zone = getZone.apply(object);
             String zoneId = (String) getID.apply(zone);
 
-            int minDaysInFirstWeek = (Integer) getMinimumDaysInFirstWeek.applyAsInt(object);
+            int minDaysInFirstWeek = getMinimumDaysInFirstWeek.applyAsInt(object);
             jsonWriter.startObject();
             jsonWriter.writeName("minimumDaysInFirstWeek");
             jsonWriter.writeInt32(minDaysInFirstWeek);
@@ -386,10 +378,7 @@ public class JodaSupport {
                 Integer year = null, month = null, day = null;
                 Object chronology = null;
                 jsonReader.nextIfObjectStart();
-                for (; ; ) {
-                    if (jsonReader.nextIfObjectEnd()) {
-                        break;
-                    }
+                while (!jsonReader.nextIfObjectEnd()) {
                     long fieldNameHashCode = jsonReader.readFieldNameHashCode();
                     if (fieldNameHashCode == HASH_YEAR) {
                         year = jsonReader.readInt32Value();
@@ -613,10 +602,7 @@ public class JodaSupport {
                 Integer year = null, month = null, day = null, hour = null, minute = null, second = null, millis = null;
                 Object chronology = null;
                 jsonReader.nextIfObjectStart();
-                for (; ; ) {
-                    if (jsonReader.nextIfObjectEnd()) {
-                        break;
-                    }
+                while (!jsonReader.nextIfObjectEnd()) {
                     long fieldNameHashCode = jsonReader.readFieldNameHashCode();
                     if (fieldNameHashCode == HASH_YEAR) {
                         year = jsonReader.readInt32Value();

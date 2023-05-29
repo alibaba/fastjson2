@@ -10,6 +10,7 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -171,16 +172,16 @@ abstract class JSONPathFilter
             } else if (fieldValue instanceof Float) {
                 cmp = ((Float) fieldValue)
                         .compareTo(
-                                Float.valueOf(value));
+                                (float) value);
             } else if (fieldValue instanceof Double) {
                 cmp = ((Double) fieldValue)
                         .compareTo(
-                                Double.valueOf(value));
+                                (double) value);
             } else if (fieldValue instanceof String) {
                 String fieldValueStr = (String) fieldValue;
                 if (IOUtils.isNumber(fieldValueStr)) {
                     try {
-                        cmp = Long.valueOf(Long.parseLong(fieldValueStr)).compareTo(Long.valueOf(value));
+                        cmp = Long.compare(Long.parseLong(fieldValueStr), value);
                     } catch (Exception ignored) {
                         cmp = fieldValueStr.compareTo(Long.toString(value));
                     }
@@ -402,8 +403,7 @@ abstract class JSONPathFilter
             if (object instanceof List) {
                 List list = (List) object;
                 JSONArray array = new JSONArray(list.size());
-                for (int i = 0, l = list.size(); i < l; i++) {
-                    Object item = list.get(i);
+                for (Object item : list) {
                     boolean match = and;
                     for (JSONPathFilter filter : filters) {
                         boolean result = filter.apply(context, item);
@@ -521,8 +521,7 @@ abstract class JSONPathFilter
             if (object instanceof List) {
                 List list = (List) object;
                 JSONArray array = new JSONArray(list.size());
-                for (int i = 0, l = list.size(); i < l; i++) {
-                    Object item = list.get(i);
+                for (Object item : list) {
                     if (apply(context, item)) {
                         array.add(item);
                     }
@@ -583,10 +582,7 @@ abstract class JSONPathFilter
             if (object instanceof Map) {
                 Object fieldValue = fieldName == null ? object : ((Map<?, ?>) object).get(fieldName);
                 if (fieldValue == null) {
-                    if (this instanceof NameIsNull) {
-                        return true;
-                    }
-                    return false;
+                    return this instanceof NameIsNull;
                 }
 
                 if (fieldName2 != null) {
@@ -608,10 +604,7 @@ abstract class JSONPathFilter
                         }
 
                         if (fieldValue == null) {
-                            if (this instanceof NameIsNull) {
-                                return true;
-                            }
-                            return false;
+                            return this instanceof NameIsNull;
                         }
                     }
                 }
@@ -743,12 +736,10 @@ abstract class JSONPathFilter
 
         @Override
         boolean apply(Object fieldValue) {
-            switch (operator) {
-                case EQ:
-                    return array.equals(fieldValue);
-                default:
-                    throw new JSONException("not support operator : " + operator);
+            if (Objects.requireNonNull(operator) == Operator.EQ) {
+                return array.equals(fieldValue);
             }
+            throw new JSONException("not support operator : " + operator);
         }
     }
 
@@ -772,12 +763,10 @@ abstract class JSONPathFilter
 
         @Override
         boolean apply(Object fieldValue) {
-            switch (operator) {
-                case EQ:
-                    return object.equals(fieldValue);
-                default:
-                    throw new JSONException("not support operator : " + operator);
+            if (Objects.requireNonNull(operator) == Operator.EQ) {
+                return object.equals(fieldValue);
             }
+            throw new JSONException("not support operator : " + operator);
         }
     }
 
@@ -941,8 +930,7 @@ abstract class JSONPathFilter
             JSONArray array = new JSONArray();
             if (object instanceof List) {
                 List list = (List) object;
-                for (int i = 0, l = list.size(); i < l; i++) {
-                    Object item = list.get(i);
+                for (Object item : list) {
                     if (item instanceof Map) {
                         if (((Map) item).containsKey(name)) {
                             array.add(item);
@@ -962,8 +950,7 @@ abstract class JSONPathFilter
 
             if (object instanceof JSONPath.Sequence) {
                 List list = ((JSONPath.Sequence) object).values;
-                for (int i = 0, l = list.size(); i < l; i++) {
-                    Object item = list.get(i);
+                for (Object item : list) {
                     if (item instanceof Map) {
                         if (((Map) item).containsKey(name)) {
                             array.add(item);

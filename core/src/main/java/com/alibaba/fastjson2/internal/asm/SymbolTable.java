@@ -41,11 +41,6 @@ final class SymbolTable {
     final ClassWriter classWriter;
 
     /**
-     * The major version number of the class to which this symbol table belongs.
-     */
-    private int majorVersion;
-
-    /**
      * The internal name of the class to which this symbol table belongs.
      */
     String className;
@@ -63,7 +58,7 @@ final class SymbolTable {
      * The content of the ClassFile's constant_pool JVMS structure corresponding to this SymbolTable.
      * The ClassFile's constant_pool_count field is <i>not</i> included.
      */
-    ByteVector constantPool;
+    final ByteVector constantPool;
 
     /**
      * The actual number of elements in {@link #typeTable}. These elements are stored from index 0 to
@@ -102,7 +97,9 @@ final class SymbolTable {
      * @return the constant pool index of a new or already existing Symbol with the given class name.
      */
     int setMajorVersionAndClassName(final int majorVersion, final String className) {
-        this.majorVersion = majorVersion;
+        /**
+         * The major version number of the class to which this symbol table belongs.
+         */
         this.className = className;
         return addConstantUtf8Reference(/*CONSTANT_CLASS_TAG*/ 7, className).index;
     }
@@ -344,8 +341,7 @@ final class SymbolTable {
      * @return a new or already existing Symbol with the given value.
      */
     int addConstantNameAndType(final String name, final String descriptor) {
-        final int CONSTANT_NAME_AND_TYPE_TAG = 12;
-        final int tag = CONSTANT_NAME_AND_TYPE_TAG;
+        final int tag = 12; // CONSTANT_NAME_AND_TYPE_TAG
         int hashCode = 0x7FFFFFFF & (tag + name.hashCode() * descriptor.hashCode());
         Symbol entry = entries[hashCode % entries.length];
         while (entry != null) {

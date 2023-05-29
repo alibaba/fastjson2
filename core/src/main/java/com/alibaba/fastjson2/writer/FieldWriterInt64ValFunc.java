@@ -9,7 +9,7 @@ final class FieldWriterInt64ValFunc<T>
         extends FieldWriterInt64<T> {
     final ToLongFunction function;
 
-    protected FieldWriterInt64ValFunc(
+    FieldWriterInt64ValFunc(
             String fieldName,
             int ordinal,
             long features,

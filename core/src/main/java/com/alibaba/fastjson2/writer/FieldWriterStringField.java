@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
 
 final class FieldWriterStringField<T>
         extends FieldWriter<T> {
-    protected FieldWriterStringField(
+    FieldWriterStringField(
             String fieldName,
             int ordinal,
             long features,

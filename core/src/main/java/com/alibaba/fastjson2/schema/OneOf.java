@@ -24,7 +24,7 @@ final class OneOf
         for (int i = 0; i < this.items.length; i++) {
             Object item = items.get(i);
             if (item instanceof Boolean) {
-                this.items[i] = ((Boolean) item).booleanValue() ? Any.INSTANCE : Any.NOT_ANY;
+                this.items[i] = (Boolean) item ? Any.INSTANCE : Any.NOT_ANY;
             } else {
                 this.items[i] = JSONSchema.of((JSONObject) item, parent);
             }

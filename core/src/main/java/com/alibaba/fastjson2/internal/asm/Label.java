@@ -275,14 +275,12 @@ public class Label {
                     }
                     hasAsmInstructions = true;
                 }
-                code[handle++] = (byte) (relativeOffset >>> 8);
-                code[handle] = (byte) relativeOffset;
             } else {
                 code[handle++] = (byte) (relativeOffset >>> 24);
                 code[handle++] = (byte) (relativeOffset >>> 16);
-                code[handle++] = (byte) (relativeOffset >>> 8);
-                code[handle] = (byte) relativeOffset;
             }
+            code[handle++] = (byte) (relativeOffset >>> 8);
+            code[handle] = (byte) relativeOffset;
         }
         return hasAsmInstructions;
     }

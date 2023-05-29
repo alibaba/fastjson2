@@ -152,7 +152,6 @@ public class FieldWriterObject<T>
             if (success) {
                 initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
             }
-            return formattedWriter;
         } else {
             if (initObjectWriter == null) {
                 boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
@@ -160,8 +159,8 @@ public class FieldWriterObject<T>
                     initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
                 }
             }
-            return formattedWriter;
         }
+        return formattedWriter;
     }
 
     static boolean typeMatch(Class initValueClass, Class valueClass) {
@@ -302,8 +301,7 @@ public class FieldWriterObject<T>
 
         if (unwrapped) {
             if (value instanceof Map) {
-                for (Iterator<Map.Entry> it = ((Map) value).entrySet().iterator(); it.hasNext(); ) {
-                    Map.Entry entry = it.next();
+                for (Map.Entry entry : (Iterable<Map.Entry>) ((Map) value).entrySet()) {
                     String entryKey = entry.getKey().toString();
                     Object entryValue = entry.getValue();
                     if (entryValue == null) {

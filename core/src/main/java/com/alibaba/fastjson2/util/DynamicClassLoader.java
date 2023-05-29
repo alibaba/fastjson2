@@ -22,13 +22,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DynamicClassLoader
         extends ClassLoader {
-    private static java.security.ProtectionDomain DOMAIN;
+    private static final java.security.ProtectionDomain DOMAIN;
 
-    private static Map<String, Class<?>> classMapping = new HashMap<>();
+    private static final Map<String, Class<?>> classMapping = new HashMap<>();
 
-    private static DynamicClassLoader instance = new DynamicClassLoader();
+    private static final DynamicClassLoader instance = new DynamicClassLoader();
 
-    private Map<String, Class> classes = new ConcurrentHashMap<>();
+    private final Map<String, Class> classes = new ConcurrentHashMap<>();
 
     static {
         Class[] classes = new Class[]{
@@ -148,11 +148,9 @@ public class DynamicClassLoader
 
     static {
         DOMAIN = (java.security.ProtectionDomain) java.security.AccessController.doPrivileged(
-                (PrivilegedAction<Object>) () -> DynamicClassLoader.class.getProtectionDomain()
+                (PrivilegedAction<Object>) DynamicClassLoader.class::getProtectionDomain
         );
     }
-
-    private final ClassLoader parent;
 
     public DynamicClassLoader() {
         this(getParentClassLoader());
@@ -160,7 +158,6 @@ public class DynamicClassLoader
 
     public DynamicClassLoader(ClassLoader parent) {
         super(parent);
-        this.parent = parent;
     }
 
     static ClassLoader getParentClassLoader() {

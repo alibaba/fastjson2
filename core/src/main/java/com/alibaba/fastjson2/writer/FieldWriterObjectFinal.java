@@ -13,7 +13,7 @@ abstract class FieldWriterObjectFinal<T>
     final Type fieldType;
     final Class fieldClass;
     volatile ObjectWriter objectWriter;
-    boolean refDetect;
+    final boolean refDetect;
 
     protected FieldWriterObjectFinal(
             String name,

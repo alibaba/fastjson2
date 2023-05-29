@@ -15,7 +15,7 @@ final class ObjectWriterImplInt16
             return;
         }
 
-        short shortValue = ((Short) object).shortValue();
+        short shortValue = (Short) object;
         jsonWriter.writeInt16(shortValue);
     }
 
@@ -25,7 +25,7 @@ final class ObjectWriterImplInt16
             jsonWriter.writeNumberNull();
             return;
         }
-        short shortValue = ((Short) object).shortValue();
+        short shortValue = (Short) object;
         jsonWriter.writeInt32(shortValue);
         if (((jsonWriter.getFeatures() | features) & JSONWriter.Feature.WriteClassName.mask) != 0
                 && fieldType != Short.class && fieldType != short.class) {

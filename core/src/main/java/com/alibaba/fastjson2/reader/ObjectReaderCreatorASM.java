@@ -32,7 +32,7 @@ public class ObjectReaderCreatorASM
         extends ObjectReaderCreator {
     // GraalVM not support
     // Android not support
-    public static ObjectReaderCreatorASM INSTANCE = new ObjectReaderCreatorASM(DynamicClassLoader.getInstance());
+    public static final ObjectReaderCreatorASM INSTANCE = new ObjectReaderCreatorASM(DynamicClassLoader.getInstance());
 
     protected static final AtomicLong seed = new AtomicLong();
 
@@ -55,7 +55,7 @@ public class ObjectReaderCreatorASM
     static final int THIS = 0;
 
     static final String packageName;
-    static Map<Class, FieldReaderInfo> infos = new HashMap<>();
+    static final Map<Class, FieldReaderInfo> infos = new HashMap<>();
 
     static {
         Package pkg = ObjectReaderCreatorASM.class.getPackage();
@@ -74,7 +74,7 @@ public class ObjectReaderCreatorASM
         infos.put(Integer.class, new FieldReaderInfo(ASMUtils.type(BiConsumer.class), "(Ljava/lang/Object;Ljava/lang/Integer;)V", "(Ljava/lang/Integer;)V", Opcodes.ALOAD, "readInt32", "()Ljava/lang/Integer;", Opcodes.ASTORE));
     }
 
-    static String[] fieldItemObjectReader = new String[1024];
+    static final String[] fieldItemObjectReader = new String[1024];
 
     static String fieldReader(int i) {
         switch (i) {
@@ -639,38 +639,13 @@ public class ObjectReaderCreatorASM
         final int HASH_CODE_32 = 3;
 
         Label rtnlt = new Label();
-        if (fieldReaderArray.length <= 6) {
-            for (int i = 0; i < fieldReaderArray.length; ++i) {
-                Label next_ = new Label(), get_ = new Label();
-                String fieldName = fieldReaderArray[i].fieldName;
-                long hashCode64 = fieldReaderArray[i].fieldNameHash;
-
-                mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE_64);
-                mw.visitLdcInsn(hashCode64);
-                mw.visitInsn(Opcodes.LCMP);
-                mw.visitJumpInsn(Opcodes.IFNE, next_);
-
-                mw.visitLabel(get_);
-                mw.visitVarInsn(Opcodes.ALOAD, THIS);
-                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
-                mw.visitJumpInsn(Opcodes.GOTO, rtnlt);
-
-                mw.visitLabel(next_);
-            }
-
-            mw.visitInsn(Opcodes.ACONST_NULL);
-            mw.visitInsn(Opcodes.ARETURN);
-        } else {
+        if (fieldReaderArray.length > 6) {
             Map<Integer, List<Long>> map = new TreeMap();
 
             for (int i = 0; i < objectReaderAdapter.hashCodes.length; i++) {
                 long hashCode64 = objectReaderAdapter.hashCodes[i];
                 int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
-                List<Long> hashCode64List = map.get(hashCode32);
-                if (hashCode64List == null) {
-                    hashCode64List = new ArrayList<>();
-                    map.put(hashCode32, hashCode64List);
-                }
+                List<Long> hashCode64List = map.computeIfAbsent(hashCode32, k -> new ArrayList<>());
                 hashCode64List.add(hashCode64);
             }
             int[] hashCode32Keys = new int[map.size()];
@@ -725,6 +700,27 @@ public class ObjectReaderCreatorASM
             mw.visitLabel(dflt);
             mw.visitInsn(Opcodes.ACONST_NULL);
             mw.visitInsn(Opcodes.ARETURN);
+        } else {
+            for (int i = 0; i < fieldReaderArray.length; ++i) {
+                Label next_ = new Label(), get_ = new Label();
+                String fieldName = fieldReaderArray[i].fieldName;
+                long hashCode64 = fieldReaderArray[i].fieldNameHash;
+
+                mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE_64);
+                mw.visitLdcInsn(hashCode64);
+                mw.visitInsn(Opcodes.LCMP);
+                mw.visitJumpInsn(Opcodes.IFNE, next_);
+
+                mw.visitLabel(get_);
+                mw.visitVarInsn(Opcodes.ALOAD, THIS);
+                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
+                mw.visitJumpInsn(Opcodes.GOTO, rtnlt);
+
+                mw.visitLabel(next_);
+            }
+
+            mw.visitInsn(Opcodes.ACONST_NULL);
+            mw.visitInsn(Opcodes.ARETURN);
         }
 
         mw.visitLabel(rtnlt);
@@ -750,38 +746,13 @@ public class ObjectReaderCreatorASM
         final int HASH_CODE_32 = 3;
 
         Label rtnlt = new Label();
-        if (fieldReaderArray.length <= 6) {
-            for (int i = 0; i < fieldReaderArray.length; ++i) {
-                Label next_ = new Label(), get_ = new Label();
-                String fieldName = fieldReaderArray[i].fieldName;
-                long hashCode64 = fieldReaderArray[i].fieldNameHashLCase;
-
-                mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE_64);
-                mw.visitLdcInsn(hashCode64);
-                mw.visitInsn(Opcodes.LCMP);
-                mw.visitJumpInsn(Opcodes.IFNE, next_);
-
-                mw.visitLabel(get_);
-                mw.visitVarInsn(Opcodes.ALOAD, THIS);
-                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
-                mw.visitJumpInsn(Opcodes.GOTO, rtnlt);
-
-                mw.visitLabel(next_);
-            }
-
-            mw.visitInsn(Opcodes.ACONST_NULL);
-            mw.visitInsn(Opcodes.ARETURN);
-        } else {
+        if (fieldReaderArray.length > 6) {
             Map<Integer, List<Long>> map = new TreeMap();
 
             for (int i = 0; i < objectReaderAdapter.hashCodesLCase.length; i++) {
                 long hashCode64 = objectReaderAdapter.hashCodesLCase[i];
                 int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
-                List<Long> hashCode64List = map.get(hashCode32);
-                if (hashCode64List == null) {
-                    hashCode64List = new ArrayList<>();
-                    map.put(hashCode32, hashCode64List);
-                }
+                List<Long> hashCode64List = map.computeIfAbsent(hashCode32, k -> new ArrayList<>());
                 hashCode64List.add(hashCode64);
             }
             int[] hashCode32Keys = new int[map.size()];
@@ -816,8 +787,7 @@ public class ObjectReaderCreatorASM
 
                 int hashCode32 = hashCode32Keys[i];
                 List<Long> hashCode64Array = map.get(hashCode32);
-                for (int j = 0; j < hashCode64Array.size(); ++j) {
-                    long hashCode64 = hashCode64Array.get(j);
+                for (long hashCode64 : hashCode64Array) {
                     mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE_64);
                     mw.visitLdcInsn(hashCode64);
                     mw.visitInsn(Opcodes.LCMP);
@@ -834,6 +804,27 @@ public class ObjectReaderCreatorASM
             }
 
             mw.visitLabel(dflt);
+            mw.visitInsn(Opcodes.ACONST_NULL);
+            mw.visitInsn(Opcodes.ARETURN);
+        } else {
+            for (int i = 0; i < fieldReaderArray.length; ++i) {
+                Label next_ = new Label(), get_ = new Label();
+                String fieldName = fieldReaderArray[i].fieldName;
+                long hashCode64 = fieldReaderArray[i].fieldNameHashLCase;
+
+                mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE_64);
+                mw.visitLdcInsn(hashCode64);
+                mw.visitInsn(Opcodes.LCMP);
+                mw.visitJumpInsn(Opcodes.IFNE, next_);
+
+                mw.visitLabel(get_);
+                mw.visitVarInsn(Opcodes.ALOAD, THIS);
+                mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
+                mw.visitJumpInsn(Opcodes.GOTO, rtnlt);
+
+                mw.visitLabel(next_);
+            }
+
             mw.visitInsn(Opcodes.ACONST_NULL);
             mw.visitInsn(Opcodes.ARETURN);
         }
@@ -896,12 +887,10 @@ public class ObjectReaderCreatorASM
         if (objectReaderSuper == TYPE_OBJECT_READER_ADAPTER) {
             for (int i = 0; i < fieldReaderArray.length; i++) {
                 FieldWriter fv = cw.visitField(Opcodes.ACC_PUBLIC, fieldReader(i), DESC_FIELD_READER);
-                fv.visitEnd();
             }
 
             for (int i = 0; i < fieldReaderArray.length; i++) {
                 FieldWriter fv = cw.visitField(Opcodes.ACC_PUBLIC, fieldObjectReader(i), DESC_OBJECT_READER);
-                fv.visitEnd();
             }
         }
 
@@ -909,7 +898,6 @@ public class ObjectReaderCreatorASM
             Class fieldClass = fieldReaderArray[i].fieldClass;
             if (List.class.isAssignableFrom(fieldClass)) {
                 FieldWriter fv = cw.visitField(Opcodes.ACC_PUBLIC, fieldItemObjectReader(i), DESC_OBJECT_READER);
-                fv.visitEnd();
             }
         }
     }
@@ -1078,7 +1066,118 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(endAutoType_);
 
-        if (fieldReaderArray.length <= 6) {
+        if (fieldReaderArray.length > 6) {
+            // use switch
+            Map<Integer, List<Long>> map = new TreeMap();
+
+            for (int i = 0; i < objectReaderAdapter.hashCodes.length; i++) {
+                long hashCode64 = objectReaderAdapter.hashCodes[i];
+                int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
+                List<Long> hashCode64List = map.computeIfAbsent(hashCode32, k -> new ArrayList<>());
+                hashCode64List.add(hashCode64);
+            }
+            int[] hashCode32Keys = new int[map.size()];
+            {
+                int off = 0;
+                for (Integer key : map.keySet()) {
+                    hashCode32Keys[off++] = key;
+                }
+            }
+            Arrays.sort(hashCode32Keys);
+
+            // int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));
+            mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE64);
+            mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE64);
+            mw.visitVarInsn(Opcodes.BIPUSH, 32);
+            mw.visitInsn(Opcodes.LUSHR);
+            mw.visitInsn(Opcodes.LXOR);
+            mw.visitInsn(Opcodes.L2I);
+            mw.visitVarInsn(Opcodes.ISTORE, HASH_CODE_32);
+
+            Label dflt = new Label();
+            Label[] labels = new Label[hashCode32Keys.length];
+            for (int i = 0; i < labels.length; i++) {
+                labels[i] = new Label();
+            }
+
+            mw.visitVarInsn(Opcodes.ILOAD, HASH_CODE_32);
+            mw.visitLookupSwitchInsn(dflt, hashCode32Keys, labels);
+
+            for (int i = 0; i < labels.length; i++) {
+                mw.visitLabel(labels[i]);
+
+                int hashCode32 = hashCode32Keys[i];
+                List<Long> hashCode64Array = map.get(hashCode32);
+                for (long hashCode64 : hashCode64Array) {
+                    mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE64);
+                    mw.visitLdcInsn(hashCode64);
+                    mw.visitInsn(Opcodes.LCMP);
+                    mw.visitJumpInsn(Opcodes.IFNE, dflt);
+
+                    int m = Arrays.binarySearch(objectReaderAdapter.hashCodes, hashCode64);
+                    int index = objectReaderAdapter.mapping[m];
+
+                    FieldReader fieldReader = fieldReaderArray[index];
+
+                    varIndex = genReadFieldValue(
+                            context,
+                            fieldReader,
+                            fieldBased,
+                            classNameType,
+                            mw,
+                            THIS,
+                            JSON_READER,
+                            OBJECT,
+                            FEATURES,
+                            varIndex,
+                            variants,
+                            ITEM_CNT,
+                            J,
+                            index,
+                            true, // JSONB
+                            TYPE_OBJECT
+                    );
+                    mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_);
+                }
+
+                mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_);
+            }
+
+            // switch_default
+            mw.visitLabel(dflt);
+
+            Label fieldReaderNull_ = new Label();
+
+            if ((readerFeatures & JSONReader.Feature.SupportSmartMatch.mask) == 0) {
+                mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isSupportSmartMatch", "(J)Z", false);
+                mw.visitJumpInsn(Opcodes.IFEQ, fieldReaderNull_);
+            }
+
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "getNameHashCodeLCase", "()J", false);
+            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_OBJECT_READER, "getFieldReaderLCase", METHOD_DESC_GET_FIELD_READER, true);
+            mw.visitInsn(Opcodes.DUP);
+            mw.visitVarInsn(Opcodes.ASTORE, FIELD_READER);
+            mw.visitJumpInsn(Opcodes.IFNULL, fieldReaderNull_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_READER);
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_READE, "readFieldValueJSONB", METHOD_DESC_READ_FIELD_VALUE, false);
+            mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
+
+            mw.visitLabel(fieldReaderNull_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA, false);
+
+            mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
+        } else {
             for (int i = 0; i < fieldReaderArray.length; ++i) {
                 Label next_ = new Label();
 
@@ -1165,122 +1264,6 @@ public class ObjectReaderCreatorASM
             }
 
             mw.visitLabel(processExtra_);
-
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA, false);
-
-            mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
-        } else {
-            // use switch
-            Map<Integer, List<Long>> map = new TreeMap();
-
-            for (int i = 0; i < objectReaderAdapter.hashCodes.length; i++) {
-                long hashCode64 = objectReaderAdapter.hashCodes[i];
-                int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
-                List<Long> hashCode64List = map.get(hashCode32);
-                if (hashCode64List == null) {
-                    hashCode64List = new ArrayList<>();
-                    map.put(hashCode32, hashCode64List);
-                }
-                hashCode64List.add(hashCode64);
-            }
-            int[] hashCode32Keys = new int[map.size()];
-            {
-                int off = 0;
-                for (Integer key : map.keySet()) {
-                    hashCode32Keys[off++] = key;
-                }
-            }
-            Arrays.sort(hashCode32Keys);
-
-            // int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));
-            mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE64);
-            mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE64);
-            mw.visitVarInsn(Opcodes.BIPUSH, 32);
-            mw.visitInsn(Opcodes.LUSHR);
-            mw.visitInsn(Opcodes.LXOR);
-            mw.visitInsn(Opcodes.L2I);
-            mw.visitVarInsn(Opcodes.ISTORE, HASH_CODE_32);
-
-            Label dflt = new Label();
-            Label[] labels = new Label[hashCode32Keys.length];
-            for (int i = 0; i < labels.length; i++) {
-                labels[i] = new Label();
-            }
-
-            mw.visitVarInsn(Opcodes.ILOAD, HASH_CODE_32);
-            mw.visitLookupSwitchInsn(dflt, hashCode32Keys, labels);
-
-            for (int i = 0; i < labels.length; i++) {
-                mw.visitLabel(labels[i]);
-
-                int hashCode32 = hashCode32Keys[i];
-                List<Long> hashCode64Array = map.get(hashCode32);
-                for (int j = 0; j < hashCode64Array.size(); ++j) {
-                    long hashCode64 = hashCode64Array.get(j);
-                    mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE64);
-                    mw.visitLdcInsn(hashCode64);
-                    mw.visitInsn(Opcodes.LCMP);
-                    mw.visitJumpInsn(Opcodes.IFNE, dflt);
-
-                    int m = Arrays.binarySearch(objectReaderAdapter.hashCodes, hashCode64);
-                    int index = objectReaderAdapter.mapping[m];
-
-                    FieldReader fieldReader = fieldReaderArray[index];
-
-                    varIndex = genReadFieldValue(
-                            context,
-                            fieldReader,
-                            fieldBased,
-                            classNameType,
-                            mw,
-                            THIS,
-                            JSON_READER,
-                            OBJECT,
-                            FEATURES,
-                            varIndex,
-                            variants,
-                            ITEM_CNT,
-                            J,
-                            index,
-                            true, // JSONB
-                            TYPE_OBJECT
-                    );
-                    mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_);
-                }
-
-                mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_);
-            }
-
-            // switch_default
-            mw.visitLabel(dflt);
-
-            Label fieldReaderNull_ = new Label();
-
-            if ((readerFeatures & JSONReader.Feature.SupportSmartMatch.mask) == 0) {
-                mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isSupportSmartMatch", "(J)Z", false);
-                mw.visitJumpInsn(Opcodes.IFEQ, fieldReaderNull_);
-            }
-
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "getNameHashCodeLCase", "()J", false);
-            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_OBJECT_READER, "getFieldReaderLCase", METHOD_DESC_GET_FIELD_READER, true);
-            mw.visitInsn(Opcodes.DUP);
-            mw.visitVarInsn(Opcodes.ASTORE, FIELD_READER);
-            mw.visitJumpInsn(Opcodes.IFNULL, fieldReaderNull_);
-
-            mw.visitVarInsn(Opcodes.ALOAD, FIELD_READER);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_READE, "readFieldValueJSONB", METHOD_DESC_READ_FIELD_VALUE, false);
-            mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
-
-            mw.visitLabel(fieldReaderNull_);
 
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
@@ -1639,7 +1622,116 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(noneAutoType_);
 
-        if (fieldReaderArray.length <= 6) {
+        if (fieldReaderArray.length > 6) {
+            // use switch
+            Map<Integer, List<Long>> map = new TreeMap();
+
+            for (int i = 0; i < objectReaderAdapter.hashCodes.length; i++) {
+                long hashCode64 = objectReaderAdapter.hashCodes[i];
+                int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
+                List<Long> hashCode64List = map.computeIfAbsent(hashCode32, k -> new ArrayList<>());
+                hashCode64List.add(hashCode64);
+            }
+            int[] hashCode32Keys = new int[map.size()];
+            {
+                int off = 0;
+                for (Integer key : map.keySet()) {
+                    hashCode32Keys[off++] = key;
+                }
+            }
+            Arrays.sort(hashCode32Keys);
+
+            // int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));
+            mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE64);
+            mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE64);
+            mw.visitVarInsn(Opcodes.BIPUSH, 32);
+            mw.visitInsn(Opcodes.LUSHR);
+            mw.visitInsn(Opcodes.LXOR);
+            mw.visitInsn(Opcodes.L2I);
+            mw.visitVarInsn(Opcodes.ISTORE, HASH_CODE_32);
+
+            Label dflt = new Label();
+            Label[] labels = new Label[hashCode32Keys.length];
+            for (int i = 0; i < labels.length; i++) {
+                labels[i] = new Label();
+            }
+
+            mw.visitVarInsn(Opcodes.ILOAD, HASH_CODE_32);
+            mw.visitLookupSwitchInsn(dflt, hashCode32Keys, labels);
+
+            for (int i = 0; i < labels.length; i++) {
+                mw.visitLabel(labels[i]);
+
+                int hashCode32 = hashCode32Keys[i];
+                List<Long> hashCode64Array = map.get(hashCode32);
+                for (long hashCode64 : hashCode64Array) {
+                    mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE64);
+                    mw.visitLdcInsn(hashCode64);
+                    mw.visitInsn(Opcodes.LCMP);
+                    mw.visitJumpInsn(Opcodes.IFNE, dflt);
+
+                    int m = Arrays.binarySearch(objectReaderAdapter.hashCodes, hashCode64);
+                    int index = objectReaderAdapter.mapping[m];
+
+                    FieldReader fieldReader = fieldReaderArray[index];
+
+                    varIndex = genReadFieldValue(
+                            context,
+                            fieldReader,
+                            fieldBased,
+                            classNameType,
+                            mw,
+                            THIS,
+                            JSON_READER,
+                            OBJECT,
+                            FEATURES,
+                            varIndex,
+                            variants,
+                            ITEM_CNT,
+                            J,
+                            index,
+                            false,
+                            TYPE_OBJECT
+                    );
+                    mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_);
+                }
+
+                mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_);
+            }
+
+            mw.visitLabel(dflt);
+            Label fieldReaderNull_ = new Label();
+
+            if ((readerFeatures & JSONReader.Feature.SupportSmartMatch.mask) == 0) {
+                mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isSupportSmartMatch", "(J)Z", false);
+                mw.visitJumpInsn(Opcodes.IFEQ, fieldReaderNull_);
+            }
+
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "getNameHashCodeLCase", "()J", false);
+            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_OBJECT_READER, "getFieldReaderLCase", METHOD_DESC_GET_FIELD_READER, true);
+            mw.visitInsn(Opcodes.DUP);
+            mw.visitVarInsn(Opcodes.ASTORE, FIELD_READER);
+            mw.visitJumpInsn(Opcodes.IFNULL, fieldReaderNull_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_READER);
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_READE, "readFieldValue", METHOD_DESC_READ_FIELD_VALUE, false);
+            mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
+
+            mw.visitLabel(fieldReaderNull_);
+
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA, false);
+
+            mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
+        } else {
             for (int i = 0; i < fieldReaderArray.length; ++i) {
                 Label next_ = new Label(), get_ = new Label();
 
@@ -1742,120 +1834,6 @@ public class ObjectReaderCreatorASM
             }
 
             mw.visitLabel(processExtra_);
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA, false);
-
-            mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
-        } else {
-            // use switch
-            Map<Integer, List<Long>> map = new TreeMap();
-
-            for (int i = 0; i < objectReaderAdapter.hashCodes.length; i++) {
-                long hashCode64 = objectReaderAdapter.hashCodes[i];
-                int hashCode32 = (int) (hashCode64 ^ (hashCode64 >>> 32));
-                List<Long> hashCode64List = map.get(hashCode32);
-                if (hashCode64List == null) {
-                    hashCode64List = new ArrayList<>();
-                    map.put(hashCode32, hashCode64List);
-                }
-                hashCode64List.add(hashCode64);
-            }
-            int[] hashCode32Keys = new int[map.size()];
-            {
-                int off = 0;
-                for (Integer key : map.keySet()) {
-                    hashCode32Keys[off++] = key;
-                }
-            }
-            Arrays.sort(hashCode32Keys);
-
-            // int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));
-            mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE64);
-            mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE64);
-            mw.visitVarInsn(Opcodes.BIPUSH, 32);
-            mw.visitInsn(Opcodes.LUSHR);
-            mw.visitInsn(Opcodes.LXOR);
-            mw.visitInsn(Opcodes.L2I);
-            mw.visitVarInsn(Opcodes.ISTORE, HASH_CODE_32);
-
-            Label dflt = new Label();
-            Label[] labels = new Label[hashCode32Keys.length];
-            for (int i = 0; i < labels.length; i++) {
-                labels[i] = new Label();
-            }
-
-            mw.visitVarInsn(Opcodes.ILOAD, HASH_CODE_32);
-            mw.visitLookupSwitchInsn(dflt, hashCode32Keys, labels);
-
-            for (int i = 0; i < labels.length; i++) {
-                mw.visitLabel(labels[i]);
-
-                int hashCode32 = hashCode32Keys[i];
-                List<Long> hashCode64Array = map.get(hashCode32);
-                for (int j = 0; j < hashCode64Array.size(); ++j) {
-                    long hashCode64 = hashCode64Array.get(j);
-                    mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE64);
-                    mw.visitLdcInsn(hashCode64);
-                    mw.visitInsn(Opcodes.LCMP);
-                    mw.visitJumpInsn(Opcodes.IFNE, dflt);
-
-                    int m = Arrays.binarySearch(objectReaderAdapter.hashCodes, hashCode64);
-                    int index = objectReaderAdapter.mapping[m];
-
-                    FieldReader fieldReader = fieldReaderArray[index];
-
-                    varIndex = genReadFieldValue(
-                            context,
-                            fieldReader,
-                            fieldBased,
-                            classNameType,
-                            mw,
-                            THIS,
-                            JSON_READER,
-                            OBJECT,
-                            FEATURES,
-                            varIndex,
-                            variants,
-                            ITEM_CNT,
-                            J,
-                            index,
-                            false,
-                            TYPE_OBJECT
-                    );
-                    mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_);
-                }
-
-                mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_);
-            }
-
-            mw.visitLabel(dflt);
-            Label fieldReaderNull_ = new Label();
-
-            if ((readerFeatures & JSONReader.Feature.SupportSmartMatch.mask) == 0) {
-                mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                mw.visitVarInsn(Opcodes.LLOAD, FEATURES);
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "isSupportSmartMatch", "(J)Z", false);
-                mw.visitJumpInsn(Opcodes.IFEQ, fieldReaderNull_);
-            }
-
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "getNameHashCodeLCase", "()J", false);
-            mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, TYPE_OBJECT_READER, "getFieldReaderLCase", METHOD_DESC_GET_FIELD_READER, true);
-            mw.visitInsn(Opcodes.DUP);
-            mw.visitVarInsn(Opcodes.ASTORE, FIELD_READER);
-            mw.visitJumpInsn(Opcodes.IFNULL, fieldReaderNull_);
-
-            mw.visitVarInsn(Opcodes.ALOAD, FIELD_READER);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_READE, "readFieldValue", METHOD_DESC_READ_FIELD_VALUE, false);
-            mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
-
-            mw.visitLabel(fieldReaderNull_);
-
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
@@ -2287,8 +2265,6 @@ public class ObjectReaderCreatorASM
                     mw.visitVarInsn(Opcodes.ALOAD, LIST);
                     mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                     mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readString", "()Ljava/lang/String;", false);
-                    mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true);
-                    mw.visitInsn(Opcodes.POP);
                 } else {
                     Label notNull_ = new Label();
 
@@ -2362,9 +2338,9 @@ public class ObjectReaderCreatorASM
                             jsonb ? "readJSONBObject" : "readObject",
                             METHOD_DESC_READ_OBJECT,
                             true);
-                    mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true);
-                    mw.visitInsn(Opcodes.POP);
                 }
+                mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true);
+                mw.visitInsn(Opcodes.POP);
 
                 if (!jsonb) {
                     mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
@@ -2794,10 +2770,8 @@ public class ObjectReaderCreatorASM
         String TYPE_OBJECT = ASMUtils.type(objectClass);
         String DESC_OBJECT = ASMUtils.desc(objectClass);
 
-        cw.visitField(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, "consumer", "Ljava/util/function/Consumer;")
-                .visitEnd();
-        cw.visitField(Opcodes.ACC_PUBLIC, "object", DESC_OBJECT)
-                .visitEnd();
+        cw.visitField(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, "consumer", "Ljava/util/function/Consumer;");
+        cw.visitField(Opcodes.ACC_PUBLIC, "object", DESC_OBJECT);
 
         cw.visit(
                 Opcodes.V1_8,

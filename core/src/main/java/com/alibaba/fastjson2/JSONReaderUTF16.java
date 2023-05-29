@@ -1687,7 +1687,7 @@ class JSONReaderUTF16
         }
 
         long hashCode = Fnv.MAGIC_HASH_CODE;
-        for (; offset < end; ) {
+        while (offset < end) {
             char c = chars[offset];
 
             if (c == '\\') {
@@ -3176,22 +3176,21 @@ class JSONReaderUTF16
                     }
                 } else {
                     int scale = this.scale - expValue;
-                    double v = longValue;
                     if (scale == 0) {
-                        doubleValue = v;
+                        doubleValue = (double) longValue;
                         if (negative) {
                             doubleValue = -doubleValue;
                         }
                         value = true;
-                    } else if ((long) v == longValue) {
+                    } else if ((long) (double) longValue == longValue) {
                         if (0 < scale && scale < DOUBLE_10_POW.length) {
-                            doubleValue = v / DOUBLE_10_POW[scale];
+                            doubleValue = (double) longValue / DOUBLE_10_POW[scale];
                             if (negative) {
                                 doubleValue = -doubleValue;
                             }
                             value = true;
                         } else if (0 > scale && scale > -DOUBLE_10_POW.length) {
-                            doubleValue = v * DOUBLE_10_POW[-scale];
+                            doubleValue = (double) longValue * DOUBLE_10_POW[-scale];
                             if (negative) {
                                 doubleValue = -doubleValue;
                             }
@@ -3474,21 +3473,20 @@ class JSONReaderUTF16
         if (!value) {
             if (!overflow) {
                 int scale = this.scale - expValue;
-                float v = longValue;
                 if (scale == 0) {
                     floatValue = (float) longValue;
                     if (negative) {
                         floatValue = -floatValue;
                     }
                     value = true;
-                } else if ((long) v == longValue) {
+                } else if ((long) (float) longValue == longValue) {
                     if (0 < scale && scale < FLOAT_10_POW.length) {
-                        floatValue = v / FLOAT_10_POW[scale];
+                        floatValue = (float) longValue / FLOAT_10_POW[scale];
                         if (negative) {
                             floatValue = -floatValue;
                         }
                     } else if (0 > scale && scale > -FLOAT_10_POW.length) {
-                        floatValue = v * FLOAT_10_POW[-scale];
+                        floatValue = (float) longValue * FLOAT_10_POW[-scale];
                         if (negative) {
                             floatValue = -floatValue;
                         }
@@ -3571,7 +3569,6 @@ class JSONReaderUTF16
     private void skipString() {
         char quote = this.ch;
         ch = chars[offset++];
-        _for:
         for (; ; ) {
             if (ch == '\\') {
                 if (offset >= end) {
@@ -3689,7 +3686,6 @@ class JSONReaderUTF16
         int valueLength;
         valueEscape = false;
 
-        _for:
         for (int i = 0; ; ++i) {
             char c = chars[offset];
             if (c == '\\') {
@@ -3713,7 +3709,7 @@ class JSONReaderUTF16
 
             if (c == quote) {
                 valueLength = i;
-                break _for;
+                break;
             }
             offset++;
         }
@@ -4087,18 +4083,14 @@ class JSONReaderUTF16
                 boolean num = false;
                 if (!dot && (ch >= '0' && ch <= '9')) {
                     num = true;
-                    for (; ; ) {
+                    do {
                         if (offset < end) {
                             ch = chars[offset++];
                         } else {
                             ch = EOI;
                             return;
                         }
-
-                        if (space || ch < '0' || ch > '9') {
-                            break;
-                        }
-                    }
+                    } while (!space && ch >= '0' && ch <= '9');
                 }
 
                 boolean small = false;
@@ -4112,18 +4104,14 @@ class JSONReaderUTF16
                     }
 
                     if (ch >= '0' && ch <= '9') {
-                        for (; ; ) {
+                        do {
                             if (offset < end) {
                                 ch = chars[offset++];
                             } else {
                                 ch = EOI;
                                 return;
                             }
-
-                            if (space || ch < '0' || ch > '9') {
-                                break;
-                            }
-                        }
+                        } while (!space && ch >= '0' && ch <= '9');
                     }
                 }
 
@@ -4145,18 +4133,14 @@ class JSONReaderUTF16
                     }
 
                     if (ch >= '0' && ch <= '9') {
-                        for (; ; ) {
+                        do {
                             if (offset < end) {
                                 ch = chars[offset++];
                             } else {
                                 ch = EOI;
                                 return;
                             }
-
-                            if (ch < '0' || ch > '9') {
-                                break;
-                            }
-                        }
+                        } while (ch >= '0' && ch <= '9');
                     } else if (eSign) {
                         throw new JSONException("illegal number, offset " + offset + ", char " + ch);
                     }
@@ -5984,13 +5968,13 @@ class JSONReaderUTF16
         }
 
         if (comma = (ch == ',')) {
-            ch = offset == end ? EOI : (char) chars[offset++];
+            ch = offset == end ? EOI : chars[offset++];
             // next inline
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 if (offset >= end) {
                     ch = EOI;
                 } else {
-                    ch = (char) chars[offset++];
+                    ch = chars[offset++];
                 }
             }
         }
@@ -6024,7 +6008,7 @@ class JSONReaderUTF16
                 .append(line > 1 ? '\n' : ' ');
 
         final int MAX_OUTPUT_LENGTH = 65535;
-        buf.append(chars, this.start, length < MAX_OUTPUT_LENGTH ? length : MAX_OUTPUT_LENGTH);
+        buf.append(chars, this.start, Math.min(length, MAX_OUTPUT_LENGTH));
 
         return buf.toString();
     }

@@ -38,11 +38,7 @@ public final class ObjectArrayReader
         if (jsonReader.nextIfMatch('[')) {
             Object[] values = new Object[16];
             int size = 0;
-            for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
-                    break;
-                }
-
+            while (!jsonReader.nextIfMatch(']')) {
                 int minCapacity = size + 1;
                 if (minCapacity - values.length > 0) {
                     int oldCapacity = values.length;

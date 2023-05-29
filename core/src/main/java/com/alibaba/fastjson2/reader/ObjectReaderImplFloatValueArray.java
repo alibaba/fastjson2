@@ -32,11 +32,7 @@ class ObjectReaderImplFloatValueArray
         if (jsonReader.nextIfMatch('[')) {
             float[] values = new float[16];
             int size = 0;
-            for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
-                    break;
-                }
-
+            while (!jsonReader.nextIfMatch(']')) {
                 if (jsonReader.isEnd()) {
                     throw new JSONException(jsonReader.info("input end"));
                 }

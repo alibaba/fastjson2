@@ -28,7 +28,7 @@ public abstract class ObjectReaderBean<T>
     protected FieldReader extraFieldReader;
 
     protected boolean hasDefaultValue;
-    protected boolean serializable;
+    protected final boolean serializable;
 
     protected final JSONSchema schema;
 
@@ -195,11 +195,7 @@ public abstract class ObjectReaderBean<T>
             throw new JSONException(jsonReader.info());
         }
 
-        while (true) {
-            if (jsonReader.nextIfMatch('}')) {
-                break;
-            }
-
+        while (!jsonReader.nextIfMatch('}')) {
             long hash = jsonReader.readFieldNameHashCode();
             FieldReader fieldReader = getFieldReader(hash);
             if (fieldReader == null && jsonReader.isSupportSmartMatch(features | getFeatures())) {

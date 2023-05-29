@@ -32,7 +32,7 @@ final class JSONBDump {
 
     String lastReference;
 
-    JSONWriter jsonWriter;
+    final JSONWriter jsonWriter;
     final SymbolTable symbolTable;
 
     final Map<Integer, String> symbols = new HashMap<>();

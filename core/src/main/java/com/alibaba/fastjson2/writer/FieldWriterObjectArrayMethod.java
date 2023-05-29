@@ -17,7 +17,7 @@ final class FieldWriterObjectArrayMethod<T>
     final Class itemClass;
     ObjectWriter itemObjectWriter;
 
-    protected FieldWriterObjectArrayMethod(
+    FieldWriterObjectArrayMethod(
             String fieldName,
             Type itemType,
             int ordinal,

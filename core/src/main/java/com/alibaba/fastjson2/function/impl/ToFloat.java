@@ -19,7 +19,7 @@ public class ToFloat
         }
 
         if (o instanceof Boolean) {
-            return ((Boolean) o).booleanValue() ? 1F : 0F;
+            return (Boolean) o ? 1F : 0F;
         }
 
         if (o instanceof Number) {

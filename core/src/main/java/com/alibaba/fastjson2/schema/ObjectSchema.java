@@ -54,8 +54,7 @@ public final class ObjectSchema
 
         JSONObject definitions = input.getJSONObject("definitions");
         if (definitions != null) {
-            for (Iterator<Map.Entry<String, Object>> it = definitions.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry<String, Object> entry = it.next();
+            for (Map.Entry<String, Object> entry : definitions.entrySet()) {
                 String entryKey = entry.getKey();
                 JSONObject entryValue = (JSONObject) entry.getValue();
                 JSONSchema schema = JSONSchema.of(entryValue, root == null ? this : root);
@@ -65,8 +64,7 @@ public final class ObjectSchema
 
         JSONObject defs = input.getJSONObject("$defs");
         if (defs != null) {
-            for (Iterator<Map.Entry<String, Object>> it = defs.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry<String, Object> entry = it.next();
+            for (Map.Entry<String, Object> entry : defs.entrySet()) {
                 String entryKey = entry.getKey();
                 JSONObject entryValue = (JSONObject) entry.getValue();
                 JSONSchema schema = JSONSchema.of(entryValue, root == null ? this : root);
@@ -76,13 +74,12 @@ public final class ObjectSchema
 
         JSONObject properties = input.getJSONObject("properties");
         if (properties != null) {
-            for (Iterator<Map.Entry<String, Object>> it = properties.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry<String, Object> entry = it.next();
+            for (Map.Entry<String, Object> entry : properties.entrySet()) {
                 String entryKey = entry.getKey();
                 Object entryValue = entry.getValue();
                 JSONSchema schema;
                 if (entryValue instanceof Boolean) {
-                    schema = ((Boolean) entryValue).booleanValue() ? Any.INSTANCE : Any.NOT_ANY;
+                    schema = (Boolean) entryValue ? Any.INSTANCE : Any.NOT_ANY;
                 } else {
                     schema = JSONSchema.of((JSONObject) entryValue, root == null ? this : root);
                 }
@@ -95,13 +92,12 @@ public final class ObjectSchema
             this.patternProperties = new PatternProperty[patternProperties.size()];
 
             int index = 0;
-            for (Iterator<Map.Entry<String, Object>> it = patternProperties.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry<String, Object> entry = it.next();
+            for (Map.Entry<String, Object> entry : patternProperties.entrySet()) {
                 String entryKey = entry.getKey();
                 Object entryValue = entry.getValue();
                 JSONSchema schema;
                 if (entryValue instanceof Boolean) {
-                    schema = ((Boolean) entryValue).booleanValue() ? Any.INSTANCE : Any.NOT_ANY;
+                    schema = (Boolean) entryValue ? Any.INSTANCE : Any.NOT_ANY;
                 } else {
                     schema = JSONSchema.of((JSONObject) entryValue, root == null ? this : root);
                 }
@@ -133,7 +129,7 @@ public final class ObjectSchema
         Object additionalProperties = input.get("additionalProperties");
         if (additionalProperties instanceof Boolean) {
             this.additionalPropertySchema = null;
-            this.additionalProperties = ((Boolean) additionalProperties).booleanValue();
+            this.additionalProperties = (Boolean) additionalProperties;
         } else {
             if (additionalProperties instanceof JSONObject) {
                 this.additionalPropertySchema = JSONSchema.of((JSONObject) additionalProperties, root);
@@ -148,7 +144,7 @@ public final class ObjectSchema
         if (propertyNames == null) {
             this.propertyNames = null;
         } else if (propertyNames instanceof Boolean) {
-            this.propertyNames = ((Boolean) propertyNames).booleanValue() ? Any.INSTANCE : Any.NOT_ANY;
+            this.propertyNames = (Boolean) propertyNames ? Any.INSTANCE : Any.NOT_ANY;
         } else {
             this.propertyNames = new StringSchema((JSONObject) propertyNames);
         }
@@ -227,8 +223,7 @@ public final class ObjectSchema
         }
 
         for (PatternProperty patternProperty : patternProperties) {
-            for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry entry = it.next();
+            for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
                 Object entryKey = entry.getKey();
                 if (entryKey instanceof String) {
                     String strKey = (String) entryKey;
@@ -244,8 +239,7 @@ public final class ObjectSchema
 
         if (!additionalProperties) {
             for_:
-            for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry entry = it.next();
+            for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
                 Object key = entry.getKey();
 
                 if (properties.containsKey(key)) {
@@ -397,8 +391,7 @@ public final class ObjectSchema
             if (fieldValue == null) {
                 String fieldName = null;
                 int j = 0;
-                for (Iterator<String> it = this.required.iterator(); it.hasNext(); ) {
-                    String itemName = it.next();
+                for (String itemName : this.required) {
                     if (j == i) {
                         fieldName = itemName;
                     }

@@ -83,8 +83,8 @@ public class ASMUtils {
 
     static final Map<MethodInfo, String[]> paramMapping = new HashMap<>();
 
-    static Map<Class, String> descMapping = new HashMap<>();
-    static Map<Class, String> typeMapping = new HashMap<>();
+    static final Map<Class, String> descMapping = new HashMap<>();
+    static final Map<Class, String> typeMapping = new HashMap<>();
 
     static {
         paramMapping.put(

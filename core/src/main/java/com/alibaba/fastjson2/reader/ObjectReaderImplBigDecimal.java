@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 final class ObjectReaderImplBigDecimal
         extends ObjectReaderPrimitive {
-    private Function converter = new ToBigDecimal();
+    private final Function converter = new ToBigDecimal();
     static final ObjectReaderImplBigDecimal INSTANCE = new ObjectReaderImplBigDecimal(null);
 
     final Function<BigDecimal, Object> function;

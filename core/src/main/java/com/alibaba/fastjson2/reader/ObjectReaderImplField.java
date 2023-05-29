@@ -7,7 +7,6 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-import java.util.List;
 
 public class ObjectReaderImplField
         implements ObjectReader {
@@ -67,13 +66,8 @@ public class ObjectReaderImplField
         }
 
         String methodName = null, declaringClassName = null;
-        List<String> paramTypeNames = null;
 
-        for (;;) {
-            if (jsonReader.nextIfObjectEnd()) {
-                break;
-            }
-
+        while (!jsonReader.nextIfObjectEnd()) {
             long nameHashCode = jsonReader.readFieldNameHashCode();
             if (nameHashCode == HASH_DECLARING_CLASS) {
                 declaringClassName = jsonReader.readString();

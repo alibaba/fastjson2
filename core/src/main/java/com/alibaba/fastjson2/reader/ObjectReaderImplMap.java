@@ -26,8 +26,8 @@ public final class ObjectReaderImplMap
     static final Class CLASS_UNMODIFIABLE_SORTED_MAP = Collections.unmodifiableSortedMap(Collections.emptySortedMap()).getClass();
     static final Class CLASS_UNMODIFIABLE_NAVIGABLE_MAP = Collections.unmodifiableNavigableMap(Collections.emptyNavigableMap()).getClass();
 
-    public static ObjectReaderImplMap INSTANCE = new ObjectReaderImplMap(null, HashMap.class, HashMap.class, 0, null);
-    public static ObjectReaderImplMap INSTANCE_OBJECT = new ObjectReaderImplMap(null, JSONObject.class, JSONObject.class, 0, null);
+    public static final ObjectReaderImplMap INSTANCE = new ObjectReaderImplMap(null, HashMap.class, HashMap.class, 0, null);
+    public static final ObjectReaderImplMap INSTANCE_OBJECT = new ObjectReaderImplMap(null, JSONObject.class, JSONObject.class, 0, null);
 
     final Type fieldType;
     final Class mapType;
@@ -336,7 +336,7 @@ public final class ObjectReaderImplMap
                     if ("..".equals(reference)) {
                         map.put(fieldName, map);
                     } else {
-                        jsonReader.addResolveTask((Map) map, fieldName, JSONPath.of(reference));
+                        jsonReader.addResolveTask(map, fieldName, JSONPath.of(reference));
                         map.put(fieldName, null);
                     }
                     continue;
@@ -455,7 +455,7 @@ public final class ObjectReaderImplMap
             Object object;
             try {
                 object = UnsafeUtils.UNSAFE.allocateInstance(objectClass);
-                UnsafeUtils.UNSAFE.putObject(object, mapOffset, (Map) map);
+                UnsafeUtils.UNSAFE.putObject(object, mapOffset, map);
             } catch (InstantiationException e) {
                 throw new JSONException("create " + objectClass.getName() + " error", e);
             }

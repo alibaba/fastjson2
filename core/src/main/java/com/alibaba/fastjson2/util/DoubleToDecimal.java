@@ -129,8 +129,8 @@ public final class DoubleToDecimal {
                 }
                 int h = q + (int) ((-k) * 913_124_641_741L >> 38) + 2;
 
-                long g1 = G[k - -324 << 1];
-                long g0 = G[k - -324 << 1 | 1];
+                long g1 = G[k + 324 << 1];
+                long g0 = G[k + 324 << 1 | 1];
 
                 long vb;
                 {
@@ -174,12 +174,11 @@ public final class DoubleToDecimal {
 
                     if (uin != win) {
                         f = uin ? s : t1;
-                        e = k + dk;
                     } else {
                         long cmp = vb - (s + t1 << 1);
                         f = cmp < 0 || cmp == 0 && (s & 0x1) == 0 ? s : t1;
-                        e = k + dk;
                     }
+                    e = k + dk;
                 }
             }
 
@@ -470,8 +469,8 @@ public final class DoubleToDecimal {
                 }
                 int h = q + (int) ((-k) * 913_124_641_741L >> 38) + 2;
 
-                long g1 = G[k - -324 << 1];
-                long g0 = G[k - -324 << 1 | 1];
+                long g1 = G[k + 324 << 1];
+                long g0 = G[k + 324 << 1 | 1];
 
                 long vb;
                 {
@@ -515,12 +514,11 @@ public final class DoubleToDecimal {
 
                     if (uin != win) {
                         f = uin ? s : t1;
-                        e = k + dk;
                     } else {
                         long cmp = vb - (s + t1 << 1);
                         f = cmp < 0 || cmp == 0 && (s & 0x1) == 0 ? s : t1;
-                        e = k + dk;
                     }
+                    e = k + dk;
                 }
             }
 
@@ -810,7 +808,7 @@ public final class DoubleToDecimal {
                 }
                 int h = q + (int) ((-k) * 913_124_641_741L >> 38) + 33;
 
-                long g = G[k - -324 << 1] + 1;
+                long g = G[k + 324 << 1] + 1;
 
                 int vb;
                 {
@@ -852,12 +850,11 @@ public final class DoubleToDecimal {
                     if (uin != win) {
                         /* Exactly one of u or w lies in Rv */
                         f = uin ? s : t1;
-                        e = k + dk;
                     } else {
                         int cmp = vb - (s + t1 << 1);
                         f = cmp < 0 || cmp == 0 && (s & 0x1) == 0 ? s : t1;
-                        e = k + dk;
                     }
+                    e = k + dk;
                 }
             }
 
@@ -1079,7 +1076,7 @@ public final class DoubleToDecimal {
                     k = (int) (q * 661_971_961_083L + (-274_743_187_321L) >> 41);
                 }
                 int h = q + (int) ((-k) * 913_124_641_741L >> 38) + 33;
-                long g = G[k - -324 << 1] + 1;
+                long g = G[k + 324 << 1] + 1;
 
                 int vb;
                 {
@@ -1121,12 +1118,11 @@ public final class DoubleToDecimal {
                     if (uin != win) {
                         /* Exactly one of u or w lies in Rv */
                         f = uin ? s : t1;
-                        e = k + dk;
                     } else {
                         int cmp = vb - (s + t1 << 1);
                         f = cmp < 0 || cmp == 0 && (s & 0x1) == 0 ? s : t1;
-                        e = k + dk;
                     }
+                    e = k + dk;
                 }
             }
 
@@ -1917,18 +1913,16 @@ public final class DoubleToDecimal {
                 MethodHandles.Lookup lookup = JDKUtils.trustedLookup(DoubleToDecimal.class);
                 MethodType methodType = MethodType.methodType(long.class, long.class, long.class);
                 MethodHandle methodHandle = lookup.findStatic(Math.class, "multiplyHigh", methodType);
-                MethodType instantiatedMethodType = methodType;
                 CallSite callSite = LambdaMetafactory.metafactory(
                         lookup,
                         "multiplyHigh",
                         MethodType.methodType(LongBiFunction.class),
                         methodType,
                         methodHandle,
-                        instantiatedMethodType
+                        methodType
                 );
                 function = (LongBiFunction) callSite.getTarget().invokeExact();
             } catch (Throwable ignored) {
-                ignored.printStackTrace();
                 // ignored
             }
         }

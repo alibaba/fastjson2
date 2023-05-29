@@ -9,7 +9,7 @@ final class FieldWriterFloatValueFunc
         extends FieldWriter {
     final ToFloatFunction function;
 
-    protected FieldWriterFloatValueFunc(
+    FieldWriterFloatValueFunc(
             String fieldName,
             int ordinal,
             long features,

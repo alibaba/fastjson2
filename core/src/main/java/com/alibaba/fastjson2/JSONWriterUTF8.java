@@ -15,7 +15,6 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
-import static com.alibaba.fastjson2.JSONWriter.Feature.NotWriteDefaultValue;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
 
@@ -105,9 +104,7 @@ class JSONWriterUTF8
         bytes[off++] = 'x';
         bytes[off++] = '\'';
 
-        for (int i = 0; i < value.length; ++i) {
-            byte b = value[i];
-
+        for (byte b : value) {
             int a = b & 0xFF;
             int b0 = a >> 4;
             int b1 = a & 0xf;
@@ -357,8 +354,7 @@ class JSONWriterUTF8
         final boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
 
         final byte quote = (byte) this.quote;
-        for (int i = 0; i < value.length; i++) {
-            byte c = value[i];
+        for (byte c : value) {
             if (c == quote
                     || c == '\\'
                     || c < ' '
@@ -415,8 +411,7 @@ class JSONWriterUTF8
 
             if (b1 == 0 && b0 >= 0) {
 //                bytes[off++] = b0;
-                byte ch = b0;
-                switch (ch) {
+                switch (b0) {
                     case '\\':
                         bytes[off] = (byte) '\\';
                         bytes[off + 1] = (byte) '\\';
@@ -460,7 +455,7 @@ class JSONWriterUTF8
                         bytes[off + 2] = '0';
                         bytes[off + 3] = '0';
                         bytes[off + 4] = '0';
-                        bytes[off + 5] = (byte) ('0' + (int) ch);
+                        bytes[off + 5] = (byte) ('0' + (int) b0);
                         off += 6;
                         break;
                     case 11:
@@ -471,7 +466,7 @@ class JSONWriterUTF8
                         bytes[off + 2] = '0';
                         bytes[off + 3] = '0';
                         bytes[off + 4] = '0';
-                        bytes[off + 5] = (byte) ('a' + (ch - 10));
+                        bytes[off + 5] = (byte) ('a' + (b0 - 10));
                         off += 6;
                         break;
                     case 16:
@@ -489,7 +484,7 @@ class JSONWriterUTF8
                         bytes[off + 2] = '0';
                         bytes[off + 3] = '0';
                         bytes[off + 4] = '1';
-                        bytes[off + 5] = (byte) ('0' + (ch - 16));
+                        bytes[off + 5] = (byte) ('0' + (b0 - 16));
                         off += 6;
                         break;
                     case 26:
@@ -503,21 +498,21 @@ class JSONWriterUTF8
                         bytes[off + 2] = '0';
                         bytes[off + 3] = '0';
                         bytes[off + 4] = '1';
-                        bytes[off + 5] = (byte) ('a' + (ch - 26));
+                        bytes[off + 5] = (byte) ('a' + (b0 - 26));
                         off += 6;
                         break;
                     default:
-                        if (ch == quote) {
+                        if (b0 == quote) {
                             bytes[off] = (byte) '\\';
                             bytes[off + 1] = (byte) quote;
                             off += 2;
                         } else {
-                            bytes[off++] = ch;
+                            bytes[off++] = b0;
                         }
                         break;
                 }
             } else {
-                char c = (char) (((b0 & 0xff) << 0) | ((b1 & 0xff) << 8));
+                char c = (char) ((b0 & 0xff) | ((b1 & 0xff) << 8));
                 if (c < 0x800) {
                     // 2 bytes, 11 bits
                     bytes[off] = (byte) (0xc0 | (c >> 6));
@@ -540,7 +535,7 @@ class JSONWriterUTF8
                         } else {
                             b0 = value[ip + 1];
                             b1 = value[ip + 2];
-                            char d = (char) (((b0 & 0xff) << 0) | ((b1 & 0xff) << 8));
+                            char d = (char) ((b0 & 0xff) | ((b1 & 0xff) << 8));
                             // d >= '\uDC00' && d < ('\uDFFF' + 1)
                             if (d >= '\uDC00' && d < ('\uDFFF' + 1)) { // Character.isLowSurrogate(d)
                                 valueOffset += 2;
@@ -709,8 +704,7 @@ class JSONWriterUTF8
         final byte[] bytes = this.bytes;
         int off = this.off;
         bytes[off++] = (byte) quote;
-        for (int i = 0; i < value.length; ++i) {
-            byte ch = value[i];
+        for (byte ch : value) {
             switch (ch) {
                 case '\\':
                     bytes[off] = (byte) '\\';
@@ -1020,11 +1014,11 @@ class JSONWriterUTF8
             } else if (ch > 0x07FF) {
                 bytes[off] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
                 bytes[off + 1] = (byte) (0x80 | ((ch >> 6) & 0x3F));
-                bytes[off + 2] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+                bytes[off + 2] = (byte) (0x80 | (ch & 0x3F));
                 off += 3;
             } else {
                 bytes[off] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
-                bytes[off + 1] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+                bytes[off + 1] = (byte) (0x80 | (ch & 0x3F));
                 off += 2;
             }
         }
@@ -1227,11 +1221,11 @@ class JSONWriterUTF8
             } else if (ch > 0x07FF) {
                 bytes[off] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
                 bytes[off + 1] = (byte) (0x80 | ((ch >> 6) & 0x3F));
-                bytes[off + 2] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+                bytes[off + 2] = (byte) (0x80 | (ch & 0x3F));
                 off += 3;
             } else {
                 bytes[off] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
-                bytes[off + 1] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+                bytes[off + 1] = (byte) (0x80 | (ch & 0x3F));
                 off += 2;
             }
         }
@@ -1384,11 +1378,11 @@ class JSONWriterUTF8
         } else if (ch > 0x07FF) {
             bytes[off] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
             bytes[off + 1] = (byte) (0x80 | ((ch >> 6) & 0x3F));
-            bytes[off + 2] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+            bytes[off + 2] = (byte) (0x80 | (ch & 0x3F));
             off += 3;
         } else {
             bytes[off] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
-            bytes[off + 1] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+            bytes[off + 1] = (byte) (0x80 | (ch & 0x3F));
             off += 2;
         }
 
@@ -1488,17 +1482,16 @@ class JSONWriterUTF8
         }
 
         final byte[] bytes = this.bytes;
-        for (int i = 0; i < chars.length; ++i) {
-            char c = chars[i];
+        for (char c : chars) {
             if ((c >= 0x0001) && (c <= 0x007F)) {
                 bytes[off++] = (byte) c;
             } else if (c > 0x07FF) {
                 bytes[off++] = (byte) (0xE0 | ((c >> 12) & 0x0F));
                 bytes[off++] = (byte) (0x80 | ((c >> 6) & 0x3F));
-                bytes[off++] = (byte) (0x80 | ((c >> 0) & 0x3F));
+                bytes[off++] = (byte) (0x80 | (c & 0x3F));
             } else {
                 bytes[off++] = (byte) (0xC0 | ((c >> 6) & 0x1F));
-                bytes[off++] = (byte) (0x80 | ((c >> 0) & 0x3F));
+                bytes[off++] = (byte) (0x80 | (c & 0x3F));
             }
         }
         this.off = off;
@@ -2417,7 +2410,7 @@ class JSONWriterUTF8
         bytes[off++] = '{';
 
         boolean first = true;
-        for (Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator(); it.hasNext(); ) {
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
             if (!first) {
                 if (off == bytes.length) {
                     ensureCapacity(off + 1);
@@ -2425,14 +2418,13 @@ class JSONWriterUTF8
                 bytes[off++] = ',';
             }
 
-            Map.Entry<String, Object> next = it.next();
-            Object value = next.getValue();
+            Object value = entry.getValue();
             if (value == null && (context.features & Feature.WriteMapNullValue.mask) == 0) {
                 continue;
             }
 
             first = false;
-            Object key = next.getKey();
+            Object key = entry.getKey();
             if (key instanceof String) {
                 writeString((String) key);
             } else {
@@ -2519,7 +2511,7 @@ class JSONWriterUTF8
         bytes[off++] = '[';
 
         boolean first = true;
-        for (int i = 0, size = array.size(); i < size; i++) {
+        for (Object o : array) {
             if (!first) {
                 if (off == bytes.length) {
                     ensureCapacity(off + 1);
@@ -2527,7 +2519,7 @@ class JSONWriterUTF8
                 bytes[off++] = ',';
             }
             first = false;
-            Object value = array.get(i);
+            Object value = o;
 
             if (value == null) {
                 writeNull();

@@ -16,9 +16,7 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
-import static com.alibaba.fastjson2.JSONWriter.Feature.NotWriteDefaultValue;
 import static com.alibaba.fastjson2.util.IOUtils.*;
-import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
 import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
 
@@ -236,8 +234,7 @@ class JSONWriterUTF16
         final char[] chars = this.chars;
         chars[off++] = quote;
 
-        for (int i = 0; i < value.length; i++) {
-            byte c = value[i];
+        for (byte c : value) {
             if (c == '\\' || c == quote || c < ' ') {
                 escape = true;
                 break;
@@ -650,8 +647,7 @@ class JSONWriterUTF16
 
         final char[] chars = this.chars;
         chars[off++] = quote;
-        for (int i = 0; i < strlen; ++i) {
-            char ch = str[i];
+        for (char ch : str) {
             switch (ch) {
                 case '"':
                 case '\'':
@@ -795,8 +791,8 @@ class JSONWriterUTF16
 
         final char[] chars = this.chars;
         chars[off++] = quote;
-        for (int i = 0; i < strlen; ++i) {
-            char ch = (char) (str[i] & 0xff);
+        for (byte b : str) {
+            char ch = (char) (b & 0xff);
             switch (ch) {
                 case '"':
                 case '\'':
@@ -1175,9 +1171,7 @@ class JSONWriterUTF16
         chars[off + 1] = '\'';
         off += 2;
 
-        for (int i = 0; i < bytes.length; ++i) {
-            byte b = bytes[i];
-
+        for (byte b : bytes) {
             int a = b & 0xFF;
             int b0 = a >> 4;
             int b1 = a & 0xf;
@@ -2444,9 +2438,8 @@ class JSONWriterUTF16
         chars[off++] = '{';
 
         boolean first = true;
-        for (Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry next = it.next();
-            Object value = next.getValue();
+        for (Map.Entry entry : map.entrySet()) {
+            Object value = entry.getValue();
             if (value == null && (context.features & Feature.WriteMapNullValue.mask) == 0) {
                 continue;
             }
@@ -2459,7 +2452,7 @@ class JSONWriterUTF16
             }
 
             first = false;
-            Object key = next.getKey();
+            Object key = entry.getKey();
             if (key instanceof String) {
                 writeString((String) key);
             } else {
@@ -2546,7 +2539,7 @@ class JSONWriterUTF16
         chars[off++] = '[';
 
         boolean first = true;
-        for (int i = 0, size = array.size(); i < size; i++) {
+        for (Object o : array) {
             if (!first) {
                 if (off == chars.length) {
                     ensureCapacity(off + 1);
@@ -2554,7 +2547,7 @@ class JSONWriterUTF16
                 chars[off++] = ',';
             }
             first = false;
-            Object value = array.get(i);
+            Object value = o;
 
             if (value == null) {
                 writeNull();
@@ -2614,8 +2607,7 @@ class JSONWriterUTF16
 
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
         boolean special = false;
-        for (int i = 0; i < chars.length; ++i) {
-            char c = chars[i];
+        for (char c : chars) {
             if (c == '\\' || c == quote || c < ' ') {
                 special = true;
                 break;

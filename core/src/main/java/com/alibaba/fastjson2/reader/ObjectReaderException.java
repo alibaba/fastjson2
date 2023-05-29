@@ -22,7 +22,7 @@ final class ObjectReaderException<T>
     static final long HASH_STACKTRACE = Fnv.hashCode64("stackTrace");
     static final long HASH_SUPPRESSED_EXCEPTIONS = Fnv.hashCode64("suppressedExceptions");
 
-    private FieldReader fieldReaderStackTrace;
+    private final FieldReader fieldReaderStackTrace;
     final List<Constructor> constructors;
 
     final Constructor constructorDefault;
@@ -32,7 +32,7 @@ final class ObjectReaderException<T>
 
     final List<String[]> constructorParameters;
 
-    protected ObjectReaderException(Class<T> objectClass) {
+    ObjectReaderException(Class<T> objectClass) {
         this(
                 objectClass,
                 Arrays.asList(BeanUtils.getConstructor(objectClass)),
@@ -40,7 +40,7 @@ final class ObjectReaderException<T>
         );
     }
 
-    protected ObjectReaderException(
+    ObjectReaderException(
             Class<T> objectClass,
             List<Constructor> constructors,
             FieldReader... fieldReaders
@@ -88,13 +88,7 @@ final class ObjectReaderException<T>
         constructors.sort((Constructor left, Constructor right) -> {
             int x = left.getParameterCount();
             int y = right.getParameterCount();
-            if (x < y) {
-                return 1;
-            }
-            if (x > y) {
-                return -1;
-            }
-            return 0;
+            return Integer.compare(y, x);
         });
 
         constructorParameters = new ArrayList<>(constructors.size());
@@ -241,9 +235,7 @@ final class ObjectReaderException<T>
                 }
 
                 boolean matchAll = true;
-                for (int j = 0; j < paramNames.length; j++) {
-                    String paramName = paramNames[j];
-
+                for (String paramName : paramNames) {
                     if (paramName == null) {
                         matchAll = false;
                         break;
@@ -328,8 +320,7 @@ final class ObjectReaderException<T>
         }
 
         if (fieldValues != null) {
-            for (Iterator<Map.Entry<String, Object>> it = fieldValues.entrySet().iterator(); it.hasNext();) {
-                Map.Entry<String, Object> entry = it.next();
+            for (Map.Entry<String, Object> entry : fieldValues.entrySet()) {
                 FieldReader fieldReader = getFieldReader(entry.getKey());
                 if (fieldReader != null) {
                     fieldReader.accept(object, entry.getValue());
@@ -338,8 +329,7 @@ final class ObjectReaderException<T>
         }
 
         if (references != null) {
-            for (Iterator<Map.Entry<String, String>> it = references.entrySet().iterator(); it.hasNext();) {
-                Map.Entry<String, String> entry = it.next();
+            for (Map.Entry<String, String> entry : references.entrySet()) {
                 FieldReader fieldReader = getFieldReader(entry.getKey());
                 if (fieldReader == null) {
                     continue;

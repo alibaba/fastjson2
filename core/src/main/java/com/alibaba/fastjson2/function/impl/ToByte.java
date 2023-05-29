@@ -19,7 +19,7 @@ public class ToByte
         }
 
         if (o instanceof Boolean) {
-            return ((Boolean) o).booleanValue() ? (byte) 1 : (byte) 0;
+            return (Boolean) o ? (byte) 1 : (byte) 0;
         }
 
         if (o instanceof Number) {

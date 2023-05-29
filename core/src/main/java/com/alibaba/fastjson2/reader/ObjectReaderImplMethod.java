@@ -72,11 +72,7 @@ public class ObjectReaderImplMethod
         String methodName = null, declaringClassName = null;
         List<String> paramTypeNames = null;
 
-        for (;;) {
-            if (jsonReader.nextIfObjectEnd()) {
-                break;
-            }
-
+        while (!jsonReader.nextIfObjectEnd()) {
             long nameHashCode = jsonReader.readFieldNameHashCode();
             if (nameHashCode == HASH_DECLARING_CLASS) {
                 declaringClassName = jsonReader.readString();

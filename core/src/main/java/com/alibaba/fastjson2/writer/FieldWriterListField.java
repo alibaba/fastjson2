@@ -10,7 +10,7 @@ import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 
 final class FieldWriterListField<T>
         extends FieldWriterList<T> {
-    protected FieldWriterListField(
+    FieldWriterListField(
             String fieldName,
             Type itemType,
             int ordinal,

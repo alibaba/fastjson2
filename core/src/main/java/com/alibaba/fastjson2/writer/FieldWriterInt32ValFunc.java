@@ -9,7 +9,7 @@ final class FieldWriterInt32ValFunc
         extends FieldWriterInt32 {
     final ToIntFunction function;
 
-    protected FieldWriterInt32ValFunc(
+    FieldWriterInt32ValFunc(
             String fieldName,
             int ordinal,
             long features,

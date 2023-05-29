@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 
 final class FieldWriterCharMethod<T>
         extends FieldWriter<T> {
-    protected FieldWriterCharMethod(
+    FieldWriterCharMethod(
             String fieldName,
             int ordinal,
             long features,
@@ -38,7 +38,7 @@ final class FieldWriterCharMethod<T>
             return;
         }
 
-        jsonWriter.writeChar(value.charValue());
+        jsonWriter.writeChar(value);
     }
 
     @Override
@@ -50,7 +50,7 @@ final class FieldWriterCharMethod<T>
         }
 
         writeFieldName(jsonWriter);
-        jsonWriter.writeChar(value.charValue());
+        jsonWriter.writeChar(value);
         return true;
     }
 }

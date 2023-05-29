@@ -21,7 +21,7 @@ public class ToDouble
         }
 
         if (o instanceof Boolean) {
-            return ((Boolean) o).booleanValue() ? 1D : 0D;
+            return (Boolean) o ? 1D : 0D;
         }
 
         if (o instanceof Number) {
@@ -40,8 +40,7 @@ public class ToDouble
         if (o instanceof List) {
             List list = (List) o;
             JSONArray array = new JSONArray(list.size());
-            for (int i = 0; i < list.size(); i++) {
-                Object item = list.get(i);
+            for (Object item : list) {
                 array.add(apply(item));
             }
             return array;

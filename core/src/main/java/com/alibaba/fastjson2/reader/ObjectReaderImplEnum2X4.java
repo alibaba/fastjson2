@@ -13,13 +13,13 @@ public final class ObjectReaderImplEnum2X4
         implements ObjectReader {
     final Class enumClass;
     final long typeNameHash;
-    protected final Enum enum0;
-    protected final Enum enum1;
+    private final Enum enum0;
+    private final Enum enum1;
 
-    protected long enumNameHashCode00;
-    protected long enumNameHashCode01;
-    protected long enumNameHashCode10;
-    protected long enumNameHashCode11;
+    private long enumNameHashCode00;
+    private long enumNameHashCode01;
+    private long enumNameHashCode10;
+    private long enumNameHashCode11;
 
     public ObjectReaderImplEnum2X4(Class enumClass, Enum[] enums, Enum[] ordinalEnums, long[] enumNameHashCodes) {
         this.enumClass = enumClass;

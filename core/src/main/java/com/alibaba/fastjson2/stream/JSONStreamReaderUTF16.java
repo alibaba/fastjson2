@@ -12,8 +12,8 @@ import java.lang.reflect.Type;
 public class JSONStreamReaderUTF16
         extends JSONStreamReader {
     char[] buf;
-    Reader input;
-    JSONReader.Context context;
+    final Reader input;
+    final JSONReader.Context context;
 
     JSONStreamReaderUTF16(Reader input, ObjectReaderAdapter objectReader) {
         super(objectReader);

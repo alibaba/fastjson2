@@ -158,22 +158,21 @@ final class JSONPathSegmentIndex
     }
 
     private Object eval(Map object) {
-        Map map = object;
-        Object value = map.get(index);
+        Object value = object.get(index);
         if (value == null) {
-            value = map.get(Integer.toString(index));
+            value = object.get(Integer.toString(index));
         }
 
         if (value == null) {
-            int size = map.size();
-            Iterator it = map.entrySet().iterator();
-            if (size == 1 || map instanceof LinkedHashMap || map instanceof SortedMap) {
+            int size = object.size();
+            Iterator it = object.entrySet().iterator();
+            if (size == 1 || object instanceof LinkedHashMap || object instanceof SortedMap) {
                 for (int i = 0; i <= index && i < size && it.hasNext(); ++i) {
                     Map.Entry entry = (Map.Entry) it.next();
                     Object entryKey = entry.getKey();
                     Object entryValue = entry.getValue();
                     if (entryKey instanceof Long) {
-                        if (entryKey.equals(Long.valueOf(index))) {
+                        if (entryKey.equals((long) index)) {
                             value = entryValue;
                             break;
                         }
@@ -184,12 +183,12 @@ final class JSONPathSegmentIndex
                     }
                 }
             } else {
-                for (int i = 0; i <= index && i < map.size() && it.hasNext(); ++i) {
+                for (int i = 0; i <= index && i < object.size() && it.hasNext(); ++i) {
                     Map.Entry entry = (Map.Entry) it.next();
                     Object entryKey = entry.getKey();
                     Object entryValue = entry.getValue();
                     if (entryKey instanceof Long) {
-                        if (entryKey.equals(Long.valueOf(index))) {
+                        if (entryKey.equals((long) index)) {
                             value = entryValue;
                             break;
                         }

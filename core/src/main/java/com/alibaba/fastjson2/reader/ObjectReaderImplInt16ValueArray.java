@@ -32,11 +32,7 @@ class ObjectReaderImplInt16ValueArray
         if (jsonReader.nextIfMatch('[')) {
             short[] values = new short[16];
             int size = 0;
-            for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
-                    break;
-                }
-
+            while (!jsonReader.nextIfMatch(']')) {
                 if (jsonReader.isEnd()) {
                     throw new JSONException(jsonReader.info("input end"));
                 }

@@ -7,7 +7,7 @@ final class FieldWriterInt16Func<T>
         extends FieldWriterInt16<T> {
     final Function<T, Short> function;
 
-    protected FieldWriterInt16Func(
+    FieldWriterInt16Func(
             String fieldName,
             int ordinal,
             long features,

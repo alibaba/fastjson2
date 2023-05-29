@@ -9,7 +9,7 @@ final class FieldWriterDoubleFunc<T>
         extends FieldWriter<T> {
     final Function<T, Double> function;
 
-    protected FieldWriterDoubleFunc(
+    FieldWriterDoubleFunc(
             String fieldName,
             int ordinal,
             long features,
@@ -33,7 +33,7 @@ final class FieldWriterDoubleFunc<T>
         if (value == null) {
             jsonWriter.writeNumberNull();
         } else {
-            double doubleValue = value.doubleValue();
+            double doubleValue = value;
             if (decimalFormat != null) {
                 jsonWriter.writeDouble(doubleValue, decimalFormat);
             } else {
@@ -68,7 +68,7 @@ final class FieldWriterDoubleFunc<T>
 
         writeFieldName(jsonWriter);
 
-        double doubleValue = value.doubleValue();
+        double doubleValue = value;
         if (decimalFormat != null) {
             jsonWriter.writeDouble(doubleValue, decimalFormat);
         } else {

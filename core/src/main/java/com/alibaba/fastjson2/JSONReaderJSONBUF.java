@@ -383,7 +383,7 @@ final class JSONReaderJSONBUF
             strlen = readLength();
             strBegin = offset;
         } else {
-            StringBuffer message = new StringBuffer()
+            StringBuilder message = new StringBuilder()
                     .append("fieldName not support input type ")
                     .append(typeName(strtype));
             if (strtype == BC_REFERENCE) {

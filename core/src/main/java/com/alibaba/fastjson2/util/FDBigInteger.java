@@ -460,12 +460,11 @@ public final class FDBigInteger {
         int subLen = subtrahend.nWords;
         int minLen = minuend.nWords;
         if (offsetDiff < 0) {
-            int rLen = minLen;
-            if (rLen < sData.length) {
+            if (minLen < sData.length) {
                 System.arraycopy(sData, 0, sData, -offsetDiff, subLen);
                 Arrays.fill(sData, 0, -offsetDiff, 0);
             } else {
-                int[] r = new int[rLen];
+                int[] r = new int[minLen];
                 System.arraycopy(sData, 0, r, -offsetDiff, subLen);
                 subtrahend.data = sData = r;
             }

@@ -189,7 +189,7 @@ public abstract class StreamReader {
                 boolean checkDate = false;
                 int sub = 0, slash = 0, colon = 0, dot = 0, nums = 0;
                 for (int i = off; i < end; i++) {
-                    char ch = (char) bytes[i];
+                    char ch = bytes[i];
                     switch (ch) {
                         case '-':
                             sub++;

@@ -302,8 +302,7 @@ public class ObjectWriterAdapter<T>
             writeTypeInfo(jsonWriter);
         }
 
-        for (int i = 0, size = fieldWriters.size(); i < size; ++i) {
-            FieldWriter fieldWriter = fieldWriters.get(i);
+        for (FieldWriter fieldWriter : fieldWriters) {
             fieldWriter.write(jsonWriter, object);
         }
 
@@ -312,8 +311,7 @@ public class ObjectWriterAdapter<T>
 
     public Map<String, Object> toMap(Object object) {
         JSONObject map = new JSONObject(fieldWriters.size());
-        for (int i = 0; i < fieldWriters.size(); i++) {
-            FieldWriter fieldWriter = fieldWriters.get(i);
+        for (FieldWriter fieldWriter : fieldWriters) {
             map.put(
                     fieldWriter.fieldName,
                     fieldWriter.getFieldValue(object)
@@ -437,9 +435,7 @@ public class ObjectWriterAdapter<T>
 
         LabelFilter labelFilter = context.getLabelFilter();
 
-        for (int i = 0, size = fieldWriters.size(); i < size; ++i) {
-            FieldWriter fieldWriter = fieldWriters.get(i);
-
+        for (FieldWriter fieldWriter : fieldWriters) {
             Field field = fieldWriter.field;
 
             if (ignoreNonFieldGetter
@@ -467,7 +463,6 @@ public class ObjectWriterAdapter<T>
             // fast return
             if (nameFilter == null
                     && propertyFilter == null
-                    && valueFilter == null
                     && contextValueFilter == null
                     && contextNameFilter == null
                     && valueFilter == null

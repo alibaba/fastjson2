@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 
 final class FieldWriterInt8Method
         extends FieldWriterInt8 {
-    protected FieldWriterInt8Method(
+    FieldWriterInt8Method(
             String fieldName,
             int ordinal,
             long features,

@@ -27,11 +27,11 @@ import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 public abstract class BeanUtils {
     static final Type[] EMPTY_TYPE_ARRAY = new Type[]{};
 
-    static ConcurrentMap<Class, Field[]> fieldCache = new ConcurrentHashMap<>();
-    static ConcurrentMap<Class, Map<String, Field>> fieldMapCache = new ConcurrentHashMap<>();
-    static ConcurrentMap<Class, Field[]> declaredFieldCache = new ConcurrentHashMap<>();
-    static ConcurrentMap<Class, Method[]> methodCache = new ConcurrentHashMap<>();
-    static ConcurrentMap<Class, Constructor[]> constructorCache = new ConcurrentHashMap<>();
+    static final ConcurrentMap<Class, Field[]> fieldCache = new ConcurrentHashMap<>();
+    static final ConcurrentMap<Class, Map<String, Field>> fieldMapCache = new ConcurrentHashMap<>();
+    static final ConcurrentMap<Class, Field[]> declaredFieldCache = new ConcurrentHashMap<>();
+    static final ConcurrentMap<Class, Method[]> methodCache = new ConcurrentHashMap<>();
+    static final ConcurrentMap<Class, Constructor[]> constructorCache = new ConcurrentHashMap<>();
 
     private static volatile Class RECORD_CLASS;
     private static volatile Method RECORD_GET_RECORD_COMPONENTS;
@@ -693,7 +693,6 @@ public abstract class BeanUtils {
             methodCache.putIfAbsent(objectClass, methods);
         }
 
-        for_:
         for (Method method : methods) {
             if (method.getParameterCount() != 0) {
                 continue;
@@ -707,7 +706,7 @@ public abstract class BeanUtils {
                 case "toString":
                 case "hashCode":
                 case "annotationType":
-                    continue for_;
+                    continue;
                 default:
                     break;
             }
@@ -760,8 +759,8 @@ public abstract class BeanUtils {
         });
 
         int nulls = 0;
-        for (int i = 0; i < annotationNames.length; i++) {
-            if (annotationNames[i] == null) {
+        for (String annotationName : annotationNames) {
+            if (annotationName == null) {
                 nulls++;
             }
         }
@@ -906,8 +905,7 @@ public abstract class BeanUtils {
 
         Class superClass = objectClass.getSuperclass();
         if (TypeUtils.isProxy(objectClass)) {
-            Class superclass = superClass;
-            getters(superclass, methodConsumer);
+            getters(superClass, methodConsumer);
             return;
         }
 
@@ -1350,11 +1348,11 @@ public abstract class BeanUtils {
                 for (int i = firstIndex; i < methodName.length(); ++i) {
                     char ch = methodName.charAt(i);
                     if (ch >= 'A' && ch <= 'Z') {
-                        char chUcase = (char) (ch + 32);
+                        char u = (char) (ch + 32);
                         if (i > firstIndex) {
                             buf.append('-');
                         }
-                        buf.append(chUcase);
+                        buf.append(u);
                     } else {
                         buf.append(ch);
                     }
@@ -1467,11 +1465,11 @@ public abstract class BeanUtils {
                 for (int i = 0; i < methodName.length(); ++i) {
                     char ch = methodName.charAt(i);
                     if (ch >= 'A' && ch <= 'Z') {
-                        char chUcase = (char) (ch + 32);
+                        char u = (char) (ch + 32);
                         if (i > 0) {
                             buf.append('-');
                         }
-                        buf.append(chUcase);
+                        buf.append(u);
                     } else {
                         buf.append(ch);
                     }
@@ -1495,11 +1493,11 @@ public abstract class BeanUtils {
             for (int i = prefixLength; i < methodNameLength; ++i) {
                 char ch = methodName.charAt(i);
                 if (ch >= 'A' && ch <= 'Z') {
-                    char chUcase = (char) (ch + 32);
+                    char u = (char) (ch + 32);
                     if (i > prefixLength) {
                         buf[off++] = '_';
                     }
-                    buf[off++] = chUcase;
+                    buf[off++] = u;
                 } else {
                     buf[off++] = ch;
                 }
@@ -1578,14 +1576,14 @@ public abstract class BeanUtils {
             for (int i = prefixLength; i < methodNameLength; ++i) {
                 char ch = methodName.charAt(i);
                 if (upper) {
-                    if (ch >= 'A' && ch <= 'Z') {
-                        if (i > prefixLength) {
-                            buf[off++] = '_';
+                    if (ch < 'A' || ch > 'Z') {
+                        if (ch >= 'a' && ch <= 'z') {
+                            ch -= 32;
                         }
                         buf[off++] = ch;
                     } else {
-                        if (ch >= 'a' && ch <= 'z') {
-                            ch -= 32;
+                        if (i > prefixLength) {
+                            buf[off++] = '_';
                         }
                         buf[off++] = ch;
                     }
@@ -1622,13 +1620,12 @@ public abstract class BeanUtils {
                         if (i > prefixLength) {
                             buf[off++] = '-';
                         }
-                        buf[off++] = ch;
                     } else {
                         if (ch >= 'a' && ch <= 'z') {
                             ch -= 32;
                         }
-                        buf[off++] = ch;
                     }
+                    buf[off++] = ch;
                 } else {
                     if (ch >= 'A' && ch <= 'Z') {
                         if (i > prefixLength) {
@@ -1662,13 +1659,12 @@ public abstract class BeanUtils {
                         if (i > prefixLength) {
                             buf[off++] = '.';
                         }
-                        buf[off++] = ch;
                     } else {
                         if (ch >= 'a' && ch <= 'z') {
                             ch -= 32;
                         }
-                        buf[off++] = ch;
                     }
+                    buf[off++] = ch;
                 } else {
                     if (ch >= 'A' && ch <= 'Z') {
                         if (i > prefixLength) {
@@ -1832,7 +1828,7 @@ public abstract class BeanUtils {
     }
 
     static boolean equal(Object a, Object b) {
-        return a == b || (a != null && a.equals(b));
+        return Objects.equals(a, b);
     }
 
     /**
@@ -1935,7 +1931,7 @@ public abstract class BeanUtils {
     }
 
     public static Type resolve(Type context, Class<?> contextRawType, Type toResolve) {
-        return resolve(context, contextRawType, toResolve, new HashMap<TypeVariable<?>, Type>());
+        return resolve(context, contextRawType, toResolve, new HashMap<>());
     }
 
     private static Type resolve(Type context, Class<?> contextRawType, Type toResolve,
@@ -2413,13 +2409,8 @@ public abstract class BeanUtils {
             String name = m.getName();
             try {
                 Object result = m.invoke(annotation);
-                switch (name) {
-                    case "value":
-                        boolean value = (Boolean) result;
-                        fieldInfo.ignore = value;
-                        break;
-                    default:
-                        break;
+                if (name.equals("value")) {
+                    fieldInfo.ignore = (boolean) (Boolean) result;
                 }
             } catch (Throwable ignored) {
                 // ignored
@@ -2594,7 +2585,7 @@ public abstract class BeanUtils {
                 }
                 case "alphabetic": {
                     Boolean alphabetic = (Boolean) result;
-                    if (!alphabetic.booleanValue()) {
+                    if (!alphabetic) {
                         beanInfo.alphabetic = false;
                     }
                     break;
@@ -2662,12 +2653,8 @@ public abstract class BeanUtils {
                             beanInfo.ignores = fields;
                         } else {
                             LinkedHashSet<String> ignoresSet = new LinkedHashSet<>();
-                            for (String ignore : beanInfo.ignores) {
-                                ignoresSet.add(ignore);
-                            }
-                            for (String ignore : fields) {
-                                ignoresSet.add(ignore);
-                            }
+                            ignoresSet.addAll(Arrays.asList(beanInfo.ignores));
+                            ignoresSet.addAll(Arrays.asList(fields));
                             beanInfo.ignores = ignoresSet.toArray(new String[ignoresSet.size()]);
                         }
                     }
@@ -2711,12 +2698,8 @@ public abstract class BeanUtils {
                     }
                     case "shape": {
                         String shape = ((Enum) result).name();
-                        switch (shape) {
-                            case "STRING":
-                                fieldInfo.features |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
-                                break;
-                            default:
-                                break;
+                        if (shape.equals("STRING")) {
+                            fieldInfo.features |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
                         }
                         break;
                     }
@@ -2735,16 +2718,11 @@ public abstract class BeanUtils {
             String name = m.getName();
             try {
                 Object result = m.invoke(annotation);
-                switch (name) {
-                    case "pattern": {
-                        String pattern = (String) result;
-                        if (pattern.length() != 0) {
-                            beanInfo.format = pattern;
-                        }
-                        break;
+                if (name.equals("pattern")) {
+                    String pattern = (String) result;
+                    if (pattern.length() != 0) {
+                        beanInfo.format = pattern;
                     }
-                    default:
-                        break;
                 }
             } catch (Throwable ignored) {
                 // ignored
@@ -2758,23 +2736,18 @@ public abstract class BeanUtils {
             String name = m.getName();
             try {
                 Object result = m.invoke(annotation);
-                switch (name) {
-                    case "value": {
-                        String include = ((Enum) result).name();
-                        switch (include) {
-                            case "ALWAYS":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNulls.mask;
-                                break;
-                            case "NON_DEFAULT":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteDefaultValue.mask;
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
+                if (name.equals("value")) {
+                    String include = ((Enum) result).name();
+                    switch (include) {
+                        case "ALWAYS":
+                            beanInfo.writerFeatures |= JSONWriter.Feature.WriteNulls.mask;
+                            break;
+                        case "NON_DEFAULT":
+                            beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteDefaultValue.mask;
+                            break;
+                        default:
+                            break;
                     }
-                    default:
-                        break;
                 }
             } catch (Throwable ignored) {
                 // ignored
@@ -2788,16 +2761,11 @@ public abstract class BeanUtils {
             String name = m.getName();
             try {
                 Object result = m.invoke(annotation);
-                switch (name) {
-                    case "value": {
-                        String value = (String) result;
-                        if (!value.isEmpty()) {
-                            beanInfo.typeName = value;
-                        }
-                        break;
+                if (name.equals("value")) {
+                    String value = (String) result;
+                    if (!value.isEmpty()) {
+                        beanInfo.typeName = value;
                     }
-                    default:
-                        break;
                 }
             } catch (Throwable ignored) {
                 // ignored

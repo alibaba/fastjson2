@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.annotation.JSONType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Objects;
 
 @JSONType(deserializeFeatures = JSONReader.Feature.SupportAutoType, typeName = "java.lang.reflect.ParameterizedType")
 public class ParameterizedTypeImpl
@@ -58,10 +59,10 @@ public class ParameterizedTypeImpl
         if (!Arrays.equals(actualTypeArguments, that.actualTypeArguments)) {
             return false;
         }
-        if (ownerType != null ? !ownerType.equals(that.ownerType) : that.ownerType != null) {
+        if (!Objects.equals(ownerType, that.ownerType)) {
             return false;
         }
-        return rawType != null ? rawType.equals(that.rawType) : that.rawType == null;
+        return Objects.equals(rawType, that.rawType);
     }
 
     @Override

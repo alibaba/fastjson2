@@ -134,8 +134,7 @@ public final class ObjectWriterImplMap
 
         jsonWriter.startObject();
         boolean writeNulls = jsonWriter.isWriteNulls();
-        for (Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<String, Object> entry = it.next();
+        for (Map.Entry<String, Object> entry : (Iterable<Map.Entry<String, Object>>) map.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
             if (value == null) {
@@ -416,8 +415,7 @@ public final class ObjectWriterImplMap
         }
 
         ObjectWriterProvider provider = jsonWriter.context.provider;
-        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = it.next();
+        for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             Object value = entry.getValue();
             Object key = entry.getKey();
 
@@ -432,9 +430,9 @@ public final class ObjectWriterImplMap
                             jsonWriter.writeName(key.toString());
                         } else {
                             if (key instanceof Integer) {
-                                jsonWriter.writeName(((Integer) key).intValue());
+                                jsonWriter.writeName((Integer) key);
                             } else if (key instanceof Long) {
-                                jsonWriter.writeName(((Long) key).longValue());
+                                jsonWriter.writeName((Long) key);
                             } else {
                                 jsonWriter.writeNameAny(key);
                             }
@@ -465,7 +463,7 @@ public final class ObjectWriterImplMap
                     jsonWriter.writeName(strKey = key.toString());
                 } else {
                     if (key instanceof Integer) {
-                        jsonWriter.writeName(((Integer) key).intValue());
+                        jsonWriter.writeName((Integer) key);
                     } else if (key instanceof Long) {
                         long longKey = (Long) key;
                         jsonWriter.writeName(longKey);
@@ -588,8 +586,7 @@ public final class ObjectWriterImplMap
         AfterFilter afterFilter = context.getAfterFilter();
         boolean writeNulls = context.isEnabled(JSONWriter.Feature.WriteNulls.mask);
 
-        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = it.next();
+        for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             Object value = entry.getValue();
             if (value == null && !writeNulls) {
                 continue;

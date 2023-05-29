@@ -57,7 +57,7 @@ class FieldWriterFloatMethod<T>
 
         writeFieldName(jsonWriter);
 
-        float floatValue = value.floatValue();
+        float floatValue = value;
         if (decimalFormat != null) {
             jsonWriter.writeFloat(floatValue, decimalFormat);
         } else {
@@ -73,7 +73,7 @@ class FieldWriterFloatMethod<T>
         if (value == null) {
             jsonWriter.writeNumberNull();
         } else {
-            float floatValue = value.floatValue();
+            float floatValue = value;
             if (decimalFormat != null) {
                 jsonWriter.writeFloat(floatValue, decimalFormat);
             } else {

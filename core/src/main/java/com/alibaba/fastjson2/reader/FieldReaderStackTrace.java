@@ -7,7 +7,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 
@@ -42,8 +41,7 @@ public class FieldReaderStackTrace
             Collection collection = (Collection) value;
 
             int nullCount = 0;
-            for (Iterator it = collection.iterator(); it.hasNext(); ) {
-                Object item = it.next();
+            for (Object item : collection) {
                 if (item == null) {
                     nullCount++;
                 }

@@ -19,7 +19,7 @@ public class ToShort
         }
 
         if (o instanceof Boolean) {
-            return ((Boolean) o).booleanValue() ? (short) 1 : (short) 0;
+            return (Boolean) o ? (short) 1 : (short) 0;
         }
 
         if (o instanceof Number) {

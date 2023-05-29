@@ -10,7 +10,7 @@ final class FieldWriterBigDecimalFunc<T>
         extends FieldWriter<T> {
     final Function<T, BigDecimal> function;
 
-    protected FieldWriterBigDecimalFunc(
+    FieldWriterBigDecimalFunc(
             String fieldName,
             int ordinal,
             long features,

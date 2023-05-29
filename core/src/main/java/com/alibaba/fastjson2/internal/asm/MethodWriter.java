@@ -34,7 +34,7 @@ import com.alibaba.fastjson2.JSONException;
  * @author Eugene Kuleshov
  */
 public final class MethodWriter {
-    protected MethodWriter mv;
+    MethodWriter mv;
 
     /**
      * Where the constants used in this MethodWriter must be stored.
@@ -93,7 +93,7 @@ public final class MethodWriter {
      * The first basic block of the method. The next ones (in bytecode offset order) can be accessed
      * with the {@link Label#nextBasicBlock} field.
      */
-    private Label firstBasicBlock;
+    private final Label firstBasicBlock;
 
     /**
      * The last basic block of the method (in bytecode offset order). This field is updated each time

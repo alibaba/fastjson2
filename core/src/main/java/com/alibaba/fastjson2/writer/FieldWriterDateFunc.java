@@ -8,9 +8,9 @@ import java.util.function.Function;
 
 final class FieldWriterDateFunc<T>
         extends FieldWriterDate<T> {
-    Function<T, Date> function;
+    final Function<T, Date> function;
 
-    protected FieldWriterDateFunc(
+    FieldWriterDateFunc(
             String fieldName,
             int ordinal,
             long features,

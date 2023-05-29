@@ -53,13 +53,13 @@ public final class FieldReaderInstant<T>
     }
 
     @Override
-    public final void readFieldValue(JSONReader jsonReader, T object) {
+    public void readFieldValue(JSONReader jsonReader, T object) {
         Instant date = (Instant) dateReader.readObject(jsonReader, fieldType, fieldName, features);
         accept(object, date);
     }
 
     @Override
-    public final void readFieldValueJSONB(JSONReader jsonReader, T object) {
+    public void readFieldValueJSONB(JSONReader jsonReader, T object) {
         Instant instant = jsonReader.readInstant();
         accept(object, instant);
     }

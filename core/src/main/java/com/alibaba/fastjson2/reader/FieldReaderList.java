@@ -88,10 +88,9 @@ public class FieldReaderList<T, V>
 
         char current = jsonReader.current();
         if (current == '[') {
-            JSONReader.Context ctx = context;
-            ObjectReader itemObjectReader = getItemObjectReader(ctx);
+            ObjectReader itemObjectReader = getItemObjectReader(context);
 
-            Collection list = createList(ctx);
+            Collection list = createList(context);
             jsonReader.next();
             for (int i = 0; ; ++i) {
                 if (jsonReader.nextIfMatch(']')) {
@@ -113,9 +112,7 @@ public class FieldReaderList<T, V>
 
                 list.add(item);
 
-                if (jsonReader.nextIfMatch(',')) {
-                    continue;
-                }
+                jsonReader.nextIfMatch(',');
             }
             if (builder != null) {
                 list = (Collection) builder.apply(list);
@@ -166,18 +163,12 @@ public class FieldReaderList<T, V>
 
             Collection list = createList(ctx);
             jsonReader.next();
-            for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
-                    break;
-                }
-
+            while (!jsonReader.nextIfMatch(']')) {
                 list.add(
                         itemObjectReader.readObject(jsonReader, null, null, 0)
                 );
 
-                if (jsonReader.nextIfMatch(',')) {
-                    continue;
-                }
+                jsonReader.nextIfMatch(',');
             }
 
             jsonReader.nextIfMatch(',');

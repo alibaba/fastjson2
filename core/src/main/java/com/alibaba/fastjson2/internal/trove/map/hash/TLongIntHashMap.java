@@ -103,12 +103,12 @@ public final class TLongIntHashMap {
         return primeCapacities[i];
     }
 
-    protected int[] values;
-    protected long[] set;
-    protected boolean consumeFreeSlot;
-    protected int size;
-    protected int free;
-    protected int maxSize;
+    private int[] values;
+    private long[] set;
+    private boolean consumeFreeSlot;
+    private int size;
+    private int free;
+    private int maxSize;
 
     /**
      * Creates a new <code>TLongIntHashMap</code> instance with the default
@@ -432,7 +432,7 @@ public final class TLongIntHashMap {
      * @param key an <code>long</code> value
      * @return an <code>int</code> value
      */
-    protected int insertKey(long key) {
+    private int insertKey(long key) {
         int hash, index;
 
         hash = ((int) (key ^ (key >>> 32))) & 0x7fffffff;

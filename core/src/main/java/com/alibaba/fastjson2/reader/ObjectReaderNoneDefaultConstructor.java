@@ -18,8 +18,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
         extends ObjectReaderAdapter<T> {
     final String[] paramNames;
     final FieldReader[] setterFieldReaders;
-    private Function<Map<Long, Object>, T> creator;
-    private List<Constructor> alternateConstructors;
+    private final Function<Map<Long, Object>, T> creator;
 
     public ObjectReaderNoneDefaultConstructor(
             Class objectClass,
@@ -50,7 +49,6 @@ public class ObjectReaderNoneDefaultConstructor<T>
         this.paramNames = paramNames;
         this.creator = creator;
         this.setterFieldReaders = setterFieldReaders;
-        this.alternateConstructors = alternateConstructors;
     }
 
     static FieldReader[] concat(FieldReader[] a, FieldReader[] b) {
@@ -129,7 +127,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
                         }
                     }
 
-                    Object object = (T) autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+                    Object object = autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
                     jsonReader.nextIfMatch(',');
                     return (T) object;
                 }
@@ -200,12 +198,12 @@ public class ObjectReaderNoneDefaultConstructor<T>
         if (jsonReader.isSupportBeanArray(features | this.features)
                 && jsonReader.nextIfMatch('[')) {
             LinkedHashMap<Long, Object> valueMap = null;
-            for (int i = 0; i < fieldReaders.length; i++) {
-                Object fieldValue = fieldReaders[i].readFieldValue(jsonReader);
+            for (FieldReader fieldReader : fieldReaders) {
+                Object fieldValue = fieldReader.readFieldValue(jsonReader);
                 if (valueMap == null) {
                     valueMap = new LinkedHashMap<>();
                 }
-                long hash = fieldReaders[i].fieldNameHash;
+                long hash = fieldReader.fieldNameHash;
                 valueMap.put(hash, fieldValue);
             }
 
@@ -266,7 +264,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 }
 
                 if (autoTypeObjectReader != null) {
-                    Object object = (T) autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
+                    Object object = autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
                     jsonReader.nextIfMatch(',');
                     return (T) object;
                 }
@@ -303,8 +301,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
         T object = creator.apply(argsMap);
 
         if (setterFieldReaders != null && valueMap != null) {
-            for (int i = 0; i < setterFieldReaders.length; i++) {
-                FieldReader fieldReader = setterFieldReaders[i];
+            for (FieldReader fieldReader : setterFieldReaders) {
                 Object fieldValue = valueMap.get(fieldReader.fieldNameHash);
                 if (fieldValue != null) {
                     fieldReader.accept(object, fieldValue);
@@ -323,8 +320,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
         }
 
         LinkedHashMap<Long, Object> valueMap = new LinkedHashMap<>();
-        for (int i = 0; i < fieldReaders.length; i++) {
-            FieldReader fieldReader = fieldReaders[i];
+        for (FieldReader fieldReader : fieldReaders) {
             Object fieldValue = fieldReader.readFieldValue(jsonReader);
             valueMap.put(fieldReader.fieldNameHash, fieldValue);
         }
@@ -340,8 +336,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
 
         LinkedHashMap<Long, Object> valueMap = new LinkedHashMap<>();
-        for (Iterator it = collection.iterator(); it.hasNext(); ) {
-            Object fieldValue = it.next();
+        for (Object fieldValue : collection) {
             if (index >= fieldReaders.length) {
                 break;
             }
@@ -373,13 +368,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
             index++;
         }
 
-        T object = createInstanceNoneDefaultConstructor(
-                valueMap == null
-                        ? Collections.emptyMap()
-                        : valueMap
-        );
-
-        return object;
+        return createInstanceNoneDefaultConstructor(valueMap);
     }
 
     @Override
@@ -408,8 +397,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
         LinkedHashMap<Long, Object> valueMap = null;
 
-        for (Iterator<Map.Entry> it = map.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = it.next();
+        for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
             String fieldName = entry.getKey().toString();
             Object fieldValue = entry.getValue();
 
@@ -446,8 +434,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
                         : valueMap
         );
 
-        for (int i = 0; i < setterFieldReaders.length; i++) {
-            FieldReader fieldReader = setterFieldReaders[i];
+        for (FieldReader fieldReader : setterFieldReaders) {
             Object fieldValue = map.get(fieldReader.fieldName);
             if (fieldValue == null) {
                 continue;

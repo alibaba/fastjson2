@@ -56,7 +56,7 @@ public final class FieldReaderLocalDateTime<T>
     }
 
     @Override
-    public final void readFieldValue(JSONReader jsonReader, Object object) {
+    public void readFieldValue(JSONReader jsonReader, Object object) {
         LocalDateTime date = (LocalDateTime) dateReader.readObject(jsonReader, fieldType, fieldName, features);
         accept(object, date);
     }

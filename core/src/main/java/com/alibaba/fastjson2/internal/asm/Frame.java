@@ -78,11 +78,6 @@ class Frame {
     // Constants to manipulate the DIM field of an abstract type.
 
     /**
-     * The constant to be added to an abstract type to get one with one more array dimension.
-     */
-    static final int ARRAY_OF = +1 << DIM_SHIFT;
-
-    /**
      * The constant to be added to an abstract type to get one with one less array dimension.
      */
     static final int ELEMENT_OF = -1 << DIM_SHIFT;
@@ -125,7 +120,7 @@ class Frame {
     /**
      * The basic block to which these input and output stack map frames correspond.
      */
-    Label owner;
+    final Label owner;
 
     /**
      * The input stack map frame locals. This is an array of abstract types.

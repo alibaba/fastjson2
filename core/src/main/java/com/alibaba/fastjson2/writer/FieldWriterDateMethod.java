@@ -9,7 +9,7 @@ import java.util.Date;
 
 final class FieldWriterDateMethod<T>
         extends FieldWriterDate<T> {
-    protected FieldWriterDateMethod(
+    FieldWriterDateMethod(
             String fieldName,
             int ordinal,
             long features,
