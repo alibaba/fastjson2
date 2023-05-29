@@ -26,7 +26,7 @@ final class ObjectReaderImplOffsetDateTime
 
     @Override
     public Class getObjectClass() {
-        return ZonedDateTime.class;
+        return OffsetDateTime.class;
     }
 
     @Override

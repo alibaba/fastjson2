@@ -410,16 +410,16 @@ public class DateUtils {
             return null;
         }
 
-        int seccond;
+        int second;
         if (s0 >= '0' && s0 <= '9'
                 && s1 >= '0' && s1 <= '9'
         ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
+            second = (s0 - '0') * 10 + (s1 - '0');
         } else {
             return null;
         }
 
-        return LocalTime.of(hour, minute, seccond);
+        return LocalTime.of(hour, minute, second);
     }
 
     public static LocalTime parseLocalTime8(char[] bytes, int off) {
@@ -466,16 +466,16 @@ public class DateUtils {
             return null;
         }
 
-        int seccond;
+        int second;
         if (s0 >= '0' && s0 <= '9'
                 && s1 >= '0' && s1 <= '9'
         ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
+            second = (s0 - '0') * 10 + (s1 - '0');
         } else {
             return null;
         }
 
-        return LocalTime.of(hour, minute, seccond);
+        return LocalTime.of(hour, minute, second);
     }
 
     public static LocalTime parseLocalTime10(byte[] bytes, int off) {
@@ -494,7 +494,7 @@ public class DateUtils {
         byte c8 = bytes[off + 8];
         byte c9 = bytes[off + 9];
 
-        byte h0, h1, i0, i1, s0, s1, m0, m1, m2;
+        byte h0, h1, i0, i1, s0, s1, m0;
         if (c2 == ':' && c5 == ':' && c8 == '.') {
             h0 = c0;
             h1 = c1;
@@ -503,8 +503,6 @@ public class DateUtils {
             s0 = c6;
             s1 = c7;
             m0 = c9;
-            m1 = '0';
-            m2 = '0';
         } else {
             return null;
         }
@@ -527,27 +525,24 @@ public class DateUtils {
             return null;
         }
 
-        int seccond;
+        int second;
         if (s0 >= '0' && s0 <= '9'
                 && s1 >= '0' && s1 <= '9'
         ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
+            second = (s0 - '0') * 10 + (s1 - '0');
         } else {
             return null;
         }
 
         int millis;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-                && m2 >= '0' && m2 <= '9'
-        ) {
-            millis = (m0 - '0') * 100 + (m1 - '0') * 10 + (m2 - '0');
+        if (m0 >= '0' && m0 <= '9') {
+            millis = (m0 - '0') * 100;
             millis *= 1000_000;
         } else {
             return null;
         }
 
-        return LocalTime.of(hour, minute, seccond, millis);
+        return LocalTime.of(hour, minute, second, millis);
     }
 
     public static LocalTime parseLocalTime10(char[] bytes, int off) {
@@ -566,7 +561,7 @@ public class DateUtils {
         char c8 = bytes[off + 8];
         char c9 = bytes[off + 9];
 
-        char h0, h1, i0, i1, s0, s1, m0, m1, m2;
+        char h0, h1, i0, i1, s0, s1, m0;
         if (c2 == ':' && c5 == ':' && c8 == '.') {
             h0 = c0;
             h1 = c1;
@@ -575,8 +570,6 @@ public class DateUtils {
             s0 = c6;
             s1 = c7;
             m0 = c9;
-            m1 = '0';
-            m2 = '0';
         } else {
             return null;
         }
@@ -599,27 +592,24 @@ public class DateUtils {
             return null;
         }
 
-        int seccond;
+        int second;
         if (s0 >= '0' && s0 <= '9'
                 && s1 >= '0' && s1 <= '9'
         ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
+            second = (s0 - '0') * 10 + (s1 - '0');
         } else {
             return null;
         }
 
         int millis;
-        if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-                && m2 >= '0' && m2 <= '9'
-        ) {
-            millis = (m0 - '0') * 100 + (m1 - '0') * 10 + (m2 - '0');
+        if (m0 >= '0' && m0 <= '9') {
+            millis = (m0 - '0') * 100;
             millis *= 1000_000;
         } else {
             return null;
         }
 
-        return LocalTime.of(hour, minute, seccond, millis);
+        return LocalTime.of(hour, minute, second, millis);
     }
 
     public static LocalTime parseLocalTime11(byte[] bytes, int off) {
@@ -639,7 +629,7 @@ public class DateUtils {
         byte c9 = bytes[off + 9];
         byte c10 = bytes[off + 10];
 
-        byte h0, h1, i0, i1, s0, s1, m0, m1, m2;
+        byte h0, h1, i0, i1, s0, s1, m0, m1;
         if (c2 == ':' && c5 == ':' && c8 == '.') {
             h0 = c0;
             h1 = c1;
@@ -649,7 +639,6 @@ public class DateUtils {
             s1 = c7;
             m0 = c9;
             m1 = c10;
-            m2 = '0';
         } else {
             return null;
         }
@@ -672,11 +661,11 @@ public class DateUtils {
             return null;
         }
 
-        int seccond;
+        int second;
         if (s0 >= '0' && s0 <= '9'
                 && s1 >= '0' && s1 <= '9'
         ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
+            second = (s0 - '0') * 10 + (s1 - '0');
         } else {
             return null;
         }
@@ -684,15 +673,14 @@ public class DateUtils {
         int millis;
         if (m0 >= '0' && m0 <= '9'
                 && m1 >= '0' && m1 <= '9'
-                && m2 >= '0' && m2 <= '9'
         ) {
-            millis = (m0 - '0') * 100 + (m1 - '0') * 10 + (m2 - '0');
+            millis = (m0 - '0') * 100 + (m1 - '0') * 10;
             millis *= 1000_000;
         } else {
             return null;
         }
 
-        return LocalTime.of(hour, minute, seccond, millis);
+        return LocalTime.of(hour, minute, second, millis);
     }
 
     public static LocalTime parseLocalTime11(char[] bytes, int off) {
@@ -712,7 +700,7 @@ public class DateUtils {
         char c9 = bytes[off + 9];
         char c10 = bytes[off + 10];
 
-        char h0, h1, i0, i1, s0, s1, m0, m1, m2;
+        char h0, h1, i0, i1, s0, s1, m0, m1;
         if (c2 == ':' && c5 == ':' && c8 == '.') {
             h0 = c0;
             h1 = c1;
@@ -722,7 +710,6 @@ public class DateUtils {
             s1 = c7;
             m0 = c9;
             m1 = c10;
-            m2 = '0';
         } else {
             return null;
         }
@@ -745,27 +732,25 @@ public class DateUtils {
             return null;
         }
 
-        int seccond;
+        int second;
         if (s0 >= '0' && s0 <= '9'
                 && s1 >= '0' && s1 <= '9'
         ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
+            second = (s0 - '0') * 10 + (s1 - '0');
         } else {
             return null;
         }
 
         int millis;
         if (m0 >= '0' && m0 <= '9'
-                && m1 >= '0' && m1 <= '9'
-                && m2 >= '0' && m2 <= '9'
-        ) {
-            millis = (m0 - '0') * 100 + (m1 - '0') * 10 + (m2 - '0');
+                && m1 >= '0' && m1 <= '9') {
+            millis = (m0 - '0') * 100 + (m1 - '0') * 10;
             millis *= 1000_000;
         } else {
             return null;
         }
 
-        return LocalTime.of(hour, minute, seccond, millis);
+        return LocalTime.of(hour, minute, second, millis);
     }
 
     public static LocalTime parseLocalTime12(byte[] bytes, int off) {
@@ -819,11 +804,11 @@ public class DateUtils {
             return null;
         }
 
-        int seccond;
+        int second;
         if (s0 >= '0' && s0 <= '9'
                 && s1 >= '0' && s1 <= '9'
         ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
+            second = (s0 - '0') * 10 + (s1 - '0');
         } else {
             return null;
         }
@@ -839,7 +824,7 @@ public class DateUtils {
             return null;
         }
 
-        return LocalTime.of(hour, minute, seccond, millis);
+        return LocalTime.of(hour, minute, second, millis);
     }
 
     public static LocalTime parseLocalTime12(char[] bytes, int off) {
@@ -893,11 +878,11 @@ public class DateUtils {
             return null;
         }
 
-        int seccond;
+        int second;
         if (s0 >= '0' && s0 <= '9'
                 && s1 >= '0' && s1 <= '9'
         ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
+            second = (s0 - '0') * 10 + (s1 - '0');
         } else {
             return null;
         }
@@ -913,7 +898,7 @@ public class DateUtils {
             return null;
         }
 
-        return LocalTime.of(hour, minute, seccond, millis);
+        return LocalTime.of(hour, minute, second, millis);
     }
 
     public static LocalTime parseLocalTime18(byte[] bytes, int off) {
@@ -979,11 +964,11 @@ public class DateUtils {
             return null;
         }
 
-        int seccond;
+        int second;
         if (s0 >= '0' && s0 <= '9'
                 && s1 >= '0' && s1 <= '9'
         ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
+            second = (s0 - '0') * 10 + (s1 - '0');
         } else {
             return null;
         }
@@ -1012,7 +997,7 @@ public class DateUtils {
             return null;
         }
 
-        return LocalTime.of(hour, minute, seccond, millis);
+        return LocalTime.of(hour, minute, second, millis);
     }
 
     public static LocalTime parseLocalTime18(char[] bytes, int off) {
@@ -1078,11 +1063,11 @@ public class DateUtils {
             return null;
         }
 
-        int seccond;
+        int second;
         if (s0 >= '0' && s0 <= '9'
                 && s1 >= '0' && s1 <= '9'
         ) {
-            seccond = (s0 - '0') * 10 + (s1 - '0');
+            second = (s0 - '0') * 10 + (s1 - '0');
         } else {
             return null;
         }
@@ -1111,7 +1096,7 @@ public class DateUtils {
             return null;
         }
 
-        return LocalTime.of(hour, minute, seccond, millis);
+        return LocalTime.of(hour, minute, second, millis);
     }
 
     public static LocalDateTime parseLocalDateTime(byte[] str, int off, int len) {
@@ -1148,8 +1133,10 @@ public class DateUtils {
                 return LocalDateTime.of(localDate, LocalTime.MIN);
             }
             case 11: {
-                LocalDate localDate = parseLocalDate11(str, off);
-                return LocalDateTime.of(localDate, LocalTime.MIN);
+                return LocalDateTime.of(
+                        parseLocalDate11(str, off),
+                        LocalTime.MIN
+                );
             }
             case 12:
                 return parseLocalDateTime12(str, off);
@@ -1487,7 +1474,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = (char) str[off + 0];
+        char c0 = (char) str[off];
         char c1 = (char) str[off + 1];
         char c2 = (char) str[off + 2];
         char c3 = (char) str[off + 3];
@@ -1595,7 +1582,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = str[off + 0];
+        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
@@ -1703,7 +1690,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = (char) str[off + 0];
+        char c0 = (char) str[off];
         char c1 = (char) str[off + 1];
         char c2 = (char) str[off + 2];
         char c3 = (char) str[off + 3];
@@ -1893,7 +1880,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = str[off + 0];
+        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
@@ -2109,7 +2096,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = (char) str[off + 0];
+        char c0 = (char) str[off];
         char c1 = (char) str[off + 1];
         char c2 = (char) str[off + 2];
         char c3 = (char) str[off + 3];
@@ -2252,7 +2239,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = str[off + 0];
+        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
@@ -2438,7 +2425,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = str[off + 0];
+        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
@@ -2548,7 +2535,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = (char) str[off + 0];
+        char c0 = (char) str[off];
         char c1 = (char) str[off + 1];
         char c2 = (char) str[off + 2];
         char c3 = (char) str[off + 3];
@@ -2634,7 +2621,7 @@ public class DateUtils {
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        char y0 = str[off + 0];
+        char y0 = str[off];
         char y1 = str[off + 1];
         char y2 = str[off + 2];
         char y3 = str[off + 3];
@@ -2715,7 +2702,7 @@ public class DateUtils {
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        char y0 = (char) str[off + 0];
+        char y0 = (char) str[off];
         char y1 = (char) str[off + 1];
         char y2 = (char) str[off + 2];
         char y3 = (char) str[off + 3];
@@ -2795,7 +2782,7 @@ public class DateUtils {
             return null;
         }
 
-        char y0 = str[off + 0];
+        char y0 = str[off];
         char y1 = str[off + 1];
         char y2 = str[off + 2];
         char y3 = str[off + 3];
@@ -2877,7 +2864,7 @@ public class DateUtils {
             return null;
         }
 
-        char y0 = (char) str[off + 0];
+        char y0 = (char) str[off];
         char y1 = (char) str[off + 1];
         char y2 = (char) str[off + 2];
         char y3 = (char) str[off + 3];
@@ -2963,7 +2950,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = str[off + 0];
+        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
@@ -3031,7 +3018,6 @@ public class DateUtils {
             i0 = '0';
             i1 = c13;
 
-            s0 = '0';
             s1 = c15;
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':') {
             y0 = c6;
@@ -3055,9 +3041,6 @@ public class DateUtils {
 
             i0 = c14;
             i1 = c15;
-
-            s0 = '0';
-            s1 = '0';
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c14 == ':') {
             // d MMM yyyy H:m:ss
             // 6 DEC 2020 2:3:14
@@ -3083,7 +3066,6 @@ public class DateUtils {
             i0 = '0';
             i1 = c13;
 
-            s0 = '0';
             s1 = c15;
         } else {
             return null;
@@ -3160,7 +3142,7 @@ public class DateUtils {
             return null;
         }
 
-        byte c0 = str[off + 0];
+        byte c0 = str[off];
         byte c1 = str[off + 1];
         byte c2 = str[off + 2];
         byte c3 = str[off + 3];
@@ -3268,7 +3250,6 @@ public class DateUtils {
             i0 = '0';
             i1 = (char) c13;
 
-            s0 = '0';
             s1 = (char) c15;
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c13 == ':') {
             y0 = (char) c6;
@@ -3292,9 +3273,6 @@ public class DateUtils {
 
             i0 = (char) c14;
             i1 = (char) c15;
-
-            s0 = '0';
-            s1 = '0';
         } else if (c1 == ' ' && c5 == ' ' && c10 == ' ' && c12 == ':' && c14 == ':') {
             // d MMM yyyy H:m:ss
             // 6 DEC 2020 2:3:14
@@ -3320,7 +3298,6 @@ public class DateUtils {
             i0 = '0';
             i1 = (char) c13;
 
-            s0 = '0';
             s1 = (char) c15;
         } else {
             return null;
@@ -3397,7 +3374,7 @@ public class DateUtils {
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        char c0 = str[off + 0];
+        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
@@ -3692,7 +3669,7 @@ public class DateUtils {
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        byte c0 = str[off + 0];
+        byte c0 = str[off];
         byte c1 = str[off + 1];
         byte c2 = str[off + 2];
         byte c3 = str[off + 3];
@@ -4027,7 +4004,7 @@ public class DateUtils {
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        char c0 = str[off + 0];
+        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
@@ -4403,7 +4380,7 @@ public class DateUtils {
             throw new DateTimeParseException("illegal input " + input, input, 0);
         }
 
-        char c0 = (char) str[off + 0];
+        char c0 = (char) str[off];
         char c1 = (char) str[off + 1];
         char c2 = (char) str[off + 2];
         char c3 = (char) str[off + 3];
@@ -4772,7 +4749,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = str[off + 0];
+        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
@@ -4917,7 +4894,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = (char) str[off + 0];
+        char c0 = (char) str[off];
         char c1 = (char) str[off + 1];
         char c2 = (char) str[off + 2];
         char c3 = (char) str[off + 3];
@@ -5036,7 +5013,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = str[off + 0];
+        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
@@ -5061,11 +5038,6 @@ public class DateUtils {
             return null;
         }
 
-        char y0 = c7;
-        char y1 = c8;
-        char y2 = c9;
-        char y3 = c10;
-
         char m0, m1;
 
         int month = DateUtils.month(c3, c4, c5);
@@ -5077,25 +5049,13 @@ public class DateUtils {
             m1 = '0';
         }
 
-        char d0 = c0;
-        char d1 = c1;
-
-        char h0 = c12;
-        char h1 = c13;
-
-        char i0 = c15;
-        char i1 = c16;
-
-        char s0 = c18;
-        char s1 = c19;
-
         return localDateTime(
-                y0, y1, y2, y3,
+                c7, c8, c9, c10, // yyyy
                 m0, m1,
-                d0, d1,
-                h0, h1,
-                i0, i1,
-                s0, s1
+                c0, c1, // dd
+                c12, c13, // HH
+                c15, c16, // mm
+                c18, c19 // ss
         );
     }
 
@@ -5104,7 +5064,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = (char) str[off + 0];
+        char c0 = (char) str[off];
         char c1 = (char) str[off + 1];
         char c2 = (char) str[off + 2];
         char c3 = (char) str[off + 3];
@@ -5129,11 +5089,6 @@ public class DateUtils {
             return null;
         }
 
-        char y0 = c7;
-        char y1 = c8;
-        char y2 = c9;
-        char y3 = c10;
-
         char m0, m1;
 
         int month = DateUtils.month(c3, c4, c5);
@@ -5145,25 +5100,13 @@ public class DateUtils {
             m1 = '0';
         }
 
-        char d0 = c0;
-        char d1 = c1;
-
-        char h0 = c12;
-        char h1 = c13;
-
-        char i0 = c15;
-        char i1 = c16;
-
-        char s0 = c18;
-        char s1 = c19;
-
         return localDateTime(
-                y0, y1, y2, y3,
+                c7, c8, c9, c10, // yyyy
                 m0, m1,
-                d0, d1,
-                h0, h1,
-                i0, i1,
-                s0, s1
+                c0, c1, // dd
+                c12, c13, // HH
+                c15, c16, // mm
+                c18, c19 // ss
         );
     }
 
@@ -5172,7 +5115,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = (char) str[off + 0];
+        char c0 = (char) str[off];
         char c1 = (char) str[off + 1];
         char c2 = (char) str[off + 2];
         char c3 = (char) str[off + 3];
@@ -5203,41 +5146,14 @@ public class DateUtils {
             return null;
         }
 
-        char y0 = c0;
-        char y1 = c1;
-        char y2 = c2;
-        char y3 = c3;
-
-        char m0 = c5;
-        char m1 = c6;
-
-        char d0 = c8;
-        char d1 = c9;
-
-        char h0 = c11;
-        char h1 = c12;
-
-        char i0 = c14;
-        char i1 = c15;
-
-        char s0 = c17;
-        char s1 = c18;
-
-        char S0 = c20;
-        char S1 = c21;
-        char S2 = c22;
-        char S3 = c23;
-        char S4 = c24;
-        char S5 = c25;
-
         return localDateTime(
-                y0, y1, y2, y3,
-                m0, m1,
-                d0, d1,
-                h0, h1,
-                i0, i1,
-                s0, s1,
-                S0, S1, S2, S3, S4, S5, '0', '0', '0'
+                c0, c1, c2, c3, // yyyy
+                c5, c6, // MM
+                c8, c9, // dd
+                c11, c12, // HH
+                c14, c15, // mm
+                c17, c18, // ss
+                c20, c21, c22, c23, c24, c25, '0', '0', '0'
         );
     }
 
@@ -5246,7 +5162,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = str[off + 0];
+        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
@@ -5277,41 +5193,15 @@ public class DateUtils {
             return null;
         }
 
-        char y0 = c0;
-        char y1 = c1;
-        char y2 = c2;
-        char y3 = c3;
-
-        char m0 = c5;
-        char m1 = c6;
-
-        char d0 = c8;
-        char d1 = c9;
-
-        char h0 = c11;
-        char h1 = c12;
-
-        char i0 = c14;
-        char i1 = c15;
-
-        char s0 = c17;
-        char s1 = c18;
-
-        char S0 = c20;
-        char S1 = c21;
-        char S2 = c22;
-        char S3 = c23;
-        char S4 = c24;
-        char S5 = c25;
-
         return localDateTime(
-                y0, y1, y2, y3,
-                m0, m1,
-                d0, d1,
-                h0, h1,
-                i0, i1,
-                s0, s1,
-                S0, S1, S2, S3, S4, S5, '0', '0', '0'
+                c0, c1, c2, c3, // yyyy
+                c5, c6, // MM
+                c8, c9, // dd
+                c11, c12, // HH
+                c14, c15, // mm
+                c17, c18, // SS
+                c20, c21, c22, c23, c24, c25,
+                '0', '0', '0'
         );
     }
 
@@ -5320,7 +5210,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = (char) str[off + 0];
+        char c0 = (char) str[off];
         char c1 = (char) str[off + 1];
         char c2 = (char) str[off + 2];
         char c3 = (char) str[off + 3];
@@ -5352,42 +5242,14 @@ public class DateUtils {
             return null;
         }
 
-        char y0 = c0;
-        char y1 = c1;
-        char y2 = c2;
-        char y3 = c3;
-
-        char m0 = c5;
-        char m1 = c6;
-
-        char d0 = c8;
-        char d1 = c9;
-
-        char h0 = c11;
-        char h1 = c12;
-
-        char i0 = c14;
-        char i1 = c15;
-
-        char s0 = c17;
-        char s1 = c18;
-
-        char S0 = c20;
-        char S1 = c21;
-        char S2 = c22;
-        char S3 = c23;
-        char S4 = c24;
-        char S5 = c25;
-        char S6 = c26;
-
         return localDateTime(
-                y0, y1, y2, y3,
-                m0, m1,
-                d0, d1,
-                h0, h1,
-                i0, i1,
-                s0, s1,
-                S0, S1, S2, S3, S4, S5, S6, '0', '0'
+                c0, c1, c2, c3, // yyyy
+                c5, c6, // MM
+                c8, c9, // dd
+                c11, c12, // HH
+                c14, c15, // mm
+                c17, c18, // ss
+                c20, c21, c22, c23, c24, c25, c26, '0', '0'
         );
     }
 
@@ -5396,7 +5258,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = str[off + 0];
+        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
@@ -5428,42 +5290,14 @@ public class DateUtils {
             return null;
         }
 
-        char y0 = c0;
-        char y1 = c1;
-        char y2 = c2;
-        char y3 = c3;
-
-        char m0 = c5;
-        char m1 = c6;
-
-        char d0 = c8;
-        char d1 = c9;
-
-        char h0 = c11;
-        char h1 = c12;
-
-        char i0 = c14;
-        char i1 = c15;
-
-        char s0 = c17;
-        char s1 = c18;
-
-        char S0 = c20;
-        char S1 = c21;
-        char S2 = c22;
-        char S3 = c23;
-        char S4 = c24;
-        char S5 = c25;
-        char S6 = c26;
-
         return localDateTime(
-                y0, y1, y2, y3,
-                m0, m1,
-                d0, d1,
-                h0, h1,
-                i0, i1,
-                s0, s1,
-                S0, S1, S2, S3, S4, S5, S6, '0', '0'
+                c0, c1, c2, c3, // yyyy
+                c5, c6, // MM
+                c8, c9, // dd
+                c11, c12, // hh
+                c14, c15, // mm
+                c17, c18, // ss
+                c20, c21, c22, c23, c24, c25, c26, '0', '0'
         );
     }
 
@@ -5472,7 +5306,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = str[off + 0];
+        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
@@ -5505,43 +5339,14 @@ public class DateUtils {
             return null;
         }
 
-        char y0 = c0;
-        char y1 = c1;
-        char y2 = c2;
-        char y3 = c3;
-
-        char m0 = c5;
-        char m1 = c6;
-
-        char d0 = c8;
-        char d1 = c9;
-
-        char h0 = c11;
-        char h1 = c12;
-
-        char i0 = c14;
-        char i1 = c15;
-
-        char s0 = c17;
-        char s1 = c18;
-
-        char S0 = c20;
-        char S1 = c21;
-        char S2 = c22;
-        char S3 = c23;
-        char S4 = c24;
-        char S5 = c25;
-        char S6 = c26;
-        char S7 = c27;
-
         return localDateTime(
-                y0, y1, y2, y3,
-                m0, m1,
-                d0, d1,
-                h0, h1,
-                i0, i1,
-                s0, s1,
-                S0, S1, S2, S3, S4, S5, S6, S7, '0'
+                c0, c1, c2, c3, // yyyy
+                c5, c6, // MM
+                c8, c9, // dd
+                c11, c12, // HH
+                c14, c15, // mm
+                c17, c18, // ss
+                c20, c21, c22, c23, c24, c25, c26, c27, '0'
         );
     }
 
@@ -5550,7 +5355,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = (char) str[off + 0];
+        char c0 = (char) str[off];
         char c1 = (char) str[off + 1];
         char c2 = (char) str[off + 2];
         char c3 = (char) str[off + 3];
@@ -5583,43 +5388,14 @@ public class DateUtils {
             return null;
         }
 
-        char y0 = c0;
-        char y1 = c1;
-        char y2 = c2;
-        char y3 = c3;
-
-        char m0 = c5;
-        char m1 = c6;
-
-        char d0 = c8;
-        char d1 = c9;
-
-        char h0 = c11;
-        char h1 = c12;
-
-        char i0 = c14;
-        char i1 = c15;
-
-        char s0 = c17;
-        char s1 = c18;
-
-        char S0 = c20;
-        char S1 = c21;
-        char S2 = c22;
-        char S3 = c23;
-        char S4 = c24;
-        char S5 = c25;
-        char S6 = c26;
-        char S7 = c27;
-
         return localDateTime(
-                y0, y1, y2, y3,
-                m0, m1,
-                d0, d1,
-                h0, h1,
-                i0, i1,
-                s0, s1,
-                S0, S1, S2, S3, S4, S5, S6, S7, '0'
+                c0, c1, c2, c3, // yyyy
+                c5, c6, // MM
+                c8, c9, // dd
+                c11, c12, // HH
+                c14, c15, // mm
+                c17, c18, // ss
+                c20, c21, c22, c23, c24, c25, c26, c27, '0'
         );
     }
 
@@ -5628,7 +5404,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = (char) str[off + 0];
+        char c0 = (char) str[off];
         char c1 = (char) str[off + 1];
         char c2 = (char) str[off + 2];
         char c3 = (char) str[off + 3];
@@ -5662,44 +5438,14 @@ public class DateUtils {
             return null;
         }
 
-        char y0 = c0;
-        char y1 = c1;
-        char y2 = c2;
-        char y3 = c3;
-
-        char m0 = c5;
-        char m1 = c6;
-
-        char d0 = c8;
-        char d1 = c9;
-
-        char h0 = c11;
-        char h1 = c12;
-
-        char i0 = c14;
-        char i1 = c15;
-
-        char s0 = c17;
-        char s1 = c18;
-
-        char S0 = c20;
-        char S1 = c21;
-        char S2 = c22;
-        char S3 = c23;
-        char S4 = c24;
-        char S5 = c25;
-        char S6 = c26;
-        char S7 = c27;
-        char S8 = c28;
-
         return localDateTime(
-                y0, y1, y2, y3,
-                m0, m1,
-                d0, d1,
-                h0, h1,
-                i0, i1,
-                s0, s1,
-                S0, S1, S2, S3, S4, S5, S6, S7, S8
+                c0, c1, c2, c3, // yyyy
+                c5, c6, // MM
+                c8, c9, // dd
+                c11, c12, // HH
+                c14, c15, // mm
+                c17, c18, // ss
+                c20, c21, c22, c23, c24, c25, c26, c27, c28
         );
     }
 
@@ -5708,7 +5454,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = str[off + 0];
+        char c0 = str[off];
         char c1 = str[off + 1];
         char c2 = str[off + 2];
         char c3 = str[off + 3];
@@ -5742,44 +5488,14 @@ public class DateUtils {
             return null;
         }
 
-        char y0 = c0;
-        char y1 = c1;
-        char y2 = c2;
-        char y3 = c3;
-
-        char m0 = c5;
-        char m1 = c6;
-
-        char d0 = c8;
-        char d1 = c9;
-
-        char h0 = c11;
-        char h1 = c12;
-
-        char i0 = c14;
-        char i1 = c15;
-
-        char s0 = c17;
-        char s1 = c18;
-
-        char S0 = c20;
-        char S1 = c21;
-        char S2 = c22;
-        char S3 = c23;
-        char S4 = c24;
-        char S5 = c25;
-        char S6 = c26;
-        char S7 = c27;
-        char S8 = c28;
-
         return localDateTime(
-                y0, y1, y2, y3,
-                m0, m1,
-                d0, d1,
-                h0, h1,
-                i0, i1,
-                s0, s1,
-                S0, S1, S2, S3, S4, S5, S6, S7, S8
+                c0, c1, c2, c3, // yyyy
+                c5, c6, // MM
+                c8, c9, // dd
+                c11, c12, // HH
+                c14, c15, // mm
+                c17, c18, // ss
+                c20, c21, c22, c23, c24, c25, c26, c27, c28 // S0 - S9
         );
     }
 
@@ -5792,7 +5508,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = str[offset + 0];
+        char c0 = str[offset];
         char c1 = str[offset + 1];
         char c2 = str[offset + 2];
         char c3 = str[offset + 3];
@@ -5926,7 +5642,7 @@ public class DateUtils {
             return null;
         }
 
-        char c0 = (char) str[offset + 0];
+        char c0 = (char) str[offset];
         char c1 = (char) str[offset + 1];
         char c2 = (char) str[offset + 2];
         char c3 = (char) str[offset + 3];
@@ -6071,11 +5787,7 @@ public class DateUtils {
         char c8 = str[off + 8];
         char c9 = str[off + 9];
         char c10 = str[off + 10];
-        char c11 = str[off + 11];
-        char c12 = str[off + 12];
         char c13 = str[off + 13];
-        char c14 = str[off + 14];
-        char c15 = str[off + 15];
 
         char y0, y1, y2, y3, m0, m1, d0, d1;
         if (c4 == '-' && c7 == '-' && (c10 == '+' || c10 == '-') && c13 == ':') {
@@ -6154,11 +5866,8 @@ public class DateUtils {
         char c8 = (char) str[off + 8];
         char c9 = (char) str[off + 9];
         char c10 = (char) str[off + 10];
-        char c11 = (char) str[off + 11];
-        char c12 = (char) str[off + 12];
         char c13 = (char) str[off + 13];
-        char c14 = (char) str[off + 14];
-        char c15 = (char) str[off + 15];
+
 
         char y0, y1, y2, y3, m0, m1, d0, d1;
         if (c4 == '-' && c7 == '-' && (c10 == '+' || c10 == '-') && c13 == ':') {
@@ -6489,7 +6198,6 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 20;
-            isTimeZone = false;
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && (len == 21 || c21 == '[' || c21 == '+' || c21 == '-' || c21 == 'Z')) {
             y0 = c0;
@@ -6636,7 +6344,6 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 22;
-            isTimeZone = false;
         } else if (len == 22
                 && c2 == '/' && c5 == '/' && c10 == ' '
                 && c13 == ':' && c16 == ':'
@@ -6673,7 +6380,6 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 22;
-            isTimeZone = false;
         } else if (len == 23
                 && c3 == ' ' && c5 == ',' && c6 == ' ' && c11 == ' '
                 && c14 == ':' && c17 == ':' && c20 == ' '
@@ -6716,7 +6422,6 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 23;
-            isTimeZone = false;
         } else if (len == 23
                 && c3 == ' ' && c6 == ',' && c7 == ' ' && c12 == ' '
                 && c14 == ':' && c17 == ':'
@@ -6759,7 +6464,6 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 23;
-            isTimeZone = false;
         } else if (len == 24
                 && c3 == ' ' && c6 == ',' && c7 == ' ' && c12 == ' '
                 && c15 == ':' && c18 == ':'
@@ -6802,7 +6506,6 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 24;
-            isTimeZone = false;
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && (len == 23 || c23 == '[' || c23 == '|' || c23 == '+' || c23 == '-' || c23 == 'Z')) {
             y0 = c0;
@@ -6979,7 +6682,6 @@ public class DateUtils {
                 S7 = '0';
                 S8 = '0';
                 zoneIdBegin = 23;
-                isTimeZone = false;
             } else {
                 S3 = c23;
                 S4 = c24;
@@ -7063,7 +6765,6 @@ public class DateUtils {
             S8 = '0';
             zoneIdBegin = 19;
             zoneIdStr = new String(str, off + 20, 3);
-            isTimeZone = false;
         } else if (len == 28 && c3 == ',' && c4 == ' ' && c6 == ' ' && c10 == ' ' && c15 == ' '
                 && c18 == ':' && c21 == ':' && c24 == ' ') {
             // RFC 1123
@@ -7214,7 +6915,6 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 17;
-            isTimeZone = false;
         } else if ((len == 32 && c6 == ',' && c7 == ' ' && c10 == '-' && c14 == '-' && c19 == ' ' && c22 == ':' && c25 == ':' && str[off + 28] == ' ')
                 || (len == 33 && c7 == ',' && c8 == ' ' && c11 == '-' && c15 == '-' && c20 == ' ' && c23 == ':' && c26 == ':' && str[off + 29] == ' ')
                 || (len == 34 && c8 == ',' && c9 == ' ' && c12 == '-' && c16 == '-' && c21 == ' ' && c24 == ':' && c27 == ':' && str[off + 30] == ' ')
@@ -7270,7 +6970,6 @@ public class DateUtils {
                     zoneId = timeZone.toZoneId();
                     break;
             }
-            // String tzStr = new String(chars, this.offset + zoneIdBegin, len - zoneIdBegin);
         } else if (zoneIdBegin == len) {
             zoneId = defaultZoneId;
         } else {
@@ -7281,15 +6980,11 @@ public class DateUtils {
                 if (zoneIdStr == null) {
                     if (first == '+' || first == '-') {
                         zoneIdStr = new String(str, off + zoneIdBegin, len - zoneIdBegin);
-                        //                    zoneIdStr = new String(chars, zoneIdBegin, len - zoneIdBegin);
                     } else if (first == ' ') {
                         zoneIdStr = new String(str, off + zoneIdBegin + 1, len - zoneIdBegin - 1);
                     } else { // '[
                         if (zoneIdBegin < len) {
                             zoneIdStr = new String(str, off + zoneIdBegin + 1, len - zoneIdBegin - 2);
-//                            zoneIdStr = str.substring(zoneIdBegin + 1, len - 1);
-                        } else {
-                            zoneIdStr = null;
                         }
                     }
                 }
@@ -7536,7 +7231,6 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 20;
-            isTimeZone = false;
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && (len == 21 || c21 == '[' || c21 == '+' || c21 == '-' || c21 == 'Z')) {
             y0 = c0;
@@ -7683,7 +7377,6 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 22;
-            isTimeZone = false;
         } else if (len == 22
                 && c2 == '/' && c5 == '/' && c10 == ' '
                 && c13 == ':' && c16 == ':'
@@ -7720,7 +7413,6 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 22;
-            isTimeZone = false;
         } else if (len == 23
                 && c3 == ' ' && c5 == ',' && c6 == ' ' && c11 == ' '
                 && c14 == ':' && c17 == ':' && c20 == ' '
@@ -7763,7 +7455,6 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 23;
-            isTimeZone = false;
         } else if (len == 23
                 && c3 == ' ' && c6 == ',' && c7 == ' ' && c12 == ' '
                 && c14 == ':' && c17 == ':'
@@ -7806,7 +7497,6 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 23;
-            isTimeZone = false;
         } else if (len == 24
                 && c3 == ' ' && c6 == ',' && c7 == ' ' && c12 == ' '
                 && c15 == ':' && c18 == ':'
@@ -7849,7 +7539,6 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 24;
-            isTimeZone = false;
         } else if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':' && c19 == '.'
                 && (len == 23 || c23 == '[' || c23 == '|' || c23 == '+' || c23 == '-' || c23 == 'Z')) {
             y0 = c0;
@@ -8026,7 +7715,6 @@ public class DateUtils {
                 S7 = '0';
                 S8 = '0';
                 zoneIdBegin = 23;
-                isTimeZone = false;
             } else {
                 S3 = c23;
                 S4 = c24;
@@ -8110,7 +7798,6 @@ public class DateUtils {
             S8 = '0';
             zoneIdBegin = 19;
             zoneIdStr = new String(str, off + 20, 3);
-            isTimeZone = false;
         } else if (len == 28 && c3 == ',' && c4 == ' ' && c6 == ' ' && c10 == ' ' && c15 == ' '
                 && c18 == ':' && c21 == ':' && c24 == ' ') {
             // RFC 1123
@@ -8261,7 +7948,6 @@ public class DateUtils {
             S7 = '0';
             S8 = '0';
             zoneIdBegin = 17;
-            isTimeZone = false;
         } else if ((len == 32 && c6 == ',' && c7 == ' ' && c10 == '-' && c14 == '-' && c19 == ' ' && c22 == ':' && c25 == ':' && str[off + 28] == ' ')
                 || (len == 33 && c7 == ',' && c8 == ' ' && c11 == '-' && c15 == '-' && c20 == ' ' && c23 == ':' && c26 == ':' && str[off + 29] == ' ')
                 || (len == 34 && c8 == ',' && c9 == ' ' && c12 == '-' && c16 == '-' && c21 == ' ' && c24 == ':' && c27 == ':' && str[off + 30] == ' ')
@@ -8335,8 +8021,6 @@ public class DateUtils {
                         if (zoneIdBegin < len) {
                             zoneIdStr = new String(str, off + zoneIdBegin + 1, len - zoneIdBegin - 2);
 //                            zoneIdStr = str.substring(zoneIdBegin + 1, len - 1);
-                        } else {
-                            zoneIdStr = null;
                         }
                     }
                 }
@@ -8633,8 +8317,7 @@ public class DateUtils {
         boolean shanghai = zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES;
         long SECONDS_1991_09_15_02 = 684900000; // utcMillis(1991, 9, 15, 2, 0, 0);
         if (shanghai && utcSeconds >= SECONDS_1991_09_15_02) {
-            final int OFFSET_0800_TOTAL_SECONDS = 28800;
-            zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            zoneOffsetTotalSeconds = 28800; // OFFSET_0800_TOTAL_SECONDS
         } else if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
             zoneOffsetTotalSeconds = 0;
         } else {
@@ -8956,8 +8639,7 @@ public class DateUtils {
         boolean shanghai = zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES;
         long SECONDS_1991_09_15_02 = 684900000; // utcMillis(1991, 9, 15, 2, 0, 0);
         if (shanghai && utcSeconds >= SECONDS_1991_09_15_02) {
-            final int OFFSET_0800_TOTAL_SECONDS = 28800;
-            zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            zoneOffsetTotalSeconds = 28800; // OFFSET_0800_TOTAL_SECONDS
         } else if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
             zoneOffsetTotalSeconds = 0;
         } else {
@@ -9033,7 +8715,7 @@ public class DateUtils {
             c9 = str.charAt(9);
         }
 
-        char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
+        char y0, y1, y2, y3, m0, m1, d0, d1;
         switch (pattern) {
             case DATE_FORMAT_10_DASH:
                 if (c4 != '-' || c7 != '-') {
@@ -9153,8 +8835,7 @@ public class DateUtils {
         boolean shanghai = zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES;
         long SECONDS_1991_09_15_02 = 684900000; // utcMillis(1991, 9, 15, 2, 0, 0);
         if (shanghai && utcSeconds >= SECONDS_1991_09_15_02) {
-            final int OFFSET_0800_TOTAL_SECONDS = 28800;
-            zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            zoneOffsetTotalSeconds = 28800; // OFFSET_0800_TOTAL_SECONDS
         } else if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
             zoneOffsetTotalSeconds = 0;
         } else {
@@ -9565,8 +9246,7 @@ public class DateUtils {
         boolean shanghai = zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES;
         long SECONDS_1991_09_15_02 = 684900000; // utcMillis(1991, 9, 15, 2, 0, 0);
         if (shanghai && utcSeconds >= SECONDS_1991_09_15_02) {
-            final int OFFSET_0800_TOTAL_SECONDS = 28800;
-            zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            zoneOffsetTotalSeconds = 28800; // OFFSET_0800_TOTAL_SECONDS
         } else if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
             zoneOffsetTotalSeconds = 0;
         } else {
@@ -9586,7 +9266,7 @@ public class DateUtils {
         }
 
         char c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18;
-        c0 = (char) bytes[off + 0];
+        c0 = (char) bytes[off];
         c1 = (char) bytes[off + 1];
         c2 = (char) bytes[off + 2];
         c3 = (char) bytes[off + 3];
@@ -9935,8 +9615,7 @@ public class DateUtils {
         boolean shanghai = zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES;
         long SECONDS_1991_09_15_02 = 684900000; // utcMillis(1991, 9, 15, 2, 0, 0);
         if (shanghai && utcSeconds >= SECONDS_1991_09_15_02) {
-            final int OFFSET_0800_TOTAL_SECONDS = 28800;
-            zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            zoneOffsetTotalSeconds = 28800; // OFFSET_0800_TOTAL_SECONDS
         } else if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
             zoneOffsetTotalSeconds = 0;
         } else {
@@ -9956,25 +9635,25 @@ public class DateUtils {
         }
 
         char c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18;
-        c0 = (char) bytes[off + 0];
-        c1 = (char) bytes[off + 1];
-        c2 = (char) bytes[off + 2];
-        c3 = (char) bytes[off + 3];
-        c4 = (char) bytes[off + 4];
-        c5 = (char) bytes[off + 5];
-        c6 = (char) bytes[off + 6];
-        c7 = (char) bytes[off + 7];
-        c8 = (char) bytes[off + 8];
-        c9 = (char) bytes[off + 9];
-        c10 = (char) bytes[off + 10];
-        c11 = (char) bytes[off + 11];
-        c12 = (char) bytes[off + 12];
-        c13 = (char) bytes[off + 13];
-        c14 = (char) bytes[off + 14];
-        c15 = (char) bytes[off + 15];
-        c16 = (char) bytes[off + 16];
-        c17 = (char) bytes[off + 17];
-        c18 = (char) bytes[off + 18];
+        c0 = bytes[off];
+        c1 = bytes[off + 1];
+        c2 = bytes[off + 2];
+        c3 = bytes[off + 3];
+        c4 = bytes[off + 4];
+        c5 = bytes[off + 5];
+        c6 = bytes[off + 6];
+        c7 = bytes[off + 7];
+        c8 = bytes[off + 8];
+        c9 = bytes[off + 9];
+        c10 = bytes[off + 10];
+        c11 = bytes[off + 11];
+        c12 = bytes[off + 12];
+        c13 = bytes[off + 13];
+        c14 = bytes[off + 14];
+        c15 = bytes[off + 15];
+        c16 = bytes[off + 16];
+        c17 = bytes[off + 17];
+        c18 = bytes[off + 18];
 
         char y0, y1, y2, y3, m0, m1, d0, d1, h0, h1, i0, i1, s0, s1;
         if (c4 == '-' && c7 == '-' && (c10 == ' ' || c10 == 'T') && c13 == ':' && c16 == ':') {
@@ -10305,8 +9984,7 @@ public class DateUtils {
         boolean shanghai = zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES;
         long SECONDS_1991_09_15_02 = 684900000; // utcMillis(1991, 9, 15, 2, 0, 0);
         if (shanghai && utcSeconds >= SECONDS_1991_09_15_02) {
-            final int OFFSET_0800_TOTAL_SECONDS = 28800;
-            zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            zoneOffsetTotalSeconds = 28800; // OFFSET_0800_TOTAL_SECONDS
         } else if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
             zoneOffsetTotalSeconds = 0;
         } else {
@@ -10507,8 +10185,7 @@ public class DateUtils {
             return null;
         }
 
-        LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, second, nanos);
-        return ldt;
+        return LocalDateTime.of(year, month, dom, hour, minute, second, nanos);
     }
 
     public static long millis(LocalDateTime ldt) {
@@ -10581,8 +10258,7 @@ public class DateUtils {
         boolean shanghai = zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES;
         long SECONDS_1991_09_15_02 = 684900000; // utcMillis(1991, 9, 15, 2, 0, 0);
         if (shanghai && utcSeconds >= SECONDS_1991_09_15_02) {
-            final int OFFSET_0800_TOTAL_SECONDS = 28800;
-            zoneOffsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            zoneOffsetTotalSeconds = 28800; // OFFSET_0800_TOTAL_SECONDS
         } else if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
             zoneOffsetTotalSeconds = 0;
         } else {
@@ -10654,8 +10330,7 @@ public class DateUtils {
         final long SECONDS_1991_09_15_02 = 684900000;
         boolean shanghai = zoneId == SHANGHAI_ZONE_ID || zoneId.getRules() == SHANGHAI_ZONE_RULES;
         if (shanghai && epochSecond > SECONDS_1991_09_15_02) {
-            final int OFFSET_0800_TOTAL_SECONDS = 28800;
-            offsetTotalSeconds = OFFSET_0800_TOTAL_SECONDS;
+            offsetTotalSeconds = 28800; // OFFSET_0800_TOTAL_SECONDS
         } else {
             Instant instant = Instant.ofEpochMilli(timeMillis);
             offsetTotalSeconds = zoneId.getRules().getOffset(instant).getTotalSeconds();
@@ -11183,13 +10858,8 @@ public class DateUtils {
         }
 
         long epochMilli = date.getTime();
-        if (format == null) {
-            toString(epochMilli, false, DEFAULT_ZONE_ID);
-        }
-
         Instant instant = Instant.ofEpochMilli(epochMilli);
-        ZoneId zoneId = DEFAULT_ZONE_ID;
-        ZonedDateTime zdt = instant.atZone(zoneId);
+        ZonedDateTime zdt = instant.atZone(DEFAULT_ZONE_ID);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
         return formatter.format(zdt);
@@ -12179,11 +11849,7 @@ public class DateUtils {
                         dom = 30;
                         break;
                 }
-                if (dd > dom) {
-                    return false;
-                }
-            } else if (dd > 31) {
-                return false;
+                return dd <= dom;
             }
 
             return true;
@@ -12285,11 +11951,7 @@ public class DateUtils {
                 return false;
             }
 
-            if (ss > 61) {
-                return false;
-            }
-
-            return true;
+            return ss <= 61;
         }
 
         try {
@@ -12324,9 +11986,9 @@ public class DateUtils {
         if (h0 >= '0' && h0 <= '2'
                 && h1 >= '0' && h1 <= '9'
                 && m0 >= '0' && m0 <= '6'
-                && m1 >= '0' && m0 <= '9'
+                && m1 >= '0' && m1 <= '9'
                 && s0 >= '0' && s0 <= '6'
-                && s1 >= '0' && s0 <= '9'
+                && s1 >= '0' && s1 <= '9'
         ) {
             int hh = (h0 - '0') * 10 + (h1 - '0');
             if (hh > 24) {
@@ -12339,11 +12001,7 @@ public class DateUtils {
             }
 
             int ss = (s0 - '0') * 10 + (s1 - '0');
-            if (ss > 61) {
-                return false;
-            }
-
-            return true;
+            return ss <= 61;
         }
 
         return false;
