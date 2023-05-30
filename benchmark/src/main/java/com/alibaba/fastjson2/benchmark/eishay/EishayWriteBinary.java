@@ -4,8 +4,11 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import com.alibaba.fastjson2.benchmark.protobuf.MediaContentTransform;
 import com.caucho.hessian.io.Hessian2Output;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
+import org.msgpack.jackson.dataformat.MessagePackFactory;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -21,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 public class EishayWriteBinary {
     static MediaContent mc;
+    static ObjectMapper msgpackMapper = new ObjectMapper(new MessagePackFactory());
 
     static {
         try {
@@ -33,7 +37,7 @@ public class EishayWriteBinary {
         }
     }
 
-    @Benchmark
+//    @Benchmark
     public void fastjson2UTF8Bytes(Blackhole bh) {
         bh.consume(JSON.toJSONBytes(mc));
     }
@@ -47,7 +51,7 @@ public class EishayWriteBinary {
         bh.consume(JSONB.toBytes(mc));
     }
 
-    @Benchmark
+//    @Benchmark
     public void javaSerialize(Blackhole bh) throws Exception {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
@@ -56,13 +60,35 @@ public class EishayWriteBinary {
         bh.consume(byteArrayOutputStream.toByteArray());
     }
 
-    @Benchmark
+//    @Benchmark
     public void hessian(Blackhole bh) throws Exception {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         Hessian2Output hessian2Output = new Hessian2Output(byteArrayOutputStream);
         hessian2Output.writeObject(mc);
         hessian2Output.flush();
         bh.consume(byteArrayOutputStream.toByteArray());
+    }
+
+    @Benchmark
+    public void msgpack(Blackhole bh) throws Exception {
+        bh.consume(msgpackMapper.writeValueAsBytes(mc));
+    }
+
+    public int msgpackSize() throws Exception {
+        return msgpackMapper.writeValueAsBytes(mc).length;
+    }
+
+    @Benchmark
+    public void protobuf(Blackhole bh) throws Exception {
+        bh.consume(
+                MediaContentTransform.forward(mc)
+                        .toByteArray()
+        );
+    }
+
+    public int protobufSize() throws Exception {
+        return MediaContentTransform.forward(mc)
+                .toByteArray().length;
     }
 
     public static void main(String[] args) throws RunnerException {

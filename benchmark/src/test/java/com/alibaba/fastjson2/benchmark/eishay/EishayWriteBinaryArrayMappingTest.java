@@ -4,13 +4,14 @@ import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
 public class EishayWriteBinaryArrayMappingTest {
     static final EishayWriteBinaryArrayMapping benchmark = new EishayWriteBinaryArrayMapping();
+    static final int LOOP = 1_000_000;
 
     public static void kryo() throws Exception {
         System.out.println("kryoSize size " + benchmark.kryoSize()); // 213
 
         for (int j = 0; j < 10; j++) {
             long start = System.currentTimeMillis();
-            for (int i = 0; i < 1000 * 1000; ++i) {
+            for (int i = 0; i < LOOP; ++i) {
                 benchmark.kryo(BH);
             }
             long millis = System.currentTimeMillis() - start;
@@ -26,7 +27,7 @@ public class EishayWriteBinaryArrayMappingTest {
 
         for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
-            for (int i = 0; i < 1000 * 1000; ++i) {
+            for (int i = 0; i < LOOP; ++i) {
                 benchmark.jsonb(BH);
             }
             long millis = System.currentTimeMillis() - start;
@@ -40,22 +41,22 @@ public class EishayWriteBinaryArrayMappingTest {
     public static void protobuf() throws Exception {
         System.out.println("protobuf size " + benchmark.protobufSize()); // 235
 
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
-            for (int i = 0; i < 1000 * 1000; ++i) {
+            for (int i = 0; i < LOOP; ++i) {
                 benchmark.protobuf(BH);
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayWriteBinaryArrayMapping-protobuf millis : " + millis);
-            // zulu8.58.0.13 :
+            // zulu8.58.0.13 : 508
             // zulu11.52.13 :
             // zulu17.32.13 :
         }
     }
 
     public static void main(String[] args) throws Exception {
-        jsonb();
+//        jsonb();
 //        kryo();
-//        protobuf();
+        protobuf();
     }
 }
