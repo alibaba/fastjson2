@@ -8,6 +8,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -472,7 +473,12 @@ class JSONPathParser {
         }
         List<JSONPathFilter> filters = new ArrayList<>();
         filters.add((JSONPathFilter) segment);
-        filters.add((JSONPathFilter) right);
+        if (right instanceof JSONPathFilter.GroupFilter) {
+            JSONPathFilter.GroupFilter group = (JSONPathFilter.GroupFilter) right;
+            group.filters.stream().filter(Objects::nonNull).forEach(f -> filters.add(f));
+        } else {
+            filters.add((JSONPathFilter) right);
+        }
         return new JSONPathFilter.GroupFilter(filters, and);
     }
 
