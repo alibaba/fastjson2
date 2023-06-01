@@ -54,7 +54,7 @@ public class FieldReaderList<T, V>
     }
 
     public Collection<V> createList(JSONReader.Context context) {
-        if (fieldClass == List.class || fieldClass == Collection.class || fieldClass == ArrayList.class) {
+        if (Collection.class.isAssignableFrom(fieldClass)) {
             return new ArrayList<>();
         }
 
