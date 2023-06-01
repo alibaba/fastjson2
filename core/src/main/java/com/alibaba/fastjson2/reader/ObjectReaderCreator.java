@@ -2273,7 +2273,7 @@ public class ObjectReaderCreator {
             fieldClassResolved = TypeUtils.getMapping(fieldTypeResolved);
         }
 
-        if (Collection.class.isAssignableFrom(fieldClass)) {
+        if (List.class.isAssignableFrom(fieldClass)) {
             if (fieldTypeResolved instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) fieldTypeResolved;
                 Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
@@ -2789,7 +2789,7 @@ public class ObjectReaderCreator {
             fieldClassResolved = TypeUtils.getMapping(fieldTypeResolved);
         }
 
-        if (Collection.class.isAssignableFrom(fieldClass)) {
+        if (List.class.isAssignableFrom(fieldClass)) {
             Type itemType = Object.class;
             Class itemClass = Object.class;
             if (fieldTypeResolved instanceof ParameterizedType) {
