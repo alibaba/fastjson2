@@ -1019,6 +1019,7 @@
                 <module>extension-spring6</module>
                 <module>example-spring6-test</module>
                 <module>incubator-vector</module>
+                <module>test-jdk17</module>
             </modules>
         </profile>
         <profile>

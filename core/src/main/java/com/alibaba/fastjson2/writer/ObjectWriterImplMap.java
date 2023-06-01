@@ -48,7 +48,7 @@ public final class ObjectWriterImplMap
 
     final boolean jsonObject1; // fastjson 1 JSONObject
     final Field jsonObject1InnerMap;
-    long jsonObject1InnerMapOffset = -1;
+    final long jsonObject1InnerMapOffset;
 
     final char[] typeInfoUTF16;
     final byte[] typeInfoUTF8;
@@ -78,6 +78,7 @@ public final class ObjectWriterImplMap
         jsonObject1 = "JO1".equals(typeName);
         this.jsonbTypeInfo = JSONB.toBytes(typeName);
         this.typeNameHash = Fnv.hashCode64(typeName);
+        long jsonObject1InnerMapOffset = -1;
         if (jsonObject1) {
             jsonObject1InnerMap = BeanUtils.getDeclaredField(objectClass, "map");
             if (jsonObject1InnerMap != null) {
@@ -89,6 +90,7 @@ public final class ObjectWriterImplMap
         } else {
             jsonObject1InnerMap = null;
         }
+        this.jsonObject1InnerMapOffset = jsonObject1InnerMapOffset;
     }
 
     public static ObjectWriterImplMap of(Class objectClass) {
