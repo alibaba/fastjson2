@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue1520 {
-
     @Test
     public void test() {
         String json = "{\"testa\":[{\"name\":\"test\"}, {\"name\":\"test2\"}]}";
