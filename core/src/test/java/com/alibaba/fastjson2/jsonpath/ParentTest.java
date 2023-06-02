@@ -47,4 +47,14 @@ public class ParentTest {
         JSONPath p5 = p4.getParent();
         assertNull(p5);
     }
+
+    @Test
+    public void test2() {
+        JSONPath path = JSONPath.of("$.posts[?(@.id == 1)]");
+        assertTrue(path.endsWithFilter());
+
+        JSONPath parent = path.getParent();
+        assertEquals("$.posts", parent.toString());
+        assertFalse(parent.endsWithFilter());
+    }
 }

@@ -35,6 +35,11 @@ class JSONPathTwoSegment
     }
 
     @Override
+    public boolean endsWithFilter() {
+        return second instanceof JSONPathFilter;
+    }
+
+    @Override
     public JSONPath getParent() {
         return JSONPathSingle.of(first);
     }
