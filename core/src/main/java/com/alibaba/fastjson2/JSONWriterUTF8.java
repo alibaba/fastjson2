@@ -1747,6 +1747,7 @@ class JSONWriterUTF8
         if (writeAsString) {
             bytes[off++] = (byte) quote;
         } else if ((context.features & WriteClassName.mask) != 0
+                && (context.features & NotWriteNumberClassName.mask) == 0
                 && i >= Integer.MIN_VALUE && i <= Integer.MAX_VALUE
         ) {
             bytes[off++] = 'L';

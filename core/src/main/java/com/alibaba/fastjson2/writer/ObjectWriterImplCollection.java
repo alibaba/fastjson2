@@ -138,8 +138,13 @@ final class ObjectWriterImplCollection
             return;
         }
 
-        if (object instanceof Set && jsonWriter.isWriteTypeInfo(object, features | this.features)) {
-            jsonWriter.writeRaw("Set");
+        long features3;
+        if (object instanceof Set
+                && jsonWriter.isWriteTypeInfo(object, features3 = jsonWriter.getFeatures(features | this.features))
+        ) {
+            if ((features3 & JSONWriter.Feature.NotWriteSetClassName.mask) == 0) {
+                jsonWriter.writeRaw("Set");
+            }
         }
 
         Iterable iterable = (Iterable) object;
