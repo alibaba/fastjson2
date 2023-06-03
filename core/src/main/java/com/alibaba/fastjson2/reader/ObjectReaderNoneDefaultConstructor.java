@@ -227,6 +227,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
             }
         }
 
+        IdentityHashMap<FieldReader, String> refMap = null;
         JSONReader.Context context = jsonReader.getContext();
         long featuresAll = this.features | features | context.getFeatures();
 
@@ -283,6 +284,15 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 continue;
             }
 
+            if (jsonReader.isReference()) {
+                String ref = jsonReader.readReference();
+                if (refMap == null) {
+                    refMap = new IdentityHashMap();
+                }
+                refMap.put(fieldReader, ref);
+                continue;
+            }
+
             Object fieldValue = fieldReader.readFieldValue(jsonReader);
             if (valueMap == null) {
                 valueMap = new LinkedHashMap<>();
@@ -306,6 +316,15 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 if (fieldValue != null) {
                     fieldReader.accept(object, fieldValue);
                 }
+            }
+        }
+
+        if (refMap != null) {
+            for (Iterator<Map.Entry<FieldReader, String>> it = refMap.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<FieldReader, String> entry = it.next();
+                FieldReader fieldReader = entry.getKey();
+                String reference = entry.getValue();
+                fieldReader.addResolveTask(jsonReader, object, reference);
             }
         }
 
