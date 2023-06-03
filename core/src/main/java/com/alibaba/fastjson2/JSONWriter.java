@@ -1839,7 +1839,17 @@ public abstract class JSONWriter
         /**
          * @since 2.0.33
          */
-        UnquoteFieldName(1L << 38);
+        UnquoteFieldName(1L << 38),
+
+        /**
+         * @since 2.0.34
+         */
+        NotWriteSetClassName(1L << 39),
+
+        /**
+         * @since 2.0.34
+         */
+        NotWriteNumberClassName(1L << 40);
 
         public final long mask;
 

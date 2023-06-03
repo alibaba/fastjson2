@@ -27,7 +27,10 @@ final class ObjectWriterImplInt16
         }
         short shortValue = (Short) object;
         jsonWriter.writeInt32(shortValue);
-        if (((jsonWriter.getFeatures() | features) & JSONWriter.Feature.WriteClassName.mask) != 0
+        long features2 = jsonWriter.getFeatures(features);
+        if ((features2 & JSONWriter.Feature.WriteClassName.mask) != 0
+                && (features2 & JSONWriter.Feature.WriteNonStringKeyAsString.mask) == 0
+                && (features2 & JSONWriter.Feature.NotWriteNumberClassName.mask) == 0
                 && fieldType != Short.class && fieldType != short.class) {
             jsonWriter.writeRaw('S');
         }
