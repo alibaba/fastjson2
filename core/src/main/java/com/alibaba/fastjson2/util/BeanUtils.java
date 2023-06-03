@@ -1256,6 +1256,10 @@ public abstract class BeanUtils {
             methodName.getChars(prefix, len, chars, 0);
             char c0 = chars[0];
             declaredFields(objectClass, field -> {
+                if (field.getDeclaringClass() != method.getDeclaringClass()) {
+                    return;
+                }
+
                 String fieldName = field.getName();
                 int fieldNameLength = fieldName.length();
                 if (fieldNameLength == len - prefix
