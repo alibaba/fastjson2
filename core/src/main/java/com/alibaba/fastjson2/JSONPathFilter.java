@@ -7,18 +7,27 @@ import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 abstract class JSONPathFilter
         extends JSONPathSegment
         implements JSONPathSegment.EvalSegment {
+    private boolean and = true;
+
+    public boolean isAnd() {
+        return and;
+    }
+
+    public JSONPathFilter setAnd(boolean and) {
+        this.and = and;
+        return this;
+    }
+
     abstract boolean apply(JSONPath.Context context, Object object);
 
     enum Operator {
@@ -378,11 +387,9 @@ abstract class JSONPathFilter
     static final class GroupFilter
             extends JSONPathSegment
             implements EvalSegment {
-        final boolean and;
         final List<JSONPathFilter> filters;
 
-        public GroupFilter(List<JSONPathFilter> filters, boolean and) {
-            this.and = and;
+        public GroupFilter(List<JSONPathFilter> filters) {
             this.filters = filters;
         }
 
@@ -400,12 +407,19 @@ abstract class JSONPathFilter
                     ? context.root
                     : context.parent.value;
 
+            List<JSONPathFilter> orderedFilters = new ArrayList<>();
+            if (this.filters != null) {
+                orderedFilters = this.filters.stream().sorted(Comparator.comparing(JSONPathFilter::isAnd)).collect(Collectors.toList());
+            }
             if (object instanceof List) {
                 List list = (List) object;
                 JSONArray array = new JSONArray(list.size());
                 for (Object item : list) {
-                    boolean match = and;
-                    for (JSONPathFilter filter : filters) {
+                    boolean match = false;
+                    for (int i = 0; i < orderedFilters.size(); ++i) {
+                        JSONPathFilter filter = orderedFilters.get(i);
+                        boolean and = filter.isAnd();
+                        match = and;
                         boolean result = filter.apply(context, item);
                         if (and) {
                             if (!result) {
@@ -428,8 +442,11 @@ abstract class JSONPathFilter
                 return;
             }
 
-            boolean match = and;
-            for (JSONPathFilter filter : filters) {
+            boolean match = false;
+            for (int i = 0; i < orderedFilters.size(); ++i) {
+                JSONPathFilter filter = orderedFilters.get(i);
+                boolean and = filter.isAnd();
+                match = and;
                 boolean result = filter.apply(context, object);
                 if (and) {
                     if (!result) {
