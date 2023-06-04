@@ -100,7 +100,7 @@ final class ObjectReaderImplCalendar
         }
 
         long millis = jsonReader.readInt64Value();
-        if (formatUnixTime) {
+        if (formatUnixTime || jsonReader.getContext().isFormatUnixTime()) {
             millis *= 1000;
         }
 
