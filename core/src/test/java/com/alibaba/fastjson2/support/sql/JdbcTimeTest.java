@@ -61,7 +61,7 @@ public class JdbcTimeTest {
 
     @Test
     public void test_timestamp_nano() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.of(2023, 6, 4, 12, 58, 54, 6);
         Timestamp ts = Timestamp.valueOf(now);
 
         {
