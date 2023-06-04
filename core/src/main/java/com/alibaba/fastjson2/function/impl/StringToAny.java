@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.function.impl;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.util.DateUtils;
@@ -76,6 +77,8 @@ public class StringToAny
         if (targetClass == Collections.class || targetClass == List.class || targetClass == JSONArray.class) {
             if ("[]".equals(str)) {
                 return new JSONArray();
+            } else {
+                return JSON.parseObject(str, targetClass);
             }
         }
 
