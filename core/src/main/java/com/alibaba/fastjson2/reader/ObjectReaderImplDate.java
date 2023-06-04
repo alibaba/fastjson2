@@ -86,7 +86,7 @@ public class ObjectReaderImplDate
             return null;
         }
 
-        if ((formatUnixTime || formatUnixTime) && jsonReader.isString()) {
+        if ((formatUnixTime || formatMillis) && jsonReader.isString()) {
             millis = jsonReader.readInt64Value();
             if (formatUnixTime) {
                 millis *= 1000L;
