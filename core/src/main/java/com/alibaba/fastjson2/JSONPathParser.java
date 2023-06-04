@@ -24,6 +24,7 @@ class JSONPathParser {
     JSONPathSegment second;
 
     List<JSONPathSegment> segments;
+    int filterNests;
 
     boolean negative;
 
@@ -278,12 +279,12 @@ class JSONPathParser {
         }
 
         if (jsonReader.ch == '&' || jsonReader.ch == '|' || jsonReader.ch == 'a' || jsonReader.ch == 'o') {
-            jsonReader.decrFilterNests();
+            filterNests--;
             segment = parseFilterRest(segment);
         }
-        while (jsonReader.isFilterNested()) {
+        while (filterNests > 0) {
             jsonReader.next();
-            jsonReader.decrFilterNests();
+            filterNests--;
         }
         if (!jsonReader.nextIfMatch(']')) {
             throw new JSONException(jsonReader.info("jsonpath syntax error"));
@@ -497,8 +498,8 @@ class JSONPathParser {
 
     JSONPathSegment parseFilter() {
         boolean parentheses = jsonReader.nextIfMatch('(');
-        if (parentheses && jsonReader.isFilterNested()) {
-            jsonReader.incrFilterNests();
+        if (parentheses && filterNests > 0) {
+            filterNests++;
         }
 
         boolean at = jsonReader.ch == '@';
@@ -532,8 +533,8 @@ class JSONPathParser {
         boolean ends = (!starts) && jsonReader.nextIfMatchIdent('e', 'n', 'd', 's');
         if ((at && (starts || ends)) || (jsonReader.ch != '.' && !JSONReader.isFirstIdentifier(jsonReader.ch))) {
             if (jsonReader.nextIfMatch('(')) {
-                jsonReader.incrFilterNests();
-                jsonReader.incrFilterNests();
+                filterNests++;
+                filterNests++;
                 return parseFilter();
             }
             if (!at) {
@@ -574,7 +575,7 @@ class JSONPathParser {
             }
 
             while (jsonReader.ch == '&' || jsonReader.ch == '|') {
-                jsonReader.decrFilterNests();
+                filterNests--;
                 segment = parseFilterRest(segment);
             }
 
@@ -599,8 +600,8 @@ class JSONPathParser {
 
         if (parentheses) {
             if (jsonReader.nextIfMatch(')')) {
-                if (jsonReader.isFilterNested()) {
-                    jsonReader.decrFilterNests();
+                if (filterNests > 0) {
+                    filterNests--;
                 }
                 return new JSONPathFilter.NameExistsFilter(fieldName, hashCode);
             }
@@ -688,7 +689,7 @@ class JSONPathParser {
 
                 JSONPathSegment segment = new JSONPathFilter.NameRLikeSegment(fieldName, hashCode, pattern, operator == JSONPathFilter.Operator.NOT_RLIKE);
                 if (jsonReader.ch == '&' || jsonReader.ch == '|' || jsonReader.ch == 'a' || jsonReader.ch == 'o') {
-                    jsonReader.decrFilterNests();
+                    filterNests--;
                     segment = parseFilterRest(segment);
                 }
                 if (!jsonReader.nextIfMatch(')')) {
@@ -735,7 +736,7 @@ class JSONPathParser {
                     throw new JSONException(jsonReader.info("jsonpath syntax error"));
                 }
                 if (jsonReader.ch == '&' || jsonReader.ch == '|' || jsonReader.ch == 'a' || jsonReader.ch == 'o') {
-                    jsonReader.decrFilterNests();
+                    filterNests--;
                     segment = parseFilterRest(segment);
                 }
                 if (!jsonReader.nextIfMatch(')')) {
@@ -946,7 +947,7 @@ class JSONPathParser {
         }
 
         if (jsonReader.ch == '&' || jsonReader.ch == '|' || jsonReader.ch == 'a' || jsonReader.ch == 'o') {
-            jsonReader.decrFilterNests();
+            filterNests--;
             segment = parseFilterRest(segment);
         }
 
