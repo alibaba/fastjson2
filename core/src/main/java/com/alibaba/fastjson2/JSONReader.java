@@ -60,6 +60,7 @@ public abstract class JSONReader
     protected int offset;
     protected char ch;
     protected boolean comma;
+    protected int filterNests;
 
     protected boolean nameEscape;
     protected boolean valueEscape;
@@ -441,6 +442,18 @@ public abstract class JSONReader
 
     public final int getOffset() {
         return offset;
+    }
+
+    public void incrFilterNests() {
+        ++this.filterNests;
+    }
+
+    public void decrFilterNests() {
+        --this.filterNests;
+    }
+
+    public boolean isFilterNested() {
+        return this.filterNests > 0;
     }
 
     public abstract void next();
