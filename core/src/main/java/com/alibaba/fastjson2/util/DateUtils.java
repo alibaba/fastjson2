@@ -80,7 +80,11 @@ public class DateUtils {
         }
 
         if (format == null || format.isEmpty()) {
-            return parseDate(str);
+            long millis = parseMillis(str, zoneId);
+            if (millis == 0) {
+                return null;
+            }
+            return new Date(millis);
         }
 
         switch (format) {
