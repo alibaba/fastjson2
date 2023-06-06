@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
+import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
 public final class ObjectReaderImplList
         implements ObjectReader {
@@ -220,7 +221,13 @@ public final class ObjectReaderImplList
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
 
-        Collection list = (Collection) createInstance(0L);
+        Collection list;
+        if (instanceType == ArrayList.class) {
+            list = new ArrayList(collection.size());
+        } else {
+            list = (Collection) createInstance(0L);
+        }
+
         for (Object item : collection) {
             if (item == null) {
                 list.add(null);
@@ -229,7 +236,12 @@ public final class ObjectReaderImplList
 
             Object value = item;
             Class<?> valueClass = value.getClass();
-            if (valueClass != itemType) {
+            if ((valueClass == JSONObject.class || valueClass == CLASS_JSON_OBJECT_1x) && this.itemClass != valueClass) {
+                if (itemObjectReader == null) {
+                    itemObjectReader = provider.getObjectReader(itemType);
+                }
+                value = itemObjectReader.createInstance((JSONObject) value, 0L);
+            } else if (valueClass != itemType) {
                 Function typeConvert = provider.getTypeConvert(valueClass, itemType);
                 if (typeConvert != null) {
                     value = typeConvert.apply(value);

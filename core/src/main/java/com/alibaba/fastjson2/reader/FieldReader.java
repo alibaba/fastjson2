@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONPath;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.schema.JSONSchema;
@@ -11,6 +10,7 @@ import java.io.Serializable;
 import java.lang.reflect.*;
 import java.time.*;
 import java.util.*;
+import java.util.function.Function;
 
 public abstract class FieldReader<T>
         implements Comparable<FieldReader> {
@@ -120,6 +120,15 @@ public abstract class FieldReader<T>
             return reader;
         }
         return reader = context.getObjectReader(fieldType);
+    }
+
+    public ObjectReader getObjectReader(ObjectReaderProvider provider) {
+        if (reader != null) {
+            return reader;
+        }
+
+        boolean fieldBased = (this.features & JSONReader.Feature.FieldBased.mask) != 0;
+        return reader = provider.getObjectReader(fieldType, fieldBased);
     }
 
     public Type getItemType() {
@@ -369,6 +378,73 @@ public abstract class FieldReader<T>
     }
 
     public abstract void accept(T object, Object value);
+
+    protected void acceptAny(T object, Object fieldValue, long features) {
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        boolean autoCast = true;
+
+        if (fieldValue != null) {
+            Class<?> valueClass = fieldValue.getClass();
+            if (!supportAcceptType(valueClass)) {
+                if (valueClass == String.class) {
+                    if (fieldClass == java.util.Date.class) {
+                        autoCast = false;
+                    }
+                } else if (valueClass == Integer.class
+                        && (fieldClass == boolean.class || fieldClass == Boolean.class)
+                        && (features & JSONReader.Feature.NonZeroNumberCastToBooleanAsTrue.mask) != 0
+                ) {
+                    int intValue = ((Integer) fieldValue);
+                    fieldValue = intValue != 0;
+                }
+
+                if (valueClass != fieldClass && autoCast) {
+                    Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
+
+                    if (typeConvert != null) {
+                        fieldValue = typeConvert.apply(fieldValue);
+                    }
+                }
+            }
+        }
+
+        Object typedFieldValue;
+        if (fieldValue == null || fieldType == fieldValue.getClass()) {
+            typedFieldValue = fieldValue;
+        } else {
+            if (fieldValue instanceof JSONObject) {
+                JSONReader.Feature[] toFeatures = (features & JSONReader.Feature.SupportSmartMatch.mask) != 0
+                        ? new JSONReader.Feature[] {JSONReader.Feature.SupportSmartMatch}
+                        : new JSONReader.Feature[0];
+                typedFieldValue = ((JSONObject) fieldValue).to(fieldType, toFeatures);
+            } else if (fieldValue instanceof JSONArray) {
+                typedFieldValue = ((JSONArray) fieldValue).to(fieldType);
+            } else if (features == 0 && !fieldClass.isInstance(fieldValue) && format == null) {
+                ObjectReader initReader = getInitReader();
+                if (initReader != null) {
+                    String fieldValueJson = JSON.toJSONString(fieldValue);
+                    typedFieldValue = initReader.readObject(JSONReader.of(fieldValueJson), null, null, features);
+                } else {
+                    typedFieldValue = TypeUtils.cast(fieldValue, fieldClass, provider);
+                }
+            } else {
+                if (autoCast) {
+                    String fieldValueJSONString = JSON.toJSONString(fieldValue);
+                    JSONReader.Context readContext = JSONFactory.createReadContext();
+                    if ((features & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
+                        readContext.config(JSONReader.Feature.SupportSmartMatch);
+                    }
+                    try (JSONReader jsonReader = JSONReader.of(fieldValueJSONString, readContext)) {
+                        ObjectReader fieldObjectReader = getObjectReader(jsonReader);
+                        typedFieldValue = fieldObjectReader.readObject(jsonReader, null, fieldName, features);
+                    }
+                } else {
+                    typedFieldValue = fieldValue;
+                }
+            }
+        }
+        accept(object, typedFieldValue);
+    }
 
     public abstract void readFieldValue(JSONReader jsonReader, T object);
 

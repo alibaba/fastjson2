@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
+import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
 public final class ObjectReaderImplMap
         implements ObjectReader {
@@ -138,7 +139,7 @@ public final class ObjectReaderImplMap
                 break;
             default:
                 if (instanceType == JSONObject1O.class) {
-                    Class objectClass = TypeUtils.loadClass("com.alibaba.fastjson.JSONObject");
+                    Class objectClass = CLASS_JSON_OBJECT_1x;
                     builder = createObjectSupplier(objectClass);
                     instanceType = LinkedHashMap.class;
                 } else if (mapType == CLASS_UNMODIFIABLE_MAP) {

@@ -9,12 +9,15 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_ARRAY_1x;
+import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
 class ObjectReaderImplMapTyped
         implements ObjectReader {
@@ -66,7 +69,13 @@ class ObjectReaderImplMapTyped
     public Object createInstance(Map input, long features) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
 
-        Map object = (Map<String, Object>) createInstance();
+        Map object;
+        if (instanceType == Map.class || instanceType == HashMap.class) {
+            object = new HashMap();
+        } else {
+            object = (Map<String, Object>) createInstance(features);
+        }
+
         for (Map.Entry entry : (Iterable<Map.Entry>) input.entrySet()) {
             Object key = entry.getKey();
             Object fieldValue = entry.getValue();
@@ -77,11 +86,33 @@ class ObjectReaderImplMapTyped
                 fieldName = TypeUtils.cast(key, keyType);
             }
 
+            Function typeConvert;
             Object value = fieldValue;
             if (value != null) {
                 Class<?> valueClass = value.getClass();
-                Function typeConvert = provider.getTypeConvert(valueClass, valueType);
-                if (typeConvert != null) {
+                if (valueType == Object.class) {
+                    // do nothing
+                } else if (valueClass == JSONObject.class || valueClass == CLASS_JSON_OBJECT_1x) {
+                    if (valueObjectReader == null) {
+                        valueObjectReader = provider.getObjectReader(valueType);
+                    }
+                    try {
+                        value = valueObjectReader.createInstance((JSONObject) value, features);
+                    } catch (Exception ignored) {
+                        // ignored
+                    }
+                } else if ((valueClass == JSONArray.class || valueClass == CLASS_JSON_ARRAY_1x)
+                        && this.valueClass == List.class
+                ) {
+                    if (valueObjectReader == null) {
+                        valueObjectReader = provider.getObjectReader(valueType);
+                    }
+                    try {
+                        value = valueObjectReader.createInstance((JSONArray) value);
+                    } catch (Exception ignored) {
+                        // ignored
+                    }
+                } else if ((typeConvert = provider.getTypeConvert(valueClass, valueType)) != null) {
                     value = typeConvert.apply(value);
                 } else if (value instanceof Map) {
                     Map map = (Map) value;
