@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
@@ -542,5 +540,92 @@ public class ObjectReaderAdapter<T>
                 fieldReader.accept(object, "");
             }
         }
+    }
+
+    public T createInstance(Map map, long features) {
+        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        Object typeKey = map.get(this.typeKey);
+
+        if (typeKey instanceof String) {
+            String typeName = (String) typeKey;
+            long typeHash = Fnv.hashCode64(typeName);
+            ObjectReader<T> reader = null;
+            if ((features & JSONReader.Feature.SupportAutoType.mask) != 0 || this instanceof ObjectReaderSeeAlso) {
+                reader = autoType(provider, typeHash);
+            }
+
+            if (reader == null) {
+                reader = provider.getObjectReader(
+                        typeName, getObjectClass(), features | getFeatures()
+                );
+            }
+
+            if (reader != this && reader != null) {
+                return reader.createInstance(map, features);
+            }
+        }
+
+        T object = createInstance(0L);
+
+        if (extraFieldReader == null
+                && ((features | this.features) & JSONReader.Feature.SupportSmartMatch.mask) == 0
+        ) {
+            for (FieldReader fieldReader : fieldReaders) {
+                Object fieldValue = map.get(fieldReader.fieldName);
+                if (fieldValue == null) {
+                    continue;
+                }
+
+                if (fieldValue.getClass() == fieldReader.fieldType) {
+                    fieldReader.accept(object, fieldValue);
+                } else {
+                    if ((fieldReader instanceof FieldReaderList)
+                            && fieldValue instanceof JSONArray
+                    ) {
+                        ObjectReader objectReader = fieldReader.getObjectReader(provider);
+                        Object fieldValueList = objectReader.createInstance((JSONArray) fieldValue);
+                        fieldReader.accept(object, fieldValueList);
+                        continue;
+                    } else if (fieldValue instanceof JSONObject
+                            && fieldReader.fieldType != JSONObject.class
+                    ) {
+                        JSONObject jsonObject = (JSONObject) fieldValue;
+                        boolean fieldBased = ((this.features | features) & JSONReader.Feature.FieldBased.mask) != 0;
+                        ObjectReader<T> objectReader = provider.getObjectReader(fieldReader.fieldType, fieldBased);
+                        Object fieldValueJavaBean = objectReader.createInstance(jsonObject, features);
+                        fieldReader.accept(object, fieldValueJavaBean);
+                        continue;
+                    }
+
+                    fieldReader.acceptAny(object, fieldValue, features);
+                }
+            }
+        } else {
+            for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
+                String entryKey = entry.getKey().toString();
+                Object fieldValue = entry.getValue();
+
+                FieldReader fieldReader = getFieldReader(entryKey);
+                if (fieldReader == null) {
+                    acceptExtra(object, entryKey, entry.getValue());
+                    continue;
+                }
+
+                if (fieldValue != null
+                        && fieldValue.getClass() == fieldReader.fieldType
+                ) {
+                    fieldReader.accept(object, fieldValue);
+                } else {
+                    fieldReader.acceptAny(object, fieldValue, features);
+                }
+            }
+        }
+
+        Function buildFunction = getBuildFunction();
+        if (buildFunction != null) {
+            return (T) buildFunction.apply(object);
+        }
+
+        return object;
     }
 }
