@@ -2361,7 +2361,7 @@ class JSONReaderUTF16
                         }
                         NAME_CACHE2[indexMask] = new NameCacheEntry2(name, nameValue0, nameValue1);
                         return name;
-                    } else if (entry.value0 == nameValue0 && entry.value0 == nameValue1) {
+                    } else if (entry.value0 == nameValue0 && entry.value1 == nameValue1) {
                         return entry.name;
                     }
                 } else {
