@@ -274,6 +274,32 @@ class JSONPathParser {
                 }
                 break;
             }
+            case '(': {
+                jsonReader.next();
+                if (jsonReader.nextIfMatch('@') && jsonReader.nextIfMatch('.')) {
+                    String fieldName = jsonReader.readFieldNameUnquote();
+                    switch (fieldName) {
+                        case "length":
+                        case "size": {
+                            int index = jsonReader.readInt32Value();
+                            if (!jsonReader.nextIfMatch(')')) {
+                                throw new JSONException("not support : " + fieldName);
+                            }
+                            if (index > 0) {
+                                throw new JSONException("not support : " + fieldName);
+                            } else {
+                                segment = JSONPathSegmentIndex.of(index);
+                            }
+                            break;
+                        }
+                        default:
+                            throw new JSONException("not support : " + path);
+                    }
+                } else {
+                    throw new JSONException("not support : " + path);
+                }
+                break;
+            }
             default:
                 throw new JSONException("TODO : " + jsonReader.current());
         }
