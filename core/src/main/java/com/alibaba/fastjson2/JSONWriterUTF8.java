@@ -1513,7 +1513,7 @@ class JSONWriterUTF8
     @Override
     public final void writeNameRaw(byte[] name) {
         int off = this.off;
-        int minCapacity = off + name.length + (pretty ? 2 + indent : 1);
+        int minCapacity = off + name.length + 2 + indent;
         if (minCapacity >= this.bytes.length) {
             ensureCapacity(minCapacity);
         }
@@ -1565,7 +1565,7 @@ class JSONWriterUTF8
 
     @Override
     public final void writeNameRaw(byte[] bytes, int off, int len) {
-        int minCapacity = this.off + len + 1;
+        int minCapacity = this.off + len + 2 + indent;
         if (minCapacity >= this.bytes.length) {
             ensureCapacity(minCapacity);
         }
