@@ -27,28 +27,42 @@ public class Issue1516 {
     public void testFastjson2JSONPathCompile() {
         String jsonArray = "[{\"name\":\"小花\",\"age\":18,\"city\":\"扬州\"},{\"name\":\"小花\",\"age\":20,\"city\":\"扬州\"},{\"name\":\"小明\",\"age\":18,\"city\":\"扬州\"},{\"name\":\"小花\",\"age\":18,\"city\":\"苏州\"}]";
         String path = "$[?( @.name=='aa' && @.age==18 && @.city=='beijing' && @.province=='beijing' )]";
-        assertEquals("[]", JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
+        String empty = "[]";
+        String ageOf18 = "[{\"name\":\"小花\",\"age\":18,\"city\":\"扬州\"},{\"name\":\"小明\",\"age\":18,\"city\":\"扬州\"},{\"name\":\"小花\",\"age\":18,\"city\":\"苏州\"}]";
+        assertEquals(empty, JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
         path = "$[?( @.name=='aa' || @.age==16 || @.city=='beijing' || @.province=='beijing')]";
-        assertEquals("[]", JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
+        assertEquals(empty, JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
         path = "$[?( @.name =~ /aa/ )]";
-        assertEquals("[]", JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
+        assertEquals(empty, JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
         path = "$[?( @.age==18 && (@.name =~ /aa/)  )]";
-        assertEquals("[]", JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
+        assertEquals(empty, JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
         path = "$[?( @.age==18 || (@.name =~ /aa/)  )]";
-        assertEquals("[{\"name\":\"小花\",\"age\":18,\"city\":\"扬州\"},{\"name\":\"小明\",\"age\":18,\"city\":\"扬州\"},{\"name\":\"小花\",\"age\":18,\"city\":\"苏州\"}]", JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
+        assertEquals(ageOf18, JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
         path = "$[?( @.name =~ /aa/ && @.age==18 )]";
-        assertEquals("[]", JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
+        assertEquals(empty, JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
         path = "$[?( (@.name =~ /aa/ && (@.city=='aa')) && @.age==18 )]";
-        assertEquals("[]", JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
+        assertEquals(empty, JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
         path = "$[?( (@.name =~ /aa/ && (@.city=='aa')) || @.age==18 )]";
-        assertEquals("[{\"name\":\"小花\",\"age\":18,\"city\":\"扬州\"},{\"name\":\"小明\",\"age\":18,\"city\":\"扬州\"},{\"name\":\"小花\",\"age\":18,\"city\":\"苏州\"}]", JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
+        assertEquals(ageOf18, JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
         path = "$[?( @.age==18 && (@.name in ('aa', 'aa2') )  )]";
-        assertEquals("[]", JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
+        assertEquals(empty, JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
         path = "$[?( @.age==18 || (@.name in ('aa', 'aa2') )  )]";
-        assertEquals("[{\"name\":\"小花\",\"age\":18,\"city\":\"扬州\"},{\"name\":\"小明\",\"age\":18,\"city\":\"扬州\"},{\"name\":\"小花\",\"age\":18,\"city\":\"苏州\"}]", JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
+        assertEquals(ageOf18, JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
         path = "$[?(@.name in ('aa', 'aa2') && @.age==18 )]";
-        assertEquals("[]", JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
+        assertEquals(empty, JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
         path = "$[?(@.name in ('aa', 'aa2') || @.age==18 )]";
-        assertEquals("[{\"name\":\"小花\",\"age\":18,\"city\":\"扬州\"},{\"name\":\"小明\",\"age\":18,\"city\":\"扬州\"},{\"name\":\"小花\",\"age\":18,\"city\":\"苏州\"}]", JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
+        assertEquals(ageOf18, JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
+    }
+
+    @Test
+    public void testWithLengthOrSize() {
+        String jsonArray = "[{\"name\":\"小花\",\"age\":18,\"city\":\"扬州\"},{\"name\":\"小花\",\"age\":20,\"city\":\"扬州\"},{\"name\":\"小明\",\"age\":18,\"city\":\"扬州\"},{\"name\":\"小花\",\"age\":18,\"city\":\"苏州\"}]";
+        String last = "{\"name\":\"小花\",\"age\":18,\"city\":\"苏州\"}";
+        String path = "$[-1]";
+        assertEquals(last, JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
+        path = "$[(@.length-1)]";
+        assertEquals(last, JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
+        path = "$[(@.size-1)]";
+        assertEquals(last, JSON.toJSONString(JSONPath.of(path).extract(JSONReader.of(jsonArray))));
     }
 }
