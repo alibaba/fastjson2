@@ -1235,8 +1235,8 @@ public class IOUtils {
             } else if (start == 1) {
                 buf[pos++] = (byte) (v >> 8);
             }
-            buf[pos++] = (byte) v;
-            return pos;
+            buf[pos] = (byte) v;
+            return pos + 1;
         }
         final int r1 = i - q1 * 1000;
         final int q2 = q1 / 1000;
@@ -1313,8 +1313,8 @@ public class IOUtils {
             } else if (start == 1) {
                 buf[pos++] = (char) (byte) (v >> 8);
             }
-            buf[pos++] = (char) (byte) v;
-            return pos;
+            buf[pos] = (char) (byte) v;
+            return pos + 1;
         }
         final int r1 = i - q1 * 1000;
         final int q2 = q1 / 1000;
