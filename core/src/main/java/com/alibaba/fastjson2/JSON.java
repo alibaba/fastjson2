@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.modules.ObjectReaderModule;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.DateUtils;
+import com.alibaba.fastjson2.util.MapMultiValueType;
 import com.alibaba.fastjson2.util.MultiType;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
@@ -815,6 +816,35 @@ public interface JSON {
      */
     @SuppressWarnings("unchecked")
     static <T> T parseObject(String text, Type type) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+
+        try (JSONReader reader = JSONReader.of(text)) {
+            ObjectReader<T> objectReader = reader.context.provider.getObjectReader(type);
+
+            T object = objectReader.readObject(reader, type, null, 0);
+            if (reader.resolveTasks != null) {
+                reader.handleResolveTasks(object);
+            }
+            if (reader.ch != EOI && (reader.context.features & IgnoreCheckClose.mask) == 0) {
+                throw new JSONException(reader.info("input not end"));
+            }
+            return object;
+        }
+    }
+
+    /**
+     * Parses the json string as {@link T}. Returns
+     * {@code null} if received {@link String} is {@code null} or empty.
+     *
+     * @param text the specified string to be parsed
+     * @param type the specified actual type of {@link T}
+     * @return {@link T} or {@code null}
+     * @throws JSONException If a parsing error occurs
+     * @since 2.0.34
+     */
+    static <T extends Map<String, Object>> T parseObject(String text, MapMultiValueType<T> type) {
         if (text == null || text.isEmpty()) {
             return null;
         }

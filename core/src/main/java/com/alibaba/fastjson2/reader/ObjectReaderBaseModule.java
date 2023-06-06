@@ -1769,6 +1769,10 @@ public class ObjectReaderBaseModule
             return new ObjectArrayReaderMultiType((MultiType) type);
         }
 
+        if (type instanceof MapMultiValueType) {
+            return new ObjectReaderImplMapMultiValueType((MapMultiValueType) type);
+        }
+
         if (type == StringBuffer.class || type == StringBuilder.class) {
             try {
                 Class objectClass = (Class) type;
