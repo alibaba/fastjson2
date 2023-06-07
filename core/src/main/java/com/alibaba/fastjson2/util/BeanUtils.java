@@ -246,7 +246,10 @@ public abstract class BeanUtils {
     }
 
     public static Method getMethod(Class objectClass, Method signature) {
-        if (objectClass == null || objectClass == Object.class) {
+        if (objectClass == null
+                || objectClass == Object.class
+                || objectClass == Serializable.class
+        ) {
             return null;
         }
 
@@ -328,6 +331,7 @@ public abstract class BeanUtils {
             Field[] declaredFields = null;
             try {
                 declaredFields = objectClass.getDeclaredFields();
+                declaredFieldCache.put(objectClass, declaredFields);
             } catch (Throwable ignored) {
                 declaredFields = new Field[0];
             }
