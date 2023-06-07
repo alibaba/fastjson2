@@ -1082,7 +1082,7 @@ class JSONWriterUTF16
 
             String item = strings[i];
             if (item == null) {
-                if (isEnabled(JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) {
+                if (isEnabled(Feature.NullAsDefaultValue.mask | Feature.WriteNullStringAsEmpty.mask)) {
                     writeString("");
                 } else {
                     writeNull();
@@ -1194,12 +1194,17 @@ class JSONWriterUTF16
 
         String str = value.toString(10);
 
-        boolean browserCompatible = ((context.features | features) & Feature.BrowserCompatible.mask) != 0;
+        features |= context.features;
+        boolean browserCompatible = (features & Feature.BrowserCompatible.mask) != 0
+                && (value.compareTo(LOW_BIGINT) < 0 || value.compareTo(HIGH_BIGINT) > 0);
+        boolean nonStringAsString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
+        boolean writeAsString = browserCompatible || nonStringAsString;
+
         final int strlen = str.length();
         ensureCapacity(off + strlen + 2);
         final char[] chars = this.chars;
         int off = this.off;
-        if (browserCompatible && (value.compareTo(LOW_BIGINT) < 0 || value.compareTo(HIGH_BIGINT) > 0)) {
+        if (writeAsString) {
             chars[off++] = '"';
             str.getChars(0, strlen, chars, off);
             off += strlen;
@@ -1230,6 +1235,8 @@ class JSONWriterUTF16
         boolean browserCompatible = (features & BrowserCompatible.mask) != 0
                 && precision >= 16
                 && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0);
+        boolean nonStringAsString = (features & WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = browserCompatible || nonStringAsString;
 
         int minCapacity = off + precision + 7;
         if (minCapacity >= chars.length) {
@@ -1237,7 +1244,7 @@ class JSONWriterUTF16
         }
 
         final char[] chars = this.chars;
-        if (browserCompatible) {
+        if (writeAsString) {
             chars[off++] = '"';
         }
 
@@ -1257,7 +1264,7 @@ class JSONWriterUTF16
             off += str.length();
         }
 
-        if (browserCompatible) {
+        if (writeAsString) {
             chars[off++] = '"';
         }
     }
@@ -1656,7 +1663,7 @@ class JSONWriterUTF16
         }
 
         boolean browserCompatible = (context.features & BrowserCompatible.mask) != 0;
-        boolean noneStringAsString = (context.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
+        boolean nonStringAsString = (context.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
 
         int off = this.off;
         int minCapacity = off + 2 + values.length * 23;
@@ -1672,7 +1679,7 @@ class JSONWriterUTF16
                 chars[off++] = ',';
             }
             long v = values[i];
-            boolean writeAsString = noneStringAsString
+            boolean writeAsString = nonStringAsString
                     || (browserCompatible && v <= 9007199254740991L && v >= -9007199254740991L);
             if (writeAsString) {
                 chars[off++] = this.quote;
@@ -1716,7 +1723,7 @@ class JSONWriterUTF16
 
     @Override
     public final void writeFloat(float value) {
-        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + 15;
@@ -1747,7 +1754,7 @@ class JSONWriterUTF16
             return;
         }
 
-        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + values.length * (writeAsString ? 16 : 18) + 1;
@@ -1780,7 +1787,7 @@ class JSONWriterUTF16
 
     @Override
     public final void writeDouble(double value) {
-        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + 24;
@@ -1808,7 +1815,7 @@ class JSONWriterUTF16
 
     @Override
     public final void writeDoubleArray(double value0, double value1) {
-        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + 48 + 3;
@@ -1852,7 +1859,7 @@ class JSONWriterUTF16
             return;
         }
 
-        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + values.length * 27 + 1;
