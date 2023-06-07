@@ -826,19 +826,13 @@ public class ObjectReaderProvider
 
     public void getBeanInfo(BeanInfo beanInfo, Class objectClass) {
         for (ObjectReaderModule module : modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor != null) {
-                annotationProcessor.getBeanInfo(beanInfo, objectClass);
-            }
+            module.getBeanInfo(beanInfo, objectClass);
         }
     }
 
     public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Field field) {
         for (ObjectReaderModule module : modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor != null) {
-                annotationProcessor.getFieldInfo(fieldInfo, objectClass, field);
-            }
+            module.getFieldInfo(fieldInfo, objectClass, field);
         }
     }
 

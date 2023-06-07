@@ -723,6 +723,10 @@ public class ObjectReaderBaseModule
 
                 Class[] interfaces = objectClass.getInterfaces();
                 for (Class i : interfaces) {
+                    if (i == Serializable.class) {
+                        continue;
+                    }
+
                     Method interfaceMethod = BeanUtils.getMethod(i, method);
                     if (interfaceMethod != null) {
                         getFieldInfo(fieldInfo, superclass, interfaceMethod);
@@ -1420,6 +1424,18 @@ public class ObjectReaderBaseModule
     @Override
     public ReaderAnnotationProcessor getAnnotationProcessor() {
         return annotationProcessor;
+    }
+
+    public void getBeanInfo(BeanInfo beanInfo, Class<?> objectClass) {
+        if (annotationProcessor != null) {
+            annotationProcessor.getBeanInfo(beanInfo, objectClass);
+        }
+    }
+
+    public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Field field) {
+        if (annotationProcessor != null) {
+            annotationProcessor.getFieldInfo(fieldInfo, objectClass, field);
+        }
     }
 
     @Override
