@@ -89,13 +89,16 @@ public final class ObjectReaderImplObject
                             Class objectClass = autoTypeObjectReader.getObjectClass();
                             if (objectClass != null) {
                                 ClassLoader objectClassLoader = objectClass.getClassLoader();
-                                ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-                                if (objectClassLoader != contextClassLoader) {
+                                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                                if (objectClassLoader != classLoader) {
                                     Class contextClass = null;
 
                                     typeName = jsonReader.getString();
                                     try {
-                                        contextClass = contextClassLoader.loadClass(typeName);
+                                        if (classLoader == null) {
+                                            classLoader = getClass().getClassLoader();
+                                        }
+                                        contextClass = classLoader.loadClass(typeName);
                                     } catch (ClassNotFoundException ignored) {
                                     }
 
