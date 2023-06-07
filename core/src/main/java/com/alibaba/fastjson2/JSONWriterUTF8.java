@@ -1250,7 +1250,7 @@ class JSONWriterUTF8
 
             String item = strings[i];
             if (item == null) {
-                if (isEnabled(JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) {
+                if (isEnabled(Feature.NullAsDefaultValue.mask | Feature.WriteNullStringAsEmpty.mask)) {
                     writeString("");
                 } else {
                     writeNull();
@@ -1699,7 +1699,7 @@ class JSONWriterUTF8
         }
 
         boolean browserCompatible = (context.features & BrowserCompatible.mask) != 0;
-        boolean noneStringAsString = (context.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
+        boolean nonStringAsString = (context.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
         int off = this.off;
         int minCapacity = off + 2 + values.length * 23;
         if (minCapacity >= bytes.length) {
@@ -1714,7 +1714,7 @@ class JSONWriterUTF8
                 bytes[off++] = (byte) ',';
             }
             long v = values[i];
-            boolean writeAsString = noneStringAsString
+            boolean writeAsString = nonStringAsString
                     || (browserCompatible && v <= 9007199254740991L && v >= -9007199254740991L);
             if (writeAsString) {
                 bytes[off++] = (byte) this.quote;
@@ -1757,7 +1757,7 @@ class JSONWriterUTF8
 
     @Override
     public final void writeFloat(float value) {
-        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + 17;
@@ -1780,7 +1780,7 @@ class JSONWriterUTF8
 
     @Override
     public final void writeDouble(double value) {
-        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + 26;
@@ -1810,7 +1810,7 @@ class JSONWriterUTF8
             return;
         }
 
-        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + values.length * (writeAsString ? 16 : 18) + 1;
@@ -1848,7 +1848,7 @@ class JSONWriterUTF8
             return;
         }
 
-        boolean writeAsString = (context.features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
         int minCapacity = off + values.length * 27 + 1;
@@ -2343,6 +2343,8 @@ class JSONWriterUTF8
         boolean browserCompatible = (features & BrowserCompatible.mask) != 0
                 && precision >= 16
                 && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0);
+        boolean nonStringAsString = (features & WriteNonStringValueAsString.mask) != 0;
+        boolean writeAsString = browserCompatible || nonStringAsString;
 
         int off = this.off;
         int minCapacity = off + precision + 7;
@@ -2351,7 +2353,7 @@ class JSONWriterUTF8
         }
 
         final byte[] bytes = this.bytes;
-        if (browserCompatible) {
+        if (writeAsString) {
             bytes[off++] = '"';
         }
 
@@ -2371,7 +2373,7 @@ class JSONWriterUTF8
             off += str.length();
         }
 
-        if (browserCompatible) {
+        if (writeAsString) {
             bytes[off++] = '"';
         }
         this.off = off;
