@@ -104,7 +104,7 @@ public class JSONWriterUTF16Test {
 
     @Test
     public void startObject() {
-        final int COUNT = 100_000;
+        final int COUNT = 2048;
         JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
         for (int i = 0; i < COUNT; i++) {
             jsonWriter.startObject();
@@ -132,7 +132,7 @@ public class JSONWriterUTF16Test {
 
     @Test
     public void startArray() {
-        final int COUNT = 100_000;
+        final int COUNT = 2048;
         JSONWriterUTF16 jsonWriter = new JSONWriterUTF16(JSONFactory.createWriteContext());
         for (int i = 0; i < COUNT; i++) {
             jsonWriter.startArray();

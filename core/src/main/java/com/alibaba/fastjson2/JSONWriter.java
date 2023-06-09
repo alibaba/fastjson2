@@ -1364,6 +1364,12 @@ public abstract class JSONWriter
 
     public abstract int flushTo(OutputStream out, Charset charset) throws IOException;
 
+    public void checkLevel(int level) {
+        if (level >= context.maxLevel) {
+            throw new JSONException("level too large : " + level);
+        }
+    }
+
     public static final class Context {
         static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
 
@@ -1379,7 +1385,7 @@ public abstract class JSONWriter
         boolean formatHasHour;
         long features;
         ZoneId zoneId;
-
+        int maxLevel = 2048;
         boolean hasFilter;
         PropertyPreFilter propertyPreFilter;
         PropertyFilter propertyFilter;
