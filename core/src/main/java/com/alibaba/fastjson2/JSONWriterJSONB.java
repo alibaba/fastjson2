@@ -77,6 +77,7 @@ final class JSONWriterJSONB
 
     @Override
     public void startObject() {
+        super.checkLevel(level);
         level++;
         int off = this.off;
         if (off == bytes.length) {

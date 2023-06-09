@@ -178,6 +178,7 @@ class JSONWriterUTF8
 
     @Override
     public final void startObject() {
+        super.checkLevel(level);
         level++;
         startObject = true;
 
@@ -245,6 +246,7 @@ class JSONWriterUTF8
 
     @Override
     public final void startArray() {
+        super.checkLevel(level);
         level++;
         int off = this.off;
         int minCapacity = off + (pretty ? 2 + indent : 1);
