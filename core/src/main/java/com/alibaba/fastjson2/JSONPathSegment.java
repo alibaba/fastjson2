@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
@@ -156,7 +157,7 @@ abstract class JSONPathSegment {
                     ? context.root
                     : context.parent.value;
 
-            if (object instanceof java.util.List) {
+            if (object instanceof List) {
                 List list = (List) object;
                 if (list.isEmpty()) {
                     return;
@@ -1131,20 +1132,13 @@ abstract class JSONPathSegment {
 
             List values = new JSONArray();
 
-            MapLoop action = new MapLoop(context, values);
-            if (object instanceof Map) {
-                Map map = (Map) object;
-                map.forEach(action);
-            } else if (object instanceof Collection) {
-                ((Collection<?>) object).forEach(action);
-            } else if (object != null) {
-                ObjectWriter<?> objectWriter = context.path
-                        .getWriterContext()
-                        .getObjectWriter(object.getClass());
-                if (objectWriter instanceof ObjectWriterAdapter) {
-                    action.accept(object);
-                }
+            Consumer action;
+            if (nameHashCode == HASH_STAR && "*".equals(name)) {
+                action = new MapRecursive(context, values, 0);
+            } else {
+                action = new MapLoop(context, values);
             }
+            action.accept(object);
 
             if (values.size() == 1 && values.get(0) instanceof Collection) {
                 context.value = values.get(0);
@@ -1234,6 +1228,49 @@ abstract class JSONPathSegment {
                         }
                     } else if (nameHashCode == HASH_STAR) {
                         values.add(value);
+                    }
+                }
+            }
+        }
+
+        class MapRecursive
+                implements Consumer {
+            static final int maxLevel = 2048;
+            final JSONPath.Context context;
+            final List values;
+            int level;
+
+            public MapRecursive(JSONPath.Context context, List values, int level) {
+                this.context = context;
+                this.values = values;
+                this.level = level;
+            }
+
+            @Override
+            public void accept(Object value) {
+                if (level > maxLevel) {
+                    throw new JSONException("level too large");
+                } else {
+                    if (value instanceof Map) {
+                        Collection collection = ((Map) value).values();
+                        values.addAll(collection);
+                        collection.forEach(this);
+                    } else if (value instanceof Collection) {
+                        Collection collection = (Collection) value;
+                        values.addAll(collection);
+                        collection.forEach(this);
+                    } else if (value != null) {
+                        ObjectWriter<?> objectWriter = context.path
+                                .getWriterContext()
+                                .getObjectWriter(value.getClass());
+                        if (objectWriter instanceof ObjectWriterAdapter) {
+                            ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) objectWriter;
+                            Object temp = Optional.ofNullable(writerAdapter.getFieldWriters()).orElseGet(() -> new ArrayList())
+                                    .stream()
+                                    .filter(Objects::nonNull).map(v -> ((FieldWriter) v).getFieldValue(value))
+                                    .collect(Collectors.toList());
+                            accept(temp);
+                        }
                     }
                 }
             }
