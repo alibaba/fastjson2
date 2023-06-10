@@ -38,9 +38,9 @@ public class EishayFuryCompatibleParseTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayFuryParse-fury millis : " + millis);
-            // zulu8.68.0.21_AppleM1Max : 2840 2719
-            // zulu11.62.17_AppleM1Max : 3361 3385 4396
-            // zulu17.40.19_AppleM1Max : 3360 3403 3490
+            // zulu8.68.0.21_AppleM1Max : 2840 2719 2879
+            // zulu11.62.17_AppleM1Max : 3361 3385 4396 2964
+            // zulu17.40.19_AppleM1Max : 3360 3403 3490 3371
 
             // jdk1.8.0_361_x86_i9 4488
             // jdk17.0.6_x86_i9 4425

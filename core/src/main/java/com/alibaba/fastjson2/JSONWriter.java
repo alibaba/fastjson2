@@ -118,11 +118,10 @@ public abstract class JSONWriter
     }
 
     public final String setPath(String name, Object object) {
-        if ((context.features & Feature.ReferenceDetection.mask) == 0) {
-            return null;
-        }
-
-        if (object == Collections.EMPTY_LIST || object == Collections.EMPTY_SET) {
+        if ((context.features & Feature.ReferenceDetection.mask) == 0
+                || object == Collections.EMPTY_LIST
+                || object == Collections.EMPTY_SET
+        ) {
             return null;
         }
 
@@ -132,14 +131,10 @@ public abstract class JSONWriter
         if (object == rootObject) {
             previous = Path.ROOT;
         } else {
-            if (refs == null) {
-                refs = new IdentityHashMap(8);
-                refs.put(object, this.path);
-                return null;
-            }
-
-            previous = refs.get(object);
-            if (previous == null) {
+            if (refs == null || (previous = refs.get(object)) == null) {
+                if (refs == null) {
+                    refs = new IdentityHashMap(8);
+                }
                 refs.put(object, this.path);
                 return null;
             }
@@ -149,32 +144,25 @@ public abstract class JSONWriter
     }
 
     public final String setPath(FieldWriter fieldWriter, Object object) {
-        if ((context.features & Feature.ReferenceDetection.mask) == 0) {
+        if ((context.features & Feature.ReferenceDetection.mask) == 0
+                || object == Collections.EMPTY_LIST
+                || object == Collections.EMPTY_SET
+        ) {
             return null;
         }
 
-        if (object == Collections.EMPTY_LIST || object == Collections.EMPTY_SET) {
-            return null;
-        }
-
-        if (this.path == Path.ROOT) {
-            this.path = fieldWriter.getRootParentPath();
-        } else {
-            this.path = fieldWriter.getPath(path);
-        }
+        this.path = this.path == Path.ROOT
+                ? fieldWriter.getRootParentPath()
+                : fieldWriter.getPath(path);
 
         Path previous;
         if (object == rootObject) {
             previous = Path.ROOT;
         } else {
-            if (refs == null) {
-                refs = new IdentityHashMap(8);
-                refs.put(object, this.path);
-                return null;
-            }
-
-            previous = refs.get(object);
-            if (previous == null) {
+            if (refs == null || (previous = refs.get(object)) == null) {
+                if (refs == null) {
+                    refs = new IdentityHashMap(8);
+                }
                 refs.put(object, this.path);
                 return null;
             }
@@ -184,42 +172,27 @@ public abstract class JSONWriter
     }
 
     public final String setPath(int index, Object object) {
-        if ((context.features & Feature.ReferenceDetection.mask) == 0) {
+        if ((context.features & Feature.ReferenceDetection.mask) == 0
+                || object == Collections.EMPTY_LIST
+                || object == Collections.EMPTY_SET
+        ) {
             return null;
         }
 
-        if (object == Collections.EMPTY_LIST || object == Collections.EMPTY_SET) {
-            return null;
-        }
-
-        if (index == 0) {
-            if (path.child0 != null) {
-                this.path = path.child0;
-            } else {
-                this.path = path.child0 = new Path(path, index);
-            }
-        } else if (index == 1) {
-            if (path.child1 != null) {
-                this.path = path.child1;
-            } else {
-                this.path = path.child1 = new Path(path, index);
-            }
-        } else {
-            this.path = new Path(path, index);
-        }
+        this.path = index == 0
+                ? (path.child0 != null ? path.child0 : (path.child0 = new Path(path, index)))
+                : index == 1
+                ? (path.child1 != null ? path.child1 : (path.child1 = new Path(path, index)))
+                : new Path(path, index);
 
         Path previous;
         if (object == rootObject) {
             previous = Path.ROOT;
         } else {
-            if (refs == null) {
-                refs = new IdentityHashMap(8);
-                refs.put(object, this.path);
-                return null;
-            }
-
-            previous = refs.get(object);
-            if (previous == null) {
+            if (refs == null || (previous = refs.get(object)) == null) {
+                if (refs == null) {
+                    refs = new IdentityHashMap(8);
+                }
                 refs.put(object, this.path);
                 return null;
             }
@@ -1097,26 +1070,13 @@ public abstract class JSONWriter
 
     public final void checkAndWriteTypeName(Object object, Class fieldClass) {
         long features = context.features;
-        if ((features & Feature.WriteClassName.mask) == 0) {
-            return;
-        }
-
-        if (object == null) {
-            return;
-        }
-
-        Class objectClass = object.getClass();
-        if (objectClass == fieldClass) {
-            return;
-        }
-
-        if ((features & Feature.NotWriteHashMapArrayListClassName.mask) != 0) {
-            if (objectClass == HashMap.class || objectClass == ArrayList.class) {
-                return;
-            }
-        }
-
-        if ((features & Feature.NotWriteRootClassName.mask) != 0 && object == this.rootObject) {
+        Class objectClass;
+        if ((features & Feature.WriteClassName.mask) == 0
+                || object == null
+                || (objectClass = object.getClass()) == fieldClass
+                || ((features & Feature.NotWriteHashMapArrayListClassName.mask) != 0 && (objectClass == HashMap.class || objectClass == ArrayList.class))
+                || ((features & Feature.NotWriteRootClassName.mask) != 0 && object == this.rootObject)
+        ) {
             return;
         }
 
@@ -1154,7 +1114,9 @@ public abstract class JSONWriter
     }
 
     public abstract void writeString(String str);
+
     public abstract void writeStringLatin1(byte[] value);
+
     public abstract void writeStringUTF16(byte[] value);
 
     public void writeString(List<String> list) {
@@ -1362,12 +1324,6 @@ public abstract class JSONWriter
     public abstract int flushTo(OutputStream to) throws IOException;
 
     public abstract int flushTo(OutputStream out, Charset charset) throws IOException;
-
-    public void checkLevel(int level) {
-        if (level >= context.maxLevel) {
-            throw new JSONException("level too large : " + level);
-        }
-    }
 
     public static final class Context {
         static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
