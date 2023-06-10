@@ -158,13 +158,12 @@ final class ObjectWriterImplCollection
                 jsonWriter.writeComma();
             }
 
-            Object item = o;
-            if (item == null) {
+            if (o == null) {
                 jsonWriter.writeNull();
                 i++;
                 continue;
             }
-            Class<?> itemClass = item.getClass();
+            Class<?> itemClass = o.getClass();
             ObjectWriter itemObjectWriter;
             if (itemClass == previousClass) {
                 itemObjectWriter = previousObjectWriter;
@@ -174,7 +173,7 @@ final class ObjectWriterImplCollection
                 previousObjectWriter = itemObjectWriter;
             }
 
-            itemObjectWriter.write(jsonWriter, item, i, this.itemType, this.features);
+            itemObjectWriter.write(jsonWriter, o, i, this.itemType, this.features);
 
             ++i;
         }

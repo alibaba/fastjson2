@@ -305,7 +305,7 @@ public class ObjectWriterProvider
         }
 
         boolean useModules = true;
-        if (fieldBased && objectClass != null) {
+        if (fieldBased) {
             if (Iterable.class.isAssignableFrom(objectClass)
                     && !Collection.class.isAssignableFrom(objectClass)) {
                 useModules = false;
@@ -328,7 +328,7 @@ public class ObjectWriterProvider
             }
         }
 
-        if (objectWriter == null && objectClass != null) {
+        if (objectClass != null) {
             String className = objectClass.getName();
             switch (className) {
                 case "com.google.common.collect.HashMultimap":
@@ -358,10 +358,6 @@ public class ObjectWriterProvider
 
         if (objectWriter == null) {
             ObjectWriterCreator creator = getCreator();
-            if (objectClass == null) {
-                objectClass = TypeUtils.getMapping(objectType);
-            }
-
             objectWriter = creator.createObjectWriter(
                     objectClass,
                     fieldBased ? JSONWriter.Feature.FieldBased.mask : 0,

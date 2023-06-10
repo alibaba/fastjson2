@@ -235,9 +235,8 @@ public class ByteVector {
      * @param stringValue the String to encode.
      * @param offset the index of the first character to encode. The previous characters are supposed
      * to have already been encoded, using only one byte per character.
-     * @return this byte vector.
      */
-    final ByteVector encodeUtf8(final String stringValue, final int offset) {
+    final void encodeUtf8(final String stringValue, final int offset) {
         int charLength = stringValue.length();
         int byteLength = offset;
         for (int i = offset; i < charLength; ++i) {
@@ -277,7 +276,6 @@ public class ByteVector {
             }
         }
         length = currentLength;
-        return this;
     }
 
     /**

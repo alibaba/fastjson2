@@ -199,8 +199,6 @@ public abstract class FieldReader<T>
             Class otherDeclaringClass = otherMember.getDeclaringClass();
             Class thisDeclaringClass = thisMember.getDeclaringClass();
             if (thisDeclaringClass != otherDeclaringClass
-                    && thisDeclaringClass != null
-                    && otherDeclaringClass != null
             ) {
                 if (thisDeclaringClass.isAssignableFrom(otherDeclaringClass)) {
                     return 1;
@@ -501,10 +499,6 @@ public abstract class FieldReader<T>
                     }
 
                     if (fieldClass == LocalDateTime.class) {
-                        if (format == null) {
-                            return ObjectReaderImplLocalDateTime.INSTANCE;
-                        }
-
                         return new ObjectReaderImplLocalDateTime(format, locale);
                     }
 
@@ -513,10 +507,6 @@ public abstract class FieldReader<T>
                     }
 
                     if (fieldClass == LocalTime.class) {
-                        if (format == null) {
-                            return ObjectReaderImplLocalTime.INSTANCE;
-                        }
-
                         return new ObjectReaderImplLocalTime(format, locale);
                     }
 

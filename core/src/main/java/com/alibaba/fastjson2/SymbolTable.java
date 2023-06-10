@@ -16,8 +16,7 @@ public final class SymbolTable {
     private final long[] hashCodesOrigin;
 
     public SymbolTable(String... input) {
-        Set<String> set = new TreeSet<>();
-        set.addAll(Arrays.asList(input));
+        Set<String> set = new TreeSet<>(Arrays.asList(input));
         names = new String[set.size()];
         Iterator<String> it = set.iterator();
 

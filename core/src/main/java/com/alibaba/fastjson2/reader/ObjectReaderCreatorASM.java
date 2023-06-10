@@ -288,7 +288,7 @@ public class ObjectReaderCreatorASM
             return annotatedObjectReader;
         }
 
-        if (fieldBased && (objectClass.isInterface() || objectClass.isInterface())) {
+        if (fieldBased && objectClass.isInterface()) {
             fieldBased = false;
         }
 
@@ -389,7 +389,7 @@ public class ObjectReaderCreatorASM
 
         if (!fieldBased) {
             if (defaultConstructor == null) {
-                return super.createObjectReader(objectClass, objectType, fieldBased, provider);
+                return super.createObjectReader(objectClass, objectType, false, provider);
             }
         }
 
@@ -680,8 +680,7 @@ public class ObjectReaderCreatorASM
 
                 int hashCode32 = hashCode32Keys[i];
                 List<Long> hashCode64Array = map.get(hashCode32);
-                for (int j = 0; j < hashCode64Array.size(); ++j) {
-                    long hashCode64 = hashCode64Array.get(j);
+                for (long hashCode64 : hashCode64Array) {
                     mw.visitVarInsn(Opcodes.LLOAD, HASH_CODE_64);
                     mw.visitLdcInsn(hashCode64);
                     mw.visitInsn(Opcodes.LCMP);
@@ -698,8 +697,6 @@ public class ObjectReaderCreatorASM
             }
 
             mw.visitLabel(dflt);
-            mw.visitInsn(Opcodes.ACONST_NULL);
-            mw.visitInsn(Opcodes.ARETURN);
         } else {
             for (int i = 0; i < fieldReaderArray.length; ++i) {
                 Label next_ = new Label(), get_ = new Label();
@@ -718,10 +715,9 @@ public class ObjectReaderCreatorASM
 
                 mw.visitLabel(next_);
             }
-
-            mw.visitInsn(Opcodes.ACONST_NULL);
-            mw.visitInsn(Opcodes.ARETURN);
         }
+        mw.visitInsn(Opcodes.ACONST_NULL);
+        mw.visitInsn(Opcodes.ARETURN);
 
         mw.visitLabel(rtnlt);
         mw.visitInsn(Opcodes.ARETURN);
@@ -804,8 +800,6 @@ public class ObjectReaderCreatorASM
             }
 
             mw.visitLabel(dflt);
-            mw.visitInsn(Opcodes.ACONST_NULL);
-            mw.visitInsn(Opcodes.ARETURN);
         } else {
             for (int i = 0; i < fieldReaderArray.length; ++i) {
                 Label next_ = new Label(), get_ = new Label();
@@ -824,10 +818,9 @@ public class ObjectReaderCreatorASM
 
                 mw.visitLabel(next_);
             }
-
-            mw.visitInsn(Opcodes.ACONST_NULL);
-            mw.visitInsn(Opcodes.ARETURN);
         }
+        mw.visitInsn(Opcodes.ACONST_NULL);
+        mw.visitInsn(Opcodes.ARETURN);
 
         mw.visitLabel(rtnlt);
         mw.visitInsn(Opcodes.ARETURN);
@@ -1066,6 +1059,7 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(endAutoType_);
 
+        // continue
         if (fieldReaderArray.length > 6) {
             // use switch
             Map<Integer, List<Long>> map = new TreeMap();
@@ -1170,13 +1164,6 @@ public class ObjectReaderCreatorASM
             mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
 
             mw.visitLabel(fieldReaderNull_);
-
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA, false);
-
-            mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
         } else {
             for (int i = 0; i < fieldReaderArray.length; ++i) {
                 Label next_ = new Label();
@@ -1262,16 +1249,13 @@ public class ObjectReaderCreatorASM
 
                 mw.visitLabel(next_);
             }
-
             mw.visitLabel(processExtra_);
-
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA, false);
-
-            mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
         }
+        mw.visitVarInsn(Opcodes.ALOAD, THIS);
+        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+        mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA, false);
+        mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
 
         mw.visitLabel(for_inc_i_);
         mw.visitIincInsn(I, 1);
@@ -1622,6 +1606,7 @@ public class ObjectReaderCreatorASM
 
         mw.visitLabel(noneAutoType_);
 
+        // continue
         if (fieldReaderArray.length > 6) {
             // use switch
             Map<Integer, List<Long>> map = new TreeMap();
@@ -1724,13 +1709,6 @@ public class ObjectReaderCreatorASM
             mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
 
             mw.visitLabel(fieldReaderNull_);
-
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA, false);
-
-            mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
         } else {
             for (int i = 0; i < fieldReaderArray.length; ++i) {
                 Label next_ = new Label(), get_ = new Label();
@@ -1834,13 +1812,12 @@ public class ObjectReaderCreatorASM
             }
 
             mw.visitLabel(processExtra_);
-            mw.visitVarInsn(Opcodes.ALOAD, THIS);
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA, false);
-
-            mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
         }
+        mw.visitVarInsn(Opcodes.ALOAD, THIS);
+        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+        mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_OBJECT_READER_ADAPTER, "processExtra", METHOD_DESC_PROCESS_EXTRA, false);
+        mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_); // continue
 
         mw.visitLabel(for_inc_i_);
         mw.visitIincInsn(I, 1);
@@ -2460,7 +2437,7 @@ public class ObjectReaderCreatorASM
         }
 
         if (method != null) {
-            boolean invokeFieldReaderAccept = method != null && (!context.publicClass || context.externalClass);
+            boolean invokeFieldReaderAccept = !context.publicClass || context.externalClass;
 
             if (invokeFieldReaderAccept) {
                 Integer FIELD_VALUE = variants.get(fieldClass);

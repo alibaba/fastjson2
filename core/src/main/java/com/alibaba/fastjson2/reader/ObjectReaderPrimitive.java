@@ -24,10 +24,5 @@ abstract class ObjectReaderPrimitive<T>
     }
 
     @Override
-    public FieldReader getFieldReader(long hashCode) {
-        return null;
-    }
-
-    @Override
     public abstract T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features);
 }

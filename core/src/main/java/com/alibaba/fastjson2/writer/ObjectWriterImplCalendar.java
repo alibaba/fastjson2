@@ -47,7 +47,7 @@ final class ObjectWriterImplCalendar
             return;
         }
 
-        if (format == null && (format == null && ctx.isDateFormatMillis())) {
+        if (format == null && ctx.isDateFormatMillis()) {
             jsonWriter.writeInt64(millis);
             return;
         }

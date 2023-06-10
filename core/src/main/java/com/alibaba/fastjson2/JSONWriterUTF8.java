@@ -531,7 +531,7 @@ class JSONWriterUTF8
                 } else if (c >= '\uD800' && c < ('\uDFFF' + 1)) { //Character.isSurrogate(c) but 1.7
                     final int uc;
                     int ip = valueOffset - 1;
-                    if (c >= '\uD800' && c < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
+                    if (c < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
                         if (value.length - ip < 2) {
                             uc = -1;
                         } else {
@@ -549,12 +549,9 @@ class JSONWriterUTF8
                         }
                     } else {
                         //
-                        if (c >= '\uDC00' && c < ('\uDFFF' + 1)) { // Character.isLowSurrogate(c)
-                            bytes[off++] = '?';
-                            continue;
-                        } else {
-                            uc = c;
-                        }
+                        // Character.isLowSurrogate(c)
+                        bytes[off++] = '?';
+                        continue;
                     }
 
                     if (uc < 0) {
@@ -804,8 +801,8 @@ class JSONWriterUTF8
                     if (browserSecure) {
                         bytes[off] = '\\';
                         bytes[off + 1] = 'u';
-                        bytes[off + 2] = (byte) DIGITS[(ch >>> 12) & 15];
-                        bytes[off + 3] = (byte) DIGITS[(ch >>> 8) & 15];
+                        bytes[off + 2] = '0';
+                        bytes[off + 3] = '0';
                         bytes[off + 4] = (byte) DIGITS[(ch >>> 4) & 15];
                         bytes[off + 5] = (byte) DIGITS[ch & 15];
                         off += 6;
@@ -851,7 +848,7 @@ class JSONWriterUTF8
         int off = this.off;
         for (; i < end; ++i) { // ascii none special fast write
             char ch = chars[i];
-            if ((ch >= 0x0000) && (ch <= 0x007F)) {
+            if (ch <= 0x007F) {
                 switch (ch) {
                     case '\\':
                         bytes[off] = (byte) '\\';
@@ -949,8 +946,8 @@ class JSONWriterUTF8
                         if (browserSecure) {
                             bytes[off] = '\\';
                             bytes[off + 1] = 'u';
-                            bytes[off + 2] = (byte) DIGITS[(ch >>> 12) & 15];
-                            bytes[off + 3] = (byte) DIGITS[(ch >>> 8) & 15];
+                            bytes[off + 2] = '0';
+                            bytes[off + 3] = '0';
                             bytes[off + 4] = (byte) DIGITS[(ch >>> 4) & 15];
                             bytes[off + 5] = (byte) DIGITS[ch & 15];
                             off += 6;
@@ -978,7 +975,7 @@ class JSONWriterUTF8
                 off += 6;
             } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
                 final int uc;
-                if (ch >= '\uD800' && ch < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
+                if (ch < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
                     if (chars.length - i < 2) {
                         uc = -1;
                     } else {
@@ -994,13 +991,10 @@ class JSONWriterUTF8
                     }
                 } else {
                     //
-                    if (ch >= '\uDC00' && ch < ('\uDFFF' + 1)) { // Character.isLowSurrogate(c)
-                        bytes[off++] = (byte) '?';
-                        continue;
+                    // Character.isLowSurrogate(c)
+                    bytes[off++] = (byte) '?';
+                    continue;
 //                        throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
-                    } else {
-                        uc = ch;
-                    }
                 }
 
                 if (uc < 0) {
@@ -1074,7 +1068,7 @@ class JSONWriterUTF8
 
         for (; i < len; ++i) { // ascii none special fast write
             char ch = chars[i];
-            if ((ch >= 0x0000) && (ch <= 0x007F)) {
+            if (ch <= 0x007F) {
                 switch (ch) {
                     case '\\':
                         bytes[off] = (byte) '\\';
@@ -1185,7 +1179,7 @@ class JSONWriterUTF8
                 off += 6;
             } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
                 final int uc;
-                if (ch >= '\uD800' && ch < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
+                if (ch < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
                     if (chars.length - i < 2) {
                         uc = -1;
                     } else {
@@ -1201,13 +1195,10 @@ class JSONWriterUTF8
                     }
                 } else {
                     //
-                    if (ch >= '\uDC00' && ch < ('\uDFFF' + 1)) { // Character.isLowSurrogate(c)
-                        bytes[off++] = (byte) '?';
-                        continue;
+                    // Character.isLowSurrogate(c)
+                    bytes[off++] = (byte) '?';
+                    continue;
 //                        throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
-                    } else {
-                        uc = ch;
-                    }
                 }
 
                 if (uc < 0) {
@@ -1274,7 +1265,7 @@ class JSONWriterUTF8
 
         final byte[] bytes = this.bytes;
         bytes[off++] = (byte) quote;
-        if ((ch >= 0x0000) && (ch <= 0x007F)) {
+        if (ch <= 0x007F) {
             switch (ch) {
                 case '\\':
                     bytes[off] = (byte) '\\';
@@ -2524,51 +2515,50 @@ class JSONWriterUTF8
                 bytes[off++] = ',';
             }
             first = false;
-            Object value = o;
 
-            if (value == null) {
+            if (o == null) {
                 writeNull();
                 continue;
             }
 
-            Class<?> valueClass = value.getClass();
+            Class<?> valueClass = o.getClass();
             if (valueClass == String.class) {
-                writeString((String) value);
+                writeString((String) o);
                 continue;
             }
 
             if (valueClass == Integer.class) {
-                writeInt32((Integer) value);
+                writeInt32((Integer) o);
                 continue;
             }
 
             if (valueClass == Long.class) {
-                writeInt64((Long) value);
+                writeInt64((Long) o);
                 continue;
             }
 
             if (valueClass == Boolean.class) {
-                writeBool((Boolean) value);
+                writeBool((Boolean) o);
                 continue;
             }
 
             if (valueClass == BigDecimal.class) {
-                writeDecimal((BigDecimal) value, 0, null);
+                writeDecimal((BigDecimal) o, 0, null);
                 continue;
             }
 
             if (valueClass == JSONArray.class) {
-                write((JSONArray) value);
+                write((JSONArray) o);
                 continue;
             }
 
             if (valueClass == JSONObject.class) {
-                write((JSONObject) value);
+                write((JSONObject) o);
                 continue;
             }
 
             ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
-            objectWriter.write(this, value, null, null, 0);
+            objectWriter.write(this, o, null, null, 0);
         }
         if (off == bytes.length) {
             ensureCapacity(off + 1);

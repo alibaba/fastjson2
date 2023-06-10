@@ -209,7 +209,7 @@ public final class JSONFactory {
             String property = System.getProperty("fastjson2.readerVector");
             if (property != null) {
                 property = property.trim();
-                if (property == null || property.isEmpty()) {
+                if (property.isEmpty()) {
                     property = properties.getProperty("fastjson2.readerVector");
                     if (property != null) {
                         property = property.trim();

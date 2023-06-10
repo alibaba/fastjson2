@@ -66,11 +66,8 @@ final class StringSchema
             Object property = input.get("enum");
             if (property instanceof Collection) {
                 Collection enums = (Collection) property;
-
-                if (enums != null) {
-                    enumValues = new HashSet<>(enums.size());
-                    enumValues.addAll((Collection<String>) enums);
-                }
+                enumValues = new HashSet<>(enums.size());
+                enumValues.addAll((Collection<String>) enums);
             }
             this.enumValues = enumValues;
         }

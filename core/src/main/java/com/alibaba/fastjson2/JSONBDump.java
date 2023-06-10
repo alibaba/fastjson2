@@ -667,11 +667,6 @@ final class JSONBDump {
             return (long) INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
         }
 
-        if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-            return ((type - BC_INT32_BYTE_ZERO) << 8)
-                    + (bytes[offset++] & 0xFF);
-        }
-
         if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
             return ((type - BC_INT64_BYTE_ZERO) << 8)
                     + (bytes[offset++] & 0xFF);

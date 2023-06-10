@@ -1576,7 +1576,6 @@ public class JSONObject
                 } else {
                     Class<?> declaringClass = method.getDeclaringClass();
                     if (declaringClass.isInterface()
-                            && method.getParameterCount() == 0
                             && !Modifier.isAbstract(method.getModifiers())
                             && !ANDROID
                             && !GRAAL
@@ -1600,7 +1599,7 @@ public class JSONObject
                 }
             }
 
-            if (value != null && !returnType.isInstance(value)) {
+            if (!returnType.isInstance(value)) {
                 Function typeConvert = JSONFactory
                         .getDefaultObjectReaderProvider()
                         .getTypeConvert(

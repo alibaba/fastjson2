@@ -314,9 +314,6 @@ public final class MethodWriter {
             // If the next instruction starts a new basic block, call visitLabel to add the label of this
             // instruction as a successor of the current block, and to start a new basic block.
             if (nextBasicBlock != null) {
-                if (nextInsnIsJumpTarget) {
-                    nextBasicBlock.flags |= Label.FLAG_JUMP_TARGET;
-                }
                 visitLabel(nextBasicBlock);
             }
             if (baseOpcode == Opcodes.GOTO) {
@@ -442,11 +439,9 @@ public final class MethodWriter {
     }
 
     public void visitLdcInsn(final int value) {
-        final int CONSTANT_INTEGER_TAG = 3;
-
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
-        Symbol constantSymbol = symbolTable.addConstantIntegerOrFloat(CONSTANT_INTEGER_TAG, value);
+        Symbol constantSymbol = symbolTable.addConstantIntegerOrFloat(value);
         int constantIndex = constantSymbol.index;
         if (constantIndex >= 256) {
             code.put12(Constants.LDC_W, constantIndex);
@@ -460,10 +455,9 @@ public final class MethodWriter {
     }
 
     public void visitLdcInsn(final long value) {
-        final int CONSTANT_LONG_TAG = 5;
         lastBytecodeOffset = code.length;
         // Add the instruction to the bytecode of the method.
-        Symbol constantSymbol = symbolTable.addConstantLongOrDouble(CONSTANT_LONG_TAG, value);
+        Symbol constantSymbol = symbolTable.addConstantLongOrDouble(value);
         int constantIndex = constantSymbol.index;
         code.put12(Constants.LDC2_W, constantIndex);
         // If needed, update the maximum stack size and number of locals, and stack map frames.
@@ -865,8 +859,7 @@ public final class MethodWriter {
             // max_locals, code_length and attributes_count, plus the bytecode and the exception table.
             size += 16 + code.length + 2;
             if (stackMapTableEntries != null) {
-                boolean useStackMapTable = true;
-                symbolTable.addConstantUtf8(useStackMapTable ? Constants.STACK_MAP_TABLE : "StackMap");
+                symbolTable.addConstantUtf8(Constants.STACK_MAP_TABLE);
                 // 6 header bytes and 2 bytes for number_of_entries.
                 size += 8 + stackMapTableEntries.length;
             }
@@ -914,7 +907,7 @@ public final class MethodWriter {
                 output
                         .putShort(
                                 symbolTable.addConstantUtf8(
-                                        useStackMapTable ? Constants.STACK_MAP_TABLE : "StackMap"))
+                                        Constants.STACK_MAP_TABLE))
                         .putInt(2 + stackMapTableEntries.length)
                         .putShort(stackMapTableNumberOfEntries)
                         .putByteArray(stackMapTableEntries.data, 0, stackMapTableEntries.length);

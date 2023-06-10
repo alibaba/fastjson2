@@ -1012,17 +1012,13 @@ public class ObjectReaderBaseModule
                         }
                         case "access": {
                             String access = ((Enum) result).name();
-                            if (access.equals("READ_ONLY")) {
-                                fieldInfo.ignore = true;
-                            } else {
-                                fieldInfo.ignore = false;
-                            }
+                            fieldInfo.ignore = access.equals("READ_ONLY");
                             break;
                         }
                         case "required":
                             boolean required = (Boolean) result;
                             if (required) {
-                                fieldInfo.required = required;
+                                fieldInfo.required = true;
                             }
                             break;
                         default:

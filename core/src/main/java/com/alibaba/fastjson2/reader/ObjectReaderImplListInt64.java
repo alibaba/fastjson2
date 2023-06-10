@@ -52,11 +52,6 @@ public final class ObjectReaderImplListInt64
     }
 
     @Override
-    public FieldReader getFieldReader(long hashCode) {
-        return null;
-    }
-
-    @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfNull()) {
             return null;

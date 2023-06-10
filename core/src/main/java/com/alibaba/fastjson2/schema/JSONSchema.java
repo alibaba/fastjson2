@@ -323,9 +323,7 @@ public abstract class JSONSchema {
                         return new AnyOf(input, parent);
                     }
 
-                    if (oneOf) {
-                        return new OneOf(input, parent);
-                    }
+                    return new OneOf(input, parent);
                 }
                 JSONSchema[] items = new JSONSchema[count];
                 int index = 0;

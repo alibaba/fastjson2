@@ -783,7 +783,6 @@ public abstract class BeanUtils {
 
         Class[] interfaces = enumClass.getInterfaces();
 
-        Member member = null;
         Method[] methods = methodCache.get(enumClass);
         if (methods == null) {
             methods = enumClass.getMethods();
@@ -821,38 +820,36 @@ public abstract class BeanUtils {
                 }
             }
 
-            if (member == null) {
-                AtomicReference<Member> memberRef = new AtomicReference<>();
-                for (Class enumInterface : interfaces) {
-                    getters(enumInterface, e -> {
+            AtomicReference<Member> memberRef = new AtomicReference<>();
+            for (Class enumInterface : interfaces) {
+                getters(enumInterface, e -> {
+                    if (e.getName().equals(methodName)) {
+                        if (isJSONField(e)) {
+                            memberRef.set(method);
+                        }
+                    }
+                });
+
+                Class mixIn;
+                if (mixinProvider != null) {
+                    mixIn = mixinProvider.getMixIn(enumInterface);
+                } else {
+                    mixIn = JSONFactory.getDefaultObjectWriterProvider().getMixIn(enumInterface);
+                }
+
+                if (mixIn != null) {
+                    getters(mixIn, e -> {
                         if (e.getName().equals(methodName)) {
                             if (isJSONField(e)) {
                                 memberRef.set(method);
                             }
                         }
                     });
-
-                    Class mixIn;
-                    if (mixinProvider != null) {
-                        mixIn = mixinProvider.getMixIn(enumInterface);
-                    } else {
-                        mixIn = JSONFactory.getDefaultObjectWriterProvider().getMixIn(enumInterface);
-                    }
-
-                    if (mixIn != null) {
-                        getters(mixIn, e -> {
-                            if (e.getName().equals(methodName)) {
-                                if (isJSONField(e)) {
-                                    memberRef.set(method);
-                                }
-                            }
-                        });
-                    }
                 }
-                Member refMember = memberRef.get();
-                if (refMember != null) {
-                    return refMember;
-                }
+            }
+            Member refMember = memberRef.get();
+            if (refMember != null) {
+                return refMember;
             }
         }
 
@@ -862,6 +859,7 @@ public abstract class BeanUtils {
             fieldCache.putIfAbsent(enumClass, fields);
         }
 
+        Member member = null;
         Enum[] enumConstants = (Enum[]) enumClass.getEnumConstants();
         for (Field field : fields) {
             boolean found = false;
@@ -1420,9 +1418,6 @@ public abstract class BeanUtils {
                 return methodName;
             }
             case "PascalCase": {
-                if (methodName.isEmpty()) {
-                    return methodName;
-                }
                 char c0 = methodName.charAt(0);
                 char c1;
                 if (c0 >= 'a' && c0 <= 'z'
@@ -1558,9 +1553,7 @@ public abstract class BeanUtils {
                         && c1 <= 'Z'
                         && (c1 = methodName.charAt(i - 1)) >= 'a'
                         && c1 <= 'z') {
-                    if (i > prefixLength) {
-                        buf[off++] = separator;
-                    }
+                    buf[off++] = separator;
                     buf[off++] = ch;
                 } else {
                     buf[off++] = ch;
@@ -1588,13 +1581,12 @@ public abstract class BeanUtils {
                         if (ch >= 'a' && ch <= 'z') {
                             ch -= 32;
                         }
-                        buf[off++] = ch;
                     } else {
                         if (i > prefixLength) {
                             buf[off++] = '_';
                         }
-                        buf[off++] = ch;
                     }
+                    buf[off++] = ch;
                 } else {
                     if (ch >= 'A' && ch <= 'Z') {
                         if (i > prefixLength) {
@@ -2180,7 +2172,7 @@ public abstract class BeanUtils {
             if (inherited) {
                 Class<?> superclass = clazz.getSuperclass();
                 if (superclass != null && superclass != Object.class) {
-                    A annotationOnSuperclass = findAnnotation(superclass, annotationType, inherited, visited);
+                    A annotationOnSuperclass = findAnnotation(superclass, annotationType, true, visited);
                     if (annotationOnSuperclass != null) {
                         return annotationOnSuperclass;
                     }
@@ -2248,7 +2240,6 @@ public abstract class BeanUtils {
             this.rawType = canonicalize(rawType);
             this.typeArguments = typeArguments.clone();
             for (int t = 0, length = this.typeArguments.length; t < length; t++) {
-                checkNotNull(this.typeArguments[t]);
                 checkNotPrimitive(this.typeArguments[t]);
                 this.typeArguments[t] = canonicalize(this.typeArguments[t]);
             }
@@ -2347,13 +2338,11 @@ public abstract class BeanUtils {
             checkArgument(upperBounds.length == 1);
 
             if (lowerBounds.length == 1) {
-                checkNotNull(lowerBounds[0]);
                 checkNotPrimitive(lowerBounds[0]);
                 checkArgument(upperBounds[0] == Object.class);
                 this.lowerBound = canonicalize(lowerBounds[0]);
                 this.upperBound = Object.class;
             } else {
-                checkNotNull(upperBounds[0]);
                 checkNotPrimitive(upperBounds[0]);
                 this.lowerBound = null;
                 this.upperBound = canonicalize(upperBounds[0]);
@@ -2401,13 +2390,6 @@ public abstract class BeanUtils {
         if (!condition) {
             throw new IllegalArgumentException();
         }
-    }
-
-    public static <T> T checkNotNull(T obj) {
-        if (obj == null) {
-            throw new NullPointerException();
-        }
-        return obj;
     }
 
     public static void processJacksonJsonIgnore(FieldInfo fieldInfo, Annotation annotation) {

@@ -434,7 +434,7 @@ abstract class JSONPathSegment {
                     ? context.root
                     : context.parent.value;
 
-            List result = new JSONArray();
+            List<Object> result = new JSONArray();
 
             if (object instanceof JSONPath.Sequence) {
                 List list = ((JSONPath.Sequence) object).values;
@@ -446,7 +446,7 @@ abstract class JSONPathSegment {
                     Object value = itemContext.value;
 
                     if (value instanceof Collection) {
-                        result.addAll((Collection) value);
+                        result.addAll((Collection<Object>) value);
                     } else {
                         result.add(value);
                     }
@@ -496,7 +496,7 @@ abstract class JSONPathSegment {
                 }
 
                 if (value instanceof Collection) {
-                    result.addAll((Collection) value);
+                    result.addAll((Collection<Object>) value);
                 } else {
                     result.add(value);
                 }
@@ -856,8 +856,7 @@ abstract class JSONPathSegment {
             }
 
             if (object instanceof List) {
-                List list = (List) object;
-                list.replaceAll(e -> value);
+                Collections.fill((List) object, value);
                 return;
             }
 
@@ -1233,12 +1232,12 @@ abstract class JSONPathSegment {
             }
         }
 
-        class MapRecursive
+        static final class MapRecursive
                 implements Consumer {
             static final int maxLevel = 2048;
             final JSONPath.Context context;
             final List values;
-            int level;
+            final int level;
 
             public MapRecursive(JSONPath.Context context, List values, int level) {
                 this.context = context;

@@ -188,8 +188,7 @@ public class ObjectWriterCreatorASM
         }
 
         long writerFieldFeatures = features | beanFeatures;
-        final boolean fieldBased = (writerFieldFeatures & JSONWriter.Feature.FieldBased.mask) != 0
-                && !(objectClass.isInterface() || objectClass.isInterface());
+        final boolean fieldBased = (writerFieldFeatures & JSONWriter.Feature.FieldBased.mask) != 0 && !objectClass.isInterface();
 
         if (Throwable.class.isAssignableFrom(objectClass)
                 || BeanUtils.isExtendedMap(objectClass)
@@ -200,8 +199,8 @@ public class ObjectWriterCreatorASM
         boolean record = BeanUtils.isRecord(objectClass);
 
         List<FieldWriter> fieldWriters;
+        Map<String, FieldWriter> fieldWriterMap = new LinkedHashMap<>();
         if (!fieldBased || record) {
-            Map<String, FieldWriter> fieldWriterMap = new LinkedHashMap<>();
             List<FieldWriter> fieldWriterList = new ArrayList<>();
             boolean fieldWritersCreated = false;
             for (ObjectWriterModule module : provider.modules) {
@@ -354,9 +353,7 @@ public class ObjectWriterCreatorASM
                     }
                 });
             }
-            fieldWriters = new ArrayList<>(fieldWriterMap.values());
         } else {
-            Map<String, FieldWriter> fieldWriterMap = new LinkedHashMap<>();
             final FieldInfo fieldInfo = new FieldInfo();
             BeanUtils.declaredFields(objectClass, field -> {
                 fieldInfo.init();
@@ -365,8 +362,8 @@ public class ObjectWriterCreatorASM
                     fieldWriterMap.put(fieldWriter.fieldName, fieldWriter);
                 }
             });
-            fieldWriters = new ArrayList<>(fieldWriterMap.values());
         }
+        fieldWriters = new ArrayList<>(fieldWriterMap.values());
 
         handleIgnores(beanInfo, fieldWriters);
         if (beanInfo.alphabetic) {
@@ -394,10 +391,7 @@ public class ObjectWriterCreatorASM
             }
         }
 
-        boolean match = true;
-        if (fieldWriters.size() >= 100 || Throwable.class.isAssignableFrom(objectClass)) {
-            match = false;
-        }
+        boolean match = fieldWriters.size() < 100 && !Throwable.class.isAssignableFrom(objectClass);
 
         if (!publicClass || externalClass) {
             for (FieldWriter fieldWriter : fieldWriters) {
@@ -3013,7 +3007,7 @@ public class ObjectWriterCreatorASM
         String classNameType = mwc.classNameType;
 
         int FIELD_VALUE = mwc.var(int.class);
-        Integer WRITE_DEFAULT_VALUE = mwc.var(NOT_WRITE_DEFAULT_VALUE);
+        int WRITE_DEFAULT_VALUE = mwc.var(NOT_WRITE_DEFAULT_VALUE);
         Label notDefaultValue_ = new Label(), endWriteValue_ = new Label();
 
         genGetObject(mwc, fieldWriter, OBJECT);

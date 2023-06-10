@@ -153,8 +153,7 @@ public final class ObjectReaderImplMap
             }
             default:
                 if (instanceType == JSONObject1O.class) {
-                    Class objectClass = CLASS_JSON_OBJECT_1x;
-                    builder = createObjectSupplier(objectClass);
+                    builder = createObjectSupplier(CLASS_JSON_OBJECT_1x);
                     instanceType = LinkedHashMap.class;
                 } else if (mapType == CLASS_UNMODIFIABLE_MAP) {
                     builder = (Function<Map, Map>) Collections::unmodifiableMap;
@@ -271,11 +270,6 @@ public final class ObjectReaderImplMap
     }
 
     @Override
-    public FieldReader getFieldReader(long hashCode) {
-        return null;
-    }
-
-    @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName1, long features) {
         ObjectReader objectReader = jsonReader.checkAutoType(mapType, mapTypeHash, this.features | features);
         if (objectReader != null && objectReader != this) {
@@ -340,7 +334,7 @@ public final class ObjectReaderImplMap
                 }
 
                 Object fieldName;
-                if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_SYMBOL) {
+                if (type >= BC_STR_ASCII_FIX_MIN) {
                     fieldName = jsonReader.readFieldName();
                 } else if (jsonReader.nextIfMatch(BC_REFERENCE)) {
                     String reference = jsonReader.readString();

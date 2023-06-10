@@ -126,8 +126,8 @@ final class JSONPathSegmentIndex
         if (object instanceof JSONPath.Sequence) {
             List sequence = ((JSONPath.Sequence) object).values;
             JSONArray values = new JSONArray(sequence.size());
-            for (int i = 0; i < sequence.size(); i++) {
-                context.value = sequence.get(i);
+            for (Object o : sequence) {
+                context.value = o;
                 JSONPath.Context itemContext = new JSONPath.Context(context.path, context, context.current, context.next, context.readerFeatures);
                 eval(itemContext);
                 values.add(itemContext.value);

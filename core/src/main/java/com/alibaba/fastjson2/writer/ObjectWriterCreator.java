@@ -206,7 +206,7 @@ public class ObjectWriterCreator {
 
         if (writeUsingWriter == null) {
             Class<?> fieldClass = field.getType();
-            if (fieldClass == Date.class && provider != null) {
+            if (fieldClass == Date.class) {
                 ObjectWriter objectWriter = provider.cache.get(fieldClass);
                 if (objectWriter != ObjectWriterImplDate.INSTANCE) {
                     writeUsingWriter = objectWriter;
@@ -269,7 +269,7 @@ public class ObjectWriterCreator {
                 if (mixinClass != null) {
                     try {
                         field = mixinClass.getDeclaredField(fieldName);
-                    } catch (NoSuchFieldException | SecurityException igored) {
+                    } catch (NoSuchFieldException | SecurityException ignored) {
                         // ignored
                     }
                 }
@@ -279,9 +279,7 @@ public class ObjectWriterCreator {
                 field = objectClass.getDeclaredField(fieldName);
             }
 
-            if (field != null
-                    && ObjectWriter.class.isAssignableFrom(field.getType())
-                    && Modifier.isStatic(field.getModifiers())) {
+            if (ObjectWriter.class.isAssignableFrom(field.getType()) && Modifier.isStatic(field.getModifiers())) {
                 field.setAccessible(true);
                 return (ObjectWriter) field.get(null);
             }
@@ -338,7 +336,7 @@ public class ObjectWriterCreator {
         long writerFieldFeatures = features | beanFeatures;
         boolean fieldBased = (writerFieldFeatures & JSONWriter.Feature.FieldBased.mask) != 0;
 
-        if (fieldBased && (record || objectClass.isInterface() || objectClass.isInterface())) {
+        if (fieldBased && (record || objectClass.isInterface())) {
             fieldBased = false;
         }
 
@@ -521,12 +519,10 @@ public class ObjectWriterCreator {
         ObjectWriterAdapter writerAdapter = null;
 
         boolean googleCollection = false;
-        if (objectClass != null) {
-            String typeName = objectClass.getName();
-            googleCollection =
-                    "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList".equals(typeName)
-                            || "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet".equals(typeName);
-        }
+        String typeName = objectClass.getName();
+        googleCollection =
+                "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList".equals(typeName)
+                        || "com.google.common.collect.AbstractMapBasedMultimap$WrappedSet".equals(typeName);
         if (!googleCollection) {
             switch (fieldWriters.size()) {
                 case 1:
@@ -612,7 +608,7 @@ public class ObjectWriterCreator {
                             || (len > 2 && c0 >= 'A' && c0 <= 'Z' && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z')
                     ) {
                         char[] chars = fieldName.toCharArray();
-                        if (c0 >= 'a' && c0 <= 'z') {
+                        if (c0 >= 'a') {
                             chars[0] = (char) (chars[0] - 32);
                         } else {
                             chars[0] = (char) (chars[0] + 32);
@@ -964,7 +960,7 @@ public class ObjectWriterCreator {
         }
 
         if (fieldClass.isEnum()
-                && (BeanUtils.getEnumValueField(fieldClass, provider) == null && initObjectWriter == null)
+                && BeanUtils.getEnumValueField(fieldClass, provider) == null
                 && !BeanUtils.isWriteEnumAsJavaBean(fieldClass)
         ) {
             String[] enumAnnotationNames = BeanUtils.getEnumAnnotationNames(fieldClass);

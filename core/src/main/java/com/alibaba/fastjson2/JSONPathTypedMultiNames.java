@@ -87,16 +87,6 @@ class JSONPathTypedMultiNames
     }
 
     @Override
-    public boolean contains(Object object) {
-        for (JSONPath jsonPath : paths) {
-            if (jsonPath.contains(object)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
     public Object eval(Object root) {
         Object[] array = new Object[paths.length];
 

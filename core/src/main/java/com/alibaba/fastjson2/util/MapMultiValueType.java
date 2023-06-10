@@ -45,13 +45,13 @@ public class MapMultiValueType<T extends Map>
             String name,
             Type type
     ) {
-        return new MapMultiValueType<T>(mapType, name, type);
+        return new MapMultiValueType<>(mapType, name, type);
     }
 
     public static <T extends Map> MapMultiValueType<T> of(
             Class<T> mapType,
             Map<String, Type> types
     ) {
-        return new MapMultiValueType<T>(mapType, types);
+        return new MapMultiValueType<>(mapType, types);
     }
 }

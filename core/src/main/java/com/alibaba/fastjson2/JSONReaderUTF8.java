@@ -4619,7 +4619,7 @@ class JSONReaderUTF8
                 long v3 = mag3 & 0XFFFFFFFFL;
                 long v2 = mag2 & 0XFFFFFFFFL;
 
-                if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
+                if (v2 <= Integer.MAX_VALUE) {
                     long v23 = (v2 << 32) + (v3);
                     long longValue = negative ? -v23 : v23;
                     consumer.accept(longValue);
@@ -5389,9 +5389,6 @@ class JSONReaderUTF8
         }
 
         LocalDateTime ldt = DateUtils.parseLocalDateTime18(bytes, offset);
-        if (ldt == null) {
-            return null;
-        }
 
         offset += 19;
         next();

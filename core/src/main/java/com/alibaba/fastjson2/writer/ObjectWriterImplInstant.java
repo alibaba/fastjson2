@@ -148,14 +148,12 @@ final class ObjectWriterImplInstant
                 return;
             }
 
-            if (yyyyMMdd8) {
-                jsonWriter.writeDateYYYMMDD8(
-                        year,
-                        month,
-                        dayOfMonth
-                );
-                return;
-            }
+            jsonWriter.writeDateYYYMMDD8(
+                    year,
+                    month,
+                    dayOfMonth
+            );
+            return;
         }
 
         ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, context.getZoneId());
@@ -187,22 +185,6 @@ final class ObjectWriterImplInstant
                         zdt.getOffset().getTotalSeconds(),
                         true
                 );
-                return;
-            }
-
-            if (yyyyMMdd8) {
-                jsonWriter.writeDateYYYMMDD8(
-                        year,
-                        zdt.getMonthValue(),
-                        zdt.getDayOfMonth());
-                return;
-            }
-
-            if (yyyyMMdd10) {
-                jsonWriter.writeDateYYYMMDD10(
-                        year,
-                        zdt.getMonthValue(),
-                        zdt.getDayOfMonth());
                 return;
             }
         }

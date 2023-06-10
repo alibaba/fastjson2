@@ -320,8 +320,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
         }
 
         if (refMap != null) {
-            for (Iterator<Map.Entry<FieldReader, String>> it = refMap.entrySet().iterator(); it.hasNext();) {
-                Map.Entry<FieldReader, String> entry = it.next();
+            for (Map.Entry<FieldReader, String> entry : refMap.entrySet()) {
                 FieldReader fieldReader = entry.getKey();
                 String reference = entry.getValue();
                 fieldReader.addResolveTask(jsonReader, object, reference);
@@ -370,10 +369,6 @@ public class ObjectReaderNoneDefaultConstructor<T>
                         fieldValue = typeConvert.apply(fieldValue);
                     }
                 }
-            }
-
-            if (valueMap == null) {
-                valueMap = new LinkedHashMap<>();
             }
 
             long hash;

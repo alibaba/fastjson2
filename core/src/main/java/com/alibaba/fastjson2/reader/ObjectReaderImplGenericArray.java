@@ -35,16 +35,6 @@ class ObjectReaderImplGenericArray
     }
 
     @Override
-    public Object createInstance(long features) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public FieldReader getFieldReader(long hashCode) {
-        return null;
-    }
-
-    @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
             long typeHash = jsonReader.readTypeHashCode();

@@ -559,12 +559,8 @@ public class ObjectWriterAdapter<T>
                 if (!nameChanged) {
                     fieldWriter.write(jsonWriter, object);
                 } else {
-                    if (nameChanged) {
-                        jsonWriter.writeName(filteredName);
-                        jsonWriter.writeColon();
-                    } else {
-                        fieldWriter.writeFieldName(jsonWriter);
-                    }
+                    jsonWriter.writeName(filteredName);
+                    jsonWriter.writeColon();
 
                     if (fieldValue == null) {
                         ObjectWriter fieldValueWriter = fieldWriter.getObjectWriter(jsonWriter, fieldWriter.fieldClass);

@@ -363,11 +363,6 @@ public final class ObjectReaderImplList
     }
 
     @Override
-    public FieldReader getFieldReader(long hashCode) {
-        return null;
-    }
-
-    @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         ObjectReader objectReader = jsonReader.checkAutoType(this.listClass, 0, features);
         if (jsonReader.nextIfNull()) {

@@ -53,7 +53,7 @@ public abstract class TypeReference<T> {
      * @throws NullPointerException If the {@link Type} is null
      */
     @SuppressWarnings("unchecked")
-    private TypeReference(Type type, boolean raw) {
+    private TypeReference(Type type) {
         if (type == null) {
             throw new NullPointerException();
         }
@@ -226,7 +226,7 @@ public abstract class TypeReference<T> {
      * @param type specify the {@link Type} to be converted
      */
     public static TypeReference<?> get(Type type) {
-        return new TypeReference<Object>(type, true) {
+        return new TypeReference<Object>(type) {
             // nothing
         };
     }

@@ -308,7 +308,7 @@ public abstract class FieldWriter<T>
         if (thisMember != null && otherMember != null) {
             Class otherDeclaringClass = otherMember.getDeclaringClass();
             Class thisDeclaringClass = thisMember.getDeclaringClass();
-            if (thisDeclaringClass != otherDeclaringClass && thisDeclaringClass != null && otherDeclaringClass != null) {
+            if (thisDeclaringClass != otherDeclaringClass) {
                 if (thisDeclaringClass.isAssignableFrom(otherDeclaringClass)) {
                     return 1;
                 } else if (otherDeclaringClass.isAssignableFrom(thisDeclaringClass)) {
@@ -337,9 +337,6 @@ public abstract class FieldWriter<T>
 
         if (thisFieldClass == boolean.class && otherFieldClass != boolean.class) {
             return 1;
-        }
-        if (otherFieldClass != boolean.class && thisFieldClass == boolean.class) {
-            return -1;
         }
 
         if (thisFieldClass == Boolean.class

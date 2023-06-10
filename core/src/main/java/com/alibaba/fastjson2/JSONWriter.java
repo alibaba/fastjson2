@@ -1312,12 +1312,11 @@ public abstract class JSONWriter
                 write0(',');
             }
 
-            Map.Entry next = o;
             writeAny(
-                    next.getKey());
+                    o.getKey());
             write0(':');
             writeAny(
-                    next.getValue());
+                    o.getValue());
 
             first = false;
         }

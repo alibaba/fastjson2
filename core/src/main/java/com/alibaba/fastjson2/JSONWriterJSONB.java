@@ -448,7 +448,7 @@ final class JSONWriterJSONB
         if (ascii) {
             if (len <= STR_ASCII_FIX_LEN) {
                 bytes[this.off++] = (byte) (len + BC_STR_ASCII_FIX_MIN);
-            } else if (len >= INT32_BYTE_MIN && len <= INT32_BYTE_MAX) {
+            } else if (len <= INT32_BYTE_MAX) {
                 bytes[this.off++] = BC_STR_ASCII;
                 bytes[this.off++] = (byte) (BC_INT32_BYTE_ZERO + (len >> 8));
                 bytes[this.off++] = (byte) (len);
@@ -671,7 +671,7 @@ final class JSONWriterJSONB
                 int strlen = str.length();
                 if (strlen <= STR_ASCII_FIX_LEN) {
                     bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
-                } else if (strlen >= INT32_BYTE_MIN && strlen <= INT32_BYTE_MAX) {
+                } else if (strlen <= INT32_BYTE_MAX) {
                     bytes[off++] = BC_STR_ASCII;
                     bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (strlen >> 8));
                     bytes[off++] = (byte) (strlen);
@@ -1194,7 +1194,7 @@ final class JSONWriterJSONB
             writeString(e.name());
         } else {
             int val = e.ordinal();
-            if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
+            if (val <= BC_INT32_NUM_MAX) {
                 if (off == bytes.length) {
                     ensureCapacity(off + 1);
                 }

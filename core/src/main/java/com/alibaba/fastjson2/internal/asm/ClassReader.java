@@ -85,7 +85,6 @@ public class ClassReader {
         char[] c = new char[maxStringLength]; // buffer used to read strings
         int i, j; // loop variables
         int u, v; // indexes in b
-        int anns = 0;
 
         //read annotations
 //        if (readAnnotations) {
@@ -133,13 +132,6 @@ public class ClassReader {
             v += 6 + readInt(v + 2);
         }
 
-        if (anns != 0) {
-            for (i = readUnsignedShort(anns), v = anns + 2; i > 0; --i) {
-                String name = readUTF8(v, c);
-//                classVisitor.visitAnnotation(name);
-            }
-        }
-
         // visits the fields
         i = readUnsignedShort(u);
         u += 2;
@@ -170,7 +162,6 @@ public class ClassReader {
         String name = readUTF8(u + 2, c);
         String desc = readUTF8(u + 4, c);
         v = 0;
-        w = 0;
 
         // looks for Code and Exceptions attributes
         j = readUnsignedShort(u + 6);
@@ -187,12 +178,6 @@ public class ClassReader {
             u += attrSize;
         }
         // reads declared exceptions
-        if (w != 0) {
-            w += 2;
-            for (j = 0; j < readUnsignedShort(w); ++j) {
-                w += 2;
-            }
-        }
 
         // visits the method's code, if any
         MethodCollector mv = classVisitor.visitMethod(access, name, desc);
