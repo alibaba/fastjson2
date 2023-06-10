@@ -99,51 +99,31 @@ abstract class FieldWriterBoolean
 
     @Override
     public final void writeBool(JSONWriter jsonWriter, boolean value) {
-        long features = jsonWriter.getFeatures() | this.features;
-        boolean writeNonStringValueAsString = (features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0;
-        if (writeNonStringValueAsString) {
+        long features = jsonWriter.getFeatures(this.features);
+        if ((features & JSONWriter.Feature.WriteNonStringValueAsString.mask) != 0) {
             writeFieldName(jsonWriter);
             jsonWriter.writeString(value ? "true" : "false");
             return;
         }
 
         if (jsonWriter.utf8) {
-            byte[] bytes;
-            if (value) {
-                if ((features & JSONWriter.Feature.WriteBooleanAsNumber.mask) != 0) {
-                    bytes = utf8Value1;
-                } else {
-                    bytes = utf8ValueTrue;
-                }
-            } else {
-                if ((features & JSONWriter.Feature.WriteBooleanAsNumber.mask) != 0) {
-                    bytes = utf8Value0;
-                } else {
-                    bytes = utf8ValueFalse;
-                }
-            }
-            jsonWriter.writeNameRaw(bytes);
+            jsonWriter.writeNameRaw(
+                    (features & JSONWriter.Feature.WriteBooleanAsNumber.mask) != 0
+                            ? (value ? utf8Value1 : utf8Value0)
+                            : (value ? utf8ValueTrue : utf8ValueFalse)
+            );
             return;
         }
 
         if (jsonWriter.utf16) {
-            char[] chars;
-            if (value) {
-                if ((features & JSONWriter.Feature.WriteBooleanAsNumber.mask) != 0) {
-                    chars = utf16Value1;
-                } else {
-                    chars = utf16ValueTrue;
-                }
-            } else {
-                if ((features & JSONWriter.Feature.WriteBooleanAsNumber.mask) != 0) {
-                    chars = utf16Value0;
-                } else {
-                    chars = utf16ValueFalse;
-                }
-            }
-            jsonWriter.writeNameRaw(chars);
+            jsonWriter.writeNameRaw(
+                    (features & JSONWriter.Feature.WriteBooleanAsNumber.mask) != 0
+                            ? (value ? utf16Value1 : utf16Value0)
+                            : (value ? utf16ValueTrue : utf16ValueFalse)
+            );
             return;
         }
+
         writeFieldName(jsonWriter);
         jsonWriter.writeBool(value);
     }

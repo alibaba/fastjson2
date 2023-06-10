@@ -1169,13 +1169,18 @@ class Frame {
             dstTypes[dstIndex] = srcType;
             return true;
         }
+
+        final String TYPE_JAVA_OBJECT = "java/lang/Object";
+
         int mergedType;
         if ((dstType & DIM_MASK) != 0 || (dstType & KIND_MASK) == REFERENCE_KIND) {
             // If dstType is a reference type of any array dimension.
             if (srcType == NULL) {
                 // If srcType is the NULL type, merge(srcType, dstType) = dstType, so there is no change.
                 return false;
-            } else if ((srcType & (DIM_MASK | KIND_MASK)) == (dstType & (DIM_MASK | KIND_MASK))) {
+            }
+
+            if ((srcType & (DIM_MASK | KIND_MASK)) == (dstType & (DIM_MASK | KIND_MASK))) {
                 // If srcType has the same array dimension and the same kind as dstType.
                 if ((dstType & KIND_MASK) == REFERENCE_KIND) {
                     // If srcType and dstType are reference types with the same array dimension,
@@ -1188,7 +1193,7 @@ class Frame {
                     // If srcType and dstType are array types of equal dimension but different element types,
                     // merge(srcType, dstType) = dim(srcType) - 1 | java/lang/Object.
                     int mergedDim = ELEMENT_OF + (srcType & DIM_MASK);
-                    mergedType = mergedDim | REFERENCE_KIND | symbolTable.addType("java/lang/Object");
+                    mergedType = mergedDim | REFERENCE_KIND | symbolTable.addType(TYPE_JAVA_OBJECT);
                 }
             } else if ((srcType & DIM_MASK) != 0 || (srcType & KIND_MASK) == REFERENCE_KIND) {
                 // If srcType is any other reference or array type,
@@ -1204,20 +1209,16 @@ class Frame {
                     dstDim = ELEMENT_OF + dstDim;
                 }
                 mergedType =
-                        Math.min(srcDim, dstDim) | REFERENCE_KIND | symbolTable.addType("java/lang/Object");
+                        Math.min(srcDim, dstDim) | REFERENCE_KIND | symbolTable.addType(TYPE_JAVA_OBJECT);
             } else {
                 // If srcType is any other type, merge(srcType, dstType) = TOP.
                 mergedType = TOP;
             }
-        } else if (dstType == NULL) {
-            // If dstType is the NULL type, merge(srcType, dstType) = srcType, or TOP if srcType is not a
-            // an array type or a reference type.
-            mergedType =
-                    (srcType & DIM_MASK) != 0 || (srcType & KIND_MASK) == REFERENCE_KIND ? srcType : TOP;
         } else {
-            // If dstType is any other type, merge(srcType, dstType) = TOP whatever srcType.
-            mergedType = TOP;
+            mergedType = dstType == NULL && ((srcType & DIM_MASK) != 0 || (srcType & KIND_MASK) == REFERENCE_KIND)
+                    ? srcType : TOP;
         }
+
         if (mergedType != dstType) {
             dstTypes[dstIndex] = mergedType;
             return true;

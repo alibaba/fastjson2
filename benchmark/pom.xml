@@ -97,7 +97,7 @@
         <dependency>
             <groupId>io.fury</groupId>
             <artifactId>fury-core</artifactId>
-            <version>0.11.0</version>
+            <version>0.11.2</version>
         </dependency>
         -->
         <dependency>
