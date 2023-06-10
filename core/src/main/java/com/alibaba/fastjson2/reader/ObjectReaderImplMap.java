@@ -36,6 +36,7 @@ public final class ObjectReaderImplMap
     final Class instanceType;
     final long features;
     final Function builder;
+    Object mapSingleton;
     volatile boolean instanceError;
 
     public static ObjectReader of(Type fieldType, Class mapType, long features) {
@@ -87,9 +88,6 @@ public final class ObjectReaderImplMap
                 case "java.util.Collections$SynchronizedSortedMap":
                     instanceType = TreeMap.class;
                     builder = (Function<SortedMap, SortedMap>) Collections::synchronizedSortedMap;
-                    break;
-                default:
-                    break;
             }
         }
 
@@ -137,6 +135,22 @@ public final class ObjectReaderImplMap
                 builder = GuavaSupport.createConvertFunction(instanceType);
                 instanceType = HashMap.class;
                 break;
+            case "kotlin.collections.EmptyMap": {
+                Object mapSingleton;
+                try {
+                    Field field = instanceType.getField("INSTANCE");
+                    if (!field.isAccessible()) {
+                        field.setAccessible(true);
+                    }
+                    mapSingleton = field.get(null);
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    throw new IllegalStateException("Failed to get singleton of " + instanceType, e);
+                }
+                return new ObjectReaderImplMap(instanceType, features, mapSingleton);
+            }
+            case "java.util.Collections$EmptyMap": {
+                return new ObjectReaderImplMap(instanceType, features, Collections.EMPTY_MAP);
+            }
             default:
                 if (instanceType == JSONObject1O.class) {
                     Class objectClass = CLASS_JSON_OBJECT_1x;
@@ -154,10 +168,14 @@ public final class ObjectReaderImplMap
                         return Collections.singletonMap(entry.getKey(), entry.getValue());
                     };
                 }
-                break;
         }
 
         return new ObjectReaderImplMap(fieldType, mapType, instanceType, features, builder);
+    }
+
+    ObjectReaderImplMap(Class mapClass, long features, Object mapSingleton) {
+        this(mapClass, mapClass, mapClass, features, null);
+        this.mapSingleton = mapSingleton;
     }
 
     ObjectReaderImplMap(Type fieldType, Class mapType, Class instanceType, long features, Function builder) {
@@ -193,8 +211,8 @@ public final class ObjectReaderImplMap
             return new JSONObject();
         }
 
-        if (instanceType == CLASS_EMPTY_MAP) {
-            return Collections.emptyMap();
+        if (mapSingleton != null) {
+            return mapSingleton;
         }
 
         if (instanceType == CLASS_EMPTY_SORTED_MAP) {
