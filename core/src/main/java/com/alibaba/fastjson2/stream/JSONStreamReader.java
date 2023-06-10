@@ -10,8 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 
-public abstract class JSONStreamReader
-        extends StreamReader {
+public abstract class JSONStreamReader<T>
+        extends StreamReader<T> {
     protected ObjectReaderAdapter objectReader;
 
     public JSONStreamReader(Type[] types) {

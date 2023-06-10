@@ -19,13 +19,13 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-public abstract class StreamReader {
+public abstract class StreamReader<T> {
     protected static final int SIZE_512K = 1024 * 512;
     protected long features;
 
@@ -539,6 +539,48 @@ public abstract class StreamReader {
             }
 
             return String.class;
+        }
+    }
+
+    public <T> Stream<T> stream() {
+        return StreamSupport.stream(new StreamReaderSpliterator(this), false);
+    }
+
+    public static class StreamReaderSpliterator<T> implements Spliterator<T> {
+
+        private final StreamReader<T> streamReader;
+
+        public StreamReaderSpliterator(StreamReader streamReader) {
+            this.streamReader = streamReader;
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super T> action) {
+            if (action == null) {
+                throw new IllegalArgumentException("action must not be null");
+            }
+            T object = streamReader.readLineObject();
+            if (streamReader.inputEnd) {
+                return false;
+            } else {
+                action.accept(object);
+                return true;
+            }
+        }
+
+        @Override
+        public Spliterator<T> trySplit() {
+            throw new UnsupportedOperationException("parallel stream not supported");
+        }
+
+        @Override
+        public long estimateSize() {
+            return streamReader.inputEnd ? 0L : Long.MAX_VALUE;
+        }
+
+        @Override
+        public int characteristics() {
+            return ORDERED + NONNULL+ IMMUTABLE;
         }
     }
 }
