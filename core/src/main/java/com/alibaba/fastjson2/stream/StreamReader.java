@@ -546,7 +546,8 @@ public abstract class StreamReader<T> {
         return StreamSupport.stream(new StreamReaderSpliterator(this), false);
     }
 
-    public static class StreamReaderSpliterator<T> implements Spliterator<T> {
+    private static class StreamReaderSpliterator<T>
+            implements Spliterator<T> {
         private final StreamReader<T> streamReader;
 
         public StreamReaderSpliterator(StreamReader streamReader) {
