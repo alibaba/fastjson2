@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -324,31 +323,6 @@ public class TypeUtilsTest {
     }
 
     @Test
-    public void test_cast_0() {
-        long millis = System.currentTimeMillis();
-        Date date = new Date(millis);
-        Instant instant = date.toInstant();
-
-        assertSame(date, TypeUtils.cast(date, Date.class));
-        assertEquals(date, TypeUtils.cast(date.toInstant(), Date.class));
-        assertEquals(instant, TypeUtils.cast(date, Instant.class));
-        assertSame(instant, TypeUtils.cast(instant, Instant.class));
-
-        assertEquals(Instant.ofEpochSecond(instant.getEpochSecond()),
-                TypeUtils.cast(JSONObject.of("epochSecond", instant.getEpochSecond()), Instant.class));
-        assertEquals(instant,
-                TypeUtils.cast(JSONObject.of("epochMilli", instant.toEpochMilli()), Instant.class));
-
-        Exception error = null;
-        try {
-            TypeUtils.cast(JSONObject.of("", "xx"), Instant.class);
-        } catch (JSONException ex) {
-            error = ex;
-        }
-        assertNotNull(error);
-    }
-
-    @Test
     public void testGetDefaultValue() {
         assertEquals(false, TypeUtils.getDefaultValue(boolean.class));
         assertEquals((byte) 0, TypeUtils.getDefaultValue(byte.class));
@@ -358,11 +332,6 @@ public class TypeUtilsTest {
         assertEquals(0F, TypeUtils.getDefaultValue(float.class));
         assertEquals(0D, TypeUtils.getDefaultValue(double.class));
         assertEquals((char) 0, TypeUtils.getDefaultValue(char.class));
-
-        assertEquals(Optional.empty(), TypeUtils.getDefaultValue(Optional.class));
-        assertEquals(OptionalInt.empty(), TypeUtils.getDefaultValue(OptionalInt.class));
-        assertEquals(OptionalLong.empty(), TypeUtils.getDefaultValue(OptionalLong.class));
-        assertEquals(OptionalDouble.empty(), TypeUtils.getDefaultValue(OptionalDouble.class));
     }
 
     @Test
@@ -433,18 +402,6 @@ public class TypeUtilsTest {
         assertSame(
                 Collections.unmodifiableList(new ArrayList<>()).getClass(),
                 TypeUtils.loadClass("java.util.Collections$UnmodifiableRandomAccessList")
-        );
-        assertSame(
-                java.util.Optional.class,
-                TypeUtils.loadClass("java.util.Optional")
-        );
-        assertSame(
-                java.util.OptionalInt.class,
-                TypeUtils.loadClass("java.util.OptionalInt")
-        );
-        assertSame(
-                java.util.OptionalLong.class,
-                TypeUtils.loadClass("java.util.OptionalLong")
         );
         assertSame(
                 List.class,

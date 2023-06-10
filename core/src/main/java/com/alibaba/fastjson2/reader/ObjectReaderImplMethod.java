@@ -31,12 +31,12 @@ public class ObjectReaderImplMethod
         String methodName = jsonReader.readString();
         List<String> paramTypeNames = jsonReader.readArray(String.class);
 
-        return getMethod(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName, paramTypeNames);
+        return getMethod(jsonReader.context.getFeatures() | features, methodName, declaringClassName, paramTypeNames);
     }
 
     @Override
     public Method readArrayMappingObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        boolean arrayStart = jsonReader.nextIfMatch('[');
+        boolean arrayStart = jsonReader.nextIfArrayStart();
         if (!arrayStart) {
             throw new JSONException("not support input " + jsonReader.info());
         }
@@ -45,14 +45,14 @@ public class ObjectReaderImplMethod
         String methodName = jsonReader.readString();
         List<String> paramTypeNames = jsonReader.readArray(String.class);
 
-        boolean arrayEnd = jsonReader.nextIfMatch(']');
+        boolean arrayEnd = jsonReader.nextIfArrayEnd();
         if (!arrayEnd) {
             throw new JSONException("not support input " + jsonReader.info());
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
-        return getMethod(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName, paramTypeNames);
+        return getMethod(jsonReader.context.getFeatures() | features, methodName, declaringClassName, paramTypeNames);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ObjectReaderImplMethod
         boolean objectStart = jsonReader.nextIfObjectStart();
         if (!objectStart) {
             if (jsonReader.isSupportBeanArray(features)) {
-                if (jsonReader.isJSONB()) {
+                if (jsonReader.jsonb) {
                     return readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
                 } else {
                     return readArrayMappingObject(jsonReader, fieldType, fieldName, features);
@@ -89,11 +89,11 @@ public class ObjectReaderImplMethod
             }
         }
 
-        if (!jsonReader.isJSONB()) {
-            jsonReader.nextIfMatch(',');
+        if (!jsonReader.jsonb) {
+            jsonReader.nextIfComma();
         }
 
-        return getMethod(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName, paramTypeNames);
+        return getMethod(jsonReader.context.getFeatures() | features, methodName, declaringClassName, paramTypeNames);
     }
 
     private Method getMethod(long features,

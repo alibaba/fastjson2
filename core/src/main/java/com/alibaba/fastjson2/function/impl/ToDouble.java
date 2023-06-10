@@ -2,9 +2,9 @@ package com.alibaba.fastjson2.function.impl;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.function.Function;
 
 import java.util.List;
-import java.util.function.Function;
 
 public class ToDouble
         implements Function {

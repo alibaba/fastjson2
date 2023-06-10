@@ -1,7 +1,8 @@
 package com.alibaba.fastjson2.issues_1000;
 
 import com.alibaba.fastjson2.JSON;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alibaba.fastjson2.annotation.JSONCreator;
+import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,6 @@ public class Issue1347 {
         Bean bean = new Bean();
         bean.accountType = LoginAccountType.PHONE;
         assertEquals("{\"accountType\":2}", JSON.toJSONString(bean));
-        System.out.println(new ObjectMapper().writeValueAsString(bean));
     }
 
     public static class Bean {
@@ -44,7 +44,7 @@ public class Issue1347 {
         // 是否是本地账号
         private final boolean local;
 
-        @com.fasterxml.jackson.annotation.JsonCreator
+        @JSONCreator
         public static LoginAccountType create(Integer value) {
             return DictEnum.valueOf(values(), value);
         }
@@ -92,7 +92,7 @@ public class Issue1347 {
          *
          * @return 字典值
          */
-        @com.fasterxml.jackson.annotation.JsonValue
+        @JSONField(value = true)
         T getValue();
 
         /**

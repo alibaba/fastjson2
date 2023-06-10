@@ -1,12 +1,12 @@
 package com.alibaba.fastjson2.function.impl;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.function.Function;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
 
 public class ToBigInteger
         implements Function {

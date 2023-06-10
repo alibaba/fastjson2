@@ -1,8 +1,9 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.annotation.JSONCompiler;
-import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -43,37 +44,6 @@ public class FieldReaderBigIntegerFuncTest {
     }
 
     @Test
-    public void test1() {
-        Bean1 bean = new Bean1();
-        ObjectReader<Bean1> objectReader = TestUtils.createObjectReaderLambda(Bean1.class);
-        FieldReader fieldReader = objectReader.getFieldReader("value");
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, "123"));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123L));
-
-        assertEquals(
-                new BigInteger("201"),
-                objectReader.readObject(
-                        JSONReader.of("{\"value\":201}"),
-                        0
-                ).value
-        );
-    }
-
-    public static class Bean1 {
-        @JSONField(schema = "{'minimum':128}")
-        private BigInteger value;
-
-        public BigInteger getValue() {
-            return value;
-        }
-
-        public void setValue(BigInteger value) {
-            this.value = value;
-        }
-    }
-
-    @Test
     public void test2() {
         Bean2 bean = new Bean2();
         ObjectReader objectReader = TestUtils.createObjectReaderLambda(Bean2.class);
@@ -102,9 +72,7 @@ public class FieldReaderBigIntegerFuncTest {
         assertEquals(bean.value, bean2.value);
     }
 
-    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     private static class Bean3 {
-        @JSONField(schema = "{'minimum':128}")
         private BigInteger value;
 
         public BigInteger getValue() {

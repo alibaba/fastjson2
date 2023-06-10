@@ -83,16 +83,16 @@ public class BeanContext {
     }
 
     public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-        T annotatition = null;
+        T annotation = null;
         if (method != null) {
-            annotatition = method.getAnnotation(annotationClass);
+            annotation = method.getAnnotation(annotationClass);
         }
 
-        if (annotatition == null && field != null) {
-            annotatition = field.getAnnotation(annotationClass);
+        if (annotation == null && field != null) {
+            annotation = field.getAnnotation(annotationClass);
         }
 
-        return annotatition;
+        return annotation;
     }
 
     public String getFormat() {

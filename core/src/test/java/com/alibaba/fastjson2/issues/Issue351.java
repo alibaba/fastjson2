@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.filter.ValueFilter;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -18,7 +17,7 @@ public class Issue351 {
         b.setA(null);
 
         ValueFilter valueFilter = (o, s, o1) -> {
-            if (Objects.isNull(o1)) {
+            if (o1 == null) {
                 return "";
             } else {
                 return o1;
@@ -64,7 +63,7 @@ public class Issue351 {
     @Test
     public void test1() {
         ValueFilter valueFilter = (o, s, o1) -> {
-            if (Objects.isNull(o1)) {
+            if (o1 == null) {
                 return "";
             } else {
                 return o1;

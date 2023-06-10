@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -9,7 +10,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.*;
 
 public class ObjectReaders {
     public static <T> ObjectReader<T> of(
@@ -106,35 +106,35 @@ public class ObjectReaders {
     }
 
     public static <T> FieldReader fieldReaderBool(String fieldName, ObjBoolConsumer<T> function) {
-        return new FieldReaderBoolValFunc<>(fieldName, 0, null, null, function);
+        return new FieldReaderBoolValFunc<>(fieldName, 0, null, function);
     }
 
     public static <T> FieldReader fieldReaderByte(String fieldName, ObjByteConsumer<T> function) {
-        return new FieldReaderInt8ValueFunc<>(fieldName, 0, null, null, function);
+        return new FieldReaderInt8ValueFunc<>(fieldName, 0, null, function);
     }
 
     public static <T> FieldReader fieldReaderShort(String fieldName, ObjShortConsumer<T> function) {
-        return new FieldReaderInt16ValueFunc<>(fieldName, 0, 0L, null, null, null, null, null, function);
+        return new FieldReaderInt16ValueFunc<>(fieldName, 0, 0L, null, null, null, null, function);
     }
 
     public static <T> FieldReader fieldReaderInt(String fieldName, ObjIntConsumer<T> function) {
-        return new FieldReaderInt32ValueFunc<>(fieldName, 0, null, null, null, function);
+        return new FieldReaderInt32ValueFunc<>(fieldName, 0, null, null, function);
     }
 
     public static <T> FieldReader fieldReaderLong(String fieldName, ObjLongConsumer<T> function) {
-        return new FieldReaderInt64ValueFunc<>(fieldName, 0, null, null, null, function);
+        return new FieldReaderInt64ValueFunc<>(fieldName, 0, null, null, function);
     }
 
     public static <T> FieldReader fieldReaderChar(String fieldName, ObjCharConsumer<T> function) {
-        return new FieldReaderCharValueFunc<>(fieldName, 0, null, null, null, null, function);
+        return new FieldReaderCharValueFunc<>(fieldName, 0, null, null, null, function);
     }
 
     public static <T> FieldReader fieldReaderFloat(String fieldName, ObjFloatConsumer<T> function) {
-        return new FieldReaderFloatValueFunc<>(fieldName, 0, null, null, null, function);
+        return new FieldReaderFloatValueFunc<>(fieldName, 0, null, null, function);
     }
 
     public static <T> FieldReader fieldReaderDouble(String fieldName, ObjDoubleConsumer<T> function) {
-        return new FieldReaderDoubleValueFunc<>(fieldName, 0, null, null, null, function);
+        return new FieldReaderDoubleValueFunc<>(fieldName, 0, null, null, function);
     }
 
     public static <T> FieldReader fieldReaderString(
@@ -178,7 +178,6 @@ public class ObjectReaders {
                 null,
                 null,
                 null,
-                null,
                 consumer,
                 fieldObjectReader
         );
@@ -216,5 +215,27 @@ public class ObjectReaders {
             BiConsumer<T, List<V>> function
     ) {
         return fieldReaderList(fieldName, itemType, ArrayList::new, function);
+    }
+
+    public static <T, V> FieldReader fieldReaderMap(
+            String fieldName,
+            Class mapClass,
+            Type keyType,
+            Type valueType,
+            BiConsumer<T, Map> function
+    ) {
+        return new FieldReaderObject(
+                fieldName,
+                TypeReference.parametricType(mapClass, keyType, valueType),
+                mapClass,
+                0,
+                0,
+                null,
+                null,
+                null,
+                null,
+                null,
+                function
+        );
     }
 }

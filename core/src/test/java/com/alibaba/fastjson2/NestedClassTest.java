@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,7 +25,7 @@ public class NestedClassTest {
             public Item() {
             }
 
-            public Item(int itemId) {
+            public Item(@JSONField(name = "itemId") int itemId) {
                 this.itemId = itemId;
             }
 
@@ -49,7 +50,7 @@ public class NestedClassTest {
         private class Item {
             public int itemId;
 
-            public Item(int itemId) {
+            public Item(@JSONField(name = "itemId") int itemId) {
                 this.itemId = itemId;
             }
 
@@ -74,7 +75,7 @@ public class NestedClassTest {
         public class Item {
             public int itemId;
 
-            public Item(int itemId) {
+            public Item(@JSONField(name = "itemId") int itemId) {
                 this.itemId = itemId;
             }
 
@@ -102,7 +103,7 @@ public class NestedClassTest {
             public Item() {
             }
 
-            public Item(int itemId) {
+            public Item(@JSONField(name = "itemId") int itemId) {
                 this.itemId = itemId;
             }
 

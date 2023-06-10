@@ -2,7 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.UnsafeUtils;
+import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.lang.reflect.Field;
 
@@ -25,7 +25,7 @@ final class FieldWriterDoubleValField<T>
         try {
             double value;
             if (fieldOffset != -1) {
-                value = UnsafeUtils.getDouble(object, fieldOffset);
+                value = JDKUtils.UNSAFE.getDouble(object, fieldOffset);
             } else {
                 value = field.getDouble(object);
             }

@@ -1,9 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.function.ToByteFunction;
-import com.alibaba.fastjson2.function.ToFloatFunction;
-import com.alibaba.fastjson2.function.ToShortFunction;
+import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -11,7 +9,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.function.*;
 
 public class ObjectWriters {
     static ObjectWriterCreator INSTANCE = ObjectWriterCreator.INSTANCE;

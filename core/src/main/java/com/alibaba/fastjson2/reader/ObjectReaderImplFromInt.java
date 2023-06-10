@@ -1,9 +1,9 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.function.IntFunction;
 
 import java.lang.reflect.Type;
-import java.util.function.IntFunction;
 
 public final class ObjectReaderImplFromInt<T>
         extends ObjectReaderPrimitive<T> {

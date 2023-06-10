@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2.features;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONReader;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -59,44 +62,6 @@ public class DuplicateValueAsArrayTest {
         String str = "{\"values\":{\"item\":1,\"item\":2}}";
         Bean1 bean = JSON.parseObject(str, Bean1.class, JSONReader.Feature.DuplicateKeyValueAsArray);
         Map object = bean.values;
-        assertEquals(1, object.size());
-        assertEquals(JSONArray.class, object.get("item").getClass());
-        assertEquals(2, ((Collection) object.get("item")).size());
-        assertEquals("[1,2]", object.get("item").toString());
-    }
-
-    @Test
-    public void testJSONPath0() {
-        JSONObject object = JSONObject.of("item", 1);
-        JSONPath path = JSONPath.of("$.item");
-        path.set(object, 2, JSONReader.Feature.DuplicateKeyValueAsArray);
-
-        assertEquals(1, object.size());
-        assertEquals(JSONArray.class, object.get("item").getClass());
-        assertEquals(2, ((Collection) object.get("item")).size());
-        assertEquals("[1,2]", object.get("item").toString());
-    }
-
-    @Test
-    public void testJSONPath1() {
-        JSONObject object = JSONObject.of("item", 1);
-        JSONObject root = JSONObject.of("value", object);
-        JSONPath path = JSONPath.of("$.value.item");
-        path.set(root, 2, JSONReader.Feature.DuplicateKeyValueAsArray);
-
-        assertEquals(1, object.size());
-        assertEquals(JSONArray.class, object.get("item").getClass());
-        assertEquals(2, ((Collection) object.get("item")).size());
-        assertEquals("[1,2]", object.get("item").toString());
-    }
-
-    @Test
-    public void testJSONPath2() {
-        JSONObject object = JSONObject.of("item", 1);
-        JSONObject root = JSONObject.of("values", JSONArray.of(object));
-        JSONPath path = JSONPath.of("$.values[0].item");
-        path.set(root, 2, JSONReader.Feature.DuplicateKeyValueAsArray);
-
         assertEquals(1, object.size());
         assertEquals(JSONArray.class, object.get("item").getClass());
         assertEquals(2, ((Collection) object.get("item")).size());

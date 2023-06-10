@@ -1,9 +1,8 @@
 package com.alibaba.jdk;
 
+import com.alibaba.fastjson2.time.DateTimeException;
+import com.alibaba.fastjson2.time.LocalTime;
 import org.junit.jupiter.api.Test;
-
-import java.time.DateTimeException;
-import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -86,26 +85,6 @@ public class TimeTest {
 
         try {
             v4(hour, minute, second, nanoOfSecond);
-        } catch (Exception e) {
-            e1 = e;
-        }
-
-        assertEquals(e0.getMessage(), e1.getMessage());
-    }
-
-    @Test
-    public void t1_secondOfDay() {
-        Exception e0 = null, e1 = null;
-
-        long secondOfDay = 999999999 + 1;
-        try {
-            LocalTime.ofSecondOfDay(secondOfDay);
-        } catch (Exception e) {
-            e0 = e;
-        }
-
-        try {
-            secondOfDay(secondOfDay);
         } catch (Exception e) {
             e1 = e;
         }

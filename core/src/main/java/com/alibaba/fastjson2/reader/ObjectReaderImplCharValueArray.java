@@ -3,11 +3,11 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.function.Function;
 
 final class ObjectReaderImplCharValueArray
         extends ObjectReaderPrimitive {
@@ -36,11 +36,11 @@ final class ObjectReaderImplCharValueArray
             return chars;
         }
 
-        if (jsonReader.nextIfMatch('[')) {
+        if (jsonReader.nextIfArrayStart()) {
             char[] values = new char[16];
             int size = 0;
             for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
+                if (jsonReader.nextIfArrayEnd()) {
                     break;
                 }
 
@@ -62,7 +62,7 @@ final class ObjectReaderImplCharValueArray
                 String str = jsonReader.readString();
                 values[size++] = (str == null) ? '\0' : str.charAt(0);
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             char[] chars = Arrays.copyOf(values, size);
             if (builder != null) {

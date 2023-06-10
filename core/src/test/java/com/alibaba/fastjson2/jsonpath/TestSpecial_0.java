@@ -15,6 +15,6 @@ public class TestSpecial_0 {
 
         vo.put("a.b", 123);
 
-        assertEquals((Integer) vo.get("a.b"), (Integer) JSONPath.eval(vo, "a\\.b"));
+        assertEquals((Integer) vo.get("a.b"), (Integer) JSONPath.of("a\\.b").eval(vo));
     }
 }

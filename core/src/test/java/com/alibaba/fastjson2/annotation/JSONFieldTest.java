@@ -22,7 +22,7 @@ public class JSONFieldTest {
         for (ObjectWriterCreator creator : creators) {
             ObjectWriter<VO> objectWriter = creator
                     .createObjectWriter(
-                            VO.class, 0, JSONFactory.getDefaultObjectWriterProvider());
+                            VO.class, 0, JSONFactory.defaultObjectWriterProvider);
             JSONWriter jsonWriter = JSONWriter.ofUTF8();
             objectWriter.write(jsonWriter, vo, null, null, 0);
 
@@ -45,7 +45,7 @@ public class JSONFieldTest {
         for (ObjectWriterCreator creator : creators) {
             ObjectWriter<VO_Method> objectWriter = creator
                     .createObjectWriter(
-                            VO_Method.class, 0, JSONFactory.getDefaultObjectWriterProvider());
+                            VO_Method.class, 0, JSONFactory.defaultObjectWriterProvider);
             JSONWriter jsonWriter = JSONWriter.ofUTF8();
             objectWriter.write(jsonWriter, vo, null, null, 0);
 

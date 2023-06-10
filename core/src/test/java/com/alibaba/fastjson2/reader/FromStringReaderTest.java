@@ -13,7 +13,7 @@ public class FromStringReaderTest {
 
     @BeforeEach
     public void setUp() {
-        provider = JSONFactory.getDefaultObjectReaderProvider();
+        provider = JSONFactory.defaultObjectReaderProvider;
         provider.register(Bean.class, ObjectReaders.ofString(Bean::new));
     }
 

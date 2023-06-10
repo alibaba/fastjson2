@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,7 +57,7 @@ public class Issue1509 {
         private Set<Long> authorities;
 
         public void setAuthorities(Set<Long> authorities) {
-            if (Objects.isNull(authorities)) {
+            if (authorities == null) {
                 return;
             }
             this.authorities = Collections.unmodifiableSet(authorities);

@@ -14,7 +14,7 @@ public class FieldReaderDateMethodTest {
     @Test
     public void test() {
         Bean bean = new Bean();
-        ObjectReader<Bean> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean.class);
+        ObjectReader<Bean> objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
 
         assertNotNull(fieldReader.method);
@@ -65,7 +65,7 @@ public class FieldReaderDateMethodTest {
     @Test
     public void test2() {
         Bean2 bean = new Bean2();
-        ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean2.class);
+        ObjectReader objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Bean2.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         assertThrows(Exception.class, () -> fieldReader.accept(bean, "123"));
         assertThrows(Exception.class, () -> fieldReader.accept(bean, 123));
@@ -84,7 +84,7 @@ public class FieldReaderDateMethodTest {
 
     @Test
     public void test3() {
-        ObjectReader<Bean3> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean3.class);
+        ObjectReader<Bean3> objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Bean3.class);
         assertEquals(
                 1499055194000L,
                 objectReader.readObject(
@@ -123,7 +123,7 @@ public class FieldReaderDateMethodTest {
 
     @Test
     public void test4() {
-        ObjectReader<Bean4> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean4.class);
+        ObjectReader<Bean4> objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Bean4.class);
         assertEquals(
                 1499055194000L,
                 objectReader.readObject(
@@ -152,7 +152,7 @@ public class FieldReaderDateMethodTest {
 
     @Test
     public void testMillis() {
-        ObjectReader<BeanMillis> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(BeanMillis.class);
+        ObjectReader<BeanMillis> objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(BeanMillis.class);
         assertEquals(
                 1499055194000L,
                 objectReader.readObject(
@@ -181,7 +181,7 @@ public class FieldReaderDateMethodTest {
 
     @Test
     public void test5() {
-        ObjectReader<Bean5> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean5.class);
+        ObjectReader<Bean5> objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Bean5.class);
         assertEquals(
                 1499055194000L,
                 objectReader.readObject(
@@ -216,7 +216,7 @@ public class FieldReaderDateMethodTest {
 
     @Test
     public void testISO8601() {
-        ObjectReader<BeanISO8601> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(BeanISO8601.class);
+        ObjectReader<BeanISO8601> objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(BeanISO8601.class);
         assertEquals(
                 1499055194000L,
                 objectReader.readObject(

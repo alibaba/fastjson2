@@ -40,19 +40,19 @@ public class ObjectWriter12Test {
         JSONObject jsonObject = JSONObject.from(bean);
         assertEquals(str, jsonObject.toString());
 
-        assertEquals(bean.f0, JSONPath.eval(bean, "$.f0"));
-        assertEquals(bean.f1, JSONPath.eval(bean, "$.f1"));
-        assertEquals(bean.f2, JSONPath.eval(bean, "$.f2"));
-        assertEquals(bean.f3, JSONPath.eval(bean, "$.f3"));
-        assertEquals(bean.f4, JSONPath.eval(bean, "$.f4"));
-        assertEquals(bean.f5, JSONPath.eval(bean, "$.f5"));
-        assertEquals(bean.f6, JSONPath.eval(bean, "$.f6"));
-        assertEquals(bean.f7, JSONPath.eval(bean, "$.f7"));
-        assertEquals(bean.f8, JSONPath.eval(bean, "$.f8"));
-        assertEquals(bean.f9, JSONPath.eval(bean, "$.f9"));
-        assertEquals(bean.f10, JSONPath.eval(bean, "$.f10"));
-        assertEquals(bean.f11, JSONPath.eval(bean, "$.f11"));
-        assertNull(JSONPath.eval(bean, "$.f100"));
+        assertEquals(bean.f0, TestUtils.eval(bean, "$.f0"));
+        assertEquals(bean.f1, TestUtils.eval(bean, "$.f1"));
+        assertEquals(bean.f2, TestUtils.eval(bean, "$.f2"));
+        assertEquals(bean.f3, TestUtils.eval(bean, "$.f3"));
+        assertEquals(bean.f4, TestUtils.eval(bean, "$.f4"));
+        assertEquals(bean.f5, TestUtils.eval(bean, "$.f5"));
+        assertEquals(bean.f6, TestUtils.eval(bean, "$.f6"));
+        assertEquals(bean.f7, TestUtils.eval(bean, "$.f7"));
+        assertEquals(bean.f8, TestUtils.eval(bean, "$.f8"));
+        assertEquals(bean.f9, TestUtils.eval(bean, "$.f9"));
+        assertEquals(bean.f10, TestUtils.eval(bean, "$.f10"));
+        assertEquals(bean.f11, TestUtils.eval(bean, "$.f11"));
+        assertNull(TestUtils.eval(bean, "$.f100"));
     }
 
     @Test

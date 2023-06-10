@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ObjectReader6Test {
     @Test
     public void test() {
-        ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean.class);
+        ObjectReader objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Bean.class);
         assertNotNull(objectReader.getFieldReader("userId1"));
         assertNotNull(objectReader.getFieldReader(Fnv.hashCode64("userId1")));
         assertNotNull(objectReader.getFieldReaderLCase(Fnv.hashCode64("userid1")));
@@ -134,7 +134,7 @@ public class ObjectReader6Test {
                 JSONB.parseObject(
                         JSONArray.of().toJSONBBytes(),
                         Bean2.class,
-                        new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider(), JSONReader.Feature.SupportArrayToBean)
+                        new JSONReader.Context(JSONFactory.defaultObjectReaderProvider, JSONReader.Feature.SupportArrayToBean)
                 ).userId0
         );
 

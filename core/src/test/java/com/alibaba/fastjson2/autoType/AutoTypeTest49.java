@@ -13,7 +13,7 @@ public class AutoTypeTest49 {
     public void test_0() throws Exception {
         String className = Bean.class.getName();
 
-        JSONFactory.getDefaultObjectReaderProvider().addAutoTypeAccept(AutoTypeTest49.class.getName() + ".B");
+        JSONFactory.defaultObjectReaderProvider.addAutoTypeAccept(AutoTypeTest49.class.getName() + ".B");
 
         Bean bean = (Bean) JSON.parseObject("{\"@type\":\"" + className + "\"}", Object.class);
         assertNotNull(bean);

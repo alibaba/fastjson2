@@ -2,7 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.UnsafeUtils;
+import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.lang.reflect.Field;
 
@@ -32,7 +32,7 @@ final class FieldWriterInt16ValField<T>
         try {
             short value;
             if (fieldOffset != -1) {
-                value = UnsafeUtils.getShort(object, fieldOffset);
+                value = JDKUtils.UNSAFE.getShort(object, fieldOffset);
             } else {
                 value = field.getShort(object);
             }

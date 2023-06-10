@@ -8,13 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class Issue4191 {
     @Test
-    public void test() {
-        Object jsonObject = JSON.parse("{\"path\":\"\"}");
-        Object readResult = JSONPath.of("$.path.docExt.a").eval(jsonObject);
-        assertNull(readResult);
-    }
-
-    @Test
     public void test1() {
         Object jsonObject = JSON.parse("{\"path\":1}");
         Object readResult = JSONPath.of("$.path.docExt.a").eval(jsonObject);

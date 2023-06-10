@@ -6,13 +6,13 @@ import com.alibaba.fastjson2.reader.ObjectReaderBean;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
@@ -238,35 +238,38 @@ public interface JSONB {
 
     static int writeInt(byte[] bytes, int off, int i) {
         if (i >= BC_INT32_NUM_MIN && i <= BC_INT32_NUM_MAX) {
-            bytes[off++] = (byte) i;
+            bytes[off] = (byte) i;
             return 1;
         }
 
         if (i >= INT32_BYTE_MIN && i <= INT32_BYTE_MAX) {
-            bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (i >> 8));
-            bytes[off++] = (byte) i;
+            bytes[off] = (byte) (BC_INT32_BYTE_ZERO + (i >> 8));
+            bytes[off + 1] = (byte) i;
             return 2;
         }
 
         if (i >= INT32_SHORT_MIN && i <= INT32_SHORT_MAX) {
-            bytes[off++] = (byte) (BC_INT32_SHORT_ZERO + (i >> 16));
-            bytes[off++] = (byte) (i >> 8);
-            bytes[off++] = (byte) i;
+            bytes[off] = (byte) (BC_INT32_SHORT_ZERO + (i >> 16));
+            bytes[off + 1] = (byte) (i >> 8);
+            bytes[off + 2] = (byte) i;
             return 3;
         }
 
-        bytes[off++] = BC_INT32;
-        bytes[off++] = (byte) (i >>> 24);
-        bytes[off++] = (byte) (i >>> 16);
-        bytes[off++] = (byte) (i >>> 8);
-        bytes[off++] = (byte) i;
+        bytes[off] = BC_INT32;
+        bytes[off + 1] = (byte) (i >>> 24);
+        bytes[off + 2] = (byte) (i >>> 16);
+        bytes[off + 3] = (byte) (i >>> 8);
+        bytes[off + 4] = (byte) i;
         return 5;
     }
 
     static Object parse(byte[] jsonbBytes, JSONReader.Feature... features) {
-        JSONReader reader = JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length);
-        reader.getContext().config(features);
-        ObjectReader objectReader = reader.getObjectReader(Object.class);
+        ObjectReaderProvider provider = defaultObjectReaderProvider;
+        JSONReader.Context context = new JSONReader.Context(provider, features);
+        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+
+        JSONReader reader = JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length, context);
+        ObjectReader objectReader = provider.getObjectReader(Object.class, fieldBased);
 
         Object object = objectReader.readJSONBObject(reader, null, null, 0);
         if (reader.resolveTasks != null) {
@@ -276,9 +279,12 @@ public interface JSONB {
     }
 
     static Object parse(byte[] jsonbBytes, SymbolTable symbolTable, JSONReader.Feature... features) {
-        JSONReader reader = JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length, symbolTable);
-        reader.getContext().config(features);
-        ObjectReader objectReader = reader.getObjectReader(Object.class);
+        ObjectReaderProvider provider = defaultObjectReaderProvider;
+        JSONReader.Context context = new JSONReader.Context(provider, symbolTable, features);
+        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+
+        JSONReader reader = JSONReader.ofJSONB(jsonbBytes, 0, jsonbBytes.length, context);
+        ObjectReader objectReader = provider.getObjectReader(Object.class, fieldBased);
 
         Object object = objectReader.readJSONBObject(reader, null, null, 0);
         if (reader.resolveTasks != null) {
@@ -288,22 +294,11 @@ public interface JSONB {
     }
 
     static JSONObject parseObject(byte[] jsonbBytes) {
-        JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider());
-        JSONReader reader;
-        if (UNSAFE_SUPPORT) {
-            reader = new JSONReaderJSONBUF(
-                    context,
-                    jsonbBytes,
-                    0,
-                    jsonbBytes.length);
-        } else {
-            reader = new JSONReaderJSONB(
-                    context,
-                    jsonbBytes,
-                    0,
-                    jsonbBytes.length);
-        }
-
+        JSONReader reader = new JSONReaderJSONB(
+                new JSONReader.Context(defaultObjectReaderProvider),
+                jsonbBytes,
+                0,
+                jsonbBytes.length);
         JSONObject object = (JSONObject) reader.readObject();
         if (reader.resolveTasks != null) {
             reader.handleResolveTasks(object);
@@ -312,11 +307,8 @@ public interface JSONB {
     }
 
     static JSONObject parseObject(byte[] jsonbBytes, JSONReader.Feature... features) {
-        JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider());
-        context.config(features);
-
         JSONReader reader = new JSONReaderJSONB(
-                context,
+                new JSONReader.Context(JSONFactory.defaultObjectReaderProvider, features),
                 jsonbBytes,
                 0,
                 jsonbBytes.length);
@@ -329,9 +321,8 @@ public interface JSONB {
     }
 
     static JSONArray parseArray(byte[] jsonbBytes) {
-        JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider());
         JSONReader reader = new JSONReaderJSONB(
-                context,
+                new JSONReader.Context(JSONFactory.defaultObjectReaderProvider),
                 jsonbBytes,
                 0,
                 jsonbBytes.length);
@@ -370,7 +361,6 @@ public interface JSONB {
         );
 
         try (JSONReader reader = JSONReader.ofJSONB(jsonbBytes, features)) {
-            reader.context.config(features);
             List<T> list = reader.read(paramType);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
@@ -399,7 +389,6 @@ public interface JSONB {
         }
 
         try (JSONReader reader = JSONReader.ofJSONB(jsonbBytes, features)) {
-            reader.context.config(features);
             List<T> list = reader.readList(types);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
@@ -409,16 +398,12 @@ public interface JSONB {
     }
 
     static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        JSONReader.Context ctx = new JSONReader.Context(provider);
-        try (JSONReader jsonReader = UNSAFE_SUPPORT
-                ? new JSONReaderJSONBUF(
-                ctx,
-                jsonbBytes,
-                0,
-                jsonbBytes.length)
-                : new JSONReaderJSONB(
-                ctx,
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
+        JSONReader.Context context = new JSONReader.Context(provider);
+        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+
+        try (JSONReader jsonReader = new JSONReaderJSONB(
+                context,
                 jsonbBytes,
                 0,
                 jsonbBytes.length)
@@ -427,7 +412,7 @@ public interface JSONB {
             if (objectClass == Object.class) {
                 object = jsonReader.readAny();
             } else {
-                ObjectReader objectReader = provider.getObjectReader(objectClass);
+                ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
                 object = objectReader.readJSONBObject(jsonReader, objectClass, null, 0);
             }
 
@@ -439,16 +424,16 @@ public interface JSONB {
     }
 
     static <T> T parseObject(byte[] jsonbBytes, Type objectType) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        JSONReader.Context ctx = new JSONReader.Context(provider);
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
+        JSONReader.Context context = new JSONReader.Context(provider);
+        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+        ObjectReader objectReader = provider.getObjectReader(objectType, fieldBased);
+
         JSONReader jsonReader = new JSONReaderJSONB(
-                ctx,
+                context,
                 jsonbBytes,
                 0,
                 jsonbBytes.length);
-
-        ObjectReader objectReader = provider.getObjectReader(objectType);
-
         T object = (T) objectReader.readJSONBObject(jsonReader, objectType, null, 0);
         if (jsonReader.resolveTasks != null) {
             jsonReader.handleResolveTasks(object);
@@ -461,16 +446,16 @@ public interface JSONB {
     }
 
     static <T> T parseObject(byte[] jsonbBytes, Type objectType, SymbolTable symbolTable) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        JSONReader.Context ctx = new JSONReader.Context(provider, symbolTable);
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
+        JSONReader.Context context = new JSONReader.Context(provider, symbolTable);
+        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+        ObjectReader objectReader = provider.getObjectReader(objectType, fieldBased);
+
         JSONReader reader = new JSONReaderJSONB(
-                ctx,
+                context,
                 jsonbBytes,
                 0,
                 jsonbBytes.length);
-
-        ObjectReader objectReader = provider.getObjectReader(objectType);
-
         T object = (T) objectReader.readJSONBObject(reader, objectType, null, 0);
         if (reader.resolveTasks != null) {
             reader.handleResolveTasks(object);
@@ -482,28 +467,19 @@ public interface JSONB {
             byte[] jsonbBytes,
             Type objectType,
             SymbolTable symbolTable,
-            JSONReader.Feature... features) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        JSONReader.Context ctx = new JSONReader.Context(provider, symbolTable);
+            JSONReader.Feature... features
+    ) {
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
+        JSONReader.Context context = new JSONReader.Context(provider, symbolTable, features);
+        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+        ObjectReader objectReader = provider.getObjectReader(objectType, fieldBased);
 
-        try (JSONReader reader = UNSAFE_SUPPORT
-                ? new JSONReaderJSONBUF(
-                ctx,
+        try (JSONReader reader = new JSONReaderJSONB(
+                context,
                 jsonbBytes,
                 0,
                 jsonbBytes.length)
-                : new JSONReaderJSONB(
-                ctx,
-                jsonbBytes,
-                0,
-                jsonbBytes.length)) {
-            for (JSONReader.Feature feature : features) {
-                ctx.features |= feature.mask;
-            }
-
-            boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
-            ObjectReader objectReader = provider.getObjectReader(objectType, fieldBased);
-
+        ) {
             T object = (T) objectReader.readJSONBObject(reader, objectType, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -517,7 +493,7 @@ public interface JSONB {
             Class<T> objectClass,
             Filter filter,
             JSONReader.Feature... features) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
         JSONReader.Context context = new JSONReader.Context(provider);
         context.config(filter, features);
 
@@ -527,8 +503,8 @@ public interface JSONB {
                 0,
                 jsonbBytes.length)
         ) {
-            for (JSONReader.Feature feature : features) {
-                context.features |= feature.mask;
+            for (int i = 0; i < features.length; i++) {
+                context.features |= features[i].mask;
             }
 
             Object object;
@@ -564,7 +540,7 @@ public interface JSONB {
             return null;
         }
 
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
         JSONReader.Context context = new JSONReader.Context(provider, symbolTable);
         context.config(filters, features);
 
@@ -574,8 +550,8 @@ public interface JSONB {
                 0,
                 jsonbBytes.length)
         ) {
-            for (JSONReader.Feature feature : features) {
-                context.features |= feature.mask;
+            for (int i = 0; i < features.length; i++) {
+                context.features |= features[i].mask;
             }
 
             Object object;
@@ -642,17 +618,14 @@ public interface JSONB {
     static <T> T parseObject(
             InputStream in,
             Type objectType,
-            JSONReader.Context ctx
+            JSONReader.Context context
     ) throws IOException {
-        try (JSONReader jsonReader = UNSAFE_SUPPORT
-                ? new JSONReaderJSONBUF(ctx, in)
-                : new JSONReaderJSONB(ctx, in)
-        ) {
+        try (JSONReader jsonReader = new JSONReaderJSONB(context, in)) {
             Object object;
             if (objectType == Object.class) {
                 object = jsonReader.readAny();
             } else {
-                ObjectReader objectReader = ctx.getObjectReader(objectType);
+                ObjectReader objectReader = context.getObjectReader(objectType);
                 object = objectReader.readJSONBObject(jsonReader, objectType, null, 0);
             }
 
@@ -669,17 +642,14 @@ public interface JSONB {
     static <T> T parseObject(
             InputStream in,
             Class objectClass,
-            JSONReader.Context ctx
+            JSONReader.Context context
     ) throws IOException {
-        try (JSONReader jsonReader = UNSAFE_SUPPORT
-                ? new JSONReaderJSONBUF(ctx, in)
-                : new JSONReaderJSONB(ctx, in)
-        ) {
+        try (JSONReader jsonReader = new JSONReaderJSONB(context, in)) {
             Object object;
             if (objectClass == Object.class) {
                 object = jsonReader.readAny();
             } else {
-                ObjectReader objectReader = ctx.getObjectReader(objectClass);
+                ObjectReader objectReader = context.getObjectReader(objectClass);
                 object = objectReader.readJSONBObject(jsonReader, objectClass, null, 0);
             }
 
@@ -746,39 +716,29 @@ public interface JSONB {
     }
 
     static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass, JSONReader.Feature... features) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        JSONReader.Context ctx = new JSONReader.Context(provider);
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
+        JSONReader.Context context = new JSONReader.Context(provider, features);
 
-        try (JSONReader jsonReader = UNSAFE_SUPPORT
-                ? new JSONReaderJSONBUF(
-                ctx,
-                jsonbBytes,
-                0,
-                jsonbBytes.length)
-                : new JSONReaderJSONB(
-                ctx,
+        try (JSONReader jsonReader = new JSONReaderJSONB(
+                context,
                 jsonbBytes,
                 0,
                 jsonbBytes.length)
         ) {
-            for (JSONReader.Feature feature : features) {
-                ctx.features |= feature.mask;
-            }
-
             Object object;
             if (objectClass == Object.class) {
                 ObjectReader autoTypeObjectReader;
                 byte type = jsonReader.getType();
                 if (type == BC_TYPED_ANY) {
                     autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, 0);
-                    object = autoTypeObjectReader.readJSONBObject(jsonReader, objectClass, null, ctx.features);
+                    object = autoTypeObjectReader.readJSONBObject(jsonReader, objectClass, null, context.features);
                 } else {
                     object = jsonReader.readAny();
                 }
             } else {
-                boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
+                boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
                 ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
-                if ((ctx.features & JSONReader.Feature.SupportArrayToBean.mask) != 0
+                if ((context.features & JSONReader.Feature.SupportArrayToBean.mask) != 0
                         && jsonReader.isArray()
                         && objectReader instanceof ObjectReaderBean
                 ) {
@@ -796,13 +756,7 @@ public interface JSONB {
     }
 
     static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass, JSONReader.Context context) {
-        try (JSONReader jsonReader = UNSAFE_SUPPORT
-                ? new JSONReaderJSONBUF(
-                context,
-                jsonbBytes,
-                0,
-                jsonbBytes.length)
-                : new JSONReaderJSONB(
+        try (JSONReader jsonReader = new JSONReaderJSONB(
                 context,
                 jsonbBytes,
                 0,
@@ -839,19 +793,14 @@ public interface JSONB {
     }
 
     static <T> T parseObject(byte[] jsonbBytes, Type objectClass, JSONReader.Feature... features) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        JSONReader.Context ctx = new JSONReader.Context(provider);
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
+        JSONReader.Context context = new JSONReader.Context(provider, features);
         JSONReader reader = new JSONReaderJSONB(
-                ctx,
+                context,
                 jsonbBytes,
                 0,
                 jsonbBytes.length);
-
-        for (JSONReader.Feature feature : features) {
-            ctx.features |= feature.mask;
-        }
-
-        boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
+        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
 
         T object = (T) objectReader.readJSONBObject(reader, objectClass, null, 0);
@@ -862,7 +811,7 @@ public interface JSONB {
     }
 
     static <T> T parseObject(byte[] jsonbBytes, int off, int len, Class<T> objectClass) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
 
         JSONReader.Context ctx = new JSONReader.Context(provider);
 
@@ -883,17 +832,15 @@ public interface JSONB {
     }
 
     static <T> T parseObject(byte[] jsonbBytes, int off, int len, Type type) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-
-        JSONReader.Context ctx = new JSONReader.Context(provider);
-
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
+        JSONReader.Context context = new JSONReader.Context(provider);
         JSONReader reader = new JSONReaderJSONB(
-                ctx,
+                context,
                 jsonbBytes,
                 off,
                 len);
 
-        boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
+        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = provider.getObjectReader(type, fieldBased);
 
         T object = (T) objectReader.readJSONBObject(reader, type, null, 0);
@@ -910,21 +857,19 @@ public interface JSONB {
             Class<T> objectClass,
             JSONReader.Feature... features
     ) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-
-        JSONReader.Context ctx = new JSONReader.Context(provider);
-
-        for (JSONReader.Feature feature : features) {
-            ctx.features |= feature.mask;
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
+        JSONReader.Context context = new JSONReader.Context(provider);
+        for (int i = 0; i < features.length; i++) {
+            context.features |= features[i].mask;
         }
 
         JSONReader reader = new JSONReaderJSONB(
-                ctx,
+                context,
                 jsonbBytes,
                 off,
                 len);
 
-        boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
+        boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = provider.getObjectReader(objectClass, fieldBased);
 
         T object = (T) objectReader.readJSONBObject(reader, objectClass, null, 0);
@@ -939,11 +884,11 @@ public interface JSONB {
             int off,
             int len,
             Type objectType,
-            JSONReader.Context ctx
+            JSONReader.Context context
     ) {
-        try (JSONReader reader = new JSONReaderJSONB(ctx, jsonbBytes, off, len)) {
-            boolean fieldBased = (ctx.features & JSONReader.Feature.FieldBased.mask) != 0;
-            ObjectReader objectReader = ctx.provider.getObjectReader(objectType, fieldBased);
+        try (JSONReader reader = new JSONReaderJSONB(context, jsonbBytes, off, len)) {
+            boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
+            ObjectReader objectReader = context.provider.getObjectReader(objectType, fieldBased);
 
             T object = (T) objectReader.readJSONBObject(reader, objectType, null, 0);
             if (reader.resolveTasks != null) {
@@ -954,10 +899,11 @@ public interface JSONB {
     }
 
     static <T> T parseObject(byte[] jsonbBytes, int off, int len, Type objectType, JSONReader.Feature... features) {
-        try (JSONReader reader = JSONReader.ofJSONB(jsonbBytes, off, len)) {
-            reader.getContext().config(features);
-            ObjectReader objectReader = reader.getObjectReader(objectType);
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
+        JSONReader.Context context = new JSONReader.Context(provider, features);
+        ObjectReader objectReader = context.getObjectReader(objectType);
 
+        try (JSONReader reader = JSONReader.ofJSONB(jsonbBytes, off, len, context)) {
             T object = (T) objectReader.readJSONBObject(reader, objectType, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -988,16 +934,18 @@ public interface JSONB {
         return object;
     }
 
-    static <T> T parseObject(byte[] jsonbBytes,
-                             int off,
-                             int len,
-                             Class<T> objectClass,
-                             SymbolTable symbolTable,
-                             JSONReader.Feature... features) {
-        JSONReader reader = JSONReader.ofJSONB(jsonbBytes, off, len, symbolTable);
-        reader.getContext().config(features);
-        ObjectReader objectReader = reader.getObjectReader(objectClass);
+    static <T> T parseObject(
+            byte[] jsonbBytes,
+            int off,
+            int len,
+            Class<T> objectClass,
+            SymbolTable symbolTable,
+            JSONReader.Feature... features
+    ) {
+        JSONReader.Context context = createReadContext(symbolTable, features);
+        ObjectReader objectReader = context.getObjectReader(objectClass);
 
+        JSONReader reader = JSONReader.ofJSONB(jsonbBytes, off, len, context);
         T object = (T) objectReader.readJSONBObject(reader, objectClass, null, 0);
         if (reader.resolveTasks != null) {
             reader.handleResolveTasks(object);
@@ -1012,9 +960,9 @@ public interface JSONB {
             Type objectClass,
             SymbolTable symbolTable,
             JSONReader.Feature... features) {
-        JSONReader reader = JSONReader.ofJSONB(jsonbBytes, off, len, symbolTable);
-        reader.getContext().config(features);
-        ObjectReader objectReader = reader.getObjectReader(objectClass);
+        JSONReader.Context context = createReadContext(symbolTable, features);
+        ObjectReader objectReader = context.getObjectReader(objectClass);
+        JSONReader reader = JSONReader.ofJSONB(jsonbBytes, off, len, context);
 
         T object = (T) objectReader.readJSONBObject(reader, objectClass, null, 0);
         if (reader.resolveTasks != null) {
@@ -1026,41 +974,6 @@ public interface JSONB {
     static byte[] toBytes(String str) {
         if (str == null) {
             return new byte[]{BC_NULL};
-        }
-
-        if (JVM_VERSION == 8) {
-            char[] chars = JDKUtils.getCharArray(str);
-            int strlen = chars.length;
-            if (strlen <= STR_ASCII_FIX_LEN) {
-                boolean ascii = true;
-                for (int i = 0; i < strlen; ++i) {
-                    if (chars[i] > 0x007F) {
-                        ascii = false;
-                        break;
-                    }
-                }
-
-                if (ascii) {
-                    byte[] bytes = new byte[chars.length + 1];
-                    bytes[0] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
-                    for (int i = 0; i < strlen; ++i) {
-                        bytes[i + 1] = (byte) chars[i];
-                    }
-                    return bytes;
-                }
-            }
-        } else if (STRING_VALUE != null) {
-            int coder = STRING_CODER.applyAsInt(str);
-            if (coder == 0) {
-                byte[] value = STRING_VALUE.apply(str);
-                int strlen = value.length;
-                if (strlen <= STR_ASCII_FIX_LEN) {
-                    byte[] bytes = new byte[value.length + 1];
-                    bytes[0] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
-                    System.arraycopy(value, 0, bytes, 1, value.length);
-                    return bytes;
-                }
-            }
         }
 
         try (JSONWriter writer = new JSONWriterJSONB(
@@ -1078,15 +991,15 @@ public interface JSONB {
         }
 
         final byte type;
-        if (charset == StandardCharsets.UTF_16) {
+        if (charset == IOUtils.UTF_16) {
             type = BC_STR_UTF16;
-        } else if (charset == StandardCharsets.UTF_16BE) {
+        } else if (charset == IOUtils.UTF_16BE) {
             type = BC_STR_UTF16BE;
-        } else if (charset == StandardCharsets.UTF_16LE) {
+        } else if (charset == IOUtils.UTF_16LE) {
             type = BC_STR_UTF16LE;
-        } else if (charset == StandardCharsets.UTF_8) {
+        } else if (charset == IOUtils.UTF_8) {
             type = BC_STR_UTF8;
-        } else if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
+        } else if (charset == IOUtils.US_ASCII || charset == IOUtils.ISO_8859_1) {
             type = BC_STR_ASCII;
         } else if (charset != null && "GB18030".equals(charset.name())) { // GraalVM support
             type = BC_STR_GB18030;
@@ -1097,7 +1010,7 @@ public interface JSONB {
         byte[] utf16 = str.getBytes(charset);
         int byteslen = 2 + utf16.length;
         if (utf16.length <= BC_INT32_NUM_MAX) {
-            byteslen += 0;
+            // skip
         } else if (utf16.length <= INT32_BYTE_MAX) {
             byteslen += 1;
         } else if (utf16.length <= INT32_SHORT_MAX) {
@@ -1115,17 +1028,15 @@ public interface JSONB {
     }
 
     static byte[] toBytes(Object object) {
-        try (JSONWriter writer = new JSONWriterJSONB(
-                new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider),
-                null
-        )) {
+        ObjectWriterProvider provider = defaultObjectWriterProvider;
+        JSONWriter.Context context = new JSONWriter.Context(provider);
+        try (JSONWriter writer = new JSONWriterJSONB(context, null)) {
             if (object == null) {
                 writer.writeNull();
             } else {
                 Class<?> valueClass = object.getClass();
-                JSONWriter.Context context = writer.context;
                 boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
-                ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                ObjectWriter objectWriter = provider.getObjectWriter(valueClass, valueClass, fieldBased);
                 objectWriter.writeJSONB(writer, object, null, null, 0);
             }
             return writer.getBytes();
@@ -1159,17 +1070,15 @@ public interface JSONB {
     }
 
     static byte[] toBytes(Object object, SymbolTable symbolTable) {
-        try (JSONWriter writer = new JSONWriterJSONB(
-                new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider),
-                symbolTable
-        )) {
+        JSONWriter.Context context = new JSONWriter.Context(defaultObjectWriterProvider);
+        try (JSONWriter writer = new JSONWriterJSONB(context, symbolTable)) {
             if (object == null) {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
 
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = writer.getObjectWriter(valueClass, valueClass);
+                ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
                 objectWriter.writeJSONB(writer, object, null, null, 0);
             }
             return writer.getBytes();
@@ -1177,25 +1086,18 @@ public interface JSONB {
     }
 
     static byte[] toBytes(Object object, SymbolTable symbolTable, JSONWriter.Feature... features) {
-        try (JSONWriter writer = new JSONWriterJSONB(
-                new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features),
-                symbolTable
-        )) {
-            JSONWriter.Context ctx = writer.context;
-
-            ctx.config(features);
-
+        ObjectWriterProvider provider = defaultObjectWriterProvider;
+        JSONWriter.Context context = new JSONWriter.Context(provider, features);
+        try (JSONWriter writer = new JSONWriterJSONB(context, symbolTable)) {
             if (object == null) {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
 
                 Class<?> valueClass = object.getClass();
-
-                boolean fieldBased = (ctx.features & JSONWriter.Feature.FieldBased.mask) != 0;
-
-                ObjectWriter objectWriter = ctx.provider.getObjectWriter(valueClass, valueClass, fieldBased);
-                if ((ctx.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
+                boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
+                ObjectWriter objectWriter = provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                if ((context.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
                     objectWriter.writeArrayMappingJSONB(writer, object, null, null, 0);
                 } else {
                     objectWriter.writeJSONB(writer, object, null, null, 0);
@@ -1206,26 +1108,19 @@ public interface JSONB {
     }
 
     static byte[] toBytes(Object object, SymbolTable symbolTable, Filter[] filters, JSONWriter.Feature... features) {
-        try (JSONWriter writer = new JSONWriterJSONB(
-                new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features),
-                symbolTable
-        )) {
-            JSONWriter.Context ctx = writer.context;
-
-            ctx.config(features);
-            ctx.configFilter(filters);
-
+        ObjectWriterProvider provider = defaultObjectWriterProvider;
+        JSONWriter.Context context = new JSONWriter.Context(provider, features);
+        context.configFilter(filters);
+        try (JSONWriter writer = new JSONWriterJSONB(context, symbolTable)) {
             if (object == null) {
                 writer.writeNull();
             } else {
                 writer.setRootObject(object);
 
                 Class<?> valueClass = object.getClass();
-
-                boolean fieldBased = (ctx.features & JSONWriter.Feature.FieldBased.mask) != 0;
-
-                ObjectWriter objectWriter = ctx.provider.getObjectWriter(valueClass, valueClass, fieldBased);
-                if ((ctx.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
+                boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
+                ObjectWriter objectWriter = provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                if ((context.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
                     objectWriter.writeArrayMappingJSONB(writer, object, null, null, 0);
                 } else {
                     objectWriter.writeJSONB(writer, object, null, null, 0);
@@ -1236,12 +1131,9 @@ public interface JSONB {
     }
 
     static byte[] toBytes(Object object, JSONWriter.Feature... features) {
-        try (JSONWriter writer = new JSONWriterJSONB(
-                new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, features),
-                null
-        )) {
-            JSONWriter.Context context = writer.context;
-
+        ObjectWriterProvider provider = defaultObjectWriterProvider;
+        JSONWriter.Context context = new JSONWriter.Context(provider, features);
+        try (JSONWriter writer = new JSONWriterJSONB(context, null)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -1251,7 +1143,7 @@ public interface JSONB {
                 boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
 
                 Class<?> valueClass = object.getClass();
-                ObjectWriter objectWriter = context.provider.getObjectWriter(valueClass, valueClass, fieldBased);
+                ObjectWriter objectWriter = provider.getObjectWriter(valueClass, valueClass, fieldBased);
                 if ((context.features & JSONWriter.Feature.BeanToArray.mask) != 0) {
                     objectWriter.writeArrayMappingJSONB(writer, object, null, null, 0);
                 } else {
@@ -1301,8 +1193,7 @@ public interface JSONB {
                 objectWriter.writeJSONB(writer, object, null, null, 0);
             }
 
-            int len = writer.flushTo(out);
-            return len;
+            return writer.flushTo(out);
         } catch (IOException e) {
             throw new JSONException("writeJSONString error", e);
         }

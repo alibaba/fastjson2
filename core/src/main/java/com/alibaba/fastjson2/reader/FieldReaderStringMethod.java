@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -21,10 +20,9 @@ final class FieldReaderStringMethod<T>
             String format,
             Locale locale,
             String defaultValue,
-            JSONSchema schema,
             Method setter
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter, null, null);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, setter, null, null);
         trim = "trim".equals(format) || (features & JSONReader.Feature.TrimString.mask) != 0;
     }
 
@@ -33,10 +31,6 @@ final class FieldReaderStringMethod<T>
         String fieldValue = jsonReader.readString();
         if (trim && fieldValue != null) {
             fieldValue = fieldValue.trim();
-        }
-
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
         }
 
         try {
@@ -66,10 +60,6 @@ final class FieldReaderStringMethod<T>
 
         if (trim && fieldValue != null) {
             fieldValue = fieldValue.trim();
-        }
-
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
         }
 
         try {

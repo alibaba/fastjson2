@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.util.BeanUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -17,7 +16,6 @@ import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
-import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
 
 public class FieldWriterObject<T>
         extends FieldWriter<T> {
@@ -71,7 +69,7 @@ public class FieldWriterObject<T>
     @Override
     public ObjectWriter getObjectWriter(JSONWriter jsonWriter, Class valueClass) {
         final Class initValueClass = this.initValueClass;
-        if (initValueClass == null || initObjectWriter == ObjectWriterBaseModule.VoidObjectWriter.INSTANCE) {
+        if (initValueClass == null || initObjectWriter == ObjectWriterModule.VoidObjectWriter.INSTANCE) {
             return getObjectWriterVoid(jsonWriter, valueClass);
         } else {
             boolean typeMatch = initValueClass == valueClass
@@ -96,19 +94,6 @@ public class FieldWriterObject<T>
 
     private ObjectWriter getObjectWriterVoid(JSONWriter jsonWriter, Class valueClass) {
         ObjectWriter formattedWriter = null;
-        if (BeanUtils.isExtendedMap(valueClass) && SUPER.equals(fieldName)) {
-            JSONWriter.Context context = jsonWriter.context;
-            boolean fieldBased = ((features | context.getFeatures()) & JSONWriter.Feature.FieldBased.mask) != 0;
-            formattedWriter = context.provider.getObjectWriter(fieldType, fieldClass, fieldBased);
-            if (initObjectWriter == null) {
-                boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
-                if (success) {
-                    initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
-                }
-            }
-            return formattedWriter;
-        }
-
         if (format == null) {
             JSONWriter.Context context = jsonWriter.context;
             boolean fieldBased = ((features | context.getFeatures()) & JSONWriter.Feature.FieldBased.mask) != 0;
@@ -152,7 +137,6 @@ public class FieldWriterObject<T>
             if (success) {
                 initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
             }
-            return formattedWriter;
         } else {
             if (initObjectWriter == null) {
                 boolean success = initValueClassUpdater.compareAndSet(this, null, valueClass);
@@ -160,8 +144,8 @@ public class FieldWriterObject<T>
                     initObjectWriterUpdater.compareAndSet(this, null, formattedWriter);
                 }
             }
-            return formattedWriter;
         }
+        return formattedWriter;
     }
 
     static boolean typeMatch(Class initValueClass, Class valueClass) {
@@ -373,7 +357,7 @@ public class FieldWriterObject<T>
         ObjectWriter valueWriter;
         if (initValueClass == null) {
             initValueClass = valueClass;
-            valueWriter = jsonWriter.getObjectWriter(valueClass);
+            valueWriter = getObjectWriter(jsonWriter, valueClass);
             initObjectWriterUpdater.compareAndSet(this, null, valueWriter);
         } else {
             if (initValueClass == valueClass) {

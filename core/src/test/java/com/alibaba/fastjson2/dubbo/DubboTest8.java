@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2.dubbo;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.ContextAutoTypeBeforeHandler;
 import org.junit.jupiter.api.Test;
 

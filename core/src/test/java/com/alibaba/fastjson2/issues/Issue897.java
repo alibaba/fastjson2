@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -18,9 +17,6 @@ public class Issue897 {
 
         assertEquals("lisi", p.name); // 成功
         assertEquals(12, p.extra.get("age")); // 成功, 使用JSON.parseObject对未知属性赋值成功
-
-        JSONPath.set(p, "$.age", 13);
-        assertEquals(13, p.extra.get("age"));
     }
 
     static class People {
@@ -61,8 +57,5 @@ public class Issue897 {
 
         assertEquals("lisi", p.name); // 成功
         assertEquals(12, p.extra.get("age"));
-
-        JSONPath.set(p, "$.age", 13);
-        assertEquals(13, p.extra.get("age"));
     }
 }

@@ -35,6 +35,13 @@ public class Issue923 {
         double score;
         protected String[] tags;
 
+        public Bean(@JSONField(name = "name") String name, @JSONField(name = "age") int age, @JSONField(name = "score") double score, @JSONField(name = "tags") String[] tags) {
+            this.name = name;
+            this.age = age;
+            this.score = score;
+            this.tags = tags;
+        }
+
         @ToString(includeFieldNames = true)
         @Value(staticConstructor = "of")
         public static class Exercise<T> {
@@ -54,6 +61,10 @@ public class Issue923 {
     public static class Bean1 {
         @JSONField(name = "ID")
         int id;
+
+        public Bean1(@JSONField(name = "ID") int id) {
+            this.id = id;
+        }
     }
 
     @Test
@@ -76,5 +87,11 @@ public class Issue923 {
         String name;
         @JSONField(name = "user_name")
         String userName;
+
+        public User(@JSONField(name = "id") int id, @JSONField(name = "name") String name, @JSONField(name = "user_name") String userName) {
+            this.id = id;
+            this.name = name;
+            this.userName = userName;
+        }
     }
 }

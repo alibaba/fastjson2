@@ -1,17 +1,11 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
 import java.util.Base64;
-import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
 
@@ -200,28 +194,6 @@ public class JSONReaderJSONBTest {
     }
 
     @Test
-    public void readLocalTime() {
-        byte[] jsonBytes = JSONB.toBytes("12:13");
-        LocalTime localTime = JSONB.parseObject(jsonBytes, LocalTime.class);
-        assertEquals(12, localTime.getHour());
-        assertEquals(13, localTime.getMinute());
-        assertEquals(0, localTime.getSecond());
-    }
-
-    @Test
-    public void readLocalDateTime() {
-        byte[] jsonBytes = JSONB.toBytes("2017/05/06T12:13:14");
-        LocalDateTime localTime = JSONB.parseObject(jsonBytes, LocalDateTime.class);
-        assertEquals(2017, localTime.getYear());
-        assertEquals(5, localTime.getMonthValue());
-        assertEquals(6, localTime.getDayOfMonth());
-
-        assertEquals(12, localTime.getHour());
-        assertEquals(13, localTime.getMinute());
-        assertEquals(14, localTime.getSecond());
-    }
-
-    @Test
     public void readBoolValue() {
         assertTrue(
                 JSONReader.ofJSONB(
@@ -292,93 +264,6 @@ public class JSONReaderJSONBTest {
                 JSONReader.ofJSONB(
                         JSONB.toBytes(str1, StandardCharsets.UTF_8)
                 ).readUUID()
-        );
-    }
-
-    @Test
-    public void readZonedDateTime() {
-        Date date = new Date();
-        Instant instant = date.toInstant();
-        ZonedDateTime zdt = instant.atZone(DateUtils.DEFAULT_ZONE_ID);
-        assertEquals(
-                zdt,
-                JSONReader.ofJSONB(
-                        JSONB.toBytes(instant)
-                ).readZonedDateTime()
-        );
-        assertEquals(
-                instant,
-                JSONReader.ofJSONB(
-                        JSONB.toBytes(instant)
-                ).readInstant()
-        );
-        assertEquals(
-                zdt,
-                JSONReader.ofJSONB(
-                        JSONB.toBytes(date)
-                ).readZonedDateTime()
-        );
-        assertEquals(
-                instant,
-                JSONReader.ofJSONB(
-                        JSONB.toBytes(date)
-                ).readInstant()
-        );
-    }
-
-    @Test
-    public void readZonedDateTime1() {
-        Date date = new Date(1680363962000L);
-        Instant instant = date.toInstant();
-        ZonedDateTime zdt = instant.atZone(DateUtils.DEFAULT_ZONE_ID);
-        assertEquals(
-                zdt,
-                JSONReader.ofJSONB(
-                        JSONB.toBytes(instant)
-                ).readZonedDateTime()
-        );
-        assertEquals(
-                instant,
-                JSONReader.ofJSONB(
-                        JSONB.toBytes(instant)
-                ).readInstant()
-        );
-        assertEquals(
-                zdt,
-                JSONReader.ofJSONB(
-                        JSONB.toBytes(date)
-                ).readZonedDateTime()
-        );
-        assertEquals(
-                instant,
-                JSONReader.ofJSONB(
-                        JSONB.toBytes(date)
-                ).readInstant()
-        );
-    }
-
-    @Test
-    public void readZonedDateTime2() {
-        Date date = new Date(6680363940000L);
-        Instant instant = date.toInstant();
-        ZonedDateTime zdt = instant.atZone(DateUtils.DEFAULT_ZONE_ID);
-        assertEquals(
-                zdt,
-                JSONReader.ofJSONB(
-                        JSONB.toBytes(instant)
-                ).readZonedDateTime()
-        );
-        assertEquals(
-                zdt,
-                JSONReader.ofJSONB(
-                        JSONB.toBytes(date)
-                ).readZonedDateTime()
-        );
-        assertEquals(
-                instant,
-                JSONReader.ofJSONB(
-                        JSONB.toBytes(date)
-                ).readInstant()
         );
     }
 

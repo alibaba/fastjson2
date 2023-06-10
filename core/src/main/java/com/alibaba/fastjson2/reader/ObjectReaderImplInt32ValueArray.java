@@ -4,12 +4,12 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.function.Function;
 
 public final class ObjectReaderImplInt32ValueArray
         extends ObjectReaderPrimitive {
@@ -25,7 +25,7 @@ public final class ObjectReaderImplInt32ValueArray
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
@@ -33,11 +33,11 @@ public final class ObjectReaderImplInt32ValueArray
             return null;
         }
 
-        if (jsonReader.nextIfMatch('[')) {
+        if (jsonReader.nextIfArrayStart()) {
             int[] values = new int[16];
             int size = 0;
             for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
+                if (jsonReader.nextIfArrayEnd()) {
                     break;
                 }
 
@@ -58,7 +58,7 @@ public final class ObjectReaderImplInt32ValueArray
 
                 values[size++] = jsonReader.readInt32Value();
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             int[] array = Arrays.copyOf(values, size);
             if (builder != null) {
@@ -115,7 +115,7 @@ public final class ObjectReaderImplInt32ValueArray
             } else if (item instanceof Number) {
                 value = ((Number) item).intValue();
             } else {
-                Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), int.class);
+                Function typeConvert = JSONFactory.defaultObjectReaderProvider.getTypeConvert(item.getClass(), int.class);
                 if (typeConvert == null) {
                     throw new JSONException("can not cast to int " + item.getClass());
                 }

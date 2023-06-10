@@ -2,7 +2,7 @@ package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -46,21 +46,21 @@ public class Issue409 {
     public static class TeacherJson {
         private static final long serialVersionUID = 1L;
 
-        @JsonProperty("user_serial")
+        @JSONField(name = "user_serial")
         private Long userSerial;
 
-        @JsonProperty("user_name")
+        @JSONField(name = "user_name")
         private String userName;
 
         private List<String> codes;
 
-        @JsonProperty("dept_list")
+        @JSONField(name = "dept_list")
         private List<DeptList> deptList;
 
-        @JsonProperty("manage_class_ids")
+        @JSONField(name = "manage_class_ids")
         private List<DeptList> manageClassIds;
 
-        @JsonProperty("user_deps")
+        @JSONField(name = "user_deps")
         private List<String> userDeps;
 
         public Long getUserSerial() {
@@ -124,16 +124,16 @@ public class Issue409 {
     public static class DeptList {
         private static final long serialVersionUID = 1L;
 
-        @JsonProperty("dept_id")
+        @JSONField(name = "dept_id")
         private Long deptId;
 
-        @JsonProperty("pt_node_path_name")
+        @JSONField(name = "pt_node_path_name")
         private String ptNodePathName;
 
-        @JsonProperty("dept_name")
+        @JSONField(name = "dept_name")
         private String deptName;
 
-        @JsonProperty("is_grade")
+        @JSONField(name = "is_grade")
         private String isGrade;
 
         public Long getDeptId() {

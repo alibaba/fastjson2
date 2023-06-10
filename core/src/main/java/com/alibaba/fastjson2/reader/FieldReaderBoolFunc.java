@@ -1,12 +1,11 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.function.BiConsumer;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
 import java.util.Locale;
-import java.util.function.BiConsumer;
 
 final class FieldReaderBoolFunc<T, V>
         extends FieldReader<T> {
@@ -20,22 +19,16 @@ final class FieldReaderBoolFunc<T, V>
             String format,
             Locale locale,
             Object defaultValue,
-            JSONSchema schema,
             Method method,
             BiConsumer<T, V> function
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, method, null);
         this.function = function;
     }
 
     @Override
     public void accept(T object, Object value) {
         Boolean booleanValue = TypeUtils.toBoolean(value);
-
-        if (schema != null) {
-            schema.validate(booleanValue);
-        }
-
         function.accept(object, (V) booleanValue);
     }
 
@@ -50,10 +43,6 @@ final class FieldReaderBoolFunc<T, V>
             } else {
                 throw e;
             }
-        }
-
-        if (schema != null) {
-            schema.validate(fieldValue);
         }
 
         function.accept(object, (V) fieldValue);

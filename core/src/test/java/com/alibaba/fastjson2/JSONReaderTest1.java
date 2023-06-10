@@ -2,10 +2,8 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.FieldReader;
-import com.alibaba.fastjson2.util.DateUtils;
-import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
+import com.alibaba.fastjson2.time.*;
+import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2_vo.*;
 import org.junit.jupiter.api.Test;
 
@@ -14,9 +12,6 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.time.*;
-import java.time.chrono.IsoChronology;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -255,7 +250,7 @@ public class JSONReaderTest1 {
     @Test
     public void testNextIfMatch() {
         for (JSONReader jsonReader : TestUtils.createJSONReaders(",中")) {
-            assertTrue(jsonReader.nextIfMatch(','));
+            assertTrue(jsonReader.nextIfComma());
             assertEquals('中', jsonReader.ch);
         }
         for (JSONReader jsonReader : TestUtils.createJSONReaders(", 中")) {
@@ -691,38 +686,6 @@ public class JSONReaderTest1 {
     }
 
     @Test
-    public void test_readLocalTime10() {
-        LocalTime localTime = LocalTime.of(12, 13, 14, 100_000_000);
-        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"12:13:14.1\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalTime10());
-            assertEquals(JSONReader.EOI, jsonReader.ch);
-            assertTrue(jsonReader.comma);
-        }
-        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'12:13:14.1' , 1")) {
-            assertEquals(localTime, jsonReader.readLocalTime10());
-            assertEquals('1', jsonReader.ch);
-            assertTrue(jsonReader.comma);
-        }
-        assertEquals(localTime, JSONB.parseObject(JSONB.toBytes("12:13:14.1"), LocalTime.class));
-    }
-
-    @Test
-    public void test_readLocalTime11() {
-        LocalTime localTime = LocalTime.of(12, 13, 14, 10_000_000);
-        for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"12:13:14.01\" , ")) {
-            assertEquals(localTime, jsonReader.readLocalTime11());
-            assertEquals(JSONReader.EOI, jsonReader.ch);
-            assertTrue(jsonReader.comma);
-        }
-        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'12:13:14.01' , 1")) {
-            assertEquals(localTime, jsonReader.readLocalTime11());
-            assertEquals('1', jsonReader.ch);
-            assertTrue(jsonReader.comma);
-        }
-        assertEquals(localTime, JSONB.parseObject(JSONB.toBytes("12:13:14.01"), LocalTime.class));
-    }
-
-    @Test
     public void test_readLocalTime12() {
         LocalTime localTime = LocalTime.of(12, 13, 14, 1_000_000);
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("\"12:13:14.001\" , ")) {
@@ -766,14 +729,6 @@ public class JSONReaderTest1 {
             assertTrue(jsonReader.comma);
         }
 
-        for (JSONReader jsonReader : TestUtils.createJSONReaders4("'20180401'")) {
-            assertEquals(localTime,
-                    jsonReader
-                            .readLocalDate8()
-            );
-            assertTrue(jsonReader.isEnd());
-            assertFalse(jsonReader.comma);
-        }
         for (JSONReader jsonReader : TestUtils.createJSONReaders4("'20183301'")) {
             assertThrows(JSONException.class, () -> jsonReader.readLocalDate8());
         }
@@ -1532,8 +1487,7 @@ public class JSONReaderTest1 {
     @Test
     public void testDates() {
         DateTimeFormatter formatter = DateTimeFormatter
-                .ofPattern("yyyy-MM-dd HH:mm:ss", Locale.CHINA)
-                .withZone(DateUtils.SHANGHAI_ZONE_ID);
+                .ofPattern("yyyy-MM-dd HH:mm:ss", Locale.CHINA, ZoneId.SHANGHAI_ZONE_ID);
 
         char[] chars = "\"1900-01-01 00:00:00\"".toCharArray();
         for (int year = 1900; year < 2200; year++) {
@@ -1546,7 +1500,7 @@ public class JSONReaderTest1 {
                 int dom = 31;
                 switch (month) {
                     case 2:
-                        dom = (IsoChronology.INSTANCE.isLeapYear(year) ? 29 : 28);
+                        dom = (LocalDate.isLeapYear(year) ? 29 : 28);
                         break;
                     case 4:
                     case 6:
@@ -1567,27 +1521,45 @@ public class JSONReaderTest1 {
 
                         {
                             JSONReader jsonReader = JSONReader.of(chars, 0, chars.length);
-                            jsonReader.getContext().setZoneId(DateUtils.SHANGHAI_ZONE_ID);
+                            jsonReader.getContext().setZoneId(ZoneId.SHANGHAI_ZONE_ID);
                             long millis19 = jsonReader.readMillis19();
 
-                            LocalDateTime ldt = LocalDateTime.parse(str, formatter);
-                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, DateUtils.SHANGHAI_ZONE_ID, null);
-                            assertEquals(zdt.toInstant().toEpochMilli(), millis19);
+                            java.time.LocalDateTime ldtJ = java.time.LocalDateTime.of(year, month, d, h, 0, 0);
+                            long epochMilliJ = ldtJ.atZone(java.time.ZoneId.of("Asia/Shanghai")).toInstant().toEpochMilli();
+
+                            assertEquals(epochMilliJ, millis19);
+
+                            LocalDateTime ldt = formatter.parseLocalDateTime(str);
+                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, ZoneId.SHANGHAI_ZONE_ID);
+                            Instant instant = zdt.toInstant();
+                            assertEquals(millis19, instant.toEpochMilli(), ldtJ.toString());
                         }
 
                         {
                             JSONReader jsonReader = JSONReader.of(chars, 0, chars.length);
-                            jsonReader.getContext().setZoneId(ZoneOffset.UTC);
+                            jsonReader.getContext().setZoneId(ZoneId.UTC);
                             long millis19 = jsonReader.readMillis19();
 
-                            LocalDateTime ldt = LocalDateTime.parse(str, formatter);
-                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, ZoneOffset.UTC, null);
+                            LocalDateTime ldt = formatter.parseLocalDateTime(str);
+                            ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, ZoneId.UTC);
                             assertEquals(zdt.toInstant().toEpochMilli(), millis19);
                         }
                     }
                 }
             }
         }
+    }
+
+    @Test
+    public void testCalendar() throws Exception {
+        int year = 1900, month = 1, d = 1, h = 1;
+        java.time.LocalDateTime ldtJ = java.time.LocalDateTime.of(year, month, d, h, 0, 0);
+        long epochMilliJ = ldtJ.atZone(java.time.ZoneId.of("Asia/Shanghai")).toInstant().toEpochMilli();
+
+        LocalDateTime ldt = LocalDateTime.of(year, month, d, h, 0, 0);
+        ZonedDateTime zdt = ZonedDateTime.ofLocal(ldt, ZoneId.SHANGHAI_ZONE_ID);
+        Instant instant = zdt.toInstant();
+        assertEquals(epochMilliJ, instant.toEpochMilli());
     }
 
     @Test
@@ -1843,7 +1815,7 @@ public class JSONReaderTest1 {
 
     @Test
     public void testMillis_shanghai() {
-        ZoneId zoneId = DateUtils.SHANGHAI_ZONE_ID;
+        ZoneId zoneId = ZoneId.SHANGHAI_ZONE_ID;
         int[] years = {
                 1992, 1991, 1990, 1989, 1988, 1987, 1986, 1985,
                 1950, 1949, 1948, 1947, 1946, 1945, 1944, 1943, 1942, 1941, 1941, 1940,
@@ -1878,7 +1850,7 @@ public class JSONReaderTest1 {
     public void testMillis_utc() {
         ZoneId[] zoneIds = {
                 ZoneId.of("Asia/Macau"),
-                ZoneOffset.UTC,
+                ZoneId.UTC,
                 ZoneId.of("Asia/Kuching"),
                 ZoneId.of("Europe/London")
         };
@@ -1918,7 +1890,7 @@ public class JSONReaderTest1 {
 
     private static void validate(ZoneId zoneId, int year, int month, int dom, int hour, int minute) {
         LocalDateTime ldt = LocalDateTime.of(year, month, dom, hour, minute, 0, 0);
-        long epochMilli = ldt.atZone(zoneId).toInstant().toEpochMilli();
+        long epochMilli = ZonedDateTime.of(ldt, zoneId).toEpochMilli();
 
         long millis = DateUtils.millis(zoneId, year, month, dom, hour, minute, 0, 0);
         assertEquals(epochMilli, millis, ldt.toString());
@@ -1928,8 +1900,8 @@ public class JSONReaderTest1 {
     public void getBigInt() throws Exception {
         Field signumField = BigInteger.class.getDeclaredField("signum");
         Field magField = BigInteger.class.getDeclaredField("mag");
-        long signumOffSet = UnsafeUtils.UNSAFE.objectFieldOffset(signumField);
-        long magOffSet = UnsafeUtils.UNSAFE.objectFieldOffset(magField);
+        long signumOffSet = JDKUtils.UNSAFE.objectFieldOffset(signumField);
+        long magOffSet = JDKUtils.UNSAFE.objectFieldOffset(magField);
 
         JSONReader.BigIntegerCreator bigIntegerCreator = new JSONReader.BigIntegerCreator();
 
@@ -1944,8 +1916,8 @@ public class JSONReaderTest1 {
                     new BigInteger("12345678901234567890123456789012345678901234567890123456789012345678901234567890")
             };
             for (BigInteger value : values) {
-                int signum = UnsafeUtils.UNSAFE.getInt(value, signumOffSet);
-                int[] mage = (int[]) UnsafeUtils.UNSAFE.getObject(value, magOffSet);
+                int signum = JDKUtils.UNSAFE.getInt(value, signumOffSet);
+                int[] mage = (int[]) JDKUtils.UNSAFE.getObject(value, magOffSet);
                 BigInteger value1 = JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR.apply(signum, mage);
                 BigInteger value2 = bigIntegerCreator.apply(signum, mage);
                 assertEquals(value, value1);
@@ -1963,8 +1935,8 @@ public class JSONReaderTest1 {
                     new BigInteger("-12345678901234567890123456789012345678901234567890123456789012345678901234567890")
             };
             for (BigInteger value : values) {
-                int signum = UnsafeUtils.UNSAFE.getInt(value, signumOffSet);
-                int[] mage = (int[]) UnsafeUtils.UNSAFE.getObject(value, magOffSet);
+                int signum = JDKUtils.UNSAFE.getInt(value, signumOffSet);
+                int[] mage = (int[]) JDKUtils.UNSAFE.getObject(value, magOffSet);
                 BigInteger value1 = JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR.apply(signum, mage);
                 BigInteger value2 = bigIntegerCreator.apply(signum, mage);
                 assertEquals(value, value1);

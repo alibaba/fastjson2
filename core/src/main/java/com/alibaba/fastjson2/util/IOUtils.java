@@ -1,12 +1,22 @@
 package com.alibaba.fastjson2.util;
 
+import com.alibaba.fastjson2.time.LocalTime;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.time.LocalTime;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 
 public class IOUtils {
+    public static final Charset US_ASCII = Charset.forName("US-ASCII");
+    public static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
+    public static final Charset UTF_8 = Charset.forName("UTF-8");
+    public static final Charset UTF_16BE = Charset.forName("UTF-16BE");
+    public static final Charset UTF_16LE = Charset.forName("UTF-16LE");
+    public static final Charset UTF_16 = Charset.forName("UTF-16");
+
     static final byte[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
             'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
 
@@ -28,7 +38,16 @@ public class IOUtils {
     private static final char[] MIN_INT_CHARS = "-2147483648".toCharArray();
     private static final byte[] MIN_LONG = "-9223372036854775808".getBytes();
 
+    static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
+    static final int[] IA = new int[256];
+
     static {
+        Arrays.fill(IA, -1);
+        for (int i = 0, iS = CA.length; i < iS; i++) {
+            IA[CA[i]] = i;
+        }
+        IA['='] = 0;
+
         for (int i = 0; i < DIGITS_K.length; i++) {
             DIGITS_K[i] = (i < 10 ? (2 << 24) : i < 100 ? (1 << 24) : 0)
                     + (((i / 100) + '0') << 16)
@@ -306,7 +325,7 @@ public class IOUtils {
             if (b1 == 0 && b0 >= 0) {
                 dst[dp++] = b0;
             } else {
-                char c = (char) (((b0 & 0xff) << 0) | ((b1 & 0xff) << 8));
+                char c = (char) ((b0 & 0xff) | ((b1 & 0xff) << 8));
                 if (c < 0x800) {
                     // 2 bytes, 11 bits
                     dst[dp] = (byte) (0xc0 | (c >> 6));
@@ -315,13 +334,13 @@ public class IOUtils {
                 } else if (c >= '\uD800' && c < ('\uDFFF' + 1)) { //Character.isSurrogate(c) but 1.7
                     final int uc;
                     int ip = offset - 1;
-                    if (c >= '\uD800' && c < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
+                    if (c < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
                         if (sl - ip < 2) {
                             uc = -1;
                         } else {
                             b0 = src[ip + 1];
                             b1 = src[ip + 2];
-                            char d = (char) (((b0 & 0xff) << 0) | ((b1 & 0xff) << 8));
+                            char d = (char) ((b0 & 0xff) | ((b1 & 0xff) << 8));
                             // d >= '\uDC00' && d < ('\uDFFF' + 1)
                             if (d >= '\uDC00' && d < ('\uDFFF' + 1)) { // Character.isLowSurrogate(d)
                                 offset += 2;
@@ -332,11 +351,8 @@ public class IOUtils {
                         }
                     } else {
                         //
-                        if (c >= '\uDC00' && c < ('\uDFFF' + 1)) { // Character.isLowSurrogate(c)
-                            return -1;
-                        } else {
-                            uc = c;
-                        }
+                        // Character.isLowSurrogate(c)
+                        return -1;
                     }
 
                     if (uc < 0) {
@@ -382,7 +398,7 @@ public class IOUtils {
             } else if (c >= '\uD800' && c < ('\uDFFF' + 1)) { //Character.isSurrogate(c) but 1.7
                 final int uc;
                 int ip = offset - 1;
-                if (c >= '\uD800' && c < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
+                if (c < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
                     if (sl - ip < 2) {
                         uc = -1;
                     } else {
@@ -398,13 +414,10 @@ public class IOUtils {
                     }
                 } else {
                     //
-                    if (c >= '\uDC00' && c < ('\uDFFF' + 1)) { // Character.isLowSurrogate(c)
-                        dst[dp++] = (byte) '?';
-                        continue;
+                    // Character.isLowSurrogate(c)
+                    dst[dp++] = (byte) '?';
+                    continue;
 //                        throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
-                    } else {
-                        uc = c;
-                    }
                 }
 
                 if (uc < 0) {
@@ -502,7 +515,7 @@ public class IOUtils {
                     } else {
                         char c = (char) (((b0 << 6) ^ b1) ^
                                 (((byte) 0xC0 << 6) ^
-                                        ((byte) 0x80 << 0)));
+                                        (byte) 0x80));
                         dst[dp] = (byte) c;
                         dst[dp + 1] = (byte) (c >> 8);
                         dp += 2;
@@ -529,7 +542,7 @@ public class IOUtils {
                                         (b1 << 6) ^
                                         (b2 ^ (((byte) 0xE0 << 12) ^
                                                 ((byte) 0x80 << 6) ^
-                                                ((byte) 0x80 << 0)))
+                                                ((byte) 0x80)))
                                 );
                         boolean isSurrogate = c >= '\uD800' && c < ('\uDFFF' + 1);
                         if (isSurrogate) {
@@ -557,7 +570,7 @@ public class IOUtils {
                                     (((byte) 0xF0 << 18) ^
                                             ((byte) 0x80 << 12) ^
                                             ((byte) 0x80 << 6) ^
-                                            ((byte) 0x80 << 0))));
+                                            ((byte) 0x80))));
                     if (((b2 & 0xc0) != 0x80 || (b3 & 0xc0) != 0x80 || (b4 & 0xc0) != 0x80) // isMalformed4
                             ||
                             // shortest form check
@@ -609,7 +622,7 @@ public class IOUtils {
                     } else {
                         dst[dp++] = (char) (((b1 << 6) ^ b2) ^
                                 (((byte) 0xC0 << 6) ^
-                                        ((byte) 0x80 << 0)));
+                                        (byte) 0x80));
                     }
                     continue;
                 }
@@ -630,7 +643,7 @@ public class IOUtils {
                                 (b3 ^
                                         (((byte) 0xE0 << 12) ^
                                                 ((byte) 0x80 << 6) ^
-                                                ((byte) 0x80 << 0))));
+                                                (byte) 0x80)));
                         boolean isSurrogate = c >= '\uD800' && c < ('\uDFFF' + 1);
                         if (isSurrogate) {
                             return -1;
@@ -641,36 +654,36 @@ public class IOUtils {
                     continue;
                 }
                 return -1;
-            } else if ((b1 >> 3) == -2) {
-                // 4 bytes, 21 bits: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-                if (off + 2 < sl) {
-                    int b2 = src[off];
-                    int b3 = src[off + 1];
-                    int b4 = src[off + 2];
-                    off += 3;
-                    int uc = ((b1 << 18) ^
-                            (b2 << 12) ^
-                            (b3 << 6) ^
-                            (b4 ^
-                                    (((byte) 0xF0 << 18) ^
-                                            ((byte) 0x80 << 12) ^
-                                            ((byte) 0x80 << 6) ^
-                                            ((byte) 0x80 << 0))));
-                    if (((b2 & 0xc0) != 0x80 || (b3 & 0xc0) != 0x80 || (b4 & 0xc0) != 0x80) // isMalformed4
-                            ||
-                            // shortest form check
-                            !(uc >= 0x010000 && uc < 0X10FFFF + 1) // !Character.isSupplementaryCodePoint(uc)
-                    ) {
-                        return -1;
-                    } else {
-                        dst[dp] = (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
-                        dst[dp + 1] = (char) ((uc & 0x3ff) + '\uDC00'); // Character.lowSurrogate(uc);
-                        dp += 2;
-                    }
-                    continue;
-                }
-                return -1;
             } else {
+                if ((b1 >> 3) == -2) {
+                    // 4 bytes, 21 bits: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+                    if (off + 2 < sl) {
+                        int b2 = src[off];
+                        int b3 = src[off + 1];
+                        int b4 = src[off + 2];
+                        off += 3;
+                        int uc = ((b1 << 18) ^
+                                (b2 << 12) ^
+                                (b3 << 6) ^
+                                (b4 ^
+                                        (((byte) 0xF0 << 18) ^
+                                                ((byte) 0x80 << 12) ^
+                                                ((byte) 0x80 << 6) ^
+                                                ((byte) 0x80))));
+                        if (((b2 & 0xc0) != 0x80 || (b3 & 0xc0) != 0x80 || (b4 & 0xc0) != 0x80) // isMalformed4
+                                ||
+                                // shortest form check
+                                !(uc >= 0x010000 && uc < 0X10FFFF + 1) // !Character.isSupplementaryCodePoint(uc)
+                        ) {
+                            return -1;
+                        } else {
+                            dst[dp] = (char) ((uc >>> 10) + ('\uD800' - (0x010000 >>> 10))); // Character.highSurrogate(uc);
+                            dst[dp + 1] = (char) ((uc & 0x3ff) + '\uDC00'); // Character.lowSurrogate(uc);
+                            dp += 2;
+                        }
+                        continue;
+                    }
+                }
                 return -1;
             }
         }
@@ -782,20 +795,20 @@ public class IOUtils {
     }
 
     public static int writeLocalTime(byte[] bytes, int off, LocalTime time) {
-        int v = DIGITS_K[time.getHour()];
+        int v = DIGITS_K[time.hour];
         bytes[off] = (byte) (v >> 8);
         bytes[off + 1] = (byte) (v);
         bytes[off + 2] = ':';
-        v = DIGITS_K[time.getMinute()];
+        v = DIGITS_K[time.minute];
         bytes[off + 3] = (byte) (v >> 8);
         bytes[off + 4] = (byte) (v);
         bytes[off + 5] = ':';
-        v = DIGITS_K[time.getSecond()];
+        v = DIGITS_K[time.second];
         bytes[off + 6] = (byte) (v >> 8);
         bytes[off + 7] = (byte) (v);
         off += 8;
 
-        int nano = time.getNano();
+        int nano = time.nano;
         if (nano != 0) {
             final int div = nano / 1000;
             final int div2 = div / 1000;
@@ -838,20 +851,20 @@ public class IOUtils {
     }
 
     public static int writeLocalTime(char[] bytes, int off, LocalTime time) {
-        int v = DIGITS_K[time.getHour()];
+        int v = DIGITS_K[time.hour];
         bytes[off] = (char) (byte) (v >> 8);
         bytes[off + 1] = (char) (byte) (v);
         bytes[off + 2] = ':';
-        v = DIGITS_K[time.getMinute()];
+        v = DIGITS_K[time.minute];
         bytes[off + 3] = (char) (byte) (v >> 8);
         bytes[off + 4] = (char) (byte) (v);
         bytes[off + 5] = ':';
-        v = DIGITS_K[time.getSecond()];
+        v = DIGITS_K[time.second];
         bytes[off + 6] = (char) (byte) (v >> 8);
         bytes[off + 7] = (char) (byte) (v);
         off += 8;
 
-        int nano = time.getNano();
+        int nano = time.nano;
         if (nano != 0) {
             final int div = nano / 1000;
             final int div2 = div / 1000;
@@ -897,9 +910,7 @@ public class IOUtils {
         long i;
         if (value < 0) {
             if (value == Long.MIN_VALUE) {
-                for (int x = 0; x < MIN_LONG.length; x++) {
-                    buf[pos + x] = MIN_LONG[x];
-                }
+                System.arraycopy(MIN_LONG, 0, buf, pos + 0, MIN_LONG.length);
                 return pos + MIN_LONG.length;
             }
             i = -value;
@@ -1398,5 +1409,108 @@ public class IOUtils {
                 ((bytes[offset + 2] & 0xFFL) << 40) +
                 ((bytes[offset + 1] & 0xFFL) << 48) +
                 ((long) (bytes[offset]) << 56);
+    }
+
+    public static byte[] decodeBase64(String s) {
+        // Check special case
+        int sLen = s.length();
+        if (sLen == 0) {
+            return new byte[0];
+        }
+
+        int sIx = 0, eIx = sLen - 1; // Start and end index after trimming.
+
+        // Trim illegal chars from start
+        while (sIx < eIx && IA[s.charAt(sIx) & 0xff] < 0) {
+            sIx++;
+        }
+
+        // Trim illegal chars from end
+        while (eIx > 0 && IA[s.charAt(eIx) & 0xff] < 0) {
+            eIx--;
+        }
+
+        // get the padding count (=) (0, 1 or 2)
+        int pad = s.charAt(eIx) == '=' ? (s.charAt(eIx - 1) == '=' ? 2 : 1) : 0; // Count '=' at end.
+        int cCnt = eIx - sIx + 1; // Content count including possible separators
+        int sepCnt = sLen > 76 ? (s.charAt(76) == '\r' ? cCnt / 78 : 0) << 1 : 0;
+
+        int len = ((cCnt - sepCnt) * 6 >> 3) - pad; // The number of decoded bytes
+        byte[] dArr = new byte[len]; // Preallocate byte[] of exact length
+
+        // Decode all but the last 0 - 2 bytes.
+        int d = 0;
+        for (int cc = 0, eLen = (len / 3) * 3; d < eLen; ) {
+            // Assemble three bytes into an int from four "valid" characters.
+            int i = IA[s.charAt(sIx)] << 18
+                    | IA[s.charAt(sIx + 1)] << 12
+                    | IA[s.charAt(sIx + 2)] << 6
+                    | IA[s.charAt(sIx + 3)];
+            sIx += 4;
+
+            // Add the bytes
+            dArr[d] = (byte) (i >> 16);
+            dArr[d + 1] = (byte) (i >> 8);
+            dArr[d + 2] = (byte) i;
+            d += 3;
+
+            // If line separator, jump over it.
+            if (sepCnt > 0 && ++cc == 19) {
+                sIx += 2;
+                cc = 0;
+            }
+        }
+
+        if (d < len) {
+            // Decode last 1-3 bytes (incl '=') into 1-3 bytes
+            int i = 0;
+            for (int j = 0; sIx <= eIx - pad; j++) {
+                i |= IA[s.charAt(sIx++)] << (18 - j * 6);
+            }
+
+            for (int r = 16; d < len; r -= 8) {
+                dArr[d++] = (byte) (i >> r);
+            }
+        }
+
+        return dArr;
+    }
+
+    public static long floorDiv(long x, long y) {
+        long r = x / y;
+        // if the signs are different and modulo not zero, round down
+        if ((x ^ y) < 0 && (r * y != x)) {
+            r--;
+        }
+        return r;
+    }
+
+    public static long floorMod(long x, long y) {
+        return x - floorDiv(x, y) * y;
+    }
+
+    public static long addExact(long x, long y) {
+        long r = x + y;
+        // HD 2-12 Overflow iff both arguments have the opposite sign of the result
+        if (((x ^ r) & (y ^ r)) < 0) {
+            throw new ArithmeticException("long overflow");
+        }
+        return r;
+    }
+
+    public static long multiplyExact(long x, long y) {
+        long r = x * y;
+        long ax = Math.abs(x);
+        long ay = Math.abs(y);
+        if (((ax | ay) >>> 31 != 0)) {
+            // Some bits greater than 2^31 that might cause overflow
+            // Check the result using the divide operator
+            // and check for the special case of Long.MIN_VALUE * -1
+            if (((y != 0) && (r / y != x)) ||
+                    (x == Long.MIN_VALUE && y == -1)) {
+                throw new ArithmeticException("long overflow");
+            }
+        }
+        return r;
     }
 }

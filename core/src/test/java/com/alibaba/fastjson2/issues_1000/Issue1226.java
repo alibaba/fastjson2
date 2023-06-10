@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue1226 {
     @Test
     public void test() {
-        ObjectWriterProvider provider = JSONFactory.getDefaultObjectWriterProvider();
+        ObjectWriterProvider provider = JSONFactory.defaultObjectWriterProvider;
         ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) provider.getObjectWriter(Bean.class);
 
         JSONWriter jsonWriter = JSONWriter.of();

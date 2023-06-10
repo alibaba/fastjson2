@@ -32,7 +32,7 @@ final class ObjectArrayReaderMultiType
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
@@ -41,9 +41,9 @@ final class ObjectArrayReaderMultiType
         }
 
         Object[] values = new Object[types.length];
-        if (jsonReader.nextIfMatch('[')) {
+        if (jsonReader.nextIfArrayStart()) {
             for (int i = 0; ; ++i) {
-                if (jsonReader.nextIfMatch(']')) {
+                if (jsonReader.nextIfArrayEnd()) {
                     break;
                 }
 
@@ -63,9 +63,9 @@ final class ObjectArrayReaderMultiType
                 }
                 values[i] = value;
 
-                jsonReader.nextIfMatch(',');
+                jsonReader.nextIfComma();
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             return values;
         }
@@ -104,7 +104,6 @@ final class ObjectArrayReaderMultiType
 
     @Override
     public Object createInstance(Collection collection) {
-        Object[] array = new Object[types.length];
-        return array;
+        return new Object[types.length];
     }
 }

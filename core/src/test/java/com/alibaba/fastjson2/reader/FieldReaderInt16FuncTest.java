@@ -1,7 +1,9 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.annotation.JSONCompiler;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -37,43 +39,7 @@ public class FieldReaderInt16FuncTest {
         );
     }
 
-    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean {
-        private Short value;
-
-        public Short getValue() {
-            return value;
-        }
-
-        public void setValue(Short value) {
-            this.value = value;
-        }
-    }
-
-    @Test
-    public void test1() {
-        Bean1 bean = new Bean1();
-        ObjectReader<Bean1> objectReader = TestUtils.createObjectReaderLambda(Bean1.class);
-        FieldReader fieldReader = objectReader.getFieldReader("value");
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, "123"));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, (short) 123));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123L));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123F));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123D));
-
-        assertEquals(
-                (short) 201,
-                objectReader.readObject(
-                        JSONReader.of("{\"value\":201}"),
-                        0
-                ).value
-        );
-    }
-
-    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
-    public static class Bean1 {
-        @JSONField(schema = "{'minimum':128}")
         private Short value;
 
         public Short getValue() {
@@ -98,7 +64,6 @@ public class FieldReaderInt16FuncTest {
         assertThrows(Exception.class, () -> fieldReader.accept(bean, 123D));
     }
 
-    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean2 {
         public void setValue(Short value) {
             throw new UnsupportedOperationException();
@@ -116,7 +81,6 @@ public class FieldReaderInt16FuncTest {
         );
     }
 
-    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean3 {
         private Short value;
         public final int id;
@@ -147,9 +111,7 @@ public class FieldReaderInt16FuncTest {
         assertEquals(bean.value, bean2.value);
     }
 
-    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     private static class Bean4 {
-        @JSONField(schema = "{'minimum':128}")
         private Short value;
 
         public Short getValue() {

@@ -1,8 +1,7 @@
 package com.alibaba.fastjson2.function.impl;
 
 import com.alibaba.fastjson2.JSONException;
-
-import java.util.function.Function;
+import com.alibaba.fastjson2.function.Function;
 
 public class ToByte
         implements Function {

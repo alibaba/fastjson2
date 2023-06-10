@@ -7,8 +7,8 @@ final class JSONPathSingleIndex
     final JSONPathSegmentIndex segment;
     final int index;
 
-    public JSONPathSingleIndex(String path, JSONPathSegmentIndex segment, Feature... features) {
-        super(segment, path, features);
+    public JSONPathSingleIndex(String path, JSONPathSegmentIndex segment) {
+        super(segment, path);
         this.segment = segment;
         this.index = segment.index;
     }
@@ -32,29 +32,5 @@ final class JSONPathSingleIndex
         context.root = object;
         segment.eval(context);
         return context.value;
-    }
-
-    @Override
-    public Object extract(JSONReader jsonReader) {
-        if (jsonReader.nextIfNull()) {
-            return null;
-        }
-
-        int max = jsonReader.startArray();
-        if (jsonReader.isJSONB() && index >= max) {
-            return null;
-        }
-
-        if ((!jsonReader.isJSONB()) && jsonReader.nextIfMatch(']')) {
-            return null;
-        }
-
-        for (int i = 0; i < index && i < max; i++) {
-            jsonReader.skipValue();
-            if ((!jsonReader.isJSONB()) && jsonReader.nextIfMatch(']')) {
-                return null;
-            }
-        }
-        return jsonReader.readAny();
     }
 }

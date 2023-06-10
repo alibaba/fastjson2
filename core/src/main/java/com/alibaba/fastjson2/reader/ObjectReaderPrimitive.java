@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 
 import java.lang.reflect.Type;
@@ -16,16 +15,6 @@ abstract class ObjectReaderPrimitive<T>
     @Override
     public Class getObjectClass() {
         return objectClass;
-    }
-
-    @Override
-    public T createInstance(long features) {
-        throw new JSONException("UnsupportedOperation");
-    }
-
-    @Override
-    public FieldReader getFieldReader(long hashCode) {
-        return null;
     }
 
     @Override

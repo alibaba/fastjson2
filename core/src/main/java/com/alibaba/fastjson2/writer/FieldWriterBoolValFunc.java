@@ -1,7 +1,8 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.function.Predicate;
+
 import java.lang.reflect.Method;
-import java.util.function.Predicate;
 
 final class FieldWriterBoolValFunc
         extends FieldWriterBoolVal {

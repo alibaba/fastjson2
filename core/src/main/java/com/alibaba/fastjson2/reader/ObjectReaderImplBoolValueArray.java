@@ -23,11 +23,11 @@ class ObjectReaderImplBoolValueArray
             return null;
         }
 
-        if (jsonReader.nextIfMatch('[')) {
+        if (jsonReader.nextIfArrayStart()) {
             boolean[] values = new boolean[16];
             int size = 0;
             for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
+                if (jsonReader.nextIfArrayEnd()) {
                     break;
                 }
 
@@ -44,7 +44,7 @@ class ObjectReaderImplBoolValueArray
 
                 values[size++] = jsonReader.readBoolValue();
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             return Arrays.copyOf(values, size);
         }

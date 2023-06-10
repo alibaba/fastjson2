@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues_1500;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.filter.Filter;
 import org.junit.jupiter.api.Test;
 
@@ -77,7 +78,7 @@ public class Issue1503 {
     public static class B {
         private final int id;
 
-        public B(int id) {
+        public B(@JSONField(name = "id") int id) {
             this.id = id;
         }
 
@@ -90,7 +91,7 @@ public class Issue1503 {
             extends B {
         private final String name;
 
-        public B1(int id, String name) {
+        public B1(@JSONField(name = "id") int id, @JSONField(name = "name") String name) {
             super(id);
             this.name = name;
         }

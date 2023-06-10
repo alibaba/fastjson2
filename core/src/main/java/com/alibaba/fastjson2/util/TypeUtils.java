@@ -1,26 +1,23 @@
 package com.alibaba.fastjson2.util;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.reader.*;
+import com.alibaba.fastjson2.time.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterPrimitiveImpl;
 
-import java.lang.invoke.*;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import java.util.function.*;
 
 import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
-import static java.lang.invoke.MethodType.methodType;
 
 public class TypeUtils {
     public static final Class CLASS_JSON_OBJECT_1x;
@@ -33,33 +30,7 @@ public class TypeUtils {
     public static final Class CLASS_UNMODIFIABLE_LIST = Collections.unmodifiableList(new ArrayList<>()).getClass();
     public static final Class CLASS_UNMODIFIABLE_SET = Collections.unmodifiableSet(new HashSet<>()).getClass();
     public static final Class CLASS_UNMODIFIABLE_SORTED_SET = Collections.unmodifiableSortedSet(new TreeSet<>()).getClass();
-    public static final Class CLASS_UNMODIFIABLE_NAVIGABLE_SET = Collections.unmodifiableNavigableSet(new TreeSet<>()).getClass();
     public static final ParameterizedType PARAM_TYPE_LIST_STR = new ParameterizedTypeImpl(List.class, String.class);
-
-    public static final MethodType METHOD_TYPE_SUPPLIER = MethodType.methodType(Supplier.class);
-    public static final MethodType METHOD_TYPE_FUNCTION = MethodType.methodType(Function.class);
-    public static final MethodType METHOD_TYPE_TO_INT_FUNCTION = MethodType.methodType(ToIntFunction.class);
-    public static final MethodType METHOD_TYPE_TO_LONG_FUNCTION = MethodType.methodType(ToLongFunction.class);
-    public static final MethodType METHOD_TYPE_OBJECT_INT_CONSUMER = MethodType.methodType(ObjIntConsumer.class);
-    public static final MethodType METHOD_TYPE_INT_FUNCTION = MethodType.methodType(IntFunction.class);
-    public static final MethodType METHOD_TYPE_LONG_FUNCTION = MethodType.methodType(LongFunction.class);
-    public static final MethodType METHOD_TYPE_BI_FUNCTION = MethodType.methodType(BiFunction.class);
-    public static final MethodType METHOD_TYPE_BI_CONSUMER = MethodType.methodType(BiConsumer.class);
-    public static final MethodType METHOD_TYPE_VOO = MethodType.methodType(void.class, Object.class, Object.class);
-
-    public static final MethodType METHOD_TYPE_OBJECT = MethodType.methodType(Object.class);
-    public static final MethodType METHOD_TYPE_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class);
-    public static final MethodType METHOD_TYPE_INT_OBJECT = MethodType.methodType(int.class, Object.class);
-    public static final MethodType METHOD_TYPE_LONG_OBJECT = MethodType.methodType(long.class, Object.class);
-    public static final MethodType METHOD_TYPE_VOID_OBJECT_INT = MethodType.methodType(void.class, Object.class, int.class);
-    public static final MethodType METHOD_TYPE_OBJECT_LONG = MethodType.methodType(Object.class, long.class);
-    public static final MethodType METHOD_TYPE_VOID_LONG = MethodType.methodType(void.class, long.class);
-    public static final MethodType METHOD_TYPE_OBJECT_OBJECT_OBJECT = MethodType.methodType(Object.class, Object.class, Object.class);
-
-    public static final MethodType METHOD_TYPE_VOID = MethodType.methodType(void.class);
-    public static final MethodType METHOD_TYPE_VOID_INT = MethodType.methodType(void.class, int.class);
-    public static final MethodType METHOD_TYPE_VOID_STRING = MethodType.methodType(void.class, String.class);
-    public static final MethodType METHOD_TYPE_OBJECT_INT = MethodType.methodType(Object.class, int.class);
 
     public static final BigInteger BIGINT_INT32_MIN = BigInteger.valueOf(Integer.MIN_VALUE);
     public static final BigInteger BIGINT_INT32_MAX = BigInteger.valueOf(Integer.MAX_VALUE);
@@ -88,65 +59,9 @@ public class TypeUtils {
             1e16, 1e32, 1e64, 1e128, 1e256};
     static final double[] TINY_10_POW = {
             1e-16, 1e-32, 1e-64, 1e-128, 1e-256};
-    static volatile boolean METHOD_NEW_PROXY_INSTANCE_ERROR;
-    static volatile MethodHandle METHOD_NEW_PROXY_INSTANCE;
 
     public static <T> T newProxyInstance(Class<T> objectClass, JSONObject object) {
-        MethodHandle newProxyInstance = METHOD_NEW_PROXY_INSTANCE;
-        try {
-            if (newProxyInstance == null) {
-                Class<?> proxyClass = Class.forName("java.lang.reflect.Proxy");
-                MethodHandles.Lookup lookup = JDKUtils.trustedLookup(proxyClass);
-                newProxyInstance = lookup.findStatic(
-                        proxyClass,
-                        "newProxyInstance",
-                        methodType(Object.class, ClassLoader.class, Class[].class, InvocationHandler.class)
-                );
-                METHOD_NEW_PROXY_INSTANCE = newProxyInstance;
-            }
-        } catch (Throwable ignored) {
-            METHOD_NEW_PROXY_INSTANCE_ERROR = true;
-        }
-
-        try {
-            return (T) newProxyInstance.invokeExact(objectClass.getClassLoader(), new Class[]{objectClass}, (InvocationHandler) object);
-        } catch (Throwable e) {
-            throw new JSONException("create proxy error : " + objectClass, e);
-        }
-    }
-
-    static class X1 {
-        static final Function<byte[], char[]> TO_CHARS;
-
-        static {
-            Function<byte[], char[]> toChars = null;
-            if (JDKUtils.JVM_VERSION > 9) {
-                try {
-                    Class<?> latin1Class = Class.forName("java.lang.StringLatin1");
-                    MethodHandles.Lookup lookup = JDKUtils.trustedLookup(latin1Class);
-                    MethodHandle handle = lookup.findStatic(
-                            latin1Class, "toChars", MethodType.methodType(char[].class, byte[].class)
-                    );
-
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "apply",
-                            methodType(Function.class),
-                            methodType(Object.class, Object.class),
-                            handle,
-                            methodType(char[].class, byte[].class)
-                    );
-                    toChars = (Function<byte[], char[]>) callSite.getTarget().invokeExact();
-                } catch (Throwable ignored) {
-                    // ignored
-                }
-            }
-
-            if (toChars == null) {
-                toChars = TypeUtils::toAsciiCharArray;
-            }
-            TO_CHARS = toChars;
-        }
+        return (T) Proxy.newProxyInstance(objectClass.getClassLoader(), new Class[]{objectClass}, object);
     }
 
     static class X2 {
@@ -196,7 +111,7 @@ public class TypeUtils {
         if (ch >= 0 && ch < X2.chars.length) {
             return X2.chars[ch];
         }
-        return new String(new byte[]{ch}, StandardCharsets.ISO_8859_1);
+        return new String(new byte[]{ch}, IOUtils.ISO_8859_1);
     }
 
     public static String toString(char c0, char c1) {
@@ -212,7 +127,7 @@ public class TypeUtils {
             int value = (c0 - X2.START) * X2.SIZE2 + (c1 - X2.START);
             return X2.chars2[value];
         }
-        return new String(new byte[]{c0, c1}, StandardCharsets.ISO_8859_1);
+        return new String(new byte[]{c0, c1}, IOUtils.ISO_8859_1);
     }
 
     public static Type intern(Type type) {
@@ -786,7 +701,7 @@ public class TypeUtils {
         for (int i = 1; i < iDigits; i++) {
             iValue = iValue * 10 + (int) digits[i] - (int) '0';
         }
-        long lValue = (long) iValue;
+        long lValue = iValue;
         for (int i = iDigits; i < kDigits; i++) {
             lValue = lValue * 10L + (long) ((int) digits[i] - (int) '0');
         }
@@ -881,7 +796,7 @@ public class TypeUtils {
         final int B5 = Math.max(0, -exp); // powers of 5 in bigB, value is not modified inside correctionLoop
         final int D5 = Math.max(0, exp); // powers of 5 in bigD, value is not modified inside correctionLoop
         bigD0 = bigD0.multByPow52(D5, 0);
-        bigD0.makeImmutable();   // prevent bigD0 modification inside correctionLoop
+        bigD0.immutable = true;   // prevent bigD0 modification inside correctionLoop
         FDBigInteger bigD = null;
         int prevD2 = 0;
 
@@ -1037,7 +952,7 @@ public class TypeUtils {
                 }
             }
         } else if ((decExponent >= nDigits) && (nDigits + decExponent <= MAX_DECIMAL_DIGITS)) {
-            long lValue = (long) iValue;
+            long lValue = iValue;
             for (int i = kDigits; i < nDigits; i++) {
                 lValue = lValue * 10L + (long) ((int) digits[i] - (int) '0');
             }
@@ -1095,7 +1010,7 @@ public class TypeUtils {
         final int B5 = Math.max(0, -exp); // powers of 5 in bigB, value is not modified inside correctionLoop
         final int D5 = Math.max(0, exp); // powers of 5 in bigD, value is not modified inside correctionLoop
         bigD0 = bigD0.multByPow52(D5, 0);
-        bigD0.makeImmutable();   // prevent bigD0 modification inside correctionLoop
+        bigD0.immutable = true;   // prevent bigD0 modification inside correctionLoop
         FDBigInteger bigD = null;
         int prevD2 = 0;
 
@@ -1262,20 +1177,25 @@ public class TypeUtils {
 
         if (obj instanceof LocalDate) {
             LocalDate localDate = (LocalDate) obj;
-            ZonedDateTime zdt = localDate.atStartOfDay(ZoneId.systemDefault());
+            ZonedDateTime zdt = localDate.atStartOfDay(ZoneId.DEFAULT_ZONE_ID);
             return new Date(
                     zdt.toInstant().toEpochMilli());
         }
 
         if (obj instanceof LocalDateTime) {
             LocalDateTime ldt = (LocalDateTime) obj;
-            ZonedDateTime zdt = ldt.atZone(ZoneId.systemDefault());
+            ZonedDateTime zdt = ZonedDateTime.of(ldt, ZoneId.DEFAULT_ZONE_ID);
             return new Date(
                     zdt.toInstant().toEpochMilli());
         }
 
         if (obj instanceof String) {
-            return DateUtils.parseDate((String) obj);
+            long millis = DateUtils.parseMillis((String) obj, ZoneId.DEFAULT_ZONE_ID);
+            if (millis == 0) {
+                return null;
+            } else {
+                return new Date(millis);
+            }
         }
 
         if (obj instanceof Long || obj instanceof Integer) {
@@ -1295,7 +1215,7 @@ public class TypeUtils {
         }
 
         if (obj instanceof Date) {
-            return ((Date) obj).toInstant();
+            Instant.ofEpochMilli(((Date) obj).getTime());
         }
 
         if (obj instanceof ZonedDateTime) {
@@ -1309,17 +1229,13 @@ public class TypeUtils {
                 return null;
             }
 
-            JSONReader jsonReader;
-            if (str.charAt(0) != '"') {
-                jsonReader = JSONReader.of('"' + str + '"');
-            } else {
-                jsonReader = JSONReader.of(str);
+            try (JSONReader jsonReader = JSONReader.of(
+                    str.charAt(0) != '"'
+                            ? '"' + str + '"'
+                            : str
+            )) {
+                return jsonReader.read(Instant.class);
             }
-            return jsonReader.read(Instant.class);
-        }
-
-        if (obj instanceof Map) {
-            return (Instant) ObjectReaderImplInstant.INSTANCE.createInstance((Map) obj, 0L);
         }
 
         throw new JSONException("can not cast to Date from " + obj.getClass());
@@ -1389,7 +1305,7 @@ public class TypeUtils {
             return (T) cast(obj, (Class) type);
         }
 
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
 
         if (obj instanceof Collection) {
             ObjectReader objectReader = provider.getObjectReader(type);
@@ -1406,7 +1322,7 @@ public class TypeUtils {
     }
 
     public static <T> T cast(Object obj, Class<T> targetClass) {
-        return cast(obj, targetClass, JSONFactory.getDefaultObjectReaderProvider());
+        return cast(obj, targetClass, JSONFactory.defaultObjectReaderProvider);
     }
 
     public static <T> T cast(Object obj, Class<T> targetClass, ObjectReaderProvider provider) {
@@ -1480,7 +1396,7 @@ public class TypeUtils {
         if (targetClass.isEnum()) {
             if (obj instanceof Integer) {
                 int intValue = ((Integer) obj).intValue();
-                ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(targetClass);
+                ObjectReader objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(targetClass);
                 if (objectReader instanceof ObjectReaderImplEnum) {
                     return (T) ((ObjectReaderImplEnum) objectReader).of(intValue);
                 }
@@ -1501,18 +1417,18 @@ public class TypeUtils {
             long millis = ((Number) obj).longValue();
             switch (className) {
                 case "java.sql.Date":
-                    return (T) JdbcSupport.createDate(millis);
+                    return (T) new java.sql.Date(millis);
                 case "java.sql.Timestamp":
-                    return (T) JdbcSupport.createTimestamp(millis);
+                    return (T) new java.sql.Timestamp(millis);
                 case "java.sql.Time":
-                    return (T) JdbcSupport.createTime(millis);
+                    return (T) new java.sql.Time(millis);
                 default:
                     break;
             }
         }
 
         ObjectWriter objectWriter = JSONFactory
-                .getDefaultObjectWriterProvider()
+                .defaultObjectWriterProvider
                 .getObjectWriter(obj.getClass());
         if (objectWriter instanceof ObjectWriterPrimitiveImpl) {
             Function function = ((ObjectWriterPrimitiveImpl<?>) objectWriter).getFunction();
@@ -1605,7 +1521,6 @@ public class TypeUtils {
         NAME_MAPPINGS.put(UUID[][].class, "[[UUID");
 
         NAME_MAPPINGS.put(Object.class, "Object");
-        NAME_MAPPINGS.put(Object[].class, "[O");
 
         NAME_MAPPINGS.put(HashMap.class, "M");
         TYPE_MAPPINGS.put("HashMap", HashMap.class);
@@ -1627,7 +1542,6 @@ public class TypeUtils {
         TYPE_MAPPINGS.put("LinkedList", LinkedList.class);
         TYPE_MAPPINGS.put("java.util.LinkedList", LinkedList.class);
         TYPE_MAPPINGS.put("java.util.concurrent.ConcurrentLinkedQueue", ConcurrentLinkedQueue.class);
-        TYPE_MAPPINGS.put("java.util.concurrent.ConcurrentLinkedDeque", ConcurrentLinkedDeque.class);
 
         //java.util.LinkedHashMap.class,
 
@@ -1636,7 +1550,6 @@ public class TypeUtils {
         NAME_MAPPINGS.put(LinkedHashSet.class, "LinkedHashSet");
         NAME_MAPPINGS.put(ConcurrentHashMap.class, "ConcurrentHashMap");
         NAME_MAPPINGS.put(ConcurrentLinkedQueue.class, "ConcurrentLinkedQueue");
-        NAME_MAPPINGS.put(ConcurrentLinkedDeque.class, "ConcurrentLinkedDeque");
         NAME_MAPPINGS.put(JSONObject.class, "JSONObject");
         NAME_MAPPINGS.put(JSONArray.class, "JSONArray");
         NAME_MAPPINGS.put(Currency.class, "Currency");
@@ -1738,12 +1651,12 @@ public class TypeUtils {
 
         {
             if (CLASS_JSON_OBJECT_1x != null) {
-                TYPE_MAPPINGS.putIfAbsent("JO1", CLASS_JSON_OBJECT_1x);
-                TYPE_MAPPINGS.putIfAbsent(CLASS_JSON_OBJECT_1x.getName(), CLASS_JSON_OBJECT_1x);
+                TYPE_MAPPINGS.put("JO1", CLASS_JSON_OBJECT_1x);
+                TYPE_MAPPINGS.put(CLASS_JSON_OBJECT_1x.getName(), CLASS_JSON_OBJECT_1x);
             }
             if (CLASS_JSON_ARRAY_1x != null) {
-                TYPE_MAPPINGS.putIfAbsent("JA1", CLASS_JSON_ARRAY_1x);
-                TYPE_MAPPINGS.putIfAbsent(CLASS_JSON_ARRAY_1x.getName(), CLASS_JSON_ARRAY_1x);
+                TYPE_MAPPINGS.put("JA1", CLASS_JSON_ARRAY_1x);
+                TYPE_MAPPINGS.put(CLASS_JSON_ARRAY_1x.getName(), CLASS_JSON_ARRAY_1x);
             }
         }
 
@@ -1770,36 +1683,48 @@ public class TypeUtils {
         TYPE_MAPPINGS.put("java.util.ImmutableCollections$SubList", ArrayList.class);
 
         for (Map.Entry<Class, String> entry : NAME_MAPPINGS.entrySet()) {
-            TYPE_MAPPINGS.putIfAbsent(entry.getValue(), entry.getKey());
+            String entryValue = entry.getValue();
+            Class origin = TYPE_MAPPINGS.get(entryValue);
+            if (origin == null) {
+                TYPE_MAPPINGS.put(entryValue, entry.getKey());
+            }
         }
     }
 
+    public static String getTypeName(Type type) {
+        if (type instanceof Class) {
+            return getTypeName((Class) type);
+        }
+        return "<non-class>";
+    }
+
     public static String getTypeName(Class type) {
+        String typeName = ((Class<?>) type).getName();
+
+        switch (typeName) {
+            case "com.alibaba.fastjson.JSONObject":
+                return "JO1";
+            case "com.alibaba.fastjson.JSONArray":
+                return "JA1";
+            case "com.alibaba.fastjson2.JSONObject":
+                return "JSONObject";
+            case "com.alibaba.fastjson2.JSONArray":
+                return "JSONArray";
+            case "java.util.HashMap":
+                return "M";
+            case "java.util.ArrayList":
+                return "A";
+            case "java.lang.Object":
+                return "Object";
+            case "java.util.List":
+                return typeName;
+            default:
+                break;
+        }
+
         String mapTypeName = NAME_MAPPINGS.get(type);
         if (mapTypeName != null) {
             return mapTypeName;
-        }
-
-        if (Proxy.isProxyClass(type)) {
-            Class[] interfaces = type.getInterfaces();
-            if (interfaces.length > 0) {
-                type = interfaces[0];
-            }
-        }
-
-        String typeName = type.getTypeName();
-        switch (typeName) {
-            case "com.alibaba.fastjson.JSONObject":
-                NAME_MAPPINGS.putIfAbsent(type, "JO1");
-                return NAME_MAPPINGS.get(type);
-            case "com.alibaba.fastjson.JSONArray":
-                NAME_MAPPINGS.putIfAbsent(type, "JA1");
-                return NAME_MAPPINGS.get(type);
-//            case "org.apache.commons.lang3.tuple.ImmutablePair":
-//                NAME_MAPPINGS.putIfAbsent(type, "org.apache.commons.lang3.tuple.Pair");
-//                return NAME_MAPPINGS.get(type);
-            default:
-                break;
         }
 
         int index = typeName.indexOf('$');
@@ -1858,14 +1783,6 @@ public class TypeUtils {
             return null;
         }
 
-        if (JDKUtils.STRING_CODER != null) {
-            int code = JDKUtils.STRING_CODER.applyAsInt(str);
-            if (code == JDKUtils.LATIN1 && JDKUtils.STRING_VALUE != null) {
-                byte[] bytes = JDKUtils.STRING_VALUE.apply(str);
-                return parseBigDecimal(bytes, 0, bytes.length);
-            }
-        }
-
         char[] chars = JDKUtils.getCharArray(str);
         return parseBigDecimal(chars, 0, chars.length);
     }
@@ -1907,7 +1824,7 @@ public class TypeUtils {
         int precision = decimal.precision();
         if (precision < 20) {
             if (FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
-                long intCompact = UnsafeUtils.getLong(decimal, FIELD_DECIMAL_INT_COMPACT_OFFSET);
+                long intCompact = JDKUtils.UNSAFE.getLong(decimal, FIELD_DECIMAL_INT_COMPACT_OFFSET);
                 switch (scale) {
                     case 1:
                         return intCompact % 10 == 0;
@@ -2387,7 +2304,7 @@ public class TypeUtils {
             case 1: {
                 byte b0 = bytes[off];
                 if (b0 >= '0' && b0 <= '9') {
-                    return (long) (b0 - '0');
+                    return (b0 - '0');
                 }
                 break;
             }
@@ -2541,7 +2458,7 @@ public class TypeUtils {
             case 1: {
                 char b0 = bytes[off];
                 if (b0 >= '0' && b0 <= '9') {
-                    return (long) (b0 - '0');
+                    return (b0 - '0');
                 }
                 break;
             }
@@ -2781,14 +2698,9 @@ public class TypeUtils {
             }
         }
 
-        char[] chars;
-        if (off == 0 && len == bytes.length) {
-            chars = X1.TO_CHARS.apply(bytes);
-        } else {
-            chars = new char[len];
-            for (int i = 0; i < len; i++) {
-                chars[i] = (char) bytes[off + i];
-            }
+        char[] chars = new char[len];
+        for (int i = 0; i < len; i++) {
+            chars[i] = (char) bytes[off + i];
         }
 
         return new BigDecimal(chars, 0, chars.length);
@@ -3255,22 +3167,6 @@ public class TypeUtils {
             return (char) 0;
         }
 
-        if (paramType == Optional.class) {
-            return Optional.empty();
-        }
-
-        if (paramType == OptionalInt.class) {
-            return OptionalInt.empty();
-        }
-
-        if (paramType == OptionalLong.class) {
-            return OptionalLong.empty();
-        }
-
-        if (paramType == OptionalDouble.class) {
-            return OptionalDouble.empty();
-        }
-
         return null;
     }
 
@@ -3290,12 +3186,6 @@ public class TypeUtils {
                 return Collections.EMPTY_LIST.getClass();
             case "java.util.Collections$EmptySet":
                 return Collections.EMPTY_SET.getClass();
-            case "java.util.Optional":
-                return Optional.class;
-            case "java.util.OptionalInt":
-                return OptionalInt.class;
-            case "java.util.OptionalLong":
-                return OptionalLong.class;
             case "List":
             case "java.util.List":
                 return List.class;
@@ -3322,8 +3212,6 @@ public class TypeUtils {
                 return ConcurrentHashMap.class;
             case "ConcurrentLinkedQueue":
                 return ConcurrentLinkedQueue.class;
-            case "ConcurrentLinkedDeque":
-                return ConcurrentLinkedDeque.class;
             case "JSONObject":
                 return JSONObject.class;
             case "JO1":
@@ -3576,7 +3464,7 @@ public class TypeUtils {
     }
 
     public static Map getInnerMap(Map object) {
-        if (object == null || CLASS_JSON_OBJECT_1x == null || !CLASS_JSON_OBJECT_1x.isInstance(object) || FIELD_JSON_OBJECT_1x_map == null) {
+        if (CLASS_JSON_OBJECT_1x == null || !CLASS_JSON_OBJECT_1x.isInstance(object) || FIELD_JSON_OBJECT_1x_map == null) {
             return object;
         }
 
@@ -3587,21 +3475,6 @@ public class TypeUtils {
         }
 
         return object;
-    }
-
-    public static boolean isFunction(Class type) {
-        if (type.isInterface()) {
-            String typeName = type.getName();
-            if (typeName.startsWith("java.util.function.")) {
-                return true;
-            }
-
-            if (type.isAnnotationPresent(FunctionalInterface.class)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public static boolean isInteger(String str) {
@@ -3629,31 +3502,6 @@ public class TypeUtils {
     }
 
     public static boolean isInteger(byte[] str, int off, int len) {
-        if (str == null || len == 0) {
-            return false;
-        }
-
-        char ch = (char) str[off];
-        boolean sign = ch == '-' || ch == '+';
-        if (sign) {
-            if (len == 1) {
-                return false;
-            }
-        } else if (ch < '0' || ch > '9') {
-            return false;
-        }
-
-        final int end = off + len;
-        for (int i = off + 1; i < end; ++i) {
-            ch = (char) str[i];
-            if (ch < '0' || ch > '9') {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static boolean isInteger(char[] str, int off, int len) {
         if (str == null || len == 0) {
             return false;
         }
@@ -3716,7 +3564,7 @@ public class TypeUtils {
                     return true;
                 }
 
-                if (space || ch < '0' || ch > '9') {
+                if (ch < '0' || ch > '9') {
                     break;
                 }
             }
@@ -3739,7 +3587,7 @@ public class TypeUtils {
                         return true;
                     }
 
-                    if (space || ch < '0' || ch > '9') {
+                    if (ch < '0' || ch > '9') {
                         break;
                     }
                 }
@@ -3826,7 +3674,7 @@ public class TypeUtils {
                     return true;
                 }
 
-                if (space || ch < '0' || ch > '9') {
+                if (ch < '0' || ch > '9') {
                     break;
                 }
             }
@@ -3849,7 +3697,7 @@ public class TypeUtils {
                         return true;
                     }
 
-                    if (space || ch < '0' || ch > '9') {
+                    if (ch < '0' || ch > '9') {
                         break;
                     }
                 }
@@ -3936,7 +3784,7 @@ public class TypeUtils {
                     return true;
                 }
 
-                if (space || ch < '0' || ch > '9') {
+                if (ch < '0' || ch > '9') {
                     break;
                 }
             }
@@ -3959,7 +3807,7 @@ public class TypeUtils {
                         return true;
                     }
 
-                    if (space || ch < '0' || ch > '9') {
+                    if (ch < '0' || ch > '9') {
                         break;
                     }
                 }

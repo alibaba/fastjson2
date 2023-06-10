@@ -2,12 +2,11 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
+import com.alibaba.fastjson2.time.*;
 import com.alibaba.fastjson2.util.DateUtils;
+import com.alibaba.fastjson2.util.IOUtils;
 
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 
@@ -17,10 +16,10 @@ final class ObjectWriterImplDate
     static final ObjectWriterImplDate INSTANCE = new ObjectWriterImplDate(null, null);
 
     static final char[] PREFIX_CHARS = "new Date(".toCharArray();
-    static final byte[] PREFIX_BYTES = "new Date(".getBytes(StandardCharsets.UTF_8);
+    static final byte[] PREFIX_BYTES = "new Date(".getBytes(IOUtils.UTF_8);
 
     static final char[] PREFIX_CHARS_SQL = "{\"@type\":\"java.sql.Date\",\"val\":".toCharArray();
-    static final byte[] PREFIX_BYTES_SQL = "{\"@type\":\"java.sql.Date\",\"val\":".getBytes(StandardCharsets.UTF_8);
+    static final byte[] PREFIX_BYTES_SQL = "{\"@type\":\"java.sql.Date\",\"val\":".getBytes(IOUtils.UTF_8);
 
     public ObjectWriterImplDate(String format, Locale locale) {
         super(format, locale);
@@ -88,15 +87,15 @@ final class ObjectWriterImplDate
         ZoneId zoneId = ctx.getZoneId();
         int offsetSeconds;
 
-        if (zoneId == DateUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == DateUtils.SHANGHAI_ZONE_RULES) {
+        if (ZoneId.SHANGHAI_ZONE_ID.equals(zoneId)) {
             offsetSeconds = DateUtils.getShanghaiZoneOffsetTotalSeconds(
-                    Math.floorDiv(millis, 1000L)
+                    IOUtils.floorDiv(millis, 1000L)
             );
-        } else if (zoneId == ZoneOffset.UTC || "UTC".equals(zoneId.getId())) {
+        } else if (zoneId == ZoneId.UTC || "UTC".equals(zoneId.id)) {
             offsetSeconds = 0;
         } else {
             ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), zoneId);
-            offsetSeconds = zdt.getOffset().getTotalSeconds();
+            offsetSeconds = zdt.offsetSeconds;
         }
 
         String dateFormat;
@@ -113,18 +112,18 @@ final class ObjectWriterImplDate
         if (dateFormat == null) {
             final int SECONDS_PER_DAY = 60 * 60 * 24;
 
-            long epochSecond = Math.floorDiv(millis, 1000L);
+            long epochSecond = IOUtils.floorDiv(millis, 1000L);
             int offsetTotalSeconds;
-            if (zoneId == DateUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == DateUtils.SHANGHAI_ZONE_RULES) {
+            if (ZoneId.SHANGHAI_ZONE_ID.equals(zoneId)) {
                 offsetTotalSeconds = DateUtils.getShanghaiZoneOffsetTotalSeconds(epochSecond);
             } else {
                 Instant instant = Instant.ofEpochMilli(millis);
-                offsetTotalSeconds = zoneId.getRules().getOffset(instant).getTotalSeconds();
+                offsetTotalSeconds = zoneId.getOffsetTotalSeconds(instant);
             }
 
             long localSecond = epochSecond + offsetTotalSeconds;
-            long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-            int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+            long localEpochDay = IOUtils.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+            int secsOfDay = (int) IOUtils.floorMod(localSecond, (long) SECONDS_PER_DAY);
             int year, month, dayOfMonth;
             {
                 final int DAYS_PER_CYCLE = 146097;
@@ -157,11 +156,7 @@ final class ObjectWriterImplDate
                 yearEst += marchMonth0 / 10;
 
                 // check year now we are certain it is correct
-                if (yearEst < Year.MIN_VALUE || yearEst > Year.MAX_VALUE) {
-                    throw new DateTimeException("Invalid year " + yearEst);
-                }
-
-                year = (int) yearEst;
+                year = LocalDateTime.checkYear(yearEst);
             }
 
             int hour, minute, second;
@@ -185,7 +180,7 @@ final class ObjectWriterImplDate
             }
 
             if (year >= 0 && year <= 9999) {
-                int mos = (int) Math.floorMod(millis, 1000L);
+                int mos = (int) IOUtils.floorMod(millis, 1000L);
                 if (mos == 0 && !formatISO8601) {
                     if (hour == 0 && minute == 0 && second == 0 && "java.sql.Date".equals(date.getClass().getName())) {
                         jsonWriter.writeDateYYYMMDD10(year, month, dayOfMonth);
@@ -205,8 +200,7 @@ final class ObjectWriterImplDate
         } else {
             formatter = ctx.getDateFormatter();
         }
-        ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), zoneId);
-        String str = formatter.format(zdt);
+        String str = formatter.format(date);
         jsonWriter.writeString(str);
     }
 }

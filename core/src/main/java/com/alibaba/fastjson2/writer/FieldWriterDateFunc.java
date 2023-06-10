@@ -1,14 +1,14 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.function.Function;
 
 import java.lang.reflect.Method;
 import java.util.Date;
-import java.util.function.Function;
 
 final class FieldWriterDateFunc<T>
         extends FieldWriterDate<T> {
-    Function<T, Date> function;
+    final Function<T, Date> function;
 
     protected FieldWriterDateFunc(
             String fieldName,

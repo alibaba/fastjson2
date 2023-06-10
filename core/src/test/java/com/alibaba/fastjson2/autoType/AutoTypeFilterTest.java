@@ -18,6 +18,8 @@ public class AutoTypeFilterTest {
         set.add(123);
         byte[] bytes = JSONB.toBytes(set, JSONWriter.Feature.WriteClassName);
 
+        System.out.println(JSONB.toJSONString(bytes));
+
         assertEquals(
                 set,
                 JSONB.parseObject(

@@ -51,28 +51,8 @@ public class Issue1421 {
     }
 
     @Test
-    public void testSet3() {
-        Set list = Collections.synchronizedNavigableSet(new TreeSet<>(Arrays.asList(1, 2, 3)));
-        byte[] bytes = JSONB.toBytes(list, JSONWriter.Feature.WriteClassName);
-        System.out.println(JSONB.toJSONString(bytes));
-        Set list2 = (Set) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType);
-        assertEquals(list.size(), list2.size());
-        assertEquals(list.getClass(), list2.getClass());
-    }
-
-    @Test
     public void testMap() {
         Map map = Collections.synchronizedMap(new TreeMap<>());
-        byte[] bytes = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName);
-        System.out.println(JSONB.toJSONString(bytes));
-        Map map2 = (Map) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType);
-        assertEquals(map.size(), map2.size());
-        assertEquals(map.getClass(), map2.getClass());
-    }
-
-    @Test
-    public void testMap2() {
-        Map map = Collections.synchronizedNavigableMap(new TreeMap<>());
         byte[] bytes = JSONB.toBytes(map, JSONWriter.Feature.WriteClassName);
         System.out.println(JSONB.toJSONString(bytes));
         Map map2 = (Map) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType);

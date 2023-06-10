@@ -2,15 +2,14 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 
 final class FieldReaderInt16Field<T>
         extends FieldReaderObjectField<T> {
-    FieldReaderInt16Field(String fieldName, Class fieldType, int ordinal, long features, String format, Short defaultValue, JSONSchema schema, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
+    FieldReaderInt16Field(String fieldName, Class fieldType, int ordinal, long features, String format, Short defaultValue, Field field) {
+        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
     }
 
     @Override
@@ -21,10 +20,6 @@ final class FieldReaderInt16Field<T>
             fieldValue = null;
         } else {
             fieldValue = (short) intValue;
-        }
-
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
         }
 
         try {
@@ -57,10 +52,6 @@ final class FieldReaderInt16Field<T>
     @Override
     public void accept(T object, Object value) {
         Short shortValue = TypeUtils.toShort(value);
-
-        if (schema != null) {
-            schema.assertValidate(shortValue);
-        }
 
         try {
             field.set(object, shortValue);

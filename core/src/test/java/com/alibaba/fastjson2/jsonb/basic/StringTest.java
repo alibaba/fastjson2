@@ -1,10 +1,8 @@
 package com.alibaba.fastjson2.jsonb.basic;
 
 import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.util.JDKUtils;
 import org.junit.jupiter.api.Test;
 
-import java.nio.ByteOrder;
 import java.util.Arrays;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
@@ -91,13 +89,7 @@ public class StringTest {
             String str = new String(chars);
             byte[] bytes = JSONB.toBytes(str);
             byte type = bytes[0];
-            if (JDKUtils.JVM_VERSION == 8) {
-                assertEquals(BC_STR_UTF8, type);
-            } else {
-                if (ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN) {
-                    assertEquals(BC_STR_UTF16LE, type);
-                }
-            }
+            assertEquals(BC_STR_UTF8, type);
 
             String parsed = (String) JSONB.parse(bytes);
             assertEquals(str, parsed);

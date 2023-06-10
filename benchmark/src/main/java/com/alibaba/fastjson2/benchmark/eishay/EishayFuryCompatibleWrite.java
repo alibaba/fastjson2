@@ -28,7 +28,7 @@ public class EishayFuryCompatibleWrite {
             JSONWriter.Feature.NotWriteHashMapArrayListClassName
     };
     static JSONWriter.Context context = new JSONWriter.Context(
-            JSONFactory.getDefaultObjectWriterProvider(), features
+            JSONFactory.defaultObjectWriterProvider, features
     );
 //
 //    static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()

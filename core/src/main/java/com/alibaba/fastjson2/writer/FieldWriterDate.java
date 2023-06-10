@@ -1,13 +1,14 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.time.*;
 import com.alibaba.fastjson2.util.DateUtils;
+import com.alibaba.fastjson2.util.IOUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 abstract class FieldWriterDate<T>
@@ -153,18 +154,18 @@ abstract class FieldWriterDate<T>
                 : ctx.getDateFormat();
         boolean formatyyyyMMddhhmmss19 = this.formatyyyyMMddhhmmss19 || (ctx.isFormatyyyyMMddhhmmss19() && this.format == null);
         if (dateFormat == null || formatyyyyMMddhhmmss14 || formatyyyyMMddhhmmss19) {
-            long epochSecond = Math.floorDiv(timeMillis, 1000L);
+            long epochSecond = IOUtils.floorDiv(timeMillis, 1000L);
             int offsetTotalSeconds;
-            if (zoneId == DateUtils.SHANGHAI_ZONE_ID || zoneId.getRules() == DateUtils.SHANGHAI_ZONE_RULES) {
+            if (ZoneId.SHANGHAI_ZONE_ID.equals(zoneId)) {
                 offsetTotalSeconds = DateUtils.getShanghaiZoneOffsetTotalSeconds(epochSecond);
             } else {
                 Instant instant = Instant.ofEpochMilli(timeMillis);
-                offsetTotalSeconds = zoneId.getRules().getOffset(instant).getTotalSeconds();
+                offsetTotalSeconds = zoneId.getOffsetTotalSeconds(instant);
             }
 
             long localSecond = epochSecond + offsetTotalSeconds;
-            long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-            int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+            long localEpochDay = IOUtils.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+            int secsOfDay = (int) IOUtils.floorMod(localSecond, (long) SECONDS_PER_DAY);
             int year, month, dayOfMonth;
             {
                 final int DAYS_PER_CYCLE = 146097;
@@ -197,11 +198,7 @@ abstract class FieldWriterDate<T>
                 yearEst += marchMonth0 / 10;
 
                 // check year now we are certain it is correct
-                if (yearEst < Year.MIN_VALUE || yearEst > Year.MAX_VALUE) {
-                    throw new DateTimeException("Invalid year " + yearEst);
-                }
-
-                year = (int) yearEst;
+                year = LocalDateTime.checkYear(yearEst);
             }
 
             int hour, minute, second;
@@ -251,14 +248,12 @@ abstract class FieldWriterDate<T>
                     return;
                 }
 
-                int millis = (int) Math.floorMod(timeMillis, 1000L);
+                int millis = (int) IOUtils.floorMod(timeMillis, 1000L);
                 if (millis != 0) {
                     Instant instant = Instant.ofEpochMilli(timeMillis);
                     int offsetSeconds = ctx
                             .getZoneId()
-                            .getRules()
-                            .getOffset(instant)
-                            .getTotalSeconds();
+                            .getOffsetTotalSeconds(instant);
                     writeFieldName(jsonWriter);
                     jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, false);
                     return;
@@ -275,25 +270,25 @@ abstract class FieldWriterDate<T>
                         Instant.ofEpochMilli(timeMillis), zoneId);
 
         if (formatISO8601 || (ctx.isDateFormatISO8601() && this.format == null)) {
-            int year = zdt.getYear();
+            int year = zdt.dateTime.date.year;
             if (year >= 0 && year <= 9999) {
-                int month = zdt.getMonthValue();
-                int dayOfMonth = zdt.getDayOfMonth();
-                int hour = zdt.getHour();
-                int minute = zdt.getMinute();
-                int second = zdt.getSecond();
-                int millis = zdt.getNano() / 1000_000;
-                int offsetSeconds = zdt.getOffset().getTotalSeconds();
+                int month = zdt.dateTime.date.monthValue;
+                int dayOfMonth = zdt.dateTime.date.dayOfMonth;
+                int hour = zdt.dateTime.time.hour;
+                int minute = zdt.dateTime.time.minute;
+                int second = zdt.dateTime.time.second;
+                int millis = zdt.dateTime.time.nano / 1000_000;
+                int offsetSeconds = zdt.offsetSeconds;
                 jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, true);
                 return;
             }
         }
 
         if (formatyyyyMMdd8) {
-            int year = zdt.getYear();
+            int year = zdt.dateTime.date.year;
             if (year >= 0 && year <= 9999) {
-                int month = zdt.getMonthValue();
-                int dayOfMonth = zdt.getDayOfMonth();
+                int month = zdt.dateTime.date.monthValue;
+                int dayOfMonth = zdt.dateTime.date.dayOfMonth;
                 jsonWriter.writeDateYYYMMDD8(year, month, dayOfMonth);
                 return;
             }
@@ -304,8 +299,7 @@ abstract class FieldWriterDate<T>
             formatter = ctx.getDateFormatter();
         }
 
-        String str = formatter.format(zdt);
-
+        String str = formatter.format(new Date(timeMillis));
         jsonWriter.writeString(str);
     }
 }

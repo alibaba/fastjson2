@@ -16,11 +16,11 @@ public class Issue223 {
         }
         String message = "{\"type\":\"APP_SYNC\",\"appList\":[{\"appPath\":\"C:\\\\Users\\\\apple\\\\AppData\"}]}";
 
-        // 这里报异常 unclosed.str.lit U
         List<app> test = JSON.parseObject(
-                JSONPath.eval(
-                        JSON.parseObject(message), "$.appList"
-                ).toString(),
+                JSONPath.of("$.appList")
+                        .eval(
+                                JSON.parseObject(message)
+                        ).toString(),
                 new TypeReference<List<app>>() {
                 }.getType()
         );
@@ -35,9 +35,10 @@ public class Issue223 {
 
         // 这里报异常 unclosed.str.lit U
         List<app> test = JSON.parseObject(
-                JSONPath.eval(
-                        JSON.parseObject(message.getBytes(StandardCharsets.UTF_8)), "$.appList"
-                ).toString(),
+                JSONPath.of("$.appList")
+                        .eval(
+                                JSON.parseObject(message.getBytes(StandardCharsets.UTF_8))
+                        ).toString(),
                 new TypeReference<List<app>>() {
                 }.getType()
         );

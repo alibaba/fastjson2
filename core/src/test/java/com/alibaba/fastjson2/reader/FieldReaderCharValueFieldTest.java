@@ -35,7 +35,7 @@ public class FieldReaderCharValueFieldTest {
     @Test
     public void testASM() {
         Bean bean = new Bean();
-        ObjectReader<Bean> objectReader = ObjectReaderCreatorASM.INSTANCE.createObjectReader(Bean.class);
+        ObjectReader<Bean> objectReader = ObjectReaderCreator.INSTANCE.createObjectReader(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "A");
         assertEquals('A', bean.value);
@@ -61,7 +61,7 @@ public class FieldReaderCharValueFieldTest {
 
     @Test
     public void test3() {
-        ObjectReader<Bean3> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean3.class);
+        ObjectReader<Bean3> objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Bean3.class);
         assertEquals(
                 'A',
                 objectReader.readObject(

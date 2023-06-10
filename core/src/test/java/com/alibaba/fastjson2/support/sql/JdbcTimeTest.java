@@ -61,11 +61,12 @@ public class JdbcTimeTest {
 
     @Test
     public void test_timestamp_nano() {
-        LocalDateTime now = LocalDateTime.now();
+        byte[] bytes = new byte[] {-88, 7, -25, 6, 4, 12, 58, 54, 6};
+        LocalDateTime now = LocalDateTime.of(2023, 6, 4, 12, 58, 54, 6);
+
         Timestamp ts = Timestamp.valueOf(now);
 
         {
-            byte[] bytes = JSONB.toBytes(ts);
             Timestamp ts_jsonb = JSONB.parseObject(bytes, Timestamp.class);
             assertEquals(ts, ts_jsonb);
         }
@@ -89,12 +90,12 @@ public class JdbcTimeTest {
 
     @Test
     public void test_timestamp_nano_1() {
-        LocalDateTime now = LocalDateTime.now();
+        byte[] bytes = new byte[] {-88, 7, -25, 6, 4, 12, 56, 13, 10};
+        LocalDateTime now = LocalDateTime.of(2023, 6, 4, 12, 56, 13, 762);
         Timestamp ts = Timestamp.valueOf(now);
         ts.setNanos(10);
 
         {
-            byte[] bytes = JSONB.toBytes(ts);
             Timestamp ts_jsonb = JSONB.parseObject(bytes, Timestamp.class);
             assertEquals(ts, ts_jsonb);
         }

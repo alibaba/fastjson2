@@ -17,18 +17,18 @@ final class ObjectReaderImplMapString
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return this.readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
-        boolean match = jsonReader.nextIfMatch('{');
+        boolean match = jsonReader.nextIfObjectStart();
         if (!match) {
             if (jsonReader.current() == '[') {
                 jsonReader.next();
                 if (jsonReader.current() == '{') {
                     Object arrayItem = readObject(jsonReader, String.class, fieldName, features);
-                    if (jsonReader.nextIfMatch(']')) {
-                        jsonReader.nextIfMatch(',');
+                    if (jsonReader.nextIfArrayEnd()) {
+                        jsonReader.nextIfComma();
                         return arrayItem;
                     }
                 }
@@ -40,7 +40,7 @@ final class ObjectReaderImplMapString
             }
         }
 
-        JSONReader.Context context = jsonReader.getContext();
+        JSONReader.Context context = jsonReader.context;
         Map<String, Object> object
                 = instanceType == HashMap.class
                 ? new HashMap<>()
@@ -48,7 +48,7 @@ final class ObjectReaderImplMapString
         long contextFeatures = features | context.getFeatures();
 
         for (int i = 0; ; ++i) {
-            if (jsonReader.nextIfMatch('}')) {
+            if (jsonReader.nextIfObjectEnd()) {
                 break;
             }
 
@@ -74,7 +74,7 @@ final class ObjectReaderImplMapString
             }
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         return object;
     }

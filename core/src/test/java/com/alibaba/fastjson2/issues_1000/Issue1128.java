@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.issues_1000;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.annotation.JSONCompiler;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import org.junit.jupiter.api.Test;
@@ -69,7 +68,6 @@ public class Issue1128 {
         assertEquals("", test2.getName());
     }
 
-    @JSONCompiler
     static class Bean1 {
         private String code;
         private String name;

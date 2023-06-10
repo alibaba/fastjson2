@@ -34,9 +34,9 @@ public class ObjectWriter2Test {
         JSONObject jsonObject = JSONObject.from(bean);
         assertEquals(str, jsonObject.toString());
 
-        assertEquals(bean.f0, JSONPath.eval(bean, "$.f0"));
-        assertEquals(bean.f1, JSONPath.eval(bean, "$.f1"));
-        assertNull(JSONPath.eval(bean, "$.f100"));
+        assertEquals(bean.f0, TestUtils.eval(bean, "$.f0"));
+        assertEquals(bean.f1, TestUtils.eval(bean, "$.f1"));
+        assertNull(TestUtils.eval(bean, "$.f100"));
     }
 
     @Test

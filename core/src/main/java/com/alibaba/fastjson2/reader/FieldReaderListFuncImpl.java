@@ -1,13 +1,13 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.function.BiConsumer;
+import com.alibaba.fastjson2.function.Supplier;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 
 class FieldReaderListFuncImpl<T, V>
         extends FieldReaderList<T, V> {
@@ -19,7 +19,7 @@ class FieldReaderListFuncImpl<T, V>
             ObjectReader<V> itemObjectReader,
             BiConsumer<T, List<V>> function,
             Type itemType, String fieldName) {
-        super(fieldName, List.class, List.class, itemType, TypeUtils.getClass(itemType), 0, 0, null, null, null, null, null, null, function);
+        super(fieldName, List.class, List.class, itemType, TypeUtils.getClass(itemType), 0, 0, null, null, null, null, null, function);
         this.listCreator = listCreator;
         this.itemObjectReader = itemObjectReader;
     }

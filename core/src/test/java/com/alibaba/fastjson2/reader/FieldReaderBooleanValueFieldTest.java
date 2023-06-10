@@ -12,7 +12,7 @@ public class FieldReaderBooleanValueFieldTest {
     @Test
     public void test() {
         Bean bean = new Bean();
-        ObjectReader<Bean> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean.class);
+        ObjectReader<Bean> objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, true);
         assertEquals(true, bean.value);
@@ -41,7 +41,7 @@ public class FieldReaderBooleanValueFieldTest {
 
     @Test
     public void test3() {
-        ObjectReader<Bean3> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean3.class);
+        ObjectReader<Bean3> objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Bean3.class);
         assertEquals(
                 true,
                 objectReader.readObject(

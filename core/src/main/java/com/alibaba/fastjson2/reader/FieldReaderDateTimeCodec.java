@@ -2,14 +2,13 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.IOUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.time.*;
 import java.util.Date;
 import java.util.Locale;
 
@@ -28,12 +27,11 @@ abstract class FieldReaderDateTimeCodec<T>
             String format,
             Locale locale,
             Object defaultValue,
-            JSONSchema schema,
             Method method,
             Field field,
             ObjectReader dateReader
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, method, field);
         this.dateReader = dateReader;
 
         boolean formatUnixTime = false, formatMillis = false, hasDay = false, hasHour = false;
@@ -71,19 +69,7 @@ abstract class FieldReaderDateTimeCodec<T>
 
     protected abstract void acceptNull(T object);
 
-    protected abstract void accept(T object, Instant value);
-
-    protected abstract void accept(T object, LocalDateTime ldt);
-
-    protected abstract void accept(T object, ZonedDateTime zdt);
-
     protected abstract Object apply(Date value);
-
-    protected abstract Object apply(Instant value);
-
-    protected abstract Object apply(ZonedDateTime zdt);
-
-    protected abstract Object apply(LocalDateTime zdt);
 
     protected abstract Object apply(long millis);
 
@@ -109,20 +95,14 @@ abstract class FieldReaderDateTimeCodec<T>
                 accept(object, millis);
                 return;
             } else {
-                value = DateUtils.parseDate(str, format, DateUtils.DEFAULT_ZONE_ID);
+                value = DateUtils.parseDate(str, format, ZoneId.DEFAULT_ZONE_ID);
             }
         }
 
         if (value instanceof Date) {
             accept(object, (Date) value);
-        } else if (value instanceof Instant) {
-            accept(object, (Instant) value);
         } else if (value instanceof Long) {
             accept(object, ((Long) value).longValue());
-        } else if (value instanceof LocalDateTime) {
-            accept(object, (LocalDateTime) value);
-        } else if (value instanceof ZonedDateTime) {
-            accept(object, (ZonedDateTime) value);
         } else {
             throw new JSONException("not support value " + value.getClass());
         }

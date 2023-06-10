@@ -2,25 +2,21 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.function.Function;
 
 import java.lang.reflect.Type;
-import java.util.function.Function;
 
 public class ObjectReaderImplValueString<T>
         implements ObjectReader<T> {
     final long features;
     final Function<String, T> function;
-    final JSONSchema schema;
 
     public ObjectReaderImplValueString(
             Class<T> objectClass,
             long features,
-            JSONSchema schema,
             Function<String, T> function
     ) {
         this.features = features;
-        this.schema = schema;
         this.function = function;
     }
 
@@ -36,11 +32,6 @@ public class ObjectReaderImplValueString<T>
         }
 
         String value = jsonReader.readString();
-
-        if (schema != null) {
-            schema.validate(value);
-        }
-
         T object;
         try {
             object = function.apply(value);
@@ -58,7 +49,6 @@ public class ObjectReaderImplValueString<T>
         return new ObjectReaderImplValueString(
                 objectClass,
                 0,
-                null,
                 function
         );
     }
@@ -66,13 +56,11 @@ public class ObjectReaderImplValueString<T>
     public static <T> ObjectReaderImplValueString<T> of(
             Class<T> objectClass,
             long features,
-            JSONSchema schema,
             Function<String, T> function
     ) {
         return new ObjectReaderImplValueString(
                 objectClass,
                 features,
-                schema,
                 function
         );
     }

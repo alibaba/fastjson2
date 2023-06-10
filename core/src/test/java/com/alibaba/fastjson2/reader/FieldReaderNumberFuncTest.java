@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,7 +47,7 @@ public class FieldReaderNumberFuncTest {
     private static class Bean1 {
         private final Number number;
 
-        public Bean1(Number number) {
+        public Bean1(@JSONField(name = "number") Number number) {
             this.number = number;
         }
 

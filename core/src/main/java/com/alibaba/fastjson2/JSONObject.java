@@ -3,31 +3,25 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.filter.ValueFilter;
+import com.alibaba.fastjson2.function.Consumer;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.time.Instant;
+import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
 import java.lang.annotation.Annotation;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
-import java.time.temporal.TemporalAccessor;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONFactory.defaultObjectReaderProvider;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
-import static com.alibaba.fastjson2.util.BeanUtils.getAnnotations;
-import static com.alibaba.fastjson2.util.JDKUtils.ANDROID;
-import static com.alibaba.fastjson2.util.JDKUtils.GRAAL;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
 public class JSONObject
@@ -158,7 +152,12 @@ public class JSONObject
      * @param defaultValue the default mapping of the key
      */
     public Object getOrDefault(String key, Object defaultValue) {
-        return super.getOrDefault(key, defaultValue);
+        Object value = super.get(key);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return value;
+        }
     }
 
     /**
@@ -173,14 +172,17 @@ public class JSONObject
                 || key instanceof Boolean
                 || key instanceof UUID
         ) {
-            return super.getOrDefault(
+            return getOrDefault(
                     key.toString(), defaultValue
             );
         }
 
-        return super.getOrDefault(
-                key, defaultValue
-        );
+        Object value = super.get(key);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return value;
+        }
     }
 
     /**
@@ -287,7 +289,7 @@ public class JSONObject
         }
 
         Class valueClass = value.getClass();
-        ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
+        ObjectWriter objectWriter = JSONFactory.defaultObjectWriterProvider.getObjectWriter(valueClass);
         if (objectWriter instanceof ObjectWriterAdapter) {
             ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) objectWriter;
             return writerAdapter.toJSONObject(value);
@@ -315,7 +317,7 @@ public class JSONObject
 
         if (value instanceof Date) {
             long timeMillis = ((Date) value).getTime();
-            return DateUtils.toString(timeMillis, false, DateUtils.DEFAULT_ZONE_ID);
+            return DateUtils.toString(timeMillis, false, ZoneId.DEFAULT_ZONE_ID);
         }
 
         if (value instanceof Boolean
@@ -323,7 +325,8 @@ public class JSONObject
                 || value instanceof Number
                 || value instanceof UUID
                 || value instanceof Enum
-                || value instanceof TemporalAccessor) {
+//                || value instanceof TemporalAccessor
+        ) {
             return value.toString();
         }
 
@@ -835,7 +838,7 @@ public class JSONObject
             return (byte[]) value;
         }
         if (value instanceof String) {
-            return Base64.getDecoder().decode((String) value);
+            return IOUtils.decodeBase64((String) value);
         }
         throw new JSONException("can not cast to byte[], value : " + value);
     }
@@ -1045,7 +1048,11 @@ public class JSONObject
         }
 
         if (value instanceof String) {
-            return DateUtils.parseDate((String) value);
+            long millis = DateUtils.parseMillis((String) value, ZoneId.DEFAULT_ZONE_ID);
+            if (millis == 0) {
+                return null;
+            }
+            return new Date(millis);
         }
 
         if (value instanceof Number) {
@@ -1195,8 +1202,7 @@ public class JSONObject
             return (T) toString();
         }
 
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
+        ObjectReader<T> objectReader = defaultObjectReaderProvider.getObjectReader(type, fieldBased);
         return objectReader.createInstance(this, featuresValue);
     }
 
@@ -1243,8 +1249,7 @@ public class JSONObject
             return (T) toString();
         }
 
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader<T> objectReader = provider.getObjectReader(clazz, fieldBased);
+        ObjectReader<T> objectReader = defaultObjectReaderProvider.getObjectReader(clazz, fieldBased);
         return objectReader.createInstance(this, featuresValue);
     }
 
@@ -1255,7 +1260,21 @@ public class JSONObject
      * @param features features to be enabled in parsing
      */
     public <T> T toJavaObject(Class<T> clazz, JSONReader.Feature... features) {
-        return to(clazz, features);
+        long featuresValue = 0L;
+        boolean fieldBased = false;
+        for (JSONReader.Feature feature : features) {
+            if (feature == JSONReader.Feature.FieldBased) {
+                fieldBased = true;
+            }
+            featuresValue |= feature.mask;
+        }
+
+        if (clazz == String.class) {
+            return (T) toString();
+        }
+
+        ObjectReader<T> objectReader = defaultObjectReaderProvider.getObjectReader(clazz, fieldBased);
+        return objectReader.createInstance(this, featuresValue);
     }
 
     /**
@@ -1311,7 +1330,7 @@ public class JSONObject
         }
 
         Class<?> valueClass = value.getClass();
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
         Function typeConvert = provider.getTypeConvert(valueClass, type);
         if (typeConvert != null) {
             return (T) typeConvert.apply(value);
@@ -1397,7 +1416,7 @@ public class JSONObject
         }
 
         Class<?> valueClass = value.getClass();
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
         Function typeConvert = provider.getTypeConvert(valueClass, type);
         if (typeConvert != null) {
             return (T) typeConvert.apply(value);
@@ -1475,7 +1494,8 @@ public class JSONObject
     @SuppressWarnings({"rawtypes", "unchecked"})
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         final String methodName = method.getName();
-        int parameterCount = method.getParameterCount();
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        int parameterCount = parameterTypes.length;
 
         Class<?> returnType = method.getReturnType();
         if (parameterCount == 1) {
@@ -1498,7 +1518,7 @@ public class JSONObject
             if (name == null) {
                 name = methodName;
 
-                if (!name.startsWith("set")) {
+                if (!name.startsWith("set", 0)) {
                     throw new JSONException("This method '" + methodName + "' is not a setter");
                 }
 
@@ -1530,7 +1550,7 @@ public class JSONObject
                 name = methodName;
                 boolean with = false;
                 int prefix;
-                if ((name.startsWith("get") || (with = name.startsWith("with")))
+                if ((name.startsWith("get", 0) || (with = name.startsWith("with", 0)))
                         && name.length() > (prefix = with ? 4 : 3)
                 ) {
                     char[] chars = new char[name.length() - prefix];
@@ -1547,7 +1567,7 @@ public class JSONObject
                     if (value == null) {
                         return null;
                     }
-                } else if (name.startsWith("is")) {
+                } else if (name.startsWith("is", 0)) {
                     if ("isEmpty".equals(name)) {
                         value = get("empty");
                         if (value == null) {
@@ -1569,28 +1589,11 @@ public class JSONObject
                     return this.hashCode();
                 } else if ("toString".equals(name)) {
                     return this.toString();
-                } else if (name.startsWith("entrySet")) {
+                } else if (name.startsWith("entrySet", 0)) {
                     return this.entrySet();
                 } else if ("size".equals(name)) {
                     return this.size();
                 } else {
-                    Class<?> declaringClass = method.getDeclaringClass();
-                    if (declaringClass.isInterface()
-                            && method.getParameterCount() == 0
-                            && !Modifier.isAbstract(method.getModifiers())
-                            && !ANDROID
-                            && !GRAAL
-                    ) {
-                        // interface default method
-                        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
-                        MethodHandle methodHandle = lookup.findSpecial(
-                                declaringClass,
-                                method.getName(),
-                                MethodType.methodType(returnType),
-                                declaringClass
-                        );
-                        return methodHandle.invoke(proxy);
-                    }
                     throw new JSONException("This method '" + methodName + "' is not a getter");
                 }
             } else {
@@ -1600,9 +1603,9 @@ public class JSONObject
                 }
             }
 
-            if (value != null && !returnType.isInstance(value)) {
+            if (!returnType.isInstance(value)) {
                 Function typeConvert = JSONFactory
-                        .getDefaultObjectReaderProvider()
+                        .defaultObjectReaderProvider
                         .getTypeConvert(
                                 value.getClass(), method.getGenericReturnType()
                         );
@@ -1623,11 +1626,11 @@ public class JSONObject
      */
     private String getJSONFieldName(Method method) {
         String name = null;
-        Annotation[] annotations = getAnnotations(method);
+        Annotation[] annotations = method.getAnnotations();
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
             JSONField jsonField = BeanUtils.findAnnotation(annotation, JSONField.class);
-            if (Objects.nonNull(jsonField)) {
+            if (jsonField != null) {
                 name = jsonField.name();
                 if (name.isEmpty()) {
                     name = null;
@@ -1696,13 +1699,6 @@ public class JSONObject
     public JSONObject fluentPut(String key, Object value) {
         put(key, value);
         return this;
-    }
-
-    /**
-     * @since 2.0.4
-     */
-    public boolean isValid(JSONSchema schema) {
-        return schema.isValid(this);
     }
 
     /**
@@ -1814,9 +1810,6 @@ public class JSONObject
         return new JSONObject(this);
     }
 
-    /**
-     * @see JSONPath#paths(Object)
-     */
     public Object eval(JSONPath path) {
         return path.eval(this);
     }
@@ -1919,8 +1912,8 @@ public class JSONObject
      * @param v2 second value
      * @param k3 third key
      * @param v3 third value
-     * @param k4 foud key
-     * @param v4 foud value
+     * @param k4 four key
+     * @param v4 four value
      * @since 2.0.8
      */
     public static JSONObject of(
@@ -1953,8 +1946,8 @@ public class JSONObject
      * @param v2 second value
      * @param k3 third key
      * @param v3 third value
-     * @param k4 foud key
-     * @param v4 foud value
+     * @param k4 four key
+     * @param v4 four value
      * @param k5 five key
      * @param v5 five value
      * @since 2.0.21

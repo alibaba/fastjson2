@@ -20,6 +20,18 @@ public class Issue1125 {
         assertEquals(bean.date.getTime(), bean1.date.getTime());
     }
 
+    @Test
+    public void testUTF8() {
+        String str = "{\"date\":\"Sun Feb 19 18:46:07 GMT+08:00 2023\"}";
+        byte[] bytes = str.getBytes();
+        Bean bean = JSON.parseObject(bytes, Bean.class);
+        assertNotNull(bean);
+        assertEquals(1676803567000L, bean.date.getTime());
+
+        Bean bean1 = JSON.parseObject(bytes).toJavaObject(Bean.class);
+        assertEquals(bean.date.getTime(), bean1.date.getTime());
+    }
+
     public static class Bean {
         public Date date;
     }

@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.List;
 
 public class Issue514 {
@@ -97,11 +97,11 @@ public class Issue514 {
                 /**
                  * 呼叫开始时间戳
                  */
-                private LocalDateTime startTime;
+                private Calendar startTime;
                 /**
                  * 呼叫结束时间戳
                  */
-                private LocalDateTime endTime;
+                private Calendar endTime;
                 /**
                  * 外呼结果
                  */

@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2.benchmark;
 
 import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
+import com.alibaba.fastjson2.util.JDKUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.Runner;
@@ -23,7 +23,7 @@ public class EncodeUTF8Benchmark {
         out = new byte[STR.length() * 3];
         try {
             Field valueField = String.class.getDeclaredField("value");
-            valueFieldOffset = UnsafeUtils.objectFieldOffset(valueField);
+            valueFieldOffset = JDKUtils.UNSAFE.objectFieldOffset(valueField);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
@@ -31,7 +31,7 @@ public class EncodeUTF8Benchmark {
 
     @Benchmark
     public int unsafeEncodeUTF8() throws Exception {
-        char[] chars = (char[]) UnsafeUtils.getObject(STR, valueFieldOffset);
+        char[] chars = (char[]) JDKUtils.UNSAFE.getObject(STR, valueFieldOffset);
         return IOUtils.encodeUTF8(chars, 0, chars.length, out, 0);
     }
 

@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.write;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import org.junit.jupiter.api.Test;
@@ -43,23 +42,6 @@ public class ObjectWriterProviderTest {
         assertSame(writer1, JSON.registerIfAbsent(Bean.class, writer1));
         assertSame(writer1, JSON.registerIfAbsent(Bean.class, writer));
         assertSame(writer1, JSON.registerIfAbsent(Bean.class, writer));
-
-        MyModoule modoule = new MyModoule();
-        MyModoule modoule1 = new MyModoule();
-
-        assertTrue(provider.register(modoule));
-        assertFalse(provider.register(modoule));
-
-        assertFalse(provider.unregister(modoule1));
-
-        assertTrue(provider.register(modoule1));
-        assertFalse(provider.register(modoule1));
-
-        assertTrue(provider.unregister(modoule));
-        assertTrue(provider.unregister(modoule1));
-
-        assertFalse(provider.unregister(modoule));
-        assertFalse(provider.unregister(modoule1));
     }
 
     public static class Bean {
@@ -70,9 +52,5 @@ public class ObjectWriterProviderTest {
         @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
         }
-    }
-
-    public static class MyModoule
-            implements ObjectWriterModule {
     }
 }

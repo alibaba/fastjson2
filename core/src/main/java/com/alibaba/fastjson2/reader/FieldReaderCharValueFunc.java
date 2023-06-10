@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.function.ObjCharConsumer;
-import com.alibaba.fastjson2.schema.JSONSchema;
 
 import java.lang.reflect.Method;
 
@@ -16,11 +15,10 @@ final class FieldReaderCharValueFunc<T>
             int ordinal,
             String format,
             Character defaultValue,
-            JSONSchema schema,
             Method method,
             ObjCharConsumer<T> function
     ) {
-        super(fieldName, char.class, char.class, ordinal, 0, format, null, defaultValue, schema, method, null);
+        super(fieldName, char.class, char.class, ordinal, 0, format, null, defaultValue, method, null);
         this.function = function;
     }
 

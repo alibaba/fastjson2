@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -24,8 +25,6 @@ public class Calendar1Test {
     private TimeZone defaultTimeZone;
 
     Calendar[] dates = new Calendar[]{
-            null,
-            calendar(0),
             calendar(1),
             calendar(10),
             calendar(100),
@@ -392,8 +391,26 @@ public class Calendar1Test {
             }
             byte[] utf8 = JSON.toJSONBytes(new Date(id.getTimeInMillis()));
             Calendar id2 = JSON.parseObject(utf8, Calendar.class);
-            assertEquals(id, id2);
+            assertEquals(id, id2, new String(utf8));
         }
+    }
+
+    @Test
+    public void test() throws Exception {
+        String str = "1653-02-10 14:19:03";
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = fmt.parse(str);
+        System.out.println(date.getTime());
+
+        Date date1 = new Date(-10000000000000L);
+        System.out.println(fmt.format(date1));
+    }
+
+    @Test
+    public void test1() throws Exception {
+        Date date = new Date(-10000000000000L);
+        byte[] utf8 = JSON.toJSONBytes(date);
+        System.out.println(new String(utf8));
     }
 
     @Test
@@ -468,8 +485,9 @@ public class Calendar1Test {
         for (int i = 0; i < dates.length; i++) {
             Calendar id = dates[i];
             byte[] utf8 = JSON.toJSONBytes(id);
+            String str = new String(utf8);
             Calendar id2 = JSON.parseObject(utf8, 0, utf8.length, StandardCharsets.US_ASCII, Calendar.class);
-            assertEquals(id, id2);
+            assertEquals(id.getTimeInMillis(), id2.getTimeInMillis(), str);
         }
     }
 

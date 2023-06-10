@@ -7,7 +7,6 @@ import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -17,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TimeSortTest {
     @Test
     public void test() {
-        ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(C0.class);
+        ObjectWriter objectWriter = JSONFactory.defaultObjectWriterProvider.getObjectWriter(C0.class);
         List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
         assertEquals(1, fieldWriters.size());
         assertEquals(C0.class, fieldWriters.get(0).method.getDeclaringClass());
@@ -25,7 +24,7 @@ public class TimeSortTest {
 
     @Test
     public void testReader() {
-        ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(C0.class);
+        ObjectReader objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(C0.class);
         FieldReader[] fieldReaders = ((ObjectReaderAdapter) objectReader).getFieldReaders();
         assertEquals(1, fieldReaders.length);
         assertEquals(C0.class, fieldReaders[0].method.getDeclaringClass());
@@ -48,7 +47,7 @@ public class TimeSortTest {
 
     @Test
     public void test1() {
-        ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(C1.class);
+        ObjectWriter objectWriter = JSONFactory.defaultObjectWriterProvider.getObjectWriter(C1.class);
         List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
         assertEquals(1, fieldWriters.size());
         assertEquals(C1.class, fieldWriters.get(0).method.getDeclaringClass());
@@ -56,7 +55,7 @@ public class TimeSortTest {
 
     @Test
     public void testReader1() {
-        ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(C1.class);
+        ObjectReader objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(C1.class);
         FieldReader[] fieldReaders = ((ObjectReaderAdapter) objectReader).getFieldReaders();
         assertEquals(1, fieldReaders.length);
         assertEquals(C1.class, fieldReaders[0].method.getDeclaringClass());
@@ -89,19 +88,9 @@ public class TimeSortTest {
         assertEquals(C2.class, fieldWriters.get(0).field.getDeclaringClass());
     }
 
-    // Android not support
-    // GraalVM not support
-    @Test
-    public void test2ASM() {
-        ObjectWriter objectWriter = ObjectWriterCreatorASM.INSTANCE.createObjectWriter(C2.class);
-        List<FieldWriter> fieldWriters = objectWriter.getFieldWriters();
-        assertEquals(1, fieldWriters.size());
-        assertEquals(C2.class, fieldWriters.get(0).field.getDeclaringClass());
-    }
-
     @Test
     public void testReader2() {
-        ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(C2.class);
+        ObjectReader objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(C2.class);
         FieldReader[] fieldReaders = ((ObjectReaderAdapter) objectReader).getFieldReaders();
         assertEquals(1, fieldReaders.length);
         assertEquals(C2.class, fieldReaders[0].field.getDeclaringClass());

@@ -2,13 +2,12 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.function.BiConsumer;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Locale;
-import java.util.function.BiConsumer;
 
 final class FieldReaderBigDecimalFunc<T, V>
         extends FieldReader<T> {
@@ -22,20 +21,15 @@ final class FieldReaderBigDecimalFunc<T, V>
             String format,
             Locale locale,
             Object defaultValue,
-            JSONSchema schema,
             Method method,
             BiConsumer<T, V> function) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, method, null);
         this.function = function;
     }
 
     @Override
     public void accept(T object, Object value) {
         BigDecimal decimalValue = TypeUtils.toBigDecimal(value);
-
-        if (schema != null) {
-            schema.assertValidate(decimalValue);
-        }
 
         try {
             function.accept(object, (V) decimalValue);
@@ -46,10 +40,6 @@ final class FieldReaderBigDecimalFunc<T, V>
 
     @Override
     public void accept(T object, int value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
         try {
             function.accept(object, (V) BigDecimal.valueOf(value));
         } catch (Exception e) {
@@ -59,10 +49,6 @@ final class FieldReaderBigDecimalFunc<T, V>
 
     @Override
     public void accept(T object, long value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
         try {
             function.accept(object, (V) BigDecimal.valueOf(value));
         } catch (Exception e) {
@@ -81,10 +67,6 @@ final class FieldReaderBigDecimalFunc<T, V>
             } else {
                 throw e;
             }
-        }
-
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
         }
 
         function.accept(object, (V) fieldValue);

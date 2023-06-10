@@ -4,12 +4,12 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.function.Function;
 
 class ObjectReaderImplDoubleValueArray
         extends ObjectReaderPrimitive {
@@ -29,11 +29,11 @@ class ObjectReaderImplDoubleValueArray
             return null;
         }
 
-        if (jsonReader.nextIfMatch('[')) {
+        if (jsonReader.nextIfArrayStart()) {
             double[] values = new double[16];
             int size = 0;
             for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
+                if (jsonReader.nextIfArrayEnd()) {
                     break;
                 }
 
@@ -54,7 +54,7 @@ class ObjectReaderImplDoubleValueArray
 
                 values[size++] = jsonReader.readDoubleValue();
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             double[] array = Arrays.copyOf(values, size);
             if (builder != null) {
@@ -111,7 +111,7 @@ class ObjectReaderImplDoubleValueArray
             } else if (item instanceof Number) {
                 value = ((Number) item).doubleValue();
             } else {
-                Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), double.class);
+                Function typeConvert = JSONFactory.defaultObjectReaderProvider.getTypeConvert(item.getClass(), double.class);
                 if (typeConvert == null) {
                     throw new JSONException("can not cast to double " + item.getClass());
                 }

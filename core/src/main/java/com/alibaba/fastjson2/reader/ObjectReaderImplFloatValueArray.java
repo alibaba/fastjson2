@@ -4,12 +4,12 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.function.Function;
 
 class ObjectReaderImplFloatValueArray
         extends ObjectReaderPrimitive {
@@ -29,11 +29,11 @@ class ObjectReaderImplFloatValueArray
             return null;
         }
 
-        if (jsonReader.nextIfMatch('[')) {
+        if (jsonReader.nextIfArrayStart()) {
             float[] values = new float[16];
             int size = 0;
             for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
+                if (jsonReader.nextIfArrayEnd()) {
                     break;
                 }
 
@@ -54,7 +54,7 @@ class ObjectReaderImplFloatValueArray
 
                 values[size++] = jsonReader.readFloatValue();
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             float[] array = Arrays.copyOf(values, size);
             if (builder != null) {
@@ -109,7 +109,7 @@ class ObjectReaderImplFloatValueArray
             } else if (item instanceof Number) {
                 value = ((Number) item).floatValue();
             } else {
-                Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), float.class);
+                Function typeConvert = JSONFactory.defaultObjectReaderProvider.getTypeConvert(item.getClass(), float.class);
                 if (typeConvert == null) {
                     throw new JSONException("can not cast to float " + item.getClass());
                 }

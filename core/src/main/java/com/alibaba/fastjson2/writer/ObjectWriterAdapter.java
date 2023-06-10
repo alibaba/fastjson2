@@ -465,12 +465,7 @@ public class ObjectWriterAdapter<T>
             }
 
             // fast return
-            if (nameFilter == null
-                    && propertyFilter == null
-                    && valueFilter == null
-                    && contextValueFilter == null
-                    && contextNameFilter == null
-                    && valueFilter == null
+            if (nameFilter == null && propertyFilter == null && valueFilter == null && contextValueFilter == null && contextNameFilter == null
             ) {
                 fieldWriter.write(jsonWriter, object);
                 continue;
@@ -564,12 +559,8 @@ public class ObjectWriterAdapter<T>
                 if (!nameChanged) {
                     fieldWriter.write(jsonWriter, object);
                 } else {
-                    if (nameChanged) {
-                        jsonWriter.writeName(filteredName);
-                        jsonWriter.writeColon();
-                    } else {
-                        fieldWriter.writeFieldName(jsonWriter);
-                    }
+                    jsonWriter.writeName(filteredName);
+                    jsonWriter.writeColon();
 
                     if (fieldValue == null) {
                         ObjectWriter fieldValueWriter = fieldWriter.getObjectWriter(jsonWriter, fieldWriter.fieldClass);
@@ -605,7 +596,7 @@ public class ObjectWriterAdapter<T>
 
                 ObjectWriter fieldObjectWriter = fieldWriter.getInitWriter();
                 if (fieldObjectWriter == null) {
-                    fieldObjectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(fieldWriter.fieldClass);
+                    fieldObjectWriter = JSONFactory.defaultObjectWriterProvider.getObjectWriter(fieldWriter.fieldClass);
                 }
                 List<FieldWriter> unwrappedFieldWriters = fieldObjectWriter.getFieldWriters();
                 for (FieldWriter unwrappedFieldWriter : unwrappedFieldWriters) {

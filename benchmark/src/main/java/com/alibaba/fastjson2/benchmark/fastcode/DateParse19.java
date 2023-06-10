@@ -11,10 +11,11 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.text.SimpleDateFormat;
-import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+
+import static com.alibaba.fastjson2.time.ZoneId.DEFAULT_ZONE_ID;
 
 public class DateParse19 {
     static final String pattern = "yyyy-MM-dd HH:mm:ss";
@@ -26,40 +27,15 @@ public class DateParse19 {
             () -> new SimpleDateFormat(pattern)
     );
 
-    @Benchmark
-    public void javaTimeFormatter(Blackhole bh) throws Throwable {
-        LocalDateTime ldt = LocalDateTime.parse(input, formatter);
-        ZoneId zoneId = DateUtils.DEFAULT_ZONE_ID;
-        ZonedDateTime zdt = ldt.atZone(zoneId);
-        Instant instant = zdt.toInstant();
-        Date date = Date.from(instant);
-        bh.consume(date);
-    }
-
-//    @Benchmark
-    public void javaTimeDateTimeFormatter1(Blackhole bh) throws Throwable {
-        LocalDateTime ldt = LocalDateTime.parse(input, formatter);
-        ZoneId zoneId = DateUtils.DEFAULT_ZONE_ID;
-        long millis = DateUtils.millis(ldt, zoneId);
-        Date date = new Date(millis);
-        bh.consume(date);
-    }
-
 //    @Benchmark
     public void parseDateSmart(Blackhole bh) throws Throwable {
-        Date date = DateUtils.parseDate(input);
-        bh.consume(date);
-    }
-
-    @Benchmark
-    public void parseDateYMDHMS19(Blackhole bh) throws Throwable {
-        Date date = DateUtils.parseDateYMDHMS19(input);
+        Date date = new Date(DateUtils.parseMillis(input, DEFAULT_ZONE_ID));
         bh.consume(date);
     }
 
 //    @Benchmark
     public void parseDate(Blackhole bh) throws Throwable {
-        Date date = DateUtils.parseDate(input, pattern);
+        Date date = DateUtils.parseDate(input, pattern, DEFAULT_ZONE_ID);
         bh.consume(date);
     }
 

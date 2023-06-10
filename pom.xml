@@ -6,7 +6,7 @@
 
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-parent</artifactId>
-    <version>2.0.33-SNAPSHOT</version>
+    <version>2.0.34.android4</version>
     <name>${project.artifactId}</name>
     <description>Fastjson is a JSON processor (JSON parser + JSON generator) written in Java</description>
     <packaging>pom</packaging>
@@ -56,25 +56,8 @@
     </properties>
 
     <modules>
-        <!--
-        <module>adapter</module>
-        -->
         <module>benchmark</module>
         <module>core</module>
-        <!--
-            <module>example-graalvm-native</module>
-        -->
-        <module>example-spring-test</module>
-        <!--
-            <module>example-spring6-test</module>
-        -->
-        <module>extension</module>
-        <module>extension-spring5</module>
-        <!--
-        <module>extension-spring6</module>
-        -->
-        <module>fastjson1-compatible</module>
-        <module>kotlin</module>
         <module>safemode-test</module>
     </modules>
 
@@ -589,8 +572,7 @@
                             <failOnViolation>true</failOnViolation>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
                             <configLocation>src/checkstyle/fastjson2-checks.xml</configLocation>
-                            <excludes>module-info.java,
-                                com/alibaba/fastjson2/fieldbased/Case1.java,
+                            <excludes>com/alibaba/fastjson2/fieldbased/Case1.java,
                                 com/alibaba/fastjson2/codec/UnicodeClassNameTest.java,
                                 com/alibaba/fastjson2/hsf/UCaseNameTest.java,
                                 com/alibaba/json/bvtVO/PushMsg.java,
@@ -650,7 +632,11 @@
                                 com/alibaba/fastjson/issues_compatible/Issue1303.java,
                                 com/alibaba/fastjson2/util/BeanUtilsTest.java,
                                 com/alibaba/fastjson2/issues_1000/Issue1395.java,
-                                com/alibaba/fastjson/v2issues/Issue1432.java
+                                com/alibaba/fastjson/v2issues/Issue1432.java,
+                                com/alibaba/fastjson2/benchmark/taobao/homepage/*.java,
+                                com/alibaba/fastjson2/benchmark/taobao/aura/*.java,
+                                com/alibaba/fastjson2/benchmark/taobao/aura/base/*.java,
+                                com/alibaba/fastjson2/issues/Issue895.java
                             </excludes>
                         </configuration>
                     </execution>
@@ -781,31 +767,6 @@
                     <groupId>org.sonatype.plugins</groupId>
                     <artifactId>nexus-staging-maven-plugin</artifactId>
                     <version>1.6.13</version>
-                </plugin>
-                <plugin>
-                    <!-- https://github.com/moditect/moditect -->
-                    <groupId>org.moditect</groupId>
-                    <artifactId>moditect-maven-plugin</artifactId>
-                    <version>1.0.0.Final</version>
-                    <executions>
-                        <execution>
-                            <id>add-module-infos</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>add-module-info</goal>
-                            </goals>
-                            <configuration>
-                                <jvmVersion>9</jvmVersion>
-                                <overwriteExistingFiles>true</overwriteExistingFiles>
-                                <module>
-                                    <!-- using `moduleInfoFile` is more IDE/editor friendly than `moduleInfoSource`/`moduleInfo` -->
-                                    <moduleInfoFile>
-                                        ${project.basedir}/src/main/moditect/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -1006,20 +967,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-        <profile>
-            <id>enable-incubators-for-jdk17+</id>
-            <activation>
-                <jdk>[17,)</jdk>
-            </activation>
-            <modules>
-                <!--
-                <module>example-graalvm-native</module>
-                -->
-                <module>extension-spring6</module>
-                <module>example-spring6-test</module>
-                <module>incubator-vector</module>
-            </modules>
         </profile>
         <profile>
             <id>deploy-settings</id>

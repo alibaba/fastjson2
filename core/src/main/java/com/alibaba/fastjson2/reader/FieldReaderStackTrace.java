@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.function.BiConsumer;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -9,7 +9,6 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.function.BiConsumer;
 
 public class FieldReaderStackTrace
         extends FieldReaderObject {
@@ -22,19 +21,14 @@ public class FieldReaderStackTrace
             String format,
             Locale locale,
             Object defaultValue,
-            JSONSchema schema,
             Method method,
             Field field,
             BiConsumer function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, method, field, function);
     }
 
     public void accept(Object object, Object value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
         if (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
             return;
         }

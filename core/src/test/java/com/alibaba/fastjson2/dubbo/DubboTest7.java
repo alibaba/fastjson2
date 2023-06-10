@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.io.Serializable;
 import java.util.Date;
 
+import static com.alibaba.fastjson2.time.ZoneId.DEFAULT_ZONE_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DubboTest7 {
@@ -32,14 +33,14 @@ public class DubboTest7 {
 
     @Test
     public void test() {
-        Date object = new Date();
+        Date date = new Date();
 
-        byte[] jsonbBytes = JSONB.toBytes(object, writerFeatures);
+        byte[] jsonbBytes = JSONB.toBytes(date, writerFeatures);
 
         String str = JSONB.parseObject(
                 jsonbBytes, String.class, readerFeatures
         );
-        assertEquals(DateUtils.toString(object), str);
+        assertEquals(DateUtils.toString(date.getTime(), false, DEFAULT_ZONE_ID), str);
     }
 
     @Test

@@ -1,10 +1,10 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.function.Function;
 
 import java.lang.reflect.Method;
 import java.util.Calendar;
-import java.util.function.Function;
 
 final class FieldWriterCalendarFunc<T>
         extends FieldWriterDate<T> {

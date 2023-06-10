@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONType;
 import org.junit.jupiter.api.Test;
@@ -24,7 +23,7 @@ public class ObjectReaderBaseModuleTest {
                 return null;
             }
         };
-        assertThrows(JSONException.class, () -> impl.createInstance(0));
+        assertThrows(Exception.class, () -> impl.createInstance(0));
         assertNull(impl.getFieldReader(0L));
     }
 

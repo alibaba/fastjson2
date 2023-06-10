@@ -5,73 +5,31 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.function.*;
-import com.alibaba.fastjson2.internal.asm.ASMUtils;
-import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
-import com.alibaba.fastjson2.modules.ObjectReaderModule;
-import com.alibaba.fastjson2.schema.JSONSchema;
-import com.alibaba.fastjson2.support.LambdaMiscCodec;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
-import java.lang.invoke.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
-import java.util.function.*;
 
-import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
-import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
-import static com.alibaba.fastjson2.util.TypeUtils.*;
+import static com.alibaba.fastjson2.codec.FieldInfo.READ_ONLY;
 
 public class ObjectReaderCreator {
-    public static final boolean JIT = !JDKUtils.ANDROID && !JDKUtils.GRAAL;
     public static final ObjectReaderCreator INSTANCE = new ObjectReaderCreator();
-
-    protected AtomicInteger jitErrorCount = new AtomicInteger();
-    protected volatile Throwable jitErrorLast;
-
-    protected static final Map<Class, LambdaSetterInfo> methodTypeMapping = new HashMap<>();
-
-    static class LambdaSetterInfo {
-        final Class fieldClass;
-        final MethodType sameMethodMethod;
-        final MethodType methodType;
-        final MethodType invokedType;
-
-        LambdaSetterInfo(Class fieldClass, Class functionClass) {
-            this.fieldClass = fieldClass;
-            this.sameMethodMethod = MethodType.methodType(void.class, Object.class, fieldClass);
-            this.methodType = MethodType.methodType(void.class, fieldClass);
-            this.invokedType = MethodType.methodType(functionClass);
-        }
-    }
-
-    static {
-        methodTypeMapping.put(boolean.class, new LambdaSetterInfo(boolean.class, ObjBoolConsumer.class));
-        methodTypeMapping.put(byte.class, new LambdaSetterInfo(byte.class, ObjByteConsumer.class));
-        methodTypeMapping.put(short.class, new LambdaSetterInfo(short.class, ObjShortConsumer.class));
-        methodTypeMapping.put(int.class, new LambdaSetterInfo(int.class, ObjIntConsumer.class));
-        methodTypeMapping.put(long.class, new LambdaSetterInfo(long.class, ObjLongConsumer.class));
-        methodTypeMapping.put(char.class, new LambdaSetterInfo(char.class, ObjCharConsumer.class));
-        methodTypeMapping.put(float.class, new LambdaSetterInfo(float.class, ObjFloatConsumer.class));
-        methodTypeMapping.put(double.class, new LambdaSetterInfo(double.class, ObjDoubleConsumer.class));
-    }
 
     public <T> ObjectReader<T> createObjectReaderNoneDefaultConstructor(Constructor constructor, String... paramNames) {
         Function<Map<Long, Object>, T> function = createFunction(constructor, paramNames);
         Class declaringClass = constructor.getDeclaringClass();
         FieldReader[] fieldReaders = createFieldReaders(
-                JSONFactory.getDefaultObjectReaderProvider(),
+                JSONFactory.defaultObjectReaderProvider,
                 declaringClass,
                 declaringClass,
                 constructor,
-                constructor.getParameters(),
+                constructor.getParameterTypes(),
                 paramNames
         );
         return createObjectReaderNoneDefaultConstructor(declaringClass, function, fieldReaders);
@@ -89,7 +47,6 @@ public class ObjectReaderCreator {
                 0,
                 creator,
                 null,
-                null,
                 fieldReaders,
                 null,
                 null,
@@ -100,11 +57,11 @@ public class ObjectReaderCreator {
     public <T> ObjectReader<T> createObjectReaderFactoryMethod(Method factoryMethod, String... paramNames) {
         Function<Map<Long, Object>, Object> factoryFunction = createFactoryFunction(factoryMethod, paramNames);
         FieldReader[] fieldReaders = createFieldReaders(
-                JSONFactory.getDefaultObjectReaderProvider(),
+                JSONFactory.defaultObjectReaderProvider,
                 null,
                 null,
                 factoryMethod,
-                factoryMethod.getParameters(),
+                factoryMethod.getParameterTypes(),
                 paramNames
         );
         return new ObjectReaderNoneDefaultConstructor(
@@ -113,7 +70,6 @@ public class ObjectReaderCreator {
                 null,
                 0,
                 factoryFunction,
-                null,
                 paramNames,
                 fieldReaders,
                 null,
@@ -126,29 +82,36 @@ public class ObjectReaderCreator {
             ObjectReaderProvider provider,
             Class objectClass,
             Type objectType,
-            Executable owner,
-            Parameter[] parameters,
+            AccessibleObject owner,
+            Class[] parameters,
             String... paramNames
     ) {
         Class<?> declaringClass = null;
-        if (owner != null) {
-            declaringClass = owner.getDeclaringClass();
+        Type[] paramTypes = null;
+        Annotation[][] parameterAnnotations = null;
+        if (owner instanceof Constructor) {
+            declaringClass = ((Constructor<?>) owner).getDeclaringClass();
+            paramTypes = ((Constructor<?>) owner).getGenericParameterTypes();
+            parameterAnnotations = ((Constructor<?>) owner).getParameterAnnotations();
+        } else if (owner instanceof Method) {
+            declaringClass = ((Method) owner).getDeclaringClass();
+            paramTypes = ((Method) owner).getGenericParameterTypes();
+            parameterAnnotations = ((Method) owner).getParameterAnnotations();
         }
 
         FieldReader[] fieldReaders = new FieldReader[parameters.length];
         for (int i = 0; i < parameters.length; i++) {
             FieldInfo fieldInfo = new FieldInfo();
 
-            Parameter parameter = parameters[i];
             String paramName;
             if (i < paramNames.length) {
                 paramName = paramNames[i];
             } else {
-                paramName = parameter.getName();
+                paramName = "arg" + i;
             }
 
             if (owner instanceof Constructor) {
-                provider.getFieldInfo(fieldInfo, declaringClass, (Constructor) owner, i, parameter);
+                provider.getFieldInfo(fieldInfo, declaringClass, (Constructor) owner, i, parameterAnnotations);
             }
 
             if (owner instanceof Constructor) {
@@ -173,8 +136,8 @@ public class ObjectReaderCreator {
                 paramName = "arg" + i;
             }
 
-            ObjectReader initReader = getInitReader(provider, parameter.getParameterizedType(), parameter.getType(), fieldInfo);
-            Type paramType = parameter.getParameterizedType();
+            Type paramType = paramTypes[i];
+            ObjectReader initReader = getInitReader(provider, paramType, parameters[i], fieldInfo);
             fieldReaders[i] = createFieldReaderParam(
                     null,
                     null,
@@ -183,11 +146,9 @@ public class ObjectReaderCreator {
                     fieldInfo.features,
                     fieldInfo.format,
                     paramType,
-                    parameter.getType(),
+                    parameters[i],
                     paramName,
                     declaringClass,
-                    parameter,
-                    null,
                     initReader
             );
         }
@@ -239,7 +200,6 @@ public class ObjectReaderCreator {
                 objectClass,
                 null,
                 0,
-                null,
                 createSupplier(objectClass),
                 null,
                 fieldReaders
@@ -251,7 +211,7 @@ public class ObjectReaderCreator {
             Supplier<T> defaultCreator,
             FieldReader... fieldReaders
     ) {
-        return createObjectReader(objectClass, null, 0, null, defaultCreator, null, fieldReaders);
+        return createObjectReader(objectClass, null, 0, defaultCreator, null, fieldReaders);
     }
 
     public <T> ObjectReader<T> createObjectReaderSeeAlso(
@@ -348,7 +308,7 @@ public class ObjectReaderCreator {
         if (builderWithPrefix == null || builderWithPrefix.isEmpty()) {
             builderWithPrefix = "with";
         }
-        int builderWithPrefixLenth = builderWithPrefix.length();
+        int builderWithPrefixLength = builderWithPrefix.length();
 
         Map<String, FieldReader> fieldReaders = new LinkedHashMap<>();
 
@@ -356,7 +316,7 @@ public class ObjectReaderCreator {
         final FieldInfo fieldInfo = new FieldInfo();
         BeanUtils.setters(builderClass, false, method -> {
             fieldInfo.init();
-            provider.getFieldInfo(fieldInfo, objectClass, method);
+            provider.module.getFieldInfo(fieldInfo, objectClass, method);
 
             if (fieldInfo.ignore) {
                 return;
@@ -366,7 +326,7 @@ public class ObjectReaderCreator {
             String fieldName;
             if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
                 final int methodNameLength = methodName.length();
-                boolean prefixNotMach = methodNameLength <= prefix.length() || !methodName.startsWith(prefix);
+                boolean prefixNotMach = methodNameLength <= prefix.length() || !methodName.startsWith(prefix, 0);
                 if (prefixNotMach) {
                     if ((method.getDeclaringClass() != Object.class && method.getReturnType() == builderClass)
                             && (method.getAnnotation(JSONField.class) != null
@@ -377,13 +337,13 @@ public class ObjectReaderCreator {
                         return;
                     }
                 } else {
-                    fieldName = BeanUtils.setterName(methodName, builderWithPrefixLenth);
+                    fieldName = BeanUtils.setterName(methodName, builderWithPrefixLength);
                 }
             } else {
                 fieldName = fieldInfo.fieldName;
             }
 
-            if (method.getParameterCount() == 0) {
+            if (method.getParameterTypes().length == 0) {
                 FieldReader fieldReader = createFieldReaderMethod(
                         builderClass,
                         builderClass,
@@ -393,16 +353,15 @@ public class ObjectReaderCreator {
                         fieldInfo.format,
                         fieldInfo.locale,
                         fieldInfo.defaultValue,
-                        fieldInfo.schema,
                         method.getGenericReturnType(),
                         method.getReturnType(),
                         method,
                         null
                 );
-                FieldReader origin = fieldReaders.putIfAbsent(fieldName,
-                        fieldReader
-                );
-                if (origin != null && origin.compareTo(fieldReader) > 0) {
+                FieldReader origin = fieldReaders.get(fieldName);
+                if (origin == null) {
+                    fieldReaders.put(fieldName, fieldReader);
+                } else if (origin.compareTo(fieldReader) > 0) {
                     fieldReaders.put(fieldName, fieldReader);
                 }
                 return;
@@ -422,39 +381,44 @@ public class ObjectReaderCreator {
                     fieldInfo.format,
                     fieldInfo.locale,
                     fieldInfo.defaultValue,
-                    fieldInfo.schema,
                     fieldType,
                     fieldClass,
                     method,
                     null);
 
-            FieldReader origin = fieldReaders.putIfAbsent(fieldName, fieldReader);
-            if (origin != null && origin.compareTo(fieldReader) > 0) {
+            FieldReader origin = fieldReaders.get(fieldName);
+            if (origin == null) {
+                fieldReaders.put(fieldName, fieldReader);
+            } else if (origin.compareTo(fieldReader) > 0) {
                 fieldReaders.put(fieldName, fieldReader);
             }
 
-            if (fieldInfo.alternateNames != null) {
-                for (String alternateName : fieldInfo.alternateNames) {
+            String[] alternateNames = fieldInfo.alternateNames;
+            if (alternateNames != null) {
+                for (int i = 0; i < alternateNames.length; i++) {
+                    String alternateName = alternateNames[i];
                     if (fieldName.equals(alternateName)) {
                         continue;
                     }
 
-                    fieldReaders
-                            .putIfAbsent(alternateName,
-                                    createFieldReaderMethod(
-                                            builderClass,
-                                            objectType,
-                                            alternateName,
-                                            fieldInfo.ordinal,
-                                            fieldInfo.features,
-                                            fieldInfo.format,
-                                            fieldInfo.locale,
-                                            fieldInfo.defaultValue,
-                                            fieldInfo.schema,
-                                            fieldType,
-                                            fieldClass,
-                                            method,
-                                            null));
+                    FieldReader alterOrigin = fieldReaders.get(alternateName);
+                    if (alterOrigin == null) {
+                        fieldReaders.put(
+                                alternateName,
+                                createFieldReaderMethod(
+                                        builderClass,
+                                        objectType,
+                                        alternateName,
+                                        fieldInfo.ordinal,
+                                        fieldInfo.features,
+                                        fieldInfo.format,
+                                        fieldInfo.locale,
+                                        fieldInfo.defaultValue,
+                                        fieldType,
+                                        fieldClass,
+                                        method,
+                                        null));
+                    }
                 }
             }
         });
@@ -477,28 +441,32 @@ public class ObjectReaderCreator {
 
         Map<String, FieldReader> fieldReaders = new LinkedHashMap<>();
 
-        Class declaringClass = null;
-        Parameter[] parameters;
+        Class declaringClass;
+        Class[] parameters;
         String[] paramNames;
+        Type[] genericParameterTypes;
+        Annotation[][] parameterAnnotations;
         if (beanInfo.creatorConstructor != null) {
-            parameters = beanInfo.creatorConstructor.getParameters();
+            parameters = beanInfo.creatorConstructor.getParameterTypes();
             declaringClass = beanInfo.creatorConstructor.getDeclaringClass();
-            paramNames = ASMUtils.lookupParameterNames(beanInfo.creatorConstructor);
+            paramNames = BeanUtils.lookupParameterNames(beanInfo.creatorConstructor);
+            genericParameterTypes = beanInfo.creatorConstructor.getGenericParameterTypes();
+            parameterAnnotations = beanInfo.creatorConstructor.getParameterAnnotations();
         } else {
-            parameters = beanInfo.createMethod.getParameters();
+            parameters = beanInfo.createMethod.getParameterTypes();
             declaringClass = beanInfo.createMethod.getDeclaringClass();
-            paramNames = ASMUtils.lookupParameterNames(beanInfo.createMethod);
+            paramNames = new String[parameters.length];
+            genericParameterTypes = beanInfo.createMethod.getGenericParameterTypes();
+            parameterAnnotations = beanInfo.createMethod.getParameterAnnotations();
         }
 
         for (int i = 0; i < parameters.length; i++) {
             fieldInfo.init();
 
-            Parameter parameter = parameters[i];
-
             if (beanInfo.creatorConstructor != null) {
-                provider.getFieldInfo(fieldInfo, objectClass, beanInfo.creatorConstructor, i, parameter);
+                provider.getFieldInfo(fieldInfo, objectClass, beanInfo.creatorConstructor, i, parameterAnnotations);
             } else {
-                provider.getFieldInfo(fieldInfo, objectClass, beanInfo.createMethod, i, parameter);
+                provider.getFieldInfo(fieldInfo, objectClass, beanInfo.createMethod, i);
             }
 
             if (parameters.length == 1 && (fieldInfo.features & FieldInfo.VALUE_MASK) != 0) {
@@ -512,13 +480,11 @@ public class ObjectReaderCreator {
                 }
 
                 if (fieldName == null || fieldName.isEmpty()) {
-                    fieldName = parameter.getName();
+                    fieldName = "arg" + i;
                 }
             }
-            if (fieldName == null || fieldName.isEmpty()) {
-                fieldName = paramNames[i];
-            } else if (fieldName.startsWith("arg")) {
-                if (paramNames != null && paramNames.length > i) {
+            if (fieldName.startsWith("arg", 0)) {
+                if (paramNames.length > i) {
                     fieldName = paramNames[i];
                 }
             } else {
@@ -526,14 +492,14 @@ public class ObjectReaderCreator {
             }
 
             String finalFieldName = fieldName;
-            Class<?> paramClass = parameter.getType();
+            Class<?> paramClass = parameters[i];
             BeanUtils.getters(objectClass, method -> {
                 if (method.getReturnType() != paramClass) {
                     return;
                 }
 
                 FieldInfo methodFieldInfo = new FieldInfo();
-                provider.getFieldInfo(methodFieldInfo, objectClass, method);
+                provider.module.getFieldInfo(methodFieldInfo, objectClass, method);
                 String methodFieldName = methodFieldInfo.fieldName;
                 if (methodFieldName == null) {
                     methodFieldName = BeanUtils.getterName(method, PropertyNamingStrategy.CamelCase.name());
@@ -549,7 +515,7 @@ public class ObjectReaderCreator {
                 fieldName = "arg" + i;
             }
 
-            Type paramType = parameter.getParameterizedType();
+            Type paramType = genericParameterTypes[i];
             ObjectReader initReader = getInitReader(provider, paramType, paramClass, fieldInfo);
             FieldReader fieldReaderParam = createFieldReaderParam(
                     objectClass,
@@ -562,33 +528,35 @@ public class ObjectReaderCreator {
                     paramClass,
                     fieldName,
                     declaringClass,
-                    parameter,
-                    null,
                     initReader
             );
             fieldReaders.put(fieldName, fieldReaderParam);
 
-            if (fieldInfo.alternateNames != null) {
-                for (String alternateName : fieldInfo.alternateNames) {
+            String[] alternateNames = fieldInfo.alternateNames;
+            if (alternateNames != null) {
+                for (int j = 0; j < alternateNames.length; j++) {
+                    String alternateName = alternateNames[j];
                     if (fieldName.equals(alternateName)) {
                         continue;
                     }
-
-                    fieldReaders.putIfAbsent(alternateName,
-                            createFieldReaderParam(
-                                    objectClass,
-                                    objectType,
-                                    alternateName,
-                                    i,
-                                    fieldInfo.features,
-                                    fieldInfo.format,
-                                    paramType,
-                                    paramClass,
-                                    fieldName,
-                                    declaringClass,
-                                    parameter,
-                                    null
-                            ));
+                    FieldReader alterOrigin = fieldReaders.get(alternateName);
+                    if (alterOrigin == null) {
+                        fieldReaders.put(
+                                alternateName,
+                                createFieldReaderParam(
+                                        objectClass,
+                                        objectType,
+                                        alternateName,
+                                        i,
+                                        fieldInfo.features,
+                                        fieldInfo.format,
+                                        paramType,
+                                        paramClass,
+                                        fieldName,
+                                        declaringClass,
+                                        null
+                                ));
+                    }
                 }
             }
         }
@@ -596,18 +564,10 @@ public class ObjectReaderCreator {
         if (parameters.length == 1 && (fieldInfo.features & FieldInfo.VALUE_MASK) != 0) {
             Type valueType = beanInfo.creatorConstructor == null
                     ? beanInfo.createMethod.getGenericParameterTypes()[0]
-                    : beanInfo.creatorConstructor.getGenericParameterTypes()[0];
+                    : genericParameterTypes[0];
             Class valueClass = beanInfo.creatorConstructor == null
                     ? beanInfo.createMethod.getParameterTypes()[0]
                     : beanInfo.creatorConstructor.getParameterTypes()[0];
-
-            JSONSchema jsonSchema = null;
-            if (fieldInfo.schema != null && !fieldInfo.schema.isEmpty()) {
-                JSONObject object = JSON.parseObject(fieldInfo.schema);
-                if (!object.isEmpty()) {
-                    jsonSchema = JSONSchema.of(object, valueClass);
-                }
-            }
 
             Object defaultValue = fieldInfo.defaultValue;
             if (defaultValue != null && defaultValue.getClass() != valueClass) {
@@ -621,41 +581,6 @@ public class ObjectReaderCreator {
                 }
             }
 
-            boolean jit = JIT || (fieldInfo.features & FieldInfo.JIT) != 0 || (beanInfo.readerFeatures & FieldInfo.JIT) != 0;
-            Function function = null;
-            if (defaultValue == null && jit) {
-                if (valueClass == int.class) {
-                    IntFunction intFunction = null;
-                    if (beanInfo.creatorConstructor != null) {
-                        intFunction = createIntFunction(beanInfo.creatorConstructor);
-                    } else if (beanInfo.createMethod != null) {
-                        intFunction = createIntFunction(beanInfo.createMethod);
-                    }
-
-                    if (intFunction != null) {
-                        return ObjectReaderImplValueInt.of(objectClass, fieldInfo.features, jsonSchema, intFunction);
-                    }
-                } else if (valueClass == String.class) {
-                    if (beanInfo.creatorConstructor != null) {
-                        function = createStringFunction(beanInfo.creatorConstructor);
-                    } else if (beanInfo.createMethod != null) {
-                        function = createStringFunction(beanInfo.createMethod);
-                    }
-
-                    if (function != null) {
-                        return ObjectReaderImplValueString.of(objectClass, fieldInfo.features, jsonSchema, function);
-                    }
-                }
-            }
-
-            if (jit && !valueClass.isPrimitive()) {
-                if (beanInfo.creatorConstructor != null) {
-                    function = createValueFunction(beanInfo.creatorConstructor, valueClass);
-                } else if (beanInfo.createMethod != null) {
-                    function = createValueFunction(beanInfo.createMethod, valueClass);
-                }
-            }
-
             return new ObjectReaderImplValue(
                     objectClass,
                     valueType,
@@ -663,10 +588,9 @@ public class ObjectReaderCreator {
                     fieldInfo.features,
                     fieldInfo.format,
                     defaultValue,
-                    jsonSchema,
                     beanInfo.creatorConstructor,
                     beanInfo.createMethod,
-                    function
+                    null
             );
         }
 
@@ -681,7 +605,7 @@ public class ObjectReaderCreator {
         fieldReaders.values().toArray(fieldReaderArray);
         Arrays.sort(fieldReaderArray);
 
-        FieldReader[] setterFieldReaders = createFieldReaders(objectClass, objectType);
+        FieldReader[] setterFieldReaders = createFieldReaders(objectClass, objectType, null, false, provider);
         Arrays.sort(setterFieldReaders);
 
         boolean[] flags = null;
@@ -713,7 +637,6 @@ public class ObjectReaderCreator {
                 beanInfo.typeName,
                 beanInfo.readerFeatures,
                 function,
-                null,
                 paramNames,
                 fieldReaderArray,
                 setterFieldReaders,
@@ -729,14 +652,13 @@ public class ObjectReaderCreator {
             Function buildFunction,
             FieldReader... fieldReaders
     ) {
-        return createObjectReader(objectClass, null, features, null, defaultCreator, buildFunction, fieldReaders);
+        return createObjectReader(objectClass, null, features, defaultCreator, buildFunction, fieldReaders);
     }
 
     public <T> ObjectReader<T> createObjectReader(
             Class<T> objectClass,
             String typeKey,
             long features,
-            JSONSchema schema,
             Supplier<T> defaultCreator,
             Function buildFunction,
             FieldReader... fieldReaders
@@ -744,7 +666,7 @@ public class ObjectReaderCreator {
         if (objectClass != null) {
             int modifiers = objectClass.getModifiers();
             if (Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers)) {
-                return new ObjectReaderAdapter(objectClass, typeKey, null, features, schema, defaultCreator, buildFunction, fieldReaders);
+                return new ObjectReaderAdapter(objectClass, typeKey, null, features, defaultCreator, buildFunction, fieldReaders);
             }
         }
 
@@ -753,7 +675,6 @@ public class ObjectReaderCreator {
                 return new ObjectReader1(
                         objectClass,
                         features,
-                        schema,
                         defaultCreator,
                         buildFunction,
                         fieldReaders[0]
@@ -762,7 +683,6 @@ public class ObjectReaderCreator {
                 return new ObjectReader2(
                         objectClass,
                         features,
-                        schema,
                         defaultCreator,
                         buildFunction,
                         fieldReaders[0],
@@ -772,7 +692,6 @@ public class ObjectReaderCreator {
                         objectClass,
                         defaultCreator,
                         features,
-                        schema,
                         buildFunction,
                         fieldReaders[0],
                         fieldReaders[1],
@@ -782,7 +701,6 @@ public class ObjectReaderCreator {
                 return new ObjectReader4(
                         objectClass,
                         features,
-                        schema,
                         defaultCreator,
                         buildFunction,
                         fieldReaders[0],
@@ -795,7 +713,6 @@ public class ObjectReaderCreator {
                         objectClass,
                         defaultCreator,
                         features,
-                        schema,
                         buildFunction,
                         fieldReaders[0],
                         fieldReaders[1],
@@ -808,7 +725,6 @@ public class ObjectReaderCreator {
                         objectClass,
                         defaultCreator,
                         features,
-                        schema,
                         buildFunction,
                         fieldReaders[0],
                         fieldReaders[1],
@@ -818,7 +734,7 @@ public class ObjectReaderCreator {
                         fieldReaders[5]
                 );
             default:
-                return new ObjectReaderAdapter(objectClass, typeKey, null, features, schema, defaultCreator, buildFunction, fieldReaders);
+                return new ObjectReaderAdapter(objectClass, typeKey, null, features, defaultCreator, buildFunction, fieldReaders);
         }
     }
 
@@ -840,7 +756,7 @@ public class ObjectReaderCreator {
                 objectType,
                 objectType,
                 false,
-                JSONFactory.getDefaultObjectReaderProvider()
+                JSONFactory.defaultObjectReaderProvider
         );
     }
 
@@ -849,50 +765,8 @@ public class ObjectReaderCreator {
                 objectType,
                 objectType,
                 fieldBased,
-                JSONFactory.getDefaultObjectReaderProvider()
+                JSONFactory.defaultObjectReaderProvider
         );
-    }
-
-    protected ObjectReader getAnnotatedObjectReader(
-            ObjectReaderProvider provider,
-            Class objectClass,
-            BeanInfo beanInfo
-    ) {
-        if ((beanInfo.readerFeatures & JSON_AUTO_WIRED_ANNOTATED) == 0) {
-            return null;
-        }
-
-        String fieldName = beanInfo.objectReaderFieldName;
-        if (fieldName == null) {
-            fieldName = "objectReader";
-        }
-        try {
-            Field field = null;
-            if (beanInfo.mixIn) {
-                Class mixinClass = provider.mixInCache.get(objectClass);
-                if (mixinClass != null) {
-                    try {
-                        field = mixinClass.getDeclaredField(fieldName);
-                    } catch (NoSuchFieldException | SecurityException igored) {
-                        // ignored
-                    }
-                }
-            }
-
-            if (field == null) {
-                field = objectClass.getDeclaredField(fieldName);
-            }
-
-            if (field != null
-                    && ObjectReader.class.isAssignableFrom(field.getType())
-                    && Modifier.isStatic(field.getModifiers())) {
-                field.setAccessible(true);
-                return (ObjectReader) field.get(null);
-            }
-        } catch (Throwable ignored) {
-            // ignored
-        }
-        return null;
     }
 
     public <T> ObjectReader<T> createObjectReader(
@@ -906,12 +780,7 @@ public class ObjectReaderCreator {
             beanInfo.readerFeatures |= JSONReader.Feature.FieldBased.mask;
         }
 
-        for (ObjectReaderModule module : provider.modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor != null) {
-                annotationProcessor.getBeanInfo(beanInfo, objectClass);
-            }
-        }
+        provider.getBeanInfo(beanInfo, objectClass);
 
         if (beanInfo.deserializer != null && ObjectReader.class.isAssignableFrom(beanInfo.deserializer)) {
             try {
@@ -924,16 +793,11 @@ public class ObjectReaderCreator {
             }
         }
 
-        ObjectReader annotatedObjectReader = getAnnotatedObjectReader(provider, objectClass, beanInfo);
-        if (annotatedObjectReader != null) {
-            return annotatedObjectReader;
-        }
-
         if (fieldBased) {
             beanInfo.readerFeatures |= JSONReader.Feature.FieldBased.mask;
         }
 
-        if (Enum.class.isAssignableFrom(objectClass) && (beanInfo.createMethod == null || beanInfo.createMethod.getParameterCount() == 1)) {
+        if (Enum.class.isAssignableFrom(objectClass) && (beanInfo.createMethod == null || beanInfo.createMethod.getParameterTypes().length == 1)) {
             return createEnumReader(objectClass, beanInfo.createMethod, provider);
         }
 
@@ -948,8 +812,8 @@ public class ObjectReaderCreator {
 
         FieldReader[] fieldReaderArray = createFieldReaders(objectClass, objectType, beanInfo, fieldBased, provider);
         boolean allReadOnlyOrZero = true;
-        for (FieldReader fieldReader : fieldReaderArray) {
-            if (!fieldReader.isReadOnly()) {
+        for (int i = 0; i < fieldReaderArray.length; i++) {
+            if (!fieldReaderArray[i].isReadOnly()) {
                 allReadOnlyOrZero = false;
                 break;
             }
@@ -963,7 +827,7 @@ public class ObjectReaderCreator {
             return createObjectReaderWithBuilder(objectClass, objectType, provider, beanInfo);
         }
 
-        Constructor creatorConstructor = beanInfo.creatorConstructor;
+        Constructor creatorConstructor = null;
 
         final List<Constructor> alternateConstructors = new ArrayList<>();
         BeanUtils.constructor(objectClass, constructor -> {
@@ -982,12 +846,13 @@ public class ObjectReaderCreator {
         for (int i = 0; i < alternateConstructors.size(); i++) {
             Constructor constructor = alternateConstructors.get(i);
 
-            if (constructor.getParameterCount() == 0) {
+            int parameterCount = constructor.getParameterTypes().length;
+            if (parameterCount == 0) {
                 defaultConstructor = constructor;
             }
 
             if (declaringClass != null
-                    && constructor.getParameterCount() == 1
+                    && parameterCount == 1
                     && declaringClass.equals(constructor.getParameterTypes()[0])) {
                 creatorConstructor = constructor;
                 index = i;
@@ -995,30 +860,43 @@ public class ObjectReaderCreator {
             } else if (creatorConstructor == null) {
                 creatorConstructor = constructor;
                 index = i;
-            } else if (constructor.getParameterCount() == 0) {
+            } else if (parameterCount == 0) {
                 creatorConstructor = constructor;
                 index = i;
-            } else if (creatorConstructor.getParameterCount() < constructor.getParameterCount()) {
+            } else if (creatorConstructor.getParameterTypes().length < parameterCount) {
                 creatorConstructor = constructor;
                 index = i;
             }
+        }
+
+        int creatorConstructorParameterCount;
+        if (creatorConstructor != null) {
+            creatorConstructorParameterCount = creatorConstructor.getParameterTypes().length;
+        } else {
+            creatorConstructorParameterCount = -1;
         }
 
         if (index != -1) {
             alternateConstructors.remove(index);
         }
 
-        if (creatorConstructor != null && creatorConstructor.getParameterCount() != 0 && beanInfo.seeAlso == null) {
-            boolean record = BeanUtils.isRecord(objectClass);
-
+        if (creatorConstructor != null && creatorConstructorParameterCount != 0 && beanInfo.seeAlso == null) {
             creatorConstructor.setAccessible(true);
             String[] parameterNames = beanInfo.createParameterNames;
-            if (record && parameterNames == null) {
-                parameterNames = BeanUtils.getRecordFieldNames(objectClass);
-            }
-
             if (parameterNames == null || parameterNames.length == 0) {
-                parameterNames = ASMUtils.lookupParameterNames(creatorConstructor);
+                parameterNames = BeanUtils.lookupParameterNames(creatorConstructor);
+
+                Class[] parameters = creatorConstructor.getParameterTypes();
+                Annotation[][] parameterAnnotations = creatorConstructor.getParameterAnnotations();
+                FieldInfo fieldInfo = new FieldInfo();
+                for (int i = 0; i < parameters.length && i < parameterNames.length; i++) {
+                    fieldInfo.init();
+
+                    provider.getFieldInfo(fieldInfo, objectClass, creatorConstructor, i, parameterAnnotations);
+                    if (fieldInfo.fieldName != null) {
+                        parameterNames[i] = fieldInfo.fieldName;
+                    }
+                }
             }
 
             int matchCount = 0;
@@ -1041,24 +919,16 @@ public class ObjectReaderCreator {
                 }
             }
 
-            if (!(fieldBased && UNSAFE_SUPPORT)
+            if (!fieldBased
                     && !(Throwable.class.isAssignableFrom(objectClass))
                     && defaultConstructor == null
                     && matchCount != parameterNames.length) {
-                if (creatorConstructor.getParameterCount() == 1) {
+                if (creatorConstructorParameterCount == 1) {
                     FieldInfo fieldInfo = new FieldInfo();
-                    provider.getFieldInfo(fieldInfo, objectClass, creatorConstructor, 0, creatorConstructor.getParameters()[0]);
+                    provider.getFieldInfo(fieldInfo, objectClass, creatorConstructor, 0, null);
                     if ((fieldInfo.features & FieldInfo.VALUE_MASK) != 0) {
                         Type valueType = creatorConstructor.getGenericParameterTypes()[0];
                         Class valueClass = creatorConstructor.getParameterTypes()[0];
-
-                        JSONSchema jsonSchema = null;
-                        if (fieldInfo.schema != null && !fieldInfo.schema.isEmpty()) {
-                            JSONObject object = JSON.parseObject(fieldInfo.schema);
-                            if (!object.isEmpty()) {
-                                jsonSchema = JSONSchema.of(object, valueClass);
-                            }
-                        }
 
                         Object defaultValue = fieldInfo.defaultValue;
                         if (defaultValue != null && defaultValue.getClass() != valueClass) {
@@ -1079,7 +949,6 @@ public class ObjectReaderCreator {
                                 fieldInfo.features,
                                 fieldInfo.format,
                                 defaultValue,
-                                jsonSchema,
                                 creatorConstructor,
                                 null,
                                 null
@@ -1087,10 +956,7 @@ public class ObjectReaderCreator {
                     }
                 }
 
-                if (defaultConstructor == null
-                        && allReadOnlyOrZero
-                        && fieldReaderArray.length != 0
-                        && alternateConstructors.isEmpty()
+                if (allReadOnlyOrZero && fieldReaderArray.length != 0 && alternateConstructors.isEmpty()
                 ) {
                     for (int i = 0; i < parameterNames.length; i++) {
                         String paramName = parameterNames[i];
@@ -1106,21 +972,11 @@ public class ObjectReaderCreator {
                     }
                 }
 
-                Function function = null;
-                BiFunction biFunction = null;
-                if (creatorConstructor != null && JIT) {
-                    if (creatorConstructor.getParameterCount() == 1) {
-                        function = LambdaMiscCodec.createFunction(creatorConstructor);
-                    } else if (creatorConstructor.getParameterCount() == 2) {
-                        biFunction = LambdaMiscCodec.createBiFunction(creatorConstructor);
-                    }
-                }
-
                 Function<Map<Long, Object>, T> constructorFunction = new ConstructorFunction(
                         alternateConstructors,
                         creatorConstructor,
-                        function,
-                        biFunction,
+                        null,
+                        null,
                         null,
                         parameterNames
                 );
@@ -1130,7 +986,7 @@ public class ObjectReaderCreator {
                         objectClass,
                         objectType,
                         creatorConstructor,
-                        creatorConstructor.getParameters(),
+                        creatorConstructor.getParameterTypes(),
                         parameterNames
                 );
                 return new ObjectReaderNoneDefaultConstructor(
@@ -1139,7 +995,6 @@ public class ObjectReaderCreator {
                         beanInfo.typeName,
                         beanInfo.readerFeatures,
                         constructorFunction,
-                        alternateConstructors,
                         parameterNames,
                         paramFieldReaders,
                         fieldReaderArray,
@@ -1173,12 +1028,10 @@ public class ObjectReaderCreator {
         }
 
         Supplier<T> creator = createSupplier(objectClass);
-        JSONSchema jsonSchema = JSONSchema.of(JSON.parseObject(beanInfo.schema), objectClass);
         ObjectReader<T> objectReader = createObjectReader(
                 objectClass,
                 beanInfo.typeKey,
                 beanInfo.readerFeatures,
-                jsonSchema,
                 creator,
                 null,
                 fieldReaderArray);
@@ -1209,7 +1062,7 @@ public class ObjectReaderCreator {
                 objectClass,
                 null,
                 false,
-                JSONFactory.getDefaultObjectReaderProvider()
+                JSONFactory.defaultObjectReaderProvider
         );
     }
 
@@ -1219,175 +1072,80 @@ public class ObjectReaderCreator {
                 objectType,
                 null,
                 false,
-                JSONFactory.getDefaultObjectReaderProvider()
+                JSONFactory.defaultObjectReaderProvider
         );
     }
 
-    protected void createFieldReader(
-            Class objectClass,
-            Type objectType,
-            String namingStrategy,
-            FieldInfo fieldInfo,
-            Field field,
-            Map<String, FieldReader> fieldReaders,
-            ObjectReaderProvider provider
-    ) {
-        provider.getFieldInfo(fieldInfo, objectClass, field);
+    final class FieldConsumer
+            implements Consumer {
+        final Class objectClass;
+        final Type objectType;
+        final String namingStrategy;
+        final FieldInfo fieldInfo;
+        final Map<String, FieldReader> fieldReaders;
+        final ObjectReaderProvider provider;
+        final BeanInfo beanInfo;
+        final boolean fieldBased;
 
-        if (fieldInfo.ignore) {
-            boolean unwrap = (fieldInfo.features & FieldInfo.UNWRAPPED_MASK) != 0
-                    && Map.class.isAssignableFrom(field.getType());
-            if (!unwrap) {
-                return;
-            }
+        public FieldConsumer(
+                Class objectClass,
+                Type objectType,
+                String namingStrategy,
+                FieldInfo fieldInfo,
+                Map<String, FieldReader> fieldReaders,
+                ObjectReaderProvider provider,
+                BeanInfo beanInfo,
+                boolean fieldBased
+        ) {
+            this.objectClass = objectClass;
+            this.objectType = objectType;
+            this.namingStrategy = namingStrategy;
+            this.fieldInfo = fieldInfo;
+            this.fieldReaders = fieldReaders;
+            this.provider = provider;
+            this.beanInfo = beanInfo;
+            this.fieldBased = fieldBased;
         }
 
-        String fieldName;
-        if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
-            fieldName = field.getName();
-            if (namingStrategy != null) {
-                fieldName = BeanUtils.fieldName(fieldName, namingStrategy);
-            }
-        } else {
-            fieldName = fieldInfo.fieldName;
-        }
+        @Override
+        public void accept(Object o) {
+            Field field = (Field) o;
 
-        Type fieldType = field.getGenericType();
-        Class<?> fieldClass = field.getType();
-
-        ObjectReader initReader = getInitReader(provider, fieldType, fieldClass, fieldInfo);
-        String schema = fieldInfo.schema;
-        if (fieldInfo.required) {
-            if (schema == null) {
-                schema = "{\"required\":true}";
-            }
-        }
-
-        FieldReader<Object> fieldReader = createFieldReader(
-                objectClass,
-                objectType,
-                fieldName,
-                fieldInfo.ordinal,
-                fieldInfo.features,
-                fieldInfo.format,
-                fieldInfo.locale,
-                fieldInfo.defaultValue,
-                schema,
-                fieldType,
-                fieldClass,
-                field,
-                initReader
-        );
-
-        FieldReader previous = fieldReaders.putIfAbsent(fieldName, fieldReader);
-        if (previous != null) {
-            int cmp = fieldReader.compareTo(previous);
-            if (cmp > 0) {
-                fieldReaders.put(fieldName, fieldReader);
-            }
-        }
-
-        if (fieldInfo.alternateNames != null) {
-            for (String alternateName : fieldInfo.alternateNames) {
-                if (fieldName.equals(alternateName)) {
-                    continue;
-                }
-
-                FieldReader<Object> fieldReader1 = createFieldReader(
-                        objectClass,
-                        objectType,
-                        alternateName,
-                        fieldInfo.ordinal,
-                        fieldInfo.features,
-                        null,
-                        fieldInfo.locale,
-                        fieldInfo.defaultValue,
-                        schema,
-                        fieldType,
-                        fieldClass,
-                        field,
-                        null
-                );
-                fieldReaders.putIfAbsent(alternateName, fieldReader1);
-            }
-        }
-    }
-
-    protected void createFieldReader(
-            Class objectClass,
-            Type objectType,
-            String namingStrategy,
-            String[] orders,
-            BeanInfo beanInfo,
-            FieldInfo fieldInfo,
-            Method method,
-            Map<String, FieldReader> fieldReaders,
-            ObjectReaderProvider provider
-    ) {
-        provider.getFieldInfo(fieldInfo, objectClass, method);
-
-        if (fieldInfo.ignore) {
-            return;
-        }
-
-        String fieldName;
-        if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
-            String methodName = method.getName();
-            if (methodName.startsWith("set")) {
-                fieldName = BeanUtils.setterName(methodName, namingStrategy);
+            fieldInfo.init();
+            if (fieldBased) {
+                fieldInfo.features |= JSONReader.Feature.FieldBased.mask;
             } else {
-                fieldName = BeanUtils.getterName(method, namingStrategy);
+                fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
             }
+            fieldInfo.features |= beanInfo.readerFeatures;
+            fieldInfo.format = beanInfo.format;
 
-            char c0 = '\0', c1;
-            int len = fieldName.length();
-            if (len > 0) {
-                c0 = fieldName.charAt(0);
-            }
+            provider.getFieldInfo(fieldInfo, objectClass, field);
 
-            if ((len == 1 && c0 >= 'a' && c0 <= 'z')
-                    || (len > 2 && c0 >= 'A' && c0 <= 'Z' && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z')
-            ) {
-                char[] chars = fieldName.toCharArray();
-                if (len == 1) {
-                    chars[0] = (char) (chars[0] - 32);
-                } else {
-                    chars[0] = (char) (chars[0] + 32);
-                }
-                String fieldName1 = new String(chars);
-                Field field = BeanUtils.getDeclaredField(objectClass, fieldName1);
-                if (field != null) {
-                    if (Modifier.isPublic(field.getModifiers())) {
-                        fieldName = field.getName();
-                    } else if (len == 1) {
-                        fieldInfo.alternateNames = new String[]{fieldName};
-                        fieldName = field.getName();
-                    }
+            if (fieldInfo.ignore) {
+                boolean unwrap = (fieldInfo.features & FieldInfo.UNWRAPPED_MASK) != 0
+                        && Map.class.isAssignableFrom(field.getType());
+                if (!unwrap) {
+                    return;
                 }
             }
-        } else {
-            fieldName = fieldInfo.fieldName;
-        }
 
-        if (orders != null && orders.length > 0) {
-            boolean match = false;
-            for (int i = 0; i < orders.length; i++) {
-                if (fieldName.equals(orders[i])) {
-                    fieldInfo.ordinal = i;
-                    match = true;
-                    break;
+            String fieldName;
+            if (fieldInfo.fieldName == null || fieldInfo.fieldName.isEmpty()) {
+                fieldName = field.getName();
+                if (namingStrategy != null) {
+                    fieldName = BeanUtils.fieldName(fieldName, namingStrategy);
                 }
+            } else {
+                fieldName = fieldInfo.fieldName;
             }
-            if (!match) {
-                if (fieldInfo.ordinal == 0) {
-                    fieldInfo.ordinal = orders.length;
-                }
-            }
-        }
 
-        int parameterCount = method.getParameterCount();
-        if (parameterCount == 0) {
-            FieldReader fieldReader = createFieldReaderMethod(
+            Type fieldType = field.getGenericType();
+            Class<?> fieldClass = field.getType();
+
+            ObjectReader initReader = getInitReader(provider, fieldType, fieldClass, fieldInfo);
+
+            FieldReader<Object> fieldReader = createFieldReader(
                     objectClass,
                     objectType,
                     fieldName,
@@ -1396,65 +1154,203 @@ public class ObjectReaderCreator {
                     fieldInfo.format,
                     fieldInfo.locale,
                     fieldInfo.defaultValue,
-                    fieldInfo.schema,
-                    method.getGenericReturnType(),
-                    method.getReturnType(),
-                    method,
-                    fieldInfo.getInitReader()
+                    fieldType,
+                    fieldClass,
+                    field,
+                    initReader
             );
-            FieldReader origin = fieldReaders.putIfAbsent(fieldName,
-                    fieldReader
-            );
-            if (origin != null && origin.compareTo(fieldReader) > 0) {
+
+            FieldReader previous = fieldReaders.get(fieldName);
+            if (previous == null) {
                 fieldReaders.put(fieldName, fieldReader);
+            } else {
+                int cmp = fieldReader.compareTo(previous);
+                if (cmp > 0) {
+                    fieldReaders.put(fieldName, fieldReader);
+                }
             }
-            return;
+
+            if (fieldInfo.alternateNames != null) {
+                for (String alternateName : fieldInfo.alternateNames) {
+                    if (fieldName.equals(alternateName)) {
+                        continue;
+                    }
+
+                    FieldReader<Object> fieldReader1 = createFieldReader(
+                            objectClass,
+                            objectType,
+                            alternateName,
+                            fieldInfo.ordinal,
+                            fieldInfo.features,
+                            null,
+                            fieldInfo.locale,
+                            fieldInfo.defaultValue,
+                            fieldType,
+                            fieldClass,
+                            field,
+                            null
+                    );
+                    FieldReader alterOrigin = fieldReaders.get(alternateName);
+                    if (alterOrigin == null) {
+                        fieldReaders.put(alternateName, fieldReader1);
+                    }
+                }
+            }
+        }
+    }
+
+    final class CreateFieldReaderConsumer
+            implements Consumer {
+        final Class objectClass;
+        final Type objectType;
+        final String namingStrategy;
+        final String[] orders;
+        final BeanInfo beanInfo;
+        final FieldInfo fieldInfo;
+        final Map<String, FieldReader> fieldReaders;
+        final ObjectReaderProvider provider;
+
+        CreateFieldReaderConsumer(
+                Class objectClass,
+                Type objectType,
+                String namingStrategy,
+                String[] orders,
+                BeanInfo beanInfo,
+                FieldInfo fieldInfo,
+                Map<String, FieldReader> fieldReaders,
+                ObjectReaderProvider provider
+        ) {
+            this.objectClass = objectClass;
+            this.objectType = objectType;
+            this.namingStrategy = namingStrategy;
+            this.orders = orders;
+            this.beanInfo = beanInfo;
+            this.fieldInfo = fieldInfo;
+            this.fieldReaders = fieldReaders;
+            this.provider = provider;
         }
 
-        if (parameterCount == 2) {
-            Class<?> fieldClass = method.getParameterTypes()[1];
-            Type fieldType = method.getGenericParameterTypes()[1];
-            method.setAccessible(true);
-            FieldReaderAnySetter anySetter = new FieldReaderAnySetter(fieldType, fieldClass, fieldInfo.ordinal, fieldInfo.features, fieldInfo.format, null, method);
-            fieldReaders.put(anySetter.fieldName, anySetter);
-            return;
-        }
+        @Override
+        public void accept(Object o) {
+            Method method = (Method) o;
 
-        Type fieldType = method.getGenericParameterTypes()[0];
-        Class fieldClass = method.getParameterTypes()[0];
+            fieldInfo.init();
+            fieldInfo.features |= beanInfo.readerFeatures;
+            fieldInfo.format = beanInfo.format;
 
-        // skip function
-        if (isFunction(fieldClass)) {
-            return;
-        }
+            provider.module.getFieldInfo(fieldInfo, objectClass, method);
 
-        ObjectReader initReader = getInitReader(provider, fieldType, fieldClass, fieldInfo);
-        FieldReader fieldReader = null;
-        boolean jit = (fieldInfo.features & FieldInfo.JIT) != 0;
-        if (jit) {
-            try {
-                fieldReader = createFieldReaderLambda(
+            if (fieldInfo.ignore) {
+                return;
+            }
+
+            String fieldName;
+            if (fieldInfo.fieldName == null) {
+                String methodName = method.getName();
+                if (methodName.startsWith("set", 0)) {
+                    fieldName = BeanUtils.setterName(methodName, namingStrategy);
+                    if (fieldInfo.alternateNames == null) {
+                        String findName = methodName.substring(3);
+                        Field field = BeanUtils.getDeclaredField(objectClass, findName);
+                        if (field != null) {
+                            fieldInfo.alternateNames = new String[]{findName};
+                        }
+                    }
+                } else {
+                    fieldName = BeanUtils.getterName(method, namingStrategy);
+                }
+
+                char c0 = '\0', c1;
+                int len = fieldName.length();
+                if (len > 0) {
+                    c0 = fieldName.charAt(0);
+                }
+
+                if ((len == 1 && c0 >= 'a' && c0 <= 'z')
+                        || (len > 2 && c0 >= 'A' && c0 <= 'Z' && (c1 = fieldName.charAt(1)) >= 'A' && c1 <= 'Z')
+                ) {
+                    char[] chars = fieldName.toCharArray();
+                    if (len == 1) {
+                        chars[0] = (char) (chars[0] - 32);
+                    } else {
+                        chars[0] = (char) (chars[0] + 32);
+                    }
+                    String fieldName1 = new String(chars);
+                    Field field = BeanUtils.getDeclaredField(objectClass, fieldName1);
+                    if (field != null) {
+                        if (Modifier.isPublic(field.getModifiers())) {
+                            fieldName = field.getName();
+                        } else if (len == 1) {
+                            fieldInfo.alternateNames = new String[]{fieldName};
+                            fieldName = field.getName();
+                        }
+                    }
+                }
+            } else {
+                fieldName = fieldInfo.fieldName;
+            }
+
+            if (orders != null && orders.length > 0) {
+                boolean match = false;
+                for (int i = 0; i < orders.length; i++) {
+                    if (fieldName.equals(orders[i])) {
+                        fieldInfo.ordinal = i;
+                        match = true;
+                        break;
+                    }
+                }
+                if (!match) {
+                    if (fieldInfo.ordinal == 0) {
+                        fieldInfo.ordinal = orders.length;
+                    }
+                }
+            }
+
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            int parameterCount = parameterTypes.length;
+            if (parameterCount == 0) {
+                FieldReader fieldReader = createFieldReaderMethod(
                         objectClass,
                         objectType,
                         fieldName,
                         fieldInfo.ordinal,
-                        fieldInfo.features,
+                        fieldInfo.features | READ_ONLY,
                         fieldInfo.format,
                         fieldInfo.locale,
                         fieldInfo.defaultValue,
-                        fieldInfo.schema,
-                        fieldType,
-                        fieldClass,
+                        method.getGenericReturnType(),
+                        method.getReturnType(),
                         method,
-                        initReader
+                        fieldInfo.getInitReader()
                 );
-            } catch (Throwable ignored) {
-                jitErrorCount.incrementAndGet();
-                jitErrorLast = ignored;
+                FieldReader origin = fieldReaders.get(fieldName);
+                if (origin == null) {
+                    fieldReaders.put(fieldName, fieldReader);
+                } else if (origin.compareTo(fieldReader) > 0) {
+                    fieldReaders.put(fieldName, fieldReader);
+                }
+                return;
             }
-        }
 
-        if (fieldReader == null) {
+            if (parameterCount == 2) {
+                Class<?> fieldClass = parameterTypes[1];
+                Type fieldType = method.getGenericParameterTypes()[1];
+                method.setAccessible(true);
+                FieldReaderAnySetter anySetter = new FieldReaderAnySetter(fieldType, fieldClass, fieldInfo.ordinal, fieldInfo.features, fieldInfo.format, method);
+                fieldReaders.put(anySetter.fieldName, anySetter);
+                return;
+            }
+
+            Class fieldClass = parameterTypes[0];
+            Type fieldType;
+            if (fieldClass.isPrimitive() || fieldClass == String.class || fieldClass.isEnum()) {
+                fieldType = fieldClass;
+            } else {
+                fieldType = method.getGenericParameterTypes()[0];
+            }
+
+            ObjectReader initReader = getInitReader(provider, fieldType, fieldClass, fieldInfo);
+            FieldReader fieldReader = null;
             fieldReader = createFieldReaderMethod(
                     objectClass,
                     objectType,
@@ -1464,27 +1360,29 @@ public class ObjectReaderCreator {
                     fieldInfo.format,
                     fieldInfo.locale,
                     fieldInfo.defaultValue,
-                    fieldInfo.schema,
                     fieldType,
                     fieldClass,
                     method,
                     initReader
             );
-        }
 
-        FieldReader origin = fieldReaders.putIfAbsent(fieldName, fieldReader);
-        if (origin != null && origin.compareTo(fieldReader) > 0) {
-            fieldReaders.put(fieldName, fieldReader);
-        }
+            FieldReader origin = fieldReaders.get(fieldName);
+            if (origin == null) {
+                fieldReaders.put(fieldName, fieldReader);
+            } else if (origin.compareTo(fieldReader) > 0) {
+                fieldReaders.put(fieldName, fieldReader);
+            }
 
-        if (fieldInfo.alternateNames != null) {
-            for (String alternateName : fieldInfo.alternateNames) {
-                if (fieldName.equals(alternateName)) {
-                    continue;
-                }
+            if (fieldInfo.alternateNames != null) {
+                for (String alternateName : fieldInfo.alternateNames) {
+                    if (fieldName.equals(alternateName)) {
+                        continue;
+                    }
 
-                fieldReaders
-                        .putIfAbsent(alternateName,
+                    FieldReader alterOrigin = fieldReaders.get(alternateName);
+                    if (alterOrigin == null) {
+                        fieldReaders.put(
+                                alternateName,
                                 createFieldReaderMethod(
                                         objectClass,
                                         objectType,
@@ -1494,12 +1392,13 @@ public class ObjectReaderCreator {
                                         fieldInfo.format,
                                         fieldInfo.locale,
                                         fieldInfo.defaultValue,
-                                        fieldInfo.schema,
                                         fieldType,
                                         fieldClass,
                                         method,
                                         initReader
                                 ));
+                    }
+                }
             }
         }
     }
@@ -1513,87 +1412,38 @@ public class ObjectReaderCreator {
     ) {
         if (beanInfo == null) {
             beanInfo = new BeanInfo();
-            for (ObjectReaderModule module : provider.modules) {
-                ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-                if (annotationProcessor != null) {
-                    annotationProcessor.getBeanInfo(beanInfo, objectClass);
-                }
-            }
+            provider.module.getBeanInfo(beanInfo, objectClass);
         }
 
-        boolean recoard = BeanUtils.isRecord(objectClass);
         final String namingStrategy = beanInfo.namingStrategy;
 
         Map<String, FieldReader> fieldReaders = new LinkedHashMap<>();
 
-        BeanInfo finalBeanInfo = beanInfo;
-        final long beanFeatures = beanInfo.readerFeatures;
-        final String beanFormat = beanInfo.format;
         final FieldInfo fieldInfo = new FieldInfo();
         final String[] orders = beanInfo.orders;
+
+        FieldConsumer fieldConsumer = new FieldConsumer(
+                objectClass,
+                objectType,
+                namingStrategy,
+                fieldInfo,
+                fieldReaders,
+                provider,
+                beanInfo,
+                fieldBased
+        );
         if (fieldBased) {
-            BeanUtils.declaredFields(objectClass, field -> {
-                fieldInfo.init();
-                fieldInfo.features |= JSONReader.Feature.FieldBased.mask;
-                fieldInfo.features |= beanFeatures;
-                fieldInfo.format = beanFormat;
-
-                createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, provider);
-            });
+            BeanUtils.declaredFields(objectClass, fieldConsumer);
         } else {
-            if (!recoard) {
-                BeanUtils.declaredFields(objectClass, field -> {
-                    fieldInfo.init();
-                    fieldInfo.ignore = (field.getModifiers() & Modifier.PUBLIC) == 0;
-                    fieldInfo.features |= beanFeatures;
-                    fieldInfo.format = beanFormat;
+            BeanUtils.declaredFields(objectClass, fieldConsumer);
 
-                    createFieldReader(objectClass, objectType, namingStrategy, fieldInfo, field, fieldReaders, provider);
-                    if (fieldInfo.required) {
-                        String fieldName = fieldInfo.fieldName;
-                        if (fieldName == null || fieldName.isEmpty()) {
-                            fieldName = field.getName();
-                        }
-                        finalBeanInfo.required(fieldName);
-                    }
-                });
-            }
-
-            Class mixIn = provider.getMixIn(objectClass);
-            BeanUtils.setters(objectClass, mixIn, method -> {
-                fieldInfo.init();
-                fieldInfo.features |= beanFeatures;
-                fieldInfo.format = beanFormat;
-                createFieldReader(objectClass, objectType, namingStrategy, orders, finalBeanInfo, fieldInfo, method, fieldReaders, provider);
-            });
+            Class mixIn = provider.mixInCache.get(objectClass);
+            final Consumer<Method> consumer = new CreateFieldReaderConsumer(objectClass, objectType, namingStrategy, orders, beanInfo, fieldInfo, fieldReaders, provider);
+            BeanUtils.setters(objectClass, mixIn, consumer);
 
             if (objectClass.isInterface()) {
-                BeanUtils.getters(objectClass, method -> {
-                    fieldInfo.init();
-                    fieldInfo.features |= beanFeatures;
-                    createFieldReader(objectClass, objectType, namingStrategy, orders, finalBeanInfo, fieldInfo, method, fieldReaders, provider);
-                });
+                BeanUtils.getters(objectClass, consumer);
             }
-        }
-
-        Class<? super T> superclass = objectClass.getSuperclass();
-        if (BeanUtils.isExtendedMap(objectClass)) {
-            Type superType = objectClass.getGenericSuperclass();
-            FieldReader fieldReader = ObjectReaders.fieldReader(
-                    SUPER,
-                    superType,
-                    superclass,
-                    (o, f) -> {
-                        Map thisMap = (Map) o;
-                        Map superMap = (Map) f;
-                        // avoid putAll oom
-                        for (Iterator it = superMap.entrySet().iterator(); it.hasNext(); ) {
-                            Map.Entry entry = (Map.Entry) it.next();
-                            thisMap.put(entry.getKey(), entry.getValue());
-                        }
-                    }
-            );
-            fieldReaders.put(SUPER, fieldReader);
         }
 
         FieldReader[] fieldReaderArray = new FieldReader[fieldReaders.size()];
@@ -1626,183 +1476,10 @@ public class ObjectReaderCreator {
     }
 
     public <T> Supplier<T> createSupplier(Constructor constructor, boolean jit) {
-        jit &= JIT;
-
-        if (jit) {
-            Class declaringClass = constructor.getDeclaringClass();
-            MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
-            try {
-                if (constructor.getParameterCount() == 0) {
-                    MethodHandle handle = lookup.findConstructor(declaringClass, METHOD_TYPE_VOID);
-                    CallSite callSite = LambdaMetafactory.metafactory(
-                            lookup,
-                            "get",
-                            METHOD_TYPE_SUPPLIER,
-                            METHOD_TYPE_OBJECT,
-                            handle,
-                            METHOD_TYPE_OBJECT
-                    );
-                    return (Supplier) callSite.getTarget().invokeExact();
-                }
-            } catch (Throwable e) {
-                jitErrorCount.incrementAndGet();
-                jitErrorLast = e;
-            }
-        }
-
         return new ConstructorSupplier(constructor);
     }
 
-    protected <T> IntFunction<T> createIntFunction(Constructor constructor) {
-        Class declaringClass = constructor.getDeclaringClass();
-        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
-        try {
-            MethodHandle handle = lookup.findConstructor(declaringClass, METHOD_TYPE_VOID_INT);
-            MethodType instantiatedMethodType = MethodType.methodType(declaringClass, int.class);
-            CallSite callSite = LambdaMetafactory.metafactory(
-                    lookup,
-                    "apply",
-                    METHOD_TYPE_INT_FUNCTION,
-                    METHOD_TYPE_OBJECT_INT,
-                    handle,
-                    instantiatedMethodType
-            );
-            return (IntFunction) callSite.getTarget().invokeExact();
-        } catch (Throwable e) {
-            jitErrorCount.incrementAndGet();
-            jitErrorLast = e;
-        }
-
-        return null;
-    }
-
-    protected <T> IntFunction<T> createIntFunction(Method factoryMethod) {
-        Class declaringClass = factoryMethod.getDeclaringClass();
-        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
-        try {
-            MethodType methodType = MethodType.methodType(factoryMethod.getReturnType(), int.class);
-            MethodHandle handle = lookup.findStatic(declaringClass, factoryMethod.getName(), methodType);
-            MethodType instantiatedMethodType = methodType;
-            CallSite callSite = LambdaMetafactory.metafactory(
-                    lookup,
-                    "apply",
-                    METHOD_TYPE_INT_FUNCTION,
-                    METHOD_TYPE_OBJECT_INT,
-                    handle,
-                    instantiatedMethodType
-            );
-            return (IntFunction) callSite.getTarget().invokeExact();
-        } catch (Throwable e) {
-            jitErrorCount.incrementAndGet();
-            jitErrorLast = e;
-        }
-
-        return null;
-    }
-
-    protected <T> Function<String, T> createStringFunction(Constructor constructor) {
-        Class declaringClass = constructor.getDeclaringClass();
-        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
-        try {
-            MethodHandle handle = lookup.findConstructor(declaringClass, METHOD_TYPE_VOID_STRING);
-            MethodType instantiatedMethodType = MethodType.methodType(declaringClass, String.class);
-            CallSite callSite = LambdaMetafactory.metafactory(
-                    lookup,
-                    "apply",
-                    METHOD_TYPE_FUNCTION,
-                    METHOD_TYPE_OBJECT_OBJECT,
-                    handle,
-                    instantiatedMethodType
-            );
-            return (Function<String, T>) callSite.getTarget().invokeExact();
-        } catch (Throwable e) {
-            jitErrorCount.incrementAndGet();
-            jitErrorLast = e;
-        }
-
-        return null;
-    }
-
-    protected <T> Function<String, T> createStringFunction(Method factoryMethod) {
-        Class declaringClass = factoryMethod.getDeclaringClass();
-        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
-        try {
-            MethodType methodType = MethodType.methodType(factoryMethod.getReturnType(), String.class);
-            MethodHandle handle = lookup.findStatic(declaringClass, factoryMethod.getName(), methodType);
-            MethodType instantiatedMethodType = methodType;
-            CallSite callSite = LambdaMetafactory.metafactory(
-                    lookup,
-                    "apply",
-                    METHOD_TYPE_FUNCTION,
-                    METHOD_TYPE_OBJECT_OBJECT,
-                    handle,
-                    instantiatedMethodType
-            );
-            return (Function<String, T>) callSite.getTarget().invokeExact();
-        } catch (Throwable e) {
-            jitErrorCount.incrementAndGet();
-            jitErrorLast = e;
-        }
-
-        return null;
-    }
-
-    protected <I, T> Function<I, T> createValueFunction(Constructor<T> constructor, Class<I> valueClass) {
-        Class declaringClass = constructor.getDeclaringClass();
-        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
-        try {
-            MethodType methodType = MethodType.methodType(void.class, valueClass);
-            MethodHandle handle = lookup.findConstructor(declaringClass, methodType);
-            MethodType instantiatedMethodType = MethodType.methodType(declaringClass, valueClass);
-            CallSite callSite = LambdaMetafactory.metafactory(
-                    lookup,
-                    "apply",
-                    METHOD_TYPE_FUNCTION,
-                    METHOD_TYPE_OBJECT_OBJECT,
-                    handle,
-                    instantiatedMethodType
-            );
-            return (Function<I, T>) callSite.getTarget().invokeExact();
-        } catch (Throwable e) {
-            jitErrorCount.incrementAndGet();
-            jitErrorLast = e;
-        }
-
-        return null;
-    }
-
-    protected <I, T> Function<I, T> createValueFunction(Method factoryMethod, Class valueClass) {
-        Class declaringClass = factoryMethod.getDeclaringClass();
-        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(declaringClass);
-        try {
-            MethodType methodType = MethodType.methodType(factoryMethod.getReturnType(), valueClass);
-            MethodHandle handle = lookup.findStatic(declaringClass, factoryMethod.getName(), methodType);
-            MethodType instantiatedMethodType = methodType;
-            CallSite callSite = LambdaMetafactory.metafactory(
-                    lookup,
-                    "apply",
-                    METHOD_TYPE_FUNCTION,
-                    METHOD_TYPE_OBJECT_OBJECT,
-                    handle,
-                    instantiatedMethodType
-            );
-            return (Function<I, T>) callSite.getTarget().invokeExact();
-        } catch (Throwable e) {
-            jitErrorCount.incrementAndGet();
-            jitErrorLast = e;
-        }
-
-        return null;
-    }
-
     public <T, R> Function<T, R> createBuildFunction(Method builderMethod) {
-        try {
-            return createBuildFunctionLambda(builderMethod);
-        } catch (Throwable e) {
-            jitErrorCount.incrementAndGet();
-            jitErrorLast = e;
-        }
-
         builderMethod.setAccessible(true);
 
         return (T o) -> {
@@ -1812,34 +1489,6 @@ public class ObjectReaderCreator {
                 throw new JSONException("create instance error", e);
             }
         };
-    }
-
-    <T, R> Function<T, R> createBuildFunctionLambda(Method builderMethod) {
-        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(builderMethod.getDeclaringClass());
-        MethodType invokedType = METHOD_TYPE_FUNCTION;
-        try {
-            MethodHandle target = lookup.findVirtual(builderMethod.getDeclaringClass(),
-                    builderMethod.getName(),
-                    MethodType.methodType(builderMethod.getReturnType())
-            );
-            MethodType func = target.type();
-
-            CallSite callSite = LambdaMetafactory.metafactory(
-                    lookup,
-                    "apply",
-                    invokedType,
-                    func.erase(),
-                    target,
-                    func
-            );
-
-            Object object = callSite
-                    .getTarget()
-                    .invoke();
-            return (Function<T, R>) object;
-        } catch (Throwable e) {
-            throw new JSONException("create fieldReader error", e);
-        }
     }
 
     public <T> FieldReader createFieldReader(
@@ -1855,7 +1504,6 @@ public class ObjectReaderCreator {
                 fieldName,
                 0,
                 0L,
-                null,
                 null,
                 null,
                 null,
@@ -1894,7 +1542,6 @@ public class ObjectReaderCreator {
                 format,
                 null,
                 null,
-                null,
                 fieldType,
                 fieldClass,
                 method,
@@ -1912,9 +1559,7 @@ public class ObjectReaderCreator {
             Type fieldType,
             Class fieldClass,
             String paramName,
-            Class declaringClass,
-            Parameter parameter,
-            JSONSchema schema
+            Class declaringClass
     ) {
         return createFieldReaderParam(
                 objectClass,
@@ -1927,8 +1572,6 @@ public class ObjectReaderCreator {
                 fieldClass,
                 paramName,
                 declaringClass,
-                parameter,
-                schema,
                 null
         );
     }
@@ -1944,8 +1587,6 @@ public class ObjectReaderCreator {
             Class fieldClass,
             String paramName,
             Class declaringClass,
-            Parameter parameter,
-            JSONSchema schema,
             ObjectReader initReader
     ) {
         if (initReader != null) {
@@ -1954,36 +1595,34 @@ public class ObjectReaderCreator {
                     fieldType,
                     fieldClass,
                     paramName,
-                    parameter,
                     ordinal,
                     features,
-                    format,
-                    schema
+                    format
             );
             paramReader.initReader = initReader;
             return paramReader;
         }
 
         if (fieldType == byte.class || fieldType == Byte.class) {
-            return new FieldReaderInt8Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, schema);
+            return new FieldReaderInt8Param(fieldName, fieldClass, paramName, ordinal, features, format);
         }
 
         if (fieldType == short.class || fieldType == Short.class) {
-            return new FieldReaderInt16Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, schema);
+            return new FieldReaderInt16Param(fieldName, fieldClass, paramName, ordinal, features, format);
         }
 
         if (fieldType == int.class || fieldType == Integer.class) {
-            return new FieldReaderInt32Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, schema);
+            return new FieldReaderInt32Param(fieldName, fieldClass, paramName, ordinal, features, format);
         }
 
         if (fieldType == long.class || fieldType == Long.class) {
-            return new FieldReaderInt64Param(fieldName, fieldClass, paramName, parameter, ordinal, features, format, schema);
+            return new FieldReaderInt64Param(fieldName, fieldClass, paramName, ordinal, features, format);
         }
 
         Type fieldTypeResolved = null;
         Class fieldClassResolved = null;
         if (!(fieldType instanceof Class) && objectType != null) {
-            fieldTypeResolved = BeanUtils.getParamType(TypeReference.get(objectType), objectClass, declaringClass, parameter, fieldType);
+            fieldTypeResolved = BeanUtils.getParamType(TypeReference.get(objectType), objectClass, declaringClass, fieldType);
             if (fieldTypeResolved != null) {
                 fieldClassResolved = TypeUtils.getMapping(fieldTypeResolved);
             }
@@ -1995,7 +1634,7 @@ public class ObjectReaderCreator {
             fieldClassResolved = fieldClass;
         }
 
-        return new FieldReaderObjectParam(fieldName, fieldTypeResolved, fieldClassResolved, paramName, parameter, ordinal, features, format, schema);
+        return new FieldReaderObjectParam(fieldName, fieldTypeResolved, fieldClassResolved, paramName, ordinal, features, format);
     }
 
     public <T> FieldReader createFieldReaderMethod(
@@ -2007,7 +1646,6 @@ public class ObjectReaderCreator {
             String format,
             Locale locale,
             Object defaultValue,
-            String schema,
             Type fieldType,
             Class fieldClass,
             Method method,
@@ -2028,14 +1666,6 @@ public class ObjectReaderCreator {
             }
         }
 
-        JSONSchema jsonSchema = null;
-        if (schema != null && !schema.isEmpty()) {
-            JSONObject object = JSON.parseObject(schema);
-            if (!object.isEmpty()) {
-                jsonSchema = JSONSchema.of(object, fieldClass);
-            }
-        }
-
         if (initReader != null) {
             FieldReaderObject fieldReaderObjectMethod = new FieldReaderObject(
                     fieldName,
@@ -2046,7 +1676,6 @@ public class ObjectReaderCreator {
                     format,
                     locale,
                     defaultValue,
-                    jsonSchema,
                     method,
                     null,
                     null
@@ -2056,105 +1685,71 @@ public class ObjectReaderCreator {
         }
 
         if (fieldType == boolean.class) {
-            return new FieldReaderBoolValueMethod(fieldName, ordinal, features, format, (Boolean) defaultValue, jsonSchema, method);
+            return new FieldReaderBoolValueMethod(fieldName, ordinal, features, format, (Boolean) defaultValue, method);
         }
 
         if (fieldType == Boolean.class) {
-            return new FieldReaderBoolMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Boolean) defaultValue, jsonSchema, method);
+            return new FieldReaderBoolMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Boolean) defaultValue, method);
         }
 
         if (fieldType == byte.class) {
-            return new FieldReaderInt8ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Byte) defaultValue, jsonSchema, method);
+            return new FieldReaderInt8ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Byte) defaultValue, method);
         }
 
         if (fieldType == short.class) {
-            return new FieldReaderInt16ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, method);
+            return new FieldReaderInt16ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Short) defaultValue, method);
         }
 
         if (fieldType == int.class) {
-            return new FieldReaderInt32ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (Integer) defaultValue, jsonSchema, method);
+            return new FieldReaderInt32ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, (Integer) defaultValue, method);
         }
 
         if (fieldType == long.class) {
-            return new FieldReaderInt64ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, method);
+            return new FieldReaderInt64ValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Long) defaultValue, method);
         }
 
         if (fieldType == float.class) {
-            return new FieldReaderFloatValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Float) defaultValue, jsonSchema, method);
+            return new FieldReaderFloatValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Float) defaultValue, method);
         }
 
         if (fieldType == double.class) {
-            return new FieldReaderDoubleValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Double) defaultValue, jsonSchema, method);
+            return new FieldReaderDoubleValueMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Double) defaultValue, method);
         }
 
         if (fieldType == Byte.class) {
-            return new FieldReaderInt8Method(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Byte) defaultValue, jsonSchema, method);
+            return new FieldReaderInt8Method(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Byte) defaultValue, method);
         }
 
         if (fieldType == Short.class) {
-            return new FieldReaderInt16Method(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, method);
+            return new FieldReaderInt16Method(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Short) defaultValue, method);
         }
 
         if (fieldType == Integer.class) {
-            return new FieldReaderInt32Method(fieldName, ordinal, features, format, locale, (Integer) defaultValue, jsonSchema, method);
+            return new FieldReaderInt32Method(fieldName, ordinal, features, format, locale, (Integer) defaultValue, method);
         }
 
         if (fieldType == Long.class) {
-            return new FieldReaderInt64Method(fieldName, ordinal, features, format, locale, (Long) defaultValue, jsonSchema, method);
+            return new FieldReaderInt64Method(fieldName, ordinal, features, format, locale, (Long) defaultValue, method);
         }
 
         if (fieldType == Float.class) {
-            return new FieldReaderFloatMethod(fieldName, ordinal, features, format, locale, (Float) defaultValue, jsonSchema, method);
+            return new FieldReaderFloatMethod(fieldName, ordinal, features, format, locale, (Float) defaultValue, method);
         }
 
         if (fieldType == Double.class) {
-            return new FieldReaderDoubleMethod(fieldName, ordinal, features, format, (Double) defaultValue, jsonSchema, method);
+            return new FieldReaderDoubleMethod(fieldName, ordinal, features, format, (Double) defaultValue, method);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldReaderBigDecimalMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (BigDecimal) defaultValue, jsonSchema, method);
+            return new FieldReaderBigDecimalMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (BigDecimal) defaultValue, method);
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldReaderBigIntegerMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (BigInteger) defaultValue, jsonSchema, method);
+            return new FieldReaderBigIntegerMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (BigInteger) defaultValue, method);
         }
 
         if (fieldType == String.class) {
-            return new FieldReaderStringMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (String) defaultValue, jsonSchema, method);
-        }
-
-        if (fieldType == LocalDate.class) {
-            return new FieldReaderLocalDate(
-                    fieldName,
-                    fieldType,
-                    fieldClass,
-                    ordinal,
-                    features,
-                    format,
-                    locale,
-                    defaultValue,
-                    jsonSchema,
-                    method,
-                    null,
-                    null
-            );
-        }
-
-        if (fieldType == OffsetDateTime.class) {
-            return new FieldReaderOffsetDateTime(
-                    fieldName,
-                    fieldType,
-                    fieldClass,
-                    ordinal,
-                    features,
-                    format,
-                    locale,
-                    defaultValue,
-                    jsonSchema,
-                    method,
-                    null,
-                    null
-            );
+            return new FieldReaderStringMethod(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (String) defaultValue, method);
         }
 
         if (fieldType == UUID.class) {
@@ -2167,7 +1762,6 @@ public class ObjectReaderCreator {
                     format,
                     locale,
                     defaultValue,
-                    jsonSchema,
                     method,
                     null,
                     null
@@ -2184,42 +1778,41 @@ public class ObjectReaderCreator {
                     format,
                     locale,
                     defaultValue,
-                    jsonSchema,
                     method,
                     null,
                     null
             );
         }
 
-        if (method.getParameterCount() == 0) {
+        if (method.getParameterTypes().length == 0) {
             if (fieldClass == AtomicInteger.class) {
-                return new FieldReaderAtomicIntegerMethodReadOnly(fieldName, fieldClass, ordinal, jsonSchema, method);
+                return new FieldReaderAtomicIntegerMethodReadOnly(fieldName, fieldClass, ordinal, method);
             }
 
             if (fieldClass == AtomicLong.class) {
-                return new FieldReaderAtomicLongReadOnly(fieldName, fieldClass, ordinal, jsonSchema, method);
+                return new FieldReaderAtomicLongReadOnly(fieldName, fieldClass, ordinal, method);
             }
 
             if (fieldClass == AtomicIntegerArray.class) {
-                return new FieldReaderAtomicIntegerArrayReadOnly(fieldName, fieldClass, ordinal, jsonSchema, method);
+                return new FieldReaderAtomicIntegerArrayReadOnly(fieldName, fieldClass, ordinal, method);
             }
 
             if (fieldClass == AtomicLongArray.class) {
-                return new FieldReaderAtomicLongArrayReadOnly(fieldName, fieldClass, ordinal, jsonSchema, method);
+                return new FieldReaderAtomicLongArrayReadOnly(fieldName, fieldClass, ordinal, method);
             }
 
             if (fieldClass == AtomicBoolean.class) {
-                return new FieldReaderAtomicBooleanMethodReadOnly(fieldName, fieldClass, ordinal, jsonSchema, method);
+                return new FieldReaderAtomicBooleanMethodReadOnly(fieldName, fieldClass, ordinal, method);
             }
 
             if (fieldClass == AtomicReference.class) {
-                return new FieldReaderAtomicReferenceMethodReadOnly(fieldName, fieldType, fieldClass, ordinal, jsonSchema, method);
+                return new FieldReaderAtomicReferenceMethodReadOnly(fieldName, fieldType, fieldClass, ordinal, method);
             }
 
             if (Collection.class.isAssignableFrom(fieldClass)) {
                 Field field = null;
                 String methodName = method.getName();
-                if (methodName.startsWith("get")) {
+                if (methodName.startsWith("get", 0)) {
                     String getterName = BeanUtils.getterName(methodName, PropertyNamingStrategy.CamelCase.name());
                     field = BeanUtils.getDeclaredField(method.getDeclaringClass(), getterName);
                 }
@@ -2230,7 +1823,6 @@ public class ObjectReaderCreator {
                         ordinal,
                         features,
                         format,
-                        jsonSchema,
                         method,
                         field
                 );
@@ -2239,7 +1831,7 @@ public class ObjectReaderCreator {
             if (Map.class.isAssignableFrom(fieldClass)) {
                 Field field = null;
                 String methodName = method.getName();
-                if (methodName.startsWith("get")) {
+                if (methodName.startsWith("get", 0)) {
                     String getterName = BeanUtils.getterName(methodName, PropertyNamingStrategy.CamelCase.name());
                     field = BeanUtils.getDeclaredField(method.getDeclaringClass(), getterName);
                 }
@@ -2250,7 +1842,6 @@ public class ObjectReaderCreator {
                         ordinal,
                         features,
                         format,
-                        jsonSchema,
                         method,
                         field
                 );
@@ -2277,20 +1868,20 @@ public class ObjectReaderCreator {
                     Class itemClass = TypeUtils.getMapping(itemType);
 
                     if (itemClass == String.class) {
-                        return new FieldReaderList(fieldName, fieldTypeResolved, fieldClass, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, method, null, null);
+                        return new FieldReaderList(fieldName, fieldTypeResolved, fieldClass, String.class, String.class, ordinal, features, format, locale, null, method, null, null);
                     }
 
-                    return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, itemType, itemClass, ordinal, features, format, locale, null, jsonSchema, method, null, null);
+                    return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, itemType, itemClass, ordinal, features, format, locale, null, method, null, null);
                 }
             }
-            return new FieldReaderList(fieldName, fieldType, fieldClass, Object.class, Object.class, ordinal, features, format, locale, null, jsonSchema, method, null, null);
+            return new FieldReaderList(fieldName, fieldType, fieldClass, Object.class, Object.class, ordinal, features, format, locale, null, method, null, null);
         }
 
         if (fieldClass == Date.class) {
-            return new FieldReaderDate(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, null, method, null);
+            return new FieldReaderDate(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, null, method, null);
         }
 
-        if (fieldClass == StackTraceElement[].class && method != null && method.getDeclaringClass() == Throwable.class) {
+        if (fieldClass == StackTraceElement[].class && method.getDeclaringClass() == Throwable.class) {
             return new FieldReaderStackTrace(
                     fieldName,
                     fieldTypeResolved != null ? fieldTypeResolved : fieldType,
@@ -2300,21 +1891,16 @@ public class ObjectReaderCreator {
                     format,
                     locale,
                     defaultValue,
-                    jsonSchema,
                     method,
                     null,
                     (BiConsumer<Throwable, StackTraceElement[]>) Throwable::setStackTrace
             );
         }
 
-        if (fieldClass == StackTraceElement[].class && method.getDeclaringClass() == Throwable.class) {
-            features |= JSONReader.Feature.IgnoreSetNullValue.mask;
-        }
-
         Field field = null;
         if ((features & FieldInfo.UNWRAPPED_MASK) != 0) {
             String methodName = method.getName();
-            if (methodName.startsWith("set")) {
+            if (methodName.startsWith("set", 0)) {
                 String setterName = BeanUtils.setterName(methodName, PropertyNamingStrategy.CamelCase.name());
                 field = BeanUtils.getDeclaredField(method.getDeclaringClass(), setterName);
                 try {
@@ -2334,7 +1920,6 @@ public class ObjectReaderCreator {
                 format,
                 locale,
                 defaultValue,
-                jsonSchema,
                 method,
                 field,
                 null
@@ -2378,7 +1963,6 @@ public class ObjectReaderCreator {
                 format,
                 null,
                 null,
-                null,
                 fieldType,
                 field.getType(),
                 field,
@@ -2395,7 +1979,6 @@ public class ObjectReaderCreator {
             String format,
             Locale locale,
             Object defaultValue,
-            String schema,
             Type fieldType,
             Class fieldClass,
             Field field,
@@ -2412,105 +1995,97 @@ public class ObjectReaderCreator {
             }
         }
 
-        JSONSchema jsonSchema = null;
-        if (schema != null && !schema.isEmpty()) {
-            JSONObject object = JSON.parseObject(schema);
-            if (!object.isEmpty()) {
-                jsonSchema = JSONSchema.of(object, fieldClass);
-            }
-        }
-
         if (field != null) {
             String objectClassName = objectClass.getName();
-            if (!objectClassName.startsWith("java.lang") && !objectClassName.startsWith("java.time")) {
+            if (!objectClassName.startsWith("java.lang", 0)) {
                 field.setAccessible(true);
             }
         }
 
         if (initReader != null) {
-            FieldReaderObjectField fieldReader = new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features | FieldInfo.READ_USING_MASK, format, defaultValue, jsonSchema, field);
+            FieldReaderObjectField fieldReader = new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features | FieldInfo.READ_USING_MASK, format, defaultValue, field);
             fieldReader.initReader = initReader;
             return fieldReader;
         }
 
         if (fieldClass == int.class) {
-            return new FieldReaderInt32ValueField(fieldName, fieldClass, ordinal, format, (Integer) defaultValue, jsonSchema, field);
+            return new FieldReaderInt32ValueField(fieldName, fieldClass, ordinal, format, (Integer) defaultValue, field);
         }
         if (fieldClass == Integer.class) {
-            return new FieldReaderInt32Field(fieldName, fieldClass, ordinal, features, format, (Integer) defaultValue, jsonSchema, field);
+            return new FieldReaderInt32Field(fieldName, fieldClass, ordinal, features, format, (Integer) defaultValue, field);
         }
 
         if (fieldClass == long.class) {
-            return new FieldReaderInt64ValueField(fieldName, fieldClass, ordinal, features, format, (Long) defaultValue, jsonSchema, field);
+            return new FieldReaderInt64ValueField(fieldName, fieldClass, ordinal, features, format, (Long) defaultValue, field);
         }
         if (fieldClass == Long.class) {
-            return new FieldReaderInt64Field(fieldName, fieldClass, ordinal, features, format, (Long) defaultValue, jsonSchema, field);
+            return new FieldReaderInt64Field(fieldName, fieldClass, ordinal, features, format, (Long) defaultValue, field);
         }
 
         if (fieldClass == short.class) {
-            return new FieldReaderInt16ValueField(fieldName, fieldClass, ordinal, features, format, (Short) defaultValue, jsonSchema, field);
+            return new FieldReaderInt16ValueField(fieldName, fieldClass, ordinal, features, format, (Short) defaultValue, field);
         }
 
         if (fieldClass == Short.class) {
-            return new FieldReaderInt16Field(fieldName, fieldClass, ordinal, features, format, (Short) defaultValue, jsonSchema, field);
+            return new FieldReaderInt16Field(fieldName, fieldClass, ordinal, features, format, (Short) defaultValue, field);
         }
 
         if (fieldClass == boolean.class) {
-            return new FieldReaderBoolValueField(fieldName, ordinal, features, format, (Boolean) defaultValue, jsonSchema, field);
+            return new FieldReaderBoolValueField(fieldName, ordinal, features, format, (Boolean) defaultValue, field);
         }
 
         if (fieldClass == Boolean.class) {
-            return new FieldReaderBoolField(fieldName, fieldClass, ordinal, features, format, (Boolean) defaultValue, jsonSchema, field);
+            return new FieldReaderBoolField(fieldName, fieldClass, ordinal, features, format, (Boolean) defaultValue, field);
         }
 
         if (fieldClass == byte.class) {
-            return new FieldReaderInt8ValueField(fieldName, fieldClass, ordinal, features, format, (Byte) defaultValue, jsonSchema, field);
+            return new FieldReaderInt8ValueField(fieldName, fieldClass, ordinal, features, format, (Byte) defaultValue, field);
         }
 
         if (fieldClass == Byte.class) {
-            return new FieldReaderInt8Field(fieldName, fieldClass, ordinal, features, format, (Byte) defaultValue, jsonSchema, field);
+            return new FieldReaderInt8Field(fieldName, fieldClass, ordinal, features, format, (Byte) defaultValue, field);
         }
 
         if (fieldClass == float.class) {
-            return new FieldReaderFloatValueField(fieldName, fieldClass, ordinal, features, format, (Float) defaultValue, jsonSchema, field);
+            return new FieldReaderFloatValueField(fieldName, fieldClass, ordinal, features, format, (Float) defaultValue, field);
         }
         if (fieldClass == Float.class) {
-            return new FieldReaderFloatField(fieldName, fieldClass, ordinal, features, format, (Float) defaultValue, jsonSchema, field);
+            return new FieldReaderFloatField(fieldName, fieldClass, ordinal, features, format, (Float) defaultValue, field);
         }
 
         if (fieldClass == double.class) {
-            return new FieldReaderDoubleValueField(fieldName, fieldClass, ordinal, features, format, (Double) defaultValue, jsonSchema, field);
+            return new FieldReaderDoubleValueField(fieldName, fieldClass, ordinal, features, format, (Double) defaultValue, field);
         }
         if (fieldClass == Double.class) {
-            return new FieldReaderDoubleField(fieldName, fieldClass, ordinal, features, format, (Double) defaultValue, jsonSchema, field);
+            return new FieldReaderDoubleField(fieldName, fieldClass, ordinal, features, format, (Double) defaultValue, field);
         }
 
         if (fieldClass == char.class) {
-            return new FieldReaderCharValueField(fieldName, ordinal, features, format, (Character) defaultValue, jsonSchema, field);
+            return new FieldReaderCharValueField(fieldName, ordinal, features, format, (Character) defaultValue, field);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldReaderBigDecimalField(fieldName, fieldClass, ordinal, features, format, (BigDecimal) defaultValue, jsonSchema, field);
+            return new FieldReaderBigDecimalField(fieldName, fieldClass, ordinal, features, format, (BigDecimal) defaultValue, field);
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldReaderBigIntegerField(fieldName, fieldClass, ordinal, features, format, (BigInteger) defaultValue, jsonSchema, field);
+            return new FieldReaderBigIntegerField(fieldName, fieldClass, ordinal, features, format, (BigInteger) defaultValue, field);
         }
 
         if (fieldClass == String.class) {
-            return new FieldReaderStringField(fieldName, fieldClass, ordinal, features, format, (String) defaultValue, jsonSchema, field);
+            return new FieldReaderStringField(fieldName, fieldClass, ordinal, features, format, (String) defaultValue, field);
         }
 
         if (fieldClass == Date.class) {
-            return new FieldReaderDate(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field, null, null);
+            return new FieldReaderDate(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, field, null, null);
         }
 
         if (fieldClass == AtomicBoolean.class) {
-            return new FieldReaderAtomicBooleanFieldReadOnly(fieldName, fieldClass, ordinal, format, (AtomicBoolean) defaultValue, jsonSchema, field);
+            return new FieldReaderAtomicBooleanFieldReadOnly(fieldName, fieldClass, ordinal, format, (AtomicBoolean) defaultValue, field);
         }
 
         if (fieldClass == AtomicReference.class) {
-            return new FieldReaderAtomicReferenceField(fieldName, fieldType, fieldClass, ordinal, format, jsonSchema, field);
+            return new FieldReaderAtomicReferenceField(fieldName, fieldType, fieldClass, ordinal, format, field);
         }
 
         Type fieldTypeResolved = null;
@@ -2531,38 +2106,29 @@ public class ObjectReaderCreator {
                     Class itemClass = TypeUtils.getMapping(itemType);
                     if (itemClass == String.class) {
                         if (finalField) {
-                            if (UNSAFE_SUPPORT && (features & JSONReader.Feature.FieldBased.mask) != 0) {
-                                return new FieldReaderListFieldUF(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, field);
+                            if ((features & JSONReader.Feature.FieldBased.mask) != 0) {
+                                return new FieldReaderListFieldUF(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, field);
                             }
 
-                            return new FieldReaderCollectionFieldReadOnly(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, field);
+                            return new FieldReaderCollectionFieldReadOnly(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, field);
                         }
 
-                        if (UNSAFE_SUPPORT) {
-                            return new FieldReaderListFieldUF(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, field);
-                        }
-
-                        return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, jsonSchema, null, field, null);
+                        return new FieldReaderListFieldUF(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, null, field);
                     }
 
-                    if (UNSAFE_SUPPORT) {
-                        return new FieldReaderListFieldUF(
-                                fieldName,
-                                fieldTypeResolved,
-                                fieldClassResolved,
-                                itemType,
-                                itemClass,
-                                ordinal,
-                                features,
-                                format,
-                                locale,
-                                (Collection) defaultValue,
-                                jsonSchema,
-                                field
-                        );
-                    }
-
-                    return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, itemType, itemClass, ordinal, features, format, locale, (Collection) defaultValue, jsonSchema, null, field, null);
+                    return new FieldReaderListFieldUF(
+                            fieldName,
+                            fieldTypeResolved,
+                            fieldClassResolved,
+                            itemType,
+                            itemClass,
+                            ordinal,
+                            features,
+                            format,
+                            locale,
+                            (Collection) defaultValue,
+                            field
+                    );
                 }
             }
 
@@ -2578,24 +2144,7 @@ public class ObjectReaderCreator {
             }
             Class itemClass = TypeUtils.getClass(itemType);
 
-            if (UNSAFE_SUPPORT) {
-                return new FieldReaderListFieldUF(
-                        fieldName,
-                        fieldType,
-                        fieldClass,
-                        itemType,
-                        itemClass,
-                        ordinal,
-                        features,
-                        format,
-                        locale,
-                        (Collection) defaultValue,
-                        jsonSchema,
-                        field
-                );
-            }
-
-            return new FieldReaderList(
+            return new FieldReaderListFieldUF(
                     fieldName,
                     fieldType,
                     fieldClass,
@@ -2606,10 +2155,7 @@ public class ObjectReaderCreator {
                     format,
                     locale,
                     (Collection) defaultValue,
-                    jsonSchema,
-                    null,
-                    field,
-                    null
+                    field
             );
         }
 
@@ -2619,8 +2165,8 @@ public class ObjectReaderCreator {
                 Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
                 if (actualTypeArguments.length == 2) {
-                    if (finalField && (!UNSAFE_SUPPORT || (features & JSONReader.Feature.FieldBased.mask) == 0)) {
-                        return new FieldReaderMapFieldReadOnly(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, jsonSchema, field);
+                    if (finalField && ((features & JSONReader.Feature.FieldBased.mask) == 0)) {
+                        return new FieldReaderMapFieldReadOnly(fieldName, fieldTypeResolved, fieldClassResolved, ordinal, features, format, field);
                     }
                 }
             }
@@ -2628,11 +2174,11 @@ public class ObjectReaderCreator {
 
         if (finalField) {
             if (fieldClass == int[].class) {
-                return new FieldReaderInt32ValueArrayFinalField(fieldName, fieldClass, ordinal, features, format, (int[]) defaultValue, jsonSchema, field);
+                return new FieldReaderInt32ValueArrayFinalField(fieldName, fieldClass, ordinal, features, format, (int[]) defaultValue, field);
             }
 
             if (fieldClass == long[].class) {
-                return new FieldReaderInt64ValueArrayFinalField(fieldName, fieldClass, ordinal, features, format, (long[]) defaultValue, jsonSchema, field);
+                return new FieldReaderInt64ValueArrayFinalField(fieldName, fieldClass, ordinal, features, format, (long[]) defaultValue, field);
             }
         }
 
@@ -2646,7 +2192,6 @@ public class ObjectReaderCreator {
                         ordinal,
                         features,
                         format,
-                        jsonSchema,
                         field);
             }
 
@@ -2658,23 +2203,10 @@ public class ObjectReaderCreator {
                     features,
                     format,
                     defaultValue,
-                    jsonSchema,
                     field);
         }
 
-        if (fieldClass == LocalDateTime.class) {
-            return new FieldReaderLocalDateTime(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field, null, null);
-        }
-
-        if (fieldClass == ZonedDateTime.class) {
-            return new FieldReaderZonedDateTime(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field, null, null);
-        }
-
-        if (fieldClass == Instant.class) {
-            return new FieldReaderInstant(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, field, null, null);
-        }
-
-        return new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, jsonSchema, field);
+        return new FieldReaderObjectField(fieldName, fieldType, fieldClass, ordinal, features, format, defaultValue, field);
     }
 
     public <T, V> FieldReader createFieldReader(
@@ -2684,7 +2216,7 @@ public class ObjectReaderCreator {
             Method method,
             BiConsumer<T, V> function
     ) {
-        return createFieldReader(null, null, fieldName, fieldType, fieldClass, 0, 0, null, null, null, null, method, function, null);
+        return createFieldReader(null, null, fieldName, fieldType, fieldClass, 0, 0, null, null, null, method, function, null);
     }
 
     public <T, V> FieldReader createFieldReader(
@@ -2698,7 +2230,6 @@ public class ObjectReaderCreator {
             String format,
             Locale locale,
             Object defaultValue,
-            JSONSchema schema,
             Method method,
             BiConsumer<T, V> function,
             ObjectReader initReader
@@ -2713,7 +2244,6 @@ public class ObjectReaderCreator {
                     format,
                     locale,
                     defaultValue,
-                    schema,
                     method,
                     null,
                     function
@@ -2723,51 +2253,51 @@ public class ObjectReaderCreator {
         }
 
         if (fieldClass == Integer.class) {
-            return new FieldReaderInt32Func<>(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
+            return new FieldReaderInt32Func<>(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, method, function);
         }
 
         if (fieldClass == Long.class) {
-            return new FieldReaderInt64Func<>(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
+            return new FieldReaderInt64Func<>(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, method, function);
         }
 
         if (fieldClass == String.class) {
-            return new FieldReaderStringFunc<>(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
+            return new FieldReaderStringFunc<>(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, method, function);
         }
 
         if (fieldClass == Boolean.class) {
-            return new FieldReaderBoolFunc<>(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
+            return new FieldReaderBoolFunc<>(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, method, function);
         }
 
         if (fieldClass == Short.class) {
-            return new FieldReaderInt16Func(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
+            return new FieldReaderInt16Func(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, method, function);
         }
 
         if (fieldClass == Byte.class) {
-            return new FieldReaderInt8Func(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
+            return new FieldReaderInt8Func(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, method, function);
         }
 
         if (fieldClass == BigDecimal.class) {
-            return new FieldReaderBigDecimalFunc(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
+            return new FieldReaderBigDecimalFunc(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, method, function);
         }
 
         if (fieldClass == BigInteger.class) {
-            return new FieldReaderBigIntegerFunc(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function);
+            return new FieldReaderBigIntegerFunc(fieldName, fieldClass, ordinal, features, format, locale, defaultValue, method, function);
         }
 
         if (fieldClass == Float.class) {
-            return new FieldReaderFloatFunc(fieldName, fieldClass, ordinal, features, format, locale, (Float) defaultValue, schema, method, function);
+            return new FieldReaderFloatFunc(fieldName, fieldClass, ordinal, features, format, locale, (Float) defaultValue, method, function);
         }
 
         if (fieldClass == Double.class) {
-            return new FieldReaderDoubleFunc(fieldName, fieldClass, ordinal, features, format, locale, (Double) defaultValue, schema, method, function);
+            return new FieldReaderDoubleFunc(fieldName, fieldClass, ordinal, features, format, locale, (Double) defaultValue, method, function);
         }
 
         if (fieldClass == Number.class) {
-            return new FieldReaderNumberFunc(fieldName, fieldClass, ordinal, features, format, locale, (Number) defaultValue, schema, method, function);
+            return new FieldReaderNumberFunc(fieldName, fieldClass, ordinal, features, format, locale, (Number) defaultValue, method, function);
         }
 
         if (fieldClass == Date.class) {
-            return new FieldReaderDate(fieldName, fieldType, fieldClass, ordinal, features, format, locale, (Date) defaultValue, schema, null, method, function);
+            return new FieldReaderDate(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, null, method, function);
         }
 
         Type fieldTypeResolved = null;
@@ -2795,19 +2325,19 @@ public class ObjectReaderCreator {
                     itemType = actualTypeArguments[0];
                     itemClass = TypeUtils.getMapping(itemType);
                     if (itemClass == String.class) {
-                        return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, defaultValue, schema, method, null, function);
+                        return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, String.class, String.class, ordinal, features, format, locale, defaultValue, method, null, function);
                     }
                 }
             }
 
-            return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, itemType, itemClass, ordinal, features, format, locale, defaultValue, schema, method, null, function);
+            return new FieldReaderList(fieldName, fieldTypeResolved, fieldClassResolved, itemType, itemClass, ordinal, features, format, locale, defaultValue, method, null, function);
         }
 
         if (fieldTypeResolved != null) {
-            return new FieldReaderObjectFunc<>(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function, initReader);
+            return new FieldReaderObjectFunc<>(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, locale, defaultValue, method, function, null);
         }
 
-        return new FieldReaderObjectFunc<>(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function, initReader);
+        return new FieldReaderObjectFunc<>(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, method, function, null);
     }
 
     protected ObjectReader createEnumReader(
@@ -2828,12 +2358,12 @@ public class ObjectReaderCreator {
 
             try {
                 fieldInfo.init();
-                Field field = objectClass.getField(name);
+                Field field = BeanUtils.getField(objectClass, name);
                 provider.getFieldInfo(fieldInfo, objectClass, field);
                 String jsonFieldName = fieldInfo.fieldName;
                 if (jsonFieldName != null && !jsonFieldName.isEmpty() && !jsonFieldName.equals(name)) {
                     long jsonFieldNameHash = Fnv.hashCode64(jsonFieldName);
-                    enumMap.putIfAbsent(jsonFieldNameHash, e);
+                    enumMap.put(jsonFieldNameHash, e);
                 }
                 if (fieldInfo.alternateNames != null) {
                     for (String alternateName : fieldInfo.alternateNames) {
@@ -2841,7 +2371,7 @@ public class ObjectReaderCreator {
                             continue;
                         }
                         long alternateNameHash = Fnv.hashCode64(alternateName);
-                        enumMap.putIfAbsent(alternateNameHash, e);
+                        enumMap.put(alternateNameHash, e);
                     }
                 }
             } catch (Exception ignored) {
@@ -2852,7 +2382,7 @@ public class ObjectReaderCreator {
             Enum e = ordinalEnums[i];
             String name = e.name();
             long hashLCase = Fnv.hashCode64LCase(name);
-            enumMap.putIfAbsent(hashLCase, e);
+            enumMap.put(hashLCase, e);
         }
 
         long[] enumNameHashCodes = new long[enumMap.size()];
@@ -2865,9 +2395,9 @@ public class ObjectReaderCreator {
         }
 
         Member enumValueField = BeanUtils.getEnumValueField(objectClass, provider);
-        if (enumValueField == null && provider.modules.size() > 0) {
+        if (enumValueField == null) {
             if (provider != null) {
-                Class fieldClassMixInSource = provider.getMixIn(objectClass);
+                Class fieldClassMixInSource = provider.mixInCache.get(objectClass);
                 if (fieldClassMixInSource != null) {
                     Member mixedValueField = BeanUtils.getEnumValueField(fieldClassMixInSource, provider);
                     if (mixedValueField instanceof Field) {
@@ -2958,23 +2488,18 @@ public class ObjectReaderCreator {
             }
         }
         if (initReader == null) {
-            if (fieldClass == long.class || fieldClass == Long.class) {
-                ObjectReader objectReader = provider.getObjectReader(Long.class);
-                if (objectReader != ObjectReaderImplInt64.INSTANCE) {
-                    initReader = objectReader;
-                }
-            } else if (fieldClass == BigDecimal.class) {
-                ObjectReader objectReader = provider.getObjectReader(BigDecimal.class);
+            if (fieldClass == BigDecimal.class) {
+                ObjectReader objectReader = provider.getObjectReader(BigDecimal.class, false);
                 if (objectReader != ObjectReaderImplBigDecimal.INSTANCE) {
                     initReader = objectReader;
                 }
             } else if (fieldClass == BigInteger.class) {
-                ObjectReader objectReader = provider.getObjectReader(BigInteger.class);
+                ObjectReader objectReader = provider.getObjectReader(BigInteger.class, false);
                 if (objectReader != ObjectReaderImplBigInteger.INSTANCE) {
                     initReader = objectReader;
                 }
             } else if (fieldClass == Date.class) {
-                ObjectReader objectReader = provider.getObjectReader(Date.class);
+                ObjectReader objectReader = provider.getObjectReader(Date.class, false);
                 if (objectReader != ObjectReaderImplDate.INSTANCE) {
                     initReader = objectReader;
                 }
@@ -2983,144 +2508,45 @@ public class ObjectReaderCreator {
         return initReader;
     }
 
-    protected <T> FieldReader createFieldReaderLambda(
-            Class<T> objectClass,
-            Type objectType,
+    public <T> FieldReader<T> createFieldReader(
             String fieldName,
-            int ordinal,
-            long features,
-            String format,
-            Locale locale,
-            Object defaultValue,
-            String schema,
-            Type fieldType,
-            Class fieldClass,
-            Method method,
-            ObjectReader initReader
+            Field field
     ) {
-        if (defaultValue != null && defaultValue.getClass() != fieldClass) {
-            Function typeConvert = JSONFactory
-                    .getDefaultObjectReaderProvider()
-                    .getTypeConvert(defaultValue.getClass(), fieldType);
-            if (typeConvert != null) {
-                defaultValue = typeConvert.apply(defaultValue);
-            } else {
-                throw new JSONException("illegal defaultValue : " + defaultValue + ", class " + fieldClass.getName());
-            }
-        }
-
-        JSONSchema jsonSchema = null;
-        if (schema != null && !schema.isEmpty()) {
-            JSONObject object = JSON.parseObject(schema);
-            if (!object.isEmpty()) {
-                jsonSchema = JSONSchema.of(object, fieldClass);
-            }
-        }
-
-        if (initReader != null) {
-            BiConsumer function = (BiConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return createFieldReader(objectClass, objectType, fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, method, function, initReader);
-        }
-
-        if (fieldType == boolean.class) {
-            ObjBoolConsumer function = (ObjBoolConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderBoolValFunc<>(fieldName, ordinal, jsonSchema, method, function);
-        }
-
-        if (fieldType == byte.class) {
-            ObjByteConsumer function = (ObjByteConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderInt8ValueFunc<>(fieldName, ordinal, jsonSchema, method, function);
-        }
-
-        if (fieldType == short.class) {
-            ObjShortConsumer function = (ObjShortConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderInt16ValueFunc<>(fieldName, ordinal, features, format, locale, (Short) defaultValue, jsonSchema, method, function);
-        }
-
-        if (fieldType == int.class) {
-            ObjIntConsumer function = (ObjIntConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderInt32ValueFunc<>(fieldName, ordinal, (Integer) defaultValue, jsonSchema, method, function);
-        }
-
-        if (fieldType == long.class) {
-            ObjLongConsumer function = (ObjLongConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderInt64ValueFunc<>(fieldName, ordinal, (Long) defaultValue, jsonSchema, method, function);
-        }
-
-        if (fieldType == char.class) {
-            ObjCharConsumer function = (ObjCharConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderCharValueFunc<>(fieldName, ordinal, format, (Character) defaultValue, jsonSchema, method, function);
-        }
-
-        if (fieldType == float.class) {
-            ObjFloatConsumer function = (ObjFloatConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderFloatValueFunc<>(fieldName, ordinal, (Float) defaultValue, jsonSchema, method, function);
-        }
-
-        if (fieldType == double.class) {
-            ObjDoubleConsumer function = (ObjDoubleConsumer) lambdaSetter(objectClass, fieldClass, method);
-            return new FieldReaderDoubleValueFunc<>(fieldName, ordinal, (Double) defaultValue, jsonSchema, method, function);
-        }
-
-        BiConsumer consumer = (BiConsumer) lambdaSetter(objectClass, fieldClass, method);
-        return createFieldReader(objectClass, objectType, fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, method, consumer, initReader);
+        return createFieldReader(fieldName, null, field.getGenericType(), field);
     }
 
-    protected Object lambdaSetter(Class objectClass, Class fieldClass, Method method) {
-        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(objectClass);
+    public <T> FieldReader createFieldReader(
+            String fieldName,
+            Method method
+    ) {
+        Class<?> declaringClass = method.getDeclaringClass();
+        Class<?>[] parameterTypes = method.getParameterTypes();
 
-        Class<?> returnType = method.getReturnType();
-        LambdaSetterInfo lambdaInfo = methodTypeMapping.get(fieldClass);
-
-        MethodType samMethodType;
-        MethodType invokedType;
-        MethodType methodType = null;
-        if (lambdaInfo != null) {
-            samMethodType = lambdaInfo.sameMethodMethod;
-            invokedType = lambdaInfo.invokedType;
-            if (returnType == void.class) {
-                methodType = lambdaInfo.methodType;
-            }
+        Class fieldClass;
+        Type fieldType;
+        if (parameterTypes.length == 0) {
+            fieldClass = method.getReturnType();
+            fieldType = method.getGenericReturnType();
+        } else if (parameterTypes.length == 1) {
+            fieldClass = parameterTypes[0];
+            fieldType = method.getGenericParameterTypes()[0];
         } else {
-            samMethodType = METHOD_TYPE_VOO;
-            invokedType = METHOD_TYPE_BI_CONSUMER;
+            throw new JSONException("illegal setter method " + method);
         }
 
-        if (methodType == null) {
-            methodType = MethodType.methodType(returnType, fieldClass);
-        }
-
-        try {
-            MethodHandle target = lookup.findVirtual(objectClass, method.getName(), methodType);
-            MethodType instantiatedMethodType = MethodType.methodType(void.class, objectClass, fieldClass);
-            CallSite callSite = LambdaMetafactory.metafactory(
-                    lookup,
-                    "accept",
-                    invokedType,
-                    samMethodType,
-                    target,
-                    instantiatedMethodType
-            );
-
-            return callSite
-                    .getTarget()
-                    .invoke();
-        } catch (Throwable e) {
-            throw new JSONException("create fieldReader error", e);
-        }
-    }
-
-    public Function<Consumer, ByteArrayValueConsumer> createByteArrayValueConsumerCreator(
-            Class objectClass,
-            FieldReader[] fieldReaderArray
-    ) {
-        return null;
-    }
-
-    public Function<Consumer, CharArrayValueConsumer> createCharArrayValueConsumerCreator(
-            Class objectClass,
-            FieldReader[] fieldReaderArray
-    ) {
-        return null;
+        return createFieldReaderMethod(
+                declaringClass,
+                declaringClass,
+                fieldName,
+                0,
+                0L,
+                null,
+                null,
+                null,
+                fieldType,
+                fieldClass,
+                method,
+                null
+        );
     }
 }

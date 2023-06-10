@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -61,7 +62,7 @@ public class TypeReferenceTest {
         int id;
         String name;
 
-        public User(int id, String name) {
+        public User(@JSONField(name = "id") int id, @JSONField(name = "name") String name) {
             this.id = id;
             this.name = name;
         }

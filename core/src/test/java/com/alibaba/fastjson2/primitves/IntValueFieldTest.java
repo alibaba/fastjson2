@@ -1,11 +1,7 @@
 package com.alibaba.fastjson2.primitves;
 
-import com.alibaba.fastjson2.JSONPath;
-import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
-import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2_vo.IntField1;
@@ -51,36 +47,6 @@ public class IntValueFieldTest {
                 objectWriter.write(jsonWriter, vo);
                 assertEquals("[1]", jsonWriter.toString());
             }
-        }
-    }
-
-    @Test
-    public void test_jsonpath() {
-        ObjectReaderCreator[] creators = TestUtils.readerCreators();
-
-        for (ObjectReaderCreator creator : creators) {
-            IntField1 vo = new IntField1();
-
-            JSONReader.Context readContext
-                    = new JSONReader.Context(
-                            new ObjectReaderProvider(creator));
-            JSONPath jsonPath = JSONPath
-                    .of("$.v0000")
-                    .setReaderContext(readContext);
-            jsonPath.set(vo, 101);
-            assertEquals(101, vo.v0000);
-            jsonPath.set(vo, 102L);
-            assertEquals(102, vo.v0000);
-            jsonPath.set(vo, null);
-            assertEquals(0, vo.v0000);
-            jsonPath.set(vo, "103");
-            assertEquals(103, vo.v0000);
-            assertEquals(103, jsonPath.eval(vo));
-
-            jsonPath.setInt(vo, 101);
-            assertEquals(101, vo.v0000);
-            jsonPath.setLong(vo, 102L);
-            assertEquals(102, vo.v0000);
         }
     }
 }

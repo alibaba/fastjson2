@@ -1,11 +1,7 @@
 package com.alibaba.fastjson2.primitves;
 
-import com.alibaba.fastjson2.JSONPath;
-import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TestUtils;
-import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
@@ -93,44 +89,6 @@ public class BigDecimalFieldTest {
                 objectWriter.write(jsonWriter, vo);
                 assertEquals("{\"id\":null}", jsonWriter.toString());
             }
-        }
-    }
-
-    @Test
-    public void test_jsonpath() {
-        ObjectReaderCreator[] creators = TestUtils.readerCreators();
-
-        for (ObjectReaderCreator creator : creators) {
-            BigDecimalField1 vo = new BigDecimalField1();
-
-            JSONReader.Context readContext
-                    = new JSONReader.Context(
-                            new ObjectReaderProvider(creator));
-            JSONPath jsonPath = JSONPath
-                    .of("$.id")
-                    .setReaderContext(readContext);
-            jsonPath.set(vo, 101);
-            assertEquals(BigDecimal.valueOf(101), vo.id);
-            jsonPath.set(vo, 102L);
-            assertEquals(BigDecimal.valueOf(102), vo.id);
-
-            jsonPath.set(vo, null);
-            assertEquals(null, vo.id);
-
-            jsonPath.set(vo, "103");
-            assertEquals(BigDecimal.valueOf(103), vo.id);
-            assertEquals(BigDecimal.valueOf(103), jsonPath.eval(vo));
-
-            jsonPath.setInt(vo, 101);
-            assertEquals(BigDecimal.valueOf(101), vo.id);
-            jsonPath.setLong(vo, 102L);
-            assertEquals(BigDecimal.valueOf(102), vo.id);
-
-            JSONPath
-                    .of("$.v0000")
-                    .setReaderContext(readContext)
-                    .setInt(vo, 103);
-            assertEquals(BigDecimal.valueOf(102), vo.id);
         }
     }
 }

@@ -4,10 +4,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -34,50 +30,6 @@ public class Issue467 {
     public static class Bean1 {
         @JSONField(format = "yyyy-MM-dd")
         public Calendar date;
-    }
-
-    @Test
-    public void test2() {
-        assertNull(JSON.parseObject("{\"date\":\"\"}", Bean2.class).date);
-        assertNull(JSON.parseObject("{\"date\":\"\"}").to(Bean2.class).date);
-    }
-
-    public static class Bean2 {
-        @JSONField(format = "yyyy-MM-dd")
-        public Instant date;
-    }
-
-    @Test
-    public void test3() {
-        assertNull(JSON.parseObject("{\"date\":\"\"}", Bean3.class).date);
-        assertNull(JSON.parseObject("{\"date\":\"\"}").to(Bean3.class).date);
-    }
-
-    public static class Bean3 {
-        @JSONField(format = "yyyy-MM-dd")
-        public LocalDateTime date;
-    }
-
-    @Test
-    public void test4() {
-        assertNull(JSON.parseObject("{\"date\":\"\"}", Bean4.class).date);
-        assertNull(JSON.parseObject("{\"date\":\"\"}").to(Bean4.class).date);
-    }
-
-    public static class Bean4 {
-        @JSONField(format = "yyyy-MM-dd")
-        public LocalDate date;
-    }
-
-    @Test
-    public void test5() {
-        assertNull(JSON.parseObject("{\"date\":\"\"}", Bean5.class).date);
-        assertNull(JSON.parseObject("{\"date\":\"\"}").to(Bean5.class).date);
-    }
-
-    public static class Bean5 {
-        @JSONField(format = "HH:mm:ss")
-        public LocalTime date;
     }
 
     @Test

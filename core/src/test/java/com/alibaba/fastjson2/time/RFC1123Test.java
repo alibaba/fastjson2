@@ -10,6 +10,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
+import static com.alibaba.fastjson2.time.ZoneId.DEFAULT_ZONE_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RFC1123Test {
@@ -89,7 +90,7 @@ public class RFC1123Test {
     public void parseDate() {
         {
             String str = "Tue, 3 Jun 2008 11:05:30 GMT";
-            Date date = DateUtils.parseDate(str);
+            Date date = new Date(DateUtils.parseMillis(str, DEFAULT_ZONE_ID));
             ZonedDateTime zdt = date.toInstant().atZone(UTC);
             assertEquals(2008, zdt.getYear());
             assertEquals(6, zdt.getMonthValue());
@@ -100,7 +101,7 @@ public class RFC1123Test {
         }
         {
             String str = "Sun, 11 Dec 2022 12:21:20 GMT";
-            Date date = DateUtils.parseDate(str);
+            Date date = new Date(DateUtils.parseMillis(str, DEFAULT_ZONE_ID));
             ZonedDateTime zdt = date.toInstant().atZone(UTC);
             assertEquals(2022, zdt.getYear());
             assertEquals(12, zdt.getMonthValue());

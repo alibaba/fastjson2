@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Method;
@@ -11,18 +10,13 @@ import java.util.Locale;
 
 final class FieldReaderInt8Method<T>
         extends FieldReaderObject<T> {
-    FieldReaderInt8Method(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Byte defaultValue, JSONSchema schema, Method setter) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, setter, null, null);
+    FieldReaderInt8Method(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Locale locale, Byte defaultValue, Method setter) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, setter, null, null);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         Integer fieldValue = jsonReader.readInt32();
-
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         try {
             method.invoke(object, fieldValue == null ? null : fieldValue.byteValue());
         } catch (Exception e) {
@@ -33,11 +27,6 @@ final class FieldReaderInt8Method<T>
     @Override
     public void accept(T object, Object value) {
         Byte byteValue = TypeUtils.toByte(value);
-
-        if (schema != null) {
-            schema.assertValidate(byteValue);
-        }
-
         try {
             method.invoke(object, byteValue);
         } catch (Exception e) {

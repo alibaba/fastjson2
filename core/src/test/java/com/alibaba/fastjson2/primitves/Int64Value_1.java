@@ -1,16 +1,10 @@
 package com.alibaba.fastjson2.primitves;
 
-import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.reader.ObjectReaders;
 import com.alibaba.fastjson2.writer.ObjectWriter;
-import com.alibaba.fastjson2.writer.ObjectWriterCreator;
-import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import com.alibaba.fastjson2.writer.ObjectWriters;
 import org.junit.jupiter.api.Test;
 
@@ -184,43 +178,6 @@ public class Int64Value_1 {
 
         public void setValue(long value) {
             this.value = value;
-        }
-    }
-
-    @Test
-    public void test_jsonpath() {
-        ObjectReaderCreator[] creators = TestUtils.readerCreators2();
-        ObjectWriterCreator[] writerCreators = TestUtils.writerCreators();
-
-        for (int i = 0; i < creators.length; i++) {
-            ObjectReaderCreator creator = creators[i];
-
-            VO vo = new VO();
-
-            JSONPath jsonPath = JSONPath
-                    .of("$.value")
-                    .setReaderContext(
-                            new JSONReader.Context(
-                                    new ObjectReaderProvider(creator))
-                    )
-                    .setWriterContext(
-                            new JSONWriter.Context(
-                                    new ObjectWriterProvider(writerCreators[i]))
-                    );
-            jsonPath.set(vo, 101);
-            assertEquals(101, vo.getValue());
-            jsonPath.set(vo, 102L);
-            assertEquals(102, vo.getValue());
-            jsonPath.set(vo, null);
-            assertEquals(0, vo.getValue());
-            jsonPath.set(vo, "103");
-            assertEquals(103, vo.getValue());
-            assertEquals(103L, jsonPath.eval(vo));
-
-            jsonPath.setInt(vo, 101);
-            assertEquals(101, vo.getValue());
-            jsonPath.setLong(vo, 102L);
-            assertEquals(102, vo.getValue());
         }
     }
 }

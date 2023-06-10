@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import org.junit.jupiter.api.Test;
@@ -89,7 +90,7 @@ public class Issue940 {
     private static class Bean2 {
         private final BigDecimal data;
 
-        public Bean2(BigDecimal data) {
+        public Bean2(@JSONField(name = "data")BigDecimal data) {
             this.data = data;
         }
     }

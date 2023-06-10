@@ -23,8 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class MainActivity extends AppCompatActivity {
     static final int SERDE_LOOP_COUNT = 10_000;

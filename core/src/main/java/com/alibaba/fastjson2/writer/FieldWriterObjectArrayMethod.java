@@ -71,6 +71,24 @@ final class FieldWriterObjectArrayMethod<T>
                 } else {
                     return ObjectWriterArrayFinal.DECIMAL_ARRAY;
                 }
+            } else if (itemType == Float.class) {
+                if (decimalFormat != null) {
+                    return new ObjectWriterImplFloat(decimalFormat);
+                } else {
+                    return ObjectWriterImplFloat.INSTANCE;
+                }
+            } else if (itemType == Double.class) {
+                if (decimalFormat != null) {
+                    return new ObjectWriterImplDouble(decimalFormat);
+                } else {
+                    return ObjectWriterImplDouble.INSTANCE;
+                }
+            } else if (itemType == BigDecimal.class) {
+                if (decimalFormat != null) {
+                    return new ObjectWriterImplBigDecimal(decimalFormat, null);
+                } else {
+                    return ObjectWriterImplBigDecimal.INSTANCE;
+                }
             }
             return itemObjectWriter = jsonWriter
                     .getObjectWriter(this.itemType, itemClass);

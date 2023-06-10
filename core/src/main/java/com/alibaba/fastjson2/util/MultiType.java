@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSON;
 
 import java.lang.reflect.Type;
 
-public class MultiType
+public final class MultiType
         implements Type {
     private final Type[] types;
 

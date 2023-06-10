@@ -39,7 +39,7 @@ public class ReadMixin {
         private int id;
         private String name;
 
-        public Bean1(int id) {
+        public Bean1(@JSONField(name = "id") int id) {
             this.id = id;
         }
 

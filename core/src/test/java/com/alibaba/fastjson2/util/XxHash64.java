@@ -7,7 +7,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
-import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static java.lang.Long.rotateLeft;
 import static java.lang.Math.min;
 import static sun.misc.Unsafe.ARRAY_BYTE_BASE_OFFSET;
@@ -152,13 +152,13 @@ public final class XxHash64 {
         long millis;
         int nanos2;
         if (seconds < 0 && nanos > 0) {
-            millis = Math.multiplyExact(seconds + 1, 1000);
+            millis = IOUtils.multiplyExact(seconds + 1, 1000);
             long adjustment = nanos / 1000_000 - 1000;
-            millis = Math.addExact(millis, adjustment);
+            millis = IOUtils.addExact(millis, adjustment);
             nanos2 = nanos + (nanos / 1000) * 1000;
         } else {
-            millis = Math.multiplyExact(seconds, 1000);
-            millis = Math.addExact(millis, nanos / 1000_000);
+            millis = IOUtils.multiplyExact(seconds, 1000);
+            millis = IOUtils.addExact(millis, nanos / 1000_000);
             nanos2 = nanos - (nanos / 1000) * 1000;
         }
         return hash(millis, nanos2);

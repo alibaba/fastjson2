@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +33,7 @@ public class Issue465 {
         public PageParameterData() {
         }
 
-        public PageParameterData(final int pNum, final int pSize) {
+        public PageParameterData(@JSONField(name = "pNum") final int pNum, @JSONField(name = "pSize") final int pSize) {
             this.pNum = pNum;
             this.pSize = pSize;
         }

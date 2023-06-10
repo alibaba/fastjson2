@@ -40,7 +40,7 @@ class Model {
 | IgnoreNoneSerializable          | 反序列化忽略非Serializable类型的字段                                                                            |
 | SupportArrayToBean              | 支持数据映射的方式                                                                                           |
 | InitStringFieldAsEmpty          | 初始化String字段为空字符串""                                                                                  |
-| SupportAutoType                 | 支持自动类型，要读取带"@type"类型信息的JSON数据，需要显示打开SupportAutoType                                                 |
+| SupportAutoType                 | 支持自动类型，要读取带"@type"类型信息的JSON数据，需要显式打开SupportAutoType                                                 |
 | SupportSmartMatch               | 默认下是camel case精确匹配，打开这个后，能够智能识别camel/upper/pascal/snake/Kebab五中case                                 |
 | UseNativeObject                 | 默认是使用JSONObject和JSONArray，配置后会使用LinkedHashMap和ArrayList                                             |
 | SupportClassForName             | 支持类型为Class的字段，使用Class.forName。为了安全这个是默认关闭的                                                          |

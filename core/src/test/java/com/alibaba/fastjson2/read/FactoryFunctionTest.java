@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.read;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONCreator;
+import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,12 +35,12 @@ public class FactoryFunctionTest {
     public static class Bean1 {
         private int id;
 
-        private Bean1(int id) {
+        private Bean1(@JSONField(name = "id") int id) {
             this.id = id;
         }
 
         @JSONCreator
-        public static Bean1 create(int id) {
+        public static Bean1 create(@JSONField(name = "id") int id) {
             return new Bean1(id);
         }
     }
@@ -75,13 +76,13 @@ public class FactoryFunctionTest {
         private int id;
         private String name;
 
-        private Bean2(int id, String name) {
+        private Bean2(@JSONField(name = "id") int id, @JSONField(name = "name") String name) {
             this.id = id;
             this.name = name;
         }
 
         @JSONCreator
-        public static Bean2 create(int id, String name) {
+        public static Bean2 create(@JSONField(name = "id") int id, @JSONField(name = "name") String name) {
             return new Bean2(id, name);
         }
     }
@@ -106,7 +107,7 @@ public class FactoryFunctionTest {
         }
 
         @JSONCreator
-        public static Bean3 create(int id, String name, String description) {
+        public static Bean3 create(@JSONField(name = "id") int id, @JSONField(name = "name") String name, @JSONField(name = "description") String description) {
             return new Bean3(id, name, description);
         }
     }

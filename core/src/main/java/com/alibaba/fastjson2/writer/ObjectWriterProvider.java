@@ -1,16 +1,10 @@
 package com.alibaba.fastjson2.writer;
 
-import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.modules.ObjectCodecProvider;
-import com.alibaba.fastjson2.modules.ObjectWriterAnnotationProcessor;
-import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.util.BeanUtils;
-import com.alibaba.fastjson2.util.GuavaSupport;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
@@ -22,21 +16,19 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class ObjectWriterProvider
-        implements ObjectCodecProvider {
+public class ObjectWriterProvider {
     static final int TYPE_INT32_MASK = 1 << 1;
     static final int TYPE_INT64_MASK = 1 << 2;
     static final int TYPE_DECIMAL_MASK = 1 << 3;
     static final int TYPE_DATE_MASK = 1 << 4;
     static final int TYPE_ENUM_MASK = 1 << 5;
-    static final int NAME_COMPATIBLE_WITH_FILED = 1 << 6; // compatibleWithFieldName 1.x
 
     final ConcurrentMap<Type, ObjectWriter> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectWriter> cacheFieldBased = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
     final ObjectWriterCreator creator;
-    final List<ObjectWriterModule> modules = new ArrayList<>();
-    PropertyNamingStrategy namingStrategy;
+    final ObjectWriterModule module = new ObjectWriterModule(this);
+    final PropertyNamingStrategy namingStrategy;
 
     volatile long userDefineMask;
 
@@ -45,54 +37,16 @@ public class ObjectWriterProvider
     }
 
     public ObjectWriterProvider(PropertyNamingStrategy namingStrategy) {
+        this.namingStrategy = namingStrategy;
         init();
 
-        ObjectWriterCreator creator = null;
-        switch (JSONFactory.CREATOR) {
-            case "reflect":
-            case "lambda":
-                creator = ObjectWriterCreator.INSTANCE;
-                break;
-            case "asm":
-            default:
-                try {
-                    if (!JDKUtils.ANDROID && !JDKUtils.GRAAL) {
-                        creator = ObjectWriterCreatorASM.INSTANCE;
-                    }
-                } catch (Throwable ignored) {
-                    // ignored
-                }
-                if (creator == null) {
-                    creator = ObjectWriterCreator.INSTANCE;
-                }
-                break;
-        }
-        this.creator = creator;
-        this.namingStrategy = namingStrategy;
+        this.creator = ObjectWriterCreator.INSTANCE;
     }
 
     public ObjectWriterProvider(ObjectWriterCreator creator) {
         init();
         this.creator = creator;
-    }
-
-    public PropertyNamingStrategy getNamingStrategy() {
-        return namingStrategy;
-    }
-
-    /**
-     * @deprecated only use compatible with fastjson 1.x
-     */
-    public void setCompatibleWithFieldName(boolean stat) {
-        if (stat) {
-            userDefineMask |= NAME_COMPATIBLE_WITH_FILED;
-        } else {
-            userDefineMask &= ~NAME_COMPATIBLE_WITH_FILED;
-        }
-    }
-
-    public void setNamingStrategy(PropertyNamingStrategy namingStrategy) {
-        this.namingStrategy = namingStrategy;
+        this.namingStrategy = null;
     }
 
     public void mixIn(Class target, Class mixinSource) {
@@ -106,14 +60,6 @@ public class ObjectWriterProvider
 
     public void cleanupMixIn() {
         mixInCache.clear();
-    }
-
-    public ObjectWriterCreator getCreator() {
-        ObjectWriterCreator contextCreator = JSONFactory.getContextWriterCreator();
-        if (contextCreator != null) {
-            return contextCreator;
-        }
-        return creator;
     }
 
     public ObjectWriter register(Type type, ObjectWriter objectWriter) {
@@ -169,7 +115,11 @@ public class ObjectWriterProvider
     }
 
     public ObjectWriter registerIfAbsent(Type type, ObjectWriter objectWriter) {
-        return cache.putIfAbsent(type, objectWriter);
+        ObjectWriter origin = cache.get(type);
+        if (origin == null) {
+            cache.put(type, objectWriter);
+        }
+        return origin;
     }
 
     public ObjectWriter unregister(Type type) {
@@ -180,53 +130,19 @@ public class ObjectWriterProvider
         return cache.remove(type, objectWriter);
     }
 
-    public boolean register(ObjectWriterModule module) {
-        for (int i = modules.size() - 1; i >= 0; i--) {
-            if (modules.get(i) == module) {
-                return false;
-            }
-        }
-
-        module.init(this);
-
-        modules.add(0, module);
-        return true;
-    }
-
-    public boolean unregister(ObjectWriterModule module) {
-        return modules.remove(module);
-    }
-
     public Class getMixIn(Class target) {
         return mixInCache.get(target);
     }
 
     public void init() {
-        modules.add(new ObjectWriterBaseModule(this));
-    }
-
-    public List<ObjectWriterModule> getModules() {
-        return modules;
     }
 
     public void getFieldInfo(BeanInfo beanInfo, FieldInfo fieldInfo, Class objectClass, Field field) {
-        for (ObjectWriterModule module : modules) {
-            ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor == null) {
-                continue;
-            }
-            annotationProcessor.getFieldInfo(beanInfo, fieldInfo, objectClass, field);
-        }
+        module.getFieldInfo(beanInfo, fieldInfo, objectClass, field);
     }
 
     public void getFieldInfo(BeanInfo beanInfo, FieldInfo fieldInfo, Class objectClass, Method method) {
-        for (ObjectWriterModule module : modules) {
-            ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor == null) {
-                continue;
-            }
-            annotationProcessor.getFieldInfo(beanInfo, fieldInfo, objectClass, method);
-        }
+        module.getFieldInfo(beanInfo, fieldInfo, objectClass, method);
     }
 
     public void getBeanInfo(BeanInfo beanInfo, Class objectClass) {
@@ -234,13 +150,7 @@ public class ObjectWriterProvider
             beanInfo.namingStrategy = namingStrategy.name();
         }
 
-        for (ObjectWriterModule module : modules) {
-            ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor == null) {
-                continue;
-            }
-            annotationProcessor.getBeanInfo(beanInfo, objectClass);
-        }
+        module.getBeanInfo(beanInfo, objectClass);
     }
 
     public ObjectWriter getObjectWriter(Class objectClass) {
@@ -277,12 +187,6 @@ public class ObjectWriterProvider
                     && superclass.getName().equals("com.google.protobuf.GeneratedMessageV3")) {
                 fieldBased = false;
             }
-            switch (objectClass.getName()) {
-                case "springfox.documentation.spring.web.json.Json":
-                    fieldBased = false;
-                default:
-                    break;
-            }
         }
 
         ObjectWriter objectWriter = fieldBased
@@ -293,22 +197,8 @@ public class ObjectWriterProvider
             return objectWriter;
         }
 
-        if (TypeUtils.isProxy(objectClass)) {
-            if (objectClass == objectType) {
-                objectType = superclass;
-            }
-            objectClass = superclass;
-            if (fieldBased) {
-                fieldBased = false;
-                objectWriter = cacheFieldBased.get(objectType);
-                if (objectWriter != null) {
-                    return objectWriter;
-                }
-            }
-        }
-
         boolean useModules = true;
-        if (fieldBased && objectClass != null) {
+        if (fieldBased) {
             if (Iterable.class.isAssignableFrom(objectClass)
                     && !Collection.class.isAssignableFrom(objectClass)) {
                 useModules = false;
@@ -316,64 +206,33 @@ public class ObjectWriterProvider
         }
 
         if (useModules) {
-            for (int i = 0; i < modules.size(); i++) {
-                ObjectWriterModule module = modules.get(i);
-                objectWriter = module.getObjectWriter(objectType, objectClass);
-                if (objectWriter != null) {
-                    ObjectWriter previous = fieldBased
-                            ? cacheFieldBased.putIfAbsent(objectType, objectWriter)
-                            : cache.putIfAbsent(objectType, objectWriter);
+            objectWriter = module.getObjectWriter(objectType, objectClass);
+            if (objectWriter != null) {
+                ObjectWriter previous = fieldBased
+                        ? cacheFieldBased.put(objectType, objectWriter)
+                        : cache.put(objectType, objectWriter);
 
-                    if (previous != null) {
-                        objectWriter = previous;
-                    }
-                    return objectWriter;
+                if (previous != null) {
+                    objectWriter = previous;
                 }
+                return objectWriter;
             }
         }
 
-        if (objectWriter == null && objectClass != null) {
-            String className = objectClass.getName();
-            switch (className) {
-                case "com.google.common.collect.HashMultimap":
-                case "com.google.common.collect.LinkedListMultimap":
-                case "com.google.common.collect.LinkedHashMultimap":
-                case "com.google.common.collect.ArrayListMultimap":
-                case "com.google.common.collect.TreeMultimap":
-                    objectWriter = GuavaSupport.createAsMapWriter(objectClass);
-                    break;
-                case "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList":
-                    objectWriter = ObjectWriterImplList.INSTANCE;
-                    break;
-                case "com.alibaba.fastjson.JSONObject":
-                    objectWriter = ObjectWriterImplMap.of(objectClass);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        if (objectWriter == null
-                && (!fieldBased)
-                && Map.class.isAssignableFrom(objectClass)
-                && BeanUtils.isExtendedMap(objectClass)) {
-            return ObjectWriterImplMap.of(objectClass);
+        String className = objectClass.getName();
+        if (className.equals("com.alibaba.fastjson.JSONObject")) {
+            objectWriter = ObjectWriterImplMap.of(objectClass);
         }
 
         if (objectWriter == null) {
-            ObjectWriterCreator creator = getCreator();
-            if (objectClass == null) {
-                objectClass = TypeUtils.getMapping(objectType);
-            }
-
             objectWriter = creator.createObjectWriter(
                     objectClass,
                     fieldBased ? JSONWriter.Feature.FieldBased.mask : 0,
                     this
             );
             ObjectWriter previous = fieldBased
-                    ? cacheFieldBased.putIfAbsent(objectType, objectWriter)
-                    : cache.putIfAbsent(objectType, objectWriter);
+                    ? cacheFieldBased.put(objectType, objectWriter)
+                    : cache.put(objectType, objectWriter);
 
             if (previous != null) {
                 objectWriter = previous;
@@ -411,14 +270,6 @@ public class ObjectWriterProvider
                 java.util.Date.class,
                 java.util.UUID.class,
                 java.util.Locale.class,
-                java.time.LocalTime.class,
-                java.time.LocalDate.class,
-                java.time.LocalDateTime.class,
-                java.time.Instant.class,
-                java.time.ZoneId.class,
-                java.time.ZonedDateTime.class,
-                java.time.OffsetDateTime.class,
-                java.time.OffsetTime.class,
                 String.class,
                 StackTraceElement.class,
                 Collections.emptyList().getClass(),
@@ -476,23 +327,15 @@ public class ObjectWriterProvider
                 return true;
             }
             Class keyClass = TypeUtils.getClass(mapTyped.keyType);
-            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
-                return true;
-            }
+            return keyClass != null && keyClass.getClassLoader() == classLoader;
         } else if (objectWriter instanceof ObjectWriterImplCollection) {
             Class itemClass = TypeUtils.getClass(((ObjectWriterImplCollection) objectWriter).itemType);
-            if (itemClass != null && itemClass.getClassLoader() == classLoader) {
-                return true;
-            }
-        } else if (objectWriter instanceof ObjectWriterImplOptional) {
-            Class itemClass = TypeUtils.getClass(((ObjectWriterImplOptional) objectWriter).valueType);
-            if (itemClass != null && itemClass.getClassLoader() == classLoader) {
-                return true;
-            }
+            return itemClass != null && itemClass.getClassLoader() == classLoader;
         } else if (objectWriter instanceof ObjectWriterAdapter) {
             checkedMap.put(objectWriter, null);
             List<FieldWriter> fieldWriters = ((ObjectWriterAdapter<?>) objectWriter).fieldWriters;
-            for (FieldWriter fieldWriter : fieldWriters) {
+            for (int i = 0; i < fieldWriters.size(); i++) {
+                FieldWriter fieldWriter = fieldWriters.get(i);
                 if (fieldWriter instanceof FieldWriterObject) {
                     ObjectWriter initObjectWriter = ((FieldWriterObject<?>) fieldWriter).initObjectWriter;
                     if (match(null, initObjectWriter, classLoader, checkedMap)) {

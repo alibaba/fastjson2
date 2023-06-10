@@ -29,14 +29,14 @@ public final class FDBigInteger {
         int i = 0;
         while (i < SMALL_5_POW.length) {
             FDBigInteger pow5 = new FDBigInteger(new int[]{SMALL_5_POW[i]}, 0);
-            pow5.makeImmutable();
+            pow5.immutable = true;
             POW_5_CACHE[i] = pow5;
             i++;
         }
         FDBigInteger prev = POW_5_CACHE[i - 1];
         while (i < MAX_FIVE_POW) {
             POW_5_CACHE[i] = prev = prev.mult(5);
-            prev.makeImmutable();
+            prev.immutable = true;
             i++;
         }
     }
@@ -44,7 +44,7 @@ public final class FDBigInteger {
     private int[] data;  // value: data[0] is least significant
     private int offset;  // number of least significant zero padding ints
     private int nWords;  // data[nWords-1]!=0, all values above are zero
-    private boolean isImmutable;
+    boolean immutable;
 
     private FDBigInteger(int[] data, int offset) {
         this.data = data;
@@ -83,10 +83,6 @@ public final class FDBigInteger {
         trimLeadingZeros();
     }
 
-    public void makeImmutable() {
-        this.isImmutable = true;
-    }
-
     private void multAddMe(int iv, int addend) {
         long v = iv & 0XFFFFFFFFL;
         // unroll 0th iteration, doing addition.
@@ -117,10 +113,6 @@ public final class FDBigInteger {
         }
     }
 
-    private int size() {
-        return nWords + offset;
-    }
-
     public FDBigInteger multByPow52(int p5, int p2) {
         if (this.nWords == 0) {
             return this;
@@ -135,7 +127,7 @@ public final class FDBigInteger {
                 res = new FDBigInteger(r, this.offset);
             } else {
                 FDBigInteger pow5 = big5pow(p5);
-                r = new int[this.nWords + pow5.size() + extraSize];
+                r = new int[this.nWords + pow5.nWords + pow5.offset + extraSize];
                 mult(this.data, this.nWords, pow5.data, pow5.nWords, r);
                 res = new FDBigInteger(r, this.offset + pow5.offset);
             }
@@ -144,7 +136,6 @@ public final class FDBigInteger {
     }
 
     private static FDBigInteger big5pow(int p) {
-        assert p >= 0 : p; // negative power of 5
         if (p < MAX_FIVE_POW) {
             return POW_5_CACHE[p];
         }
@@ -160,33 +151,15 @@ public final class FDBigInteger {
         return new FDBigInteger(r, offset);
     }
 
-    private FDBigInteger mult(FDBigInteger other) {
-        if (this.nWords == 0) {
-            return this;
-        }
-        if (this.size() == 1) {
-            return other.mult(data[0]);
-        }
-        if (other.nWords == 0) {
-            return other;
-        }
-        if (other.size() == 1) {
-            return this.mult(other.data[0]);
-        }
-        int[] r = new int[nWords + other.nWords];
-        mult(this.data, this.nWords, other.data, other.nWords, r);
-        return new FDBigInteger(r, this.offset + other.offset);
-    }
-
-    private static void mult(int[] src, int srcLen, int value, int[] dst) {
+    private static void mult(int[] src, int srcLen, int value, int[] r) {
         long val = value & 0XFFFFFFFFL;
         long carry = 0;
         for (int i = 0; i < srcLen; i++) {
             long product = (src[i] & 0XFFFFFFFFL) * val + carry;
-            dst[i] = (int) product;
+            r[i] = (int) product;
             carry = product >>> 32;
         }
-        dst[srcLen] = (int) carry;
+        r[srcLen] = (int) carry;
     }
 
     private static void mult(int[] s1, int s1Len, int[] s2, int s2Len, int[] dst) {
@@ -200,25 +173,6 @@ public final class FDBigInteger {
             }
             dst[i + s2Len] = (int) p;
         }
-    }
-
-    private static void mult(int[] src, int srcLen, int v0, int v1, int[] dst) {
-        long v = v0 & 0XFFFFFFFFL;
-        long carry = 0;
-        for (int j = 0; j < srcLen; j++) {
-            long product = v * (src[j] & 0XFFFFFFFFL) + carry;
-            dst[j] = (int) product;
-            carry = product >>> 32;
-        }
-        dst[srcLen] = (int) carry;
-        v = v1 & 0XFFFFFFFFL;
-        carry = 0;
-        for (int j = 0; j < srcLen; j++) {
-            long product = (dst[j + 1] & 0XFFFFFFFFL) + v * (src[j] & 0XFFFFFFFFL) + carry;
-            dst[j + 1] = (int) product;
-            carry = product >>> 32;
-        }
-        dst[srcLen + 1] = (int) carry;
     }
 
     private static void leftShift(int[] src, int idx, int[] result, int bitcount, int anticount, int prev) {
@@ -238,7 +192,7 @@ public final class FDBigInteger {
         }
         int wordcount = shift >> 5;
         int bitcount = shift & 0x1f;
-        if (this.isImmutable) {
+        if (this.immutable) {
             if (bitcount == 0) {
                 return new FDBigInteger(Arrays.copyOf(data, nWords), offset + wordcount);
             } else {
@@ -311,7 +265,22 @@ public final class FDBigInteger {
         if (r < SMALL_5_POW.length) {
             return bigq.mult(SMALL_5_POW[r]);
         } else {
-            return bigq.mult(big5powRec(r));
+            FDBigInteger other = big5powRec(r);
+            if (bigq.nWords == 0) {
+                return bigq;
+            }
+            if (bigq.nWords + bigq.offset == 1) {
+                return other.mult(bigq.data[0]);
+            }
+            if (other.nWords == 0) {
+                return other;
+            }
+            if (other.nWords + other.offset == 1) {
+                return bigq.mult(other.data[0]);
+            }
+            int[] r1 = new int[bigq.nWords + other.nWords];
+            mult(bigq.data, bigq.nWords, other.data, other.nWords, r1);
+            return new FDBigInteger(r1, bigq.offset + other.offset);
         }
     }
 
@@ -344,13 +313,32 @@ public final class FDBigInteger {
             } else {
                 FDBigInteger pow5 = big5pow(p5);
                 int[] r;
-                if (v1 == 0) {
-                    r = new int[pow5.nWords + 1 + ((p2 != 0) ? 1 : 0)];
-                    mult(pow5.data, pow5.nWords, v0, r);
-                } else {
-                    r = new int[pow5.nWords + 2 + ((p2 != 0) ? 1 : 0)];
-                    mult(pow5.data, pow5.nWords, v0, v1, r);
+                final int[] src = pow5.data;
+                final int srcLen = pow5.nWords;
+                long v = v0 & 0XFFFFFFFFL;
+                long carry = 0;
+
+                r = v1 == 0
+                        ? new int[pow5.nWords + 1 + ((p2 != 0) ? 1 : 0)]
+                        : new int[pow5.nWords + 2 + ((p2 != 0) ? 1 : 0)];
+                for (int i = 0; i < srcLen; i++) {
+                    long product = v * (src[i] & 0XFFFFFFFFL) + carry;
+                    r[i] = (int) product;
+                    carry = product >>> 32;
                 }
+                r[srcLen] = (int) carry;
+
+                if (v1 != 0) {
+                    v = v1 & 0XFFFFFFFFL;
+                    carry = 0;
+                    for (int j = 0; j < srcLen; j++) {
+                        long product = (r[j + 1] & 0XFFFFFFFFL) + v * (src[j] & 0XFFFFFFFFL) + carry;
+                        r[j + 1] = (int) product;
+                        carry = product >>> 32;
+                    }
+                    r[srcLen + 1] = (int) carry;
+                }
+
                 return (new FDBigInteger(r, pow5.offset)).leftShift(p2);
             }
         } else if (p2 != 0) {
@@ -403,9 +391,8 @@ public final class FDBigInteger {
     }
 
     public FDBigInteger leftInplaceSub(FDBigInteger subtrahend) {
-        assert this.size() >= subtrahend.size() : "result should be positive";
         FDBigInteger minuend;
-        if (this.isImmutable) {
+        if (this.immutable) {
             minuend = new FDBigInteger(this.data.clone(), this.offset);
         } else {
             minuend = this;
@@ -449,9 +436,8 @@ public final class FDBigInteger {
     }
 
     public FDBigInteger rightInplaceSub(FDBigInteger subtrahend) {
-        assert this.size() >= subtrahend.size() : "result should be positive";
         FDBigInteger minuend = this;
-        if (subtrahend.isImmutable) {
+        if (subtrahend.immutable) {
             subtrahend = new FDBigInteger(subtrahend.data.clone(), subtrahend.offset);
         }
         int offsetDiff = minuend.offset - subtrahend.offset;
@@ -460,17 +446,15 @@ public final class FDBigInteger {
         int subLen = subtrahend.nWords;
         int minLen = minuend.nWords;
         if (offsetDiff < 0) {
-            int rLen = minLen;
-            if (rLen < sData.length) {
+            if (minLen < sData.length) {
                 System.arraycopy(sData, 0, sData, -offsetDiff, subLen);
                 Arrays.fill(sData, 0, -offsetDiff, 0);
             } else {
-                int[] r = new int[rLen];
+                int[] r = new int[minLen];
                 System.arraycopy(sData, 0, r, -offsetDiff, subLen);
                 subtrahend.data = sData = r;
             }
             subtrahend.offset = minuend.offset;
-            subLen -= offsetDiff;
             offsetDiff = 0;
         } else {
             int rLen = minLen + offsetDiff;
@@ -482,7 +466,7 @@ public final class FDBigInteger {
         int sIndex = 0;
         long borrow = 0L;
         for (; sIndex < offsetDiff; sIndex++) {
-            long diff = 0L - (sData[sIndex] & 0XFFFFFFFFL) + borrow;
+            long diff = -(sData[sIndex] & 0XFFFFFFFFL) + borrow;
             sData[sIndex] = (int) diff;
             borrow = diff >> 32; // signed shift
         }

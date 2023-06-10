@@ -32,7 +32,7 @@ final class ObjectReaderImplClass
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         long classNameHash = jsonReader.readValueHashCode();
 
-        JSONReader.Context context = jsonReader.getContext();
+        JSONReader.Context context = jsonReader.context;
         JSONReader.AutoTypeBeforeHandler typeFilter = context.getContextAutoTypeBeforeHandler();
         if (typeFilter != null) {
             Class<?> filterClass = typeFilter.apply(classNameHash, Class.class, features);
@@ -58,7 +58,7 @@ final class ObjectReaderImplClass
             return mappingClass;
         }
 
-        ObjectReaderProvider provider = context.getProvider();
+        ObjectReaderProvider provider = context.provider;
         Class<?> resolvedClass = provider.checkAutoType(className, null, JSONReader.Feature.SupportAutoType.mask);
         if (resolvedClass == null) {
             throw new JSONException(jsonReader.info("class not found " + className));

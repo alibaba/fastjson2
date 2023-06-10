@@ -75,7 +75,10 @@ final class FieldWriterListMethod<T>
         } else {
             writeList(jsonWriter, true, value);
         }
-        jsonWriter.popPath(value);
+
+        if ((features & ReferenceDetection.mask) != 0) {
+            jsonWriter.popPath(value);
+        }
         return true;
     }
 

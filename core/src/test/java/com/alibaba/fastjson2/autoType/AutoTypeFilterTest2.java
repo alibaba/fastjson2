@@ -7,7 +7,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -486,52 +485,6 @@ public class AutoTypeFilterTest2 {
     }
 
     @Test
-    public void test_jsonb_ConcurrentLinkedDeque() {
-        ConcurrentLinkedDeque values = new ConcurrentLinkedDeque<>();
-        values.add(123);
-        byte[] bytes = JSONB.toBytes(values, JSONWriter.Feature.WriteClassName);
-        assertThrows(
-                JSONException.class,
-                () -> JSONB.parseObject(
-                        bytes,
-                        Object.class,
-                        JSONReader.autoTypeFilter("Object"),
-                        JSONReader.Feature.ErrorOnNotSupportAutoType
-                )
-        );
-
-        assertEquals(
-                values.getClass(),
-                JSONB.parseObject(
-                        bytes,
-                        Object.class,
-                        JSONReader.autoTypeFilter("ConcurrentLinkedDeque"),
-                        JSONReader.Feature.ErrorOnNotSupportAutoType
-                ).getClass()
-        );
-
-        assertEquals(
-                values.getClass(),
-                JSONB.parseObject(
-                        bytes,
-                        Object.class,
-                        JSONReader.autoTypeFilter(ConcurrentLinkedDeque.class),
-                        JSONReader.Feature.ErrorOnNotSupportAutoType
-                ).getClass()
-        );
-
-        assertEquals(
-                values.getClass(),
-                JSONB.parseObject(
-                        bytes,
-                        Object.class,
-                        JSONReader.autoTypeFilter("java.util.concurrent.ConcurrentLinkedDeque"),
-                        JSONReader.Feature.ErrorOnNotSupportAutoType
-                ).getClass()
-        );
-    }
-
-    @Test
     public void test_jsonb_UUID() {
         UUID[] values = new UUID[]{UUID.randomUUID()};
         byte[] bytes = JSONB.toBytes(values, JSONWriter.Feature.WriteClassName);
@@ -721,26 +674,6 @@ public class AutoTypeFilterTest2 {
                         bytes,
                         Object.class,
                         JSONReader.autoTypeFilter("Object"),
-                        JSONReader.Feature.ErrorOnNotSupportAutoType
-                )
-        );
-
-        assertArrayEquals(
-                values,
-                (LocalDate[]) JSONB.parseObject(
-                        bytes,
-                        Object.class,
-                        JSONReader.autoTypeFilter(LocalDate.class),
-                        JSONReader.Feature.ErrorOnNotSupportAutoType
-                )
-        );
-
-        assertArrayEquals(
-                values,
-                (LocalDate[]) JSONB.parseObject(
-                        bytes,
-                        Object.class,
-                        JSONReader.autoTypeFilter("java.time.LocalDate"),
                         JSONReader.Feature.ErrorOnNotSupportAutoType
                 )
         );

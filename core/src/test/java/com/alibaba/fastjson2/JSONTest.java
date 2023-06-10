@@ -4,14 +4,11 @@ import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.filter.NameFilter;
 import com.alibaba.fastjson2.filter.PascalNameFilter;
 import com.alibaba.fastjson2.filter.SimplePropertyPreFilter;
-import com.alibaba.fastjson2.modules.ObjectReaderModule;
-import com.alibaba.fastjson2.modules.ObjectWriterModule;
+import com.alibaba.fastjson2.function.Consumer;
 import com.alibaba.fastjson2.reader.ObjectReaderImplList;
 import com.alibaba.fastjson2.reader.ObjectReaderImplListStr;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.ParameterizedTypeImpl;
-import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import com.alibaba.fastjson2_vo.Date1;
 import com.alibaba.fastjson2_vo.IntField1;
 import org.junit.jupiter.api.Test;
@@ -24,7 +21,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -409,7 +405,6 @@ public class JSONTest {
                 Deque.class,
                 AbstractSequentialList.class,
                 LinkedList.class,
-                ConcurrentLinkedDeque.class,
                 ConcurrentLinkedQueue.class,
         };
 
@@ -427,7 +422,6 @@ public class JSONTest {
                 Deque.class,
                 AbstractSequentialList.class,
                 LinkedList.class,
-                ConcurrentLinkedDeque.class,
                 ConcurrentLinkedQueue.class,
         };
 
@@ -446,7 +440,6 @@ public class JSONTest {
                 Deque.class,
                 AbstractSequentialList.class,
                 LinkedList.class,
-                ConcurrentLinkedDeque.class,
                 ConcurrentLinkedQueue.class,
         };
 
@@ -1072,30 +1065,6 @@ public class JSONTest {
     public void testValid() {
         assertTrue(JSON.isValidArray("[]".getBytes(StandardCharsets.UTF_8)));
         assertFalse(JSON.isValidArray("{}".getBytes(StandardCharsets.UTF_8)));
-    }
-
-    @Test
-    public void testRegisterReaderModule() {
-        ObjectReaderModule module = new ObjectReaderModule() {
-            @Override
-            public void init(ObjectReaderProvider provider) {
-                ObjectReaderModule.super.init(provider);
-            }
-        };
-        JSON.register(module);
-        JSONFactory.getDefaultObjectReaderProvider().unregister(module);
-    }
-
-    @Test
-    public void testRegisterWriterModule() {
-        ObjectWriterModule module = new ObjectWriterModule() {
-            @Override
-            public void init(ObjectWriterProvider provider) {
-                ObjectWriterModule.super.init(provider);
-            }
-        };
-        JSON.register(module);
-        JSONFactory.getDefaultObjectWriterProvider().unregister(module);
     }
 
     @Test

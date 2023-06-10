@@ -16,11 +16,11 @@ public class Issue557 {
     static {
         ObjectReader objectReader1 = ObjectReaderImplMap.of(new TypeReference<Map<String, Object>>() {
         }.getType(), TestPublicMap.class, 0);
-        JSONFactory.getDefaultObjectReaderProvider().register(TestPublicMap.class, objectReader1);
+        JSONFactory.defaultObjectReaderProvider.register(TestPublicMap.class, objectReader1);
 
         ObjectReader objectReader2 = ObjectReaderImplMap.of(new TypeReference<Map<String, Object>>() {
         }.getType(), TestPrivateMap.class, 0);
-        JSONFactory.getDefaultObjectReaderProvider().register(TestPrivateMap.class, objectReader2);
+        JSONFactory.defaultObjectReaderProvider.register(TestPrivateMap.class, objectReader2);
     }
 
     @Test

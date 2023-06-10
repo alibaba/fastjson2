@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONSchemaValidException;
 import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
@@ -31,39 +30,6 @@ public class FieldReaderInt32FuncTest {
     }
 
     public static class Bean {
-        private Integer value;
-
-        public Integer getValue() {
-            return value;
-        }
-
-        public void setValue(Integer value) {
-            this.value = value;
-        }
-    }
-
-    @Test
-    public void test1() {
-        Bean1 bean = new Bean1();
-        ObjectReader<Bean1> objectReader = TestUtils.createObjectReaderLambda(Bean1.class);
-        FieldReader fieldReader = objectReader.getFieldReader("value");
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, "123"));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123L));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123F));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123D));
-
-        assertEquals(
-                201,
-                objectReader.readObject(
-                        JSONReader.of("{\"value\":201}"),
-                        0
-                ).value
-        );
-    }
-
-    public static class Bean1 {
-        @JSONField(schema = "{'minimum':128}")
         private Integer value;
 
         public Integer getValue() {

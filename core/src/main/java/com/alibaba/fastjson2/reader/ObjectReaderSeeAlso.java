@@ -3,12 +3,12 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.function.Function;
+import com.alibaba.fastjson2.function.Supplier;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 final class ObjectReaderSeeAlso<T>
         extends ObjectReaderAdapter<T> {
@@ -26,7 +26,6 @@ final class ObjectReaderSeeAlso<T>
                 typeKey,
                 null,
                 JSONReader.Feature.SupportAutoType.mask,
-                null,
                 defaultCreator,
                 null,
                 seeAlso,
@@ -77,7 +76,7 @@ final class ObjectReaderSeeAlso<T>
 
     @Override
     public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
@@ -86,7 +85,7 @@ final class ObjectReaderSeeAlso<T>
         }
 
         if (jsonReader.nextIfNull()) {
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return null;
         }
 
@@ -126,7 +125,7 @@ final class ObjectReaderSeeAlso<T>
         }
 
         T object = null;
-        boolean objectStart = jsonReader.nextIfMatch('{');
+        boolean objectStart = jsonReader.nextIfObjectStart();
         if (!objectStart) {
             char ch = jsonReader.current();
             // skip for fastjson 1.x compatible
@@ -141,14 +140,14 @@ final class ObjectReaderSeeAlso<T>
         }
 
         for (int i = 0; ; i++) {
-            if (jsonReader.nextIfMatch('}')) {
+            if (jsonReader.nextIfObjectEnd()) {
                 if (object == null) {
-                    object = createInstance(jsonReader.getContext().getFeatures() | features);
+                    object = createInstance(jsonReader.context.getFeatures() | features);
                 }
                 break;
             }
 
-            JSONReader.Context context = jsonReader.getContext();
+            JSONReader.Context context = jsonReader.context;
             long features3, hash = jsonReader.readFieldNameHashCode();
             JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
             if (hash == getTypeKeyHash()
@@ -233,7 +232,7 @@ final class ObjectReaderSeeAlso<T>
             }
 
             if (object == null) {
-                object = createInstance(jsonReader.getContext().getFeatures() | features);
+                object = createInstance(jsonReader.context.getFeatures() | features);
             }
 
             if (fieldReader == null) {
@@ -244,15 +243,11 @@ final class ObjectReaderSeeAlso<T>
             fieldReader.readFieldValue(jsonReader, object);
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         Function buildFunction = getBuildFunction();
         if (buildFunction != null) {
             object = (T) buildFunction.apply(object);
-        }
-
-        if (schema != null) {
-            schema.assertValidate(object);
         }
 
         return object;

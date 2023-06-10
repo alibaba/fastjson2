@@ -9,7 +9,6 @@ import com.alibaba.fastjson2.util.IOUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 class FieldWriterEnum
@@ -198,29 +197,30 @@ class FieldWriterEnum
                 return;
             }
 
-            final boolean usingOrdinal = (features & JSONWriter.Feature.WriteEnumUsingOrdinal.mask) != 0;
             boolean unquoteName = (features & JSONWriter.Feature.UnquoteFieldName.mask) != 0;
             final boolean utf8 = jsonWriter.utf8;
-            final boolean utf16 = jsonWriter.utf8 ? false : jsonWriter.utf16;
+            final boolean utf16 = !jsonWriter.utf8 && jsonWriter.utf16;
             final int ordinal = e.ordinal();
 
-            if (usingOrdinal) {
-                if (utf8 && !unquoteName) {
-                    byte[] bytes = utf8ValueCache[ordinal];
-                    if (bytes == null) {
-                        utf8ValueCache[ordinal] = bytes = getBytes(ordinal);
+            if ((features & JSONWriter.Feature.WriteEnumUsingOrdinal.mask) != 0) {
+                if (!unquoteName) {
+                    if (utf8) {
+                        byte[] bytes = utf8ValueCache[ordinal];
+                        if (bytes == null) {
+                            utf8ValueCache[ordinal] = bytes = getBytes(ordinal);
+                        }
+                        jsonWriter.writeNameRaw(bytes);
+                        return;
                     }
-                    jsonWriter.writeNameRaw(bytes);
-                    return;
-                }
 
-                if (utf16 && !unquoteName) {
-                    char[] chars = utf16ValueCache[ordinal];
-                    if (chars == null) {
-                        utf16ValueCache[ordinal] = chars = getChars(ordinal);
+                    if (utf16) {
+                        char[] chars = utf16ValueCache[ordinal];
+                        if (chars == null) {
+                            utf16ValueCache[ordinal] = chars = getChars(ordinal);
+                        }
+                        jsonWriter.writeNameRaw(chars);
+                        return;
                     }
-                    jsonWriter.writeNameRaw(chars);
-                    return;
                 }
 
                 writeFieldName(jsonWriter);
@@ -228,23 +228,25 @@ class FieldWriterEnum
                 return;
             }
 
-            if (utf8 && !unquoteName) {
-                byte[] bytes = valueNameCacheUTF8[ordinal];
+            if (!unquoteName) {
+                if (utf8) {
+                    byte[] bytes = valueNameCacheUTF8[ordinal];
 
-                if (bytes == null) {
-                    valueNameCacheUTF8[ordinal] = bytes = getNameBytes(ordinal);
+                    if (bytes == null) {
+                        valueNameCacheUTF8[ordinal] = bytes = getNameBytes(ordinal);
+                    }
+                    jsonWriter.writeNameRaw(bytes);
+                    return;
                 }
-                jsonWriter.writeNameRaw(bytes);
-                return;
-            }
 
-            if (utf16 && !unquoteName) {
-                char[] chars = valueNameCacheUTF16[ordinal];
-                if (chars == null) {
-                    valueNameCacheUTF16[ordinal] = chars = getNameChars(ordinal);
+                if (utf16) {
+                    char[] chars = valueNameCacheUTF16[ordinal];
+                    if (chars == null) {
+                        valueNameCacheUTF16[ordinal] = chars = getNameChars(ordinal);
+                    }
+                    jsonWriter.writeNameRaw(chars);
+                    return;
                 }
-                jsonWriter.writeNameRaw(chars);
-                return;
             }
         }
 
@@ -264,7 +266,7 @@ class FieldWriterEnum
 
     private byte[] getNameBytes(int ordinal) {
         byte[] bytes;
-        byte[] nameUft8Bytes = enumConstants[ordinal].name().getBytes(StandardCharsets.UTF_8);
+        byte[] nameUft8Bytes = enumConstants[ordinal].name().getBytes(IOUtils.UTF_8);
         bytes = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + nameUft8Bytes.length + 2);
         bytes[nameWithColonUTF8.length] = '"';
         int index = nameWithColonUTF8.length + 1;

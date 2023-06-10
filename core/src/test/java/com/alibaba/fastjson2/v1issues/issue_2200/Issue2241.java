@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
-import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -44,19 +43,6 @@ public class Issue2241 {
         assertEquals("{\"createTime\":\"20180714224948\"}", json);
     }
 
-    @Test
-    public void test_for_issue4() {
-        String text = "{\"createTime\":1548166745}";
-
-        Order4 o = JSON.parseObject(text, Order4.class);
-        assertEquals(ZonedDateTime.class, o.createTime.getClass());
-        long seconds = o.createTime.toEpochSecond();
-        assertEquals(1548166745L, seconds);
-
-        String json = JSON.toJSONString(o);
-        assertEquals("{\"createTime\":1548166745}", json);
-    }
-
     public static class Order {
         @JSONField(format = "unixtime")
         public Date createTime;
@@ -70,10 +56,5 @@ public class Issue2241 {
     public static class Order3 {
         @JSONField(format = "yyyyMMddHHmmss")
         public Calendar createTime;
-    }
-
-    public static class Order4 {
-        @JSONField(format = "unixtime")
-        public ZonedDateTime createTime;
     }
 }

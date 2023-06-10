@@ -199,7 +199,6 @@ public class JSONBTest {
                 Deque.class,
                 AbstractSequentialList.class,
                 LinkedList.class,
-                ConcurrentLinkedDeque.class,
                 ConcurrentLinkedQueue.class,
         };
 
@@ -219,7 +218,6 @@ public class JSONBTest {
                 Deque.class,
                 AbstractSequentialList.class,
                 LinkedList.class,
-                ConcurrentLinkedDeque.class,
                 ConcurrentLinkedQueue.class,
         };
 
@@ -240,7 +238,6 @@ public class JSONBTest {
                 Deque.class,
                 AbstractSequentialList.class,
                 LinkedList.class,
-                ConcurrentLinkedDeque.class,
                 ConcurrentLinkedQueue.class,
         };
 
@@ -351,7 +348,7 @@ public class JSONBTest {
 
     @Test
     public void test_null_features1() {
-        byte[] jsonbBytes = JSONB.toBytes((Object) null, new JSONWriter.Context(JSONFactory.getDefaultObjectWriterProvider(), JSONWriter.Feature.WriteNulls));
+        byte[] jsonbBytes = JSONB.toBytes((Object) null, new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider, JSONWriter.Feature.WriteNulls));
         assertNull(JSONB.parseObject(jsonbBytes, Object.class));
     }
 

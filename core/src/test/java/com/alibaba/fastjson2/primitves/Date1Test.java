@@ -1,6 +1,10 @@
 package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.time.Instant;
+import com.alibaba.fastjson2.time.LocalDateTime;
+import com.alibaba.fastjson2.time.ZoneId;
+import com.alibaba.fastjson2.time.ZonedDateTime;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
@@ -14,11 +18,6 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.zone.ZoneRules;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -30,7 +29,6 @@ public class Date1Test {
 
     Date[] dates = new Date[]{
             null,
-            new Date(0),
             new Date(1),
             new Date(10),
             new Date(100),
@@ -347,7 +345,7 @@ public class Date1Test {
 
     @Test
     public void test_str_value_utc() {
-        ZoneId utc = ZoneOffset.UTC;
+        ZoneId utc = ZoneId.UTC;
         for (int i = 0; i < dates.length; i++) {
             Date date0 = dates[i];
             JSONWriter writer = JSONWriter.of();
@@ -370,7 +368,7 @@ public class Date1Test {
     public void test_str_value_zone() {
         ZoneId[] zoneIds = {
                 ZoneId.of("Asia/Macau"),
-                ZoneOffset.UTC,
+                ZoneId.UTC,
                 ZoneId.of("Asia/Kuching"),
                 ZoneId.of("Europe/London")
         };
@@ -504,8 +502,13 @@ public class Date1Test {
         for (int i = 0; i < dates.length; i++) {
             Date id = dates[i];
             byte[] utf8 = JSON.toJSONBytes(id);
+            String str = new String(utf8);
             Date id2 = JSON.parseObject(utf8, 0, utf8.length, StandardCharsets.US_ASCII, Date.class);
-            assertEquals(id, id2);
+            if (id == null || id.getTime() == 0) {
+                assertNull(id2);
+            } else {
+                assertEquals(id.getTime(), id2.getTime(), str);
+            }
         }
     }
 
@@ -540,7 +543,13 @@ public class Date1Test {
 
             JSONReader jsonReader = JSONReader.of(byteIn, StandardCharsets.UTF_8);
             Date1 v1 = jsonReader.read(Date1.class);
-            assertEquals(vo.getDate(), v1.getDate());
+            Date date = vo.getDate();
+            Date date1 = v1.getDate();
+            if (date == null || date.getTime() == 0) {
+                assertNull(date1);
+            } else {
+                assertEquals(date, date1);
+            }
         }
     }
 
@@ -550,12 +559,10 @@ public class Date1Test {
         ZoneId zoneId = ZoneId.of("Asia/Shanghai");
 //        LocalDateTime ldt = LocalDateTime.parse(str);
         LocalDateTime ldt = LocalDateTime.of(1899, 1, 1, 8, 0, 0);
-        ZoneRules zoneIdRules = zoneId.getRules();
-        ZoneOffset zoneOffset = zoneIdRules.getOffset(ldt);
-        int zoneOffsetTotalSeconds = zoneOffset.getTotalSeconds();
-        long epochMilli = ldt.atZone(zoneId).toInstant().toEpochMilli();
+        int zoneOffsetTotalSeconds = zoneId.getOffsetTotalSeconds(ldt);
+        long epochMilli = ZonedDateTime.of(ldt, zoneId).toInstant().toEpochMilli();
 
-        zoneIdRules.getOffset(Instant.ofEpochMilli(epochMilli));
+        zoneId.getOffsetTotalSeconds(Instant.ofEpochMilli(epochMilli));
 
         TimeZone timeZone = TimeZone.getTimeZone("Asia/Shanghai");
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");

@@ -1,22 +1,24 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.function.Supplier;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
-import java.util.function.Supplier;
 
 final class ConstructorSupplier
         implements Supplier {
     final Constructor constructor;
     final Class objectClass;
     final boolean useClassNewInstance;
+    final int parameterCount;
 
     public ConstructorSupplier(Constructor constructor) {
         constructor.setAccessible(true);
         this.constructor = constructor;
         this.objectClass = this.constructor.getDeclaringClass();
-        this.useClassNewInstance = constructor.getParameterCount() == 0
+        this.parameterCount = constructor.getParameterTypes().length;
+        this.useClassNewInstance = parameterCount == 0
                 && Modifier.isPublic(constructor.getModifiers())
                 && Modifier.isPublic(objectClass.getModifiers());
     }
@@ -27,7 +29,7 @@ final class ConstructorSupplier
             if (useClassNewInstance) {
                 return objectClass.newInstance();
             } else {
-                if (constructor.getParameterCount() == 1) {
+                if (parameterCount == 1) {
                     return constructor.newInstance(new Object[1]);
                 } else {
                     return constructor.newInstance();

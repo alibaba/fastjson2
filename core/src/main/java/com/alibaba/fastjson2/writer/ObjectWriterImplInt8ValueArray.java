@@ -3,13 +3,13 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.function.Function;
 import java.util.zip.GZIPOutputStream;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteByteArrayAsBase64;
@@ -54,7 +54,7 @@ final class ObjectWriterImplInt8ValueArray
         }
 
         byte[] bytes;
-        if (function != null && object != null) {
+        if (function != null) {
             bytes = function.apply(object);
         } else {
             bytes = (byte[]) object;

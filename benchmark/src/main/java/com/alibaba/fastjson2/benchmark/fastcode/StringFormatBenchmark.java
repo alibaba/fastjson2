@@ -1,7 +1,5 @@
 package com.alibaba.fastjson2.benchmark.fastcode;
 
-import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -30,25 +28,6 @@ public class StringFormatBenchmark {
         bh.consume(
                 new StringBuilder().append(PREFIX).append(value).toString()
         );
-    }
-
-    @Benchmark
-    public void creator(Blackhole bh) {
-        int i = value;
-        int size = (i < 0) ? IOUtils.stringSize(-i) + 1 : IOUtils.stringSize(i);
-        String str;
-        if (JDKUtils.JVM_VERSION == 8) {
-            char[] chars = new char[PREFIX_CHARS.length + size];
-            System.arraycopy(PREFIX_CHARS, 0, chars, 0, PREFIX_CHARS.length);
-            IOUtils.getChars(i, chars.length, chars);
-            str = JDKUtils.STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-        } else {
-            byte[] chars = new byte[PREFIX_BYTES.length + size];
-            System.arraycopy(PREFIX_BYTES, 0, chars, 0, PREFIX_BYTES.length);
-            IOUtils.getChars(i, chars.length, chars);
-            str = JDKUtils.STRING_CREATOR_JDK11.apply(chars, JDKUtils.LATIN1);
-        }
-        bh.consume(str);
     }
 
     public static void main(String[] args) throws RunnerException {

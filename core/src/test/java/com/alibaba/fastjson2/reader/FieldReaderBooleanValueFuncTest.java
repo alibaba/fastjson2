@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.TestUtils;
-import com.alibaba.fastjson2.annotation.JSONCompiler;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +38,6 @@ public class FieldReaderBooleanValueFuncTest {
         );
     }
 
-    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean {
         private boolean value;
 
@@ -65,7 +63,6 @@ public class FieldReaderBooleanValueFuncTest {
         assertThrows(Exception.class, () -> fieldReader.accept(bean, 123D));
     }
 
-    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean2 {
         public void setValue(boolean value) {
             throw new UnsupportedOperationException();
@@ -83,7 +80,6 @@ public class FieldReaderBooleanValueFuncTest {
         );
     }
 
-    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean3 {
         private boolean value;
         public final int id;

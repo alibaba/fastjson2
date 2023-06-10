@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -36,7 +37,7 @@ public class FieldReaderAtomicReferenceTest {
     public static class Bean1 {
         public final AtomicReference<String> value;
 
-        public Bean1(AtomicReference<String> value) {
+        public Bean1(@JSONField(name = "value") AtomicReference<String> value) {
             this.value = value;
         }
     }

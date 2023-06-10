@@ -11,9 +11,10 @@ public class FieldInfo {
     public static final long RAW_VALUE_MASK = 1L << 50;
     public static final long READ_USING_MASK = 1L << 51;
     public static final long FIELD_MASK = 1L << 52;
-    public static final long JSON_AUTO_WIRED_ANNOTATED = 1L << 53;
-    public static final long JIT = 1L << 54;
+//    public static final long JSON_AUTO_WIRED_ANNOTATED = 1L << 53;
+//    public static final long JIT = 1L << 54;
     public static final long DISABLE_UNSAFE = 1L << 55;
+    public static final long READ_ONLY = 1L << 56;
 
     public String fieldName;
     public String format;
@@ -64,6 +65,5 @@ public class FieldInfo {
         isTransient = false;
         defaultValue = null;
         locale = null;
-        schema = null;
     }
 }

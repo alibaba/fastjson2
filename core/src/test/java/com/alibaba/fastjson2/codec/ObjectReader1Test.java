@@ -1,12 +1,10 @@
 package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2_vo.Integer1;
 import org.junit.jupiter.api.Test;
 
@@ -83,22 +81,6 @@ public class ObjectReader1Test {
 
             Integer1 vo = objectReader.readObject(
                     JSONReader.of("{\"V0000\":101,\"V0001\":102}"), JSONReader.Feature.SupportSmartMatch.mask);
-            assertEquals(Integer.valueOf(101), vo.getV0000());
-        }
-    }
-
-    @Test
-    public void test_jsonpath() {
-        ObjectReaderCreator[] creators = TestUtils.readerCreators();
-
-        for (ObjectReaderCreator creator : creators) {
-            Integer1 vo = new Integer1();
-
-            JSONPath path = JSONPath.of("$.v0000");
-            path.setReaderContext(
-                    new JSONReader.Context(
-                            new ObjectReaderProvider(creator)));
-            path.set(vo, 101);
             assertEquals(Integer.valueOf(101), vo.getV0000());
         }
     }

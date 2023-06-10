@@ -29,7 +29,7 @@ public class Issue1349 {
     public static class Bean1 {
         private final Date date;
 
-        public Bean1(@JSONField(locale = "zh", format = "yyyy-mm-dd")Date date) {
+        public Bean1(@JSONField(locale = "zh", format = "yyyy-mm-dd", name = "date") Date date) {
             this.date = date;
         }
     }

@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class TypeConvertTest {
     @Test
     public void test_0() {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
 
         assertEquals(0F, provider.getTypeConvert(String.class, float.class).apply(""));
         assertEquals(0D, provider.getTypeConvert(String.class, double.class).apply(""));

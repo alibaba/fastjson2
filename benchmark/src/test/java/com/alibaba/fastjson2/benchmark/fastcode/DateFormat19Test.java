@@ -35,34 +35,6 @@ public class DateFormat19Test {
         }
     }
 
-    public static void fastjsonFormat2() throws Throwable {
-        for (int j = 0; j < 5; j++) {
-            long start = System.currentTimeMillis();
-            for (int i = 0; i < COUNT; ++i) {
-                benchmark.fastjsonFormat2(BH);
-            }
-            long millis = System.currentTimeMillis() - start;
-            System.out.println("DateFormat19-fastjsonFormat2 millis : " + millis);
-            // zulu8.58.0.13 :
-            // zulu11.52.13 :
-            // zulu17.38.21 :
-        }
-    }
-
-    public static void javaTimeDateFormatter() throws Throwable {
-        for (int j = 0; j < 5; j++) {
-            long start = System.currentTimeMillis();
-            for (int i = 0; i < COUNT; ++i) {
-                benchmark.javaTimeFormatter(BH);
-            }
-            long millis = System.currentTimeMillis() - start;
-            System.out.println("DateFormat19-javaTimeDateFormatter millis : " + millis);
-            // zulu8.58.0.13 :
-            // zulu11.52.13 :
-            // zulu17.38.21 :
-        }
-    }
-
     public static void simpleParseX() throws Throwable {
         int COUNT = 1_000_000;
         for (int j = 0; j < 5; j++) {

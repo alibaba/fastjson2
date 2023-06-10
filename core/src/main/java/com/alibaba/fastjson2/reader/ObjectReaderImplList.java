@@ -1,16 +1,16 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.GuavaSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.function.Function;
 
-import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
+import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
 public final class ObjectReaderImplList
         implements ObjectReader {
@@ -23,8 +23,6 @@ public final class ObjectReaderImplList
     static final Class CLASS_UNMODIFIABLE_COLLECTION = Collections.unmodifiableCollection(Collections.emptyList()).getClass();
     static final Class CLASS_UNMODIFIABLE_LIST = Collections.unmodifiableList(Collections.emptyList()).getClass();
     static final Class CLASS_UNMODIFIABLE_SET = Collections.unmodifiableSet(Collections.emptySet()).getClass();
-    static final Class CLASS_UNMODIFIABLE_SORTED_SET = Collections.unmodifiableSortedSet(Collections.emptySortedSet()).getClass();
-    static final Class CLASS_UNMODIFIABLE_NAVIGABLE_SET = Collections.unmodifiableNavigableSet(Collections.emptyNavigableSet()).getClass();
 
     public static ObjectReaderImplList INSTANCE = new ObjectReaderImplList(ArrayList.class, ArrayList.class, ArrayList.class, Object.class, null);
 
@@ -37,6 +35,7 @@ public final class ObjectReaderImplList
     final String itemClassName;
     final long itemClassNameHash;
     final Function builder;
+    Object listSingleton;
     ObjectReader itemObjectReader;
     volatile boolean instanceError;
 
@@ -113,34 +112,9 @@ public final class ObjectReaderImplList
         } else if (listClass == CLASS_UNMODIFIABLE_SET) {
             instanceClass = LinkedHashSet.class;
             builder = (Object obj) -> Collections.unmodifiableSet((Set) obj);
-        } else if (listClass == CLASS_UNMODIFIABLE_SORTED_SET) {
-            instanceClass = TreeSet.class;
-            builder = (Object obj) -> Collections.unmodifiableSortedSet((SortedSet) obj);
-        } else if (listClass == CLASS_UNMODIFIABLE_NAVIGABLE_SET) {
-            instanceClass = TreeSet.class;
-            builder = (Object obj) -> Collections.unmodifiableNavigableSet((NavigableSet) obj);
         } else {
-            String typeName = listClass.getTypeName();
+            String typeName = TypeUtils.getTypeName(listClass);
             switch (typeName) {
-                case "com.google.common.collect.ImmutableList":
-                case "com.google.common.collect.SingletonImmutableList":
-                case "com.google.common.collect.RegularImmutableList":
-                case "com.google.common.collect.AbstractMapBasedMultimap$RandomAccessWrappedList":
-                    instanceClass = ArrayList.class;
-                    builder = GuavaSupport.immutableListConverter();
-                    break;
-                case "com.google.common.collect.ImmutableSet":
-                case "com.google.common.collect.SingletonImmutableSet":
-                case "com.google.common.collect.RegularImmutableSet":
-                    instanceClass = ArrayList.class;
-                    builder = GuavaSupport.immutableSetConverter();
-                    break;
-                case "com.google.common.collect.Lists$TransformingRandomAccessList":
-                    instanceClass = ArrayList.class;
-                    break;
-                case "com.google.common.collect.Lists.TransformingSequentialList":
-                    instanceClass = LinkedList.class;
-                    break;
                 case "java.util.Collections$SynchronizedRandomAccessList":
                     instanceClass = ArrayList.class;
                     builder = (Function<List, List>) Collections::synchronizedList;
@@ -157,18 +131,37 @@ public final class ObjectReaderImplList
                     instanceClass = TreeSet.class;
                     builder = (Function<SortedSet, SortedSet>) Collections::synchronizedSortedSet;
                     break;
-                case "java.util.Collections$SynchronizedNavigableSet":
-                    instanceClass = TreeSet.class;
-                    builder = (Function<NavigableSet, NavigableSet>) Collections::synchronizedNavigableSet;
-                    break;
                 default:
                     instanceClass = listClass;
                     break;
             }
         }
 
+        switch (type.getTypeName()) {
+            case "kotlin.collections.EmptySet":
+            case "kotlin.collections.EmptyList": {
+                Object empty;
+                Class<?> clazz = (Class<?>) type;
+                try {
+                    Field field = clazz.getField("INSTANCE");
+                    if (!field.isAccessible()) {
+                        field.setAccessible(true);
+                    }
+                    empty = field.get(null);
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    throw new IllegalStateException("Failed to get singleton of " + type, e);
+                }
+                return new ObjectReaderImplList(clazz, empty);
+            }
+            case "java.util.Collections$EmptySet": {
+                return new ObjectReaderImplList((Class) type, Collections.emptySet());
+            }
+            case "java.util.Collections$EmptyList": {
+                return new ObjectReaderImplList((Class) type, Collections.emptyList());
+            }
+        }
+
         if (type == ObjectReaderImplList.CLASS_EMPTY_SET
-                || type == ObjectReaderImplList.CLASS_EMPTY_LIST
                 || type == ObjectReaderImplList.CLASS_EMPTY_LIST
         ) {
             return new ObjectReaderImplList(type, (Class) type, (Class) type, Object.class, null);
@@ -183,6 +176,11 @@ public final class ObjectReaderImplList
         }
 
         return new ObjectReaderImplList(type, listClass, instanceClass, itemType, builder);
+    }
+
+    ObjectReaderImplList(Class listClass, Object listSingleton) {
+        this(listClass, listClass, listClass, Object.class, null);
+        this.listSingleton = listSingleton;
     }
 
     public ObjectReaderImplList(Type listType, Class listClass, Class instanceType, Type itemType, Function builder) {
@@ -219,9 +217,15 @@ public final class ObjectReaderImplList
             return list;
         }
 
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
 
-        Collection list = (Collection) createInstance(0L);
+        Collection list;
+        if (instanceType == ArrayList.class) {
+            list = new ArrayList(collection.size());
+        } else {
+            list = (Collection) createInstance(0L);
+        }
+
         for (Object item : collection) {
             if (item == null) {
                 list.add(null);
@@ -230,7 +234,14 @@ public final class ObjectReaderImplList
 
             Object value = item;
             Class<?> valueClass = value.getClass();
-            if (valueClass != itemType) {
+            if ((valueClass == JSONObject.class || valueClass == CLASS_JSON_OBJECT_1x)
+                    && this.itemClass != valueClass
+            ) {
+                if (itemObjectReader == null) {
+                    itemObjectReader = provider.getObjectReader(itemType);
+                }
+                value = itemObjectReader.createInstance((JSONObject) value, 0L);
+            } else if (valueClass != itemType) {
                 Function typeConvert = provider.getTypeConvert(valueClass, itemType);
                 if (typeConvert != null) {
                     value = typeConvert.apply(value);
@@ -276,7 +287,7 @@ public final class ObjectReaderImplList
     @Override
     public Object createInstance(long features) {
         if (instanceType == ArrayList.class) {
-            return JVM_VERSION == 8 ? new ArrayList(10) : new ArrayList();
+            return new ArrayList();
         }
 
         if (instanceType == LinkedList.class) {
@@ -295,12 +306,8 @@ public final class ObjectReaderImplList
             return new TreeSet();
         }
 
-        if (instanceType == CLASS_EMPTY_LIST) {
-            return Collections.emptyList();
-        }
-
-        if (instanceType == CLASS_EMPTY_SET) {
-            return Collections.emptySet();
+        if (listSingleton != null) {
+            return listSingleton;
         }
 
         if (instanceType != null) {
@@ -332,11 +339,6 @@ public final class ObjectReaderImplList
     }
 
     @Override
-    public FieldReader getFieldReader(long hashCode) {
-        return null;
-    }
-
-    @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         ObjectReader objectReader = jsonReader.checkAutoType(this.listClass, 0, features);
         if (jsonReader.nextIfNull()) {
@@ -357,12 +359,6 @@ public final class ObjectReaderImplList
             } else if (listType == CLASS_UNMODIFIABLE_SET) {
                 listType = LinkedHashSet.class;
                 builder = (Function<Set, Set>) Collections::unmodifiableSet;
-            } else if (listType == CLASS_UNMODIFIABLE_SORTED_SET) {
-                listType = TreeSet.class;
-                builder = (Function<SortedSet, SortedSet>) Collections::unmodifiableSortedSet;
-            } else if (listType == CLASS_UNMODIFIABLE_NAVIGABLE_SET) {
-                listType = TreeSet.class;
-                builder = (Function<NavigableSet, NavigableSet>) Collections::unmodifiableNavigableSet;
             } else if (listType == CLASS_SINGLETON) {
                 listType = ArrayList.class;
                 builder = (Function<Collection, Collection>) ((Collection list) -> Collections.singleton(list.iterator().next()));
@@ -376,7 +372,7 @@ public final class ObjectReaderImplList
 
         if (entryCnt > 0 && itemObjectReader == null) {
             itemObjectReader = jsonReader
-                    .getContext()
+                    .context
                     .getObjectReader(itemType);
         }
 
@@ -392,7 +388,7 @@ public final class ObjectReaderImplList
                         item = list;
                     } else {
                         item = null;
-                        jsonReader.addResolveTask((List) list, i, JSONPath.of(reference));
+                        jsonReader.addResolveTask(list, i, JSONPath.of(reference));
                     }
                 } else {
                     item = itemObjectReader.readJSONBObject(jsonReader, itemType, i, features);
@@ -435,7 +431,7 @@ public final class ObjectReaderImplList
                 throw new JSONException(jsonReader.info("create instance error " + listType), e);
             }
         } else {
-            list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
+            list = (Collection) createInstance(jsonReader.context.getFeatures() | features);
         }
 
         ObjectReader itemObjectReader = this.itemObjectReader;
@@ -486,13 +482,13 @@ public final class ObjectReaderImplList
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        JSONReader.Context context = jsonReader.getContext();
+        JSONReader.Context context = jsonReader.context;
         if (itemObjectReader == null) {
             itemObjectReader = context
                     .getObjectReader(itemType);
         }
 
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
@@ -510,20 +506,20 @@ public final class ObjectReaderImplList
         if (ch == '"') {
             String str = jsonReader.readString();
             if (itemClass == String.class) {
-                jsonReader.nextIfMatch(',');
+                jsonReader.nextIfComma();
                 list.add(str);
                 return list;
             }
 
             if (str.isEmpty()) {
-                jsonReader.nextIfMatch(',');
+                jsonReader.nextIfComma();
                 return null;
             }
 
-            Function typeConvert = context.getProvider().getTypeConvert(String.class, itemType);
+            Function typeConvert = context.provider.getTypeConvert(String.class, itemType);
             if (typeConvert != null) {
                 Object converted = typeConvert.apply(str);
-                jsonReader.nextIfMatch(',');
+                jsonReader.nextIfComma();
                 list.add(converted);
                 return list;
             }
@@ -556,7 +552,7 @@ public final class ObjectReaderImplList
         }
 
         for (int i = 0; ; ++i) {
-            if (jsonReader.nextIfMatch(']')) {
+            if (jsonReader.nextIfArrayEnd()) {
                 break;
             }
 
@@ -581,12 +577,12 @@ public final class ObjectReaderImplList
 
             list.add(item);
 
-            if (jsonReader.nextIfMatch(',')) {
+            if (jsonReader.nextIfComma()) {
                 continue;
             }
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         if (builder != null) {
             return builder.apply(list);

@@ -1,60 +1,28 @@
 package com.alibaba.fastjson2.date;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.TestUtils;
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.time.LocalDate;
+import com.alibaba.fastjson2.time.LocalDateTime;
+import com.alibaba.fastjson2.time.ZonedDateTime;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class FormatTest {
-    @Test
-    public void test() {
-        LocalDate date = LocalDate.of(2017, 12, 13);
-        LocalDateTime dateTime = LocalDateTime.of(2017, 1, 2, 12, 13, 14);
-
-        Bean bean = new Bean();
-        bean.date = date;
-        bean.dateTime = dateTime;
-
-        JSON.mixIn(LocalDateTime.class, LocalDateTimeMixin.class);
-        assertEquals("{\"date\":\"2017-12-13\",\"dateTime\":\"2017-01-02 12:13:14\"}", JSON.toJSONString(bean));
-
-        // clear cache
-        JSON.mixIn(LocalDateTime.class, null);
-        JSON.mixIn(Bean.class, null);
-
-        assertEquals("{\"date\":\"2017-12-13\",\"dateTime\":\"2017-01-02 12:13:14\"}", JSON.toJSONString(bean));
-
-        JSON.mixIn(LocalDateTime.class, null);
-        JSON.mixIn(Bean.class, null);
-
-        JSON.mixIn(LocalDate.class, LocalDateMixin.class);
-        assertEquals("\"2017-12-13 00:00:00\"", JSON.toJSONString(date));
-        JSON.mixIn(LocalDate.class, null);
-        assertEquals("\"2017-12-13\"", JSON.toJSONString(date));
-
-        assertNull(JSON.parseObject("{\"date\":\"\"}", Bean.class).date);
-    }
-
     @Test
     public void testLocalDateTime1() {
         String str = "\"20220613T121317Z\"";
         JSONReader[] jsonReaders = TestUtils.createJSONReaders(str);
         for (JSONReader jsonReader : jsonReaders) {
             LocalDateTime localDateTime = jsonReader.readLocalDateTime();
-            assertEquals(2022, localDateTime.getYear());
-            assertEquals(6, localDateTime.getMonthValue());
-            assertEquals(13, localDateTime.getDayOfMonth());
-            assertEquals(12, localDateTime.getHour());
-            assertEquals(13, localDateTime.getMinute());
-            assertEquals(17, localDateTime.getSecond());
+            assertEquals(2022, localDateTime.date.year);
+            assertEquals(6, localDateTime.date.monthValue);
+            assertEquals(13, localDateTime.date.dayOfMonth);
+            assertEquals(12, localDateTime.time.hour);
+            assertEquals(13, localDateTime.time.minute);
+            assertEquals(17, localDateTime.time.second);
         }
     }
 
@@ -64,12 +32,12 @@ public class FormatTest {
         JSONReader[] jsonReaders = TestUtils.createJSONReaders(str);
         for (JSONReader jsonReader : jsonReaders) {
             LocalDateTime localDateTime = jsonReader.readLocalDateTime();
-            assertEquals(2022, localDateTime.getYear());
-            assertEquals(6, localDateTime.getMonthValue());
-            assertEquals(13, localDateTime.getDayOfMonth());
-            assertEquals(20, localDateTime.getHour());
-            assertEquals(13, localDateTime.getMinute());
-            assertEquals(17, localDateTime.getSecond());
+            assertEquals(2022, localDateTime.date.year);
+            assertEquals(6, localDateTime.date.monthValue);
+            assertEquals(13, localDateTime.date.dayOfMonth);
+            assertEquals(20, localDateTime.time.hour);
+            assertEquals(13, localDateTime.time.minute);
+            assertEquals(17, localDateTime.time.second);
         }
     }
 
@@ -79,12 +47,12 @@ public class FormatTest {
         JSONReader[] jsonReaders = TestUtils.createJSONReaders(str);
         for (JSONReader jsonReader : jsonReaders) {
             LocalDateTime localDateTime = jsonReader.readLocalDateTime();
-            assertEquals(2022, localDateTime.getYear());
-            assertEquals(6, localDateTime.getMonthValue());
-            assertEquals(13, localDateTime.getDayOfMonth());
-            assertEquals(12, localDateTime.getHour());
-            assertEquals(13, localDateTime.getMinute());
-            assertEquals(17, localDateTime.getSecond());
+            assertEquals(2022, localDateTime.date.year);
+            assertEquals(6, localDateTime.date.monthValue);
+            assertEquals(13, localDateTime.date.dayOfMonth);
+            assertEquals(12, localDateTime.time.hour);
+            assertEquals(13, localDateTime.time.minute);
+            assertEquals(17, localDateTime.time.second);
         }
     }
 
@@ -94,12 +62,12 @@ public class FormatTest {
         JSONReader[] jsonReaders = TestUtils.createJSONReaders(str);
         for (JSONReader jsonReader : jsonReaders) {
             ZonedDateTime zdt = jsonReader.readZonedDateTime();
-            assertEquals(2022, zdt.getYear());
-            assertEquals(6, zdt.getMonthValue());
-            assertEquals(13, zdt.getDayOfMonth());
-            assertEquals(12, zdt.getHour());
-            assertEquals(13, zdt.getMinute());
-            assertEquals(17, zdt.getSecond());
+            assertEquals(2022, zdt.dateTime.date.year);
+            assertEquals(6, zdt.dateTime.date.monthValue);
+            assertEquals(13, zdt.dateTime.date.dayOfMonth);
+            assertEquals(12, zdt.dateTime.time.hour);
+            assertEquals(13, zdt.dateTime.time.minute);
+            assertEquals(17, zdt.dateTime.time.second);
         }
     }
 
@@ -109,12 +77,12 @@ public class FormatTest {
         JSONReader[] jsonReaders = TestUtils.createJSONReaders(str);
         for (JSONReader jsonReader : jsonReaders) {
             ZonedDateTime zdt = jsonReader.readZonedDateTime();
-            assertEquals(2022, zdt.getYear());
-            assertEquals(6, zdt.getMonthValue());
-            assertEquals(13, zdt.getDayOfMonth());
-            assertEquals(12, zdt.getHour());
-            assertEquals(13, zdt.getMinute());
-            assertEquals(17, zdt.getSecond());
+            assertEquals(2022, zdt.dateTime.date.year);
+            assertEquals(6, zdt.dateTime.date.monthValue);
+            assertEquals(13, zdt.dateTime.date.dayOfMonth);
+            assertEquals(12, zdt.dateTime.time.hour);
+            assertEquals(13, zdt.dateTime.time.minute);
+            assertEquals(17, zdt.dateTime.time.second);
         }
     }
 
@@ -124,12 +92,12 @@ public class FormatTest {
         JSONReader[] jsonReaders = TestUtils.createJSONReaders(str);
         for (JSONReader jsonReader : jsonReaders) {
             ZonedDateTime zdt = jsonReader.readZonedDateTime();
-            assertEquals(2022, zdt.getYear());
-            assertEquals(6, zdt.getMonthValue());
-            assertEquals(13, zdt.getDayOfMonth());
-            assertEquals(12, zdt.getHour());
-            assertEquals(13, zdt.getMinute());
-            assertEquals(17, zdt.getSecond());
+            assertEquals(2022, zdt.dateTime.date.year);
+            assertEquals(6, zdt.dateTime.date.monthValue);
+            assertEquals(13, zdt.dateTime.date.dayOfMonth);
+            assertEquals(12, zdt.dateTime.time.hour);
+            assertEquals(13, zdt.dateTime.time.minute);
+            assertEquals(17, zdt.dateTime.time.second);
         }
     }
 

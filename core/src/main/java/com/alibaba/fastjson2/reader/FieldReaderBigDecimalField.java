@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
@@ -17,18 +16,14 @@ final class FieldReaderBigDecimalField<T>
             long features,
             String format,
             BigDecimal defaultValue,
-            JSONSchema schema, Field field
+            Field field
     ) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         BigDecimal fieldValue = jsonReader.readBigDecimal();
-
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
 
         try {
             field.set(object, fieldValue);
@@ -39,10 +34,6 @@ final class FieldReaderBigDecimalField<T>
 
     @Override
     public void accept(T object, int value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
         try {
             field.set(object, BigDecimal.valueOf(value));
         } catch (Exception e) {
@@ -52,10 +43,6 @@ final class FieldReaderBigDecimalField<T>
 
     @Override
     public void accept(T object, long value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
         try {
             field.set(object, BigDecimal.valueOf(value));
         } catch (Exception e) {
@@ -66,10 +53,6 @@ final class FieldReaderBigDecimalField<T>
     @Override
     public void accept(T object, Object value) {
         BigDecimal decimalValue = TypeUtils.toBigDecimal(value);
-
-        if (schema != null) {
-            schema.assertValidate(decimalValue);
-        }
 
         try {
             field.set(object, decimalValue);

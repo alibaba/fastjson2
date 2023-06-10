@@ -418,7 +418,7 @@ public class ReaderFeatureErrorOnNullForPrimitivesTest {
                 ObjectReaders.fieldReaderDouble("f5", Bean4::setF5),
                 ObjectReaders.fieldReaderBool("f6", Bean4::setF6)
         );
-        JSONFactory.getDefaultObjectReaderProvider().register(Bean4.class, objectReader);
+        JSONFactory.defaultObjectReaderProvider.register(Bean4.class, objectReader);
 
         for (String string : strings) {
             assertThrows(

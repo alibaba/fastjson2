@@ -1,8 +1,9 @@
 package com.alibaba.fastjson2.writer;
 
+import com.alibaba.fastjson2.function.Function;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.function.Function;
 
 final class FieldWriterEnumFunc
         extends FieldWriterEnum {

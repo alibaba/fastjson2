@@ -2,10 +2,10 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
-import java.util.function.Function;
 
 import static com.alibaba.fastjson2.writer.ObjectWriterProvider.TYPE_INT64_MASK;
 
@@ -34,7 +34,7 @@ final class ObjectWriterImplInt64ValueArray
         }
 
         long[] array;
-        if (function != null && object != null) {
+        if (function != null) {
             array = function.apply(object);
         } else {
             array = (long[]) object;
@@ -57,7 +57,7 @@ final class ObjectWriterImplInt64ValueArray
         }
 
         long[] array;
-        if (function != null && object != null) {
+        if (function != null) {
             array = function.apply(object);
         } else {
             array = (long[]) object;

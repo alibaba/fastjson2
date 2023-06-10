@@ -1,41 +1,25 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
 
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
-import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 class FieldReaderInt32ValueField<T>
         extends FieldReaderObjectField<T> {
     final long fieldOffset;
-    FieldReaderInt32ValueField(String fieldName, Class fieldType, int ordinal, String format, Integer defaultValue, JSONSchema schema, Field field) {
-        super(fieldName, fieldType, fieldType, ordinal, 0, format, defaultValue, schema, field);
-        fieldOffset = UNSAFE_SUPPORT ? UnsafeUtils.objectFieldOffset(field) : 0;
+    FieldReaderInt32ValueField(String fieldName, Class fieldType, int ordinal, String format, Integer defaultValue, Field field) {
+        super(fieldName, fieldType, fieldType, ordinal, 0, format, defaultValue, field);
+        fieldOffset = JDKUtils.UNSAFE.objectFieldOffset(field);
     }
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         int fieldInt = jsonReader.readInt32Value();
-
-        if (schema != null) {
-            schema.assertValidate(fieldInt);
-        }
-
-        if (UNSAFE_SUPPORT) {
-            UNSAFE.putInt(object, fieldOffset, fieldInt);
-        } else {
-            try {
-                field.setInt(object, fieldInt);
-            } catch (Exception e) {
-                throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
-            }
-        }
+        UNSAFE.putInt(object, fieldOffset, fieldInt);
     }
 
     @Override
@@ -57,38 +41,13 @@ class FieldReaderInt32ValueField<T>
     @Override
     public void accept(T object, Object value) {
         int intValue = TypeUtils.toIntValue(value);
-
-        if (schema != null) {
-            schema.assertValidate(intValue);
-        }
-
-        if (UNSAFE_SUPPORT) {
-            UNSAFE.putInt(object, fieldOffset, intValue);
-        } else {
-            try {
-                field.setInt(object, intValue);
-            } catch (Exception e) {
-                throw new JSONException("set " + fieldName + " error", e);
-            }
-        }
+        UNSAFE.putInt(object, fieldOffset, intValue);
     }
 
     @Override
     public void accept(T object, long value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
         int intValue = (int) value;
-        if (UNSAFE_SUPPORT) {
-            UNSAFE.putInt(object, fieldOffset, intValue);
-        } else {
-            try {
-                field.setInt(object, intValue);
-            } catch (Exception e) {
-                throw new JSONException("set " + fieldName + " error", e);
-            }
-        }
+        UNSAFE.putInt(object, fieldOffset, intValue);
     }
 
     @Override

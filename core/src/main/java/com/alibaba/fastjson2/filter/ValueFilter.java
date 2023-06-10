@@ -1,8 +1,9 @@
 package com.alibaba.fastjson2.filter;
 
+import com.alibaba.fastjson2.function.Function;
+import com.alibaba.fastjson2.function.Predicate;
+
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 public interface ValueFilter
         extends Filter {

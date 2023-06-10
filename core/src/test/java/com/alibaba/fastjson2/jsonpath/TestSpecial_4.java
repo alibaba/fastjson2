@@ -12,7 +12,7 @@ public class TestSpecial_4 {
     public void test_special() {
         String json = "{\"大小\":123}";
         JSONObject object = JSON.parseObject(json);
-        Object obj = JSONPath.eval(object, "$.大小");
+        Object obj = JSONPath.of("$.大小").eval(object);
         assertEquals(123, obj);
     }
 }

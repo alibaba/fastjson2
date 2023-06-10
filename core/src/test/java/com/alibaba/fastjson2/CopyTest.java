@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2_vo.Int2;
 import org.junit.jupiter.api.Test;
 
@@ -151,7 +152,7 @@ public class CopyTest {
         private final int id;
         private String name;
 
-        public Bean4(int id) {
+        public Bean4(@JSONField(name = "id") int id) {
             this.id = id;
         }
 

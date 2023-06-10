@@ -1,13 +1,10 @@
 package com.alibaba.fastjson2.issues;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_VALUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue435 {
@@ -48,25 +45,6 @@ public class Issue435 {
             String str = new String(new char[]{ch});
             byte[] jsonBytes = JSON.toJSONBytes(str);
             assertEquals(str, JSON.parse(jsonBytes), "fail " + i);
-        }
-    }
-
-    @Test
-    public void test256All() {
-        if (STRING_VALUE == null) {
-            return;
-        }
-
-        for (int i = 0; i < 256; ++i) {
-            char ch = (char) i;
-            String str = new String(new char[]{ch});
-
-            JSONWriter[] jsonWriters = TestUtils.createJSONWriters();
-            for (JSONWriter jsonWriter : jsonWriters) {
-                jsonWriter.writeString(str);
-                String json = jsonWriter.toString();
-                assertEquals(str, JSON.parse(json), "fail " + i);
-            }
         }
     }
 }

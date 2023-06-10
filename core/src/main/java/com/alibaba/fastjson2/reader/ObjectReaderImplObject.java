@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.function.Supplier;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
@@ -8,7 +9,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
@@ -31,7 +31,7 @@ public final class ObjectReaderImplObject
 
     @Override
     public Object createInstance(Map map, long features) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
         Object typeKey = map.get(getTypeKey());
 
         if (typeKey instanceof String) {
@@ -62,11 +62,11 @@ public final class ObjectReaderImplObject
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return jsonReader.readAny();
         }
 
-        JSONReader.Context context = jsonReader.getContext();
+        JSONReader.Context context = jsonReader.context;
 
         String typeName = null;
         if (jsonReader.isObject()) {
@@ -114,7 +114,7 @@ public final class ObjectReaderImplObject
                         typeName = jsonReader.readString();
                         autoTypeObjectReader = context.getObjectReaderAutoType(typeName, null);
 
-                        if (autoTypeObjectReader == null && jsonReader.getContext().isEnabled(JSONReader.Feature.ErrorOnNotSupportAutoType)) {
+                        if (autoTypeObjectReader == null && jsonReader.context.isEnabled(JSONReader.Feature.ErrorOnNotSupportAutoType)) {
                             throw new JSONException(jsonReader.info("autoType not support : " + typeName));
                         }
                     }
@@ -128,7 +128,7 @@ public final class ObjectReaderImplObject
             }
 
             Map object;
-            Supplier<Map> objectSupplier = jsonReader.getContext().getObjectSupplier();
+            Supplier<Map> objectSupplier = jsonReader.context.getObjectSupplier();
             if (objectSupplier != null) {
                 object = objectSupplier.get();
             } else {
@@ -152,7 +152,7 @@ public final class ObjectReaderImplObject
             }
 
             for (int i = 0; ; ++i) {
-                if (jsonReader.nextIfMatch('}')) {
+                if (jsonReader.nextIfObjectEnd()) {
                     break;
                 }
 
@@ -241,7 +241,7 @@ public final class ObjectReaderImplObject
                 }
             }
 
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             return object;
         }

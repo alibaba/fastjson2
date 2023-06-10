@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.*;
+import com.alibaba.fastjson2.time.*;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
@@ -14,16 +15,11 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
-import static com.alibaba.fastjson2.JSONWriter.Feature.NotWriteDefaultValue;
-import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public abstract class JSONWriter
         implements Closeable {
@@ -60,8 +56,8 @@ public abstract class JSONWriter
         this.symbolTable = symbolTable;
         this.charset = charset;
         this.jsonb = jsonb;
-        this.utf8 = !jsonb && charset == StandardCharsets.UTF_8;
-        this.utf16 = !jsonb && charset == StandardCharsets.UTF_16;
+        this.utf8 = !jsonb && charset == IOUtils.UTF_8;
+        this.utf16 = !jsonb && charset == IOUtils.UTF_16;
         this.useSingleQuote = !jsonb && (context.features & Feature.UseSingleQuotes.mask) != 0;
 
         quote = useSingleQuote ? '\'' : '"';
@@ -119,11 +115,10 @@ public abstract class JSONWriter
     }
 
     public final String setPath(String name, Object object) {
-        if ((context.features & Feature.ReferenceDetection.mask) == 0) {
-            return null;
-        }
-
-        if (object == Collections.EMPTY_LIST || object == Collections.EMPTY_SET) {
+        if ((context.features & Feature.ReferenceDetection.mask) == 0
+                || object == Collections.EMPTY_LIST
+                || object == Collections.EMPTY_SET
+        ) {
             return null;
         }
 
@@ -133,14 +128,10 @@ public abstract class JSONWriter
         if (object == rootObject) {
             previous = Path.ROOT;
         } else {
-            if (refs == null) {
-                refs = new IdentityHashMap(8);
-                refs.put(object, this.path);
-                return null;
-            }
-
-            previous = refs.get(object);
-            if (previous == null) {
+            if (refs == null || (previous = refs.get(object)) == null) {
+                if (refs == null) {
+                    refs = new IdentityHashMap(8);
+                }
                 refs.put(object, this.path);
                 return null;
             }
@@ -150,32 +141,25 @@ public abstract class JSONWriter
     }
 
     public final String setPath(FieldWriter fieldWriter, Object object) {
-        if ((context.features & Feature.ReferenceDetection.mask) == 0) {
+        if ((context.features & Feature.ReferenceDetection.mask) == 0
+                || object == Collections.EMPTY_LIST
+                || object == Collections.EMPTY_SET
+        ) {
             return null;
         }
 
-        if (object == Collections.EMPTY_LIST || object == Collections.EMPTY_SET) {
-            return null;
-        }
-
-        if (this.path == Path.ROOT) {
-            this.path = fieldWriter.getRootParentPath();
-        } else {
-            this.path = fieldWriter.getPath(path);
-        }
+        this.path = this.path == Path.ROOT
+                ? fieldWriter.getRootParentPath()
+                : fieldWriter.getPath(path);
 
         Path previous;
         if (object == rootObject) {
             previous = Path.ROOT;
         } else {
-            if (refs == null) {
-                refs = new IdentityHashMap(8);
-                refs.put(object, this.path);
-                return null;
-            }
-
-            previous = refs.get(object);
-            if (previous == null) {
+            if (refs == null || (previous = refs.get(object)) == null) {
+                if (refs == null) {
+                    refs = new IdentityHashMap(8);
+                }
                 refs.put(object, this.path);
                 return null;
             }
@@ -185,42 +169,27 @@ public abstract class JSONWriter
     }
 
     public final String setPath(int index, Object object) {
-        if ((context.features & Feature.ReferenceDetection.mask) == 0) {
+        if ((context.features & Feature.ReferenceDetection.mask) == 0
+                || object == Collections.EMPTY_LIST
+                || object == Collections.EMPTY_SET
+        ) {
             return null;
         }
 
-        if (object == Collections.EMPTY_LIST || object == Collections.EMPTY_SET) {
-            return null;
-        }
-
-        if (index == 0) {
-            if (path.child0 != null) {
-                this.path = path.child0;
-            } else {
-                this.path = path.child0 = new Path(path, index);
-            }
-        } else if (index == 1) {
-            if (path.child1 != null) {
-                this.path = path.child1;
-            } else {
-                this.path = path.child1 = new Path(path, index);
-            }
-        } else {
-            this.path = new Path(path, index);
-        }
+        this.path = index == 0
+                ? (path.child0 != null ? path.child0 : (path.child0 = new Path(path, index)))
+                : index == 1
+                ? (path.child1 != null ? path.child1 : (path.child1 = new Path(path, index)))
+                : new Path(path, index);
 
         Path previous;
         if (object == rootObject) {
             previous = Path.ROOT;
         } else {
-            if (refs == null) {
-                refs = new IdentityHashMap(8);
-                refs.put(object, this.path);
-                return null;
-            }
-
-            previous = refs.get(object);
-            if (previous == null) {
+            if (refs == null || (previous = refs.get(object)) == null) {
+                if (refs == null) {
+                    refs = new IdentityHashMap(8);
+                }
                 refs.put(object, this.path);
                 return null;
             }
@@ -365,15 +334,12 @@ public abstract class JSONWriter
     }
 
     private static boolean isWriteTypeInfoGenericArray(GenericArrayType fieldType, Class objectClass) {
-        GenericArrayType genericArrayType = fieldType;
-        Type componentType = genericArrayType.getGenericComponentType();
+        Type componentType = fieldType.getGenericComponentType();
         if (componentType instanceof ParameterizedType) {
             componentType = ((ParameterizedType) componentType).getRawType();
         }
         if (objectClass.isArray()) {
-            if (objectClass.getComponentType().equals(componentType)) {
-                return true;
-            }
+            return objectClass.getComponentType().equals(componentType);
         }
         return false;
     }
@@ -521,32 +487,12 @@ public abstract class JSONWriter
     }
 
     public static JSONWriter of() {
-        JSONWriter.Context writeContext = new JSONWriter.Context(JSONFactory.defaultObjectWriterProvider);
+        Context writeContext = new Context(JSONFactory.defaultObjectWriterProvider);
         JSONWriter jsonWriter;
-        if (JVM_VERSION == 8) {
-            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
-                jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
-            } else {
-                jsonWriter = new JSONWriterUTF16JDK8(writeContext);
-            }
-        } else if ((defaultWriterFeatures & Feature.OptimizedForAscii.mask) != 0) {
-            if (STRING_VALUE != null) {
-                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
-                } else {
-                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
-                }
-            } else {
-                jsonWriter = new JSONWriterUTF8(writeContext);
-            }
+        if ((defaultWriterFeatures & Feature.OptimizedForAscii.mask) != 0) {
+            jsonWriter = new JSONWriterUTF8(writeContext);
         } else {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
-            } else if (FIELD_STRING_VALUE != null && STRING_CODER != null && STRING_VALUE != null && UNSAFE_SUPPORT) {
-                jsonWriter = new JSONWriterUTF16JDK9UF(writeContext);
-            } else {
-                jsonWriter = new JSONWriterUTF16(writeContext);
-            }
+            jsonWriter = new JSONWriterUTF16(writeContext);
         }
         return jsonWriter;
     }
@@ -563,58 +509,22 @@ public abstract class JSONWriter
         }
 
         JSONWriter jsonWriter;
-        if (JVM_VERSION == 8) {
-            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
-                jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
-            } else {
-                jsonWriter = new JSONWriterUTF16JDK8(writeContext);
-            }
-        } else if ((writeContext.features & Feature.OptimizedForAscii.mask) != 0) {
-            if (STRING_VALUE != null) {
-                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
-                } else {
-                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
-                }
-            } else {
-                jsonWriter = new JSONWriterUTF8(writeContext);
-            }
+        if ((writeContext.features & Feature.OptimizedForAscii.mask) != 0) {
+            jsonWriter = new JSONWriterUTF8(writeContext);
         } else {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
-            } else {
-                jsonWriter = new JSONWriterUTF16(writeContext);
-            }
+            jsonWriter = new JSONWriterUTF16(writeContext);
         }
 
         return jsonWriter;
     }
 
     public static JSONWriter of(Feature... features) {
-        Context writeContext = JSONFactory.createWriteContext(features);
+        Context context = JSONFactory.createWriteContext(features);
         JSONWriter jsonWriter;
-        if (JVM_VERSION == 8) {
-            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
-                jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
-            } else {
-                jsonWriter = new JSONWriterUTF16JDK8(writeContext);
-            }
-        } else if ((writeContext.features & Feature.OptimizedForAscii.mask) != 0) {
-            if (STRING_VALUE != null) {
-                if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
-                } else {
-                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
-                }
-            } else {
-                jsonWriter = new JSONWriterUTF8(writeContext);
-            }
+        if ((context.features & Feature.OptimizedForAscii.mask) != 0) {
+            jsonWriter = new JSONWriterUTF8(context);
         } else {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
-            } else {
-                jsonWriter = new JSONWriterUTF16(writeContext);
-            }
+            jsonWriter = new JSONWriterUTF16(context);
         }
 
         return jsonWriter;
@@ -622,22 +532,7 @@ public abstract class JSONWriter
 
     public static JSONWriter ofUTF16(Feature... features) {
         Context writeContext = JSONFactory.createWriteContext(features);
-        JSONWriter jsonWriter;
-        if (JVM_VERSION == 8) {
-            if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
-                jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
-            } else {
-                jsonWriter = new JSONWriterUTF16JDK8(writeContext);
-            }
-        } else {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
-            } else {
-                jsonWriter = new JSONWriterUTF16(writeContext);
-            }
-        }
-
-        return jsonWriter;
+        return new JSONWriterUTF16(writeContext);
     }
 
     public static JSONWriter ofJSONB() {
@@ -683,50 +578,16 @@ public abstract class JSONWriter
 
     public static JSONWriter ofUTF8() {
         Context context = createWriteContext();
-        JSONWriter jsonWriter;
-        if (STRING_VALUE != null) {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(context);
-            } else {
-                jsonWriter = new JSONWriterUTF8JDK9(context);
-            }
-        } else {
-            jsonWriter = new JSONWriterUTF8(context);
-        }
-
-        return jsonWriter;
+        return new JSONWriterUTF8(context);
     }
 
     public static JSONWriter ofUTF8(JSONWriter.Context context) {
-        JSONWriter jsonWriter;
-        if (STRING_VALUE != null) {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(context);
-            } else {
-                jsonWriter = new JSONWriterUTF8JDK9(context);
-            }
-        } else {
-            jsonWriter = new JSONWriterUTF8(context);
-        }
-
-        return jsonWriter;
+        return new JSONWriterUTF8(context);
     }
 
     public static JSONWriter ofUTF8(Feature... features) {
         Context context = createWriteContext(features);
-
-        JSONWriter jsonWriter;
-        if (STRING_VALUE != null) {
-            if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(context);
-            } else {
-                jsonWriter = new JSONWriterUTF8JDK9(context);
-            }
-        } else {
-            jsonWriter = new JSONWriterUTF8(context);
-        }
-
-        return jsonWriter;
+        return new JSONWriterUTF8(context);
     }
 
     public void writeBinary(byte[] bytes) {
@@ -908,6 +769,11 @@ public abstract class JSONWriter
             return;
         }
 
+        if (Float.isNaN(value) || Float.isInfinite(value)) {
+            writeNull();
+            return;
+        }
+
         String str = format.format(value);
         writeRaw(str);
     }
@@ -962,6 +828,11 @@ public abstract class JSONWriter
     public final void writeDouble(double value, DecimalFormat format) {
         if (format == null || jsonb) {
             writeDouble(value);
+            return;
+        }
+
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            writeNull();
             return;
         }
 
@@ -1158,7 +1029,9 @@ public abstract class JSONWriter
     }
 
     public abstract void writeString(String str);
+
     public abstract void writeStringLatin1(byte[] value);
+
     public abstract void writeStringUTF16(byte[] value);
 
     public void writeString(List<String> list) {
@@ -1186,48 +1059,10 @@ public abstract class JSONWriter
 
     public abstract void writeString(char[] chars, int off, int len, boolean quote);
 
-    public abstract void writeLocalDate(LocalDate date);
-
-    protected final boolean writeLocalDateWithFormat(LocalDate date, Context context) {
-        if (context.dateFormatUnixTime || context.dateFormatMillis) {
-            LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.MIN);
-            long millis = dateTime.atZone(context.getZoneId())
-                    .toInstant()
-                    .toEpochMilli();
-            writeInt64(context.dateFormatMillis ? millis : millis / 1000);
-            return true;
-        }
-
-        DateTimeFormatter formatter = context.getDateFormatter();
-        if (formatter != null) {
-            String str;
-            if (context.isDateFormatHasHour()) {
-                str = formatter.format(LocalDateTime.of(date, LocalTime.MIN));
-            } else {
-                str = formatter.format(date);
-            }
-            writeString(str);
-            return true;
-        }
-        return false;
-    }
-
     public abstract void writeLocalDateTime(LocalDateTime dateTime);
 
-    public abstract void writeLocalTime(LocalTime time);
-
-    public abstract void writeZonedDateTime(ZonedDateTime dateTime);
-
-    public abstract void writeOffsetDateTime(OffsetDateTime dateTime);
-
-    public void writeInstant(Instant instant) {
-        if (instant == null) {
-            writeNull();
-            return;
-        }
-
-        String str = DateTimeFormatter.ISO_INSTANT.format(instant);
-        writeString(str);
+    public void writeInstant(long seconds, int nano) {
+        throw new JSONException("TODO");
     }
 
     public abstract void writeDateTime14(
@@ -1369,12 +1204,11 @@ public abstract class JSONWriter
     public abstract int flushTo(OutputStream out, Charset charset) throws IOException;
 
     public static final class Context {
-        static ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
-
         public final ObjectWriterProvider provider;
         DateTimeFormatter dateFormatter;
         String dateFormat;
         Locale locale;
+        TimeZone timeZone;
         boolean dateFormatMillis;
         boolean dateFormatISO8601;
         boolean dateFormatUnixTime;
@@ -1411,7 +1245,7 @@ public abstract class JSONWriter
 
         public Context(Feature... features) {
             this.features = defaultWriterFeatures;
-            this.provider = JSONFactory.getDefaultObjectWriterProvider();
+            this.provider = JSONFactory.defaultObjectWriterProvider;
 
             String format = defaultWriterFormat;
             if (format != null) {
@@ -1425,11 +1259,29 @@ public abstract class JSONWriter
 
         public Context(String format, Feature... features) {
             this.features = defaultWriterFeatures;
-            this.provider = JSONFactory.getDefaultObjectWriterProvider();
+            this.provider = JSONFactory.defaultObjectWriterProvider;
 
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;
             }
+
+            if (format == null) {
+                format = defaultWriterFormat;
+            }
+            if (format != null) {
+                setDateFormat(format);
+            }
+        }
+
+        public Context(ObjectWriterProvider provider, String format, Filter filter, Feature... features) {
+            this.features = defaultWriterFeatures;
+            this.provider = provider;
+
+            for (int i = 0; i < features.length; i++) {
+                this.features |= features[i].mask;
+            }
+
+            configFilter(filter);
 
             if (format == null) {
                 format = defaultWriterFormat;
@@ -1455,6 +1307,17 @@ public abstract class JSONWriter
             if (format != null) {
                 setDateFormat(format);
             }
+        }
+
+        public TimeZone getTimeZone() {
+            if (timeZone == null) {
+                timeZone = ZoneId.DEFAULT_TIME_ZONE;
+            }
+            return timeZone;
+        }
+
+        public void setTimeZone(TimeZone timeZone) {
+            this.timeZone = timeZone;
         }
 
         public long getFeatures() {
@@ -1484,7 +1347,12 @@ public abstract class JSONWriter
         }
 
         public void configFilter(Filter... filters) {
-            for (Filter filter : filters) {
+            if (filters == null) {
+                return;
+            }
+
+            for (int i = 0; i < filters.length; i++) {
+                Filter filter = filters[i];
                 if (filter instanceof NameFilter) {
                     if (this.nameFilter == null) {
                         this.nameFilter = (NameFilter) filter;
@@ -1557,7 +1425,7 @@ public abstract class JSONWriter
 
         public ZoneId getZoneId() {
             if (zoneId == null) {
-                zoneId = DEFAULT_ZONE_ID;
+                zoneId = ZoneId.DEFAULT_ZONE_ID;
             }
             return zoneId;
         }
@@ -1615,11 +1483,9 @@ public abstract class JSONWriter
                         dateFormatMillis = true;
                         break;
                     case "iso8601":
-                        dateFormatMillis = false;
                         dateFormatISO8601 = true;
                         break;
                     case "unixtime":
-                        dateFormatMillis = false;
                         dateFormatUnixTime = true;
                         break;
                     case "yyyy-MM-ddTHH:mm:ss":
@@ -1633,7 +1499,6 @@ public abstract class JSONWriter
                         formatHasHour = true;
                         break;
                     default:
-                        dateFormatMillis = false;
                         formatHasDay = dateFormat.contains("d");
                         formatHasHour = dateFormat.contains("H");
                         break;
@@ -1843,7 +1708,17 @@ public abstract class JSONWriter
         /**
          * @since 2.0.33
          */
-        UnquoteFieldName(1L << 38);
+        UnquoteFieldName(1L << 38),
+
+        /**
+         * @since 2.0.34
+         */
+        NotWriteSetClassName(1L << 39),
+
+        /**
+         * @since 2.0.34
+         */
+        NotWriteNumberClassName(1L << 40);
 
         public final long mask;
 
@@ -1886,12 +1761,14 @@ public abstract class JSONWriter
             }
 
             Path path = (Path) o;
-            return index == path.index && Objects.equals(parent, path.parent) && Objects.equals(name, path.name);
+            return index == path.index
+                    && (parent == path.parent) || (parent != null && parent.equals(path.parent))
+                    && (name == path.name) || (name != null && name.equals(path.name));
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(parent, name, index);
+            return Arrays.hashCode(new Object[]{parent, name, index});
         }
 
         @Override
@@ -1940,253 +1817,120 @@ public abstract class JSONWriter
                         buf[off++] = '.';
                     }
 
-                    if (JVM_VERSION == 8) {
-                        char[] chars = getCharArray(name);
-                        for (int j = 0; j < chars.length; j++) {
-                            char ch = chars[j];
-                            switch (ch) {
-                                case '/':
-                                case ':':
-                                case ';':
-                                case '`':
-                                case '.':
-                                case '~':
-                                case '!':
-                                case '@':
-                                case '#':
-                                case '%':
-                                case '^':
-                                case '&':
-                                case '*':
-                                case '[':
-                                case ']':
-                                case '<':
-                                case '>':
-                                case '?':
-                                case '(':
-                                case ')':
-                                case '-':
-                                case '+':
-                                case '=':
-                                case '\\':
-                                case '"':
-                                case '\'':
-                                    if (off + 1 >= buf.length) {
+                    for (int j = 0; j < name.length(); j++) {
+                        char ch = name.charAt(j);
+                        switch (ch) {
+                            case '/':
+                            case ':':
+                            case ';':
+                            case '`':
+                            case '.':
+                            case '~':
+                            case '!':
+                            case '@':
+                            case '#':
+                            case '%':
+                            case '^':
+                            case '&':
+                            case '*':
+                            case '[':
+                            case ']':
+                            case '<':
+                            case '>':
+                            case '?':
+                            case '(':
+                            case ')':
+                            case '-':
+                            case '+':
+                            case '=':
+                            case '\\':
+                            case '"':
+                            case '\'':
+                                if (off + 1 >= buf.length) {
+                                    int newCapacity = buf.length + (buf.length >> 1);
+                                    buf = Arrays.copyOf(buf, newCapacity);
+                                }
+                                buf[off++] = '\\';
+                                buf[off++] = (byte) ch;
+                                break;
+                            default:
+                                if ((ch >= 0x0001) && (ch <= 0x007F)) {
+                                    if (off == buf.length) {
                                         int newCapacity = buf.length + (buf.length >> 1);
                                         buf = Arrays.copyOf(buf, newCapacity);
                                     }
-                                    buf[off++] = '\\';
                                     buf[off++] = (byte) ch;
-                                    break;
-                                default:
-                                    if ((ch >= 0x0001) && (ch <= 0x007F)) {
+                                } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
+                                    ascii = false;
+                                    final int uc;
+                                    if (ch < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
+                                        if (name.length() - i < 2) {
+                                            uc = -1;
+                                        } else {
+                                            char d = name.charAt(i + 1);
+                                            // d >= '\uDC00' && d < ('\uDFFF' + 1)
+                                            if (d >= '\uDC00' && d < ('\uDFFF' + 1)) { // Character.isLowSurrogate(d)
+                                                uc = ((ch << 10) + d) + (0x010000 - ('\uD800' << 10) - '\uDC00'); // Character.toCodePoint(c, d)
+                                            } else {
+//                            throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
+                                                buf[off++] = (byte) '?';
+                                                continue;
+                                            }
+                                        }
+                                    } else {
+                                        //
+                                        // Character.isLowSurrogate(c)
+                                        buf[off++] = (byte) '?';
+                                        continue;
+//                        throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
+                                    }
+
+                                    if (uc < 0) {
                                         if (off == buf.length) {
                                             int newCapacity = buf.length + (buf.length >> 1);
                                             buf = Arrays.copyOf(buf, newCapacity);
                                         }
-                                        buf[off++] = (byte) ch;
-                                    } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
-                                        ascii = false;
-                                        final int uc;
-                                        if (ch < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
-                                            if (name.length() - i < 2) {
-                                                uc = -1;
-                                            } else {
-                                                char d = name.charAt(i + 1);
-                                                // d >= '\uDC00' && d < ('\uDFFF' + 1)
-                                                if (d >= '\uDC00' && d < ('\uDFFF' + 1)) { // Character.isLowSurrogate(d)
-                                                    uc = ((ch << 10) + d) + (0x010000 - ('\uD800' << 10) - '\uDC00'); // Character.toCodePoint(c, d)
-                                                } else {
-//                            throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
-                                                    buf[off++] = (byte) '?';
-                                                    continue;
-                                                }
-                                            }
-                                        } else {
-                                            //
-                                            // Character.isLowSurrogate(c)
-                                            buf[off++] = (byte) '?';
-                                            continue;
-//                        throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
-                                        }
 
-                                        if (uc < 0) {
-                                            if (off == buf.length) {
-                                                int newCapacity = buf.length + (buf.length >> 1);
-                                                buf = Arrays.copyOf(buf, newCapacity);
-                                            }
-                                            buf[off++] = (byte) '?';
-                                        } else {
-                                            if (off + 3 >= buf.length) {
-                                                int newCapacity = buf.length + (buf.length >> 1);
-                                                buf = Arrays.copyOf(buf, newCapacity);
-                                            }
-                                            buf[off++] = (byte) (0xf0 | ((uc >> 18)));
-                                            buf[off++] = (byte) (0x80 | ((uc >> 12) & 0x3f));
-                                            buf[off++] = (byte) (0x80 | ((uc >> 6) & 0x3f));
-                                            buf[off++] = (byte) (0x80 | (uc & 0x3f));
-                                            j++; // 2 chars
-                                        }
-                                    } else if (ch > 0x07FF) {
-                                        if (off + 2 >= buf.length) {
-                                            int newCapacity = buf.length + (buf.length >> 1);
-                                            buf = Arrays.copyOf(buf, newCapacity);
-                                        }
-                                        ascii = false;
-
-                                        buf[off++] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 6) & 0x3F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+                                        buf[off++] = (byte) '?';
                                     } else {
-                                        if (off + 1 >= buf.length) {
+                                        if (off + 3 >= buf.length) {
                                             int newCapacity = buf.length + (buf.length >> 1);
                                             buf = Arrays.copyOf(buf, newCapacity);
                                         }
-                                        ascii = false;
 
-                                        buf[off++] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
+                                        buf[off++] = (byte) (0xf0 | ((uc >> 18)));
+                                        buf[off++] = (byte) (0x80 | ((uc >> 12) & 0x3f));
+                                        buf[off++] = (byte) (0x80 | ((uc >> 6) & 0x3f));
+                                        buf[off++] = (byte) (0x80 | (uc & 0x3f));
+                                        j++; // 2 chars
                                     }
-                                    break;
-                            }
-                        }
-                    } else {
-                        for (int j = 0; j < name.length(); j++) {
-                            char ch = name.charAt(j);
-                            switch (ch) {
-                                case '/':
-                                case ':':
-                                case ';':
-                                case '`':
-                                case '.':
-                                case '~':
-                                case '!':
-                                case '@':
-                                case '#':
-                                case '%':
-                                case '^':
-                                case '&':
-                                case '*':
-                                case '[':
-                                case ']':
-                                case '<':
-                                case '>':
-                                case '?':
-                                case '(':
-                                case ')':
-                                case '-':
-                                case '+':
-                                case '=':
-                                case '\\':
-                                case '"':
-                                case '\'':
+                                } else if (ch > 0x07FF) {
+                                    if (off + 2 >= buf.length) {
+                                        int newCapacity = buf.length + (buf.length >> 1);
+                                        buf = Arrays.copyOf(buf, newCapacity);
+                                    }
+                                    ascii = false;
+
+                                    buf[off++] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
+                                    buf[off++] = (byte) (0x80 | ((ch >> 6) & 0x3F));
+                                    buf[off++] = (byte) (0x80 | (ch & 0x3F));
+                                } else {
                                     if (off + 1 >= buf.length) {
                                         int newCapacity = buf.length + (buf.length >> 1);
                                         buf = Arrays.copyOf(buf, newCapacity);
                                     }
-                                    buf[off++] = '\\';
-                                    buf[off++] = (byte) ch;
-                                    break;
-                                default:
-                                    if ((ch >= 0x0001) && (ch <= 0x007F)) {
-                                        if (off == buf.length) {
-                                            int newCapacity = buf.length + (buf.length >> 1);
-                                            buf = Arrays.copyOf(buf, newCapacity);
-                                        }
-                                        buf[off++] = (byte) ch;
-                                    } else if (ch >= '\uD800' && ch < ('\uDFFF' + 1)) { //  //Character.isSurrogate(c)
-                                        ascii = false;
-                                        final int uc;
-                                        if (ch < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
-                                            if (name.length() - i < 2) {
-                                                uc = -1;
-                                            } else {
-                                                char d = name.charAt(i + 1);
-                                                // d >= '\uDC00' && d < ('\uDFFF' + 1)
-                                                if (d >= '\uDC00' && d < ('\uDFFF' + 1)) { // Character.isLowSurrogate(d)
-                                                    uc = ((ch << 10) + d) + (0x010000 - ('\uD800' << 10) - '\uDC00'); // Character.toCodePoint(c, d)
-                                                } else {
-//                            throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
-                                                    buf[off++] = (byte) '?';
-                                                    continue;
-                                                }
-                                            }
-                                        } else {
-                                            //
-                                            // Character.isLowSurrogate(c)
-                                            buf[off++] = (byte) '?';
-                                            continue;
-//                        throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
-                                        }
+                                    ascii = false;
 
-                                        if (uc < 0) {
-                                            if (off == buf.length) {
-                                                int newCapacity = buf.length + (buf.length >> 1);
-                                                buf = Arrays.copyOf(buf, newCapacity);
-                                            }
-
-                                            buf[off++] = (byte) '?';
-                                        } else {
-                                            if (off + 3 >= buf.length) {
-                                                int newCapacity = buf.length + (buf.length >> 1);
-                                                buf = Arrays.copyOf(buf, newCapacity);
-                                            }
-
-                                            buf[off++] = (byte) (0xf0 | ((uc >> 18)));
-                                            buf[off++] = (byte) (0x80 | ((uc >> 12) & 0x3f));
-                                            buf[off++] = (byte) (0x80 | ((uc >> 6) & 0x3f));
-                                            buf[off++] = (byte) (0x80 | (uc & 0x3f));
-                                            j++; // 2 chars
-                                        }
-                                    } else if (ch > 0x07FF) {
-                                        if (off + 2 >= buf.length) {
-                                            int newCapacity = buf.length + (buf.length >> 1);
-                                            buf = Arrays.copyOf(buf, newCapacity);
-                                        }
-                                        ascii = false;
-
-                                        buf[off++] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 6) & 0x3F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
-                                    } else {
-                                        if (off + 1 >= buf.length) {
-                                            int newCapacity = buf.length + (buf.length >> 1);
-                                            buf = Arrays.copyOf(buf, newCapacity);
-                                        }
-                                        ascii = false;
-
-                                        buf[off++] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 0) & 0x3F));
-                                    }
-                                    break;
-                            }
+                                    buf[off++] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
+                                    buf[off++] = (byte) (0x80 | (ch & 0x3F));
+                                }
+                                break;
                         }
                     }
                 }
             }
 
-            if (ascii) {
-                if (STRING_CREATOR_JDK11 != null) {
-                    byte[] bytes;
-                    if (off == buf.length) {
-                        bytes = buf;
-                    } else {
-                        bytes = new byte[off];
-                        System.arraycopy(buf, 0, bytes, 0, off);
-                    }
-                    return fullPath = STRING_CREATOR_JDK11.apply(bytes, LATIN1);
-                }
-
-                if (STRING_CREATOR_JDK8 != null) {
-                    char[] chars = new char[off];
-                    for (int i = 0; i < off; i++) {
-                        chars[i] = (char) buf[i];
-                    }
-                    return fullPath = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
-                }
-            }
-
-            return fullPath = new String(buf, 0, off, ascii ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8);
+            return fullPath = new String(buf, 0, off, ascii ? IOUtils.ISO_8859_1 : IOUtils.UTF_8);
         }
     }
 }

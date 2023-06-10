@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ObjectReader1Test {
     @Test
     public void test() {
-        ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean.class);
+        ObjectReader objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Bean.class);
         assertNotNull(objectReader.getFieldReader("userId"));
         assertNotNull(objectReader.getFieldReader(Fnv.hashCode64("userId")));
         assertNotNull(objectReader.getFieldReaderLCase(Fnv.hashCode64("userid")));

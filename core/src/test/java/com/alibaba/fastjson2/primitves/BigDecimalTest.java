@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
@@ -235,39 +233,6 @@ public class BigDecimalTest {
             byte[] utf8Bytes = JSON.toJSONBytes(id);
             BigDecimal id2 = JSON.parseObject(utf8Bytes, 0, utf8Bytes.length, StandardCharsets.US_ASCII, BigDecimal.class);
             assertEquals(id, id2);
-        }
-    }
-
-    @Test
-    public void test_jsonpath() {
-        ObjectReaderCreator[] creators = TestUtils.readerCreators();
-
-        for (ObjectReaderCreator creator : creators) {
-            BigDecimal1 vo = new BigDecimal1();
-
-            JSONReader.Context readContext
-                    = new JSONReader.Context(
-                            new ObjectReaderProvider(creator));
-            JSONPath jsonPath = JSONPath
-                    .of("$.id")
-                    .setReaderContext(readContext);
-            jsonPath.set(vo, 101);
-            assertEquals(BigDecimal.valueOf(101), vo.getId());
-            jsonPath.set(vo, 102L);
-            assertEquals(BigDecimal.valueOf(102), vo.getId());
-
-            jsonPath.set(vo, null);
-            assertEquals(null, vo.getId());
-
-            jsonPath.set(vo, "103");
-            assertEquals(BigDecimal.valueOf(103), vo.getId());
-
-            assertEquals(BigDecimal.valueOf(103), jsonPath.eval(vo));
-
-            jsonPath.setInt(vo, 101);
-            assertEquals(BigDecimal.valueOf(101), vo.getId());
-            jsonPath.setLong(vo, 102L);
-            assertEquals(BigDecimal.valueOf(102), vo.getId());
         }
     }
 

@@ -4,12 +4,11 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.function.Function;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_NULL;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
@@ -18,8 +17,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
         extends ObjectReaderAdapter<T> {
     final String[] paramNames;
     final FieldReader[] setterFieldReaders;
-    private Function<Map<Long, Object>, T> creator;
-    private List<Constructor> alternateConstructors;
+    private final Function<Map<Long, Object>, T> creator;
 
     public ObjectReaderNoneDefaultConstructor(
             Class objectClass,
@@ -27,7 +25,6 @@ public class ObjectReaderNoneDefaultConstructor<T>
             String typeName,
             long features,
             Function<Map<Long, Object>, T> creator,
-            List<Constructor> alternateConstructors,
             String[] paramNames,
             FieldReader[] paramFieldReaders,
             FieldReader[] setterFieldReaders,
@@ -41,7 +38,6 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 features,
                 null,
                 null,
-                null,
                 seeAlso,
                 seeAlsoNames,
                 concat(paramFieldReaders, setterFieldReaders)
@@ -50,7 +46,6 @@ public class ObjectReaderNoneDefaultConstructor<T>
         this.paramNames = paramNames;
         this.creator = creator;
         this.setterFieldReaders = setterFieldReaders;
-        this.alternateConstructors = alternateConstructors;
     }
 
     static FieldReader[] concat(FieldReader[] a, FieldReader[] b) {
@@ -118,7 +113,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
                 if (hashCode == HASH_TYPE && i == 0) {
                     long typeHash = jsonReader.readTypeHashCode();
-                    JSONReader.Context context = jsonReader.getContext();
+                    JSONReader.Context context = jsonReader.context;
                     ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
                     if (autoTypeObjectReader == null) {
                         String typeName = jsonReader.getString();
@@ -129,9 +124,9 @@ public class ObjectReaderNoneDefaultConstructor<T>
                         }
                     }
 
-                    Object object = (T) autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
-                    jsonReader.nextIfMatch(',');
-                    return (T) object;
+                    T object = (T) autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+                    jsonReader.nextIfComma();
+                    return object;
                 }
 
                 FieldReader fieldReader = getFieldReader(hashCode);
@@ -165,7 +160,8 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 : valueMap;
         T object = createInstanceNoneDefaultConstructor(args);
         if (setterFieldReaders != null) {
-            for (FieldReader fieldReader : setterFieldReaders) {
+            for (int i = 0; i < setterFieldReaders.length; i++) {
+                FieldReader fieldReader = setterFieldReaders[i];
                 Object fieldValue = args.get(fieldReader.fieldNameHash);
                 fieldReader.accept(object, fieldValue);
             }
@@ -193,12 +189,12 @@ public class ObjectReaderNoneDefaultConstructor<T>
             jsonReader.errorOnNoneSerializable(objectClass);
         }
 
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
         if (jsonReader.isSupportBeanArray(features | this.features)
-                && jsonReader.nextIfMatch('[')) {
+                && jsonReader.nextIfArrayStart()) {
             LinkedHashMap<Long, Object> valueMap = null;
             for (int i = 0; i < fieldReaders.length; i++) {
                 Object fieldValue = fieldReaders[i].readFieldValue(jsonReader);
@@ -209,11 +205,11 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 valueMap.put(hash, fieldValue);
             }
 
-            if (!jsonReader.nextIfMatch(']')) {
+            if (!jsonReader.nextIfArrayEnd()) {
                 throw new JSONException(jsonReader.info("array not end, " + jsonReader.current()));
             }
 
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return createInstanceNoneDefaultConstructor(
                     valueMap == null
                             ? Collections.emptyMap()
@@ -229,12 +225,12 @@ public class ObjectReaderNoneDefaultConstructor<T>
             }
         }
 
-        JSONReader.Context context = jsonReader.getContext();
+        JSONReader.Context context = jsonReader.context;
         long featuresAll = this.features | features | context.getFeatures();
 
         LinkedHashMap<Long, Object> valueMap = null;
         for (int i = 0; ; i++) {
-            if (jsonReader.nextIfMatch('}')) {
+            if (jsonReader.nextIfObjectEnd()) {
                 break;
             }
 
@@ -266,8 +262,8 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 }
 
                 if (autoTypeObjectReader != null) {
-                    Object object = (T) autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
-                    jsonReader.nextIfMatch(',');
+                    Object object = autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
+                    jsonReader.nextIfComma();
                     return (T) object;
                 }
                 continue;
@@ -312,7 +308,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
             }
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         return object;
     }
@@ -337,7 +333,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
     public T createInstance(Collection collection) {
         int index = 0;
 
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
 
         LinkedHashMap<Long, Object> valueMap = new LinkedHashMap<>();
         for (Iterator it = collection.iterator(); it.hasNext(); ) {
@@ -358,10 +354,6 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 }
             }
 
-            if (valueMap == null) {
-                valueMap = new LinkedHashMap<>();
-            }
-
             long hash;
             if (fieldReader instanceof FieldReaderObjectParam) {
                 hash = ((FieldReaderObjectParam<?>) fieldReader).paramNameHash;
@@ -373,18 +365,14 @@ public class ObjectReaderNoneDefaultConstructor<T>
             index++;
         }
 
-        T object = createInstanceNoneDefaultConstructor(
-                valueMap == null
-                        ? Collections.emptyMap()
-                        : valueMap
+        return createInstanceNoneDefaultConstructor(
+                valueMap
         );
-
-        return object;
     }
 
     @Override
     public T createInstance(Map map, long features) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
         Object typeKey = map.get(getTypeKey());
 
         if (typeKey instanceof String) {

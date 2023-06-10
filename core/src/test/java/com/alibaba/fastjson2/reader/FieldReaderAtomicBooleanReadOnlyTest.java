@@ -24,7 +24,7 @@ public class FieldReaderAtomicBooleanReadOnlyTest {
                 JSON.parseObject(str).to(Bean.class).value.get()
         );
 
-        ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean.class);
+        ObjectReader objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         assertEquals("getValue", fieldReader.toString());
         assertTrue(fieldReader.isReadOnly());

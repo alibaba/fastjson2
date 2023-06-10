@@ -42,7 +42,7 @@ public class JSONType_deserializer {
                     jsonReader.skipValue();
                 }
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return bean;
         }
     }

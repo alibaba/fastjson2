@@ -11,12 +11,11 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+
+import static com.alibaba.fastjson2.time.ZoneId.DEFAULT_ZONE_ID;
 
 public class DateFormat19 {
     static final String pattern = "yyyy-MM-dd HH:mm:ss";
@@ -28,15 +27,6 @@ public class DateFormat19 {
     static ThreadLocal<SimpleDateFormat> SIMPLE_DATE_FORMAT_LOCAL = ThreadLocal.withInitial(
             () -> new SimpleDateFormat(pattern)
     );
-
-//    @Benchmark
-    public void javaTimeFormatter(Blackhole bh) throws Throwable {
-        ZoneId zonedId = DateUtils.DEFAULT_ZONE_ID;
-        Instant instant = date.toInstant();
-        LocalDateTime ldt = LocalDateTime.ofInstant(instant, zonedId);
-        String str = formatter.format(ldt);
-        bh.consume(str);
-    }
 
 //    @Benchmark
     public void commonsFastFormat(Blackhole bh) throws Throwable {
@@ -65,12 +55,7 @@ public class DateFormat19 {
 
 //    @Benchmark
     public void formatYMDHMS19(Blackhole bh) throws Throwable {
-        bh.consume(DateUtils.formatYMDHMS19(date));
-    }
-
-//    @Benchmark
-    public void fastjsonFormat2(Blackhole bh) throws Throwable {
-        bh.consume(DateUtils.format(date.getTime()));
+        bh.consume(DateUtils.formatYMDHMS19(date, DEFAULT_ZONE_ID));
     }
 
     @Benchmark

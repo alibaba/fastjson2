@@ -19,7 +19,8 @@ public class SimplePropertyPreFilter
     public SimplePropertyPreFilter(Class<?> clazz, String... properties) {
         super();
         this.clazz = clazz;
-        for (String item : properties) {
+        for (int i = 0; i < properties.length; i++) {
+            String item = properties[i];
             if (item != null) {
                 this.includes.add(item);
             }

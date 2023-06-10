@@ -8,8 +8,6 @@ import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2_vo.LongValueField10;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -126,7 +124,7 @@ public class ObjectReader10Test {
         map.put("v0007", 108);
         map.put("v0008", 109);
         map.put("v0009", 110);
-        map.put("x0001", LocalDateTime.now());
+        map.put("x0001", new Date());
         map.put("x0002", "中2");
         map.put("x0003", "中3");
         map.put("x0004", "中4");
@@ -168,7 +166,7 @@ public class ObjectReader10Test {
         map.put("v0007", 108);
         map.put("v0008", 109);
         map.put("v0009", 110);
-        map.put("x0001", ZonedDateTime.now());
+        map.put("x0001", new Date());
         map.put("x0002", new Date());
         map.put("x0003", UUID.randomUUID());
         map.put("x0004", new byte[]{1, 2, 3, 4, 5, 6, 7, 8});

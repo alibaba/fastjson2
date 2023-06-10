@@ -3,8 +3,8 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONSchemaValidException;
-import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.function.BiConsumer;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -13,8 +13,6 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 public class FieldReaderObject<T>
         extends FieldReader<T> {
@@ -30,12 +28,11 @@ public class FieldReaderObject<T>
             String format,
             Locale locale,
             Object defaultValue,
-            JSONSchema schema,
             Method method,
             Field field,
             BiConsumer function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, method, field);
         this.function = function;
     }
 
@@ -90,7 +87,7 @@ public class FieldReaderObject<T>
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         if (!fieldClassSerializable) {
-            long contextFeatures = jsonReader.getContext().getFeatures();
+            long contextFeatures = jsonReader.context.getFeatures();
             if ((contextFeatures & JSONReader.Feature.IgnoreNoneSerializable.mask) != 0) {
                 jsonReader.skipValue();
                 return;
@@ -107,7 +104,7 @@ public class FieldReaderObject<T>
             if (formattedObjectReader != null) {
                 objectReader = this.initReader = formattedObjectReader;
             } else {
-                objectReader = this.initReader = jsonReader.getContext().getObjectReader(fieldType);
+                objectReader = this.initReader = jsonReader.context.getObjectReader(fieldType);
             }
         }
 
@@ -124,18 +121,8 @@ public class FieldReaderObject<T>
         try {
             Object value;
             if (jsonReader.nextIfNull()) {
-                if (fieldClass == OptionalInt.class) {
-                    value = OptionalInt.empty();
-                } else if (fieldClass == OptionalLong.class) {
-                    value = OptionalLong.empty();
-                } else if (fieldClass == OptionalDouble.class) {
-                    value = OptionalDouble.empty();
-                } else if (fieldClass == Optional.class) {
-                    value = Optional.empty();
-                } else {
-                    value = null;
-                }
-            } else if (jsonReader.isJSONB()) {
+                value = null;
+            } else if (jsonReader.jsonb) {
                 if (fieldClass == Object.class) {
                     ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, features);
                     if (autoTypeObjectReader != null) {
@@ -154,8 +141,6 @@ public class FieldReaderObject<T>
             if (noneStaticMemberClass) {
                 BeanUtils.setNoneStaticMemberClassParent(value, object);
             }
-        } catch (JSONSchemaValidException ex) {
-            throw ex;
         } catch (Exception | IllegalAccessError ex) {
             Member member = this.field != null ? this.field : this.method;
             String message;
@@ -171,7 +156,7 @@ public class FieldReaderObject<T>
     @Override
     public void readFieldValueJSONB(JSONReader jsonReader, T object) {
         if (!fieldClassSerializable && jsonReader.getType() != JSONB.Constants.BC_TYPED_ANY) {
-            long contextFeatures = jsonReader.getContext().getFeatures();
+            long contextFeatures = jsonReader.context.getFeatures();
             if ((contextFeatures & JSONReader.Feature.IgnoreNoneSerializable.mask) != 0) {
                 jsonReader.skipValue();
                 return;
@@ -181,7 +166,7 @@ public class FieldReaderObject<T>
         }
 
         if (initReader == null) {
-            initReader = jsonReader.getContext().getObjectReader(fieldType);
+            initReader = jsonReader.context.getObjectReader(fieldType);
         }
 
         if (jsonReader.isReference()) {
@@ -240,10 +225,6 @@ public class FieldReaderObject<T>
 
     @Override
     public void accept(T object, Object value) {
-        if (schema != null) {
-            schema.assertValidate(value);
-        }
-
         if (value == null && (features & JSONReader.Feature.IgnoreSetNullValue.mask) != 0) {
             return;
         }
@@ -282,7 +263,7 @@ public class FieldReaderObject<T>
             initReader = getObjectReader(jsonReader);
         }
 
-        Object object = jsonReader.isJSONB()
+        Object object = jsonReader.jsonb
                 ? initReader.readJSONBObject(jsonReader, fieldType, fieldName, features)
                 : initReader.readObject(jsonReader, fieldType, fieldName, features);
 

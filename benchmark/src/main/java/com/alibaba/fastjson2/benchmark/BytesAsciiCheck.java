@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.benchmark;
 
 import com.alibaba.fastjson2.benchmark.eishay.EishayParseBinaryArrayMapping;
-import com.alibaba.fastjson2.util.JDKUtils;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -24,20 +23,6 @@ public class BytesAsciiCheck {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @Benchmark
-    public void handler(Blackhole bh) throws Throwable {
-        bh.consume(
-                JDKUtils.METHOD_HANDLE_HAS_NEGATIVE.invoke(bytes, 0, bytes.length)
-        );
-    }
-
-    @Benchmark
-    public void lambda(Blackhole bh) throws Throwable {
-        bh.consume(
-                JDKUtils.PREDICATE_IS_ASCII.test(bytes)
-        );
     }
 
     @Benchmark

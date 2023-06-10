@@ -4,7 +4,7 @@ import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
 public class EishayWriteStringTest {
     static final EishayWriteString benchmark = new EishayWriteString();
-    static final int LOOP = 10_000_000;
+    static final int LOOP = 1_000_000;
 
     public static void fastjson2() {
         for (int j = 0; j < 5; j++) {
@@ -15,6 +15,7 @@ public class EishayWriteStringTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
             // zulu8.70.0.23 : 3001
+            // zulu8.70.0.23_android : 4766
             // zulu11.62.17 : 3288
             // zulu17.32.13 : 3305 2909
             // zulu17.40.91_vec : 2527 2536

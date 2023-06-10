@@ -2,8 +2,9 @@ package com.alibaba.fastjson2.v1issues.issue_3300;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.annotation.JSONCreator;
-import org.joda.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
+
+import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -28,7 +29,7 @@ public class Issue3358 {
     public static class Model {
         private String code;
 
-        private LocalDateTime expireTime;
+        private Date expireTime;
 
         public String getCode() {
             return code;
@@ -38,27 +39,24 @@ public class Issue3358 {
             this.code = code;
         }
 
-        public LocalDateTime getExpireTime() {
+        public Date getExpireTime() {
             return expireTime;
         }
 
-        public void setExpireTime(LocalDateTime expireTime) {
+        public void setExpireTime(Date expireTime) {
             this.expireTime = expireTime;
         }
 
         public Model(String code, int expireIn) {
             this.code = code;
-            this.expireTime = LocalDateTime.now().plusSeconds(expireIn);
+            long millis = System.currentTimeMillis();
+            this.expireTime = new Date(millis + expireIn * 1000L);
         }
 
         @JSONCreator
-        public Model(String code, LocalDateTime expireTime) {
+        public Model(String code, Date expireTime) {
             this.code = code;
             this.expireTime = expireTime;
-        }
-
-        public boolean isExpried() {
-            return LocalDateTime.now().isAfter(getExpireTime());
         }
     }
 }

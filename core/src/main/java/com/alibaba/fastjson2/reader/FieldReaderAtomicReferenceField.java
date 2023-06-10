@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.schema.JSONSchema;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -18,9 +17,8 @@ final class FieldReaderAtomicReferenceField<T>
             Class fieldClass,
             int ordinal,
             String format,
-            JSONSchema schema,
             Field field) {
-        super(fieldName, fieldType, fieldClass, ordinal, 0, format, schema, null, field);
+        super(fieldName, fieldType, fieldClass, ordinal, 0, format, null, field);
 
         readOnly = Modifier.isFinal(field.getModifiers());
     }

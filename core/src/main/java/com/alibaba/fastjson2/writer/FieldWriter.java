@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.time.*;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.ByteArrayOutputStream;
@@ -10,14 +11,11 @@ import java.io.Serializable;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.zip.GZIPOutputStream;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
-import static java.time.temporal.ChronoField.SECOND_OF_DAY;
-import static java.time.temporal.ChronoField.YEAR;
 
 public abstract class FieldWriter<T>
         implements Comparable {
@@ -31,7 +29,7 @@ public abstract class FieldWriter<T>
     public final String label;
     public final Field field;
     public final Method method;
-    protected long fieldOffset;
+    protected final long fieldOffset;
     protected final boolean primitive;
 
     final long hashCode;
@@ -105,8 +103,8 @@ public abstract class FieldWriter<T>
         this.decimalFormat = decimalFormat;
 
         long fieldOffset = -1L;
-        if (field != null && JDKUtils.UNSAFE_SUPPORT) {
-            fieldOffset = UnsafeUtils.objectFieldOffset(field);
+        if (field != null) {
+            fieldOffset = JDKUtils.UNSAFE.objectFieldOffset(field);
         }
         this.fieldOffset = fieldOffset;
 
@@ -139,10 +137,10 @@ public abstract class FieldWriter<T>
                 // 2 bytes, 11 bits
                 bytes[off++] = (byte) (0xE0 | ((c >> 12) & 0x0F));
                 bytes[off++] = (byte) (0x80 | ((c >> 6) & 0x3F));
-                bytes[off++] = (byte) (0x80 | ((c >> 0) & 0x3F));
+                bytes[off++] = (byte) (0x80 | (c & 0x3F));
             } else {
                 bytes[off++] = (byte) (0xC0 | ((c >> 6) & 0x1F));
-                bytes[off++] = (byte) (0x80 | ((c >> 0) & 0x3F));
+                bytes[off++] = (byte) (0x80 | (c & 0x3F));
             }
         }
         bytes[off++] = '"';
@@ -270,7 +268,7 @@ public abstract class FieldWriter<T>
             try {
                 Object value;
                 if (fieldOffset != -1 && !primitive) {
-                    value = UnsafeUtils.getObject(object, fieldOffset);
+                    value = JDKUtils.UNSAFE.getObject(object, fieldOffset);
                 } else {
                     value = field.get(object);
                 }
@@ -296,9 +294,7 @@ public abstract class FieldWriter<T>
             return 1;
         }
 
-        String thisName = this.fieldName;
-        String otherName = other.fieldName;
-        int nameCompare = thisName.compareTo(otherName);
+        int nameCompare = this.fieldName.compareTo(other.fieldName);
 
         if (nameCompare != 0) {
             return nameCompare;
@@ -310,7 +306,7 @@ public abstract class FieldWriter<T>
         if (thisMember != null && otherMember != null) {
             Class otherDeclaringClass = otherMember.getDeclaringClass();
             Class thisDeclaringClass = thisMember.getDeclaringClass();
-            if (thisDeclaringClass != otherDeclaringClass && thisDeclaringClass != null && otherDeclaringClass != null) {
+            if (thisDeclaringClass != otherDeclaringClass) {
                 if (thisDeclaringClass.isAssignableFrom(otherDeclaringClass)) {
                     return 1;
                 } else if (otherDeclaringClass.isAssignableFrom(thisDeclaringClass)) {
@@ -339,9 +335,6 @@ public abstract class FieldWriter<T>
 
         if (thisFieldClass == boolean.class && otherFieldClass != boolean.class) {
             return 1;
-        }
-        if (otherFieldClass != boolean.class && thisFieldClass == boolean.class) {
-            return -1;
         }
 
         if (thisFieldClass == Boolean.class
@@ -587,14 +580,10 @@ public abstract class FieldWriter<T>
         String dateFormat = ctx.getDateFormat();
         if (dateFormat == null) {
             Instant instant = Instant.ofEpochMilli(millis);
-            long epochSecond = instant.getEpochSecond();
-            ZoneOffset offset = zoneId
-                    .getRules()
-                    .getOffset(instant);
-
-            long localSecond = epochSecond + offset.getTotalSeconds();
-            long localEpochDay = Math.floorDiv(localSecond, (long) SECONDS_PER_DAY);
-            int secsOfDay = (int) Math.floorMod(localSecond, (long) SECONDS_PER_DAY);
+            long epochSecond = instant.epochSecond;
+            long localSecond = epochSecond + zoneId.getOffsetTotalSeconds(instant);
+            long localEpochDay = IOUtils.floorDiv(localSecond, (long) SECONDS_PER_DAY);
+            int secsOfDay = (int) IOUtils.floorMod(localSecond, (long) SECONDS_PER_DAY);
             int year, month, dayOfMonth;
             {
                 final int DAYS_PER_CYCLE = 146097;
@@ -627,7 +616,7 @@ public abstract class FieldWriter<T>
                 yearEst += marchMonth0 / 10;
 
                 // check year now we are certain it is correct
-                year = YEAR.checkValidIntValue(yearEst);
+                year = LocalDateTime.checkYear(yearEst);
             }
 
             int hour, minute, second;
@@ -637,7 +626,7 @@ public abstract class FieldWriter<T>
                 final int SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
 
                 long secondOfDay = secsOfDay;
-                SECOND_OF_DAY.checkValidValue(secondOfDay);
+                LocalDateTime.checkSecondOfDay(secondOfDay);
                 int hours = (int) (secondOfDay / SECONDS_PER_HOUR);
                 secondOfDay -= hours * SECONDS_PER_HOUR;
                 int minutes = (int) (secondOfDay / SECONDS_PER_MINUTE);
@@ -658,14 +647,14 @@ public abstract class FieldWriter<T>
                             Instant.ofEpochMilli(millis), zoneId);
 
             if (isDateFormatISO8601() || ctx.isDateFormatISO8601()) {
-                int year = zdt.getYear();
-                int month = zdt.getMonthValue();
-                int dayOfMonth = zdt.getDayOfMonth();
-                int hour = zdt.getHour();
-                int minute = zdt.getMinute();
-                int second = zdt.getSecond();
-                int milliSeconds = zdt.getNano() / 1000_000;
-                int offsetSeconds = zdt.getOffset().getTotalSeconds();
+                int year = zdt.dateTime.date.year;
+                int month = zdt.dateTime.date.monthValue;
+                int dayOfMonth = zdt.dateTime.date.dayOfMonth;
+                int hour = zdt.dateTime.time.hour;
+                int minute = zdt.dateTime.time.minute;
+                int second = zdt.dateTime.time.second;
+                int milliSeconds = zdt.dateTime.time.nano / 1000_000;
+                int offsetSeconds = zdt.offsetSeconds;
                 jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, milliSeconds, offsetSeconds, true);
                 return;
             }
@@ -745,57 +734,6 @@ public abstract class FieldWriter<T>
                 return new ObjectWriterImplCalendar(format, locale);
             }
 
-            if (ZonedDateTime.class.isAssignableFrom(valueClass)) {
-                if (format == null || format.isEmpty()) {
-                    return ObjectWriterImplZonedDateTime.INSTANCE;
-                } else {
-                    return new ObjectWriterImplZonedDateTime(format, locale);
-                }
-            }
-
-            if (LocalDateTime.class.isAssignableFrom(valueClass)) {
-                ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(LocalDateTime.class);
-                if (objectWriter != null && objectWriter != ObjectWriterImplLocalDateTime.INSTANCE) {
-                    return objectWriter;
-                }
-
-                if (format == null || format.isEmpty()) {
-                    return ObjectWriterImplLocalDateTime.INSTANCE;
-                } else {
-                    return new ObjectWriterImplLocalDateTime(format, locale);
-                }
-            }
-
-            if (LocalDate.class.isAssignableFrom(valueClass)) {
-                ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(LocalDate.class);
-                if (objectWriter != null && objectWriter != ObjectWriterImplLocalDate.INSTANCE) {
-                    return objectWriter;
-                }
-
-                return ObjectWriterImplLocalDate.of(format, locale);
-            }
-
-            if (LocalTime.class.isAssignableFrom(valueClass)) {
-                ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(LocalTime.class);
-                if (objectWriter != null && objectWriter != ObjectWriterImplLocalTime.INSTANCE) {
-                    return objectWriter;
-                }
-
-                if (format == null || format.isEmpty()) {
-                    return ObjectWriterImplLocalTime.INSTANCE;
-                } else {
-                    return new ObjectWriterImplLocalTime(format, locale);
-                }
-            }
-
-            if (Instant.class == valueClass) {
-                if (format == null || format.isEmpty()) {
-                    return ObjectWriterImplInstant.INSTANCE;
-                } else {
-                    return new ObjectWriterImplInstant(format, locale);
-                }
-            }
-
             if (BigDecimal.class == valueClass) {
                 if (format == null || format.isEmpty()) {
                     return ObjectWriterImplBigDecimal.INSTANCE;
@@ -812,22 +750,14 @@ public abstract class FieldWriter<T>
                 }
             }
 
-            if (Optional.class == valueClass) {
-                return ObjectWriterImplOptional.of(format, locale);
-            }
-
             String className = valueClass.getName();
             switch (className) {
                 case "java.sql.Time":
-                    return JdbcSupport.createTimeWriter(format);
+                    return JdbcSupport.TimeWriter.of(format);
                 case "java.sql.Date":
                     return new ObjectWriterImplDate(format, locale);
                 case "java.sql.Timestamp":
-                    return JdbcSupport.createTimestampWriter(valueClass, format);
-                case "org.joda.time.LocalDate":
-                    return JodaSupport.createLocalDateWriter(valueClass, format);
-                case "org.joda.time.LocalDateTime":
-                    return JodaSupport.createLocalDateTimeWriter(valueClass, format);
+                    return new JdbcSupport.TimestampWriter(format);
                 default:
                     break;
             }

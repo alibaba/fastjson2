@@ -29,12 +29,12 @@ public class ObjectReaderImplField
         String declaringClassName = jsonReader.readString();
         String methodName = jsonReader.readString();
 
-        return getField(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName);
+        return getField(jsonReader.context.getFeatures() | features, methodName, declaringClassName);
     }
 
     @Override
     public Object readArrayMappingObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        boolean arrayStart = jsonReader.nextIfMatch('[');
+        boolean arrayStart = jsonReader.nextIfArrayStart();
         if (!arrayStart) {
             throw new JSONException("not support input " + jsonReader.info());
         }
@@ -42,14 +42,14 @@ public class ObjectReaderImplField
         String declaringClassName = jsonReader.readString();
         String methodName = jsonReader.readString();
 
-        boolean arrayEnd = jsonReader.nextIfMatch(']');
+        boolean arrayEnd = jsonReader.nextIfArrayEnd();
         if (!arrayEnd) {
             throw new JSONException("not support input " + jsonReader.info());
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
-        return getField(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName);
+        return getField(jsonReader.context.getFeatures() | features, methodName, declaringClassName);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class ObjectReaderImplField
         boolean objectStart = jsonReader.nextIfObjectStart();
         if (!objectStart) {
             if (jsonReader.isSupportBeanArray(features)) {
-                if (jsonReader.isJSONB()) {
+                if (jsonReader.jsonb) {
                     return readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
                 } else {
                     return readArrayMappingObject(jsonReader, fieldType, fieldName, features);
@@ -84,11 +84,11 @@ public class ObjectReaderImplField
             }
         }
 
-        if (!jsonReader.isJSONB()) {
-            jsonReader.nextIfMatch(',');
+        if (!jsonReader.jsonb) {
+            jsonReader.nextIfComma();
         }
 
-        return getField(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName);
+        return getField(jsonReader.context.getFeatures() | features, methodName, declaringClassName);
     }
 
     private Field getField(long features,

@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -11,8 +10,8 @@ import java.util.Map;
 
 class FieldReaderMapFieldReadOnly<T>
         extends FieldReaderObjectField<T> {
-    FieldReaderMapFieldReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, JSONSchema schema, Field field) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, schema, field);
+    FieldReaderMapFieldReadOnly(String fieldName, Type fieldType, Class fieldClass, int ordinal, long features, String format, Field field) {
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, field);
     }
 
     @Override
@@ -95,13 +94,12 @@ class FieldReaderMapFieldReadOnly<T>
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         if (initReader == null) {
-            initReader = jsonReader
-                    .getContext()
+            initReader = jsonReader.context
                     .getObjectReader(fieldType);
         }
 
         Object value;
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             value = initReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         } else {
             value = initReader.readObject(jsonReader, fieldType, fieldName, features);

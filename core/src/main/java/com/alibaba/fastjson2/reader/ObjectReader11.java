@@ -1,9 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.schema.JSONSchema;
-
-import java.util.function.Function;
-import java.util.function.Supplier;
+import com.alibaba.fastjson2.function.Function;
+import com.alibaba.fastjson2.function.Supplier;
 
 public class ObjectReader11<T>
         extends ObjectReaderAdapter<T> {
@@ -60,12 +58,11 @@ public class ObjectReader11<T>
             String typeKey,
             String typeName,
             long features,
-            JSONSchema schema,
             Supplier<T> creator,
             Function buildFunction,
             FieldReader... fieldReaders
     ) {
-        super(objectClass, typeKey, typeName, features, schema, creator, buildFunction, fieldReaders);
+        super(objectClass, typeKey, typeName, features, creator, buildFunction, fieldReaders);
 
         this.fieldReader0 = fieldReaders[0];
         this.fieldReader1 = fieldReaders[1];

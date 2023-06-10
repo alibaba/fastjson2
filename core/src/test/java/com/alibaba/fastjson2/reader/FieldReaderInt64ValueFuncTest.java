@@ -2,13 +2,10 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONSchemaValidException;
 import com.alibaba.fastjson2.TestUtils;
-import com.alibaba.fastjson2.annotation.JSONCompiler;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
-import static com.alibaba.fastjson2.annotation.JSONCompiler.CompilerOption.LAMBDA;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FieldReaderInt64ValueFuncTest {
@@ -32,42 +29,7 @@ public class FieldReaderInt64ValueFuncTest {
         );
     }
 
-    @JSONCompiler(LAMBDA)
     public static class Bean {
-        private long value;
-
-        public long getValue() {
-            return value;
-        }
-
-        public void setValue(long value) {
-            this.value = value;
-        }
-    }
-
-    @Test
-    public void test1() {
-        Bean1 bean = new Bean1();
-        ObjectReader<Bean1> objectReader = TestUtils.createObjectReaderLambda(Bean1.class);
-        FieldReader fieldReader = objectReader.getFieldReader("value");
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, "123"));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123L));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123F));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 123D));
-
-        assertEquals(
-                201L,
-                objectReader.readObject(
-                        JSONReader.of("{\"value\":201}"),
-                        0
-                ).value
-        );
-    }
-
-    @JSONCompiler(LAMBDA)
-    public static class Bean1 {
-        @JSONField(schema = "{'minimum':128}")
         private long value;
 
         public long getValue() {
@@ -91,7 +53,6 @@ public class FieldReaderInt64ValueFuncTest {
         assertThrows(Exception.class, () -> fieldReader.accept(bean, 123D));
     }
 
-    @JSONCompiler(LAMBDA)
     public static class Bean2 {
         public void setValue(long value) {
             throw new UnsupportedOperationException();
@@ -109,7 +70,6 @@ public class FieldReaderInt64ValueFuncTest {
         );
     }
 
-    @JSONCompiler(LAMBDA)
     public static class Bean3 {
         private long value;
         public final int id;

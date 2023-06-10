@@ -4,195 +4,39 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
-import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderImplDate;
-import com.alibaba.fastjson2.support.LambdaMiscCodec;
+import com.alibaba.fastjson2.time.*;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.Reader;
-import java.lang.invoke.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
+import java.sql.Clob;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Locale;
-import java.util.function.Function;
-import java.util.function.LongFunction;
-import java.util.function.ObjIntConsumer;
-import java.util.function.ToIntFunction;
-
-import static com.alibaba.fastjson2.support.LambdaMiscCodec.*;
 
 public class JdbcSupport {
-    static Class CLASS_CLOB;
-    static volatile boolean CLASS_CLOB_ERROR;
-
-    static volatile LongFunction TIMESTAMP_CREATOR;
-    static volatile boolean TIMESTAMP_CREATOR_ERROR;
-
-    static volatile LongFunction DATE_CREATOR;
-    static volatile boolean DATE_CREATOR_ERROR;
-
-    static volatile LongFunction TIME_CREATOR;
-    static volatile boolean TIME_CREATOR_ERROR;
-
-    public static ObjectReader createTimeReader(Class objectClass, String format, Locale locale) {
-        return new TimeReader(objectClass, format, locale);
-    }
-
-    public static ObjectReader createTimestampReader(Class objectClass, String format, Locale locale) {
-        return new TimestampReader(objectClass, format, locale);
-    }
-
-    public static ObjectReader createDateReader(Class objectClass, String format, Locale locale) {
-        return new DateReader(objectClass, format, locale);
-    }
-
-    public static ObjectWriter createTimeWriter(String format) {
-        if (format == null) {
-            return TimeWriter.INSTANCE;
-        }
-
-        return new TimeWriter(format);
-    }
-
-    public static Object createTimestamp(long millis) {
-        if (TIMESTAMP_CREATOR == null && !TIMESTAMP_CREATOR_ERROR) {
-            try {
-                TIMESTAMP_CREATOR = createFunction("java.sql.Timestamp");
-            } catch (Throwable ignored) {
-                TIMESTAMP_CREATOR_ERROR = true;
-            }
-        }
-
-        if (TIMESTAMP_CREATOR == null) {
-            throw new JSONException("create java.sql.Timestamp error");
-        }
-
-        return TIMESTAMP_CREATOR.apply(millis);
-    }
-
-    public static Object createDate(long millis) {
-        if (DATE_CREATOR == null && !DATE_CREATOR_ERROR) {
-            try {
-                DATE_CREATOR = createFunction("java.sql.Date");
-            } catch (Throwable ignored) {
-                DATE_CREATOR_ERROR = true;
-            }
-        }
-
-        if (DATE_CREATOR == null) {
-            throw new JSONException("create java.sql.Date error");
-        }
-
-        return DATE_CREATOR.apply(millis);
-    }
-
-    public static Object createTime(long millis) {
-        if (TIME_CREATOR == null && !TIME_CREATOR_ERROR) {
-            try {
-                TIME_CREATOR = createFunction("java.sql.Time");
-            } catch (Throwable ignored) {
-                TIME_CREATOR_ERROR = true;
-            }
-        }
-
-        if (TIME_CREATOR == null) {
-            throw new JSONException("create java.sql.Timestamp error");
-        }
-
-        return TIME_CREATOR.apply(millis);
-    }
-
-    static LongFunction createFunction(String className) throws Throwable {
-        Class<?> timestampClass = Class.forName(className);
-        MethodHandles.Lookup lookup = JDKUtils.trustedLookup(timestampClass);
-        MethodHandle constructor = lookup.findConstructor(timestampClass, MethodType.methodType(void.class, long.class));
-        CallSite callSite = LambdaMetafactory.metafactory(
-                lookup,
-                "apply",
-                MethodType.methodType(LongFunction.class),
-                MethodType.methodType(Object.class, long.class),
-                constructor,
-                MethodType.methodType(Object.class, long.class)
-        );
-        MethodHandle target = callSite.getTarget();
-        return (LongFunction) target.invokeExact();
-    }
-
-    public static ObjectWriter createClobWriter(Class objectClass) {
-        return new ClobWriter(objectClass);
-    }
-
-    public static ObjectWriter createTimestampWriter(Class objectClass, String format) {
-        return new TimestampWriter(objectClass, format);
-    }
-
-    public static boolean isClob(Class objectClass) {
-        if (CLASS_CLOB == null && !CLASS_CLOB_ERROR) {
-            try {
-                CLASS_CLOB = Class.forName("java.sql.Clob");
-            } catch (Throwable e) {
-                CLASS_CLOB_ERROR = true;
-            }
-        }
-
-        return CLASS_CLOB != null && CLASS_CLOB.isAssignableFrom(objectClass);
-    }
-
-    static class ClobWriter
+    public static final class ClobWriter
             implements ObjectWriter {
-        final Class objectClass;
-        final Function function;
-
-        public ClobWriter(Class objectClass) {
-            if (CLASS_CLOB == null && !CLASS_CLOB_ERROR) {
-                try {
-                    CLASS_CLOB = Class.forName("java.sql.Clob");
-                } catch (Throwable e) {
-                    CLASS_CLOB_ERROR = true;
-                }
-            }
-
-            if (CLASS_CLOB == null) {
-                throw new JSONException("class java.sql.Clob not found");
-            }
-
-            this.objectClass = objectClass;
-            try {
-                Method getCharacterStream = CLASS_CLOB.getMethod("getCharacterStream");
-                function = LambdaMiscCodec.createFunction(getCharacterStream);
-            } catch (Throwable e) {
-                throw new JSONException("getMethod getCharacterStream error", e);
-            }
-        }
-
         @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-            Reader reader = (Reader) function.apply(object);
+            Clob clob = (Clob) object;
+            Reader reader;
+            try {
+                reader = clob.getCharacterStream();
+            } catch (SQLException e) {
+                throw new JSONException("get getCharacterStream error", e);
+            }
             jsonWriter.writeString(reader);
         }
     }
 
-    static class TimeReader
+    public static final class TimeReader
             extends ObjectReaderImplDate {
-        final LongFunction function;
-        final Function functionValueOf;
-
-        public TimeReader(Class objectClass, String format, Locale locale) {
+        public TimeReader(String format, Locale locale) {
             super(format, locale);
-            try {
-                function = createLongFunction(
-                        objectClass.getConstructor(long.class)
-                );
-
-                Method methodValueOf = objectClass.getMethod("valueOf", String.class);
-                functionValueOf = LambdaMiscCodec.createFunction(methodValueOf);
-            } catch (NoSuchMethodException e) {
-                throw new IllegalStateException("illegal state", e);
-            }
         }
 
         @Override
@@ -208,7 +52,7 @@ public class JdbcSupport {
                 if (formatUnixTime) {
                     millis *= 1000;
                 }
-                return function.apply(millis);
+                return new Time(millis);
             }
 
             if (jsonReader.readIfNull()) {
@@ -217,12 +61,12 @@ public class JdbcSupport {
 
             if (formatISO8601 || formatMillis) {
                 long millis = jsonReader.readMillisFromString();
-                return function.apply(millis);
+                return new Time(millis);
             }
 
             if (formatUnixTime) {
                 long seconds = jsonReader.readInt64();
-                return function.apply(seconds * 1000L);
+                return new Time(seconds * 1000L);
             }
 
             long millis;
@@ -239,18 +83,18 @@ public class JdbcSupport {
                     LocalDateTime ldt;
                     if (!formatHasHour) {
                         ldt = LocalDateTime.of(
-                                LocalDate.parse(str, formatter),
+                                formatter.parseLocalDate(str),
                                 LocalTime.MIN
                         );
                     } else if (!formatHasDay) {
                         ldt = LocalDateTime.of(
                                 LocalDate.of(1970, 1, 1),
-                                LocalTime.parse(str, formatter)
+                                formatter.parseLocalTime(str)
                         );
                     } else {
-                        ldt = LocalDateTime.parse(str, formatter);
+                        ldt = formatter.parseLocalDateTime(str);
                     }
-                    zdt = ldt.atZone(jsonReader.getContext().getZoneId());
+                    zdt = ZonedDateTime.of(ldt, jsonReader.context.getZoneId());
                 } else {
                     zdt = jsonReader.readZonedDateTime();
                 }
@@ -258,27 +102,35 @@ public class JdbcSupport {
             } else {
                 String str = jsonReader.readString();
                 if ("0000-00-00".equals(str) || "0000-00-00 00:00:00".equals(str)) {
-                    return function.apply(0);
+                    return new Time(0);
                 }
 
                 if (str.isEmpty() || "null".equals(str)) {
                     return null;
                 }
 
-                return functionValueOf.apply(str);
+                return Time.valueOf(str);
             }
 
-            return function.apply(millis);
+            return new Time(millis);
         }
     }
 
-    static class TimeWriter
+    public static final class TimeWriter
             extends DateTimeCodec
             implements ObjectWriter {
-        public static TimeWriter INSTANCE = new TimeWriter(null);
+        public static final TimeWriter INSTANCE = new TimeWriter(null);
 
         public TimeWriter(String format) {
             super(format);
+        }
+
+        public static TimeWriter of(String format) {
+            if (format == null) {
+                return TimeWriter.INSTANCE;
+            }
+
+            return new TimeWriter(format);
         }
 
         @Override
@@ -297,24 +149,22 @@ public class JdbcSupport {
             }
 
             if (formatMillis || context.isDateFormatMillis()) {
-                long millis = ((Date) object).getTime();
+                long millis = ((Time) object).getTime();
                 jsonWriter.writeInt64(millis);
                 return;
             }
 
             if (formatISO8601 || context.isDateFormatISO8601()) {
-                ZoneId zoneId = context.getZoneId();
-                long millis = ((Date) object).getTime();
-                Instant instant = Instant.ofEpochMilli(millis);
-                ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, zoneId);
-                int offsetSeconds = zdt.getOffset().getTotalSeconds();
+                Instant instant = Instant.ofEpochMilli(((Time) object).getTime());
+                ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, ZoneId.UTC);
+                int offsetSeconds = zdt.offsetSeconds;
 
-                int year = zdt.getYear();
-                int month = zdt.getMonthValue();
-                int dayOfMonth = zdt.getDayOfMonth();
-                int hour = zdt.getHour();
-                int minute = zdt.getMinute();
-                int second = zdt.getSecond();
+                int year = zdt.dateTime.date.year;
+                int month = zdt.dateTime.date.monthValue;
+                int dayOfMonth = zdt.dateTime.date.dayOfMonth;
+                int hour = zdt.dateTime.time.hour;
+                int minute = zdt.dateTime.time.minute;
+                int second = zdt.dateTime.time.second;
                 int nano = 0;
                 jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nano, offsetSeconds, true);
                 return;
@@ -348,23 +198,11 @@ public class JdbcSupport {
         }
     }
 
-    static class TimestampWriter
+    public static final class TimestampWriter
             extends DateTimeCodec
             implements ObjectWriter {
-        final ToIntFunction functionGetNano;
-        final Function functionToLocalDateTime;
-
-        public TimestampWriter(Class objectClass, String format) {
+        public TimestampWriter(String format) {
             super(format);
-            try {
-                functionGetNano = createToIntFunction(
-                        objectClass.getMethod("getNanos")
-                );
-                Method methodToLocalDateTime = objectClass.getMethod("toLocalDateTime");
-                functionToLocalDateTime = LambdaMiscCodec.createFunction(methodToLocalDateTime);
-            } catch (NoSuchMethodException e) {
-                throw new JSONException("illegal state", e);
-            }
         }
 
         @Override
@@ -374,18 +212,16 @@ public class JdbcSupport {
                 return;
             }
 
-            Date date = (Date) object;
+            Timestamp ts = (Timestamp) object;
+            long millis = ts.getTime();
 
-            int nanos;
-            nanos = functionGetNano.applyAsInt(object);
-
+            int nanos = ts.getNanos();
             if (nanos == 0) {
-                jsonWriter.writeMillis(date.getTime());
+                jsonWriter.writeMillis(millis);
                 return;
             }
 
-            LocalDateTime localDateTime = (LocalDateTime) functionToLocalDateTime.apply(object);
-            jsonWriter.writeLocalDateTime(localDateTime);
+            jsonWriter.writeInstant(millis, nanos);
         }
 
         @Override
@@ -397,27 +233,27 @@ public class JdbcSupport {
 
             JSONWriter.Context ctx = jsonWriter.context;
 
-            Date date = (Date) object;
+            Timestamp ts = (Timestamp) object;
 
             if (formatUnixTime || ctx.isDateFormatUnixTime()) {
-                long millis = date.getTime();
+                long millis = ts.getTime();
                 jsonWriter.writeInt64(millis / 1000L);
                 return;
             }
 
             ZoneId zoneId = ctx.getZoneId();
-            Instant instant = date.toInstant();
+            Instant instant = Instant.of(ts);
             ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, zoneId);
-            int offsetSeconds = zdt.getOffset().getTotalSeconds();
+            int offsetSeconds = zoneId.getOffsetTotalSeconds(instant);
 
-            if ((formatISO8601 || ctx.isDateFormatISO8601()) && (zdt.getNano() % 1000_000 == 0)) {
-                int year = zdt.getYear();
-                int month = zdt.getMonthValue();
-                int dayOfMonth = zdt.getDayOfMonth();
-                int hour = zdt.getHour();
-                int minute = zdt.getMinute();
-                int second = zdt.getSecond();
-                int nano = zdt.getNano();
+            if ((formatISO8601 || ctx.isDateFormatISO8601()) && (zdt.dateTime.time.nano % 1000_000 == 0)) {
+                int year = zdt.dateTime.date.year;
+                int month = zdt.dateTime.date.monthValue;
+                int dayOfMonth = zdt.dateTime.date.dayOfMonth;
+                int hour = zdt.dateTime.time.hour;
+                int minute = zdt.dateTime.time.minute;
+                int second = zdt.dateTime.time.second;
+                int nano = zdt.dateTime.time.nano;
                 int millis = nano / 1000_000;
                 jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, millis, offsetSeconds, true);
                 return;
@@ -430,30 +266,28 @@ public class JdbcSupport {
 
             if (dateFormatter == null) {
                 if (formatMillis || ctx.isDateFormatMillis()) {
-                    long millis = date.getTime();
+                    long millis = ts.getTime();
                     jsonWriter.writeInt64(millis);
                     return;
                 }
 
-                int nanos = functionGetNano.applyAsInt(date);
+                int nanos = ts.getNanos();
 
                 if (nanos == 0) {
-                    jsonWriter.writeInt64(date.getTime());
+                    jsonWriter.writeInt64(ts.getTime());
                     return;
                 }
 
-                int year = zdt.getYear();
-                int month = zdt.getMonthValue();
-                int dayOfMonth = zdt.getDayOfMonth();
-                int hour = zdt.getHour();
-                int minute = zdt.getMinute();
-                int second = zdt.getSecond();
-                if (nanos == 0) {
-                    jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
-                } else if (nanos % 1000_000 == 0) {
+                int year = zdt.dateTime.date.year;
+                int month = zdt.dateTime.date.monthValue;
+                int dayOfMonth = zdt.dateTime.date.dayOfMonth;
+                int hour = zdt.dateTime.time.hour;
+                int minute = zdt.dateTime.time.minute;
+                int second = zdt.dateTime.time.second;
+                if (nanos % 1000_000 == 0) {
                     jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nanos / 1000_000, offsetSeconds, false);
                 } else {
-                    jsonWriter.writeLocalDateTime(zdt.toLocalDateTime());
+                    jsonWriter.writeLocalDateTime(zdt.dateTime);
                 }
             } else {
                 String str = dateFormatter.format(zdt);
@@ -462,36 +296,10 @@ public class JdbcSupport {
         }
     }
 
-    static class TimestampReader
+    public static final class TimestampReader
             extends ObjectReaderImplDate {
-        final LongFunction function;
-        final ObjIntConsumer functionSetNanos;
-        final Function functionValueOf;
-
-        public TimestampReader(Class objectClass, String format, Locale locale) {
+        public TimestampReader(String format, Locale locale) {
             super(format, locale);
-            try {
-                Constructor constructor = objectClass.getConstructor(long.class);
-                this.function = createLongFunction(constructor);
-            } catch (Throwable e) {
-                throw new IllegalStateException("illegal state", e);
-            }
-
-            try {
-                Method methodSetNanos = objectClass.getMethod("setNanos", int.class);
-                functionSetNanos = createObjIntConsumer(methodSetNanos);
-            } catch (NoSuchMethodException e) {
-                throw new IllegalStateException("illegal state", e);
-            }
-
-            Function functionValueOf = null;
-            try {
-                Method methodValueOf = objectClass.getMethod("valueOf", LocalDateTime.class);
-                functionValueOf = LambdaMiscCodec.createFunction(methodValueOf);
-            } catch (Throwable ignored) {
-                // ignored
-            }
-            this.functionValueOf = functionValueOf;
         }
 
         @Override
@@ -514,11 +322,11 @@ public class JdbcSupport {
         }
 
         Object createTimestamp(long millis, int nanos) {
-            Object timestamp = function.apply(millis);
+            Timestamp ts = new Timestamp(millis);
             if (nanos != 0) {
-                functionSetNanos.accept(timestamp, nanos);
+                ts.setNanos(nanos);
             }
-            return timestamp;
+            return ts;
         }
 
         @Override
@@ -538,22 +346,20 @@ public class JdbcSupport {
             }
 
             if (format == null || formatISO8601 || formatMillis) {
-                if (functionValueOf != null) {
-                    LocalDateTime localDateTime = jsonReader.readLocalDateTime();
-                    if (localDateTime != null) {
-                        return functionValueOf.apply(localDateTime);
-                    }
+                LocalDateTime localDateTime = jsonReader.readLocalDateTime();
+                if (localDateTime != null) {
+                    return localDateTime.toTimestamp();
+                }
 
-                    if (jsonReader.wasNull()) {
-                        return null;
-                    }
+                if (jsonReader.wasNull()) {
+                    return null;
                 }
 
                 long millis = jsonReader.readMillisFromString();
                 if (millis == 0 && jsonReader.wasNull()) {
                     return null;
                 }
-                return function.apply(millis);
+                return new Timestamp(millis);
             }
 
             String str = jsonReader.readString();
@@ -565,42 +371,25 @@ public class JdbcSupport {
 
             Instant instant;
             if (!formatHasHour) {
-                LocalDate localDate = LocalDate.parse(str, dateFormatter);
+                LocalDate localDate = dateFormatter.parseLocalDate(str);
                 LocalDateTime ldt = LocalDateTime.of(localDate, LocalTime.MIN);
-                instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
+                instant = ZonedDateTime.of(ldt, jsonReader.context.getZoneId()).toInstant();
             } else {
-                LocalDateTime ldt = LocalDateTime.parse(str, dateFormatter);
-                instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
+                LocalDateTime ldt = DateUtils.parseLocalDateTime(str, 0, str.length());
+                instant = ldt.toInstant(jsonReader.context.getZoneId());
             }
 
             long millis = instant.toEpochMilli();
-            int nanos = instant.getNano();
+            int nanos = instant.nanos;
 
             return createTimestamp(millis, nanos);
         }
     }
 
-    static class DateReader
+    public static final class DateReader
             extends ObjectReaderImplDate {
-        final LongFunction function;
-        final Function functionValueOf;
-
-        public DateReader(Class objectClass, String format, Locale locale) {
+        public DateReader(String format, Locale locale) {
             super(format, locale);
-
-            try {
-                Constructor constructor = objectClass.getConstructor(long.class);
-                this.function = createLongFunction(constructor);
-            } catch (Throwable e) {
-                throw new IllegalStateException("illegal state", e);
-            }
-
-            try {
-                Method methodValueOf = objectClass.getMethod("valueOf", LocalDate.class);
-                functionValueOf = LambdaMiscCodec.createFunction(methodValueOf);
-            } catch (NoSuchMethodException | SecurityException e) {
-                throw new IllegalStateException("illegal state", e);
-            }
         }
 
         @Override
@@ -617,7 +406,7 @@ public class JdbcSupport {
                     millis *= 1000L;
                 }
 
-                return function.apply(millis);
+                return new java.sql.Date(millis);
             }
 
             if (jsonReader.readIfNull()) {
@@ -629,14 +418,15 @@ public class JdbcSupport {
                     String str = jsonReader.readString();
                     long millis = Long.parseLong(str);
                     millis *= 1000L;
-                    return function.apply(millis);
+                    return new java.sql.Date(millis);
                 }
             }
 
             if (format == null || formatISO8601 || formatMillis) {
                 LocalDateTime localDateTime = jsonReader.readLocalDateTime();
                 if (localDateTime != null) {
-                    return functionValueOf.apply(localDateTime.toLocalDate());
+                    Instant instant = localDateTime.toInstant(jsonReader.getZoneId());
+                    return new java.sql.Date(instant.toEpochMilli());
                 }
 
                 if (jsonReader.wasNull()) {
@@ -647,7 +437,7 @@ public class JdbcSupport {
                 if (millis == 0 && jsonReader.wasNull()) {
                     return null;
                 }
-                return function.apply(millis);
+                return new java.sql.Date(millis);
             }
 
             String str = jsonReader.readString();
@@ -658,16 +448,16 @@ public class JdbcSupport {
             DateTimeFormatter dateFormatter = getDateFormatter();
 
             Instant instant;
-            if (format != null && !formatHasHour) {
-                LocalDate localDate = LocalDate.parse(str, dateFormatter);
+            if (!formatHasHour) {
+                LocalDate localDate = dateFormatter.parseLocalDate(str);
                 LocalDateTime ldt = LocalDateTime.of(localDate, LocalTime.MIN);
-                instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
+                instant = ZonedDateTime.of(ldt, jsonReader.context.getZoneId()).toInstant();
             } else {
-                LocalDateTime ldt = LocalDateTime.parse(str, dateFormatter);
-                instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();
+                LocalDateTime ldt = dateFormatter.parseLocalDateTime(str);
+                instant = ZonedDateTime.of(ldt, jsonReader.context.getZoneId()).toInstant();
             }
 
-            return function.apply(
+            return new java.sql.Date(
                     instant.toEpochMilli()
             );
         }

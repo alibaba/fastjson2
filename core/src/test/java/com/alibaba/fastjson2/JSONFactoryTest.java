@@ -8,24 +8,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class JSONFactoryTest {
     @Test
     public void contextReaderCreator() {
-        JSONFactory.setContextObjectReaderProvider(null);
-        assertSame(JSONFactory.defaultObjectReaderProvider, JSONFactory.getDefaultObjectReaderProvider());
-    }
-
-    @Test
-    public void contextJSONPathCompiler() {
-        JSONFactory.setContextJSONPathCompiler(null);
-        assertSame(JSONFactory.defaultJSONPathCompiler, JSONFactory.getDefaultJSONPathCompiler());
+        assertSame(JSONFactory.defaultObjectReaderProvider, JSONFactory.defaultObjectReaderProvider);
     }
 
     @Test
     public void test1() {
-        JSONFactory.setUseJacksonAnnotation(false);
-        assertFalse(JSONFactory.isUseJacksonAnnotation());
-        JSONFactory.setUseJacksonAnnotation(true);
-        assertTrue(JSONFactory.isUseJacksonAnnotation());
-
-        ObjectWriterProvider provider = JSONFactory.getDefaultObjectWriterProvider();
+        ObjectWriterProvider provider = JSONFactory.defaultObjectWriterProvider;
         JSONWriter.Context context = JSONFactory.createWriteContext(provider);
         assertSame(provider, context.getProvider());
     }

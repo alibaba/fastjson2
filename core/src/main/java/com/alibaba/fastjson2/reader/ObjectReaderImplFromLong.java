@@ -1,9 +1,9 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.function.LongFunction;
 
 import java.lang.reflect.Type;
-import java.util.function.LongFunction;
 
 public final class ObjectReaderImplFromLong<T>
         extends ObjectReaderPrimitive<T> {

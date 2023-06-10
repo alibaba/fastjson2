@@ -26,12 +26,12 @@ public class ObjectWriter5Test {
         JSONObject jsonObject = JSONObject.from(bean);
         assertEquals(str, jsonObject.toString());
 
-        assertEquals(bean.f0, JSONPath.eval(bean, "$.f0"));
-        assertEquals(bean.f1, JSONPath.eval(bean, "$.f1"));
-        assertEquals(bean.f2, JSONPath.eval(bean, "$.f2"));
-        assertEquals(bean.f3, JSONPath.eval(bean, "$.f3"));
-        assertEquals(bean.f4, JSONPath.eval(bean, "$.f4"));
-        assertNull(JSONPath.eval(bean, "$.f100"));
+        assertEquals(bean.f0, TestUtils.eval(bean, "$.f0"));
+        assertEquals(bean.f1, TestUtils.eval(bean, "$.f1"));
+        assertEquals(bean.f2, TestUtils.eval(bean, "$.f2"));
+        assertEquals(bean.f3, TestUtils.eval(bean, "$.f3"));
+        assertEquals(bean.f4, TestUtils.eval(bean, "$.f4"));
+        assertNull(TestUtils.eval(bean, "$.f100"));
     }
 
     @Test

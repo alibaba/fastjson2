@@ -1,22 +1,16 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.time.LocalDateTime;
 import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
-import static com.alibaba.fastjson2.util.JDKUtils.STRING_CREATOR_JDK11;
-import static com.alibaba.fastjson2.util.JDKUtils.UTF16;
 
 final class JSONBDump {
     static Charset GB18030;
@@ -32,7 +26,7 @@ final class JSONBDump {
 
     String lastReference;
 
-    JSONWriter jsonWriter;
+    final JSONWriter jsonWriter;
     final SymbolTable symbolTable;
 
     final Map<Integer, String> symbols = new HashMap<>();
@@ -124,7 +118,6 @@ final class JSONBDump {
                                 ((long) (bytes[offset]) << 56);
                 offset += 8;
                 jsonWriter.writeInt64(int64Value);
-                jsonWriter.writeInt64(int64Value);
                 return;
             }
             case BC_BIGINT: {
@@ -183,7 +176,7 @@ final class JSONBDump {
             case BC_STR_UTF8: {
                 int strlen = readLength();
 
-                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_8);
+                String str = new String(bytes, offset, strlen, IOUtils.UTF_8);
                 offset += strlen;
                 jsonWriter.writeString(str);
                 return;
@@ -195,39 +188,21 @@ final class JSONBDump {
             }
             case BC_STR_UTF16: {
                 int strlen = readLength();
-                String str = new String(bytes, offset, strlen, StandardCharsets.UTF_16);
+                String str = new String(bytes, offset, strlen, IOUtils.UTF_16);
                 offset += strlen;
                 jsonWriter.writeString(str);
                 return;
             }
             case BC_STR_UTF16LE: {
                 int strlen = readLength();
-
-                String str;
-                if (STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
-                    byte[] chars = new byte[strlen];
-                    System.arraycopy(bytes, offset, chars, 0, strlen);
-                    str = STRING_CREATOR_JDK11.apply(chars, UTF16);
-                } else {
-                    str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
-                }
-
+                String str = new String(bytes, offset, strlen, IOUtils.UTF_16LE);
                 offset += strlen;
                 jsonWriter.writeString(str);
                 return;
             }
             case BC_STR_UTF16BE: {
                 int strlen = readLength();
-
-                String str;
-                if (STRING_CREATOR_JDK11 != null && JDKUtils.BIG_ENDIAN) {
-                    byte[] chars = new byte[strlen];
-                    System.arraycopy(bytes, offset, chars, 0, strlen);
-                    str = STRING_CREATOR_JDK11.apply(chars, UTF16);
-                } else {
-                    str = new String(bytes, offset, strlen, StandardCharsets.UTF_16BE);
-                }
-
+                String str = new String(bytes, offset, strlen, IOUtils.UTF_16BE);
                 offset += strlen;
                 jsonWriter.writeString(str);
                 return;
@@ -369,16 +344,13 @@ final class JSONBDump {
                 int month = bytes[offset++];
                 int dayOfMonth = bytes[offset++];
 
-                LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
-                jsonWriter.writeLocalDate(localDate);
+                jsonWriter.writeDateYYYMMDD10(year, month, dayOfMonth);
                 break;
             }
             case BC_TIMESTAMP:
                 long epochSeconds = readInt64Value();
                 int nano = readInt32Value();
-                jsonWriter.writeInstant(
-                        Instant.ofEpochSecond(epochSeconds, nano)
-                );
+                jsonWriter.writeInstant(epochSeconds, nano);
                 break;
             case BC_OBJECT: {
                 dumpObject(null);
@@ -443,7 +415,7 @@ final class JSONBDump {
                         return;
                     }
 
-                    String str = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
+                    String str = new String(bytes, offset, strlen, IOUtils.ISO_8859_1);
                     offset += strlen;
                     jsonWriter.writeString(str);
                     return;
@@ -667,11 +639,6 @@ final class JSONBDump {
             return (long) INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
         }
 
-        if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
-            return ((type - BC_INT32_BYTE_ZERO) << 8)
-                    + (bytes[offset++] & 0xFF);
-        }
-
         if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
             return ((type - BC_INT64_BYTE_ZERO) << 8)
                     + (bytes[offset++] & 0xFF);
@@ -872,42 +839,24 @@ final class JSONBDump {
                 strlen = strtype - BC_STR_ASCII_FIX_MIN;
             }
 
-            charset = StandardCharsets.ISO_8859_1;
+            charset = IOUtils.ISO_8859_1;
         } else if (strtype == BC_STR_UTF8) {
             strlen = readLength();
             strBegin = offset;
 
-            charset = StandardCharsets.UTF_8;
+            charset = IOUtils.UTF_8;
         } else if (strtype == BC_STR_UTF16) {
             strlen = readLength();
             strBegin = offset;
-            charset = StandardCharsets.UTF_16;
+            charset = IOUtils.UTF_16;
         } else if (strtype == BC_STR_UTF16LE) {
             strlen = readLength();
             strBegin = offset;
-
-            if (STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
-                byte[] chars = new byte[strlen];
-                System.arraycopy(bytes, offset, chars, 0, strlen);
-                String str = STRING_CREATOR_JDK11.apply(chars, UTF16);
-                offset += strlen;
-                return str;
-            }
-
-            charset = StandardCharsets.UTF_16LE;
+            charset = IOUtils.UTF_16LE;
         } else if (strtype == BC_STR_UTF16BE) {
             strlen = readLength();
             strBegin = offset;
-
-            if (STRING_CREATOR_JDK11 != null && JDKUtils.BIG_ENDIAN) {
-                byte[] chars = new byte[strlen];
-                System.arraycopy(bytes, offset, chars, 0, strlen);
-                String str = STRING_CREATOR_JDK11.apply(chars, UTF16);
-                offset += strlen;
-                return str;
-            }
-
-            charset = StandardCharsets.UTF_16BE;
+            charset = IOUtils.UTF_16BE;
         } else if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
             return Byte.toString(strtype);
         } else {

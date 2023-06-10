@@ -1,9 +1,8 @@
 package com.alibaba.fastjson2.filter;
 
 import com.alibaba.fastjson2.PropertyNamingStrategy;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.BeanUtils;
-
-import java.util.function.Function;
 
 public interface NameFilter
         extends Filter {

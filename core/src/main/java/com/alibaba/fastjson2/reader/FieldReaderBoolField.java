@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
@@ -16,10 +15,9 @@ final class FieldReaderBoolField<T>
             long features,
             String format,
             Boolean defaultValue,
-            JSONSchema schema,
             Field field
     ) {
-        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, schema, field);
+        super(fieldName, fieldType, fieldType, ordinal, features, format, defaultValue, field);
     }
 
     @Override
@@ -45,10 +43,6 @@ final class FieldReaderBoolField<T>
     @Override
     public void accept(T object, Object value) {
         Boolean booleanValue = TypeUtils.toBoolean(value);
-        if (schema != null) {
-            schema.assertValidate(booleanValue);
-        }
-
         try {
             field.set(object, booleanValue);
         } catch (Exception e) {

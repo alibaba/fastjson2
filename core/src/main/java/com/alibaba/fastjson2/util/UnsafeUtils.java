@@ -4,14 +4,25 @@ import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 
-public class UnsafeUtils {
+public final class UnsafeUtils {
     public static final Unsafe UNSAFE;
     static {
         Unsafe unsafe = null;
+
         try {
-            Field theUnsafeField = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafeField.setAccessible(true);
-            unsafe = (Unsafe) theUnsafeField.get(null);
+            Field theUnsafeField = null;
+            for (Field field : Unsafe.class.getDeclaredFields()) {
+                String fieldName = field.getName();
+                if (fieldName.equals("theUnsafe") || fieldName.equals("THE_ONE")) {
+                    theUnsafeField = field;
+                    break;
+                }
+            }
+
+            if (theUnsafeField != null) {
+                theUnsafeField.setAccessible(true);
+                unsafe = (Unsafe) theUnsafeField.get(null);
+            }
         } catch (Throwable ignored) {
             // ignored
         }

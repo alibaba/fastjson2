@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,7 +28,7 @@ public class Issue508 {
             implements IBase {
         private int id;
         private String name;
-        protected Base(int id, String name) {
+        protected Base(@JSONField(name = "id") int id, @JSONField(name = "name") String name) {
             this.id = id;
             this.name = name;
         }
@@ -44,7 +45,7 @@ public class Issue508 {
     public static class Device
             extends Base
             implements IBase {
-        public Device(int id, String name) {
+        public Device(@JSONField(name = "id") int id, @JSONField(name = "name") String name) {
             super(id, name);
         }
     }
@@ -57,7 +58,7 @@ public class Issue508 {
             implements Ixx {
         private IBase base;
 
-        public Xx(IBase base) {
+        public Xx(@JSONField(name = "base") IBase base) {
             this.base = base;
         }
 

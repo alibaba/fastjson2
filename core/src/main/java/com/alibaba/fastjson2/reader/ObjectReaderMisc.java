@@ -43,7 +43,7 @@ public class ObjectReaderMisc
                     jsonReader.skipValue();
                 }
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return new InetSocketAddress(inetAddress, port);
         }
 

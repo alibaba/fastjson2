@@ -2,13 +2,12 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.function.Function;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.function.Function;
 
 public class ObjectReaderImplValue<I, T>
         implements ObjectReader<T> {
@@ -18,7 +17,6 @@ public class ObjectReaderImplValue<I, T>
     final Constructor<T> constructor;
     final Method factoryMethod;
     final Function<I, T> function;
-    final JSONSchema schema;
     final Object emptyVariantArgs;
     ObjectReader valueReader;
 
@@ -29,7 +27,6 @@ public class ObjectReaderImplValue<I, T>
             long features,
             String format,
             Object defaultValue,
-            JSONSchema schema,
             Constructor<T> constructor,
             Method factoryMethod,
             Function<I, T> function
@@ -37,13 +34,13 @@ public class ObjectReaderImplValue<I, T>
         this.valueType = valueType;
         this.valueClass = valueClass;
         this.features = features;
-        this.schema = schema;
         this.constructor = constructor;
         this.factoryMethod = factoryMethod;
         this.function = function;
 
-        if (factoryMethod != null && factoryMethod.getParameterCount() == 2) {
-            Class<?> varArgType = factoryMethod.getParameterTypes()[1].getComponentType();
+        Class<?>[] parameterTypes;
+        if (factoryMethod != null && (parameterTypes = factoryMethod.getParameterTypes()).length == 2) {
+            Class<?> varArgType = parameterTypes[1].getComponentType();
             emptyVariantArgs = Array.newInstance(varArgType, 0);
         } else {
             emptyVariantArgs = null;
@@ -65,10 +62,6 @@ public class ObjectReaderImplValue<I, T>
 
         if (value == null) {
             return null;
-        }
-
-        if (schema != null) {
-            schema.validate(value);
         }
 
         T object;
@@ -103,10 +96,10 @@ public class ObjectReaderImplValue<I, T>
     }
 
     public static <I, T> ObjectReaderImplValue<I, T> of(Class<T> objectClass, Class<I> valueClass, Method method) {
-        return new ObjectReaderImplValue(objectClass, valueClass, valueClass, 0L, null, null, null, null, method, null);
+        return new ObjectReaderImplValue(objectClass, valueClass, valueClass, 0L, null, null, null, method, null);
     }
 
     public static <I, T> ObjectReaderImplValue<I, T> of(Class<T> objectClass, Class<I> valueClass, Function<I, T> function) {
-        return new ObjectReaderImplValue(objectClass, valueClass, valueClass, 0L, null, null, null, null, null, function);
+        return new ObjectReaderImplValue(objectClass, valueClass, valueClass, 0L, null, null, null, null, function);
     }
 }

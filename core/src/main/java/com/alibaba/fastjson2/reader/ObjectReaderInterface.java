@@ -4,12 +4,12 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.function.Function;
+import com.alibaba.fastjson2.function.Supplier;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public final class ObjectReaderInterface<T>
         extends ObjectReaderAdapter<T> {
@@ -22,7 +22,7 @@ public final class ObjectReaderInterface<T>
             Function buildFunction,
             FieldReader[] fieldReaders
     ) {
-        super(objectClass, typeKey, typeName, features, null, creator, buildFunction, fieldReaders);
+        super(objectClass, typeKey, typeName, features, creator, buildFunction, fieldReaders);
     }
 
     @Override
@@ -56,7 +56,7 @@ public final class ObjectReaderInterface<T>
             long hash = jsonReader.readFieldNameHashCode();
             if (hash == typeKeyHashCode && i == 0) {
                 long typeHash = jsonReader.readValueHashCode();
-                JSONReader.Context context = jsonReader.getContext();
+                JSONReader.Context context = jsonReader.context;
                 ObjectReader autoTypeObjectReader = autoType(context, typeHash);
                 if (autoTypeObjectReader == null) {
                     String typeName = jsonReader.getString();
@@ -92,22 +92,17 @@ public final class ObjectReaderInterface<T>
             }
         }
 
-        object = (T) TypeUtils.newProxyInstance(objectClass, jsonObject);
-        if (schema != null) {
-            schema.assertValidate(object);
-        }
-
-        return (T) object;
+        return (T) TypeUtils.newProxyInstance(objectClass, jsonObject);
     }
 
     @Override
     public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         if (jsonReader.nextIfNull()) {
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return null;
         }
 
@@ -115,9 +110,9 @@ public final class ObjectReaderInterface<T>
             return readArrayMappingObject(jsonReader, fieldType, fieldName, features);
         }
 
-        T object = null;
+        T object;
         JSONObject jsonObject = new JSONObject();
-        boolean objectStart = jsonReader.nextIfMatch('{');
+        boolean objectStart = jsonReader.nextIfObjectStart();
         if (!objectStart) {
             char ch = jsonReader.current();
             // skip for fastjson 1.x compatible
@@ -132,11 +127,11 @@ public final class ObjectReaderInterface<T>
         }
 
         for (int i = 0; ; i++) {
-            if (jsonReader.nextIfMatch('}')) {
+            if (jsonReader.nextIfObjectEnd()) {
                 break;
             }
 
-            JSONReader.Context context = jsonReader.getContext();
+            JSONReader.Context context = jsonReader.context;
             long features3, hash = jsonReader.readFieldNameHashCode();
             JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
             if (i == 0
@@ -206,16 +201,12 @@ public final class ObjectReaderInterface<T>
             }
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         object = (T) TypeUtils.newProxyInstance(objectClass, jsonObject);
         Function buildFunction = getBuildFunction();
         if (buildFunction != null) {
             object = (T) buildFunction.apply(object);
-        }
-
-        if (schema != null) {
-            schema.assertValidate(object);
         }
 
         return object;

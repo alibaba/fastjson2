@@ -39,7 +39,7 @@ public class InterfaceTest {
             return;
         }
 
-        ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Item.class);
+        ObjectReader objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Item.class);
         Item item = (Item) objectReader.createInstance(0L);
         item.setId(123);
         assertEquals(123, item.getId());

@@ -1,9 +1,8 @@
 package com.alibaba.fastjson2.issues;
 
+import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.DateUtils;
 import org.junit.jupiter.api.Test;
-
-import java.time.ZoneId;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

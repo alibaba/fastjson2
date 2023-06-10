@@ -2,11 +2,10 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.function.BiConsumer;
 
 import java.lang.reflect.Method;
 import java.util.Locale;
-import java.util.function.BiConsumer;
 
 final class FieldReaderStringFunc<T, V>
         extends FieldReader<T> {
@@ -23,11 +22,10 @@ final class FieldReaderStringFunc<T, V>
             String format,
             Locale locale,
             Object defaultValue,
-            JSONSchema schema,
             Method method,
             BiConsumer<T, V> function
     ) {
-        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, null);
+        super(fieldName, fieldClass, fieldClass, ordinal, features, format, locale, defaultValue, method, null);
         this.function = function;
 
         this.format = format;
@@ -57,10 +55,6 @@ final class FieldReaderStringFunc<T, V>
             fieldValue = fieldValue.trim();
         }
 
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         try {
             function.accept(object, (V) fieldValue);
         } catch (Exception e) {
@@ -71,15 +65,9 @@ final class FieldReaderStringFunc<T, V>
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         String fieldValue = jsonReader.readString();
-
         if (trim && fieldValue != null) {
             fieldValue = fieldValue.trim();
         }
-
-        if (schema != null) {
-            schema.assertValidate(fieldValue);
-        }
-
         function.accept(object, (V) fieldValue);
     }
 

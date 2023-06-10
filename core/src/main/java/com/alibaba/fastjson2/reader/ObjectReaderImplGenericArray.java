@@ -4,13 +4,13 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONReader.Feature.Base64StringAsByteArray;
@@ -35,16 +35,6 @@ class ObjectReaderImplGenericArray
     }
 
     @Override
-    public Object createInstance(long features) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public FieldReader getFieldReader(long hashCode) {
-        return null;
-    }
-
-    @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
             long typeHash = jsonReader.readTypeHashCode();
@@ -58,7 +48,7 @@ class ObjectReaderImplGenericArray
 
         if (entryCnt > 0 && itemObjectReader == null) {
             itemObjectReader = jsonReader
-                    .getContext()
+                    .context
                     .getObjectReader(itemType);
         }
 
@@ -76,11 +66,11 @@ class ObjectReaderImplGenericArray
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (itemObjectReader == null) {
             itemObjectReader = jsonReader
-                    .getContext()
+                    .context
                     .getObjectReader(itemType);
         }
 
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
@@ -96,7 +86,7 @@ class ObjectReaderImplGenericArray
                 byte[] bytes;
                 if ((jsonReader.features(features) & Base64StringAsByteArray.mask) != 0) {
                     String str = jsonReader.readString();
-                    bytes = Base64.getDecoder().decode(str);
+                    bytes = IOUtils.decodeBase64(str);
                 } else {
                     bytes = jsonReader.readBinary();
                 }
@@ -118,7 +108,7 @@ class ObjectReaderImplGenericArray
         jsonReader.next();
 
         for (; ; ) {
-            if (jsonReader.nextIfMatch(']')) {
+            if (jsonReader.nextIfArrayEnd()) {
                 break;
             }
 
@@ -135,12 +125,12 @@ class ObjectReaderImplGenericArray
 
             list.add(item);
 
-            if (jsonReader.nextIfMatch(',')) {
+            if (jsonReader.nextIfComma()) {
                 continue;
             }
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         Object array = Array.newInstance(componentClass, list.size());
 

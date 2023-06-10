@@ -33,9 +33,14 @@ public class SqlTimestampTest {
         String str = "{\"birthday\":\"2022-05-03T15:26:05\"}";
         Student1 student = JSON.parseObject(str, Student1.class);
         String str2 = JSON.toJSONString(student);
+        System.out.println(str2);
+        assertEquals("{\"birthday\":\"2022-05-03T15:26:05+08:00\"}", str2);
         Student1 student1 = JSON.parseObject(str2, Student1.class);
         assertEquals(student.birthday.getYear(), student1.birthday.getYear());
-        assertEquals(student.birthday.toInstant().toEpochMilli(), student1.birthday.toInstant().toEpochMilli());
+        assertEquals(
+                student.birthday.getTime(),
+                student1.birthday.getTime()
+        );
     }
 
     @Test

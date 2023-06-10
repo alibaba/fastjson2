@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.benchmark.sonic;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.util.List;
 
@@ -39,8 +38,6 @@ public class EishayTest {
                 "    \"width\":640\n" +
                 "  }\n" +
                 "}";
-
-        System.out.println("JDKUtils_vector_bit_length : " + JDKUtils.VECTOR_BIT_LENGTH);
 
         JSONReader reader = JSONReader.of(str);
         reader.close();

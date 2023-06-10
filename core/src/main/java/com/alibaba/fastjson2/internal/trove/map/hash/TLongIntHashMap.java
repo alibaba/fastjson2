@@ -21,7 +21,6 @@
 package com.alibaba.fastjson2.internal.trove.map.hash;
 
 import java.util.Arrays;
-import java.util.function.BiFunction;
 
 /**
  * An open addressed Map implementation for long keys and int values.
@@ -295,33 +294,26 @@ public final class TLongIntHashMap {
             return values[-index - 1];
         }
 
-        boolean isNewMapping = true;
-        if (index < 0) {
-            index = -index - 1;
-            isNewMapping = false;
-        }
         values[index] = value;
 
-        if (isNewMapping) {
-            if (consumeFreeSlot) {
-                free--;
-            }
+        if (consumeFreeSlot) {
+            free--;
+        }
 
-            // rehash whenever we exhaust the available space in the table
-            if (++size > maxSize || free == 0) {
-                // choose a new capacity suited to the new state of the table
-                // if we've grown beyond our maximum size, double capacity;
-                // if we've exhausted the free spots, rehash to the same capacity,
-                // which will free up any stale removed slots for reuse.
-                int capacity = set.length;
+        // rehash whenever we exhaust the available space in the table
+        if (++size > maxSize || free == 0) {
+            // choose a new capacity suited to the new state of the table
+            // if we've grown beyond our maximum size, double capacity;
+            // if we've exhausted the free spots, rehash to the same capacity,
+            // which will free up any stale removed slots for reuse.
+            int capacity = set.length;
 //                rehash(newCapacity);
-                rehash(capacity);
+            rehash(capacity);
 
-                capacity = set.length;
-                // computeMaxSize(capacity);
-                maxSize = Math.min(capacity - 1, (int) (capacity * 0.5f));
-                free = capacity - size; // reset the free element count
-            }
+            capacity = set.length;
+            // computeMaxSize(capacity);
+            maxSize = Math.min(capacity - 1, (int) (capacity * 0.5f));
+            free = capacity - size; // reset the free element count
         }
 
         return value;
@@ -386,42 +378,32 @@ public final class TLongIntHashMap {
         return DEFAULT_ENTRY_VALUE;
     }
 
-    public boolean forEachEntry(BiFunction<Long, Integer, Boolean> procedure) {
-        long[] keys = set;
-        int[] values = this.values;
-        for (int i = keys.length; i-- > 0; ) {
-            if (set[i] != 0 && !procedure.apply(keys[i], values[i])) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     @Override
     public String toString() {
         final StringBuilder buf = new StringBuilder("{");
-        forEachEntry(new BiFunction<Long, Integer, Boolean>() {
-            private boolean first = true;
 
-            @Override
-            public Boolean apply(Long key, Integer value) {
+        long[] keys = this.set;
+        int[] values = this.values;
+
+        boolean first = true;
+        for (int i = keys.length; i-- > 0; ) {
+            if (keys[i] != 0) {
+                long key = keys[i];
+                int value = values[i];
+
                 if (first) {
                     first = false;
                 } else {
                     buf.append(", ");
                 }
                 buf.append(key);
-                buf.append("=");
+                buf.append('=');
                 buf.append(value);
-                return true;
             }
-        });
-        buf.append("}");
-        return buf.toString();
-    }
+        }
 
-    public int size() {
-        return size;
+        buf.append('}');
+        return buf.toString();
     }
 
     /**
@@ -449,7 +431,7 @@ public final class TLongIntHashMap {
             return index;      // empty, all done
         }
 
-        if (state && set[index] == key) {
+        if (set[index] == key) {
             return -index - 1;   // already stored
         }
 
@@ -480,7 +462,7 @@ public final class TLongIntHashMap {
                     return index;
                 }
 
-                if (state && set[index] == key) {
+                if (set[index] == key) {
                     return -index - 1;
                 }
 

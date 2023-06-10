@@ -2,34 +2,34 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.JSONReader.AutoTypeBeforeHandler;
+import com.alibaba.fastjson2.annotation.JSONCompiled;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.modules.ObjectCodecProvider;
-import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
-import com.alibaba.fastjson2.modules.ObjectReaderModule;
-import com.alibaba.fastjson2.support.LambdaMiscCodec;
+import com.alibaba.fastjson2.function.Consumer;
+import com.alibaba.fastjson2.function.Function;
+import com.alibaba.fastjson2.function.impl.*;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_HASH_CODE;
 import static com.alibaba.fastjson2.util.Fnv.MAGIC_PRIME;
 import static com.alibaba.fastjson2.util.TypeUtils.loadClass;
 
-public class ObjectReaderProvider
-        implements ObjectCodecProvider {
-    static final ClassLoader FASTJSON2_CLASS_LOADER = JSON.class.getClassLoader();
+public class ObjectReaderProvider {
     public static final boolean SAFE_MODE;
     static final String[] DENYS;
     static final String[] AUTO_TYPE_ACCEPT_LIST;
@@ -145,16 +145,15 @@ public class ObjectReaderProvider
 
     final ConcurrentMap<Type, ObjectReader> cache = new ConcurrentHashMap<>();
     final ConcurrentMap<Type, ObjectReader> cacheFieldBased = new ConcurrentHashMap<>();
-    final ConcurrentMap<Integer, ConcurrentHashMap<Long, ObjectReader>> tclHashCaches = new ConcurrentHashMap<>();
     final ConcurrentMap<Long, ObjectReader> hashCache = new ConcurrentHashMap<>();
     final ConcurrentMap<Class, Class> mixInCache = new ConcurrentHashMap<>();
 
     final LRUAutoTypeCache autoTypeList = new LRUAutoTypeCache(1024);
 
-    private ConcurrentMap<Type, Map<Type, Function>> typeConverts = new ConcurrentHashMap<>();
+    private ConcurrentMap<Type, Map<Type, Function>> typeConverts;
 
-    final ObjectReaderCreator creator;
-    final List<ObjectReaderModule> modules = new ArrayList<>();
+    public final ObjectReaderCreator creator;
+    final ObjectReaderModule module = new ObjectReaderModule(this);
 
     private long[] denyHashCodes;
     private long[] acceptHashCodes;
@@ -350,19 +349,7 @@ public class ObjectReaderProvider
     }
 
     public void registerIfAbsent(long hashCode, ObjectReader objectReader) {
-        ClassLoader tcl = Thread.currentThread().getContextClassLoader();
-        if (tcl != null && tcl != JSON.class.getClassLoader()) {
-            int tclHash = System.identityHashCode(tcl);
-            ConcurrentHashMap<Long, ObjectReader> tclHashCache = tclHashCaches.get(tclHash);
-            if (tclHashCache == null) {
-                tclHashCaches.putIfAbsent(tclHash, new ConcurrentHashMap<>());
-                tclHashCache = tclHashCaches.get(tclHash);
-            }
-
-            tclHashCache.putIfAbsent(hashCode, objectReader);
-        }
-
-        hashCache.putIfAbsent(hashCode, objectReader);
+        hashCache.put(hashCode, objectReader);
     }
 
     public void addAutoTypeAccept(String name) {
@@ -450,7 +437,10 @@ public class ObjectReaderProvider
     }
 
     public ObjectReader registerIfAbsent(Type type, ObjectReader objectReader) {
-        return cache.putIfAbsent(type, objectReader);
+        if (cache.containsKey(type)) {
+            return cache.get(type);
+        }
+        return cache.put(type, objectReader);
     }
 
     public ObjectReader unregisterObjectReader(Type type) {
@@ -461,36 +451,10 @@ public class ObjectReaderProvider
         return cache.remove(type, reader);
     }
 
-    public boolean register(ObjectReaderModule module) {
-        for (int i = modules.size() - 1; i >= 0; i--) {
-            if (modules.get(i) == module) {
-                return false;
-            }
-        }
-
-        module.init(this);
-
-        modules.add(0, module);
-        return true;
-    }
-
-    public boolean unregister(ObjectReaderModule module) {
-        return modules.remove(module);
-    }
-
     public void cleanup(Class objectClass) {
         mixInCache.remove(objectClass);
         cache.remove(objectClass);
         cacheFieldBased.remove(objectClass);
-        for (ConcurrentHashMap<Long, ObjectReader> tlc : tclHashCaches.values()) {
-            for (Iterator<Map.Entry<Long, ObjectReader>> it = tlc.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry<Long, ObjectReader> entry = it.next();
-                ObjectReader reader = entry.getValue();
-                if (reader.getObjectClass() == objectClass) {
-                    it.remove();
-                }
-            }
-        }
         BeanUtils.cleanupCache(objectClass);
     }
 
@@ -507,7 +471,9 @@ public class ObjectReaderProvider
                 return true;
             }
 
-            for (Type argType : paramType.getActualTypeArguments()) {
+            Type[] actualTypeArguments = paramType.getActualTypeArguments();
+            for (int i = 0; i < actualTypeArguments.length; i++) {
+                Type argType = actualTypeArguments[i];
                 if (match(argType, objectReader, classLoader)) {
                     return true;
                 }
@@ -521,19 +487,10 @@ public class ObjectReaderProvider
                 return true;
             }
             Class keyClass = TypeUtils.getClass(mapTyped.keyType);
-            if (keyClass != null && keyClass.getClassLoader() == classLoader) {
-                return true;
-            }
+            return keyClass != null && keyClass.getClassLoader() == classLoader;
         } else if (objectReader instanceof ObjectReaderImplList) {
             ObjectReaderImplList list = (ObjectReaderImplList) objectReader;
-            if (list.itemClass != null && list.itemClass.getClassLoader() == classLoader) {
-                return true;
-            }
-        } else if (objectReader instanceof ObjectReaderImplOptional) {
-            Class itemClass = ((ObjectReaderImplOptional) objectReader).itemClass;
-            if (itemClass != null && itemClass.getClassLoader() == classLoader) {
-                return true;
-            }
+            return list.itemClass != null && list.itemClass.getClassLoader() == classLoader;
         } else if (objectReader instanceof ObjectReaderAdapter) {
             FieldReader[] fieldReaders = ((ObjectReaderAdapter<?>) objectReader).fieldReaders;
             for (FieldReader fieldReader : fieldReaders) {
@@ -574,60 +531,32 @@ public class ObjectReaderProvider
             }
         }
 
-        int tclHash = System.identityHashCode(classLoader);
-        tclHashCaches.remove(tclHash);
-
         BeanUtils.cleanupCache(classLoader);
     }
 
     public ObjectReaderCreator getCreator() {
-        ObjectReaderCreator contextCreator = JSONFactory.getContextReaderCreator();
-        if (contextCreator != null) {
-            return contextCreator;
-        }
         return this.creator;
     }
 
     public ObjectReaderProvider() {
-        ObjectReaderCreator creator = null;
-        switch (JSONFactory.CREATOR) {
-            case "reflect":
-            case "lambda":
-                creator = ObjectReaderCreator.INSTANCE;
-                break;
-            case "asm":
-            default:
-                try {
-                    if (!JDKUtils.ANDROID && !JDKUtils.GRAAL) {
-                        creator = ObjectReaderCreatorASM.INSTANCE;
-                    }
-                } catch (Throwable ignored) {
-                    // ignored
-                }
-                if (creator == null) {
-                    creator = ObjectReaderCreator.INSTANCE;
-                }
-                break;
-        }
-        this.creator = creator;
-
-        modules.add(new ObjectReaderBaseModule(this));
+        this.creator = ObjectReaderCreator.INSTANCE;
         init();
     }
 
     public ObjectReaderProvider(ObjectReaderCreator creator) {
         this.creator = creator;
-        modules.add(new ObjectReaderBaseModule(this));
         init();
     }
 
     void init() {
-        for (ObjectReaderModule module : modules) {
-            module.init(this);
-        }
     }
 
     public Function getTypeConvert(Type from, Type to) {
+        ConcurrentMap<Type, Map<Type, Function>> typeConverts = this.typeConverts;
+        if (typeConverts == null) {
+            typeConverts = this.typeConverts = buildInitTypeConverts();
+        }
+
         Map<Type, Function> map = typeConverts.get(from);
         if (map == null) {
             return null;
@@ -635,10 +564,163 @@ public class ObjectReaderProvider
         return map.get(to);
     }
 
-    public Function registerTypeConvert(Type from, Type to, Function typeConvert) {
+    protected static ConcurrentMap<Type, Map<Type, Function>> buildInitTypeConverts() {
+        ConcurrentMap<Type, Map<Type, Function>> typeConverts = new ConcurrentHashMap<>();
+
+        registerTypeConvert(typeConverts, Character.class, char.class, o -> o);
+
+        Class[] numberTypes = new Class[]{
+                Boolean.class,
+                Byte.class,
+                Short.class,
+                Integer.class,
+                Long.class,
+                Number.class,
+                Float.class,
+                Double.class,
+                BigInteger.class,
+                BigDecimal.class,
+                AtomicInteger.class,
+                AtomicLong.class,
+        };
+
+        Function<Object, Boolean> TO_BOOLEAN = new ToBoolean(null);
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, Boolean.class, TO_BOOLEAN);
+        }
+
+        Function<Object, Boolean> TO_BOOLEAN_VALUE = new ToBoolean(Boolean.FALSE);
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, boolean.class, TO_BOOLEAN_VALUE);
+        }
+
+        Function<Object, String> TO_STRING = new ToString();
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, String.class, TO_STRING);
+        }
+
+        Function<Object, BigDecimal> TO_DECIMAL = new ToBigDecimal();
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, BigDecimal.class, TO_DECIMAL);
+        }
+
+        Function<Object, BigInteger> TO_BIGINT = new ToBigInteger();
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, BigInteger.class, TO_BIGINT);
+        }
+
+        Function<Object, Byte> TO_BYTE = new ToByte(null);
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, Byte.class, TO_BYTE);
+        }
+
+        Function<Object, Byte> TO_BYTE_VALUE = new ToByte((byte) 0);
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, byte.class, TO_BYTE_VALUE);
+        }
+
+        Function<Object, Short> TO_SHORT = new ToShort(null);
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, Short.class, TO_SHORT);
+        }
+
+        Function<Object, Short> TO_SHORT_VALUE = new ToShort((short) 0);
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, short.class, TO_SHORT_VALUE);
+        }
+
+        Function<Object, Integer> TO_INTEGER = new ToInteger(null);
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, Integer.class, TO_INTEGER);
+        }
+
+        Function<Object, Integer> TO_INT = new ToInteger(0);
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, int.class, TO_INT);
+        }
+
+        Function<Object, Long> TO_LONG = new ToLong(null);
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, Long.class, TO_LONG);
+        }
+
+        Function<Object, Long> TO_LONG_VALUE = new ToLong(0L);
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, long.class, TO_LONG_VALUE);
+        }
+
+        Function<Object, Float> TO_FLOAT = new ToFloat(null);
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, Float.class, TO_FLOAT);
+        }
+
+        Function<Object, Float> TO_FLOAT_VALUE = new ToFloat(0F);
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, float.class, TO_FLOAT_VALUE);
+        }
+
+        Function<Object, Double> TO_DOUBLE = new ToDouble(null);
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, Double.class, TO_DOUBLE);
+        }
+
+        Function<Object, Double> TO_DOUBLE_VALUE = new ToDouble(0D);
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, double.class, TO_DOUBLE_VALUE);
+        }
+
+        Function<Object, Number> TO_NUMBER = new ToNumber(0D);
+        for (Class type : numberTypes) {
+            registerTypeConvert(typeConverts, type, Number.class, TO_NUMBER);
+        }
+
+        {
+            // String to Any
+            registerTypeConvert(typeConverts, String.class, char.class, new StringToAny(char.class, '0'));
+            registerTypeConvert(typeConverts, String.class, boolean.class, new StringToAny(boolean.class, false));
+            registerTypeConvert(typeConverts, String.class, float.class, new StringToAny(float.class, (float) 0));
+            registerTypeConvert(typeConverts, String.class, double.class, new StringToAny(double.class, (double) 0));
+            registerTypeConvert(typeConverts, String.class, byte.class, new StringToAny(byte.class, (byte) 0));
+            registerTypeConvert(typeConverts, String.class, short.class, new StringToAny(short.class, (short) 0));
+            registerTypeConvert(typeConverts, String.class, int.class, new StringToAny(int.class, 0));
+            registerTypeConvert(typeConverts, String.class, long.class, new StringToAny(long.class, 0L));
+
+            registerTypeConvert(typeConverts, String.class, Character.class, new StringToAny(Character.class, null));
+            registerTypeConvert(typeConverts, String.class, Boolean.class, new StringToAny(Boolean.class, null));
+            registerTypeConvert(typeConverts, String.class, Double.class, new StringToAny(Double.class, null));
+            registerTypeConvert(typeConverts, String.class, Float.class, new StringToAny(Float.class, null));
+            registerTypeConvert(typeConverts, String.class, Byte.class, new StringToAny(Byte.class, null));
+            registerTypeConvert(typeConverts, String.class, Short.class, new StringToAny(Short.class, null));
+            registerTypeConvert(typeConverts, String.class, Integer.class, new StringToAny(Integer.class, null));
+            registerTypeConvert(typeConverts, String.class, Long.class, new StringToAny(Long.class, null));
+            registerTypeConvert(typeConverts, String.class, BigDecimal.class, new StringToAny(BigDecimal.class, null));
+            registerTypeConvert(typeConverts, String.class, BigInteger.class, new StringToAny(BigInteger.class, null));
+            registerTypeConvert(typeConverts, String.class, Number.class, new StringToAny(BigDecimal.class, null));
+            registerTypeConvert(typeConverts, String.class, Collection.class, new StringToAny(Collection.class, null));
+            registerTypeConvert(typeConverts, String.class, List.class, new StringToAny(List.class, null));
+            registerTypeConvert(typeConverts, String.class, JSONArray.class, new StringToAny(JSONArray.class, null));
+        }
+
+        {
+            registerTypeConvert(typeConverts, Boolean.class, boolean.class, o -> o);
+        }
+        {
+            Function function = o -> o == null || "null".equals(o) || "".equals(o)
+                    ? null
+                    : UUID.fromString((String) o);
+            registerTypeConvert(typeConverts, String.class, UUID.class, function);
+        }
+        return typeConverts;
+    }
+
+    static Function registerTypeConvert(
+            ConcurrentMap<Type, Map<Type, Function>> typeConverts,
+            Type from, Type to,
+            Function typeConvert
+    ) {
         Map<Type, Function> map = typeConverts.get(from);
         if (map == null) {
-            typeConverts.putIfAbsent(from, new ConcurrentHashMap<>());
+            typeConverts.put(from, new ConcurrentHashMap<>());
             map = typeConverts.get(from);
         }
         return map.put(to, typeConvert);
@@ -657,19 +739,7 @@ public class ObjectReaderProvider
         }
 
         Long hashCodeObj = new Long(hashCode);
-        ObjectReader objectReader = null;
-        ClassLoader tcl = Thread.currentThread().getContextClassLoader();
-        if (tcl != null && tcl != FASTJSON2_CLASS_LOADER) {
-            int tclHash = System.identityHashCode(tcl);
-            ConcurrentHashMap<Long, ObjectReader> tclHashCache = tclHashCaches.get(tclHash);
-            if (tclHashCache != null) {
-                objectReader = tclHashCache.get(hashCodeObj);
-            }
-        }
-
-        if (objectReader == null) {
-            objectReader = hashCache.get(hashCodeObj);
-        }
+        ObjectReader objectReader = hashCache.get(hashCodeObj);
 
         if (objectReader != null && readerCache == null) {
             readerCache = new ObjectReaderCachePair(hashCode, objectReader);
@@ -698,7 +768,7 @@ public class ObjectReaderProvider
         }
 
         synchronized (autoTypeList) {
-            autoTypeList.putIfAbsent(typeName, new Date());
+            autoTypeList.put(typeName, new Date());
         }
     }
 
@@ -835,26 +905,12 @@ public class ObjectReaderProvider
         return clazz;
     }
 
-    public List<ObjectReaderModule> getModules() {
-        return modules;
-    }
-
     public void getBeanInfo(BeanInfo beanInfo, Class objectClass) {
-        for (ObjectReaderModule module : modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor != null) {
-                annotationProcessor.getBeanInfo(beanInfo, objectClass);
-            }
-        }
+        module.getBeanInfo(beanInfo, objectClass);
     }
 
     public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Field field) {
-        for (ObjectReaderModule module : modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor != null) {
-                annotationProcessor.getFieldInfo(fieldInfo, objectClass, field);
-            }
-        }
+        module.getFieldInfo(fieldInfo, objectClass, field);
     }
 
     public void getFieldInfo(
@@ -862,46 +918,21 @@ public class ObjectReaderProvider
             Class objectClass,
             Constructor constructor,
             int paramIndex,
-            Parameter parameter
+            Annotation[][] parameterAnnotations
     ) {
-        for (ObjectReaderModule module : modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor != null) {
-                annotationProcessor.getFieldInfo(fieldInfo, objectClass, constructor, paramIndex, parameter);
-            }
-        }
+        module.getFieldInfo(fieldInfo, objectClass, constructor, paramIndex, parameterAnnotations);
     }
 
     public void getFieldInfo(
             FieldInfo fieldInfo,
             Class objectClass,
             Method method,
-            int paramIndex,
-            Parameter parameter) {
-        for (ObjectReaderModule module : modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor != null) {
-                annotationProcessor.getFieldInfo(fieldInfo, objectClass, method, paramIndex, parameter);
-            }
-        }
+            int paramIndex) {
+        module.getFieldInfo(fieldInfo, objectClass, method, paramIndex);
     }
 
     public ObjectReader getObjectReader(Type objectType) {
         return getObjectReader(objectType, false);
-    }
-
-    public Function<Consumer, ByteArrayValueConsumer> createValueConsumerCreator(
-            Class objectClass,
-            FieldReader[] fieldReaderArray
-    ) {
-        return creator.createByteArrayValueConsumerCreator(objectClass, fieldReaderArray);
-    }
-
-    public Function<Consumer, CharArrayValueConsumer> createCharArrayValueConsumerCreator(
-            Class objectClass,
-            FieldReader[] fieldReaderArray
-    ) {
-        return creator.createCharArrayValueConsumerCreator(objectClass, fieldReaderArray);
     }
 
     public ObjectReader getObjectReader(Type objectType, boolean fieldBased) {
@@ -917,18 +948,16 @@ public class ObjectReaderProvider
             return objectReader;
         }
 
-        for (ObjectReaderModule module : modules) {
-            objectReader = module.getObjectReader(this, objectType);
-            if (objectReader != null) {
-                ObjectReader previous = fieldBased
-                        ? cacheFieldBased.putIfAbsent(objectType, objectReader)
-                        : cache.putIfAbsent(objectType, objectReader);
+        objectReader = module.getObjectReader(this, objectType);
+        if (objectReader != null) {
+            ObjectReader previous = fieldBased
+                    ? cacheFieldBased.put(objectType, objectReader)
+                    : cache.put(objectType, objectReader);
 
-                if (previous != null) {
-                    objectReader = previous;
-                }
-                return objectReader;
+            if (previous != null) {
+                objectReader = previous;
             }
+            return objectReader;
         }
 
         if (objectType instanceof TypeVariable) {
@@ -976,15 +1005,18 @@ public class ObjectReaderProvider
         }
 
         Class<?> objectClass = TypeUtils.getMapping(objectType);
+        if (objectClass.isAnnotationPresent(JSONCompiled.class)) {
+            String codeGenClassName = objectClass.getName() + "_FASTJOSNReader";
+            ClassLoader classLoader = objectClass.getClassLoader();
 
-        String className = objectClass.getName();
-        if (objectReader == null && !fieldBased) {
-            switch (className) {
-                case "com.google.common.collect.ArrayListMultimap":
-                    objectReader = ObjectReaderImplMap.of(null, objectClass, 0);
-                    break;
-                default:
-                    break;
+            try {
+                Class<?> loadedClass = classLoader.loadClass(codeGenClassName);
+                if (ObjectReader.class.isAssignableFrom(loadedClass)) {
+                    objectReader = (ObjectReader) loadedClass.newInstance();
+                }
+            } catch (Exception ignored) {
+                ignored.printStackTrace();
+                // ignored
             }
         }
 
@@ -1003,8 +1035,8 @@ public class ObjectReaderProvider
 
     private ObjectReader getPreviousObjectReader(boolean fieldBased, Type objectType, ObjectReader boundObjectReader) {
         return fieldBased
-                ? cacheFieldBased.putIfAbsent(objectType, boundObjectReader)
-                : cache.putIfAbsent(objectType, boundObjectReader);
+                ? cacheFieldBased.put(objectType, boundObjectReader)
+                : cache.put(objectType, boundObjectReader);
     }
 
     public AutoTypeBeforeHandler getAutoTypeBeforeHandler() {
@@ -1032,44 +1064,6 @@ public class ObjectReaderProvider
         protected boolean removeEldestEntry(Map.Entry<String, Date> eldest) {
             return this.size() > this.maxSize;
         }
-    }
-
-    public void getFieldInfo(FieldInfo fieldInfo, Class objectClass, Method method) {
-        for (ObjectReaderModule module : modules) {
-            ObjectReaderAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
-            if (annotationProcessor == null) {
-                continue;
-            }
-            annotationProcessor.getFieldInfo(fieldInfo, objectClass, method);
-        }
-
-        if (fieldInfo.fieldName == null && fieldInfo.alternateNames == null) {
-            String methodName = method.getName();
-            if (methodName.startsWith("set")) {
-                String findName = methodName.substring(3);
-                Field field = BeanUtils.getDeclaredField(objectClass, findName);
-                if (field != null) {
-                    fieldInfo.alternateNames = new String[]{findName};
-                }
-            }
-        }
-    }
-
-    public <T> Supplier<T> createObjectCreator(Class<T> objectClass, long readerFeatures) {
-        boolean fieldBased = (readerFeatures & JSONReader.Feature.FieldBased.mask) != 0;
-        ObjectReader objectReader = fieldBased
-                ? cacheFieldBased.get(objectClass)
-                : cache.get(objectClass);
-        if (objectReader != null) {
-            return () -> (T) objectReader.createInstance(0);
-        }
-
-        Constructor constructor = BeanUtils.getDefaultConstructor(objectClass, false);
-        if (constructor == null) {
-            throw new JSONException("default constructor not found : " + objectClass.getName());
-        }
-
-        return LambdaMiscCodec.createSupplier(constructor);
     }
 
     public FieldReader createFieldReader(Class objectClass, String fieldName, long readerFeatures) {

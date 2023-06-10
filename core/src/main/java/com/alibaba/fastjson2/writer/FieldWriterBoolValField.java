@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.util.UnsafeUtils;
+import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.lang.reflect.Field;
 
@@ -32,7 +32,7 @@ final class FieldWriterBoolValField
         try {
             boolean value;
             if (fieldOffset != -1) {
-                value = UnsafeUtils.getBoolean(object, fieldOffset);
+                value = JDKUtils.UNSAFE.getBoolean(object, fieldOffset);
             } else {
                 value = field.getBoolean(object);
             }

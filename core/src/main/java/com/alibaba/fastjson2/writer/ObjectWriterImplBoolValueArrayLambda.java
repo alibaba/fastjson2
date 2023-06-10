@@ -1,10 +1,10 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.function.BiFunction;
+import com.alibaba.fastjson2.function.ToIntFunction;
 
 import java.lang.reflect.Type;
-import java.util.function.BiFunction;
-import java.util.function.ToIntFunction;
 
 import static com.alibaba.fastjson2.writer.ObjectWriterImplBoolValueArray.JSONB_TYPE_HASH;
 import static com.alibaba.fastjson2.writer.ObjectWriterImplBoolValueArray.JSONB_TYPE_NAME_BYTES;

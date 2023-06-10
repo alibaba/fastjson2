@@ -6,10 +6,6 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -124,9 +120,8 @@ public class JSONWriterUTF8Test {
 
     @Test
     public void writeLocalDate() {
-        LocalDate localDate = LocalDate.of(2018, 6, 23);
         JSONWriterUTF8 jsonWriter = new JSONWriterUTF8(JSONFactory.createWriteContext());
-        jsonWriter.writeLocalDate(localDate);
+        jsonWriter.writeDateYYYMMDD10(2018, 6, 23);
         assertEquals("\"2018-06-23\"", jsonWriter.toString());
     }
 
@@ -552,58 +547,6 @@ public class JSONWriterUTF8Test {
     }
 
     @Test
-    public void test_writeLocalDateTime() {
-        Bean2 bean = new Bean2();
-        bean.dateTime = LocalDateTime.now();
-        byte[] bytes = JSON.toJSONBytes(bean);
-        byte[] bytes2 = JSON.toJSONBytes(bean, PrettyFormat);
-        Bean2 bean1 = JSON.parseObject(bytes, Bean2.class);
-        Bean2 bean2 = JSON.parseObject(bytes2, Bean2.class);
-        assertEquals(bean.dateTime, bean1.dateTime);
-        assertEquals(bean.dateTime, bean2.dateTime);
-    }
-
-    public static class Bean2 {
-        public LocalDateTime dateTime;
-    }
-
-    @Test
-    public void test_writeZonedDateTime() {
-        Bean3 bean = new Bean3();
-        bean.dateTime = ZonedDateTime.now();
-        byte[] bytes = JSON.toJSONBytes(bean);
-        byte[] bytes2 = JSON.toJSONBytes(bean, PrettyFormat);
-        Bean3 bean1 = JSON.parseObject(bytes, Bean3.class);
-        Bean3 bean2 = JSON.parseObject(bytes2, Bean3.class);
-        assertEquals(bean.dateTime, bean1.dateTime);
-        assertEquals(bean.dateTime, bean2.dateTime);
-
-        Bean3 bean3 = JSONB.parseObject(JSON.parseObject(bytes).toJSONBBytes(), Bean3.class);
-        assertEquals(bean.dateTime, bean3.dateTime);
-    }
-
-    public static class Bean3 {
-        public ZonedDateTime dateTime;
-    }
-
-    @Test
-    public void test_writeLocalTime() {
-        Bean4 bean = new Bean4();
-        bean.time = LocalTime.of(18, 38, 1, 423000000);
-        byte[] bytes = JSON.toJSONBytes(bean);
-        byte[] bytes2 = JSON.toJSONBytes(bean, PrettyFormat);
-        assertEquals("{\"time\":\"18:38:01.423\"}", new String(bytes));
-        Bean4 bean1 = JSON.parseObject(bytes, Bean4.class);
-        Bean4 bean2 = JSON.parseObject(bytes2, Bean4.class);
-        assertEquals(bean.time, bean1.time);
-        assertEquals(bean.time, bean2.time);
-    }
-
-    public static class Bean4 {
-        public LocalTime time;
-    }
-
-    @Test
     public void writeChars() {
         char[] chars = new char[256];
         for (int i = 0; i < chars.length; i++) {
@@ -638,8 +581,8 @@ public class JSONWriterUTF8Test {
     @Test
     public void writeCharsNull1() {
         JSONWriter jsonWriter = new JSONWriterUTF8(
-                        JSONFactory.createWriteContext(NullAsDefaultValue, PrettyFormat)
-                );
+                JSONFactory.createWriteContext(NullAsDefaultValue, PrettyFormat)
+        );
         jsonWriter.writeString((char[]) null);
         assertEquals("\"\"", jsonWriter.toString());
     }

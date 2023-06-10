@@ -2,7 +2,6 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -18,10 +17,9 @@ final class FieldReaderCollectionFieldReadOnly<T>
             int ordinal,
             long features,
             String format,
-            JSONSchema schema,
             Field field
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, schema, field);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, field);
     }
 
     @Override
@@ -44,8 +42,7 @@ final class FieldReaderCollectionFieldReadOnly<T>
         String name = collection.getClass().getName();
         if ("java.util.Collections$UnmodifiableRandomAccessList".equals(name)
                 || "java.util.Arrays$ArrayList".equals(name)
-                || "java.util.Collections$SingletonList".equals(name)
-                || name.startsWith("java.util.ImmutableCollections$")) {
+                || "java.util.Collections$SingletonList".equals(name)) {
             return;
         }
 
@@ -60,8 +57,7 @@ final class FieldReaderCollectionFieldReadOnly<T>
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         if (initReader == null) {
-            initReader = jsonReader
-                    .getContext()
+            initReader = jsonReader.context
                     .getObjectReader(fieldType);
         }
         Object value = initReader.readObject(jsonReader, fieldType, fieldName, 0);

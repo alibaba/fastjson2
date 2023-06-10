@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -9,7 +10,6 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
-import java.util.function.Function;
 
 final class ObjectArrayTypedReader
         extends ObjectReaderPrimitive {
@@ -32,7 +32,7 @@ final class ObjectArrayTypedReader
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
@@ -40,11 +40,11 @@ final class ObjectArrayTypedReader
             return null;
         }
 
-        if (jsonReader.nextIfMatch('[')) {
+        if (jsonReader.nextIfArrayStart()) {
             Object[] values = (Object[]) Array.newInstance(componentType, 16);
             int size = 0;
             for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
+                if (jsonReader.nextIfArrayEnd()) {
                     break;
                 }
 
@@ -62,9 +62,9 @@ final class ObjectArrayTypedReader
                 Object value = jsonReader.read(componentType);
                 values[size++] = value;
 
-                jsonReader.nextIfMatch(',');
+                jsonReader.nextIfComma();
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             return Arrays.copyOf(values, size);
         }
@@ -139,7 +139,7 @@ final class ObjectArrayTypedReader
             if (item != null) {
                 Class<?> valueClass = item.getClass();
                 if (valueClass != componentType) {
-                    ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+                    ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
                     Function typeConvert = provider.getTypeConvert(valueClass, componentType);
                     if (typeConvert != null) {
                         item = typeConvert.apply(item);
@@ -147,10 +147,8 @@ final class ObjectArrayTypedReader
                 }
             }
 
-            if (componentType.isInstance(item)) {
-                values[index++] = item;
-            } else {
-                ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(componentType);
+            if (!componentType.isInstance(item)) {
+                ObjectReader objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(componentType);
                 if (item instanceof Map) {
                     item = objectReader.createInstance((Map) item);
                 } else if (item instanceof Collection) {
@@ -170,8 +168,8 @@ final class ObjectArrayTypedReader
                         throw new JSONException("component type not match, expect " + componentType.getName() + ", but " + itemClass);
                     }
                 }
-                values[index++] = item;
             }
+            values[index++] = item;
         }
         return values;
     }

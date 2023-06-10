@@ -1,21 +1,20 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.function.Function;
+import com.alibaba.fastjson2.function.Supplier;
 import com.alibaba.fastjson2.util.ReferenceKey;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
+import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_ARRAY_1x;
+import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
 class ObjectReaderImplMapTyped
         implements ObjectReader {
@@ -48,7 +47,7 @@ class ObjectReaderImplMapTyped
         Constructor defaultConstructor = null;
         Constructor[] constructors = this.instanceType.getDeclaredConstructors();
         for (Constructor constructor : constructors) {
-            if (constructor.getParameterCount() == 0
+            if (constructor.getParameterTypes().length == 0
                     && !Modifier.isPublic(constructor.getModifiers())) {
                 constructor.setAccessible(true);
                 defaultConstructor = constructor;
@@ -65,9 +64,15 @@ class ObjectReaderImplMapTyped
 
     @Override
     public Object createInstance(Map input, long features) {
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
 
-        Map object = (Map<String, Object>) createInstance();
+        Map object;
+        if (instanceType == Map.class || instanceType == HashMap.class) {
+            object = new HashMap();
+        } else {
+            object = (Map<String, Object>) createInstance(features);
+        }
+
         for (Iterator<Map.Entry> it = input.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = it.next();
             Object key = entry.getKey();
@@ -79,11 +84,33 @@ class ObjectReaderImplMapTyped
                 fieldName = TypeUtils.cast(key, keyType);
             }
 
+            Function typeConvert;
             Object value = fieldValue;
             if (value != null) {
                 Class<?> valueClass = value.getClass();
-                Function typeConvert = provider.getTypeConvert(valueClass, valueType);
-                if (typeConvert != null) {
+                if (valueType == Object.class) {
+                    // do nothing
+                } else if (valueClass == JSONObject.class || valueClass == CLASS_JSON_OBJECT_1x) {
+                    if (valueObjectReader == null) {
+                        valueObjectReader = provider.getObjectReader(valueType);
+                    }
+                    try {
+                        value = valueObjectReader.createInstance((JSONObject) value, features);
+                    } catch (Exception ignored) {
+                        // ignored
+                    }
+                } else if ((valueClass == JSONArray.class || valueClass == CLASS_JSON_ARRAY_1x)
+                        && this.valueClass == List.class
+                ) {
+                    if (valueObjectReader == null) {
+                        valueObjectReader = provider.getObjectReader(valueType);
+                    }
+                    try {
+                        value = valueObjectReader.createInstance((JSONArray) value);
+                    } catch (Exception ignored) {
+                        // ignored
+                    }
+                } else if ((typeConvert = provider.getTypeConvert(valueClass, valueType)) != null) {
                     value = typeConvert.apply(value);
                 } else if (value instanceof Map) {
                     Map map = (Map) value;
@@ -156,7 +183,7 @@ class ObjectReaderImplMapTyped
             jsonReader.next();
         }
 
-        JSONReader.Context context = jsonReader.getContext();
+        JSONReader.Context context = jsonReader.context;
         long contextFeatures = features | context.getFeatures();
 
         Map object;
@@ -201,7 +228,7 @@ class ObjectReaderImplMapTyped
                 if ("..".equals(reference)) {
                     object.put(name, object);
                 } else {
-                    jsonReader.addResolveTask((Map) object, name, JSONPath.of(reference));
+                    jsonReader.addResolveTask(object, name, JSONPath.of(reference));
                     if (!(object instanceof ConcurrentMap)) {
                         object.put(name, null);
                     }
@@ -241,7 +268,7 @@ class ObjectReaderImplMapTyped
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         int index = 0;
-        if (!jsonReader.nextIfMatch('{')) {
+        if (!jsonReader.nextIfObjectStart()) {
             if (jsonReader.isTypeRedirect()) {
                 index = 1;
                 jsonReader.setTypeRedirect(false);
@@ -253,7 +280,7 @@ class ObjectReaderImplMapTyped
             }
         }
 
-        JSONReader.Context context = jsonReader.getContext();
+        JSONReader.Context context = jsonReader.context;
         long contextFeatures = context.getFeatures() | features;
         Map object, innerMap = null;
         if (instanceType == HashMap.class) {
@@ -270,7 +297,7 @@ class ObjectReaderImplMapTyped
 
         Object name;
         for (; ; index++) {
-            if (jsonReader.nextIfMatch('}') || jsonReader.isEnd()) {
+            if (jsonReader.nextIfObjectEnd() || jsonReader.isEnd()) {
                 break;
             }
 
@@ -362,7 +389,7 @@ class ObjectReaderImplMapTyped
             }
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         if (builder != null) {
             return builder.apply(object);

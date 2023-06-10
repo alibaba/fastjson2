@@ -23,13 +23,6 @@ class JSONBuilderCombinationTest {
         assertNotNull(jsonType);
     }
 
-    @Test
-    void testCombinationGet() {
-        Class<CombinationJSONBuilderPojo> clazz = CombinationJSONBuilderPojo.class;
-        JSONBuilder jsonType = BeanUtils.findAnnotation(clazz, JSONBuilder.class);
-        assertNotNull(jsonType);
-    }
-
     @JSONBuilder
     public static class DirectlyJSONBuilderPojo {
     }

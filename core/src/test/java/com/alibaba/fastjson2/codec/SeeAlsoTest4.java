@@ -49,7 +49,7 @@ public class SeeAlsoTest4 {
 
     @Test
     public void test_seeAlso1() throws Exception {
-        ObjectReader<Animal> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Animal.class);
+        ObjectReader<Animal> objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Animal.class);
         {
             Animal animal = objectReader.readObject(JSONReader.of("{\"type\":\"Cat\",\"catId\":1001}"), 0);
             assertEquals(Cat.class, animal.getClass());

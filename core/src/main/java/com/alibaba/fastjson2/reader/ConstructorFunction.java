@@ -1,30 +1,31 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.internal.asm.ASMUtils;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.function.BiFunction;
+import com.alibaba.fastjson2.function.Function;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class ConstructorFunction<T>
         implements Function<Map<Long, Object>, T> {
     final Constructor constructor;
+    final int parameterCount;
     final Function function;
     final BiFunction biFunction;
 
-    final Parameter[] parameters;
-    final String[] paramNames;
+    final Class[] parameterTypes;
     final boolean kotlinMaker;
     final long[] hashCodes;
-    final List<Constructor> alternateConstructors;
     Map<Set<Long>, Constructor> alternateConstructorMap;
     Map<Set<Long>, String[]> alternateConstructorNames;
     Map<Set<Long>, long[]> alternateConstructorNameHashCodes;
@@ -42,38 +43,52 @@ final class ConstructorFunction<T>
         this.function = function;
         this.biFunction = biFunction;
         this.constructor = kotlinMaker ? markerConstructor : constructor;
-        this.parameters = constructor.getParameters();
-        this.paramNames = paramNames;
-        this.hashCodes = new long[parameters.length];
-        for (int i = 0; i < parameters.length; i++) {
-            String name;
+        this.parameterCount = this.constructor.getParameterTypes().length;
+        this.parameterTypes = constructor.getParameterTypes();
+        this.hashCodes = new long[parameterTypes.length];
+        for (int i = 0; i < parameterTypes.length; i++) {
+            String name = null;
             if (i < paramNames.length) {
                 name = paramNames[i];
-            } else {
-                name = parameters[i].getName();
             }
+
             if (name == null) {
                 name = "arg" + i;
             }
             hashCodes[i] = Fnv.hashCode64(name);
         }
 
-        this.alternateConstructors = alternateConstructors;
         if (alternateConstructors != null) {
             alternateConstructorMap = new HashMap<>(alternateConstructors.size());
             alternateConstructorNames = new HashMap<>(alternateConstructors.size());
             alternateConstructorArgTypes = new HashMap<>(alternateConstructors.size());
             alternateConstructorNameHashCodes = new HashMap<>(alternateConstructors.size());
-            for (Constructor alternateConstructor : alternateConstructors) {
+            for (int i = 0; i < alternateConstructors.size(); i++) {
+                Constructor alternateConstructor = alternateConstructors.get(i);
                 alternateConstructor.setAccessible(true);
 
-                String[] parameterNames = ASMUtils.lookupParameterNames(alternateConstructor);
+                String[] parameterNames = BeanUtils.lookupParameterNames(alternateConstructor);
+
+                Class[] parameters = alternateConstructor.getParameterTypes();
+                FieldInfo fieldInfo = new FieldInfo();
+                ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
+                Annotation[][] parameterAnnotations = alternateConstructor.getParameterAnnotations();
+                for (int j = 0; i < parameters.length && j < parameterNames.length; j++) {
+                    fieldInfo.init();
+
+                    provider.getFieldInfo(fieldInfo, alternateConstructor.getDeclaringClass(), alternateConstructor, j, parameterAnnotations);
+                    if (fieldInfo.fieldName != null) {
+                        parameterNames[j] = fieldInfo.fieldName;
+                    }
+                }
+
                 long[] parameterNameHashCodes = new long[parameterNames.length];
                 Type[] parameterTypes = alternateConstructor.getGenericParameterTypes();
                 Set<Long> paramHashCodes = new HashSet<>(parameterNames.length);
-                for (int i = 0; i < parameterNames.length; i++) {
-                    long hashCode64 = Fnv.hashCode64(parameterNames[i]);
-                    parameterNameHashCodes[i] = hashCode64;
+                for (int j = 0; j < parameterNames.length; j++) {
+                    String paramName = parameterNames[j];
+                    long hashCode64 = paramName == null ? 0 : Fnv.hashCode64(paramName);
+                    parameterNameHashCodes[j] = hashCode64;
                     paramHashCodes.add(hashCode64);
                 }
                 alternateConstructorMap.put(paramHashCodes, alternateConstructor);
@@ -87,8 +102,8 @@ final class ConstructorFunction<T>
     @Override
     public T apply(Map<Long, Object> values) {
         boolean containsAll = true;
-        for (long hashCode : hashCodes) {
-            if (!values.containsKey(hashCode)) {
+        for (int i = 0; i < hashCodes.length; i++) {
+            if (!values.containsKey(hashCodes[i])) {
                 containsAll = false;
                 break;
             }
@@ -119,10 +134,9 @@ final class ConstructorFunction<T>
             }
         }
 
-        if (function != null && parameters.length == 1) {
-            Parameter param = parameters[0];
+        if (function != null && parameterTypes.length == 1) {
             Object arg = values.get(hashCodes[0]);
-            Class<?> paramType = param.getType();
+            Class<?> paramType = (Class<?>) parameterTypes[0];
             if (arg == null) {
                 arg = TypeUtils.getDefaultValue(paramType);
             } else {
@@ -133,10 +147,9 @@ final class ConstructorFunction<T>
             return (T) function.apply(arg);
         }
 
-        if (biFunction != null && parameters.length == 2) {
+        if (biFunction != null && parameterTypes.length == 2) {
             Object arg0 = values.get(hashCodes[0]);
-            Parameter param0 = parameters[0];
-            Class<?> param0Type = param0.getType();
+            Class<?> param0Type = parameterTypes[0];
             if (arg0 == null) {
                 arg0 = TypeUtils.getDefaultValue(param0Type);
             } else {
@@ -146,8 +159,7 @@ final class ConstructorFunction<T>
             }
 
             Object arg1 = values.get(hashCodes[1]);
-            Parameter param1 = parameters[1];
-            Class<?> param1Type = param1.getType();
+            Class<?> param1Type = parameterTypes[1];
             if (arg1 == null) {
                 arg1 = TypeUtils.getDefaultValue(param1Type);
             } else {
@@ -159,8 +171,8 @@ final class ConstructorFunction<T>
             return (T) biFunction.apply(arg0, arg1);
         }
 
-        final int size = parameters.length;
-        Object[] args = new Object[constructor.getParameterCount()];
+        final int size = parameterTypes.length;
+        Object[] args = new Object[parameterCount];
 
         if (kotlinMaker) {
             int i = 0, flag = 0;
@@ -170,7 +182,7 @@ final class ConstructorFunction<T>
                     args[i] = arg;
                 } else {
                     flag |= (1 << i);
-                    Class<?> paramType = parameters[i].getType();
+                    Class<?> paramType = parameterTypes[i];
                     if (paramType.isPrimitive()) {
                         args[i] = TypeUtils.getDefaultValue(paramType);
                     }
@@ -183,7 +195,7 @@ final class ConstructorFunction<T>
             }
         } else {
             for (int i = 0; i < size; i++) {
-                Class<?> paramType = parameters[i].getType();
+                Class<?> paramType = parameterTypes[i];
                 Object arg = values.get(hashCodes[i]);
                 if (arg == null) {
                     arg = TypeUtils.getDefaultValue(paramType);

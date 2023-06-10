@@ -4,16 +4,16 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.util.IOUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collection;
-import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
 class ObjectReaderImplInt8Array
@@ -34,11 +34,11 @@ class ObjectReaderImplInt8Array
             return null;
         }
 
-        if (jsonReader.nextIfMatch('[')) {
+        if (jsonReader.nextIfArrayStart()) {
             Byte[] values = new Byte[16];
             int size = 0;
             for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
+                if (jsonReader.nextIfArrayEnd()) {
                     break;
                 }
 
@@ -60,7 +60,7 @@ class ObjectReaderImplInt8Array
                 Integer i = jsonReader.readInt32();
                 values[size++] = i == null ? null : i.byteValue();
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             return Arrays.copyOf(values, size);
         }
@@ -80,13 +80,13 @@ class ObjectReaderImplInt8Array
             }
 
             if ("base64".equals(format)) {
-                return Base64.getDecoder().decode(strVal);
+                return IOUtils.decodeBase64(strVal);
             }
 
             if ("gzip,base64".equals(format) || "gzip".equals(format)) {
-                byte[] bytes = Base64.getDecoder().decode(strVal);
+                byte[] bytes = IOUtils.decodeBase64(strVal);
 
-                GZIPInputStream gzipIn = null;
+                GZIPInputStream gzipIn;
                 try {
                     gzipIn = new GZIPInputStream(new ByteArrayInputStream(bytes));
 
@@ -147,7 +147,7 @@ class ObjectReaderImplInt8Array
             } else if (item instanceof Number) {
                 value = ((Number) item).byteValue();
             } else {
-                Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), Byte.class);
+                Function typeConvert = JSONFactory.defaultObjectReaderProvider.getTypeConvert(item.getClass(), Byte.class);
                 if (typeConvert == null) {
                     throw new JSONException("can not cast to Byte " + item.getClass());
                 }

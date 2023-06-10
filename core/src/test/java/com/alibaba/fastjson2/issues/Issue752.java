@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.issues;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -30,7 +31,7 @@ public class Issue752 {
     public static class Bean {
         private Class<?>[] param;
 
-        public Bean(Class<?>[] param) {
+        public Bean(@JSONField(name = "param") Class<?>[] param) {
             this.param = param;
         }
 

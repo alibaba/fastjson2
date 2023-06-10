@@ -1,9 +1,11 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.function.BiConsumer;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -11,8 +13,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 public class FieldReaderList<T, V>
         extends FieldReaderObject<T> {
@@ -30,12 +30,11 @@ public class FieldReaderList<T, V>
             String format,
             Locale locale,
             Object defaultValue,
-            JSONSchema schema,
             Method method,
             Field field,
             BiConsumer function
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, field, function);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, method, field, function);
         this.itemType = itemType;
         this.itemClass = itemClass;
         this.itemClassHash = this.itemClass == null ? 0 : Fnv.hashCode64(itemClass.getName());
@@ -63,7 +62,7 @@ public class FieldReaderList<T, V>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             readFieldValueJSONB(jsonReader, object);
             return;
         }
@@ -73,7 +72,7 @@ public class FieldReaderList<T, V>
             return;
         }
 
-        JSONReader.Context context = jsonReader.getContext();
+        JSONReader.Context context = jsonReader.context;
         ObjectReader objectReader = getObjectReader(context);
 
         Function builder = null;
@@ -88,13 +87,12 @@ public class FieldReaderList<T, V>
 
         char current = jsonReader.current();
         if (current == '[') {
-            JSONReader.Context ctx = context;
-            ObjectReader itemObjectReader = getItemObjectReader(ctx);
+            ObjectReader itemObjectReader = getItemObjectReader(context);
 
-            Collection list = createList(ctx);
+            Collection list = createList(context);
             jsonReader.next();
             for (int i = 0; ; ++i) {
-                if (jsonReader.nextIfMatch(']')) {
+                if (jsonReader.nextIfArrayEnd()) {
                     break;
                 }
 
@@ -113,21 +111,17 @@ public class FieldReaderList<T, V>
 
                 list.add(item);
 
-                if (jsonReader.nextIfMatch(',')) {
-                    continue;
-                }
+                jsonReader.nextIfComma();
             }
             if (builder != null) {
                 list = (Collection) builder.apply(list);
             }
             accept(object, list);
 
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return;
         } else if (current == '{' && getItemObjectReader(context) instanceof ObjectReaderBean) {
-            Object itemValue = jsonReader.isJSONB()
-                    ? itemReader.readJSONBObject(jsonReader, null, null, features)
-                    : itemReader.readObject(jsonReader, null, null, features);
+            Object itemValue = itemReader.readObject(jsonReader, null, null, features);
             Collection list = (Collection) objectReader.createInstance(features);
             list.add(itemValue);
             if (builder != null) {
@@ -135,25 +129,23 @@ public class FieldReaderList<T, V>
             }
             accept(object, list);
 
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return;
         }
 
-        Object value = jsonReader.isJSONB()
-                ? objectReader.readJSONBObject(jsonReader, null, null, features)
-                : objectReader.readObject(jsonReader, null, null, features);
+        Object value = objectReader.readObject(jsonReader, null, null, features);
         accept(object, value);
     }
 
     @Override
     public Object readFieldValue(JSONReader jsonReader) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             int entryCnt = jsonReader.startArray();
 
             Object[] array = new Object[entryCnt];
             ObjectReader itemObjectReader
                     = getItemObjectReader(
-                    jsonReader.getContext());
+                    jsonReader.context);
             for (int i = 0; i < entryCnt; ++i) {
                 array[i] = itemObjectReader.readObject(jsonReader, null, null, 0);
             }
@@ -161,13 +153,13 @@ public class FieldReaderList<T, V>
         }
 
         if (jsonReader.current() == '[') {
-            JSONReader.Context ctx = jsonReader.getContext();
+            JSONReader.Context ctx = jsonReader.context;
             ObjectReader itemObjectReader = getItemObjectReader(ctx);
 
             Collection list = createList(ctx);
             jsonReader.next();
             for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
+                if (jsonReader.nextIfArrayEnd()) {
                     break;
                 }
 
@@ -175,12 +167,10 @@ public class FieldReaderList<T, V>
                         itemObjectReader.readObject(jsonReader, null, null, 0)
                 );
 
-                if (jsonReader.nextIfMatch(',')) {
-                    continue;
-                }
+                jsonReader.nextIfComma();
             }
 
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             return list;
         }
@@ -190,9 +180,9 @@ public class FieldReaderList<T, V>
             if (itemType instanceof Class
                     && Number.class.isAssignableFrom((Class<?>) itemType)
             ) {
-                Function typeConvert = jsonReader.getContext().getProvider().getTypeConvert(String.class, itemType);
+                Function typeConvert = jsonReader.context.provider.getTypeConvert(String.class, itemType);
                 if (typeConvert != null) {
-                    Collection list = createList(jsonReader.getContext());
+                    Collection list = createList(jsonReader.context);
 
                     if (str.indexOf(',') != -1) {
                         String[] items = str.split(",");
@@ -216,7 +206,7 @@ public class FieldReaderList<T, V>
         if (jsonReader.nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
             long typeHash = jsonReader.readTypeHashCode();
             final long features = jsonReader.features(this.features);
-            JSONReader.Context context = jsonReader.getContext();
+            JSONReader.Context context = jsonReader.context;
             JSONReader.AutoTypeBeforeHandler autoTypeFilter = context.getContextAutoTypeBeforeHandler();
             if (autoTypeFilter != null) {
                 Class<?> filterClass = autoTypeFilter.apply(typeHash, fieldClass, features);
@@ -249,5 +239,9 @@ public class FieldReaderList<T, V>
             return autoTypeObjectReader;
         }
         return null;
+    }
+
+    public void accept(T object, JSONArray value) {
+        accept(object, (Object) value);
     }
 }

@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.codec;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONFactory;
-import com.alibaba.fastjson2.TestUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
@@ -29,22 +27,15 @@ public class TestExternal {
     @Test
     public void test_1() throws Exception {
         ExtClassLoader classLoader = new ExtClassLoader();
-        try {
-            JSONFactory.setContextReaderCreator(TestUtils.readerCreator(classLoader));
-            JSONFactory.setContextWriterCreator(TestUtils.writerCreator(classLoader));
 
-            Class<?> clazz = classLoader.loadClass("external.VO");
-            Method method = clazz.getMethod("setName", new Class[]{String.class});
-            Object obj = clazz.newInstance();
-            method.invoke(obj, "jobs");
+        Class<?> clazz = classLoader.loadClass("external.VO");
+        Method method = clazz.getMethod("setName", new Class[]{String.class});
+        Object obj = clazz.newInstance();
+        method.invoke(obj, "jobs");
 
-            String text = JSON.toJSONString(obj);
-            System.out.println(text);
-            JSON.parseObject(text, clazz);
-        } finally {
-            JSONFactory.setContextReaderCreator(null);
-            JSONFactory.setContextWriterCreator(null);
-        }
+        String text = JSON.toJSONString(obj);
+        System.out.println(text);
+        JSON.parseObject(text, clazz);
     }
 
     public static class ExtClassLoader

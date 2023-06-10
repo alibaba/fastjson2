@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.function.impl;
 
-import java.util.function.Function;
+import com.alibaba.fastjson2.function.Function;
 
 public class ToString
         implements Function {

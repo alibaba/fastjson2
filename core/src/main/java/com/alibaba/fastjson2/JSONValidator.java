@@ -5,10 +5,9 @@ public class JSONValidator {
         Object, Array, Value
     }
 
-    private JSONReader jsonReader;
+    private final JSONReader jsonReader;
     private Boolean validateResult;
     private Type type;
-    private char firstChar;
 
     protected JSONValidator(JSONReader jsonReader) {
         this.jsonReader = jsonReader;
@@ -31,6 +30,7 @@ public class JSONValidator {
             return validateResult;
         }
 
+        char firstChar;
         try {
             firstChar = jsonReader.current();
 

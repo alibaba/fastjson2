@@ -2,10 +2,10 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
-import java.util.function.Function;
 
 final class ObjectWriterImplInt32ValueArray
         extends ObjectWriterPrimitiveImpl {
@@ -31,7 +31,7 @@ final class ObjectWriterImplInt32ValueArray
         }
 
         int[] array;
-        if (function != null && object != null) {
+        if (function != null) {
             array = function.apply(object);
         } else {
             array = (int[]) object;
@@ -48,7 +48,7 @@ final class ObjectWriterImplInt32ValueArray
         }
 
         int[] array;
-        if (function != null && object != null) {
+        if (function != null) {
             array = function.apply(object);
         } else {
             array = (int[]) object;

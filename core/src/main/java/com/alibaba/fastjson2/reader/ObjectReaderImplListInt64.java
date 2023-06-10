@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -11,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.function.Function;
 
 public final class ObjectReaderImplListInt64
         implements ObjectReader {
@@ -52,11 +52,6 @@ public final class ObjectReaderImplListInt64
     }
 
     @Override
-    public FieldReader getFieldReader(long hashCode) {
-        return null;
-    }
-
-    @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.nextIfNull()) {
             return null;
@@ -77,7 +72,7 @@ public final class ObjectReaderImplListInt64
         } else if (listType != null && listType != this.listType) {
             list = (Collection) objectReader.createInstance(features);
         } else {
-            list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
+            list = (Collection) createInstance(jsonReader.context.getFeatures() | features);
         }
 
         int entryCnt = jsonReader.startArray();
@@ -97,7 +92,7 @@ public final class ObjectReaderImplListInt64
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
@@ -106,7 +101,7 @@ public final class ObjectReaderImplListInt64
         }
 
         if (jsonReader.isString()) {
-            Collection list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
+            Collection list = (Collection) createInstance(jsonReader.context.getFeatures() | features);
             String str = jsonReader.readString();
             if (str.indexOf(',') != -1) {
                 String[] items = str.split(",");
@@ -118,7 +113,7 @@ public final class ObjectReaderImplListInt64
                 list.add(
                         Long.parseLong(str));
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return list;
         }
 
@@ -133,7 +128,7 @@ public final class ObjectReaderImplListInt64
         if (set && instanceType == Collection.class) {
             list = new LinkedHashSet();
         } else {
-            list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
+            list = (Collection) createInstance(jsonReader.context.getFeatures() | features);
         }
 
         for (; ; ) {
@@ -141,7 +136,7 @@ public final class ObjectReaderImplListInt64
                 throw new JSONException(jsonReader.info("illegal input error"));
             }
 
-            if (jsonReader.nextIfMatch(']')) {
+            if (jsonReader.nextIfArrayEnd()) {
                 break;
             }
 
@@ -149,7 +144,7 @@ public final class ObjectReaderImplListInt64
                     jsonReader.readInt64());
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         return list;
     }

@@ -193,7 +193,7 @@ public class DateParse {
         }
 
         long millis;
-        if (DEFAULT_ZONE_ID == SHANGHAI_ZONE_ID || DEFAULT_ZONE_ID.getRules() == DateUtils.SHANGHAI_ZONE_RULES) {
+        if (DEFAULT_ZONE_ID.equals(SHANGHAI_ZONE_ID)) {
             long seconds = DateUtils.utcSeconds(year, month, dom, hour, minute, second);
             int zoneOffsetTotalSeconds = DateUtils.getShanghaiZoneOffsetTotalSeconds(seconds);
             seconds -= zoneOffsetTotalSeconds;

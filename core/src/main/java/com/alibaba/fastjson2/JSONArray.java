@@ -1,9 +1,10 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderImplEnum;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -14,11 +15,9 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
-import java.time.temporal.TemporalAccessor;
 import java.util.*;
-import java.util.function.Function;
 
+import static com.alibaba.fastjson2.JSONFactory.defaultObjectReaderProvider;
 import static com.alibaba.fastjson2.JSONObject.NONE_DIRECT_FEATURES;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
@@ -202,7 +201,7 @@ public class JSONArray
         }
 
         Class valueClass = value.getClass();
-        ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(valueClass);
+        ObjectWriter objectWriter = JSONFactory.defaultObjectWriterProvider.getObjectWriter(valueClass);
         if (objectWriter instanceof ObjectWriterAdapter) {
             ObjectWriterAdapter writerAdapter = (ObjectWriterAdapter) objectWriter;
             return writerAdapter.toJSONObject(value);
@@ -231,7 +230,7 @@ public class JSONArray
 
         if (value instanceof Date) {
             long timeMillis = ((Date) value).getTime();
-            return DateUtils.toString(timeMillis, false, DateUtils.DEFAULT_ZONE_ID);
+            return DateUtils.toString(timeMillis, false, ZoneId.DEFAULT_ZONE_ID);
         }
 
         if (value instanceof Boolean
@@ -239,7 +238,8 @@ public class JSONArray
                 || value instanceof Number
                 || value instanceof UUID
                 || value instanceof Enum
-                || value instanceof TemporalAccessor) {
+//                || value instanceof TemporalAccessor
+        ) {
             return value.toString();
         }
 
@@ -860,35 +860,6 @@ public class JSONArray
     }
 
     /**
-     * Returns the {@link Instant} at the specified location in this {@link JSONArray}.
-     *
-     * @param index index of the element to return
-     * @return {@link Instant} or null
-     * @throws IndexOutOfBoundsException if the index is out of range {@code (index < 0 || index >= size())}
-     */
-    public Instant getInstant(int index) {
-        Object value = get(index);
-
-        if (value == null) {
-            return null;
-        }
-
-        if (value instanceof Instant) {
-            return (Instant) value;
-        }
-
-        if (value instanceof Number) {
-            long millis = ((Number) value).longValue();
-            if (millis == 0) {
-                return null;
-            }
-            return Instant.ofEpochMilli(millis);
-        }
-
-        return TypeUtils.toInstant(value);
-    }
-
-    /**
      * Serialize to JSON {@link String}
      *
      * @return JSON {@link String}
@@ -978,8 +949,7 @@ public class JSONArray
             return (T) toString();
         }
 
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader<T> objectReader = provider.getObjectReader(type);
+        ObjectReader<T> objectReader = defaultObjectReaderProvider.getObjectReader(type);
         return objectReader.createInstance(this);
     }
 
@@ -992,8 +962,7 @@ public class JSONArray
             return (T) toString();
         }
 
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-        ObjectReader<T> objectReader = provider.getObjectReader(type);
+        ObjectReader<T> objectReader = defaultObjectReaderProvider.getObjectReader(type);
         return objectReader.createInstance(this);
     }
 
@@ -1032,7 +1001,7 @@ public class JSONArray
             }
         }
 
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
         ObjectReader<?> objectReader = provider.getObjectReader(itemClass, fieldBased);
 
         List<T> list = new ArrayList<>(size());
@@ -1089,7 +1058,7 @@ public class JSONArray
             }
         }
 
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
         ObjectReader<?> objectReader = provider.getObjectReader(itemClass, fieldBased);
 
         T[] list = (T[]) Array.newInstance(itemClass, size());
@@ -1156,7 +1125,7 @@ public class JSONArray
         }
 
         Class<?> valueClass = value.getClass();
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
         Function typeConvert = provider.getTypeConvert(valueClass, type);
 
         if (typeConvert != null) {
@@ -1215,7 +1184,7 @@ public class JSONArray
         }
 
         Class<?> valueClass = value.getClass();
-        ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
         Function typeConvert = provider.getTypeConvert(valueClass, type);
 
         if (typeConvert != null) {
@@ -1364,15 +1333,6 @@ public class JSONArray
     public JSONArray fluentAddAll(Collection<?> c) {
         addAll(c);
         return this;
-    }
-
-    /**
-     * @since 2.0.3
-     */
-    public boolean isValid(JSONSchema schema) {
-        return schema
-                .validate(this)
-                .isSuccess();
     }
 
     @Override

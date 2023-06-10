@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2.issues_1000;
 
 import com.alibaba.fastjson2.JSON;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +21,7 @@ public class Issue1276 {
     @Data
     public static class Bean {
         private Long id;
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+        @JSONField(format = "yyyy-MM-dd HH:mm")
         private Date sendTime;
     }
 }

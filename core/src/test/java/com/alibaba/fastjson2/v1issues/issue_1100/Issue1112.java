@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.v1issues.issue_1100;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
+import com.alibaba.fastjson2.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,7 +16,7 @@ public class Issue1112 {
         JSONObject object = new JSONObject();
         object.put("123", "abc");
 
-        assertEquals("abc", JSONPath.eval(object, "$.123"));
+        assertEquals("abc", JSONPath.of("$.123").eval(object));
     }
 
     @Test
@@ -23,7 +24,7 @@ public class Issue1112 {
         JSONObject object = new JSONObject();
         object.put("345_xiu", "abc");
 
-        assertEquals("abc", JSONPath.eval(object, "$.345_xiu"));
+        assertEquals("abc", TestUtils.eval(object, "$.345_xiu"));
     }
 
     @Test
@@ -31,6 +32,6 @@ public class Issue1112 {
         JSONObject object = new JSONObject();
         object.put("345.xiu", "abc");
 
-        assertEquals("abc", JSONPath.eval(object, "$.345\\.xiu"));
+        assertEquals("abc", TestUtils.eval(object, "$.345\\.xiu"));
     }
 }

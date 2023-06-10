@@ -3,11 +3,8 @@ package com.alibaba.fastjson2;
 import com.alibaba.fastjson.util.IOUtils;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderCreatorASM;
-import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
-import com.alibaba.fastjson2.writer.ObjectWriterCreatorASM;
 
 import java.nio.charset.StandardCharsets;
 
@@ -17,88 +14,31 @@ public class TestUtils {
 
     public static ObjectReaderCreator[] readerCreators() {
         return new ObjectReaderCreator[]{
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE,
+                ObjectReaderCreator.INSTANCE
         };
     }
 
     public static ObjectWriterCreator[] writerCreators() {
         return new ObjectWriterCreator[]{
-                ObjectWriterCreator.INSTANCE,
-                ObjectWriterCreatorASM.INSTANCE,
+                ObjectWriterCreator.INSTANCE
         };
     }
 
     public static ObjectReaderCreator[] readerCreators2() {
         return new ObjectReaderCreator[]{
-                ObjectReaderCreator.INSTANCE,
-                ObjectReaderCreatorASM.INSTANCE,
+                ObjectReaderCreator.INSTANCE
         };
     }
 
     public static JSONWriter[] createJSONWriters() {
-        if (JDKUtils.STRING_VALUE == null) {
-            if (JDKUtils.JVM_VERSION == 8) {
-                if (JDKUtils.UNSAFE_SUPPORT) {
-                    return new JSONWriter[]{
-                            new JSONWriterUTF8(JSONFactory.createWriteContext()),
-                            new JSONWriterUTF16(JSONFactory.createWriteContext()),
-                            new JSONWriterUTF16JDK8(JSONFactory.createWriteContext()),
-                            new JSONWriterUTF16JDK8UF(JSONFactory.createWriteContext())
-                    };
-                }
-                return new JSONWriter[]{
-                        new JSONWriterUTF8(JSONFactory.createWriteContext()),
-                        new JSONWriterUTF16(JSONFactory.createWriteContext()),
-                        new JSONWriterUTF16JDK8(JSONFactory.createWriteContext())
-                };
-            } else {
-                if (JDKUtils.UNSAFE_SUPPORT) {
-                    return new JSONWriter[]{
-                            new JSONWriterUTF8(JSONFactory.createWriteContext()),
-                            new JSONWriterUTF16(JSONFactory.createWriteContext())
-                    };
-                }
-                return new JSONWriter[]{
-                        new JSONWriterUTF8(JSONFactory.createWriteContext()),
-                        new JSONWriterUTF16(JSONFactory.createWriteContext())
-                };
-            }
-        }
-
-        if (JDKUtils.JVM_VERSION == 8) {
-            if (JDKUtils.UNSAFE_SUPPORT) {
-                return new JSONWriter[]{
-                        new JSONWriterUTF8(JSONFactory.createWriteContext()),
-                        new JSONWriterUTF16(JSONFactory.createWriteContext()),
-                        new JSONWriterUTF16JDK8(JSONFactory.createWriteContext()),
-                        new JSONWriterUTF16JDK8UF(JSONFactory.createWriteContext())
-                };
-            }
-
-            return new JSONWriter[]{
-                    new JSONWriterUTF8(JSONFactory.createWriteContext()),
-                    new JSONWriterUTF16(JSONFactory.createWriteContext()),
-                    new JSONWriterUTF16JDK8(JSONFactory.createWriteContext())
-            };
-        }
-
-        if (JDKUtils.UNSAFE_SUPPORT) {
-            return new JSONWriter[]{
-                    new JSONWriterUTF8JDK9(JSONFactory.createWriteContext()),
-                    new JSONWriterUTF16(JSONFactory.createWriteContext()),
-                    new JSONWriterUTF16JDK9UF(JSONFactory.createWriteContext())
-            };
-        }
-
         return new JSONWriter[]{
-                new JSONWriterUTF16(JSONFactory.createWriteContext()),
-                new JSONWriterUTF16JDK8(JSONFactory.createWriteContext())
+                new JSONWriterUTF8(JSONFactory.createWriteContext()),
+                new JSONWriterUTF16(JSONFactory.createWriteContext())
         };
     }
 
-    public static ObjectReaderCreator READER_CREATOR = ObjectReaderCreatorASM.INSTANCE;
-    public static ObjectWriterCreator WRITER_CREATOR = ObjectWriterCreatorASM.INSTANCE;
+    public static ObjectReaderCreator READER_CREATOR = ObjectReaderCreator.INSTANCE;
+    public static ObjectWriterCreator WRITER_CREATOR = ObjectWriterCreator.INSTANCE;
 
     public static <T> ObjectReader<T> createObjectReaderLambda(Class<T> objectClass) {
         return ObjectReaderCreator.INSTANCE.createObjectReader(objectClass);
@@ -110,11 +50,11 @@ public class TestUtils {
     }
 
     public static ObjectReaderCreator readerCreator(ClassLoader classLoader) {
-        return new ObjectReaderCreatorASM(classLoader);
+        return ObjectReaderCreator.INSTANCE;
     }
 
     public static ObjectWriterCreator writerCreator(ClassLoader classLoader) {
-        return new ObjectWriterCreatorASM(classLoader);
+        return ObjectWriterCreator.INSTANCE;
     }
 
     public static <T> ObjectReader<T> of(Class<T> objectType) {
@@ -202,5 +142,10 @@ public class TestUtils {
 
     public static JSONReader createJSONReaderStr(String str, JSONReader.Feature... features) {
         return JSONReader.of(str, JSONFactory.createReadContext(features));
+    }
+
+    public static Object eval(Object rootObject, String path) {
+        return JSONPath.of(path)
+                .eval(rootObject);
     }
 }

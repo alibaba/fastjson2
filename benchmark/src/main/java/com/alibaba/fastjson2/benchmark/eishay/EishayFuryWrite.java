@@ -37,7 +37,7 @@ public class EishayFuryWrite {
             JSONWriter.Feature.BeanToArray
     };
     static JSONWriter.Context context = new JSONWriter.Context(
-            JSONFactory.getDefaultObjectWriterProvider(), features
+            JSONFactory.defaultObjectWriterProvider, features
     );
 
     static {

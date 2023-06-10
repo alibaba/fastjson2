@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -11,36 +14,6 @@ public class FieldReaderInt16MethodTest {
     public void test() {
         Bean bean = new Bean();
         ObjectReader<Bean> objectReader = ObjectReaderCreator.INSTANCE.createObjectReader(Bean.class);
-        FieldReader fieldReader = objectReader.getFieldReader("value");
-        fieldReader.accept(bean, "123");
-        assertEquals((short) 123, bean.value);
-        assertNotNull(fieldReader.method);
-
-        fieldReader.accept(bean, (short) 101);
-        assertEquals((short) 101, bean.value);
-
-        fieldReader.accept(bean, 102);
-        assertEquals((short) 102, bean.value);
-
-        assertThrows(JSONException.class, () -> fieldReader.accept(bean, new Object()));
-
-        assertEquals(
-                (short) 101,
-                objectReader.readObject(
-                        JSONReader.of("{\"value\":101}"),
-                        0
-                ).value
-        );
-
-        byte[] jsonbBytes = JSONB.toBytes(bean);
-        Bean bean1 = objectReader.readObject(JSONReader.ofJSONB(jsonbBytes));
-        assertEquals(bean.value, bean1.value);
-    }
-
-    @Test
-    public void testASM() {
-        Bean bean = new Bean();
-        ObjectReader<Bean> objectReader = ObjectReaderCreatorASM.INSTANCE.createObjectReader(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
         assertEquals((short) 123, bean.value);
@@ -80,43 +53,9 @@ public class FieldReaderInt16MethodTest {
     }
 
     @Test
-    public void test1() {
-        Bean1 bean = new Bean1();
-        ObjectReader<Bean1> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean1.class);
-        FieldReader fieldReader = objectReader.getFieldReader("value");
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, "95"));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, (short) 95));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 95));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 95L));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 95F));
-        assertThrows(JSONSchemaValidException.class, () -> fieldReader.accept(bean, 95D));
-
-        assertEquals(
-                (short) 101,
-                objectReader.readObject(
-                        JSONReader.of("{\"value\":101}"),
-                        0
-                ).value
-        );
-    }
-
-    public static class Bean1 {
-        @JSONField(schema = "{'minimum':100}")
-        private Short value;
-
-        public Short getValue() {
-            return value;
-        }
-
-        public void setValue(Short value) {
-            this.value = value;
-        }
-    }
-
-    @Test
     public void test2() {
         Bean2 bean = new Bean2();
-        ObjectReader<Bean2> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean2.class);
+        ObjectReader<Bean2> objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Bean2.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         assertThrows(Exception.class, () -> fieldReader.accept(bean, "123"));
         assertThrows(Exception.class, () -> fieldReader.accept(bean, 123));
@@ -134,7 +73,7 @@ public class FieldReaderInt16MethodTest {
 
     @Test
     public void test3() {
-        ObjectReader<Bean3> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean3.class);
+        ObjectReader<Bean3> objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Bean3.class);
         assertEquals(
                 (short) 123,
                 objectReader.readObject(

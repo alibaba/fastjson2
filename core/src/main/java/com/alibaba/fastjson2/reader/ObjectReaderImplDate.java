@@ -3,16 +3,13 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.codec.DateTimeCodec;
+import com.alibaba.fastjson2.time.*;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.Locale;
 
@@ -56,7 +53,7 @@ public class ObjectReaderImplDate
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.isInt()) {
+        if (jsonReader.isInt() && format == null) {
             long millis = jsonReader.readInt64Value();
             if (formatUnixTime) {
                 millis *= 1000;
@@ -86,7 +83,7 @@ public class ObjectReaderImplDate
             return null;
         }
 
-        if ((formatUnixTime || formatUnixTime) && jsonReader.isString()) {
+        if (formatUnixTime || formatMillis) {
             millis = jsonReader.readInt64Value();
             if (formatUnixTime) {
                 millis *= 1000L;
@@ -107,6 +104,10 @@ public class ObjectReaderImplDate
                 DateTimeFormatter formatter = getDateFormatter(jsonReader.getLocale());
 
                 if (formatter != null) {
+                    if (jsonReader.jsonb && !jsonReader.isString()) {
+                        return jsonReader.readDate();
+                    }
+
                     String str = jsonReader.readString();
                     if (str.isEmpty() || "null".equals(str)) {
                         return null;
@@ -115,17 +116,11 @@ public class ObjectReaderImplDate
                     LocalDateTime ldt;
                     if (!formatHasHour) {
                         if (!formatHasDay) {
-                            TemporalAccessor parsed = formatter.parse(str);
-                            int year = parsed.get(ChronoField.YEAR);
-                            int month = parsed.get(ChronoField.MONTH_OF_YEAR);
-                            int dayOfYear = 1;
-                            ldt = LocalDateTime.of(
-                                    LocalDate.of(year, month, dayOfYear),
-                                    LocalTime.MIN
-                            );
+                            return formatter.parseDate(str, jsonReader.getZoneId());
                         } else {
-                            LocalDate localDate;
-                            if (str.length() == 19 && jsonReader.isEnabled(JSONReader.Feature.SupportSmartMatch)) {
+                            if (str.length() == 19
+                                    && jsonReader.isEnabled(JSONReader.Feature.SupportSmartMatch)
+                            ) {
                                 ldt = DateUtils.parseLocalDateTime(str, 0, str.length());
                             } else {
                                 if (format.indexOf('-') != -1 && str.indexOf('-') == -1 && TypeUtils.isInteger(str)) {
@@ -133,8 +128,7 @@ public class ObjectReaderImplDate
                                     return new Date(millis);
                                 }
 
-                                localDate = LocalDate.parse(str, formatter);
-                                ldt = LocalDateTime.of(localDate, LocalTime.MIN);
+                                return formatter.parseDate(str, jsonReader.getZoneId());
                             }
                         }
                     } else {
@@ -142,10 +136,14 @@ public class ObjectReaderImplDate
                             int length = yyyyMMddhhmm16 ? 16 : 19;
                             ldt = DateUtils.parseLocalDateTime(str, 0, length);
                         } else {
-                            ldt = LocalDateTime.parse(str, formatter);
+                            try {
+                                return new SimpleDateFormat(format).parse(str);
+                            } catch (ParseException e) {
+                                throw new JSONException("parse format '" + format + "'", e);
+                            }
                         }
                     }
-                    zdt = ldt.atZone(jsonReader.getContext().getZoneId());
+                    zdt = ZonedDateTime.of(ldt, jsonReader.context.getZoneId());
                 } else {
                     zdt = jsonReader.readZonedDateTime();
                 }
@@ -156,7 +154,7 @@ public class ObjectReaderImplDate
             }
 
             long seconds = zdt.toEpochSecond();
-            int nanos = zdt.toLocalTime().getNano();
+            int nanos = zdt.dateTime.time.nano;
             if (seconds < 0 && nanos > 0) {
                 millis = (seconds + 1) * 1000;
                 long adjustment = nanos / 1000_000 - 1000;
@@ -169,18 +167,14 @@ public class ObjectReaderImplDate
             if (jsonReader.isTypeRedirect() && jsonReader.nextIfMatchIdent('"', 'v', 'a', 'l', '"')) {
                 jsonReader.nextIfMatch(':');
                 millis = jsonReader.readInt64Value();
-                jsonReader.nextIfMatch('}');
+                jsonReader.nextIfObjectEnd();
                 jsonReader.setTypeRedirect(false);
             } else {
-                millis = jsonReader.readMillisFromString();
+                return jsonReader.readDate();
             }
 
             if (millis == 0 && jsonReader.wasNull()) {
                 return null;
-            }
-
-            if (formatUnixTime) {
-                millis *= 1000;
             }
         }
 

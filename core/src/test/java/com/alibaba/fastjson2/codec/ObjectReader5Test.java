@@ -9,7 +9,6 @@ import com.alibaba.fastjson2_vo.LongValue5;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -130,13 +129,14 @@ public class ObjectReader5Test {
         map.put("V0002", 103);
         map.put("V0003", "104");
         map.put("V0004", 105L);
-        map.put("x0001", ZonedDateTime.now());
         map.put("x0002", new Date());
         map.put("x0003", UUID.randomUUID());
         map.put("x0004", new byte[]{1, 2, 3, 4, 5, 6, 7, 8});
         map.put("x0005", false);
         map.put("x0006", true);
-        byte[] jsonbBytes = JSONB.toBytes(map);
+        byte[] jsonbBytes = new byte[]{
+                -90, 78, 86, 48, 48, 48, 48, 56, 101, 78, 86, 48, 48, 48, 49, 56, 102, 78, 86, 48, 48, 48, 52, -48, 105, 78, 120, 48, 48, 48, 49, -86, 7, -25, 6, 4, 17, 33, 45, 72, 17, -122, 21, -128, 86, 65, 115, 105, 97, 47, 83, 104, 97, 110, 103, 104, 97, 105, 78, 86, 48, 48, 48, 50, 56, 103, 78, 120, 48, 48, 48, 51, -111, 16, 18, 90, 113, -22, 105, 66, 78, -65, -103, 32, 19, -2, -6, -43, -68, 101, 78, 86, 48, 48, 48, 51, 76, 49, 48, 52, 78, 120, 48, 48, 48, 50, -85, 0, 0, 1, -120, -123, -63, 105, -50, 78, 120, 48, 48, 48, 53, -80, 78, 120, 48, 48, 48, 52, -111, 8, 1, 2, 3, 4, 5, 6, 7, 8, 78, 120, 48, 48, 48, 54, -79, -91
+        };
 
         for (ObjectReaderCreator creator : creators) {
             ObjectReader<LongValue5> objectReader = creator.createObjectReader(LongValue5.class);

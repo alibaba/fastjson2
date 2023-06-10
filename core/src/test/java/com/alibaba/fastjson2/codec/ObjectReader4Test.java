@@ -22,7 +22,7 @@ public class ObjectReader4Test {
             ObjectReader<StringField4> objectReader = creator.createObjectReader(StringField4.class);
 
             JSONReader jsonReader = JSONReader.of("[101,102,103,104]");
-            jsonReader.getContext().config(JSONReader.Feature.SupportArrayToBean);
+            jsonReader.context.config(JSONReader.Feature.SupportArrayToBean);
             StringField4 vo = objectReader.readObject(jsonReader, 0);
             assertEquals("101", vo.v0000);
             assertEquals("102", vo.v0001);

@@ -37,14 +37,6 @@ class JSONCreatorCombinationTest {
     }
 
     @Test
-    void testCombinationGetFromClass() {
-        Class<CombinationJSONCreatorPojo> clazz = CombinationJSONCreatorPojo.class;
-        Constructor<?>[] constructors = clazz.getConstructors();
-
-        assertExistJSONCreator(constructors);
-    }
-
-    @Test
     void testCombinationGetFromAnnotationType() {
         Class<CombinationJSONCreatorPojo> clazz = CombinationJSONCreatorPojo.class;
         Constructor<?>[] constructors = clazz.getConstructors();

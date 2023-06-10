@@ -3,7 +3,6 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -22,11 +21,10 @@ class FieldReaderCollectionMethodReadOnly<T>
             int ordinal,
             long features,
             String format,
-            JSONSchema schema,
             Method setter,
             Field field
     ) {
-        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, schema, setter, field, null);
+        super(fieldName, fieldType, fieldClass, ordinal, features, format, null, null, setter, field, null);
         Type itemType = null;
         if (fieldType instanceof ParameterizedType) {
             Type[] actualTypeArguments = ((ParameterizedType) fieldType).getActualTypeArguments();
@@ -51,18 +49,13 @@ class FieldReaderCollectionMethodReadOnly<T>
         }
 
         if (collection == Collections.EMPTY_LIST || collection == Collections.EMPTY_SET || collection == null) {
-            if (schema != null) {
-                schema.assertValidate(collection);
-            }
-
             return;
         }
 
         String name = collection.getClass().getName();
         if ("java.util.Collections$UnmodifiableRandomAccessList".equals(name)
                 || "java.util.Arrays$ArrayList".equals(name)
-                || "java.util.Collections$SingletonList".equals(name)
-                || name.startsWith("java.util.ImmutableCollections$")) {
+                || "java.util.Collections$SingletonList".equals(name)) {
             return;
         }
 
@@ -81,17 +74,13 @@ class FieldReaderCollectionMethodReadOnly<T>
                 if (!((Class) itemType).isAssignableFrom(item.getClass())) {
                     if (itemReader == null) {
                         itemReader = JSONFactory
-                                .getDefaultObjectReaderProvider()
+                                .defaultObjectReaderProvider
                                 .getObjectReader(itemType);
                     }
                     item = itemReader.createInstance((Map) item, 0L);
                 }
             }
             collection.add(item);
-        }
-
-        if (schema != null) {
-            schema.assertValidate(collection);
         }
     }
 
@@ -103,11 +92,10 @@ class FieldReaderCollectionMethodReadOnly<T>
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
         if (initReader == null) {
-            initReader = jsonReader
-                    .getContext()
+            initReader = jsonReader.context
                     .getObjectReader(fieldType);
         }
-        Object value = jsonReader.isJSONB()
+        Object value = jsonReader.jsonb
                 ? initReader.readJSONBObject(jsonReader, fieldType, fieldName, 0)
                 : initReader.readObject(jsonReader, fieldType, fieldName, 0);
         accept(object, value);

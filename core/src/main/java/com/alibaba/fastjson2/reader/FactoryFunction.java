@@ -1,15 +1,13 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.support.LambdaMiscCodec;
+import com.alibaba.fastjson2.function.BiFunction;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 final class FactoryFunction<T>
         implements Function<Map<Long, Object>, T> {
@@ -21,32 +19,23 @@ final class FactoryFunction<T>
 
     FactoryFunction(Method factoryMethod, String... paramNames) {
         this.factoryMethod = factoryMethod;
-        Parameter[] parameters = factoryMethod.getParameters();
+        Class[] parameters = factoryMethod.getParameterTypes();
         this.paramNames = new String[parameters.length];
         this.hashCodes = new long[parameters.length];
         for (int i = 0; i < parameters.length; i++) {
-            String name;
+            String name = null;
             if (i < paramNames.length) {
                 name = paramNames[i];
-            } else {
-                name = parameters[i].getName();
+            }
+            if (name == null) {
+                name = "arg" + i;
             }
             paramNames[i] = name;
             hashCodes[i] = Fnv.hashCode64(name);
         }
 
-        Function function = null;
-        BiFunction biFunction = null;
-        if (ObjectReaderCreator.JIT) {
-            int parameterCount = factoryMethod.getParameterCount();
-            if (parameterCount == 1) {
-                function = LambdaMiscCodec.createFunction(factoryMethod);
-            } else if (parameterCount == 2) {
-                biFunction = LambdaMiscCodec.createBiFunction(factoryMethod);
-            }
-        }
-        this.function = function;
-        this.biFunction = biFunction;
+        this.function = null;
+        this.biFunction = null;
     }
 
     @Override

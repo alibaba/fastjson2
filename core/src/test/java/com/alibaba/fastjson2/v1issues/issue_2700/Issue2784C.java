@@ -2,35 +2,34 @@ package com.alibaba.fastjson2.v1issues.issue_2700;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.time.Instant;
+import com.alibaba.fastjson2.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue2784C {
-    ZoneId zoneId = ZoneId.systemDefault();
+    LocalDateTime now = LocalDateTime.now();
 
     @Test
     public void test_for_issue() {
         Model m = new Model();
-        m.time = LocalDateTime.now();
+        m.time = now.toDate();
         String str = JSON.toJSONString(m);
         assertEquals("{\"time\":"
-                + m.time.atZone(zoneId).toInstant().toEpochMilli()
+                + Instant.of(m.time).toEpochMilli()
                 + "}", str);
 
         Model m1 = JSON.parseObject(str, Model.class);
-        assertEquals(m.time.atZone(zoneId).toInstant().toEpochMilli(), m1.time.atZone(zoneId).toInstant().toEpochMilli());
+        assertEquals(Instant.of(m.time).toEpochMilli(), Instant.of(m1.time).toEpochMilli());
     }
 
     @Test
     public void f_test_for_issue_1() {
         Model m = new Model();
-        m.ztime = ZonedDateTime.now();
+        m.ztime = new Date();
         String str = JSON.toJSONString(m);
         assertEquals("{\"ztime\":"
                 + m.ztime.toInstant().toEpochMilli()
@@ -43,29 +42,29 @@ public class Issue2784C {
     @Test
     public void test_for_issue_2() {
         Model m = new Model();
-        m.time1 = LocalDateTime.now();
+        m.time1 = new Date();
         String str = JSON.toJSONString(m);
         assertEquals("{\"time1\":"
-                + m.time1.atZone(zoneId).toEpochSecond()
+                + Instant.of(m.time1).epochSecond
                 + "}", str);
 
         Model m1 = JSON.parseObject(str, Model.class);
-        assertEquals(m.time1.atZone(zoneId).toEpochSecond(),
-                m1.time1.atZone(zoneId).toEpochSecond());
+        assertEquals(Instant.of(m.time1).epochSecond,
+                Instant.of(m1.time1).epochSecond);
     }
 
     @Test
     public void test_for_issue_3() {
         Model m = new Model();
-        m.ztime1 = ZonedDateTime.now();
+        m.ztime1 = new Date();
         String str = JSON.toJSONString(m);
         assertEquals("{\"ztime1\":"
-                + m.ztime1.toEpochSecond()
+                + Instant.of(m.ztime1).epochSecond
                 + "}", str);
 
         Model m1 = JSON.parseObject(str, Model.class);
-        assertEquals(m.ztime1.toEpochSecond(),
-                m1.ztime1.toEpochSecond());
+        assertEquals(Instant.of(m.ztime1).epochSecond,
+                Instant.of(m1.ztime1).epochSecond);
     }
 
     @Test
@@ -113,21 +112,24 @@ public class Issue2784C {
     @Test
     public void test_for_issue_7() {
         Model m = JSON.parseObject("{\"time2\":20190714121314}", Model.class);
-        assertEquals(LocalDateTime.of(2019, 7, 14, 12, 13, 14), m.time2);
+        assertEquals(
+                LocalDateTime.of(2019, 7, 14, 12, 13, 14).toDate(),
+                m.time2
+        );
     }
 
     public static class Model {
         @JSONField(format = "millis")
-        public LocalDateTime time;
+        public Date time;
 
         @JSONField(format = "millis")
-        public ZonedDateTime ztime;
+        public Date ztime;
 
         @JSONField(format = "unixtime")
-        public LocalDateTime time1;
+        public Date time1;
 
         @JSONField(format = "unixtime")
-        public ZonedDateTime ztime1;
+        public Date ztime1;
 
         @JSONField(format = "millis")
         public Date date;
@@ -136,6 +138,6 @@ public class Issue2784C {
         public Date date1;
 
         @JSONField(format = "yyyyMMddHHmmss")
-        public LocalDateTime time2;
+        public Date time2;
     }
 }

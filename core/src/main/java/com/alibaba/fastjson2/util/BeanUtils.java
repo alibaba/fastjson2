@@ -5,19 +5,21 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.modules.ObjectCodecProvider;
+import com.alibaba.fastjson2.function.Consumer;
+import com.alibaba.fastjson2.reader.ObjectReaderModule;
+import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.annotation.Inherited;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.*;
-import java.util.function.Consumer;
 
-import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
+import static java.lang.reflect.Modifier.PUBLIC;
+import static java.lang.reflect.Modifier.STATIC;
 
 /**
  * @author Bob Lee
@@ -25,81 +27,29 @@ import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
  * @author Shaojin Wen
  */
 public abstract class BeanUtils {
+    static final AtomicReference<char[]> charsCache = new AtomicReference<>();
+    static final NameCacheEntry[] NAME_CACHE = new NameCacheEntry[2048];
+
     static final Type[] EMPTY_TYPE_ARRAY = new Type[]{};
 
-    static ConcurrentMap<Class, Field[]> fieldCache = new ConcurrentHashMap<>();
-    static ConcurrentMap<Class, Map<String, Field>> fieldMapCache = new ConcurrentHashMap<>();
-    static ConcurrentMap<Class, Field[]> declaredFieldCache = new ConcurrentHashMap<>();
-    static ConcurrentMap<Class, Method[]> methodCache = new ConcurrentHashMap<>();
-    static ConcurrentMap<Class, Constructor[]> constructorCache = new ConcurrentHashMap<>();
-
-    private static volatile Class RECORD_CLASS;
-    private static volatile Method RECORD_GET_RECORD_COMPONENTS;
-    private static volatile Method RECORD_COMPONENT_GET_NAME;
-
-    public static final String SUPER = "$super$";
-
-    static final long[] IGNORE_CLASS_HASH_CODES = {
-            -9214723784238596577L,
-            -9030616758866828325L,
-            -8335274122997354104L,
-            -6963030519018899258L,
-            -4863137578837233966L,
-            -3653547262287832698L,
-            -2819277587813726773L,
-            -2291619803571459675L,
-            -1811306045128064037L,
-            -864440709753525476L,
-            8731803887940231L,
-            1616814008855344660L,
-            2164749833121980361L,
-            3724195282986200606L,
-            4882459834864833642L,
-            7981148566008458638L,
-            8344106065386396833L
-    };
-
-    public static String[] getRecordFieldNames(Class<?> recordType) {
-        if (JVM_VERSION < 14) {
-            return new String[0];
-        }
-
-        try {
-            if (RECORD_GET_RECORD_COMPONENTS == null) {
-                RECORD_GET_RECORD_COMPONENTS = Class.class.getMethod("getRecordComponents");
-            }
-
-            if (RECORD_COMPONENT_GET_NAME == null) {
-                Class<?> c = Class.forName("java.lang.reflect.RecordComponent");
-                RECORD_COMPONENT_GET_NAME = c.getMethod("getName");
-            }
-
-            final Object[] components = (Object[]) RECORD_GET_RECORD_COMPONENTS.invoke(recordType);
-            final String[] names = new String[components.length];
-            for (int i = 0; i < components.length; i++) {
-                names[i] = (String) RECORD_COMPONENT_GET_NAME.invoke(components[i]);
-            }
-
-            return names;
-        } catch (Exception e) {
-            throw new RuntimeException(String.format(
-                    "Failed to access Methods needed to support `java.lang.Record`: (%s) %s",
-                    e.getClass().getName(), e.getMessage()), e);
-        }
-    }
+    static final ConcurrentMap<Class, Field[]> fieldCache = new ConcurrentHashMap<>();
+    static final ConcurrentMap<Class, Map<String, Field>> fieldMapCache = new ConcurrentHashMap<>();
+    static final ConcurrentMap<Class, Field[]> declaredFieldCache = new ConcurrentHashMap<>();
+    static final ConcurrentMap<Class, Method[]> methodCache = new ConcurrentHashMap<>();
+    static final ConcurrentMap<Class, Constructor[]> constructorCache = new ConcurrentHashMap<>();
 
     public static void getKotlinConstructor(Class<?> objectClass, BeanInfo beanInfo) {
         Constructor<?>[] constructors = constructorCache.get(objectClass);
         if (constructors == null) {
             constructors = objectClass.getDeclaredConstructors();
-            constructorCache.putIfAbsent(objectClass, constructors);
+            constructorCache.put(objectClass, constructors);
         }
 
         Constructor<?> creatorConstructor = null;
         String[] paramNames = beanInfo.createParameterNames;
 
         for (Constructor<?> constructor : constructors) {
-            int parameterCount = constructor.getParameterCount();
+            int parameterCount = constructor.getParameterTypes().length;
             if (paramNames != null && parameterCount != paramNames.length) {
                 continue;
             }
@@ -114,7 +64,7 @@ public abstract class BeanUtils {
                 }
             }
 
-            if (creatorConstructor != null && creatorConstructor.getParameterCount() >= parameterCount) {
+            if (creatorConstructor != null && creatorConstructor.getParameterTypes().length >= parameterCount) {
                 continue;
             }
 
@@ -206,16 +156,10 @@ public abstract class BeanUtils {
     }
 
     public static void fields(Class objectClass, Consumer<Field> fieldReaders) {
-        if (TypeUtils.isProxy(objectClass)) {
-            Class superclass = objectClass.getSuperclass();
-            fields(superclass, fieldReaders);
-            return;
-        }
-
         Field[] fields = fieldCache.get(objectClass);
         if (fields == null) {
             fields = objectClass.getFields();
-            fieldCache.putIfAbsent(objectClass, fields);
+            fieldCache.put(objectClass, fields);
         }
 
         boolean enumClass = Enum.class.isAssignableFrom(objectClass);
@@ -232,8 +176,8 @@ public abstract class BeanUtils {
     public static Method getMethod(Class objectClass, String methodName) {
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
-            methods = getMethods(objectClass);
-            methodCache.putIfAbsent(objectClass, methods);
+            methods = objectClass.getMethods();
+            methodCache.put(objectClass, methods);
         }
 
         for (Method method : methods) {
@@ -246,21 +190,21 @@ public abstract class BeanUtils {
     }
 
     public static Method getMethod(Class objectClass, Method signature) {
-        if (objectClass == null || objectClass == Object.class) {
+        if (objectClass == null || objectClass == Object.class || objectClass == Serializable.class) {
             return null;
         }
 
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
-            methods = getMethods(objectClass);
-            methodCache.putIfAbsent(objectClass, methods);
+            methods = objectClass.getMethods();
+            methodCache.put(objectClass, methods);
         }
 
         for (Method method : methods) {
             if (!method.getName().equals(signature.getName())) {
                 continue;
             }
-            if (method.getParameterCount() != signature.getParameterCount()) {
+            if (method.getParameterTypes().length != signature.getParameterTypes().length) {
                 continue;
             }
             Class<?>[] parameterTypes0 = method.getParameterTypes();
@@ -284,13 +228,122 @@ public abstract class BeanUtils {
         Map<String, Field> fieldMap = fieldMapCache.get(objectClass);
         if (fieldMap == null) {
             Map<String, Field> map = new HashMap<>();
-            declaredFields(objectClass, field -> map.put(field.getName(), field));
 
-            fieldMapCache.putIfAbsent(objectClass, map);
+            Field[] fields = declaredFieldCache.get(objectClass);
+            if (fields == null) {
+                Field[] declaredFields;
+                try {
+                    declaredFields = objectClass.getDeclaredFields();
+                    declaredFieldCache.put(objectClass, declaredFields);
+                } catch (Throwable ignored) {
+                    declaredFields = new Field[0];
+                }
+
+                boolean allMatch = true;
+                for (Field field : declaredFields) {
+                    int modifiers = field.getModifiers();
+                    if (Modifier.isStatic(modifiers)) {
+                        allMatch = false;
+                        break;
+                    }
+                }
+
+                if (allMatch) {
+                    fields = declaredFields;
+                } else {
+                    List<Field> list = new ArrayList<>(declaredFields.length);
+                    for (Field field : declaredFields) {
+                        int modifiers = field.getModifiers();
+                        if (Modifier.isStatic(modifiers)) {
+                            continue;
+                        }
+                        list.add(field);
+                    }
+                    fields = list.toArray(new Field[list.size()]);
+                }
+
+                fieldCache.put(objectClass, fields);
+            }
+
+            for (Field field : fields) {
+                map.put(field.getName(), field);
+            }
+
+            fieldMapCache.put(objectClass, map);
             fieldMap = fieldMapCache.get(objectClass);
         }
 
         return fieldMap.get(fieldName);
+    }
+
+    public static Field getField(Class objectClass, String fieldName) {
+        Field[] fields = fieldCache.get(objectClass);
+        if (fields == null) {
+            fields = objectClass.getFields();
+            fieldCache.put(objectClass, fields);
+        }
+
+        for (Field field : fields) {
+            if (field.getName().equals(fieldName)) {
+                return field;
+            }
+        }
+        return null;
+    }
+
+    public static void getFieldInfo(
+            Class objectClass,
+            FieldInfo fieldInfo,
+            ObjectReaderModule processor,
+            String fieldName,
+            String fieldName1,
+            String fieldName2
+    ) {
+        Field[] fields = declaredFieldCache.get(objectClass);
+        if (fields == null) {
+            fields = objectClass.getDeclaredFields();
+            declaredFieldCache.put(objectClass, fields);
+        }
+
+        for (int i = 0; i < fields.length; i++) {
+            Field field = fields[i];
+            int modifiers = field.getModifiers();
+            if ((modifiers & STATIC) != 0) {
+                continue;
+            }
+
+            boolean nonPublic = (modifiers & PUBLIC) == 0;
+
+            String itemFieldName = field.getName();
+            if (itemFieldName.equals(fieldName)) {
+                if (nonPublic) {
+                    processor.getFieldInfo(fieldInfo, objectClass, field);
+                }
+                fieldInfo.features |= FieldInfo.FIELD_MASK;
+            } else if (itemFieldName.equals(fieldName1)) {
+                if (nonPublic) {
+                    processor.getFieldInfo(fieldInfo, objectClass, field);
+                }
+                fieldInfo.features |= FieldInfo.FIELD_MASK;
+            } else if (itemFieldName.equals(fieldName2)) {
+                if (nonPublic) {
+                    processor.getFieldInfo(fieldInfo, objectClass, field);
+                }
+                fieldInfo.features |= FieldInfo.FIELD_MASK;
+            }
+        }
+    }
+
+    public static Method getSetter(Class objectClass, String methodName) {
+        Method[] methods = new Method[1];
+        setters(objectClass, e -> {
+            if (!methodName.equals(e.getName())) {
+                return;
+            }
+
+            methods[0] = e;
+        });
+        return methods[0];
     }
 
     /**
@@ -298,16 +351,6 @@ public abstract class BeanUtils {
      */
     public static void declaredFields(Class objectClass, Consumer<Field> fieldConsumer) {
         if (objectClass == null || fieldConsumer == null) {
-            return;
-        }
-
-        if (ignore(objectClass)) {
-            return;
-        }
-
-        if (TypeUtils.isProxy(objectClass)) {
-            Class superclass = objectClass.getSuperclass();
-            declaredFields(superclass, fieldConsumer);
             return;
         }
 
@@ -325,9 +368,10 @@ public abstract class BeanUtils {
 
         Field[] fields = declaredFieldCache.get(objectClass);
         if (fields == null) {
-            Field[] declaredFields = null;
+            Field[] declaredFields;
             try {
                 declaredFields = objectClass.getDeclaredFields();
+                declaredFieldCache.put(objectClass, declaredFields);
             } catch (Throwable ignored) {
                 declaredFields = new Field[0];
             }
@@ -355,12 +399,12 @@ public abstract class BeanUtils {
                 fields = list.toArray(new Field[list.size()]);
             }
 
-            fieldCache.putIfAbsent(objectClass, fields);
+            fieldCache.put(objectClass, fields);
         }
 
         for (Field field : fields) {
             int modifiers = field.getModifiers();
-            if ((modifiers & Modifier.STATIC) != 0) {
+            if ((modifiers & STATIC) != 0) {
                 continue;
             }
 
@@ -390,8 +434,8 @@ public abstract class BeanUtils {
     public static void staticMethod(Class objectClass, Consumer<Method> methodConsumer) {
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
-            methods = getMethods(objectClass);
-            methodCache.putIfAbsent(objectClass, methods);
+            methods = objectClass.getMethods();
+            methodCache.put(objectClass, methods);
         }
 
         for (Method method : methods) {
@@ -407,8 +451,8 @@ public abstract class BeanUtils {
     public static Method buildMethod(Class objectClass, String methodName) {
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
-            methods = getMethods(objectClass);
-            methodCache.putIfAbsent(objectClass, methods);
+            methods = objectClass.getMethods();
+            methodCache.put(objectClass, methods);
         }
 
         for (Method method : methods) {
@@ -417,7 +461,7 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            if (method.getParameterCount() != 0) {
+            if (method.getParameterTypes().length != 0) {
                 continue;
             }
 
@@ -433,7 +477,7 @@ public abstract class BeanUtils {
         Constructor[] constructors = constructorCache.get(objectClass);
         if (constructors == null) {
             constructors = objectClass.getDeclaredConstructors();
-            constructorCache.putIfAbsent(objectClass, constructors);
+            constructorCache.put(objectClass, constructors);
         }
 
         for (Constructor constructor : constructors) {
@@ -445,25 +489,25 @@ public abstract class BeanUtils {
         Constructor[] constructors = constructorCache.get(objectClass);
         if (constructors == null) {
             constructors = objectClass.getDeclaredConstructors();
-            constructorCache.putIfAbsent(objectClass, constructors);
+            constructorCache.put(objectClass, constructors);
         }
 
         return constructors;
     }
 
     public static Constructor getDefaultConstructor(Class objectClass, boolean includeNoneStaticMember) {
-        if (objectClass == StackTraceElement.class && JVM_VERSION >= 9) {
+        if (objectClass == StackTraceElement.class) {
             return null;
         }
 
         Constructor[] constructors = constructorCache.get(objectClass);
         if (constructors == null) {
             constructors = objectClass.getDeclaredConstructors();
-            constructorCache.putIfAbsent(objectClass, constructors);
+            constructorCache.put(objectClass, constructors);
         }
 
         for (Constructor constructor : constructors) {
-            if (constructor.getParameterCount() == 0) {
+            if (constructor.getParameterTypes().length == 0) {
                 return constructor;
             }
         }
@@ -475,7 +519,7 @@ public abstract class BeanUtils {
         Class declaringClass = objectClass.getDeclaringClass();
         if (declaringClass != null) {
             for (Constructor constructor : constructors) {
-                if (constructor.getParameterCount() == 1) {
+                if (constructor.getParameterTypes().length == 1) {
                     Class firstParamType = constructor.getParameterTypes()[0];
                     if (declaringClass.equals(firstParamType)) {
                         return constructor;
@@ -492,14 +536,10 @@ public abstract class BeanUtils {
     }
 
     public static void setters(Class objectClass, Class mixin, Consumer<Method> methodConsumer) {
-        if (ignore(objectClass)) {
-            return;
-        }
-
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
-            methods = getMethods(objectClass);
-            methodCache.putIfAbsent(objectClass, methods);
+            methods = objectClass.getMethods();
+            methodCache.put(objectClass, methods);
         }
 
         for (Method method : methods) {
@@ -529,11 +569,12 @@ public abstract class BeanUtils {
                 continue;
             }
 
-            int paramCount = method.getParameterCount();
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            int paramCount = parameterTypes.length;
 
             // read only getter
             if (paramCount == 0) {
-                if (methodName.length() <= 3 || !methodName.startsWith("get")) {
+                if (methodName.length() <= 3 || !methodName.startsWith("get", 0)) {
                     continue;
                 }
 
@@ -554,31 +595,18 @@ public abstract class BeanUtils {
 
             if (paramCount == 2
                     && method.getReturnType() == Void.TYPE
-                    && method.getParameterTypes()[0] == String.class
+                    && parameterTypes[0] == String.class
             ) {
-                Annotation[] annotations = getAnnotations(method);
+                Annotation[] annotations = method.getDeclaredAnnotations();
 
                 boolean unwrapped = false;
                 for (Annotation annotation : annotations) {
-                    Class<? extends Annotation> annotationType = annotation.annotationType();
                     JSONField jsonField = findAnnotation(annotation, JSONField.class);
                     if (jsonField != null) {
                         if (jsonField.unwrapped()) {
                             unwrapped = true;
                             break;
                         }
-                        continue;
-                    }
-
-                    switch (annotationType.getName()) {
-                        case "com.fasterxml.jackson.annotation.JsonAnySetter":
-                        case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonAnySetter":
-                            if (JSONFactory.isUseJacksonAnnotation()) {
-                                unwrapped = true;
-                            }
-                            break;
-                        default:
-                            break;
                     }
                 }
 
@@ -593,12 +621,12 @@ public abstract class BeanUtils {
             }
 
             final int methodNameLength = methodName.length();
-            boolean nameMatch = methodNameLength > 3 && methodName.startsWith("set");
+            boolean nameMatch = methodNameLength > 3 && methodName.startsWith("set", 0);
             if (!nameMatch) {
                 if (mixin != null) {
                     Method mixinMethod = getMethod(mixin, method);
                     if (mixinMethod != null) {
-                        Annotation[] annotations = getAnnotations(mixinMethod);
+                        Annotation[] annotations = mixinMethod.getDeclaredAnnotations();
                         for (Annotation annotation : annotations) {
                             if (annotation.annotationType() == JSONField.class) {
                                 JSONField jsonField = (JSONField) annotation;
@@ -613,7 +641,7 @@ public abstract class BeanUtils {
             }
 
             if (!nameMatch) {
-                Annotation[] annotations = getAnnotations(method);
+                Annotation[] annotations = method.getDeclaredAnnotations();
                 for (Annotation annotation : annotations) {
                     if (annotation.annotationType() == JSONField.class) {
                         JSONField jsonField = (JSONField) annotation;
@@ -634,23 +662,19 @@ public abstract class BeanUtils {
     }
 
     public static void setters(Class objectClass, boolean checkPrefix, Consumer<Method> methodConsumer) {
-        if (ignore(objectClass)) {
-            return;
-        }
-
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
-            methods = getMethods(objectClass);
-            methodCache.putIfAbsent(objectClass, methods);
+            methods = objectClass.getMethods();
+            methodCache.put(objectClass, methods);
         }
 
         for (Method method : methods) {
-            int paramType = method.getParameterCount();
+            int paramType = method.getParameterTypes().length;
 
             // read only getter
             if (paramType == 0) {
                 String methodName = method.getName();
-                if (checkPrefix && (methodName.length() <= 3 || !methodName.startsWith("get"))) {
+                if (checkPrefix && (methodName.length() <= 3 || !methodName.startsWith("get", 0))) {
                     continue;
                 }
 
@@ -678,7 +702,7 @@ public abstract class BeanUtils {
 
             String methodName = method.getName();
             final int methodNameLength = methodName.length();
-            if (checkPrefix && (methodNameLength <= 3 || !methodName.startsWith("set"))) {
+            if (checkPrefix && (methodNameLength <= 3 || !methodName.startsWith("set", 0))) {
                 continue;
             }
 
@@ -689,13 +713,13 @@ public abstract class BeanUtils {
     public static void annotationMethods(Class objectClass, Consumer<Method> methodConsumer) {
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
-            methods = getMethods(objectClass);
-            methodCache.putIfAbsent(objectClass, methods);
+            methods = objectClass.getMethods();
+            methodCache.put(objectClass, methods);
         }
 
         for_:
         for (Method method : methods) {
-            if (method.getParameterCount() != 0) {
+            if (method.getParameterTypes().length != 0) {
                 continue;
             }
             Class<?> declaringClass = method.getDeclaringClass();
@@ -717,7 +741,7 @@ public abstract class BeanUtils {
     }
 
     public static boolean isWriteEnumAsJavaBean(Class clazz) {
-        Annotation[] annotations = getAnnotations(clazz);
+        Annotation[] annotations = clazz.getDeclaredAnnotations();
         for (Annotation annotation : annotations) {
             JSONType jsonType = findAnnotation(annotation, JSONType.class);
             if (jsonType != null) {
@@ -741,7 +765,14 @@ public abstract class BeanUtils {
     public static String[] getEnumAnnotationNames(Class enumClass) {
         Enum[] enumConstants = (Enum[]) enumClass.getEnumConstants();
         String[] annotationNames = new String[enumConstants.length];
-        BeanUtils.fields(enumClass, field -> {
+
+        Field[] fields = fieldCache.get(enumClass);
+        if (fields == null) {
+            fields = enumClass.getFields();
+            fieldCache.put(enumClass, fields);
+        }
+
+        for (Field field : fields) {
             String fieldName = field.getName();
             for (int i = 0; i < enumConstants.length; i++) {
                 Enum e = enumConstants[i];
@@ -757,7 +788,7 @@ public abstract class BeanUtils {
                     break;
                 }
             }
-        });
+        }
 
         int nulls = 0;
         for (int i = 0; i < annotationNames.length; i++) {
@@ -773,7 +804,7 @@ public abstract class BeanUtils {
         return annotationNames;
     }
 
-    public static Member getEnumValueField(Class enumClass, ObjectCodecProvider mixinProvider) {
+    public static Member getEnumValueField(Class enumClass, Object mixinProvider) {
         if (enumClass == null) {
             return null;
         }
@@ -784,15 +815,11 @@ public abstract class BeanUtils {
         Method[] methods = methodCache.get(enumClass);
         if (methods == null) {
             methods = enumClass.getMethods();
-            methodCache.putIfAbsent(enumClass, methods);
+            methodCache.put(enumClass, methods);
         }
 
         for (Method method : methods) {
             if (method.getReturnType() == Void.class) {
-                continue;
-            }
-
-            if (method.getParameterCount() != 0) {
                 continue;
             }
 
@@ -806,11 +833,15 @@ public abstract class BeanUtils {
                 continue;
             }
 
+            if (method.getParameterTypes().length != 0) {
+                continue;
+            }
+
             if (isJSONField(method)) {
                 return method;
             }
 
-            if (methodName.startsWith("get")) {
+            if (methodName.startsWith("get", 0)) {
                 String fieldName = BeanUtils.getterName(methodName, null);
                 Field field = BeanUtils.getDeclaredField(enumClass, fieldName);
                 if (field != null && isJSONField(field)) {
@@ -818,45 +849,45 @@ public abstract class BeanUtils {
                 }
             }
 
-            if (member == null) {
-                AtomicReference<Member> memberRef = new AtomicReference<>();
-                for (Class enumInterface : interfaces) {
-                    getters(enumInterface, e -> {
+            AtomicReference<Member> memberRef = new AtomicReference<>();
+            for (Class enumInterface : interfaces) {
+                getters(enumInterface, e -> {
+                    if (e.getName().equals(methodName)) {
+                        if (isJSONField(e)) {
+                            memberRef.set(method);
+                        }
+                    }
+                });
+
+                Class mixIn;
+                if (mixinProvider instanceof ObjectReaderProvider) {
+                    mixIn = ((ObjectReaderProvider) mixinProvider).getMixIn(enumInterface);
+                } else if (mixinProvider instanceof ObjectWriterProvider) {
+                    mixIn = ((ObjectWriterProvider) mixinProvider).getMixIn(enumInterface);
+                } else {
+                    mixIn = JSONFactory.defaultObjectWriterProvider.getMixIn(enumInterface);
+                }
+
+                if (mixIn != null) {
+                    getters(mixIn, e -> {
                         if (e.getName().equals(methodName)) {
                             if (isJSONField(e)) {
                                 memberRef.set(method);
                             }
                         }
                     });
-
-                    Class mixIn;
-                    if (mixinProvider != null) {
-                        mixIn = mixinProvider.getMixIn(enumInterface);
-                    } else {
-                        mixIn = JSONFactory.getDefaultObjectWriterProvider().getMixIn(enumInterface);
-                    }
-
-                    if (mixIn != null) {
-                        getters(mixIn, e -> {
-                            if (e.getName().equals(methodName)) {
-                                if (isJSONField(e)) {
-                                    memberRef.set(method);
-                                }
-                            }
-                        });
-                    }
                 }
-                Member refMember = memberRef.get();
-                if (refMember != null) {
-                    return refMember;
-                }
+            }
+            Member refMember = memberRef.get();
+            if (refMember != null) {
+                return refMember;
             }
         }
 
         Field[] fields = fieldCache.get(enumClass);
         if (fields == null) {
             fields = enumClass.getFields();
-            fieldCache.putIfAbsent(enumClass, fields);
+            fieldCache.put(enumClass, fields);
         }
 
         Enum[] enumConstants = (Enum[]) enumClass.getEnumConstants();
@@ -892,48 +923,18 @@ public abstract class BeanUtils {
             return;
         }
 
-        if (Proxy.isProxyClass(objectClass)) {
-            Class[] interfaces = objectClass.getInterfaces();
-            if (interfaces.length == 1) {
-                getters(interfaces[0], methodConsumer);
-                return;
-            }
-        }
-
-        if (ignore(objectClass)) {
-            return;
-        }
-
         Class superClass = objectClass.getSuperclass();
-        if (TypeUtils.isProxy(objectClass)) {
-            Class superclass = superClass;
-            getters(superclass, methodConsumer);
-            return;
-        }
-
-        boolean record = isRecord(objectClass);
-
-        String[] recordFieldNames = null;
-        if (record) {
-            recordFieldNames = getRecordFieldNames(objectClass);
-        }
 
         Method[] methods = methodCache.get(objectClass);
         if (methods == null) {
-            methods = getMethods(objectClass);
-            methodCache.putIfAbsent(objectClass, methods);
+            methods = objectClass.getMethods();
+            methodCache.put(objectClass, methods);
         }
 
         boolean protobufMessageV3 = superClass != null && superClass.getName().equals("com.google.protobuf.GeneratedMessageV3");
 
         for (Method method : methods) {
-            int paramType = method.getParameterCount();
-            if (paramType != 0) {
-                continue;
-            }
-
-            int mods = method.getModifiers();
-            if (Modifier.isStatic(mods)) {
+            if ((method.getModifiers() & STATIC) != 0) {
                 continue;
             }
 
@@ -944,6 +945,10 @@ public abstract class BeanUtils {
 
             Class<?> declaringClass = method.getDeclaringClass();
             if (declaringClass == Enum.class || declaringClass == Object.class) {
+                continue;
+            }
+
+            if (method.getParameterTypes().length != 0) {
                 continue;
             }
 
@@ -979,7 +984,7 @@ public abstract class BeanUtils {
             }
 
             // skip thrift isSetXXX
-            if (methodName.startsWith("isSet") && returnClass == boolean.class) {
+            if (methodName.startsWith("isSet", 0) && returnClass == boolean.class) {
                 boolean setterFound = false, unsetFound = false, getterFound = false;
                 String setterName = BeanUtils.getterName(methodName, null);
                 String getterName = "g" + setterName.substring(1);
@@ -987,14 +992,14 @@ public abstract class BeanUtils {
                 String unsetName = "un" + setterName;
                 for (Method m : methods) {
                     if (m.getName().equals(setterName)
-                            && m.getParameterCount() == 1
+                            && m.getParameterTypes().length == 1
                             && m.getReturnType() == void.class) {
                         setterFound = true;
                     } else if (m.getName().equals(getterName)
-                            && m.getParameterCount() == 0) {
+                            && m.getParameterTypes().length == 0) {
                         getterFound = true;
                     } else if (m.getName().equals(unsetName)
-                            && m.getParameterCount() == 0
+                            && m.getParameterTypes().length == 0
                             && m.getReturnType() == void.class) {
                         unsetFound = true;
                     }
@@ -1006,30 +1011,15 @@ public abstract class BeanUtils {
                 }
             }
 
-            if (record) {
-                boolean match = false;
-                for (String recordFieldName : recordFieldNames) {
-                    if (methodName.equals(recordFieldName)) {
-                        match = true;
-                        break;
-                    }
-                }
-
-                if (match) {
-                    methodConsumer.accept(method);
-                    continue;
-                }
-            }
-
             final int methodNameLength = methodName.length();
-            boolean nameMatch = methodNameLength > 3 && methodName.startsWith("get");
+            boolean nameMatch = methodNameLength > 3 && methodName.startsWith("get", 0);
             if (nameMatch) {
                 char firstChar = methodName.charAt(3);
                 if (firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 4) {
                     nameMatch = false;
                 }
             } else if (returnClass == boolean.class || returnClass == Boolean.class) {
-                nameMatch = methodNameLength > 2 && methodName.startsWith("is");
+                nameMatch = methodNameLength > 2 && methodName.startsWith("is", 0);
                 if (nameMatch) {
                     char firstChar = methodName.charAt(2);
                     if (firstChar >= 'a' && firstChar <= 'z' && methodNameLength == 3) {
@@ -1069,7 +1059,7 @@ public abstract class BeanUtils {
                     case "getParserForType":
                     case "getMessageBytes":
                     case "getDefaultInstanceForType":
-                        ignore = returnType.getName().startsWith("com.google.protobuf.") || returnType == objectClass;
+                        ignore = returnType.getName().startsWith("com.google.protobuf.", 0) || returnType == objectClass;
                         break;
                     default:
                         break;
@@ -1084,16 +1074,6 @@ public abstract class BeanUtils {
         }
     }
 
-    private static Method[] getMethods(Class objectClass) {
-        Method[] methods;
-        try {
-            methods = objectClass.getMethods();
-        } catch (NoClassDefFoundError ignored) {
-            methods = new Method[0];
-        }
-        return methods;
-    }
-
     private static boolean isJSONField(AnnotatedElement element) {
         Annotation[] annotations = element.getAnnotations();
         for (Annotation annotation : annotations) {
@@ -1102,52 +1082,11 @@ public abstract class BeanUtils {
                 case "com.alibaba.fastjson.annotation.JSONField":
                 case "com.alibaba.fastjson2.annotation.JSONField":
                     return true;
-                case "com.fasterxml.jackson.annotation.JsonValue":
-                case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonValue":
-                case "com.fasterxml.jackson.annotation.JsonRawValue":
-                case "com.fasterxml.jackson.annotation.JsonProperty":
-                case "com.alibaba.fastjson2.adapter.jackson.annotation.JsonProperty":
-                    if (JSONFactory.isUseJacksonAnnotation()) {
-                        return true;
-                    }
-                    break;
                 default:
                     break;
             }
         }
         return false;
-    }
-
-    static boolean ignore(Class objectClass) {
-        if (objectClass == null) {
-            return true;
-        }
-
-        return Arrays.binarySearch(
-                IGNORE_CLASS_HASH_CODES,
-                Fnv.hashCode64(
-                        objectClass.getName()
-                )
-        ) >= 0;
-    }
-
-    public static boolean isRecord(Class objectClass) {
-        Class superclass = objectClass.getSuperclass();
-        if (superclass == null) {
-            return false;
-        }
-
-        if (RECORD_CLASS == null) {
-            String superclassName = superclass.getName();
-            if ("java.lang.Record".equals(superclassName)) {
-                RECORD_CLASS = superclass;
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        return superclass == RECORD_CLASS;
     }
 
     public static String setterName(String methodName, String namingStrategy) {
@@ -1160,7 +1099,7 @@ public abstract class BeanUtils {
             return methodName;
         }
 
-        int prefixLength = methodName.startsWith("set") ? 3 : 0;
+        int prefixLength = methodName.startsWith("set", 0) ? 3 : 0;
 
         switch (namingStrategy) {
             case "NeverUseThisValueExceptDefaultValue":
@@ -1246,7 +1185,7 @@ public abstract class BeanUtils {
             } else if (c0 == 'g' && c1 == 'e' && c2 == 't') {
                 get = len > 3;
             } else if (c0 == 's' && c1 == 'e' && c2 == 't') {
-                set = len > 3 && method.getParameterCount() == 1;
+                set = len > 3 && method.getParameterTypes().length == 1;
             }
         }
 
@@ -1282,8 +1221,8 @@ public abstract class BeanUtils {
         }
 
         final int methodNameLength = methodName.length();
-        boolean is = methodName.startsWith("is");
-        boolean get = methodName.startsWith("get");
+        boolean is = methodName.startsWith("is", 0);
+        boolean get = methodName.startsWith("get", 0);
 
         final int prefixLength;
         if (is) {
@@ -1301,14 +1240,45 @@ public abstract class BeanUtils {
         switch (namingStrategy) {
             case "NeverUseThisValueExceptDefaultValue":
             case "CamelCase": {
-                char[] chars = new char[methodNameLength - prefixLength];
-                methodName.getChars(prefixLength, methodNameLength, chars, 0);
-                char c0 = chars[0];
-                boolean c1UCase = chars.length > 1 && chars[1] >= 'A' && chars[1] <= 'Z';
-                if (c0 >= 'A' && c0 <= 'Z' && !c1UCase) {
-                    chars[0] = (char) (c0 + 32);
+                int nameLength = methodNameLength - prefixLength;
+                char[] chars = charsCache.getAndSet(null);
+                if (chars == null || chars.length < nameLength) {
+                    chars = new char[Math.max(32, nameLength)];
                 }
-                return new String(chars);
+                try {
+                    methodName.getChars(prefixLength, methodNameLength, chars, 0);
+                    char c0 = chars[0];
+                    boolean c1UCase = chars.length > 1 && chars[1] >= 'A' && chars[1] <= 'Z';
+                    if (c0 >= 'A' && c0 <= 'Z' && !c1UCase) {
+                        chars[0] = (char) (c0 + 32);
+                    }
+
+                    if (nameLength <= 8) {
+                        long nameValue = 0;
+                        for (int i = 0; i < nameLength; i++) {
+                            char ch = chars[i];
+                            if (ch > 128) {
+                                nameValue = 0;
+                                break;
+                            }
+                            nameValue = (nameValue << 8) + ch;
+                        }
+                        if (nameValue != 0) {
+                            int indexMask = ((int) nameValue) & (NAME_CACHE.length - 1);
+                            NameCacheEntry entry = NAME_CACHE[indexMask];
+                            if (entry == null) {
+                                String name = new String(chars, 0, nameLength);
+                                NAME_CACHE[indexMask] = new NameCacheEntry(name, nameValue);
+                                return name;
+                            } else if (entry.value == nameValue) {
+                                return entry.name;
+                            }
+                        }
+                    }
+                    return new String(chars, 0, nameLength);
+                } finally {
+                    charsCache.set(chars);
+                }
             }
             case "CamelCase1x": {
                 char[] chars = new char[methodNameLength - prefixLength];
@@ -1414,9 +1384,6 @@ public abstract class BeanUtils {
                 return methodName;
             }
             case "PascalCase": {
-                if (methodName.isEmpty()) {
-                    return methodName;
-                }
                 char c0 = methodName.charAt(0);
                 char c1;
                 if (c0 >= 'a' && c0 <= 'z'
@@ -1552,9 +1519,7 @@ public abstract class BeanUtils {
                         && c1 <= 'Z'
                         && (c1 = methodName.charAt(i - 1)) >= 'a'
                         && c1 <= 'z') {
-                    if (i > prefixLength) {
-                        buf[off++] = separator;
-                    }
+                    buf[off++] = separator;
                     buf[off++] = ch;
                 } else {
                     buf[off++] = ch;
@@ -1582,13 +1547,12 @@ public abstract class BeanUtils {
                         if (i > prefixLength) {
                             buf[off++] = '_';
                         }
-                        buf[off++] = ch;
                     } else {
                         if (ch >= 'a' && ch <= 'z') {
                             ch -= 32;
                         }
-                        buf[off++] = ch;
                     }
+                    buf[off++] = ch;
                 } else {
                     if (ch >= 'A' && ch <= 'Z') {
                         if (i > prefixLength) {
@@ -1622,13 +1586,12 @@ public abstract class BeanUtils {
                         if (i > prefixLength) {
                             buf[off++] = '-';
                         }
-                        buf[off++] = ch;
                     } else {
                         if (ch >= 'a' && ch <= 'z') {
                             ch -= 32;
                         }
-                        buf[off++] = ch;
                     }
+                    buf[off++] = ch;
                 } else {
                     if (ch >= 'A' && ch <= 'Z') {
                         if (i > prefixLength) {
@@ -1662,13 +1625,12 @@ public abstract class BeanUtils {
                         if (i > prefixLength) {
                             buf[off++] = '.';
                         }
-                        buf[off++] = ch;
                     } else {
                         if (ch >= 'a' && ch <= 'z') {
                             ch -= 32;
                         }
-                        buf[off++] = ch;
                     }
+                    buf[off++] = ch;
                 } else {
                     if (ch >= 'A' && ch <= 'Z') {
                         if (i > prefixLength) {
@@ -1710,11 +1672,12 @@ public abstract class BeanUtils {
         return null;
     }
 
-    public static Type getParamType(TypeReference type,
-                                    Class<?> raw,
-                                    Class declaringClass,
-                                    Parameter field,
-                                    Type fieldType) {
+    public static Type getParamType(
+            TypeReference type,
+            Class<?> raw,
+            Class declaringClass,
+            Type fieldType
+    ) {
         while (raw != Object.class) {
             if (declaringClass == raw) {
                 return resolve(type.getType(), declaringClass, fieldType);
@@ -2090,8 +2053,7 @@ public abstract class BeanUtils {
             throw new NullPointerException("annotationType must not be null");
         }
 
-        boolean inherited = annotationType.isAnnotationPresent(Inherited.class);
-        return findAnnotation(element, annotationType, inherited, new HashSet<>());
+        return element.getAnnotation(annotationType);
     }
 
     /**
@@ -2119,110 +2081,41 @@ public abstract class BeanUtils {
             return (A) annotation;
         }
 
-        boolean inherited = annotationType.isAnnotationPresent(Inherited.class);
-        return findAnnotation(annotationTypeClass, annotationType, inherited, new HashSet<>());
-    }
-
-    /**
-     * Find the first annotation of {@code annotationType} that is either
-     * <em>directly present</em>, <em>meta-present</em>, or <em>indirectly
-     * present</em> on the supplied {@code element}.
-     *
-     * <p>If the element is a class and the annotation is neither <em>directly
-     * present</em> nor <em>meta-present</em> on the class, this method will additionally search on
-     * interfaces implemented by the class before finding an annotation that is <em>indirectly
-     * present</em> on the class.
-     *
-     * @param element the element on which to search for the annotation
-     * @param annotationType the annotation type of need to search
-     * @param inherited whether has {@link Inherited}
-     * @param visited this annotation whether visited
-     * @param <A> the annotation type
-     * @return the searched annotation
-     */
-    private static <A extends Annotation> A findAnnotation(
-            AnnotatedElement element,
-            Class<A> annotationType,
-            boolean inherited,
-            Set<Annotation> visited
-    ) {
-        if (element == null || annotationType == null) {
-            return null;
-        }
-
-        A annotation = element.getDeclaredAnnotation(annotationType);
-        if (annotation != null) {
-            return annotation;
-        }
-
-        Annotation[] declaredAnnotations = element.getDeclaredAnnotations();
-        A directMetaAnnotation = findMetaAnnotation(annotationType, declaredAnnotations, inherited, visited);
-        if (directMetaAnnotation != null) {
-            return directMetaAnnotation;
-        }
-
-        if (element instanceof Class) {
-            Class<?> clazz = (Class<?>) element;
-
-            for (Class<?> ifc : clazz.getInterfaces()) {
-                if (ifc != Annotation.class) {
-                    A annotationOnInterface = findAnnotation(ifc, annotationType, inherited, visited);
-                    if (annotationOnInterface != null) {
-                        return annotationOnInterface;
-                    }
-                }
-            }
-
-            if (inherited) {
-                Class<?> superclass = clazz.getSuperclass();
-                if (superclass != null && superclass != Object.class) {
-                    A annotationOnSuperclass = findAnnotation(superclass, annotationType, inherited, visited);
-                    if (annotationOnSuperclass != null) {
-                        return annotationOnSuperclass;
-                    }
-                }
-            }
-        }
-
-        return findMetaAnnotation(annotationType, getAnnotations(element), inherited, visited);
-    }
-
-    /**
-     * Find meta-present on indirectly present annotations.
-     *
-     * @param annotationType the annotation type of need to search
-     * @param candidates annotations for candidates
-     * @param inherited whether has {@link Inherited}
-     * @param visited this annotation whether visited
-     * @param <A> the annotation type
-     * @return the searched annotation
-     */
-    private static <A extends Annotation> A findMetaAnnotation(
-            Class<A> annotationType,
-            Annotation[] candidates,
-            boolean inherited,
-            Set<Annotation> visited
-    ) {
-        for (Annotation candidateAnnotation : candidates) {
-            Class<? extends Annotation> candidateAnnotationType = candidateAnnotation.annotationType();
-            String name = candidateAnnotationType.getName();
-            boolean isInJavaLangAnnotationPackage = name.startsWith("java.lang.annotation") || name.startsWith("kotlin.");
-            if (!isInJavaLangAnnotationPackage && visited.add(candidateAnnotation)) {
-                A metaAnnotation = findAnnotation(candidateAnnotationType, annotationType, inherited, visited);
-                if (metaAnnotation != null) {
-                    return metaAnnotation;
-                }
-            }
-        }
         return null;
     }
 
-    public static Annotation[] getAnnotations(AnnotatedElement element) {
-        try {
-            return element.getDeclaredAnnotations();
-        } catch (Throwable ignored) {
-            return new Annotation[0];
+    public static String[] lookupParameterNames(Constructor constructor) {
+        Class declaringClass = constructor.getDeclaringClass();
+        Class[] parameterTypes = constructor.getParameterTypes();
+
+        if (Throwable.class.isAssignableFrom(declaringClass)) {
+            switch (parameterTypes.length) {
+                case 1:
+                    if (parameterTypes[0] == String.class) {
+                        return new String[]{"message"};
+                    }
+
+                    if (Throwable.class.isAssignableFrom(parameterTypes[0])) {
+                        return new String[]{"cause"};
+                    }
+                    break;
+                case 2:
+                    if (parameterTypes[0] == String.class && Throwable.class.isAssignableFrom(parameterTypes[1])) {
+                        return new String[]{"message", "cause"};
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
+
+        int paramCount = parameterTypes.length;
+        String[] paramNames = new String[paramCount];
+        if (paramCount > 0 && parameterTypes[0] == declaringClass.getDeclaringClass()
+                && !Modifier.isStatic(declaringClass.getModifiers())) {
+            paramNames[0] = "this.$0";
+        }
+        return paramNames;
     }
 
     static final class ParameterizedTypeImpl
@@ -2406,32 +2299,12 @@ public abstract class BeanUtils {
         return obj;
     }
 
-    public static void processJacksonJsonIgnore(FieldInfo fieldInfo, Annotation annotation) {
-        fieldInfo.ignore = true;
-        Class<? extends Annotation> annotationClass = annotation.getClass();
-        BeanUtils.annotationMethods(annotationClass, m -> {
-            String name = m.getName();
-            try {
-                Object result = m.invoke(annotation);
-                switch (name) {
-                    case "value":
-                        boolean value = (Boolean) result;
-                        fieldInfo.ignore = value;
-                        break;
-                    default:
-                        break;
-                }
-            } catch (Throwable ignored) {
-                // ignored
-            }
-        });
-    }
-
     public static boolean isNoneStaticMemberClass(Class objectClass, Class memberClass) {
         if (memberClass == null
                 || memberClass.isPrimitive()
                 || memberClass == String.class
                 || memberClass == List.class
+                || memberClass.isEnum()
         ) {
             return false;
         }
@@ -2448,7 +2321,7 @@ public abstract class BeanUtils {
         Constructor[] constructors = constructorCache.get(memberClass);
         if (constructors == null) {
             constructors = memberClass.getDeclaredConstructors();
-            constructorCache.putIfAbsent(memberClass, constructors);
+            constructorCache.put(memberClass, constructors);
         }
 
         if (constructors.length == 0) {
@@ -2456,11 +2329,11 @@ public abstract class BeanUtils {
         }
 
         Constructor firstConstructor = constructors[0];
-        if (firstConstructor.getParameterCount() == 0) {
+        Class[] parameterTypes = firstConstructor.getParameterTypes();
+        if (parameterTypes.length == 0) {
             return false;
         }
 
-        Class[] parameterTypes = firstConstructor.getParameterTypes();
         return enclosingClass.equals(parameterTypes[0]);
     }
 
@@ -2493,7 +2366,7 @@ public abstract class BeanUtils {
                 fields = list.toArray(new Field[list.size()]);
             }
 
-            fieldCache.putIfAbsent(objectClass, fields);
+            fieldCache.put(objectClass, fields);
         }
 
         Field this0 = null;
@@ -2665,9 +2538,7 @@ public abstract class BeanUtils {
                             for (String ignore : beanInfo.ignores) {
                                 ignoresSet.add(ignore);
                             }
-                            for (String ignore : fields) {
-                                ignoresSet.add(ignore);
-                            }
+                            Collections.addAll(ignoresSet, fields);
                             beanInfo.ignores = ignoresSet.toArray(new String[ignoresSet.size()]);
                         }
                     }
@@ -2693,208 +2564,5 @@ public abstract class BeanUtils {
         } catch (Throwable ignored) {
             // ignored
         }
-    }
-
-    public static void processJacksonJsonFormat(FieldInfo fieldInfo, Annotation annotation) {
-        Class<? extends Annotation> annotationClass = annotation.getClass();
-        BeanUtils.annotationMethods(annotationClass, m -> {
-            String name = m.getName();
-            try {
-                Object result = m.invoke(annotation);
-                switch (name) {
-                    case "pattern": {
-                        String pattern = (String) result;
-                        if (pattern.length() != 0) {
-                            fieldInfo.format = pattern;
-                        }
-                        break;
-                    }
-                    case "shape": {
-                        String shape = ((Enum) result).name();
-                        switch (shape) {
-                            case "STRING":
-                                fieldInfo.features |= JSONWriter.Feature.WriteNonStringValueAsString.mask;
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            } catch (Throwable ignored) {
-                // ignored
-            }
-        });
-    }
-
-    public static void processJacksonJsonFormat(BeanInfo beanInfo, Annotation annotation) {
-        Class<? extends Annotation> annotationClass = annotation.getClass();
-        BeanUtils.annotationMethods(annotationClass, m -> {
-            String name = m.getName();
-            try {
-                Object result = m.invoke(annotation);
-                switch (name) {
-                    case "pattern": {
-                        String pattern = (String) result;
-                        if (pattern.length() != 0) {
-                            beanInfo.format = pattern;
-                        }
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            } catch (Throwable ignored) {
-                // ignored
-            }
-        });
-    }
-
-    public static void processJacksonJsonInclude(BeanInfo beanInfo, Annotation annotation) {
-        Class<? extends Annotation> annotationClass = annotation.getClass();
-        BeanUtils.annotationMethods(annotationClass, m -> {
-            String name = m.getName();
-            try {
-                Object result = m.invoke(annotation);
-                switch (name) {
-                    case "value": {
-                        String include = ((Enum) result).name();
-                        switch (include) {
-                            case "ALWAYS":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.WriteNulls.mask;
-                                break;
-                            case "NON_DEFAULT":
-                                beanInfo.writerFeatures |= JSONWriter.Feature.NotWriteDefaultValue.mask;
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            } catch (Throwable ignored) {
-                // ignored
-            }
-        });
-    }
-
-    public static void processJacksonJsonTypeName(BeanInfo beanInfo, Annotation annotation) {
-        Class<? extends Annotation> annotationClass = annotation.getClass();
-        BeanUtils.annotationMethods(annotationClass, m -> {
-            String name = m.getName();
-            try {
-                Object result = m.invoke(annotation);
-                switch (name) {
-                    case "value": {
-                        String value = (String) result;
-                        if (!value.isEmpty()) {
-                            beanInfo.typeName = value;
-                        }
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            } catch (Throwable ignored) {
-                // ignored
-            }
-        });
-    }
-
-    public static void processJacksonJsonSubTypesType(BeanInfo beanInfo, int index, Annotation annotation) {
-        Class<? extends Annotation> annotationClass = annotation.getClass();
-        BeanUtils.annotationMethods(annotationClass, m -> {
-            String name = m.getName();
-            try {
-                Object result = m.invoke(annotation);
-                switch (name) {
-                    case "value": {
-                        Class value = (Class) result;
-                        beanInfo.seeAlso[index] = value;
-                        break;
-                    }
-                    case "name": {
-                        String value = (String) result;
-                        beanInfo.seeAlsoNames[index] = value;
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            } catch (Throwable ignored) {
-                // ignored
-            }
-        });
-    }
-
-    public static void processGsonSerializedName(FieldInfo fieldInfo, Annotation annotation) {
-        Class<? extends Annotation> annotationClass = annotation.getClass();
-        BeanUtils.annotationMethods(annotationClass, m -> {
-            String name = m.getName();
-            try {
-                Object result = m.invoke(annotation);
-                switch (name) {
-                    case "value":
-                        String value = (String) result;
-                        if (!value.isEmpty()) {
-                            fieldInfo.fieldName = value;
-                        }
-                        break;
-                    case "alternate":
-                        String[] alternate = (String[]) result;
-                        if (alternate.length != 0) {
-                            fieldInfo.alternateNames = alternate;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            } catch (Throwable ignored) {
-                // ignored
-            }
-        });
-    }
-
-    public static boolean isExtendedMap(Class objectClass) {
-        if (objectClass == HashMap.class
-                || objectClass == LinkedHashMap.class
-                || objectClass == TreeMap.class
-                || "".equals(objectClass.getSimpleName())
-        ) {
-            return false;
-        }
-
-        Class superclass = objectClass.getSuperclass();
-        if (superclass != HashMap.class
-                && superclass != LinkedHashMap.class
-                && superclass != TreeMap.class
-        ) {
-            return false;
-        }
-
-        Constructor defaultConstructor = getDefaultConstructor(objectClass, false);
-        if (defaultConstructor != null) {
-            return false;
-        }
-
-        List<Field> fields = new ArrayList<>();
-        BeanUtils.declaredFields(objectClass, field -> {
-            int modifiers = field.getModifiers();
-            if (Modifier.isStatic(modifiers)
-                    || Modifier.isTransient(modifiers)
-                    || field.getDeclaringClass().isAssignableFrom(superclass)
-                    || field.getName().equals("this$0")
-            ) {
-                return;
-            }
-
-            fields.add(field);
-        });
-
-        return !fields.isEmpty();
     }
 }

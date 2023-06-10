@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.annotation.JSONCompiler;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
@@ -87,7 +86,6 @@ public class NumberFormatTest {
         assertEquals("[12.34]", JSON.toJSONString(bean, JSONWriter.Feature.BeanToArray));
     }
 
-    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean4 {
         @JSONField(format = "#.00")
         private double value;
@@ -109,7 +107,6 @@ public class NumberFormatTest {
         assertEquals("[12.34]", JSON.toJSONString(bean, JSONWriter.Feature.BeanToArray));
     }
 
-    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean5 {
         @JSONField(format = "#.00")
         private float value;
@@ -199,7 +196,6 @@ public class NumberFormatTest {
         assertEquals("[12.34]", JSON.toJSONString(bean, JSONWriter.Feature.BeanToArray));
     }
 
-    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean10 {
         @JSONField(format = "#.00")
         private Double value;
@@ -221,7 +217,6 @@ public class NumberFormatTest {
         assertEquals("[12.34]", JSON.toJSONString(bean, JSONWriter.Feature.BeanToArray));
     }
 
-    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     public static class Bean11 {
         @JSONField(format = "#.00")
         private Float value;
@@ -319,7 +314,6 @@ public class NumberFormatTest {
         assertEquals("[12.34]", JSON.toJSONString(bean, JSONWriter.Feature.BeanToArray));
     }
 
-    @JSONCompiler(JSONCompiler.CompilerOption.LAMBDA)
     private static class Bean16 {
         @JSONField(format = "#.00")
         private BigDecimal value;

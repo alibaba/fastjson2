@@ -58,56 +58,6 @@ public class AutoTypeTest27 {
     }
 
     @Test
-    public void test_unmodifiableSortedSet() throws Exception {
-        SortedSet collection = new TreeSet();
-        collection.add("A");
-
-        Bean1 bean = new Bean1();
-        bean.items = Collections.unmodifiableSortedSet(collection);
-
-        byte[] bytes = JSONB.toBytes(bean,
-                JSONWriter.Feature.WriteClassName,
-                JSONWriter.Feature.FieldBased,
-                JSONWriter.Feature.ReferenceDetection,
-                JSONWriter.Feature.WriteNulls,
-                JSONWriter.Feature.NotWriteDefaultValue
-        );
-
-        JSONB.dump(bytes);
-
-        Bean1 bean2 = (Bean1) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
-        assertNotNull(bean2);
-        assertNotNull(bean2.items);
-
-        assertSame(bean.items.getClass(), bean2.items.getClass());
-    }
-
-    @Test
-    public void test_unmodifiableNavigableSet() throws Exception {
-        TreeSet collection = new TreeSet();
-        collection.add("A");
-        Bean1 bean = new Bean1();
-        bean.items = Collections.unmodifiableNavigableSet(collection);
-
-        byte[] bytes = JSONB.toBytes(bean,
-                JSONWriter.Feature.WriteClassName,
-                JSONWriter.Feature.FieldBased,
-                JSONWriter.Feature.ReferenceDetection,
-                JSONWriter.Feature.WriteNulls,
-                JSONWriter.Feature.NotWriteDefaultValue
-        );
-
-        JSONB.dump(bytes);
-
-        Bean1 bean2 = (Bean1) JSONB.parseObject(bytes, Object.class, JSONReader.Feature.SupportAutoType, JSONReader.Feature.FieldBased);
-        assertNotNull(bean2);
-        assertNotNull(bean2.items);
-
-        assertSame(bean.items.getClass(), bean2.items.getClass());
-        assertSame(bean.items.size(), bean2.items.size());
-    }
-
-    @Test
     public void test_emptySet() throws Exception {
         Bean1 bean = new Bean1();
         bean.items = Collections.emptySet();

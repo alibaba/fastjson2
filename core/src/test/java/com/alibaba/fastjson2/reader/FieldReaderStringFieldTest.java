@@ -12,7 +12,7 @@ public class FieldReaderStringFieldTest {
     @Test
     public void test() {
         Bean bean = new Bean();
-        ObjectReader<Bean> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean.class);
+        ObjectReader<Bean> objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Bean.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         fieldReader.accept(bean, "123");
         assertEquals("123", bean.value);
@@ -47,32 +47,9 @@ public class FieldReaderStringFieldTest {
     }
 
     @Test
-    public void test1() {
-        Bean1 bean = new Bean1();
-        ObjectReader<Bean1> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean1.class);
-        FieldReader fieldReader = objectReader.getFieldReader("value");
-        assertThrows(Exception.class, () -> fieldReader.accept(bean, "123"));
-        assertThrows(Exception.class, () -> fieldReader.accept(bean, 123));
-        assertThrows(Exception.class, () -> fieldReader.accept(bean, Integer.valueOf(123)));
-
-        assertEquals(
-                "AB",
-                objectReader.readObject(
-                        JSONReader.of("{\"value\":\"AB\"}"),
-                        0
-                ).value
-        );
-    }
-
-    private static class Bean1 {
-        @JSONField(schema = "{'maxLength':2}")
-        public String value;
-    }
-
-    @Test
     public void test2() {
         Bean2 bean = new Bean2();
-        ObjectReader objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean2.class);
+        ObjectReader objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Bean2.class);
         FieldReader fieldReader = objectReader.getFieldReader("value");
         assertThrows(JSONException.class, () -> fieldReader.accept(bean, "123"));
         assertThrows(JSONException.class, () -> fieldReader.accept(bean, 123));
@@ -89,7 +66,7 @@ public class FieldReaderStringFieldTest {
 
     @Test
     public void test3() {
-        ObjectReader<Bean3> objectReader = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(Bean3.class);
+        ObjectReader<Bean3> objectReader = JSONFactory.defaultObjectReaderProvider.getObjectReader(Bean3.class);
         assertEquals(
                 "123",
                 objectReader.readObject(

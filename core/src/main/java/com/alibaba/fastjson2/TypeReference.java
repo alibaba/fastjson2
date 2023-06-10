@@ -125,7 +125,7 @@ public abstract class TypeReference<T> {
      * See {@link JSON#parseObject(byte[], Type)} for details
      *
      * <pre>{@code
-     * String utf8Bytes = "{\"id\":1,\"name\":\"kraity\"}".getBytes(StandardCharsets.UTF_8);
+     * String utf8Bytes = "{\"id\":1,\"name\":\"kraity\"}".getBytes(IOUtils.UTF_8);
      * User user = new TypeReference<User>(){}.parseObject(utf8Bytes);
      * }</pre>
      *
@@ -156,7 +156,7 @@ public abstract class TypeReference<T> {
      * See {@link JSON#parseArray(byte[], Type, JSONReader.Feature...)} for details
      *
      * <pre>{@code
-     * String utf8Bytes = "[{\"id\":1,\"name\":\"kraity\"}]".getBytes(StandardCharsets.UTF_8);
+     * String utf8Bytes = "[{\"id\":1,\"name\":\"kraity\"}]".getBytes(IOUtils.UTF_8);
      * List<User> users = new TypeReference<User>(){}.parseArray(utf8Bytes);
      * }</pre>
      *

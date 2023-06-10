@@ -3,16 +3,14 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
-import com.alibaba.fastjson2.util.UnsafeUtils;
+import com.alibaba.fastjson2.function.Function;
+import com.alibaba.fastjson2.function.Supplier;
+import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.lang.reflect.Type;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT;
 import static com.alibaba.fastjson2.JSONB.Constants.BC_OBJECT_END;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectReader6<T>
         extends ObjectReaderAdapter<T> {
@@ -47,7 +45,6 @@ public class ObjectReader6<T>
             Class objectClass,
             Supplier<T> creator,
             long features,
-            JSONSchema schema,
             Function buildFunction,
             FieldReader fieldReader0,
             FieldReader fieldReader1,
@@ -61,7 +58,6 @@ public class ObjectReader6<T>
                 null,
                 null,
                 features,
-                schema,
                 creator,
                 buildFunction,
                 fieldReader0,
@@ -78,12 +74,11 @@ public class ObjectReader6<T>
             String typeKey,
             String typeName,
             long features,
-            JSONSchema schema,
             Supplier<T> creator,
             Function buildFunction,
             FieldReader... fieldReaders
     ) {
-        super(objectClass, typeKey, typeName, features, schema, creator, buildFunction, fieldReaders);
+        super(objectClass, typeKey, typeName, features, creator, buildFunction, fieldReaders);
 
         this.fieldReader0 = fieldReaders[0];
         this.fieldReader1 = fieldReaders[1];
@@ -217,9 +212,9 @@ public class ObjectReader6<T>
         T object;
         if (creator != null) {
             object = creator.get();
-        } else if (UNSAFE_SUPPORT && ((features | jsonReader.getContext().getFeatures()) & JSONReader.Feature.FieldBased.mask) != 0) {
+        } else if (((features | jsonReader.context.getFeatures()) & JSONReader.Feature.FieldBased.mask) != 0) {
             try {
-                object = (T) UnsafeUtils.UNSAFE.allocateInstance(objectClass);
+                object = (T) JDKUtils.UNSAFE.allocateInstance(objectClass);
             } catch (InstantiationException e) {
                 throw new JSONException(jsonReader.info("create instance error"), e);
             }
@@ -282,10 +277,6 @@ public class ObjectReader6<T>
             object = (T) buildFunction.apply(object);
         }
 
-        if (schema != null) {
-            schema.assertValidate(object);
-        }
-
         return object;
     }
 
@@ -295,19 +286,19 @@ public class ObjectReader6<T>
             jsonReader.errorOnNoneSerializable(objectClass);
         }
 
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
         if (jsonReader.nextIfNull()) {
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return null;
         }
 
         long featuresAll = jsonReader.features(this.features | features);
         if (jsonReader.isArray()) {
             if ((featuresAll & JSONReader.Feature.SupportArrayToBean.mask) != 0) {
-                jsonReader.nextIfMatch('[');
+                jsonReader.nextIfArrayStart();
                 T object = creator.get();
                 if (hasDefaultValue) {
                     initDefaultValue(object);
@@ -319,22 +310,22 @@ public class ObjectReader6<T>
                 fieldReader3.readFieldValue(jsonReader, object);
                 fieldReader4.readFieldValue(jsonReader, object);
                 fieldReader5.readFieldValue(jsonReader, object);
-                if (!jsonReader.nextIfMatch(']')) {
+                if (!jsonReader.nextIfArrayEnd()) {
                     throw new JSONException(jsonReader.info("array to bean end error"));
                 }
 
-                jsonReader.nextIfMatch(',');
+                jsonReader.nextIfComma();
 
                 if (buildFunction != null) {
                     return (T) buildFunction.apply(object);
                 }
-                return (T) object;
+                return object;
             }
 
             return processObjectInputSingleItemArray(jsonReader, fieldType, fieldName, featuresAll);
         }
 
-        jsonReader.nextIfMatch('{');
+        jsonReader.nextIfObjectStart();
         T object = creator.get();
         if (hasDefaultValue) {
             initDefaultValue(object);
@@ -344,7 +335,7 @@ public class ObjectReader6<T>
         }
 
         for (int i = 0; ; ++i) {
-            if (jsonReader.nextIfMatch('}')) {
+            if (jsonReader.nextIfObjectEnd()) {
 //                jsonReader.next();
                 break;
             }
@@ -353,7 +344,7 @@ public class ObjectReader6<T>
 
             if (i == 0 && hashCode == HASH_TYPE) {
                 long typeHash = jsonReader.readTypeHashCode();
-                JSONReader.Context context = jsonReader.getContext();
+                JSONReader.Context context = jsonReader.context;
                 ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
                 if (autoTypeObjectReader == null) {
                     String typeName = jsonReader.getString();
@@ -409,14 +400,10 @@ public class ObjectReader6<T>
             }
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         if (buildFunction != null) {
             object = (T) buildFunction.apply(object);
-        }
-
-        if (schema != null) {
-            schema.assertValidate(object);
         }
 
         return object;

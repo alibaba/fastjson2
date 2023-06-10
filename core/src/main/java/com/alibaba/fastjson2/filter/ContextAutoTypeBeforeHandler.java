@@ -2,17 +2,13 @@ package com.alibaba.fastjson2.filter;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.time.*;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
@@ -105,7 +101,6 @@ public class ContextAutoTypeBeforeHandler
 
                     Date.class,
                     Calendar.class,
-                    LocalTime.class,
                     LocalDate.class,
                     LocalDateTime.class,
                     Instant.class,
@@ -132,9 +127,7 @@ public class ContextAutoTypeBeforeHandler
                     CLASS_UNMODIFIABLE_LIST,
                     CLASS_UNMODIFIABLE_SET,
                     CLASS_UNMODIFIABLE_SORTED_SET,
-                    CLASS_UNMODIFIABLE_NAVIGABLE_SET,
                     Collections.unmodifiableMap(new HashMap<>()).getClass(),
-                    Collections.unmodifiableNavigableMap(new TreeMap<>()).getClass(),
                     Collections.unmodifiableSortedMap(new TreeMap<>()).getClass(),
                     Arrays.asList().getClass(),
 
@@ -180,21 +173,18 @@ public class ContextAutoTypeBeforeHandler
                     StackTraceElement.class
             };
 
-            for (Class basicType : basicTypes) {
+            for (int i = 0; i < basicTypes.length; i++) {
+                Class basicType = basicTypes[i];
                 String name = TypeUtils.getTypeName(basicType);
                 nameSet.add(name);
             }
 
-            String[] basicTypeNames = {
-                    "javax.validation.ValidationException",
-                    "javax.validation.NoProviderFoundException"
-            };
-            for (String basicType : basicTypeNames) {
-                nameSet.add(basicType);
-            }
+            nameSet.add("javax.validation.ValidationException");
+            nameSet.add("javax.validation.NoProviderFoundException");
         }
 
-        for (String name : acceptNames) {
+        for (int i = 0; i < acceptNames.length; i++) {
+            String name = acceptNames[i];
             if (name == null || name.isEmpty()) {
                 continue;
             }
@@ -329,12 +319,12 @@ public class ContextAutoTypeBeforeHandler
             int tclHash = System.identityHashCode(tcl);
             ConcurrentHashMap<Long, Class> tclHashCache = tclHashCaches.get(tclHash);
             if (tclHashCache == null) {
-                tclHashCaches.putIfAbsent(tclHash, new ConcurrentHashMap<>());
+                tclHashCaches.put(tclHash, new ConcurrentHashMap<>());
                 tclHashCache = tclHashCaches.get(tclHash);
             }
 
-            return tclHashCache.putIfAbsent(typeNameHash, type);
+            return tclHashCache.put(typeNameHash, type);
         }
-        return classCache.putIfAbsent(typeNameHash, type);
+        return classCache.put(typeNameHash, type);
     }
 }

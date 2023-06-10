@@ -46,7 +46,7 @@ public class Issue1265 {
             }
             return name;
         };
-        ObjectWriter objectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(Bean1.class);
+        ObjectWriter objectWriter = JSONFactory.defaultObjectWriterProvider.getObjectWriter(Bean1.class);
         objectWriter.setFilter(nameFilter);
 
         String str = JSON.toJSONString(bean);

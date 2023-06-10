@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class OracleClobTest {
     @Test
     public void test() {
-        ObjectWriterProvider provider = JSONFactory.getDefaultObjectWriterProvider();
+        ObjectWriterProvider provider = JSONFactory.defaultObjectWriterProvider;
         assertEquals(JdbcSupport.ClobWriter.class, provider.getObjectWriter(oracle.sql.CLOB.class).getClass());
         assertEquals(JdbcSupport.ClobWriter.class, provider.getObjectWriter(oracle.sql.NCLOB.class).getClass());
 

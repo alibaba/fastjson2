@@ -1,9 +1,8 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.function.Function;
+import com.alibaba.fastjson2.function.Supplier;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 
@@ -11,15 +10,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class ObjectReaderAdapter<T>
         extends ObjectReaderBean<T> {
     protected final String typeKey;
     protected final long typeKeyHashCode;
 
-    final FieldReader[] fieldReaders;
+    protected final FieldReader[] fieldReaders;
     final long[] hashCodes;
     final short[] mapping;
 
@@ -27,7 +24,7 @@ public class ObjectReaderAdapter<T>
     final short[] mappingLCase;
 
     final Constructor constructor;
-    volatile boolean instantiationError;
+    final int parameterCount;
 
     // seeAlso
     final Class[] seeAlso;
@@ -36,7 +33,7 @@ public class ObjectReaderAdapter<T>
     final Map<Long, Class> seeAlsoMapping;
 
     public ObjectReaderAdapter(Class objectClass, Supplier<T> creator, FieldReader... fieldReaders) {
-        this(objectClass, null, null, 0, null, creator, null, fieldReaders);
+        this(objectClass, null, null, 0, creator, null, fieldReaders);
     }
 
     public ObjectReaderAdapter(
@@ -44,7 +41,6 @@ public class ObjectReaderAdapter<T>
             String typeKey,
             String typeName,
             long features,
-            JSONSchema schema,
             Supplier<T> creator,
             Function buildFunction,
             FieldReader... fieldReaders
@@ -54,7 +50,6 @@ public class ObjectReaderAdapter<T>
                 typeKey,
                 typeName,
                 features,
-                schema,
                 creator,
                 buildFunction,
                 null,
@@ -69,7 +64,6 @@ public class ObjectReaderAdapter<T>
             String typeKey,
             String typeName,
             long features,
-            JSONSchema schema,
             Supplier<T> creator,
             Function buildFunction,
             Class[] seeAlso,
@@ -81,7 +75,6 @@ public class ObjectReaderAdapter<T>
                 typeKey,
                 typeName,
                 features,
-                schema,
                 creator,
                 buildFunction,
                 seeAlso,
@@ -96,7 +89,6 @@ public class ObjectReaderAdapter<T>
             String typeKey,
             String typeName,
             long features,
-            JSONSchema schema,
             Supplier<T> creator,
             Function buildFunction,
             Class[] seeAlso,
@@ -104,15 +96,26 @@ public class ObjectReaderAdapter<T>
             Class seeAlsoDefault,
             FieldReader... fieldReaders
     ) {
-        super(objectClass, creator, typeName, features, schema, buildFunction);
+        super(objectClass, creator, typeName, features, buildFunction);
 
-        this.constructor = objectClass == null
-                ? null
-                : BeanUtils.getDefaultConstructor(objectClass, true);
+        Constructor constructor;
+        if (creator instanceof ConstructorSupplier) {
+            constructor = ((ConstructorSupplier) creator).constructor;
+        } else {
+            constructor = objectClass == null
+                    ? null
+                    : BeanUtils.getDefaultConstructor(objectClass, true);
+            if (constructor != null) {
+                constructor.setAccessible(true);
+            }
+        }
 
         if (constructor != null) {
-            constructor.setAccessible(true);
+            parameterCount = constructor.getParameterTypes().length;
+        } else {
+            parameterCount = -1;
         }
+        this.constructor = constructor;
 
         if (typeKey == null || typeKey.isEmpty()) {
             this.typeKey = "@type";
@@ -208,7 +211,7 @@ public class ObjectReaderAdapter<T>
 
     public Object auoType(JSONReader jsonReader, Class expectClass, long features) {
         long typeHash = jsonReader.readTypeHashCode();
-        JSONReader.Context context = jsonReader.getContext();
+        JSONReader.Context context = jsonReader.context;
 
         ObjectReader autoTypeObjectReader = null;
         if (jsonReader.isSupportAutoTypeOrHandler(features)) {
@@ -241,18 +244,18 @@ public class ObjectReaderAdapter<T>
             jsonReader.errorOnNoneSerializable(objectClass);
         }
 
-        jsonReader.nextIfMatch('[');
+        jsonReader.nextIfArrayStart();
         Object object = creator.get();
 
-        for (FieldReader fieldReader : fieldReaders) {
-            fieldReader.readFieldValue(jsonReader, object);
+        for (int i = 0; i < fieldReaders.length; i++) {
+            fieldReaders[i].readFieldValue(jsonReader, object);
         }
 
-        if (!jsonReader.nextIfMatch(']')) {
+        if (!jsonReader.nextIfArrayEnd()) {
             throw new JSONException(jsonReader.info("array to bean end error"));
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         if (buildFunction != null) {
             return (T) buildFunction.apply(object);
@@ -297,7 +300,7 @@ public class ObjectReaderAdapter<T>
     protected Object createInstance0(long features) throws InstantiationException {
         if ((features & JSONReader.Feature.UseDefaultConstructorAsPossible.mask) != 0
                 && constructor != null
-                && constructor.getParameterCount() == 0) {
+                && constructor.getParameterTypes().length == 0) {
             T object;
             try {
                 object = (T) constructor.newInstance();
@@ -345,46 +348,24 @@ public class ObjectReaderAdapter<T>
 
     @Override
     public T createInstance(long features) {
-        if (instantiationError && constructor != null) {
-            T object;
+        T object;
+        if (constructor != null && parameterCount == 0) {
             try {
                 object = (T) constructor.newInstance();
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
                 throw new JSONException("create instance error, " + objectClass, ex);
             }
-
-            if (hasDefaultValue) {
-                initDefaultValue(object);
+        } else {
+            if (creator == null) {
+                throw new JSONException("create instance error, " + objectClass);
             }
-
-            return object;
+            object = creator.get();
         }
 
-        InstantiationException error;
-        try {
-            T object = (T) createInstance0(features);
-            if (hasDefaultValue) {
-                initDefaultValue(object);
-            }
-            return object;
-        } catch (InstantiationException ex) {
-            error = ex;
+        if (hasDefaultValue) {
+            initDefaultValue(object);
         }
-        instantiationError = true;
-
-        if (constructor != null) {
-            try {
-                T object = (T) constructor.newInstance();
-                if (hasDefaultValue) {
-                    initDefaultValue(object);
-                }
-                return object;
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
-                throw new JSONException("create instance error, " + objectClass, ex);
-            }
-        }
-
-        throw new JSONException("create instance error, " + objectClass, error);
+        return object;
     }
 
     @Override
@@ -411,7 +392,7 @@ public class ObjectReaderAdapter<T>
 
     protected T autoType(JSONReader jsonReader) {
         long typeHash = jsonReader.readTypeHashCode();
-        JSONReader.Context context = jsonReader.getContext();
+        JSONReader.Context context = jsonReader.context;
         ObjectReader autoTypeObjectReader = autoType(context, typeHash);
         if (autoTypeObjectReader == null) {
             String typeName = jsonReader.getString();
@@ -459,7 +440,7 @@ public class ObjectReaderAdapter<T>
             long hash = jsonReader.readFieldNameHashCode();
             if (hash == typeKeyHashCode && i == 0) {
                 long typeHash = jsonReader.readValueHashCode();
-                JSONReader.Context context = jsonReader.getContext();
+                JSONReader.Context context = jsonReader.context;
                 ObjectReader autoTypeObjectReader = autoType(context, typeHash);
                 if (autoTypeObjectReader == null) {
                     String typeName = jsonReader.getString();
@@ -493,18 +474,14 @@ public class ObjectReaderAdapter<T>
             }
 
             if (object == null) {
-                object = createInstance(jsonReader.getContext().getFeatures() | features);
+                object = createInstance(jsonReader.context.getFeatures() | features);
             }
 
             fieldReader.readFieldValue(jsonReader, object);
         }
 
         if (object == null) {
-            object = createInstance(jsonReader.getContext().getFeatures() | features);
-        }
-
-        if (schema != null) {
-            schema.assertValidate(object);
+            object = createInstance(jsonReader.context.getFeatures() | features);
         }
 
         return (T) object;
@@ -538,10 +515,98 @@ public class ObjectReaderAdapter<T>
     }
 
     protected void initStringFieldAsEmpty(Object object) {
-        for (FieldReader fieldReader : fieldReaders) {
+        for (int i = 0; i < fieldReaders.length; i++) {
+            FieldReader fieldReader = fieldReaders[i];
             if (fieldReader.fieldClass == String.class) {
                 fieldReader.accept(object, "");
             }
         }
+    }
+
+    public T createInstance(Map map, long features) {
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
+        Object typeKey = map.get(this.typeKey);
+
+        if (typeKey instanceof String) {
+            String typeName = (String) typeKey;
+            long typeHash = Fnv.hashCode64(typeName);
+            ObjectReader<T> reader = null;
+            if ((features & JSONReader.Feature.SupportAutoType.mask) != 0 || this instanceof ObjectReaderSeeAlso) {
+                reader = autoType(provider, typeHash);
+            }
+
+            if (reader == null) {
+                reader = provider.getObjectReader(
+                        typeName, getObjectClass(), features | getFeatures()
+                );
+            }
+
+            if (reader != this && reader != null) {
+                return reader.createInstance(map, features);
+            }
+        }
+
+        T object = createInstance(0L);
+
+        if (extraFieldReader == null
+                && ((features | this.features) & JSONReader.Feature.SupportSmartMatch.mask) == 0
+        ) {
+            for (int i = 0; i < fieldReaders.length; i++) {
+                FieldReader fieldReader = fieldReaders[i];
+                Object fieldValue = map.get(fieldReader.fieldName);
+                if (fieldValue == null) {
+                    continue;
+                }
+
+                if (fieldValue.getClass() == fieldReader.fieldType) {
+                    fieldReader.accept(object, fieldValue);
+                } else {
+                    if ((fieldReader instanceof FieldReaderList)
+                            && fieldValue instanceof JSONArray
+                    ) {
+                        ObjectReader objectReader = fieldReader.getObjectReader(provider);
+                        Object fieldValueList = objectReader.createInstance((JSONArray) fieldValue);
+                        fieldReader.accept(object, fieldValueList);
+                        continue;
+                    } else if (fieldValue instanceof JSONObject
+                            && fieldReader.fieldType != JSONObject.class
+                    ) {
+                        JSONObject jsonObject = (JSONObject) fieldValue;
+                        ObjectReader<T> objectReader = fieldReader.getObjectReader(provider);
+                        Object fieldValueJavaBean = objectReader.createInstance(jsonObject, features);
+                        fieldReader.accept(object, fieldValueJavaBean);
+                        continue;
+                    }
+
+                    fieldReader.acceptAny(object, fieldValue, features);
+                }
+            }
+        } else {
+            for (Map.Entry entry : (Iterable<Map.Entry>) map.entrySet()) {
+                String entryKey = entry.getKey().toString();
+                Object fieldValue = entry.getValue();
+
+                FieldReader fieldReader = getFieldReader(entryKey);
+                if (fieldReader == null) {
+                    acceptExtra(object, entryKey, entry.getValue());
+                    continue;
+                }
+
+                if (fieldValue != null
+                        && fieldValue.getClass() == fieldReader.fieldType
+                ) {
+                    fieldReader.accept(object, fieldValue);
+                } else {
+                    fieldReader.acceptAny(object, fieldValue, features);
+                }
+            }
+        }
+
+        Function buildFunction = getBuildFunction();
+        if (buildFunction != null) {
+            return (T) buildFunction.apply(object);
+        }
+
+        return object;
     }
 }

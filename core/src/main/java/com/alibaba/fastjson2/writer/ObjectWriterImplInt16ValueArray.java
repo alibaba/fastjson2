@@ -2,10 +2,10 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
-import java.util.function.Function;
 
 final class ObjectWriterImplInt16ValueArray
         extends ObjectWriterPrimitiveImpl {
@@ -46,7 +46,7 @@ final class ObjectWriterImplInt16ValueArray
         }
 
         short[] shorts;
-        if (function != null && object != null) {
+        if (function != null) {
             shorts = function.apply(object);
         } else {
             shorts = (short[]) object;

@@ -38,7 +38,7 @@ public class JSONDirectTest {
     public static class Mode1l {
         public int id;
 
-        @JsonRawValue
+        @JSONField(jsonDirect = true)
         public String value;
     }
 

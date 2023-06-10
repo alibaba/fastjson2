@@ -1,16 +1,16 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONPath;
-import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.FieldInfo;
-import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.*;
 
 import java.io.Serializable;
 import java.lang.reflect.*;
-import java.time.*;
 import java.util.*;
+
+import static com.alibaba.fastjson2.codec.FieldInfo.READ_ONLY;
 
 public abstract class FieldReader<T>
         implements Comparable<FieldReader> {
@@ -25,7 +25,6 @@ public abstract class FieldReader<T>
     protected final long fieldOffset;
     public final Object defaultValue;
     public final Locale locale;
-    public final JSONSchema schema;
 
     final boolean fieldClassSerializable;
     final long fieldNameHash;
@@ -50,14 +49,17 @@ public abstract class FieldReader<T>
             String format,
             Locale locale,
             Object defaultValue,
-            JSONSchema schema,
             Method method,
             Field field
     ) {
         this.fieldName = fieldName;
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;
-        this.fieldClassSerializable = fieldClass != null && (Serializable.class.isAssignableFrom(fieldClass)
+        this.fieldClassSerializable = fieldClass != null
+                && (fieldClass.isPrimitive()
+                || fieldClass == String.class
+                || fieldClass == List.class
+                || Serializable.class.isAssignableFrom(fieldClass)
                 || Modifier.isInterface(fieldClass.getModifiers()));
         this.features = features;
         this.fieldNameHash = Fnv.hashCode64(fieldName);
@@ -66,21 +68,16 @@ public abstract class FieldReader<T>
         this.format = format;
         this.locale = locale;
         this.defaultValue = defaultValue;
-        this.schema = schema;
         this.method = method;
         this.field = field;
 
-        boolean readOnly = false;
-        if (method != null && method.getParameterCount() == 0) {
-            readOnly = true;
-        } else if (field != null && Modifier.isFinal(field.getModifiers())) {
-            readOnly = true;
-        }
+        boolean readOnly = field != null && Modifier.isFinal(field.getModifiers())
+                || (features & READ_ONLY) != 0;
         this.readOnly = readOnly;
 
         long fieldOffset = -1L;
-        if (field != null && JDKUtils.UNSAFE_SUPPORT && (features & FieldInfo.DISABLE_UNSAFE) == 0) {
-            fieldOffset = UnsafeUtils.objectFieldOffset(field);
+        if (field != null && (features & FieldInfo.DISABLE_UNSAFE) == 0) {
+            fieldOffset = JDKUtils.UNSAFE.objectFieldOffset(field);
         }
         this.fieldOffset = fieldOffset;
 
@@ -88,7 +85,7 @@ public abstract class FieldReader<T>
             try {
                 field.setAccessible(true);
             } catch (Throwable ignored) {
-                JDKUtils.setReflectErrorLast(ignored);
+                // ignored
             }
         }
 
@@ -189,10 +186,7 @@ public abstract class FieldReader<T>
         if (thisMember != null && otherMember != null && thisMember.getClass() != otherMember.getClass()) {
             Class otherDeclaringClass = otherMember.getDeclaringClass();
             Class thisDeclaringClass = thisMember.getDeclaringClass();
-            if (thisDeclaringClass != otherDeclaringClass
-                    && thisDeclaringClass != null
-                    && otherDeclaringClass != null
-            ) {
+            if (thisDeclaringClass != otherDeclaringClass) {
                 if (thisDeclaringClass.isAssignableFrom(otherDeclaringClass)) {
                     return 1;
                 } else if (otherDeclaringClass.isAssignableFrom(thisDeclaringClass)) {
@@ -234,9 +228,12 @@ public abstract class FieldReader<T>
                 }
             }
 
-            if (this.method.getParameterCount() == 1 && o.method.getParameterCount() == 1) {
-                Class<?> thisParamType = this.method.getParameterTypes()[0];
-                Class<?> otherParamType = o.method.getParameterTypes()[0];
+            Class<?>[] thisParameterTypes = this.method.getParameterTypes();
+            Class<?>[] otherParameterTypes = o.method.getParameterTypes();
+
+            if (thisParameterTypes.length == 1 && otherParameterTypes.length == 1) {
+                Class<?> thisParamType = thisParameterTypes[0];
+                Class<?> otherParamType = otherParameterTypes[0];
 
                 if (thisParamType != otherParamType) {
                     if (thisParamType.isAssignableFrom(otherParamType)) {
@@ -305,8 +302,8 @@ public abstract class FieldReader<T>
             return 1;
         }
 
-        boolean thisClassStartsWithJava = thisFieldClass.getName().startsWith("java.");
-        boolean otherClassStartsWithJava = otherClass.getName().startsWith("java.");
+        boolean thisClassStartsWithJava = thisFieldClass.getName().startsWith("java.", 0);
+        boolean otherClassStartsWithJava = otherClass.getName().startsWith("java.", 0);
         if (thisClassStartsWithJava && !otherClassStartsWithJava) {
             return -1;
         }
@@ -370,6 +367,73 @@ public abstract class FieldReader<T>
 
     public abstract void accept(T object, Object value);
 
+    protected void acceptAny(T object, Object fieldValue, long features) {
+        ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
+        boolean autoCast = true;
+
+        if (fieldValue != null) {
+            Class<?> valueClass = fieldValue.getClass();
+            if (!supportAcceptType(valueClass)) {
+                if (valueClass == String.class) {
+                    if (fieldClass == java.util.Date.class) {
+                        autoCast = false;
+                    }
+                } else if (valueClass == Integer.class
+                        && (fieldClass == boolean.class || fieldClass == Boolean.class)
+                        && (features & JSONReader.Feature.NonZeroNumberCastToBooleanAsTrue.mask) != 0
+                ) {
+                    int intValue = ((Integer) fieldValue);
+                    fieldValue = intValue != 0;
+                }
+
+                if (valueClass != fieldClass && autoCast) {
+                    Function typeConvert = provider.getTypeConvert(valueClass, fieldClass);
+
+                    if (typeConvert != null) {
+                        fieldValue = typeConvert.apply(fieldValue);
+                    }
+                }
+            }
+        }
+
+        Object typedFieldValue;
+        if (fieldValue == null || fieldType == fieldValue.getClass()) {
+            typedFieldValue = fieldValue;
+        } else {
+            if (fieldValue instanceof JSONObject) {
+                JSONReader.Feature[] toFeatures = (features & JSONReader.Feature.SupportSmartMatch.mask) != 0
+                        ? new JSONReader.Feature[] {JSONReader.Feature.SupportSmartMatch}
+                        : new JSONReader.Feature[0];
+                typedFieldValue = ((JSONObject) fieldValue).to(fieldType, toFeatures);
+            } else if (fieldValue instanceof JSONArray) {
+                typedFieldValue = ((JSONArray) fieldValue).to(fieldType);
+            } else if (features == 0 && !fieldClass.isInstance(fieldValue) && format == null) {
+                ObjectReader initReader = getInitReader();
+                if (initReader != null) {
+                    String fieldValueJson = JSON.toJSONString(fieldValue);
+                    typedFieldValue = initReader.readObject(JSONReader.of(fieldValueJson), null, null, features);
+                } else {
+                    typedFieldValue = TypeUtils.cast(fieldValue, fieldClass, provider);
+                }
+            } else {
+                if (autoCast) {
+                    String fieldValueJSONString = JSON.toJSONString(fieldValue);
+                    JSONReader.Context readContext = JSONFactory.createReadContext();
+                    if ((features & JSONReader.Feature.SupportSmartMatch.mask) != 0) {
+                        readContext.config(JSONReader.Feature.SupportSmartMatch);
+                    }
+                    try (JSONReader jsonReader = JSONReader.of(fieldValueJSONString, readContext)) {
+                        ObjectReader fieldObjectReader = getObjectReader(jsonReader);
+                        typedFieldValue = fieldObjectReader.readObject(jsonReader, null, fieldName, features);
+                    }
+                } else {
+                    typedFieldValue = fieldValue;
+                }
+            }
+        }
+        accept(object, typedFieldValue);
+    }
+
     public abstract void readFieldValue(JSONReader jsonReader, T object);
 
     public ObjectReader checkObjectAutoType(JSONReader jsonReader) {
@@ -398,58 +462,35 @@ public abstract class FieldReader<T>
         return itemReader = ctx.getObjectReader(itemType);
     }
 
+    public ObjectReader getObjectReader(ObjectReaderProvider provider) {
+        if (reader != null) {
+            return reader;
+        }
+
+        boolean fieldBased = (this.features & JSONReader.Feature.FieldBased.mask) != 0;
+        return reader = provider.getObjectReader(fieldType, fieldBased);
+    }
+
     public ObjectReader getItemObjectReader(JSONReader jsonReader) {
-        return getItemObjectReader(jsonReader.getContext());
+        return getItemObjectReader(jsonReader.context);
     }
 
     static ObjectReader createFormattedObjectReader(Type fieldType, Class fieldClass, String format, Locale locale) {
         if (format != null && !format.isEmpty()) {
-            String typeName = fieldType.getTypeName();
+            String typeName = TypeUtils.getTypeName(fieldType);
             switch (typeName) {
                 case "java.sql.Time":
-                    return JdbcSupport.createTimeReader((Class) fieldType, format, locale);
+                    return new JdbcSupport.TimeReader(format, locale);
                 case "java.sql.Timestamp":
-                    return JdbcSupport.createTimestampReader((Class) fieldType, format, locale);
+                    return new JdbcSupport.TimestampReader(format, locale);
                 case "java.sql.Date":
-                    return JdbcSupport.createDateReader((Class) fieldType, format, locale);
+                    return new JdbcSupport.DateReader(format, locale);
                 case "byte[]":
                 case "[B":
                     return new ObjectReaderImplInt8Array(format);
                 default:
                     if (Calendar.class.isAssignableFrom(fieldClass)) {
                         return ObjectReaderImplCalendar.of(format, locale);
-                    }
-
-                    if (fieldClass == ZonedDateTime.class) {
-                        return ObjectReaderImplZonedDateTime.of(format, locale);
-                    }
-
-                    if (fieldClass == LocalDateTime.class) {
-                        if (format == null) {
-                            return ObjectReaderImplLocalDateTime.INSTANCE;
-                        }
-
-                        return new ObjectReaderImplLocalDateTime(format, locale);
-                    }
-
-                    if (fieldClass == LocalDate.class) {
-                        return ObjectReaderImplLocalDate.of(format, locale);
-                    }
-
-                    if (fieldClass == LocalTime.class) {
-                        if (format == null) {
-                            return ObjectReaderImplLocalTime.INSTANCE;
-                        }
-
-                        return new ObjectReaderImplLocalTime(format, locale);
-                    }
-
-                    if (fieldClass == Instant.class) {
-                        return ObjectReaderImplInstant.of(format, locale);
-                    }
-
-                    if (fieldClass == Optional.class) {
-                        return ObjectReaderImplOptional.of(fieldType, format, locale);
                     }
 
                     if (fieldClass == Date.class) {

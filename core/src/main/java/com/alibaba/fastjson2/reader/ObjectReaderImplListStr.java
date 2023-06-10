@@ -4,10 +4,10 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.function.Function;
 
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.function.Function;
 
 import static com.alibaba.fastjson2.reader.ObjectReaderImplList.*;
 
@@ -72,11 +72,6 @@ public final class ObjectReaderImplListStr
     }
 
     @Override
-    public FieldReader getFieldReader(long hashCode) {
-        return null;
-    }
-
-    @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         Class instanceType = this.instanceType;
 
@@ -115,12 +110,6 @@ public final class ObjectReaderImplListStr
         } else if (instanceType == CLASS_UNMODIFIABLE_SET) {
             list = new LinkedHashSet();
             builder = (Function<Set, Set>) Collections::unmodifiableSet;
-        } else if (instanceType == CLASS_UNMODIFIABLE_SORTED_SET) {
-            list = new TreeSet();
-            builder = (Function<SortedSet, SortedSet>) Collections::unmodifiableSortedSet;
-        } else if (instanceType == CLASS_UNMODIFIABLE_NAVIGABLE_SET) {
-            list = new TreeSet();
-            builder = (Function<NavigableSet, NavigableSet>) Collections::unmodifiableNavigableSet;
         } else if (instanceType == CLASS_SINGLETON) {
             list = new ArrayList();
             builder = (Function<Collection, Collection>) ((Collection collection) -> Collections.singleton(collection.iterator().next()));
@@ -134,7 +123,7 @@ public final class ObjectReaderImplListStr
                 throw new JSONException(jsonReader.info("create instance error " + instanceType), e);
             }
         } else {
-            list = (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
+            list = (Collection) createInstance(jsonReader.context.getFeatures() | features);
         }
 
         for (int i = 0; i < entryCnt; ++i) {
@@ -150,7 +139,7 @@ public final class ObjectReaderImplListStr
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 
@@ -161,13 +150,13 @@ public final class ObjectReaderImplListStr
         boolean set = jsonReader.nextIfSet();
         Collection list = set
                 ? new HashSet()
-                : (Collection) createInstance(jsonReader.getContext().getFeatures() | features);
+                : (Collection) createInstance(jsonReader.context.getFeatures() | features);
 
         char ch = jsonReader.current();
         if (ch == '[') {
             jsonReader.next();
             for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
+                if (jsonReader.nextIfArrayEnd()) {
                     break;
                 }
 
@@ -183,7 +172,7 @@ public final class ObjectReaderImplListStr
             throw new JSONException(jsonReader.info());
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         return list;
     }

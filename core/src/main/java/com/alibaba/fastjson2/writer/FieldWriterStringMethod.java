@@ -30,7 +30,9 @@ final class FieldWriterStringMethod<T>
 
     @Override
     public void writeValue(JSONWriter jsonWriter, T object) {
-        String value = (String) getFieldValue(object);
+        Object fieldValue;
+        fieldValue = getFieldValue(object);
+        String value = (String) fieldValue;
 
         if (trim && value != null) {
             value = value.trim();
@@ -53,7 +55,7 @@ final class FieldWriterStringMethod<T>
         try {
             value = (String) getFieldValue(object);
         } catch (JSONException error) {
-            if (jsonWriter.isIgnoreErrorGetter()) {
+            if ((jsonWriter.getFeatures(features) | JSONWriter.Feature.IgnoreNonFieldGetter.mask) != 0) {
                 return false;
             }
             throw error;

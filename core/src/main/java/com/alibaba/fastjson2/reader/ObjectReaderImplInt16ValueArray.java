@@ -4,12 +4,12 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.function.Function;
 
 class ObjectReaderImplInt16ValueArray
         extends ObjectReaderPrimitive {
@@ -29,11 +29,11 @@ class ObjectReaderImplInt16ValueArray
             return null;
         }
 
-        if (jsonReader.nextIfMatch('[')) {
+        if (jsonReader.nextIfArrayStart()) {
             short[] values = new short[16];
             int size = 0;
             for (; ; ) {
-                if (jsonReader.nextIfMatch(']')) {
+                if (jsonReader.nextIfArrayEnd()) {
                     break;
                 }
 
@@ -55,7 +55,7 @@ class ObjectReaderImplInt16ValueArray
                 values[size++] = (short) jsonReader.readInt32Value();
             }
 
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             short[] array = Arrays.copyOf(values, size);
             if (builder != null) {
@@ -112,7 +112,7 @@ class ObjectReaderImplInt16ValueArray
             } else if (item instanceof Number) {
                 value = ((Number) item).shortValue();
             } else {
-                Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(item.getClass(), short.class);
+                Function typeConvert = JSONFactory.defaultObjectReaderProvider.getTypeConvert(item.getClass(), short.class);
                 if (typeConvert == null) {
                     throw new JSONException("can not cast to short " + item.getClass());
                 }

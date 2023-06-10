@@ -8,10 +8,6 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -954,37 +950,6 @@ public class JSONObjectTest {
         Date date = new Date(millis);
         assertSame(date, JSONObject.of("id", date).getDate("id"));
         assertEquals(date, JSONObject.of("id", millis).getDate("id"));
-
-        ZonedDateTime zdt = ZonedDateTime.ofInstant(
-                Instant.ofEpochMilli(millis), ZoneId.of("Asia/Shanghai"));
-        assertEquals(date, JSONObject.of("id", zdt).getDate("id"));
-        assertEquals(date, JSONObject.of("id", zdt.toString()).getDate("id"));
-        assertEquals(date, JSONObject.of("id", '"' + zdt.toString() + '"').getDate("id"));
-
-        LocalDate ldt = LocalDate.now();
-        Date date1 = JSONObject.of("date", ldt).getDate("date");
-        assertEquals(ldt.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(), date1.getTime());
-    }
-
-    @Test
-    public void test_getInstant() {
-        assertNull(JSONObject.of("id", null).getInstant("id"));
-        assertNull(JSONObject.of("id", "").getInstant("id"));
-        assertNull(JSONObject.of("id", "null").getInstant("id"));
-        assertNull(JSONObject.of("id", 0).getInstant("id"));
-        assertNull(JSONObject.of("id", 0L).getInstant("id"));
-
-        long millis = System.currentTimeMillis();
-        Instant instant = Instant.ofEpochMilli(millis);
-        assertSame(instant, JSONObject.of("id", instant).getInstant("id"));
-        assertEquals(instant, JSONObject.of("id", millis).getInstant("id"));
-        assertEquals(instant, JSONObject.of("id", new Date(millis)).getInstant("id"));
-
-        ZonedDateTime zdt = ZonedDateTime.ofInstant(
-                Instant.ofEpochMilli(millis), ZoneId.of("UTC+0"));
-        assertEquals(instant, JSONObject.of("id", zdt).getInstant("id"));
-        assertEquals(instant, JSONObject.of("id", zdt.toString()).getInstant("id"));
-        assertEquals(instant, JSONObject.of("id", '"' + zdt.toString() + '"').getInstant("id"));
     }
 
     @Test

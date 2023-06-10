@@ -57,9 +57,9 @@ public class EishayWriteStringNoneCache {
     @Benchmark
     public void fastjson2Mixin(Blackhole bh) {
         ObjectWriterProvider provider = new ObjectWriterProvider();
-        provider.mixIn(MediaContent.class, MediaContentMixin.class);
-        provider.mixIn(Media.class, MediaMixin.class);
-        provider.mixIn(Image.class, ImageMixin.class);
+        provider.register(MediaContent.class, MediaContentMixin.objectWriter);
+        provider.register(Media.class, MediaMixin.objectWriter);
+        provider.register(Image.class, ImageMixin.objectWriter);
         bh.consume(JSON.toJSONString(mc, JSONFactory.createWriteContext(provider)));
     }
 

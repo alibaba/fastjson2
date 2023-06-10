@@ -2,9 +2,9 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.util.IOUtils;
 
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 
 final class ObjectWriterMisc
         implements ObjectWriter {
@@ -54,7 +54,7 @@ final class ObjectWriterMisc
             case "com.fasterxml.jackson.databind.node.ArrayNode":
                 str = object.toString();
                 if (jsonWriter.isUTF8()) {
-                    jsonWriter.writeRaw(str.getBytes(StandardCharsets.UTF_8));
+                    jsonWriter.writeRaw(str.getBytes(IOUtils.UTF_8));
                 } else {
                     jsonWriter.writeRaw(str);
                 }

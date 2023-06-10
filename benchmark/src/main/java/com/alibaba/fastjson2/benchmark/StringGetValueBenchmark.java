@@ -1,6 +1,6 @@
 package com.alibaba.fastjson2.benchmark;
 
-import com.alibaba.fastjson2.util.UnsafeUtils;
+import com.alibaba.fastjson2.util.JDKUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.Runner;
@@ -22,7 +22,7 @@ public class StringGetValueBenchmark {
         try {
             valueField = String.class.getDeclaredField("value");
             valueField.setAccessible(true);
-            valueFieldOffset = UnsafeUtils.objectFieldOffset(valueField);
+            valueFieldOffset = JDKUtils.UNSAFE.objectFieldOffset(valueField);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
@@ -55,7 +55,7 @@ public class StringGetValueBenchmark {
 
     @Benchmark
     public char[] unsafe() throws Exception {
-        return (char[]) UnsafeUtils.getObject(STR, valueFieldOffset);
+        return (char[]) JDKUtils.UNSAFE.getObject(STR, valueFieldOffset);
 //        for (int i = 0; i < chars.length; i++) {
 //            char ch = chars[i];
 //        }

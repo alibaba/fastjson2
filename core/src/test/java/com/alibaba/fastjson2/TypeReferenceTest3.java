@@ -38,7 +38,7 @@ public class TypeReferenceTest3 {
         private final T value;
 
         @JSONCreator
-        private Response1(T value) {
+        private Response1(@JSONField(name = "value") T value) {
             this.value = value;
         }
     }

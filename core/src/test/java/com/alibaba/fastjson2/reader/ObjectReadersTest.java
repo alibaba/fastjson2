@@ -1,17 +1,17 @@
 package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 import org.junit.jupiter.api.Test;
 
+import java.awt.*;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import static com.alibaba.fastjson2.reader.ObjectReaders.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ObjectReadersTest {
     @Test
@@ -28,7 +28,7 @@ public class ObjectReadersTest {
     }
 
     static class ColorCreator
-            implements Function<Map<Long, Object>, java.awt.Color> {
+            implements Function<Map<Long, Object>, Color> {
         static final long HASH_RGB = Fnv.hashCode64("rgb");
         static final long HASH_R = Fnv.hashCode64("r");
         static final long HASH_G = Fnv.hashCode64("g");
@@ -217,5 +217,27 @@ public class ObjectReadersTest {
         public void setValues(List<String> values) {
             this.values = values;
         }
+    }
+
+    @Test
+    public void test7() throws Exception {
+        ObjectReader<Bean7> objectReader = ObjectReaders.objectReader(
+                Bean7.class,
+                Bean7::new,
+                ObjectReaders.fieldReaderMap("items", Map.class, String.class, Item.class, (Bean7 o, Map v) -> o.items = v)
+        );
+        JSONReader reader = JSONReader.of("{\"items\":{\"x1\":{\"id\":123}}}");
+        Bean7 bean = objectReader.readObject(reader);
+        assertEquals(1, bean.items.size());
+        assertNotNull(bean.items.get("x1"));
+        assertEquals(123, bean.items.get("x1").id);
+    }
+
+    public static class Bean7 {
+        public Map<String, Item> items;
+    }
+
+    public static class Item {
+        public int id;
     }
 }

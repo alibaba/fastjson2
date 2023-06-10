@@ -2,10 +2,10 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.util.Fnv;
 
 import java.lang.reflect.Type;
-import java.util.function.Function;
 
 class ObjectWriterImplBoolValueArray
         extends ObjectWriterPrimitiveImpl {

@@ -1,6 +1,9 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.schema.JSONSchema;
+import com.alibaba.fastjson2.time.Instant;
+import com.alibaba.fastjson2.time.LocalDate;
+import com.alibaba.fastjson2.time.LocalDateTime;
+import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2_vo.Integer1;
 import com.alibaba.fastjson2_vo.Long1;
 import org.junit.jupiter.api.Test;
@@ -8,9 +11,6 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -970,24 +970,9 @@ public class JSONArrayTest {
         assertEquals(date, JSONArray.of(millis).getDate(0));
         assertEquals(date, JSONArray.of(Instant.ofEpochMilli(millis)).getDate(0));
 
-        LocalDate ldt = LocalDate.now();
+        LocalDate ldt = LocalDateTime.now().date;
         Date date1 = JSONObject.of("date", ldt).getDate("date");
-        assertEquals(ldt.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(), date1.getTime());
-    }
-
-    @Test
-    public void test_getInstant() {
-        assertNull(JSONArray.of((Object) null).getInstant(0));
-        assertNull(JSONArray.of("").getInstant(0));
-        assertNull(JSONArray.of("null").getInstant(0));
-        assertNull(JSONArray.of(0).getInstant(0));
-        assertNull(JSONArray.of(0L).getInstant(0));
-
-        long millis = System.currentTimeMillis();
-        Instant instant = Instant.ofEpochMilli(millis);
-        assertSame(instant, JSONArray.of(instant).getInstant(0));
-        assertEquals(instant, JSONArray.of(millis).getInstant(0));
-        assertEquals(instant, JSONArray.of(new Date(millis)).getInstant(0));
+        assertEquals(ldt.atStartOfDay(ZoneId.DEFAULT_ZONE_ID).toInstant().toEpochMilli(), date1.getTime());
     }
 
     @Test
@@ -1066,22 +1051,6 @@ public class JSONArrayTest {
     public void test_toJavaList() {
         assertThrows(JSONException.class,
                 () -> JSONArray.of(1, 2).toJavaList(Bean.class)
-        );
-    }
-
-    @Test
-    public void test_getObject2() {
-        assertEquals(
-                JSONSchema.Type.Integer,
-                JSONArray
-                        .of("integer")
-                        .getObject(0, JSONSchema.Type.class)
-        );
-        assertEquals(
-                JSONSchema.Type.Integer,
-                JSONArray
-                        .of("Integer")
-                        .getObject(0, JSONSchema.Type.class)
         );
     }
 

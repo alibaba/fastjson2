@@ -1,16 +1,13 @@
 package com.alibaba.fastjson2.reader;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONPath;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.internal.asm.ASMUtils;
+import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.Fnv;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 
 final class ObjectReaderException<T>
@@ -23,7 +20,7 @@ final class ObjectReaderException<T>
     static final long HASH_STACKTRACE = Fnv.hashCode64("stackTrace");
     static final long HASH_SUPPRESSED_EXCEPTIONS = Fnv.hashCode64("suppressedExceptions");
 
-    private FieldReader fieldReaderStackTrace;
+    private final FieldReader fieldReaderStackTrace;
     final List<Constructor> constructors;
 
     final Constructor constructorDefault;
@@ -46,7 +43,7 @@ final class ObjectReaderException<T>
             List<Constructor> constructors,
             FieldReader... fieldReaders
     ) {
-        super(objectClass, null, objectClass.getName(), 0, null, null, null, fieldReaders);
+        super(objectClass, null, objectClass.getName(), 0, null, null, fieldReaders);
         this.constructors = constructors;
 
         Constructor constructorDefault = null;
@@ -56,7 +53,7 @@ final class ObjectReaderException<T>
 
         for (Constructor constructor : constructors) {
             if (constructor != null && constructorMessageCause == null) {
-                int paramCount = constructor.getParameterCount();
+                int paramCount = constructor.getParameterTypes().length;
 
                 if (paramCount == 0) {
                     constructorDefault = constructor;
@@ -86,9 +83,9 @@ final class ObjectReaderException<T>
         this.constructorMessageCause = constructorMessageCause;
         this.constructorCause = constructorCause;
 
-        constructors.sort((Constructor left, Constructor right) -> {
-            int x = left.getParameterCount();
-            int y = right.getParameterCount();
+        Collections.sort(constructors, (Constructor left, Constructor right) -> {
+            int x = left.getParameterTypes().length;
+            int y = right.getParameterTypes().length;
             if (x < y) {
                 return 1;
             }
@@ -100,11 +97,25 @@ final class ObjectReaderException<T>
 
         constructorParameters = new ArrayList<>(constructors.size());
         for (Constructor constructor : constructors) {
-            int paramCount = constructor.getParameterCount();
+            Class[] parameters = constructor.getParameterTypes();
+            int paramCount = parameters.length;
+
             String[] parameterNames = null;
             if (paramCount > 0) {
-                parameterNames = ASMUtils.lookupParameterNames(constructor);
+                parameterNames = BeanUtils.lookupParameterNames(constructor);
+                FieldInfo fieldInfo = new FieldInfo();
+                Annotation[][] parameterAnnotations = constructor.getParameterAnnotations();
+                for (int i = 0; i < parameters.length && i < parameterNames.length; i++) {
+                    fieldInfo.init();
+
+                    ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
+                    provider.getFieldInfo(fieldInfo, objectClass, constructor, i, parameterAnnotations);
+                    if (fieldInfo.fieldName != null) {
+                        parameterNames[i] = fieldInfo.fieldName;
+                    }
+                }
             }
+
             constructorParameters.add(parameterNames);
         }
 
@@ -144,7 +155,7 @@ final class ObjectReaderException<T>
 
             if (i == 0 && hash == HASH_TYPE && jsonReader.isSupportAutoType(features)) {
                 long typeHash = jsonReader.readTypeHashCode();
-                JSONReader.Context context = jsonReader.getContext();
+                JSONReader.Context context = jsonReader.context;
                 ObjectReader reader = autoType(context, typeHash);
                 String typeName = null;
                 if (reader == null) {
@@ -239,14 +250,6 @@ final class ObjectReaderException<T>
                         case "message":
                         case "cause":
                             break;
-                        case "errorIndex":
-                            if (objectClass == DateTimeParseException.class) {
-                                break;
-                            }
-                            if (!fieldValues.containsKey(paramName)) {
-                                matchAll = false;
-                            }
-                            break;
                         default:
                             if (!fieldValues.containsKey(paramName)) {
                                 matchAll = false;
@@ -269,12 +272,6 @@ final class ObjectReaderException<T>
                             break;
                         case "cause":
                             fieldValue = cause;
-                            break;
-                        case "errorIndex":
-                            fieldValue = fieldValues.get(paramName);
-                            if (fieldValue == null && objectClass == DateTimeParseException.class) {
-                                fieldValue = 0;
-                            }
                             break;
                         default:
                             fieldValue = fieldValues.get(paramName);
@@ -340,7 +337,7 @@ final class ObjectReaderException<T>
     @Override
     public T readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         if (jsonReader.getType() == JSONB.Constants.BC_TYPED_ANY) {
-            JSONReader.Context context = jsonReader.getContext();
+            JSONReader.Context context = jsonReader.context;
 
             if (jsonReader.isSupportAutoType(features) || context.getContextAutoTypeBeforeHandler() != null) {
                 jsonReader.next();

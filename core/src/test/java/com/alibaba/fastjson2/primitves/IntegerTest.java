@@ -1,8 +1,6 @@
 package com.alibaba.fastjson2.primitves;
 
 import com.alibaba.fastjson2.*;
-import com.alibaba.fastjson2.reader.ObjectReaderCreator;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterCreator;
 import com.alibaba.fastjson2_vo.Integer1;
@@ -351,29 +349,5 @@ public class IntegerTest {
         String str = "{\"v0000\":\"1001\"}";
         Integer1 v1 = JSON.parseObject(str, Integer1.class);
         assertEquals(Integer.valueOf(1001), v1.getV0000());
-    }
-
-    @Test
-    public void test_jsonpath() {
-        ObjectReaderCreator[] creators = TestUtils.readerCreators();
-
-        for (ObjectReaderCreator creator : creators) {
-            Integer1 vo = new Integer1();
-
-            JSONReader.Context readContext
-                    = new JSONReader.Context(
-                            new ObjectReaderProvider(creator));
-            JSONPath jsonPath = JSONPath
-                    .of("$.v0000")
-                    .setReaderContext(readContext);
-            jsonPath.set(vo, 101);
-            assertEquals(Integer.valueOf(101), vo.getV0000());
-            jsonPath.set(vo, 102L);
-            assertEquals(Integer.valueOf(102), vo.getV0000());
-            jsonPath.set(vo, "103");
-            assertEquals(Integer.valueOf(103), vo.getV0000());
-
-            assertEquals(Integer.valueOf(103), jsonPath.eval(vo));
-        }
     }
 }

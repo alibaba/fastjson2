@@ -143,7 +143,7 @@ public class CalendarFieldTest {
         assertEquals("{\"value\":1654686106}", str);
 
         Bean bean1 = JSON.parseObject(str, Bean.class, "unixtime");
-        assertEquals(1654686106, bean1.value.getTime().getTime());
+        assertEquals(1654686106000L, bean1.value.getTime().getTime());
     }
 
     public static class Bean {
