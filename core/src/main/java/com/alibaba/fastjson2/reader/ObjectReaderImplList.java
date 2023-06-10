@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.GuavaSupport;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -38,6 +39,7 @@ public final class ObjectReaderImplList
     final String itemClassName;
     final long itemClassNameHash;
     final Function builder;
+    Object listSingleton;
     ObjectReader itemObjectReader;
     volatile boolean instanceError;
 
@@ -164,14 +166,31 @@ public final class ObjectReaderImplList
                     break;
                 default:
                     instanceClass = listClass;
-                    break;
             }
         }
 
-        if (type == ObjectReaderImplList.CLASS_EMPTY_SET
-                || type == ObjectReaderImplList.CLASS_EMPTY_LIST
-        ) {
-            return new ObjectReaderImplList(type, (Class) type, (Class) type, Object.class, null);
+        switch (type.getTypeName()) {
+            case "kotlin.collections.EmptySet":
+            case "kotlin.collections.EmptyList": {
+                Object empty;
+                Class<?> clazz = (Class<?>) type;
+                try {
+                    Field field = clazz.getField("INSTANCE");
+                    if (!field.isAccessible()) {
+                        field.setAccessible(true);
+                    }
+                    empty = field.get(null);
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    throw new IllegalStateException("Failed to get singleton of " + type, e);
+                }
+                return new ObjectReaderImplList(clazz, empty);
+            }
+            case "java.util.Collections$EmptySet": {
+                return new ObjectReaderImplList((Class) type, Collections.emptySet());
+            }
+            case "java.util.Collections$EmptyList": {
+                return new ObjectReaderImplList((Class) type, Collections.emptyList());
+            }
         }
 
         if (itemType == String.class && builder == null) {
@@ -183,6 +202,11 @@ public final class ObjectReaderImplList
         }
 
         return new ObjectReaderImplList(type, listClass, instanceClass, itemType, builder);
+    }
+
+    ObjectReaderImplList(Class listClass, Object listSingleton) {
+        this(listClass, listClass, listClass, Object.class, null);
+        this.listSingleton = listSingleton;
     }
 
     public ObjectReaderImplList(Type listType, Class listClass, Class instanceType, Type itemType, Function builder) {
@@ -306,12 +330,8 @@ public final class ObjectReaderImplList
             return new TreeSet();
         }
 
-        if (instanceType == CLASS_EMPTY_LIST) {
-            return Collections.emptyList();
-        }
-
-        if (instanceType == CLASS_EMPTY_SET) {
-            return Collections.emptySet();
+        if (listSingleton != null) {
+            return listSingleton;
         }
 
         if (instanceType != null) {
