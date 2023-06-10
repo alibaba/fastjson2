@@ -547,7 +547,6 @@ public abstract class StreamReader<T> {
     }
 
     public static class StreamReaderSpliterator<T> implements Spliterator<T> {
-
         private final StreamReader<T> streamReader;
 
         public StreamReaderSpliterator(StreamReader streamReader) {
@@ -580,7 +579,7 @@ public abstract class StreamReader<T> {
 
         @Override
         public int characteristics() {
-            return ORDERED + NONNULL+ IMMUTABLE;
+            return ORDERED + NONNULL + IMMUTABLE;
         }
     }
 }
