@@ -10,8 +10,8 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 
-class JSONStreamReaderUTF8
-        extends JSONStreamReader {
+class JSONStreamReaderUTF8<T>
+        extends JSONStreamReader<T> {
     byte[] buf;
     final InputStream input;
     final Charset charset;

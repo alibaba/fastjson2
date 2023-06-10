@@ -11,9 +11,11 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.util.Date;
+import java.util.Objects;
 import java.util.zip.ZipInputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JSONStreamReaderTest {
     File tempFile;
@@ -40,6 +42,35 @@ public class JSONStreamReaderTest {
     }
 
     @Test
+    public void testStream() throws Exception {
+        init();
+
+        try (
+                InputStream fis = new FileInputStream(tempFile)
+        ) {
+            JSONStreamReader streamReader = JSONStreamReader.of(fis);
+
+            assertEquals(7702, streamReader.stream().count());
+        }
+    }
+
+    @Test
+    public void testStreamParallel() throws Exception {
+        init();
+
+        try (
+                InputStream fis = new FileInputStream(tempFile)
+        ) {
+            JSONStreamReader<Object> streamReader = JSONStreamReader.of(fis);
+
+            assertEquals(7702, streamReader.stream().parallel().count());
+        } catch (Exception e) {
+            assertTrue(e instanceof UnsupportedOperationException);
+            assertEquals("parallel stream not supported", e.getMessage());
+        }
+    }
+
+    @Test
     public void testObj() throws Exception {
         init();
 
@@ -56,6 +87,38 @@ public class JSONStreamReaderTest {
             }
 
             assertEquals(7702, rowCount);
+        }
+    }
+
+    @Test
+    public void testObjGeneric() throws Exception {
+        init();
+
+        try (
+                InputStream fis = new FileInputStream(tempFile)
+        ) {
+            JSONStreamReader<Event> streamReader = JSONStreamReader.of(fis, Event.class);
+
+            int rowCount = 0;
+            Event event;
+            while ((event = streamReader.readLineObject()) != null) {
+                rowCount++;
+            }
+
+            assertEquals(7702, rowCount);
+        }
+    }
+
+    @Test
+    public void testObjStream() throws Exception {
+        init();
+
+        try (
+                InputStream fis = new FileInputStream(tempFile)
+        ) {
+            JSONStreamReader<Event> streamReader = JSONStreamReader.of(fis, Event.class);
+
+            assertEquals(7702, streamReader.stream().filter(Objects::nonNull).count());
         }
     }
 

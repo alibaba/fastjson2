@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Type;
 
-public class JSONStreamReaderUTF16
-        extends JSONStreamReader {
+public class JSONStreamReaderUTF16<T>
+        extends JSONStreamReader<T> {
     char[] buf;
     final Reader input;
     final JSONReader.Context context;

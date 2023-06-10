@@ -21,7 +21,7 @@ import java.util.stream.IntStream;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public abstract class CSVReader<T>
-        extends StreamReader
+        extends StreamReader<T>
         implements Closeable {
     boolean quote;
     protected Class<T> objectClass;
