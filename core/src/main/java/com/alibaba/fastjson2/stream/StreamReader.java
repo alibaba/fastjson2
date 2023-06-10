@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.support.csv.CSVReader;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
@@ -543,15 +544,38 @@ public abstract class StreamReader<T> {
     }
 
     public <T> Stream<T> stream() {
-        return StreamSupport.stream(new StreamReaderSpliterator(this), false);
+        return StreamSupport.stream(new StreamReaderSpliterator<T>((StreamReader<T>) this), false);
     }
 
-    private static class StreamReaderSpliterator<T>
+    public <T> Stream<T> stream(Class<T> clazz) {
+        return StreamSupport.stream(new StreamReaderSpliterator<T>((StreamReader<T>) this, clazz), false);
+    }
+
+    protected static class StreamReaderSpliterator<T>
             implements Spliterator<T> {
         private final StreamReader<T> streamReader;
+        private Class<T> clazz;
+        private CSVReader csvReader;
 
-        public StreamReaderSpliterator(StreamReader streamReader) {
+        public StreamReaderSpliterator(StreamReader<T> streamReader) {
             this.streamReader = streamReader;
+            if (streamReader instanceof CSVReader) {
+                CSVReader reader = (CSVReader) streamReader;
+                if (!reader.isObjectSupport()) {
+                    csvReader = reader;
+                }
+            }
+        }
+
+        public StreamReaderSpliterator(StreamReader<T> streamReader, Class<T> clazz) {
+            this.streamReader = streamReader;
+            this.clazz = clazz;
+            if (streamReader instanceof CSVReader) {
+                CSVReader reader = (CSVReader) streamReader;
+                if (!reader.isObjectSupport()) {
+                    csvReader = reader;
+                }
+            }
         }
 
         @Override
@@ -559,12 +583,24 @@ public abstract class StreamReader<T> {
             if (action == null) {
                 throw new IllegalArgumentException("action must not be null");
             }
-            T object = streamReader.readLineObject();
-            if (streamReader.inputEnd) {
+            T object = next();
+            if (streamReader.inputEnd || object == null) {
                 return false;
             } else {
                 action.accept(object);
                 return true;
+            }
+        }
+
+        private T next() {
+            if (csvReader != null) {
+                Object[] objects = csvReader.readLineValues();
+                if (clazz != null & !clazz.isAssignableFrom(objects.getClass())) {
+                    throw new ClassCastException(String.format("%s can not cast to %s", objects.getClass(), clazz));
+                }
+                return (T) objects;
+            } else {
+                return streamReader.readLineObject();
             }
         }
 

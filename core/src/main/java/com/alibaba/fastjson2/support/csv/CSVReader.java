@@ -25,6 +25,7 @@ public abstract class CSVReader<T>
         implements Closeable {
     boolean quote;
     protected Class<T> objectClass;
+    private boolean objectSupport = true;
 
     CSVReader() {
     }
@@ -35,6 +36,7 @@ public abstract class CSVReader<T>
 
     public CSVReader(Type[] types) {
         super(types);
+        this.objectSupport = false;
     }
 
     public void config(Feature... features) {
@@ -263,6 +265,7 @@ public abstract class CSVReader<T>
     }
 
     public List<String> readHeader() {
+        this.objectSupport = true;
         String[] columns = (String[]) readLineValues(true);
 
         if (objectClass != null) {
@@ -339,6 +342,9 @@ public abstract class CSVReader<T>
     public abstract void readLineObjectAll(boolean readHeader, Consumer<T> consumer);
 
     public T readLineObject() {
+        if (!objectSupport) {
+            throw new UnsupportedOperationException("this method should not be called, try specify objectClass or method readLineValues instead ?");
+        }
         if (inputEnd) {
             return null;
         }
@@ -737,6 +743,10 @@ public abstract class CSVReader<T>
             objects.add(object);
         }
         return objects;
+    }
+
+    public boolean isObjectSupport() {
+        return objectSupport;
     }
 
     public abstract void statAll();

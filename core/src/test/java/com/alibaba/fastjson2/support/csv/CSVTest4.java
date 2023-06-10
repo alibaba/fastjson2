@@ -5,9 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CSVTest4 {
     @Test
@@ -25,6 +26,40 @@ public class CSVTest4 {
         Object[] line1 = parser.readLineValues();
         assertEquals(2, line1[0]);
         assertEquals(null, line1[1]);
+    }
+
+    @Test
+    public void testStream() throws Exception {
+        String str = "1,101\n2,abc";
+        byte[] bytes = str.getBytes();
+        InputStream in = new ByteArrayInputStream(bytes);
+        Type[] types = new Type[] {Integer.class, Integer.class};
+        CSVReader parser = CSVReader.of(in, types);
+        parser.config(StreamReader.Feature.ErrorAsNull);
+        parser.config(StreamReader.Feature.ErrorAsNull, false);
+        parser.config(StreamReader.Feature.ErrorAsNull, true);
+        try {
+            parser.stream(String[].class).findFirst().get();
+        } catch (Exception e) {
+            assertTrue(e instanceof ClassCastException);
+            assertEquals("class [Ljava.lang.Object; can not cast to class [Ljava.lang.String;", e.getMessage());
+        }
+
+        in = new ByteArrayInputStream(bytes);
+        parser = CSVReader.of(in, types);
+        try {
+            parser.stream(Integer[].class).findFirst().get();
+        } catch (Exception e) {
+            assertTrue(e instanceof ClassCastException);
+            assertEquals("class [Ljava.lang.Object; can not cast to class [Ljava.lang.Integer;", e.getMessage());
+        }
+
+        in = new ByteArrayInputStream(bytes);
+        CSVReader<Integer[]> parser2 = CSVReader.of(in, types);
+        Object object = parser2.stream(Object[].class).findFirst().get();
+        assertTrue(object instanceof Object[]);
+        assertFalse(object instanceof Integer[]);
+        assertFalse(object instanceof String[]);
     }
 
     @Test

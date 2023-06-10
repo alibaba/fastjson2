@@ -123,6 +123,19 @@ public class JSONStreamReaderTest {
     }
 
     @Test
+    public void testObjStreamType() throws Exception {
+        init();
+
+        try (
+                InputStream fis = new FileInputStream(tempFile)
+        ) {
+            JSONStreamReader<Event> streamReader = JSONStreamReader.of(fis, Event.class);
+
+            assertEquals(7702, streamReader.stream(Event.class).filter(v -> v instanceof Event).count());
+        }
+    }
+
+    @Test
     public void statAll() throws Exception {
         init();
 
