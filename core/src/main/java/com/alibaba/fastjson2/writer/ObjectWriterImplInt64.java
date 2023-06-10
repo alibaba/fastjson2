@@ -42,8 +42,7 @@ final class ObjectWriterImplInt64
         ) {
             long contextFeatures = jsonWriter.getFeatures();
             if ((contextFeatures & WriteClassName.mask) == 0) {
-                boolean writeAsString = (contextFeatures & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0
-                        || ((contextFeatures & BrowserCompatible.mask) != 0 && (i > 9007199254740991L || i < -9007199254740991L));
+                boolean writeAsString = (contextFeatures & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
                 if (!writeAsString) {
                     jsonWriter.writeRaw('L');
                 }

@@ -573,11 +573,7 @@ public class ObjectWriterBaseModule
                             break;
                         case "access": {
                             String access = ((Enum) result).name();
-                            if (access.equals("WRITE_ONLY")) {
-                                fieldInfo.ignore = true;
-                            } else {
-                                fieldInfo.ignore = false;
-                            }
+                            fieldInfo.ignore = access.equals("WRITE_ONLY");
                             break;
                         }
                         default:
@@ -1122,12 +1118,7 @@ public class ObjectWriterBaseModule
         }
 
         if (Map.Entry.class.isAssignableFrom(objectClass)) {
-            String objectClassName = objectClass.getName();
-            if (!"org.apache.commons.lang3.tuple.ImmutablePair".equals(objectClassName)
-                    && !"org.apache.commons.lang3.tuple.MutablePair".equals(objectClassName)
-            ) {
-                return ObjectWriterImplMapEntry.INSTANCE;
-            }
+            return ObjectWriterImplMapEntry.INSTANCE;
         }
 
         if (java.nio.file.Path.class.isAssignableFrom(objectClass)) {
@@ -1282,10 +1273,6 @@ public class ObjectWriterBaseModule
 
             if (clazz == Long[].class) {
                 return ObjectWriterImplInt64Array.INSTANCE;
-            }
-
-            if (clazz == AtomicLongArray.class) {
-                return ObjectWriterImplAtomicLongArray.INSTANCE;
             }
 
             if (String[].class == clazz) {

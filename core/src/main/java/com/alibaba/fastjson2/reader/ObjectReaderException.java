@@ -367,7 +367,6 @@ final class ObjectReaderException<T>
     }
 
     private Throwable createObject(String message, Throwable cause) {
-        Throwable object = null;
         try {
             if (constructorMessageCause != null) {
                 if (cause != null && message != null) {
@@ -412,6 +411,6 @@ final class ObjectReaderException<T>
             throw new JSONException("create Exception error, class " + objectClass.getName() + ", " + e.getMessage(), e);
         }
 
-        return object;
+        return null;
     }
 }

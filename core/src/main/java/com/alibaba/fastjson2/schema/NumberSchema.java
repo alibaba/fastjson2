@@ -181,9 +181,7 @@ final class NumberSchema
                     return new ValidateResult(false, exclusiveMinimum ? "exclusiveMinimum not match, expect >= %s, but %s" : "minimum not match, expect >= %s, but %s", minimum, value);
                 }
             } else {
-                if (decimalValue == null) {
-                    decimalValue = BigDecimal.valueOf(value);
-                }
+                decimalValue = BigDecimal.valueOf(value);
                 if (exclusiveMinimum
                         ? minimum.compareTo(decimalValue) >= 0
                         : minimum.compareTo(decimalValue) > 0) {

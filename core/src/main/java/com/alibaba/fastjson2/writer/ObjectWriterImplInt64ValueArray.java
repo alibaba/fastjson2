@@ -34,7 +34,7 @@ final class ObjectWriterImplInt64ValueArray
         }
 
         long[] array;
-        if (function != null && object != null) {
+        if (function != null) {
             array = function.apply(object);
         } else {
             array = (long[]) object;
@@ -57,7 +57,7 @@ final class ObjectWriterImplInt64ValueArray
         }
 
         long[] array;
-        if (function != null && object != null) {
+        if (function != null) {
             array = function.apply(object);
         } else {
             array = (long[]) object;

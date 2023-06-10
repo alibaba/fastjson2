@@ -594,12 +594,12 @@ public final class ObjectWriterImplMap
                 continue;
             }
 
-            Object enryKey = entry.getKey();
+            Object entryKey = entry.getKey();
             String key;
-            if (enryKey == null) {
+            if (entryKey == null) {
                 key = null;
             } else {
-                key = enryKey.toString();
+                key = entryKey.toString();
             }
 
             if (propertyPreFilter != null) {

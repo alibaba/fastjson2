@@ -416,8 +416,7 @@ abstract class JSONPathFilter
                 JSONArray array = new JSONArray(list.size());
                 for (Object item : list) {
                     boolean match = false;
-                    for (int i = 0; i < orderedFilters.size(); ++i) {
-                        JSONPathFilter filter = orderedFilters.get(i);
+                    for (JSONPathFilter filter : orderedFilters) {
                         boolean and = filter.isAnd();
                         match = and;
                         boolean result = filter.apply(context, item);
@@ -443,8 +442,7 @@ abstract class JSONPathFilter
             }
 
             boolean match = false;
-            for (int i = 0; i < orderedFilters.size(); ++i) {
-                JSONPathFilter filter = orderedFilters.get(i);
+            for (JSONPathFilter filter : orderedFilters) {
                 boolean and = filter.isAnd();
                 match = and;
                 boolean result = filter.apply(context, object);

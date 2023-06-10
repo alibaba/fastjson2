@@ -481,7 +481,7 @@ public final class FDBigInteger {
         int sIndex = 0;
         long borrow = 0L;
         for (; sIndex < offsetDiff; sIndex++) {
-            long diff = 0L - (sData[sIndex] & 0XFFFFFFFFL) + borrow;
+            long diff = -(sData[sIndex] & 0XFFFFFFFFL) + borrow;
             sData[sIndex] = (int) diff;
             borrow = diff >> 32; // signed shift
         }

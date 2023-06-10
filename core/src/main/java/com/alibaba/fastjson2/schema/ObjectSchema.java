@@ -536,11 +536,7 @@ public final class ObjectSchema
             }
         }
 
-        if (objectWriter instanceof ObjectWriterAdapter) {
-            return SUCCESS;
-        }
-
-        return typed ? FAIL_TYPE_NOT_MATCH : SUCCESS;
+        return SUCCESS;
     }
 
     public Map<String, JSONSchema> getProperties() {

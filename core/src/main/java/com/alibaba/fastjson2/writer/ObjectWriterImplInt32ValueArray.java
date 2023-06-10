@@ -31,7 +31,7 @@ final class ObjectWriterImplInt32ValueArray
         }
 
         int[] array;
-        if (function != null && object != null) {
+        if (function != null) {
             array = function.apply(object);
         } else {
             array = (int[]) object;
@@ -48,7 +48,7 @@ final class ObjectWriterImplInt32ValueArray
         }
 
         int[] array;
-        if (function != null && object != null) {
+        if (function != null) {
             array = function.apply(object);
         } else {
             array = (int[]) object;

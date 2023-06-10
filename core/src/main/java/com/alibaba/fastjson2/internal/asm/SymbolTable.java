@@ -304,32 +304,32 @@ final class SymbolTable {
         return put(new Symbol(constantPoolCount++, tag, owner, name, descriptor, 0, hashCode));
     }
 
-    Symbol addConstantIntegerOrFloat(final int tag, final int value) {
-        int hashCode = 0x7FFFFFFF & (tag + value);
+    Symbol addConstantIntegerOrFloat(final int value) {
+        int hashCode = 0x7FFFFFFF & (3 + value);
         Symbol entry = entries[hashCode % entries.length];
         while (entry != null) {
-            if (entry.tag == tag && entry.hashCode == hashCode && entry.data == value) {
+            if (entry.tag == 3 && entry.hashCode == hashCode && entry.data == value) {
                 return entry;
             }
             entry = entry.next;
         }
-        constantPool.putByte(tag).putInt(value);
-        return put(new Symbol(constantPoolCount++, tag, null, null, null, value, hashCode));
+        constantPool.putByte(3).putInt(value);
+        return put(new Symbol(constantPoolCount++, 3, null, null, null, value, hashCode));
     }
 
-    Symbol addConstantLongOrDouble(final int tag, final long value) {
-        int hashCode = 0x7FFFFFFF & (tag + (int) value + (int) (value >>> 32));
+    Symbol addConstantLongOrDouble(final long value) {
+        int hashCode = 0x7FFFFFFF & (5 + (int) value + (int) (value >>> 32));
         Symbol entry = entries[hashCode % entries.length];
         while (entry != null) {
-            if (entry.tag == tag && entry.hashCode == hashCode && entry.data == value) {
+            if (entry.tag == 5 && entry.hashCode == hashCode && entry.data == value) {
                 return entry;
             }
             entry = entry.next;
         }
         int index = constantPoolCount;
-        constantPool.putByte(tag).putLong(value);
+        constantPool.putByte(5).putLong(value);
         constantPoolCount += 2;
-        return put(new Symbol(index, tag, null, null, null, value, hashCode));
+        return put(new Symbol(index, 5, null, null, null, value, hashCode));
     }
 
     /**

@@ -883,7 +883,7 @@ public class ObjectReaderCreator {
                 field = objectClass.getDeclaredField(fieldName);
             }
 
-            if (field != null
+            if ((field != null)
                     && ObjectReader.class.isAssignableFrom(field.getType())
                     && Modifier.isStatic(field.getModifiers())) {
                 field.setAccessible(true);
@@ -963,7 +963,7 @@ public class ObjectReaderCreator {
             return createObjectReaderWithBuilder(objectClass, objectType, provider, beanInfo);
         }
 
-        Constructor creatorConstructor = beanInfo.creatorConstructor;
+        Constructor creatorConstructor = null;
 
         final List<Constructor> alternateConstructors = new ArrayList<>();
         BeanUtils.constructor(objectClass, alternateConstructors::add);
@@ -1096,11 +1096,7 @@ public class ObjectReaderCreator {
                     }
                 }
 
-                if (defaultConstructor == null
-                        && allReadOnlyOrZero
-                        && fieldReaderArray.length != 0
-                        && alternateConstructors.isEmpty()
-                ) {
+                if (allReadOnlyOrZero && fieldReaderArray.length != 0 && alternateConstructors.isEmpty()) {
                     for (int i = 0; i < parameterNames.length; i++) {
                         String paramName = parameterNames[i];
                         for (FieldReader fieldReader : fieldReaderArray) {
@@ -1117,7 +1113,7 @@ public class ObjectReaderCreator {
 
                 Function function = null;
                 BiFunction biFunction = null;
-                if (creatorConstructor != null && JIT) {
+                if (JIT) {
                     if (creatorConstructor.getParameterCount() == 1) {
                         function = LambdaMiscCodec.createFunction(creatorConstructor);
                     } else if (creatorConstructor.getParameterCount() == 2) {
@@ -2298,7 +2294,7 @@ public class ObjectReaderCreator {
             return new FieldReaderDate(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, null, method, null);
         }
 
-        if (fieldClass == StackTraceElement[].class && method != null && method.getDeclaringClass() == Throwable.class) {
+        if (fieldClass == StackTraceElement[].class && method.getDeclaringClass() == Throwable.class) {
             return new FieldReaderStackTrace(
                     fieldName,
                     fieldTypeResolved != null ? fieldTypeResolved : fieldType,
@@ -2313,10 +2309,6 @@ public class ObjectReaderCreator {
                     null,
                     (BiConsumer<Throwable, StackTraceElement[]>) Throwable::setStackTrace
             );
-        }
-
-        if (fieldClass == StackTraceElement[].class && method.getDeclaringClass() == Throwable.class) {
-            features |= JSONReader.Feature.IgnoreSetNullValue.mask;
         }
 
         Field field = null;
@@ -2812,10 +2804,10 @@ public class ObjectReaderCreator {
         }
 
         if (fieldTypeResolved != null) {
-            return new FieldReaderObjectFunc<>(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function, initReader);
+            return new FieldReaderObjectFunc<>(fieldName, fieldTypeResolved, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function, null);
         }
 
-        return new FieldReaderObjectFunc<>(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function, initReader);
+        return new FieldReaderObjectFunc<>(fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, schema, method, function, null);
     }
 
     protected ObjectReader createEnumReader(
@@ -2874,20 +2866,18 @@ public class ObjectReaderCreator {
 
         Member enumValueField = BeanUtils.getEnumValueField(objectClass, provider);
         if (enumValueField == null && provider.modules.size() > 0) {
-            if (provider != null) {
-                Class fieldClassMixInSource = provider.getMixIn(objectClass);
-                if (fieldClassMixInSource != null) {
-                    Member mixedValueField = BeanUtils.getEnumValueField(fieldClassMixInSource, provider);
-                    if (mixedValueField instanceof Field) {
-                        try {
-                            enumValueField = objectClass.getField(mixedValueField.getName());
-                        } catch (NoSuchFieldException ignored) {
-                        }
-                    } else if (mixedValueField instanceof Method) {
-                        try {
-                            enumValueField = objectClass.getMethod(mixedValueField.getName());
-                        } catch (NoSuchMethodException ignored) {
-                        }
+            Class fieldClassMixInSource = provider.getMixIn(objectClass);
+            if (fieldClassMixInSource != null) {
+                Member mixedValueField = BeanUtils.getEnumValueField(fieldClassMixInSource, provider);
+                if (mixedValueField instanceof Field) {
+                    try {
+                        enumValueField = objectClass.getField(mixedValueField.getName());
+                    } catch (NoSuchFieldException ignored) {
+                    }
+                } else if (mixedValueField instanceof Method) {
+                    try {
+                        enumValueField = objectClass.getMethod(mixedValueField.getName());
+                    } catch (NoSuchMethodException ignored) {
                     }
                 }
             }
@@ -3071,7 +3061,7 @@ public class ObjectReaderCreator {
         }
 
         BiConsumer consumer = (BiConsumer) lambdaSetter(objectClass, fieldClass, method);
-        return createFieldReader(objectClass, objectType, fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, method, consumer, initReader);
+        return createFieldReader(objectClass, objectType, fieldName, fieldType, fieldClass, ordinal, features, format, locale, defaultValue, jsonSchema, method, consumer, null);
     }
 
     protected Object lambdaSetter(Class objectClass, Class fieldClass, Method method) {

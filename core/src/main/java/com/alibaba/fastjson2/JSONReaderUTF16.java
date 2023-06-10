@@ -1130,9 +1130,9 @@ class JSONReaderUTF16
                 return -1;
             }
 
-            String errorMsg, preFieldName;
-            if (ch == '[' && nameBegin > 0 && (preFieldName = getFieldName()) != null) {
-                errorMsg = "illegal fieldName input " + ch + ", previous fieldName " + preFieldName;
+            String errorMsg;
+            if (ch == '[' && nameBegin > 0) {
+                errorMsg = "illegal fieldName input " + ch + ", previous fieldName " + getFieldName();
             } else {
                 errorMsg = "illegal fieldName input" + ch;
             }
@@ -3831,7 +3831,7 @@ class JSONReaderUTF16
                     } else if (c2 == quote) {
                         offset += 2;
                         i += 2;
-                    } else if (c3 == quote) {
+                    } else {
                         offset += 3;
                         i += 3;
                     }
@@ -4383,8 +4383,7 @@ class JSONReaderUTF16
             if (!intOverflow) {
                 int digit = ch - '0';
                 mag3 *= 10;
-                if (mag3 < multmin
-                        || mag3 < limit + digit) {
+                if (mag3 < multmin) {
                     intOverflow = true;
                 } else {
                     mag3 -= digit;
@@ -4408,8 +4407,7 @@ class JSONReaderUTF16
                 if (!intOverflow) {
                     int digit = ch - '0';
                     mag3 *= 10;
-                    if (mag3 < multmin
-                            || mag3 < limit + digit) {
+                    if (mag3 < multmin) {
                         intOverflow = true;
                     } else {
                         mag3 -= digit;
@@ -5277,9 +5275,6 @@ class JSONReaderUTF16
         }
 
         LocalDateTime ldt = DateUtils.parseLocalDateTime18(chars, offset);
-        if (ldt == null) {
-            return null;
-        }
 
         offset += 19;
         next();

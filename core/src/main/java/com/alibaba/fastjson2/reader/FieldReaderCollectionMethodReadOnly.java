@@ -73,7 +73,7 @@ class FieldReaderCollectionMethodReadOnly<T>
         Collection values = (Collection) value;
         for (Object item : values) {
             if (item == null) {
-                collection.add(item);
+                collection.add(null);
                 continue;
             }
 

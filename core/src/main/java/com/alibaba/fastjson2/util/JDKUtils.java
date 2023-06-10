@@ -200,7 +200,7 @@ public class JDKUtils {
         int vector_bit_length = -1;
         boolean vector_support = false;
         try {
-            if (JVM_VERSION >= 11 && trustedLookup != null) {
+            if (JVM_VERSION >= 11) {
                 Class<?> factorClass = Class.forName("java.lang.management.ManagementFactory");
                 Class<?> runtimeMXBeanClass = Class.forName("java.lang.management.RuntimeMXBean");
                 Method getRuntimeMXBean = factorClass.getMethod("getRuntimeMXBean");
@@ -230,7 +230,7 @@ public class JDKUtils {
             // isASCII
             MethodHandle handle = null;
             Class<?> classStringCoding = null;
-            if (trustedLookup != null && JVM_VERSION >= 17) {
+            if (JVM_VERSION >= 17) {
                 try {
                     handle = trustedLookup.findStatic(
                             classStringCoding = String.class,
@@ -242,7 +242,7 @@ public class JDKUtils {
                 }
             }
 
-            if (handle == null && trustedLookup != null && JVM_VERSION >= 11) {
+            if (handle == null && JVM_VERSION >= 11) {
                 try {
                     classStringCoding = Class.forName("java.lang.StringCoding");
                     handle = trustedLookup.findStatic(
@@ -255,7 +255,7 @@ public class JDKUtils {
                 }
             }
 
-            if (handle != null && classStringCoding != null) {
+            if (handle != null) {
                 try {
                     MethodHandles.Lookup lookup = trustedLookup(classStringCoding);
                     CallSite callSite = LambdaMetafactory.metafactory(
@@ -277,7 +277,7 @@ public class JDKUtils {
 
         {
             MethodHandle handle = null;
-            if (trustedLookup != null && JVM_VERSION >= 11) {
+            if (JVM_VERSION >= 11) {
                 try {
                     Class<?> classStringCoding = Class.forName("java.lang.StringCoding");
                     handle = trustedLookup.findStatic(
@@ -294,7 +294,7 @@ public class JDKUtils {
 
         Boolean compact_strings = null;
         try {
-            if (JVM_VERSION == 8 && trustedLookup != null) {
+            if (JVM_VERSION == 8) {
                 MethodHandles.Lookup lookup = trustedLookup(String.class);
 
                 MethodHandle handle = lookup.findConstructor(
@@ -313,17 +313,15 @@ public class JDKUtils {
             }
 
             boolean lookupLambda = false;
-            if (JVM_VERSION > 8 && trustedLookup != null && !android) {
+            if (JVM_VERSION > 8 && !android) {
                 try {
                     Field compact_strings_field = String.class.getDeclaredField("COMPACT_STRINGS");
-                    if (compact_strings_field != null) {
-                        if (UNSAFE_SUPPORT) {
-                            long fieldOffset = UnsafeUtils.UNSAFE.staticFieldOffset(compact_strings_field);
-                            compact_strings = UnsafeUtils.UNSAFE.getBoolean(String.class, fieldOffset);
-                        } else {
-                            compact_strings_field.setAccessible(true);
-                            compact_strings = (Boolean) compact_strings_field.get(null);
-                        }
+                    if (UNSAFE_SUPPORT) {
+                        long fieldOffset = UnsafeUtils.UNSAFE.staticFieldOffset(compact_strings_field);
+                        compact_strings = UnsafeUtils.UNSAFE.getBoolean(String.class, fieldOffset);
+                    } else {
+                        compact_strings_field.setAccessible(true);
+                        compact_strings = (Boolean) compact_strings_field.get(null);
                     }
                 } catch (Throwable e) {
                     initErrorLast = e;

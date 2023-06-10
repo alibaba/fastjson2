@@ -54,7 +54,7 @@ final class ObjectWriterImplInt8ValueArray
         }
 
         byte[] bytes;
-        if (function != null && object != null) {
+        if (function != null) {
             bytes = function.apply(object);
         } else {
             bytes = (byte[]) object;

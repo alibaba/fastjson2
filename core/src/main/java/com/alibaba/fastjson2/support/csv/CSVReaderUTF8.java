@@ -247,9 +247,6 @@ final class CSVReaderUTF8<T>
         }
 
         if (type == Float.class) {
-            if (len == 0) {
-                return null;
-            }
             return TypeUtils.parseFloat(bytes, off, len);
         }
 

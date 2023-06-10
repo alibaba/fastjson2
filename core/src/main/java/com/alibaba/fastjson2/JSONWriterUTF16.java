@@ -462,11 +462,11 @@ class JSONWriterUTF16
                 case '>':
                 case '(':
                 case ')':
-                    if (browserSecure && (ch == '<' || ch == '>' || ch == '(' || ch == ')')) {
+                    if (browserSecure) {
                         chars[off] = '\\';
                         chars[off + 1] = 'u';
-                        chars[off + 2] = DIGITS[(ch >>> 12) & 15];
-                        chars[off + 3] = DIGITS[(ch >>> 8) & 15];
+                        chars[off + 2] = '0';
+                        chars[off + 3] = '0';
                         chars[off + 4] = DIGITS[(ch >>> 4) & 15];
                         chars[off + 5] = DIGITS[ch & 15];
                         off += 6;
@@ -607,11 +607,11 @@ class JSONWriterUTF16
                 case '>':
                 case '(':
                 case ')':
-                    if (browserSecure && (ch == '<' || ch == '>' || ch == '(' || ch == ')')) {
+                    if (browserSecure) {
                         chars[off] = '\\';
                         chars[off + 1] = 'u';
-                        chars[off + 2] = DIGITS[(ch >>> 12) & 15];
-                        chars[off + 3] = DIGITS[(ch >>> 8) & 15];
+                        chars[off + 2] = '0';
+                        chars[off + 3] = '0';
                         chars[off + 4] = DIGITS[(ch >>> 4) & 15];
                         chars[off + 5] = DIGITS[ch & 15];
                         off += 6;
@@ -751,11 +751,11 @@ class JSONWriterUTF16
                 case '>':
                 case '(':
                 case ')':
-                    if (browserSecure && (ch == '<' || ch == '>' || ch == '(' || ch == ')')) {
+                    if (browserSecure) {
                         chars[off] = '\\';
                         chars[off + 1] = 'u';
-                        chars[off + 2] = DIGITS[(ch >>> 12) & 15];
-                        chars[off + 3] = DIGITS[(ch >>> 8) & 15];
+                        chars[off + 2] = '0';
+                        chars[off + 3] = '0';
                         chars[off + 4] = DIGITS[(ch >>> 4) & 15];
                         chars[off + 5] = DIGITS[ch & 15];
                         off += 6;
@@ -896,11 +896,11 @@ class JSONWriterUTF16
                 case '>':
                 case '(':
                 case ')':
-                    if (browserSecure && (ch == '<' || ch == '>' || ch == '(' || ch == ')')) {
+                    if (browserSecure) {
                         chars[off] = '\\';
                         chars[off + 1] = 'u';
-                        chars[off + 2] = DIGITS[(ch >>> 12) & 15];
-                        chars[off + 3] = DIGITS[(ch >>> 8) & 15];
+                        chars[off + 2] = '0';
+                        chars[off + 3] = '0';
                         chars[off + 4] = DIGITS[(ch >>> 4) & 15];
                         chars[off + 5] = DIGITS[ch & 15];
                         off += 6;
@@ -912,8 +912,8 @@ class JSONWriterUTF16
                     if (escapeNoneAscii && ch > 0x007F) {
                         chars[off] = '\\';
                         chars[off + 1] = 'u';
-                        chars[off + 2] = DIGITS[(ch >>> 12) & 15];
-                        chars[off + 3] = DIGITS[(ch >>> 8) & 15];
+                        chars[off + 2] = '0';
+                        chars[off + 3] = '0';
                         chars[off + 4] = DIGITS[(ch >>> 4) & 15];
                         chars[off + 5] = DIGITS[ch & 15];
                         off += 6;
@@ -2557,51 +2557,50 @@ class JSONWriterUTF16
                 chars[off++] = ',';
             }
             first = false;
-            Object value = o;
 
-            if (value == null) {
+            if (o == null) {
                 writeNull();
                 continue;
             }
 
-            Class<?> valueClass = value.getClass();
+            Class<?> valueClass = o.getClass();
             if (valueClass == String.class) {
-                writeString((String) value);
+                writeString((String) o);
                 continue;
             }
 
             if (valueClass == Integer.class) {
-                writeInt32((Integer) value);
+                writeInt32((Integer) o);
                 continue;
             }
 
             if (valueClass == Long.class) {
-                writeInt64((Long) value);
+                writeInt64((Long) o);
                 continue;
             }
 
             if (valueClass == Boolean.class) {
-                writeBool((Boolean) value);
+                writeBool((Boolean) o);
                 continue;
             }
 
             if (valueClass == BigDecimal.class) {
-                writeDecimal((BigDecimal) value, 0, null);
+                writeDecimal((BigDecimal) o, 0, null);
                 continue;
             }
 
             if (valueClass == JSONArray.class) {
-                write((JSONArray) value);
+                write((JSONArray) o);
                 continue;
             }
 
             if (valueClass == JSONObject.class) {
-                write((JSONObject) value);
+                write((JSONObject) o);
                 continue;
             }
 
             ObjectWriter objectWriter = context.getObjectWriter(valueClass, valueClass);
-            objectWriter.write(this, value, null, null, 0);
+            objectWriter.write(this, o, null, null, 0);
         }
         if (off == chars.length) {
             ensureCapacity(off + 1);

@@ -296,32 +296,26 @@ public final class TLongIntHashMap {
         }
 
         boolean isNewMapping = true;
-        if (index < 0) {
-            index = -index - 1;
-            isNewMapping = false;
-        }
         values[index] = value;
 
-        if (isNewMapping) {
-            if (consumeFreeSlot) {
-                free--;
-            }
+        if (consumeFreeSlot) {
+            free--;
+        }
 
-            // rehash whenever we exhaust the available space in the table
-            if (++size > maxSize || free == 0) {
-                // choose a new capacity suited to the new state of the table
-                // if we've grown beyond our maximum size, double capacity;
-                // if we've exhausted the free spots, rehash to the same capacity,
-                // which will free up any stale removed slots for reuse.
-                int capacity = set.length;
+        // rehash whenever we exhaust the available space in the table
+        if (++size > maxSize || free == 0) {
+            // choose a new capacity suited to the new state of the table
+            // if we've grown beyond our maximum size, double capacity;
+            // if we've exhausted the free spots, rehash to the same capacity,
+            // which will free up any stale removed slots for reuse.
+            int capacity = set.length;
 //                rehash(newCapacity);
-                rehash(capacity);
+            rehash(capacity);
 
-                capacity = set.length;
-                // computeMaxSize(capacity);
-                maxSize = Math.min(capacity - 1, (int) (capacity * 0.5f));
-                free = capacity - size; // reset the free element count
-            }
+            capacity = set.length;
+            // computeMaxSize(capacity);
+            maxSize = Math.min(capacity - 1, (int) (capacity * 0.5f));
+            free = capacity - size; // reset the free element count
         }
 
         return value;
@@ -449,7 +443,7 @@ public final class TLongIntHashMap {
             return index;      // empty, all done
         }
 
-        if (state && set[index] == key) {
+        if (set[index] == key) {
             return -index - 1;   // already stored
         }
 
@@ -480,7 +474,7 @@ public final class TLongIntHashMap {
                     return index;
                 }
 
-                if (state && set[index] == key) {
+                if (set[index] == key) {
                     return -index - 1;
                 }
 

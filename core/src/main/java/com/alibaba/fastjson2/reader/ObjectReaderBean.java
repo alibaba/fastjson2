@@ -146,9 +146,7 @@ public abstract class ObjectReaderBean<T>
                     }
                 }
 
-                if (filterClass != null) {
-                    return context.getObjectReader(filterClass);
-                }
+                return context.getObjectReader(filterClass);
             }
 
             ObjectReader autoTypeObjectReader = jsonReader.getObjectReaderAutoType(typeHash, expectClass, features);

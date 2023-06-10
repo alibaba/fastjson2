@@ -46,7 +46,7 @@ final class ObjectWriterImplInt16ValueArray
         }
 
         short[] shorts;
-        if (function != null && object != null) {
+        if (function != null) {
             shorts = function.apply(object);
         } else {
             shorts = (short[]) object;

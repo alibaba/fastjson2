@@ -33,7 +33,7 @@ public final class ValidateResult {
 
     public String getMessage() {
         if (message == null) {
-            if (format != null && args != null && args.length > 0) {
+            if (format != null && args.length > 0) {
                 String s = String.format(format, args);
                 if (cause != null) {
                     s += "; " + cause.getMessage();

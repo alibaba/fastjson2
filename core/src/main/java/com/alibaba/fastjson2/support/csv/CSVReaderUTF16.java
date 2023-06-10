@@ -231,16 +231,10 @@ final class CSVReaderUTF16<T>
         }
 
         if (type == Float.class) {
-            if (len == 0) {
-                return null;
-            }
             return TypeUtils.parseFloat(chars, off, len);
         }
 
         if (type == Double.class) {
-            if (len == 0) {
-                return null;
-            }
             return TypeUtils.parseDouble(chars, off, len);
         }
 

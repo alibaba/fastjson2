@@ -957,7 +957,7 @@ public class ObjectReaderProvider
         Class<?> objectClass = TypeUtils.getMapping(objectType);
 
         String className = objectClass.getName();
-        if (objectReader == null && !fieldBased) {
+        if (!fieldBased) {
             if (className.equals("com.google.common.collect.ArrayListMultimap")) {
                 objectReader = ObjectReaderImplMap.of(null, objectClass, 0);
             }

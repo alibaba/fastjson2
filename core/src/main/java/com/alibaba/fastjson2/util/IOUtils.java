@@ -303,7 +303,7 @@ public class IOUtils {
                 } else if (c >= '\uD800' && c < ('\uDFFF' + 1)) { //Character.isSurrogate(c) but 1.7
                     final int uc;
                     int ip = offset - 1;
-                    if (c >= '\uD800' && c < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
+                    if (c < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
                         if (sl - ip < 2) {
                             uc = -1;
                         } else {
@@ -320,11 +320,8 @@ public class IOUtils {
                         }
                     } else {
                         //
-                        if (c >= '\uDC00' && c < ('\uDFFF' + 1)) { // Character.isLowSurrogate(c)
-                            return -1;
-                        } else {
-                            uc = c;
-                        }
+                        // Character.isLowSurrogate(c)
+                        return -1;
                     }
 
                     if (uc < 0) {
@@ -370,7 +367,7 @@ public class IOUtils {
             } else if (c >= '\uD800' && c < ('\uDFFF' + 1)) { //Character.isSurrogate(c) but 1.7
                 final int uc;
                 int ip = offset - 1;
-                if (c >= '\uD800' && c < ('\uDBFF' + 1)) { // Character.isHighSurrogate(c)
+                if (c < '\uDBFF' + 1) { // Character.isHighSurrogate(c)
                     if (sl - ip < 2) {
                         uc = -1;
                     } else {
@@ -386,13 +383,10 @@ public class IOUtils {
                     }
                 } else {
                     //
-                    if (c >= '\uDC00' && c < ('\uDFFF' + 1)) { // Character.isLowSurrogate(c)
-                        dst[dp++] = (byte) '?';
-                        continue;
+                    // Character.isLowSurrogate(c)
+                    dst[dp++] = (byte) '?';
+                    continue;
 //                        throw new JSONException("encodeUTF8 error", new MalformedInputException(1));
-                    } else {
-                        uc = c;
-                    }
                 }
 
                 if (uc < 0) {
@@ -885,7 +879,7 @@ public class IOUtils {
         long i;
         if (value < 0) {
             if (value == Long.MIN_VALUE) {
-                System.arraycopy(MIN_LONG, 0, buf, pos + 0, MIN_LONG.length);
+                System.arraycopy(MIN_LONG, 0, buf, pos, MIN_LONG.length);
                 return pos + MIN_LONG.length;
             }
             i = -value;

@@ -212,7 +212,7 @@ public abstract class StreamReader<T> {
                     }
                 }
 
-                if ((!checkDate) && (sub == 2 || slash == 2 || colon == 2)) {
+                if (sub == 2 || slash == 2 || colon == 2) {
                     checkDate = true;
                 }
 
@@ -370,7 +370,7 @@ public abstract class StreamReader<T> {
                     }
                 }
 
-                if ((!checkDate) && (sub == 2 || slash == 2 || colon == 2)) {
+                if (sub == 2 || slash == 2 || colon == 2) {
                     checkDate = true;
                 }
 
@@ -544,11 +544,11 @@ public abstract class StreamReader<T> {
     }
 
     public <T> Stream<T> stream() {
-        return StreamSupport.stream(new StreamReaderSpliterator<T>((StreamReader<T>) this), false);
+        return StreamSupport.stream(new StreamReaderSpliterator<>((StreamReader<T>) this), false);
     }
 
     public <T> Stream<T> stream(Class<T> clazz) {
-        return StreamSupport.stream(new StreamReaderSpliterator<T>((StreamReader<T>) this, clazz), false);
+        return StreamSupport.stream(new StreamReaderSpliterator<>((StreamReader<T>) this, clazz), false);
     }
 
     protected static class StreamReaderSpliterator<T>

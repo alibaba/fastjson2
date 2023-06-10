@@ -133,9 +133,6 @@ class JSONReaderJSONB
             charset = StandardCharsets.UTF_16BE;
         } else if (strtype == BC_SYMBOL) {
             int symbol = strlen;
-            if (symbol < 0) {
-                return symbolTable.getName(-symbol);
-            }
             int index = symbol * 2;
 //            return symbols[index];
             throw new JSONException("TODO : " + JSONB.typeName(strtype));
@@ -428,7 +425,7 @@ class JSONReaderJSONB
             }
 
             Object name;
-            if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_SYMBOL) {
+            if (type >= BC_STR_ASCII_FIX_MIN) {
                 name = readFieldName();
             } else {
                 name = readAny();
@@ -538,12 +535,8 @@ class JSONReaderJSONB
                     }
 
                     int minCapacity = strlen << 1;
-                    if (valueBytes == null) {
+                    if (minCapacity > valueBytes.length) {
                         valueBytes = new byte[minCapacity];
-                    } else {
-                        if (minCapacity > valueBytes.length) {
-                            valueBytes = new byte[minCapacity];
-                        }
                     }
 
                     int utf16_len = IOUtils.decodeUTF8(bytes, offset, strlen, valueBytes);
@@ -770,10 +763,9 @@ class JSONReaderJSONB
                     }
 
                     Object name;
-                    if (supportAutoType && i == 0 && type >= BC_STR_ASCII_FIX_MIN && type <= BC_SYMBOL) {
+                    if (supportAutoType && i == 0 && type >= BC_STR_ASCII_FIX_MIN) {
                         long hash = readFieldNameHashCode();
-
-                        if (hash == ObjectReader.HASH_TYPE && supportAutoType) {
+                        if (hash == ObjectReader.HASH_TYPE) {
                             long typeHash = readValueHashCode();
                             ObjectReader autoTypeObjectReader = context.getObjectReaderAutoType(typeHash);
                             if (autoTypeObjectReader == null) {
@@ -790,7 +782,7 @@ class JSONReaderJSONB
                         }
                         name = getFieldName();
                     } else {
-                        if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_SYMBOL) {
+                        if (type >= BC_STR_ASCII_FIX_MIN) {
                             name = readFieldName();
                         } else {
                             name = readAny();
@@ -1313,7 +1305,7 @@ class JSONReaderJSONB
             strtype = bytes[offset];
             if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32) {
                 int symbol;
-                if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
+                if (strtype <= BC_INT32_NUM_MAX) {
                     offset++;
                     symbol = strtype;
                 } else {
@@ -1535,7 +1527,7 @@ class JSONReaderJSONB
             strtype = bytes[offset];
             if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32) {
                 int symbol;
-                if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
+                if (strtype <= BC_INT32_NUM_MAX) {
                     offset++;
                     symbol = strtype;
                 } else {
@@ -1572,10 +1564,10 @@ class JSONReaderJSONB
 
         if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32) {
             int typeIndex;
-            if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32_NUM_MAX) {
+            if (strtype <= BC_INT32_NUM_MAX) {
                 offset++;
                 typeIndex = strtype;
-            } else if (strtype >= BC_INT32_BYTE_MIN && strtype <= BC_INT32_BYTE_MAX) {
+            } else if (strtype <= BC_INT32_BYTE_MAX) {
                 offset++;
                 typeIndex = ((strtype - BC_INT32_BYTE_ZERO) << 8)
                         + (bytes[offset++] & 0xFF);
@@ -2353,10 +2345,6 @@ class JSONReaderJSONB
                     return;
                 }
 
-                if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
-                    return;
-                }
-
                 if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
                     offset++;
                     return;
@@ -2395,10 +2383,6 @@ class JSONReaderJSONB
         ) {
             strlen = readLength();
             offset += strlen;
-            return true;
-        }
-
-        if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_UTF16BE) {
             return true;
         }
 
@@ -2739,12 +2723,8 @@ class JSONReaderJSONB
                 }
 
                 int minCapacity = strlen << 1;
-                if (valueBytes == null) {
+                if (minCapacity > valueBytes.length) {
                     valueBytes = new byte[minCapacity];
-                } else {
-                    if (minCapacity > valueBytes.length) {
-                        valueBytes = new byte[minCapacity];
-                    }
                 }
 
                 int utf16_len = IOUtils.decodeUTF8(bytes, offset, strlen, valueBytes);
@@ -2885,7 +2865,7 @@ class JSONReaderJSONB
             }
         }
 
-        return readStringNonAscii(str, ascii);
+        return readStringNonAscii(null, ascii);
     }
 
     private String readStringNonAscii(String str, boolean ascii) {
@@ -2958,14 +2938,13 @@ class JSONReaderJSONB
         return str;
     }
 
-    private String readGB18030() {
+    private void readGB18030() {
         strlen = readLength();
         strBegin = offset;
 
         if (GB18030 == null) {
             GB18030 = Charset.forName("GB18030");
         }
-        return null;
     }
 
     private String readUTF16BE() {
@@ -3043,12 +3022,8 @@ class JSONReaderJSONB
             }
 
             int minCapacity = strlen << 1;
-            if (valueBytes == null) {
+            if (minCapacity > valueBytes.length) {
                 valueBytes = new byte[minCapacity];
-            } else {
-                if (minCapacity > valueBytes.length) {
-                    valueBytes = new byte[minCapacity];
-                }
             }
 
             int utf16_len = IOUtils.decodeUTF8(bytes, offset, strlen, valueBytes);

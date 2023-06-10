@@ -69,11 +69,7 @@ public final class ArraySchema
             additionalItemsSupport = true;
             this.itemSchema = null;
         } else if (items instanceof Boolean) {
-            if ((Boolean) items) {
-                additionalItemsSupport = true;
-            } else {
-                additionalItemsSupport = false;
-            }
+            additionalItemsSupport = (Boolean) items;
             this.itemSchema = null;
         } else if (items instanceof JSONArray) {
             if (prefixItems == null) {
@@ -157,10 +153,8 @@ public final class ArraySchema
                 return new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, size);
             }
 
-            if (maxLength >= 0) {
-                if (maxLength >= 0 && size > maxLength) {
-                    return new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
-                }
+            if (maxLength >= 0 && size > maxLength) {
+                return new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
             }
 
             int containsCount = 0;
@@ -254,10 +248,8 @@ public final class ArraySchema
                 return new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, size);
             }
 
-            if (maxLength >= 0) {
-                if (maxLength >= 0 && size > maxLength) {
-                    return new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
-                }
+            if (maxLength >= 0 && size > maxLength) {
+                return new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
             }
 
             int containsCount = 0;
@@ -349,10 +341,8 @@ public final class ArraySchema
                 return new ValidateResult(false, "minLength not match, expect >= %s, but %s", minLength, size);
             }
 
-            if (maxLength >= 0) {
-                if (maxLength >= 0 && size > maxLength) {
-                    return new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
-                }
+            if (maxLength >= 0 && size > maxLength) {
+                return new ValidateResult(false, "maxLength not match, expect <= %s, but %s", maxLength, size);
             }
 
             if (!additionalItems) {

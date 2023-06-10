@@ -448,9 +448,7 @@ public class JdbcSupport {
                 int hour = zdt.getHour();
                 int minute = zdt.getMinute();
                 int second = zdt.getSecond();
-                if (nanos == 0) {
-                    jsonWriter.writeDateTime19(year, month, dayOfMonth, hour, minute, second);
-                } else if (nanos % 1000_000 == 0) {
+                if (nanos % 1000_000 == 0) {
                     jsonWriter.writeDateTimeISO8601(year, month, dayOfMonth, hour, minute, second, nanos / 1000_000, offsetSeconds, false);
                 } else {
                     jsonWriter.writeLocalDateTime(zdt.toLocalDateTime());
@@ -658,7 +656,7 @@ public class JdbcSupport {
             DateTimeFormatter dateFormatter = getDateFormatter();
 
             Instant instant;
-            if (format != null && !formatHasHour) {
+            if (!formatHasHour) {
                 LocalDate localDate = LocalDate.parse(str, dateFormatter);
                 LocalDateTime ldt = LocalDateTime.of(localDate, LocalTime.MIN);
                 instant = ldt.atZone(jsonReader.getContext().getZoneId()).toInstant();

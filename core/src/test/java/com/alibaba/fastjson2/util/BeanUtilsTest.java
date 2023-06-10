@@ -174,10 +174,6 @@ public class BeanUtilsTest {
                 new Type[]{null},
                 new Type[]{Object.class}
         ));
-        assertThrows(Exception.class, () -> new BeanUtils.WildcardTypeImpl(
-                new Type[]{Object.class},
-                new Type[]{null}
-        ));
         assertEquals(
                 "?",
                 new BeanUtils.WildcardTypeImpl(

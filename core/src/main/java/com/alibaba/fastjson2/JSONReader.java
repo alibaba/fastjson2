@@ -632,7 +632,7 @@ public abstract class JSONReader
                         long v3 = mag3 & 0XFFFFFFFFL;
                         long v2 = mag2 & 0XFFFFFFFFL;
 
-                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
+                        if (v2 <= Integer.MAX_VALUE) {
                             long v23 = (v2 << 32) + (v3);
                             return negative ? -v23 : v23;
                         }
@@ -644,7 +644,7 @@ public abstract class JSONReader
                     mag = new int[]{mag0, mag1, mag2, mag3};
                 }
 
-                int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                int signum = negative ? -1 : 1;
                 BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
                 return bigInt.longValue();
             case JSON_TYPE_DEC:
@@ -1543,9 +1543,7 @@ public abstract class JSONReader
             Object item = ObjectReaderImplObject.INSTANCE.readObject(this, null, null, 0);
             list.add(item);
 
-            if (nextIfMatch(',')) {
-                continue;
-            }
+            nextIfMatch(',');
         }
 
         nextIfMatch(',');
@@ -2230,7 +2228,7 @@ public abstract class JSONReader
                         long v3 = mag3 & 0XFFFFFFFFL;
                         long v2 = mag2 & 0XFFFFFFFFL;
 
-                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
+                        if (v2 <= Integer.MAX_VALUE) {
                             long v23 = (v2 << 32) + (v3);
                             return BigDecimal.valueOf(negative ? -v23 : v23);
                         }
@@ -2257,7 +2255,7 @@ public abstract class JSONReader
                         long v3 = mag3 & 0XFFFFFFFFL;
                         long v2 = mag2 & 0XFFFFFFFFL;
 
-                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
+                        if (v2 <= Integer.MAX_VALUE) {
                             long v23 = (v2 << 32) + (v3);
                             long unscaledVal = negative ? -v23 : v23;
                             decimal = BigDecimal.valueOf(unscaledVal, scale);
@@ -2274,7 +2272,7 @@ public abstract class JSONReader
                             : new int[]{mag1, mag2, mag3}
                             : new int[]{mag0, mag1, mag2, mag3};
 
-                    int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                    int signum = negative ? -1 : 1;
                     BigInteger bigInt = BIG_INTEGER_CREATOR.apply(signum, mag);
                     decimal = new BigDecimal(bigInt, scale);
                 }
@@ -2347,7 +2345,7 @@ public abstract class JSONReader
                         long v3 = mag3 & 0XFFFFFFFFL;
                         long v2 = mag2 & 0XFFFFFFFFL;
 
-                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
+                        if (v2 <= Integer.MAX_VALUE) {
                             long v23 = (v2 << 32) + (v3);
                             return negative ? -v23 : v23;
                         }
@@ -2359,7 +2357,7 @@ public abstract class JSONReader
                     mag = new int[]{mag0, mag1, mag2, mag3};
                 }
 
-                int signum = mag.length == 0 ? 0 : negative ? -1 : 1;
+                int signum = negative ? -1 : 1;
                 return BIG_INTEGER_CREATOR.apply(signum, mag);
             }
             case JSON_TYPE_INT16: {
@@ -2432,7 +2430,7 @@ public abstract class JSONReader
                         long v3 = mag3 & 0XFFFFFFFFL;
                         long v2 = mag2 & 0XFFFFFFFFL;
 
-                        if (v2 >= Integer.MIN_VALUE && v2 <= Integer.MAX_VALUE) {
+                        if (v2 <= Integer.MAX_VALUE) {
                             long v23 = (v2 << 32) + (v3);
                             long unscaledVal = negative ? -v23 : v23;
 
@@ -2454,16 +2452,6 @@ public abstract class JSONReader
                                      * multiply or divide to compute the (properly
                                      * rounded) result.
                                      */
-                                    if (unscaledVal != Long.MIN_VALUE && unsignedUnscaledVal < 1L << 22) {
-                                        // Don't have too guard against
-                                        // Math.abs(MIN_VALUE) because of outer check
-                                        // against INFLATED.
-                                        if (scale > 0 && scale < FLOAT_10_POW.length) {
-                                            return (float) unscaledVal / FLOAT_10_POW[scale];
-                                        } else if (scale < 0 && scale > -FLOAT_10_POW.length) {
-                                            return (float) unscaledVal * FLOAT_10_POW[-scale];
-                                        }
-                                    }
 
                                     int len = IOUtils.stringSize(unsignedUnscaledVal);
                                     if (doubleChars == null) {
@@ -2488,7 +2476,7 @@ public abstract class JSONReader
                                      * double multiply or divide to compute the (properly
                                      * rounded) result.
                                      */
-                                    if (unscaledVal != Long.MIN_VALUE && unsignedUnscaledVal < 1L << 52) {
+                                    if (unsignedUnscaledVal < 1L << 52) {
                                         // Don't have too guard against
                                         // Math.abs(MIN_VALUE) because of outer check
                                         // against INFLATED.
@@ -2519,9 +2507,7 @@ public abstract class JSONReader
                 if (decimal == null) {
                     int[] mag = mag0 == 0
                             ? mag1 == 0
-                            ? mag2 == 0
-                            ? new int[]{mag3}
-                            : new int[]{mag2, mag3}
+                            ? new int[]{mag2, mag3}
                             : new int[]{mag1, mag2, mag3}
                             : new int[]{mag0, mag1, mag2, mag3};
                     int signum = negative ? -1 : 1;
@@ -2537,9 +2523,8 @@ public abstract class JSONReader
 
                 if (exponent != 0) {
                     String decimalStr = decimal.toPlainString();
-                    double doubleValue = Double.parseDouble(
+                    return Double.parseDouble(
                             decimalStr + "E" + exponent);
-                    return doubleValue;
                 }
 
                 if ((context.features & Feature.UseBigDecimalForFloats.mask) != 0) {
@@ -2574,18 +2559,16 @@ public abstract class JSONReader
 
                 if (valueType == JSON_TYPE_FLOAT) {
                     if (exponent != 0) {
-                        float floatValueValue = Float.parseFloat(
+                        return Float.parseFloat(
                                 decimal + "E" + exponent);
-                        return floatValueValue;
                     }
 
                     return decimal.floatValue();
                 }
 
                 if (exponent != 0) {
-                    double doubleValue = Double.parseDouble(
+                    return Double.parseDouble(
                             decimal + "E" + exponent);
-                    return doubleValue;
                 }
                 return decimal.doubleValue();
             }
@@ -2622,7 +2605,7 @@ public abstract class JSONReader
             return Long.parseLong(val);
         }
 
-        if (val != null && val.length() > 10 && val.length() < 40) {
+        if (val.length() > 10 && val.length() < 40) {
             try {
                 return DateUtils.parseMillis(val, context.zoneId);
             } catch (DateTimeException | JSONException ignored) {
