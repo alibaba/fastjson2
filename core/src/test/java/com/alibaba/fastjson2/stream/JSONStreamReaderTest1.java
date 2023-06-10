@@ -46,6 +46,21 @@ public class JSONStreamReaderTest1 {
     }
 
     @Test
+    public void testUTF8_1Generic() throws Exception {
+        String str = "[101,102,103]\n[201,202,203]";
+        Charset charset = StandardCharsets.UTF_8;
+        byte[] bytes = str.getBytes(charset);
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        JSONStreamReader<List> reader = JSONStreamReader.of(in, charset);
+
+        List list1 = reader.readLineObject();
+        assertEquals("[101,102,103]", JSON.toJSONString(list1));
+
+        List list2 = reader.readLineObject();
+        assertEquals("[201,202,203]", JSON.toJSONString(list2));
+    }
+
+    @Test
     public void testUTF16() throws Exception {
         String str = "[101,102,103]\n[201,202,203]";
         Charset charset = StandardCharsets.UTF_16;
@@ -77,5 +92,20 @@ public class JSONStreamReaderTest1 {
 
         List obj2 = (List) reader.readLineObject();
         assertEquals("[201,202,203]", JSON.toJSONString(obj2));
+    }
+
+    @Test
+    public void testUTF16_1Generic() throws Exception {
+        String str = "[101,102,103]\n[201,202,203]";
+        Charset charset = StandardCharsets.UTF_16;
+        byte[] bytes = str.getBytes(charset);
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        JSONStreamReader<List> reader = JSONStreamReader.of(in, charset);
+
+        List list1 = reader.readLineObject();
+        assertEquals("[101,102,103]", JSON.toJSONString(list1));
+
+        List list2 = reader.readLineObject();
+        assertEquals("[201,202,203]", JSON.toJSONString(list2));
     }
 }
