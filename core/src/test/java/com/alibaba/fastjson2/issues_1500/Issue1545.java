@@ -38,7 +38,6 @@ public class Issue1545 {
 
     @Data
     public class FieldPerm {
-
         private String fieldId;
 
         private PermMode mode;
