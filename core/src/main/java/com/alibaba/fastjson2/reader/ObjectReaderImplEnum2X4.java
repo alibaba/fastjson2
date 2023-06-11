@@ -82,6 +82,7 @@ public final class ObjectReaderImplEnum2X4
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        int start = jsonReader.getOffset();
         byte type = jsonReader.getType();
         if (type == BC_TYPED_ANY) {
             jsonReader.next();
@@ -125,12 +126,13 @@ public final class ObjectReaderImplEnum2X4
                 }
             }
         }
-        failFastIfNecessary(fieldValue, fieldType, this.getClass().getSimpleName());
+        failFastIfNecessary(fieldValue, fieldType, jsonReader.getOffset() - start, this.getClass().getSimpleName());
         return fieldValue;
     }
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        int start = jsonReader.getOffset();
         Enum fieldValue;
         if (jsonReader.isInt()) {
             int ordinal = jsonReader.readInt32Value();
@@ -160,7 +162,7 @@ public final class ObjectReaderImplEnum2X4
                 }
             }
         }
-        failFastIfNecessary(fieldValue, fieldType, this.getClass().getSimpleName());
+        failFastIfNecessary(fieldValue, fieldType, jsonReader.getOffset() - start, this.getClass().getSimpleName());
         return fieldValue;
     }
 }
