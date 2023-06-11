@@ -39,8 +39,9 @@ class JSONReaderUTF8
         int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
         cacheItem = CACHE_ITEMS[cacheIndex];
         byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
+        int bufferSize = ctx.getBufferSize();
         if (bytes == null) {
-            bytes = new byte[8192];
+            bytes = new byte[bufferSize];
         }
 
         int off = 0;
@@ -53,7 +54,7 @@ class JSONReaderUTF8
                 off += n;
 
                 if (off == bytes.length) {
-                    bytes = Arrays.copyOf(bytes, bytes.length + 8192);
+                    bytes = Arrays.copyOf(bytes, bytes.length + bufferSize);
                 }
             }
         } catch (IOException ioe) {
