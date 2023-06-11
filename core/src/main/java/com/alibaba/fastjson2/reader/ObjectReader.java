@@ -3,8 +3,10 @@ package com.alibaba.fastjson2.reader;
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.util.Fnv;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -275,4 +277,15 @@ public interface ObjectReader<T> {
      * @throws JSONException If a suitable ObjectReader is not found
      */
     T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features);
+
+    default void failFastIfNecessary(Object fieldValue, Type fieldType, String parseType) {
+        if (fieldValue == null) {
+            if (fieldType instanceof ParameterizedType) {
+                Type rawType = ((ParameterizedType) fieldType).getRawType();
+                if (List.class.isAssignableFrom((Class<?>) rawType)) {
+                    throw new JSONException(String.format("%s parses error, found null value when field type belongs to collection to avoid OOM", parseType));
+                }
+            }
+        }
+    }
 }
