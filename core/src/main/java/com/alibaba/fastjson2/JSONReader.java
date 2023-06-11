@@ -3490,6 +3490,7 @@ public abstract class JSONReader
         boolean formatHasHour;
         boolean useSimpleFormatter;
         int maxLevel = 2048;
+        int bufferSize = 1024 * 512;
         DateTimeFormatter dateFormatter;
         ZoneId zoneId;
         long features;
@@ -3798,6 +3799,18 @@ public abstract class JSONReader
 
         public void setMaxLevel(int maxLevel) {
             this.maxLevel = maxLevel;
+        }
+
+        public int getBufferSize() {
+            return bufferSize;
+        }
+
+        public Context setBufferSize(int bufferSize) {
+            if (bufferSize < 0) {
+                throw new IllegalArgumentException("buffer size can not be less than zero");
+            }
+            this.bufferSize = bufferSize;
+            return this;
         }
 
         public Locale getLocale() {
