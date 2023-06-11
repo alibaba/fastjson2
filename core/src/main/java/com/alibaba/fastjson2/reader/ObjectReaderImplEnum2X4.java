@@ -125,6 +125,7 @@ public final class ObjectReaderImplEnum2X4
                 }
             }
         }
+        failFastIfNecessary(fieldValue, fieldType, this.getClass().getSimpleName());
         return fieldValue;
     }
 
@@ -159,6 +160,7 @@ public final class ObjectReaderImplEnum2X4
                 }
             }
         }
+        failFastIfNecessary(fieldValue, fieldType, this.getClass().getSimpleName());
         return fieldValue;
     }
 }

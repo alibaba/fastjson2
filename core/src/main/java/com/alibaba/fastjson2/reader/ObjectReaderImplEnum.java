@@ -187,6 +187,7 @@ public final class ObjectReaderImplEnum
                 fieldValue = getEnumByHashCode(nameHash);
             }
         }
+        failFastIfNecessary(fieldValue, fieldType, this.getClass().getSimpleName());
         return fieldValue;
     }
 
@@ -248,6 +249,7 @@ public final class ObjectReaderImplEnum
                 throw new JSONException(jsonReader.info("parse enum error, class " + enumClass.getName() + ", value " + strVal));
             }
         }
+        failFastIfNecessary(fieldValue, fieldType, this.getClass().getSimpleName());
         return fieldValue;
     }
 }
