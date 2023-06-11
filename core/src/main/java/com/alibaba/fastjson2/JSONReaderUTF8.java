@@ -1849,14 +1849,12 @@ class JSONReaderUTF8
 
         boolean overflow = false;
         while (ch >= '0' && ch <= '9') {
-            if (!overflow) {
-                int intValue10 = intValue * 10 + (ch - '0');
-                if (intValue10 < intValue) {
-                    overflow = true;
-                    break;
-                } else {
-                    intValue = intValue10;
-                }
+            int intValue10 = intValue * 10 + (ch - '0');
+            if (intValue10 < intValue) {
+                overflow = true;
+                break;
+            } else {
+                intValue = intValue10;
             }
             if (offset == end) {
                 ch = EOI;
@@ -1986,14 +1984,12 @@ class JSONReaderUTF8
 
         boolean overflow = false;
         while (ch >= '0' && ch <= '9') {
-            if (!overflow) {
-                int intValue10 = intValue * 10 + (ch - '0');
-                if (intValue10 < intValue) {
-                    overflow = true;
-                    break;
-                } else {
-                    intValue = intValue10;
-                }
+            int intValue10 = intValue * 10 + (ch - '0');
+            if (intValue10 < intValue) {
+                overflow = true;
+                break;
+            } else {
+                intValue = intValue10;
             }
             if (offset == end) {
                 ch = EOI;
@@ -2114,14 +2110,12 @@ class JSONReaderUTF8
 
         boolean overflow = false;
         while (ch >= '0' && ch <= '9') {
-            if (!overflow) {
-                long intValue10 = longValue * 10 + (ch - '0');
-                if (intValue10 < longValue) {
-                    overflow = true;
-                    break;
-                } else {
-                    longValue = intValue10;
-                }
+            long intValue10 = longValue * 10 + (ch - '0');
+            if (intValue10 < longValue) {
+                overflow = true;
+                break;
+            } else {
+                longValue = intValue10;
             }
             if (offset == end) {
                 ch = EOI;
@@ -2261,14 +2255,12 @@ class JSONReaderUTF8
 
         boolean overflow = false;
         while (ch >= '0' && ch <= '9') {
-            if (!overflow) {
-                long intValue10 = longValue * 10 + (ch - '0');
-                if (intValue10 < longValue) {
-                    overflow = true;
-                    break;
-                } else {
-                    longValue = intValue10;
-                }
+            long intValue10 = longValue * 10 + (ch - '0');
+            if (intValue10 < longValue) {
+                overflow = true;
+                break;
+            } else {
+                longValue = intValue10;
             }
 
             if (offset == end) {
@@ -3434,7 +3426,7 @@ class JSONReaderUTF8
                     }
                 }
                 boolean dot = ch == '.';
-                boolean space = false;
+//                boolean space = false;
                 boolean num = false;
                 if (!dot && (ch >= '0' && ch <= '9')) {
                     num = true;
@@ -3445,7 +3437,7 @@ class JSONReaderUTF8
                             ch = EOI;
                             return;
                         }
-                    } while (!space && ch >= '0' && ch <= '9');
+                    } while (ch >= '0' && ch <= '9');
                 }
 
                 if (num && (ch == 'L' || ch == 'F' || ch == 'D' || ch == 'B' || ch == 'S')) {
@@ -3470,7 +3462,7 @@ class JSONReaderUTF8
                                 ch = EOI;
                                 return;
                             }
-                        } while (!space && ch >= '0' && ch <= '9');
+                        } while (ch >= '0' && ch <= '9');
                     }
                 }
 
@@ -4221,8 +4213,7 @@ class JSONReaderUTF8
             if (!intOverflow) {
                 int digit = ch - '0';
                 mag3 *= 10;
-                if (mag3 < multmin
-                        || mag3 < limit + digit) {
+                if (mag3 < multmin) {
                     intOverflow = true;
                 } else {
                     mag3 -= digit;
@@ -4246,8 +4237,7 @@ class JSONReaderUTF8
                 if (!intOverflow) {
                     int digit = ch - '0';
                     mag3 *= 10;
-                    if (mag3 < multmin
-                            || mag3 < limit + digit) {
+                    if (mag3 < multmin) {
                         intOverflow = true;
                     } else {
                         mag3 -= digit;
