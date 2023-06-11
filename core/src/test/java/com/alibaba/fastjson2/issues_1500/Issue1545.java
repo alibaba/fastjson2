@@ -28,26 +28,19 @@ public class Issue1545 {
             ex = e;
         }
         assertTrue(ex instanceof JSONException);
-        assertEquals("ObjectReaderImplEnum parses error, found null value when field type belongs to collection to avoid OOM", ex.getMessage());
+        assertEquals("ObjectReaderImplEnum parses error, JSONReader not forward when field type belongs to collection to avoid OOM", ex.getMessage());
     }
 
     @Data
     public class ApproveActionConfig {
-        private List<FieldPerm.PermMode> fieldPermissions;
+        private List<PermMode> fieldPermissions;
     }
 
-    @Data
-    public class FieldPerm {
-        private String fieldId;
+    public enum PermMode {
+        READ,
 
-        private PermMode mode;
+        WRITE,
 
-        public enum PermMode {
-            READ,
-
-            WRITE,
-
-            NONE
-        }
+        NONE
     }
 }

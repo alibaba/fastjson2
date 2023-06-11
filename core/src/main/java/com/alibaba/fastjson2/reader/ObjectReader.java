@@ -340,12 +340,12 @@ public interface ObjectReader<T> {
      */
     T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features);
 
-    default void failFastIfNecessary(Object fieldValue, Type fieldType, String parseType) {
-        if (fieldValue == null) {
+    default void failFastIfNecessary(Object fieldValue, Type fieldType, int steps, String parseType) {
+        if (fieldValue == null && steps == 0) {
             if (fieldType instanceof ParameterizedType) {
                 Type rawType = ((ParameterizedType) fieldType).getRawType();
                 if (List.class.isAssignableFrom((Class<?>) rawType)) {
-                    throw new JSONException(String.format("%s parses error, found null value when field type belongs to collection to avoid OOM", parseType));
+                    throw new JSONException(String.format("%s parses error, JSONReader not forward when field type belongs to collection to avoid OOM", parseType));
                 }
             }
         }

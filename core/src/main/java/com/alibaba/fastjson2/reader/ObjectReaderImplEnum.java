@@ -152,6 +152,7 @@ public final class ObjectReaderImplEnum
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        int start = jsonReader.getOffset();
         byte type = jsonReader.getType();
         if (type == BC_TYPED_ANY) {
             ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(enumClass, 0L, features);
@@ -187,12 +188,13 @@ public final class ObjectReaderImplEnum
                 fieldValue = getEnumByHashCode(nameHash);
             }
         }
-        failFastIfNecessary(fieldValue, fieldType, this.getClass().getSimpleName());
+        failFastIfNecessary(fieldValue, fieldType, jsonReader.getOffset() - start, this.getClass().getSimpleName());
         return fieldValue;
     }
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
+        int start = jsonReader.getOffset();
         if (createMethodParamType != null) {
             Object paramValue = jsonReader.read(createMethodParamType);
             try {
@@ -249,7 +251,7 @@ public final class ObjectReaderImplEnum
                 throw new JSONException(jsonReader.info("parse enum error, class " + enumClass.getName() + ", value " + strVal));
             }
         }
-        failFastIfNecessary(fieldValue, fieldType, this.getClass().getSimpleName());
+        failFastIfNecessary(fieldValue, fieldType, jsonReader.getOffset() - start, this.getClass().getSimpleName());
         return fieldValue;
     }
 }
