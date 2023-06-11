@@ -2009,8 +2009,9 @@ public interface JSON {
         int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
         final CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
         byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
+        int bufferSize = 512 * 1024;
         if (bytes == null) {
-            bytes = new byte[8192];
+            bytes = new byte[bufferSize];
         }
 
         int offset = 0, start = 0, end;
@@ -2060,7 +2061,7 @@ public interface JSON {
                         start = 0;
                         offset = len;
                     } else {
-                        bytes = Arrays.copyOf(bytes, bytes.length + 8192);
+                        bytes = Arrays.copyOf(bytes, bytes.length + bufferSize);
                     }
                 }
             }
