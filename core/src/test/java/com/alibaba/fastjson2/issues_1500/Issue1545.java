@@ -43,7 +43,6 @@ public class Issue1545 {
         private PermMode mode;
 
         public enum PermMode {
-
             READ,
 
             WRITE,
