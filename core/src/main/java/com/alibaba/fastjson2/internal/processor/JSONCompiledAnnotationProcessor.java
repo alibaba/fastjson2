@@ -262,6 +262,46 @@ public class JSONCompiledAnnotationProcessor
                 genReadFieldValue(ifStmt, i, field, jsonReader, object, forLabel, jsonb);
 //                ifStmt.continueStmt();
             }
+        } else {
+            Map<Integer, List<Long>> map = new TreeMap();
+            Map<Long, AttributeInfo> mapping = new TreeMap();
+            Map<Long, Integer> mappingIndex = new TreeMap();
+
+            for (int i = 0; i < fields.size(); i++) {
+                AttributeInfo field = fields.get(i);
+                long fieldNameHash = Fnv.hashCode64(field.name);
+                int hashCode32 = (int) (fieldNameHash ^ (fieldNameHash >>> 32));
+                List<Long> hashCode64List = map.computeIfAbsent(hashCode32, k -> new ArrayList<>());
+                hashCode64List.add(fieldNameHash);
+                mapping.put(fieldNameHash, field);
+                mappingIndex.put(fieldNameHash, i);
+            }
+
+            int[] hashCode32Keys = new int[map.size()];
+            {
+                int off = 0;
+                for (Integer key : map.keySet()) {
+                    hashCode32Keys[off++] = key;
+                }
+            }
+            Arrays.sort(hashCode32Keys);
+
+            // int hashCode32 = (int)(hashCode64 ^ (hashCode64 >>> 32));
+            OpName hashCode32 = var("hashCode32");
+            forStmt.declare(int.class, hashCode32, cast(eor(hashCode64, urs(hashCode64, ldc(32))), int.class));
+            Block.SwitchStmt switchStmt = forStmt.switchStmt(hashCode32, hashCode32Keys);
+            for (int i = 0; i < switchStmt.labels(); i++) {
+                Block label = switchStmt.lable(i);
+                List<Long> hashCode64Array = map.get(switchStmt.labelKey(i));
+                for (int j = 0; j < hashCode64Array.size(); ++j) {
+                    Long fieldNameHash = hashCode64Array.get(j);
+                    int index = mappingIndex.get(fieldNameHash);
+                    AttributeInfo field = mapping.get(fieldNameHash);
+                    Block.IfStmt ifStmt = label.ifStmt(eq(hashCode64, ldc(fieldNameHash)));
+                    genReadFieldValue(ifStmt, index, field, jsonReader, object, forLabel, jsonb);
+                    ifStmt.continueStmt(forLabel);
+                }
+            }
         }
 
         mw.ret(object);
