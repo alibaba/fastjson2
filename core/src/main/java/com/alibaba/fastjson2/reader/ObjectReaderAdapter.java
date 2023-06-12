@@ -17,7 +17,7 @@ public class ObjectReaderAdapter<T>
     protected final String typeKey;
     protected final long typeKeyHashCode;
 
-    final FieldReader[] fieldReaders;
+    protected final FieldReader[] fieldReaders;
     final long[] hashCodes;
     final short[] mapping;
 

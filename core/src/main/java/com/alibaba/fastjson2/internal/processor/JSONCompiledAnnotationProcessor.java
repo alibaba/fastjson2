@@ -293,7 +293,7 @@ public class JSONCompiledAnnotationProcessor
                 long fieldNameHash = field.nameHashCode;
                 Block.IfStmt ifStmt = forStmt.ifStmt(eq(hashCode64, ldc(fieldNameHash)));
                 genReadFieldValue(ifStmt, i, field, jsonReader, object, forLabel, jsonb);
-//                ifStmt.continueStmt();
+                ifStmt.continueStmt();
             }
         } else {
             Map<Integer, List<Long>> map = new TreeMap();
@@ -337,6 +337,8 @@ public class JSONCompiledAnnotationProcessor
             }
         }
 
+        forStmt.stmt(invoke(null, "processExtra", jsonReader, object));
+
         mw.ret(object);
     }
 
@@ -376,6 +378,9 @@ public class JSONCompiledAnnotationProcessor
             case "char":
                 value = invoke(jsonReader, "readCharValue");
                 break;
+            case "long[]":
+                value = invoke(jsonReader, "readInt64ValueArray");
+                break;
             case "java.lang.String":
                 value = Opcodes.invoke(jsonReader, "readString");
                 break;
@@ -399,6 +404,15 @@ public class JSONCompiledAnnotationProcessor
                 break;
             case "java.util.UUID":
                 value = invoke(jsonReader, "readUUID");
+                break;
+            case "java.lang.String[]":
+                value = invoke(jsonReader, "readStringArray");
+                break;
+            case "java.time.LocalDate":
+                value = invoke(jsonReader, "readLocalDate");
+                break;
+            case "java.time.OffsetDateTime":
+                value = invoke(jsonReader, "readOffsetDateTime");
                 break;
             default:
                 OpName fieldValue = var(field.name);
