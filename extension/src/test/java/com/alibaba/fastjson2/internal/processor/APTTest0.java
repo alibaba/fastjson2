@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.internal.processor;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 import javax.tools.*;
 
@@ -12,16 +11,15 @@ import java.util.Collections;
 import java.util.List;
 
 public class APTTest0 {
-    @TempDir
-    Path tempDir;
-
     @Test
     public void test() throws Exception {
+        Path dir = new File("/Users/wenshao/Work/git/fastjson2/extension/target/generated-sources")
+                .toPath();
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null);
-        fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Arrays.asList(tempDir.toFile()));
-        fileManager.setLocation(StandardLocation.SOURCE_OUTPUT, Arrays.asList(tempDir.toFile()));
+        fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Arrays.asList(dir.toFile()));
+        fileManager.setLocation(StandardLocation.SOURCE_OUTPUT, Arrays.asList(dir.toFile()));
 
         File file = new File("src/test/java/com/alibaba/fastjson2/internal/processor/Bean.java");
         Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjects(file);

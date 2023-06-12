@@ -85,17 +85,24 @@ public class Block {
     }
 
     public Statement declare(Class type, Opcodes.OpName name) {
-        DeclareStmt stmt = new DeclareStmt(type, name, null);
+        DeclareStmt stmt = new DeclareStmt(ClassWriter.getTypeName(type), name, null);
         statements.add(stmt);
         return stmt;
     }
 
     public Statement declare(Class type, Opcodes.OpName name, Opcodes.Op initValue) {
-        DeclareStmt stmt = new DeclareStmt(type, name, initValue);
+        DeclareStmt stmt = new DeclareStmt(ClassWriter.getTypeName(type), name, initValue);
         statements.add(stmt);
         return stmt;
     }
+
     public Statement declare(Class type, Opcodes.OpName name, Object initValue) {
+        DeclareStmt stmt = new DeclareStmt(ClassWriter.getTypeName(type), name, initValue == null ? null : ldc(initValue));
+        statements.add(stmt);
+        return stmt;
+    }
+
+    public Statement declare(String type, Opcodes.OpName name, Op initValue) {
         DeclareStmt stmt = new DeclareStmt(type, name, initValue == null ? null : ldc(initValue));
         statements.add(stmt);
         return stmt;
@@ -322,11 +329,11 @@ public class Block {
 
     public static class DeclareStmt
             implements Statement {
-        public final Class type;
+        public final String type;
         public final Opcodes.OpName name;
         public final Opcodes.Op initValue;
 
-        public DeclareStmt(Class type, Opcodes.OpName name, Opcodes.Op initValue) {
+        public DeclareStmt(String type, Opcodes.OpName name, Opcodes.Op initValue) {
             this.type = type;
             this.name = name;
             this.initValue = initValue;
@@ -334,7 +341,7 @@ public class Block {
 
         public void toString(MethodWriter mw, StringBuilder buf, int indent) {
             mw.ident(buf, indent);
-            buf.append(ClassWriter.getTypeName(type)).append(' ');
+            buf.append(type).append(' ');
             buf.append(name.name);
             if (initValue != null) {
                 buf.append(" = ");

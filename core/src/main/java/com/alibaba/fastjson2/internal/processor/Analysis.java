@@ -153,17 +153,20 @@ public class Analysis {
                     }
 
                     ExecutableElement getter = null, setter = null;
+                    TypeMirror type = null;
                     String name = null;
                     if (parameters.size() == 0 && (methodName.startsWith("get") || methodName.startsWith("is"))) {
                         name = BeanUtils.getterName(methodName, null);
                         getter = method;
-                    } else if (methodName.startsWith("set")) {
+                        type = method.getReturnType();
+                    } else if (methodName.startsWith("set") && method.getParameters().size() == 1) {
                         name = BeanUtils.setterName(methodName, null);
                         setter = method;
+                        type = method.getParameters().get(0).asType();
                     } else {
                         continue;
                     }
-                    AttributeInfo attr = info.getAttributeByMethod(name, getter, setter);
+                    AttributeInfo attr = info.getAttributeByMethod(name, type, getter, setter);
                 }
             }
         }

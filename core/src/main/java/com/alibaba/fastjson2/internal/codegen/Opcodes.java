@@ -27,6 +27,10 @@ public class Opcodes {
     }
 
     public static Op allocate(Class type, Op... args) {
+        return new OpAllocate(ClassWriter.getTypeName(type), args);
+    }
+
+    public static Op allocate(String type, Op... args) {
         return new OpAllocate(type, args);
     }
 
@@ -240,16 +244,16 @@ public class Opcodes {
 
     public static class OpAllocate
             implements Op {
-        public final Class type;
+        public final String type;
         public final Op[] args;
 
-        public OpAllocate(Class type, Op[] args) {
+        public OpAllocate(String type, Op[] args) {
             this.type = type;
             this.args = args;
         }
 
         public void toString(MethodWriter mw, StringBuilder buf, int indent) {
-            buf.append("new ").append(ClassWriter.getTypeName(type)).append('(');
+            buf.append("new ").append(type).append('(');
             for (int i = 0; i < args.length; i++) {
                 if (i != 0) {
                     buf.append(", ");
@@ -294,6 +298,11 @@ public class Opcodes {
 
             if (value instanceof Class) {
                 buf.append(ClassWriter.getTypeName((Class) value)).append(".class");
+                return;
+            }
+
+            if (value instanceof Op) {
+                ((Op) value).toString(mw, buf, indent);
                 return;
             }
 
