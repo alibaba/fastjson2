@@ -10,7 +10,8 @@ import com.alibaba.fastjson2.internal.codegen.Opcodes;
 import com.alibaba.fastjson2.reader.FieldReader;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
-import com.alibaba.fastjson2.util.Fnv;
+import com.alibaba.fastjson2.reader.ObjectReaderCreator;
+import com.alibaba.fastjson2.util.BeanUtils;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -26,7 +27,6 @@ import java.io.Writer;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.internal.CodeGenUtils.fieldObjectReader;
 import static com.alibaba.fastjson2.internal.CodeGenUtils.fieldReader;
@@ -136,12 +136,14 @@ public class JSONCompiledAnnotationProcessor
             packageName = generateFullClassName.substring(0, dotIndex);
         }
 
-        Class supperClass = CodeGenUtils.getSupperClass(si.attributes.size());
+        List<AttributeInfo> fields = si.getReaderAttributes();
+
+        Class supperClass = CodeGenUtils.getSupperClass(fields.size());
         ClassWriter cw = new ClassWriter(packageName, generateClassName, supperClass, new Class[0]);
 
-        final boolean generatedFields = si.attributes.size() < 128;
+        final boolean generatedFields = fields.size() < 128;
         if (generatedFields) {
-            genFields(si.attributes.size(), cw, supperClass);
+            genFields(fields.size(), cw, supperClass);
         }
 
         {
@@ -149,22 +151,54 @@ public class JSONCompiledAnnotationProcessor
                     Modifier.PUBLIC,
                     "<init>",
                     void.class,
-                    new Class[]{Class.class, Supplier.class, FieldReader[].class},
-                    new String[]{"objectClass", "supplier", "fieldReaders"}
+                    new Class[]{},
+                    new String[]{}
             );
+
+            Op[] fieldReaders = new Op[fields.size()];
+            for (int i = 0; i < fields.size(); i++) {
+                AttributeInfo attr = fields.get(i);
+                if (attr.setMethod != null) {
+                    fieldReaders[i] = invoke(
+                            getStatic(ObjectReaderCreator.class, "INSTANCE"),
+                            "createFieldReader",
+                            ldc(attr.name),
+                            invokeStatic(
+                                    BeanUtils.class,
+                                    "getSetter",
+                                    ldc(ObjectReaderCreator.class),
+                                    ldc(attr.field.getSimpleName().toString())
+                            )
+                    );
+                } else if (attr.field != null) {
+                    fieldReaders[i] = invoke(
+                            getStatic(ObjectReaderCreator.class, "INSTANCE"),
+                            "createFieldReader",
+                            ldc(attr.name),
+                            invokeStatic(
+                                    BeanUtils.class,
+                                    "getDeclaredField",
+                                    ldc(ObjectReaderCreator.class),
+                                    ldc(attr.field.getSimpleName().toString())
+                            )
+                    );
+                } else {
+                    throw new IOException("TODO");
+                }
+            }
             mw.invoke(SUPER,
                     "<init>",
-                    var("objectClass"),
+                    getStatic(className, "class"),
                     Opcodes.ldc(si.typeKey),
                     Opcodes.ldc(null),
                     Opcodes.ldc(si.readerFeatures),
                     Opcodes.ldc(null),
-                    var("supplier"),
+                    Opcodes.methodRef(className, "new"),
                     Opcodes.ldc(null),
-                    var("fieldReaders")
+                    Opcodes.allocateArray(FieldReader.class, null, fieldReaders)
             );
 
-            genInitFields(si.attributes.size(), generatedFields, "fieldReaders", mw, supperClass);
+            genInitFields(fields.size(), generatedFields, "fieldReaders", mw, supperClass);
         }
 
         {
@@ -172,8 +206,8 @@ public class JSONCompiledAnnotationProcessor
                     Modifier.PUBLIC,
                     "createInstance",
                     Object.class,
-                    new Class[]{Class.class, Supplier.class, FieldReader[].class},
-                    new String[]{"objectClass", "supplier", "fieldReaders"}
+                    new Class[]{long.class},
+                    new String[]{"features"}
             );
 
             mw.ret(
@@ -181,7 +215,7 @@ public class JSONCompiledAnnotationProcessor
             );
         }
 
-        genMethodReadObject(className, si, cw, false);
+        genMethodReadObject(className, si, fields, cw, false);
 
         code.write(cw.toString());
     }
@@ -217,6 +251,7 @@ public class JSONCompiledAnnotationProcessor
     public static void genMethodReadObject(
             String className,
             StructInfo si,
+            List<AttributeInfo> fields,
             ClassWriter cw,
             boolean jsonb
     ) {
@@ -252,12 +287,10 @@ public class JSONCompiledAnnotationProcessor
         forStmt.declare(long.class, hashCode64, invoke(jsonReader, "readFieldNameHashCode"));
         forStmt.ifStmt(eq(hashCode64, ldc(0))).breakStmt(null);
 
-        List<AttributeInfo> fields = new ArrayList<>(si.attributes.values()); // TODO : skip write only fields
         if (fields.size() <= 6) {
             for (int i = 0; i < fields.size(); ++i) {
                 AttributeInfo field = fields.get(i);
-//                FieldReader fieldReader = fieldReaderArray[i];
-                long fieldNameHash = Fnv.hashCode64(field.name);
+                long fieldNameHash = field.nameHashCode;
                 Block.IfStmt ifStmt = forStmt.ifStmt(eq(hashCode64, ldc(fieldNameHash)));
                 genReadFieldValue(ifStmt, i, field, jsonReader, object, forLabel, jsonb);
 //                ifStmt.continueStmt();
@@ -269,7 +302,7 @@ public class JSONCompiledAnnotationProcessor
 
             for (int i = 0; i < fields.size(); i++) {
                 AttributeInfo field = fields.get(i);
-                long fieldNameHash = Fnv.hashCode64(field.name);
+                long fieldNameHash = field.nameHashCode;
                 int hashCode32 = (int) (fieldNameHash ^ (fieldNameHash >>> 32));
                 List<Long> hashCode64List = map.computeIfAbsent(hashCode32, k -> new ArrayList<>());
                 hashCode64List.add(fieldNameHash);

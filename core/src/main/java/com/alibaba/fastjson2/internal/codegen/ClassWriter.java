@@ -73,7 +73,7 @@ public class ClassWriter {
         buf.append("public final class ").append(name);
 
         if (superClass != null) {
-            buf.append(" extends ").append(getTypeName(superClass));
+            buf.append("\n\t\textends ").append(getTypeName(superClass));
         }
 
         buf.append(" {\n");

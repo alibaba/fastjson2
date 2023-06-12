@@ -6,8 +6,8 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class StructInfo {
     final int modifiers;
@@ -50,7 +50,10 @@ public class StructInfo {
         return attr;
     }
 
-    public AttributeInfo getAttributeByMethod(String name, TypeMirror type, ExecutableElement getter, ExecutableElement setter) {
+    public AttributeInfo getAttributeByMethod(String name,
+                                              TypeMirror type,
+                                              ExecutableElement getter,
+                                              ExecutableElement setter) {
         AttributeInfo attr = attributes.get(name);
         if (attr == null) {
             attr = new AttributeInfo(name, type, null, getter, setter, null);
@@ -70,20 +73,11 @@ public class StructInfo {
         return attr;
     }
 
-    private TypeMirror unpackType(TypeMirror type) {
-//        String typeName = type.toString();
-//        if (typeName.startsWith("(@") || typeName.startsWith("@")) {
-//            //TODO: hacky fix for annotation removal from types
-//            //To fix it nicely Java8 AnnotatedType signature is required ;(
-//            if (type.getKind().isPrimitive()) {
-//                return types.getPrimitiveType(type.getKind());
-//            }
-//            String actualType = typeWithoutAnnotations(typeName);
-//            if (!actualType.contains("<") && !actualType.contains("[")) {
-//                Element element = types.asElement(type);
-//                return element.asType();
-//            }
-//        }
-        return type;
+    public List<AttributeInfo> getReaderAttributes() {
+        return attributes.values()
+                .stream()
+                .filter(AttributeInfo::supportSet)
+                .sorted()
+                .collect(Collectors.toList());
     }
 }

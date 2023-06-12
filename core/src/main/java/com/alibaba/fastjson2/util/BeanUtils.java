@@ -296,6 +296,18 @@ public abstract class BeanUtils {
         return fieldMap.get(fieldName);
     }
 
+    public static Method getSetter(Class objectClass, String methodName) {
+        Method[] methods = new Method[1];
+        setters(objectClass, e -> {
+            if (!methodName.equals(e.getName())) {
+                return;
+            }
+
+            methods[0] = e;
+        });
+        return null;
+    }
+
     /**
      * ignore static fields
      */

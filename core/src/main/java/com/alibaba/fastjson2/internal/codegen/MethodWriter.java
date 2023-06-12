@@ -33,14 +33,27 @@ public class MethodWriter
             buf.append(getTypeName(returnType)).append(' ').append(name);
         }
 
+        boolean newLine = paramTypes.length > 3;
         buf.append('(');
+        if (newLine) {
+            buf.append("\n\t\t");
+        }
+
         for (int i = 0; i < paramTypes.length; i++) {
             if (i != 0) {
-                buf.append(", ");
+                if (newLine) {
+                    buf.append(",\n\t\t");
+                } else {
+                    buf.append(", ");
+                }
             }
             Class paramType = paramTypes[i];
             String paramName = paramNames[i];
             buf.append(getTypeName(paramType)).append(' ').append(paramName);
+        }
+
+        if (newLine) {
+            buf.append("\n\t");
         }
 
         buf.append(") {\n");

@@ -2,6 +2,8 @@ package com.alibaba.fastjson2.internal.codegen;
 
 import com.alibaba.fastjson2.JSONException;
 
+import static com.alibaba.fastjson2.internal.codegen.ClassWriter.getTypeName;
+
 public class Opcodes {
     public static OpName THIS = var("this");
     public static OpName SUPER = var("super");
@@ -26,12 +28,28 @@ public class Opcodes {
         return new OpInvoke(THIS, method, args);
     }
 
+    public static Op invokeStatic(Class type, String method, Op... args) {
+        return new OpInvoke(var(getTypeName(type)), method, args);
+    }
+
+    public static MethodRef methodRef(String type, String method) {
+        return new MethodRef(type, method);
+    }
+
     public static Op allocate(Class type, Op... args) {
-        return new OpAllocate(ClassWriter.getTypeName(type), args);
+        return new OpAllocate(getTypeName(type), args);
     }
 
     public static Op allocate(String type, Op... args) {
         return new OpAllocate(type, args);
+    }
+
+    public static Op allocateArray(Class type, Op size, Op... values) {
+        return new OpAllocateArray(getTypeName(type), size, values);
+    }
+
+    public static Op allocateArray(String type, Op size, Op... values) {
+        return new OpAllocateArray(type, size, values);
     }
 
     public static Op putField(Op owner, String fieldName, Op value) {
@@ -39,6 +57,10 @@ public class Opcodes {
     }
 
     public static Op getStatic(Class type, String field) {
+        return new GetStatic(getTypeName(type), field);
+    }
+
+    public static Op getStatic(String type, String field) {
         return new GetStatic(type, field);
     }
 
@@ -63,7 +85,7 @@ public class Opcodes {
     }
 
     public static Op cast(Op value, Class type) {
-        return new Cast(ClassWriter.getTypeName(type), value);
+        return new Cast(getTypeName(type), value);
     }
 
     public static Op bitOr(Op a, Op b) {
@@ -150,16 +172,16 @@ public class Opcodes {
 
     static class GetStatic
             implements Op {
-        public final Class type;
+        public final String type;
         public final String fieldName;
 
-        public GetStatic(Class type, String fieldName) {
+        public GetStatic(String type, String fieldName) {
             this.type = type;
             this.fieldName = fieldName;
         }
 
         public void toString(MethodWriter mw, StringBuilder buf, int indent) {
-            buf.append(ClassWriter.getTypeName(type)).append('.').append(fieldName);
+            buf.append(type).append('.').append(fieldName);
         }
     }
 
@@ -232,13 +254,52 @@ public class Opcodes {
             }
 
             buf.append('(');
+            boolean newLine = args.length > 3;
+            if (newLine) {
+                buf.append("\n\t");
+                for (int i = 0; i < indent; i++) {
+                    buf.append('\t');
+                }
+            }
+
             for (int i = 0; i < args.length; i++) {
                 if (i != 0) {
-                    buf.append(", ");
+                    if (newLine) {
+                        buf.append(",\n\t");
+                        for (int j = 0; j < indent; j++) {
+                            buf.append('\t');
+                        }
+                    } else {
+                        buf.append(", ");
+                    }
                 }
-                args[i].toString(mw, buf, indent);
+                args[i].toString(mw, buf, indent + 1);
+            }
+
+            if (newLine) {
+                buf.append("\n");
+                for (int i = 0; i < indent; i++) {
+                    buf.append('\t');
+                }
             }
             buf.append(')');
+        }
+    }
+
+    public static class MethodRef
+            implements Op {
+        public final String type;
+        public final String method;
+
+        public MethodRef(String type, String method) {
+            this.type = type;
+            this.method = method;
+        }
+
+        public void toString(MethodWriter mw, StringBuilder buf, int indent) {
+            buf.append(type);
+            buf.append("::");
+            buf.append(method);
         }
     }
 
@@ -261,6 +322,52 @@ public class Opcodes {
                 args[i].toString(mw, buf, indent);
             }
             buf.append(')');
+        }
+    }
+
+    public static class OpAllocateArray
+            implements Op {
+        public final String type;
+        public final Op size;
+        public final Op[] values;
+
+        public OpAllocateArray(String type, Op size, Op[] values) {
+            this.type = type;
+            this.size = size;
+            this.values = values;
+        }
+
+        public void toString(MethodWriter mw, StringBuilder buf, int indent) {
+            buf.append("new ").append(type).append('[');
+
+            if (size != null) {
+                size.toString(mw, buf, indent);
+            }
+            buf.append(']');
+            if (values != null && values.length > 0) {
+                buf.append('{');
+
+                buf.append("\n\t");
+                for (int i = 0; i < indent; i++) {
+                    buf.append('\t');
+                }
+
+                for (int i = 0; i < values.length; i++) {
+                    if (i != 0) {
+                        buf.append(",\n\t");
+                        for (int j = 0; j < indent; j++) {
+                            buf.append('\t');
+                        }
+                    }
+                    values[i].toString(mw, buf, indent + 1);
+                }
+
+                buf.append("\n");
+                for (int i = 0; i < indent; i++) {
+                    buf.append('\t');
+                }
+                buf.append('}');
+            }
         }
     }
 
@@ -297,7 +404,7 @@ public class Opcodes {
             }
 
             if (value instanceof Class) {
-                buf.append(ClassWriter.getTypeName((Class) value)).append(".class");
+                buf.append(getTypeName((Class) value)).append(".class");
                 return;
             }
 

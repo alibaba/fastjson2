@@ -2351,6 +2351,49 @@ public class ObjectReaderCreator {
 
     public <T> FieldReader<T> createFieldReader(
             String fieldName,
+            Field field
+    ) {
+        return createFieldReader(fieldName, null, field.getGenericType(), field);
+    }
+
+    public <T> FieldReader createFieldReader(
+            String fieldName,
+            Method method
+    ) {
+        Class<?> declaringClass = method.getDeclaringClass();
+        int parameterCount = method.getParameterCount();
+
+        Class fieldClass;
+        Type fieldType;
+        if (parameterCount == 0) {
+            fieldClass = method.getReturnType();
+            fieldType = method.getGenericReturnType();
+        } else if (parameterCount == 1) {
+            fieldClass = method.getParameterTypes()[0];
+            fieldType = method.getGenericParameterTypes()[0];
+        } else {
+            throw new JSONException("illegal setter method " + method);
+        }
+
+        return createFieldReaderMethod(
+                declaringClass,
+                declaringClass,
+                fieldName,
+                0,
+                0L,
+                null,
+                null,
+                null,
+                null,
+                fieldType,
+                fieldClass,
+                method,
+                null
+        );
+    }
+
+    public <T> FieldReader<T> createFieldReader(
+            String fieldName,
             String format,
             Type fieldType,
             Field field
