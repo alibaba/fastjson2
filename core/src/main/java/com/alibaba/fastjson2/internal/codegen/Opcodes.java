@@ -88,6 +88,10 @@ public class Opcodes {
         return new Cast(getTypeName(type), value);
     }
 
+    public static Op cast(Op value, String type) {
+        return new Cast(type, value);
+    }
+
     public static Op bitOr(Op a, Op b) {
         return new OpBinary(a, "|", b);
     }

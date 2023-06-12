@@ -350,15 +350,93 @@ public class JSONCompiledAnnotationProcessor
             boolean jsonb
     ) {
         Op value;
-        switch (field.type.toString()) {
+        String type = field.type.toString();
+        switch (type) {
+            case "boolean":
+                value = Opcodes.invoke(jsonReader, "readBoolValue");
+                break;
+            case "byte":
+                value = cast(invoke(jsonReader, "readInt32Value"), byte.class);
+                break;
+            case "short":
+                value = cast(invoke(jsonReader, "readInt32Value"), short.class);
+                break;
             case "int":
                 value = Opcodes.invoke(jsonReader, "readInt32Value");
+                break;
+            case "long":
+                value = Opcodes.invoke(jsonReader, "readInt64Value");
+                break;
+            case "float":
+                value = Opcodes.invoke(jsonReader, "readFloatValue");
+                break;
+            case "double":
+                value = Opcodes.invoke(jsonReader, "readDoubleValue");
+                break;
+            case "char":
+                value = invoke(jsonReader, "readCharValue");
                 break;
             case "java.lang.String":
                 value = Opcodes.invoke(jsonReader, "readString");
                 break;
+            case "java.lang.Integer":
+                value = invoke(jsonReader, "readInt32");
+                break;
+            case "java.lang.Long":
+                value = invoke(jsonReader, "readInt64");
+                break;
+            case "java.lang.Float":
+                value = invoke(jsonReader, "readFloat");
+                break;
+            case "java.lang.readDouble":
+                value = invoke(jsonReader, "readDouble");
+                break;
+            case "java.math.BigDecimal":
+                value = invoke(jsonReader, "readBigDecimal");
+                break;
+            case "java.math.BigInteger":
+                value = invoke(jsonReader, "readBigInteger");
+                break;
+            case "java.util.UUID":
+                value = invoke(jsonReader, "readUUID");
+                break;
             default:
-                throw new JSONException("TODO");
+                OpName fieldValue = var(field.name);
+                mw.declare(type, fieldValue);
+                Block.IfStmt isRef = mw.ifStmt(invoke(jsonReader, "isReference"));
+
+                OpName ref = var("ref");
+                isRef.declare(String.class, ref, invoke(jsonReader, "readReference"));
+                isRef.stmt(invoke(var(CodeGenUtils.fieldReader(i)), "addResolveTask", jsonReader, object, ref));
+                isRef.continueStmt(continueLabel);
+
+                Block elseStmt = isRef.elseStmt();
+                elseStmt.ifNull(var(CodeGenUtils.fieldObjectReader(i)))
+                        .putField(
+                                CodeGenUtils.fieldObjectReader(i),
+                                invoke(var(CodeGenUtils.fieldReader(i)), "getObjectReader", jsonReader)
+                        );
+
+                elseStmt.stmt(
+                        assign(
+                                fieldValue,
+                                cast(
+                                        invoke(
+                                                var(CodeGenUtils.fieldObjectReader(i)),
+                                                jsonb ? "readJSONBObject" : "readObject",
+                                                jsonReader,
+                                                getField(var(CodeGenUtils.fieldReader(i)), "fieldType"),
+                                                ldc(field.name),
+                                                ldc(field.readerFeatures)
+                                        ),
+                                        type
+                                )
+                        )
+                );
+
+//                throw new JSONException("TODO : " + type);
+                value = fieldValue;
+                break;
         }
 
         if (field.setMethod != null) {

@@ -90,6 +90,12 @@ public class Block {
         return stmt;
     }
 
+    public Statement declare(String type, Opcodes.OpName name) {
+        DeclareStmt stmt = new DeclareStmt(type, name, null);
+        statements.add(stmt);
+        return stmt;
+    }
+
     public Statement declare(Class type, Opcodes.OpName name, Opcodes.Op initValue) {
         DeclareStmt stmt = new DeclareStmt(ClassWriter.getTypeName(type), name, initValue);
         statements.add(stmt);

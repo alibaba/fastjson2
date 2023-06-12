@@ -28,15 +28,6 @@ public class ClassWriter {
         return mw;
     }
 
-    public void addImport(Class type) {
-        Package pkg = type.getPackage();
-        if (pkg == null || pkg.getName().equals("java.lang")) {
-            return;
-        }
-        String className = getTypeName(type);
-        imports.add(className);
-    }
-
     static String getTypeName(Class type) {
         Package pkg = type.getPackage();
         if (pkg != null && pkg.getName().equals("java.lang") && !type.isArray()) {

@@ -15,6 +15,7 @@ public class AttributeInfo
     ExecutableElement getMethod;
     ExecutableElement setMethod;
     VariableElement argument;
+    long readerFeatures;
 
     public AttributeInfo(
             String name,
