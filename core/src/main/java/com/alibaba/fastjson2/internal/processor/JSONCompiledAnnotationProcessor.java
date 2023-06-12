@@ -16,6 +16,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Modifier;
@@ -34,7 +35,8 @@ import static com.alibaba.fastjson2.internal.codegen.Opcodes.var;
         "com.alibaba.fastjson2.annotation.JSONField",
         "com.alibaba.fastjson2.annotation.JSONType"
 })
-public class JSONCompiledAnnotationProcessor extends AbstractProcessor {
+public class JSONCompiledAnnotationProcessor
+        extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
@@ -78,7 +80,6 @@ public class JSONCompiledAnnotationProcessor extends AbstractProcessor {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
                         "Failed creating compiled json serialization file " + classNamePath);
             }
-
         }
 
 //        final List<String> allConfigurations = new ArrayList<>(configurations.keySet());
@@ -164,7 +165,6 @@ public class JSONCompiledAnnotationProcessor extends AbstractProcessor {
 
         code.write(cw.toString());
     }
-
 
     static void genInitFields(
             int fieldReaderArray,

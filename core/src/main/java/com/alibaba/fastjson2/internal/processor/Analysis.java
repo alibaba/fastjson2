@@ -11,7 +11,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-import java.lang.reflect.Method;
+
 import java.util.*;
 
 public class Analysis {
@@ -176,7 +176,9 @@ public class Analysis {
     }
 
     private void getAllTypes(TypeElement element, List<TypeElement> result, Set<TypeElement> processed) {
-        if (!processed.add(element) || element.getQualifiedName().contentEquals("java.lang.Object")) return;
+        if (!processed.add(element) || element.getQualifiedName().contentEquals("java.lang.Object")) {
+            return;
+        }
         result.add(element);
         for (TypeMirror type : types.directSupertypes(element.asType())) {
             Element current = types.asElement(type);
@@ -185,6 +187,4 @@ public class Analysis {
             }
         }
     }
-
-
 }
