@@ -10,8 +10,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.reader.ObjectReaders.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ObjectReadersTest {
     @Test
@@ -217,5 +216,27 @@ public class ObjectReadersTest {
         public void setValues(List<String> values) {
             this.values = values;
         }
+    }
+
+    @Test
+    public void test7() throws Exception {
+        ObjectReader<Bean7> objectReader = ObjectReaders.objectReader(
+                Bean7.class,
+                Bean7::new,
+                ObjectReaders.fieldReaderMap("items", Map.class, String.class, Item.class, (Bean7 o, Map v) -> o.items = v)
+        );
+        JSONReader reader = JSONReader.of("{\"items\":{\"x1\":{\"id\":123}}}");
+        Bean7 bean = objectReader.readObject(reader);
+        assertEquals(1, bean.items.size());
+        assertNotNull(bean.items.get("x1"));
+        assertEquals(123, bean.items.get("x1").id);
+    }
+
+    public static class Bean7 {
+        public Map<String, Item> items;
+    }
+
+    public static class Item {
+        public int id;
     }
 }
