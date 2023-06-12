@@ -2325,6 +2325,9 @@ public class ObjectReaderCreatorASM
                 if (fieldClass == String[].class) {
                     mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                     mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readStringArray", "()[Ljava/lang/String;", false);
+                } else if (fieldClass == int[].class) {
+                    mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readInt32ValueArray", "()[I", false);
                 } else if (fieldClass == long[].class) {
                     mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                     mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readInt64ValueArray", "()[J", false);

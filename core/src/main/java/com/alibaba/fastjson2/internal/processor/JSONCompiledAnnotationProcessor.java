@@ -378,6 +378,9 @@ public class JSONCompiledAnnotationProcessor
             case "char":
                 value = invoke(jsonReader, "readCharValue");
                 break;
+            case "int[]":
+                value = invoke(jsonReader, "readInt32ValueArray");
+                break;
             case "long[]":
                 value = invoke(jsonReader, "readInt64ValueArray");
                 break;

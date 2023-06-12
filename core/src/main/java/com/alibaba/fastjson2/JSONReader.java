@@ -526,6 +526,48 @@ public abstract class JSONReader
 
     public abstract int readInt32Value();
 
+    public int[] readInt32ValueArray() {
+        if (nextIfNull()) {
+            return null;
+        }
+
+        if (nextIfMatch('[')) {
+            int[] values = new int[8];
+            int size = 0;
+            while (!nextIfMatch(']')) {
+                if (isEnd()) {
+                    throw new JSONException(info("input end"));
+                }
+
+                if (size == values.length) {
+                    values = Arrays.copyOf(values, values.length << 1);
+                }
+
+                values[size++] = readInt32Value();
+            }
+            nextIfMatch(',');
+
+            int[] array;
+            if (size == values.length) {
+                array = values;
+            } else {
+                array = Arrays.copyOf(values, size);
+            }
+            return array;
+        }
+
+        if (isString()) {
+            String str = readString();
+            if (str.isEmpty()) {
+                return null;
+            }
+
+            throw new JSONException(info("not support input " + str));
+        }
+
+        throw new JSONException(info("TODO"));
+    }
+
     public boolean nextIfMatch(byte type) {
         throw new JSONException("UnsupportedOperation");
     }

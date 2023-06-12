@@ -1,12 +1,9 @@
 package com.alibaba.fastjson2.benchmark.eishay.vo;
 
-import com.alibaba.fastjson2.annotation.JSONCompiled;
-
 import java.util.List;
 import java.util.Objects;
 
 @SuppressWarnings("serial")
-@JSONCompiled
 public class Media
         implements java.io.Serializable {
     public enum Player {
@@ -24,8 +21,6 @@ public class Media
     private String uri;
     private int width;
     private String copyright;
-    public int[] x1;
-    public long[] x2;
 
     public Media() {
     }

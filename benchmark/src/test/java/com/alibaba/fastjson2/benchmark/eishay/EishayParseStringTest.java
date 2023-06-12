@@ -3,7 +3,7 @@ package com.alibaba.fastjson2.benchmark.eishay;
 import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
 public class EishayParseStringTest {
-    static final int LOOP = 10_000_000;
+    static final int LOOP = 1_000_000;
     static final EishayParseString benchmark = new EishayParseString();
 
     public static void fastjson2() {
