@@ -18,7 +18,7 @@ public class Analysis {
     final ProcessingEnvironment processingEnv;
     final Elements elements;
     private final Types types;
-    final TypeElement jsonCompiledEleement;
+    final TypeElement jsonCompiledElement;
     final TypeElement jsonTypeElement;
     public final DeclaredType compiledJsonType;
     final Map<String, StructInfo> structs = new LinkedHashMap<>();
@@ -27,8 +27,8 @@ public class Analysis {
         this.processingEnv = processingEnv;
         this.elements = processingEnv.getElementUtils();
         this.types = processingEnv.getTypeUtils();
-        this.jsonCompiledEleement = elements.getTypeElement(JSONCompiled.class.getName());
-        this.compiledJsonType = types.getDeclaredType(jsonCompiledEleement);
+        this.jsonCompiledElement = elements.getTypeElement(JSONCompiled.class.getName());
+        this.compiledJsonType = types.getDeclaredType(jsonCompiledElement);
         this.jsonTypeElement = elements.getTypeElement(JSONType.class.getName());
     }
 

@@ -52,7 +52,7 @@ public class JSONCompiledAnnotationProcessor
         }
 
         Analysis analysis = new Analysis(processingEnv);
-        Set<? extends Element> compiledJsons = roundEnv.getElementsAnnotatedWith(analysis.jsonCompiledEleement);
+        Set<? extends Element> compiledJsons = roundEnv.getElementsAnnotatedWith(analysis.jsonCompiledElement);
 
         if (!compiledJsons.isEmpty()) {
             analysis.processAnnotation(analysis.compiledJsonType, compiledJsons);
