@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.benchmark.eishay;
 
-import com.alibaba.fastjson2.internal.processor.JSONCompiledAnnotationProcessor;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.*;

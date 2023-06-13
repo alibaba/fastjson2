@@ -262,11 +262,11 @@ public class JSONCompiledAnnotationProcessor
                 new String[]{"jsonReader", "fieldType", "fieldName", "features"}
         );
 
-        Opcodes.Op jsonReader = var("jsonReader");
-        Opcodes.Op features = var("features");
-        Opcodes.Op fieldType = var("fieldType");
-        Opcodes.Op fieldName = var("fieldName");
-        Opcodes.OpName object = var("object");
+        Op jsonReader = var("jsonReader");
+        Op features = var("features");
+        Op fieldType = var("fieldType");
+        Op fieldName = var("fieldName");
+        OpName object = var("object");
 
         mw.ifStmt(invoke(jsonReader, "nextIfNull"))
                 .ret(Opcodes.ldc(null));
@@ -345,8 +345,8 @@ public class JSONCompiledAnnotationProcessor
             Block mw,
             int i,
             AttributeInfo field,
-            Opcodes.Op jsonReader,
-            Opcodes.Op object,
+            Op jsonReader,
+            Op object,
             String continueLabel,
             boolean jsonb
     ) {

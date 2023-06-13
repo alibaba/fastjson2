@@ -59,6 +59,7 @@
         <!--
         <module>adapter</module>
         -->
+        <module>apt</module>
         <module>benchmark</module>
         <module>core</module>
         <!--

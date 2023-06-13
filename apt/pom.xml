@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.alibaba.fastjson2</groupId>
+        <artifactId>fastjson2-parent</artifactId>
+        <version>2.0.34-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>fastjson2-apt-codegen</artifactId>
+    <name>fastjson2-apt-codegen</name>
+    <description>fastjson2 annotation processor</description>
+    <packaging>jar</packaging>
+    <url>https://github.com/alibaba/fastjson2</url>
+    <inceptionYear>2022</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>Apache 2</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+    <scm>
+        <url>https://github.com/alibaba/fastjson2</url>
+        <connection>scm:git:https://git@github.com/alibaba/fastjson2.git</connection>
+    </scm>
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <add.modules.option>--add-modules=jdk.incubator.vector</add.modules.option>
+    </properties>
+
+    <organization>
+        <name>Alibaba Group</name>
+        <url>https://github.com/alibaba</url>
+    </organization>
+    <developers>
+        <developer>
+            <id>wenshao</id>
+            <name>wenshao</name>
+            <email>shaojin.wensj(at)alibaba-inc.com</email>
+            <roles>
+                <role>Developer</role>
+                <role>Tech Leader</role>
+            </roles>
+            <timezone>+8</timezone>
+            <url>https://github.com/wenshao</url>
+        </developer>
+    </developers>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- test libs -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerVersion>${maven.compiler.source}</compilerVersion>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.source}</target>
+                    <compilerArgument>-proc:none</compilerArgument>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>com/alibaba/fastjson2/**/*.java</include>
+                    </includes>
+                    <systemPropertyVariables>
+                        <user.timezone>Asia/Shanghai</user.timezone>
+                    </systemPropertyVariables>
+                    <argLine>${add.modules.option}</argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>gen-javadoc</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <show>package</show>
+                            <additionalOptions>
+                                <additionalOption>${add.modules.option}</additionalOption>
+                            </additionalOptions>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
