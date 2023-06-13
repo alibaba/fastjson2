@@ -30,9 +30,8 @@
         <connection>scm:git:https://git@github.com/alibaba/fastjson2.git</connection>
     </scm>
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <add.modules.option>--add-modules=jdk.incubator.vector</add.modules.option>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
     </properties>
 
     <organization>
