@@ -5,7 +5,9 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
@@ -126,7 +128,16 @@ public final class ObjectReaderImplEnum2X4
                 }
             }
         }
-        failFastIfNecessary(fieldValue, fieldType, jsonReader.getOffset() - start, this.getClass().getSimpleName());
+
+        if (fieldValue == null && jsonReader.getOffset() == start) {
+            if (fieldType instanceof ParameterizedType) {
+                Type rawType = ((ParameterizedType) fieldType).getRawType();
+                if (List.class.isAssignableFrom((Class<?>) rawType)) {
+                    throw new JSONException(this.getClass().getSimpleName() + "s parses error, JSONReader not forward when field type belongs to collection to avoid OOM");
+                }
+            }
+        }
+
         return fieldValue;
     }
 
@@ -162,7 +173,16 @@ public final class ObjectReaderImplEnum2X4
                 }
             }
         }
-        failFastIfNecessary(fieldValue, fieldType, jsonReader.getOffset() - start, this.getClass().getSimpleName());
+
+        if (fieldValue == null && jsonReader.getOffset() == start) {
+            if (fieldType instanceof ParameterizedType) {
+                Type rawType = ((ParameterizedType) fieldType).getRawType();
+                if (List.class.isAssignableFrom((Class<?>) rawType)) {
+                    throw new JSONException(this.getClass().getSimpleName() + "s parses error, JSONReader not forward when field type belongs to collection to avoid OOM");
+                }
+            }
+        }
+
         return fieldValue;
     }
 }

@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.*;
 import java.util.Arrays;
+import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
 
@@ -188,7 +189,16 @@ public final class ObjectReaderImplEnum
                 fieldValue = getEnumByHashCode(nameHash);
             }
         }
-        failFastIfNecessary(fieldValue, fieldType, jsonReader.getOffset() - start, this.getClass().getSimpleName());
+
+        if (fieldValue == null && jsonReader.getOffset() == start) {
+            if (fieldType instanceof ParameterizedType) {
+                Type rawType = ((ParameterizedType) fieldType).getRawType();
+                if (List.class.isAssignableFrom((Class<?>) rawType)) {
+                    throw new JSONException(this.getClass().getSimpleName() + "s parses error, JSONReader not forward when field type belongs to collection to avoid OOM");
+                }
+            }
+        }
+
         return fieldValue;
     }
 
@@ -251,7 +261,16 @@ public final class ObjectReaderImplEnum
                 throw new JSONException(jsonReader.info("parse enum error, class " + enumClass.getName() + ", value " + strVal));
             }
         }
-        failFastIfNecessary(fieldValue, fieldType, jsonReader.getOffset() - start, this.getClass().getSimpleName());
+
+        if (fieldValue == null && jsonReader.getOffset() == start) {
+            if (fieldType instanceof ParameterizedType) {
+                Type rawType = ((ParameterizedType) fieldType).getRawType();
+                if (List.class.isAssignableFrom((Class<?>) rawType)) {
+                    throw new JSONException(this.getClass().getSimpleName() + "s parses error, JSONReader not forward when field type belongs to collection to avoid OOM");
+                }
+            }
+        }
+
         return fieldValue;
     }
 }
