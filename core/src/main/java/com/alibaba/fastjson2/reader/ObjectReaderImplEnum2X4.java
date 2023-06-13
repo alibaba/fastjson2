@@ -133,7 +133,7 @@ public final class ObjectReaderImplEnum2X4
             if (fieldType instanceof ParameterizedType) {
                 Type rawType = ((ParameterizedType) fieldType).getRawType();
                 if (List.class.isAssignableFrom((Class<?>) rawType)) {
-                    throw new JSONException(this.getClass().getSimpleName() + "s parses error, JSONReader not forward when field type belongs to collection to avoid OOM");
+                    throw new JSONException(this.getClass().getSimpleName() + " parses error, JSONReader not forward when field type belongs to collection to avoid OOM");
                 }
             }
         }
@@ -178,7 +178,7 @@ public final class ObjectReaderImplEnum2X4
             if (fieldType instanceof ParameterizedType) {
                 Type rawType = ((ParameterizedType) fieldType).getRawType();
                 if (List.class.isAssignableFrom((Class<?>) rawType)) {
-                    throw new JSONException(this.getClass().getSimpleName() + "s parses error, JSONReader not forward when field type belongs to collection to avoid OOM");
+                    throw new JSONException(this.getClass().getSimpleName() + " parses error, JSONReader not forward when field type belongs to collection to avoid OOM");
                 }
             }
         }
