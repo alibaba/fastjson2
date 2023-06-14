@@ -87,7 +87,7 @@
         </dependency>
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
-            <artifactId>fastjson2-apt-codegen</artifactId>
+            <artifactId>fastjson2-codegen</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>

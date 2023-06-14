@@ -1,7 +1,5 @@
 package com.alibaba.fastjson2.internal.processor;
 
-import org.junit.jupiter.api.Test;
-
 import javax.tools.*;
 
 import java.io.File;
@@ -11,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class APTTest0 {
-    @Test
+//    @ org.junit.jupiter.api.Test
     public void test() throws Exception {
         Path dir = new File("/Users/wenshao/Work/git/fastjson2/extension/target/generated-sources")
                 .toPath();

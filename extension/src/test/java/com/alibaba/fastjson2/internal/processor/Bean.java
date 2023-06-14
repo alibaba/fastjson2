@@ -6,8 +6,8 @@ import com.alibaba.fastjson2.annotation.JSONType;
 
 import java.util.Objects;
 
-@JSONCompiled
 @JSONType(naming = PropertyNamingStrategy.PascalCase)
+@JSONCompiled
 public class Bean {
     public int id;
     public String name;

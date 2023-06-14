@@ -10,9 +10,9 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>fastjson2-apt-codegen</artifactId>
-    <name>fastjson2-apt-codegen</name>
-    <description>fastjson2 annotation processor</description>
+    <artifactId>fastjson2-codegen</artifactId>
+    <name>fastjson2-codegen</name>
+    <description>fastjson2 codegen</description>
     <packaging>jar</packaging>
     <url>https://github.com/alibaba/fastjson2</url>
     <inceptionYear>2022</inceptionYear>

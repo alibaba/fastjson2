@@ -59,8 +59,8 @@
         <!--
         <module>adapter</module>
         -->
-        <module>apt</module>
         <module>benchmark</module>
+        <module>codegen</module>
         <module>core</module>
         <!--
             <module>example-graalvm-native</module>
