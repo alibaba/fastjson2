@@ -876,6 +876,10 @@ public abstract class JSONWriter
             writeFloat(value);
             return;
         }
+        if (Float.isNaN(value) || Float.isInfinite(value)) {
+            writeNull();
+            return;
+        }
 
         String str = format.format(value);
         writeRaw(str);
@@ -931,6 +935,10 @@ public abstract class JSONWriter
     public final void writeDouble(double value, DecimalFormat format) {
         if (format == null || jsonb) {
             writeDouble(value);
+            return;
+        }
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            writeNull();
             return;
         }
 
