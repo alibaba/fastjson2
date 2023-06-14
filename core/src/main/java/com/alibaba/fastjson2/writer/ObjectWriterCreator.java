@@ -985,7 +985,7 @@ public class ObjectWriterCreator {
             return new FieldWriterStringMethod(fieldName, ordinal, format, label, features, method);
         }
 
-        if (fieldClass == List.class) {
+        if (fieldClass == List.class || fieldClass == Iterable.class) {
             Type itemType = null;
             if (fieldType instanceof ParameterizedType) {
                 itemType = ((ParameterizedType) fieldType).getActualTypeArguments()[0];
