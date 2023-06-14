@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 import static com.alibaba.fastjson2.util.JDKUtils.VECTOR_BIT_LENGTH;
 
 public final class JSONFactory {
