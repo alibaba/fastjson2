@@ -8,6 +8,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_ARRAY_FIX_0;
@@ -67,7 +68,7 @@ final class ObjectWriterImplList
             return;
         }
 
-        List list = (List) object;
+        List list = getList(object);
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
@@ -131,7 +132,7 @@ final class ObjectWriterImplList
             }
         }
 
-        List list = (List) object;
+        List list = getList(object);
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
@@ -238,8 +239,7 @@ final class ObjectWriterImplList
             return;
         }
 
-        List list = (List) object;
-
+        List list = getList(object);
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
         boolean previousRefDetect = true;
@@ -377,5 +377,19 @@ final class ObjectWriterImplList
             }
         }
         jsonWriter.endArray();
+    }
+
+    private List getList(Object object) {
+        List list;
+        if (object instanceof Iterable) {
+            list = new ArrayList();
+            Iterator iterator = ((Iterable) object).iterator();
+            while (iterator.hasNext()) {
+                list.add(iterator.next());
+            }
+        } else {
+            list = (List) object;
+        }
+        return list;
     }
 }
