@@ -305,7 +305,7 @@ public abstract class BeanUtils {
 
             methods[0] = e;
         });
-        return null;
+        return methods[0];
     }
 
     /**

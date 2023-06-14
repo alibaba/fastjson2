@@ -11,6 +11,10 @@ import java.util.Objects;
 public class Bean {
     public int id;
     public String name;
+    public long v0;
+    public java.util.Date v1;
+    public Long v2;
+    public String v3;
 
     public Bean() {
     }

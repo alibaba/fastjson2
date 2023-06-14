@@ -165,8 +165,8 @@ public class JSONCompiledAnnotationProcessor
                             invokeStatic(
                                     BeanUtils.class,
                                     "getSetter",
-                                    ldc(ObjectReaderCreator.class),
-                                    ldc(attr.field.getSimpleName().toString())
+                                    getStatic(className, "class"),
+                                    ldc(attr.setMethod.getSimpleName().toString())
                             )
                     );
                 } else if (attr.field != null) {
@@ -177,7 +177,7 @@ public class JSONCompiledAnnotationProcessor
                             invokeStatic(
                                     BeanUtils.class,
                                     "getDeclaredField",
-                                    ldc(ObjectReaderCreator.class),
+                                    getStatic(className, "class"),
                                     ldc(attr.field.getSimpleName().toString())
                             )
                     );
