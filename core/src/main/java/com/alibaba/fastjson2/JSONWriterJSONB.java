@@ -661,15 +661,12 @@ final class JSONWriterJSONB
         if (STRING_VALUE != null && STRING_CODER != null) {
             int mark = off;
             final int LATIN = 0;
-            boolean latinAll = true;
-            for (int i = 0; i < size; i++) {
-                String str = list.get(i);
+            for (String str : list) {
                 if (str == null) {
                     writeNull();
                 }
                 int coder = STRING_CODER.applyAsInt(str);
                 if (coder != LATIN) {
-                    latinAll = false;
                     off = mark;
                     break;
                 }
@@ -689,13 +686,9 @@ final class JSONWriterJSONB
                 System.arraycopy(value, 0, bytes, off, value.length);
                 off += strlen;
             }
-            if (latinAll) {
-                return;
-            }
         }
 
-        for (int i = 0; i < size; i++) {
-            String str = list.get(i);
+        for (String str : list) {
             writeString(str);
         }
     }
@@ -1696,7 +1689,7 @@ final class JSONWriterJSONB
         }
         bytes[off++] = BC_REFERENCE;
 
-        if (path == this.lastReference) {
+        if (Objects.equals(path, this.lastReference)) {
             writeString("#-1");
         } else {
             writeString(path);
@@ -1842,8 +1835,7 @@ final class JSONWriterJSONB
 
         final int size = array.size();
         startArray(size);
-        for (int i = 0; i < size; i++) {
-            Object item = array.get(i);
+        for (Object item : array) {
             writeAny(item);
         }
     }
