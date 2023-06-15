@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.PropertyNamingStrategy;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 import com.alibaba.fastjson2.annotation.JSONType;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 
 @JSONType(naming = PropertyNamingStrategy.PascalCase)
@@ -15,6 +17,9 @@ public class Bean {
     public java.util.Date v1;
     public Long v2;
     public String v3;
+    public BigDecimal v4;
+    public List<Item> items;
+    public List<String> strings;
 
     public Bean() {
     }
@@ -53,5 +58,9 @@ public class Bean {
         int result = id;
         result = 31 * result + (name != null ? name.hashCode() : 0);
         return result;
+    }
+
+    public static class Item {
+        public int id;
     }
 }

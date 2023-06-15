@@ -212,6 +212,16 @@ class JSONReaderJSONB
     }
 
     @Override
+    public final boolean nextIfArrayStart() {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
+    public final boolean nextIfArrayEnd() {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
     public final boolean nextIfObjectStart() {
         if (bytes[offset] != BC_OBJECT) {
             return false;

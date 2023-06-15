@@ -81,13 +81,13 @@ public class JSONReader
 
     public void startArray() {
         raw.nextIfMatch(':');
-        if (!raw.nextIfMatch('[')) {
+        if (!raw.nextIfArrayStart()) {
             throw new JSONException("not support operation");
         }
     }
 
     public void endArray() {
-        if (!raw.nextIfMatch(']')) {
+        if (!raw.nextIfArrayEnd()) {
             throw new JSONException("not support operation");
         }
         raw.nextIfMatch(',');

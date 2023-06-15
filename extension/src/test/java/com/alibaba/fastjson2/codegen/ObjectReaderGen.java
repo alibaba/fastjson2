@@ -213,7 +213,7 @@ public class ObjectReaderGen {
             readFieldValue(0, false, (short) i, fieldReader, member, fieldType, fieldClass);
         }
 
-        println("\t\tif (!jsonReader.nextIfMatch(']')) {");
+        println("\t\tif (!jsonReader.nextIfArrayEnd()) {");
         println("\t\t\tthrow new JSONException(\"array to bean end error, \" + jsonReader.current());");
         println("\t\t}");
 

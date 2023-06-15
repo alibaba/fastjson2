@@ -8,8 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class BeanTest {
     @Test
     public void test() {
-        String str = "{\"id\":123}";
+        String str = "{\"id\":123,\"strings\":[\"a\",\"b\"]}";
         Bean bean = JSON.parseObject(str, Bean.class);
         assertEquals(123, bean.id);
+        assertEquals(2, bean.strings.size());
     }
 }

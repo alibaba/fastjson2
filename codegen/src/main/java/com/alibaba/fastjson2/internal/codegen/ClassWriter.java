@@ -69,16 +69,16 @@ public class ClassWriter {
 
         buf.append(" {\n");
 
-        if (!fields.isEmpty()) {
-            buf.append("\n");
-        }
-
         for (FieldWriter fw : fields) {
             buf.append('\t')
                     .append(getTypeName(fw.fieldClass))
                     .append(' ')
                     .append(fw.name)
                     .append(";\n");
+        }
+
+        if (!fields.isEmpty()) {
+            buf.append("\n");
         }
 
         for (int i = 0; i < methods.size(); i++) {

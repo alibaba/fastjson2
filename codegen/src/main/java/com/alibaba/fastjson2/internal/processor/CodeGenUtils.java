@@ -1,8 +1,57 @@
-package com.alibaba.fastjson2.internal;
+package com.alibaba.fastjson2.internal.processor;
 
+import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.IOUtils;
 
 public class CodeGenUtils {
+    static final String[] fieldItemObjectReader = new String[1024];
+
+    public static Class getSupperClass(int fieldReaders) {
+        Class objectReaderSuper;
+        switch (fieldReaders) {
+            case 1:
+                objectReaderSuper = ObjectReader1.class;
+                break;
+            case 2:
+                objectReaderSuper = ObjectReader2.class;
+                break;
+            case 3:
+                objectReaderSuper = ObjectReader3.class;
+                break;
+            case 4:
+                objectReaderSuper = ObjectReader4.class;
+                break;
+            case 5:
+                objectReaderSuper = ObjectReader5.class;
+                break;
+            case 6:
+                objectReaderSuper = ObjectReader6.class;
+                break;
+            case 7:
+                objectReaderSuper = ObjectReader7.class;
+                break;
+            case 8:
+                objectReaderSuper = ObjectReader8.class;
+                break;
+            case 9:
+                objectReaderSuper = ObjectReader9.class;
+                break;
+            case 10:
+                objectReaderSuper = ObjectReader10.class;
+                break;
+            case 11:
+                objectReaderSuper = ObjectReader11.class;
+                break;
+            case 12:
+                objectReaderSuper = ObjectReader11.class;
+                break;
+            default:
+                objectReaderSuper = ObjectReaderAdapter.class;
+                break;
+        }
+        return objectReaderSuper;
+    }
+
     public static String fieldReader(int i) {
         switch (i) {
             case 0:
@@ -89,5 +138,21 @@ public class CodeGenUtils {
                 IOUtils.getChars(i, chars.length, chars);
                 return new String(chars);
         }
+    }
+
+    public static String fieldItemObjectReader(int i) {
+        String fieldName = fieldItemObjectReader[i];
+
+        if (fieldName != null) {
+            return fieldName;
+        }
+
+        String base = "itemReader";
+        int size = IOUtils.stringSize(i);
+        char[] chars = new char[base.length() + size];
+        base.getChars(0, base.length(), chars, 0);
+        IOUtils.getChars(i, chars.length, chars);
+        fieldItemObjectReader[i] = fieldName = new String(chars);
+        return fieldName;
     }
 }

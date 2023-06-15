@@ -72,6 +72,12 @@ public class Block {
         return stmt;
     }
 
+    public WhileStmt whileStmtStmt(Opcodes.Op condition) {
+        WhileStmt stmt = new WhileStmt(condition);
+        statements.add(stmt);
+        return stmt;
+    }
+
     public SwitchStmt switchStmt(Opcodes.Op op, int[] hashCodes) {
         SwitchStmt stmt = new SwitchStmt(op, hashCodes);
         statements.add(stmt);
@@ -137,7 +143,10 @@ public class Block {
         }
 
         public Block elseStmt() {
-            return elseStmt = new Block();
+            if (elseStmt == null) {
+                elseStmt = new Block();
+            }
+            return elseStmt;
         }
 
         public void toString(MethodWriter mw, StringBuilder buf, int indent) {
@@ -244,8 +253,6 @@ public class Block {
                 }
 
                 buf.append('\n');
-                mw.ident(buf, indent);
-                buf.append("break;\n");
                 indent--;
 
                 mw.ident(buf, indent);
@@ -317,6 +324,34 @@ public class Block {
                 buf.append(' ');
                 increment.toString(mw, buf, indent);
             }
+            buf.append(") {\n");
+
+            for (int i = 0; i < statements.size(); i++) {
+                if (i != 0) {
+                    buf.append('\n');
+                }
+                Statement stmt = statements.get(i);
+                stmt.toString(mw, buf, indent + 1);
+            }
+
+            buf.append('\n');
+            mw.ident(buf, indent);
+            buf.append("}");
+        }
+    }
+
+    public static class WhileStmt
+            extends Block
+            implements Statement {
+        final Opcodes.Op condition;
+        public WhileStmt(Opcodes.Op condition) {
+            this.condition = condition;
+        }
+
+        public void toString(MethodWriter mw, StringBuilder buf, int indent) {
+            mw.ident(buf, indent);
+            buf.append("while (");
+            condition.toString(mw, buf, indent);
             buf.append(") {\n");
 
             for (int i = 0; i < statements.size(); i++) {

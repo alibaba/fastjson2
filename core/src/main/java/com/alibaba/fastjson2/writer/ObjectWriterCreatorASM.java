@@ -177,11 +177,6 @@ public class ObjectWriterCreatorASM
             }
         }
 
-        ObjectWriter annotatedObjectWriter = getAnnotatedObjectWriter(provider, objectClass, beanInfo);
-        if (annotatedObjectWriter != null) {
-            return annotatedObjectWriter;
-        }
-
         long beanFeatures = beanInfo.writerFeatures;
         if (beanInfo.seeAlso != null) {
             beanFeatures &= ~JSONWriter.Feature.WriteClassName.mask;

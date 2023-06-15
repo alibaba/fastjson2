@@ -49,10 +49,10 @@ public final class ObjectReaderImplInt64Array
             return null;
         }
 
-        if (jsonReader.nextIfMatch('[')) {
+        if (jsonReader.nextIfArrayStart()) {
             Long[] values = new Long[16];
             int size = 0;
-            while (!jsonReader.nextIfMatch(']')) {
+            while (!jsonReader.nextIfArrayEnd()) {
                 if (jsonReader.isEnd()) {
                     throw new JSONException(jsonReader.info("input end"));
                 }

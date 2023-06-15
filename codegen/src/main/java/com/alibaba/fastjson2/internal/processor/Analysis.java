@@ -77,7 +77,7 @@ public class Analysis {
         final TypeElement element = (TypeElement) el;
         String name = "struct" + structs.size();
         String binaryName = elements.getBinaryName(element).toString();
-        StructInfo info = new StructInfo(element, discoveredBy, name, binaryName);
+        StructInfo info = new StructInfo(types, element, discoveredBy, name, binaryName);
         structs.put(typeName, info);
     }
 

@@ -26,10 +26,10 @@ final class ObjectReaderImplDoubleArray
             return null;
         }
 
-        if (jsonReader.nextIfMatch('[')) {
+        if (jsonReader.nextIfArrayStart()) {
             Double[] values = new Double[16];
             int size = 0;
-            while (!jsonReader.nextIfMatch(']')) {
+            while (!jsonReader.nextIfArrayEnd()) {
                 if (jsonReader.isEnd()) {
                     throw new JSONException(jsonReader.info("input end"));
                 }

@@ -2,15 +2,11 @@ package com.alibaba.fastjson2.internal.processor;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.internal.CodeGenUtils;
 import com.alibaba.fastjson2.internal.codegen.Block;
 import com.alibaba.fastjson2.internal.codegen.ClassWriter;
 import com.alibaba.fastjson2.internal.codegen.MethodWriter;
 import com.alibaba.fastjson2.internal.codegen.Opcodes;
-import com.alibaba.fastjson2.reader.FieldReader;
-import com.alibaba.fastjson2.reader.ObjectReader;
-import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
-import com.alibaba.fastjson2.reader.ObjectReaderCreator;
+import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.BeanUtils;
 
 import javax.annotation.processing.*;
@@ -26,9 +22,9 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
 
-import static com.alibaba.fastjson2.internal.CodeGenUtils.fieldObjectReader;
-import static com.alibaba.fastjson2.internal.CodeGenUtils.fieldReader;
 import static com.alibaba.fastjson2.internal.codegen.Opcodes.*;
+import static com.alibaba.fastjson2.internal.processor.CodeGenUtils.fieldObjectReader;
+import static com.alibaba.fastjson2.internal.processor.CodeGenUtils.fieldReader;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({
@@ -85,25 +81,6 @@ public class JSONCompiledAnnotationProcessor
             }
         }
 
-//        final List<String> allConfigurations = new ArrayList<>(configurations.keySet());
-//        if (configurationFileName != null) {
-//            try {
-//                FileObject configFile = processingEnv.getFiler()
-//                        .createSourceFile(configurationFileName, originatingElements.toArray(new Element[0]));
-//                try (Writer writer = configFile.openWriter()) {
-//                    if (!buildRootConfiguration(writer, configurationFileName, generatedFiles, processingEnv))
-//                        return false;
-//                    allConfigurations.add(configurationFileName);
-//                } catch (Exception e) {
-//                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-//                            "Failed saving configuration file " + configurationFileName);
-//                }
-//            } catch (IOException e) {
-//                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-//                        "Failed creating configuration file " + configurationFileName);
-//            }
-//        }
-
         return false;
     }
 
@@ -114,8 +91,6 @@ public class JSONCompiledAnnotationProcessor
             return className + "_FASTJOSNReader";
         }
         String packageName = structInfo.binaryName.substring(0, dotIndex);
-        Package packageClass = Package.getPackage(packageName);
-        boolean useDslPackage = packageClass != null && packageClass.isSealed() || structInfo.binaryName.startsWith("java.");
         return packageName + '.' + className + "_FASTJOSNReader";
     }
 
@@ -142,7 +117,7 @@ public class JSONCompiledAnnotationProcessor
 
         final boolean generatedFields = fields.size() < 128;
         if (generatedFields) {
-            genFields(fields.size(), cw, supperClass);
+            genFields(fields, cw, supperClass);
         }
 
         {
@@ -157,8 +132,12 @@ public class JSONCompiledAnnotationProcessor
             Op[] fieldReaders = new Op[fields.size()];
             for (int i = 0; i < fields.size(); i++) {
                 AttributeInfo attr = fields.get(i);
+                String fieldType = attr.type.toString();
+                boolean fieldTypeIsClass = fieldType.indexOf('<') == -1;
+                Op fieldReader;
                 if (attr.setMethod != null) {
-                    fieldReaders[i] = invoke(
+                    String methodName = attr.setMethod.getSimpleName().toString();
+                    fieldReader = invoke(
                             getStatic(ObjectReaderCreator.class, "INSTANCE"),
                             "createFieldReader",
                             ldc(attr.name),
@@ -166,11 +145,11 @@ public class JSONCompiledAnnotationProcessor
                                     BeanUtils.class,
                                     "getSetter",
                                     getStatic(className, "class"),
-                                    ldc(attr.setMethod.getSimpleName().toString())
+                                    ldc(methodName)
                             )
                     );
                 } else if (attr.field != null) {
-                    fieldReaders[i] = invoke(
+                    fieldReader = invoke(
                             getStatic(ObjectReaderCreator.class, "INSTANCE"),
                             "createFieldReader",
                             ldc(attr.name),
@@ -181,9 +160,12 @@ public class JSONCompiledAnnotationProcessor
                                     ldc(attr.field.getSimpleName().toString())
                             )
                     );
+
+                    fieldReaders[i] = fieldReader;
                 } else {
                     throw new IOException("TODO");
                 }
+                fieldReaders[i] = fieldReader;
             }
             mw.invoke(SUPER,
                     "<init>",
@@ -191,7 +173,6 @@ public class JSONCompiledAnnotationProcessor
                     Opcodes.ldc(si.typeKey),
                     Opcodes.ldc(null),
                     Opcodes.ldc(si.readerFeatures),
-                    Opcodes.ldc(null),
                     Opcodes.methodRef(className, "new"),
                     Opcodes.ldc(null),
                     Opcodes.allocateArray(FieldReader.class, null, fieldReaders)
@@ -235,14 +216,23 @@ public class JSONCompiledAnnotationProcessor
         }
     }
 
-    static void genFields(int attributes, ClassWriter cw, Class objectReaderSuper) {
+    static void genFields(List<AttributeInfo> fields, ClassWriter cw, Class objectReaderSuper) {
+        int fieldCount = fields.size();
         if (objectReaderSuper == ObjectReaderAdapter.class) {
-            for (int i = 0; i < attributes; i++) {
+            for (int i = 0; i < fieldCount; i++) {
                 cw.field(Modifier.PUBLIC, fieldReader(i), FieldReader.class);
             }
 
-            for (int i = 0; i < attributes; i++) {
+            for (int i = 0; i < fieldCount; i++) {
                 cw.field(Modifier.PUBLIC, fieldObjectReader(i), ObjectReader.class);
+            }
+        }
+
+        for (int i = 0; i < fields.size(); i++) {
+            AttributeInfo field = fields.get(i);
+            String fieldType = field.type.toString();
+            if (fieldType.startsWith("java.util.List<")) {
+                cw.field(Modifier.PUBLIC, CodeGenUtils.fieldItemObjectReader(i), ObjectReader.class);
             }
         }
     }
@@ -291,7 +281,7 @@ public class JSONCompiledAnnotationProcessor
                 AttributeInfo field = fields.get(i);
                 long fieldNameHash = field.nameHashCode;
                 Block.IfStmt ifStmt = forStmt.ifStmt(eq(hashCode64, ldc(fieldNameHash)));
-                genReadFieldValue(ifStmt, i, field, jsonReader, object, forLabel, jsonb);
+                genReadFieldValue(ifStmt, i, si, field, jsonReader, object, forLabel, jsonb);
                 ifStmt.continueStmt();
             }
         } else {
@@ -325,13 +315,23 @@ public class JSONCompiledAnnotationProcessor
             for (int i = 0; i < switchStmt.labels(); i++) {
                 Block label = switchStmt.lable(i);
                 List<Long> hashCode64Array = map.get(switchStmt.labelKey(i));
-                for (int j = 0; j < hashCode64Array.size(); ++j) {
-                    Long fieldNameHash = hashCode64Array.get(j);
+
+                if (hashCode64Array.size() == 1 && hashCode64Array.get(0) == hashCode32Keys[i]) {
+                    Long fieldNameHash = hashCode64Array.get(0);
                     int index = mappingIndex.get(fieldNameHash);
                     AttributeInfo field = mapping.get(fieldNameHash);
-                    Block.IfStmt ifStmt = label.ifStmt(eq(hashCode64, ldc(fieldNameHash)));
-                    genReadFieldValue(ifStmt, index, field, jsonReader, object, forLabel, jsonb);
-                    ifStmt.continueStmt(forLabel);
+                    genReadFieldValue(label, index, si, field, jsonReader, object, forLabel, jsonb);
+                    label.continueStmt(forLabel);
+                } else {
+                    for (int j = 0; j < hashCode64Array.size(); ++j) {
+                        Long fieldNameHash = hashCode64Array.get(j);
+                        int index = mappingIndex.get(fieldNameHash);
+                        AttributeInfo field = mapping.get(fieldNameHash);
+                        Block.IfStmt ifStmt = label.ifStmt(eq(hashCode64, ldc(fieldNameHash)));
+                        genReadFieldValue(ifStmt, index, si, field, jsonReader, object, forLabel, jsonb);
+                        ifStmt.continueStmt(forLabel);
+                    }
+                    label.breakStmt();
                 }
             }
         }
@@ -344,6 +344,7 @@ public class JSONCompiledAnnotationProcessor
     static void genReadFieldValue(
             Block mw,
             int i,
+            StructInfo info,
             AttributeInfo field,
             Op jsonReader,
             Op object,
@@ -417,31 +418,67 @@ public class JSONCompiledAnnotationProcessor
                 value = invoke(jsonReader, "readOffsetDateTime");
                 break;
             default:
+                if (info.referenceDetect) {
+                    Block.IfStmt isRef = mw.ifStmt(invoke(jsonReader, "isReference"));
+
+                    OpName ref = var("ref");
+                    isRef.declare(String.class, ref, invoke(jsonReader, "readReference"));
+                    isRef.stmt(invoke(var(CodeGenUtils.fieldReader(i)), "addResolveTask", jsonReader, object, ref));
+                    isRef.continueStmt(continueLabel);
+                }
+
                 OpName fieldValue = var(field.name);
                 mw.declare(type, fieldValue);
-                Block.IfStmt isRef = mw.ifStmt(invoke(jsonReader, "isReference"));
 
-                OpName ref = var("ref");
-                isRef.declare(String.class, ref, invoke(jsonReader, "readReference"));
-                isRef.stmt(invoke(var(CodeGenUtils.fieldReader(i)), "addResolveTask", jsonReader, object, ref));
-                isRef.continueStmt(continueLabel);
+                boolean list = type.startsWith("java.util.List<");
+                if (list) {
+                    String itemType = type.substring(15, type.length() - 1);
+                    boolean itemTypeIsClass = itemType.indexOf('<') == -1;
+                    if (itemTypeIsClass) {
+                        Block.IfStmt nextIfNull = mw.ifStmt(invoke(jsonReader, "nextIfNull"));
+                        nextIfNull.stmt(assign(fieldValue, ldc(null)));
+                        Block nextIfNullElse = nextIfNull.elseStmt();
+                        nextIfNullElse.stmt(assign(fieldValue, allocate(ArrayList.class)));
+                        boolean stringItemClass = "java.lang.String".equals(itemType);
+                        OpName itemReader = var(CodeGenUtils.fieldItemObjectReader(i));
+                        if (!stringItemClass) {
+                            nextIfNullElse.ifNull(itemReader).stmt(
+                                    assign(
+                                            itemReader,
+                                            invoke(getField(THIS, fieldReader(i)), "getItemObjectReader", jsonReader)
+                                    )
+                            );
+                        }
 
-                Block elseStmt = isRef.elseStmt();
-                elseStmt.ifNull(var(CodeGenUtils.fieldObjectReader(i)))
+                        Block.IfStmt nextIfMatch = nextIfNullElse.ifStmt(invoke(jsonReader, "nextIfArrayStart"));
+                        Block.WhileStmt whileStmt = nextIfMatch.whileStmtStmt(not(invoke(jsonReader, "nextIfArrayEnd")));
+                        Op item;
+                        if (stringItemClass) {
+                            item = invoke(jsonReader, "readString");
+                        } else {
+                            item = cast(invoke(itemReader, "readObject", jsonReader, ldc(null), ldc(null), ldc(0L)), itemType);
+                        }
+                        whileStmt.stmt(invoke(fieldValue, "add", item));
+
+                        value = fieldValue;
+                        break;
+                    }
+                }
+
+                mw.ifNull(var(CodeGenUtils.fieldObjectReader(i)))
                         .putField(
                                 CodeGenUtils.fieldObjectReader(i),
                                 invoke(var(CodeGenUtils.fieldReader(i)), "getObjectReader", jsonReader)
                         );
-
-                elseStmt.stmt(
+                mw.stmt(
                         assign(
                                 fieldValue,
                                 cast(
                                         invoke(
-                                                var(CodeGenUtils.fieldObjectReader(i)),
+                                                var(fieldObjectReader(i)),
                                                 jsonb ? "readJSONBObject" : "readObject",
                                                 jsonReader,
-                                                getField(var(CodeGenUtils.fieldReader(i)), "fieldType"),
+                                                getField(var(fieldReader(i)), "fieldType"),
                                                 ldc(field.name),
                                                 ldc(field.readerFeatures)
                                         ),
@@ -450,7 +487,6 @@ public class JSONCompiledAnnotationProcessor
                         )
                 );
 
-//                throw new JSONException("TODO : " + type);
                 value = fieldValue;
                 break;
         }

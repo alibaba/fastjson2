@@ -240,11 +240,6 @@ public class ObjectReaderCreatorASM
             }
         }
 
-        ObjectReader annotatedObjectReader = getAnnotatedObjectReader(provider, objectClass, beanInfo);
-        if (annotatedObjectReader != null) {
-            return annotatedObjectReader;
-        }
-
         if (fieldBased && objectClass.isInterface()) {
             fieldBased = false;
         }

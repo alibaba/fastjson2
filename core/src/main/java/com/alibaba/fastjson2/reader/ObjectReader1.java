@@ -38,6 +38,18 @@ public class ObjectReader1<T>
             String typeKey,
             String typeName,
             long features,
+            Supplier<T> creator,
+            Function buildFunction,
+            FieldReader... fieldReaders
+    ) {
+        this(objectClass, typeKey, typeName, features, null, creator, buildFunction, fieldReaders);
+    }
+
+    public ObjectReader1(
+            Class objectClass,
+            String typeKey,
+            String typeName,
+            long features,
             JSONSchema schema,
             Supplier<T> creator,
             Function buildFunction,
@@ -217,7 +229,7 @@ public class ObjectReader1<T>
                 T object = creator.get();
 
                 fieldReader0.readFieldValue(jsonReader, object);
-                if (!jsonReader.nextIfMatch(']')) {
+                if (!jsonReader.nextIfArrayEnd()) {
                     throw new JSONException(jsonReader.info("array to bean end error, " + jsonReader.current()));
                 }
 

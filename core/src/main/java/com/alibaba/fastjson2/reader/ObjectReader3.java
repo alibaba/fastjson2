@@ -60,6 +60,18 @@ public class ObjectReader3<T>
             String typeKey,
             String typeName,
             long features,
+            Supplier<T> creator,
+            Function buildFunction,
+            FieldReader... fieldReaders
+    ) {
+        this(objectClass, typeKey, typeName, features, null, creator, buildFunction, fieldReaders);
+    }
+
+    public ObjectReader3(
+            Class objectClass,
+            String typeKey,
+            String typeName,
+            long features,
             JSONSchema schema,
             Supplier<T> creator,
             Function buildFunction,
@@ -244,7 +256,7 @@ public class ObjectReader3<T>
         long featuresAll = jsonReader.features(this.features | features);
         if (jsonReader.isArray()) {
             if ((featuresAll & JSONReader.Feature.SupportArrayToBean.mask) != 0) {
-                jsonReader.nextIfMatch('[');
+                jsonReader.nextIfArrayStart();
                 T object = creator.get();
                 if (hasDefaultValue) {
                     initDefaultValue(object);
@@ -253,7 +265,7 @@ public class ObjectReader3<T>
                 fieldReader0.readFieldValue(jsonReader, object);
                 fieldReader1.readFieldValue(jsonReader, object);
                 fieldReader2.readFieldValue(jsonReader, object);
-                if (!jsonReader.nextIfMatch(']')) {
+                if (!jsonReader.nextIfArrayEnd()) {
                     throw new JSONException(jsonReader.info("array to bean end error"));
                 }
 

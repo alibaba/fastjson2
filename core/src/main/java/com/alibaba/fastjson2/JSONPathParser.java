@@ -312,7 +312,7 @@ class JSONPathParser {
             jsonReader.next();
             filterNests--;
         }
-        if (!jsonReader.nextIfMatch(']')) {
+        if (!jsonReader.nextIfArrayEnd()) {
             throw new JSONException(jsonReader.info("jsonpath syntax error"));
         }
 

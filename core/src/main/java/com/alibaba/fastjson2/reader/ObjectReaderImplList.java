@@ -582,7 +582,7 @@ public final class ObjectReaderImplList
         }
 
         for (int i = 0; ; ++i) {
-            if (jsonReader.nextIfMatch(']')) {
+            if (jsonReader.nextIfArrayEnd()) {
                 break;
             }
 

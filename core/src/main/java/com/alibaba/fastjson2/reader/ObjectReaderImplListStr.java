@@ -181,7 +181,7 @@ public final class ObjectReaderImplListStr
         char ch = jsonReader.current();
         if (ch == '[') {
             jsonReader.next();
-            while (!jsonReader.nextIfMatch(']')) {
+            while (!jsonReader.nextIfArrayEnd()) {
                 list.add(
                         jsonReader.readString());
             }

@@ -36,6 +36,14 @@ public class Opcodes {
         return new MethodRef(type, method);
     }
 
+    public static Lambda lambda(String type, String name, Op op) {
+        return new Lambda(new String[]{type}, new String[]{name}, op);
+    }
+
+    public static Lambda lambda(String type0, String name0, String type1, String name1, Op op) {
+        return new Lambda(new String[]{type0, type1}, new String[]{name0, name1}, op);
+    }
+
     public static Op allocate(Class type, Op... args) {
         return new OpAllocate(getTypeName(type), args);
     }
@@ -134,6 +142,10 @@ public class Opcodes {
 
     public static Op increment(Op value) {
         return new OpUnary(value, "++");
+    }
+
+    public static Op not(Op value) {
+        return new OpUnary(value, "!");
     }
 
     static class ArrayGet
@@ -307,6 +319,38 @@ public class Opcodes {
         }
     }
 
+    public static class Lambda
+            implements Op {
+        public final String[] paramTypes;
+        public final String[] paramNames;
+        public final Op op;
+
+        public Lambda(String[] paramTypes, String[] paramNames, Op op) {
+            this.paramTypes = paramTypes;
+            this.paramNames = paramNames;
+            this.op = op;
+        }
+
+        @Override
+        public void toString(MethodWriter mw, StringBuilder buf, int indent) {
+            buf.append('(');
+            for (int i = 0; i < paramNames.length; i++) {
+                if (i != 0) {
+                    buf.append(", ");
+                }
+                String paramName = paramNames[i];
+                String type = paramTypes[i];
+                if (type != null) {
+                    buf.append(type);
+                    buf.append(' ');
+                }
+                buf.append(paramName);
+            }
+            buf.append(") -> ");
+            op.toString(mw, buf, indent);
+        }
+    }
+
     public static class OpAllocate
             implements Op {
         public final String type;
@@ -407,6 +451,13 @@ public class Opcodes {
                 return;
             }
 
+            if (value instanceof Character) {
+                buf.append('\'')
+                        .append(((Character) value).charValue())
+                        .append('\'');
+                return;
+            }
+
             if (value instanceof Class) {
                 buf.append(getTypeName((Class) value)).append(".class");
                 return;
@@ -480,8 +531,14 @@ public class Opcodes {
         }
 
         public void toString(MethodWriter mw, StringBuilder buf, int indent) {
-            left.toString(mw, buf, indent);
-            buf.append(op);
+            boolean prefix = "!".equals(op);
+            if (prefix) {
+                buf.append(op);
+                left.toString(mw, buf, indent);
+            } else {
+                left.toString(mw, buf, indent);
+                buf.append(op);
+            }
         }
     }
 }

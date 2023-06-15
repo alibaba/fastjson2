@@ -496,6 +496,108 @@ class JSONReaderUTF16
     }
 
     @Override
+    public final boolean nextIfArrayStart() {
+        final char[] chars = this.chars;
+        int offset = this.offset;
+        char ch = this.ch;
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
+        }
+
+        if (ch != '[') {
+            return false;
+        }
+
+        if (offset >= end) {
+            this.offset = offset;
+            this.ch = EOI;
+            return true;
+        }
+
+        ch = chars[offset];
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+            offset++;
+            if (offset >= end) {
+                this.offset = offset;
+                this.ch = EOI;
+                return true;
+            }
+            ch = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = ch;
+        while (this.ch == '/' && this.offset < chars.length && chars[this.offset] == '/') {
+            skipLineComment();
+        }
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfArrayEnd() {
+        final char[] chars = this.chars;
+        int offset = this.offset;
+        char ch = this.ch;
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = chars[offset++];
+            }
+        }
+
+        if (ch == '}' || ch == EOI) {
+            throw new JSONException(info());
+        }
+
+        if (ch != ']') {
+            return false;
+        }
+
+        if (offset >= end) {
+            this.offset = offset;
+            this.ch = EOI;
+            return true;
+        }
+
+        ch = chars[offset];
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+            offset++;
+            if (offset >= end) {
+                this.offset = offset;
+                this.ch = EOI;
+                return true;
+            }
+            ch = chars[offset];
+        }
+
+        if (ch == ',') {
+            this.comma = true;
+            ch = chars[++offset];
+            while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                offset++;
+                if (offset >= end) {
+                    this.offset = offset;
+                    this.ch = EOI;
+                    return true;
+                }
+                ch = chars[offset];
+            }
+        }
+
+        this.offset = offset + 1;
+        this.ch = ch;
+        while (this.ch == '/' && this.offset < chars.length && chars[this.offset] == '/') {
+            skipLineComment();
+        }
+        return true;
+    }
+
+    @Override
     public final boolean nextIfNullOrEmptyString() {
         final char first = this.ch;
         final int end = this.end;
@@ -833,6 +935,20 @@ class JSONReaderUTF16
                 }
                 ch = chars[offset];
             }
+
+            if (comma = (ch == ',')) {
+                ch = chars[++offset];
+                while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                    offset++;
+                    if (offset >= end) {
+                        this.offset = offset;
+                        this.ch = EOI;
+                        return true;
+                    }
+                    ch = chars[offset];
+                }
+            }
+
             this.offset = offset + 1;
             this.ch = ch;
 
@@ -4757,6 +4873,10 @@ class JSONReaderUTF16
 
     @Override
     public final void readNull() {
+        final char[] chars = this.chars;
+        int offset = this.offset;
+        char ch = this.ch;
+
         if (chars[offset] == 'u'
                 && chars[offset + 1] == 'l'
                 && chars[offset + 2] == 'l') {
@@ -4792,6 +4912,9 @@ class JSONReaderUTF16
                 }
             }
         }
+
+        this.ch = ch;
+        this.offset = offset;
     }
 
     public final BigDecimal readBigDecimal() {
