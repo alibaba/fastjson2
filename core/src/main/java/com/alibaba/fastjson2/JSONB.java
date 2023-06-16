@@ -238,20 +238,20 @@ public interface JSONB {
 
     static int writeInt(byte[] bytes, int off, int i) {
         if (i >= BC_INT32_NUM_MIN && i <= BC_INT32_NUM_MAX) {
-            bytes[off++] = (byte) i;
+            bytes[off] = (byte) i;
             return 1;
         }
 
         if (i >= INT32_BYTE_MIN && i <= INT32_BYTE_MAX) {
             bytes[off++] = (byte) (BC_INT32_BYTE_ZERO + (i >> 8));
-            bytes[off++] = (byte) i;
+            bytes[off] = (byte) i;
             return 2;
         }
 
         if (i >= INT32_SHORT_MIN && i <= INT32_SHORT_MAX) {
             bytes[off++] = (byte) (BC_INT32_SHORT_ZERO + (i >> 16));
             bytes[off++] = (byte) (i >> 8);
-            bytes[off++] = (byte) i;
+            bytes[off] = (byte) i;
             return 3;
         }
 
@@ -259,7 +259,7 @@ public interface JSONB {
         bytes[off++] = (byte) (i >>> 24);
         bytes[off++] = (byte) (i >>> 16);
         bytes[off++] = (byte) (i >>> 8);
-        bytes[off++] = (byte) i;
+        bytes[off] = (byte) i;
         return 5;
     }
 
@@ -697,7 +697,7 @@ public interface JSONB {
             JSONReader.Context context
     ) throws IOException {
         int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
-        final JSONFactory.CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
+        final CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
         byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
         if (bytes == null) {
             bytes = new byte[8192];
@@ -725,7 +725,7 @@ public interface JSONB {
             JSONReader.Feature... features
     ) throws IOException {
         int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
-        final JSONFactory.CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
+        final CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
         byte[] bytes = BYTES_UPDATER.getAndSet(cacheItem, null);
         if (bytes == null) {
             bytes = new byte[8192];
