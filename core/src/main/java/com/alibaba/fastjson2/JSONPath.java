@@ -385,7 +385,7 @@ public abstract class JSONPath {
             return ((Number) object).longValue();
         }
 
-        java.util.function.Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(object.getClass(), long.class);
+        Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(object.getClass(), long.class);
         if (typeConvert == null) {
             throw new JSONException("can not convert to long : " + object);
         }
@@ -410,7 +410,7 @@ public abstract class JSONPath {
         if (object instanceof Number) {
             return ((Number) object).intValue();
         }
-        java.util.function.Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(object.getClass(), int.class);
+        Function typeConvert = JSONFactory.getDefaultObjectReaderProvider().getTypeConvert(object.getClass(), int.class);
         if (typeConvert == null) {
             throw new JSONException("can not convert to int : " + object);
         }
@@ -540,8 +540,6 @@ public abstract class JSONPath {
                             sameMultiLength = false;
                         }
                     }
-                } else {
-                    sameMultiLength = false;
                 }
             }
 
