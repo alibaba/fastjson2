@@ -2,8 +2,11 @@ package com.alibaba.fastjson2.issues_1500;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Gabriel
@@ -14,11 +17,13 @@ public class Issue1568 {
         public Date d = new Date();
     }
 
-    public static void main(String[] args) {
-        JSON.configWriterDateFormat("millis");
+    @Test
+    public void test() {
         Time t = new Time();
+        t.d.setTime(1686905364389L);
         byte[] bytes = JSONB.toBytes(t);
-        System.out.println(JSON.toJSONString(t));
-        System.out.println(JSONB.toJSONString(bytes));
+        assertEquals("{\n" +
+                "\t\"d\":1686905364389\n" +
+                "}", JSONB.toJSONString(bytes));
     }
 }
