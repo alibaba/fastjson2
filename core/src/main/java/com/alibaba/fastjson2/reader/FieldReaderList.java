@@ -93,7 +93,7 @@ public class FieldReaderList<T, V>
             Collection list = createList(context);
             jsonReader.next();
             for (int i = 0; ; ++i) {
-                if (jsonReader.nextIfMatch(']')) {
+                if (jsonReader.nextIfArrayEnd()) {
                     break;
                 }
 
@@ -163,7 +163,7 @@ public class FieldReaderList<T, V>
 
             Collection list = createList(ctx);
             jsonReader.next();
-            while (!jsonReader.nextIfMatch(']')) {
+            while (!jsonReader.nextIfArrayEnd()) {
                 list.add(
                         itemObjectReader.readObject(jsonReader, null, null, 0)
                 );

@@ -35,9 +35,9 @@ public class EishayParseString {
             str = IOUtils.toString(is, "UTF-8");
             JSON.parseObject(str, MediaContent.class);
 
-            provider.mixIn(MediaContent.class, MediaContentMixin.class);
-            provider.mixIn(Image.class, ImageMixin.class);
-            provider.mixIn(Media.class, MediaMixin.class);
+            provider.register(MediaContent.class, MediaContentMixin.objectReader);
+            provider.register(Image.class, ImageMixin.objectReader);
+            provider.register(Media.class, MediaMixin.objectReader);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }

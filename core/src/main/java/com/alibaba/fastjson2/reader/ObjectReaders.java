@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.reader;
 
+import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -215,5 +216,31 @@ public class ObjectReaders {
             BiConsumer<T, List<V>> function
     ) {
         return fieldReaderList(fieldName, itemType, ArrayList::new, function);
+    }
+
+    /**
+     * @since 2.0.34
+     */
+    public static <T, M extends Map> FieldReader fieldReaderMap(
+            String fieldName,
+            Class<M> mapClass,
+            Type keyType,
+            Type valueType,
+            BiConsumer<T, M> function
+    ) {
+        return new FieldReaderObject(
+                fieldName,
+                TypeReference.parametricType(mapClass, keyType, valueType),
+                mapClass,
+                0,
+                0,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                function
+        );
     }
 }

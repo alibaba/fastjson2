@@ -17,7 +17,7 @@ public class ObjectReaderAdapter<T>
     protected final String typeKey;
     protected final long typeKeyHashCode;
 
-    final FieldReader[] fieldReaders;
+    protected final FieldReader[] fieldReaders;
     final long[] hashCodes;
     final short[] mapping;
 
@@ -60,6 +60,18 @@ public class ObjectReaderAdapter<T>
                 null,
                 fieldReaders
         );
+    }
+
+    public ObjectReaderAdapter(
+            Class objectClass,
+            String typeKey,
+            String typeName,
+            long features,
+            Supplier<T> creator,
+            Function buildFunction,
+            FieldReader... fieldReaders
+    ) {
+        this(objectClass, typeKey, typeName, features, null, creator, buildFunction, fieldReaders);
     }
 
     public ObjectReaderAdapter(
@@ -239,14 +251,14 @@ public class ObjectReaderAdapter<T>
             jsonReader.errorOnNoneSerializable(objectClass);
         }
 
-        jsonReader.nextIfMatch('[');
+        jsonReader.nextIfArrayStart();
         Object object = creator.get();
 
         for (FieldReader fieldReader : fieldReaders) {
             fieldReader.readFieldValue(jsonReader, object);
         }
 
-        if (!jsonReader.nextIfMatch(']')) {
+        if (!jsonReader.nextIfArrayEnd()) {
             throw new JSONException(jsonReader.info("array to bean end error"));
         }
 

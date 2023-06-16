@@ -40,10 +40,10 @@ final class ObjectArrayTypedReader
             return null;
         }
 
-        if (jsonReader.nextIfMatch('[')) {
+        if (jsonReader.nextIfArrayStart()) {
             Object[] values = (Object[]) Array.newInstance(componentType, 16);
             int size = 0;
-            while (!jsonReader.nextIfMatch(']')) {
+            while (!jsonReader.nextIfArrayEnd()) {
                 int minCapacity = size + 1;
                 if (minCapacity - values.length > 0) {
                     int oldCapacity = values.length;

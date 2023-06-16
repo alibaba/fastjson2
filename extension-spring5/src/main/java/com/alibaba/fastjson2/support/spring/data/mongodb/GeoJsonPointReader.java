@@ -40,7 +40,7 @@ public class GeoJsonPointReader
                     throw new JSONException("not support input type : " + jsonReader.getString());
                 }
             } else if (nameHashCode == HASH_COORDINATES) {
-                boolean match = jsonReader.nextIfMatch('[');
+                boolean match = jsonReader.nextIfArrayStart();
                 if (!match) {
                     throw new JSONException("coordinates not support input " + jsonReader.current());
                 }
@@ -48,7 +48,7 @@ public class GeoJsonPointReader
                 x = jsonReader.readDoubleValue();
                 y = jsonReader.readDoubleValue();
 
-                match = jsonReader.nextIfMatch(']');
+                match = jsonReader.nextIfArrayEnd();
                 if (!match) {
                     throw new JSONException("coordinates not support input " + jsonReader.current());
                 }

@@ -26,12 +26,12 @@ public class HSFJSONUtils {
         if (jsonReader.nextIfMatch('{')) {
             long hash0 = jsonReader.readFieldNameHashCode();
             if (hash0 == HASH_ARGS_TYPES) {
-                if (jsonReader.nextIfMatch('[')) {
+                if (jsonReader.nextIfArrayStart()) {
                     String name0 = null, name1 = null;
                     List<String> nameList = null;
                     int i = 0;
                     for (; ; ++i) {
-                        if (jsonReader.nextIfMatch(']')) {
+                        if (jsonReader.nextIfArrayEnd()) {
                             jsonReader.nextIfMatch(',');
                             break;
                         } else if (jsonReader.isEnd()) {
@@ -93,13 +93,13 @@ public class HSFJSONUtils {
                     }
                 }
             }
-        } else if (jsonReader.nextIfMatch('[')) {
-            if (jsonReader.nextIfMatch('[')) {
+        } else if (jsonReader.nextIfArrayStart()) {
+            if (jsonReader.nextIfArrayStart()) {
                 String name0 = null, name1 = null;
                 List<String> nameList = null;
                 int i = 0;
                 for (; ; ++i) {
-                    if (jsonReader.nextIfMatch(']')) {
+                    if (jsonReader.nextIfArrayEnd()) {
                         jsonReader.nextIfMatch(',');
                         break;
                     } else if (jsonReader.isEnd()) {

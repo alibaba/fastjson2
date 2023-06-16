@@ -27,7 +27,7 @@ final class ObjectReaderImplMapString
                 jsonReader.next();
                 if (jsonReader.current() == '{') {
                     Object arrayItem = readObject(jsonReader, String.class, fieldName, features);
-                    if (jsonReader.nextIfMatch(']')) {
+                    if (jsonReader.nextIfArrayEnd()) {
                         jsonReader.nextIfMatch(',');
                         return arrayItem;
                     }

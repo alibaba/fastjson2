@@ -26,10 +26,10 @@ final class ObjectReaderImplFloatArray
             return null;
         }
 
-        if (jsonReader.nextIfMatch('[')) {
+        if (jsonReader.nextIfArrayStart()) {
             Float[] values = new Float[16];
             int size = 0;
-            while (!jsonReader.nextIfMatch(']')) {
+            while (!jsonReader.nextIfArrayEnd()) {
                 if (jsonReader.isEnd()) {
                     throw new JSONException(jsonReader.info("input end"));
                 }

@@ -41,9 +41,9 @@ final class ObjectArrayReaderMultiType
         }
 
         Object[] values = new Object[types.length];
-        if (jsonReader.nextIfMatch('[')) {
+        if (jsonReader.nextIfArrayStart()) {
             for (int i = 0; ; ++i) {
-                if (jsonReader.nextIfMatch(']')) {
+                if (jsonReader.nextIfArrayEnd()) {
                     break;
                 }
 

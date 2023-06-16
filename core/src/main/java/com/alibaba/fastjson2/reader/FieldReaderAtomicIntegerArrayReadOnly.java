@@ -64,9 +64,9 @@ final class FieldReaderAtomicIntegerArrayReadOnly<T>
             throw new JSONException(jsonReader.info("set " + fieldName + " error"), e);
         }
 
-        if (jsonReader.nextIfMatch('[')) {
+        if (jsonReader.nextIfArrayStart()) {
             for (int i = 0; ; ++i) {
-                if (jsonReader.nextIfMatch(']')) {
+                if (jsonReader.nextIfArrayEnd()) {
                     break;
                 }
 

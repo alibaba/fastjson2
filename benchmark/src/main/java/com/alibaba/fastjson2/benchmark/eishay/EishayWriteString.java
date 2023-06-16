@@ -37,9 +37,9 @@ public class EishayWriteString {
             mc = JSONReader.of(str)
                     .read(MediaContent.class);
 
-            provider.mixIn(MediaContent.class, MediaContentMixin.class);
-            provider.mixIn(Media.class, MediaMixin.class);
-            provider.mixIn(Image.class, ImageMixin.class);
+            provider.register(MediaContent.class, MediaContentMixin.objectWriter);
+            provider.register(Media.class, MediaMixin.objectWriter);
+            provider.register(Image.class, ImageMixin.objectWriter);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }

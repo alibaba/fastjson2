@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.benchmark.eishay.vo;
 
 import java.util.Objects;
 
+@com.alibaba.fastjson2.annotation.JSONCompiled(referenceDetect = false)
 public class Image
         implements java.io.Serializable {
     private static final long serialVersionUID = 1L;

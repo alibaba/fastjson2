@@ -196,7 +196,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
         }
 
         if (jsonReader.isSupportBeanArray(features | this.features)
-                && jsonReader.nextIfMatch('[')) {
+                && jsonReader.nextIfArrayStart()) {
             LinkedHashMap<Long, Object> valueMap = null;
             for (FieldReader fieldReader : fieldReaders) {
                 Object fieldValue = fieldReader.readFieldValue(jsonReader);
@@ -207,7 +207,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 valueMap.put(hash, fieldValue);
             }
 
-            if (!jsonReader.nextIfMatch(']')) {
+            if (!jsonReader.nextIfArrayEnd()) {
                 throw new JSONException(jsonReader.info("array not end, " + jsonReader.current()));
             }
 

@@ -212,6 +212,16 @@ class JSONReaderJSONB
     }
 
     @Override
+    public final boolean nextIfArrayStart() {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
+    public final boolean nextIfArrayEnd() {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    @Override
     public final boolean nextIfObjectStart() {
         if (bytes[offset] != BC_OBJECT) {
             return false;
@@ -3203,7 +3213,33 @@ class JSONReaderJSONB
         return str.charAt(0);
     }
 
-    public long[] readInt64ValueArray() {
+    @Override
+    public final int[] readInt32ValueArray() {
+        if (nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
+            long typeHash = readTypeHashCode();
+            if (typeHash != ObjectReaderImplInt64ValueArray.HASH_TYPE
+                    && typeHash != ObjectReaderImplInt64Array.HASH_TYPE
+                    && typeHash != ObjectReaderImplInt32Array.HASH_TYPE
+                    && typeHash != ObjectReaderImplInt32ValueArray.HASH_TYPE
+            ) {
+                throw new JSONException(info("not support " + getString()));
+            }
+        }
+
+        int entryCnt = startArray();
+        if (entryCnt == -1) {
+            return null;
+        }
+
+        int[] array = new int[entryCnt];
+        for (int i = 0; i < entryCnt; i++) {
+            array[i] = readInt32Value();
+        }
+        return array;
+    }
+
+    @Override
+    public final long[] readInt64ValueArray() {
         if (nextIfMatch(JSONB.Constants.BC_TYPED_ANY)) {
             long typeHash = readTypeHashCode();
             if (typeHash != ObjectReaderImplInt64ValueArray.HASH_TYPE

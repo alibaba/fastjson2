@@ -136,7 +136,7 @@ public final class ObjectReaderImplListInt64
                 throw new JSONException(jsonReader.info("illegal input error"));
             }
 
-            if (jsonReader.nextIfMatch(']')) {
+            if (jsonReader.nextIfArrayEnd()) {
                 break;
             }
 

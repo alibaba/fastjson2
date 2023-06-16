@@ -44,6 +44,18 @@ public class ObjectReader2<T>
             String typeKey,
             String typeName,
             long features,
+            Supplier<T> creator,
+            Function buildFunction,
+            FieldReader... fieldReaders
+    ) {
+        this(objectClass, typeKey, typeName, features, null, creator, buildFunction, fieldReaders);
+    }
+
+    public ObjectReader2(
+            Class objectClass,
+            String typeKey,
+            String typeName,
+            long features,
             JSONSchema schema,
             Supplier<T> creator,
             Function buildFunction,

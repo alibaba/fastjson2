@@ -28,7 +28,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.*;
 
-import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 import static com.alibaba.fastjson2.util.BeanUtils.*;
 
 public class ObjectWriterBaseModule
@@ -92,17 +91,6 @@ public class ObjectWriterBaseModule
                     if (compiler.value() == JSONCompiler.CompilerOption.LAMBDA) {
                         beanInfo.writerFeatures |= FieldInfo.JIT;
                     }
-                }
-
-                if (annotationType == JSONAutowired.class) {
-                    beanInfo.writerFeatures |= JSON_AUTO_WIRED_ANNOTATED;
-
-                    JSONAutowired autowired = (JSONAutowired) annotation;
-                    String fieldName = autowired.writer();
-                    if (!fieldName.isEmpty()) {
-                        beanInfo.objectWriterFieldName = fieldName;
-                    }
-                    continue;
                 }
 
                 boolean useJacksonAnnotation = JSONFactory.isUseJacksonAnnotation();
@@ -182,17 +170,6 @@ public class ObjectWriterBaseModule
                         Class<? extends Annotation> annotationType = annotation.annotationType();
                         jsonType = findAnnotation(annotation, JSONType.class);
                         if (jsonType == annotation) {
-                            continue;
-                        }
-
-                        if (annotationType == JSONAutowired.class) {
-                            beanInfo.writerFeatures |= JSON_AUTO_WIRED_ANNOTATED;
-
-                            JSONAutowired autowired = (JSONAutowired) annotation;
-                            String fieldName = autowired.writer();
-                            if (!fieldName.isEmpty()) {
-                                beanInfo.objectWriterFieldName = fieldName;
-                            }
                             continue;
                         }
 
