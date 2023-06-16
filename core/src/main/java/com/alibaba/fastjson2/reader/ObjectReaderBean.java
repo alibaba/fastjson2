@@ -184,16 +184,16 @@ public abstract class ObjectReaderBean<T>
 
     public void readObject(JSONReader jsonReader, Object object, long features) {
         if (jsonReader.nextIfNull()) {
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return;
         }
 
-        boolean objectStart = jsonReader.nextIfMatch('{');
+        boolean objectStart = jsonReader.nextIfObjectStart();
         if (!objectStart) {
             throw new JSONException(jsonReader.info());
         }
 
-        while (!jsonReader.nextIfMatch('}')) {
+        while (!jsonReader.nextIfObjectEnd()) {
             long hash = jsonReader.readFieldNameHashCode();
             FieldReader fieldReader = getFieldReader(hash);
             if (fieldReader == null && jsonReader.isSupportSmartMatch(features | getFeatures())) {
@@ -209,7 +209,7 @@ public abstract class ObjectReaderBean<T>
             fieldReader.readFieldValue(jsonReader, object);
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         if (schema != null) {
             schema.assertValidate(object);
@@ -223,7 +223,7 @@ public abstract class ObjectReaderBean<T>
         }
 
         if (jsonReader.nextIfNullOrEmptyString()) {
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return null;
         }
 
@@ -237,7 +237,7 @@ public abstract class ObjectReaderBean<T>
         }
 
         T object = null;
-        boolean objectStart = jsonReader.nextIfMatch('{');
+        boolean objectStart = jsonReader.nextIfObjectStart();
         if (!objectStart) {
             char ch = jsonReader.current();
             // skip for fastjson 1.x compatible
@@ -252,7 +252,7 @@ public abstract class ObjectReaderBean<T>
         }
 
         for (int i = 0; ; i++) {
-            if (jsonReader.nextIfMatch('}')) {
+            if (jsonReader.nextIfObjectEnd()) {
                 if (object == null) {
                     object = createInstance(jsonReader.getContext().getFeatures() | features);
                     if (object != null && (featuresAll & JSONReader.Feature.InitStringFieldAsEmpty.mask) != 0) {
@@ -340,7 +340,7 @@ public abstract class ObjectReaderBean<T>
             fieldReader.readFieldValue(jsonReader, object);
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         Function buildFunction = getBuildFunction();
         if (buildFunction != null) {

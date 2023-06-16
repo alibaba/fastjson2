@@ -40,7 +40,7 @@ class ObjectReaderImplBoolValueArray
 
                 values[size++] = jsonReader.readBoolValue();
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             return Arrays.copyOf(values, size);
         }

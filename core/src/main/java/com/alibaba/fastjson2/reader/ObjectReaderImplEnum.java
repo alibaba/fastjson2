@@ -125,7 +125,8 @@ public final class ObjectReaderImplEnum
         } else {
             try {
                 if (valueField instanceof Field) {
-                    for (Enum e : enums) {
+                    for (int i = 0; i < enums.length; i++) {
+                        Enum e = enums[i];
                         if (((Field) valueField).getInt(e) == intValue) {
                             enumValue = e;
                             break;
@@ -133,7 +134,8 @@ public final class ObjectReaderImplEnum
                     }
                 } else {
                     Method valueMethod = (Method) valueField;
-                    for (Enum e : enums) {
+                    for (int i = 0; i < enums.length; i++) {
+                        Enum e = enums[i];
                         if (((Number) valueMethod.invoke(e)).intValue() == intValue) {
                             enumValue = e;
                             break;

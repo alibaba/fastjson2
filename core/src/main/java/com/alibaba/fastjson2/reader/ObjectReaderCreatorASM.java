@@ -1437,8 +1437,7 @@ public class ObjectReaderCreatorASM
         }
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-        mw.visitIntInsn(Opcodes.BIPUSH, '[');
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfArrayStart", "()Z", false);
 
         genCreateObject(mw, context, classNameType, TYPE_OBJECT, FEATURES, fieldBased, defaultConstructor, objectReaderAdapter.creator);
         mw.visitVarInsn(Opcodes.ASTORE, OBJECT);
@@ -1467,13 +1466,11 @@ public class ObjectReaderCreatorASM
         }
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-        mw.visitIntInsn(Opcodes.BIPUSH, ']');
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfArrayEnd", "()Z", false);
         mw.visitInsn(Opcodes.POP); // TODO HANDLE ERROR
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-        mw.visitIntInsn(Opcodes.BIPUSH, ',');
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfComma", "()Z", false);
         mw.visitInsn(Opcodes.POP);
 
         mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
@@ -1493,8 +1490,7 @@ public class ObjectReaderCreatorASM
         Label notNull_ = new Label(), end_ = new Label();
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-        mw.visitIntInsn(Opcodes.BIPUSH, '{');
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfObjectStart", "()Z", false);
         mw.visitJumpInsn(Opcodes.IFNE, notNull_);
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
@@ -1518,8 +1514,7 @@ public class ObjectReaderCreatorASM
         mw.visitLabel(for_start_i_);
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-        mw.visitIntInsn(Opcodes.BIPUSH, '}');
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfObjectEnd", "()Z", false);
         mw.visitJumpInsn(Opcodes.IFNE, for_end_i_);
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
@@ -1780,8 +1775,7 @@ public class ObjectReaderCreatorASM
         mw.visitLabel(end_);
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-        mw.visitIntInsn(Opcodes.BIPUSH, ',');
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
+        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfComma", "()Z", false);
         mw.visitInsn(Opcodes.POP);
 
         mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
@@ -2097,8 +2091,7 @@ public class ObjectReaderCreatorASM
                     mw.visitJumpInsn(Opcodes.IFNE, loadNull_);
 
                     mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                    mw.visitIntInsn(Opcodes.BIPUSH, '[');
-                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
+                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfArrayStart", "()Z", false);
                     mw.visitJumpInsn(Opcodes.IFNE, match_);
 
                     if (itemClass == String.class) {
@@ -2185,8 +2178,7 @@ public class ObjectReaderCreatorASM
                     mw.visitJumpInsn(Opcodes.IF_ICMPGE, for_end_j_);
                 } else {
                     mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                    mw.visitIntInsn(Opcodes.BIPUSH, ']');
-                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
+                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfArrayEnd", "()Z", false);
                     mw.visitJumpInsn(Opcodes.IFNE, for_end_j_);
                 }
 
@@ -2273,8 +2265,7 @@ public class ObjectReaderCreatorASM
 
                 if (!jsonb) {
                     mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                    mw.visitIntInsn(Opcodes.BIPUSH, ',');
-                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
+                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfComma", "()Z", false);
                     mw.visitInsn(Opcodes.POP);
                 }
 
@@ -2286,8 +2277,7 @@ public class ObjectReaderCreatorASM
 
                 if (!jsonb) {
                     mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                    mw.visitIntInsn(Opcodes.BIPUSH, ',');
-                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
+                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfComma", "()Z", false);
                     mw.visitInsn(Opcodes.POP);
                 }
 
@@ -2385,8 +2375,7 @@ public class ObjectReaderCreatorASM
 
             if (!jsonb) {
                 mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                mw.visitIntInsn(Opcodes.BIPUSH, ',');
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfMatch", "(C)Z", false);
+                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfComma", "()Z", false);
                 mw.visitInsn(Opcodes.POP);
             }
         }

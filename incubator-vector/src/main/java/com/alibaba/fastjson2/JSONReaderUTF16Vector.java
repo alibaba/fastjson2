@@ -13,6 +13,10 @@ final class JSONReaderUTF16Vector
         super(ctx, str, chars, offset, length);
     }
 
+    JSONReaderUTF16Vector(Context ctx, String str, int offset, int length) {
+        super(ctx, str, offset, length);
+    }
+
     @Override
     public String readString() {
         if (ch == '"' || ch == '\'') {
@@ -207,7 +211,11 @@ final class JSONReaderUTF16Vector
             implements JSONFactory.JSONReaderUTF16Creator {
         @Override
         public JSONReader create(Context ctx, String str, char[] chars, int offset, int length) {
-            return new JSONReaderUTF16Vector(ctx, str, chars, offset, length);
+            if (chars == null) {
+                return new JSONReaderUTF16Vector(ctx, str, offset, length);
+            } else {
+                return new JSONReaderUTF16Vector(ctx, str, chars, offset, length);
+            }
         }
     }
 }

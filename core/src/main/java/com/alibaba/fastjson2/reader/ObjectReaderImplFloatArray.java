@@ -47,7 +47,7 @@ final class ObjectReaderImplFloatArray
 
                 values[size++] = jsonReader.readFloat();
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             return Arrays.copyOf(values, size);
         }

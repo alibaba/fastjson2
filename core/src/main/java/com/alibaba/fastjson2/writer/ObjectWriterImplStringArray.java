@@ -38,7 +38,8 @@ final class ObjectWriterImplStringArray
         String[] list = (String[]) object;
 
         jsonWriter.startArray(list.length);
-        for (String item : list) {
+        for (int i = 0; i < list.length; i++) {
+            String item = list[i];
             if (item == null) {
                 if (jsonWriter.isEnabled(JSONWriter.Feature.NullAsDefaultValue.mask | JSONWriter.Feature.WriteNullStringAsEmpty.mask)) {
                     jsonWriter.writeString("");

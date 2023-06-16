@@ -58,7 +58,7 @@ final class ObjectReaderImplCharValueArray
                 String str = jsonReader.readString();
                 values[size++] = (str == null) ? '\0' : str.charAt(0);
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             char[] chars = Arrays.copyOf(values, size);
             if (builder != null) {

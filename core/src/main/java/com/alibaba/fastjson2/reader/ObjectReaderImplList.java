@@ -536,20 +536,20 @@ public final class ObjectReaderImplList
         if (ch == '"') {
             String str = jsonReader.readString();
             if (itemClass == String.class) {
-                jsonReader.nextIfMatch(',');
+                jsonReader.nextIfComma();
                 list.add(str);
                 return list;
             }
 
             if (str.isEmpty()) {
-                jsonReader.nextIfMatch(',');
+                jsonReader.nextIfComma();
                 return null;
             }
 
             Function typeConvert = context.getProvider().getTypeConvert(String.class, itemType);
             if (typeConvert != null) {
                 Object converted = typeConvert.apply(str);
-                jsonReader.nextIfMatch(',');
+                jsonReader.nextIfComma();
                 list.add(converted);
                 return list;
             }
@@ -607,10 +607,10 @@ public final class ObjectReaderImplList
 
             list.add(item);
 
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         if (builder != null) {
             return builder.apply(list);

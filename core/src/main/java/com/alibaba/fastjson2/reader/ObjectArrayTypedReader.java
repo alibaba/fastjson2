@@ -58,7 +58,7 @@ final class ObjectArrayTypedReader
                 Object value = jsonReader.read(componentType);
                 values[size++] = value;
 
-                jsonReader.nextIfMatch(',');
+                jsonReader.nextIfComma();
             }
             jsonReader.nextIfMatch(',');
 

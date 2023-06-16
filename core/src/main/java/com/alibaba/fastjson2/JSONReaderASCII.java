@@ -50,76 +50,109 @@ class JSONReaderASCII
     }
 
     public final boolean nextIfObjectStart() {
-        if (this.ch != '{') {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch = this.ch;
+        if (ch != '{') {
             return false;
         }
+        comma = false;
 
-        int offset = this.offset;
         if (offset >= end) {
-            ch = EOI;
-        } else {
-            final byte[] bytes = this.bytes;
-            byte ch = bytes[offset];
-            while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
-                offset++;
-                if (offset >= end) {
-                    this.offset = offset;
-                    this.ch = EOI;
-                    return true;
-                }
-                ch = bytes[offset];
-            }
-            this.offset = offset + 1;
-            this.ch = (char) (ch & 0xFF);
+            this.offset = offset;
+            this.ch = EOI;
+            return true;
+        }
 
-            while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
-                skipLineComment();
+        ch = bytes[offset];
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+            offset++;
+            if (offset >= end) {
+                this.offset = offset;
+                this.ch = EOI;
+                return true;
             }
+            ch = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) (ch & 0xFF);
+
+        while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
+            skipLineComment();
         }
 
         return true;
     }
 
     public final boolean nextIfObjectEnd() {
-        if (this.ch != '}') {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch = this.ch;
+        if (ch != '}') {
             return false;
         }
+        comma = false;
 
-        int offset = this.offset;
         if (offset >= end) {
-            ch = EOI;
-        } else {
-            final byte[] bytes = this.bytes;
-            byte ch = bytes[offset];
-            while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
-                offset++;
-                if (offset >= end) {
-                    this.offset = offset;
-                    this.ch = EOI;
-                    return true;
-                }
-                ch = bytes[offset];
-            }
+            this.offset = offset;
+            this.ch = EOI;
+            return true;
+        }
 
-            if (comma = (ch == ',')) {
-                ch = bytes[++offset];
-                while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
-                    offset++;
-                    if (offset >= end) {
-                        this.offset = offset;
-                        this.ch = EOI;
-                        return true;
-                    }
-                    ch = bytes[offset];
-                }
+        ch = bytes[offset];
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+            offset++;
+            if (offset >= end) {
+                this.offset = offset;
+                this.ch = EOI;
+                return true;
             }
+            ch = bytes[offset];
+        }
 
-            this.offset = offset + 1;
-            this.ch = (char) (ch & 0xFF);
+        this.offset = offset + 1;
+        this.ch = (char) (ch & 0xFF);
 
-            while (ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
-                skipLineComment();
+        while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
+            skipLineComment();
+        }
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfComma() {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch = this.ch;
+        if (ch != ',') {
+            return false;
+        }
+        comma = true;
+
+        if (offset >= end) {
+            this.offset = offset;
+            this.ch = EOI;
+            return true;
+        }
+
+        ch = bytes[offset];
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+            offset++;
+            if (offset >= end) {
+                this.offset = offset;
+                this.ch = EOI;
+                return true;
             }
+            ch = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) (ch & 0xFF);
+
+        while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
+            skipLineComment();
         }
 
         return true;
@@ -163,7 +196,7 @@ class JSONReaderASCII
         this.offset = offset + 1;
         this.ch = (char) (ch & 0xFF);
 
-        while (ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
+        while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
             skipLineComment();
         }
 
@@ -175,14 +208,6 @@ class JSONReaderASCII
         final byte[] bytes = this.bytes;
         int offset = this.offset;
         int ch = this.ch;
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            if (offset >= end) {
-                ch = EOI;
-            } else {
-                ch = bytes[offset++];
-            }
-        }
-
         if (ch != '[') {
             return false;
         }
@@ -207,7 +232,7 @@ class JSONReaderASCII
         this.offset = offset + 1;
         this.ch = (char) (ch & 0xFF);
 
-        while (ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
+        while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
             skipLineComment();
         }
 
@@ -219,14 +244,6 @@ class JSONReaderASCII
         final byte[] bytes = this.bytes;
         int offset = this.offset;
         int ch = this.ch;
-        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
-            if (offset >= end) {
-                ch = EOI;
-            } else {
-                ch = bytes[offset++];
-            }
-        }
-
         if (ch == '}' || ch == EOI) {
             throw new JSONException(info());
         }
@@ -269,7 +286,7 @@ class JSONReaderASCII
         this.offset = offset + 1;
         this.ch = (char) (ch & 0xFF);
 
-        while (ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
+        while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
             skipLineComment();
         }
 
@@ -338,10 +355,6 @@ class JSONReaderASCII
     @Override
     public final long readFieldNameHashCode() {
         final byte[] bytes = this.bytes;
-        while (ch == '/' && offset < bytes.length && bytes[offset] == '/') {
-            skipLineComment();
-        }
-
         if (ch != '"' && ch != '\'') {
             if ((context.features & Feature.AllowUnQuotedFieldNames.mask) != 0 && isFirstIdentifier(ch)) {
                 return readFieldNameHashCodeUnquote();
@@ -367,7 +380,7 @@ class JSONReaderASCII
         int offset = this.nameBegin = this.offset;
 
         long nameValue = 0;
-        if (MIXED_HASH_ALGORITHM && offset + 9 < end) {
+        if (offset + 9 < end) {
             byte c0, c1, c2, c3, c4, c5, c6, c7;
 
             if ((c0 = bytes[offset]) == quote) {
@@ -455,7 +468,7 @@ class JSONReaderASCII
             }
         }
 
-        if (MIXED_HASH_ALGORITHM && nameValue == 0) {
+        if (nameValue == 0) {
             for (int i = 0; offset < end; offset++, i++) {
                 int c = bytes[offset];
 
@@ -473,26 +486,29 @@ class JSONReaderASCII
 
                 if (c == '\\') {
                     nameEscape = true;
-                    c = bytes[++offset];
+                    c = bytes[offset + 1];
                     switch (c) {
                         case 'u': {
-                            byte c1 = bytes[++offset];
-                            byte c2 = bytes[++offset];
-                            byte c3 = bytes[++offset];
-                            byte c4 = bytes[++offset];
+                            byte c1 = bytes[offset + 2];
+                            byte c2 = bytes[offset + 3];
+                            byte c3 = bytes[offset + 4];
+                            byte c4 = bytes[offset + 5];
                             c = char4(c1, c2, c3, c4);
+                            offset += 5;
                             break;
                         }
                         case 'x': {
-                            byte c1 = bytes[++offset];
-                            byte c2 = bytes[++offset];
+                            byte c1 = bytes[offset + 2];
+                            byte c2 = bytes[offset + 3];
                             c = char2(c1, c2);
+                            offset += 3;
                             break;
                         }
                         case '\\':
                         case '"':
                         default:
                             c = char1(c);
+                            offset += 1;
                             break;
                     }
                 }
@@ -660,85 +676,82 @@ class JSONReaderASCII
 
         this.nameEscape = false;
         int offset = this.nameBegin = this.offset;
-
         long nameValue = 0;
-        if (MIXED_HASH_ALGORITHM) {
-            for (int i = 0; offset < end; offset++, i++) {
-                int c = bytes[offset];
+        for (int i = 0; offset < end; offset++, i++) {
+            int c = bytes[offset];
 
-                if (c == quote) {
-                    if (i == 0) {
-                        nameValue = 0;
-                        offset = this.nameBegin;
-                        break;
-                    }
-
-                    this.nameLength = i;
-                    this.nameEnd = offset;
-                    offset++;
-                    break;
-                }
-
-                if (c == '\\') {
-                    nameEscape = true;
-                    c = bytes[++offset];
-                    switch (c) {
-                        case 'u': {
-                            byte c1 = bytes[++offset];
-                            byte c2 = bytes[++offset];
-                            byte c3 = bytes[++offset];
-                            byte c4 = bytes[++offset];
-                            c = char4(c1, c2, c3, c4);
-                            break;
-                        }
-                        case 'x': {
-                            byte c1 = bytes[++offset];
-                            byte c2 = bytes[++offset];
-                            c = char2(c1, c2);
-                            break;
-                        }
-                        case '\\':
-                        case '"':
-                        default:
-                            c = char1(c);
-                            break;
-                    }
-                }
-
-                if (c > 0xFF || i >= 8 || (i == 0 && c == 0)) {
+            if (c == quote) {
+                if (i == 0) {
                     nameValue = 0;
                     offset = this.nameBegin;
                     break;
                 }
 
-                switch (i) {
-                    case 0:
-                        nameValue = (byte) c;
+                this.nameLength = i;
+                this.nameEnd = offset;
+                offset++;
+                break;
+            }
+
+            if (c == '\\') {
+                nameEscape = true;
+                c = bytes[++offset];
+                switch (c) {
+                    case 'u': {
+                        byte c1 = bytes[++offset];
+                        byte c2 = bytes[++offset];
+                        byte c3 = bytes[++offset];
+                        byte c4 = bytes[++offset];
+                        c = char4(c1, c2, c3, c4);
                         break;
-                    case 1:
-                        nameValue = (((byte) c) << 8) + (nameValue & 0xFFL);
+                    }
+                    case 'x': {
+                        byte c1 = bytes[++offset];
+                        byte c2 = bytes[++offset];
+                        c = char2(c1, c2);
                         break;
-                    case 2:
-                        nameValue = (((byte) c) << 16) + (nameValue & 0xFFFFL);
-                        break;
-                    case 3:
-                        nameValue = (((byte) c) << 24) + (nameValue & 0xFFFFFFL);
-                        break;
-                    case 4:
-                        nameValue = (((long) (byte) c) << 32) + (nameValue & 0xFFFFFFFFL);
-                        break;
-                    case 5:
-                        nameValue = (((long) (byte) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
-                        break;
-                    case 6:
-                        nameValue = (((long) (byte) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
-                        break;
-                    case 7:
-                        nameValue = (((long) (byte) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
-                        break;
+                    }
+                    case '\\':
+                    case '"':
                     default:
+                        c = char1(c);
                         break;
                 }
+            }
+
+            if (c > 0xFF || i >= 8 || (i == 0 && c == 0)) {
+                nameValue = 0;
+                offset = this.nameBegin;
+                break;
+            }
+
+            switch (i) {
+                case 0:
+                    nameValue = (byte) c;
+                    break;
+                case 1:
+                    nameValue = (((byte) c) << 8) + (nameValue & 0xFFL);
+                    break;
+                case 2:
+                    nameValue = (((byte) c) << 16) + (nameValue & 0xFFFFL);
+                    break;
+                case 3:
+                    nameValue = (((byte) c) << 24) + (nameValue & 0xFFFFFFL);
+                    break;
+                case 4:
+                    nameValue = (((long) (byte) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                    break;
+                case 5:
+                    nameValue = (((long) (byte) c) << 40L) + (nameValue & 0xFFFFFFFFFFL);
+                    break;
+                case 6:
+                    nameValue = (((long) (byte) c) << 48L) + (nameValue & 0xFFFFFFFFFFFFL);
+                    break;
+                case 7:
+                    nameValue = (((long) (byte) c) << 56L) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -828,90 +841,87 @@ class JSONReaderASCII
     @Override
     public final long getNameHashCodeLCase() {
         int offset = nameBegin;
+        long nameValue = 0;
+        for (int i = 0; offset < end; offset++) {
+            int c = bytes[offset];
 
-        if (MIXED_HASH_ALGORITHM) {
-            long nameValue = 0;
-            for (int i = 0; offset < end; offset++) {
-                int c = bytes[offset];
-
-                if (c == '\\') {
-                    c = bytes[++offset];
-                    switch (c) {
-                        case 'u': {
-                            int c1 = bytes[++offset];
-                            int c2 = bytes[++offset];
-                            int c3 = bytes[++offset];
-                            int c4 = bytes[++offset];
-                            c = char4(c1, c2, c3, c4);
-                            break;
-                        }
-                        case 'x': {
-                            int c1 = bytes[++offset];
-                            int c2 = bytes[++offset];
-                            c = char2(c1, c2);
-                            break;
-                        }
-                        case '\\':
-                        case '"':
-                        default:
-                            c = char1(c);
-                            break;
+            if (c == '\\') {
+                c = bytes[++offset];
+                switch (c) {
+                    case 'u': {
+                        int c1 = bytes[++offset];
+                        int c2 = bytes[++offset];
+                        int c3 = bytes[++offset];
+                        int c4 = bytes[++offset];
+                        c = char4(c1, c2, c3, c4);
+                        break;
                     }
-                } else if (c == '"') {
-                    break;
-                }
-
-                if (c > 0xFF || c < 0 || i >= 8 || (i == 0 && c == 0)) {
-                    nameValue = 0;
-                    offset = this.nameBegin;
-                    break;
-                }
-
-                if (c == '_' || c == '-' || c == ' ') {
-                    byte c1 = bytes[offset + 1];
-                    if (c1 != '"' && c1 != '\'' && c1 != c) {
-                        continue;
+                    case 'x': {
+                        int c1 = bytes[++offset];
+                        int c2 = bytes[++offset];
+                        c = char2(c1, c2);
+                        break;
                     }
-                }
-
-                if (c >= 'A' && c <= 'Z') {
-                    c = (char) (c + 32);
-                }
-
-                switch (i) {
-                    case 0:
-                        nameValue = (byte) c;
-                        break;
-                    case 1:
-                        nameValue = (((byte) c) << 8) + (nameValue & 0xFFL);
-                        break;
-                    case 2:
-                        nameValue = (((byte) c) << 16) + (nameValue & 0xFFFFL);
-                        break;
-                    case 3:
-                        nameValue = (((byte) c) << 24) + (nameValue & 0xFFFFFFL);
-                        break;
-                    case 4:
-                        nameValue = (((long) (byte) c) << 32) + (nameValue & 0xFFFFFFFFL);
-                        break;
-                    case 5:
-                        nameValue = (((long) (byte) c) << 40) + (nameValue & 0xFFFFFFFFFFL);
-                        break;
-                    case 6:
-                        nameValue = (((long) (byte) c) << 48) + (nameValue & 0xFFFFFFFFFFFFL);
-                        break;
-                    case 7:
-                        nameValue = (((long) (byte) c) << 56) + (nameValue & 0xFFFFFFFFFFFFFFL);
-                        break;
+                    case '\\':
+                    case '"':
                     default:
+                        c = char1(c);
                         break;
                 }
-                ++i;
+            } else if (c == '"') {
+                break;
             }
 
-            if (nameValue != 0) {
-                return nameValue;
+            if (c > 0xFF || c < 0 || i >= 8 || (i == 0 && c == 0)) {
+                nameValue = 0;
+                offset = this.nameBegin;
+                break;
             }
+
+            if (c == '_' || c == '-' || c == ' ') {
+                byte c1 = bytes[offset + 1];
+                if (c1 != '"' && c1 != '\'' && c1 != c) {
+                    continue;
+                }
+            }
+
+            if (c >= 'A' && c <= 'Z') {
+                c = (char) (c + 32);
+            }
+
+            switch (i) {
+                case 0:
+                    nameValue = (byte) c;
+                    break;
+                case 1:
+                    nameValue = (((byte) c) << 8) + (nameValue & 0xFFL);
+                    break;
+                case 2:
+                    nameValue = (((byte) c) << 16) + (nameValue & 0xFFFFL);
+                    break;
+                case 3:
+                    nameValue = (((byte) c) << 24) + (nameValue & 0xFFFFFFL);
+                    break;
+                case 4:
+                    nameValue = (((long) (byte) c) << 32) + (nameValue & 0xFFFFFFFFL);
+                    break;
+                case 5:
+                    nameValue = (((long) (byte) c) << 40) + (nameValue & 0xFFFFFFFFFFL);
+                    break;
+                case 6:
+                    nameValue = (((long) (byte) c) << 48) + (nameValue & 0xFFFFFFFFFFFFL);
+                    break;
+                case 7:
+                    nameValue = (((long) (byte) c) << 56) + (nameValue & 0xFFFFFFFFFFFFFFL);
+                    break;
+                default:
+                    break;
+            }
+            ++i;
+        }
+
+        if (nameValue != 0) {
+            return nameValue;
         }
 
         long hashCode = Fnv.MAGIC_HASH_CODE;

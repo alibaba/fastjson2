@@ -254,15 +254,15 @@ public class ObjectReaderAdapter<T>
         jsonReader.nextIfArrayStart();
         Object object = creator.get();
 
-        for (FieldReader fieldReader : fieldReaders) {
-            fieldReader.readFieldValue(jsonReader, object);
+        for (int i = 0; i < fieldReaders.length; i++) {
+            fieldReaders[i].readFieldValue(jsonReader, object);
         }
 
         if (!jsonReader.nextIfArrayEnd()) {
             throw new JSONException(jsonReader.info("array to bean end error"));
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         if (buildFunction != null) {
             return (T) buildFunction.apply(object);
@@ -330,7 +330,8 @@ public class ObjectReaderAdapter<T>
 
     @Override
     protected void initDefaultValue(T object) {
-        for (FieldReader fieldReader : fieldReaders) {
+        for (int i = 0; i < fieldReaders.length; i++) {
+            FieldReader fieldReader = fieldReaders[i];
             Object defaultValue = fieldReader.defaultValue;
             if (defaultValue != null) {
                 fieldReader.accept(object, defaultValue);
@@ -547,7 +548,8 @@ public class ObjectReaderAdapter<T>
     }
 
     protected void initStringFieldAsEmpty(Object object) {
-        for (FieldReader fieldReader : fieldReaders) {
+        for (int i = 0; i < fieldReaders.length; i++) {
+            FieldReader fieldReader = fieldReaders[i];
             if (fieldReader.fieldClass == String.class) {
                 fieldReader.accept(object, "");
             }
@@ -582,7 +584,8 @@ public class ObjectReaderAdapter<T>
         if (extraFieldReader == null
                 && ((features | this.features) & JSONReader.Feature.SupportSmartMatch.mask) == 0
         ) {
-            for (FieldReader fieldReader : fieldReaders) {
+            for (int i = 0; i < fieldReaders.length; i++) {
+                FieldReader fieldReader = fieldReaders[i];
                 Object fieldValue = map.get(fieldReader.fieldName);
                 if (fieldValue == null) {
                     continue;

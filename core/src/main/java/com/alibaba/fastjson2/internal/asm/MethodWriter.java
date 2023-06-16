@@ -500,7 +500,8 @@ public final class MethodWriter {
             // Add all the labels as successors of the current basic block.
             addSuccessorToCurrentBasicBlock(dflt);
             dflt.getCanonicalInstance().flags |= Label.FLAG_JUMP_TARGET;
-            for (Label label : labels) {
+            for (int i = 0; i < labels.length; i++) {
+                Label label = labels[i];
                 addSuccessorToCurrentBasicBlock(label);
                 label.getCanonicalInstance().flags |= Label.FLAG_JUMP_TARGET;
             }

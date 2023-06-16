@@ -29,10 +29,11 @@ final class JSONWriterUTF16JDK8
         final int strlen = value.length;
 
         boolean escape = false;
-        for (char c0 : value) {
-            if (c0 == quote || c0 == '\\' || c0 < ' '
-                    || (browserSecure && (c0 == '<' || c0 == '>' || c0 == '(' || c0 == ')'))
-                    || (escapeNoneAscii && c0 > 0x007F)
+        for (int i = 0; i < value.length; i++) {
+            char ch = value[i];
+            if (ch == quote || ch == '\\' || ch < ' '
+                    || (browserSecure && (ch == '<' || ch == '>' || ch == '(' || ch == ')'))
+                    || (escapeNoneAscii && ch > 0x007F)
             ) {
                 escape = true;
                 break;

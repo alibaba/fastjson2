@@ -46,7 +46,8 @@ public class TypeCollector {
 
         Type[] argTypes = Type.getArgumentTypes(desc);
         int longOrDoubleQuantity = 0;
-        for (Type t : argTypes) {
+        for (int i = 0; i < argTypes.length; i++) {
+            Type t = argTypes[i];
             String className = t.getClassName();
             if ("long".equals(className) || "double".equals(className)) {
                 longOrDoubleQuantity++;

@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2;
 
+import com.alibaba.fastjson2.filter.ExtraProcessor;
+import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderCreator;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
@@ -29,8 +31,6 @@ public final class JSONFactory {
     public static final String PROPERTY_AUTO_TYPE_ACCEPT = "fastjson2.autoTypeAccept";
     public static final String PROPERTY_AUTO_TYPE_HANDLER = "fastjson2.autoTypeHandler";
     public static final String PROPERTY_AUTO_TYPE_BEFORE_HANDLER = "fastjson2.autoTypeBeforeHandler";
-
-    public static final boolean MIXED_HASH_ALGORITHM = true;
 
     static boolean useJacksonAnnotation;
 
@@ -394,7 +394,28 @@ public final class JSONFactory {
         JSONReader.Context context = new JSONReader.Context(
                 JSONFactory.getDefaultObjectReaderProvider()
         );
-        context.config(features);
+        for (int i = 0; i < features.length; i++) {
+            context.features |= features[i].mask;
+        }
+        return context;
+    }
+
+    public static JSONReader.Context createReadContext(Filter filter, JSONReader.Feature... features) {
+        JSONReader.Context context = new JSONReader.Context(
+                JSONFactory.getDefaultObjectReaderProvider()
+        );
+
+        if (filter instanceof JSONReader.AutoTypeBeforeHandler) {
+            context.autoTypeBeforeHandler = (JSONReader.AutoTypeBeforeHandler) filter;
+        }
+
+        if (filter instanceof ExtraProcessor) {
+            context.extraProcessor = (ExtraProcessor) filter;
+        }
+
+        for (int i = 0; i < features.length; i++) {
+            context.features |= features[i].mask;
+        }
         return context;
     }
 

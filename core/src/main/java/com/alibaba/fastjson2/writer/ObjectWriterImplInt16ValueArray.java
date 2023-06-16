@@ -33,8 +33,8 @@ final class ObjectWriterImplInt16ValueArray
         }
 
         jsonWriter.startArray(shorts.length);
-        for (short aShort : shorts) {
-            jsonWriter.writeInt32(aShort);
+        for (int i = 0; i < shorts.length; i++) {
+            jsonWriter.writeInt32(shorts[i]);
         }
     }
 

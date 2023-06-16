@@ -121,10 +121,10 @@ class ObjectReaderImplGenericArray
 
             list.add(item);
 
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         Object array = Array.newInstance(componentClass, list.size());
 

@@ -297,7 +297,8 @@ final class JSONWriterJSONB
             }
 
             bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
-            for (char ch : chars) {
+            for (int i = 0; i < chars.length; i++) {
+                char ch = chars[i];
                 if (ch > 0x00FF) {
                     ascii = false;
                     break;
@@ -354,8 +355,8 @@ final class JSONWriterJSONB
             } else {
                 off += putStringSizeLarge(bytes, off, strlen);
             }
-            for (char aChar : chars) {
-                bytes[off++] = (byte) aChar;
+            for (int i = 0; i < chars.length; i++) {
+                bytes[off++] = (byte) chars[i];
             }
         } else {
             int maxSize = chars.length * 3;
@@ -385,7 +386,7 @@ final class JSONWriterJSONB
     }
 
     @Override
-    public void writeString(final char[] chars, final int off, final int len) {
+    public void writeString(final char[] chars, final int charsOff, final int len) {
         if (chars == null) {
             writeNull();
             return;
@@ -402,7 +403,7 @@ final class JSONWriterJSONB
             }
 
             bytes[this.off++] = (byte) (len + BC_STR_ASCII_FIX_MIN);
-            for (int i = off; i < len; i++) {
+            for (int i = charsOff; i < len; i++) {
                 char ch = chars[i];
                 if (ch > 0x00FF) {
                     ascii = false;
@@ -419,7 +420,7 @@ final class JSONWriterJSONB
         }
 
         {
-            int i = off;
+            int i = charsOff;
             int upperBound = chars.length & ~3;
             for (; i < upperBound; i += 4) {
                 char c0 = chars[i];
@@ -451,18 +452,21 @@ final class JSONWriterJSONB
         }
 
         if (ascii) {
+            byte[] bytes = this.bytes;
             if (len <= STR_ASCII_FIX_LEN) {
                 bytes[this.off++] = (byte) (len + BC_STR_ASCII_FIX_MIN);
             } else if (len <= INT32_BYTE_MAX) {
-                bytes[this.off++] = BC_STR_ASCII;
-                bytes[this.off++] = (byte) (BC_INT32_BYTE_ZERO + (len >> 8));
-                bytes[this.off++] = (byte) (len);
+                int off = this.off;
+                bytes[off] = BC_STR_ASCII;
+                bytes[off + 1] = (byte) (BC_INT32_BYTE_ZERO + (len >> 8));
+                bytes[off + 2] = (byte) (len);
+                this.off += 3;
             } else {
                 bytes[this.off++] = BC_STR_ASCII;
                 writeInt32(len);
             }
-            for (char aChar : chars) {
-                bytes[this.off++] = (byte) aChar;
+            for (int i = 0; i < chars.length; i++) {
+                bytes[this.off++] = (byte) chars[i];
             }
         } else {
             int maxSize = chars.length * 3;
@@ -479,8 +483,9 @@ final class JSONWriterJSONB
             if (utf8len >= BC_INT32_NUM_MIN && utf8len <= BC_INT32_NUM_MAX) {
                 bytes[this.off++] = (byte) utf8len;
             } else if (utf8len >= INT32_BYTE_MIN && utf8len <= INT32_BYTE_MAX) {
-                bytes[this.off++] = (byte) (BC_INT32_BYTE_ZERO + (utf8len >> 8));
-                bytes[this.off++] = (byte) (utf8len);
+                bytes[this.off] = (byte) (BC_INT32_BYTE_ZERO + (utf8len >> 8));
+                bytes[this.off + 1] = (byte) (utf8len);
+                this.off += 2;
             } else {
                 writeInt32(utf8len);
             }
@@ -495,7 +500,8 @@ final class JSONWriterJSONB
         }
 
         startArray(strings.length);
-        for (String item : strings) {
+        for (int i = 0; i < strings.length; i++) {
+            String item = strings[i];
             if (item == null) {
                 if (isEnabled(Feature.NullAsDefaultValue.mask | Feature.WriteNullStringAsEmpty.mask)) {
                     writeString("");
@@ -662,7 +668,8 @@ final class JSONWriterJSONB
             int mark = off;
             final int LATIN = 0;
             boolean latinAll = true;
-            for (String str : list) {
+            for (int i = 0; i < list.size(); i++) {
+                String str = list.get(i);
                 if (str == null) {
                     writeNull();
                 }
@@ -673,13 +680,17 @@ final class JSONWriterJSONB
                     break;
                 }
                 int strlen = str.length();
+                if (strlen + 3 > bytes.length) {
+                    ensureCapacity(strlen + 3);
+                }
                 if (strlen <= STR_ASCII_FIX_LEN) {
                     bytes[off++] = (byte) (strlen + BC_STR_ASCII_FIX_MIN);
                 } else if (strlen <= INT32_BYTE_MAX) {
+                    int off = this.off;
                     bytes[off] = BC_STR_ASCII;
                     bytes[off + 1] = (byte) (BC_INT32_BYTE_ZERO + (strlen >> 8));
                     bytes[off + 2] = (byte) (strlen);
-                    off += 3;
+                    this.off += 3;
                 } else {
                     bytes[off++] = BC_STR_ASCII;
                     writeInt32(strlen);
@@ -693,7 +704,8 @@ final class JSONWriterJSONB
             }
         }
 
-        for (String str : list) {
+        for (int i = 0; i < list.size(); i++) {
+            String str = list.get(i);
             writeString(str);
         }
     }
@@ -964,7 +976,8 @@ final class JSONWriterJSONB
             off += writeInt32(bytes, off + 1, size) + 1;
         }
 
-        for (long val : value) {
+        for (int i = 0; i < value.length; i++) {
+            long val = value[i];
             if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
                 bytes[off++] = (byte) val;
                 continue;
@@ -1038,14 +1051,14 @@ final class JSONWriterJSONB
     }
 
     @Override
-    public void writeFloat(float[] value) {
-        if (value == null) {
+    public void writeFloat(float[] values) {
+        if (values == null) {
             writeNull();
             return;
         }
-        startArray(value.length);
-        for (float v : value) {
-            writeFloat(v);
+        startArray(values.length);
+        for (int i = 0; i < values.length; i++) {
+            writeFloat(values[i]);
         }
         endArray();
     }
@@ -1093,27 +1106,27 @@ final class JSONWriterJSONB
     }
 
     @Override
-    public void writeDouble(double[] value) {
-        if (value == null) {
+    public void writeDouble(double[] values) {
+        if (values == null) {
             writeNull();
             return;
         }
-        startArray(value.length);
-        for (double v : value) {
-            writeDouble(v);
+        startArray(values.length);
+        for (int i = 0; i < values.length; i++) {
+            writeDouble(values[i]);
         }
         endArray();
     }
 
     @Override
-    public void writeInt16(short[] value) {
-        if (value == null) {
+    public void writeInt16(short[] values) {
+        if (values == null) {
             writeNull();
             return;
         }
-        startArray(value.length);
-        for (short item : value) {
-            writeInt32(item);
+        startArray(values.length);
+        for (int i = 0; i < values.length; i++) {
+            writeInt32(values[i]);
         }
         endArray();
     }
@@ -1145,7 +1158,8 @@ final class JSONWriterJSONB
         }
 
         final byte[] bytes = this.bytes;
-        for (int val : values) {
+        for (int i = 0; i < values.length; i++) {
+            int val = values[i];
             if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
                 bytes[off++] = (byte) val;
                 continue;
@@ -1674,15 +1688,15 @@ final class JSONWriterJSONB
     }
 
     @Override
-    public void writeBool(boolean[] value) {
-        if (value == null) {
+    public void writeBool(boolean[] valeus) {
+        if (valeus == null) {
             writeNull();
             return;
         }
 
-        startArray(value.length);
-        for (boolean b : value) {
-            writeBool(b);
+        startArray(valeus.length);
+        for (int i = 0; i < valeus.length; i++) {
+            writeBool(valeus[i]);
         }
         endArray();
     }
@@ -1840,7 +1854,8 @@ final class JSONWriterJSONB
 
         final int size = array.size();
         startArray(size);
-        for (Object item : array) {
+        for (int i = 0; i < array.size(); i++) {
+            Object item = array.get(i);
             writeAny(item);
         }
     }

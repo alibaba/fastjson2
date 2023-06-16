@@ -287,7 +287,7 @@ public class ObjectReader5<T>
         }
 
         if (jsonReader.nextIfNull()) {
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return null;
         }
 
@@ -309,7 +309,7 @@ public class ObjectReader5<T>
                     throw new JSONException(jsonReader.info("array to bean end error"));
                 }
 
-                jsonReader.nextIfMatch(',');
+                jsonReader.nextIfComma();
 
                 if (buildFunction != null) {
                     return (T) buildFunction.apply(object);
@@ -320,7 +320,7 @@ public class ObjectReader5<T>
             return processObjectInputSingleItemArray(jsonReader, fieldType, fieldName, featuresAll);
         }
 
-        jsonReader.nextIfMatch('{');
+        jsonReader.nextIfObjectStart();
         T object = creator.get();
         if (hasDefaultValue) {
             initDefaultValue(object);
@@ -330,7 +330,7 @@ public class ObjectReader5<T>
         }
 
         for (int i = 0; ; ++i) {
-            if (jsonReader.nextIfMatch('}')) {
+            if (jsonReader.nextIfObjectEnd()) {
                 break;
             }
 
@@ -394,7 +394,7 @@ public class ObjectReader5<T>
             }
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         if (buildFunction != null) {
             object = (T) buildFunction.apply(object);

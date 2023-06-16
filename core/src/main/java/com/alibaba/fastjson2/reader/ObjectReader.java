@@ -41,8 +41,8 @@ public interface ObjectReader<T> {
 
     default T createInstance(Map map, JSONReader.Feature... features) {
         long featuresValue = 0;
-        for (JSONReader.Feature feature : features) {
-            featuresValue |= feature.mask;
+        for (int i = 0; i < features.length; i++) {
+            featuresValue |= features[i].mask;
         }
         return createInstance(map, featuresValue);
     }

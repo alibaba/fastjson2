@@ -21,8 +21,8 @@ public class JSONReader
         com.alibaba.fastjson2.JSONReader.Context context = JSON.createReadContext(JSON.DEFAULT_PARSER_FEATURE, features);
         this.raw = com.alibaba.fastjson2.JSONReader.of(input, context);
         this.input = input;
-        for (Feature feature : features) {
-            if (feature == Feature.SupportArrayToBean) {
+        for (int i = 0; i < features.length; i++) {
+            if (features[i] == Feature.SupportArrayToBean) {
                 context.config(com.alibaba.fastjson2.JSONReader.Feature.SupportArrayToBean);
             }
         }
@@ -90,21 +90,21 @@ public class JSONReader
         if (!raw.nextIfArrayEnd()) {
             throw new JSONException("not support operation");
         }
-        raw.nextIfMatch(',');
+        raw.nextIfComma();
     }
 
     public void startObject() {
         raw.nextIfMatch(':');
-        if (!raw.nextIfMatch('{')) {
+        if (!raw.nextIfObjectStart()) {
             throw new JSONException("not support operation");
         }
     }
 
     public void endObject() {
-        if (!raw.nextIfMatch('}')) {
+        if (!raw.nextIfObjectEnd()) {
             throw new JSONException(raw.info("not support operation"));
         }
-        raw.nextIfMatch(',');
+        raw.nextIfComma();
     }
 
     public Locale getLocal() {

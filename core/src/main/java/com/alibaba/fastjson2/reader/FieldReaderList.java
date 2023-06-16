@@ -112,14 +112,14 @@ public class FieldReaderList<T, V>
 
                 list.add(item);
 
-                jsonReader.nextIfMatch(',');
+                jsonReader.nextIfComma();
             }
             if (builder != null) {
                 list = (Collection) builder.apply(list);
             }
             accept(object, list);
 
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return;
         } else if (current == '{' && getItemObjectReader(context) instanceof ObjectReaderBean) {
             Object itemValue = jsonReader.isJSONB()
@@ -132,7 +132,7 @@ public class FieldReaderList<T, V>
             }
             accept(object, list);
 
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return;
         }
 
@@ -168,10 +168,10 @@ public class FieldReaderList<T, V>
                         itemObjectReader.readObject(jsonReader, null, null, 0)
                 );
 
-                jsonReader.nextIfMatch(',');
+                jsonReader.nextIfComma();
             }
 
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             return list;
         }

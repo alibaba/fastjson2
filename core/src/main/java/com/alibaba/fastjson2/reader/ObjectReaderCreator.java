@@ -900,7 +900,8 @@ public class ObjectReaderCreator {
 
         FieldReader[] fieldReaderArray = createFieldReaders(objectClass, objectType, beanInfo, fieldBased, provider);
         boolean allReadOnlyOrZero = true;
-        for (FieldReader fieldReader : fieldReaderArray) {
+        for (int i = 0; i < fieldReaderArray.length; i++) {
+            FieldReader fieldReader = fieldReaderArray[i];
             if (!fieldReader.isReadOnly()) {
                 allReadOnlyOrZero = false;
                 break;
@@ -986,12 +987,14 @@ public class ObjectReaderCreator {
 
             int matchCount = 0;
             if (defaultConstructor != null) {
-                for (String parameterName : parameterNames) {
+                for (int i = 0; i < parameterNames.length; i++) {
+                    String parameterName = parameterNames[i];
                     if (parameterName == null) {
                         continue;
                     }
 
-                    for (FieldReader fieldReader : fieldReaderArray) {
+                    for (int j = 0; j < fieldReaderArray.length; j++) {
+                        FieldReader fieldReader = fieldReaderArray[j];
                         if (fieldReader != null) {
                             if (parameterName.equals(fieldReader.fieldName)) {
                                 matchCount++;

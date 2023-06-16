@@ -155,7 +155,8 @@ final class JSONPathFunction
         if (value instanceof List) {
             List list = (List) value;
             JSONArray values = new JSONArray(list.size());
-            for (Object item : list) {
+            for (int i = 0; i < list.size(); i++) {
+                Object item = list.get(i);
                 Object negativeItem = negative(item);
                 values.add(negativeItem);
             }
@@ -312,7 +313,8 @@ final class JSONPathFunction
         if (value instanceof List) {
             List list = (List) value;
             JSONArray values = new JSONArray(list.size());
-            for (Object item : list) {
+            for (int i = 0; i < list.size(); i++) {
+                Object item = list.get(i);
                 values.add(abs(item));
             }
             return values;

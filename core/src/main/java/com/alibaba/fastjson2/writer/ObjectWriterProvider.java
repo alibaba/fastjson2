@@ -210,7 +210,8 @@ public class ObjectWriterProvider
     }
 
     public void getFieldInfo(BeanInfo beanInfo, FieldInfo fieldInfo, Class objectClass, Field field) {
-        for (ObjectWriterModule module : modules) {
+        for (int i = 0; i < modules.size(); i++) {
+            ObjectWriterModule module = modules.get(i);
             ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor == null) {
                 continue;
@@ -220,7 +221,8 @@ public class ObjectWriterProvider
     }
 
     public void getFieldInfo(BeanInfo beanInfo, FieldInfo fieldInfo, Class objectClass, Method method) {
-        for (ObjectWriterModule module : modules) {
+        for (int i = 0; i < modules.size(); i++) {
+            ObjectWriterModule module = modules.get(i);
             ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor == null) {
                 continue;
@@ -234,7 +236,8 @@ public class ObjectWriterProvider
             beanInfo.namingStrategy = namingStrategy.name();
         }
 
-        for (ObjectWriterModule module : modules) {
+        for (int i = 0; i < modules.size(); i++) {
+            ObjectWriterModule module = modules.get(i);
             ObjectWriterAnnotationProcessor annotationProcessor = module.getAnnotationProcessor();
             if (annotationProcessor == null) {
                 continue;
@@ -313,7 +316,8 @@ public class ObjectWriterProvider
         }
 
         if (useModules) {
-            for (ObjectWriterModule module : modules) {
+            for (int i = 0; i < modules.size(); i++) {
+                ObjectWriterModule module = modules.get(i);
                 objectWriter = module.getObjectWriter(objectType, objectClass);
                 if (objectWriter != null) {
                     ObjectWriter previous = fieldBased
@@ -478,7 +482,8 @@ public class ObjectWriterProvider
         } else if (objectWriter instanceof ObjectWriterAdapter) {
             checkedMap.put(objectWriter, null);
             List<FieldWriter> fieldWriters = ((ObjectWriterAdapter<?>) objectWriter).fieldWriters;
-            for (FieldWriter fieldWriter : fieldWriters) {
+            for (int i = 0; i < fieldWriters.size(); i++) {
+                FieldWriter fieldWriter = fieldWriters.get(i);
                 if (fieldWriter instanceof FieldWriterObject) {
                     ObjectWriter initObjectWriter = ((FieldWriterObject<?>) fieldWriter).initObjectWriter;
                     if (match(null, initObjectWriter, classLoader, checkedMap)) {

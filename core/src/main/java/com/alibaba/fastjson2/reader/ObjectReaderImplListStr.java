@@ -194,7 +194,7 @@ public final class ObjectReaderImplListStr
             throw new JSONException(jsonReader.info());
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         return list;
     }

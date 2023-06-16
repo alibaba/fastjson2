@@ -40,7 +40,8 @@ public class ToDouble
         if (o instanceof List) {
             List list = (List) o;
             JSONArray array = new JSONArray(list.size());
-            for (Object item : list) {
+            for (int i = 0; i < list.size(); i++) {
+                Object item = list.get(i);
                 array.add(apply(item));
             }
             return array;

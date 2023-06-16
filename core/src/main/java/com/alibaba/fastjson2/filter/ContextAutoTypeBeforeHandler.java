@@ -180,8 +180,8 @@ public class ContextAutoTypeBeforeHandler
                     StackTraceElement.class
             };
 
-            for (Class basicType : basicTypes) {
-                String name = TypeUtils.getTypeName(basicType);
+            for (int i = 0; i < basicTypes.length; i++) {
+                String name = TypeUtils.getTypeName(basicTypes[i]);
                 nameSet.add(name);
             }
 
@@ -192,7 +192,8 @@ public class ContextAutoTypeBeforeHandler
             nameSet.addAll(Arrays.asList(basicTypeNames));
         }
 
-        for (String name : acceptNames) {
+        for (int i = 0; i < acceptNames.length; i++) {
+            String name = acceptNames[i];
             if (name == null || name.isEmpty()) {
                 continue;
             }

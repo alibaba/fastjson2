@@ -46,7 +46,7 @@ public class ObjectReaderImplField
             throw new JSONException("not support input " + jsonReader.info());
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         return getField(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName);
     }
@@ -79,7 +79,7 @@ public class ObjectReaderImplField
         }
 
         if (!jsonReader.isJSONB()) {
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
         }
 
         return getField(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName);
