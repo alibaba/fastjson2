@@ -431,7 +431,7 @@ final class JSONBDump {
                     return;
                 }
 
-                if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII) {
+                if (type >= BC_STR_ASCII_FIX_MIN) {
                     strlen = type == BC_STR_ASCII
                             ? readLength()
                             : type - BC_STR_ASCII_FIX_MIN;

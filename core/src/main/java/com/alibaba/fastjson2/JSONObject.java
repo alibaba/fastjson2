@@ -1918,8 +1918,8 @@ public class JSONObject
      * @param v2 second value
      * @param k3 third key
      * @param v3 third value
-     * @param k4 foud key
-     * @param v4 foud value
+     * @param k4 four key
+     * @param v4 four value
      * @since 2.0.8
      */
     public static JSONObject of(
@@ -1952,8 +1952,8 @@ public class JSONObject
      * @param v2 second value
      * @param k3 third key
      * @param v3 third value
-     * @param k4 foud key
-     * @param v4 foud value
+     * @param k4 four key
+     * @param v4 four value
      * @param k5 five key
      * @param v5 five value
      * @since 2.0.21
