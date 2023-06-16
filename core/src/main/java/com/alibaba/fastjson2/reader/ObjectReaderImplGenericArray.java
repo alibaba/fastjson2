@@ -107,7 +107,7 @@ class ObjectReaderImplGenericArray
         }
         jsonReader.next();
 
-        while (!jsonReader.nextIfMatch(']')) {
+        while (!jsonReader.nextIfArrayEnd()) {
             Object item;
             if (itemObjectReader != null) {
                 item = itemObjectReader.readObject(jsonReader, itemType, null, 0);

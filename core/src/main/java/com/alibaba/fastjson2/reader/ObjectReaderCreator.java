@@ -24,7 +24,6 @@ import java.util.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
 
-import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
@@ -853,48 +852,6 @@ public class ObjectReaderCreator {
         );
     }
 
-    protected ObjectReader getAnnotatedObjectReader(
-            ObjectReaderProvider provider,
-            Class objectClass,
-            BeanInfo beanInfo
-    ) {
-        if ((beanInfo.readerFeatures & JSON_AUTO_WIRED_ANNOTATED) == 0) {
-            return null;
-        }
-
-        String fieldName = beanInfo.objectReaderFieldName;
-        if (fieldName == null) {
-            fieldName = "objectReader";
-        }
-        try {
-            Field field = null;
-            if (beanInfo.mixIn) {
-                Class mixinClass = provider.mixInCache.get(objectClass);
-                if (mixinClass != null) {
-                    try {
-                        field = mixinClass.getDeclaredField(fieldName);
-                    } catch (NoSuchFieldException | SecurityException igored) {
-                        // ignored
-                    }
-                }
-            }
-
-            if (field == null) {
-                field = objectClass.getDeclaredField(fieldName);
-            }
-
-            if ((field != null)
-                    && ObjectReader.class.isAssignableFrom(field.getType())
-                    && Modifier.isStatic(field.getModifiers())) {
-                field.setAccessible(true);
-                return (ObjectReader) field.get(null);
-            }
-        } catch (Throwable ignored) {
-            // ignored
-        }
-        return null;
-    }
-
     public <T> ObjectReader<T> createObjectReader(
             Class<T> objectClass,
             Type objectType,
@@ -922,11 +879,6 @@ public class ObjectReaderCreator {
                      InvocationTargetException e) {
                 throw new JSONException("create deserializer error", e);
             }
-        }
-
-        ObjectReader annotatedObjectReader = getAnnotatedObjectReader(provider, objectClass, beanInfo);
-        if (annotatedObjectReader != null) {
-            return annotatedObjectReader;
         }
 
         if (fieldBased) {
@@ -2347,6 +2299,49 @@ public class ObjectReaderCreator {
             Field field
     ) {
         return createFieldReader(fieldName, null, fieldType, field);
+    }
+
+    public <T> FieldReader<T> createFieldReader(
+            String fieldName,
+            Field field
+    ) {
+        return createFieldReader(fieldName, null, field.getGenericType(), field);
+    }
+
+    public <T> FieldReader createFieldReader(
+            String fieldName,
+            Method method
+    ) {
+        Class<?> declaringClass = method.getDeclaringClass();
+        int parameterCount = method.getParameterCount();
+
+        Class fieldClass;
+        Type fieldType;
+        if (parameterCount == 0) {
+            fieldClass = method.getReturnType();
+            fieldType = method.getGenericReturnType();
+        } else if (parameterCount == 1) {
+            fieldClass = method.getParameterTypes()[0];
+            fieldType = method.getGenericParameterTypes()[0];
+        } else {
+            throw new JSONException("illegal setter method " + method);
+        }
+
+        return createFieldReaderMethod(
+                declaringClass,
+                declaringClass,
+                fieldName,
+                0,
+                0L,
+                null,
+                null,
+                null,
+                null,
+                fieldType,
+                fieldClass,
+                method,
+                null
+        );
     }
 
     public <T> FieldReader<T> createFieldReader(

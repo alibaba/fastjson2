@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
 import static com.alibaba.fastjson2.util.JDKUtils.VECTOR_BIT_LENGTH;
 
 public final class JSONFactory {
@@ -31,7 +30,7 @@ public final class JSONFactory {
     public static final String PROPERTY_AUTO_TYPE_HANDLER = "fastjson2.autoTypeHandler";
     public static final String PROPERTY_AUTO_TYPE_BEFORE_HANDLER = "fastjson2.autoTypeBeforeHandler";
 
-    public static final boolean MIXED_HASH_ALGORITHM;
+    public static final boolean MIXED_HASH_ALGORITHM = true;
 
     static boolean useJacksonAnnotation;
 
@@ -166,26 +165,6 @@ public final class JSONFactory {
             }
 
             CREATOR = property == null ? "asm" : property;
-        }
-
-        {
-            String property = System.getProperty("fastjson2.hash-algorithm");
-            if (property != null) {
-                property = property.trim();
-            }
-
-            if (property == null || property.isEmpty()) {
-                property = properties.getProperty("fastjson2.hash-algorithm");
-                if (property != null) {
-                    property = property.trim();
-                }
-            }
-
-            if ("mixed".equals(property)) {
-                MIXED_HASH_ALGORITHM = true;
-            } else {
-                MIXED_HASH_ALGORITHM = JVM_VERSION > 8;
-            }
         }
 
         {

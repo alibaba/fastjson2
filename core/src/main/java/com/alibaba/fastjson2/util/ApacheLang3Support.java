@@ -138,10 +138,10 @@ public interface ApacheLang3Support {
                         throw new JSONException(jsonReader.info("not support input"));
                     }
                 }
-            } else if (jsonReader.nextIfMatch('[')) {
+            } else if (jsonReader.nextIfArrayStart()) {
                 left = jsonReader.read(leftType);
                 right = jsonReader.read(rightType);
-                if (!jsonReader.nextIfMatch(']')) {
+                if (!jsonReader.nextIfArrayEnd()) {
                     throw new JSONException(jsonReader.info("not support input"));
                 }
             } else {

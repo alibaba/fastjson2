@@ -36,7 +36,7 @@ public class ObjectReaderImplMethod
 
     @Override
     public Method readArrayMappingObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        boolean arrayStart = jsonReader.nextIfMatch('[');
+        boolean arrayStart = jsonReader.nextIfArrayStart();
         if (!arrayStart) {
             throw new JSONException("not support input " + jsonReader.info());
         }
@@ -45,7 +45,7 @@ public class ObjectReaderImplMethod
         String methodName = jsonReader.readString();
         List<String> paramTypeNames = jsonReader.readArray(String.class);
 
-        boolean arrayEnd = jsonReader.nextIfMatch(']');
+        boolean arrayEnd = jsonReader.nextIfArrayEnd();
         if (!arrayEnd) {
             throw new JSONException("not support input " + jsonReader.info());
         }

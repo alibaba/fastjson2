@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.benchmark.eishay.mixin;
 
-import com.alibaba.fastjson2.annotation.JSONAutowired;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Media;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
@@ -13,7 +12,6 @@ import java.util.ArrayList;
 
 import static com.alibaba.fastjson2.reader.ObjectReaders.*;
 
-@JSONAutowired
 public class MediaContentMixin {
     public static final ObjectWriter<MediaContent> objectWriter = ObjectWriters.objectWriter(
             MediaContent.class,

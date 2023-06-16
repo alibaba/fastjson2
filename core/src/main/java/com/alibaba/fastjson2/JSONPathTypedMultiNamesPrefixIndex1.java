@@ -29,12 +29,12 @@ public class JSONPathTypedMultiNamesPrefixIndex1
             return new Object[paths.length];
         }
 
-        if (!jsonReader.nextIfMatch('[')) {
+        if (!jsonReader.nextIfArrayStart()) {
             throw new JSONException(jsonReader.info("illegal input, expect '[', but " + jsonReader.current()));
         }
 
         for (int i = 0; i < index; ++i) {
-            if (jsonReader.nextIfMatch(']')) {
+            if (jsonReader.nextIfArrayEnd()) {
                 return new Object[paths.length];
             }
 
@@ -49,7 +49,7 @@ public class JSONPathTypedMultiNamesPrefixIndex1
             return new Object[paths.length];
         }
 
-        if (jsonReader.nextIfMatch(']')) {
+        if (jsonReader.nextIfArrayEnd()) {
             return new Object[paths.length];
         }
 

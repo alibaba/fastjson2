@@ -100,10 +100,24 @@ class JSONReaderASCII
                 }
                 ch = bytes[offset];
             }
+
+            if (comma = (ch == ',')) {
+                ch = bytes[++offset];
+                while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                    offset++;
+                    if (offset >= end) {
+                        this.offset = offset;
+                        this.ch = EOI;
+                        return true;
+                    }
+                    ch = bytes[offset];
+                }
+            }
+
             this.offset = offset + 1;
             this.ch = (char) (ch & 0xFF);
 
-            while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
+            while (ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
                 skipLineComment();
             }
         }
@@ -149,7 +163,113 @@ class JSONReaderASCII
         this.offset = offset + 1;
         this.ch = (char) (ch & 0xFF);
 
-        while (this.ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
+        while (ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
+            skipLineComment();
+        }
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfArrayStart() {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch = this.ch;
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = bytes[offset++];
+            }
+        }
+
+        if (ch != '[') {
+            return false;
+        }
+
+        if (offset >= end) {
+            this.offset = offset;
+            this.ch = EOI;
+            return true;
+        }
+
+        ch = bytes[offset];
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+            offset++;
+            if (offset >= end) {
+                this.offset = offset;
+                this.ch = EOI;
+                return true;
+            }
+            ch = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) (ch & 0xFF);
+
+        while (ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
+            skipLineComment();
+        }
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfArrayEnd() {
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        int ch = this.ch;
+        while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
+            if (offset >= end) {
+                ch = EOI;
+            } else {
+                ch = bytes[offset++];
+            }
+        }
+
+        if (ch == '}' || ch == EOI) {
+            throw new JSONException(info());
+        }
+
+        if (ch != ']') {
+            return false;
+        }
+
+        if (offset >= end) {
+            this.offset = offset;
+            this.ch = EOI;
+            return true;
+        }
+
+        ch = bytes[offset];
+        while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+            offset++;
+            if (offset >= end) {
+                this.offset = offset;
+                this.ch = EOI;
+                return true;
+            }
+            ch = bytes[offset];
+        }
+
+        if (ch == ',') {
+            this.comma = true;
+            ch = bytes[++offset];
+            while (ch == '\0' || (ch <= ' ' && ((1L << ch) & SPACE) != 0)) {
+                offset++;
+                if (offset >= end) {
+                    this.offset = offset;
+                    this.ch = EOI;
+                    return true;
+                }
+                ch = bytes[offset];
+            }
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) (ch & 0xFF);
+
+        while (ch == '/' && this.offset < bytes.length && bytes[this.offset] == '/') {
             skipLineComment();
         }
 

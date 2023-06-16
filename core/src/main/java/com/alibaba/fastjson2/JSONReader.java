@@ -354,7 +354,7 @@ public abstract class JSONReader
     public abstract boolean nextIfObjectEnd();
 
     public int startArray() {
-        if (!nextIfMatch('[')) {
+        if (!nextIfArrayStart()) {
             throw new JSONException(info("illegal input, expect '[', but " + ch));
         }
         return Integer.MAX_VALUE;
@@ -433,6 +433,10 @@ public abstract class JSONReader
 
     public abstract boolean nextIfMatch(char ch);
 
+    public abstract boolean nextIfArrayStart();
+
+    public abstract boolean nextIfArrayEnd();
+
     public abstract boolean nextIfSet();
 
     public abstract boolean nextIfInfinity();
@@ -502,7 +506,7 @@ public abstract class JSONReader
             throw new JSONException(info("not support input " + str));
         }
 
-        if (nextIfMatch('[')) {
+        if (nextIfArrayStart()) {
             int index = 0;
             byte[] bytes = new byte[64];
             while (true) {
@@ -525,6 +529,48 @@ public abstract class JSONReader
     }
 
     public abstract int readInt32Value();
+
+    public int[] readInt32ValueArray() {
+        if (nextIfNull()) {
+            return null;
+        }
+
+        if (nextIfArrayStart()) {
+            int[] values = new int[8];
+            int size = 0;
+            while (!nextIfArrayEnd()) {
+                if (isEnd()) {
+                    throw new JSONException(info("input end"));
+                }
+
+                if (size == values.length) {
+                    values = Arrays.copyOf(values, values.length << 1);
+                }
+
+                values[size++] = readInt32Value();
+            }
+            nextIfMatch(',');
+
+            int[] array;
+            if (size == values.length) {
+                array = values;
+            } else {
+                array = Arrays.copyOf(values, size);
+            }
+            return array;
+        }
+
+        if (isString()) {
+            String str = readString();
+            if (str.isEmpty()) {
+                return null;
+            }
+
+            throw new JSONException(info("not support input " + str));
+        }
+
+        throw new JSONException(info("TODO"));
+    }
 
     public boolean nextIfMatch(byte type) {
         throw new JSONException("UnsupportedOperation");
@@ -673,7 +719,7 @@ public abstract class JSONReader
             return null;
         }
 
-        if (nextIfMatch('[')) {
+        if (nextIfArrayStart()) {
             long[] values = new long[8];
             int size = 0;
             while (!nextIfMatch(']')) {
@@ -1454,11 +1500,11 @@ public abstract class JSONReader
             return null;
         }
 
-        if (nextIfMatch('[')) {
+        if (nextIfArrayStart()) {
             String[] values = null;
             int size = 0;
             for (; ; ) {
-                if (nextIfMatch(']')) {
+                if (nextIfArrayEnd()) {
                     if (values == null) {
                         values = new String[0];
                     }
@@ -1525,7 +1571,7 @@ public abstract class JSONReader
     }
 
     public final void read(List list) {
-        if (!nextIfMatch('[')) {
+        if (!nextIfArrayStart()) {
             throw new JSONException("illegal input, offset " + offset + ", char " + ch);
         }
 
@@ -1535,7 +1581,7 @@ public abstract class JSONReader
         }
 
         for (; ; ) {
-            if (nextIfMatch(']')) {
+            if (nextIfArrayEnd()) {
                 level--;
                 break;
             }
@@ -1550,7 +1596,7 @@ public abstract class JSONReader
     }
 
     public final void read(Collection list) {
-        if (!nextIfMatch('[')) {
+        if (!nextIfArrayStart()) {
             throw new JSONException("illegal input, offset " + offset + ", char " + ch);
         }
 
@@ -1948,14 +1994,14 @@ public abstract class JSONReader
         }
 
         List list = new ArrayList();
-        if (!nextIfMatch('[')) {
+        if (!nextIfArrayStart()) {
             throw new JSONException(info("syntax error : " + ch));
         }
 
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = context.provider.getObjectReader(itemType, fieldBased);
 
-        while (!nextIfMatch(']')) {
+        while (!nextIfArrayEnd()) {
             Object item = objectReader.readObject(this, null, null, 0);
             list.add(item);
 
@@ -1977,7 +2023,7 @@ public abstract class JSONReader
         }
 
         List list = new ArrayList(types.length);
-        if (!nextIfMatch('[')) {
+        if (!nextIfArrayStart()) {
             throw new JSONException("syntax error : " + ch);
         }
 
@@ -2006,7 +2052,7 @@ public abstract class JSONReader
             return null;
         }
 
-        if (!nextIfMatch('[')) {
+        if (!nextIfArrayStart()) {
             throw new JSONException(info("syntax error"));
         }
 
@@ -2042,18 +2088,10 @@ public abstract class JSONReader
     }
 
     public final void readArray(Collection list, Type itemType) {
-        if (nextIfMatch('[')) {
-            while (!nextIfMatch(']')) {
+        if (nextIfArrayStart()) {
+            while (!nextIfArrayEnd()) {
                 Object item = read(itemType);
                 list.add(item);
-
-                if (ch == '}' || ch == EOI) {
-                    throw new JSONException(info());
-                }
-            }
-
-            if (comma = (ch == ',')) {
-                next();
             }
             return;
         }

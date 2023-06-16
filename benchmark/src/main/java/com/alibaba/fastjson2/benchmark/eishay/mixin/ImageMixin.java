@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.benchmark.eishay.mixin;
 
-import com.alibaba.fastjson2.annotation.JSONAutowired;
 import com.alibaba.fastjson2.benchmark.eishay.vo.Image;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaders;
@@ -9,7 +8,6 @@ import com.alibaba.fastjson2.writer.ObjectWriters;
 
 import static com.alibaba.fastjson2.reader.ObjectReaders.*;
 
-@JSONAutowired
 public class ImageMixin {
     public static final ObjectWriter<Image> objectWriter = ObjectWriters.objectWriter(
             Image.class,

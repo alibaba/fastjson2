@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteClassName;
-import static com.alibaba.fastjson2.codec.FieldInfo.JSON_AUTO_WIRED_ANNOTATED;
 import static com.alibaba.fastjson2.util.BeanUtils.SUPER;
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 import static com.alibaba.fastjson2.writer.ObjectWriterProvider.NAME_COMPATIBLE_WITH_FILED;
@@ -251,44 +250,6 @@ public class ObjectWriterCreator {
         return createFieldWriter(provider, fieldName, fieldInfo.ordinal, fieldInfo.features, format, fieldInfo.label, field, writeUsingWriter);
     }
 
-    protected ObjectWriter getAnnotatedObjectWriter(ObjectWriterProvider provider,
-                                                    Class objectClass,
-                                                    BeanInfo beanInfo) {
-        if ((beanInfo.writerFeatures & JSON_AUTO_WIRED_ANNOTATED) == 0) {
-            return null;
-        }
-
-        String fieldName = beanInfo.objectWriterFieldName;
-        if (fieldName == null) {
-            fieldName = "objectWriter";
-        }
-        try {
-            Field field = null;
-            if (beanInfo.mixIn) {
-                Class mixinClass = provider.mixInCache.get(objectClass);
-                if (mixinClass != null) {
-                    try {
-                        field = mixinClass.getDeclaredField(fieldName);
-                    } catch (NoSuchFieldException | SecurityException ignored) {
-                        // ignored
-                    }
-                }
-            }
-
-            if (field == null) {
-                field = objectClass.getDeclaredField(fieldName);
-            }
-
-            if (ObjectWriter.class.isAssignableFrom(field.getType()) && Modifier.isStatic(field.getModifiers())) {
-                field.setAccessible(true);
-                return (ObjectWriter) field.get(null);
-            }
-        } catch (Throwable ignored) {
-            // ignored
-        }
-        return null;
-    }
-
     public ObjectWriter createObjectWriter(
             Class objectClass,
             long features,
@@ -319,11 +280,6 @@ public class ObjectWriterCreator {
             } catch (InstantiationException | IllegalAccessException e) {
                 throw new JSONException("create serializer error", e);
             }
-        }
-
-        ObjectWriter annotatedObjectWriter = getAnnotatedObjectWriter(provider, objectClass, beanInfo);
-        if (annotatedObjectWriter != null) {
-            return annotatedObjectWriter;
         }
 
         boolean record = BeanUtils.isRecord(objectClass);
