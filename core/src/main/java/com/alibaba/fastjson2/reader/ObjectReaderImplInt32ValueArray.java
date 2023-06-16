@@ -54,7 +54,7 @@ public final class ObjectReaderImplInt32ValueArray
 
                 values[size++] = jsonReader.readInt32Value();
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             int[] array = Arrays.copyOf(values, size);
             if (builder != null) {

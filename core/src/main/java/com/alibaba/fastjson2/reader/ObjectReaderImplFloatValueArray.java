@@ -50,7 +50,7 @@ class ObjectReaderImplFloatValueArray
 
                 values[size++] = jsonReader.readFloatValue();
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             float[] array = Arrays.copyOf(values, size);
             if (builder != null) {

@@ -223,7 +223,7 @@ public class ObjectReader2<T>
         }
 
         if (jsonReader.nextIfNull()) {
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return null;
         }
 
@@ -249,7 +249,7 @@ public class ObjectReader2<T>
             return processObjectInputSingleItemArray(jsonReader, fieldType, fieldName, featuresAll);
         }
 
-        jsonReader.nextIfMatch('{');
+        jsonReader.nextIfObjectStart();
         object = creator.get();
         if (hasDefaultValue) {
             initDefaultValue(object);
@@ -259,7 +259,7 @@ public class ObjectReader2<T>
         }
 
         for (int i = 0; ; ++i) {
-            if (jsonReader.nextIfMatch('}')) {
+            if (jsonReader.nextIfObjectEnd()) {
                 break;
             }
 

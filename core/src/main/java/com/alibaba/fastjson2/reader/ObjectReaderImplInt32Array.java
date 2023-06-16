@@ -70,7 +70,7 @@ public final class ObjectReaderImplInt32Array
 
                 values[size++] = jsonReader.readInt32();
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             return Arrays.copyOf(values, size);
         }

@@ -350,7 +350,9 @@ public abstract class JSONReader
     }
 
     public abstract boolean nextIfObjectStart();
+
     public abstract boolean nextIfNullOrEmptyString();
+
     public abstract boolean nextIfObjectEnd();
 
     public int startArray() {
@@ -432,6 +434,8 @@ public abstract class JSONReader
     }
 
     public abstract boolean nextIfMatch(char ch);
+
+    public abstract boolean nextIfComma();
 
     public abstract boolean nextIfArrayStart();
 
@@ -521,7 +525,7 @@ public abstract class JSONReader
                 }
                 bytes[index++] = (byte) readInt32Value();
             }
-            nextIfMatch(',');
+            nextIfComma();
             return Arrays.copyOf(bytes, index);
         }
 
@@ -549,7 +553,7 @@ public abstract class JSONReader
 
                 values[size++] = readInt32Value();
             }
-            nextIfMatch(',');
+            nextIfComma();
 
             int[] array;
             if (size == values.length) {
@@ -722,7 +726,7 @@ public abstract class JSONReader
         if (nextIfArrayStart()) {
             long[] values = new long[8];
             int size = 0;
-            while (!nextIfMatch(']')) {
+            while (!nextIfArrayEnd()) {
                 if (isEnd()) {
                     throw new JSONException(info("input end"));
                 }
@@ -733,7 +737,7 @@ public abstract class JSONReader
 
                 values[size++] = readInt64Value();
             }
-            nextIfMatch(',');
+            nextIfComma();
 
             long[] array;
             if (size == values.length) {
@@ -1525,7 +1529,7 @@ public abstract class JSONReader
 
                 values[size++] = readString();
             }
-            nextIfMatch(',');
+            nextIfComma();
 
             if (values.length == size) {
                 return values;
@@ -1589,10 +1593,10 @@ public abstract class JSONReader
             Object item = ObjectReaderImplObject.INSTANCE.readObject(this, null, null, 0);
             list.add(item);
 
-            nextIfMatch(',');
+            nextIfComma();
         }
 
-        nextIfMatch(',');
+        nextIfComma();
     }
 
     public final void read(Collection list) {
@@ -1606,17 +1610,17 @@ public abstract class JSONReader
         }
 
         for (; ; ) {
-            if (nextIfMatch(']')) {
+            if (nextIfArrayEnd()) {
                 level--;
                 break;
             }
             Object item = readAny();
             list.add(item);
 
-            nextIfMatch(',');
+            nextIfComma();
         }
 
-        nextIfMatch(',');
+        nextIfComma();
     }
 
     public final void readObject(Object object, Feature... features) {
@@ -1645,7 +1649,7 @@ public abstract class JSONReader
     }
 
     public void read(Map object, long features) {
-        boolean match = nextIfMatch('{');
+        boolean match = nextIfObjectStart();
         boolean typeRedirect = false;
         if (!match) {
             if (typeRedirect = isTypeRedirect()) {
@@ -1673,7 +1677,7 @@ public abstract class JSONReader
                 skipLineComment();
             }
 
-            if (nextIfMatch('}')) {
+            if (nextIfObjectEnd()) {
                 break;
             }
 
@@ -1794,11 +1798,11 @@ public abstract class JSONReader
             }
         }
 
-        nextIfMatch(',');
+        nextIfComma();
     }
 
     public final void read(Map object, Type keyType, Type valueType, long features) {
-        boolean match = nextIfMatch('{');
+        boolean match = nextIfObjectStart();
         if (!match) {
             throw new JSONException("illegal input， offset " + offset + ", char " + ch);
         }
@@ -1811,7 +1815,7 @@ public abstract class JSONReader
                 skipLineComment();
             }
 
-            if (nextIfMatch('}')) {
+            if (nextIfObjectEnd()) {
                 break;
             }
 
@@ -1844,7 +1848,7 @@ public abstract class JSONReader
             }
         }
 
-        nextIfMatch(',');
+        nextIfComma();
     }
 
     public <T> T read(Class<T> type) {
@@ -2028,7 +2032,7 @@ public abstract class JSONReader
         }
 
         for (int i = 0; ; ++i) {
-            if (nextIfMatch(']')) {
+            if (nextIfArrayEnd()) {
                 break;
             }
             Type itemType = types[i];
@@ -2060,7 +2064,7 @@ public abstract class JSONReader
         Object[] list = new Object[types.length];
         for (int i = 0; i < types.length; i++) {
             if (i != 0) {
-                if (nextIfMatch(']')) {
+                if (nextIfArrayEnd()) {
                     arrayEnd = true;
                     break;
                 } else if (isEnd()) {
@@ -2756,6 +2760,7 @@ public abstract class JSONReader
             if (INCUBATOR_VECTOR_READER_CREATOR_ASCII != null) {
                 return INCUBATOR_VECTOR_READER_CREATOR_ASCII.create(context, null, utf8Bytes, 0, utf8Bytes.length);
             }
+
             return new JSONReaderASCII(context, null, utf8Bytes, 0, utf8Bytes.length);
         }
 
@@ -2776,6 +2781,7 @@ public abstract class JSONReader
             if (INCUBATOR_VECTOR_READER_CREATOR_ASCII != null) {
                 return INCUBATOR_VECTOR_READER_CREATOR_ASCII.create(context, null, utf8Bytes, 0, utf8Bytes.length);
             }
+
             return new JSONReaderASCII(context, null, utf8Bytes, 0, utf8Bytes.length);
         }
 
@@ -2879,6 +2885,14 @@ public abstract class JSONReader
                 length);
     }
 
+    public static JSONReader ofJSONB(byte[] bytes, int offset, int length, Context context) {
+        return new JSONReaderJSONB(
+                context,
+                bytes,
+                offset,
+                length);
+    }
+
     public static JSONReader ofJSONB(byte[] bytes, int offset, int length, SymbolTable symbolTable) {
         return new JSONReaderJSONB(
                 JSONFactory.createReadContext(symbolTable),
@@ -2967,6 +2981,14 @@ public abstract class JSONReader
         }
     }
 
+    public static JSONReader of(byte[] bytes, int offset, int length, Context context) {
+        if (INCUBATOR_VECTOR_READER_CREATOR_UTF8 != null) {
+            return INCUBATOR_VECTOR_READER_CREATOR_UTF8.create(context, null, bytes, offset, length);
+        } else {
+            return new JSONReaderUTF8(context, null, bytes, offset, length);
+        }
+    }
+
     public static JSONReader of(char[] chars, int offset, int length) {
         Context context = createReadContext();
 
@@ -3042,6 +3064,14 @@ public abstract class JSONReader
         throw new JSONException("not support charset " + charset);
     }
 
+    public static JSONReader of(ByteBuffer buffer, Charset charset, Context context) {
+        if (charset == StandardCharsets.UTF_8 || charset == null) {
+            return new JSONReaderUTF8(context, buffer);
+        }
+
+        throw new JSONException("not support charset " + charset);
+    }
+
     @Deprecated
     public static JSONReader of(Context context, String str) {
         return of(str, context);
@@ -3073,23 +3103,21 @@ public abstract class JSONReader
         }
 
         final int length = str.length();
-        char[] chars;
         if (JVM_VERSION == 8) {
-            chars = JDKUtils.getCharArray(str);
-        } else {
-            chars = str.toCharArray();
+            char[] chars = JDKUtils.getCharArray(str);
+            return new JSONReaderUTF16(context, str, chars, 0, length);
         }
 
         if (INCUBATOR_VECTOR_READER_CREATOR_UTF16 != null) {
             return INCUBATOR_VECTOR_READER_CREATOR_UTF16.create(
                     context,
                     str,
-                    chars,
+                    null,
                     0,
                     length);
         }
 
-        return new JSONReaderUTF16(context, str, chars, 0, length);
+        return new JSONReaderUTF16(context, str, 0, length);
     }
 
     public static JSONReader of(String str, Context context) {
@@ -3620,6 +3648,25 @@ public abstract class JSONReader
             }
         }
 
+        public Context(ObjectReaderProvider provider, Filter filter, Feature... features) {
+            this.features = defaultReaderFeatures;
+            this.provider = provider;
+            this.objectSupplier = JSONFactory.defaultObjectSupplier;
+            this.arraySupplier = JSONFactory.defaultArraySupplier;
+            this.symbolTable = null;
+
+            config(filter);
+
+            String format = defaultReaderFormat;
+            if (format != null) {
+                setDateFormat(format);
+            }
+
+            for (Feature feature : features) {
+                this.features |= feature.mask;
+            }
+        }
+
         public Context(ObjectReaderProvider provider, SymbolTable symbolTable) {
             this.features = defaultReaderFeatures;
             this.provider = provider;
@@ -3635,6 +3682,23 @@ public abstract class JSONReader
             this.features = defaultReaderFeatures;
             this.provider = provider;
             this.symbolTable = symbolTable;
+
+            String format = defaultReaderFormat;
+            if (format != null) {
+                setDateFormat(format);
+            }
+
+            for (Feature feature : features) {
+                this.features |= feature.mask;
+            }
+        }
+
+        public Context(ObjectReaderProvider provider, SymbolTable symbolTable, Filter[] filters, Feature... features) {
+            this.features = defaultReaderFeatures;
+            this.provider = provider;
+            this.symbolTable = symbolTable;
+
+            config(filters);
 
             String format = defaultReaderFormat;
             if (format != null) {
@@ -3868,8 +3932,8 @@ public abstract class JSONReader
         }
 
         public void config(Feature... features) {
-            for (Feature feature : features) {
-                this.features |= feature.mask;
+            for (int i = 0; i < features.length; i++) {
+                this.features |= features[i].mask;
             }
         }
 
@@ -3887,6 +3951,16 @@ public abstract class JSONReader
             }
         }
 
+        public void config(Filter filter) {
+            if (filter instanceof AutoTypeBeforeHandler) {
+                autoTypeBeforeHandler = (AutoTypeBeforeHandler) filter;
+            }
+
+            if (filter instanceof ExtraProcessor) {
+                extraProcessor = (ExtraProcessor) filter;
+            }
+        }
+
         public void config(Filter[] filters, Feature... features) {
             for (Filter filter : filters) {
                 if (filter instanceof AutoTypeBeforeHandler) {
@@ -3900,6 +3974,18 @@ public abstract class JSONReader
 
             for (Feature feature : features) {
                 this.features |= feature.mask;
+            }
+        }
+
+        public void config(Filter[] filters) {
+            for (Filter filter : filters) {
+                if (filter instanceof AutoTypeBeforeHandler) {
+                    autoTypeBeforeHandler = (AutoTypeBeforeHandler) filter;
+                }
+
+                if (filter instanceof ExtraProcessor) {
+                    extraProcessor = (ExtraProcessor) filter;
+                }
             }
         }
 

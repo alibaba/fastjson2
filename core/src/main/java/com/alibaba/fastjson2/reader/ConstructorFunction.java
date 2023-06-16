@@ -66,7 +66,8 @@ final class ConstructorFunction<T>
             alternateConstructorNames = new HashMap<>(alternateConstructors.size());
             alternateConstructorArgTypes = new HashMap<>(alternateConstructors.size());
             alternateConstructorNameHashCodes = new HashMap<>(alternateConstructors.size());
-            for (Constructor alternateConstructor : alternateConstructors) {
+            for (int i = 0; i < alternateConstructors.size(); i++) {
+                Constructor alternateConstructor = alternateConstructors.get(i);
                 alternateConstructor.setAccessible(true);
 
                 String[] parameterNames = ASMUtils.lookupParameterNames(alternateConstructor);
@@ -74,22 +75,22 @@ final class ConstructorFunction<T>
                 Parameter[] parameters = alternateConstructor.getParameters();
                 FieldInfo fieldInfo = new FieldInfo();
                 ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
-                for (int i = 0; i < parameters.length && i < parameterNames.length; i++) {
+                for (int j = 0; j < parameters.length && j < parameterNames.length; j++) {
                     fieldInfo.init();
 
-                    Parameter parameter = parameters[i];
-                    provider.getFieldInfo(fieldInfo, alternateConstructor.getDeclaringClass(), alternateConstructor, i, parameter);
+                    Parameter parameter = parameters[j];
+                    provider.getFieldInfo(fieldInfo, alternateConstructor.getDeclaringClass(), alternateConstructor, j, parameter);
                     if (fieldInfo.fieldName != null) {
-                        parameterNames[i] = fieldInfo.fieldName;
+                        parameterNames[j] = fieldInfo.fieldName;
                     }
                 }
 
                 long[] parameterNameHashCodes = new long[parameterNames.length];
                 Type[] parameterTypes = alternateConstructor.getGenericParameterTypes();
                 Set<Long> paramHashCodes = new HashSet<>(parameterNames.length);
-                for (int i = 0; i < parameterNames.length; i++) {
-                    long hashCode64 = Fnv.hashCode64(parameterNames[i]);
-                    parameterNameHashCodes[i] = hashCode64;
+                for (int j = 0; j < parameterNames.length; j++) {
+                    long hashCode64 = Fnv.hashCode64(parameterNames[j]);
+                    parameterNameHashCodes[j] = hashCode64;
                     paramHashCodes.add(hashCode64);
                 }
                 alternateConstructorMap.put(paramHashCodes, alternateConstructor);

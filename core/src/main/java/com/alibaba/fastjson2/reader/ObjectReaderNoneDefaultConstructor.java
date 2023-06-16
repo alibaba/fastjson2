@@ -128,7 +128,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
                     }
 
                     Object object = autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
-                    jsonReader.nextIfMatch(',');
+                    jsonReader.nextIfComma();
                     return (T) object;
                 }
 
@@ -163,7 +163,8 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 : valueMap;
         T object = createInstanceNoneDefaultConstructor(args);
         if (setterFieldReaders != null) {
-            for (FieldReader fieldReader : setterFieldReaders) {
+            for (int i = 0; i < setterFieldReaders.length; i++) {
+                FieldReader fieldReader = setterFieldReaders[i];
                 Object fieldValue = args.get(fieldReader.fieldNameHash);
                 fieldReader.accept(object, fieldValue);
             }
@@ -198,7 +199,8 @@ public class ObjectReaderNoneDefaultConstructor<T>
         if (jsonReader.isSupportBeanArray(features | this.features)
                 && jsonReader.nextIfArrayStart()) {
             LinkedHashMap<Long, Object> valueMap = null;
-            for (FieldReader fieldReader : fieldReaders) {
+            for (int i = 0; i < fieldReaders.length; i++) {
+                FieldReader fieldReader = fieldReaders[i];
                 Object fieldValue = fieldReader.readFieldValue(jsonReader);
                 if (valueMap == null) {
                     valueMap = new LinkedHashMap<>();
@@ -211,7 +213,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
                 throw new JSONException(jsonReader.info("array not end, " + jsonReader.current()));
             }
 
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return createInstanceNoneDefaultConstructor(
                     valueMap == null
                             ? Collections.emptyMap()
@@ -233,7 +235,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
         LinkedHashMap<Long, Object> valueMap = null;
         for (int i = 0; ; i++) {
-            if (jsonReader.nextIfMatch('}')) {
+            if (jsonReader.nextIfObjectEnd()) {
                 break;
             }
 
@@ -266,7 +268,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
                 if (autoTypeObjectReader != null) {
                     Object object = autoTypeObjectReader.readObject(jsonReader, fieldType, fieldName, 0);
-                    jsonReader.nextIfMatch(',');
+                    jsonReader.nextIfComma();
                     return (T) object;
                 }
                 continue;
@@ -311,7 +313,8 @@ public class ObjectReaderNoneDefaultConstructor<T>
         T object = creator.apply(argsMap);
 
         if (setterFieldReaders != null && valueMap != null) {
-            for (FieldReader fieldReader : setterFieldReaders) {
+            for (int i = 0; i < setterFieldReaders.length; i++) {
+                FieldReader fieldReader = setterFieldReaders[i];
                 Object fieldValue = valueMap.get(fieldReader.fieldNameHash);
                 if (fieldValue != null) {
                     fieldReader.accept(object, fieldValue);
@@ -327,7 +330,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
             }
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         return object;
     }
@@ -338,7 +341,8 @@ public class ObjectReaderNoneDefaultConstructor<T>
         }
 
         LinkedHashMap<Long, Object> valueMap = new LinkedHashMap<>();
-        for (FieldReader fieldReader : fieldReaders) {
+        for (int i = 0; i < fieldReaders.length; i++) {
+            FieldReader fieldReader = fieldReaders[i];
             Object fieldValue = fieldReader.readFieldValue(jsonReader);
             valueMap.put(fieldReader.fieldNameHash, fieldValue);
         }
@@ -448,7 +452,8 @@ public class ObjectReaderNoneDefaultConstructor<T>
                         : valueMap
         );
 
-        for (FieldReader fieldReader : setterFieldReaders) {
+        for (int i = 0; i < setterFieldReaders.length; i++) {
+            FieldReader fieldReader = setterFieldReaders[i];
             Object fieldValue = map.get(fieldReader.fieldName);
             if (fieldValue == null) {
                 continue;

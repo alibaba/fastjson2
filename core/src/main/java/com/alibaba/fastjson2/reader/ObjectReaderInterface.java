@@ -107,7 +107,7 @@ public final class ObjectReaderInterface<T>
         }
 
         if (jsonReader.nextIfNull()) {
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return null;
         }
 
@@ -117,7 +117,7 @@ public final class ObjectReaderInterface<T>
 
         T object = null;
         JSONObject jsonObject = new JSONObject();
-        boolean objectStart = jsonReader.nextIfMatch('{');
+        boolean objectStart = jsonReader.nextIfObjectStart();
         if (!objectStart) {
             char ch = jsonReader.current();
             // skip for fastjson 1.x compatible
@@ -132,7 +132,7 @@ public final class ObjectReaderInterface<T>
         }
 
         for (int i = 0; ; i++) {
-            if (jsonReader.nextIfMatch('}')) {
+            if (jsonReader.nextIfObjectEnd()) {
                 break;
             }
 
@@ -206,7 +206,7 @@ public final class ObjectReaderInterface<T>
             }
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         object = (T) TypeUtils.newProxyInstance(objectClass, jsonObject);
         Function buildFunction = getBuildFunction();

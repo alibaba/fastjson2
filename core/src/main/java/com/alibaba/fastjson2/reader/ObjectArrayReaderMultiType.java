@@ -63,9 +63,9 @@ final class ObjectArrayReaderMultiType
                 }
                 values[i] = value;
 
-                jsonReader.nextIfMatch(',');
+                jsonReader.nextIfComma();
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             return values;
         }

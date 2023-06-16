@@ -3,7 +3,7 @@ package com.alibaba.fastjson2.benchmark.eishay;
 import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
 public class EishayParseStringTest {
-    static final int LOOP = 1_000_000;
+    static final int LOOP = 10_000_000;
     static final EishayParseString benchmark = new EishayParseString();
 
     public static void fastjson2() {
@@ -14,9 +14,9 @@ public class EishayParseStringTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("fastjson2 millis : " + millis);
-            // zulu8.70.0.23 : 5569
-            // zulu11.64.19 : 5022
-            // zulu17.42.19 : 5377 5193
+            // zulu8.70.0.23 : 5569 5630
+            // zulu11.64.19 : 5022 5033
+            // zulu17.42.19 : 5377 5193 5222 5154 5116 5083 4987
         }
     }
 

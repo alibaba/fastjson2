@@ -526,33 +526,33 @@ public abstract class JSONWriter
         return of(context);
     }
 
-    public static JSONWriter of(Context writeContext) {
-        if (writeContext == null) {
-            writeContext = JSONFactory.createWriteContext();
+    public static JSONWriter of(Context context) {
+        if (context == null) {
+            context = JSONFactory.createWriteContext();
         }
 
         JSONWriter jsonWriter;
         if (JVM_VERSION == 8) {
             if (FIELD_STRING_VALUE != null && !ANDROID && !OPENJ9) {
-                jsonWriter = new JSONWriterUTF16JDK8UF(writeContext);
+                jsonWriter = new JSONWriterUTF16JDK8UF(context);
             } else {
-                jsonWriter = new JSONWriterUTF16JDK8(writeContext);
+                jsonWriter = new JSONWriterUTF16JDK8(context);
             }
-        } else if ((writeContext.features & Feature.OptimizedForAscii.mask) != 0) {
+        } else if ((context.features & Feature.OptimizedForAscii.mask) != 0) {
             if (STRING_VALUE != null) {
                 if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF8 != null) {
-                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(writeContext);
+                    jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF8.apply(context);
                 } else {
-                    jsonWriter = new JSONWriterUTF8JDK9(writeContext);
+                    jsonWriter = new JSONWriterUTF8JDK9(context);
                 }
             } else {
-                jsonWriter = new JSONWriterUTF8(writeContext);
+                jsonWriter = new JSONWriterUTF8(context);
             }
         } else {
             if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
-                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
+                jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(context);
             } else {
-                jsonWriter = new JSONWriterUTF16(writeContext);
+                jsonWriter = new JSONWriterUTF16(context);
             }
         }
 
@@ -1383,8 +1383,8 @@ public abstract class JSONWriter
                 setDateFormat(format);
             }
 
-            for (Feature feature : features) {
-                this.features |= feature.mask;
+            for (int i = 0; i < features.length; i++) {
+                this.features |= features[i].mask;
             }
         }
 
@@ -1392,8 +1392,8 @@ public abstract class JSONWriter
             this.features = defaultWriterFeatures;
             this.provider = JSONFactory.getDefaultObjectWriterProvider();
 
-            for (Feature feature : features) {
-                this.features |= feature.mask;
+            for (int i = 0; i < features.length; i++) {
+                this.features |= features[i].mask;
             }
 
             if (format == null) {
@@ -1412,8 +1412,8 @@ public abstract class JSONWriter
             this.features = defaultWriterFeatures;
             this.provider = provider;
 
-            for (Feature feature : features) {
-                this.features |= feature.mask;
+            for (int i = 0; i < features.length; i++) {
+                this.features |= features[i].mask;
             }
 
             String format = defaultWriterFormat;
@@ -1435,8 +1435,8 @@ public abstract class JSONWriter
         }
 
         public void config(Feature... features) {
-            for (Feature feature : features) {
-                this.features |= feature.mask;
+            for (int i = 0; i < features.length; i++) {
+                this.features |= features[i].mask;
             }
         }
 
@@ -1449,7 +1449,8 @@ public abstract class JSONWriter
         }
 
         public void configFilter(Filter... filters) {
-            for (Filter filter : filters) {
+            for (int i = 0; i < filters.length; i++) {
+                Filter filter = filters[i];
                 if (filter instanceof NameFilter) {
                     if (this.nameFilter == null) {
                         this.nameFilter = (NameFilter) filter;
@@ -1950,8 +1951,9 @@ public abstract class JSONWriter
                                         int newCapacity = buf.length + (buf.length >> 1);
                                         buf = Arrays.copyOf(buf, newCapacity);
                                     }
-                                    buf[off++] = '\\';
-                                    buf[off++] = (byte) ch;
+                                    buf[off] = '\\';
+                                    buf[off + 1] = (byte) ch;
+                                    off += 2;
                                     break;
                                 default:
                                     if ((ch >= 0x0001) && (ch <= 0x007F)) {
@@ -1996,10 +1998,11 @@ public abstract class JSONWriter
                                                 int newCapacity = buf.length + (buf.length >> 1);
                                                 buf = Arrays.copyOf(buf, newCapacity);
                                             }
-                                            buf[off++] = (byte) (0xf0 | ((uc >> 18)));
-                                            buf[off++] = (byte) (0x80 | ((uc >> 12) & 0x3f));
-                                            buf[off++] = (byte) (0x80 | ((uc >> 6) & 0x3f));
-                                            buf[off++] = (byte) (0x80 | (uc & 0x3f));
+                                            buf[off] = (byte) (0xf0 | ((uc >> 18)));
+                                            buf[off + 1] = (byte) (0x80 | ((uc >> 12) & 0x3f));
+                                            buf[off + 2] = (byte) (0x80 | ((uc >> 6) & 0x3f));
+                                            buf[off + 3] = (byte) (0x80 | (uc & 0x3f));
+                                            off += 4;
                                             j++; // 2 chars
                                         }
                                     } else if (ch > 0x07FF) {
@@ -2009,9 +2012,10 @@ public abstract class JSONWriter
                                         }
                                         ascii = false;
 
-                                        buf[off++] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 6) & 0x3F));
-                                        buf[off++] = (byte) (0x80 | ((ch) & 0x3F));
+                                        buf[off] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
+                                        buf[off + 1] = (byte) (0x80 | ((ch >> 6) & 0x3F));
+                                        buf[off + 2] = (byte) (0x80 | ((ch) & 0x3F));
+                                        off += 3;
                                     } else {
                                         if (off + 1 >= buf.length) {
                                             int newCapacity = buf.length + (buf.length >> 1);
@@ -2019,8 +2023,9 @@ public abstract class JSONWriter
                                         }
                                         ascii = false;
 
-                                        buf[off++] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
-                                        buf[off++] = (byte) (0x80 | ((ch) & 0x3F));
+                                        buf[off] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
+                                        buf[off + 1] = (byte) (0x80 | ((ch) & 0x3F));
+                                        off += 2;
                                     }
                                     break;
                             }
@@ -2059,8 +2064,9 @@ public abstract class JSONWriter
                                         int newCapacity = buf.length + (buf.length >> 1);
                                         buf = Arrays.copyOf(buf, newCapacity);
                                     }
-                                    buf[off++] = '\\';
-                                    buf[off++] = (byte) ch;
+                                    buf[off] = '\\';
+                                    buf[off + 1] = (byte) ch;
+                                    off += 2;
                                     break;
                                 default:
                                     if ((ch >= 0x0001) && (ch <= 0x007F)) {
@@ -2102,15 +2108,16 @@ public abstract class JSONWriter
 
                                             buf[off++] = (byte) '?';
                                         } else {
-                                            if (off + 3 >= buf.length) {
+                                            if (off + 4 >= buf.length) {
                                                 int newCapacity = buf.length + (buf.length >> 1);
                                                 buf = Arrays.copyOf(buf, newCapacity);
                                             }
 
-                                            buf[off++] = (byte) (0xf0 | ((uc >> 18)));
-                                            buf[off++] = (byte) (0x80 | ((uc >> 12) & 0x3f));
-                                            buf[off++] = (byte) (0x80 | ((uc >> 6) & 0x3f));
-                                            buf[off++] = (byte) (0x80 | (uc & 0x3f));
+                                            buf[off] = (byte) (0xf0 | ((uc >> 18)));
+                                            buf[off + 1] = (byte) (0x80 | ((uc >> 12) & 0x3f));
+                                            buf[off + 2] = (byte) (0x80 | ((uc >> 6) & 0x3f));
+                                            buf[off + 3] = (byte) (0x80 | (uc & 0x3f));
+                                            off += 4;
                                             j++; // 2 chars
                                         }
                                     } else if (ch > 0x07FF) {
@@ -2120,9 +2127,10 @@ public abstract class JSONWriter
                                         }
                                         ascii = false;
 
-                                        buf[off++] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
-                                        buf[off++] = (byte) (0x80 | ((ch >> 6) & 0x3F));
-                                        buf[off++] = (byte) (0x80 | ((ch) & 0x3F));
+                                        buf[off] = (byte) (0xE0 | ((ch >> 12) & 0x0F));
+                                        buf[off + 1] = (byte) (0x80 | ((ch >> 6) & 0x3F));
+                                        buf[off + 2] = (byte) (0x80 | ((ch) & 0x3F));
+                                        off += 3;
                                     } else {
                                         if (off + 1 >= buf.length) {
                                             int newCapacity = buf.length + (buf.length >> 1);
@@ -2130,8 +2138,9 @@ public abstract class JSONWriter
                                         }
                                         ascii = false;
 
-                                        buf[off++] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
-                                        buf[off++] = (byte) (0x80 | ((ch) & 0x3F));
+                                        buf[off] = (byte) (0xC0 | ((ch >> 6) & 0x1F));
+                                        buf[off + 1] = (byte) (0x80 | ((ch) & 0x3F));
+                                        off += 2;
                                     }
                                     break;
                             }

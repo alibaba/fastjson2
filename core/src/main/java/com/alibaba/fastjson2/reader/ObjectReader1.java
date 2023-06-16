@@ -233,7 +233,7 @@ public class ObjectReader1<T>
                     throw new JSONException(jsonReader.info("array to bean end error, " + jsonReader.current()));
                 }
 
-                jsonReader.nextIfMatch(',');
+                jsonReader.nextIfComma();
 
                 if (buildFunction != null) {
                     return (T) buildFunction.apply(object);
@@ -244,7 +244,7 @@ public class ObjectReader1<T>
             return processObjectInputSingleItemArray(jsonReader, fieldType, fieldName, featuresAll);
         }
 
-        jsonReader.nextIfMatch('{');
+        jsonReader.nextIfObjectStart();
         T object = creator != null
                 ? creator.get()
                 : null;
@@ -257,7 +257,7 @@ public class ObjectReader1<T>
         }
 
         for (int i = 0; ; ++i) {
-            if (jsonReader.nextIfMatch('}')) {
+            if (jsonReader.nextIfObjectEnd()) {
                 break;
             }
 
@@ -295,7 +295,7 @@ public class ObjectReader1<T>
             }
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         if (buildFunction != null) {
             object = (T) buildFunction.apply(object);

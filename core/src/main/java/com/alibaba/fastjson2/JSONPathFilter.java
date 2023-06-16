@@ -414,7 +414,8 @@ abstract class JSONPathFilter
             if (object instanceof List) {
                 List list = (List) object;
                 JSONArray array = new JSONArray(list.size());
-                for (Object item : list) {
+                for (int i = 0; i < list.size(); i++) {
+                    Object item = list.get(i);
                     boolean match = false;
                     for (JSONPathFilter filter : orderedFilters) {
                         boolean and = filter.isAnd();
@@ -536,7 +537,8 @@ abstract class JSONPathFilter
             if (object instanceof List) {
                 List list = (List) object;
                 JSONArray array = new JSONArray(list.size());
-                for (Object item : list) {
+                for (int i = 0; i < list.size(); i++) {
+                    Object item = list.get(i);
                     if (apply(context, item)) {
                         array.add(item);
                     }
@@ -945,7 +947,8 @@ abstract class JSONPathFilter
             JSONArray array = new JSONArray();
             if (object instanceof List) {
                 List list = (List) object;
-                for (Object item : list) {
+                for (int i = 0; i < list.size(); i++) {
+                    Object item = list.get(i);
                     if (item instanceof Map) {
                         if (((Map) item).containsKey(name)) {
                             array.add(item);
@@ -965,7 +968,8 @@ abstract class JSONPathFilter
 
             if (object instanceof JSONPath.Sequence) {
                 List list = ((JSONPath.Sequence) object).values;
-                for (Object item : list) {
+                for (int i = 0; i < list.size(); i++) {
+                    Object item = list.get(i);
                     if (item instanceof Map) {
                         if (((Map) item).containsKey(name)) {
                             array.add(item);

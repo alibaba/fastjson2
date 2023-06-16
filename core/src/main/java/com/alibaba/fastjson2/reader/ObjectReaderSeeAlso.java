@@ -37,8 +37,8 @@ final class ObjectReaderSeeAlso<T>
     }
 
     ObjectReaderSeeAlso addSubType(Class subTypeClass, String subTypeClassName) {
-        for (Class item : seeAlso) {
-            if (item == subTypeClass) {
+        for (int i = 0; i < seeAlso.length; i++) {
+            if (seeAlso[i] == subTypeClass) {
                 return this;
             }
         }
@@ -86,14 +86,15 @@ final class ObjectReaderSeeAlso<T>
         }
 
         if (jsonReader.nextIfNull()) {
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return null;
         }
 
         if (jsonReader.isString()) {
             long valueHashCode = jsonReader.readValueHashCode();
 
-            for (Class seeAlsoType : seeAlso) {
+            for (int i = 0; i < seeAlso.length; i++) {
+                Class seeAlsoType = seeAlso[i];
                 if (Enum.class.isAssignableFrom(seeAlsoType)) {
                     ObjectReader seeAlsoTypeReader = jsonReader.getObjectReader(seeAlsoType);
 
@@ -126,7 +127,7 @@ final class ObjectReaderSeeAlso<T>
         }
 
         T object = null;
-        boolean objectStart = jsonReader.nextIfMatch('{');
+        boolean objectStart = jsonReader.nextIfObjectStart();
         if (!objectStart) {
             char ch = jsonReader.current();
             // skip for fastjson 1.x compatible
@@ -141,7 +142,7 @@ final class ObjectReaderSeeAlso<T>
         }
 
         for (int i = 0; ; i++) {
-            if (jsonReader.nextIfMatch('}')) {
+            if (jsonReader.nextIfObjectEnd()) {
                 if (object == null) {
                     object = createInstance(jsonReader.getContext().getFeatures() | features);
                 }
@@ -244,7 +245,7 @@ final class ObjectReaderSeeAlso<T>
             fieldReader.readFieldValue(jsonReader, object);
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         Function buildFunction = getBuildFunction();
         if (buildFunction != null) {

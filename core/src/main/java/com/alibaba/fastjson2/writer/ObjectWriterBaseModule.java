@@ -79,7 +79,8 @@ public class ObjectWriterBaseModule
             Annotation jsonType1x = null;
             JSONType jsonType = null;
             Annotation[] annotations = getAnnotations(objectClass);
-            for (Annotation annotation : annotations) {
+            for (int i = 0; i < annotations.length; i++) {
+                Annotation annotation = annotations[i];
                 Class annotationType = annotation.annotationType();
                 jsonType = findAnnotation(annotation, JSONType.class);
                 if (jsonType == annotation) {
@@ -166,7 +167,8 @@ public class ObjectWriterBaseModule
                     beanInfo.mixIn = true;
 
                     Annotation[] mixInAnnotations = getAnnotations(mixInSource);
-                    for (Annotation annotation : mixInAnnotations) {
+                    for (int i = 0; i < mixInAnnotations.length; i++) {
+                        Annotation annotation = mixInAnnotations[i];
                         Class<? extends Annotation> annotationType = annotation.annotationType();
                         jsonType = findAnnotation(annotation, JSONType.class);
                         if (jsonType == annotation) {

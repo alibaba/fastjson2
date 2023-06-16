@@ -126,7 +126,7 @@ public class DefaultJSONParser
                 expect = ')';
                 break;
             case JSONToken.COMMA:
-                if (reader.hasComma() || reader.nextIfMatch(',')) {
+                if (reader.hasComma() || reader.nextIfComma()) {
                     return;
                 }
                 throw new JSONException(

@@ -438,8 +438,8 @@ abstract class JSONPathSegment {
 
             if (object instanceof JSONPath.Sequence) {
                 List list = ((JSONPath.Sequence) object).values;
-
-                for (Object item : list) {
+                for (int i = 0; i < list.size(); i++) {
+                    Object item = list.get(i);
                     context.value = item;
                     JSONPath.Context itemContext = new JSONPath.Context(context.path, context, context.current, context.next, context.readerFeatures);
                     eval(itemContext);
@@ -756,7 +756,8 @@ abstract class JSONPathSegment {
                 List list = (List) object;
                 JSONArray values = new JSONArray(list.size());
                 if (context.next == null && !array) {
-                    for (Object item : list) {
+                    for (int i = 0; i < list.size(); i++) {
+                        Object item = list.get(i);
                         if (item instanceof Map) {
                             values.addAll(((Map<?, ?>) item).values());
                         } else {
@@ -788,7 +789,8 @@ abstract class JSONPathSegment {
                 List list = ((JSONPath.Sequence) object).values;
                 JSONArray values = new JSONArray(list.size());
                 if (context.next == null) {
-                    for (Object item : list) {
+                    for (int i = 0; i < list.size(); i++) {
+                        Object item = list.get(i);
                         if (item instanceof Map && !array) {
                             values.addAll(((Map<?, ?>) item).values());
                         } else if (item instanceof Collection) {
@@ -959,7 +961,7 @@ abstract class JSONPathSegment {
             boolean alwaysReturnList = context.next == null && (context.path.features & JSONPath.Feature.AlwaysReturnList.mask) != 0;
             List<Object> values = new JSONArray();
 
-            if (jsonReader.nextIfMatch('{')) {
+            if (jsonReader.nextIfObjectStart()) {
                 _for:
                 for (; ; ) {
                     if (jsonReader.ch == '}') {

@@ -155,7 +155,7 @@ public final class ObjectReaderImplObject
             }
 
             for (int i = 0; ; ++i) {
-                if (jsonReader.nextIfMatch('}')) {
+                if (jsonReader.nextIfObjectEnd()) {
                     break;
                 }
 
@@ -244,7 +244,7 @@ public final class ObjectReaderImplObject
                 }
             }
 
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             return object;
         }

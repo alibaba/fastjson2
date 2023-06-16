@@ -21,14 +21,14 @@ final class ObjectReaderImplMapString
             return this.readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
-        boolean match = jsonReader.nextIfMatch('{');
+        boolean match = jsonReader.nextIfObjectStart();
         if (!match) {
             if (jsonReader.current() == '[') {
                 jsonReader.next();
                 if (jsonReader.current() == '{') {
                     Object arrayItem = readObject(jsonReader, String.class, fieldName, features);
                     if (jsonReader.nextIfArrayEnd()) {
-                        jsonReader.nextIfMatch(',');
+                        jsonReader.nextIfComma();
                         return arrayItem;
                     }
                 }
@@ -48,7 +48,7 @@ final class ObjectReaderImplMapString
         long contextFeatures = features | context.getFeatures();
 
         for (int i = 0; ; ++i) {
-            if (jsonReader.nextIfMatch('}')) {
+            if (jsonReader.nextIfObjectEnd()) {
                 break;
             }
 

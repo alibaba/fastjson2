@@ -52,7 +52,7 @@ class ObjectReaderImplMapEntry
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        jsonReader.nextIfMatch('{');
+        jsonReader.nextIfObjectStart();
         Object key = jsonReader.readAny();
         jsonReader.nextIfMatch(':');
 
@@ -66,8 +66,8 @@ class ObjectReaderImplMapEntry
             value = valueReader.readObject(jsonReader, fieldType, fieldName, features);
         }
 
-        jsonReader.nextIfMatch('}');
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfObjectEnd();
+        jsonReader.nextIfComma();
         return new AbstractMap.SimpleEntry(key, value);
     }
 }

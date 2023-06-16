@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
@@ -383,17 +382,7 @@ final class JSONReaderJSONBUF
             strlen = readLength();
             strBegin = offset;
         } else {
-            StringBuilder message = new StringBuilder()
-                    .append("fieldName not support input type ")
-                    .append(typeName(strtype));
-            if (strtype == BC_REFERENCE) {
-                message.append(" ")
-                        .append(readString());
-            }
-
-            message.append(", offset ")
-                    .append(offset);
-            throw new JSONException(message.toString());
+            throw readFieldNameHashCodeEror();
         }
 
         long hashCode;
@@ -401,7 +390,7 @@ final class JSONReaderJSONBUF
             hashCode = symbolTable.getHashCode(-strlen);
         } else {
             long nameValue = 0;
-            if (MIXED_HASH_ALGORITHM && strlen <= 8 && offset + strlen < bytes.length) {
+            if (strlen <= 8 && offset + strlen < bytes.length) {
                 switch (strlen) {
                     case 1:
                         nameValue = bytes[offset];
@@ -470,7 +459,7 @@ final class JSONReaderJSONBUF
 
             long strInfo = ((long) strBegin << 32) + ((long) strlen << 8) + strtype;
 
-            int symbolIndex = symbol * 2;
+            int symbolIndex = symbol << 1;
             int minCapacity = symbolIndex + 2;
             if (symbols == null) {
                 symbols = new long[Math.max(minCapacity, 32)];

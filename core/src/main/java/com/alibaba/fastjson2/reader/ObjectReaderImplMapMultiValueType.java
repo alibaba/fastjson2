@@ -93,7 +93,7 @@ public class ObjectReaderImplMapMultiValueType
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (!jsonReader.nextIfMatch('{')) {
+        if (!jsonReader.nextIfObjectStart()) {
             if (jsonReader.nextIfNullOrEmptyString()) {
                 return null;
             }
@@ -120,7 +120,7 @@ public class ObjectReaderImplMapMultiValueType
         String name;
         Type valueType = null;
         for (int i = 0; ; i++) {
-            if (jsonReader.nextIfMatch('}') || jsonReader.isEnd()) {
+            if (jsonReader.nextIfObjectEnd() || jsonReader.isEnd()) {
                 break;
             }
 

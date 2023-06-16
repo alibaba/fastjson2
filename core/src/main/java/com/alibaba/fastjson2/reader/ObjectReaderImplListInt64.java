@@ -105,7 +105,8 @@ public final class ObjectReaderImplListInt64
             String str = jsonReader.readString();
             if (str.indexOf(',') != -1) {
                 String[] items = str.split(",");
-                for (String item : items) {
+                for (int i = 0; i < items.length; i++) {
+                    String item = items[i];
                     list.add(
                             Long.parseLong(item));
                 }
@@ -113,7 +114,7 @@ public final class ObjectReaderImplListInt64
                 list.add(
                         Long.parseLong(str));
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
             return list;
         }
 
@@ -144,7 +145,7 @@ public final class ObjectReaderImplListInt64
                     jsonReader.readInt64());
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         return list;
     }

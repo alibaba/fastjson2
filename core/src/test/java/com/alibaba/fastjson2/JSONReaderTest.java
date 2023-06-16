@@ -33,43 +33,43 @@ public class JSONReaderTest {
 
         {
             JSONReader reader = JSONReader.of(str);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
         {
             JSONReader reader = JSONReader.of(str.toCharArray());
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
         {
             JSONReader reader = JSONReader.of(strBytes);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
         {
             JSONReader reader = JSONReader.of(strBytes, 0, strBytes.length, StandardCharsets.US_ASCII);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
     }
 
@@ -85,43 +85,43 @@ public class JSONReaderTest {
 
         {
             JSONReader reader = JSONReader.of(str);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
         {
             JSONReader reader = JSONReader.of(str.toCharArray());
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
         {
             JSONReader reader = JSONReader.of(strBytes);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
         {
             JSONReader reader = JSONReader.of(strBytes, 0, strBytes.length, StandardCharsets.US_ASCII);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
     }
 
@@ -137,33 +137,33 @@ public class JSONReaderTest {
 
         {
             JSONReader reader = JSONReader.of(str);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
         {
             JSONReader reader = JSONReader.of(str.toCharArray());
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
         {
             JSONReader reader = JSONReader.of(strBytes);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
     }
 
@@ -179,33 +179,33 @@ public class JSONReaderTest {
 
         {
             JSONReader reader = JSONReader.of(str);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
         {
             JSONReader reader = JSONReader.of(str.toCharArray());
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
         {
             JSONReader reader = JSONReader.of(strBytes);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
     }
 
@@ -221,33 +221,33 @@ public class JSONReaderTest {
 
         {
             JSONReader reader = JSONReader.of(str);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
         {
             JSONReader reader = JSONReader.of(str.toCharArray());
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
         {
             JSONReader reader = JSONReader.of(strBytes);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(valueHash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
     }
 
@@ -262,33 +262,33 @@ public class JSONReaderTest {
         long hash = Fnv.hashCode64(fieldName);
         {
             JSONReader reader = JSONReader.of(str);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(hash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
         {
             JSONReader reader = JSONReader.of(str.toCharArray());
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(hash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
         {
             JSONReader reader = JSONReader.of(strBytes);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(hash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
         {
             JSONReader reader = JSONReader.of(strBytes);
@@ -302,13 +302,13 @@ public class JSONReaderTest {
         }
         {
             JSONReader reader = JSONReader.of(strBytes, 0, strBytes.length, StandardCharsets.US_ASCII);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
             assertEquals(hash, reader.readValueHashCode());
             assertEquals(value, reader.getString());
-            assertTrue(reader.nextIfMatch('}'));
+            assertTrue(reader.nextIfObjectEnd());
         }
     }
 
@@ -560,7 +560,7 @@ public class JSONReaderTest {
         long hash = Fnv.hashCode64(fieldName);
         {
             JSONReader reader = JSONReader.of(str);
-            reader.nextIfMatch('{');
+            reader.nextIfObjectStart();
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
@@ -569,7 +569,7 @@ public class JSONReaderTest {
         }
         {
             JSONReader reader = JSONReader.of(strBytes, 0, strBytes.length, StandardCharsets.US_ASCII);
-            reader.nextIfMatch('{');
+            reader.nextIfObjectStart();
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
@@ -578,7 +578,7 @@ public class JSONReaderTest {
         }
         {
             JSONReader reader = JSONReader.of(strBytes);
-            reader.nextIfMatch('{');
+            reader.nextIfObjectStart();
             assertEquals(hash, reader.readFieldNameHashCode());
             assertEquals(hash, reader.getNameHashCodeLCase());
             assertEquals(fieldName, reader.getFieldName());
@@ -1072,17 +1072,17 @@ public class JSONReaderTest {
         byte[] strBytes = str.getBytes(StandardCharsets.UTF_8);
         {
             JSONReader reader = JSONReader.of(str);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(ch, reader.current());
         }
         {
             JSONReader reader = JSONReader.of(str.toCharArray());
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(ch, reader.current());
         }
         {
             JSONReader reader = JSONReader.of(strBytes);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(ch, reader.current());
         }
     }
@@ -1117,22 +1117,22 @@ public class JSONReaderTest {
         byte[] latin1 = str.getBytes(StandardCharsets.ISO_8859_1);
         {
             JSONReader reader = JSONReader.of(str);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(ch, reader.current());
         }
         {
             JSONReader reader = JSONReader.of(str.toCharArray());
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(ch, reader.current());
         }
         {
             JSONReader reader = JSONReader.of(utf8);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(ch, reader.current());
         }
         {
             JSONReader reader = JSONReader.of(latin1, 0, latin1.length, StandardCharsets.ISO_8859_1);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertEquals(ch, reader.current());
         }
     }
@@ -1171,22 +1171,22 @@ public class JSONReaderTest {
         byte[] strBytes = str.getBytes(StandardCharsets.UTF_8);
         {
             JSONReader reader = JSONReader.of(str);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertTrue(reader.isEnd());
         }
         {
             JSONReader reader = JSONReader.of(str.toCharArray());
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertTrue(reader.isEnd());
         }
         {
             JSONReader reader = JSONReader.of(strBytes);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertTrue(reader.isEnd());
         }
         {
             JSONReader reader = JSONReader.of(strBytes, 0, strBytes.length, StandardCharsets.ISO_8859_1);
-            assertTrue(reader.nextIfMatch('{'));
+            assertTrue(reader.nextIfObjectStart());
             assertTrue(reader.isEnd());
         }
     }

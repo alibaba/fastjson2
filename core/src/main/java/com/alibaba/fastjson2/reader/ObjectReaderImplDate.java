@@ -169,7 +169,7 @@ public class ObjectReaderImplDate
             if (jsonReader.isTypeRedirect() && jsonReader.nextIfMatchIdent('"', 'v', 'a', 'l', '"')) {
                 jsonReader.nextIfMatch(':');
                 millis = jsonReader.readInt64Value();
-                jsonReader.nextIfMatch('}');
+                jsonReader.nextIfObjectEnd();
                 jsonReader.setTypeRedirect(false);
             } else {
                 millis = jsonReader.readMillisFromString();

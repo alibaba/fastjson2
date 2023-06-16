@@ -47,7 +47,7 @@ final class ObjectReaderImplDoubleArray
 
                 values[size++] = jsonReader.readDouble();
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             return Arrays.copyOf(values, size);
         }

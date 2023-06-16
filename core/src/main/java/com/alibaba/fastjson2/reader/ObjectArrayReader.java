@@ -90,7 +90,7 @@ public final class ObjectArrayReader
                 }
                 values[size++] = value;
             }
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
 
             return Arrays.copyOf(values, size);
         }

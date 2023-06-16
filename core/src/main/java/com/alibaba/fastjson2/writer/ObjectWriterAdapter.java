@@ -302,7 +302,8 @@ public class ObjectWriterAdapter<T>
             writeTypeInfo(jsonWriter);
         }
 
-        for (FieldWriter fieldWriter : fieldWriters) {
+        for (int i = 0; i < fieldWriters.size(); i++) {
+            FieldWriter fieldWriter = fieldWriters.get(i);
             fieldWriter.write(jsonWriter, object);
         }
 
@@ -311,7 +312,8 @@ public class ObjectWriterAdapter<T>
 
     public Map<String, Object> toMap(Object object) {
         JSONObject map = new JSONObject(fieldWriters.size());
-        for (FieldWriter fieldWriter : fieldWriters) {
+        for (int i = 0; i < fieldWriters.size(); i++) {
+            FieldWriter fieldWriter = fieldWriters.get(i);
             map.put(
                     fieldWriter.fieldName,
                     fieldWriter.getFieldValue(object)
@@ -435,7 +437,8 @@ public class ObjectWriterAdapter<T>
 
         LabelFilter labelFilter = context.getLabelFilter();
 
-        for (FieldWriter fieldWriter : fieldWriters) {
+        for (int i = 0; i < fieldWriters.size(); i++) {
+            FieldWriter fieldWriter = fieldWriters.get(i);
             Field field = fieldWriter.field;
 
             if (ignoreNonFieldGetter
@@ -584,7 +587,8 @@ public class ObjectWriterAdapter<T>
     public JSONObject toJSONObject(T object) {
         JSONObject jsonObject = new JSONObject();
 
-        for (FieldWriter fieldWriter : fieldWriters) {
+        for (int i = 0; i < fieldWriters.size(); i++) {
+            FieldWriter fieldWriter = fieldWriters.get(i);
             Object fieldValue = fieldWriter.getFieldValue(object);
 
             long fieldFeatures = fieldWriter.features;
@@ -599,7 +603,8 @@ public class ObjectWriterAdapter<T>
                     fieldObjectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(fieldWriter.fieldClass);
                 }
                 List<FieldWriter> unwrappedFieldWriters = fieldObjectWriter.getFieldWriters();
-                for (FieldWriter unwrappedFieldWriter : unwrappedFieldWriters) {
+                for (int j = 0; j < unwrappedFieldWriters.size(); j++) {
+                    FieldWriter unwrappedFieldWriter = unwrappedFieldWriters.get(j);
                     Object unwrappedFieldValue = unwrappedFieldWriter.getFieldValue(fieldValue);
                     jsonObject.put(unwrappedFieldWriter.fieldName, unwrappedFieldValue);
                 }

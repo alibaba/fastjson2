@@ -88,6 +88,9 @@ public final class ObjectReaderImplMap
                 case "java.util.Collections$SynchronizedSortedMap":
                     instanceType = TreeMap.class;
                     builder = (Function<SortedMap, SortedMap>) Collections::synchronizedSortedMap;
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -410,7 +413,7 @@ public final class ObjectReaderImplMap
 
         jsonReader.read(object, features);
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         if (builder != null) {
             return builder.apply(object);

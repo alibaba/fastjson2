@@ -655,7 +655,8 @@ class JSONWriterUTF16
 
         final char[] chars = this.chars;
         chars[off++] = quote;
-        for (char ch : str) {
+        for (int i = 0; i < str.length; i++) {
+            char ch = str[i];
             switch (ch) {
                 case '"':
                 case '\'':
@@ -799,7 +800,8 @@ class JSONWriterUTF16
 
         final char[] chars = this.chars;
         chars[off++] = quote;
-        for (byte b : str) {
+        for (int i = 0; i < str.length; i++) {
+            byte b = str[i];
             char ch = (char) (b & 0xff);
             switch (ch) {
                 case '"':
@@ -1179,7 +1181,8 @@ class JSONWriterUTF16
         chars[off + 1] = '\'';
         off += 2;
 
-        for (byte b : bytes) {
+        for (int i = 0; i < bytes.length; i++) {
+            byte b = bytes[i];
             int a = b & 0xFF;
             int b0 = a >> 4;
             int b1 = a & 0xf;
@@ -2546,7 +2549,8 @@ class JSONWriterUTF16
         chars[off++] = '[';
 
         boolean first = true;
-        for (Object o : array) {
+        for (int i = 0; i < array.size(); i++) {
+            Object o = array.get(i);
             if (!first) {
                 if (off == chars.length) {
                     ensureCapacity(off + 1);
@@ -2613,7 +2617,8 @@ class JSONWriterUTF16
 
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
         boolean special = false;
-        for (char c : chars) {
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
             if (c == '\\' || c == quote || c < ' ') {
                 special = true;
                 break;

@@ -92,13 +92,13 @@ class JSONWriterUTF8
     }
 
     @Override
-    public final void writeHex(byte[] value) {
-        if (value == null) {
+    public final void writeHex(byte[] values) {
+        if (values == null) {
             writeNull();
             return;
         }
 
-        int charsLen = value.length * 2 + 3;
+        int charsLen = values.length * 2 + 3;
 
         int off = this.off;
         ensureCapacity(off + charsLen + 2);
@@ -107,7 +107,8 @@ class JSONWriterUTF8
         bytes[off + 1] = '\'';
         off += 2;
 
-        for (byte b : value) {
+        for (int i = 0; i < values.length; i++) {
+            byte b = values[i];
             int a = b & 0xFF;
             int b0 = a >> 4;
             int b1 = a & 0xf;
@@ -356,8 +357,8 @@ class JSONWriterUTF8
         this.bytes[this.off++] = (byte) quote;
     }
 
-    public void writeStringLatin1(byte[] value) {
-        if (value == null) {
+    public void writeStringLatin1(byte[] values) {
+        if (values == null) {
             writeStringNull();
             return;
         }
@@ -366,7 +367,8 @@ class JSONWriterUTF8
         final boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
 
         final byte quote = (byte) this.quote;
-        for (byte c : value) {
+        for (int i = 0; i < values.length; i++) {
+            byte c = values[i];
             if (c == quote
                     || c == '\\'
                     || c < ' '
@@ -380,19 +382,19 @@ class JSONWriterUTF8
 
         int off = this.off;
         if (!escape) {
-            int minCapacity = off + value.length + 2;
+            int minCapacity = off + values.length + 2;
             if (minCapacity >= this.bytes.length) {
                 ensureCapacity(minCapacity);
             }
             final byte[] bytes = this.bytes;
             bytes[off] = quote;
-            System.arraycopy(value, 0, bytes, off + 1, value.length);
-            off += value.length + 1;
+            System.arraycopy(values, 0, bytes, off + 1, values.length);
+            off += values.length + 1;
             bytes[off] = quote;
             this.off = off + 1;
             return;
         }
-        writeStringEscaped(value);
+        writeStringEscaped(values);
     }
 
     public final void writeStringUTF16(byte[] value) {
@@ -418,8 +420,9 @@ class JSONWriterUTF8
 
         int valueOffset = 0;
         while (valueOffset < value.length) {
-            byte b0 = value[valueOffset++];
-            byte b1 = value[valueOffset++];
+            byte b0 = value[valueOffset];
+            byte b1 = value[valueOffset + 1];
+            valueOffset += 2;
 
             if (b1 == 0 && b0 >= 0) {
 //                bytes[off++] = b0;
@@ -703,8 +706,8 @@ class JSONWriterUTF8
         this.bytes[this.off++] = (byte) quote;
     }
 
-    protected final void writeStringEscaped(byte[] value) {
-        int minCapacity = off + value.length * 4 + 2;
+    protected final void writeStringEscaped(byte[] values) {
+        int minCapacity = off + values.length * 4 + 2;
         if (minCapacity >= this.bytes.length) {
             ensureCapacity(minCapacity);
         }
@@ -713,7 +716,8 @@ class JSONWriterUTF8
         final byte[] bytes = this.bytes;
         int off = this.off;
         bytes[off++] = (byte) quote;
-        for (byte ch : value) {
+        for (int i = 0; i < values.length; i++) {
+            byte ch = values[i];
             switch (ch) {
                 case '\\':
                     bytes[off] = (byte) '\\';
@@ -1481,7 +1485,8 @@ class JSONWriterUTF8
         }
 
         final byte[] bytes = this.bytes;
-        for (char c : chars) {
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
             if ((c >= 0x0001) && (c <= 0x007F)) {
                 bytes[off++] = (byte) c;
             } else if (c > 0x07FF) {
@@ -2510,7 +2515,8 @@ class JSONWriterUTF8
         bytes[off++] = '[';
 
         boolean first = true;
-        for (Object o : array) {
+        for (int i = 0; i < array.size(); i++) {
+            Object o = array.get(i);
             if (!first) {
                 if (off == bytes.length) {
                     ensureCapacity(off + 1);

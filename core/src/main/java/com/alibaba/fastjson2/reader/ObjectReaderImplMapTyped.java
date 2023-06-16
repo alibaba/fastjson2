@@ -270,7 +270,7 @@ class ObjectReaderImplMapTyped
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
         int index = 0;
-        if (!jsonReader.nextIfMatch('{')) {
+        if (!jsonReader.nextIfObjectStart()) {
             if (jsonReader.isTypeRedirect()) {
                 index = 1;
                 jsonReader.setTypeRedirect(false);
@@ -299,7 +299,7 @@ class ObjectReaderImplMapTyped
 
         Object name;
         for (; ; index++) {
-            if (jsonReader.nextIfMatch('}') || jsonReader.isEnd()) {
+            if (jsonReader.nextIfObjectEnd() || jsonReader.isEnd()) {
                 break;
             }
 
@@ -391,7 +391,7 @@ class ObjectReaderImplMapTyped
             }
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         if (builder != null) {
             return builder.apply(object);

@@ -50,7 +50,7 @@ public class ObjectReaderImplMethod
             throw new JSONException("not support input " + jsonReader.info());
         }
 
-        jsonReader.nextIfMatch(',');
+        jsonReader.nextIfComma();
 
         return getMethod(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName, paramTypeNames);
     }
@@ -86,7 +86,7 @@ public class ObjectReaderImplMethod
         }
 
         if (!jsonReader.isJSONB()) {
-            jsonReader.nextIfMatch(',');
+            jsonReader.nextIfComma();
         }
 
         return getMethod(jsonReader.getContext().getFeatures() | features, methodName, declaringClassName, paramTypeNames);

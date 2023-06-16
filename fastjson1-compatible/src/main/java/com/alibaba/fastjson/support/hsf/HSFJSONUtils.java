@@ -23,7 +23,7 @@ public class HSFJSONUtils {
         Object[] values;
         String[] typeNames;
 
-        if (jsonReader.nextIfMatch('{')) {
+        if (jsonReader.nextIfObjectStart()) {
             long hash0 = jsonReader.readFieldNameHashCode();
             if (hash0 == HASH_ARGS_TYPES) {
                 if (jsonReader.nextIfArrayStart()) {
@@ -32,7 +32,7 @@ public class HSFJSONUtils {
                     int i = 0;
                     for (; ; ++i) {
                         if (jsonReader.nextIfArrayEnd()) {
-                            jsonReader.nextIfMatch(',');
+                            jsonReader.nextIfComma();
                             break;
                         } else if (jsonReader.isEnd()) {
                             throw new JSONException("illegal format");
@@ -100,7 +100,7 @@ public class HSFJSONUtils {
                 int i = 0;
                 for (; ; ++i) {
                     if (jsonReader.nextIfArrayEnd()) {
-                        jsonReader.nextIfMatch(',');
+                        jsonReader.nextIfComma();
                         break;
                     } else if (jsonReader.isEnd()) {
                         throw new JSONException("illegal format");

@@ -191,7 +191,7 @@ class JSONPathParser {
                     list.add(index);
                     if (last) {
                         list.add(-1);
-                        jsonReader.nextIfMatch(',');
+                        jsonReader.nextIfComma();
                     }
 
                     while (true) {
@@ -200,7 +200,7 @@ class JSONPathParser {
                             list.add(index);
                         } else if (jsonReader.nextIfMatchIdent('l', 'a', 's', 't')) {
                             list.add(-1);
-                            jsonReader.nextIfMatch(',');
+                            jsonReader.nextIfComma();
                         } else {
                             break;
                         }
