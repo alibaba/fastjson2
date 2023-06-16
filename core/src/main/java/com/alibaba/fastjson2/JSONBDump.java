@@ -124,7 +124,7 @@ final class JSONBDump {
                                 ((long) (bytes[offset]) << 56);
                 offset += 8;
                 jsonWriter.writeInt64(int64Value);
-                jsonWriter.writeInt64(int64Value);
+
                 return;
             }
             case BC_BIGINT: {
