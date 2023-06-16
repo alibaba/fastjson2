@@ -1689,7 +1689,7 @@ final class JSONWriterJSONB
         }
         bytes[off++] = BC_REFERENCE;
 
-        if (Objects.equals(path, this.lastReference)) {
+        if (path == this.lastReference) {
             writeString("#-1");
         } else {
             writeString(path);
