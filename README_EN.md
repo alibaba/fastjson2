@@ -12,11 +12,11 @@
 [![GitHub Contributors](https://img.shields.io/github/contributors/alibaba/fastjson2)](https://github.com/alibaba/fastjson2/graphs/contributors)
 
 ##### 📖 English Documentation | 📖 [中文文档](README.md)
-#####  The issues of fastjson will be aslo posted on [Alibaba Cloud Developer Community](https://developer.aliyun.com/ask/)
+#####  The issues of fastjson will be also posted on [Alibaba Cloud Developer Community](https://developer.aliyun.com/ask/)
 
 # FASTJSON v2
 
-`FASTJSON v2` is an upgrade of the `FASTJSON`, with the goal of providing a highly optimized `JSON` librarray for the next ten years.
+`FASTJSON v2` is an upgrade of the `FASTJSON`, with the goal of providing a highly optimized `JSON` library for the next ten years.
 
 - Supports the JSON and JSONB Protocols.
 - Supports full parsing and partial parsing.
