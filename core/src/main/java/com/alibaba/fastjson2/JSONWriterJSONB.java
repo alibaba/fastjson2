@@ -662,8 +662,7 @@ final class JSONWriterJSONB
             int mark = off;
             final int LATIN = 0;
             boolean latinAll = true;
-            for (int i = 0; i < size; i++) {
-                String str = list.get(i);
+            for (String str : list) {
                 if (str == null) {
                     writeNull();
                 }
@@ -694,8 +693,7 @@ final class JSONWriterJSONB
             }
         }
 
-        for (int i = 0; i < size; i++) {
-            String str = list.get(i);
+        for (String str : list) {
             writeString(str);
         }
     }
@@ -1842,8 +1840,7 @@ final class JSONWriterJSONB
 
         final int size = array.size();
         startArray(size);
-        for (int i = 0; i < size; i++) {
-            Object item = array.get(i);
+        for (Object item : array) {
             writeAny(item);
         }
     }
