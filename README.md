@@ -91,8 +91,15 @@ dependencies {
     <artifactId>fastjson2-kotlin</artifactId>
     <version>2.0.33</version>
 </dependency>
+```
 
-<!-- 有些场景需要依赖kotlin-reflect -->
+```xml
+<dependency>
+    <groupId>org.jetbrains.kotlin</groupId>
+    <artifactId>kotlin-stdlib</artifactId>
+    <version>${kotlin-version}</version>
+</dependency>
+
 <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-reflect</artifactId>
@@ -105,6 +112,13 @@ dependencies {
 ```kotlin
 dependencies {
     implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.33")
+}
+```
+
+```kotlin
+dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
 }
 ```
 
