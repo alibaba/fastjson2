@@ -214,7 +214,7 @@ public final class ObjectReaderImplEnum
             }
         }
 
-        Enum fieldValue = null;
+        Enum<?> fieldValue = null;
         if (jsonReader.isInt()) {
             int intValue = jsonReader.readInt32Value();
             if (valueField == null) {
@@ -233,27 +233,35 @@ public final class ObjectReaderImplEnum
                     throw new JSONException(jsonReader.info("parse enum error, class " + enumClass.getName() + ", " + valueField.getName() + " " + intValue));
                 }
             }
-        } else if (jsonReader.nextIfNullOrEmptyString()) {
-            fieldValue = null;
-        } else if (valueFieldType != null && valueFieldType == String.class && jsonReader.isString()) {
-            String str = jsonReader.readString();
-            for (int i = 0; i < stringValues.length; i++) {
-                if (str.equals(stringValues[i])) {
-                    fieldValue = enums[i];
-                    break;
+        } else if (!jsonReader.nextIfNullOrEmptyString()) {
+            if (stringValues != null && jsonReader.isString()) {
+                String str = jsonReader.readString();
+                for (int i = 0; i < stringValues.length; i++) {
+                    if (str.equals(stringValues[i])) {
+                        fieldValue = enums[i];
+                        break;
+                    }
                 }
-            }
-        } else {
-            long hashCode = jsonReader.readValueHashCode();
-            fieldValue = getEnumByHashCode(hashCode);
-            if (hashCode == Fnv.MAGIC_HASH_CODE) {
-                return null;
-            }
+            } else if (intValues != null && jsonReader.isString()) {
+                int intValue = jsonReader.readInt32Value();
+                for (int i = 0; i < intValues.length; i++) {
+                    if (intValues[i] == intValue) {
+                        fieldValue = enums[i];
+                        break;
+                    }
+                }
+            } else {
+                long hashCode = jsonReader.readValueHashCode();
+                if (hashCode == Fnv.MAGIC_HASH_CODE) {
+                    return null;
+                }
 
-            if (fieldValue == null) {
-                fieldValue = getEnumByHashCode(
-                        jsonReader.getNameHashCodeLCase()
-                );
+                fieldValue = getEnumByHashCode(hashCode);
+                if (fieldValue == null) {
+                    fieldValue = getEnumByHashCode(
+                            jsonReader.getNameHashCodeLCase()
+                    );
+                }
             }
 
             if (fieldValue == null && jsonReader.isEnabled(JSONReader.Feature.ErrorOnEnumNotMatch)) {
