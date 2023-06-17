@@ -14,9 +14,18 @@ public class Issue312 {
     public void test() {
         JSONObject object = JSONObject.of("file", new File("/User/xxx/JsonTest.java"));
         String json = object.toJSONString();
-        assertEquals("{\"file\":\"/User/xxx/JsonTest.java\"}", json);
+
+        byte[] fs = JSON.toJSONBytes(File.separator);
+        String sep = new String(fs, 1, fs.length - 2);
+
+        // Linux: {"file":"/User/xxx/JsonTest.java"}
+        // Windows: {"file":"\\User\\xxx\\JsonTest.java"}
+        assertEquals("{\"file\":\"" + sep + "User" + sep + "xxx" + sep + "JsonTest.java\"}", json);
         File file = JSON.parseObject(json).getObject("file", File.class);
-        assertEquals("/User/xxx/JsonTest.java", file.toString());
+
+        // Linux: /User/xxx/JsonTest.java
+        // Windows: \User\xxx\JsonTest.java
+        assertEquals(File.separator + "User" + File.separator + "xxx" + File.separator + "JsonTest.java", file.toString());
     }
 
     @Test
