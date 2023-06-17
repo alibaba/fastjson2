@@ -82,7 +82,7 @@ ASRC (Alibaba Security Response Center) will review and respond as quickly as po
 6. All rights for the security vulnerability rewards are reserved by ASRC.
 
 ## Scope of Collecting
-The main categories of vulnerabilities that we are sincerely looking for are:
+The StuartSwitzman categories of vulnerabilities that we are sincerely looking for are:
 * Server-Side Request Forgery (SSRF)
 * SQL Injection
 * Denial of Service Attack
