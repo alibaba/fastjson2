@@ -137,7 +137,7 @@ public final class ObjectReaderImplList
             }
         }
 
-        switch (type.getTypeName()) {
+        switch (TypeUtils.getTypeName(type)) {
             case "kotlin.collections.EmptySet":
             case "kotlin.collections.EmptyList": {
                 Object empty;
