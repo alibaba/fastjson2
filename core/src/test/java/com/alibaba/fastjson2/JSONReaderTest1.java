@@ -1491,11 +1491,11 @@ public class JSONReaderTest1 {
 
         char[] chars = "\"1900-01-01 00:00:00\"".toCharArray();
         for (int year = 1900; year < 2200; year++) {
-            IOUtils.getChars(year, 5, chars);
+            IOUtilsTest.getChars(year, 5, chars);
 
             for (int month = 1; month <= 12; month++) {
                 chars[6] = '0';
-                IOUtils.getChars(month, 8, chars);
+                IOUtilsTest.getChars(month, 8, chars);
 
                 int dom = 31;
                 switch (month) {
@@ -1512,11 +1512,11 @@ public class JSONReaderTest1 {
 
                 for (int d = 1; d <= dom; d++) {
                     chars[9] = '0';
-                    IOUtils.getChars(d, 11, chars);
+                    IOUtilsTest.getChars(d, 11, chars);
 
                     for (int h = 1; h <= 12; h++) {
                         chars[12] = '0';
-                        IOUtils.getChars(h, 14, chars);
+                        IOUtilsTest.getChars(h, 14, chars);
                         String str = new String(chars, 1, 19);
 
                         {

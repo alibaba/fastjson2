@@ -2481,11 +2481,10 @@ public abstract class JSONReader
                                      * rounded) result.
                                      */
 
-                                    int len = IOUtils.stringSize(unsignedUnscaledVal);
                                     if (doubleChars == null) {
                                         doubleChars = new char[20];
                                     }
-                                    IOUtils.getChars(unsignedUnscaledVal, len, doubleChars);
+                                    int len = IOUtils.writeInt64(doubleChars, 0, unsignedUnscaledVal);
                                     return TypeUtils.floatValue(isNegative, len - scale, doubleChars, len);
                                 } else if ((context.features & Feature.UseBigDecimalForDoubles.mask) != 0) {
                                     boolean isNegative;
@@ -2515,15 +2514,10 @@ public abstract class JSONReader
                                         }
                                     }
 
-                                    int len = unsignedUnscaledVal < 10000000000000000L
-                                            ? 16
-                                            : unsignedUnscaledVal < 100000000000000000L
-                                            ? 17
-                                            : unsignedUnscaledVal < 1000000000000000000L ? 18 : 19;
                                     if (doubleChars == null) {
                                         doubleChars = new char[20];
                                     }
-                                    IOUtils.getChars(unsignedUnscaledVal, len, doubleChars);
+                                    int len = IOUtils.writeInt64(doubleChars, 0, unsignedUnscaledVal);
                                     return TypeUtils.doubleValue(isNegative, len - scale, doubleChars, len);
                                 }
                             }

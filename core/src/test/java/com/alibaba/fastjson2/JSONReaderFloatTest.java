@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.IOUtilsTest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -549,7 +550,7 @@ public class JSONReaderFloatTest {
 
         for (int i = 0; i < 1000_000; ++i) {
             int len = IOUtils.stringSize(i);
-            IOUtils.getChars(i, len + 2, chars);
+            IOUtilsTest.getChars(i, len + 2, chars);
             JSONReader jsonReader = JSONReader.of(chars, 0, len + 2);
 
             String str = new String(chars, 0, len + 2);
@@ -571,7 +572,7 @@ public class JSONReaderFloatTest {
 
         for (int i = 0; i < 1000_000; ++i) {
             int len = IOUtils.stringSize(i);
-            IOUtils.getChars(i, len + off + 2, chars);
+            IOUtilsTest.getChars(i, len + off + 2, chars);
             JSONReader jsonReader = JSONReader.of(chars, 0, len + off + 2);
 
             String str = new String(chars, 0, len + off + 2);
@@ -593,7 +594,7 @@ public class JSONReaderFloatTest {
 
         for (int i = 0; i < 1000_000; ++i) {
             int len = IOUtils.stringSize(i);
-            IOUtils.getChars(i, len + off + 2, chars);
+            IOUtilsTest.getChars(i, len + off + 2, chars);
             JSONReader jsonReader = JSONReader.of(chars, 0, len + off + 2);
 
             String str = new String(chars, 0, len + off + 2);
@@ -615,7 +616,7 @@ public class JSONReaderFloatTest {
 
         for (int i = 0; i < 1000_000; ++i) {
             int len = IOUtils.stringSize(i);
-            IOUtils.getChars(i, len + off + 2, chars);
+            IOUtilsTest.getChars(i, len + off + 2, chars);
             JSONReader jsonReader = JSONReader.of(chars, 0, len + off + 2);
 
             String str = new String(chars, 0, len + off + 2);
@@ -637,7 +638,7 @@ public class JSONReaderFloatTest {
 
         for (int i = 0; i < 1000_000; ++i) {
             int len = IOUtils.stringSize(i);
-            IOUtils.getChars(i, len + off + 2, chars);
+            IOUtilsTest.getChars(i, len + off + 2, chars);
             JSONReader jsonReader = JSONReader.of(chars, 0, len + off + 2);
 
             String str = new String(chars, 0, len + off + 2);

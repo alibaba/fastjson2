@@ -1692,14 +1692,14 @@ public class DateUtilsTest {
     public void parseLocalDateTime9() {
         char[] chars = "1900-01-1".toCharArray();
         for (int year = 1900; year < 2200; year++) {
-            IOUtils.getChars(year, 4, chars);
+            IOUtilsTest.getChars(year, 4, chars);
 
             for (int month = 1; month <= 12; month++) {
                 chars[5] = '0';
-                IOUtils.getChars(month, 7, chars);
+                IOUtilsTest.getChars(month, 7, chars);
 
                 for (int d = 1; d <= 9; d++) {
-                    IOUtils.getChars(d, 9, chars);
+                    IOUtilsTest.getChars(d, 9, chars);
 
                     String str = new String(chars);
 
@@ -1733,10 +1733,10 @@ public class DateUtilsTest {
     public void parseLocalDateTime9_1() {
         char[] chars = "1900-1-01".toCharArray();
         for (int year = 1900; year < 2200; year++) {
-            IOUtils.getChars(year, 4, chars);
+            IOUtilsTest.getChars(year, 4, chars);
 
             for (int month = 1; month <= 9; month++) {
-                IOUtils.getChars(month, 6, chars);
+                IOUtilsTest.getChars(month, 6, chars);
 
                 int dom = 31;
                 switch (month) {
@@ -1753,7 +1753,7 @@ public class DateUtilsTest {
 
                 for (int d = 1; d <= dom; d++) {
                     chars[7] = '0';
-                    IOUtils.getChars(d, 9, chars);
+                    IOUtilsTest.getChars(d, 9, chars);
 
                     String str = new String(chars);
 
@@ -1782,13 +1782,13 @@ public class DateUtilsTest {
     public void parseLocalDateTime9_2() {
         char[] chars = "1900年1月1日".toCharArray();
         for (int year = 1900; year < 2200; year++) {
-            IOUtils.getChars(year, 4, chars);
+            IOUtilsTest.getChars(year, 4, chars);
 
             for (int month = 1; month <= 9; month++) {
-                IOUtils.getChars(month, 6, chars);
+                IOUtilsTest.getChars(month, 6, chars);
 
                 for (int d = 1; d <= 9; d++) {
-                    IOUtils.getChars(d, 8, chars);
+                    IOUtilsTest.getChars(d, 8, chars);
 
                     String str = new String(chars);
 
@@ -1812,11 +1812,11 @@ public class DateUtilsTest {
     public void parseLocalDateTime10() {
         char[] chars = "1900-01-01".toCharArray();
         for (int year = 1900; year < 2200; year++) {
-            IOUtils.getChars(year, 4, chars);
+            IOUtilsTest.getChars(year, 4, chars);
 
             for (int month = 1; month <= 12; month++) {
                 chars[5] = '0';
-                IOUtils.getChars(month, 7, chars);
+                IOUtilsTest.getChars(month, 7, chars);
 
                 int dom = 31;
                 switch (month) {
@@ -1833,7 +1833,7 @@ public class DateUtilsTest {
 
                 for (int d = 1; d <= dom; d++) {
                     chars[8] = '0';
-                    IOUtils.getChars(d, 10, chars);
+                    IOUtilsTest.getChars(d, 10, chars);
 
                     String str = new String(chars);
 
@@ -1862,11 +1862,11 @@ public class DateUtilsTest {
     public void parseLocalDateTime11() {
         char[] chars = "1900年01月01日".toCharArray();
         for (int year = 1900; year < 2200; year++) {
-            IOUtils.getChars(year, 4, chars);
+            IOUtilsTest.getChars(year, 4, chars);
 
             for (int month = 1; month <= 12; month++) {
                 chars[5] = '0';
-                IOUtils.getChars(month, 7, chars);
+                IOUtilsTest.getChars(month, 7, chars);
 
                 int dom = 31;
                 switch (month) {
@@ -1883,7 +1883,7 @@ public class DateUtilsTest {
 
                 for (int d = 1; d <= dom; d++) {
                     chars[8] = '0';
-                    IOUtils.getChars(d, 10, chars);
+                    IOUtilsTest.getChars(d, 10, chars);
 
                     String str = new String(chars);
 
@@ -1912,11 +1912,11 @@ public class DateUtilsTest {
     public void parseLocalDateTime16() {
         char[] chars = "19000101T000000Z".toCharArray();
         for (int year = 1900; year < 2200; year++) {
-            IOUtils.getChars(year, 4, chars);
+            IOUtilsTest.getChars(year, 4, chars);
 
             for (int month = 1; month <= 12; month++) {
                 chars[4] = '0';
-                IOUtils.getChars(month, 6, chars);
+                IOUtilsTest.getChars(month, 6, chars);
 
                 int dom = 31;
                 switch (month) {
@@ -1933,11 +1933,11 @@ public class DateUtilsTest {
 
                 for (int d = 1; d <= dom; d++) {
                     chars[6] = '0';
-                    IOUtils.getChars(d, 8, chars);
+                    IOUtilsTest.getChars(d, 8, chars);
 
                     for (int h = 1; h <= 12; h++) {
                         chars[9] = '0';
-                        IOUtils.getChars(h, 11, chars);
+                        IOUtilsTest.getChars(h, 11, chars);
                         String str = new String(chars);
 
                         LocalDateTime of = LocalDateTime.of(year, month, d, h, 0, 0);
@@ -1966,11 +1966,11 @@ public class DateUtilsTest {
     public void parseLocalDateTime16_1() {
         char[] chars = "1900-01-01 00:00".toCharArray();
         for (int year = 1900; year < 2200; year++) {
-            IOUtils.getChars(year, 4, chars);
+            IOUtilsTest.getChars(year, 4, chars);
 
             for (int month = 1; month <= 12; month++) {
                 chars[5] = '0';
-                IOUtils.getChars(month, 7, chars);
+                IOUtilsTest.getChars(month, 7, chars);
 
                 int dom = 31;
                 switch (month) {
@@ -1987,11 +1987,11 @@ public class DateUtilsTest {
 
                 for (int d = 1; d <= dom; d++) {
                     chars[8] = '0';
-                    IOUtils.getChars(d, 10, chars);
+                    IOUtilsTest.getChars(d, 10, chars);
 
                     for (int h = 1; h <= 12; h++) {
                         chars[11] = '0';
-                        IOUtils.getChars(h, 13, chars);
+                        IOUtilsTest.getChars(h, 13, chars);
                         String str = new String(chars);
 
                         LocalDateTime of = LocalDateTime.of(year, month, d, h, 0, 0);
@@ -2032,11 +2032,11 @@ public class DateUtilsTest {
     public void parseLocalDateTime18() {
         char[] chars = "1900-01-01 00:00:1".toCharArray();
         for (int year = 1900; year < 2200; year++) {
-            IOUtils.getChars(year, 4, chars);
+            IOUtilsTest.getChars(year, 4, chars);
 
             for (int month = 1; month <= 12; month++) {
                 chars[5] = '0';
-                IOUtils.getChars(month, 7, chars);
+                IOUtilsTest.getChars(month, 7, chars);
 
                 int dom = 31;
                 switch (month) {
@@ -2053,11 +2053,11 @@ public class DateUtilsTest {
 
                 for (int d = 1; d <= dom; d++) {
                     chars[8] = '0';
-                    IOUtils.getChars(d, 10, chars);
+                    IOUtilsTest.getChars(d, 10, chars);
 
                     for (int h = 1; h <= 12; h++) {
                         chars[11] = '0';
-                        IOUtils.getChars(h, 13, chars);
+                        IOUtilsTest.getChars(h, 13, chars);
                         String str = new String(chars);
 
                         LocalDateTime of = LocalDateTime.of(year, month, d, h, 0, 1);
@@ -2086,11 +2086,11 @@ public class DateUtilsTest {
     public void parseLocalDateTime18_1() {
         char[] chars = "1900-01-01 00:1:01".toCharArray();
         for (int year = 1900; year < 2200; year++) {
-            IOUtils.getChars(year, 4, chars);
+            IOUtilsTest.getChars(year, 4, chars);
 
             for (int month = 1; month <= 12; month++) {
                 chars[5] = '0';
-                IOUtils.getChars(month, 7, chars);
+                IOUtilsTest.getChars(month, 7, chars);
 
                 int dom = 31;
                 switch (month) {
@@ -2107,11 +2107,11 @@ public class DateUtilsTest {
 
                 for (int d = 1; d <= dom; d++) {
                     chars[8] = '0';
-                    IOUtils.getChars(d, 10, chars);
+                    IOUtilsTest.getChars(d, 10, chars);
 
                     for (int h = 1; h <= 12; h++) {
                         chars[11] = '0';
-                        IOUtils.getChars(h, 13, chars);
+                        IOUtilsTest.getChars(h, 13, chars);
                         String str = new String(chars);
 
                         LocalDateTime of = LocalDateTime.of(year, month, d, h, 1, 1);
@@ -2140,11 +2140,11 @@ public class DateUtilsTest {
     public void parseLocalDateTime18_2() {
         char[] chars = "1900-01-01 0:01:01".toCharArray();
         for (int year = 1900; year < 2200; year++) {
-            IOUtils.getChars(year, 4, chars);
+            IOUtilsTest.getChars(year, 4, chars);
 
             for (int month = 1; month <= 12; month++) {
                 chars[5] = '0';
-                IOUtils.getChars(month, 7, chars);
+                IOUtilsTest.getChars(month, 7, chars);
 
                 int dom = 31;
                 switch (month) {
@@ -2161,10 +2161,10 @@ public class DateUtilsTest {
 
                 for (int d = 1; d <= dom; d++) {
                     chars[8] = '0';
-                    IOUtils.getChars(d, 10, chars);
+                    IOUtilsTest.getChars(d, 10, chars);
 
                     for (int h = 0; h <= 9; h++) {
-                        IOUtils.getChars(h, 12, chars);
+                        IOUtilsTest.getChars(h, 12, chars);
                         String str = new String(chars);
 
                         LocalDateTime of = LocalDateTime.of(year, month, d, h, 1, 1);
@@ -2193,11 +2193,11 @@ public class DateUtilsTest {
     public void parseLocalDateTime18_3() {
         char[] chars = "1900-01-1 00:01:01".toCharArray();
         for (int year = 1900; year < 2200; year++) {
-            IOUtils.getChars(year, 4, chars);
+            IOUtilsTest.getChars(year, 4, chars);
 
             for (int month = 1; month <= 12; month++) {
                 chars[5] = '0';
-                IOUtils.getChars(month, 7, chars);
+                IOUtilsTest.getChars(month, 7, chars);
 
                 int dom = 31;
                 switch (month) {
@@ -2213,11 +2213,11 @@ public class DateUtilsTest {
                 }
 
                 for (int d = 1; d <= 9; d++) {
-                    IOUtils.getChars(d, 9, chars);
+                    IOUtilsTest.getChars(d, 9, chars);
 
                     for (int h = 1; h <= 12; h++) {
                         chars[10] = '0';
-                        IOUtils.getChars(h, 12, chars);
+                        IOUtilsTest.getChars(h, 12, chars);
                         String str = new String(chars);
 
                         LocalDateTime of = LocalDateTime.of(year, month, d, h, 1, 1);
@@ -2246,10 +2246,10 @@ public class DateUtilsTest {
     public void parseLocalDateTime18_4() {
         char[] chars = "1900-1-01 00:01:01".toCharArray();
         for (int year = 1900; year < 2200; year++) {
-            IOUtils.getChars(year, 4, chars);
+            IOUtilsTest.getChars(year, 4, chars);
 
             for (int month = 1; month <= 9; month++) {
-                IOUtils.getChars(month, 6, chars);
+                IOUtilsTest.getChars(month, 6, chars);
 
                 int dom = 31;
                 switch (month) {
@@ -2266,11 +2266,11 @@ public class DateUtilsTest {
 
                 for (int d = 1; d <= dom; d++) {
                     chars[7] = '0';
-                    IOUtils.getChars(d, 9, chars);
+                    IOUtilsTest.getChars(d, 9, chars);
 
                     for (int h = 1; h <= 12; h++) {
                         chars[10] = '0';
-                        IOUtils.getChars(h, 12, chars);
+                        IOUtilsTest.getChars(h, 12, chars);
                         String str = new String(chars);
 
                         LocalDateTime of = LocalDateTime.of(year, month, d, h, 1, 1);
@@ -2299,11 +2299,11 @@ public class DateUtilsTest {
     public void parseLocalDateTime19() {
         char[] chars = "1900-01-01 00:00:00".toCharArray();
         for (int year = 1900; year < 2200; year++) {
-            IOUtils.getChars(year, 4, chars);
+            IOUtilsTest.getChars(year, 4, chars);
 
             for (int month = 1; month <= 12; month++) {
                 chars[5] = '0';
-                IOUtils.getChars(month, 7, chars);
+                IOUtilsTest.getChars(month, 7, chars);
 
                 int dom = 31;
                 switch (month) {
@@ -2320,11 +2320,11 @@ public class DateUtilsTest {
 
                 for (int d = 1; d <= dom; d++) {
                     chars[8] = '0';
-                    IOUtils.getChars(d, 10, chars);
+                    IOUtilsTest.getChars(d, 10, chars);
 
                     for (int h = 1; h <= 12; h++) {
                         chars[11] = '0';
-                        IOUtils.getChars(h, 13, chars);
+                        IOUtilsTest.getChars(h, 13, chars);
                         String str = new String(chars);
 
                         LocalDateTime of = LocalDateTime.of(year, month, d, h, 0, 0);

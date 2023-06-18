@@ -1804,8 +1804,7 @@ public abstract class JSONWriter
                     }
 
                     buf[off++] = '[';
-                    IOUtils.getChars(intValue, off + intValueSize, buf);
-                    off += intValueSize;
+                    off = IOUtils.writeInt32(buf, off, intValue);
                     buf[off++] = ']';
                 } else {
                     if (off + 1 >= buf.length) {

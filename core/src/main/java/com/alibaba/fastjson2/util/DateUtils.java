@@ -11551,14 +11551,14 @@ public class DateUtils {
                 bytes[i] = '0';
             }
             if (millis < 10) {
-                IOUtils.getChars(millis, 19 + millislen, bytes);
+                IOUtils.writeInt32(bytes, 22, millis);
             } else {
                 if (millis % 100 == 0) {
-                    IOUtils.getChars(millis / 100, 19 + millislen, bytes);
+                    IOUtils.writeInt32(bytes, 20, millis / 100);
                 } else if (millis % 10 == 0) {
-                    IOUtils.getChars(millis / 10, 19 + millislen, bytes);
+                    IOUtils.writeInt32(bytes, 20, millis / 10);
                 } else {
-                    IOUtils.getChars(millis, 19 + millislen, bytes);
+                    IOUtils.writeInt32(bytes, 20, millis);
                 }
             }
         }
@@ -11574,15 +11574,25 @@ public class DateUtils {
                 } else {
                     bytes[19 + millislen] = '-';
                 }
-                bytes[19 + millislen + 1] = '0';
-                IOUtils.getChars(offsetAbs, 19 + millislen + 3, bytes);
-                bytes[19 + millislen + 3] = ':';
-                bytes[19 + millislen + 4] = '0';
+                if (offsetAbs < 10) {
+                    bytes[20 + millislen] = '0';
+                    bytes[21 + millislen] = (byte) ('0' + offsetAbs);
+                } else {
+                    bytes[20 + millislen] = (byte) ('0' + offsetAbs / 10);
+                    bytes[21 + millislen] = (byte) ('0' + offsetAbs % 10);
+                }
+                bytes[22 + millislen] = ':';
                 int offsetMinutes = (offsetTotalSeconds - timeZoneOffset * 3600) / 60;
                 if (offsetMinutes < 0) {
                     offsetMinutes = -offsetMinutes;
                 }
-                IOUtils.getChars(offsetMinutes, 19 + millislen + zonelen, bytes);
+                if (offsetMinutes < 10) {
+                    bytes[23 + millislen] = '0';
+                    bytes[24 + millislen] = (byte) ('0' + offsetMinutes);
+                } else {
+                    bytes[23 + millislen] = (byte) ('0' + offsetMinutes / 10);
+                    bytes[24 + millislen] = (byte) ('0' + offsetMinutes % 10);
+                }
             }
         }
 

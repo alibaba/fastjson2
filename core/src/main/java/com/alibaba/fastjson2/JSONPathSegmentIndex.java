@@ -152,7 +152,7 @@ final class JSONPathSegmentIndex
         int size = IOUtils.stringSize(index);
         byte[] bytes = new byte[size + 2];
         bytes[0] = '[';
-        IOUtils.getChars(index, bytes.length - 1, bytes);
+        IOUtils.writeInt32(bytes, 1, index);
         bytes[bytes.length - 1] = ']';
         return new String(bytes, IOUtils.ISO_8859_1);
     }

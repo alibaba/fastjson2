@@ -282,7 +282,7 @@ class FieldWriterEnum
         int size = IOUtils.stringSize(ordinal);
         char[] original = Arrays.copyOf(nameWithColonUTF16, nameWithColonUTF16.length + size);
         chars = Arrays.copyOf(original, original.length);
-        IOUtils.getChars(ordinal, chars.length, chars);
+        IOUtils.writeInt32(chars, 0, ordinal);
         return chars;
     }
 
@@ -291,7 +291,7 @@ class FieldWriterEnum
         int size = IOUtils.stringSize(ordinal);
         byte[] original = Arrays.copyOf(nameWithColonUTF8, nameWithColonUTF8.length + size);
         bytes = Arrays.copyOf(original, original.length);
-        IOUtils.getChars(ordinal, bytes.length, bytes);
+        IOUtils.writeInt32(bytes, nameWithColonUTF8.length, ordinal);
         return bytes;
     }
 
