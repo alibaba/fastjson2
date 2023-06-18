@@ -88,10 +88,11 @@ public class CodeGenUtils {
                 return "fieldReader15";
             default:
                 String base = "fieldReader";
+                final int baseSize = base.length();
                 int size = IOUtils.stringSize(i);
-                char[] chars = new char[base.length() + size];
-                base.getChars(0, base.length(), chars, 0);
-                IOUtils.getChars(i, chars.length, chars);
+                char[] chars = new char[baseSize + size];
+                base.getChars(0, baseSize, chars, 0);
+                IOUtils.writeInt32(chars, baseSize, i);
                 return new String(chars);
         }
     }
@@ -132,10 +133,11 @@ public class CodeGenUtils {
                 return "objectReader15";
             default:
                 String base = "objectReader";
+                final int baseSize = base.length();
                 int size = IOUtils.stringSize(i);
-                char[] chars = new char[base.length() + size];
-                base.getChars(0, base.length(), chars, 0);
-                IOUtils.getChars(i, chars.length, chars);
+                char[] chars = new char[baseSize + size];
+                base.getChars(0, baseSize, chars, 0);
+                IOUtils.writeInt32(chars, baseSize, i);
                 return new String(chars);
         }
     }
@@ -148,11 +150,11 @@ public class CodeGenUtils {
         }
 
         String base = "itemReader";
+        final int baseSize = base.length();
         int size = IOUtils.stringSize(i);
-        char[] chars = new char[base.length() + size];
-        base.getChars(0, base.length(), chars, 0);
-        IOUtils.getChars(i, chars.length, chars);
-        fieldItemObjectReader[i] = fieldName = new String(chars);
-        return fieldName;
+        char[] chars = new char[baseSize + size];
+        base.getChars(0, baseSize, chars, 0);
+        IOUtils.writeInt32(chars, baseSize, i);
+        return new String(chars);
     }
 }

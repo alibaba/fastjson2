@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2;
 
-import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 
 import java.math.BigDecimal;
@@ -558,25 +557,15 @@ final class JSONBDump {
                         jsonWriter.writeName(readString());
                     } else {
                         if (type >= BC_INT32_NUM_MIN && type <= BC_INT32) {
-                            int intValue = readInt32Value();
-                            int size = (intValue < 0) ? IOUtils.stringSize(-intValue) + 1 : IOUtils.stringSize(intValue);
-                            if (jsonWriter.utf16) {
-                                char[] chars = new char[size];
-                                IOUtils.getChars(intValue, chars.length, chars);
-                                jsonWriter.writeNameRaw(chars);
-                            } else {
-                                byte[] chars = new byte[size];
-                                IOUtils.getChars(intValue, chars.length, chars);
-                                jsonWriter.writeNameRaw(chars);
-                            }
+                            jsonWriter.writeName(
+                                    readInt32Value()
+                            );
                         } else if ((type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX)
                                 || type == BC_INT64
                         ) {
-                            long value = readInt64Value();
-                            int size = (value < 0) ? IOUtils.stringSize(-value) + 1 : IOUtils.stringSize(value);
-                            char[] chars = new char[size];
-                            IOUtils.getChars(value, chars.length, chars);
-                            jsonWriter.writeNameRaw(chars);
+                            jsonWriter.writeName(
+                                    readInt64Value()
+                            );
                         } else {
                             if (valueCount != 0) {
                                 jsonWriter.writeComma();
