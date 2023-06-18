@@ -11,7 +11,7 @@ import java.util.List;
 public class APTTest0 {
 //    @org.junit.jupiter.api.Test
     public void test() throws Exception {
-        Path dir = new File("/Users/wenshao/Work/git/fastjson2/extension/target/generated-sources")
+        Path dir = new File("/Users/wenshao/Work/git/fastjson2/codegen/target/generated-sources")
                 .toPath();
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
