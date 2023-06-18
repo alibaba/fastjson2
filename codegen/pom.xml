@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.alibaba.fastjson2</groupId>
         <artifactId>fastjson2-parent</artifactId>
-        <version>2.0.34-SNAPSHOT</version>
+        <version>2.0.34</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -80,16 +80,68 @@
                 </configuration>
             </plugin>
             <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadoc</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
-                    <includes>
-                        <include>com/alibaba/fastjson2/**/*.java</include>
-                    </includes>
-                    <systemPropertyVariables>
-                        <user.timezone>Asia/Shanghai</user.timezone>
-                    </systemPropertyVariables>
-                    <argLine>${add.modules.option}</argLine>
+                    <show>protected</show>
+                    <charset>UTF-8</charset>
+                    <encoding>UTF-8</encoding>
+                    <docencoding>UTF-8</docencoding>
+                    <doclint>all,-missing</doclint>
+                    <links>
+                        <link>https://docs.oracle.com/javase/8/docs/api</link>
+                    </links>
+                    <additionalJOptions>
+                        <additionalJOption>-J-Duser.language=en -J-Duser.country=US</additionalJOption>
+                    </additionalJOptions>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadoc</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <show>protected</show>
+                    <charset>UTF-8</charset>
+                    <encoding>UTF-8</encoding>
+                    <docencoding>UTF-8</docencoding>
+                    <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/examples/exclude-package-names.html -->
+                    <excludePackageNames>
+                        ${javadoc.default.exclude.packages}:jdk.incubator.vector
+                    </excludePackageNames>
+                    <doclint>all,-missing</doclint>
+                    <links>
+                        <link>https://docs.oracle.com/javase/8/docs/api</link>
+                    </links>
+                    <additionalJOptions>
+                        <additionalJOption>-J-Duser.language=en -J-Duser.country=US</additionalJOption>
+                    </additionalJOptions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
