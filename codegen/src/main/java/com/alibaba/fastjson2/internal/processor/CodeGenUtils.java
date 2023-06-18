@@ -4,8 +4,6 @@ import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.IOUtils;
 
 public class CodeGenUtils {
-    static final String[] fieldItemObjectReader = new String[1024];
-
     public static Class getSupperClass(int fieldReaders) {
         Class objectReaderSuper;
         switch (fieldReaders) {
@@ -43,7 +41,7 @@ public class CodeGenUtils {
                 objectReaderSuper = ObjectReader11.class;
                 break;
             case 12:
-                objectReaderSuper = ObjectReader11.class;
+                objectReaderSuper = ObjectReader12.class;
                 break;
             default:
                 objectReaderSuper = ObjectReaderAdapter.class;
@@ -87,13 +85,7 @@ public class CodeGenUtils {
             case 15:
                 return "fieldReader15";
             default:
-                String base = "fieldReader";
-                final int baseSize = base.length();
-                int size = IOUtils.stringSize(i);
-                char[] chars = new char[baseSize + size];
-                base.getChars(0, baseSize, chars, 0);
-                IOUtils.writeInt32(chars, baseSize, i);
-                return new String(chars);
+                return getName("fieldReader", i);
         }
     }
 
@@ -132,28 +124,54 @@ public class CodeGenUtils {
             case 15:
                 return "objectReader15";
             default:
-                String base = "objectReader";
-                final int baseSize = base.length();
-                int size = IOUtils.stringSize(i);
-                char[] chars = new char[baseSize + size];
-                base.getChars(0, baseSize, chars, 0);
-                IOUtils.writeInt32(chars, baseSize, i);
-                return new String(chars);
+                return getName("objectReader", i);
         }
     }
 
     public static String fieldItemObjectReader(int i) {
-        String fieldName = fieldItemObjectReader[i];
-
-        if (fieldName != null) {
-            return fieldName;
+        switch (i) {
+            case 0:
+                return "itemReader0";
+            case 1:
+                return "itemReader1";
+            case 2:
+                return "itemReader2";
+            case 3:
+                return "itemReader3";
+            case 4:
+                return "itemReader4";
+            case 5:
+                return "itemReader5";
+            case 6:
+                return "itemReader6";
+            case 7:
+                return "itemReader7";
+            case 8:
+                return "itemReader8";
+            case 9:
+                return "itemReader9";
+            case 10:
+                return "itemReader10";
+            case 11:
+                return "itemReader11";
+            case 12:
+                return "itemReader12";
+            case 13:
+                return "itemReader13";
+            case 14:
+                return "itemReader14";
+            case 15:
+                return "itemReader15";
+            default:
+                return getName("itemReader", i);
         }
+    }
 
-        String base = "itemReader";
+    static String getName(String base, int i) {
         final int baseSize = base.length();
         int size = IOUtils.stringSize(i);
-        char[] chars = new char[baseSize + size];
-        base.getChars(0, baseSize, chars, 0);
+        byte[] chars = new byte[baseSize + size];
+        base.getBytes(0, baseSize, chars, 0);
         IOUtils.writeInt32(chars, baseSize, i);
         return new String(chars);
     }
