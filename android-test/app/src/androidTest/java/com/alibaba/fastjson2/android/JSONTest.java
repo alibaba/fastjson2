@@ -13,7 +13,6 @@ public class JSONTest {
 
     @Test
     public void test_parseObject() {
-        System.out.println("android " + JDKUtils.ANDROID);
         User user = JSON.parseObject(
             "{\"id\":1,\"name\":\"kraity\"}", User.class
         );
