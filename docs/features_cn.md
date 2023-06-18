@@ -89,4 +89,11 @@ class Model {
 | WriteNonStringKeyAsString         | 将Map中的非String类型的Key当做String类型输出                                                         |
 | ErrorOnNoneSerializable           | 序列化非Serializable对象时报错                                                                   |
 | WritePairAsJavaBean               | 将 Apache Common 包中的Pair对象当做JavaBean序列化                                                  |
-| LargeObject                       | 这个是一个保护措施，是为了防止序列化有循环引用对象消耗过大资源的保护措施。                                 |
+| BrowserSecure                     | 浏览器安全，将会'<' '>' '(' ')'字符做转义输出                                                          |
+| WriteLongAsString                 | 将Long序列化为String                                                                         |
+| WriteEnumUsingOrdinal             | 序列化Enum使用Ordinal，缺省是name                                                                | 
+| WriteThrowableClassName           | 序列化Throwable时带上类型信息                                                                     |
+| LargeObject                       | 这个是一个保护措施，是为了防止序列化有循环引用对象消耗过大资源的保护措施。                                                   |
+| UnquoteFieldName                  | 不带引号输出Key                                                                               |
+| NotWriteSetClassName              | 当打开WriteClassName时又不想输出Set的类型信息，使用这个Feature                                             |
+| NotWriteNumberClassName           | 当打开WriteClassName时又不想输出Number的类型信息，比如L/S/B/F/D这种后缀，使用这个Feature                          |
