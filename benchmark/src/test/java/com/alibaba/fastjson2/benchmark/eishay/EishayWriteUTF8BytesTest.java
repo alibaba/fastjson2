@@ -18,6 +18,7 @@ public class EishayWriteUTF8BytesTest {
             // zulu11.52.13 : 337 314 289
             // zulu17.40.19 : 317 320 285
             // zulu17.40.19_vec : 267 250
+            // graalvm_17.0.7 207
         }
     }
 

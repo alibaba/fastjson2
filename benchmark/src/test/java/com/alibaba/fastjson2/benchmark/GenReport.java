@@ -7,8 +7,8 @@ import java.util.*;
 public class GenReport {
     public void gen() throws Exception {
         File dir = new File("/Users/wenshao/Work/git/fastjson2/docs/benchmark/");
-        File file = new File(dir, "benchmark_2.0.33_raw.md");
-        File outFile = new File(dir, "benchmark_2.0.33.md");
+        File file = new File(dir, "benchmark_2.0.34_raw.md");
+        File outFile = new File(dir, "benchmark_2.0.34.md");
 
         Map<String, BenchmarkResult> benchResults = new LinkedHashMap<>();
 
@@ -36,6 +36,7 @@ public class GenReport {
             Map<String, BenchmarkResult> benchResults
     ) throws FileNotFoundException {
         PrintStream out = new PrintStream(new FileOutputStream(outFile));
+        int h1 = 0;
         for (BenchmarkResult benchmarkResult : benchResults.values()) {
             if (benchmarkResult.libraryResults.size() == 4) {
                 LibResult fastjson2 = benchmarkResult.libraryResults.get("fastjson2");
@@ -119,7 +120,7 @@ public class GenReport {
                 }
             }
 
-            out.println("## " + benchmarkResult.benchmarkCase);
+            out.println("## " + (++h1) + " " + benchmarkResult.benchmarkCase);
 
             LibResult firLib = benchmarkResult.libraryResults.values().iterator().next();
             Set<String> jdks = firLib.scores.keySet();
@@ -138,6 +139,7 @@ public class GenReport {
             out.print("|");
             out.println();
 
+            Set<String> eccWrited = new HashSet<>();
             for (String jdk : jdks) {
                 double firstScore = benchmarkResult.libraryResults.values().iterator().next().scores.get(jdk);
 
@@ -149,9 +151,17 @@ public class GenReport {
                     out.print(" | ");
                 } else {
                     String ecs = jdk.substring(0, p);
-                    out.print(ecs);
+
+                    if (eccWrited.add(ecs)) {
+                        out.print(ecs);
+                    }
+
                     out.print(" | ");
-                    out.print(jdk.substring(p + 1));
+                    String jdkinfo = jdk.substring(p + 1);
+                    if (jdkinfo.startsWith("graalvm-jdk-")) {
+                        jdkinfo = "graalvm_" + jdkinfo.substring("graalvm-jdk-".length());
+                    }
+                    out.print(jdkinfo);
                 }
 
                 int i = 0;
@@ -170,6 +180,49 @@ public class GenReport {
             }
 
             out.println();
+
+            LinkedHashMap<String, String[]> graalvm17_jdks = new LinkedHashMap<>();
+            String jdk17 = null, graalvm17 = null;
+            String jdk17_info = null, graalvm17_info = null;
+            for (String jdk : jdks) {
+                int p = jdk.indexOf('-');
+                if (p == -1) {
+                    continue;
+                }
+
+                String ecs = jdk.substring(0, p);
+                String[] ecs_jdk17s = graalvm17_jdks.get(ecs);
+                if (ecs_jdk17s == null) {
+                    ecs_jdk17s = new String[2];
+                    graalvm17_jdks.put(ecs, ecs_jdk17s);
+                }
+
+                String jdkinfo = jdk.substring(p + 1);
+                if (jdkinfo.startsWith("jdk-17.")) {
+                    jdk17 = jdk;
+                    jdk17_info = jdkinfo;
+                    ecs_jdk17s[0] = jdk;
+                } else if (jdkinfo.startsWith("graalvm-jdk-17.")) {
+                    graalvm17 = jdk;
+                    graalvm17_info = jdkinfo;
+                    ecs_jdk17s[1] = jdk;
+                }
+            }
+
+            if (jdk17 != null && graalvm17 != null) {
+                out.println();
+                out.println("### " + h1 + ".1 jdk17 vs graalvm17");
+                out.println("|  ecs | library | " + jdk17_info + " | " + graalvm17_info + " | delta |");
+                out.println("|-----|-----|-----|-----|-----|");
+                for (LibResult libResult : benchmarkResult.libraryResults.values()) {
+                    for (Map.Entry<String, String[]> entry : graalvm17_jdks.entrySet()) {
+                        Double score_jdk17 = libResult.scores.get(entry.getValue()[0]);
+                        Double score_graalvm17 = libResult.scores.get(entry.getValue()[1]);
+                        double percent = (score_graalvm17 - score_jdk17) / score_jdk17;
+                        out.println("|  " + entry.getKey() + " |  " + libResult.library + " | " + score_jdk17 + " | " + score_graalvm17 + " | " + new DecimalFormat("#,##0.##%").format(percent) + " |");
+                    }
+                }
+            }
         }
         out.close();
     }

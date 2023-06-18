@@ -46,6 +46,7 @@ public class EishayParseUTF8BytesTest {
             // zulu8.62.0.19 : 963
             // zulu11.52.13 : 1058
             // zulu17.32.13 : 1064
+            // graalvm_17.0.7 600
         }
     }
 
