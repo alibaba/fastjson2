@@ -91,7 +91,7 @@ class JSONWriterUTF16
         startObject = true;
 
         int off = this.off;
-        int minCapacity = off + (pretty ? 2 + indent : 1);
+        int minCapacity = off + (pretty ? 3 + indent : 1);
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -160,7 +160,7 @@ class JSONWriterUTF16
 
         level++;
         int off = this.off;
-        int minCapacity = off + (pretty ? 2 + indent : 1);
+        int minCapacity = off + (pretty ? 3 + indent : 1);
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
