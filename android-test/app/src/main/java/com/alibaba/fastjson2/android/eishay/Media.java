@@ -1,7 +1,5 @@
 package com.alibaba.fastjson2.android.eishay;
 
-import com.alibaba.fastjson2.annotation.JSONField;
-
 import java.util.List;
 
 @SuppressWarnings("serial")
