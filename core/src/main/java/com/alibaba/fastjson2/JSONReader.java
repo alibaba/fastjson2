@@ -3263,6 +3263,7 @@ public abstract class JSONReader
         String dateFormat;
         boolean formatyyyyMMddhhmmss19;
         boolean formatyyyyMMddhhmmssT19;
+        boolean yyyyMMddhhmm16;
         boolean formatyyyyMMdd8;
         boolean formatMillis;
         boolean formatUnixTime;
@@ -3577,6 +3578,9 @@ public abstract class JSONReader
                         formatyyyyMMdd8 = true;
                         hasDay = true;
                         hasHour = false;
+                        break;
+                    case "yyyy-MM-dd HH:mm":
+                        yyyyMMddhhmm16 = true;
                         break;
                     default:
                         hasDay = format.indexOf('d') != -1;
@@ -3917,5 +3921,92 @@ public abstract class JSONReader
         }
 
         return context.provider.getObjectReader(typeName, expectClass, context.features | features);
+    }
+
+    public Byte readInt8() {
+        Integer i = readInt32();
+        if (i == null) {
+            return null;
+        }
+        return i.byteValue();
+    }
+
+    public byte readInt8Value() {
+        int i = readInt32Value();
+        return (byte) i;
+    }
+
+    public Short readInt16() {
+        Integer i = readInt32();
+        if (i == null) {
+            return null;
+        }
+        return i.shortValue();
+    }
+
+    public short readInt16Value() {
+        int i = readInt32Value();
+        return (short) i;
+    }
+
+    public Character readCharacter() {
+        String str = readString();
+        if (str == null || str.isEmpty()) {
+            wasNull = true;
+            return '\0';
+        }
+        return Character.valueOf(str.charAt(0));
+    }
+
+    public final JSONArray readJSONArray() {
+        JSONArray array = new JSONArray();
+        read(array);
+        return array;
+    }
+
+    public final JSONObject readJSONObject() {
+        JSONObject object = new JSONObject();
+        read(object, 0L);
+        return object;
+    }
+
+    /**
+     * @since 2.0.35
+     */
+    public void read(Map map, ObjectReader itemReader, long features) {
+        nextIfObjectStart();
+
+        for (int i = 0; ; ++i) {
+            if (ch == '/') {
+                skipLineComment();
+            }
+
+            if (nextIfObjectEnd()) {
+                break;
+            }
+
+            if (i != 0 && !comma) {
+                throw new JSONException(info());
+            }
+
+            String name = readFieldName();
+            Object value = itemReader.readObject(this, itemReader.getObjectClass(), name, features);
+
+            Object origin = map.put(name, value);
+            if (origin != null) {
+                long contextFeatures = features | context.getFeatures();
+                if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
+                    if (origin instanceof Collection) {
+                        ((Collection) origin).add(value);
+                        map.put(name, origin);
+                    } else {
+                        JSONArray array = JSONArray.of(origin, value);
+                        map.put(name, array);
+                    }
+                }
+            }
+        }
+
+        nextIfComma();
     }
 }
