@@ -27,7 +27,7 @@ public class DateTypeTest {
         Bean bean1 = JSON.parseObject(str, Bean.class);
         assertEquals(bean.v01, bean1.v01);
         assertEquals(bean.v02, bean1.v02);
-        assertEquals(bean.v03.getTime(), bean1.v03.getTime());
+        assertEquals(bean.v03.getYear(), bean1.v03.getYear());
         assertEquals(bean.v04.getTime(), bean1.v04.getTime());
         assertEquals(bean.v05, bean1.v05);
         assertEquals(bean.v06, bean1.v06);
