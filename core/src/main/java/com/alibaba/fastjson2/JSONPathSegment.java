@@ -1106,6 +1106,7 @@ abstract class JSONPathSegment {
     static final class CycleNameSegment
             extends JSONPathSegment {
         static final long HASH_STAR = Fnv.hashCode64("*");
+        static final long HASH_EMPTY = Fnv.hashCode64("");
         final String name;
         final long nameHashCode;
 
@@ -1134,7 +1135,7 @@ abstract class JSONPathSegment {
             List values = new JSONArray();
 
             Consumer action;
-            if (nameHashCode == HASH_STAR && "*".equals(name)) {
+            if (nameHashCode == HASH_STAR || nameHashCode == HASH_EMPTY) {
                 action = new MapRecursive(context, values, 0);
             } else {
                 action = new MapLoop(context, values);
@@ -1249,7 +1250,7 @@ abstract class JSONPathSegment {
 
             @Override
             public void accept(Object value) {
-                if (level > maxLevel) {
+                if (level >= maxLevel) {
                     throw new JSONException("level too large");
                 } else {
                     if (value instanceof Map) {
