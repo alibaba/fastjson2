@@ -21,6 +21,8 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class ObjectWriterProvider
         implements ObjectCodecProvider {
@@ -405,6 +407,7 @@ public class ObjectWriterProvider
                 String.class,
                 java.util.Currency.class,
                 java.util.Date.class,
+                java.util.Calendar.class,
                 java.util.UUID.class,
                 java.util.Locale.class,
                 java.time.LocalTime.class,
@@ -415,6 +418,8 @@ public class ObjectWriterProvider
                 java.time.ZonedDateTime.class,
                 java.time.OffsetDateTime.class,
                 java.time.OffsetTime.class,
+                AtomicInteger.class,
+                AtomicLong.class,
                 String.class,
                 StackTraceElement.class,
                 Collections.emptyList().getClass(),

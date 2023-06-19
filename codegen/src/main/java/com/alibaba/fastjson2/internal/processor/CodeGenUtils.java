@@ -1,7 +1,17 @@
 package com.alibaba.fastjson2.internal.processor;
 
+import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.annotation.JSONField;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.util.IOUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
+
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Set;
 
 public class CodeGenUtils {
     public static Class getSupperClass(int fieldReaders) {
@@ -174,5 +184,110 @@ public class CodeGenUtils {
         base.getBytes(0, baseSize, chars, 0);
         IOUtils.writeInt32(chars, baseSize, i);
         return new String(chars);
+    }
+
+    static boolean isReference(String typeName) {
+        if (typeName.startsWith("java.")) {
+            switch (typeName) {
+                case "java.sql.Date":
+                case "java.sql.Time":
+                case "java.sql.Timestamp":
+                    return false;
+                default:
+                    break;
+            }
+            Class type = TypeUtils.loadClass(typeName);
+            if (type != null) {
+                return !ObjectWriterProvider.isPrimitiveOrEnum(type);
+            }
+        }
+        return true;
+    }
+
+    public static void getFieldInfo(FieldInfo fieldInfo, JSONField jsonField, boolean serialize) {
+        if (jsonField == null) {
+            return;
+        }
+
+        String jsonFieldName = jsonField.name();
+        if (!jsonFieldName.isEmpty()) {
+            fieldInfo.fieldName = jsonFieldName;
+        }
+
+        String jsonFieldFormat = jsonField.format();
+        if (!jsonFieldFormat.isEmpty()) {
+            jsonFieldFormat = jsonFieldFormat.trim();
+            if (jsonFieldFormat.indexOf('T') != -1 && !jsonFieldFormat.contains("'T'")) {
+                jsonFieldFormat = jsonFieldFormat.replaceAll("T", "'T'");
+            }
+
+            fieldInfo.format = jsonFieldFormat;
+        }
+
+        String label = jsonField.label();
+        if (!label.isEmpty()) {
+            label = label.trim();
+            fieldInfo.label = label;
+        }
+
+        String defaultValue = jsonField.defaultValue();
+        if (!defaultValue.isEmpty()) {
+            fieldInfo.defaultValue = defaultValue;
+        }
+
+        String locale = jsonField.locale();
+        if (!locale.isEmpty()) {
+            String[] parts = locale.split("_");
+            if (parts.length == 2) {
+                fieldInfo.locale = new Locale(parts[0], parts[1]);
+            }
+        }
+
+        String[] alternateNames = jsonField.alternateNames();
+        if (alternateNames.length != 0) {
+            if (fieldInfo.alternateNames == null) {
+                fieldInfo.alternateNames = alternateNames;
+            } else {
+                Set<String> nameSet = new LinkedHashSet<>();
+                nameSet.addAll(Arrays.asList(alternateNames));
+                nameSet.addAll(Arrays.asList(fieldInfo.alternateNames));
+                fieldInfo.alternateNames = nameSet.toArray(new String[nameSet.size()]);
+            }
+        }
+
+        if (!fieldInfo.ignore) {
+            if (serialize) {
+                fieldInfo.ignore = !jsonField.serialize();
+            } else {
+                fieldInfo.ignore = !jsonField.deserialize();
+            }
+        }
+
+        for (JSONReader.Feature feature : jsonField.deserializeFeatures()) {
+            fieldInfo.features |= feature.mask;
+        }
+
+        int ordinal = jsonField.ordinal();
+        if (ordinal != 0) {
+            fieldInfo.ordinal = ordinal;
+        }
+
+        boolean value = jsonField.value();
+        if (value) {
+            fieldInfo.features |= FieldInfo.VALUE_MASK;
+        }
+
+        if (jsonField.unwrapped()) {
+            fieldInfo.features |= FieldInfo.UNWRAPPED_MASK;
+        }
+
+        if (jsonField.required()) {
+            fieldInfo.required = true;
+        }
+
+        String schema = jsonField.schema().trim();
+        if (!schema.isEmpty()) {
+            fieldInfo.schema = schema;
+        }
     }
 }

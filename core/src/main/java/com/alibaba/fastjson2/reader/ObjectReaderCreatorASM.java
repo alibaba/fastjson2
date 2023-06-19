@@ -1918,6 +1918,12 @@ public class ObjectReaderCreatorASM
                 mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "trim", "()Ljava/lang/String;", false);
             }
             mw.visitLabel(null_);
+        } else if (fieldClass == Byte.class) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readInt8", "()Ljava/lang/Byte;", false);
+        } else if (fieldClass == Short.class) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readInt16", "()Ljava/lang/Short;", false);
         } else if (fieldClass == Integer.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readInt32", "()Ljava/lang/Integer;", false);
@@ -1936,6 +1942,9 @@ public class ObjectReaderCreatorASM
         } else if (fieldClass == BigInteger.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readBigInteger", "()Ljava/math/BigInteger;", false);
+        } else if (fieldClass == Number.class) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readNumber", "()Ljava/lang/Number;", false);
         } else if (fieldClass == UUID.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readUUID", "()Ljava/util/UUID;", false);
@@ -1945,6 +1954,12 @@ public class ObjectReaderCreatorASM
         } else if (fieldClass == OffsetDateTime.class && fieldReader.format == null) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
             mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readOffsetDateTime", "()Ljava/time/OffsetDateTime;", false);
+        } else if (fieldClass == Date.class && fieldReader.format == null) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readDate", "()Ljava/util/Date;", false);
+        } else if (fieldClass == Calendar.class && fieldReader.format == null) {
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readCalendar", "()Ljava/util/Calendar;", false);
         } else {
             Label endObject_ = new Label();
 

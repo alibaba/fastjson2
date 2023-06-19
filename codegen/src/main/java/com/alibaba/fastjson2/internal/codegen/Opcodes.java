@@ -270,33 +270,37 @@ public class Opcodes {
             }
 
             buf.append('(');
+            int start = buf.length();
             boolean newLine = args.length > 3;
             if (newLine) {
-                buf.append("\n\t");
-                for (int i = 0; i < indent; i++) {
-                    buf.append('\t');
-                }
+                buf.append('\n');
+                mw.ident(buf, indent + 2);
             }
 
             for (int i = 0; i < args.length; i++) {
                 if (i != 0) {
                     if (newLine) {
-                        buf.append(",\n\t");
-                        for (int j = 0; j < indent; j++) {
-                            buf.append('\t');
-                        }
+                        buf.append(",\n");
+                        mw.ident(buf, indent + 2);
                     } else {
                         buf.append(", ");
                     }
                 }
-                args[i].toString(mw, buf, indent + 1);
+                args[i].toString(mw, buf, indent + 2);
             }
 
+            boolean hasNewLine = buf.toString().indexOf('\n', start) != -1;
             if (newLine) {
-                buf.append("\n");
-                for (int i = 0; i < indent; i++) {
-                    buf.append('\t');
+                buf.append('\n');
+                mw.ident(buf, indent);
+            } else if (hasNewLine) {
+                for (int i = 0; i < indent + 2; i++) {
+                    buf.insert(start, '\t');
                 }
+                buf.insert(start, '\n');
+
+                buf.append('\n');
+                mw.ident(buf, indent);
             }
             buf.append(')');
         }
@@ -395,25 +399,19 @@ public class Opcodes {
             if (values != null && values.length > 0) {
                 buf.append('{');
 
-                buf.append("\n\t");
-                for (int i = 0; i < indent; i++) {
-                    buf.append('\t');
-                }
+                buf.append('\n');
+                mw.ident(buf, indent + 2);
 
                 for (int i = 0; i < values.length; i++) {
                     if (i != 0) {
-                        buf.append(",\n\t");
-                        for (int j = 0; j < indent; j++) {
-                            buf.append('\t');
-                        }
+                        buf.append(",\n");
+                        mw.ident(buf, indent + 2);
                     }
-                    values[i].toString(mw, buf, indent + 1);
+                    values[i].toString(mw, buf, indent + 2);
                 }
 
-                buf.append("\n");
-                for (int i = 0; i < indent; i++) {
-                    buf.append('\t');
-                }
+                buf.append('\n');
+                mw.ident(buf, indent);
                 buf.append('}');
             }
         }

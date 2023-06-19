@@ -592,6 +592,32 @@ public abstract class JSONReader
 
     public abstract boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5);
 
+    public Byte readInt8() {
+        Integer i = readInt32();
+        if (i == null) {
+            return null;
+        }
+        return i.byteValue();
+    }
+
+    public byte readInt8Value() {
+        int i = readInt32Value();
+        return (byte) i;
+    }
+
+    public Short readInt16() {
+        Integer i = readInt32();
+        if (i == null) {
+            return null;
+        }
+        return i.shortValue();
+    }
+
+    public short readInt16Value() {
+        int i = readInt32Value();
+        return (short) i;
+    }
+
     public abstract Integer readInt32();
 
     public final int getInt32Value() {
@@ -1189,6 +1215,67 @@ public abstract class JSONReader
         throw new JSONException("TODO : " + ch);
     }
 
+    public OffsetTime readOffsetTime() {
+        throw new JSONException("TODO");
+    }
+
+    public Calendar readCalendar() {
+        if (isString()) {
+            long millis = readMillisFromString();
+            if (millis == 0 && wasNull) {
+                return null;
+            }
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(millis);
+            return calendar;
+        }
+
+        if (readIfNull()) {
+            return null;
+        }
+
+        long millis = readInt64Value();
+        if (context.formatUnixTime) {
+            millis *= 1000;
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(millis);
+        return calendar;
+    }
+
+    public Date readDate() {
+        if (isInt()) {
+            long millis = readInt64Value();
+            return new Date(millis);
+        }
+
+        if (readIfNull()) {
+            return null;
+        }
+
+        if (nextIfNullOrEmptyString()) {
+            return null;
+        }
+
+        long millis;
+        if (isTypeRedirect() && nextIfMatchIdent('"', 'v', 'a', 'l', '"')) {
+            nextIfMatch(':');
+            millis = readInt64Value();
+            nextIfObjectEnd();
+            setTypeRedirect(false);
+        } else {
+            millis = readMillisFromString();
+        }
+
+        if (millis == 0 && wasNull) {
+            return null;
+        }
+
+        return new Date(millis);
+    }
+
     public LocalTime readLocalTime() {
         if (nextIfNull()) {
             return null;
@@ -1237,7 +1324,7 @@ public abstract class JSONReader
             return zdt.toLocalTime();
         }
 
-        throw new JSONException("not support len : " + len);
+        throw new JSONException("not support len : " + str);
     }
 
     protected abstract int getStringLength();
@@ -1558,6 +1645,15 @@ public abstract class JSONReader
         return str.charAt(0);
     }
 
+    public Character readCharacter() {
+        String str = readString();
+        if (str == null || str.isEmpty()) {
+            wasNull = true;
+            return '\0';
+        }
+        return Character.valueOf(str.charAt(0));
+    }
+
     public abstract void readNull();
 
     public abstract boolean readIfNull();
@@ -1646,6 +1742,52 @@ public abstract class JSONReader
         } else {
             throw new JSONException("read object not support");
         }
+    }
+
+    /**
+     * @since 2.0.35
+     */
+    public void read(Map object, ObjectReader itemReader, long features) {
+        nextIfObjectStart();
+        Map map;
+        if (object instanceof Wrapper) {
+            map = ((Wrapper) object).unwrap(Map.class);
+        } else {
+            map = object;
+        }
+
+        for (int i = 0; ; ++i) {
+            if (ch == '/') {
+                skipLineComment();
+            }
+
+            if (nextIfObjectEnd()) {
+                break;
+            }
+
+            if (i != 0 && !comma) {
+                throw new JSONException(info());
+            }
+
+            String name = readFieldName();
+            Object value = itemReader.readObject(this, itemReader.getObjectClass(), name, features);
+
+            Object origin = map.put(name, value);
+            if (origin != null) {
+                long contextFeatures = features | context.getFeatures();
+                if ((contextFeatures & JSONReader.Feature.DuplicateKeyValueAsArray.mask) != 0) {
+                    if (origin instanceof Collection) {
+                        ((Collection) origin).add(value);
+                        map.put(name, origin);
+                    } else {
+                        JSONArray array = JSONArray.of(origin, value);
+                        map.put(name, array);
+                    }
+                }
+            }
+        }
+
+        nextIfComma();
     }
 
     public void read(Map object, long features) {
@@ -2128,6 +2270,18 @@ public abstract class JSONReader
         if (comma = (ch == ',')) {
             next();
         }
+    }
+
+    public final JSONArray readJSONArray() {
+        JSONArray array = new JSONArray();
+        read(array);
+        return array;
+    }
+
+    public final JSONObject readJSONObject() {
+        JSONObject object = new JSONObject();
+        read(object, 0L);
+        return object;
     }
 
     public List readArray() {
@@ -3548,6 +3702,7 @@ public abstract class JSONReader
         String dateFormat;
         boolean formatyyyyMMddhhmmss19;
         boolean formatyyyyMMddhhmmssT19;
+        boolean yyyyMMddhhmm16;
         boolean formatyyyyMMdd8;
         boolean formatMillis;
         boolean formatUnixTime;
@@ -3857,6 +4012,9 @@ public abstract class JSONReader
                         hasDay = true;
                         hasHour = false;
                         break;
+                    case "yyyy-MM-dd HH:mm":
+                        yyyyMMddhhmm16 = true;
+                        break;
                     default:
                         hasDay = format.indexOf('d') != -1;
                         hasHour = format.indexOf('H') != -1
@@ -3865,6 +4023,8 @@ public abstract class JSONReader
                                 || format.indexOf('k') != -1;
                         break;
                 }
+
+                // this.yyyyMMddhhmm16 = "yyyy-MM-dd HH:mm".equals(format);
             }
 
             if (!Objects.equals(this.dateFormat, format)) {

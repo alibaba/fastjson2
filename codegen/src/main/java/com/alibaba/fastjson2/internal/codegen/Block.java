@@ -58,6 +58,12 @@ public class Block {
         return stmt;
     }
 
+    public IfStmt ifNotNull(Opcodes.Op testValue) {
+        IfStmt stmt = new IfStmt(ne(testValue, ldc(null)));
+        statements.add(stmt);
+        return stmt;
+    }
+
     public void newLine() {
         statements.add(new Empty());
     }
@@ -385,7 +391,13 @@ public class Block {
             buf.append(type).append(' ');
             buf.append(name.name);
             if (initValue != null) {
-                buf.append(" = ");
+                if (type.length() >= 16) {
+                    buf.append('\n');
+                    mw.ident(buf, indent + 2);
+                    buf.append("= ");
+                } else {
+                    buf.append(" = ");
+                }
                 initValue.toString(mw, buf, indent);
             }
             buf.append(';');

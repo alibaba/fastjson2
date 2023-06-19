@@ -364,4 +364,25 @@ public abstract class ObjectReaderBean<T>
     public void setAutoTypeBeforeHandler(JSONReader.AutoTypeBeforeHandler autoTypeBeforeHandler) {
         this.autoTypeBeforeHandler = autoTypeBeforeHandler;
     }
+
+    protected boolean readFieldValueWithLCase(
+            JSONReader jsonReader,
+            Object object,
+            long hashCode64,
+            long features2
+    ) {
+        if (jsonReader.isSupportSmartMatch(features2)) {
+            long hashCode64L = jsonReader.getNameHashCodeLCase();
+            if (hashCode64L != hashCode64) {
+                com.alibaba.fastjson2.reader.FieldReader fieldReader
+                        = this.getFieldReaderLCase(hashCode64L);
+                if (fieldReader != null) {
+                    fieldReader.readFieldValue(jsonReader, object);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }
