@@ -2,8 +2,11 @@ package com.alibaba.fastjson2.reader;
 
 import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.function.*;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -241,6 +244,30 @@ public class ObjectReaders {
                 null,
                 null,
                 function
+        );
+    }
+
+    public static FieldReader fieldReaderWithField(String fieldName, Class objectClass) {
+        Field field = BeanUtils.getDeclaredField(objectClass, fieldName);
+        return ObjectReaderCreator.INSTANCE.createFieldReader(
+                fieldName,
+                field
+        );
+    }
+
+    public static FieldReader fieldReaderWithField(String name, Class objectClass, String fieldName) {
+        Field field = BeanUtils.getDeclaredField(objectClass, fieldName);
+        return ObjectReaderCreator.INSTANCE.createFieldReader(
+                name,
+                field
+        );
+    }
+
+    public static FieldReader fieldReaderWithMethod(String name, Class objectClass, String methodName) {
+        Method method = BeanUtils.getSetter(objectClass, methodName);
+        return ObjectReaderCreator.INSTANCE.createFieldReader(
+                name,
+                method
         );
     }
 }

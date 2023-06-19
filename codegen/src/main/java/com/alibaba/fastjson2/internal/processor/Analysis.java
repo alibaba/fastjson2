@@ -1,7 +1,9 @@
 package com.alibaba.fastjson2.internal.processor;
 
 import com.alibaba.fastjson2.annotation.JSONCompiled;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.annotation.JSONType;
+import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.BeanUtils;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -123,7 +125,18 @@ public class Analysis {
                         continue;
                     }
 
+                    FieldInfo fieldInfo = new FieldInfo();
+
                     String name = field.getSimpleName().toString();
+                    JSONField[] annotations = field.getAnnotationsByType(JSONField.class);
+                    for (JSONField annotation : annotations) {
+                        CodeGenUtils.getFieldInfo(fieldInfo, annotation, false);
+                    }
+
+                    if (fieldInfo.fieldName != null) {
+                        name = fieldInfo.fieldName;
+                    }
+
                     info.getAttributeByField(name, field);
                 }
 

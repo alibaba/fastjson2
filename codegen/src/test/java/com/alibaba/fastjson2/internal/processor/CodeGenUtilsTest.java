@@ -2,7 +2,10 @@ package com.alibaba.fastjson2.internal.processor;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class CodeGenUtilsTest {
     @Test
@@ -32,5 +35,10 @@ public class CodeGenUtilsTest {
         for (int i = 1; i <= 10000; i++) {
             assertEquals("itemReader" + i, CodeGenUtils.fieldItemObjectReader(i));
         }
+    }
+
+    @Test
+    public void isReference() {
+        assertFalse(CodeGenUtils.isReference(AtomicInteger.class.getName()));
     }
 }

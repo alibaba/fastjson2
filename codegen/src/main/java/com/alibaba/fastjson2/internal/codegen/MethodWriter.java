@@ -36,13 +36,13 @@ public class MethodWriter
         boolean newLine = paramTypes.length > 3;
         buf.append('(');
         if (newLine) {
-            buf.append("\n\t\t");
+            buf.append("\n\t\t\t");
         }
 
         for (int i = 0; i < paramTypes.length; i++) {
             if (i != 0) {
                 if (newLine) {
-                    buf.append(",\n\t\t");
+                    buf.append(",\n\t\t\t");
                 } else {
                     buf.append(", ");
                 }
