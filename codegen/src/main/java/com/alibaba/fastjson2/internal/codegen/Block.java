@@ -248,9 +248,17 @@ public class Block {
                 mw.ident(buf, indent);
 
                 indent++;
-                buf.append("case ").append(hashKeys[i]).append(": {").append('\n');
 
                 List<Statement> statements = lables[i].statements;
+                boolean brace = statements.stream().anyMatch(e -> e instanceof DeclareStmt);
+
+                buf.append("case ").append(hashKeys[i]);
+                if (brace) {
+                    buf.append(": {\n");
+                } else {
+                    buf.append(":\n");
+                }
+
                 for (int j = 0; j < statements.size(); j++) {
                     if (j != 0) {
                         buf.append('\n');
@@ -261,17 +269,27 @@ public class Block {
                 buf.append('\n');
                 indent--;
 
-                mw.ident(buf, indent);
-                buf.append("}\n");
+                if (brace) {
+                    mw.ident(buf, indent);
+                    buf.append("}\n");
+                }
+
                 indent--;
             }
 
             indent++;
             mw.ident(buf, indent);
-            buf.append("default : {\n");
+
+            List<Statement> statements = dflt.statements;
+            boolean brace = statements.stream().anyMatch(e -> e instanceof DeclareStmt);
+
+            if (brace) {
+                buf.append("default : {\n");
+            } else {
+                buf.append("default :\n");
+            }
 
             indent++;
-            List<Statement> statements = dflt.statements;
             for (int j = 0; j < statements.size(); j++) {
                 if (j != 0) {
                     buf.append('\n');
@@ -286,8 +304,10 @@ public class Block {
             buf.append("break;\n");
             indent--;
 
-            mw.ident(buf, indent);
-            buf.append("}\n");
+            if (brace) {
+                mw.ident(buf, indent);
+                buf.append("}\n");
+            }
 
             indent--;
 

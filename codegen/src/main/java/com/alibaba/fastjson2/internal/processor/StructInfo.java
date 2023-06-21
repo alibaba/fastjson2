@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 public class StructInfo {
     final int modifiers;
     final boolean referenceDetect;
+    final boolean smartMatch;
+
     String typeKey;
     int readerFeatures;
     int writerFeatures;
@@ -43,7 +45,7 @@ public class StructInfo {
             }
         }
 
-        boolean referenceDetect = true;
+        boolean referenceDetect = true, smartMatch = true;
         if (anntation != null) {
             for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : anntation.getElementValues().entrySet()) {
                 String annFieldName = entry.getKey().getSimpleName().toString();
@@ -52,10 +54,16 @@ public class StructInfo {
                     case "referenceDetect":
                         referenceDetect = (Boolean) value.getValue();
                         break;
+                    case "smartMatch":
+                        smartMatch = (Boolean) value.getValue();
+                        break;
+                    default:
+                        break;
                 }
             }
         }
         this.referenceDetect = referenceDetect;
+        this.smartMatch = smartMatch;
     }
 
     public AttributeInfo getAttributeByField(String name, VariableElement field) {
