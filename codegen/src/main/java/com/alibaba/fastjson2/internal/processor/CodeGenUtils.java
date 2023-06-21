@@ -8,12 +8,56 @@ import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 
 public class CodeGenUtils {
+    static Map<String, String> readDirectMap = new HashMap<>();
+    static {
+        readDirectMap.put("boolean", "readBoolValue");
+        readDirectMap.put("char", "readCharValue");
+
+        readDirectMap.put("byte", "readInt8Value");
+        readDirectMap.put("short", "readInt16Value");
+        readDirectMap.put("int", "readInt32Value");
+        readDirectMap.put("long", "readInt64Value");
+        readDirectMap.put("float", "readFloatValue");
+        readDirectMap.put("double", "readDoubleValue");
+
+        readDirectMap.put("java.lang.Boolean", "readBool");
+        readDirectMap.put("java.lang.Character", "readCharacter");
+
+        readDirectMap.put("java.lang.Byte", "readInt8");
+        readDirectMap.put("java.lang.Short", "readInt16");
+        readDirectMap.put("java.lang.Integer", "readInt32");
+        readDirectMap.put("java.lang.Long", "readInt64");
+        readDirectMap.put("java.lang.Float", "readFloat");
+        readDirectMap.put("java.lang.Double", "readDouble");
+        readDirectMap.put("java.lang.Number", "readNumber");
+
+        readDirectMap.put("java.lang.String", "readString");
+
+        readDirectMap.put("java.math.BigInteger", "readBigInteger");
+        readDirectMap.put("java.math.BigDecimal", "readBigDecimal");
+
+        readDirectMap.put("java.util.UUID", "readUUID");
+        readDirectMap.put("java.util.Date", "readDate");
+        readDirectMap.put("java.util.Calendar", "readCalendar");
+
+        readDirectMap.put("java.time.LocalDate", "readLocalDate");
+        readDirectMap.put("java.time.LocalTime", "readLocalTime");
+        readDirectMap.put("java.time.LocalDateTime", "readLocalDateTime");
+        readDirectMap.put("java.time.ZonedDateTime", "readZonedDateTime");
+        readDirectMap.put("java.time.OffsetDateTime", "readOffsetDateTime");
+        readDirectMap.put("java.time.OffsetTime", "readOffsetTime");
+
+        readDirectMap.put("int[]", "readInt32ValueArray");
+        readDirectMap.put("long[]", "readInt64ValueArray");
+        readDirectMap.put("java.lang.String[]", "readStringArray");
+
+        readDirectMap.put("com.alibaba.fastjson2.JSONObject", "readJSONObject");
+        readDirectMap.put("com.alibaba.fastjson2.JSONArray", "readJSONArray");
+    }
+
     public static Class getSupperClass(int fieldReaders) {
         Class objectReaderSuper;
         switch (fieldReaders) {
@@ -187,15 +231,32 @@ public class CodeGenUtils {
     }
 
     static boolean isReference(String typeName) {
+        switch (typeName) {
+            case "byte":
+            case "short":
+            case "int":
+            case "long":
+            case "float":
+            case "double":
+            case "boolean":
+            case "char":
+            case "byte[]":
+            case "short[]":
+            case "int[]":
+            case "long[]":
+            case "float[]":
+            case "double[]":
+            case "boolean[]":
+            case "char[]":
+            case "java.sql.Date":
+            case "java.sql.Time":
+            case "java.sql.Timestamp":
+                return false;
+            default:
+                break;
+        }
+
         if (typeName.startsWith("java.")) {
-            switch (typeName) {
-                case "java.sql.Date":
-                case "java.sql.Time":
-                case "java.sql.Timestamp":
-                    return false;
-                default:
-                    break;
-            }
             Class type = TypeUtils.loadClass(typeName);
             if (type != null) {
                 return !ObjectWriterProvider.isPrimitiveOrEnum(type);
@@ -289,5 +350,13 @@ public class CodeGenUtils {
         if (!schema.isEmpty()) {
             fieldInfo.schema = schema;
         }
+    }
+
+    public static boolean supportReadDirect(String type) {
+        return readDirectMap.containsKey(type);
+    }
+
+    public static String getReadDirectMethod(String type) {
+        return readDirectMap.get(type);
     }
 }

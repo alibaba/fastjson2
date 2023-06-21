@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.internal.processor;
 
 import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.internal.codegen.Block;
 import com.alibaba.fastjson2.internal.codegen.ClassWriter;
@@ -350,14 +351,16 @@ public class JSONCompiledAnnotationProcessor
             whileStmt.newLine();
         }
 
-        whileStmt.ifStmt(invoke(THIS, "readFieldValueWithLCase", jsonReader, object, hashCode64, features2))
-                .continueStmt(forLabel);
-        whileStmt.newLine();
+        if (si.smartMatch) {
+            whileStmt.ifStmt(invoke(THIS, "readFieldValueWithLCase", jsonReader, object, hashCode64, features2))
+                    .continueStmt(forLabel);
+            whileStmt.newLine();
+        }
 
         whileStmt.stmt(invoke(null, "processExtra", jsonReader, object));
 
-        mw.invoke(jsonReader, "nextIfComma");
         mw.newLine();
+        mw.invoke(jsonReader, "nextIfComma");
 
         mw.newLine();
         mw.ret(object);
@@ -373,196 +376,43 @@ public class JSONCompiledAnnotationProcessor
             String continueLabel,
             boolean jsonb
     ) {
-        Op value;
+        Op value = null;
         String type = field.type.toString();
-        switch (type) {
-            case "boolean":
-                value = Opcodes.invoke(jsonReader, "readBoolValue");
-                break;
-            case "byte":
-                value = invoke(jsonReader, "readInt8Value");
-                break;
-            case "short":
-                value = invoke(jsonReader, "readInt16Value");
-                break;
-            case "int":
-                value = Opcodes.invoke(jsonReader, "readInt32Value");
-                break;
-            case "long":
-                value = Opcodes.invoke(jsonReader, "readInt64Value");
-                break;
-            case "float":
-                value = Opcodes.invoke(jsonReader, "readFloatValue");
-                break;
-            case "double":
-                value = Opcodes.invoke(jsonReader, "readDoubleValue");
-                break;
-            case "char":
-                value = invoke(jsonReader, "readCharValue");
-                break;
-            case "int[]":
-                value = invoke(jsonReader, "readInt32ValueArray");
-                break;
-            case "long[]":
-                value = invoke(jsonReader, "readInt64ValueArray");
-                break;
-            case "java.lang.String":
-                value = Opcodes.invoke(jsonReader, "readString");
-                break;
-            case "java.lang.Boolean":
-                value = invoke(jsonReader, "readBool");
-                break;
-            case "java.lang.Byte":
-                value = invoke(jsonReader, "readInt8");
-                break;
-            case "java.lang.Character":
-                value = invoke(jsonReader, "readCharacter");
-                break;
-            case "java.lang.Short":
-                value = invoke(jsonReader, "readInt16");
-                break;
-            case "java.lang.Integer":
-                value = invoke(jsonReader, "readInt32");
-                break;
-            case "java.lang.Long":
-                value = invoke(jsonReader, "readInt64");
-                break;
-            case "java.lang.Float":
-                value = invoke(jsonReader, "readFloat");
-                break;
-            case "java.lang.Double":
-                value = invoke(jsonReader, "readDouble");
-                break;
-            case "java.lang.Number":
-                value = invoke(jsonReader, "readNumber");
-                break;
-            case "java.math.BigDecimal":
-                value = invoke(jsonReader, "readBigDecimal");
-                break;
-            case "java.math.BigInteger":
-                value = invoke(jsonReader, "readBigInteger");
-                break;
-            case "java.util.UUID":
-                value = invoke(jsonReader, "readUUID");
-                break;
-            case "java.lang.String[]":
-                value = invoke(jsonReader, "readStringArray");
-                break;
-            case "java.util.Date":
-                value = invoke(jsonReader, "readDate");
-                break;
-            case "java.util.Calendar":
-                value = invoke(jsonReader, "readCalendar");
-                break;
-            case "java.time.LocalDate":
-                value = invoke(jsonReader, "readLocalDate");
-                break;
-            case "java.time.LocalTime":
-                value = invoke(jsonReader, "readLocalTime");
-                break;
-            case "java.time.LocalDateTime":
-                value = invoke(jsonReader, "readLocalDateTime");
-                break;
-            case "java.time.ZonedDateTime":
-                value = invoke(jsonReader, "readZonedDateTime");
-                break;
-            case "java.time.OffsetDateTime":
-                value = invoke(jsonReader, "readOffsetDateTime");
-                break;
-            case "java.time.OffsetTime":
-                value = invoke(jsonReader, "readOffsetTime");
-                break;
-            default:
-                boolean referenceDetect = info.referenceDetect;
-                if (referenceDetect) {
-                    referenceDetect = CodeGenUtils.isReference(type);
-                }
-                if (referenceDetect) {
-                    Block.IfStmt isRef = mw.ifStmt(invoke(jsonReader, "isReference"));
 
-                    OpName ref = var("ref");
-                    isRef.declare(String.class, ref, invoke(jsonReader, "readReference"));
-                    isRef.stmt(invoke(var(CodeGenUtils.fieldReader(i)), "addResolveTask", jsonReader, object, ref));
-                    isRef.continueStmt(continueLabel);
-                }
+        boolean referenceDetect = info.referenceDetect;
+        if (referenceDetect) {
+            referenceDetect = CodeGenUtils.isReference(type);
+        }
 
-                if (!referenceDetect) {
-                    if ("com.alibaba.fastjson2.JSONArray".equals(type)) {
-                        value = invoke(jsonReader, "readJSONArray");
-                        break;
-                    }
-                    if ("com.alibaba.fastjson2.JSONObject".equals(type)) {
-                        value = invoke(jsonReader, "readJSONObject");
-                        break;
-                    }
-                }
+        if (referenceDetect) {
+            Block.IfStmt isRef = mw.ifStmt(invoke(jsonReader, "isReference"));
 
-                OpName fieldValue = var(field.name);
-                mw.declare(type, fieldValue);
+            OpName ref = var("ref");
+            isRef.declare(String.class, ref, invoke(jsonReader, "readReference"));
+            isRef.stmt(invoke(var(CodeGenUtils.fieldReader(i)), "addResolveTask", jsonReader, object, ref));
+            isRef.continueStmt(continueLabel);
+            mw.newLine();
+        }
 
-                boolean list = type.startsWith("java.util.List<");
-                if (list & !referenceDetect) {
-                    String itemType = type.substring(15, type.length() - 1);
-                    boolean itemTypeIsClass = itemType.indexOf('<') == -1;
-                    if (itemTypeIsClass) {
-                        Block.IfStmt nextIfNull = mw.ifStmt(invoke(jsonReader, "nextIfNull"));
-                        nextIfNull.stmt(assign(fieldValue, ldc(null)));
-                        Block nextIfNullElse = nextIfNull.elseStmt();
-                        nextIfNullElse.stmt(assign(fieldValue, allocate(ArrayList.class)));
-                        boolean stringItemClass = "java.lang.String".equals(itemType);
-                        OpName itemReader = var(CodeGenUtils.fieldItemObjectReader(i));
-                        if (!stringItemClass) {
-                            nextIfNullElse.ifNull(itemReader).stmt(
-                                    assign(
-                                            itemReader,
-                                            invoke(getField(THIS, fieldReader(i)), "getItemObjectReader", jsonReader)
-                                    )
-                            );
-                        }
+        String readDirectMethod = CodeGenUtils.getReadDirectMethod(type);
+        if (readDirectMethod != null) {
+            value = Opcodes.invoke(jsonReader, readDirectMethod);
+        } else {
+            String fieldName = field.name;
+            OpName fieldValue = var(fieldName);
+            mw.declare(type, fieldValue);
 
-                        Block.IfStmt nextIfMatch = nextIfNullElse.ifStmt(invoke(jsonReader, "nextIfArrayStart"));
-                        Block.WhileStmt whileStmt = nextIfMatch.whileStmtStmt(not(invoke(jsonReader, "nextIfArrayEnd")));
-                        Op item;
-                        if (stringItemClass) {
-                            item = invoke(jsonReader, "readString");
-                        } else {
-                            item = cast(invoke(itemReader, "readObject", jsonReader, ldc(null), ldc(null), ldc(0L)), itemType);
-                        }
-                        whileStmt.stmt(invoke(fieldValue, "add", item));
+            boolean list = type.startsWith("java.util.List<");
+            boolean mapStr = type.startsWith("java.util.Map<java.lang.String,");
 
-                        value = fieldValue;
-                        break;
-                    }
-                }
+            if (list) {
+                value = genReadFieldValueList(mw, i, jsonReader, type, fieldName, value, fieldValue, referenceDetect);
+            } else if (mapStr) {
+                genReadFieldValueMap(mw, i, jsonReader, type, fieldName, fieldValue, referenceDetect);
+                value = fieldValue;
+            }
 
-                boolean mapStr = type.startsWith("java.util.Map<java.lang.String,");
-                if (mapStr & !referenceDetect) {
-                    String itemType = type.substring(31, type.length() - 1);
-                    boolean itemTypeIsClass = itemType.indexOf('<') == -1;
-//                    if (itemTypeIsClass) {
-//                    }
-                    Block.IfStmt nextIfNull = mw.ifStmt(invoke(jsonReader, "nextIfNull"));
-                    nextIfNull.stmt(assign(fieldValue, ldc(null)));
-                    Block nextIfNullElse = nextIfNull.elseStmt();
-                    OpName itemReader = var(CodeGenUtils.fieldItemObjectReader(i));
-                    nextIfNullElse.ifNull(itemReader).stmt(
-                            assign(
-                                    itemReader,
-                                    invoke(jsonReader, "getObjectReader", getStatic(itemType, "class"))
-                            )
-                    );
-                    nextIfNullElse.stmt(assign(fieldValue, allocate(HashMap.class)));
-                    nextIfNullElse.invoke(
-                            jsonReader,
-                            "read",
-                            fieldValue,
-                            itemReader,
-                            var("features2")
-                    );
-                    value = fieldValue;
-                    break;
-                }
-
+            if (value == null) {
                 mw.ifNull(var(CodeGenUtils.fieldObjectReader(i)))
                         .putField(
                                 CodeGenUtils.fieldObjectReader(i),
@@ -584,9 +434,9 @@ public class JSONCompiledAnnotationProcessor
                                 )
                         )
                 );
+            }
 
-                value = fieldValue;
-                break;
+            value = fieldValue;
         }
 
         if (field.setMethod != null) {
@@ -596,5 +446,163 @@ public class JSONCompiledAnnotationProcessor
         } else {
             throw new JSONException("TODO");
         }
+    }
+
+    private static Op genReadFieldValueList(
+            Block mw,
+            int i,
+            Op jsonReader,
+            String type,
+            String fieldName,
+            Op value,
+            OpName fieldValue,
+            boolean referenceDetect
+    ) {
+        String itemType = type.substring(15, type.length() - 1);
+        boolean itemTypeIsClass = itemType.indexOf('<') == -1;
+        if (itemTypeIsClass) {
+            Block.IfStmt nextIfNull = mw.ifStmt(invoke(jsonReader, "nextIfNull"));
+            nextIfNull.stmt(assign(fieldValue, ldc(null)));
+            Block nextIfNullElse = nextIfNull.elseStmt();
+            nextIfNullElse.stmt(assign(fieldValue, allocate(ArrayList.class)));
+
+            String readDirectMethod = CodeGenUtils.getReadDirectMethod(itemType);
+            OpName itemReader = var(CodeGenUtils.fieldItemObjectReader(i));
+            if (readDirectMethod == null) {
+                nextIfNullElse.ifNull(itemReader).stmt(
+                        assign(
+                                itemReader,
+                                invoke(getField(THIS, fieldReader(i)), "getItemObjectReader", jsonReader)
+                        )
+                );
+            }
+
+            if (referenceDetect) {
+                referenceDetect = CodeGenUtils.isReference(itemType);
+            }
+
+            OpName for_i;
+            if (fieldName.equals("i")) {
+                for_i = var("j");
+            } else {
+                for_i = var("i");
+            }
+            Block.IfStmt nextIfMatch = nextIfNullElse.ifStmt(invoke(jsonReader, "nextIfArrayStart"));
+            Block whileStmt;
+            if (referenceDetect) {
+                whileStmt = nextIfMatch.forStmt(int.class, assign(for_i, ldc(0)), not(invoke(jsonReader, "nextIfArrayEnd")), increment(for_i));
+            } else {
+                whileStmt = nextIfMatch.whileStmtStmt(not(invoke(jsonReader, "nextIfArrayEnd")));
+            }
+
+            Op item;
+            if (readDirectMethod != null) {
+                item = invoke(jsonReader, readDirectMethod);
+            } else {
+                item = cast(invoke(itemReader, "readObject", jsonReader, ldc(null), ldc(null), ldc(0L)), itemType);
+            }
+
+            if (referenceDetect) {
+                OpName listItem = var(fieldName + "_item");
+
+                Block.IfStmt isReference = whileStmt.ifStmt(invoke(jsonReader, "isReference"));
+                OpName ref = var("ref");
+                isReference.declare(String.class, ref, invoke(jsonReader, "readReference"));
+                isReference.invoke(jsonReader, "addResolveTask", fieldValue, for_i, invokeStatic(JSONPath.class, "of", ref));
+                isReference.stmt(invoke(fieldValue, "add", ldc(null)));
+                isReference.continueStmt();
+                whileStmt.newLine();
+
+                whileStmt.declare(itemType, listItem, item);
+                item = listItem;
+            }
+
+            whileStmt.stmt(invoke(fieldValue, "add", item));
+
+            value = fieldValue;
+        }
+        return value;
+    }
+
+    private static void genReadFieldValueMap(
+            Block mw, int i,
+            Op jsonReader,
+            String type,
+            String fieldName,
+            OpName fieldValue,
+            boolean referenceDetect
+    ) {
+        // TODO referenceDetect
+        String itemType = type.substring(31, type.length() - 1);
+        boolean itemTypeIsClass = itemType.indexOf('<') == -1;
+//                    if (itemTypeIsClass) {
+//                    }
+        Block.IfStmt nextIfNull = mw.ifStmt(invoke(jsonReader, "nextIfNull"));
+        nextIfNull.stmt(assign(fieldValue, ldc(null)));
+        Block nextIfNullElse = nextIfNull.elseStmt();
+        OpName itemReader = var(CodeGenUtils.fieldItemObjectReader(i));
+
+        boolean readDirect = CodeGenUtils.supportReadDirect(itemType);
+
+        if (!readDirect) {
+            nextIfNullElse.ifNull(itemReader).stmt(
+                    assign(
+                            itemReader,
+                            invoke(jsonReader, "getObjectReader", getStatic(itemType, "class"))
+                    )
+            );
+            nextIfNullElse.newLine();
+        }
+
+        nextIfNullElse.stmt(assign(fieldValue, allocate(HashMap.class)));
+
+        nextIfNullElse.newLine();
+        nextIfNullElse.invoke(jsonReader, "nextIfObjectStart");
+        Block.WhileStmt readMapWhile = nextIfNullElse.whileStmtStmt(not(invoke(jsonReader, "nextIfObjectEnd")));
+
+        if (referenceDetect) {
+            referenceDetect = CodeGenUtils.isReference(itemType);
+        }
+
+        Op mapEntryValue;
+        if (readDirect) {
+            String method = CodeGenUtils.getReadDirectMethod(itemType);
+            mapEntryValue = invoke(jsonReader, method);
+        } else {
+            mapEntryValue = cast(
+                    invoke(itemReader, "readObject", jsonReader, getStatic(itemType, "class"), ldc(fieldName), var("features")),
+                    itemType
+            );
+        }
+
+        Op mapEntryKey = invoke(jsonReader, "readFieldName");
+
+        if (referenceDetect) {
+            OpName mapKey = var(fieldName + "_key");
+            OpName mapValue = var(fieldName + "_value");
+
+            readMapWhile.declare(String.class, mapKey, mapEntryKey);
+            mapEntryKey = mapKey;
+
+            readMapWhile.newLine();
+            Block.IfStmt isReference = readMapWhile.ifStmt(invoke(jsonReader, "isReference"));
+            OpName ref = var("ref");
+            isReference.declare(String.class, ref, invoke(jsonReader, "readReference"));
+            isReference.invoke(jsonReader, "addResolveTask", fieldValue, mapKey, invokeStatic(JSONPath.class, "of", ref));
+            isReference.continueStmt();
+            readMapWhile.newLine();
+
+            readMapWhile.declare(itemType, mapValue, mapEntryValue);
+            mapEntryValue = mapValue;
+        }
+
+        readMapWhile.invoke(
+                fieldValue,
+                "put",
+                mapEntryKey,
+                mapEntryValue
+        );
+        nextIfNullElse.newLine();
+        nextIfNullElse.invoke(jsonReader, "nextIfComma");
     }
 }

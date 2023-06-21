@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.internal.processor.maps;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONCompiled;
 import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
@@ -10,17 +11,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class MapTest {
     @Test
     public void test() {
         Bean bean = new Bean();
         bean.v01 = new HashMap<>();
-        bean.v01.put("123", new Item(123));
+        Item value = new Item(123);
+        bean.v01.put("123", value);
+        bean.v01.put("12x", value);
 
-        String str = JSON.toJSONString(bean);
+        String str = JSON.toJSONString(bean, JSONWriter.Feature.ReferenceDetection);
+
         Bean bean1 = JSON.parseObject(str, Bean.class);
-        assertEquals(bean.v01, bean1.v01);
+        assertSame(bean1.v01.get("123"), bean1.v01.get("12x"));
     }
 
     @JSONCompiled

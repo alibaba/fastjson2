@@ -272,6 +272,12 @@ public class Opcodes {
             buf.append('(');
             int start = buf.length();
             boolean newLine = args.length > 3;
+            for (Op arg : args) {
+                if (arg instanceof OpInvoke) {
+                    newLine = true;
+                }
+            }
+
             if (newLine) {
                 buf.append('\n');
                 mw.ident(buf, indent + 2);
