@@ -2419,7 +2419,9 @@ class JSONWriterUTF8
                 if (off == bytes.length) {
                     ensureCapacity(off + 1);
                 }
-                bytes[off++] = ',';
+                if (entry.getValue() != null) {
+                    bytes[off++] = ',';
+                }
             }
 
             Object value = entry.getValue();
