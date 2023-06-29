@@ -861,6 +861,28 @@ public abstract class JSONWriter
 
     public abstract void writeInt32(int value);
 
+    public final void writeInt32(int value, DecimalFormat format) {
+        if (format == null || jsonb) {
+            writeInt32(value);
+            return;
+        }
+
+        writeString(
+                format.format(value)
+        );
+    }
+
+    public final void writeInt32(int value, String format) {
+        if (format == null || jsonb) {
+            writeInt32(value);
+            return;
+        }
+
+        writeString(
+                String.format(format, value)
+        );
+    }
+
     public abstract void writeInt64(long i);
 
     public void writeMillis(long i) {

@@ -36,7 +36,11 @@ abstract class FieldWriterInt32<T>
             return;
         }
         writeFieldName(jsonWriter);
-        jsonWriter.writeInt32(value);
+        if (format != null) {
+            jsonWriter.writeInt32(value, format);
+        } else {
+            jsonWriter.writeInt32(value);
+        }
     }
 
     @Override
