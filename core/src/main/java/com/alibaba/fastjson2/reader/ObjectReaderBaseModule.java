@@ -2102,6 +2102,8 @@ public class ObjectReaderBaseModule
                 return JodaSupport.createLocalDateTimeReader((Class) type);
             case "org.joda.time.Instant":
                 return JodaSupport.createInstantReader((Class) type);
+            case "org.joda.time.DateTime":
+                return new ObjectReaderImplZonedDateTime(new JodaSupport.DateTimeFromZDT());
             case "javax.money.CurrencyUnit":
                 return MoneySupport.createCurrencyUnitReader();
             case "javax.money.MonetaryAmount":

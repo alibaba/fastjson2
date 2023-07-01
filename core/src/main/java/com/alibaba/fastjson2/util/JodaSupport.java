@@ -13,9 +13,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.function.*;
@@ -816,6 +814,115 @@ public class JodaSupport {
                 jsonWriter.endObject();
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new JSONException("write LocalDateWriter error", e);
+            }
+        }
+    }
+
+    public static final class DateTimeFromZDT
+            implements Function {
+        static Constructor CONS;
+        static Method FOR_ID;
+
+        @Override
+        public Object apply(Object o) {
+            ZonedDateTime zdt = (ZonedDateTime) o;
+            try {
+                if (FOR_ID == null) {
+                    Class<?> zoneClass = Class.forName("org.joda.time.DateTimeZone");
+                    FOR_ID = zoneClass.getMethod("forID", String.class);
+                }
+
+                if (CONS == null) {
+                    CONS = Class.forName("org.joda.time.DateTime")
+                            .getConstructor(
+                                    int.class, int.class, int.class, int.class, int.class, int.class, int.class,
+                                    FOR_ID.getDeclaringClass()
+                            );
+                }
+
+                String zondId = zdt.getZone().getId();
+                if ("Z".equals(zondId)) {
+                    zondId = "UTC";
+                }
+
+                return CONS.newInstance(
+                        zdt.getYear(),
+                        zdt.getMonthValue(),
+                        zdt.getDayOfMonth(),
+                        zdt.getHour(),
+                        zdt.getMinute(),
+                        zdt.getSecond(),
+                        zdt.getNano() / 1_000_000,
+                        FOR_ID.invoke(null, zondId)
+                        );
+            } catch (Exception e) {
+                throw new JSONException("build DateTime error", e);
+            }
+        }
+    }
+
+    public static final class DateTime2ZDT
+            implements Function {
+        static Class CLASS;
+        static ToIntFunction YEAR;
+        static ToIntFunction MONTH;
+        static ToIntFunction DAY_OF_MONTH;
+        static ToIntFunction HOUR;
+        static ToIntFunction MINUTE;
+        static ToIntFunction SECOND;
+        static ToIntFunction MILLIS;
+        static Function GET_ZONE;
+        static Function GET_ID;
+
+        @Override
+        public Object apply(Object o) {
+            try {
+                if (CLASS == null) {
+                    CLASS = Class.forName("org.joda.time.DateTime");
+                }
+                if (YEAR == null) {
+                    YEAR = LambdaMiscCodec.createToIntFunction(CLASS.getMethod("getYear"));
+                }
+                if (MONTH == null) {
+                    MONTH = LambdaMiscCodec.createToIntFunction(CLASS.getMethod("getMonthOfYear"));
+                }
+                if (DAY_OF_MONTH == null) {
+                    DAY_OF_MONTH = LambdaMiscCodec.createToIntFunction(CLASS.getMethod("getDayOfMonth"));
+                }
+                if (HOUR == null) {
+                    HOUR = LambdaMiscCodec.createToIntFunction(CLASS.getMethod("getHourOfDay"));
+                }
+                if (MINUTE == null) {
+                    MINUTE = LambdaMiscCodec.createToIntFunction(CLASS.getMethod("getMinuteOfHour"));
+                }
+                if (SECOND == null) {
+                    SECOND = LambdaMiscCodec.createToIntFunction(CLASS.getMethod("getSecondOfMinute"));
+                }
+                if (MILLIS == null) {
+                    MILLIS = LambdaMiscCodec.createToIntFunction(CLASS.getMethod("getMillisOfSecond"));
+                }
+                if (GET_ZONE == null) {
+                    GET_ZONE = LambdaMiscCodec.createFunction(CLASS.getMethod("getZone"));
+                }
+                if (GET_ID == null) {
+                    GET_ID = LambdaMiscCodec.createFunction(Class.forName("org.joda.time.DateTimeZone").getMethod("getID"));
+                }
+
+                Object zone = GET_ZONE.apply(o);
+                String zonIdStr = (String) GET_ID.apply(zone);
+                ZoneId zoneId = ZoneId.of(zonIdStr);
+                return ZonedDateTime.of(
+                        YEAR.applyAsInt(o),
+                        MONTH.applyAsInt(o),
+                        DAY_OF_MONTH.applyAsInt(o),
+                        HOUR.applyAsInt(o),
+                        MINUTE.applyAsInt(o),
+                        SECOND.applyAsInt(o),
+                        MILLIS.applyAsInt(o) * 1_000_000,
+                        zoneId
+                );
+            } catch (Exception e) {
+                throw new JSONException("convert joda org.joda.time.DateTime to java.time.ZonedDateTime error", e);
             }
         }
     }
