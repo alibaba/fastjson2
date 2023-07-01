@@ -2782,10 +2782,11 @@ public class ObjectWriterCreatorASM
         mw.visitLabel(null_);
 
         // if (!jw.isWriteNulls())
-        mw.visitVarInsn(Opcodes.ILOAD, mwc.var(WRITE_NULLS));
-        mw.visitJumpInsn(Opcodes.IFNE, writeNull_);
-
-        mw.visitJumpInsn(Opcodes.GOTO, endIfNull_);
+        if ((fieldWriter.features & WriteNulls.mask) == 0) {
+            mw.visitVarInsn(Opcodes.ILOAD, mwc.var(WRITE_NULLS));
+            mw.visitJumpInsn(Opcodes.IFNE, writeNull_);
+            mw.visitJumpInsn(Opcodes.GOTO, endIfNull_);
+        }
 
         mw.visitLabel(writeNull_);
         gwFieldName(mwc, i);
