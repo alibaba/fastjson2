@@ -963,6 +963,8 @@ public class ObjectWriterBaseModule
                 return JodaSupport.createLocalDateWriter(objectClass, null);
             case "org.joda.time.LocalDateTime":
                 return JodaSupport.createLocalDateTimeWriter(objectClass, null);
+            case "org.joda.time.DateTime":
+                return new ObjectWriterImplZonedDateTime(null, null, new JodaSupport.DateTime2ZDT());
             default:
                 if (JdbcSupport.isClob(objectClass)) {
                     return JdbcSupport.createClobWriter(objectClass);

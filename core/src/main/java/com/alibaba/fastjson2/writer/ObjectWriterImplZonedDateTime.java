@@ -7,14 +7,22 @@ import java.lang.reflect.Type;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.function.Function;
 
 final class ObjectWriterImplZonedDateTime
         extends DateTimeCodec
         implements ObjectWriter {
     static final ObjectWriterImplZonedDateTime INSTANCE = new ObjectWriterImplZonedDateTime(null, null);
 
+    private final Function function;
+
     public ObjectWriterImplZonedDateTime(String format, Locale locale) {
+        this(format, locale, null);
+    }
+
+    public ObjectWriterImplZonedDateTime(String format, Locale locale, Function function) {
         super(format, locale);
+        this.function = function;
     }
 
     @Override
@@ -29,7 +37,12 @@ final class ObjectWriterImplZonedDateTime
             return;
         }
 
-        ZonedDateTime zdt = (ZonedDateTime) object;
+        ZonedDateTime zdt;
+        if (function != null) {
+            zdt = (ZonedDateTime) function.apply(object);
+        } else {
+            zdt = (ZonedDateTime) object;
+        }
 
         JSONWriter.Context ctx = jsonWriter.context;
 
