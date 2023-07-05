@@ -283,7 +283,7 @@ public class ObjectWriterCreatorASM
 
                     Class<?> returnType = method.getReturnType();
                     // skip function
-                    if (isFunction(returnType)) {
+                    if (isFunction(returnType) || returnType == Void.TYPE) {
                         return;
                     }
 
