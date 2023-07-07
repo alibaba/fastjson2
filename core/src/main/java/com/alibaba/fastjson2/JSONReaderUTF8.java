@@ -5835,7 +5835,14 @@ class JSONReaderUTF8
             throw new JSONException("date only support string input");
         }
 
-        LocalDateTime ldt = DateUtils.parseLocalDateTimeX(bytes, offset, len);
+        LocalDateTime ldt;
+        if (bytes[offset + len - 1] == 'Z') {
+            ZonedDateTime zdt = DateUtils.parseZonedDateTime(bytes, offset, len);
+            ldt = zdt.toLocalDateTime();
+        } else {
+            ldt = DateUtils.parseLocalDateTimeX(bytes, offset, len);
+        }
+
         if (ldt == null) {
             return null;
         }

@@ -4401,6 +4401,14 @@ class JSONReaderJSONB
             return LocalDate.of(year, month, dayOfMonth);
         }
 
+        if (type == BC_LOCAL_DATETIME) {
+            return readLocalDateTime().toLocalDate();
+        }
+
+        if (type == BC_TIMESTAMP_WITH_TIMEZONE) {
+            return readZonedDateTime().toLocalDate();
+        }
+
         if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
             int len = getStringLength();
             switch (len) {
@@ -4413,6 +4421,10 @@ class JSONReaderJSONB
                 case 11:
                     return readLocalDate11();
                 default:
+                    if (bytes[offset + len] == 'Z') {
+                        ZonedDateTime zdt = readZonedDateTime();
+                        return zdt.toLocalDate();
+                    }
                     break;
             }
             throw new JSONException("TODO : " + len + ", " + readString());
@@ -4437,7 +4449,7 @@ class JSONReaderJSONB
             }
         }
 
-        throw new UnsupportedOperationException();
+        throw new JSONException("not support type : " + typeName((byte) type));
     }
 
     @Override
@@ -4455,6 +4467,10 @@ class JSONReaderJSONB
             int nano = readInt32Value();
 
             return LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
+        }
+
+        if (type == BC_TIMESTAMP_WITH_TIMEZONE) {
+            return readZonedDateTime().toLocalDateTime();
         }
 
         if (type >= BC_STR_ASCII_FIX_MIN && type <= BC_STR_ASCII_FIX_MAX) {
@@ -4508,7 +4524,7 @@ class JSONReaderJSONB
             throw new JSONException("TODO : " + len + ", " + readString());
         }
 
-        throw new UnsupportedOperationException();
+        throw new JSONException("not support type : " + typeName((byte) type));
     }
 
     @Override
@@ -4700,6 +4716,24 @@ class JSONReaderJSONB
                 Instant instant = Instant.ofEpochSecond(seconds);
                 return ZonedDateTime.ofInstant(instant, DEFAULT_ZONE_ID);
             }
+            case BC_LOCAL_DATE: {
+                int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
+                byte month = bytes[offset++];
+                byte dayOfMonth = bytes[offset++];
+                LocalDate localDate = LocalDate.of(year, month, dayOfMonth);
+                return ZonedDateTime.of(localDate, LocalTime.MIN, DEFAULT_ZONE_ID);
+            }
+            case BC_LOCAL_DATETIME: {
+                int year = (bytes[offset++] << 8) + (bytes[offset++] & 0xFF);
+                byte month = bytes[offset++];
+                byte dayOfMonth = bytes[offset++];
+                byte hour = bytes[offset++];
+                byte minute = bytes[offset++];
+                byte second = bytes[offset++];
+                int nano = readInt32Value();
+                LocalDateTime ldt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
+                return ZonedDateTime.of(ldt, DEFAULT_ZONE_ID);
+            }
             case BC_INT64:
             case BC_TIMESTAMP_MILLIS: {
                 long millis =
@@ -4740,7 +4774,7 @@ class JSONReaderJSONB
                 }
                 break;
         }
-        throw new UnsupportedOperationException();
+        throw new JSONException("type not support : " + JSONB.typeName((byte) type));
     }
 
     @Override
