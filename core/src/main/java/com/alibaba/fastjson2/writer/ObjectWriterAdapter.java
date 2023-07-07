@@ -4,15 +4,15 @@ import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.*;
 import com.alibaba.fastjson2.util.BeanUtils;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static com.alibaba.fastjson2.JSONB.Constants.BC_TYPED_ANY;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
@@ -590,6 +590,19 @@ public class ObjectWriterAdapter<T>
         for (int i = 0; i < fieldWriters.size(); i++) {
             FieldWriter fieldWriter = fieldWriters.get(i);
             Object fieldValue = fieldWriter.getFieldValue(object);
+            String format = fieldWriter.format;
+            Class fieldClass = fieldWriter.fieldClass;
+            if (format != null) {
+                if (fieldClass == Date.class) {
+                    fieldValue = DateUtils.format((Date) fieldValue, format);
+                } else if (fieldClass == LocalDate.class) {
+                    fieldValue = DateUtils.format((LocalDate) fieldValue, format);
+                } else if (fieldClass == LocalDateTime.class) {
+                    fieldValue = DateUtils.format((LocalDateTime) fieldValue, format);
+                } else if (fieldClass == LocalDate.class) {
+                    fieldValue = DateUtils.format((LocalDate) fieldValue, format);
+                }
+            }
 
             long fieldFeatures = fieldWriter.features;
             if ((fieldFeatures & FieldInfo.UNWRAPPED_MASK) != 0) {
@@ -600,7 +613,7 @@ public class ObjectWriterAdapter<T>
 
                 ObjectWriter fieldObjectWriter = fieldWriter.getInitWriter();
                 if (fieldObjectWriter == null) {
-                    fieldObjectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(fieldWriter.fieldClass);
+                    fieldObjectWriter = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(fieldClass);
                 }
                 List<FieldWriter> unwrappedFieldWriters = fieldObjectWriter.getFieldWriters();
                 for (int j = 0; j < unwrappedFieldWriters.size(); j++) {
