@@ -2193,6 +2193,7 @@ class JSONWriterUTF8
             bytes[off++] = 'Z';
         } else {
             zoneId.getBytes(0, zoneIdLength, bytes, off);
+            off += zoneIdLength;
         }
         bytes[off] = (byte) quote;
         this.off = off + 1;

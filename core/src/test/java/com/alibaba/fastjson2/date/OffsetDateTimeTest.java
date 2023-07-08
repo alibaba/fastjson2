@@ -155,4 +155,46 @@ public class OffsetDateTimeTest {
         OffsetDateTime odt2 = JSON.parseObject(str.toCharArray(), OffsetDateTime.class);
         assertEquals(odt, odt2);
     }
+
+    @Test
+    public void test_min() {
+        OffsetDateTime odt = OffsetDateTime.MIN;
+        {
+            String str = JSON.toJSONString(odt);
+            OffsetDateTime odt1 = JSON.parseObject(str, OffsetDateTime.class);
+            assertEquals(odt, odt1);
+
+            OffsetDateTime odt2 = JSON.parseObject(str.toCharArray(), OffsetDateTime.class);
+            assertEquals(odt, odt2);
+
+            OffsetDateTime odt3 = JSON.parseObject(str.getBytes(), OffsetDateTime.class);
+            assertEquals(odt, odt3);
+        }
+        {
+            byte[] strBytes = JSON.toJSONBytes(odt);
+            OffsetDateTime odt1 = JSON.parseObject(strBytes, OffsetDateTime.class);
+            assertEquals(odt, odt1);
+        }
+    }
+
+    @Test
+    public void test_max() {
+        OffsetDateTime odt = OffsetDateTime.MAX;
+        {
+            String str = JSON.toJSONString(odt);
+            OffsetDateTime odt1 = JSON.parseObject(str, OffsetDateTime.class);
+            assertEquals(odt, odt1);
+
+            OffsetDateTime odt2 = JSON.parseObject(str.toCharArray(), OffsetDateTime.class);
+            assertEquals(odt, odt2);
+
+            OffsetDateTime odt3 = JSON.parseObject(str.getBytes(), OffsetDateTime.class);
+            assertEquals(odt, odt3);
+        }
+        {
+            byte[] strBytes = JSON.toJSONBytes(odt);
+            OffsetDateTime odt1 = JSON.parseObject(strBytes, OffsetDateTime.class);
+            assertEquals(odt, odt1);
+        }
+    }
 }
