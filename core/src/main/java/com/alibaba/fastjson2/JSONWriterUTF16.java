@@ -2300,6 +2300,7 @@ class JSONWriterUTF16
             chars[off++] = 'Z';
         } else {
             zoneId.getChars(0, zoneIdLength, chars, off);
+            off += zoneIdLength;
         }
         chars[off] = quote;
         this.off = off + 1;

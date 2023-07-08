@@ -707,6 +707,9 @@ public class IOUtils {
             bytes[off + 3] = (byte) v;
             off += 4;
         } else {
+            if (year > 9999) {
+                bytes[off++] = '+';
+            }
             off = IOUtils.writeInt32(bytes, off, year);
         }
 
@@ -747,6 +750,9 @@ public class IOUtils {
             chars[off + 3] = (char) (byte) v;
             off += 4;
         } else {
+            if (year > 9999) {
+                chars[off++] = '+';
+            }
             off = IOUtils.writeInt32(chars, off, year);
         }
 
