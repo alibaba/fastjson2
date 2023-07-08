@@ -716,7 +716,10 @@ public interface JSON {
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context context = new JSONReader.Context(provider);
-        ObjectReader<T> objectReader = provider.getObjectReader(clazz, false);
+        ObjectReader<T> objectReader = provider.getObjectReader(
+                clazz,
+                (defaultReaderFeatures & JSONReader.Feature.FieldBased.mask) != 0
+        );
 
         try (JSONReader reader = JSONReader.of(text, context)) {
             T object = objectReader.readObject(reader, clazz, null, 0);
@@ -840,7 +843,10 @@ public interface JSON {
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context context = new JSONReader.Context(provider);
-        final ObjectReader<T> objectReader = provider.getObjectReader(type, false);
+        final ObjectReader<T> objectReader = provider.getObjectReader(
+                type,
+                (defaultReaderFeatures & JSONReader.Feature.FieldBased.mask) != 0
+        );
 
         try (JSONReader reader = JSONReader.of(text, context)) {
             T object = objectReader.readObject(reader, type, null, 0);
@@ -1349,7 +1355,10 @@ public interface JSON {
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context context = new JSONReader.Context(provider);
-        ObjectReader<T> objectReader = provider.getObjectReader(clazz, false);
+        ObjectReader<T> objectReader = provider.getObjectReader(
+                clazz,
+                (JSONFactory.defaultReaderFeatures & JSONReader.Feature.FieldBased.mask) != 0
+        );
 
         try (JSONReader reader = JSONReader.of(bytes, context)) {
             T object = objectReader.readObject(reader, clazz, null, 0);
@@ -2738,7 +2747,11 @@ public interface JSON {
                 if (valueClass == JSONObject.class && context.features == 0) {
                     writer.write((JSONObject) object);
                 } else {
-                    ObjectWriter<?> objectWriter = provider.getObjectWriter(valueClass, valueClass, false);
+                    ObjectWriter<?> objectWriter = provider.getObjectWriter(
+                            valueClass,
+                            valueClass,
+                            (defaultWriterFeatures & JSONWriter.Feature.FieldBased.mask) != 0
+                    );
                     objectWriter.write(writer, object, null, null, 0);
                 }
             }
@@ -2946,7 +2959,11 @@ public interface JSON {
                 if (valueClass == JSONObject.class && writer.context.features == 0) {
                     writer.write((JSONObject) object);
                 } else {
-                    ObjectWriter<?> objectWriter = provider.getObjectWriter(valueClass, valueClass, false);
+                    ObjectWriter<?> objectWriter = provider.getObjectWriter(
+                            valueClass,
+                            valueClass,
+                            (defaultWriterFeatures & JSONWriter.Feature.FieldBased.mask) != 0
+                    );
                     objectWriter.write(writer, object, null, null, 0);
                 }
             }
