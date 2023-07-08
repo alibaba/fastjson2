@@ -54,9 +54,10 @@ public abstract class BeanUtils {
             1616814008855344660L,
             2164749833121980361L,
             3724195282986200606L,
+            3977020351318456359L, // sun.nio.ch.FileChannelImpl
             4882459834864833642L,
             7981148566008458638L,
-            8344106065386396833L
+            8344106065386396833L,
     };
 
     public static String[] getRecordFieldNames(Class<?> recordType) {
