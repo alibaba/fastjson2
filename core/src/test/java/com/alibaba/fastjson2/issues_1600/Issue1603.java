@@ -28,4 +28,16 @@ public class Issue1603 {
             assertEquals(expected, JSON.toJSONString(jsonObject, JSONWriter.Feature.WriteMapNullValue));
         }
     }
+
+    @Test
+    public void test1() {
+        JSONObject object = JSONObject.of("v", 123, "a", null, "b", null, "c", null);
+        String expected = "{\"v\":123}";
+        assertEquals(expected, object.toJSONString(object));
+        assertEquals(expected, new String(JSON.toJSONBytes(object)));
+
+        String expected2 = "{\"v\":123,\"a\":null,\"b\":null,\"c\":null}";
+        assertEquals(expected2, object.toJSONString(object, JSONWriter.Feature.WriteMapNullValue));
+        assertEquals(expected2, new String(JSON.toJSONBytes(object, JSONWriter.Feature.WriteMapNullValue)));
+    }
 }
