@@ -709,7 +709,10 @@ public interface JSON {
 
         ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider);
-        ObjectReader<T> objectReader = provider.getObjectReader(clazz, false);
+        ObjectReader<T> objectReader = provider.getObjectReader(
+                clazz,
+                (defaultReaderFeatures & JSONReader.Feature.FieldBased.mask) != 0
+        );
 
         try (JSONReader reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             T object = objectReader.readObject(reader, clazz, null, 0);
@@ -827,7 +830,10 @@ public interface JSON {
         ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider);
         try (JSONReader reader = JSONReader.of(text, context)) {
-            ObjectReader<T> objectReader = provider.getObjectReader(type, false);
+            ObjectReader<T> objectReader = provider.getObjectReader(
+                    type,
+                    (defaultReaderFeatures & JSONReader.Feature.FieldBased.mask) != 0
+            );
 
             T object = objectReader.readObject(reader, type, null, 0);
             if (reader.resolveTasks != null) {
@@ -858,7 +864,10 @@ public interface JSON {
         ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider);
         try (JSONReader reader = JSONReader.of(text, context)) {
-            ObjectReader<T> objectReader = provider.getObjectReader(type, false);
+            ObjectReader<T> objectReader = provider.getObjectReader(
+                    type,
+                    (defaultReaderFeatures & JSONReader.Feature.FieldBased.mask) != 0
+            );
 
             T object = objectReader.readObject(reader, type, null, 0);
             if (reader.resolveTasks != null) {
@@ -905,7 +914,10 @@ public interface JSON {
         final ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider, features);
         Type type = typeReference.getType();
-        ObjectReader<T> objectReader = provider.getObjectReader(type, false);
+        ObjectReader<T> objectReader = provider.getObjectReader(
+                type,
+                (defaultReaderFeatures & JSONReader.Feature.FieldBased.mask) != 0
+        );
 
         try (JSONReader reader = JSONReader.of(text, context)) {
             T object = objectReader.readObject(reader, type, null, 0);

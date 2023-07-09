@@ -755,6 +755,17 @@ public abstract class JSONWriter
 
     public abstract void writeInt64(long i);
 
+    public final void writeInt32(int value, String format) {
+        if (format == null || jsonb) {
+            writeInt32(value);
+            return;
+        }
+
+        writeString(
+                String.format(format, value)
+        );
+    }
+
     public void writeMillis(long i) {
         writeInt64(i);
     }

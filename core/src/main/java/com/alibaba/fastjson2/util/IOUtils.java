@@ -737,8 +737,8 @@ public class IOUtils {
         } else {
             i = value;
         }
-        final long q1 = i / 1000;
-        if (q1 == 0) {
+
+        if (i < 1000) {
             int v = DIGITS_K[(int) i];
             int start = v >> 24;
             if (start == 0) {
@@ -751,10 +751,11 @@ public class IOUtils {
             buf[pos++] = (byte) v;
             return pos;
         }
+
+        final long q1 = i / 1000;
         final int r1 = (int) (i - q1 * 1000);
-        final long q2 = q1 / 1000;
         final int v1 = DIGITS_K[r1];
-        if (q2 == 0) {
+        if (i < 1000000) {
             final int v2 = DIGITS_K[(int) q1];
 
             int start = v2 >> 24;
@@ -771,10 +772,11 @@ public class IOUtils {
             buf[pos + 3] = (byte) v1;
             return pos + 4;
         }
+
+        final long q2 = q1 / 1000;
         final int r2 = (int) (q1 - q2 * 1000);
-        final long q3 = q2 / 1000;
         final int v2 = DIGITS_K[r2];
-        if (q3 == 0) {
+        if (i < 1000000000) {
             final int v3 = DIGITS_K[(int) q2];
             int start = v3 >> 24;
             if (start == 0) {
@@ -793,10 +795,11 @@ public class IOUtils {
             buf[pos + 6] = (byte) v1;
             return pos + 7;
         }
+
+        final long q3 = q2 / 1000;
         final int r3 = (int) (q2 - q3 * 1000);
-        final int q4 = (int) (q3 / 1000);
         final int v3 = DIGITS_K[r3];
-        if (q4 == 0) {
+        if (i < 1000000000000L) {
             final int v4 = DIGITS_K[(int) q3];
             final int start = v4 >> 24;
             if (start == 0) {
@@ -819,11 +822,11 @@ public class IOUtils {
             buf[pos + 9] = (byte) v1;
             return pos + 10;
         }
-        final int r4 = (int) (q3 - q4 * 1000);
-        final int q5 = q4 / 1000;
 
+        final int q4 = (int) (q3 / 1000);
+        final int r4 = (int) (q3 - q4 * 1000);
         final int v4 = DIGITS_K[r4];
-        if (q5 == 0) {
+        if (i < 1000000000000000L) {
             final int v5 = DIGITS_K[q4];
             int start = v5 >> 24;
             if (start == 0) {
@@ -848,6 +851,8 @@ public class IOUtils {
             buf[pos + 12] = (byte) v1;
             return pos + 13;
         }
+
+        final int q5 = q4 / 1000;
         final int r5 = q4 - q5 * 1000;
         final int q6 = q5 / 1000;
         final int v5 = DIGITS_K[r5];
@@ -904,8 +909,8 @@ public class IOUtils {
         } else {
             i = value;
         }
-        final long q1 = i / 1000;
-        if (q1 == 0) {
+
+        if (i < 1000) {
             int v = DIGITS_K[(int) i];
             int start = v >> 24;
             if (start == 0) {
@@ -918,10 +923,11 @@ public class IOUtils {
             buf[pos++] = (char) (byte) v;
             return pos;
         }
+
+        final long q1 = i / 1000;
         final int r1 = (int) (i - q1 * 1000);
-        final long q2 = q1 / 1000;
         final int v1 = DIGITS_K[r1];
-        if (q2 == 0) {
+        if (i < 1000000) {
             final int v2 = DIGITS_K[(int) q1];
 
             int start = v2 >> 24;
@@ -938,10 +944,11 @@ public class IOUtils {
             buf[pos + 3] = (char) (byte) v1;
             return pos + 4;
         }
+
+        final long q2 = q1 / 1000;
         final int r2 = (int) (q1 - q2 * 1000);
-        final long q3 = q2 / 1000;
         final int v2 = DIGITS_K[r2];
-        if (q3 == 0) {
+        if (i < 1000000000) {
             final int v3 = DIGITS_K[(int) q2];
             int start = v3 >> 24;
             if (start == 0) {
@@ -960,12 +967,12 @@ public class IOUtils {
             buf[pos + 6] = (char) (byte) v1;
             return pos + 7;
         }
-        final int r3 = (int) (q2 - q3 * 1000);
-        final int q4 = (int) (q3 / 1000);
-        final int v3 = DIGITS_K[r3];
-        if (q4 == 0) {
-            final int v4 = DIGITS_K[(int) q3];
 
+        final long q3 = q2 / 1000;
+        final int r3 = (int) (q2 - q3 * 1000);
+        final int v3 = DIGITS_K[r3];
+        if (i < 1000000000000L) {
+            final int v4 = DIGITS_K[(int) q3];
             final int start = v4 >> 24;
             if (start == 0) {
                 buf[pos] = (char) (byte) (v4 >> 16);
@@ -986,10 +993,11 @@ public class IOUtils {
             buf[pos + 9] = (char) (byte) v1;
             return pos + 10;
         }
+
+        final int q4 = (int) (q3 / 1000);
         final int r4 = (int) (q3 - q4 * 1000);
-        final int q5 = q4 / 1000;
         final int v4 = DIGITS_K[r4];
-        if (q5 == 0) {
+        if (i < 1000000000000000L) {
             final int v5 = DIGITS_K[q4];
             int start = v5 >> 24;
             if (start == 0) {
@@ -1014,6 +1022,8 @@ public class IOUtils {
             buf[pos + 12] = (char) (byte) v1;
             return pos + 13;
         }
+
+        final int q5 = q4 / 1000;
         final int r5 = q4 - q5 * 1000;
         final int q6 = q5 / 1000;
         final int v5 = DIGITS_K[r5];
@@ -1068,8 +1078,8 @@ public class IOUtils {
         } else {
             i = value;
         }
-        final int q1 = i / 1000;
-        if (q1 == 0) {
+
+        if (i < 1000) {
             int v = DIGITS_K[i];
             final int start = v >> 24;
             if (start == 0) {
@@ -1082,10 +1092,11 @@ public class IOUtils {
             buf[pos++] = (byte) v;
             return pos;
         }
+
+        final int q1 = i / 1000;
         final int r1 = i - q1 * 1000;
-        final int q2 = q1 / 1000;
         final int v1 = DIGITS_K[r1];
-        if (q2 == 0) {
+        if (i < 1000000) {
             final int v2 = DIGITS_K[q1];
             int start = v2 >> 24;
             if (start == 0) {
@@ -1101,6 +1112,8 @@ public class IOUtils {
             buf[pos + 3] = (byte) v1;
             return pos + 4;
         }
+
+        final int q2 = q1 / 1000;
         final int r2 = q1 - q2 * 1000;
         final int q3 = q2 / 1000;
         final int v2 = DIGITS_K[r2];
@@ -1146,8 +1159,8 @@ public class IOUtils {
         } else {
             i = value;
         }
-        final int q1 = i / 1000;
-        if (q1 == 0) {
+
+        if (i < 1000) {
             int v = DIGITS_K[i];
             final int start = v >> 24;
             if (start == 0) {
@@ -1160,10 +1173,12 @@ public class IOUtils {
             buf[pos++] = (char) (byte) v;
             return pos;
         }
+
+        final int q1 = i / 1000;
         final int r1 = i - q1 * 1000;
-        final int q2 = q1 / 1000;
         final int v1 = DIGITS_K[r1];
-        if (q2 == 0) {
+
+        if (i < 1000000) {
             final int v2 = DIGITS_K[q1];
             int start = v2 >> 24;
             if (start == 0) {
@@ -1179,6 +1194,8 @@ public class IOUtils {
             buf[pos + 3] = (char) (byte) v1;
             return pos + 4;
         }
+
+        final int q2 = q1 / 1000;
         final int r2 = q1 - q2 * 1000;
         final int q3 = q2 / 1000;
         final int v2 = DIGITS_K[r2];

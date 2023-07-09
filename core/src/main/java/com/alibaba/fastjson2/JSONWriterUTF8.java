@@ -189,7 +189,7 @@ class JSONWriterUTF8
         startObject = true;
 
         int off = this.off;
-        int minCapacity = off + (pretty ? 2 + indent : 1);
+        int minCapacity = off + (pretty ? 3 + indent : 1);
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
@@ -254,7 +254,7 @@ class JSONWriterUTF8
     public final void startArray() {
         level++;
         int off = this.off;
-        int minCapacity = off + (pretty ? 2 + indent : 1);
+        int minCapacity = off + (pretty ? 3 + indent : 1);
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
@@ -2277,15 +2277,18 @@ class JSONWriterUTF8
 
         boolean first = true;
         for (Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<String, Object> next = it.next();
+            Object value = next.getValue();
+
             if (!first) {
                 if (off == bytes.length) {
                     ensureCapacity(off + 1);
                 }
-                bytes[off++] = ',';
+                if (value != null && (context.features & Feature.WriteMapNullValue.mask) == 0) {
+                    bytes[off++] = ',';
+                }
             }
 
-            Map.Entry<String, Object> next = it.next();
-            Object value = next.getValue();
             if (value == null && (context.features & Feature.WriteMapNullValue.mask) == 0) {
                 continue;
             }
