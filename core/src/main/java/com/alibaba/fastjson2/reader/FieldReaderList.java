@@ -222,6 +222,10 @@ public class FieldReaderList<T, V>
 
             boolean isSupportAutoType = jsonReader.isSupportAutoType(features);
             if (!isSupportAutoType) {
+                if (jsonReader.isArray() && !jsonReader.isEnabled(JSONReader.Feature.ErrorOnNotSupportAutoType)) {
+                    return getObjectReader(jsonReader);
+                }
+
                 throw new JSONException(jsonReader.info("autoType not support input " + jsonReader.getString()));
             }
 

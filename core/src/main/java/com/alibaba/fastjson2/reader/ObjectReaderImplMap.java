@@ -364,7 +364,11 @@ public final class ObjectReaderImplMap
                     value = jsonReader.readString();
                 } else if (type == BC_TYPED_ANY) {
                     ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, this.features | features);
-                    value = autoTypeObjectReader.readJSONBObject(jsonReader, null, fieldName, features);
+                    if (autoTypeObjectReader != null) {
+                        value = autoTypeObjectReader.readJSONBObject(jsonReader, null, fieldName, features);
+                    } else {
+                        value = jsonReader.readAny();
+                    }
                 } else if (type == BC_TRUE) {
                     value = Boolean.TRUE;
                     jsonReader.next();

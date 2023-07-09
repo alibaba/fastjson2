@@ -311,7 +311,9 @@ public final class ObjectReaderImplObject
 
         if (type == BC_TYPED_ANY) {
             ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, features);
-            return autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+            if (autoTypeObjectReader != null) {
+                return autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
+            }
         }
 
         if (type == BC_NULL) {

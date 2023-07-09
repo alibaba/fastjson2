@@ -1198,6 +1198,9 @@ class JSONReaderJSONB
             final long features2 = context.features | features;
             boolean isSupportAutoType = (features2 & Feature.SupportAutoType.mask) != 0;
             if (!isSupportAutoType) {
+                if ((features2 & Feature.ErrorOnNotSupportAutoType.mask) == 0) {
+                    return null;
+                }
                 autoTypeError();
             }
 
@@ -1219,6 +1222,9 @@ class JSONReaderJSONB
             if (autoTypeObjectReader == null) {
                 autoTypeObjectReader = provider.getObjectReader(getString(), expectClass, features2);
                 if (autoTypeObjectReader == null) {
+                    if ((features2 & Feature.ErrorOnNotSupportAutoType.mask) == 0) {
+                        return null;
+                    }
                     autoTypeError();
                 }
             }
