@@ -163,7 +163,7 @@ public final class ObjectReaderImplEnum
                 if (autoTypeObjectReader != this) {
                     return autoTypeObjectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
                 }
-            } else {
+            } else if (jsonReader.isEnabled(JSONReader.Feature.ErrorOnNotSupportAutoType)) {
                 throw new JSONException(jsonReader.info("not support enumType : " + jsonReader.getString()));
             }
         }

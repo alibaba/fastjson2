@@ -364,11 +364,11 @@ public final class ObjectReaderImplList
 
     @Override
     public Object readJSONBObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        ObjectReader objectReader = jsonReader.checkAutoType(this.listClass, 0, features);
         if (jsonReader.nextIfNull()) {
             return null;
         }
 
+        ObjectReader objectReader = jsonReader.checkAutoType(this.listClass, 0, features);
         Function builder = this.builder;
         Class listType = this.instanceType;
         if (objectReader != null) {

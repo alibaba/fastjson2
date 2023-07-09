@@ -80,7 +80,7 @@ public class ObjectReaderNoneDefaultConstructor<T>
 
         if (type == BC_TYPED_ANY) {
             ObjectReader objectReader = jsonReader.checkAutoType(this.objectClass, typeNameHash, this.features | features);
-            if (objectReader != this) {
+            if (objectReader != null && objectReader != this) {
                 return (T) objectReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
             }
         }
