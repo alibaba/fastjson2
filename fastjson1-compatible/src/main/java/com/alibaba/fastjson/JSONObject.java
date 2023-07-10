@@ -1008,7 +1008,7 @@ public class JSONObject
 
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         ObjectReader objectReader = provider.getObjectReader(clazz);
-        return (T) objectReader.createInstance(this, 0L);
+        return (T) objectReader.createInstance(this, JSONReader.Feature.SupportSmartMatch.mask);
     }
 
     public <T> T toJavaObject(Class<T> clazz, ParserConfig config, int features) {
