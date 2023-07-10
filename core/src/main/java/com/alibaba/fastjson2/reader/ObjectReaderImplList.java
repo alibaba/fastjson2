@@ -395,6 +395,15 @@ public final class ObjectReaderImplList
             } else if (listType == CLASS_SINGLETON_LIST) {
                 listType = ArrayList.class;
                 builder = (Function<List, List>) ((List list) -> Collections.singletonList(list.get(0)));
+            } else {
+                switch (listType.getTypeName()) {
+                    case "kotlin.collections.EmptySet":
+                    case "kotlin.collections.EmptyList": {
+                        return objectReader.readObject(jsonReader, fieldType, fieldName, features);
+                    }
+                    default:
+                        break;
+                }
             }
         }
 
