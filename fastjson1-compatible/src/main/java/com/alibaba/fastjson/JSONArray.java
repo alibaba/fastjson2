@@ -826,7 +826,7 @@ public class JSONArray
         for (Object item : this) {
             T classItem;
             if (item instanceof Map) {
-                classItem = (T) objectReader.createInstance((Map) item, 0L);
+                classItem = (T) objectReader.createInstance((Map) item, JSONReader.Feature.SupportSmartMatch.mask);
             } else {
                 if (item == null || item.getClass() == clazz) {
                     list.add((T) item);
