@@ -35,7 +35,7 @@ final class ObjectReaderImplMapString
                 throw new JSONException(jsonReader.info("expect '{', but '['"));
             }
 
-            if (jsonReader.nextIfNullOrEmptyString()) {
+            if (jsonReader.nextIfNullOrEmptyString() || jsonReader.nextIfMatchIdent('"', 'n', 'u', 'l', 'l', '"')) {
                 return null;
             }
         }
