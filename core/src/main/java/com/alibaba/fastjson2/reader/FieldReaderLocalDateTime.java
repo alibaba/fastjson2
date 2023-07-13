@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.DateUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -15,6 +14,8 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Locale;
 import java.util.function.BiConsumer;
+
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 public final class FieldReaderLocalDateTime<T>
         extends FieldReaderDateTimeCodec<T> {
@@ -139,7 +140,7 @@ public final class FieldReaderLocalDateTime<T>
         }
 
         if (fieldOffset != -1) {
-            UnsafeUtils.putObject(object, fieldOffset, value);
+            UNSAFE.putObject(object, fieldOffset, value);
             return;
         }
 

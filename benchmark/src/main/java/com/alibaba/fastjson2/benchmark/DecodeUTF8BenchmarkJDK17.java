@@ -1,7 +1,6 @@
 package com.alibaba.fastjson2.benchmark;
 
 import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.Runner;
@@ -19,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
 import static com.alibaba.fastjson2.util.JDKUtils.JVM_VERSION;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 public class DecodeUTF8BenchmarkJDK17 {
     static byte[] utf8Bytes = "01234567890ABCDEFGHIJKLMNOPQRSTUVWZYZabcdefghijklmnopqrstuvwzyz"
@@ -29,7 +29,7 @@ public class DecodeUTF8BenchmarkJDK17 {
     static {
         try {
             Field valueField = String.class.getDeclaredField("value");
-            valueFieldOffset = UnsafeUtils.objectFieldOffset(valueField);
+            valueFieldOffset = UNSAFE.objectFieldOffset(valueField);
             stringCreator = getStringCreatorJDK17();
         } catch (Throwable e) {
             e.printStackTrace();

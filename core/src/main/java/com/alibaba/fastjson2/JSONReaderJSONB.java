@@ -24,6 +24,8 @@ import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
 class JSONReaderJSONB
         extends JSONReader {
+    static final long BASE = UNSAFE.arrayBaseOffset(byte[].class);
+
     static final byte[] SHANGHAI_ZONE_ID_NAME_BYTES = JSONB.toBytes(SHANGHAI_ZONE_ID_NAME);
     static Charset GB18030;
 
@@ -1323,6 +1325,7 @@ class JSONReaderJSONB
     public long readFieldNameHashCode() {
         strtype = bytes[offset++];
         boolean typeSymbol = strtype == BC_SYMBOL;
+
         if (typeSymbol) {
             strtype = bytes[offset];
             if (strtype >= BC_INT32_NUM_MIN && strtype <= BC_INT32) {
@@ -1378,59 +1381,37 @@ class JSONReaderJSONB
             hashCode = symbolTable.getHashCode(-strlen);
         } else {
             long nameValue = 0;
-            if (strlen <= 8) {
+            if (strlen <= 8 && offset + strlen <= bytes.length) {
                 switch (strlen) {
                     case 1:
                         nameValue = bytes[offset];
                         break;
                     case 2:
-                        nameValue = (bytes[offset + 1] << 8)
-                                + (bytes[offset] & 0xFF);
+                        nameValue = UNSAFE.getShort(bytes, BASE + offset) & 0xFFFFL;
                         break;
                     case 3:
                         nameValue = (bytes[offset + 2] << 16)
-                                + ((bytes[offset + 1] & 0xFF) << 8)
-                                + (bytes[offset] & 0xFF);
+                                + (UNSAFE.getShort(bytes, BASE + offset) & 0xFFFFL);
                         break;
                     case 4:
-                        nameValue = (bytes[offset + 3] << 24)
-                                + ((bytes[offset + 2] & 0xFF) << 16)
-                                + ((bytes[offset + 1] & 0xFF) << 8)
-                                + (bytes[offset] & 0xFF);
+                        nameValue = UNSAFE.getInt(bytes, BASE + offset);
                         break;
                     case 5:
                         nameValue = (((long) bytes[offset + 4]) << 32)
-                                + (((long) bytes[offset + 3] & 0xFFL) << 24)
-                                + (((long) bytes[offset + 2] & 0xFFL) << 16)
-                                + (((long) bytes[offset + 1] & 0xFFL) << 8)
-                                + (bytes[offset] & 0xFFL);
+                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
                         break;
                     case 6:
-                        nameValue = (((long) bytes[offset + 5]) << 40)
-                                + (((long) bytes[offset + 4] & 0xFFL) << 32)
-                                + (((long) bytes[offset + 3] & 0xFFL) << 24)
-                                + (((long) bytes[offset + 2] & 0xFFL) << 16)
-                                + (((long) bytes[offset + 1] & 0xFFL) << 8)
-                                + (bytes[offset] & 0xFFL);
+                        nameValue = ((long) UNSAFE.getShort(bytes, BASE + offset + 4) << 32)
+                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
                         break;
                     case 7:
                         nameValue = (((long) bytes[offset + 6]) << 48)
                                 + (((long) bytes[offset + 5] & 0xFFL) << 40)
                                 + (((long) bytes[offset + 4] & 0xFFL) << 32)
-                                + (((long) bytes[offset + 3] & 0xFFL) << 24)
-                                + (((long) bytes[offset + 2] & 0xFFL) << 16)
-                                + (((long) bytes[offset + 1] & 0xFFL) << 8)
-                                + (bytes[offset] & 0xFFL);
+                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
                         break;
                     case 8:
-                        nameValue = (((long) bytes[offset + 7]) << 56)
-                                + (((long) bytes[offset + 6] & 0xFFL) << 48)
-                                + (((long) bytes[offset + 5] & 0xFFL) << 40)
-                                + (((long) bytes[offset + 4] & 0xFFL) << 32)
-                                + (((long) bytes[offset + 3] & 0xFFL) << 24)
-                                + (((long) bytes[offset + 2] & 0xFFL) << 16)
-                                + (((long) bytes[offset + 1] & 0xFFL) << 8)
-                                + (bytes[offset] & 0xFFL);
+                        nameValue = UNSAFE.getLong(bytes, BASE + offset);
                         break;
                     default:
                         break;
@@ -1469,15 +1450,16 @@ class JSONReaderJSONB
 
             long strInfo = ((long) strBegin << 32) + ((long) strlen << 8) + strtype;
 
-            int minCapacity = symbol * 2 + 2;
+            int symbolIndex = symbol << 1;
+            int minCapacity = symbolIndex + 2;
             if (symbols == null) {
                 symbols = new long[Math.max(minCapacity, 32)];
             } else if (symbols.length < minCapacity) {
                 symbols = Arrays.copyOf(symbols, minCapacity + 16);
             }
 
-            symbols[symbol * 2] = hashCode;
-            symbols[symbol * 2 + 1] = strInfo;
+            symbols[symbolIndex] = hashCode;
+            symbols[symbolIndex + 1] = strInfo;
         }
 
         return hashCode;
@@ -2444,7 +2426,7 @@ class JSONReaderJSONB
                     strtype = symbol0StrType;
                     strlen = symbol0Length;
                     strBegin = symbol0Begin;
-                    return getString();
+                    return getFieldName();
                 }
 
                 int index = symbol * 2 + 1;
@@ -2458,13 +2440,12 @@ class JSONReaderJSONB
         }
 
         strBegin = offset;
-        Charset charset;
+        Charset charset = null;
         String str = null;
         if (strtype == BC_STR_ASCII_FIX_MIN + 1) {
             str = TypeUtils.toString((char) (bytes[offset] & 0xff));
             strlen = 1;
             offset++;
-            charset = StandardCharsets.ISO_8859_1;
         } else if (strtype == BC_STR_ASCII_FIX_MIN + 2) {
             str = TypeUtils.toString(
                     (char) (bytes[offset] & 0xff),
@@ -2472,7 +2453,6 @@ class JSONReaderJSONB
             );
             strlen = 2;
             offset += 2;
-            charset = StandardCharsets.ISO_8859_1;
         } else if (strtype >= BC_STR_ASCII_FIX_MIN && strtype <= BC_STR_ASCII) {
             long nameValue0 = -1, nameValue1 = -1;
 
@@ -2482,6 +2462,10 @@ class JSONReaderJSONB
             } else {
                 strlen = strtype - BC_STR_ASCII_FIX_MIN;
 
+                if (offset + strlen > bytes.length) {
+                    throw new JSONException("illegal jsonb data");
+                }
+
                 switch (strlen) {
                     case 3:
                         nameValue0
@@ -2490,180 +2474,72 @@ class JSONReaderJSONB
                                 + (bytes[offset] & 0xFFL);
                         break;
                     case 4:
-                        nameValue0
-                                = (bytes[offset + 3] << 24)
-                                + ((bytes[offset + 2] & 0xFFL) << 16)
-                                + ((bytes[offset + 1] & 0xFFL) << 8)
-                                + (bytes[offset] & 0xFFL);
+                        nameValue0 = UNSAFE.getInt(bytes, BASE + offset);
                         break;
                     case 5:
                         nameValue0
                                 = (((long) bytes[offset + 4]) << 32)
-                                + ((bytes[offset + 3] & 0xFFL) << 24)
-                                + ((bytes[offset + 2] & 0xFFL) << 16)
-                                + ((bytes[offset + 1] & 0xFFL) << 8)
-                                + (bytes[offset] & 0xFFL);
+                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
                         break;
                     case 6:
                         nameValue0
                                 = (((long) bytes[offset + 5]) << 40)
                                 + ((bytes[offset + 4] & 0xFFL) << 32)
-                                + ((bytes[offset + 3] & 0xFFL) << 24)
-                                + ((bytes[offset + 2] & 0xFFL) << 16)
-                                + ((bytes[offset + 1] & 0xFFL) << 8)
-                                + (bytes[offset] & 0xFFL);
+                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
                         break;
                     case 7:
                         nameValue0
                                 = (((long) bytes[offset + 6]) << 48)
                                 + ((bytes[offset + 5] & 0xFFL) << 40)
                                 + ((bytes[offset + 4] & 0xFFL) << 32)
-                                + ((bytes[offset + 4] & 0xFFL) << 24)
-                                + ((bytes[offset + 3] & 0xFFL) << 16)
-                                + ((bytes[offset + 2] & 0xFFL) << 8)
-                                + (bytes[offset] & 0xFFL);
+                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
                         break;
                     case 8:
-                        nameValue0
-                                = (((long) bytes[offset + 7]) << 56)
-                                + ((bytes[offset + 6] & 0xFFL) << 48)
-                                + ((bytes[offset + 5] & 0xFFL) << 40)
-                                + ((bytes[offset + 4] & 0xFFL) << 32)
-                                + ((bytes[offset + 3] & 0xFFL) << 24)
-                                + ((bytes[offset + 2] & 0xFFL) << 16)
-                                + ((bytes[offset + 1] & 0xFFL) << 8)
-                                + (bytes[offset] & 0xFFL);
+                        nameValue0 = UNSAFE.getLong(bytes, BASE + offset);
                         break;
                     case 9:
                         nameValue0 = bytes[offset];
-                        nameValue1
-                                = (((long) bytes[offset + 8]) << 56)
-                                + ((bytes[offset + 7] & 0xFFL) << 48)
-                                + ((bytes[offset + 6] & 0xFFL) << 40)
-                                + ((bytes[offset + 5] & 0xFFL) << 32)
-                                + ((bytes[offset + 4] & 0xFFL) << 24)
-                                + ((bytes[offset + 3] & 0xFFL) << 16)
-                                + ((bytes[offset + 2] & 0xFFL) << 8)
-                                + (bytes[offset + 1] & 0xFFL);
+                        nameValue1 = UNSAFE.getLong(bytes, BASE + offset + 1);
                         break;
                     case 10:
-                        nameValue0
-                                = (bytes[offset + 1] << 8)
-                                + (bytes[offset] & 0xFFL);
-                        nameValue1
-                                = (((long) bytes[offset + 9]) << 56)
-                                + ((bytes[offset + 8] & 0xFFL) << 48)
-                                + ((bytes[offset + 7] & 0xFFL) << 40)
-                                + ((bytes[offset + 6] & 0xFFL) << 32)
-                                + ((bytes[offset + 5] & 0xFFL) << 24)
-                                + ((bytes[offset + 4] & 0xFFL) << 16)
-                                + ((bytes[offset + 3] & 0xFFL) << 8)
-                                + (bytes[offset + 2] & 0xFFL);
+                        nameValue0 = UNSAFE.getShort(bytes, BASE + offset);
+                        nameValue1 = UNSAFE.getLong(bytes, BASE + offset + 2);
                         break;
                     case 11:
                         nameValue0
-                                = (bytes[offset + 2] << 16)
+                                = (bytes[offset] << 16)
                                 + ((bytes[offset + 1] & 0xFFL) << 8)
-                                + (bytes[offset] & 0xFFL);
-                        nameValue1
-                                = (((long) bytes[offset + 10]) << 56)
-                                + ((bytes[offset + 9] & 0xFFL) << 48)
-                                + ((bytes[offset + 8] & 0xFFL) << 40)
-                                + ((bytes[offset + 7] & 0xFFL) << 32)
-                                + ((bytes[offset + 6] & 0xFFL) << 24)
-                                + ((bytes[offset + 5] & 0xFFL) << 16)
-                                + ((bytes[offset + 4] & 0xFFL) << 8)
-                                + (bytes[offset + 3] & 0xFFL);
+                                + (bytes[offset + 2] & 0xFFL);
+                        nameValue1 = UNSAFE.getLong(bytes, BASE + offset + 3);
                         break;
                     case 12:
-                        nameValue0
-                                = (bytes[offset + 3] << 24)
-                                + ((bytes[offset + 2] & 0xFFL) << 16)
-                                + ((bytes[offset + 1] & 0xFFL) << 8)
-                                + (bytes[offset] & 0xFFL);
-                        nameValue1
-                                = (((long) bytes[offset + 11]) << 56)
-                                + ((bytes[offset + 10] & 0xFFL) << 48)
-                                + ((bytes[offset + 9] & 0xFFL) << 40)
-                                + ((bytes[offset + 8] & 0xFFL) << 32)
-                                + ((bytes[offset + 7] & 0xFFL) << 24)
-                                + ((bytes[offset + 6] & 0xFFL) << 16)
-                                + ((bytes[offset + 5] & 0xFFL) << 8)
-                                + (bytes[offset + 4] & 0xFFL);
+                        nameValue0 = UNSAFE.getInt(bytes, BASE + offset);
+                        nameValue1 = UNSAFE.getLong(bytes, BASE + offset + 4);
                         break;
                     case 13:
                         nameValue0
                                 = (((long) bytes[offset + 4]) << 32)
-                                + ((bytes[offset + 3] & 0xFFL) << 24)
-                                + ((bytes[offset + 2] & 0xFFL) << 16)
-                                + ((bytes[offset + 1] & 0xFFL) << 8)
-                                + (bytes[offset] & 0xFFL);
-                        nameValue1
-                                = (((long) bytes[offset + 12]) << 56)
-                                + ((bytes[offset + 11] & 0xFFL) << 48)
-                                + ((bytes[offset + 10] & 0xFFL) << 40)
-                                + ((bytes[offset + 9] & 0xFFL) << 32)
-                                + ((bytes[offset + 8] & 0xFFL) << 24)
-                                + ((bytes[offset + 7] & 0xFFL) << 16)
-                                + ((bytes[offset + 6] & 0xFFL) << 8)
-                                + (bytes[offset + 5] & 0xFFL);
+                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
+                        nameValue1 = UNSAFE.getLong(bytes, BASE + offset + 5);
                         break;
                     case 14:
                         nameValue0
                                 = (((long) bytes[offset + 5]) << 40)
                                 + ((bytes[offset + 4] & 0xFFL) << 32)
-                                + ((bytes[offset + 3] & 0xFFL) << 24)
-                                + ((bytes[offset + 2] & 0xFFL) << 16)
-                                + ((bytes[offset + 1] & 0xFFL) << 8)
-                                + (bytes[offset] & 0xFFL);
-                        nameValue1
-                                = (((long) bytes[offset + 13]) << 56)
-                                + ((bytes[offset + 12] & 0xFFL) << 48)
-                                + ((bytes[offset + 11] & 0xFFL) << 40)
-                                + ((bytes[offset + 10] & 0xFFL) << 32)
-                                + ((bytes[offset + 9] & 0xFFL) << 24)
-                                + ((bytes[offset + 8] & 0xFFL) << 16)
-                                + ((bytes[offset + 7] & 0xFFL) << 8)
-                                + (bytes[offset + 6] & 0xFFL);
+                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
+                        nameValue1 = UNSAFE.getLong(bytes, BASE + offset + 6);
                         break;
                     case 15:
                         nameValue0
                                 = (((long) bytes[offset + 6]) << 48)
                                 + ((bytes[offset + 5] & 0xFFL) << 40)
                                 + ((bytes[offset + 4] & 0xFFL) << 32)
-                                + ((bytes[offset + 3] & 0xFFL) << 24)
-                                + ((bytes[offset + 2] & 0xFFL) << 16)
-                                + ((bytes[offset + 1] & 0xFFL) << 8)
-                                + (bytes[offset] & 0xFFL);
-                        nameValue1
-                                = (((long) bytes[offset + 14]) << 56)
-                                + ((bytes[offset + 13] & 0xFFL) << 48)
-                                + ((bytes[offset + 12] & 0xFFL) << 40)
-                                + ((bytes[offset + 11] & 0xFFL) << 32)
-                                + ((bytes[offset + 10] & 0xFFL) << 24)
-                                + ((bytes[offset + 9] & 0xFFL) << 16)
-                                + ((bytes[offset + 8] & 0xFFL) << 8)
-                                + (bytes[offset + 7] & 0xFFL);
+                                + (UNSAFE.getInt(bytes, BASE + offset) & 0xFFFFFFFFL);
+                        nameValue1 = UNSAFE.getLong(bytes, BASE + offset + 7);
                         break;
                     case 16:
-                        nameValue0
-                                = (((long) bytes[offset + 7]) << 56)
-                                + ((bytes[offset + 6] & 0xFFL) << 48)
-                                + ((bytes[offset + 5] & 0xFFL) << 40)
-                                + ((bytes[offset + 4] & 0xFFL) << 32)
-                                + ((bytes[offset + 3] & 0xFFL) << 24)
-                                + ((bytes[offset + 2] & 0xFFL) << 16)
-                                + ((bytes[offset + 1] & 0xFFL) << 8)
-                                + (bytes[offset] & 0xFFL);
-                        nameValue1
-                                = (((long) bytes[offset + 15]) << 56)
-                                + ((bytes[offset + 14] & 0xFFL) << 48)
-                                + ((bytes[offset + 13] & 0xFFL) << 40)
-                                + ((bytes[offset + 12] & 0xFFL) << 32)
-                                + ((bytes[offset + 11] & 0xFFL) << 24)
-                                + ((bytes[offset + 10] & 0xFFL) << 16)
-                                + ((bytes[offset + 9] & 0xFFL) << 8)
-                                + (bytes[offset + 8] & 0xFFL);
+                        nameValue0 = UNSAFE.getLong(bytes, BASE + offset);
+                        nameValue1 = UNSAFE.getLong(bytes, BASE + offset + 8);
                         break;
                     default:
                         break;
@@ -2675,18 +2551,20 @@ class JSONReaderJSONB
                     int indexMask = ((int) nameValue1) & (NAME_CACHE2.length - 1);
                     JSONFactory.NameCacheEntry2 entry = NAME_CACHE2[indexMask];
                     if (entry == null) {
+                        String name;
                         if (STRING_CREATOR_JDK8 != null) {
                             char[] chars = new char[strlen];
                             for (int i = 0; i < strlen; ++i) {
                                 chars[i] = (char) (bytes[offset + i] & 0xff);
                             }
-                            str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                            name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                         } else {
-                            str = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
+                            name = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                         }
 
-                        NAME_CACHE2[indexMask] = new JSONFactory.NameCacheEntry2(str, nameValue0, nameValue1);
+                        NAME_CACHE2[indexMask] = new JSONFactory.NameCacheEntry2(name, nameValue0, nameValue1);
                         offset += strlen;
+                        str = name;
                     } else if (entry.value0 == nameValue0 && entry.value1 == nameValue1) {
                         offset += strlen;
                         str = entry.name;
@@ -2695,18 +2573,20 @@ class JSONReaderJSONB
                     int indexMask = ((int) nameValue0) & (NAME_CACHE.length - 1);
                     JSONFactory.NameCacheEntry entry = NAME_CACHE[indexMask];
                     if (entry == null) {
+                        String name;
                         if (STRING_CREATOR_JDK8 != null) {
                             char[] chars = new char[strlen];
                             for (int i = 0; i < strlen; ++i) {
                                 chars[i] = (char) (bytes[offset + i] & 0xff);
                             }
-                            str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+                            name = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                         } else {
-                            str = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
+                            name = new String(bytes, offset, strlen, StandardCharsets.ISO_8859_1);
                         }
 
-                        NAME_CACHE[indexMask] = new JSONFactory.NameCacheEntry(str, nameValue0);
+                        NAME_CACHE[indexMask] = new JSONFactory.NameCacheEntry(name, nameValue0);
                         offset += strlen;
+                        str = name;
                     } else if (entry.value == nameValue0) {
                         offset += strlen;
                         str = entry.name;
@@ -2721,7 +2601,6 @@ class JSONReaderJSONB
                         chars[i] = (char) (bytes[offset + i] & 0xff);
                     }
                     offset += strlen;
-
                     str = STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
                 } else if (STRING_CREATOR_JDK11 != null && strlen >= 0) {
                     byte[] chars = new byte[strlen];
@@ -2729,8 +2608,8 @@ class JSONReaderJSONB
                     str = STRING_CREATOR_JDK11.apply(chars, LATIN1);
                     offset += strlen;
                 }
+                charset = StandardCharsets.ISO_8859_1;
             }
-            charset = StandardCharsets.ISO_8859_1;
         } else if (strtype == BC_STR_UTF8) {
             strlen = readLength();
             strBegin = offset;
@@ -2793,8 +2672,6 @@ class JSONReaderJSONB
                 GB18030 = Charset.forName("GB18030");
             }
             charset = GB18030;
-        } else {
-            charset = StandardCharsets.UTF_8;
         }
 
         if (strlen < 0) {

@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.internal.trove.map.hash.TLongIntHashMap;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 import com.alibaba.fastjson2.writer.ObjectWriter;
 
 import java.io.IOException;
@@ -1635,7 +1634,7 @@ final class JSONWriterJSONB
         int scale = value.scale();
 
         if (precision < 19 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
-            long intCompact = UnsafeUtils.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET);
+            long intCompact = UNSAFE.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET);
             if (scale == 0) {
                 ensureCapacity(off + 1);
                 this.bytes[off++] = BC_DECIMAL_LONG;

@@ -39,26 +39,13 @@ public class TestUtils {
     public static JSONWriter[] createJSONWriters() {
         if (JDKUtils.STRING_VALUE == null) {
             if (JDKUtils.JVM_VERSION == 8) {
-                if (JDKUtils.UNSAFE_SUPPORT) {
-                    return new JSONWriter[]{
-                            new JSONWriterUTF8(JSONFactory.createWriteContext()),
-                            new JSONWriterUTF16(JSONFactory.createWriteContext()),
-                            new JSONWriterUTF16JDK8(JSONFactory.createWriteContext()),
-                            new JSONWriterUTF16JDK8UF(JSONFactory.createWriteContext())
-                    };
-                }
                 return new JSONWriter[]{
                         new JSONWriterUTF8(JSONFactory.createWriteContext()),
                         new JSONWriterUTF16(JSONFactory.createWriteContext()),
-                        new JSONWriterUTF16JDK8(JSONFactory.createWriteContext())
+                        new JSONWriterUTF16JDK8(JSONFactory.createWriteContext()),
+                        new JSONWriterUTF16JDK8UF(JSONFactory.createWriteContext())
                 };
             } else {
-                if (JDKUtils.UNSAFE_SUPPORT) {
-                    return new JSONWriter[]{
-                            new JSONWriterUTF8(JSONFactory.createWriteContext()),
-                            new JSONWriterUTF16(JSONFactory.createWriteContext())
-                    };
-                }
                 return new JSONWriter[]{
                         new JSONWriterUTF8(JSONFactory.createWriteContext()),
                         new JSONWriterUTF16(JSONFactory.createWriteContext())
@@ -67,33 +54,18 @@ public class TestUtils {
         }
 
         if (JDKUtils.JVM_VERSION == 8) {
-            if (JDKUtils.UNSAFE_SUPPORT) {
-                return new JSONWriter[]{
-                        new JSONWriterUTF8(JSONFactory.createWriteContext()),
-                        new JSONWriterUTF16(JSONFactory.createWriteContext()),
-                        new JSONWriterUTF16JDK8(JSONFactory.createWriteContext()),
-                        new JSONWriterUTF16JDK8UF(JSONFactory.createWriteContext())
-                };
-            }
-
             return new JSONWriter[]{
                     new JSONWriterUTF8(JSONFactory.createWriteContext()),
                     new JSONWriterUTF16(JSONFactory.createWriteContext()),
-                    new JSONWriterUTF16JDK8(JSONFactory.createWriteContext())
-            };
-        }
-
-        if (JDKUtils.UNSAFE_SUPPORT) {
-            return new JSONWriter[]{
-                    new JSONWriterUTF8JDK9(JSONFactory.createWriteContext()),
-                    new JSONWriterUTF16(JSONFactory.createWriteContext()),
-                    new JSONWriterUTF16JDK9UF(JSONFactory.createWriteContext())
+                    new JSONWriterUTF16JDK8(JSONFactory.createWriteContext()),
+                    new JSONWriterUTF16JDK8UF(JSONFactory.createWriteContext())
             };
         }
 
         return new JSONWriter[]{
+                new JSONWriterUTF8JDK9(JSONFactory.createWriteContext()),
                 new JSONWriterUTF16(JSONFactory.createWriteContext()),
-                new JSONWriterUTF16JDK8(JSONFactory.createWriteContext())
+                new JSONWriterUTF16JDK9UF(JSONFactory.createWriteContext())
         };
     }
 

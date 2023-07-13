@@ -2,9 +2,10 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
+
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 class FieldWriterFloatField<T>
         extends FieldWriter<T> {
@@ -28,7 +29,7 @@ class FieldWriterFloatField<T>
         try {
             Object value;
             if (fieldOffset != -1 && !fieldClass.isPrimitive()) {
-                value = UnsafeUtils.getObject(object, fieldOffset);
+                value = UNSAFE.getObject(object, fieldOffset);
             } else {
                 value = field.get(object);
             }

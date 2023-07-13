@@ -1,6 +1,5 @@
 package com.alibaba.fastjson2.benchmark;
 
-import com.alibaba.fastjson2.util.UnsafeUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.runner.Runner;
@@ -13,6 +12,8 @@ import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
+
 public class StringCreateBenchmark {
     static final BiFunction<char[], Boolean, String> STRING_CREATOR = getStringCreator();
     static final char[] chars = new char[128];
@@ -22,7 +23,7 @@ public class StringCreateBenchmark {
         try {
             Field field = String.class.getDeclaredField("value");
             field.setAccessible(true);
-            valueOffset = UnsafeUtils.objectFieldOffset(field);
+            valueOffset = UNSAFE.objectFieldOffset(field);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
@@ -66,8 +67,8 @@ public class StringCreateBenchmark {
 
     @Benchmark
     public String unsafe() throws Exception {
-        String str = (String) UnsafeUtils.allocateInstance(String.class);
-        UnsafeUtils.putObject(str, valueOffset, chars);
+        String str = (String) UNSAFE.allocateInstance(String.class);
+        UNSAFE.putObject(str, valueOffset, chars);
         return str;
     }
 

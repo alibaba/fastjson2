@@ -36,7 +36,7 @@ public class JSONReaderJSONBUFTest {
 
         {
             JSONReader.Context context = JSONFactory.createReadContext();
-            JSONReaderJSONB jsonReader = new JSONReaderJSONBUF(
+            JSONReaderJSONB jsonReader = new JSONReaderJSONB(
                     context,
                     jsonbBytes,
                     0,

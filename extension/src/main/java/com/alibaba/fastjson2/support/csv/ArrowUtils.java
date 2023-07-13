@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 import org.apache.arrow.memory.ArrowBuf;
 import org.apache.arrow.vector.*;
 
@@ -407,7 +406,7 @@ public class ArrowUtils {
         }
         int precision = decimal.precision();
         if (precision < 19 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
-            long unscaleValue = UnsafeUtils.getLong(decimal, FIELD_DECIMAL_INT_COMPACT_OFFSET);
+            long unscaleValue = UNSAFE.getLong(decimal, FIELD_DECIMAL_INT_COMPACT_OFFSET);
             if (unscaleValue != Long.MIN_VALUE) {
                 BitVectorHelper.setBit(vector.getValidityBuffer(), row);
                 ArrowBuf dataBuffer = vector.getDataBuffer();

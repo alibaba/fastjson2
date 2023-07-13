@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
@@ -654,52 +653,14 @@ public class ObjectWriterCreator {
         Class<?> declaringClass = field.getDeclaringClass();
         Method method = null;
 
-        final boolean unsafeFieldWriter = JDKUtils.UNSAFE_SUPPORT;
         if (declaringClass == Throwable.class) {
-            switch (field.getName()) {
-                case "detailMessage":
-                    if (!unsafeFieldWriter) {
-                        method = BeanUtils.getMethod(Throwable.class, "getMessage");
-                        fieldName = "message";
-                    }
-                    break;
-                case "cause":
-                    if (!unsafeFieldWriter) {
-                        method = BeanUtils.getMethod(Throwable.class, "getCause");
-                    }
-                    break;
-                case "suppressedExceptions": {
-                    if (!unsafeFieldWriter) {
-                        fieldName = "suppressed";
-                    }
-                    break;
-                }
-                case "stackTrace": {
-                    method = BeanUtils.getMethod(Throwable.class, "getStackTrace");
-                    break;
-                }
-                default:
-                    break;
-            }
-        } else if (declaringClass == DateTimeParseException.class && !unsafeFieldWriter) {
-            switch (field.getName()) {
-                case "errorIndex":
-                    method = BeanUtils.getMethod(DateTimeParseException.class, "getErrorIndex");
-                    break;
-                case "parsedString":
-                    method = BeanUtils.getMethod(DateTimeParseException.class, "getParsedString");
-                    break;
-                default:
-                    break;
+            if (field.getName().equals("stackTrace")) {
+                method = BeanUtils.getMethod(Throwable.class, "getStackTrace");
             }
         }
 
         if (method != null) {
             return createFieldWriter(provider, (Class<T>) Throwable.class, fieldName, ordinal, features, format, label, method, initObjectWriter);
-        }
-
-        if (!unsafeFieldWriter) {
-            field.setAccessible(true);
         }
 
         Class<?> fieldClass = field.getType();

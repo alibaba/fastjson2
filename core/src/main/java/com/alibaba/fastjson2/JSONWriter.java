@@ -511,7 +511,7 @@ public abstract class JSONWriter
         } else {
             if (INCUBATOR_VECTOR_WRITER_CREATOR_UTF16 != null) {
                 jsonWriter = INCUBATOR_VECTOR_WRITER_CREATOR_UTF16.apply(writeContext);
-            } else if (FIELD_STRING_VALUE != null && STRING_CODER != null && STRING_VALUE != null && UNSAFE_SUPPORT) {
+            } else if (FIELD_STRING_VALUE != null && STRING_CODER != null && STRING_VALUE != null) {
                 jsonWriter = new JSONWriterUTF16JDK9UF(writeContext);
             } else {
                 jsonWriter = new JSONWriterUTF16(writeContext);

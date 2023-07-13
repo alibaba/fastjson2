@@ -12,6 +12,8 @@ import java.time.*;
 import java.util.*;
 import java.util.function.Function;
 
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
+
 public abstract class FieldReader<T>
         implements Comparable<FieldReader> {
     public final int ordinal;
@@ -79,8 +81,8 @@ public abstract class FieldReader<T>
         this.readOnly = readOnly;
 
         long fieldOffset = -1L;
-        if (field != null && JDKUtils.UNSAFE_SUPPORT && (features & FieldInfo.DISABLE_UNSAFE) == 0) {
-            fieldOffset = UnsafeUtils.objectFieldOffset(field);
+        if (field != null && (features & FieldInfo.DISABLE_UNSAFE) == 0) {
+            fieldOffset = UNSAFE.objectFieldOffset(field);
         }
         this.fieldOffset = fieldOffset;
 

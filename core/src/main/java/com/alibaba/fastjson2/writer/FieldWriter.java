@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.zip.GZIPOutputStream;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static java.time.temporal.ChronoField.SECOND_OF_DAY;
 import static java.time.temporal.ChronoField.YEAR;
 
@@ -105,8 +106,8 @@ public abstract class FieldWriter<T>
         this.decimalFormat = decimalFormat;
 
         long fieldOffset = -1L;
-        if (field != null && JDKUtils.UNSAFE_SUPPORT) {
-            fieldOffset = UnsafeUtils.objectFieldOffset(field);
+        if (field != null) {
+            fieldOffset = UNSAFE.objectFieldOffset(field);
         }
         this.fieldOffset = fieldOffset;
 
@@ -268,7 +269,7 @@ public abstract class FieldWriter<T>
             try {
                 Object value;
                 if (fieldOffset != -1 && !primitive) {
-                    value = UnsafeUtils.getObject(object, fieldOffset);
+                    value = UNSAFE.getObject(object, fieldOffset);
                 } else {
                     value = field.get(object);
                 }

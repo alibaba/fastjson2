@@ -28,7 +28,6 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static com.alibaba.fastjson2.util.BeanUtils.*;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
 
 public class ObjectReaderBaseModule
         implements ObjectReaderModule {
@@ -2129,10 +2128,7 @@ public class ObjectReaderBaseModule
             case "java.lang.RuntimeException":
             case "java.io.IOException":
             case "java.io.UncheckedIOException":
-                if (!UNSAFE_SUPPORT) {
-                    return new ObjectReaderException((Class) type);
-                }
-                break;
+                return new ObjectReaderException((Class) type);
             case "java.nio.HeapByteBuffer":
             case "java.nio.ByteBuffer":
                 return new ObjectReaderImplInt8ValueArray(ByteBuffer::wrap, null);
