@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.*;
 
 import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static java.lang.invoke.MethodType.methodType;
 
 public class TypeUtils {
@@ -1902,7 +1903,7 @@ public class TypeUtils {
         int precision = decimal.precision();
         if (precision < 20) {
             if (FIELD_DECIMAL_INT_COMPACT_OFFSET != -1) {
-                long intCompact = UnsafeUtils.getLong(decimal, FIELD_DECIMAL_INT_COMPACT_OFFSET);
+                long intCompact = UNSAFE.getLong(decimal, FIELD_DECIMAL_INT_COMPACT_OFFSET);
                 switch (scale) {
                     case 1:
                         return intCompact % 10 == 0;

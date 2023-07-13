@@ -4,9 +4,10 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.TypeUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
+
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 final class FieldReaderBoolValueField<T>
         extends FieldReaderObjectField<T> {
@@ -68,7 +69,7 @@ final class FieldReaderBoolValueField<T>
         }
 
         if (fieldOffset != -1) {
-            UnsafeUtils.putBoolean(object, fieldOffset, value);
+            UNSAFE.putBoolean(object, fieldOffset, value);
             return;
         }
 

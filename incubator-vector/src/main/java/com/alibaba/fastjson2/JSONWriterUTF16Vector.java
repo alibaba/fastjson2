@@ -10,7 +10,7 @@ import java.util.function.Function;
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
 import static com.alibaba.fastjson2.util.JDKUtils.STRING_CODER;
 import static com.alibaba.fastjson2.util.JDKUtils.STRING_VALUE;
-import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 final class JSONWriterUTF16Vector
         extends JSONWriterUTF16 {

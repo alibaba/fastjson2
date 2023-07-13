@@ -1,10 +1,10 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.util.JDKUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserSecure;
 import static com.alibaba.fastjson2.JSONWriter.Feature.EscapeNoneAscii;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 public final class JSONWriterUTF16JDK8UF
         extends JSONWriterUTF16 {
@@ -21,7 +21,7 @@ public final class JSONWriterUTF16JDK8UF
 
         boolean browserSecure = (context.features & BrowserSecure.mask) != 0;
         boolean escapeNoneAscii = (context.features & EscapeNoneAscii.mask) != 0;
-        char[] value = (char[]) UnsafeUtils.UNSAFE.getObject(str, JDKUtils.FIELD_STRING_VALUE_OFFSET);
+        char[] value = (char[]) UNSAFE.getObject(str, JDKUtils.FIELD_STRING_VALUE_OFFSET);
         final int strlen = value.length;
 
         boolean escape = false;

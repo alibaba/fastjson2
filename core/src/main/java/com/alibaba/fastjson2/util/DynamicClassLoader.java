@@ -83,7 +83,7 @@ public class DynamicClassLoader
                 ObjectWriter11.class,
                 ObjectWriter12.class,
                 ObjectWriterAdapter.class,
-                UnsafeUtils.class,
+                JDKUtils.class,
                 TypeUtils.class,
                 DateUtils.class,
                 PropertyNamingStrategy.class,

@@ -45,7 +45,7 @@ public class ObjectWriterCreatorASM
                     property = str;
                 }
             }
-            boolean value = !(UNSAFE_SUPPORT && !ANDROID && !GRAAL);
+            boolean value = !(!ANDROID && !GRAAL);
             if ("".equals(property) || "true".equals(property)) {
                 value = true;
             } else if ("false".equals(property)) {
@@ -156,12 +156,6 @@ public class ObjectWriterCreatorASM
         int modifiers = objectClass.getModifiers();
         boolean externalClass = classLoader.isExternalClass(objectClass);
         boolean publicClass = Modifier.isPublic(modifiers);
-
-        if (!publicClass || externalClass) {
-            if (!UNSAFE_SUPPORT) {
-                return super.createObjectWriter(objectClass, features, provider);
-            }
-        }
 
         BeanInfo beanInfo = new BeanInfo();
         provider.getBeanInfo(beanInfo, objectClass);
@@ -2678,7 +2672,6 @@ public class ObjectWriterCreatorASM
 
         if ((!DISABLE_STRING_UNSAFE_GET)
                 && JVM_VERSION == 8
-                && UNSAFE_SUPPORT
                 && !OPENJ9
                 && !FIELD_STRING_VALUE_ERROR
                 && !symbol
@@ -2698,7 +2691,6 @@ public class ObjectWriterCreatorASM
             );
         } else if ((!DISABLE_STRING_UNSAFE_GET)
                 && JVM_VERSION > 8
-                && UNSAFE_SUPPORT
                 && !OPENJ9
                 && FIELD_STRING_CODER_OFFSET != -1
                 && FIELD_STRING_VALUE_OFFSET != -1
@@ -3499,7 +3491,7 @@ public class ObjectWriterCreatorASM
         mw.visitFieldInsn(Opcodes.GETSTATIC, ObjectWriterCreatorASMUtils.TYPE_UNSAFE_UTILS, "UNSAFE", "Lsun/misc/Unsafe;");
         mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
         mw.visitLdcInsn(
-                UnsafeUtils.objectFieldOffset(field));
+                UNSAFE.objectFieldOffset(field));
         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "sun/misc/Unsafe", methodName, methodDes, false);
         if (castToType != null) {
             mw.visitTypeInsn(Opcodes.CHECKCAST, castToType);

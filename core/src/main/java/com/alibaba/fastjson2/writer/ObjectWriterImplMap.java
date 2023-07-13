@@ -14,7 +14,7 @@ import java.util.*;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.BrowserCompatible;
 import static com.alibaba.fastjson2.JSONWriter.Feature.WriteNonStringKeyAsString;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
 public final class ObjectWriterImplMap
@@ -83,9 +83,7 @@ public final class ObjectWriterImplMap
             jsonObject1InnerMap = BeanUtils.getDeclaredField(objectClass, "map");
             if (jsonObject1InnerMap != null) {
                 jsonObject1InnerMap.setAccessible(true);
-                if (UNSAFE_SUPPORT) {
-                    jsonObject1InnerMapOffset = UnsafeUtils.objectFieldOffset(jsonObject1InnerMap);
-                }
+                jsonObject1InnerMapOffset = UNSAFE.objectFieldOffset(jsonObject1InnerMap);
             }
         } else {
             jsonObject1InnerMap = null;
@@ -169,7 +167,7 @@ public final class ObjectWriterImplMap
             boolean ordered = false;
             if (jsonObject1InnerMap != null) {
                 if (jsonObject1InnerMapOffset != -1) {
-                    Object innerMap = UnsafeUtils.UNSAFE.getObject(object, jsonObject1InnerMapOffset);
+                    Object innerMap = UNSAFE.getObject(object, jsonObject1InnerMapOffset);
                     ordered = innerMap instanceof LinkedHashMap;
                 } else {
                     try {

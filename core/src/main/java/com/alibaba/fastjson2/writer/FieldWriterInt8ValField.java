@@ -2,9 +2,10 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
+
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 final class FieldWriterInt8ValField<T>
         extends FieldWriterInt8<T> {
@@ -32,7 +33,7 @@ final class FieldWriterInt8ValField<T>
         try {
             byte value;
             if (fieldOffset != -1) {
-                value = UnsafeUtils.getByte(object, fieldOffset);
+                value = UNSAFE.getByte(object, fieldOffset);
             } else {
                 value = field.getByte(object);
             }

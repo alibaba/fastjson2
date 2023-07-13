@@ -1205,7 +1205,7 @@ public class JSONWriterTest {
 
     static JSONObject parseObjectUF(byte[] jsonbBytes) {
         JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider());
-        JSONReader reader = new JSONReaderJSONBUF(
+        JSONReader reader = new JSONReaderJSONB(
                 context,
                 jsonbBytes,
                 0,
@@ -1234,7 +1234,7 @@ public class JSONWriterTest {
         JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider());
         context.config(features);
 
-        JSONReader reader = new JSONReaderJSONBUF(
+        JSONReader reader = new JSONReaderJSONB(
                 context,
                 jsonbBytes,
                 0,

@@ -7,7 +7,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
-import static com.alibaba.fastjson2.util.UnsafeUtils.UNSAFE;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static java.lang.Long.rotateLeft;
 import static java.lang.Math.min;
 import static sun.misc.Unsafe.ARRAY_BYTE_BASE_OFFSET;

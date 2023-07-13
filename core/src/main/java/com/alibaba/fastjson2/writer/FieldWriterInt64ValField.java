@@ -2,9 +2,10 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
+
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 final class FieldWriterInt64ValField<T>
         extends FieldWriterInt64<T> {
@@ -32,7 +33,7 @@ final class FieldWriterInt64ValField<T>
         try {
             long value;
             if (fieldOffset != -1) {
-                value = UnsafeUtils.getLong(object, fieldOffset);
+                value = UNSAFE.getLong(object, fieldOffset);
             } else {
                 value = field.getLong(object);
             }

@@ -5,10 +5,7 @@ import com.alibaba.fastjson2.annotation.JSONType;
 import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.schema.JSONSchema;
-import com.alibaba.fastjson2.util.DateUtils;
-import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.TypeUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
+import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.*;
 import com.alibaba.fastjson2.writer.FieldWriter;
 
@@ -27,7 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
 
 public class ASMUtils {
-    public static final String TYPE_UNSAFE_UTILS = UnsafeUtils.class.getName().replace('.', '/');
+    public static final String TYPE_UNSAFE_UTILS = JDKUtils.class.getName().replace('.', '/');
 
     public static final String TYPE_OBJECT_WRITER_ADAPTER
             = ObjectWriterAdapter.class.getName().replace('.', '/');
@@ -179,7 +176,7 @@ public class ASMUtils {
                 ObjFloatConsumer.class,
                 ObjDoubleConsumer.class,
                 BiConsumer.class,
-                UnsafeUtils.class,
+                JDKUtils.class,
                 ObjectWriterAdapter.class,
                 ObjectWriter1.class,
                 ObjectWriter2.class,

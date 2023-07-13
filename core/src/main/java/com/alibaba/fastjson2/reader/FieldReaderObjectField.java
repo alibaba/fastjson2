@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.schema.JSONSchema;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -15,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import static com.alibaba.fastjson2.util.DateUtils.DEFAULT_ZONE_ID;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 class FieldReaderObjectField<T>
         extends FieldReaderObject<T> {
@@ -51,7 +51,7 @@ class FieldReaderObjectField<T>
         }
 
         if (fieldOffset != -1 && fieldClass == boolean.class) {
-            UnsafeUtils.putBoolean(object, fieldOffset, value);
+            UNSAFE.putBoolean(object, fieldOffset, value);
             return;
         }
 
@@ -69,7 +69,7 @@ class FieldReaderObjectField<T>
         }
 
         if (fieldOffset != -1 && fieldClass == byte.class) {
-            UnsafeUtils.putByte(object, fieldOffset, value);
+            UNSAFE.putByte(object, fieldOffset, value);
             return;
         }
 
@@ -87,7 +87,7 @@ class FieldReaderObjectField<T>
         }
 
         if (fieldOffset != -1 && fieldClass == short.class) {
-            UnsafeUtils.putShort(object, fieldOffset, value);
+            UNSAFE.putShort(object, fieldOffset, value);
             return;
         }
 
@@ -105,7 +105,7 @@ class FieldReaderObjectField<T>
         }
 
         if (fieldOffset != -1 && fieldClass == int.class) {
-            UnsafeUtils.putInt(object, fieldOffset, value);
+            UNSAFE.putInt(object, fieldOffset, value);
             return;
         }
 
@@ -123,7 +123,7 @@ class FieldReaderObjectField<T>
         }
 
         if (fieldOffset != -1 && fieldClass == long.class) {
-            UnsafeUtils.putLong(object, fieldOffset, value);
+            UNSAFE.putLong(object, fieldOffset, value);
             return;
         }
 
@@ -141,7 +141,7 @@ class FieldReaderObjectField<T>
         }
 
         if (fieldOffset != -1 && fieldClass == float.class) {
-            UnsafeUtils.putFloat(object, fieldOffset, value);
+            UNSAFE.putFloat(object, fieldOffset, value);
             return;
         }
 
@@ -159,7 +159,7 @@ class FieldReaderObjectField<T>
         }
 
         if (fieldOffset != -1 && fieldClass == double.class) {
-            UnsafeUtils.putDouble(object, fieldOffset, value);
+            UNSAFE.putDouble(object, fieldOffset, value);
             return;
         }
 
@@ -177,7 +177,7 @@ class FieldReaderObjectField<T>
         }
 
         if (fieldOffset != -1 && fieldClass == char.class) {
-            UnsafeUtils.putChar(object, fieldOffset, value);
+            UNSAFE.putChar(object, fieldOffset, value);
             return;
         }
 
@@ -236,7 +236,7 @@ class FieldReaderObjectField<T>
         }
 
         if (fieldOffset != -1) {
-            UnsafeUtils.putObject(object, fieldOffset, value);
+            UNSAFE.putObject(object, fieldOffset, value);
             return;
         }
 

@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.util;
 
+import sun.misc.Unsafe;
+
 import java.lang.invoke.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -12,6 +14,9 @@ import java.util.function.*;
 import static java.lang.invoke.MethodType.methodType;
 
 public class JDKUtils {
+    public static final Unsafe UNSAFE;
+    public static final long ARRAY_BYTE_BASE_OFFSET;
+
     public static final int JVM_VERSION;
     public static final Byte LATIN1 = 0;
     public static final Byte UTF16 = 1;
@@ -37,7 +42,7 @@ public class JDKUtils {
     public static final Class CLASS_TRANSIENT;
     public static final boolean BIG_ENDIAN;
 
-    public static final boolean UNSAFE_SUPPORT;
+    public static final boolean UNSAFE_SUPPORT = true;
     public static final boolean VECTOR_SUPPORT;
     public static final int VECTOR_BIT_LENGTH;
 
@@ -59,6 +64,19 @@ public class JDKUtils {
     static final AtomicInteger reflectErrorCount = new AtomicInteger();
 
     static {
+        Unsafe unsafe = null;
+        long offset = -1;
+        try {
+            Field theUnsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+            theUnsafeField.setAccessible(true);
+            unsafe = (Unsafe) theUnsafeField.get(null);
+            offset = Unsafe.ARRAY_BYTE_BASE_OFFSET;
+        } catch (Throwable ignored) {
+            // ignored
+        }
+        UNSAFE = unsafe;
+        ARRAY_BYTE_BASE_OFFSET = offset;
+
         int jvmVersion = -1;
         boolean openj9 = false, android = false, graal = false;
         try {
@@ -116,7 +134,7 @@ public class JDKUtils {
             try {
                 field = String.class.getDeclaredField("value");
                 field.setAccessible(true);
-                fieldOffset = UnsafeUtils.objectFieldOffset(field);
+                fieldOffset = UNSAFE.objectFieldOffset(field);
             } catch (Exception ignored) {
                 FIELD_STRING_VALUE_ERROR = true;
             }
@@ -132,7 +150,7 @@ public class JDKUtils {
             long fieldValueOffset = -1;
             try {
                 fieldValue = String.class.getDeclaredField("value");
-                fieldValueOffset = UnsafeUtils.objectFieldOffset(fieldValue);
+                fieldValueOffset = UNSAFE.objectFieldOffset(fieldValue);
             } catch (Exception ignored) {
                 FIELD_STRING_VALUE_ERROR = true;
             }
@@ -143,7 +161,7 @@ public class JDKUtils {
             long fieldCodeOffset = -1;
             try {
                 fieldCode = String.class.getDeclaredField("coder");
-                fieldCodeOffset = UnsafeUtils.objectFieldOffset(fieldCode);
+                fieldCodeOffset = UNSAFE.objectFieldOffset(fieldCode);
             } catch (Exception ignored) {
                 FIELD_STRING_CODER_ERROR = true;
             }
@@ -151,25 +169,13 @@ public class JDKUtils {
             FIELD_STRING_CODER = fieldCode;
         }
 
-        boolean unsafeSupport;
-        unsafeSupport = ((Predicate) o -> {
-            try {
-                return UnsafeUtils.UNSAFE != null;
-            } catch (Throwable ignored) {
-                return false;
-            }
-        }).test(null);
-        UNSAFE_SUPPORT = unsafeSupport;
-
         {
             long fieldOffset = -1;
-            if (UNSAFE_SUPPORT) {
-                try {
-                    Field field = BigDecimal.class.getDeclaredField("intCompact");
-                    fieldOffset = UnsafeUtils.objectFieldOffset(field);
-                } catch (Throwable ignored) {
-                    // ignored
-                }
+            try {
+                Field field = BigDecimal.class.getDeclaredField("intCompact");
+                fieldOffset = UNSAFE.objectFieldOffset(field);
+            } catch (Throwable ignored) {
+                // ignored
             }
             FIELD_DECIMAL_INT_COMPACT_OFFSET = fieldOffset;
         }
@@ -186,8 +192,8 @@ public class JDKUtils {
             try {
                 Class lookupClass = MethodHandles.Lookup.class;
                 Field implLookup = lookupClass.getDeclaredField("IMPL_LOOKUP");
-                long fieldOffset = UnsafeUtils.UNSAFE.staticFieldOffset(implLookup);
-                trustedLookup = (MethodHandles.Lookup) UnsafeUtils.UNSAFE.getObject(lookupClass, fieldOffset);
+                long fieldOffset = UNSAFE.staticFieldOffset(implLookup);
+                trustedLookup = (MethodHandles.Lookup) UNSAFE.getObject(lookupClass, fieldOffset);
             } catch (Throwable ignored) {
                 // ignored
             }
@@ -316,13 +322,8 @@ public class JDKUtils {
             if (JVM_VERSION > 8 && !android) {
                 try {
                     Field compact_strings_field = String.class.getDeclaredField("COMPACT_STRINGS");
-                    if (UNSAFE_SUPPORT) {
-                        long fieldOffset = UnsafeUtils.UNSAFE.staticFieldOffset(compact_strings_field);
-                        compact_strings = UnsafeUtils.UNSAFE.getBoolean(String.class, fieldOffset);
-                    } else {
-                        compact_strings_field.setAccessible(true);
-                        compact_strings = (Boolean) compact_strings_field.get(null);
-                    }
+                    long fieldOffset = UNSAFE.staticFieldOffset(compact_strings_field);
+                    compact_strings = UNSAFE.getBoolean(String.class, fieldOffset);
                 } catch (Throwable e) {
                     initErrorLast = e;
                 }
@@ -405,7 +406,7 @@ public class JDKUtils {
         // Android not support
         if (!FIELD_STRING_VALUE_ERROR) {
             try {
-                return (char[]) UnsafeUtils.UNSAFE.getObject(str, FIELD_STRING_VALUE_OFFSET);
+                return (char[]) UNSAFE.getObject(str, FIELD_STRING_VALUE_OFFSET);
             } catch (Exception ignored) {
                 FIELD_STRING_VALUE_ERROR = true;
             }

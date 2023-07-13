@@ -2,10 +2,7 @@ package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.reader.FieldReader;
-import com.alibaba.fastjson2.util.DateUtils;
-import com.alibaba.fastjson2.util.Fnv;
-import com.alibaba.fastjson2.util.IOUtils;
-import com.alibaba.fastjson2.util.UnsafeUtils;
+import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2_vo.*;
 import org.junit.jupiter.api.Test;
 
@@ -19,6 +16,7 @@ import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONReaderTest1 {
@@ -1928,8 +1926,8 @@ public class JSONReaderTest1 {
     public void getBigInt() throws Exception {
         Field signumField = BigInteger.class.getDeclaredField("signum");
         Field magField = BigInteger.class.getDeclaredField("mag");
-        long signumOffSet = UnsafeUtils.UNSAFE.objectFieldOffset(signumField);
-        long magOffSet = UnsafeUtils.UNSAFE.objectFieldOffset(magField);
+        long signumOffSet = UNSAFE.objectFieldOffset(signumField);
+        long magOffSet = UNSAFE.objectFieldOffset(magField);
 
         JSONReader.BigIntegerCreator bigIntegerCreator = new JSONReader.BigIntegerCreator();
 
@@ -1944,8 +1942,8 @@ public class JSONReaderTest1 {
                     new BigInteger("12345678901234567890123456789012345678901234567890123456789012345678901234567890")
             };
             for (BigInteger value : values) {
-                int signum = UnsafeUtils.UNSAFE.getInt(value, signumOffSet);
-                int[] mage = (int[]) UnsafeUtils.UNSAFE.getObject(value, magOffSet);
+                int signum = UNSAFE.getInt(value, signumOffSet);
+                int[] mage = (int[]) UNSAFE.getObject(value, magOffSet);
                 BigInteger value1 = JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR.apply(signum, mage);
                 BigInteger value2 = bigIntegerCreator.apply(signum, mage);
                 assertEquals(value, value1);
@@ -1963,8 +1961,8 @@ public class JSONReaderTest1 {
                     new BigInteger("-12345678901234567890123456789012345678901234567890123456789012345678901234567890")
             };
             for (BigInteger value : values) {
-                int signum = UnsafeUtils.UNSAFE.getInt(value, signumOffSet);
-                int[] mage = (int[]) UnsafeUtils.UNSAFE.getObject(value, magOffSet);
+                int signum = UNSAFE.getInt(value, signumOffSet);
+                int[] mage = (int[]) UNSAFE.getObject(value, magOffSet);
                 BigInteger value1 = JSONReader.BigIntegerCreator.BIG_INTEGER_CREATOR.apply(signum, mage);
                 BigInteger value2 = bigIntegerCreator.apply(signum, mage);
                 assertEquals(value, value1);

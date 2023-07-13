@@ -13,7 +13,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.alibaba.fastjson2.JSONB.Constants.*;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE_SUPPORT;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
 public final class ObjectReaderImplMap
@@ -225,24 +225,22 @@ public final class ObjectReaderImplMap
             return Collections.emptyNavigableMap();
         }
 
-        if (UNSAFE_SUPPORT) {
-            String instanceTypeName = instanceType.getName();
-            switch (instanceTypeName) {
-                case "com.ali.com.google.common.collect.EmptyImmutableBiMap":
-                    return ((Supplier) () -> {
-                        try {
-                            return UnsafeUtils.UNSAFE.allocateInstance(instanceType);
-                        } catch (InstantiationException e) {
-                            throw new JSONException("create map error : " + instanceType);
-                        }
-                    }).get();
-                case "java.util.ImmutableCollections$Map1":
-                    return new HashMap<>();
-                case "java.util.ImmutableCollections$MapN":
-                    return new LinkedHashMap<>();
-                default:
-                    break;
-            }
+        String instanceTypeName = instanceType.getName();
+        switch (instanceTypeName) {
+            case "com.ali.com.google.common.collect.EmptyImmutableBiMap":
+                return ((Supplier) () -> {
+                    try {
+                        return UNSAFE.allocateInstance(instanceType);
+                    } catch (InstantiationException e) {
+                        throw new JSONException("create map error : " + instanceType);
+                    }
+                }).get();
+            case "java.util.ImmutableCollections$Map1":
+                return new HashMap<>();
+            case "java.util.ImmutableCollections$MapN":
+                return new LinkedHashMap<>();
+            default:
+                break;
         }
 
         try {
@@ -427,27 +425,10 @@ public final class ObjectReaderImplMap
     }
 
     static Function createObjectSupplier(Class objectClass) {
-        if (UNSAFE_SUPPORT) {
-            if (UNSAFE_OBJECT_CREATOR != null) {
-                return UNSAFE_OBJECT_CREATOR;
-            }
-            return UNSAFE_OBJECT_CREATOR = new ObjectCreatorUF(objectClass);
+        if (UNSAFE_OBJECT_CREATOR != null) {
+            return UNSAFE_OBJECT_CREATOR;
         }
-
-        Constructor constructor;
-        try {
-            constructor = objectClass.getConstructor(Map.class);
-        } catch (NoSuchMethodException e) {
-            throw new JSONException("create JSONObject1 error");
-        }
-
-        return (Object arg) -> {
-            try {
-                return constructor.newInstance(arg);
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                throw new JSONException("create JSONObject1 error");
-            }
-        };
+        return UNSAFE_OBJECT_CREATOR = new ObjectCreatorUF(objectClass);
     }
 
     static class ObjectCreatorUF
@@ -463,7 +444,7 @@ public final class ObjectReaderImplMap
             } catch (NoSuchFieldException e) {
                 throw new JSONException("field map not found", e);
             }
-            mapOffset = UnsafeUtils.UNSAFE.objectFieldOffset(map);
+            mapOffset = UNSAFE.objectFieldOffset(map);
         }
 
         @Override
@@ -474,8 +455,8 @@ public final class ObjectReaderImplMap
 
             Object object;
             try {
-                object = UnsafeUtils.UNSAFE.allocateInstance(objectClass);
-                UnsafeUtils.UNSAFE.putObject(object, mapOffset, map);
+                object = UNSAFE.allocateInstance(objectClass);
+                UNSAFE.putObject(object, mapOffset, map);
             } catch (InstantiationException e) {
                 throw new JSONException("create " + objectClass.getName() + " error", e);
             }

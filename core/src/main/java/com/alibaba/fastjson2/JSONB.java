@@ -291,20 +291,11 @@ public interface JSONB {
 
     static JSONObject parseObject(byte[] jsonbBytes) {
         JSONReader.Context context = new JSONReader.Context(JSONFactory.getDefaultObjectReaderProvider());
-        JSONReader reader;
-        if (UNSAFE_SUPPORT) {
-            reader = new JSONReaderJSONBUF(
-                    context,
-                    jsonbBytes,
-                    0,
-                    jsonbBytes.length);
-        } else {
-            reader = new JSONReaderJSONB(
-                    context,
-                    jsonbBytes,
-                    0,
-                    jsonbBytes.length);
-        }
+        JSONReader reader = new JSONReaderJSONB(
+                context,
+                jsonbBytes,
+                0,
+                jsonbBytes.length);
 
         JSONObject object = (JSONObject) reader.readObject();
         if (reader.resolveTasks != null) {
@@ -414,13 +405,7 @@ public interface JSONB {
     static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass) {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context context = new JSONReader.Context(provider);
-        try (JSONReader jsonReader = UNSAFE_SUPPORT
-                ? new JSONReaderJSONBUF(
-                context,
-                jsonbBytes,
-                0,
-                jsonbBytes.length)
-                : new JSONReaderJSONB(
+        try (JSONReader jsonReader = new JSONReaderJSONB(
                 context,
                 jsonbBytes,
                 0,
@@ -489,13 +474,7 @@ public interface JSONB {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = provider.getObjectReader(objectType, fieldBased);
 
-        try (JSONReader reader = UNSAFE_SUPPORT
-                ? new JSONReaderJSONBUF(
-                context,
-                jsonbBytes,
-                0,
-                jsonbBytes.length)
-                : new JSONReaderJSONB(
+        try (JSONReader reader = new JSONReaderJSONB(
                 context,
                 jsonbBytes,
                 0,
@@ -639,9 +618,7 @@ public interface JSONB {
             Type objectType,
             JSONReader.Context context
     ) {
-        try (JSONReader jsonReader = UNSAFE_SUPPORT
-                ? new JSONReaderJSONBUF(context, in)
-                : new JSONReaderJSONB(context, in)
+        try (JSONReader jsonReader = new JSONReaderJSONB(context, in)
         ) {
             Object object;
             if (objectType == Object.class) {
@@ -666,9 +643,7 @@ public interface JSONB {
             Class objectClass,
             JSONReader.Context context
     ) {
-        try (JSONReader jsonReader = UNSAFE_SUPPORT
-                ? new JSONReaderJSONBUF(context, in)
-                : new JSONReaderJSONB(context, in)
+        try (JSONReader jsonReader = new JSONReaderJSONB(context, in)
         ) {
             Object object;
             if (objectClass == Object.class) {
@@ -744,13 +719,7 @@ public interface JSONB {
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
         JSONReader.Context context = new JSONReader.Context(provider, features);
 
-        try (JSONReader jsonReader = UNSAFE_SUPPORT
-                ? new JSONReaderJSONBUF(
-                context,
-                jsonbBytes,
-                0,
-                jsonbBytes.length)
-                : new JSONReaderJSONB(
+        try (JSONReader jsonReader = new JSONReaderJSONB(
                 context,
                 jsonbBytes,
                 0,
@@ -787,13 +756,7 @@ public interface JSONB {
     }
 
     static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass, JSONReader.Context context) {
-        try (JSONReader jsonReader = UNSAFE_SUPPORT
-                ? new JSONReaderJSONBUF(
-                context,
-                jsonbBytes,
-                0,
-                jsonbBytes.length)
-                : new JSONReaderJSONB(
+        try (JSONReader jsonReader = new JSONReaderJSONB(
                 context,
                 jsonbBytes,
                 0,

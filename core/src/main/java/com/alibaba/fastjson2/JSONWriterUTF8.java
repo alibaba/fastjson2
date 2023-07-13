@@ -17,6 +17,7 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 class JSONWriterUTF8
         extends JSONWriter {
@@ -2365,7 +2366,7 @@ class JSONWriterUTF8
         if (precision < 19
                 && (scale = value.scale()) >= 0
                 && FIELD_DECIMAL_INT_COMPACT_OFFSET != -1
-                && (unscaleValue = UnsafeUtils.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET)) != Long.MIN_VALUE
+                && (unscaleValue = UNSAFE.getLong(value, FIELD_DECIMAL_INT_COMPACT_OFFSET)) != Long.MIN_VALUE
                 && !asPlain
         ) {
             off = IOUtils.writeDecimal(bytes, off, unscaleValue, scale);

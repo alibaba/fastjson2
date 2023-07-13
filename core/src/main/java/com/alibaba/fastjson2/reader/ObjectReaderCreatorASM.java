@@ -217,12 +217,6 @@ public class ObjectReaderCreatorASM
             return super.createObjectReader(objectClass, objectType, fieldBased, provider);
         }
 
-        if (externalClass) {
-            if (!UNSAFE_SUPPORT) {
-                return super.createObjectReader(objectClass, objectType, fieldBased, provider);
-            }
-        }
-
         BeanInfo beanInfo = new BeanInfo();
         provider.getBeanInfo(beanInfo, objectClass);
         if (externalClass || !Modifier.isPublic(objectClassModifiers)) {
@@ -2371,7 +2365,7 @@ public class ObjectReaderCreatorASM
                     if (fieldReader.noneStaticMemberClass) {
                         try {
                             Field this0 = fieldClass.getDeclaredField("this$0");
-                            long fieldOffset = UnsafeUtils.objectFieldOffset(this0);
+                            long fieldOffset = UNSAFE.objectFieldOffset(this0);
 
                             mw.visitInsn(Opcodes.DUP);
                             mw.visitFieldInsn(Opcodes.GETSTATIC, TYPE_UNSAFE_UTILS, "UNSAFE", "Lsun/misc/Unsafe;");
@@ -2582,7 +2576,7 @@ public class ObjectReaderCreatorASM
                 mw.visitInsn(Opcodes.SWAP);
 
                 mw.visitLdcInsn(
-                        UnsafeUtils.objectFieldOffset(field));
+                        UNSAFE.objectFieldOffset(field));
                 mw.visitVarInsn(LOAD, FIELD_VALUE);
                 mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "sun/misc/Unsafe", methodName, methodDes, false);
             }
