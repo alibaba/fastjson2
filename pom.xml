@@ -931,7 +931,7 @@
                         <groupId>io.github.git-commit-id</groupId>
                         <artifactId>git-commit-id-maven-plugin</artifactId>
                         <!-- DO NOT upgrade to v5+, since don't support java 8 -->
-                        <version>5.0.0</version>
+                        <version>6.0.0</version>
                         <executions>
                             <execution>
                                 <id>get-the-git-infos</id>
