@@ -756,7 +756,7 @@ public interface JSONB {
     }
 
     static <T> T parseObject(byte[] jsonbBytes, Class<T> objectClass, JSONReader.Context context) {
-        try (JSONReader jsonReader = new JSONReaderJSONB(
+        try (JSONReaderJSONB jsonReader = new JSONReaderJSONB(
                 context,
                 jsonbBytes,
                 0,
@@ -765,16 +765,17 @@ public interface JSONB {
             Object object;
             if (objectClass == Object.class) {
                 ObjectReader autoTypeObjectReader;
-                byte type = jsonReader.getType();
-                if (type == BC_TYPED_ANY) {
+                if (jsonReader.getType() == BC_TYPED_ANY) {
                     autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, 0);
                     object = autoTypeObjectReader.readJSONBObject(jsonReader, objectClass, null, context.features);
                 } else {
                     object = jsonReader.readAny();
                 }
             } else {
-                boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
-                ObjectReader objectReader = context.provider.getObjectReader(objectClass, fieldBased);
+                ObjectReader objectReader = context.provider.getObjectReader(
+                        objectClass,
+                        (context.features & JSONReader.Feature.FieldBased.mask) != 0
+                );
                 if ((context.features & JSONReader.Feature.SupportArrayToBean.mask) != 0
                         && jsonReader.isArray()
                         && objectReader instanceof ObjectReaderBean
