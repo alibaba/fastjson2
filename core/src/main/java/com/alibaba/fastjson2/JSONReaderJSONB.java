@@ -584,7 +584,7 @@ final class JSONReaderJSONB
                 if (STRING_CREATOR_JDK11 != null && !JDKUtils.BIG_ENDIAN) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
-                    str = STRING_CREATOR_JDK11.apply(chars, UTF16);
+                    str = STRING_CREATOR_JDK11.apply(chars, strlen == 0 ? LATIN1 : UTF16);
                 } else {
                     str = new String(bytes, offset, strlen, StandardCharsets.UTF_16LE);
                 }
@@ -599,7 +599,7 @@ final class JSONReaderJSONB
                 if (STRING_CREATOR_JDK11 != null && JDKUtils.BIG_ENDIAN) {
                     byte[] chars = new byte[strlen];
                     System.arraycopy(bytes, offset, chars, 0, strlen);
-                    str = STRING_CREATOR_JDK11.apply(chars, UTF16);
+                    str = STRING_CREATOR_JDK11.apply(chars, strlen == 0 ? LATIN1 : UTF16);
                 } else {
                     str = new String(bytes, offset, strlen, StandardCharsets.UTF_16BE);
                 }
@@ -1162,6 +1162,67 @@ final class JSONReaderJSONB
         }
 
         throw new JSONException("reference not support input " + error(type));
+    }
+
+    Object readAnyObject() {
+        if (bytes[offset] != BC_TYPED_ANY) {
+            return readAny();
+        }
+
+        Context context = this.context;
+        offset++;
+        final long typeHash = readTypeHashCode();
+
+        ObjectReader autoTypeObjectReader = null;
+        AutoTypeBeforeHandler autoTypeBeforeHandler = context.autoTypeBeforeHandler;
+        if (autoTypeBeforeHandler != null) {
+            Class<?> objectClass = autoTypeBeforeHandler.apply(typeHash, Object.class, 0L);
+            if (objectClass == null) {
+                objectClass = autoTypeBeforeHandler.apply(getString(), Object.class, 0L);
+            }
+            if (objectClass != null) {
+                autoTypeObjectReader = context.getObjectReader(objectClass);
+            }
+        }
+
+        final long features = context.features;
+
+        if (autoTypeObjectReader == null) {
+            if ((features & Feature.SupportAutoType.mask) == 0) {
+                if ((features & Feature.ErrorOnNotSupportAutoType.mask) == 0) {
+                    return null;
+                }
+                autoTypeError();
+            }
+            autoTypeObjectReader = context.provider.getObjectReader(typeHash);
+        }
+
+        if (autoTypeObjectReader != null) {
+            Class objectClass = autoTypeObjectReader.getObjectClass();
+            if (objectClass != null) {
+                ClassLoader classLoader = objectClass.getClassLoader();
+                if (classLoader != null) {
+                    ClassLoader tcl = Thread.currentThread().getContextClassLoader();
+                    if (classLoader != tcl) {
+                        autoTypeObjectReader = getObjectReaderContext(autoTypeObjectReader, objectClass, tcl);
+                    }
+                }
+            }
+        }
+
+        if (autoTypeObjectReader == null) {
+            autoTypeObjectReader = context.provider.getObjectReader(getString(), Object.class, features);
+            if (autoTypeObjectReader == null) {
+                if ((features & Feature.ErrorOnNotSupportAutoType.mask) == 0) {
+                    return null;
+                }
+                autoTypeError();
+            }
+        }
+
+        this.type = bytes[offset];
+
+        return autoTypeObjectReader.readJSONBObject(this, Object.class, null, context.features);
     }
 
     @Override

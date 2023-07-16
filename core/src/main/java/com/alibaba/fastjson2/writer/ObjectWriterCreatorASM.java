@@ -2834,7 +2834,13 @@ public class ObjectWriterCreatorASM
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
         mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldWriter(i), DESC_FIELD_WRITER);
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_WRITER, "writeFieldName", METHOD_DESC_WRITE_FIELD_NAME, false);
+        mw.visitMethodInsn(
+                Opcodes.INVOKEVIRTUAL,
+                TYPE_FIELD_WRITER,
+                mwc.jsonb ? "writeFieldNameJSONB" : "writeFieldName",
+                METHOD_DESC_WRITE_FIELD_NAME,
+                false
+        );
     }
 
     private void gwFieldValueInt64VA(

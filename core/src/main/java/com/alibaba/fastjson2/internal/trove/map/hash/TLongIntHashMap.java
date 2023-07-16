@@ -295,7 +295,6 @@ public final class TLongIntHashMap {
             return values[-index - 1];
         }
 
-        boolean isNewMapping = true;
         values[index] = value;
 
         if (consumeFreeSlot) {
