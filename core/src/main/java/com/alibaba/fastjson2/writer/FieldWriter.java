@@ -182,6 +182,14 @@ public abstract class FieldWriter<T>
         return false;
     }
 
+    public final void writeFieldNameJSONB(JSONWriter jsonWriter) {
+        SymbolTable symbolTable = jsonWriter.symbolTable;
+        if (symbolTable != null && writeFieldNameSymbol(jsonWriter, symbolTable)) {
+            return;
+        }
+        jsonWriter.writeNameRaw(nameJSONB, hashCode);
+    }
+
     public final void writeFieldName(JSONWriter jsonWriter) {
         if (jsonWriter.jsonb) {
             SymbolTable symbolTable = jsonWriter.symbolTable;

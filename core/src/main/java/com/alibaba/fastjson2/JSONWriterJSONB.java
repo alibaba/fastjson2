@@ -266,7 +266,9 @@ final class JSONWriterJSONB
     private static int putStringSizeLarge(byte[] bytes, int off, int strlen) {
         if (strlen <= INT32_SHORT_MAX) {
             bytes[off] = BC_STR_ASCII;
-            putInt3(bytes, off + 1, strlen);
+            bytes[off + 1] = (byte) (BC_INT32_SHORT_ZERO + (strlen >> 16));
+            bytes[off + 2] = (byte) (strlen >> 8);
+            bytes[off + 3] = (byte) (strlen);
             return 4;
         }
 
@@ -932,11 +934,16 @@ final class JSONWriterJSONB
             bytes[off + 1] = (byte) (val);
             size = 2;
         } else if (val >= INT64_SHORT_MIN && val <= INT64_SHORT_MAX) {
-            putLong3(bytes, off, (int) val);
+            bytes[off] = (byte) (BC_INT64_SHORT_ZERO + (val >> 16));
+            bytes[off + 1] = (byte) (val >> 8);
+            bytes[off + 2] = (byte) (val);
             size = 3;
         } else if (val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE) {
             bytes[off] = BC_INT64_INT;
-            putInt(bytes, off + 1, (int) val);
+            bytes[off + 1] = (byte) (val >>> 24);
+            bytes[off + 2] = (byte) (val >>> 16);
+            bytes[off + 3] = (byte) (val >>> 8);
+            bytes[off + 4] = (byte) val;
             size = 5;
         } else {
             bytes[off] = BC_INT64;
@@ -944,12 +951,6 @@ final class JSONWriterJSONB
             size = 9;
         }
         this.off = off + size;
-    }
-
-    static void putLong3(byte[] bytes, int off, int val) {
-        bytes[off] = (byte) (BC_INT64_SHORT_ZERO + (val >> 16));
-        bytes[off + 1] = (byte) (val >> 8);
-        bytes[off + 2] = (byte) (val);
     }
 
     @Override
@@ -990,7 +991,9 @@ final class JSONWriterJSONB
             }
 
             if (val >= INT64_SHORT_MIN && val <= INT64_SHORT_MAX) {
-                putLong3(bytes, off, (int) val);
+                bytes[off] = (byte) (BC_INT64_SHORT_ZERO + (val >> 16));
+                bytes[off + 1] = (byte) (val >> 8);
+                bytes[off + 2] = (byte) (val);
                 off += 3;
                 continue;
             }
@@ -1171,7 +1174,9 @@ final class JSONWriterJSONB
             }
 
             if (val >= INT32_SHORT_MIN && val <= INT32_SHORT_MAX) {
-                putInt3(bytes, off, val);
+                bytes[off] = (byte) (BC_INT32_SHORT_ZERO + (val >> 16));
+                bytes[off + 1] = (byte) (val >> 8);
+                bytes[off + 2] = (byte) (val);
                 off += 3;
                 continue;
             }
@@ -1254,7 +1259,9 @@ final class JSONWriterJSONB
             bytes[off + 1] = (byte) (val);
             size = 2;
         } else if (val >= INT32_SHORT_MIN && val <= INT32_SHORT_MAX) {
-            putInt3(bytes, off, val);
+            bytes[off] = (byte) (BC_INT32_SHORT_ZERO + (val >> 16));
+            bytes[off + 1] = (byte) (val >> 8);
+            bytes[off + 2] = (byte) (val);
             size = 3;
         } else {
             bytes[off] = BC_INT32;
@@ -1262,12 +1269,6 @@ final class JSONWriterJSONB
             size = 5;
         }
         this.off += size;
-    }
-
-    static void putInt3(byte[] bytes, int off, int val) {
-        bytes[off] = (byte) (BC_INT32_SHORT_ZERO + (val >> 16));
-        bytes[off + 1] = (byte) (val >> 8);
-        bytes[off + 2] = (byte) (val);
     }
 
     public static int writeInt32(byte[] bytes, int off, int val) {
@@ -1279,7 +1280,9 @@ final class JSONWriterJSONB
             bytes[off + 1] = (byte) (val);
             return 2;
         } else if (val >= INT32_SHORT_MIN && val <= INT32_SHORT_MAX) {
-            putInt3(bytes, off, val);
+            bytes[off] = (byte) (BC_INT32_SHORT_ZERO + (val >> 16));
+            bytes[off + 1] = (byte) (val >> 8);
+            bytes[off + 2] = (byte) (val);
             return 3;
         } else {
             bytes[off] = BC_INT32;
