@@ -16,7 +16,7 @@ public final class ZoneId {
     public static final ZoneId SHANGHAI_ZONE_ID
             = SHANGHAI_ZONE_ID_NAME.equals(DEFAULT_ZONE_ID.id)
             ? DEFAULT_ZONE_ID
-            : ZoneId.of(SHANGHAI_ZONE_ID_NAME);
+            : new ZoneId(TimeZone.getTimeZone(SHANGHAI_ZONE_ID_NAME));
     public static ZoneId UTC = ZoneId.of("Z");
     public final TimeZone timeZone;
     public final String id;
