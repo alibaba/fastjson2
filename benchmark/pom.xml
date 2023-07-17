@@ -103,7 +103,7 @@
         <dependency>
             <groupId>io.github.wycst</groupId>
             <artifactId>wast</artifactId>
-            <version>0.0.10.1</version>
+            <version>0.0.10.2</version>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.javacsv</groupId>
