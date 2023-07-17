@@ -2711,8 +2711,7 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(byte[] utf8Bytes) {
-        Context context = createReadContext();
-        return new JSONReaderUTF8(context, null, utf8Bytes, 0, utf8Bytes.length);
+        return new JSONReaderUTF8(createReadContext(), null, utf8Bytes, 0, utf8Bytes.length);
     }
 
     @Deprecated
@@ -2853,8 +2852,7 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(byte[] bytes, int offset, int length) {
-        Context context = createReadContext();
-        return new JSONReaderUTF8(context, null, bytes, offset, length);
+        return new JSONReaderUTF8(createReadContext(), null, bytes, offset, length);
     }
 
     public static JSONReader of(byte[] bytes, int offset, int length, JSONReader.Context context) {
@@ -2907,8 +2905,10 @@ public abstract class JSONReader
     }
 
     public static JSONReader of(ByteBuffer buffer, Charset charset) {
-        Context context = JSONFactory.createReadContext();
+        return of(buffer, createReadContext(), charset);
+    }
 
+    public static JSONReader of(ByteBuffer buffer, Context context, Charset charset) {
         if (charset == IOUtils.UTF_8 || charset == null) {
             return new JSONReaderUTF8(context, buffer);
         }
@@ -3292,6 +3292,7 @@ public abstract class JSONReader
             this.objectSupplier = JSONFactory.defaultObjectSupplier;
             this.arraySupplier = JSONFactory.defaultArraySupplier;
             this.symbolTable = null;
+            this.zoneId = defaultReaderZoneId;
 
             String format = defaultReaderFormat;
             if (format != null) {
@@ -3305,6 +3306,7 @@ public abstract class JSONReader
             this.objectSupplier = JSONFactory.defaultObjectSupplier;
             this.arraySupplier = JSONFactory.defaultArraySupplier;
             this.symbolTable = null;
+            this.zoneId = defaultReaderZoneId;
 
             String format = defaultReaderFormat;
             if (format != null) {
@@ -3318,6 +3320,7 @@ public abstract class JSONReader
             this.objectSupplier = JSONFactory.defaultObjectSupplier;
             this.arraySupplier = JSONFactory.defaultArraySupplier;
             this.symbolTable = null;
+            this.zoneId = defaultReaderZoneId;
 
             String format = defaultReaderFormat;
             if (format != null) {
@@ -3335,6 +3338,7 @@ public abstract class JSONReader
             this.objectSupplier = JSONFactory.defaultObjectSupplier;
             this.arraySupplier = JSONFactory.defaultArraySupplier;
             this.symbolTable = null;
+            this.zoneId = defaultReaderZoneId;
 
             String format = defaultReaderFormat;
             if (format != null) {
@@ -3353,6 +3357,7 @@ public abstract class JSONReader
             this.objectSupplier = JSONFactory.defaultObjectSupplier;
             this.arraySupplier = JSONFactory.defaultArraySupplier;
             this.symbolTable = null;
+            this.zoneId = defaultReaderZoneId;
 
             String format = defaultReaderFormat;
             if (format != null) {
@@ -3368,6 +3373,7 @@ public abstract class JSONReader
             this.features = defaultReaderFeatures;
             this.provider = provider;
             this.symbolTable = symbolTable;
+            this.zoneId = defaultReaderZoneId;
 
             String format = defaultReaderFormat;
             if (format != null) {
@@ -3379,6 +3385,7 @@ public abstract class JSONReader
             this.features = defaultReaderFeatures;
             this.provider = provider;
             this.symbolTable = symbolTable;
+            this.zoneId = defaultReaderZoneId;
 
             String format = defaultReaderFormat;
             if (format != null) {
@@ -3394,6 +3401,7 @@ public abstract class JSONReader
             this.features = defaultReaderFeatures;
             this.provider = provider;
             this.symbolTable = symbolTable;
+            this.zoneId = defaultReaderZoneId;
 
             String format = defaultReaderFormat;
             if (format != null) {
@@ -3411,6 +3419,7 @@ public abstract class JSONReader
             this.features = defaultReaderFeatures;
             this.provider = provider;
             this.symbolTable = symbolTable;
+            this.zoneId = defaultReaderZoneId;
 
             String format = defaultReaderFormat;
             if (format != null) {

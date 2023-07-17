@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.filter.Filter;
 import com.alibaba.fastjson2.function.Supplier;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.reader.ObjectReaderProvider;
+import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.NameCacheEntry;
 import com.alibaba.fastjson2.writer.ObjectWriterProvider;
@@ -28,9 +29,11 @@ public final class JSONFactory {
 
     static long defaultReaderFeatures;
     static String defaultReaderFormat;
+    static ZoneId defaultReaderZoneId;
 
     static long defaultWriterFeatures;
     static String defaultWriterFormat;
+    static ZoneId defaultWriterZoneId;
 
     static Supplier<Map> defaultObjectSupplier;
     static Supplier<List> defaultArraySupplier;

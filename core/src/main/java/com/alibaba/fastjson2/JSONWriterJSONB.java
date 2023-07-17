@@ -100,7 +100,6 @@ final class JSONWriterJSONB
             writeTypeName(array.getClass().getName());
         }
 
-        level++;
         int off = this.off;
         if (off == bytes.length) {
             ensureCapacity(off + 1);
@@ -117,7 +116,6 @@ final class JSONWriterJSONB
 
     @Override
     public void startArray(int size) {
-        level++;
         int off = this.off;
         if (off == bytes.length) {
             ensureCapacity(off + 1);
@@ -172,7 +170,6 @@ final class JSONWriterJSONB
 
     @Override
     public void endArray() {
-        level--;
     }
 
     @Override

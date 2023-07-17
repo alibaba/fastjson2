@@ -5059,11 +5059,11 @@ class JSONReaderUTF16
         long longValue = 0;
         while (ch >= '0' && ch <= '9') {
             if (!overflow) {
-                long intValue10 = longValue * 10 + (ch - '0');
-                if (intValue10 < longValue) {
-                    overflow = true;
+                long r = longValue * 10;
+                if ((longValue | 10) >>> 31 == 0L || (r / 10 == longValue)) {
+                    longValue = r + (ch - '0');
                 } else {
-                    longValue = intValue10;
+                    overflow = true;
                 }
             }
 
@@ -5082,11 +5082,11 @@ class JSONReaderUTF16
             while (ch >= '0' && ch <= '9') {
                 this.scale++;
                 if (!overflow) {
-                    long intValue10 = longValue * 10 + (ch - '0');
-                    if (intValue10 < longValue) {
-                        overflow = true;
+                    long r = longValue * 10;
+                    if ((longValue | 10) >>> 31 == 0L || (r / 10 == longValue)) {
+                        longValue = r + (ch - '0');
                     } else {
-                        longValue = intValue10;
+                        overflow = true;
                     }
                 }
 

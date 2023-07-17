@@ -1247,6 +1247,7 @@ public abstract class JSONWriter
 
             this.features = defaultWriterFeatures;
             this.provider = provider;
+            this.zoneId = defaultWriterZoneId;
 
             String format = defaultWriterFormat;
             if (format != null) {
@@ -1257,6 +1258,7 @@ public abstract class JSONWriter
         public Context(Feature... features) {
             this.features = defaultWriterFeatures;
             this.provider = JSONFactory.defaultObjectWriterProvider;
+            this.zoneId = defaultWriterZoneId;
 
             String format = defaultWriterFormat;
             if (format != null) {
@@ -1271,6 +1273,7 @@ public abstract class JSONWriter
         public Context(String format, Feature... features) {
             this.features = defaultWriterFeatures;
             this.provider = JSONFactory.defaultObjectWriterProvider;
+            this.zoneId = defaultWriterZoneId;
 
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;
@@ -1287,6 +1290,7 @@ public abstract class JSONWriter
         public Context(ObjectWriterProvider provider, String format, Filter filter, Feature... features) {
             this.features = defaultWriterFeatures;
             this.provider = provider;
+            this.zoneId = defaultWriterZoneId;
 
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;
@@ -1309,6 +1313,7 @@ public abstract class JSONWriter
 
             this.features = defaultWriterFeatures;
             this.provider = provider;
+            this.zoneId = defaultWriterZoneId;
 
             for (int i = 0; i < features.length; i++) {
                 this.features |= features[i].mask;

@@ -82,8 +82,7 @@ public final class SymbolTable {
     }
 
     public int getOrdinal(String name) {
-        long hashCode = Fnv.hashCode64(name);
-        int m = Arrays.binarySearch(hashCodes, hashCode);
+        int m = Arrays.binarySearch(hashCodes, Fnv.hashCode64(name));
         if (m < 0) {
             return -1;
         }

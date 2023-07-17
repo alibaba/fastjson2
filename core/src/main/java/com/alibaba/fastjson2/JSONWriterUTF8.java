@@ -211,7 +211,7 @@ class JSONWriterUTF8
     public final void endObject() {
         level--;
         int off = this.off;
-        int minCapacity = off + (pretty ? 2 + indent : 1);
+        int minCapacity = off + (pretty ? 3 + indent : 1);
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
@@ -234,7 +234,7 @@ class JSONWriterUTF8
     public final void writeComma() {
         startObject = false;
         int off = this.off;
-        int minCapacity = off + (pretty ? 2 + indent : 1);
+        int minCapacity = off + (pretty ? 3 + indent : 1);
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
@@ -275,7 +275,7 @@ class JSONWriterUTF8
     public final void endArray() {
         level--;
         int off = this.off;
-        int minCapacity = off + (pretty ? 2 + indent : 1);
+        int minCapacity = off + (pretty ? 3 + indent : 1);
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }

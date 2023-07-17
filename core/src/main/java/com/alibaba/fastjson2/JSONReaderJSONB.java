@@ -21,7 +21,7 @@ import static com.alibaba.fastjson2.util.IOUtils.getLong;
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
-class JSONReaderJSONB
+final class JSONReaderJSONB
         extends JSONReader {
     static final long BASE = UNSAFE.arrayBaseOffset(byte[].class);
 
@@ -1105,6 +1105,9 @@ class JSONReaderJSONB
             final long features2 = context.features | features;
             boolean isSupportAutoType = (features2 & Feature.SupportAutoType.mask) != 0;
             if (!isSupportAutoType) {
+                if ((features2 & Feature.ErrorOnNotSupportAutoType.mask) == 0) {
+                    return null;
+                }
                 autoTypeError();
             }
 

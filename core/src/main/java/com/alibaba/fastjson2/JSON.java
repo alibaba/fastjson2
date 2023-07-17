@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.function.Consumer;
 import com.alibaba.fastjson2.function.Function;
 import com.alibaba.fastjson2.reader.*;
 import com.alibaba.fastjson2.time.LocalDate;
+import com.alibaba.fastjson2.time.ZoneId;
 import com.alibaba.fastjson2.util.*;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -47,7 +48,7 @@ public interface JSON {
 
         final ObjectReaderProvider provider = getDefaultObjectReaderProvider();
         final JSONReader.Context context = new JSONReader.Context(provider);
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             Object object;
             char ch = reader.current();
 
@@ -96,7 +97,7 @@ public interface JSON {
         final JSONReader.Context context = new JSONReader.Context(provider, features);
         ObjectReader<?> objectReader = provider.getObjectReader(Object.class, false);
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             Object object = objectReader.readObject(reader, null, null, 0);
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
@@ -150,7 +151,7 @@ public interface JSON {
         }
 
         ObjectReader<?> objectReader = context.getObjectReader(Object.class);
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             Object object = objectReader.readObject(reader, null, null, 0);
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
@@ -177,7 +178,7 @@ public interface JSON {
         final JSONReader.Context context = new JSONReader.Context(provider, features);
         ObjectReader<?> objectReader = provider.getObjectReader(Object.class, false);
 
-        try (JSONReader reader = JSONReader.of(bytes, context)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, 0, bytes.length)) {
             Object object = objectReader.readObject(reader, null, null, 0);
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
@@ -204,7 +205,13 @@ public interface JSON {
         final JSONReader.Context context = new JSONReader.Context(provider, features);
         ObjectReader<?> objectReader = provider.getObjectReader(Object.class, false);
 
-        try (JSONReader reader = JSONReader.of(chars, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(
+                context,
+                null,
+                chars,
+                0,
+                chars.length)
+        ) {
             Object object = objectReader.readObject(reader, null, null, 0);
             if (reader.ch != EOI && (context.features & IgnoreCheckClose.mask) == 0) {
                 throw new JSONException(reader.info("input not end"));
@@ -227,7 +234,7 @@ public interface JSON {
         }
 
         final JSONReader.Context context = new JSONReader.Context(defaultObjectReaderProvider);
-        try (JSONReader reader = new JSONReaderUTF16(context, text, 0, text.length())) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             if (reader.nextIfNull()) {
                 return null;
             }
@@ -258,7 +265,7 @@ public interface JSON {
         }
 
         final JSONReader.Context context = JSONFactory.createReadContext(features);
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             if (reader.nextIfNull()) {
                 return null;
             }
@@ -451,7 +458,7 @@ public interface JSON {
         }
 
         final JSONReader.Context context = JSONFactory.createReadContext();
-        try (JSONReader reader = JSONReader.of(bytes, context)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, 0, bytes.length)) {
             if (reader.nextIfNull()) {
                 return null;
             }
@@ -482,7 +489,13 @@ public interface JSON {
         }
 
         final JSONReader.Context context = JSONFactory.createReadContext();
-        try (JSONReader reader = JSONReader.of(chars, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(
+                context,
+                null,
+                chars,
+                0,
+                chars.length)
+        ) {
             if (reader.nextIfNull()) {
                 return null;
             }
@@ -568,7 +581,7 @@ public interface JSON {
         }
 
         final JSONReader.Context context = JSONFactory.createReadContext(features);
-        try (JSONReader reader = JSONReader.of(bytes, context)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, 0, bytes.length)) {
             if (reader.nextIfNull()) {
                 return null;
             }
@@ -601,7 +614,7 @@ public interface JSON {
         }
 
         final JSONReader.Context context = JSONFactory.createReadContext(features);
-        try (JSONReader reader = JSONReader.of(bytes, offset, length, context)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, offset, length)) {
             if (reader.nextIfNull()) {
                 return null;
             }
@@ -634,7 +647,7 @@ public interface JSON {
         }
 
         final JSONReader.Context context = JSONFactory.createReadContext(features);
-        try (JSONReader reader = JSONReader.of(chars, offset, length, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, null, chars, offset, length)) {
             if (reader.nextIfNull()) {
                 return null;
             }
@@ -714,7 +727,7 @@ public interface JSON {
                 (defaultReaderFeatures & JSONReader.Feature.FieldBased.mask) != 0
         );
 
-        try (JSONReader reader = new JSONReaderUTF16(context, text, 0, text.length())) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             T object = objectReader.readObject(reader, clazz, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -752,7 +765,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             if (reader.nextIfNull()) {
                 return null;
             }
@@ -796,7 +809,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = context.provider.getObjectReader(type, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             if (reader.nextIfNull()) {
                 return null;
             }
@@ -829,7 +842,7 @@ public interface JSON {
 
         ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider);
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             ObjectReader<T> objectReader = provider.getObjectReader(
                     type,
                     (defaultReaderFeatures & JSONReader.Feature.FieldBased.mask) != 0
@@ -863,7 +876,7 @@ public interface JSON {
 
         ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider);
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             ObjectReader<T> objectReader = provider.getObjectReader(
                     type,
                     (defaultReaderFeatures & JSONReader.Feature.FieldBased.mask) != 0
@@ -919,7 +932,7 @@ public interface JSON {
                 (defaultReaderFeatures & JSONReader.Feature.FieldBased.mask) != 0
         );
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             T object = objectReader.readObject(reader, type, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -959,7 +972,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             T object = objectReader.readObject(reader, type, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -992,7 +1005,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(clazz, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             T object = objectReader.readObject(reader, clazz, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1027,7 +1040,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(clazz, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(text, offset, length, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, offset, length)) {
             T object = objectReader.readObject(reader, clazz, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1058,7 +1071,7 @@ public interface JSON {
 
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             T object = objectReader.readObject(reader, clazz, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1096,7 +1109,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(clazz, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             T object = objectReader.readObject(reader, clazz, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1129,7 +1142,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(text)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             T object = objectReader.readObject(reader, type, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1163,7 +1176,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             T object = objectReader.readObject(reader, type, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1201,7 +1214,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             T object = objectReader.readObject(reader, type, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1237,7 +1250,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(chars, offset, length, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, null, chars, offset, length)) {
             T object = objectReader.readObject(reader, type, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1270,7 +1283,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(clazz, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(chars, context)) {
+        try (JSONReader reader = new JSONReaderUTF16(context, null, chars, 0, chars.length)) {
             T object = objectReader.readObject(reader, clazz, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1307,7 +1320,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(bytes, offset, length)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, offset, length)) {
             T object = objectReader.readObject(reader, type, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1340,7 +1353,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(bytes)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, 0, bytes.length)) {
             T object = objectReader.readObject(reader, type, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1368,7 +1381,7 @@ public interface JSON {
         }
 
         final JSONReader.Context context = JSONFactory.createReadContext();
-        try (JSONReader reader = JSONReader.of(bytes, context)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, 0, bytes.length)) {
             ObjectReader<T> objectReader = context.getObjectReader(clazz);
 
             T object = objectReader.readObject(reader, clazz, null, 0);
@@ -1405,7 +1418,7 @@ public interface JSON {
         }
 
         final JSONReader.Context context = JSONFactory.createReadContext();
-        try (JSONReader reader = JSONReader.of(bytes, context)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, 0, bytes.length)) {
             context.config(filter, features);
 
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
@@ -1443,7 +1456,7 @@ public interface JSON {
             return null;
         }
 
-        try (JSONReader reader = JSONReader.of(bytes, context)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, 0, bytes.length)) {
             boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
             ObjectReader<T> objectReader = context.provider.getObjectReader(clazz, fieldBased);
 
@@ -1489,7 +1502,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(bytes, context)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, 0, bytes.length)) {
             T object = objectReader.readObject(reader, type, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1523,7 +1536,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(clazz, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(bytes, context)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, 0, bytes.length)) {
             T object = objectReader.readObject(reader, clazz, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1557,7 +1570,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(bytes)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, 0, bytes.length)) {
             T object = objectReader.readObject(reader, type, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1591,7 +1604,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(objectClass, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(chars, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, null, chars, 0, chars.length)) {
             T object = objectReader.readObject(reader, objectClass, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1625,7 +1638,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(chars, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, null, chars, 0, chars.length)) {
             T object = objectReader.readObject(reader, type, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1660,7 +1673,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(bytes, context)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, 0, bytes.length)) {
             T object = objectReader.readObject(reader, type, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1698,7 +1711,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(bytes)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, 0, bytes.length)) {
             T object = objectReader.readObject(reader, type, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1731,7 +1744,7 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(objectClass, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(buffer, null)) {
+        try (JSONReader reader = JSONReader.of(buffer, context, null)) {
             T object = objectReader.readObject(reader, objectClass, null, 0);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(object);
@@ -1765,7 +1778,10 @@ public interface JSON {
         boolean fieldBased = (context.features & JSONReader.Feature.FieldBased.mask) != 0;
         ObjectReader<T> objectReader = provider.getObjectReader(type, fieldBased);
 
-        try (JSONReader reader = JSONReader.of(input, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(
+                context,
+                input)
+        ) {
             if (reader.isEnd()) {
                 return null;
             }
@@ -2246,7 +2262,7 @@ public interface JSON {
         final ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider);
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             if (reader.nextIfNull()) {
                 return null;
             }
@@ -2278,7 +2294,7 @@ public interface JSON {
         final ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider);
 
-        try (JSONReader reader = JSONReader.of(bytes)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, 0, bytes.length)) {
             if (reader.nextIfNull()) {
                 return null;
             }
@@ -2345,7 +2361,13 @@ public interface JSON {
         final ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider);
 
-        try (JSONReader reader = JSONReader.of(chars, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(
+                context,
+                null,
+                chars,
+                0,
+                chars.length)
+        ) {
             if (reader.nextIfNull()) {
                 return null;
             }
@@ -2378,7 +2400,7 @@ public interface JSON {
         final ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider, features);
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             if (reader.nextIfNull()) {
                 return null;
             }
@@ -2469,7 +2491,7 @@ public interface JSON {
         final ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider, features);
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             List<T> list = reader.readArray(type);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
@@ -2499,7 +2521,7 @@ public interface JSON {
         final ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider);
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             List<T> list = reader.readArray(type);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
@@ -2529,7 +2551,7 @@ public interface JSON {
         final ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider);
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             List<T> list = reader.readArray(type);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
@@ -2559,7 +2581,7 @@ public interface JSON {
         final ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider);
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             List<T> list = reader.readList(types);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
@@ -2590,7 +2612,7 @@ public interface JSON {
         final ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider, features);
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             List<T> list = reader.readArray(type);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
@@ -2621,7 +2643,13 @@ public interface JSON {
         final ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider, features);
 
-        try (JSONReader reader = JSONReader.of(chars, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(
+                context,
+                null,
+                chars,
+                0,
+                chars.length)
+        ) {
             List<T> list = reader.readArray(type);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
@@ -2651,7 +2679,7 @@ public interface JSON {
         final ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider, features);
 
-        try (JSONReader reader = JSONReader.of(text, context)) {
+        try (JSONReaderUTF16 reader = new JSONReaderUTF16(context, text, 0, text.length())) {
             if (reader.nextIfNull()) {
                 return null;
             }
@@ -2693,7 +2721,7 @@ public interface JSON {
         final ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider, features);
 
-        try (JSONReader reader = JSONReader.of(bytes, context)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, 0, bytes.length)) {
             List<T> list = reader.readArray(type);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
@@ -2724,7 +2752,7 @@ public interface JSON {
         final ObjectReaderProvider provider = defaultObjectReaderProvider;
         final JSONReader.Context context = new JSONReader.Context(provider, features);
 
-        try (JSONReader reader = JSONReader.of(bytes, context)) {
+        try (JSONReaderUTF8 reader = new JSONReaderUTF8(context, null, bytes, 0, bytes.length)) {
             List<T> list = reader.readArray(type);
             if (reader.resolveTasks != null) {
                 reader.handleResolveTasks(list);
@@ -3001,7 +3029,7 @@ public interface JSON {
         JSONWriter.Context context = new JSONWriter.Context(provider);
         boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
 
-        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+        try (JSONWriterUTF8 writer = new JSONWriterUTF8(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3037,7 +3065,7 @@ public interface JSON {
         }
         boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
 
-        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+        try (JSONWriterUTF8 writer = new JSONWriterUTF8(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3066,7 +3094,7 @@ public interface JSON {
         context.configFilter(filters);
         boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
 
-        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+        try (JSONWriterUTF8 writer = new JSONWriterUTF8(context)) {
             if (filters != null && filters.length != 0) {
                 writer.context.configFilter(filters);
             }
@@ -3098,7 +3126,7 @@ public interface JSON {
         JSONWriter.Context context = new JSONWriter.Context(provider, features);
         boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
 
-        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+        try (JSONWriterUTF8 writer = new JSONWriterUTF8(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3128,7 +3156,7 @@ public interface JSON {
         context.configFilter(filters);
         boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
 
-        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+        try (JSONWriterUTF8 writer = new JSONWriterUTF8(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3159,7 +3187,7 @@ public interface JSON {
         context.configFilter(filters);
         boolean fieldBased = (context.features & JSONWriter.Feature.FieldBased.mask) != 0;
 
-        try (JSONWriter writer = JSONWriter.ofUTF8(context)) {
+        try (JSONWriterUTF8 writer = new JSONWriterUTF8(context)) {
             if (object == null) {
                 writer.writeNull();
             } else {
@@ -3722,6 +3750,24 @@ public interface JSON {
      */
     static void configWriterDateFormat(String dateFormat) {
         defaultWriterFormat = dateFormat;
+    }
+
+    /**
+     * config default reader zoneId
+     *
+     * @param zoneId
+     */
+    static void configReaderZoneId(ZoneId zoneId) {
+        defaultReaderZoneId = zoneId;
+    }
+
+    /**
+     * config default writer zoneId
+     *
+     * @param zoneId
+     */
+    static void configWriterZoneId(ZoneId zoneId) {
+        defaultWriterZoneId = zoneId;
     }
 
     /**

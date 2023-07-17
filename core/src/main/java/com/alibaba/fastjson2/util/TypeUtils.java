@@ -2633,7 +2633,13 @@ public class TypeUtils {
                     }
                     dotIndex = j;
                 } else if (b >= '0' && b <= '9') {
-                    unscaleValue = unscaleValue * 10 + (b - '0');
+                    long r = unscaleValue * 10;
+                    if ((unscaleValue | 10) >>> 31 == 0L || (r / 10 == unscaleValue)) {
+                        unscaleValue = r + (b - '0');
+                    } else {
+                        unscaleValue = -1;
+                        break;
+                    }
                 } else {
                     unscaleValue = -1;
                     break;
@@ -2680,7 +2686,13 @@ public class TypeUtils {
                     }
                     dotIndex = j;
                 } else if (b >= '0' && b <= '9') {
-                    unscaleValue = unscaleValue * 10 + (b - '0');
+                    long r = unscaleValue * 10;
+                    if ((unscaleValue | 10) >>> 31 == 0L || (r / 10 == unscaleValue)) {
+                        unscaleValue = r + (b - '0');
+                    } else {
+                        unscaleValue = -1;
+                        break;
+                    }
                 } else {
                     unscaleValue = -1;
                     break;

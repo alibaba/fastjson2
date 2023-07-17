@@ -246,7 +246,7 @@ class ObjectReaderImplMapTyped
                 value = jsonReader.readAny();
             } else {
                 ObjectReader autoTypeValueReader = jsonReader.checkAutoType(valueClass, 0, features);
-                if (autoTypeValueReader != null) {
+                if (autoTypeValueReader != null && autoTypeValueReader != this) {
                     value = autoTypeValueReader.readJSONBObject(jsonReader, valueType, name, features);
                 } else {
                     if (valueObjectReader == null) {

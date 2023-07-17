@@ -125,7 +125,11 @@ public final class ObjectArrayReader
                 value = jsonReader.readString();
             } else if (type == BC_TYPED_ANY) {
                 autoTypeValueReader = jsonReader.checkAutoType(Object.class, 0, features);
-                value = autoTypeValueReader.readJSONBObject(jsonReader, null, null, features);
+                if (autoTypeValueReader != null) {
+                    value = autoTypeValueReader.readJSONBObject(jsonReader, null, null, features);
+                } else {
+                    value = jsonReader.readAny();
+                }
             } else if (type == BC_NULL) {
                 jsonReader.next();
                 value = null;
