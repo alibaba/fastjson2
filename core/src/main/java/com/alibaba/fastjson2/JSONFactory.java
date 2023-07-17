@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
@@ -40,9 +41,11 @@ public final class JSONFactory {
 
     static long defaultReaderFeatures;
     static String defaultReaderFormat;
+    static ZoneId defaultReaderZoneId;
 
     static long defaultWriterFeatures;
     static String defaultWriterFormat;
+    static ZoneId defaultWriterZoneId;
 
     static Supplier<Map> defaultObjectSupplier;
     static Supplier<List> defaultArraySupplier;
