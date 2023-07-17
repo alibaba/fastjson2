@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -3672,6 +3673,26 @@ public interface JSON {
      */
     static void configWriterDateFormat(String dateFormat) {
         defaultWriterFormat = dateFormat;
+    }
+
+    /**
+     * config default reader zoneId
+     *
+     * @param zoneId
+     * @since 2.0.36
+     */
+    static void configReaderZoneId(ZoneId zoneId) {
+        defaultReaderZoneId = zoneId;
+    }
+
+    /**
+     * config default writer zoneId
+     *
+     * @param zoneId
+     * @since 2.0.36
+     */
+    static void configWriterZoneId(ZoneId zoneId) {
+        defaultWriterZoneId = zoneId;
     }
 
     /**
