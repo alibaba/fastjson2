@@ -110,8 +110,6 @@ public void test_entity() throws Exception {
    
   assertSame(entity.getValue(), JSONPath.eval(entity, "$.value")); 
   assertTrue(JSONPath.contains(entity, "$.value"));
-  assertTrue(JSONPath.containsValue(entity, "$.id", 123));
-  assertTrue(JSONPath.containsValue(entity, "$.value", entity.getValue())); 
   assertEquals(2, JSONPath.size(entity, "$"));
   assertEquals(0, JSONPath.size(new Object[], "$")); 
 }

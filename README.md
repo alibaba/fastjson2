@@ -41,7 +41,7 @@
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2</artifactId>
-    <version>2.0.35</version>
+    <version>2.0.36</version>
 </dependency>
 ```
 
@@ -49,7 +49,7 @@
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2:2.0.35'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.36'
 }
 ```
 
@@ -67,7 +67,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
-    <version>2.0.35</version>
+    <version>2.0.36</version>
 </dependency>
 ```
 
@@ -75,7 +75,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba:fastjson:2.0.35'
+    implementation 'com.alibaba:fastjson:2.0.36'
 }
 ```
 
@@ -89,7 +89,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-kotlin</artifactId>
-    <version>2.0.35</version>
+    <version>2.0.36</version>
 </dependency>
 ```
 
@@ -111,7 +111,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.35")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.36")
 }
 ```
 
@@ -132,7 +132,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension-spring5</artifactId>
-    <version>2.0.35</version>
+    <version>2.0.36</version>
 </dependency>
 ```
 
@@ -140,7 +140,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension-spring6</artifactId>
-    <version>2.0.35</version>
+    <version>2.0.36</version>
 </dependency>
 ```
 
@@ -148,14 +148,14 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.35'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.36'
 }
 ```
 
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.35'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.36'
 }
 ```
 
