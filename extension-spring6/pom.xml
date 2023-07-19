@@ -106,7 +106,7 @@
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-bom</artifactId>
                 <type>pom</type>
-                <version>6.1.1</version>
+                <version>6.1.2</version>
                 <scope>import</scope>
             </dependency>
         </dependencies>
