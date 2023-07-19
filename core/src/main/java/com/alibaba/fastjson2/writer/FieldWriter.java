@@ -718,7 +718,19 @@ public abstract class FieldWriter<T>
         return jsonWriter.getObjectWriter(valueClass);
     }
 
-    public void writeList(JSONWriter jsonWriter, boolean writeFieldName, List list) {
+    public void writeListValueJSONB(JSONWriter jsonWriter, List list) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void writeListValue(JSONWriter jsonWriter, List list) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void writeListJSONB(JSONWriter jsonWriter, List list) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void writeList(JSONWriter jsonWriter, List list) {
         throw new UnsupportedOperationException();
     }
 

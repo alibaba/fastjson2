@@ -197,11 +197,13 @@ public class JSONWriterJSONBTest {
             JSONWriterJSONB jsonWriter = (JSONWriterJSONB) JSONWriter.ofJSONB();
             bytes.set(jsonWriter, new byte[0]);
             jsonWriter.writeInt64(new long[1]);
-            jsonWriter.writeInt64(null);
+            jsonWriter.writeInt64((long[]) null);
+            jsonWriter.writeInt64((Long) null);
             jsonWriter.writeFloat((Float) null);
             jsonWriter.writeFloat((float[]) null);
             jsonWriter.writeDouble((double[]) null);
-            jsonWriter.writeInt32(null);
+            jsonWriter.writeInt32((int[]) null);
+            jsonWriter.writeInt32((Integer) null);
             jsonWriter.writeLocalDate(null);
             jsonWriter.writeLocalTime(null);
             jsonWriter.writeLocalDateTime(null);

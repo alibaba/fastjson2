@@ -179,7 +179,10 @@ public final class ObjectReaderImplEnum
                 ordinal = jsonReader.readInt32Value();
             }
 
-            fieldValue = getEnumByOrdinal(ordinal);
+            if (ordinal < 0 || ordinal >= ordinalEnums.length) {
+                throw new JSONException("No enum ordinal " + enumClass.getCanonicalName() + "." + ordinal);
+            }
+            fieldValue = ordinalEnums[ordinal];
         } else if (jsonReader.nextIfNullOrEmptyString()) {
             return null;
         } else {
@@ -193,15 +196,19 @@ public final class ObjectReaderImplEnum
         }
 
         if (fieldValue == null && jsonReader.getOffset() == start) {
-            if (fieldType instanceof ParameterizedType) {
-                Type rawType = ((ParameterizedType) fieldType).getRawType();
-                if (List.class.isAssignableFrom((Class<?>) rawType)) {
-                    throw new JSONException(this.getClass().getSimpleName() + " parses error, JSONReader not forward when field type belongs to collection to avoid OOM");
-                }
-            }
+            oomCheck(fieldType);
         }
 
         return fieldValue;
+    }
+
+    private void oomCheck(Type fieldType) {
+        if (fieldType instanceof ParameterizedType) {
+            Type rawType = ((ParameterizedType) fieldType).getRawType();
+            if (List.class.isAssignableFrom((Class<?>) rawType)) {
+                throw new JSONException(this.getClass().getSimpleName() + " parses error, JSONReader not forward when field type belongs to collection to avoid OOM");
+            }
+        }
     }
 
     @Override
@@ -220,7 +227,10 @@ public final class ObjectReaderImplEnum
         if (jsonReader.isInt()) {
             int intValue = jsonReader.readInt32Value();
             if (valueField == null) {
-                fieldValue = getEnumByOrdinal(intValue);
+                if (intValue < 0 || intValue >= ordinalEnums.length) {
+                    throw new JSONException("No enum ordinal " + enumClass.getCanonicalName() + "." + intValue);
+                }
+                fieldValue = ordinalEnums[intValue];
             } else {
                 if (intValues != null) {
                     for (int i = 0; i < intValues.length; i++) {
@@ -273,12 +283,7 @@ public final class ObjectReaderImplEnum
         }
 
         if (fieldValue == null && jsonReader.getOffset() == start) {
-            if (fieldType instanceof ParameterizedType) {
-                Type rawType = ((ParameterizedType) fieldType).getRawType();
-                if (List.class.isAssignableFrom((Class<?>) rawType)) {
-                    throw new JSONException(this.getClass().getSimpleName() + " parses error, JSONReader not forward when field type belongs to collection to avoid OOM");
-                }
-            }
+            oomCheck(fieldType);
         }
 
         return fieldValue;

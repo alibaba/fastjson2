@@ -792,7 +792,7 @@ public abstract class JSONReader
 
     public abstract float readFloatValue();
 
-    public final Float readFloat() {
+    public Float readFloat() {
         if (nextIfNull()) {
             return null;
         }

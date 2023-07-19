@@ -893,9 +893,13 @@ public class ObjectReaderProvider
                 ? cacheFieldBased.get(objectType)
                 : cache.get(objectType);
 
-        if (objectReader != null) {
-            return objectReader;
-        }
+        return objectReader != null
+                ? objectReader
+                : getObjectReaderInternal(objectType, fieldBased);
+    }
+
+    private ObjectReader getObjectReaderInternal(Type objectType, boolean fieldBased) {
+        ObjectReader objectReader = null;
 
         for (ObjectReaderModule module : modules) {
             objectReader = module.getObjectReader(this, objectType);

@@ -71,7 +71,7 @@ final class FieldWriterListFunc<T>
         if (itemType == String.class) {
             writeListStr(jsonWriter, true, value);
         } else {
-            writeList(jsonWriter, true, value);
+            writeList(jsonWriter, value);
         }
         jsonWriter.popPath(value);
         return true;

@@ -1664,6 +1664,16 @@ class JSONWriterUTF16
         this.off = off;
     }
 
+    @Override
+    public final void writeInt32(Integer i) {
+        if (i == null) {
+            writeNumberNull();
+        } else {
+            writeInt32(i.intValue());
+        }
+    }
+
+    @Override
     public final void writeInt64(long[] values) {
         if (values == null) {
             writeNull();
@@ -1704,6 +1714,56 @@ class JSONWriterUTF16
     }
 
     @Override
+    public final void writeListInt64(List<Long> values) {
+        if (values == null) {
+            writeNull();
+            return;
+        }
+
+        int size = values.size();
+        long features = context.features;
+        boolean browserCompatible = (features & BrowserCompatible.mask) != 0;
+        boolean nonStringAsString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
+        int off = this.off;
+        int minCapacity = off + 2 + size * 23;
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final char[] chars = this.chars;
+        chars[off++] = (byte) '[';
+
+        for (int i = 0; i < size; i++) {
+            if (i != 0) {
+                chars[off++] = (byte) ',';
+            }
+            Long item = values.get(i);
+            if (item == null) {
+                chars[off] = 'n';
+                chars[off + 1] = 'u';
+                chars[off + 2] = 'l';
+                chars[off + 3] = 'l';
+                off += 4;
+                continue;
+            }
+
+            long v = item.longValue();
+            boolean writeAsString = nonStringAsString
+                    || (browserCompatible && v <= 9007199254740991L && v >= -9007199254740991L);
+            if (writeAsString) {
+                chars[off++] = this.quote;
+            }
+            off = IOUtils.writeInt64(chars, off, v);
+            if (writeAsString) {
+                chars[off++] = this.quote;
+            }
+        }
+
+        chars[off] = ']';
+        this.off = off + 1;
+    }
+
+    @Override
     public final void writeInt64(long i) {
         final long features = context.features;
         boolean writeAsString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0
@@ -1728,6 +1788,15 @@ class JSONWriterUTF16
             chars[off++] = 'L';
         }
         this.off = off;
+    }
+
+    @Override
+    public final void writeInt64(Long i) {
+        if (i == null) {
+            writeNumberNull();
+        } else {
+            writeInt64(i.longValue());
+        }
     }
 
     @Override
