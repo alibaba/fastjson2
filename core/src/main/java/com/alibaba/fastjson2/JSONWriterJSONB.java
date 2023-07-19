@@ -914,6 +914,54 @@ final class JSONWriterJSONB
     }
 
     @Override
+    public void writeInt64(Long i) {
+        int minCapacity = off + 9;
+        if (minCapacity > bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final byte[] bytes = this.bytes;
+        int off = this.off;
+        int size;
+        if (i == null) {
+            if ((this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullNumberAsZero.mask)) == 0) {
+                bytes[off] = BC_NULL;
+            } else {
+                bytes[off] = (byte) (BC_INT64_NUM_MIN + (0 - INT64_NUM_LOW_VALUE));
+            }
+            size = 1;
+        } else {
+            long val = i.longValue();
+            if (val >= INT64_NUM_LOW_VALUE && val <= INT64_NUM_HIGH_VALUE) {
+                bytes[off] = (byte) (BC_INT64_NUM_MIN + (val - INT64_NUM_LOW_VALUE));
+                size = 1;
+            } else if (val >= INT64_BYTE_MIN && val <= INT64_BYTE_MAX) {
+                bytes[off] = (byte) (BC_INT64_BYTE_ZERO + (val >> 8));
+                bytes[off + 1] = (byte) (val);
+                size = 2;
+            } else if (val >= INT64_SHORT_MIN && val <= INT64_SHORT_MAX) {
+                bytes[off] = (byte) (BC_INT64_SHORT_ZERO + (val >> 16));
+                bytes[off + 1] = (byte) (val >> 8);
+                bytes[off + 2] = (byte) (val);
+                size = 3;
+            } else if (val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE) {
+                bytes[off] = BC_INT64_INT;
+                bytes[off + 1] = (byte) (val >>> 24);
+                bytes[off + 2] = (byte) (val >>> 16);
+                bytes[off + 3] = (byte) (val >>> 8);
+                bytes[off + 4] = (byte) val;
+                size = 5;
+            } else {
+                bytes[off] = BC_INT64;
+                putLong(bytes, off + 1, val);
+                size = 9;
+            }
+        }
+
+        this.off = off + size;
+    }
+
+    @Override
     public void writeInt64(long val) {
         int minCapacity = off + 9;
         if (minCapacity > bytes.length) {
@@ -960,7 +1008,7 @@ final class JSONWriterJSONB
         int size = value.length;
 
         int off = this.off;
-        int minCapacity = off + value.length * 9 + 5;
+        int minCapacity = off + size * 9 + 5;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
@@ -975,8 +1023,73 @@ final class JSONWriterJSONB
 
         for (int i = 0; i < value.length; i++) {
             long val = value[i];
-            if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
-                bytes[off++] = (byte) val;
+            if (val >= INT64_NUM_LOW_VALUE && val <= INT64_NUM_HIGH_VALUE) {
+                bytes[off++] = (byte) (BC_INT64_NUM_MIN + (val - INT64_NUM_LOW_VALUE));
+                continue;
+            }
+
+            if (val >= INT64_BYTE_MIN && val <= INT64_BYTE_MAX) {
+                bytes[off] = (byte) (BC_INT64_BYTE_ZERO + (val >> 8));
+                bytes[off + 1] = (byte) (val);
+                off += 2;
+                continue;
+            }
+
+            if (val >= INT64_SHORT_MIN && val <= INT64_SHORT_MAX) {
+                bytes[off] = (byte) (BC_INT64_SHORT_ZERO + (val >> 16));
+                bytes[off + 1] = (byte) (val >> 8);
+                bytes[off + 2] = (byte) (val);
+                off += 3;
+                continue;
+            }
+
+            if (val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE) {
+                bytes[off] = BC_INT64_INT;
+                putInt(bytes, off + 1, (int) val);
+                off += 5;
+                continue;
+            }
+
+            bytes[off] = BC_INT64;
+            putLong(bytes, off + 1, val);
+            off += 9;
+        }
+        this.off = off;
+    }
+
+    @Override
+    public void writeListInt64(List<Long> values) {
+        if (values == null) {
+            writeArrayNull();
+            return;
+        }
+
+        int size = values.size();
+
+        int off = this.off;
+        int minCapacity = off + size * 9 + 5;
+        if (minCapacity >= bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final byte[] bytes = this.bytes;
+        if (size <= ARRAY_FIX_LEN) {
+            bytes[off++] = (byte) (BC_ARRAY_FIX_MIN + size);
+        } else {
+            bytes[off] = BC_ARRAY;
+            off += writeInt32(bytes, off + 1, size) + 1;
+        }
+
+        for (int i = 0; i < size; i++) {
+            Long item = values.get(i);
+            if (item == null) {
+                bytes[off++] = BC_NULL;
+                continue;
+            }
+
+            long val = item.longValue();
+            if (val >= INT64_NUM_LOW_VALUE && val <= INT64_NUM_HIGH_VALUE) {
+                bytes[off++] = (byte) (BC_INT64_NUM_MIN + (val - INT64_NUM_LOW_VALUE));
                 continue;
             }
 
@@ -1043,7 +1156,10 @@ final class JSONWriterJSONB
         } else {
             bytes[off] = BC_FLOAT;
             i = Float.floatToIntBits(value);
-            putInt(bytes, off + 1, i);
+            bytes[off + 1] = (byte) (i >>> 24);
+            bytes[off + 2] = (byte) (i >>> 16);
+            bytes[off + 3] = (byte) (i >>> 8);
+            bytes[off + 4] = (byte) i;
             off += 5;
         }
         this.off = off;
@@ -1236,6 +1352,46 @@ final class JSONWriterJSONB
             }
             writeInt32(val);
         }
+    }
+
+    @Override
+    public void writeInt32(Integer i) {
+        int minCapacity = off + 5;
+        if (minCapacity >= bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final byte[] bytes = this.bytes;
+        int size;
+        int off = this.off;
+        if (i == null) {
+            if ((this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullNumberAsZero.mask)) == 0) {
+                bytes[off] = BC_NULL;
+            } else {
+                bytes[off] = 0;
+            }
+            size = 1;
+        } else {
+            int val = i.intValue();
+            if (val >= BC_INT32_NUM_MIN && val <= BC_INT32_NUM_MAX) {
+                bytes[off] = (byte) val;
+                size = 1;
+            } else if (val >= INT32_BYTE_MIN && val <= INT32_BYTE_MAX) {
+                bytes[off] = (byte) (BC_INT32_BYTE_ZERO + (val >> 8));
+                bytes[off + 1] = (byte) (val);
+                size = 2;
+            } else if (val >= INT32_SHORT_MIN && val <= INT32_SHORT_MAX) {
+                bytes[off] = (byte) (BC_INT32_SHORT_ZERO + (val >> 16));
+                bytes[off + 1] = (byte) (val >> 8);
+                bytes[off + 2] = (byte) (val);
+                size = 3;
+            } else {
+                bytes[off] = BC_INT32;
+                putInt(bytes, off + 1, val);
+                size = 5;
+            }
+        }
+        this.off += size;
     }
 
     @Override

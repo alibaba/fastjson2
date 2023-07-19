@@ -1679,6 +1679,15 @@ class JSONWriterUTF8
     }
 
     @Override
+    public final void writeInt32(Integer i) {
+        if (i == null) {
+            writeNumberNull();
+        } else {
+            writeInt32(i.intValue());
+        }
+    }
+
+    @Override
     public final void writeInt32(int i) {
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
@@ -1699,6 +1708,7 @@ class JSONWriterUTF8
         this.off = off;
     }
 
+    @Override
     public final void writeInt64(long[] values) {
         if (values == null) {
             writeNull();
@@ -1722,6 +1732,56 @@ class JSONWriterUTF8
                 bytes[off++] = (byte) ',';
             }
             long v = values[i];
+            boolean writeAsString = nonStringAsString
+                    || (browserCompatible && v <= 9007199254740991L && v >= -9007199254740991L);
+            if (writeAsString) {
+                bytes[off++] = (byte) this.quote;
+            }
+            off = IOUtils.writeInt64(bytes, off, v);
+            if (writeAsString) {
+                bytes[off++] = (byte) this.quote;
+            }
+        }
+
+        bytes[off] = ']';
+        this.off = off + 1;
+    }
+
+    @Override
+    public final void writeListInt64(List<Long> values) {
+        if (values == null) {
+            writeNull();
+            return;
+        }
+
+        int size = values.size();
+        long features = context.features;
+        boolean browserCompatible = (features & BrowserCompatible.mask) != 0;
+        boolean nonStringAsString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
+        int off = this.off;
+        int minCapacity = off + 2 + size * 23;
+        if (minCapacity >= bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final byte[] bytes = this.bytes;
+        bytes[off++] = (byte) '[';
+
+        for (int i = 0; i < size; i++) {
+            if (i != 0) {
+                bytes[off++] = (byte) ',';
+            }
+            Long item = values.get(i);
+            if (item == null) {
+                bytes[off] = 'n';
+                bytes[off + 1] = 'u';
+                bytes[off + 2] = 'l';
+                bytes[off + 3] = 'l';
+                off += 4;
+                continue;
+            }
+
+            long v = item.longValue();
             boolean writeAsString = nonStringAsString
                     || (browserCompatible && v <= 9007199254740991L && v >= -9007199254740991L);
             if (writeAsString) {
@@ -1762,6 +1822,15 @@ class JSONWriterUTF8
             bytes[off++] = 'L';
         }
         this.off = off;
+    }
+
+    @Override
+    public final void writeInt64(Long i) {
+        if (i == null) {
+            writeNumberNull();
+        } else {
+            writeInt64(i.longValue());
+        }
     }
 
     @Override

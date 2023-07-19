@@ -77,7 +77,7 @@ public class ObjectWriterCreatorASM
     static final String METHOD_DESC_WRITE_BArray = "(" + DESC_JSON_WRITER + "[B)V";
     static final String METHOD_DESC_WRITE_CArray = "(" + DESC_JSON_WRITER + "[C)V";
     static final String METHOD_DESC_WRITE_ENUM = "(" + DESC_JSON_WRITER + "Ljava/lang/Enum;)V";
-    static final String METHOD_DESC_WRITE_LIST = "(" + DESC_JSON_WRITER + "ZLjava/util/List;)V";
+    static final String METHOD_DESC_WRITE_LIST = "(" + DESC_JSON_WRITER + "Ljava/util/List;)V";
     static final String METHOD_DESC_FIELD_WRITE_OBJECT = "(" + DESC_JSON_WRITER + "Ljava/lang/Object;)Z";
     static final String METHOD_DESC_GET_OBJECT_WRITER = "(" + DESC_JSON_WRITER + "Ljava/lang/Class;)" + DESC_OBJECT_WRITER;
     static final String METHOD_DESC_GET_ITEM_WRITER = "(" + DESC_JSON_WRITER + "Ljava/lang/reflect/Type;)" + DESC_OBJECT_WRITER;
@@ -878,6 +878,8 @@ public class ObjectWriterCreatorASM
                 || fieldClass == double.class
                 || fieldClass == double[].class
                 || fieldClass == String.class
+                || fieldClass == Integer.class
+                || fieldClass == Long.class
                 || fieldClass.isEnum()
         ) {
             gwValue(mwc, fieldWriter, OBJECT, i);
@@ -1008,15 +1010,17 @@ public class ObjectWriterCreatorASM
         int LIST = mwc.var(fieldClass);
         int REF_PATH = mwc.var("REF_PATH");
 
-        boolean listStr = false;
-        Type itemType;
+        boolean listSimple = false;
+        Type itemType = null;
+        Class itemClass = null;
         if (fieldType instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) fieldType;
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
             if (actualTypeArguments.length == 1) {
                 itemType = actualTypeArguments[0];
-                listStr = itemType == String.class;
+                itemClass = TypeUtils.getClass(itemType);
+                listSimple = (itemType == String.class || itemType == Long.class);
             }
         }
 
@@ -1071,8 +1075,8 @@ public class ObjectWriterCreatorASM
             mw.visitLabel(endDetect_);
         }
 
-        if (listStr) {
-            gwListStr(mwc, i, mw, fieldClass, LIST);
+        if (listSimple) {
+            gwListSimpleType(mwc, i, mw, fieldClass, itemClass, LIST);
         } else {
             int PREVIOUS_CLASS = mwc.var("ITEM_CLASS");
             int ITEM_OBJECT_WRITER = mwc.var("ITEM_OBJECT_WRITER");
@@ -1085,9 +1089,14 @@ public class ObjectWriterCreatorASM
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldWriter(i), DESC_FIELD_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitInsn(Opcodes.ICONST_0);
             mw.visitVarInsn(Opcodes.ALOAD, LIST);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_WRITER, "writeList", METHOD_DESC_WRITE_LIST, false);
+            mw.visitMethodInsn(
+                    Opcodes.INVOKEVIRTUAL,
+                    TYPE_FIELD_WRITER,
+                    "writeListValueJSONB",
+                    METHOD_DESC_WRITE_LIST,
+                    false
+            );
 
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, LIST);
@@ -1158,9 +1167,15 @@ public class ObjectWriterCreatorASM
         } else if (fieldClass == int.class) {
             methodName = "writeInt32";
             methodDesc = "(I)V";
+        } else if (fieldClass == Integer.class) {
+            methodName = "writeInt32";
+            methodDesc = "(Ljava/lang/Integer;)V";
         } else if (fieldClass == long.class) {
             methodName = "writeInt64";
             methodDesc = "(J)V";
+        } else if (fieldClass == Long.class) {
+            methodName = "writeInt64";
+            methodDesc = "(Ljava/lang/Long;)V";
         } else if (fieldClass == float.class) {
             methodName = "writeFloat";
             methodDesc = "(F)V";
@@ -1332,6 +1347,8 @@ public class ObjectWriterCreatorASM
                 || fieldClass == double.class
                 || fieldClass == double[].class
                 || fieldClass == String.class
+                || fieldClass == Integer.class
+                || fieldClass == Long.class
                 || fieldClass.isEnum()
         ) {
             gwValue(mwc, fieldWriter, OBJECT, i);
@@ -1494,7 +1511,7 @@ public class ObjectWriterCreatorASM
         int LIST = mwc.var(fieldClass);
         MethodWriter mw = mwc.mw;
 
-        boolean listStr = false;
+        boolean listSimple = false;
         Type itemType;
         Class itemClass = null;
         if (fieldType instanceof ParameterizedType) {
@@ -1504,7 +1521,7 @@ public class ObjectWriterCreatorASM
             if (actualTypeArguments.length == 1) {
                 itemType = actualTypeArguments[0];
                 itemClass = TypeUtils.getMapping(itemType);
-                listStr = itemType == String.class;
+                listSimple = (itemType == String.class || itemType == Long.class);
             }
         }
 
@@ -1521,10 +1538,10 @@ public class ObjectWriterCreatorASM
 
         mw.visitLabel(listNotNull_);
 
-        if (listStr) {
+        if (listSimple) {
             genGetObject(mwc, fieldWriter, OBJECT);
             mw.visitVarInsn(Opcodes.ASTORE, LIST);
-            gwListStr(mwc, i, mw, fieldClass, LIST);
+            gwListSimpleType(mwc, i, mw, fieldClass, itemClass, LIST);
         } else {
             int LIST_SIZE = mwc.var("LIST_SIZE");
             int J = mwc.var("J");
@@ -2019,12 +2036,17 @@ public class ObjectWriterCreatorASM
         int LIST = mwc.var(fieldClass);
         int REF_PATH = mwc.var("REF_PATH");
 
-        boolean listStr = false;
+        Class itemClass = null;
+        boolean listSimple = false;
         if (fieldType instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) fieldType;
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 
-            listStr = actualTypeArguments.length == 1 && actualTypeArguments[0] == String.class;
+            if (actualTypeArguments.length == 1) {
+                Type arg0 = actualTypeArguments[0];
+                itemClass = TypeUtils.getClass(arg0);
+                listSimple = (arg0 == String.class || arg0 == Long.class);
+            }
         }
 
         int FIELD_VALUE = mwc.var(fieldClass);
@@ -2088,7 +2110,7 @@ public class ObjectWriterCreatorASM
         }
 
         // listStr
-        if (listStr) {
+        if (listSimple) {
             // void writeListStr(JSONWriter jw, List<String> list)
 //            mw.visitVarInsn(Opcodes.ALOAD, THIS);
 //            mw.visitFieldInsn(Opcodes.GETFIELD, mwc.classNameType, fieldWriter(i), DESC_FIELD_WRITER);
@@ -2098,15 +2120,19 @@ public class ObjectWriterCreatorASM
 //            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_WRITER, "writeListStr", METHOD_DESC_WRITE_LIST, false);
 //
             gwFieldName(mwc, i);
-            gwListStr(mwc, i, mw, fieldClass, FIELD_VALUE);
+            gwListSimpleType(mwc, i, mw, fieldClass, itemClass, FIELD_VALUE);
         } else {
             // void writeList(JSONWriter jw, ObjectWriterContext ctx, List list) {
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitFieldInsn(Opcodes.GETFIELD, mwc.classNameType, fieldWriter(i), DESC_FIELD_WRITER);
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitInsn(Opcodes.ICONST_1);
             mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_WRITER, "writeList", METHOD_DESC_WRITE_LIST, false);
+            mw.visitMethodInsn(
+                    Opcodes.INVOKEVIRTUAL,
+                    TYPE_FIELD_WRITER,
+                    mwc.jsonb ? "writeListJSONB" : "writeList",
+                    METHOD_DESC_WRITE_LIST, false
+            );
         }
 
         mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
@@ -2540,8 +2566,9 @@ public class ObjectWriterCreatorASM
 
         // fw.getObjectWriter(w, value.getClass());
 
-        if (fieldClass == List.class && fieldWriter.getItemClass() == String.class) {
-            gwListStr(mwc, i, mw, fieldClass, FIELD_VALUE);
+        Class itemClass = fieldWriter.getItemClass();
+        if (fieldClass == List.class && (itemClass == String.class || itemClass == Long.class)) {
+            gwListSimpleType(mwc, i, mw, fieldClass, itemClass, FIELD_VALUE);
         } else {
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
             mw.visitFieldInsn(Opcodes.GETFIELD, mwc.classNameType, fieldWriter(i), DESC_FIELD_WRITER);
@@ -2581,11 +2608,12 @@ public class ObjectWriterCreatorASM
         mw.visitLabel(endIfNull_);
     }
 
-    private static void gwListStr(
+    private static void gwListSimpleType(
             MethodWriterContext mwc,
             int i,
             MethodWriter mw,
             Class<?> fieldClass,
+            Class itemClass,
             int FIELD_VALUE
     ) {
         if (mwc.jsonb) {
@@ -2601,59 +2629,21 @@ public class ObjectWriterCreatorASM
             );
         }
 
-        int LIST_SIZE = mwc.var("LIST_SIZE");
-        int LIST_ITEM = mwc.var("LIST_ITEM");
-        int J = mwc.var("J");
-
-        mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
-        mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/List", "size", "()I", true);
-        mw.visitVarInsn(Opcodes.ISTORE, LIST_SIZE);
-
-        if (mwc.jsonb) {
+        if (itemClass == Long.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitVarInsn(Opcodes.ILOAD, LIST_SIZE);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "startArray", "(I)V", false);
-        } else {
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "startArray", "()V", false);
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeListInt64", "(Ljava/util/List;)V", false);
+            return;
         }
 
-        Label for_start_j_ = new Label(), for_end_j_ = new Label(), for_inc_j_ = new Label(), notFirst_ = new Label();
-        mw.visitInsn(Opcodes.ICONST_0);
-        mw.visitVarInsn(Opcodes.ISTORE, J);
-
-        mw.visitLabel(for_start_j_);
-        mw.visitVarInsn(Opcodes.ILOAD, J);
-        mw.visitVarInsn(Opcodes.ILOAD, LIST_SIZE);
-        mw.visitJumpInsn(Opcodes.IF_ICMPGE, for_end_j_);
-
-        if (!mwc.jsonb) {
-            mw.visitVarInsn(Opcodes.ILOAD, J);
-            mw.visitJumpInsn(Opcodes.IFEQ, notFirst_);
-
+        if (itemClass == String.class) {
             mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeComma", "()V", false);
-            mw.visitLabel(notFirst_);
+            mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "writeString", "(Ljava/util/List;)V", false);
+            return;
         }
 
-        mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
-        mw.visitVarInsn(Opcodes.ILOAD, J);
-        mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/List", "get", "(I)Ljava/lang/Object;", true);
-        mw.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/String"); // cast
-        mw.visitVarInsn(Opcodes.ASTORE, LIST_ITEM);
-
-        gwString(mwc, false, true, LIST_ITEM);
-
-        mw.visitLabel(for_inc_j_);
-        mw.visitIincInsn(J, 1);
-        mw.visitJumpInsn(Opcodes.GOTO, for_start_j_);
-
-        mw.visitLabel(for_end_j_);
-
-        if (!mwc.jsonb) {
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
-            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "endArray", "()V", false);
-        }
+        throw new JSONException("TOOD " + itemClass.getName());
     }
 
     static void gwString(MethodWriterContext mwc, boolean symbol, boolean checkNull, int STR) {

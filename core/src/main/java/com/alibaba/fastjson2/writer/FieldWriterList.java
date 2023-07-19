@@ -113,24 +113,17 @@ abstract class FieldWriterList<T>
         return jsonWriter.getObjectWriter(valueClass);
     }
 
-    public final void writeListJSONB(JSONWriter jsonWriter, boolean writeFieldName, List list) {
+    @Override
+    public final void writeListValueJSONB(JSONWriter jsonWriter, List list) {
         Class previousClass = null;
         ObjectWriter previousObjectWriter = null;
 
         long features = jsonWriter.getFeatures(this.features);
         boolean beanToArray = (features & JSONWriter.Feature.BeanToArray.mask) != 0;
 
-        if ((features & NotWriteEmptyArray.mask) != 0 && list.isEmpty() && writeFieldName) {
-            return;
-        }
+        int size = list.size();
 
         boolean refDetect = (features & ReferenceDetection.mask) != 0;
-
-        if (writeFieldName) {
-            writeFieldName(jsonWriter);
-        }
-
-        int size = list.size();
 
         if (jsonWriter.isWriteTypeInfo(list, fieldClass)) {
             jsonWriter.writeTypeName(
@@ -164,13 +157,8 @@ abstract class FieldWriterList<T>
             }
             itemObjectWriter = previousObjectWriter;
 
-            if (refDetect) {
-                String refPath = jsonWriter.setPath(i, item);
-                if (refPath != null) {
-                    jsonWriter.writeReference(refPath);
-                    jsonWriter.popPath(item);
-                    continue;
-                }
+            if (refDetect && jsonWriter.writeReference(i, item)) {
+                continue;
             }
 
             if (beanToArray) {
@@ -186,9 +174,9 @@ abstract class FieldWriterList<T>
     }
 
     @Override
-    public void writeList(JSONWriter jsonWriter, boolean writeFieldName, List list) {
+    public void writeListValue(JSONWriter jsonWriter, List list) {
         if (jsonWriter.jsonb) {
-            writeListJSONB(jsonWriter, writeFieldName, list);
+            writeListJSONB(jsonWriter, list);
             return;
         }
 
@@ -197,15 +185,9 @@ abstract class FieldWriterList<T>
 
         long features = jsonWriter.getFeatures(this.features);
 
-        if ((features & NotWriteEmptyArray.mask) != 0 && list.isEmpty() && writeFieldName) {
-            return;
-        }
-
         boolean previousItemRefDetect = (features & ReferenceDetection.mask) != 0;
 
-        if (writeFieldName) {
-            writeFieldName(jsonWriter);
-        }
+        writeFieldName(jsonWriter);
 
         jsonWriter.startArray();
         for (int i = 0; i < list.size(); i++) {
@@ -241,13 +223,138 @@ abstract class FieldWriterList<T>
                 previousItemRefDetect = itemRefDetect;
             }
 
+            if (itemRefDetect && jsonWriter.writeReference(i, item)) {
+                continue;
+            }
+
+            itemObjectWriter.write(jsonWriter, item, null, itemType, features);
+
             if (itemRefDetect) {
-                String refPath = jsonWriter.setPath(i, item);
-                if (refPath != null) {
-                    jsonWriter.writeReference(refPath);
-                    jsonWriter.popPath(item);
-                    continue;
+                jsonWriter.popPath(item);
+            }
+        }
+        jsonWriter.endArray();
+    }
+
+    public final void writeListJSONB(JSONWriter jsonWriter, List list) {
+        Class previousClass = null;
+        ObjectWriter previousObjectWriter = null;
+
+        long features = jsonWriter.getFeatures(this.features);
+        boolean beanToArray = (features & JSONWriter.Feature.BeanToArray.mask) != 0;
+
+        int size = list.size();
+
+        if ((features & NotWriteEmptyArray.mask) != 0 && size == 0) {
+            return;
+        }
+
+        writeFieldName(jsonWriter);
+
+        boolean refDetect = (features & ReferenceDetection.mask) != 0;
+        if (jsonWriter.isWriteTypeInfo(list, fieldClass)) {
+            jsonWriter.writeTypeName(
+                    TypeUtils.getTypeName(list.getClass()));
+        }
+
+        jsonWriter.startArray(size);
+        for (int i = 0; i < size; i++) {
+            Object item = list.get(i);
+            if (item == null) {
+                jsonWriter.writeNull();
+                continue;
+            }
+            Class<?> itemClass = item.getClass();
+            ObjectWriter itemObjectWriter;
+            if (itemClass != previousClass) {
+                refDetect = jsonWriter.isRefDetect();
+                if (itemClass == this.itemType && this.itemObjectWriter != null) {
+                    previousObjectWriter = this.itemObjectWriter;
+                } else {
+                    previousObjectWriter = getItemWriter(jsonWriter, itemClass);
                 }
+                previousClass = itemClass;
+                if (refDetect) {
+                    if (itemClass == this.itemClass) {
+                        refDetect = !itemClassNotReferenceDetect;
+                    } else {
+                        refDetect = !ObjectWriterProvider.isNotReferenceDetect(itemClass);
+                    }
+                }
+            }
+            itemObjectWriter = previousObjectWriter;
+
+            if (refDetect && jsonWriter.writeReference(i, item)) {
+                continue;
+            }
+
+            if (beanToArray) {
+                itemObjectWriter.writeArrayMappingJSONB(jsonWriter, item, i, itemType, features);
+            } else {
+                itemObjectWriter.writeJSONB(jsonWriter, item, i, itemType, features);
+            }
+
+            if (refDetect) {
+                jsonWriter.popPath(item);
+            }
+        }
+    }
+
+    @Override
+    public void writeList(JSONWriter jsonWriter, List list) {
+        if (jsonWriter.jsonb) {
+            writeListJSONB(jsonWriter, list);
+            return;
+        }
+
+        Class previousClass = null;
+        ObjectWriter previousObjectWriter = null;
+
+        long features = jsonWriter.getFeatures(this.features);
+
+        if ((features & NotWriteEmptyArray.mask) != 0 && list.isEmpty()) {
+            return;
+        }
+
+        writeFieldName(jsonWriter);
+        boolean previousItemRefDetect = (features & ReferenceDetection.mask) != 0;
+
+        jsonWriter.startArray();
+        for (int i = 0; i < list.size(); i++) {
+            if (i != 0) {
+                jsonWriter.writeComma();
+            }
+
+            Object item = list.get(i);
+            if (item == null) {
+                jsonWriter.writeNull();
+                continue;
+            }
+
+            Class<?> itemClass = item.getClass();
+            if (itemClass == String.class) {
+                jsonWriter.writeString((String) item);
+                continue;
+            }
+
+            boolean itemRefDetect;
+            ObjectWriter itemObjectWriter;
+            if (itemClass == previousClass) {
+                itemObjectWriter = previousObjectWriter;
+                itemRefDetect = previousItemRefDetect;
+            } else {
+                itemRefDetect = jsonWriter.isRefDetect();
+                itemObjectWriter = getItemWriter(jsonWriter, itemClass);
+                previousClass = itemClass;
+                previousObjectWriter = itemObjectWriter;
+                if (itemRefDetect) {
+                    itemRefDetect = !ObjectWriterProvider.isNotReferenceDetect(itemClass);
+                }
+                previousItemRefDetect = itemRefDetect;
+            }
+
+            if (itemRefDetect && jsonWriter.writeReference(i, item)) {
+                continue;
             }
 
             itemObjectWriter.write(jsonWriter, item, null, itemType, features);

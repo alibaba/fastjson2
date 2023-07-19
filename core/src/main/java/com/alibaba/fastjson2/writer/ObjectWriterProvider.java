@@ -268,6 +268,15 @@ public class ObjectWriterProvider
     }
 
     public ObjectWriter getObjectWriter(Type objectType, Class objectClass, boolean fieldBased) {
+        ObjectWriter objectWriter = fieldBased
+                ? cacheFieldBased.get(objectType)
+                : cache.get(objectType);
+        return objectWriter != null
+                ? objectWriter
+                : getObjectWriterInternal(objectType, objectClass, fieldBased);
+    }
+
+    private ObjectWriter getObjectWriterInternal(Type objectType, Class objectClass, boolean fieldBased) {
         Class superclass = objectClass.getSuperclass();
         if (!objectClass.isEnum()
                 && superclass != null

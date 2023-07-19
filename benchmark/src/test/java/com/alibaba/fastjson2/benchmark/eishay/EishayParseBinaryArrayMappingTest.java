@@ -33,9 +33,9 @@ public class EishayParseBinaryArrayMappingTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayParseBinaryArrayMapping-fastjson2_jsonb millis : " + millis);
-            // zulu8.68.0.21 : 1873
+            // zulu8.68.0.21 : 1873 1637
             // zulu11.52.13 :
-            // zulu17.32.13 :
+            // zulu17.32.13 : 1300
         }
     }
 

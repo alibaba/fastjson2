@@ -4,12 +4,12 @@ import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
 public class EishayWriteBinaryArrayMappingTest {
     static final EishayWriteBinaryArrayMapping benchmark = new EishayWriteBinaryArrayMapping();
-    static final int LOOP = 1_000_000;
+    static final int LOOP = 10_000_000;
 
     public static void kryo() throws Exception {
         System.out.println("kryoSize size " + benchmark.kryoSize()); // 213
 
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < LOOP; ++i) {
                 benchmark.kryo(BH);
@@ -32,9 +32,9 @@ public class EishayWriteBinaryArrayMappingTest {
             }
             long millis = System.currentTimeMillis() - start;
             System.out.println("EishayWriteBinaryArrayMapping-jsonb millis : " + millis);
-            // zulu8.62.0.19 : 190 168
-            // zulu11.52.13 : 105
-            // zulu17.32.13 : 105 978
+            // zulu8.62.0.19 : 1265
+            // zulu11.52.13 :
+            // zulu17.32.13 : 804 766
         }
     }
 
@@ -55,8 +55,8 @@ public class EishayWriteBinaryArrayMappingTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        jsonb();
+        jsonb();
 //        kryo();
-        protobuf();
+//        protobuf();
     }
 }

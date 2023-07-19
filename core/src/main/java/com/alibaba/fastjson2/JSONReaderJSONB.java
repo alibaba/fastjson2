@@ -3250,13 +3250,13 @@ final class JSONReaderJSONB
             offset += 8;
         } else {
             this.offset = offset;
-            return readInt64ValueTypeNotMatch(bytes, type);
+            return readInt64Value0(bytes, type);
         }
         this.offset = offset;
         return int64Value;
     }
 
-    private long readInt64ValueTypeNotMatch(byte[] bytes, byte type) {
+    private long readInt64Value0(byte[] bytes, byte type) {
         if (type >= BC_INT32_BYTE_MIN && type <= BC_INT32_BYTE_MAX) {
             return ((type - BC_INT32_BYTE_ZERO) << 8)
                     + (bytes[offset++] & 0xFF);
@@ -3398,24 +3398,25 @@ final class JSONReaderJSONB
                     + (bytes[offset] & 0xFF);
             offset += 1;
         } else if (type >= BC_INT32_SHORT_MIN && type <= BC_INT32_SHORT_MAX) {
-            int32Value = getInt3(bytes, offset, type);
+            int32Value = ((type - BC_INT32_SHORT_ZERO) << 16)
+                    + ((bytes[offset] & 0xFF) << 8)
+                    + (bytes[offset + 1] & 0xFF);
             offset += 2;
         } else if (type == BC_INT32) {
-//            int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-//            if (BIG_ENDIAN) {
-//                int32Value = Integer.reverseBytes(int32Value);
-//            }
-            int32Value = getInt(bytes, offset);
+            int32Value = ((bytes[offset + 3] & 0xFF)) +
+                    ((bytes[offset + 2] & 0xFF) << 8) +
+                    ((bytes[offset + 1] & 0xFF) << 16) +
+                    ((bytes[offset]) << 24);
             offset += 4;
         } else {
             this.offset = offset;
-            return readInt32ValueNotMatchType(bytes, type);
+            return readInt32Value0(bytes, type);
         }
         this.offset = offset;
         return int32Value;
     }
 
-    private int readInt32ValueNotMatchType(byte[] bytes, byte type) {
+    private int readInt32Value0(byte[] bytes, byte type) {
         if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
             return INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
         }
@@ -3573,17 +3574,42 @@ final class JSONReaderJSONB
 
     @Override
     public Long readInt64() {
-        if (bytes[offset] == BC_NULL) {
-            offset++;
-            wasNull = true;
+        final byte[] bytes = this.bytes;
+        int offset = this.offset;
+        byte type = bytes[offset++];
+
+        if (type == BC_NULL) {
+            this.offset = offset;
             return null;
         }
 
-        long value = readInt64Value();
-        if (wasNull) {
-            return null;
+        long int64Value;
+        if (type >= BC_INT64_NUM_MIN && type <= BC_INT64_NUM_MAX) {
+            int64Value = INT64_NUM_LOW_VALUE + (type - BC_INT64_NUM_MIN);
+        } else if (type >= BC_INT64_BYTE_MIN && type <= BC_INT64_BYTE_MAX) {
+            int64Value = ((type - BC_INT64_BYTE_ZERO) << 8)
+                    + (bytes[offset] & 0xFF);
+            offset += 1;
+        } else if (type >= BC_INT64_SHORT_MIN && type <= BC_INT64_SHORT_MAX) {
+            int64Value = ((type - BC_INT64_SHORT_ZERO) << 16)
+                    + ((bytes[offset] & 0xFF) << 8)
+                    + (bytes[offset + 1] & 0xFF);
+            offset += 2;
+        } else if (type == BC_INT64_INT) {
+            int64Value = ((bytes[offset + 3] & 0xFF)) +
+                    ((bytes[offset + 2] & 0xFF) << 8) +
+                    ((bytes[offset + 1] & 0xFF) << 16) +
+                    ((bytes[offset]) << 24);
+            offset += 4;
+        } else if (type == BC_INT64) {
+            int64Value = getLong(bytes, offset);
+            offset += 8;
+        } else {
+            this.offset = offset;
+            return readInt64Value0(bytes, type);
         }
-        return value;
+        this.offset = offset;
+        return int64Value;
     }
 
     protected String readFixedAsciiString(int strlen) {
@@ -3608,10 +3634,43 @@ final class JSONReaderJSONB
         return str;
     }
 
+    public Float readFloat() {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        byte type = bytes[offset];
+        if (type == BC_FLOAT) {
+            int int32Value = ((bytes[offset + 4] & 0xFF)) +
+                    ((bytes[offset + 3] & 0xFF) << 8) +
+                    ((bytes[offset + 2] & 0xFF) << 16) +
+                    ((bytes[offset + 1]) << 24);
+            this.offset = offset + 5;
+            return Float.intBitsToFloat(int32Value);
+        } else if (type == BC_NULL) {
+            this.offset = offset + 1;
+            return null;
+        }
+
+        return readFloat0();
+    }
+
     @Override
     public float readFloatValue() {
-        byte type = bytes[offset++];
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        if (bytes[offset] == BC_FLOAT) {
+            int int32Value = ((bytes[offset + 4] & 0xFF)) +
+                    ((bytes[offset + 3] & 0xFF) << 8) +
+                    ((bytes[offset + 2] & 0xFF) << 16) +
+                    ((bytes[offset + 1]) << 24);
+            this.offset = offset + 5;
+            return Float.intBitsToFloat(int32Value);
+        }
 
+        return readFloat0();
+    }
+
+    private float readFloat0() {
+        byte type = bytes[offset++];
         switch (type) {
             case BC_NULL:
                 if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {
@@ -3638,11 +3697,6 @@ final class JSONReaderJSONB
                 int int32Value = getInt(bytes, offset);
                 offset += 4;
                 return int32Value;
-            }
-            case BC_FLOAT: {
-                int int32Value = getInt(bytes, offset);
-                offset += 4;
-                return Float.intBitsToFloat(int32Value);
             }
             case BC_DOUBLE: {
                 long int64Value =
@@ -3753,6 +3807,25 @@ final class JSONReaderJSONB
 
     @Override
     public double readDoubleValue() {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        if (bytes[offset] == BC_DOUBLE) {
+            long int64Value = ((bytes[offset + 8] & 0xFFL)) +
+                    ((bytes[offset + 7] & 0xFFL) << 8) +
+                    ((bytes[offset + 6] & 0xFFL) << 16) +
+                    ((bytes[offset + 5] & 0xFFL) << 24) +
+                    ((bytes[offset + 4] & 0xFFL) << 32) +
+                    ((bytes[offset + 3] & 0xFFL) << 40) +
+                    ((bytes[offset + 2] & 0xFFL) << 48) +
+                    ((long) (bytes[offset + 1]) << 56);
+            this.offset = offset + 9;
+            return Double.longBitsToDouble(int64Value);
+        }
+
+        return readDoubleValue0();
+    }
+
+    private double readDoubleValue0() {
         byte type = bytes[offset++];
         switch (type) {
             case BC_NULL:
@@ -3788,11 +3861,6 @@ final class JSONReaderJSONB
             case BC_FLOAT_INT: {
                 return (float) readInt32Value();
             }
-            case BC_DOUBLE:
-                long int64Value =
-                        getLong(bytes, offset);
-                offset += 8;
-                return Double.longBitsToDouble(int64Value);
             case BC_DOUBLE_LONG:
                 return readInt64Value();
             case BC_STR_ASCII: {
@@ -4855,14 +4923,22 @@ final class JSONReaderJSONB
     @Override
     public boolean readBoolValue() {
         wasNull = false;
+        byte type = this.bytes[offset++];
+        if (type == BC_TRUE) {
+            return true;
+        } else if (type == BC_FALSE) {
+            return false;
+        }
+
+        return readBoolValue0(type);
+    }
+
+    private boolean readBoolValue0(byte type) {
         final byte[] bytes = this.bytes;
-        byte type = bytes[offset++];
         switch (type) {
             case BC_INT32_NUM_1:
-            case BC_TRUE:
                 return true;
             case BC_INT32_NUM_0:
-            case BC_FALSE:
                 return false;
             case BC_NULL:
                 if ((context.features & Feature.ErrorOnNullForPrimitives.mask) != 0) {

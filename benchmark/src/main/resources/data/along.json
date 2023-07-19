@@ -1,0 +1,95 @@
+{
+    "attackerId": 1784915096,
+    "harmList": [
+        {
+            "curHp": 2214090.5,
+            "dead": true,
+            "maxHp": 7244422.0,
+            "real": 23590,
+            "targetId": 2009239345,
+            "type": 61,
+            "value": 17495.12
+        },
+        {
+            "curHp": 1152855.2,
+            "dead": true,
+            "maxHp": 6402139.5,
+            "real": 46839,
+            "targetId": 1188603823,
+            "type": 88,
+            "value": 54630.61
+        },
+        {
+            "curHp": 1504246.4,
+            "dead": true,
+            "maxHp": 8543909.0,
+            "real": 98086,
+            "targetId": 1233342584,
+            "type": 8,
+            "value": 97565.03
+        },
+        {
+            "curHp": 5198943.5,
+            "dead": true,
+            "maxHp": 1997015.8,
+            "real": 35577,
+            "targetId": 1947070362,
+            "type": 85,
+            "value": 45887.67
+        },
+        {
+            "curHp": 1639543.4,
+            "dead": false,
+            "maxHp": 9637510.0,
+            "real": 71485,
+            "targetId": 1965108670,
+            "type": 79,
+            "value": 54457.5
+        },
+        {
+            "curHp": 3545105.5,
+            "dead": true,
+            "maxHp": 8496628.0,
+            "real": 21708,
+            "targetId": 1602879009,
+            "type": 46,
+            "value": 44459.16
+        },
+        {
+            "curHp": 8786076.0,
+            "dead": false,
+            "maxHp": 1442285.5,
+            "real": 77398,
+            "targetId": 1120550865,
+            "type": 14,
+            "value": 93219.53
+        },
+        {
+            "curHp": 4911716.5,
+            "dead": false,
+            "maxHp": 2528763.5,
+            "real": 10983,
+            "targetId": 2108488986,
+            "type": 58,
+            "value": 77973.16
+        },
+        {
+            "curHp": 2909037.8,
+            "dead": false,
+            "maxHp": 2109388.8,
+            "real": 94957,
+            "targetId": 1565205071,
+            "type": 47,
+            "value": 61426.68
+        }
+    ],
+    "index": 83,
+    "param1": [
+        4,
+        2,
+        0,
+        3,
+        3
+    ],
+    "skillCategory": 2
+}

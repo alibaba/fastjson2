@@ -52,7 +52,7 @@ final class FieldWriterListField<T>
         if (itemType == String.class) {
             writeListStr(jsonWriter, true, value);
         } else {
-            writeList(jsonWriter, true, value);
+            writeList(jsonWriter, value);
         }
         jsonWriter.popPath(value);
         return true;
@@ -78,7 +78,7 @@ final class FieldWriterListField<T>
             }
         }
 
-        writeList(jsonWriter, false, value);
+        writeListValue(jsonWriter, value);
 
         if (refDetect) {
             jsonWriter.popPath(value);

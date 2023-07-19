@@ -2124,7 +2124,9 @@ public class ObjectReaderCreatorASM
 
                         mw.visitVarInsn(Opcodes.ALOAD, LIST);
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
-                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readString", "()Ljava/lang/String;", false);
+                        if (itemClass == String.class) {
+                            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readString", "()Ljava/lang/String;", false);
+                        }
                         mw.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true);
                         mw.visitInsn(Opcodes.POP);
 
@@ -2195,6 +2197,14 @@ public class ObjectReaderCreatorASM
                     mw.visitVarInsn(Opcodes.ALOAD, LIST);
                     mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                     mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readString", "()Ljava/lang/String;", false);
+                } else if (itemType == Integer.class) {
+                    mw.visitVarInsn(Opcodes.ALOAD, LIST);
+                    mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readInt32", "()Ljava/lang/Integer;", false);
+                } else if (itemType == Long.class) {
+                    mw.visitVarInsn(Opcodes.ALOAD, LIST);
+                    mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                    mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "readInt64", "()Ljava/lang/Long;", false);
                 } else {
                     Label notNull_ = new Label();
 

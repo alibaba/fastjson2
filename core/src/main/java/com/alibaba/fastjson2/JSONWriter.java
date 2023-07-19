@@ -171,6 +171,16 @@ public abstract class JSONWriter
         return previous.toString();
     }
 
+    public final boolean writeReference(int index, Object object) {
+        String refPath = setPath(index, object);
+        if (refPath != null) {
+            writeReference(refPath);
+            popPath(object);
+            return true;
+        }
+        return false;
+    }
+
     public final String setPath(int index, Object object) {
         if ((context.features & Feature.ReferenceDetection.mask) == 0
                 || object == Collections.EMPTY_LIST
@@ -861,6 +871,8 @@ public abstract class JSONWriter
 
     public abstract void writeInt32(int value);
 
+    public abstract void writeInt32(Integer i);
+
     public final void writeInt32(int value, DecimalFormat format) {
         if (format == null || jsonb) {
             writeInt32(value);
@@ -885,11 +897,15 @@ public abstract class JSONWriter
 
     public abstract void writeInt64(long i);
 
+    public abstract void writeInt64(Long i);
+
     public void writeMillis(long i) {
         writeInt64(i);
     }
 
     public abstract void writeInt64(long[] value);
+
+    public abstract void writeListInt64(List<Long> values);
 
     public abstract void writeFloat(float value);
 

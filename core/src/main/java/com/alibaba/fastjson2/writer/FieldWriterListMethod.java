@@ -73,7 +73,7 @@ final class FieldWriterListMethod<T>
         if (itemType == String.class) {
             writeListStr(jsonWriter, true, value);
         } else {
-            writeList(jsonWriter, true, value);
+            writeList(jsonWriter, value);
         }
         jsonWriter.popPath(value);
         return true;
@@ -88,6 +88,6 @@ final class FieldWriterListMethod<T>
             return;
         }
 
-        writeList(jsonWriter, false, value);
+        writeListValue(jsonWriter, value);
     }
 }
