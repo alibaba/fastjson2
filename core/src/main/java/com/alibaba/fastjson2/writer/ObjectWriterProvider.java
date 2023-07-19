@@ -220,8 +220,17 @@ public class ObjectWriterProvider {
         }
 
         String className = objectClass.getName();
-        if (className.equals("com.alibaba.fastjson.JSONObject")) {
-            objectWriter = ObjectWriterImplMap.of(objectClass);
+        switch (className) {
+            case "com.alibaba.fastjson.JSONObject":
+                objectWriter = ObjectWriterImplMap.of(objectClass);
+                break;
+            case "android.net.Uri$OpaqueUri":
+            case "android.net.Uri$HierarchicalUri":
+            case "android.net.Uri$StringUri":
+                objectWriter = ObjectWriterImplToString.INSTANCE;
+                break;
+            default:
+                break;
         }
 
         if (objectWriter == null) {
