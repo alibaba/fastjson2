@@ -17,7 +17,6 @@ import static com.alibaba.fastjson2.JSONB.Constants.*;
 import static com.alibaba.fastjson2.JSONB.typeName;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.util.DateUtils.*;
-import static com.alibaba.fastjson2.util.IOUtils.getInt;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static com.alibaba.fastjson2.util.TypeUtils.toBigDecimal;
 
@@ -1065,9 +1064,9 @@ final class JSONReaderJSONB
                 offset += 3;
                 value = int3;
             } else if (valueType == BC_INT32) {
-                int int32Value = getInt(bytes, offset + 1);
+                int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
                 offset += 5;
-                value = int32Value;
+                value = BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value);
             } else if (valueType == BC_REFERENCE) {
                 String reference = readReference();
                 if ("..".equals(reference)) {
@@ -1301,7 +1300,7 @@ final class JSONReaderJSONB
         return null;
     }
 
-    final void autoTypeError() {
+    void autoTypeError() {
         throw new JSONException("auotype not support : " + getString());
     }
 
@@ -3040,17 +3039,17 @@ final class JSONReaderJSONB
                 return "1.0";
             case BC_INT64_INT:
             case BC_INT32: {
-                long int32Value = getInt(bytes, offset);
+                int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
                 offset += 4;
-                return Long.toString(int32Value);
+                return Long.toString(BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value));
             }
             case BC_FLOAT_INT:
                 return Float.toString(
                         readInt32Value());
             case BC_FLOAT: {
-                int int32Value = getInt(bytes, offset);
+                int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
                 offset += 4;
-                float floatValue = Float.intBitsToFloat(int32Value);
+                float floatValue = Float.intBitsToFloat(BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value));
                 return Float.toString(floatValue);
             }
             case BC_DOUBLE: {
@@ -3060,16 +3059,16 @@ final class JSONReaderJSONB
                 return Double.toString(doubleValue);
             }
             case BC_TIMESTAMP_SECONDS: {
-                long seconds = getInt(bytes, offset);
+                int seconds = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
                 offset += 4;
-                long millis = seconds * 1000;
+                long millis = (BIG_ENDIAN ? seconds : Integer.reverseBytes(seconds)) * 1000L;
                 Date date = new Date(millis);
                 return DateUtils.toString(date);
             }
             case BC_TIMESTAMP_MINUTES: {
-                long minutes = getInt(bytes, offset);
+                int minutes = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
                 offset += 4;
-                long millis = minutes * 60 * 1000;
+                long millis = (BIG_ENDIAN ? minutes : Integer.reverseBytes(minutes)) * 60000L;
                 Date date = new Date(millis);
                 return DateUtils.toString(date);
             }
@@ -3288,14 +3287,14 @@ final class JSONReaderJSONB
                 offset += 2;
                 return int16Value;
             case BC_INT32: {
-                int int32Value = getInt(bytes, offset);
+                int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
                 offset += 4;
-                return int32Value;
+                return BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value);
             }
             case BC_FLOAT: {
-                int int32Value = getInt(bytes, offset);
+                int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
                 offset += 4;
-                float floatValue = Float.intBitsToFloat(int32Value);
+                float floatValue = Float.intBitsToFloat(BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value));
                 return (long) floatValue;
             }
             case BC_DOUBLE: {
@@ -3838,14 +3837,14 @@ final class JSONReaderJSONB
             }
             case BC_INT64_INT:
             case BC_INT32: {
-                int int32Value = getInt(bytes, offset);
+                int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
                 offset += 4;
-                return int32Value;
+                return BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value);
             }
             case BC_FLOAT:
-                int int32Value = getInt(bytes, offset);
+                int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
                 offset += 4;
-                return Float.intBitsToFloat(int32Value);
+                return Float.intBitsToFloat(BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value));
             case BC_FLOAT_INT: {
                 return (float) readInt32Value();
             }
@@ -4088,6 +4087,41 @@ final class JSONReaderJSONB
     @Override
     public BigDecimal readBigDecimal() {
         byte type = bytes[offset++];
+        BigDecimal decimal;
+        if (type == BC_DECIMAL) {
+            int scale = readInt32Value();
+            if (bytes[offset] == BC_BIGINT_LONG) {
+                offset++;
+                long unscaledLongValue = readInt64Value();
+                decimal = BigDecimal.valueOf(unscaledLongValue, scale);
+            } else if (bytes[offset] == BC_INT32) {
+                decimal = BigDecimal.valueOf(getInt(bytes, offset + 1), scale);
+                offset += 5;
+            } else if (bytes[offset] == BC_INT64) {
+                long unscaledValue = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset + 1);
+                decimal = BigDecimal.valueOf(
+                        BIG_ENDIAN
+                                ? unscaledValue
+                                : Long.reverseBytes(unscaledValue), scale
+                );
+                offset += 9;
+            } else {
+                BigInteger unscaledValue = readBigInteger();
+                decimal = scale == 0
+                        ? new BigDecimal(unscaledValue)
+                        : new BigDecimal(unscaledValue, scale);
+            }
+        } else if (type == BC_DECIMAL_LONG) {
+            decimal = BigDecimal.valueOf(
+                    readInt64Value()
+            );
+        } else {
+            decimal = readDecimal0(type);
+        }
+        return decimal;
+    }
+
+    private BigDecimal readDecimal0(byte type) {
         switch (type) {
             case BC_NULL:
                 return null;
@@ -4134,43 +4168,8 @@ final class JSONReaderJSONB
                 return BigDecimal.valueOf(BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value));
             }
             case BC_BIGINT: {
-                BigInteger bigInt = readBigInteger0();
+                BigInteger bigInt = readBigInteger();
                 return new BigDecimal(bigInt);
-            }
-            case BC_DECIMAL: {
-                int scale = readInt32Value();
-
-                if (bytes[offset] == BC_BIGINT_LONG) {
-                    offset++;
-                    long unscaledLongValue = readInt64Value();
-                    return BigDecimal.valueOf(unscaledLongValue, scale);
-                }
-
-                if (bytes[offset] == BC_INT32) {
-                    offset++;
-                    int unscaledValue = getInt(bytes, offset);
-                    offset += 4;
-                    return BigDecimal.valueOf(unscaledValue, scale);
-                }
-
-                if (bytes[offset] == BC_INT64) {
-                    offset++;
-                    long unscaledValue = UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
-                    offset += 8;
-                    return BigDecimal.valueOf(BIG_ENDIAN ? unscaledValue : Long.reverseBytes(unscaledValue), scale);
-                }
-
-                BigInteger unscaledValue = readBigInteger();
-                if (scale == 0) {
-                    return new BigDecimal(unscaledValue);
-                } else {
-                    return new BigDecimal(unscaledValue, scale);
-                }
-            }
-            case BC_DECIMAL_LONG: {
-                return BigDecimal.valueOf(
-                        readInt64Value()
-                );
             }
             case BC_DOUBLE_LONG: {
                 double doubleValue = readInt64Value();
@@ -4240,17 +4239,27 @@ final class JSONReaderJSONB
         throw new JSONException("not support type :" + typeName(type));
     }
 
-    private BigInteger readBigInteger0() {
-        int len = readInt32Value();
-        byte[] bytes = new byte[len];
-        System.arraycopy(this.bytes, offset, bytes, 0, len);
-        offset += len;
-        return new BigInteger(bytes);
-    }
-
     @Override
     public BigInteger readBigInteger() {
         byte type = bytes[offset++];
+        BigInteger bigInt;
+        if (type == BC_BIGINT_LONG) {
+            bigInt = BigInteger.valueOf(
+                    readInt64Value()
+            );
+        } else if (type == BC_BIGINT) {
+            int len = readInt32Value();
+            byte[] bytes = new byte[len];
+            System.arraycopy(this.bytes, offset, bytes, 0, len);
+            offset += len;
+            bigInt = new BigInteger(bytes);
+        } else {
+            bigInt = readBigInteger0(type);
+        }
+        return bigInt;
+    }
+
+    private BigInteger readBigInteger0(byte type) {
         switch (type) {
             case BC_NULL:
                 return null;
@@ -4298,9 +4307,12 @@ final class JSONReaderJSONB
                 offset += 8;
                 return BigInteger.valueOf(BIG_ENDIAN ? int64Value : Long.reverseBytes(int64Value));
             }
-            case BC_BIGINT:
             case BC_BINARY: {
-                return readBigInteger0();
+                int len = readInt32Value();
+                byte[] bytes = new byte[len];
+                System.arraycopy(this.bytes, offset, bytes, 0, len);
+                offset += len;
+                return new BigInteger(bytes);
             }
             case BC_DECIMAL: {
                 int scale = readInt32Value();
@@ -4312,11 +4324,6 @@ final class JSONReaderJSONB
                     decimal = new BigDecimal(unscaledValue, scale);
                 }
                 return decimal.toBigInteger();
-            }
-            case BC_BIGINT_LONG: {
-                return BigInteger.valueOf(
-                        readInt64Value()
-                );
             }
             case BC_DOUBLE_LONG: {
                 double doubleValue = readInt64Value();
@@ -4409,6 +4416,10 @@ final class JSONReaderJSONB
             return LocalDate.of(year, month, dayOfMonth);
         }
 
+        return readLocalDate0(type);
+    }
+
+    private LocalDate readLocalDate0(int type) {
         if (type == BC_LOCAL_DATETIME) {
             return readLocalDateTime().toLocalDate();
         }
@@ -4477,6 +4488,10 @@ final class JSONReaderJSONB
             return LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nano);
         }
 
+        return readLocalDateTime0(type);
+    }
+
+    private LocalDateTime readLocalDateTime0(int type) {
         if (type == BC_TIMESTAMP_WITH_TIMEZONE) {
             return readZonedDateTime().toLocalDateTime();
         }
@@ -4671,9 +4686,10 @@ final class JSONReaderJSONB
         int type = bytes[offset++];
         switch (type) {
             case BC_TIMESTAMP: {
-                long second = readInt64Value();
-                int nano = readInt32Value();
-                return Instant.ofEpochSecond(second, nano);
+                return Instant.ofEpochSecond(
+                        readInt64Value(),
+                        readInt32Value()
+                );
             }
             case BC_TIMESTAMP_MINUTES: {
                 long minutes = getInt(bytes, offset);
@@ -4895,6 +4911,20 @@ final class JSONReaderJSONB
             default:
                 throw new JSONException("type not support : " + JSONB.typeName(type));
         }
+    }
+
+    @Override
+    public Boolean readBool() {
+        byte type = this.bytes[offset++];
+        if (type == BC_NULL) {
+            return null;
+        } else if (type == BC_TRUE) {
+            return true;
+        } else if (type == BC_FALSE) {
+            return false;
+        }
+
+        return readBoolValue0(type);
     }
 
     @Override
@@ -5304,5 +5334,10 @@ final class JSONReaderJSONB
 
     public boolean isEnd() {
         return offset >= end;
+    }
+
+    static int getInt(byte[] bytes, int offset) {
+        int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+        return BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value);
     }
 }

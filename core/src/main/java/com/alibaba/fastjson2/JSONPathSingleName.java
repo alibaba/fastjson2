@@ -50,8 +50,10 @@ final class JSONPathSingleName
                 }
             }
         } else {
-            JSONWriter.Context writerContext = getWriterContext();
-            ObjectWriter objectWriter = writerContext.getObjectWriter(root.getClass());
+            ObjectWriter objectWriter = getWriterContext()
+                    .getObjectWriter(
+                            root.getClass()
+                    );
             if (objectWriter == null) {
                 return null;
             }
@@ -65,11 +67,9 @@ final class JSONPathSingleName
         }
 
         if ((features & Feature.AlwaysReturnList.mask) != 0) {
-            if (value == null) {
-                value = new JSONArray();
-            } else {
-                value = JSONArray.of(value);
-            }
+            value = value == null
+                    ? new JSONArray()
+                    : JSONArray.of(value);
         }
         return value;
     }

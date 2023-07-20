@@ -1381,24 +1381,26 @@ public class TypeUtils {
     }
 
     public static <T> T cast(Object obj, Type type) {
-        if (type instanceof Class) {
-            return (T) cast(obj, (Class) type);
-        }
-
         ObjectReaderProvider provider = JSONFactory.getDefaultObjectReaderProvider();
 
+        if (type instanceof Class) {
+            return (T) cast(obj, (Class) type, provider);
+        }
+
         if (obj instanceof Collection) {
-            ObjectReader objectReader = provider.getObjectReader(type);
-            return (T) objectReader.createInstance((Collection) obj);
+            return (T) provider.getObjectReader(type)
+                    .createInstance((Collection) obj);
         }
 
         if (obj instanceof Map) {
-            ObjectReader objectReader = provider.getObjectReader(type);
-            return (T) objectReader.createInstance((Map) obj, 0L);
+            return (T) provider.getObjectReader(type)
+                    .createInstance((Map) obj, 0L);
         }
 
-        String json = JSON.toJSONString(obj);
-        return JSON.parseObject(json, type);
+        return JSON.parseObject(
+                JSON.toJSONString(obj),
+                type
+        );
     }
 
     public static <T> T cast(Object obj, Class<T> targetClass) {
@@ -1488,8 +1490,8 @@ public class TypeUtils {
         }
 
         if (obj instanceof Collection) {
-            ObjectReader objectReader = provider.getObjectReader(targetClass);
-            return (T) objectReader.createInstance((Collection) obj);
+            return (T) provider.getObjectReader(targetClass)
+                    .createInstance((Collection) obj);
         }
 
         String className = targetClass.getName();

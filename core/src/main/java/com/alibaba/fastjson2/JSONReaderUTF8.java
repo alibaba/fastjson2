@@ -4123,30 +4123,12 @@ class JSONReaderUTF8
     }
 
     protected final void skipString() {
-        char quote = this.ch;
+        byte ch = (byte) this.ch;
+        byte quote = ch;
 
-        while (offset + 4 < end && offset + 4 < bytes.length) {
-            byte b0 = bytes[offset];
-            byte b1 = bytes[offset + 1];
-            byte b2 = bytes[offset + 2];
-            byte b3 = bytes[offset + 3];
-
-            if (b0 != '\\'
-                    && b1 != '\\'
-                    && b2 != '\\'
-                    && b3 != '\\'
-                    && b0 != '"'
-                    && b1 != '"'
-                    && b2 != '"'
-                    && b3 != '"'
-            ) {
-                offset += 4;
-                continue;
-            }
-            break;
-        }
-
-        byte ch = bytes[offset++];
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        ch = bytes[offset++];
         for (; ; ) {
             if (ch == '\\') {
                 ch = bytes[offset++];
@@ -4166,11 +4148,7 @@ class JSONReaderUTF8
                 continue;
             }
             if (ch == quote) {
-                if (offset < end) {
-                    ch = bytes[offset++];
-                } else {
-                    ch = EOI;
-                }
+                ch = offset < end ? bytes[offset++] : (byte) EOI;
                 break;
             }
 
@@ -4188,6 +4166,7 @@ class JSONReaderUTF8
 
         if (comma = (ch == ',')) {
             if (offset >= end) {
+                this.offset = offset;
                 this.ch = EOI;
                 return;
             }
@@ -4197,12 +4176,14 @@ class JSONReaderUTF8
                 offset++;
                 if (offset >= end) {
                     this.ch = EOI;
+                    this.offset = offset;
                     return;
                 }
                 ch = bytes[offset];
             }
             offset++;
         }
+        this.offset = offset;
         this.ch = (char) ch;
     }
 

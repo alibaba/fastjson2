@@ -3773,8 +3773,10 @@ class JSONReaderUTF16
     }
 
     private void skipString() {
+        char[] chars = this.chars;
+        int offset = this.offset;
         char quote = this.ch;
-        ch = chars[offset++];
+        char ch = chars[offset++];
         for (; ; ) {
             if (ch == '\\') {
                 if (offset >= end) {
@@ -3787,8 +3789,8 @@ class JSONReaderUTF16
                     continue;
                 }
                 if (ch == 'u') {
-                    offset += 4;
-                    ch = chars[offset++];
+                    ch = chars[offset + 4];
+                    offset += 5;
                     continue;
                 }
                 ch = char1(ch);
@@ -3796,11 +3798,7 @@ class JSONReaderUTF16
             }
 
             if (ch == quote) {
-                if (offset < end) {
-                    ch = chars[offset++];
-                } else {
-                    ch = EOI;
-                }
+                ch = offset < end ? chars[offset++] : EOI;
                 break;
             }
 
@@ -3818,7 +3816,8 @@ class JSONReaderUTF16
 
         if (comma = (ch == ',')) {
             if (offset >= end) {
-                ch = EOI;
+                this.offset = offset;
+                this.ch = EOI;
                 return;
             }
 
@@ -3826,13 +3825,16 @@ class JSONReaderUTF16
             while (ch <= ' ' && ((1L << ch) & SPACE) != 0) {
                 offset++;
                 if (offset >= end) {
-                    ch = EOI;
+                    this.offset = offset;
+                    this.ch = EOI;
                     return;
                 }
                 ch = chars[offset];
             }
             offset++;
         }
+        this.offset = offset;
+        this.ch = ch;
     }
 
     @Override

@@ -1709,6 +1709,52 @@ class JSONWriterUTF8
     }
 
     @Override
+    public final void writeListInt32(List<Integer> values) {
+        if (values == null) {
+            writeNull();
+            return;
+        }
+
+        int size = values.size();
+        boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
+        int off = this.off;
+        int minCapacity = off + 2 + size * 23;
+        if (minCapacity >= bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final byte[] bytes = this.bytes;
+        bytes[off++] = (byte) '[';
+
+        for (int i = 0; i < size; i++) {
+            if (i != 0) {
+                bytes[off++] = (byte) ',';
+            }
+            Number item = values.get(i);
+            if (item == null) {
+                bytes[off] = 'n';
+                bytes[off + 1] = 'u';
+                bytes[off + 2] = 'l';
+                bytes[off + 3] = 'l';
+                off += 4;
+                continue;
+            }
+
+            int v = item.intValue();
+            if (writeAsString) {
+                bytes[off++] = (byte) quote;
+            }
+            off = IOUtils.writeInt32(bytes, off, v);
+            if (writeAsString) {
+                bytes[off++] = (byte) quote;
+            }
+        }
+
+        bytes[off] = ']';
+        this.off = off + 1;
+    }
+
+    @Override
     public final void writeInt64(long[] values) {
         if (values == null) {
             writeNull();
