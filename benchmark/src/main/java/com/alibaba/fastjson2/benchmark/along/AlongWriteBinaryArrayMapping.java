@@ -36,7 +36,7 @@ public class AlongWriteBinaryArrayMapping {
 
     @Benchmark
     public void jsonb(Blackhole bh) {
-        bh.consume(JSONB.toBytes(mc, JSONWriter.Feature.BeanToArray));
+        bh.consume(JSONB.toBytes(mc, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.FieldBased));
     }
 
     public static void main(String[] args) throws RunnerException {

@@ -26,6 +26,7 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public abstract class JSONWriter
         implements Closeable {
+    static final long WRITE_ARRAY_NULL_MASK = Feature.NullAsDefaultValue.mask | Feature.WriteNullListAsEmpty.mask;
     static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
     public final Context context;
