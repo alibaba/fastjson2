@@ -592,7 +592,7 @@ public abstract class JSONReader
 
     public abstract boolean nextIfMatchIdent(char c0, char c1, char c2, char c3, char c4, char c5);
 
-    public Byte readInt8() {
+    public final Byte readInt8() {
         Integer i = readInt32();
         if (i == null) {
             return null;
@@ -605,7 +605,7 @@ public abstract class JSONReader
         return (byte) i;
     }
 
-    public Short readInt16() {
+    public final Short readInt16() {
         Integer i = readInt32();
         if (i == null) {
             return null;
@@ -2115,7 +2115,7 @@ public abstract class JSONReader
 
     public abstract void skipLineComment();
 
-    public final Boolean readBool() {
+    public Boolean readBool() {
         if (isNull()) {
             readNull();
             return null;

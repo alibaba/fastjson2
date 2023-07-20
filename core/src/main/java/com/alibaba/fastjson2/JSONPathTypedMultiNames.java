@@ -109,8 +109,8 @@ class JSONPathTypedMultiNames
                         result = TypeUtils.toLong(result);
                     } else if (type == BigDecimal.class) {
                         result = TypeUtils.toBigDecimal(result);
-                    } else if (type == String[].class) {
-                        result = TypeUtils.toStringArray(result);
+//                    } else if (type == String[].class) {
+//                        result = TypeUtils.toStringArray(result);
                     } else {
                         result = TypeUtils.cast(result, type);
                     }
@@ -118,8 +118,10 @@ class JSONPathTypedMultiNames
                 array[i] = result;
             }
         } else {
-            Class objectClass = object.getClass();
-            ObjectWriter objectReader = JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(objectClass);
+            ObjectWriter objectReader = JSONFactory.defaultObjectWriterProvider
+                    .getObjectWriter(
+                            object.getClass()
+                    );
 
             for (int i = 0; i < names.length; i++) {
                 FieldWriter fieldWriter = objectReader.getFieldWriter(names[i]);

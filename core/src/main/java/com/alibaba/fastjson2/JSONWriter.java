@@ -908,6 +908,8 @@ public abstract class JSONWriter
 
     public abstract void writeListInt64(List<Long> values);
 
+    public abstract void writeListInt32(List<Integer> values);
+
     public abstract void writeFloat(float value);
 
     public final void writeFloat(float value, DecimalFormat format) {

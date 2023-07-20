@@ -1,7 +1,9 @@
 package com.alibaba.fastjson2.benchmark.jjb;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.JSONWriter;
 import com.dslplatform.json.DslJson;
 import com.dslplatform.json.runtime.Settings;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,6 +44,14 @@ public class ClientsWriteUTF8Bytes {
     @Benchmark
     public void fastjson2(Blackhole bh) {
         bh.consume(JSON.toJSONBytes(clients));
+    }
+
+    public void jsonb(Blackhole bh) {
+        bh.consume(JSONB.toBytes(clients));
+    }
+
+    public void jsonb_beanToArray(Blackhole bh) {
+        bh.consume(JSONB.toBytes(clients, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.FieldBased));
     }
 
     public void fastjson2_str(Blackhole bh) {
