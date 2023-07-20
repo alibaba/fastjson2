@@ -271,10 +271,11 @@ final class JSONWriterJSONB
 
         bytes[off] = BC_STR_ASCII;
         bytes[off + 1] = BC_INT32;
-        bytes[off + 2] = (byte) (strlen >>> 24);
-        bytes[off + 3] = (byte) (strlen >>> 16);
-        bytes[off + 4] = (byte) (strlen >>> 8);
-        bytes[off + 5] = (byte) strlen;
+        UNSAFE.putInt(
+                bytes,
+                ARRAY_BYTE_BASE_OFFSET + off + 2,
+                BIG_ENDIAN ? strlen : Integer.reverseBytes(strlen)
+        );
         return 6;
     }
 
@@ -878,10 +879,11 @@ final class JSONWriterJSONB
                 int secondsInt = (int) seconds;
 
                 bytes[off] = BC_TIMESTAMP_SECONDS;
-                bytes[off + 1] = (byte) (secondsInt >>> 24);
-                bytes[off + 2] = (byte) (secondsInt >>> 16);
-                bytes[off + 3] = (byte) (secondsInt >>> 8);
-                bytes[off + 4] = (byte) secondsInt;
+                UNSAFE.putInt(
+                        bytes,
+                        ARRAY_BYTE_BASE_OFFSET + off + 1,
+                        BIG_ENDIAN ? secondsInt : Integer.reverseBytes(secondsInt)
+                );
                 this.off = off + 5;
                 return;
             }
@@ -891,10 +893,11 @@ final class JSONWriterJSONB
                 if (minutes >= Integer.MIN_VALUE && minutes <= Integer.MAX_VALUE) {
                     int minutesInt = (int) minutes;
                     bytes[off] = BC_TIMESTAMP_MINUTES;
-                    bytes[off + 1] = (byte) (minutesInt >>> 24);
-                    bytes[off + 2] = (byte) (minutesInt >>> 16);
-                    bytes[off + 3] = (byte) (minutesInt >>> 8);
-                    bytes[off + 4] = (byte) minutesInt;
+                    UNSAFE.putInt(
+                            bytes,
+                            ARRAY_BYTE_BASE_OFFSET + off + 1,
+                            BIG_ENDIAN ? minutesInt : Integer.reverseBytes(minutesInt)
+                    );
                     this.off = off + 5;
                     return;
                 }
@@ -902,16 +905,15 @@ final class JSONWriterJSONB
         }
 
         bytes[off] = BC_TIMESTAMP_MILLIS;
-        bytes[off + 1] = (byte) (millis >>> 56);
-        bytes[off + 2] = (byte) (millis >>> 48);
-        bytes[off + 3] = (byte) (millis >>> 40);
-        bytes[off + 4] = (byte) (millis >>> 32);
-        bytes[off + 5] = (byte) (millis >>> 24);
-        bytes[off + 6] = (byte) (millis >>> 16);
-        bytes[off + 7] = (byte) (millis >>> 8);
-        bytes[off + 8] = (byte) millis;
+        UNSAFE.putLong(
+                bytes,
+                ARRAY_BYTE_BASE_OFFSET + off + 1,
+                BIG_ENDIAN ? millis : Long.reverseBytes(millis)
+        );
         this.off = off + 9;
     }
+
+    static final long WRITE_NUM_NULL_MASK = Feature.NullAsDefaultValue.mask | Feature.WriteNullNumberAsZero.mask;
 
     @Override
     public void writeInt64(Long i) {
@@ -924,14 +926,12 @@ final class JSONWriterJSONB
         int off = this.off;
         int size;
         if (i == null) {
-            if ((this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullNumberAsZero.mask)) == 0) {
-                bytes[off] = BC_NULL;
-            } else {
-                bytes[off] = (byte) (BC_INT64_NUM_MIN + (0 - INT64_NUM_LOW_VALUE));
-            }
+            bytes[off] = (this.context.features & WRITE_NUM_NULL_MASK) == 0
+                    ? BC_NULL
+                    : (byte) (BC_INT64_NUM_MIN - INT64_NUM_LOW_VALUE);
             size = 1;
         } else {
-            long val = i.longValue();
+            long val = i;
             if (val >= INT64_NUM_LOW_VALUE && val <= INT64_NUM_HIGH_VALUE) {
                 bytes[off] = (byte) (BC_INT64_NUM_MIN + (val - INT64_NUM_LOW_VALUE));
                 size = 1;
@@ -946,15 +946,14 @@ final class JSONWriterJSONB
                 size = 3;
             } else if (val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE) {
                 bytes[off] = BC_INT64_INT;
-                bytes[off + 1] = (byte) (val >>> 24);
-                bytes[off + 2] = (byte) (val >>> 16);
-                bytes[off + 3] = (byte) (val >>> 8);
-                bytes[off + 4] = (byte) val;
+                UNSAFE.putInt(
+                        bytes,
+                        ARRAY_BYTE_BASE_OFFSET + off + 1,
+                        BIG_ENDIAN ? (int) val : Integer.reverseBytes((int) val)
+                );
                 size = 5;
             } else {
-                bytes[off] = BC_INT64;
-                putLong(bytes, off + 1, val);
-                size = 9;
+                size = writeInt64Large8(bytes, off, val);
             }
         }
 
@@ -985,14 +984,19 @@ final class JSONWriterJSONB
             size = 3;
         } else if (val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE) {
             bytes[off] = BC_INT64_INT;
-            bytes[off + 1] = (byte) (val >>> 24);
-            bytes[off + 2] = (byte) (val >>> 16);
-            bytes[off + 3] = (byte) (val >>> 8);
-            bytes[off + 4] = (byte) val;
+            UNSAFE.putInt(
+                    bytes,
+                    ARRAY_BYTE_BASE_OFFSET + off + 1,
+                    BIG_ENDIAN ? (int) val : Integer.reverseBytes((int) val)
+            );
             size = 5;
         } else {
             bytes[off] = BC_INT64;
-            putLong(bytes, off + 1, val);
+            UNSAFE.putLong(
+                    bytes,
+                    ARRAY_BYTE_BASE_OFFSET + off + 1,
+                    BIG_ENDIAN ? val : Long.reverseBytes(val)
+            );
             size = 9;
         }
         this.off = off + size;
@@ -1045,13 +1049,21 @@ final class JSONWriterJSONB
 
             if (val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE) {
                 bytes[off] = BC_INT64_INT;
-                putInt(bytes, off + 1, (int) val);
+                UNSAFE.putInt(
+                        bytes,
+                        ARRAY_BYTE_BASE_OFFSET + off + 1,
+                        BIG_ENDIAN ? (int) val : Integer.reverseBytes((int) val)
+                );
                 off += 5;
                 continue;
             }
 
             bytes[off] = BC_INT64;
-            putLong(bytes, off + 1, val);
+            UNSAFE.putLong(
+                    bytes,
+                    ARRAY_BYTE_BASE_OFFSET + off + 1,
+                    BIG_ENDIAN ? val : Long.reverseBytes(val)
+            );
             off += 9;
         }
         this.off = off;
@@ -1108,36 +1120,33 @@ final class JSONWriterJSONB
                 continue;
             }
 
-            if (val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE) {
-                bytes[off] = BC_INT64_INT;
-                putInt(bytes, off + 1, (int) val);
-                off += 5;
-                continue;
-            }
-
-            bytes[off] = BC_INT64;
-            putLong(bytes, off + 1, val);
-            off += 9;
+            off += writeInt64Large(bytes, off, val);
         }
         this.off = off;
     }
 
-    private static void putInt(byte[] bytes, int off, int val) {
-        bytes[off] = (byte) (val >>> 24);
-        bytes[off + 1] = (byte) (val >>> 16);
-        bytes[off + 2] = (byte) (val >>> 8);
-        bytes[off + 3] = (byte) val;
+    private static int writeInt64Large(byte[] bytes, int off, long val) {
+        if (val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE) {
+            bytes[off] = BC_INT64_INT;
+            UNSAFE.putInt(
+                    bytes,
+                    ARRAY_BYTE_BASE_OFFSET + off + 1,
+                    BIG_ENDIAN ? (int) val : Integer.reverseBytes((int) val)
+            );
+            return 5;
+        }
+
+        return writeInt64Large8(bytes, off, val);
     }
 
-    private static void putLong(byte[] bytes, int off, long val) {
-        bytes[off] = (byte) (val >>> 56);
-        bytes[off + 1] = (byte) (val >>> 48);
-        bytes[off + 2] = (byte) (val >>> 40);
-        bytes[off + 3] = (byte) (val >>> 32);
-        bytes[off + 4] = (byte) (val >>> 24);
-        bytes[off + 5] = (byte) (val >>> 16);
-        bytes[off + 6] = (byte) (val >>> 8);
-        bytes[off + 7] = (byte) val;
+    private static int writeInt64Large8(byte[] bytes, int off, long val) {
+        bytes[off] = BC_INT64;
+        UNSAFE.putLong(
+                bytes,
+                ARRAY_BYTE_BASE_OFFSET + off + 1,
+                BIG_ENDIAN ? val : Long.reverseBytes(val)
+        );
+        return 9;
     }
 
     @Override
@@ -1156,10 +1165,11 @@ final class JSONWriterJSONB
         } else {
             bytes[off] = BC_FLOAT;
             i = Float.floatToIntBits(value);
-            bytes[off + 1] = (byte) (i >>> 24);
-            bytes[off + 2] = (byte) (i >>> 16);
-            bytes[off + 3] = (byte) (i >>> 8);
-            bytes[off + 4] = (byte) i;
+            UNSAFE.putInt(
+                    bytes,
+                    ARRAY_BYTE_BASE_OFFSET + off + 1,
+                    BIG_ENDIAN ? i : Integer.reverseBytes(i)
+            );
             off += 5;
         }
         this.off = off;
@@ -1209,14 +1219,11 @@ final class JSONWriterJSONB
         final byte[] bytes = this.bytes;
         bytes[off] = BC_DOUBLE;
         long i = Double.doubleToLongBits(value);
-        bytes[off + 1] = (byte) (i >>> 56);
-        bytes[off + 2] = (byte) (i >>> 48);
-        bytes[off + 3] = (byte) (i >>> 40);
-        bytes[off + 4] = (byte) (i >>> 32);
-        bytes[off + 5] = (byte) (i >>> 24);
-        bytes[off + 6] = (byte) (i >>> 16);
-        bytes[off + 7] = (byte) (i >>> 8);
-        bytes[off + 8] = (byte) i;
+        UNSAFE.putLong(
+                bytes,
+                ARRAY_BYTE_BASE_OFFSET + off + 1,
+                BIG_ENDIAN ? i : Long.reverseBytes(i)
+        );
         this.off = off + 9;
     }
 
@@ -1295,7 +1302,11 @@ final class JSONWriterJSONB
             }
 
             bytes[off] = BC_INT32;
-            putInt(bytes, off + 1, val);
+            UNSAFE.putInt(
+                    bytes,
+                    ARRAY_BYTE_BASE_OFFSET + off + 1,
+                    BIG_ENDIAN ? val : Integer.reverseBytes(val)
+            );
             off += 5;
         }
         this.off = off;
@@ -1387,7 +1398,11 @@ final class JSONWriterJSONB
                 size = 3;
             } else {
                 bytes[off] = BC_INT32;
-                putInt(bytes, off + 1, val);
+                UNSAFE.putInt(
+                        bytes,
+                        ARRAY_BYTE_BASE_OFFSET + off + 1,
+                        BIG_ENDIAN ? val : Integer.reverseBytes(val)
+                );
                 size = 5;
             }
         }
@@ -1418,7 +1433,11 @@ final class JSONWriterJSONB
             size = 3;
         } else {
             bytes[off] = BC_INT32;
-            putInt(bytes, off + 1, val);
+            UNSAFE.putInt(
+                    bytes,
+                    ARRAY_BYTE_BASE_OFFSET + off + 1,
+                    BIG_ENDIAN ? val : Integer.reverseBytes(val)
+            );
             size = 5;
         }
         this.off += size;
@@ -1439,7 +1458,11 @@ final class JSONWriterJSONB
             return 3;
         } else {
             bytes[off] = BC_INT32;
-            putInt(bytes, off + 1, val);
+            UNSAFE.putInt(
+                    bytes,
+                    ARRAY_BYTE_BASE_OFFSET + off + 1,
+                    BIG_ENDIAN ? val : Integer.reverseBytes(val)
+            );
             return 5;
         }
     }
@@ -1450,11 +1473,7 @@ final class JSONWriterJSONB
             ensureCapacity(off + 1);
         }
 
-        if ((this.context.features & (Feature.NullAsDefaultValue.mask | Feature.WriteNullListAsEmpty.mask)) != 0) {
-            bytes[off++] = BC_ARRAY_FIX_MIN;
-        } else {
-            bytes[off++] = BC_NULL;
-        }
+        bytes[off++] = (this.context.features & WRITE_ARRAY_NULL_MASK) != 0 ? BC_ARRAY_FIX_MIN : BC_NULL;
     }
 
     @Override
