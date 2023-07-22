@@ -16,6 +16,7 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -173,7 +174,36 @@ public abstract class JSONSchema {
         return of(type, null);
     }
 
-    public static JSONSchema of(java.lang.reflect.Type type, JSONSchema root) {
+    public static JSONSchema ofValue(Object value) {
+        return ofValue(value, null);
+    }
+
+    static JSONSchema ofValue(Object value, JSONSchema root) {
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Map) {
+            JSONObject object = JSONObject.of("type", "object");
+            ObjectSchema schema = new ObjectSchema(object, root);
+
+            Map map = (Map) value;
+            for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
+                Map.Entry entry = (Map.Entry) it.next();
+                Object entryKey = entry.getKey();
+                if (entryKey instanceof String) {
+                    JSONSchema valueSchema = ofValue(entry.getValue(), root == null ? schema : root);
+                    schema.properties.put((String) entryKey, valueSchema);
+                }
+            }
+
+            return schema;
+        }
+
+        return of(value.getClass(), root);
+    }
+
+    static JSONSchema of(java.lang.reflect.Type type, JSONSchema root) {
         if (type instanceof ParameterizedType) {
             ParameterizedType paramType = (ParameterizedType) type;
 
