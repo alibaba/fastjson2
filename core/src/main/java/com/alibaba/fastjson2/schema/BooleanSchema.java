@@ -2,8 +2,6 @@ package com.alibaba.fastjson2.schema;
 
 import com.alibaba.fastjson2.JSONObject;
 
-import java.util.Objects;
-
 final class BooleanSchema
         extends JSONSchema {
     BooleanSchema(JSONObject input) {
@@ -29,19 +27,7 @@ final class BooleanSchema
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        com.alibaba.fastjson2.schema.BooleanSchema that = (com.alibaba.fastjson2.schema.BooleanSchema) o;
-        return Objects.equals(title, that.title) && Objects.equals(description, that.description);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(title, description);
+    public JSONObject toJSONObject() {
+        return JSONObject.of("type", "boolean");
     }
 }

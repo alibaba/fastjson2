@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.schema;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.TypeReference;
 import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.TypeUtils;
 
@@ -9,10 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,8 +64,10 @@ final class StringSchema
             Object property = input.get("enum");
             if (property instanceof Collection) {
                 Collection enums = (Collection) property;
-                enumValues = new HashSet<>(enums.size());
+                enumValues = new LinkedHashSet<>(enums.size());
                 enumValues.addAll((Collection<String>) enums);
+            } else if (property instanceof Object[]) {
+                enumValues = input.getObject("enum", TypeReference.collectionType(LinkedHashSet.class, String.class));
             }
             this.enumValues = enumValues;
         }
@@ -208,31 +208,6 @@ final class StringSchema
         return new ValidateResult(false, "expect type %s, but %s", Type.String, value.getClass());
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        StringSchema that = (StringSchema) o;
-        return maxLength == that.maxLength
-                && minLength == that.minLength
-                && typed == that.typed
-                && Objects.equals(format, that.format)
-                && Objects.equals(patternFormat, that.patternFormat)
-                && Objects.equals(pattern, that.pattern)
-                && Objects.equals(formatValidator, that.formatValidator);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(maxLength, minLength, format, patternFormat, pattern, typed, formatValidator);
-    }
-
     public static boolean isEmail(String email) {
         if (email == null) {
             return false;
@@ -269,5 +244,42 @@ final class StringSchema
         }
 
         return validDomain;
+    }
+
+    @Override
+    public JSONObject toJSONObject() {
+        JSONObject object = new JSONObject();
+
+        object.put("type", "string");
+
+        if (minLength != -1) {
+            object.put("minLength", minLength);
+        }
+
+        if (format != null) {
+            object.put("format", format);
+        }
+
+        if (patternFormat != null) {
+            object.put("pattern", pattern);
+        }
+
+        if (anyOf != null) {
+            object.put("anyOf", anyOf);
+        }
+
+        if (oneOf != null) {
+            object.put("oneOf", oneOf);
+        }
+
+        if (constValue != null) {
+            object.put("const", constValue);
+        }
+
+        if (enumValues != null && !enumValues.isEmpty()) {
+            object.put("enum", enumValues);
+        }
+
+        return object;
     }
 }

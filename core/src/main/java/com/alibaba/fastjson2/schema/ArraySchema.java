@@ -17,7 +17,7 @@ public final class ArraySchema
 
     final int maxLength;
     final int minLength;
-    final JSONSchema itemSchema;
+    JSONSchema itemSchema;
     final JSONSchema[] prefixItems;
     final boolean additionalItems;
     final JSONSchema additionalItem;
@@ -440,20 +440,61 @@ public final class ArraySchema
         return typed ? FAIL_TYPE_NOT_MATCH : SUCCESS;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        com.alibaba.fastjson2.schema.ArraySchema that = (com.alibaba.fastjson2.schema.ArraySchema) o;
-        return Objects.equals(title, that.title) && Objects.equals(description, that.description);
-    }
+    public JSONObject toJSONObject() {
+        JSONObject object = new JSONObject();
+        object.put("type", "array");
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(title, description);
+        if (maxLength != -1) {
+            object.put("maxLength", maxLength);
+        }
+
+        if (minLength != -1) {
+            object.put("minLength", minLength);
+        }
+
+        if (itemSchema != null) {
+            object.put("items", itemSchema);
+        }
+
+        if (prefixItems != null && prefixItems.length != 0) {
+            object.put("prefixItems", prefixItems);
+        }
+
+        if (!additionalItems) {
+            object.put("additionalItems", additionalItems);
+        }
+
+        if (additionalItem != null) {
+            object.put("additionalItem", additionalItem);
+        }
+
+        if (contains != null) {
+            object.put("contains", contains);
+        }
+
+        if (minContains != -1) {
+            object.put("minContains", minContains);
+        }
+
+        if (maxContains != -1) {
+            object.put("maxContains", maxContains);
+        }
+
+        if (uniqueItems) {
+            object.put("uniqueItems", uniqueItems);
+        }
+
+        if (allOf != null) {
+            object.put("allOf", allOf);
+        }
+
+        if (anyOf != null) {
+            object.put("anyOf", anyOf);
+        }
+
+        if (oneOf != null) {
+            object.put("oneOf", oneOf);
+        }
+        return object;
     }
 }
