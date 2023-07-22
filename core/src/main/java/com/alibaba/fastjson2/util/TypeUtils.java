@@ -1297,12 +1297,12 @@ public class TypeUtils {
             return array;
         }
 
-        return cast(object, String[].class);
+        return cast(object, String[].class, JSONFactory.defaultObjectReaderProvider);
     }
 
     public static <T> T cast(Object obj, Type type) {
         if (type instanceof Class) {
-            return (T) cast(obj, (Class) type);
+            return (T) cast(obj, (Class) type, JSONFactory.defaultObjectReaderProvider);
         }
 
         ObjectReaderProvider provider = JSONFactory.defaultObjectReaderProvider;
@@ -1759,7 +1759,7 @@ public class TypeUtils {
             return new BigDecimal(str);
         }
 
-        return cast(value, BigDecimal.class);
+        return cast(value, BigDecimal.class, JSONFactory.defaultObjectReaderProvider);
     }
 
     public static BigDecimal toBigDecimal(long i) {

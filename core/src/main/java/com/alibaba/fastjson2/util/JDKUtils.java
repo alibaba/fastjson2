@@ -13,6 +13,7 @@ public class JDKUtils {
     public static final long FIELD_DECIMAL_INT_COMPACT_OFFSET;
     public static final boolean BIG_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
     public static final Unsafe UNSAFE;
+    public static final long ARRAY_BYTE_BASE_OFFSET;
 
     static {
         Unsafe unsafe = null;
@@ -41,6 +42,12 @@ public class JDKUtils {
             }
         }
         UNSAFE = unsafe;
+
+        int arrayByteBaseOffset = -1;
+        if (unsafe != null) {
+            arrayByteBaseOffset = unsafe.arrayBaseOffset(byte[].class);
+        }
+        ARRAY_BYTE_BASE_OFFSET = arrayByteBaseOffset;
 
         long fieldOffset = -1;
         try {

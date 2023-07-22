@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
+import static com.alibaba.fastjson2.util.JDKUtils.*;
+
 public class IOUtils {
     public static final Charset US_ASCII = Charset.forName("US-ASCII");
     public static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
@@ -1230,21 +1232,8 @@ public class IOUtils {
     }
 
     public static int getInt(byte[] bytes, int offset) {
-        return ((bytes[offset + 3] & 0xFF)) +
-                ((bytes[offset + 2] & 0xFF) << 8) +
-                ((bytes[offset + 1] & 0xFF) << 16) +
-                ((bytes[offset]) << 24);
-    }
-
-    public static long getLong(byte[] bytes, int offset) {
-        return ((bytes[offset + 7] & 0xFFL)) +
-                ((bytes[offset + 6] & 0xFFL) << 8) +
-                ((bytes[offset + 5] & 0xFFL) << 16) +
-                ((bytes[offset + 4] & 0xFFL) << 24) +
-                ((bytes[offset + 3] & 0xFFL) << 32) +
-                ((bytes[offset + 2] & 0xFFL) << 40) +
-                ((bytes[offset + 1] & 0xFFL) << 48) +
-                ((long) (bytes[offset]) << 56);
+        int int32Value = UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset);
+        return BIG_ENDIAN ? int32Value : Integer.reverseBytes(int32Value);
     }
 
     public static byte[] decodeBase64(String s) {

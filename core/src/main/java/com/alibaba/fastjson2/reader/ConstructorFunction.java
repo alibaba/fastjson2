@@ -141,7 +141,7 @@ final class ConstructorFunction<T>
                 arg = TypeUtils.getDefaultValue(paramType);
             } else {
                 if (!paramType.isInstance(arg)) {
-                    arg = TypeUtils.cast(arg, paramType);
+                    arg = TypeUtils.cast(arg, paramType, JSONFactory.defaultObjectReaderProvider);
                 }
             }
             return (T) function.apply(arg);
@@ -154,7 +154,7 @@ final class ConstructorFunction<T>
                 arg0 = TypeUtils.getDefaultValue(param0Type);
             } else {
                 if (!param0Type.isInstance(arg0)) {
-                    arg0 = TypeUtils.cast(arg0, param0Type);
+                    arg0 = TypeUtils.cast(arg0, param0Type, JSONFactory.defaultObjectReaderProvider);
                 }
             }
 
@@ -164,7 +164,7 @@ final class ConstructorFunction<T>
                 arg1 = TypeUtils.getDefaultValue(param1Type);
             } else {
                 if (!param1Type.isInstance(arg1)) {
-                    arg1 = TypeUtils.cast(arg1, param1Type);
+                    arg1 = TypeUtils.cast(arg1, param1Type, JSONFactory.defaultObjectReaderProvider);
                 }
             }
 
@@ -201,7 +201,7 @@ final class ConstructorFunction<T>
                     arg = TypeUtils.getDefaultValue(paramType);
                 } else {
                     if (!paramType.isInstance(arg)) {
-                        arg = TypeUtils.cast(arg, paramType);
+                        arg = TypeUtils.cast(arg, paramType, JSONFactory.defaultObjectReaderProvider);
                     }
                 }
                 args[i] = arg;
