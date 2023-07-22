@@ -238,8 +238,4 @@ result = (Collection<String>)JSONPath.eval(map, "$.e.keySet()");
 assertEquals(2, result.size());
 .assertTrue(result.contains("id")); // included
 assertTrue(result.contains("name"));
-
-// Same result
-assertEquals(result, JSONPath.keySet(map, "$.e"));
-assertEquals(result, new JSONPath("$.e").keySet(map));
 ```
