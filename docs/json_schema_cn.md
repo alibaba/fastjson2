@@ -139,3 +139,38 @@ public void test2() {
     );
 }
 ```
+
+# 4. 通过类型构造JSONSchema
+在后端和前端交互时，需要将java类型转换成JSONSchema返回给客户端。
+```java
+@Test
+public void test() {
+    JSONSchema schema = JSONSchema.of(Bean.class);
+    String string = schema.toString();
+    assertEquals(
+            "{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\"},\"name\":{\"type\":\"string\"}},\"required\":[\"id\"]}",
+            string
+    );
+    JSONSchema pased = JSONSchema.of(JSON.parseObject(string));
+    assertTrue(Differ.diff(schema, pased));
+
+    Bean bean = new Bean();
+    JSONSchema valueSchema = JSONSchema.ofValue(bean);
+    assertTrue(Differ.diff(schema, valueSchema));
+}
+
+public static class Bean {
+    public int id;
+    public String name;
+}
+```
+
+# 5. 通过值对象构造JSONSchema
+```java
+@Test
+public void fromValueMap() {
+    Map map = new HashMap();
+    map.put("id", 123);
+    assertEquals("{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\"}}}", JSONSchema.ofValue(map).toString());
+}
+```
