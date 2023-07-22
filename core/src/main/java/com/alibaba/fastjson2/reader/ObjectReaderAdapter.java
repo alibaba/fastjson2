@@ -9,6 +9,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -214,6 +215,12 @@ public class ObjectReaderAdapter<T>
 
     public FieldReader[] getFieldReaders() {
         return Arrays.copyOf(this.fieldReaders, this.fieldReaders.length);
+    }
+
+    public void apply(Consumer<FieldReader> fieldReaderConsumer) {
+        for (FieldReader fieldReader : fieldReaders) {
+            fieldReaderConsumer.accept(fieldReader);
+        }
     }
 
     public Object auoType(JSONReader jsonReader, Class expectClass, long features) {

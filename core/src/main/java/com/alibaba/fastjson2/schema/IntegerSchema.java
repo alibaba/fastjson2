@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -265,25 +264,27 @@ final class IntegerSchema
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        com.alibaba.fastjson2.schema.IntegerSchema that = (com.alibaba.fastjson2.schema.IntegerSchema) o;
-        return Objects.equals(title, that.title)
-                && Objects.equals(description, that.description)
-                && Objects.equals(minimum, that.minimum)
-                && Objects.equals(exclusiveMinimum, that.exclusiveMinimum)
-                && Objects.equals(maximum, that.maximum)
-                && Objects.equals(exclusiveMaximum, that.exclusiveMaximum)
-                && Objects.equals(multipleOf, that.multipleOf);
-    }
+    public JSONObject toJSONObject() {
+        JSONObject object = new JSONObject();
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(title, description, minimum, exclusiveMinimum, maximum, exclusiveMaximum, multipleOf);
+        object.put("type", "integer");
+
+        if (minimum != Long.MIN_VALUE) {
+            object.put(exclusiveMinimum ? "exclusiveMinimum" : "minimum", minimum);
+        }
+
+        if (maximum != Long.MIN_VALUE) {
+            object.put(exclusiveMaximum ? "exclusiveMaximum" : "maximum", maximum);
+        }
+
+        if (multipleOf != 0) {
+            object.put("multipleOf", multipleOf);
+        }
+
+        if (constValue != null) {
+            object.put("const", constValue);
+        }
+
+        return object;
     }
 }

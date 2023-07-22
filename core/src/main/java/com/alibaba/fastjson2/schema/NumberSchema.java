@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONObject;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Objects;
 
 final class NumberSchema
         extends JSONSchema {
@@ -271,25 +270,27 @@ final class NumberSchema
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        com.alibaba.fastjson2.schema.NumberSchema that = (com.alibaba.fastjson2.schema.NumberSchema) o;
-        return Objects.equals(title, that.title)
-                && Objects.equals(description, that.description)
-                && Objects.equals(exclusiveMinimum, that.exclusiveMinimum)
-                && Objects.equals(exclusiveMaximum, that.exclusiveMaximum)
-                && (minimum == null ? that.minimum == null : minimum.compareTo(that.minimum) == 0)
-                && (maximum == null ? that.maximum == null : maximum.compareTo(that.maximum) == 0)
-                && (multipleOf == null ? that.multipleOf == null : multipleOf.compareTo(that.multipleOf) == 0);
-    }
+    public JSONObject toJSONObject() {
+        JSONObject object = JSONObject.of("type", "number");
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(title, description, minimum, exclusiveMinimum, maximum, exclusiveMaximum, multipleOf);
+        if (minimumLongValue != Long.MIN_VALUE) {
+            object.put(exclusiveMinimum ? "exclusiveMinimum" : "minimum", minimumLongValue);
+        } else if (minimum != null) {
+            object.put(exclusiveMinimum ? "exclusiveMinimum" : "minimum", minimum);
+        }
+
+        if (maximumLongValue != Long.MIN_VALUE) {
+            object.put(exclusiveMaximum ? "exclusiveMaximum" : "maximum", minimumLongValue);
+        } else if (maximum != null) {
+            object.put(exclusiveMaximum ? "exclusiveMaximum" : "maximum", maximum);
+        }
+
+        if (multipleOfLongValue != Long.MIN_VALUE) {
+            object.put("multipleOf", multipleOfLongValue);
+        } else if (multipleOf != null) {
+            object.put("multipleOf", multipleOf);
+        }
+
+        return object;
     }
 }

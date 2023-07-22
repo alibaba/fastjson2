@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.schema;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -80,6 +81,8 @@ public final class ObjectSchema
                 JSONSchema schema;
                 if (entryValue instanceof Boolean) {
                     schema = (Boolean) entryValue ? Any.INSTANCE : Any.NOT_ANY;
+                } else if (entryValue instanceof JSONSchema) {
+                    schema = (JSONSchema) entryValue;
                 } else {
                     schema = JSONSchema.of((JSONObject) entryValue, root == null ? this : root);
                 }
@@ -109,7 +112,7 @@ public final class ObjectSchema
         }
 
         JSONArray required = input.getJSONArray("required");
-        if (required == null) {
+        if (required == null || required.isEmpty()) {
             this.required = Collections.emptySet();
             this.requiredHashCode = new long[0];
         } else {
@@ -551,24 +554,6 @@ public final class ObjectSchema
         return required;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        com.alibaba.fastjson2.schema.ObjectSchema that = (com.alibaba.fastjson2.schema.ObjectSchema) o;
-        return Objects.equals(properties, that.properties)
-                && Objects.equals(required, that.required);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(properties, required);
-    }
-
     static final class PatternProperty {
         final Pattern pattern;
         final JSONSchema schema;
@@ -577,5 +562,94 @@ public final class ObjectSchema
             this.pattern = pattern;
             this.schema = schema;
         }
+    }
+
+    @JSONField(value = true)
+    public JSONObject toJSONObject() {
+        JSONObject object = new JSONObject();
+
+        object.put("type", "object");
+
+        if (title != null) {
+            object.put("title", title);
+        }
+
+        if (description != null) {
+            object.put("description", description);
+        }
+
+        if (!definitions.isEmpty()) {
+            object.put("definitions", definitions);
+        }
+
+        if (!defs.isEmpty()) {
+            object.put("defs", defs);
+        }
+
+        if (!properties.isEmpty()) {
+            object.put("properties", properties);
+        }
+
+        if (!required.isEmpty()) {
+            object.put("required", required);
+        }
+
+        if (!additionalProperties) {
+            if (additionalPropertySchema != null) {
+                object.put("additionalProperties", additionalPropertySchema);
+            } else {
+                object.put("additionalProperties", additionalProperties);
+            }
+        }
+
+        if (patternProperties != null && patternProperties.length != 0) {
+            object.put("patternProperties", patternProperties);
+        }
+
+        if (propertyNames != null) {
+            object.put("propertyNames", propertyNames);
+        }
+
+        if (minProperties != -1) {
+            object.put("minProperties", minProperties);
+        }
+
+        if (maxProperties != -1) {
+            object.put("maxProperties", maxProperties);
+        }
+
+        if (dependentRequired != null && !dependentRequired.isEmpty()) {
+            object.put("dependentRequired", dependentRequired);
+        }
+
+        if (dependentSchemas != null && !dependentSchemas.isEmpty()) {
+            object.put("dependentSchemas", dependentSchemas);
+        }
+
+        if (ifSchema != null) {
+            object.put("if", ifSchema);
+        }
+
+        if (thenSchema != null) {
+            object.put("then", thenSchema);
+        }
+
+        if (elseSchema != null) {
+            object.put("else", elseSchema);
+        }
+
+        if (allOf != null) {
+            object.put("allOf", allOf);
+        }
+
+        if (anyOf != null) {
+            object.put("anyOf", anyOf);
+        }
+
+        if (oneOf != null) {
+            object.put("oneOf", oneOf);
+        }
+
+        return object;
     }
 }
