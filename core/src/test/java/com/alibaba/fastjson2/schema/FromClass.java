@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -28,6 +27,10 @@ public class FromClass {
         );
         JSONSchema pased = JSONSchema.of(JSON.parseObject(string));
         assertTrue(Differ.diff(schema, pased));
+
+        Bean bean = new Bean();
+        JSONSchema valueSchema = JSONSchema.ofValue(bean);
+        assertTrue(Differ.diff(schema, valueSchema));
     }
 
     public static class Bean {
@@ -86,5 +89,19 @@ public class FromClass {
         );
         JSONSchema pased = JSONSchema.of(JSON.parseObject(string));
         assertTrue(Differ.diff(schema, pased));
+    }
+
+    @Test
+    public void fromValueMap() {
+        Map map = new HashMap();
+        map.put("id", 123);
+        assertEquals("{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\"}}}", JSONSchema.ofValue(map).toString());
+    }
+
+    @Test
+    public void fromValueList() {
+        List list = new ArrayList();
+        list.add("xxx");
+        assertEquals("{\"type\":\"array\"}", JSONSchema.ofValue(list).toString());
     }
 }
