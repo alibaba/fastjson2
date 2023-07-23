@@ -137,7 +137,7 @@ public class FieldReaderObject<T>
                 } else {
                     value = null;
                 }
-            } else if (jsonReader.isJSONB()) {
+            } else if (jsonReader.jsonb) {
                 if (fieldClass == Object.class) {
                     ObjectReader autoTypeObjectReader = jsonReader.checkAutoType(Object.class, 0, features);
                     if (autoTypeObjectReader != null) {
@@ -284,7 +284,7 @@ public class FieldReaderObject<T>
             initReader = getObjectReader(jsonReader);
         }
 
-        Object object = jsonReader.isJSONB()
+        Object object = jsonReader.jsonb
                 ? initReader.readJSONBObject(jsonReader, fieldType, fieldName, features)
                 : initReader.readObject(jsonReader, fieldType, fieldName, features);
 

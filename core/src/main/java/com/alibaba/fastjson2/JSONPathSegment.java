@@ -69,7 +69,7 @@ abstract class JSONPathSegment {
                 return;
             }
 
-            if (jsonReader.isJSONB()) {
+            if (jsonReader.jsonb) {
                 JSONArray array = new JSONArray();
 
                 {
@@ -259,7 +259,7 @@ abstract class JSONPathSegment {
                 return;
             }
 
-            if (jsonReader.isJSONB()) {
+            if (jsonReader.jsonb) {
                 JSONArray array = new JSONArray();
 
                 {
@@ -513,7 +513,7 @@ abstract class JSONPathSegment {
                 return;
             }
 
-            if (jsonReader.isJSONB()) {
+            if (jsonReader.jsonb) {
                 JSONArray array = new JSONArray();
                 int itemCnt = jsonReader.startArray();
                 for (int i = 0; i < itemCnt; i++) {
@@ -931,7 +931,7 @@ abstract class JSONPathSegment {
                 return;
             }
 
-            if (jsonReader.isJSONB()) {
+            if (jsonReader.jsonb) {
                 List<Object> values = new JSONArray();
                 if (jsonReader.nextIfMatch(BC_OBJECT)) {
                     while (!jsonReader.nextIfMatch(BC_OBJECT_END)) {
@@ -1387,7 +1387,7 @@ abstract class JSONPathSegment {
         }
 
         public void accept(JSONReader jsonReader, JSONPath.Context context, List<Object> values) {
-            if (jsonReader.isJSONB()) {
+            if (jsonReader.jsonb) {
                 if (jsonReader.nextIfMatch(BC_OBJECT)) {
                     while (!jsonReader.nextIfMatch(BC_OBJECT_END)) {
                         long nameHashCode = jsonReader.readFieldNameHashCode();

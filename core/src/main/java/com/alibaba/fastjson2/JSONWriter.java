@@ -767,6 +767,34 @@ public abstract class JSONWriter
 
     public abstract void writeNameRaw(byte[] bytes);
 
+    public void writeName3Raw(long name) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    public void writeName4Raw(long name) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    public void writeName5Raw(long name) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    public void writeName6Raw(long name) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    public void writeName7Raw(long name) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    public void writeName8Raw(long name0) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
+    public void writeName9Raw(long name0, int name1) {
+        throw new JSONException("UnsupportedOperation");
+    }
+
     public void writeSymbol(int symbol) {
         throw new JSONException("UnsupportedOperation");
     }
@@ -778,6 +806,10 @@ public abstract class JSONWriter
     public abstract void writeNameRaw(char[] chars);
 
     public abstract void writeNameRaw(char[] bytes, int offset, int len);
+
+    public boolean xxxbac() {
+        return utf8 && (context.features & 5726) == 0;
+    }
 
     public void writeName(String name) {
         if (startObject) {
@@ -1044,9 +1076,7 @@ public abstract class JSONWriter
         endArray();
     }
 
-    public void writeNull() {
-        writeRaw("null");
-    }
+    public abstract void writeNull();
 
     public void writeStringNull() {
         String raw;

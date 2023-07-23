@@ -70,7 +70,7 @@ class ObjectReaderImplGenericArray
                     .getObjectReader(itemType);
         }
 
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 

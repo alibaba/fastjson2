@@ -34,7 +34,7 @@ class JSONReaderUTF8
     protected final CacheItem cacheItem;
 
     JSONReaderUTF8(Context ctx, InputStream is) {
-        super(ctx);
+        super(ctx, false, true);
 
         int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
         cacheItem = CACHE_ITEMS[cacheIndex];
@@ -75,7 +75,7 @@ class JSONReaderUTF8
     }
 
     JSONReaderUTF8(Context ctx, ByteBuffer buffer) {
-        super(ctx);
+        super(ctx, false, true);
 
         int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
         cacheItem = CACHE_ITEMS[cacheIndex];
@@ -100,7 +100,7 @@ class JSONReaderUTF8
     }
 
     JSONReaderUTF8(Context ctx, String str, byte[] bytes, int offset, int length) {
-        super(ctx);
+        super(ctx, false, true);
 
         this.bytes = bytes;
         this.offset = offset;
@@ -944,6 +944,738 @@ class JSONReaderUTF8
         }
 
         return hashCode;
+    }
+
+    @Override
+    public final int getRawInt() {
+        if (offset + 3 < bytes.length) {
+            return UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 1);
+        }
+        return 0;
+    }
+
+    @Override
+    public final long getRawLong() {
+        if (offset + 8 < bytes.length) {
+            return UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 1);
+        }
+        return 0;
+    }
+
+    @Override
+    public final boolean nextIfName8Match2() {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 9;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (bytes[offset - 2] != '"' || bytes[offset - 1] != ':') {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName8Match1() {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 8;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (bytes[offset - 1] != ':') {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName8Match0() {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 7;
+
+        if (offset == end) {
+            this.ch = EOI;
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match2() {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 4;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (bytes[offset - 1] != ':') {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match3() {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 5;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (bytes[offset - 2] != '"' || bytes[offset - 1] != ':') {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match4(byte c4) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 6;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (bytes[offset - 3] != c4 || bytes[offset - 2] != '"' || bytes[offset - 1] != ':') {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match5(int name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 7;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name1) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match6(int name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 8;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 5) != name1 || bytes[offset - 1] != ':') {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match7(int name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 9;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name1
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match8(int name1, byte c8) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 10;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name1
+                || bytes[offset - 3] != c8
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match9(long name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 11;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name1) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match10(long name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 12;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name1
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match11(long name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 12;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 10) != name1
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match2() {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 3;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        int c = bytes[offset] & 0xff;
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : (bytes[offset] & 0xff);
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match3() {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 4;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (bytes[offset - 1] != '"') {
+            return false;
+        }
+
+        int c = bytes[offset] & 0xff;
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : (bytes[offset] & 0xff);
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match4(byte c4) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 5;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (bytes[offset - 2] != c4 || bytes[offset - 1] != '"') {
+            return false;
+        }
+
+        int c = bytes[offset] & 0xff;
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : (bytes[offset] & 0xff);
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match5(byte c4, byte c5) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 6;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (bytes[offset - 3] != c4
+                || bytes[offset - 2] != c5
+                || bytes[offset - 1] != '"'
+        ) {
+            return false;
+        }
+
+        int c = bytes[offset] & 0xff;
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : (bytes[offset] & 0xff);
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match6(int name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 7;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name1) {
+            return false;
+        }
+
+        int c = bytes[offset] & 0xff;
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : (bytes[offset] & 0xff);
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match7(int name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 8;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 5) != name1
+                || bytes[offset - 1] != '"'
+        ) {
+            return false;
+        }
+
+        int c = bytes[offset] & 0xff;
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : (bytes[offset] & 0xff);
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match8(int name1, byte c8) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 9;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name1
+                || bytes[offset - 2] != c8
+                || bytes[offset - 1] != '"'
+        ) {
+            return false;
+        }
+
+        int c = bytes[offset] & 0xff;
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : (bytes[offset] & 0xff);
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match9(int name1, byte c8, byte c9) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 10;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name1
+                || bytes[offset - 3] != c8
+                || bytes[offset - 2] != c9
+                || bytes[offset - 1] != '"'
+        ) {
+            return false;
+        }
+
+        int c = bytes[offset] & 0xff;
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : (bytes[offset] & 0xff);
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match10(long name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 11;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name1) {
+            return false;
+        }
+
+        int c = bytes[offset] & 0xff;
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : (bytes[offset] & 0xff);
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match11(long name1) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 12;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name1
+                || bytes[offset - 1] != '"'
+        ) {
+            return false;
+        }
+
+        int c = bytes[offset] & 0xff;
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : (bytes[offset] & 0xff);
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
     }
 
     @Override

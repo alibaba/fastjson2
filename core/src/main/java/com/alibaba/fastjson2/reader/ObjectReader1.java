@@ -213,7 +213,7 @@ public class ObjectReader1<T>
             jsonReader.errorOnNoneSerializable(objectClass);
         }
 
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 

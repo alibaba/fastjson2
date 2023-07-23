@@ -13,7 +13,7 @@ final class JSONPathSingleNameInteger
 
     @Override
     public Object extract(JSONReader jsonReader) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             if (jsonReader.isObject()) {
                 jsonReader.nextIfObjectStart();
                 while (!jsonReader.nextIfObjectEnd()) {

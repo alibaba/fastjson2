@@ -400,7 +400,7 @@ public final class ObjectReaderImplMap
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 

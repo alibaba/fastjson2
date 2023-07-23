@@ -16,8 +16,7 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
-import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 class JSONWriterUTF8
         extends JSONWriter {
@@ -35,6 +34,16 @@ class JSONWriterUTF8
             bytes = new byte[8192];
         }
         this.bytes = bytes;
+    }
+
+    public final void writeNull() {
+        int minCapacity = off + 4;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + off, NULL_INT32);
+        off += 4;
     }
 
     @Override
@@ -1541,6 +1550,188 @@ class JSONWriterUTF8
     }
 
     @Override
+    public void writeName3Raw(long name) {
+        int off = this.off;
+        int minCapacity = off + 10 + indent;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        byte[] bytes = this.bytes;
+        if (startObject) {
+            startObject = false;
+        } else {
+            bytes[off++] = ',';
+            if (pretty) {
+                bytes[off++] = '\n';
+                for (int i = 0; i < indent; ++i) {
+                    bytes[off++] = '\t';
+                }
+            }
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        this.off = off + 6;
+    }
+
+    @Override
+    public void writeName4Raw(long name) {
+        int off = this.off;
+        int minCapacity = off + 10 + indent;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        byte[] bytes = this.bytes;
+        if (startObject) {
+            startObject = false;
+        } else {
+            bytes[off++] = ',';
+            if (pretty) {
+                bytes[off++] = '\n';
+                for (int i = 0; i < indent; ++i) {
+                    bytes[off++] = '\t';
+                }
+            }
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        this.off = off + 7;
+    }
+
+    @Override
+    public void writeName5Raw(long name) {
+        int off = this.off;
+        int minCapacity = off + 10 + indent;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        byte[] bytes = this.bytes;
+        if (startObject) {
+            startObject = false;
+        } else {
+            bytes[off++] = ',';
+            if (pretty) {
+                bytes[off++] = '\n';
+                for (int i = 0; i < indent; ++i) {
+                    bytes[off++] = '\t';
+                }
+            }
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        this.off = off + 8;
+    }
+
+    @Override
+    public void writeName6Raw(long name) {
+        int off = this.off;
+        int minCapacity = off + 11 + indent;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final byte[] bytes = this.bytes;
+        if (startObject) {
+            startObject = false;
+        } else {
+            bytes[off++] = ',';
+            if (pretty) {
+                bytes[off++] = '\n';
+                for (int i = 0; i < indent; ++i) {
+                    bytes[off++] = '\t';
+                }
+            }
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        bytes[off + 8] = ':';
+        this.off = off + 9;
+    }
+
+    @Override
+    public void writeName7Raw(long name) {
+        int off = this.off;
+        int minCapacity = off + 12 + indent;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final byte[] bytes = this.bytes;
+        if (startObject) {
+            startObject = false;
+        } else {
+            bytes[off++] = ',';
+            if (pretty) {
+                bytes[off++] = '\n';
+                for (int i = 0; i < indent; ++i) {
+                    bytes[off++] = '\t';
+                }
+            }
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name);
+        bytes[off + 8] = (byte) quote;
+        bytes[off + 9] = ':';
+        this.off = off + 10;
+    }
+
+    @Override
+    public void writeName8Raw(long name) {
+        int off = this.off;
+        int minCapacity = off + 13 + indent;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final byte[] bytes = this.bytes;
+        if (startObject) {
+            startObject = false;
+        } else {
+            bytes[off++] = ',';
+            if (pretty) {
+                bytes[off++] = '\n';
+                for (int i = 0; i < indent; ++i) {
+                    bytes[off++] = '\t';
+                }
+            }
+        }
+
+        bytes[off] = (byte) quote;
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off + 1, name);
+        bytes[off + 9] = (byte) quote;
+        bytes[off + 10] = ':';
+        this.off = off + 11;
+    }
+
+    @Override
+    public void writeName9Raw(long name0, int name1) {
+        int off = this.off;
+        int minCapacity = off + 14 + indent;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final byte[] bytes = this.bytes;
+        if (startObject) {
+            startObject = false;
+        } else {
+            bytes[off++] = ',';
+            if (pretty) {
+                bytes[off++] = '\n';
+                for (int i = 0; i < indent; ++i) {
+                    bytes[off++] = '\t';
+                }
+            }
+        }
+
+        UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + off, name0);
+        UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + off + 8, name1);
+        this.off = off + 12;
+    }
+
+    @Override
     public final void writeRaw(char ch) {
         if (ch > 128) {
             throw new JSONException("not support " + ch);
@@ -1732,10 +1923,7 @@ class JSONWriterUTF8
             }
             Number item = values.get(i);
             if (item == null) {
-                bytes[off] = 'n';
-                bytes[off + 1] = 'u';
-                bytes[off + 2] = 'l';
-                bytes[off + 3] = 'l';
+                UNSAFE.putInt(off, ARRAY_BYTE_BASE_OFFSET, NULL_INT32);
                 off += 4;
                 continue;
             }
@@ -1819,10 +2007,7 @@ class JSONWriterUTF8
             }
             Long item = values.get(i);
             if (item == null) {
-                bytes[off] = 'n';
-                bytes[off + 1] = 'u';
-                bytes[off + 2] = 'l';
-                bytes[off + 3] = 'l';
+                UNSAFE.putInt(off, ARRAY_BYTE_BASE_OFFSET, NULL_INT32);
                 off += 4;
                 continue;
             }

@@ -443,7 +443,7 @@ final class JSONPathSegmentIndex
             return;
         }
 
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             int itemCnt = jsonReader.startArray();
             for (int i = 0; i < itemCnt; i++) {
                 boolean match = index == i;

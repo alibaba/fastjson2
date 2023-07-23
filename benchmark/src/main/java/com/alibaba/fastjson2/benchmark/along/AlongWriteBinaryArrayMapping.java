@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.benchmark.along;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
@@ -37,6 +38,11 @@ public class AlongWriteBinaryArrayMapping {
     @Benchmark
     public void jsonb(Blackhole bh) {
         bh.consume(JSONB.toBytes(mc, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.FieldBased));
+    }
+
+    @Benchmark
+    public void json(Blackhole bh) {
+        bh.consume(JSON.toJSONBytes(mc, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.FieldBased));
     }
 
     public static void main(String[] args) throws RunnerException {

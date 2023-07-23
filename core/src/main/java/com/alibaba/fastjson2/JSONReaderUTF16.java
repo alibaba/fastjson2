@@ -34,7 +34,7 @@ class JSONReaderUTF16
     private int cacheIndex = -1;
 
     JSONReaderUTF16(Context ctx, byte[] bytes, int offset, int length) {
-        super(ctx);
+        super(ctx, false, false);
 
         this.str = null;
         this.chars = new char[length / 2];
@@ -298,7 +298,7 @@ class JSONReaderUTF16
     }
 
     JSONReaderUTF16(Context ctx, Reader input) {
-        super(ctx);
+        super(ctx, false, false);
         this.input = input;
 
         cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
@@ -368,7 +368,7 @@ class JSONReaderUTF16
     }
 
     JSONReaderUTF16(Context ctx, String str, int offset, int length) {
-        super(ctx);
+        super(ctx, false, false);
 
         cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
         final CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
@@ -414,7 +414,7 @@ class JSONReaderUTF16
     }
 
     JSONReaderUTF16(Context ctx, String str, char[] chars, int offset, int length) {
-        super(ctx);
+        super(ctx, false, false);
 
         this.str = str;
         this.chars = chars;
@@ -452,7 +452,7 @@ class JSONReaderUTF16
     }
 
     JSONReaderUTF16(Context ctx, InputStream input) {
-        super(ctx);
+        super(ctx, false, false);
         this.input = input;
         final int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
         final CacheItem cacheItem = CACHE_ITEMS[cacheIndex];
@@ -6247,5 +6247,778 @@ class JSONReaderUTF16
                 // ignored
             }
         }
+    }
+
+    public final int getRawInt() {
+        if (offset + 3 < chars.length) {
+            return getInt(chars, offset - 1);
+        }
+
+        return 0;
+    }
+
+    static int getInt(char[] chars, int offset) {
+        long int64Val = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET + (offset << 1));
+
+        if ((int64Val & (BIG_ENDIAN ? 0x00ff00ff00ff00ffL : 0xff00ff00ff00ff00L)) != 0) {
+            return 0;
+        }
+
+        if (BIG_ENDIAN) {
+            int64Val >>= 8;
+        }
+
+        return (int) ((int64Val & 0xff)
+                | (((int64Val >> 16) & 0xff) << 8)
+                | (((int64Val >> 32) & 0xff) << 16)
+                | (((int64Val >> 48)) & 0xff) << 24);
+    }
+
+    public final long getRawLong() {
+        if (offset + 7 < chars.length) {
+            return getLong(chars, offset - 1);
+        }
+
+        return 0;
+    }
+
+    static long getLong(char[] chars, int offset) {
+        long int64Val0 = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET + (offset << 1));
+        long int64Val1 = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET + ((offset + 4) << 1));
+
+        long mask = BIG_ENDIAN ? 0x00ff00ff00ff00ffL : 0xff00ff00ff00ff00L;
+        if ((int64Val0 & mask) != 0 || (int64Val1 & mask) != 0) {
+            return 0;
+        }
+
+        if (BIG_ENDIAN) {
+            int64Val0 >>= 8;
+            int64Val1 >>= 8;
+        }
+
+        return (int64Val0 & 0xff)
+                | (((int64Val0 >> 16) & 0xff) << 8)
+                | (((int64Val0 >> 32) & 0xff) << 16)
+                | (((int64Val0 >> 48) & 0xff) << 24)
+                | ((int64Val1 & 0xff) << 32)
+                | (((int64Val1 >>> 16) & 0xff) << 40)
+                | (((int64Val1 >>> 32) & 0xff) << 48)
+                | (((int64Val1 >>> 48) & 0xff) << 56);
+    }
+
+    @Override
+    public final boolean nextIfName8Match0() {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 7;
+
+        if (offset == end) {
+            this.ch = EOI;
+            return false;
+        }
+
+        char c = chars[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName8Match1() {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 8;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (chars[offset - 1] != ':') {
+            return false;
+        }
+
+        char c = chars[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName8Match2() {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 9;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (chars[offset - 2] != '"' || chars[offset - 1] != ':') {
+            return false;
+        }
+
+        char c = chars[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match2() {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 4;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (chars[offset - 1] != ':') {
+            return false;
+        }
+
+        char c = chars[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match3() {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 5;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (chars[offset - 2] != '"' || chars[offset - 1] != ':') {
+            return false;
+        }
+
+        char c = chars[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match4(byte c4) {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 6;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (chars[offset - 3] != c4 || chars[offset - 2] != '"' || chars[offset - 1] != ':') {
+            return false;
+        }
+
+        char c = chars[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match5(int name1) {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 7;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (getInt(chars, offset - 4) != name1) {
+            return false;
+        }
+
+        char c = chars[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match6(int name1) {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 8;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (getInt(chars, offset - 5) != name1 || chars[offset - 1] != ':') {
+            return false;
+        }
+
+        char c = chars[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match7(int name1) {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 9;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (getInt(chars, offset - 6) != name1
+                || chars[offset - 2] != '"'
+                || chars[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        char c = chars[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match8(int name1, byte c8) {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 10;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (getInt(chars, offset - 7) != name1
+                || chars[offset - 3] != c8
+                || chars[offset - 2] != '"'
+                || chars[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        char c = chars[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match9(long name1) {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 11;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (getLong(chars, offset - 8) != name1) {
+            return false;
+        }
+
+        char c = chars[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match10(long name1) {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 12;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (getLong(chars, offset - 9) != name1
+                || chars[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        char c = chars[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match11(long name1) {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 12;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (getLong(chars, offset - 10) != name1
+                || chars[offset - 2] != '"'
+                || chars[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        char c = chars[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match2() {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 3;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        char c = chars[offset];
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : chars[offset];
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match3() {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 4;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (chars[offset - 1] != '"') {
+            return false;
+        }
+
+        char c = chars[offset];
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : chars[offset];
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match4(byte c4) {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 5;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (chars[offset - 2] != c4 || chars[offset - 1] != '"') {
+            return false;
+        }
+
+        char c = chars[offset];
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : chars[offset];
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match5(byte c4, byte c5) {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 6;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (chars[offset - 3] != c4
+                || chars[offset - 2] != c5
+                || chars[offset - 1] != '"'
+        ) {
+            return false;
+        }
+
+        char c = chars[offset];
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : chars[offset];
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match6(int name1) {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 7;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (getInt(chars, offset - 4) != name1) {
+            return false;
+        }
+
+        char c = chars[offset];
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : chars[offset];
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match7(int name1) {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 8;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (getInt(chars, offset - 5) != name1
+                || chars[offset - 1] != '"'
+        ) {
+            return false;
+        }
+
+        char c = chars[offset];
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : chars[offset];
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match8(int name1, byte c8) {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 9;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (getInt(chars, offset - 6) != name1
+                || chars[offset - 2] != c8
+                || chars[offset - 1] != '"'
+        ) {
+            return false;
+        }
+
+        char c = chars[offset];
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : chars[offset];
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match9(int name1, byte c8, byte c9) {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 10;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (getInt(chars, offset - 7) != name1
+                || chars[offset - 3] != c8
+                || chars[offset - 2] != c9
+                || chars[offset - 1] != '"'
+        ) {
+            return false;
+        }
+
+        char c = chars[offset];
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : chars[offset];
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match10(long name1) {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 11;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (getLong(chars, offset - 8) != name1) {
+            return false;
+        }
+
+        char c = chars[offset];
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : chars[offset];
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfValue4Match11(long name1) {
+        char[] chars = this.chars;
+        int offset = this.offset;
+        offset += 12;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (getLong(chars, offset - 9) != name1
+                || chars[offset - 1] != '"'
+        ) {
+            return false;
+        }
+
+        char c = chars[offset];
+        if (c != ',' && c != '}' && c != ']') {
+            return false;
+        }
+
+        if (c == ',') {
+            comma = true;
+            offset++;
+            c = offset == end ? EOI : chars[offset];
+        }
+
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = chars[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = c;
+
+        return true;
     }
 }

@@ -62,7 +62,7 @@ public final class ObjectReaderImplObject
 
     @Override
     public Object readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return jsonReader.readAny();
         }
 

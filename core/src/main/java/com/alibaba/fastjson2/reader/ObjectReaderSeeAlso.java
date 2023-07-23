@@ -77,7 +77,7 @@ final class ObjectReaderSeeAlso<T>
 
     @Override
     public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 
@@ -101,8 +101,6 @@ final class ObjectReaderSeeAlso<T>
                     Enum e = null;
                     if (seeAlsoTypeReader instanceof ObjectReaderImplEnum) {
                         e = ((ObjectReaderImplEnum) seeAlsoTypeReader).getEnumByHashCode(valueHashCode);
-                    } else if (seeAlsoTypeReader instanceof ObjectReaderImplEnum2X4) {
-                        e = ((ObjectReaderImplEnum2X4) seeAlsoTypeReader).getEnumByHashCode(valueHashCode);
                     }
 
                     if (e != null) {

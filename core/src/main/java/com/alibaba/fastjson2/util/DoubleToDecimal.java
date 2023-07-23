@@ -27,7 +27,9 @@ package com.alibaba.fastjson2.util;
 
 import java.lang.invoke.*;
 
-import static com.alibaba.fastjson2.util.JDKUtils.ANDROID;
+import static com.alibaba.fastjson2.util.IOUtils.NULL_INT32;
+import static com.alibaba.fastjson2.util.IOUtils.NULL_INT64;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.lang.Float.floatToRawIntBits;
 import static java.lang.Integer.numberOfLeadingZeros;
 
@@ -35,6 +37,43 @@ import static java.lang.Integer.numberOfLeadingZeros;
  * This class exposes a method to render a {@code double} as a string.
  */
 public final class DoubleToDecimal {
+    static final long INFINITY;
+
+    static final long INFI;
+    static final long NITY;
+    static {
+        long infinity
+                = (((long) 'I') << 56)
+                | (((long) 'n') << 48)
+                | (((long) 'f') << 40)
+                | (((long) 'i') << 32)
+                | ('n' << 24)
+                | ('i' << 16)
+                | ('t' << 8)
+                | 'y';
+
+        INFINITY = BIG_ENDIAN ? infinity : Long.reverseBytes(infinity);
+
+        long infi = (((long) 'I') << 48)
+                | (((long) 'n') << 32)
+                | (((long) 'f') << 16)
+                | 'i';
+        if (!BIG_ENDIAN) {
+            infi <<= 8;
+            infi = Long.reverseBytes(infi);
+        }
+        INFI = infi;
+
+        long nity = (((long) 'n') << 48)
+                | (((long) 'i') << 32)
+                | (((long) 't') << 16)
+                | 'y';
+        if (!BIG_ENDIAN) {
+            nity <<= 8;
+            nity = Long.reverseBytes(nity);
+        }
+        NITY = nity;
+    }
     /*
      * For full details about this code see the following references:
      *
@@ -358,36 +397,26 @@ public final class DoubleToDecimal {
             return index + 1 - off;
         }
 
-        int index = off - 1;
+        int index = off;
         if (json) {
-            bytes[1 + index] = 'n';
-            bytes[2 + index] = 'u';
-            bytes[3 + index] = 'l';
-            bytes[4 + index] = 'l';
+            UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + index, NULL_INT32);
             index += 4;
         } else if (t != 0) {
-            bytes[1 + index] = 'N';
-            bytes[2 + index] = 'a';
-            bytes[3 + index] = 'N';
+            bytes[index] = 'N';
+            bytes[index + 1] = 'a';
+            bytes[index + 2] = 'N';
             index += 3;
         } else {
             if (bits <= 0) {
-                bytes[++index] = '-';
+                bytes[index++] = '-';
             }
-            bytes[1 + index] = 'I';
-            bytes[2 + index] = 'n';
-            bytes[3 + index] = 'f';
-            bytes[4 + index] = 'i';
-            bytes[5 + index] = 'n';
-            bytes[6 + index] = 'i';
-            bytes[7 + index] = 't';
-            bytes[8 + index] = 'y';
+            UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + index, INFINITY);
             index += 8;
         }
-        return index + 1 - off;
+        return index - off;
     }
 
-    public static int toString(double v, char[] bytes, int off, boolean json) {
+    public static int toString(double v, char[] chars, int off, boolean json) {
         final int P = 53;
         final int Q_MIN = -1074;
         final long C_TINY = 3;
@@ -405,18 +434,18 @@ public final class DoubleToDecimal {
                  * fd != null implies bytes == null and bits >= 0
                  * Thus, when fd != null, control never reaches here.
                  */
-                bytes[++index] = '-';
+                chars[++index] = '-';
             }
 
             if (bq == 0 && t == 0) {
                 index = off - 1;
                 if (bits != 0) {
-                    bytes[++index] = '-';
+                    chars[++index] = '-';
                 }
 
-                bytes[1 + index] = '0';
-                bytes[2 + index] = '.';
-                bytes[3 + index] = '0';
+                chars[1 + index] = '0';
+                chars[2 + index] = '.';
+                chars[3 + index] = '0';
                 return index + 4 - off;
             }
 
@@ -539,7 +568,7 @@ public final class DoubleToDecimal {
             if (0 < e && e <= 7) {
                 final int MASK_28 = 268435455;
                 {
-                    bytes[++index] = (char) ('0' + h);
+                    chars[++index] = (char) ('0' + h);
                     int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                             (long) (m + 1) << 28,
                             193_428_131_138_340_668L) >>> 20) - 1;
@@ -547,13 +576,13 @@ public final class DoubleToDecimal {
                     int i = 1;
                     for (; i < e; ++i) {
                         t1 = 10 * y;
-                        bytes[++index] = (char) ('0' + (t1 >>> 28));
+                        chars[++index] = (char) ('0' + (t1 >>> 28));
                         y = t1 & MASK_28;
                     }
-                    bytes[++index] = '.';
+                    chars[++index] = '.';
                     for (; i <= 8; ++i) {
                         t1 = 10 * y;
-                        bytes[++index] = (char) ('0' + (t1 >>> 28));
+                        chars[++index] = (char) ('0' + (t1 >>> 28));
                         y = t1 & MASK_28;
                     }
                 }
@@ -569,30 +598,30 @@ public final class DoubleToDecimal {
                             193_428_131_138_340_668L) >>> 20) - 1;
                     for (int i = 0; i < 8; ++i) {
                         int t1 = 10 * y;
-                        bytes[++index] = (char) ('0' + (t1 >>> 28));
+                        chars[++index] = (char) ('0' + (t1 >>> 28));
                         y = t1 & MASK_28;
                     }
                 }
 
 //        removeTrailingZeroes();
-                while (bytes[index] == '0') {
+                while (chars[index] == '0') {
                     --index;
                 }
                 /* ... but do not remove the one directly to the right of '.' */
-                if (bytes[index] == '.') {
+                if (chars[index] == '.') {
                     ++index;
                 }
 
                 return index + 1 - off;
             } else if (-3 < e && e <= 0) {
                 /* -3 < e <= 0: plain format with leading zeroes */
-                bytes[1 + index] = (byte) ('0');
-                bytes[2 + index] = '.';
+                chars[1 + index] = (byte) ('0');
+                chars[2 + index] = '.';
                 index += 2;
                 for (; e < 0; ++e) {
-                    bytes[++index] = (byte) ('0');
+                    chars[++index] = (byte) ('0');
                 }
-                bytes[++index] = (char) ('0' + h);
+                chars[++index] = (char) ('0' + h);
 
                 final int MASK_28 = 268435455;
                 {
@@ -601,7 +630,7 @@ public final class DoubleToDecimal {
                             193_428_131_138_340_668L) >>> 20) - 1;
                     for (int i = 0; i < 8; ++i) {
                         int t1 = 10 * y;
-                        bytes[++index] = (char) ('0' + (t1 >>> 28));
+                        chars[++index] = (char) ('0' + (t1 >>> 28));
                         y = t1 & MASK_28;
                     }
                 }
@@ -612,21 +641,21 @@ public final class DoubleToDecimal {
                             193_428_131_138_340_668L) >>> 20) - 1;
                     for (int i = 0; i < 8; ++i) {
                         int t1 = 10 * y;
-                        bytes[++index] = (char) ('0' + (t1 >>> 28));
+                        chars[++index] = (char) ('0' + (t1 >>> 28));
                         y = t1 & MASK_28;
                     }
                 }
-                while (bytes[index] == '0') {
+                while (chars[index] == '0') {
                     --index;
                 }
-                if (bytes[index] == '.') {
+                if (chars[index] == '.') {
                     ++index;
                 }
                 return index + 1 - off;
             }
 
-            bytes[1 + index] = (char) ('0' + h);
-            bytes[2 + index] = '.';
+            chars[1 + index] = (char) ('0' + h);
+            chars[2 + index] = '.';
             index += 2;
 
             final int MASK_28 = 268435455;
@@ -636,7 +665,7 @@ public final class DoubleToDecimal {
                         193_428_131_138_340_668L) >>> 20) - 1;
                 for (int i = 0; i < 8; ++i) {
                     int t1 = 10 * y;
-                    bytes[++index] = (char) ('0' + (t1 >>> 28));
+                    chars[++index] = (char) ('0' + (t1 >>> 28));
                     y = t1 & MASK_28;
                 }
             }
@@ -652,28 +681,28 @@ public final class DoubleToDecimal {
                         193_428_131_138_340_668L) >>> 20) - 1;
                 for (int i = 0; i < 8; ++i) {
                     int t1 = 10 * y;
-                    bytes[++index] = (char) ('0' + (t1 >>> 28));
+                    chars[++index] = (char) ('0' + (t1 >>> 28));
                     y = t1 & MASK_28;
                 }
             }
             // removeTrailingZeroes();
-            while (bytes[index] == '0') {
+            while (chars[index] == '0') {
                 --index;
             }
             /* ... but do not remove the one directly to the right of '.' */
-            if (bytes[index] == '.') {
+            if (chars[index] == '.') {
                 ++index;
             }
 
             int e1 = e - 1;
             {
-                bytes[++index] = 'E';
+                chars[++index] = 'E';
                 if (e1 < 0) {
-                    bytes[++index] = '-';
+                    chars[++index] = '-';
                     e1 = -e1;
                 }
                 if (e1 < 10) {
-                    bytes[++index] = (char) ('0' + e1);
+                    chars[++index] = (char) ('0' + e1);
                 } else {
                     int d;
                     if (e1 >= 100) {
@@ -682,7 +711,7 @@ public final class DoubleToDecimal {
                          *     floor(e1 / 100) = floor(1_311 e1 / 2^17)
                          */
                         d = e1 * 1_311 >>> 17;
-                        bytes[++index] = (char) ('0' + d);
+                        chars[++index] = (char) ('0' + d);
                         e1 -= 100 * d;
                     }
                     /*
@@ -690,41 +719,32 @@ public final class DoubleToDecimal {
                      *     floor(e1 / 10) = floor(103 e1 / 2^10)
                      */
                     d = e1 * 103 >>> 10;
-                    bytes[1 + index] = (char) ('0' + d);
-                    bytes[2 + index] = (char) ('0' + (e1 - 10 * d));
+                    chars[1 + index] = (char) ('0' + d);
+                    chars[2 + index] = (char) ('0' + (e1 - 10 * d));
                     index += 2;
                 }
             }
             return index + 1 - off;
         }
 
-        int index = off - 1;
+        int index = off;
         if (json) {
-            bytes[1 + index] = 'n';
-            bytes[2 + index] = 'u';
-            bytes[3 + index] = 'l';
-            bytes[4 + index] = 'l';
+            UNSAFE.putLong(chars, ARRAY_BYTE_BASE_OFFSET + (index << 1), NULL_INT64);
             index += 4;
         } else if (t != 0) {
-            bytes[1 + index] = 'N';
-            bytes[2 + index] = 'a';
-            bytes[3 + index] = 'N';
+            chars[index] = 'N';
+            chars[index + 1] = 'a';
+            chars[index + 2] = 'N';
             index += 3;
         } else {
             if (bits <= 0) {
-                bytes[++index] = '-';
+                chars[index++] = '-';
             }
-            bytes[1 + index] = 'I';
-            bytes[2 + index] = 'n';
-            bytes[3 + index] = 'f';
-            bytes[4 + index] = 'i';
-            bytes[5 + index] = 'n';
-            bytes[6 + index] = 'i';
-            bytes[7 + index] = 't';
-            bytes[8 + index] = 'y';
+            UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + (index << 1), INFI);
+            UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + ((index + 4) << 1), NITY);
             index += 8;
         }
-        return index + 1 - off;
+        return index - off;
     }
 
     public static int toString(float v, byte[] bytes, int off, boolean json) {
@@ -966,36 +986,26 @@ public final class DoubleToDecimal {
             return index + 1 - off;
         }
 
-        int index = off - 1;
+        int index = off;
         if (json) {
-            bytes[1 + index] = 'n';
-            bytes[2 + index] = 'u';
-            bytes[3 + index] = 'l';
-            bytes[4 + index] = 'l';
+            UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + index, NULL_INT32);
             index += 4;
         } else if (t != 0) {
-            bytes[1 + index] = 'N';
-            bytes[2 + index] = 'a';
-            bytes[3 + index] = 'N';
+            bytes[index] = 'N';
+            bytes[index + 1] = 'a';
+            bytes[index + 2] = 'N';
             index += 3;
         } else {
             if (bits <= 0) {
-                bytes[++index] = '-';
+                bytes[index++] = '-';
             }
-            bytes[1 + index] = 'I';
-            bytes[2 + index] = 'n';
-            bytes[3 + index] = 'f';
-            bytes[4 + index] = 'i';
-            bytes[5 + index] = 'n';
-            bytes[6 + index] = 'i';
-            bytes[7 + index] = 't';
-            bytes[8 + index] = 'y';
+            UNSAFE.putLong(bytes, ARRAY_BYTE_BASE_OFFSET + index, INFINITY);
             index += 8;
         }
-        return index + 1 - off;
+        return index - off;
     }
 
-    public static int toString(float v, char[] bytes, int off, boolean json) {
+    public static int toString(float v, char[] chars, int off, boolean json) {
         final int Q_MIN = -149;
         final int C_TINY = 8;
         final int C_MIN = 8388608;
@@ -1010,7 +1020,7 @@ public final class DoubleToDecimal {
         if (bq < BQ_MASK) {
             int index = off - 1;
             if (bits < 0) {
-                bytes[++index] = '-';
+                chars[++index] = '-';
             }
 
             int q = 0;
@@ -1020,12 +1030,12 @@ public final class DoubleToDecimal {
             if (bq == 0 && t == 0) {
                 index = off - 1;
                 if (bits != 0) {
-                    bytes[++index] = '-';
+                    chars[++index] = '-';
                 }
 
-                bytes[1 + index] = '0';
-                bytes[2 + index] = '.';
-                bytes[3 + index] = '0';
+                chars[1 + index] = '0';
+                chars[2 + index] = '.';
+                chars[3 + index] = '0';
                 index += 3;
                 return index + 1 - off;
             }
@@ -1138,7 +1148,7 @@ public final class DoubleToDecimal {
             int l = f - 100_000_000 * h1;
 
             if (0 < e && e <= 7) {
-                bytes[++index] = (char) ('0' + h1);
+                chars[++index] = (char) ('0' + h1);
                 int y = (int) (MULTIPLY_HIGH.multiplyHigh(
                         (long) (l + 1) << 28,
                         193_428_131_138_340_668L) >>> 20) - 1;
@@ -1146,32 +1156,32 @@ public final class DoubleToDecimal {
                 int i = 1;
                 for (; i < e; ++i) {
                     t1 = 10 * y;
-                    bytes[++index] = (char) ('0' + (t1 >>> 28));
+                    chars[++index] = (char) ('0' + (t1 >>> 28));
                     y = t1 & MASK_28;
                 }
-                bytes[++index] = '.';
+                chars[++index] = '.';
                 for (; i <= 8; ++i) {
                     t1 = 10 * y;
-                    bytes[++index] = (char) ('0' + (t1 >>> 28));
+                    chars[++index] = (char) ('0' + (t1 >>> 28));
                     y = t1 & MASK_28;
                 }
 
                 // removeTrailingZeroes();
-                while (bytes[index] == '0') {
+                while (chars[index] == '0') {
                     --index;
                 }
                 /* ... but do not remove the one directly to the right of '.' */
-                if (bytes[index] == '.') {
+                if (chars[index] == '.') {
                     ++index;
                 }
             } else if (-3 < e && e <= 0) {
-                bytes[1 + index] = '0';
-                bytes[2 + index] = '.';
+                chars[1 + index] = '0';
+                chars[2 + index] = '.';
                 index += 2;
                 for (; e < 0; ++e) {
-                    bytes[++index] = '0';
+                    chars[++index] = '0';
                 }
-                bytes[++index] = (char) ('0' + h1);
+                chars[++index] = (char) ('0' + h1);
 
                 // append8Digits(l);
                 int y = (int) (MULTIPLY_HIGH.multiplyHigh(
@@ -1179,21 +1189,21 @@ public final class DoubleToDecimal {
                         193_428_131_138_340_668L) >>> 20) - 1;
                 for (int i = 0; i < 8; ++i) {
                     int t1 = 10 * y;
-                    bytes[++index] = (char) ('0' + (t1 >>> 28));
+                    chars[++index] = (char) ('0' + (t1 >>> 28));
                     y = t1 & MASK_28;
                 }
 
                 // removeTrailingZeroes();
-                while (bytes[index] == '0') {
+                while (chars[index] == '0') {
                     --index;
                 }
                 /* ... but do not remove the one directly to the right of '.' */
-                if (bytes[index] == '.') {
+                if (chars[index] == '.') {
                     ++index;
                 }
             } else {
-                bytes[1 + index] = (char) ('0' + h1);
-                bytes[2 + index] = '.';
+                chars[1 + index] = (char) ('0' + h1);
+                chars[2 + index] = '.';
                 index += 2;
 
                 // append8Digits(l);
@@ -1202,31 +1212,31 @@ public final class DoubleToDecimal {
                         193_428_131_138_340_668L) >>> 20) - 1;
                 for (int i = 0; i < 8; ++i) {
                     int t1 = 10 * y;
-                    bytes[++index] = (char) ('0' + (t1 >>> 28));
+                    chars[++index] = (char) ('0' + (t1 >>> 28));
                     y = t1 & MASK_28;
                 }
 
                 // removeTrailingZeroes();
-                while (bytes[index] == '0') {
+                while (chars[index] == '0') {
                     --index;
                 }
                 /* ... but do not remove the one directly to the right of '.' */
-                if (bytes[index] == '.') {
+                if (chars[index] == '.') {
                     ++index;
                 }
 
                 int e1 = e - 1;
-                bytes[++index] = 'E';
+                chars[++index] = 'E';
                 if (e1 < 0) {
-                    bytes[++index] = '-';
+                    chars[++index] = '-';
                     e1 = -e1;
                 }
                 if (e1 < 10) {
-                    bytes[++index] = (char) ('0' + e1);
+                    chars[++index] = (char) ('0' + e1);
                 } else {
                     int d = e1 * 103 >>> 10;
-                    bytes[1 + index] = (char) ('0' + d);
-                    bytes[2 + index] = (char) ('0' + (e1 - 10 * d));
+                    chars[1 + index] = (char) ('0' + d);
+                    chars[2 + index] = (char) ('0' + (e1 - 10 * d));
                     index += 2;
                 }
             }
@@ -1234,33 +1244,24 @@ public final class DoubleToDecimal {
             return index + 1 - off;
         }
 
-        int index = off - 1;
+        int index = off;
         if (json) {
-            bytes[1 + index] = 'n';
-            bytes[2 + index] = 'u';
-            bytes[3 + index] = 'l';
-            bytes[4 + index] = 'l';
+            UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + (index << 1), NULL_INT64);
             index += 4;
         } else if (t != 0) {
-            bytes[1 + index] = 'N';
-            bytes[2 + index] = 'a';
-            bytes[3 + index] = 'N';
+            chars[index] = 'N';
+            chars[index + 1] = 'a';
+            chars[index + 2] = 'N';
             index += 3;
         } else {
             if (bits <= 0) {
-                bytes[++index] = '-';
+                chars[index++] = '-';
             }
-            bytes[1 + index] = 'I';
-            bytes[2 + index] = 'n';
-            bytes[3 + index] = 'f';
-            bytes[4 + index] = 'i';
-            bytes[5 + index] = 'n';
-            bytes[6 + index] = 'i';
-            bytes[7 + index] = 't';
-            bytes[8 + index] = 'y';
+            UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + (index << 1), INFI);
+            UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + ((index + 4) << 1), NITY);
             index += 8;
         }
-        return index + 1 - off;
+        return index - off;
     }
 
     private static final long[] G = {

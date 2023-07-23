@@ -101,7 +101,7 @@ class FieldReaderMapFieldReadOnly<T>
         }
 
         Object value;
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             value = initReader.readJSONBObject(jsonReader, fieldType, fieldName, features);
         } else {
             value = initReader.readObject(jsonReader, fieldType, fieldName, features);
