@@ -218,7 +218,7 @@ public abstract class ObjectReaderBean<T>
 
     @Override
     public T readObject(JSONReader jsonReader, Type fieldType, Object fieldName, long features) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 

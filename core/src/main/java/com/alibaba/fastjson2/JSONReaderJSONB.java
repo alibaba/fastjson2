@@ -49,7 +49,7 @@ final class JSONReaderJSONB
     protected long[] symbols;
 
     JSONReaderJSONB(Context ctx, InputStream is) {
-        super(ctx);
+        super(ctx, true, false);
 
         int cacheIndex = System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1);
         cacheItem = CACHE_ITEMS[cacheIndex];
@@ -84,18 +84,13 @@ final class JSONReaderJSONB
     }
 
     JSONReaderJSONB(Context ctx, byte[] bytes, int off, int length) {
-        super(ctx);
+        super(ctx, true, false);
         this.bytes = bytes;
         this.offset = off;
         this.length = length;
         this.end = off + length;
         this.symbolTable = ctx.symbolTable;
         this.cacheItem = CACHE_ITEMS[System.identityHashCode(Thread.currentThread()) & (CACHE_ITEMS.length - 1)];
-    }
-
-    @Override
-    public boolean isJSONB() {
-        return true;
     }
 
     @Override

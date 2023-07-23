@@ -289,8 +289,6 @@ public final class ObjectReaderImplList
 
                     if (itemObjectReader instanceof ObjectReaderImplEnum) {
                         value = ((ObjectReaderImplEnum) itemObjectReader).getEnum((String) value);
-                    } else if (itemObjectReader instanceof ObjectReaderImplEnum2X4) {
-                        value = ((ObjectReaderImplEnum2X4) itemObjectReader).getEnum((String) value);
                     } else {
                         throw new JSONException("can not convert from " + valueClass + " to " + itemType);
                     }
@@ -527,7 +525,7 @@ public final class ObjectReaderImplList
                     .getObjectReader(itemType);
         }
 
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, 0);
         }
 

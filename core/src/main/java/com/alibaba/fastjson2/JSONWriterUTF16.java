@@ -17,8 +17,7 @@ import java.util.*;
 import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
-import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 class JSONWriterUTF16
         extends JSONWriter {
@@ -36,6 +35,16 @@ class JSONWriterUTF16
             chars = new char[8192];
         }
         this.chars = chars;
+    }
+
+    public final void writeNull() {
+        int minCapacity = off + 4;
+        if (minCapacity >= this.chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + (off << 1), NULL_INT64);
+        off += 4;
     }
 
     @Override

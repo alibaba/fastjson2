@@ -217,7 +217,7 @@ public class ObjectReader2<T>
             jsonReader.errorOnNoneSerializable(objectClass);
         }
 
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             return readJSONBObject(jsonReader, fieldType, fieldName, features);
         }
 

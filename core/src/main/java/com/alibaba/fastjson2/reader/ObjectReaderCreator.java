@@ -2860,23 +2860,6 @@ public class ObjectReaderCreator {
             enums[i] = e;
         }
 
-        if (createMethod == null && enumValueField == null) {
-            if (ordinalEnums != null && ordinalEnums.length == 2) {
-                Enum first = ordinalEnums[0];
-
-                int matchCount = 0;
-                for (Enum anEnum : enums) {
-                    if (anEnum == first) {
-                        matchCount++;
-                    }
-                }
-
-                if (matchCount == 2) {
-                    return new ObjectReaderImplEnum2X4(objectClass, enums, ordinalEnums, enumNameHashCodes);
-                }
-            }
-        }
-
         return new ObjectReaderImplEnum(objectClass, createMethod, enumValueField, enums, ordinalEnums, enumNameHashCodes);
     }
 

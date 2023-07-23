@@ -56,7 +56,7 @@ public class ObjectReaderImplField
         boolean objectStart = jsonReader.nextIfObjectStart();
         if (!objectStart) {
             if (jsonReader.isSupportBeanArray(features)) {
-                if (jsonReader.isJSONB()) {
+                if (jsonReader.jsonb) {
                     return readArrayMappingJSONBObject(jsonReader, fieldType, fieldName, features);
                 } else {
                     return readArrayMappingObject(jsonReader, fieldType, fieldName, features);
@@ -78,7 +78,7 @@ public class ObjectReaderImplField
             }
         }
 
-        if (!jsonReader.isJSONB()) {
+        if (!jsonReader.jsonb) {
             jsonReader.nextIfComma();
         }
 

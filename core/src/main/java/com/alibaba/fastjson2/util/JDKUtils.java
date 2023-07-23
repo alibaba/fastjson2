@@ -16,6 +16,7 @@ import static java.lang.invoke.MethodType.methodType;
 public class JDKUtils {
     public static final Unsafe UNSAFE;
     public static final long ARRAY_BYTE_BASE_OFFSET;
+    public static final long ARRAY_CHAR_BASE_OFFSET;
 
     public static final int JVM_VERSION;
     public static final Byte LATIN1 = 0;
@@ -65,17 +66,19 @@ public class JDKUtils {
 
     static {
         Unsafe unsafe = null;
-        long offset = -1;
+        long offset = -1, charOffset = -1;
         try {
             Field theUnsafeField = Unsafe.class.getDeclaredField("theUnsafe");
             theUnsafeField.setAccessible(true);
             unsafe = (Unsafe) theUnsafeField.get(null);
             offset = Unsafe.ARRAY_BYTE_BASE_OFFSET;
+            charOffset = Unsafe.ARRAY_CHAR_BASE_OFFSET;
         } catch (Throwable ignored) {
             // ignored
         }
         UNSAFE = unsafe;
         ARRAY_BYTE_BASE_OFFSET = offset;
+        ARRAY_CHAR_BASE_OFFSET = charOffset;
 
         int jvmVersion = -1;
         boolean openj9 = false, android = false, graal = false;

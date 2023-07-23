@@ -55,6 +55,9 @@ public abstract class JSONReader
     static final long SPACE = (1L << ' ') | (1L << '\n') | (1L << '\r') | (1L << '\f') | (1L << '\t') | (1L << '\b');
 
     protected final Context context;
+    public final boolean jsonb;
+    public final boolean utf8;
+
     List<ResolveTask> resolveTasks;
 
     protected int offset;
@@ -111,8 +114,10 @@ public abstract class JSONReader
 
     public abstract boolean nextIfNull();
 
-    public JSONReader(Context context) {
+    public JSONReader(Context context, boolean jsonb, boolean utf8) {
         this.context = context;
+        this.jsonb = jsonb;
+        this.utf8 = utf8;
     }
 
     public final Context getContext() {
@@ -140,6 +145,106 @@ public abstract class JSONReader
 
     public final long features(long features) {
         return context.features | features;
+    }
+
+    public int getRawInt() {
+        return 0;
+    }
+
+    public long getRawLong() {
+        return 0;
+    }
+
+    public boolean nextIfName4Match2() {
+        return false;
+    }
+
+    public boolean nextIfValue4Match2() {
+        return false;
+    }
+
+    public boolean nextIfName4Match3() {
+        return false;
+    }
+
+    public boolean nextIfValue4Match3() {
+        return false;
+    }
+
+    public boolean nextIfName4Match4(byte c4) {
+        return false;
+    }
+
+    public boolean nextIfValue4Match4(byte c4) {
+        return false;
+    }
+
+    public boolean nextIfName4Match5(int name1) {
+        return false;
+    }
+
+    public boolean nextIfValue4Match5(byte c4, byte c5) {
+        return false;
+    }
+
+    public boolean nextIfName4Match6(int name1) {
+        return false;
+    }
+
+    public boolean nextIfValue4Match6(int name1) {
+        return false;
+    }
+
+    public boolean nextIfName4Match7(int name1) {
+        return false;
+    }
+
+    public boolean nextIfValue4Match7(int name1) {
+        return false;
+    }
+
+    public boolean nextIfName4Match8(int name1, byte c8) {
+        return false;
+    }
+
+    public boolean nextIfValue4Match8(int name1, byte c8) {
+        return false;
+    }
+
+    public boolean nextIfName4Match9(long name1) {
+        return false;
+    }
+
+    public boolean nextIfValue4Match9(int name1, byte c8, byte c9) {
+        return false;
+    }
+
+    public boolean nextIfName4Match10(long name1) {
+        return false;
+    }
+
+    public boolean nextIfValue4Match10(long name1) {
+        return false;
+    }
+
+    public boolean nextIfName4Match11(long name1) {
+        return false;
+    }
+
+    public boolean nextIfValue4Match11(long name1) {
+        return false;
+    }
+
+    public boolean nextIfName8Match0() {
+        return false;
+    }
+
+    public boolean nextIfName8Match1() {
+        return false;
+    }
+
+    public boolean nextIfName8Match2() {
+        return false;
     }
 
     public final void handleResolveTasks(Object root) {
@@ -275,8 +380,8 @@ public abstract class JSONReader
         return ((context.features | features) & Feature.SupportAutoType.mask) != 0 || context.autoTypeBeforeHandler != null;
     }
 
-    public boolean isJSONB() {
-        return false;
+    public final boolean isJSONB() {
+        return jsonb;
     }
 
     public final boolean isIgnoreNoneSerializable() {

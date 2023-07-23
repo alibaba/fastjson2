@@ -187,8 +187,6 @@ abstract class FieldWriterList<T>
 
         boolean previousItemRefDetect = (features & ReferenceDetection.mask) != 0;
 
-        writeFieldName(jsonWriter);
-
         jsonWriter.startArray();
         for (int i = 0; i < list.size(); i++) {
             if (i != 0) {

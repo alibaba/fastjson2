@@ -450,7 +450,7 @@ class JSONPathSegmentName
             return;
         }
 
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             if (jsonReader.nextIfObjectStart()) {
                 for (int i = 0; ; ++i) {
                     if (jsonReader.nextIfObjectEnd()) {

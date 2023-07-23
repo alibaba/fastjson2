@@ -6,7 +6,30 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.time.LocalTime;
 
+import static com.alibaba.fastjson2.util.JDKUtils.BIG_ENDIAN;
+
 public class IOUtils {
+    public static final int NULL_INT32;
+    public static final long NULL_INT64;
+
+    static {
+        int nullInt = ('n' << 24)
+                | ('u' << 16)
+                | ('l' << 8)
+                | 'l';
+        NULL_INT32 = BIG_ENDIAN ? nullInt : Integer.reverseBytes(nullInt);
+
+        long nullInt64 = (((long) 'n') << 48)
+                | (((long) 'u') << 32)
+                | (((long) 'l') << 16)
+                | 'l';
+        if (!BIG_ENDIAN) {
+            nullInt64 <<= 8;
+            nullInt64 = Long.reverseBytes(nullInt64);
+        }
+        NULL_INT64 = nullInt64;
+    }
+
     static final byte[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
             'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
 

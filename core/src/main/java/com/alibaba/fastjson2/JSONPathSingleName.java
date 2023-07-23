@@ -259,7 +259,7 @@ final class JSONPathSingleName
 
     @Override
     public Object extract(JSONReader jsonReader) {
-        if (jsonReader.isJSONB()) {
+        if (jsonReader.jsonb) {
             if (jsonReader.nextIfObjectStart()) {
                 while (!jsonReader.nextIfObjectEnd()) {
                     long nameHashCode = jsonReader.readFieldNameHashCode();
