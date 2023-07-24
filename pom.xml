@@ -48,7 +48,7 @@
         <!-- https://kotlinlang.org/docs/maven.html#specifying-compiler-options -->
         <kotlin.compiler.apiVersion>1.5</kotlin.compiler.apiVersion>
 
-        <junit5.version>5.9.3</junit5.version>
+        <junit5.version>5.10.0</junit5.version>
         <kotest.version>5.5.5</kotest.version>
         <jmh.version>1.36</jmh.version>
 
