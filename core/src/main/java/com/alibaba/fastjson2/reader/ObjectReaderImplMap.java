@@ -169,6 +169,9 @@ public final class ObjectReaderImplMap
                         Map.Entry entry = (Map.Entry) map.entrySet().iterator().next();
                         return Collections.singletonMap(entry.getKey(), entry.getValue());
                     };
+                } else if (mapType == EnumMap.class) {
+                    instanceType = LinkedHashMap.class;
+                    builder = e -> new EnumMap((Map) e);
                 }
         }
 
