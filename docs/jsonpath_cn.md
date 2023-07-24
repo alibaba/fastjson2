@@ -188,13 +188,11 @@ assertSame(entities.get(0), result.get(0));
 ```java
 Entity entity = new Entity(1001, "ljw2083");
 assertSame(entity , JSONPath.eval(entity, "[?(@.id = 1001)]"));
-assertNull(JSONPath.eval(entity, "[id = 1002]"));
 
 JSONPath.set(entity, "id", 123456); //将id字段修改为123456
 assertEquals(123456, entity.getId().intValue());
 
 JSONPath.set(entity, "value", new int[0]); //将value字段赋值为长度为0的数组
-JSONPath.arrayAdd(entity, "value", 1, 2, 3); //将value字段的数组添加元素1,2,3
 ```
 
 ### 3.7 例7
