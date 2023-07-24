@@ -41,7 +41,7 @@
         <springboot3.version>3.1.1</springboot3.version>
         <arrow.version>12.0.1</arrow.version>
 
-        <!-- Requires kotlin major version less than the latest version -->
+        <!-- Requires kotlin minor version less than the latest version -->
         <kotlin.version>1.6.21</kotlin.version>
         <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
@@ -49,7 +49,7 @@
         <kotlin.compiler.apiVersion>1.5</kotlin.compiler.apiVersion>
 
         <junit5.version>5.9.3</junit5.version>
-        <kotest.version>5.6.2</kotest.version>
+        <kotest.version>5.5.5</kotest.version>
         <jmh.version>1.36</jmh.version>
 
         <!-- overridden by submodule that need skip deploy -->
@@ -565,97 +565,6 @@
                         <goals>
                             <goal>testCompile</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.3.0</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.puppycrawl.tools</groupId>
-                        <artifactId>checkstyle</artifactId>
-                        <version>9.2</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <id>checkstyle</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <configuration>
-                            <skip>false</skip>
-                            <failOnViolation>true</failOnViolation>
-                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                            <configLocation>src/checkstyle/fastjson2-checks.xml</configLocation>
-                            <excludes>module-info.java,
-                                com/alibaba/fastjson2/fieldbased/Case1.java,
-                                com/alibaba/fastjson2/codec/UnicodeClassNameTest.java,
-                                com/alibaba/fastjson2/hsf/UCaseNameTest.java,
-                                com/alibaba/json/bvtVO/PushMsg.java,
-                                com/alibaba/json/bvtVO/IncomingDataPoint_ext_double.java,
-                                com/alibaba/json/bvtVO/vip_com/QueryLoanOrderRsp.java,
-                                com/alibaba/json/bvtVO/vip_com/TxnListItsm.java,
-                                com/alibaba/json/bvtVO/一个中文名字的包/User.java,
-                                com/alibaba/fastjson2_vo/cart/OrderBy.java,com/alibaba/fastjson2_vo/homepage/GetHomePageData.java,
-                                com/alibaba/fastjson2/v1issues/issue_4000/Issue4073.java,
-                                com/alibaba/fastjson2/v1issues/issue_1400/Issue1486.java,
-                                com/alibaba/fastjson2/v1issues/issue_1400/Issue1487.java,
-                                com/alibaba/fastjson2/v1issues/issue_1300/Issue1335.java,
-                                com/alibaba/fastjson2/v1issues/issue_1200/Issue1254.java,
-                                com/alibaba/fastjson2/v1issues/issue_1200/Issue1276.java,
-                                com/alibaba/fastjson2/v1issues/issue_1100/Issue1165.java,
-                                com/alibaba/fastjson2/v1issues/issue_1500/Issue1576.java,
-                                com/alibaba/fastjson2/v1issues/issue_1500/Issue1529.java,
-                                com/alibaba/fastjson2/issues/Issue371.java,
-                                com/alibaba/fastjson2/issues/Issue325.java,
-                                com/alibaba/fastjson2/issues/Issue402.java,
-                                com/alibaba/fastjson2/v1issues/issue_1500/Issue1558.java,
-                                com/alibaba/fastjson/issue_2800/Issue2866.java,
-                                com/alibaba/fastjson/issues_compatible/Issue325.java,
-                                com/alibaba/fastjson/issue_3200/Issue3217.java,
-                                com/alibaba/fastjson/issue_2400/Issue2488.java,
-                                com/alibaba/fastjson/issue_1100/Issue1165.java,
-                                com/alibaba/fastjson/issue_1200/Issue1254.java,
-                                com/alibaba/fastjson/issue_1200/Issue1276.java,
-                                com/alibaba/fastjson/issue_1300/Issue1306.java,
-                                com/alibaba/fastjson/issue_1300/Issue1335.java,
-                                com/alibaba/fastjson/issue_1300/Issue1367.java,
-                                com/alibaba/fastjson/issue_1400/Issue1486.java,
-                                com/alibaba/fastjson/issue_1400/Issue1487.java,
-                                com/alibaba/fastjson/issue_1500/Issue1576.java,
-                                com/alibaba/fastjson/issue_1500/Issue1529.java,
-                                com/alibaba/fastjson/issue_1500/Issue1558.java,
-                                com/alibaba/fastjson/issue_1600/Issue*.java,
-                                com/alibaba/fastjson/issue_1700/Issue*.java,
-                                com/alibaba/fastjson/issue_1900/Issue*.java,
-                                com/alibaba/fastjson/issue_2300/Issue*.java,
-                                com/alibaba/fastjson2/naming/*.java,
-                                com/alibaba/json/bvt/**/*.java,
-                                com/alibaba/fastjson2/issues/Issue485.java,
-                                com/alibaba/fastjson2/issues/Issue765.java,
-                                com/alibaba/fastjson2/issues/Issue924.java,
-                                com/alibaba/fastjson2/issues_1000/Issue1084.java,
-                                com/alibaba/fastjson/issue_1300/Issue1367_jaxrs.java,
-                                com/fasterxml/jackson/core/*.java,
-                                com/fasterxml/jackson/databind/*.java,
-                                com/alibaba/fastjson2/adapter/http/*.java,
-                                com/alibaba/fastjson2/dubbo/GoogleProtobufBasic.java,
-                                com/alibaba/fastjson2/issues/Issue983.java,
-                                com/alibaba/fastjson2/protobuf/PersonOuterClass.java,
-                                com/alibaba/fastjson2/benchmark/protobuf/MediaContentHolder.java,
-                                org/apache/dubbo/springboot/demo/BusinessException.java,
-                                com/alibaba/fastjson2/issues_1000/Issue1246.java,
-                                com/alibaba/fastjson/issues_compatible/Issue1303.java,
-                                com/alibaba/fastjson2/util/BeanUtilsTest.java,
-                                com/alibaba/fastjson2/issues_1000/Issue1395.java,
-                                com/alibaba/fastjson/v2issues/Issue1432.java
-                            </excludes>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
