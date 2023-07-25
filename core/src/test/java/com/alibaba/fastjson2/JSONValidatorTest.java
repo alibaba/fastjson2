@@ -350,7 +350,7 @@ public class JSONValidatorTest {
 
         for (String string : strings) {
             assertFalse(JSON.isValid(string), string);
-            assertFalse(JSON.isValid(string.getBytes()));
+            assertFalse(JSON.isValid(string.getBytes()), string);
         }
     }
 

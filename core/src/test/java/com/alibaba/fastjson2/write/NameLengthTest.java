@@ -172,6 +172,24 @@ public class NameLengthTest {
     }
 
     @Test
+    public void test7_long_1() {
+        String str = "{\"ABCDEF\":101}";
+        byte[] bytes = str.getBytes();
+        char[] chars = str.toCharArray();
+
+        JSONReader readerUTF8 = JSONReader.of(bytes);
+
+        readerUTF8.next();
+        assertEquals('"', readerUTF8.current());
+        assertEquals(2469737605147803938L, readerUTF8.getRawLong());
+
+        JSONReader readerUTF16 = JSONReader.of(chars);
+        readerUTF16.next();
+        assertEquals('"', readerUTF16.current());
+        assertEquals(2469737605147803938L, readerUTF16.getRawLong());
+    }
+
+    @Test
     public void test8() {
         String input = "{\"profile_background_image_url\":\"http://a3.twimg.com/a/1301071706/images/themes/theme1/bg.png\",\"profile_use_background_image\":\"true\"}";
         Bean8 bean = JSON.parseObject(input, Bean8.class);

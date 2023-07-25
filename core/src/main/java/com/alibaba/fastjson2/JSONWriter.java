@@ -1052,13 +1052,7 @@ public abstract class JSONWriter
 
     public abstract void writeDouble(double[] value);
 
-    public void writeBool(boolean value) {
-        if ((context.features & Feature.WriteBooleanAsNumber.mask) != 0) {
-            write0(value ? '1' : '0');
-        } else {
-            writeRaw(value ? "true" : "false");
-        }
-    }
+    public abstract void writeBool(boolean value);
 
     public void writeBool(boolean[] value) {
         if (value == null) {

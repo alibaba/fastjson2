@@ -42,7 +42,7 @@ class JSONWriterUTF8
             ensureCapacity(minCapacity);
         }
 
-        UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + off, NULL_INT32);
+        UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + off, NULL_32);
         off += 4;
     }
 
@@ -1923,7 +1923,7 @@ class JSONWriterUTF8
             }
             Number item = values.get(i);
             if (item == null) {
-                UNSAFE.putInt(off, ARRAY_BYTE_BASE_OFFSET, NULL_INT32);
+                UNSAFE.putInt(off, ARRAY_BYTE_BASE_OFFSET, NULL_32);
                 off += 4;
                 continue;
             }
@@ -2007,7 +2007,7 @@ class JSONWriterUTF8
             }
             Long item = values.get(i);
             if (item == null) {
-                UNSAFE.putInt(off, ARRAY_BYTE_BASE_OFFSET, NULL_INT32);
+                UNSAFE.putInt(off, ARRAY_BYTE_BASE_OFFSET, NULL_32);
                 off += 4;
                 continue;
             }
@@ -2878,6 +2878,26 @@ class JSONWriterUTF8
             ensureCapacity(off + 1);
         }
         bytes[off++] = ']';
+    }
+
+    public void writeBool(boolean value) {
+        int minCapacity = off + 5;
+        if (minCapacity >= this.bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        byte[] bytes = this.bytes;
+        int off = this.off;
+        if ((context.features & Feature.WriteBooleanAsNumber.mask) != 0) {
+            bytes[off++] = (byte) (value ? '1' : '0');
+        } else {
+            if (!value) {
+                bytes[off++] = 'f';
+            }
+            UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + off, value ? TRUE : ALSE);
+            off += 4;
+        }
+        this.off = off;
     }
 
     @Override

@@ -14,10 +14,13 @@ import java.time.*;
 import java.util.*;
 
 import static com.alibaba.fastjson2.JSONFactory.*;
+import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 class JSONReaderUTF16
         extends JSONReader {
+    static final long CHAR_MASK = BIG_ENDIAN ? 0x00ff00ff00ff00ffL : 0xff00ff00ff00ff00L;
+
     protected final String str;
     protected final char[] chars;
     protected final int length;
@@ -196,16 +199,12 @@ class JSONReaderUTF16
         }
 
         char quote = ch;
-        if (quote != '"' && quote != '\'' || this.offset + 5 >= end) {
-            return false;
-        }
-
-        if (chars[offset + 1] != '$'
+        if (offset + 6 >= end
+                || chars[offset + 1] != '$'
                 || chars[offset + 2] != 'r'
                 || chars[offset + 3] != 'e'
                 || chars[offset + 4] != 'f'
                 || chars[offset + 5] != quote
-                || offset + 6 >= end
         ) {
             return false;
         }
@@ -3319,22 +3318,17 @@ class JSONReaderUTF16
                     doubleValue = 1;
                     if (offset == end) {
                         ch = EOI;
-                        offset++;
                     } else {
                         ch = chars[offset++];
                     }
                 }
             } else if (ch == 'f') {
-                if (chars[offset++] == 'a'
-                        && chars[offset++] == 'l'
-                        && chars[offset++] == 's'
-                        && chars[offset++] == 'e'
-                ) {
+                if (offset + 4 <= end && UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET + (offset << 1)) == ALSE_64) {
+                    offset += 4;
                     doubleValue = 0;
                     value = true;
                     if (offset == end) {
                         ch = EOI;
-                        offset++;
                     } else {
                         ch = chars[offset++];
                     }
@@ -6260,7 +6254,7 @@ class JSONReaderUTF16
     static int getInt(char[] chars, int offset) {
         long int64Val = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET + (offset << 1));
 
-        if ((int64Val & (BIG_ENDIAN ? 0x00ff00ff00ff00ffL : 0xff00ff00ff00ff00L)) != 0) {
+        if ((int64Val & CHAR_MASK) != 0) {
             return 0;
         }
 
@@ -6269,9 +6263,9 @@ class JSONReaderUTF16
         }
 
         return (int) ((int64Val & 0xff)
-                | (((int64Val >> 16) & 0xff) << 8)
-                | (((int64Val >> 32) & 0xff) << 16)
-                | (((int64Val >> 48)) & 0xff) << 24);
+                | ((int64Val & 0xff_0000) >> 8)
+                | ((int64Val & 0xff_0000_0000L) >> 16)
+                | ((int64Val & 0xff_0000_0000_0000L) >> 24));
     }
 
     public final long getRawLong() {
@@ -6283,11 +6277,11 @@ class JSONReaderUTF16
     }
 
     static long getLong(char[] chars, int offset) {
-        long int64Val0 = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET + (offset << 1));
-        long int64Val1 = UNSAFE.getLong(chars, ARRAY_CHAR_BASE_OFFSET + ((offset + 4) << 1));
+        long arrayOffset = ARRAY_CHAR_BASE_OFFSET + (offset << 1);
+        long int64Val0 = UNSAFE.getLong(chars, arrayOffset);
+        long int64Val1 = UNSAFE.getLong(chars, arrayOffset + 8);
 
-        long mask = BIG_ENDIAN ? 0x00ff00ff00ff00ffL : 0xff00ff00ff00ff00L;
-        if ((int64Val0 & mask) != 0 || (int64Val1 & mask) != 0) {
+        if (((int64Val0 | int64Val1) & CHAR_MASK) != 0) {
             return 0;
         }
 
@@ -6297,13 +6291,13 @@ class JSONReaderUTF16
         }
 
         return (int64Val0 & 0xff)
-                | (((int64Val0 >> 16) & 0xff) << 8)
-                | (((int64Val0 >> 32) & 0xff) << 16)
-                | (((int64Val0 >> 48) & 0xff) << 24)
+                | ((int64Val0 & 0xff_0000) >> 8)
+                | ((int64Val0 & 0xff_0000_0000L) >> 16)
+                | ((int64Val0 & 0xff_0000_0000_0000L) >> 24)
                 | ((int64Val1 & 0xff) << 32)
-                | (((int64Val1 >>> 16) & 0xff) << 40)
-                | (((int64Val1 >>> 32) & 0xff) << 48)
-                | (((int64Val1 >>> 48) & 0xff) << 56);
+                | ((int64Val1 & 0xff_0000L) << 24)
+                | ((int64Val1 & 0xff_0000_0000L) << 16)
+                | ((int64Val1 & 0xff_0000_0000_0000L) << 8);
     }
 
     @Override

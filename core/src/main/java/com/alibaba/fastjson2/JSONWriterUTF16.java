@@ -43,7 +43,7 @@ class JSONWriterUTF16
             ensureCapacity(minCapacity);
         }
 
-        UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + (off << 1), NULL_INT64);
+        UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + (off << 1), NULL_64);
         off += 4;
     }
 
@@ -2801,5 +2801,25 @@ class JSONWriterUTF16
         }
 
         writeStringEscape(new String(chars, off, len));
+    }
+
+    public void writeBool(boolean value) {
+        int minCapacity = off + 5;
+        if (minCapacity >= this.chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        char[] chars = this.chars;
+        int off = this.off;
+        if ((context.features & Feature.WriteBooleanAsNumber.mask) != 0) {
+            chars[off++] = value ? '1' : '0';
+        } else {
+            if (!value) {
+                chars[off++] = 'f';
+            }
+            UNSAFE.putLong(chars, ARRAY_BYTE_BASE_OFFSET + (off << 1), value ? TRUE_64 : ALSE_64);
+            off += 4;
+        }
+        this.off = off;
     }
 }

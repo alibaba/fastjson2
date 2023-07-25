@@ -27,8 +27,8 @@ package com.alibaba.fastjson2.util;
 
 import java.lang.invoke.*;
 
-import static com.alibaba.fastjson2.util.IOUtils.NULL_INT32;
-import static com.alibaba.fastjson2.util.IOUtils.NULL_INT64;
+import static com.alibaba.fastjson2.util.IOUtils.NULL_32;
+import static com.alibaba.fastjson2.util.IOUtils.NULL_64;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static java.lang.Float.floatToRawIntBits;
 import static java.lang.Integer.numberOfLeadingZeros;
@@ -399,7 +399,7 @@ public final class DoubleToDecimal {
 
         int index = off;
         if (json) {
-            UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + index, NULL_INT32);
+            UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + index, NULL_32);
             index += 4;
         } else if (t != 0) {
             bytes[index] = 'N';
@@ -729,7 +729,7 @@ public final class DoubleToDecimal {
 
         int index = off;
         if (json) {
-            UNSAFE.putLong(chars, ARRAY_BYTE_BASE_OFFSET + (index << 1), NULL_INT64);
+            UNSAFE.putLong(chars, ARRAY_BYTE_BASE_OFFSET + (index << 1), NULL_64);
             index += 4;
         } else if (t != 0) {
             chars[index] = 'N';
@@ -988,7 +988,7 @@ public final class DoubleToDecimal {
 
         int index = off;
         if (json) {
-            UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + index, NULL_INT32);
+            UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + index, NULL_32);
             index += 4;
         } else if (t != 0) {
             bytes[index] = 'N';
@@ -1246,7 +1246,7 @@ public final class DoubleToDecimal {
 
         int index = off;
         if (json) {
-            UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + (index << 1), NULL_INT64);
+            UNSAFE.putLong(chars, ARRAY_CHAR_BASE_OFFSET + (index << 1), NULL_64);
             index += 4;
         } else if (t != 0) {
             chars[index] = 'N';

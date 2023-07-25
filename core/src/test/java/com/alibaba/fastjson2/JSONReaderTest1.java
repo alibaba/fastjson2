@@ -2218,4 +2218,46 @@ public class JSONReaderTest1 {
 
         assertTrue(reader.isEnd());
     }
+
+    @Test
+    public void readFloatValue() {
+        assertEquals(
+                0f,
+                JSONReader.of("false".getBytes())
+                        .readFloatValue()
+        );
+        assertEquals(
+                0f,
+                JSONReader.of("false".toCharArray())
+                        .readFloatValue()
+        );
+    }
+
+    @Test
+    public void readBigDecimal() {
+        assertEquals(
+                BigDecimal.ZERO,
+                JSONReader.of("false".getBytes())
+                        .readBigDecimal()
+        );
+        assertEquals(
+                BigDecimal.ZERO,
+                JSONReader.of("false".toCharArray())
+                        .readBigDecimal()
+        );
+    }
+
+    @Test
+    public void skipValue() {
+        {
+            JSONReader reader = JSONReader.of("false".getBytes());
+            reader.skipValue();
+            assertTrue(reader.isEnd());
+        }
+        {
+            JSONReader reader = JSONReader.of("false ".getBytes());
+            reader.skipValue();
+            assertTrue(reader.isEnd());
+        }
+    }
 }

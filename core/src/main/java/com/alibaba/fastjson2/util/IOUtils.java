@@ -6,29 +6,29 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.time.LocalTime;
 
-import static com.alibaba.fastjson2.util.JDKUtils.BIG_ENDIAN;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 public class IOUtils {
-    public static final int NULL_INT32;
-    public static final long NULL_INT64;
+    public static final int NULL_32 = BIG_ENDIAN ? 0x6e756c6c : 0x6c6c756e;
+    public static final long NULL_64 = BIG_ENDIAN ? 0x6e0075006c006cL : 0x6c006c0075006eL;
 
-    static {
-        int nullInt = ('n' << 24)
-                | ('u' << 16)
-                | ('l' << 8)
-                | 'l';
-        NULL_INT32 = BIG_ENDIAN ? nullInt : Integer.reverseBytes(nullInt);
+    public static final int TRUE = BIG_ENDIAN ? 0x74727565 : 0x65757274;
+    public static final long TRUE_64 = BIG_ENDIAN ? 0x74007200750065L : 0x65007500720074L;
 
-        long nullInt64 = (((long) 'n') << 48)
-                | (((long) 'u') << 32)
-                | (((long) 'l') << 16)
-                | 'l';
-        if (!BIG_ENDIAN) {
-            nullInt64 <<= 8;
-            nullInt64 = Long.reverseBytes(nullInt64);
-        }
-        NULL_INT64 = nullInt64;
-    }
+    public static final int ALSE = BIG_ENDIAN ? 0x616c7365 : 0x65736c61;
+    public static final long ALSE_64 = BIG_ENDIAN ? 0x61006c00730065L : 0x650073006c0061L;
+//
+//    static {
+//        {
+//            long int64 = (((long) 't') << 48) | (((long) 'r') << 32) | (((long) 'u') << 16) | 'e';
+//            System.out.println(Long.toHexString(int64));
+//            if (!BIG_ENDIAN) {
+//                int64 <<= 8;
+//                int64 = Long.reverseBytes(int64);
+//            }
+//            System.out.println(Long.toHexString(int64));
+//        }
+//    }
 
     static final byte[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
             'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
