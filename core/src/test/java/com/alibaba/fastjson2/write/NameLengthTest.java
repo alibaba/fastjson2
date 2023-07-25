@@ -1,8 +1,14 @@
 package com.alibaba.fastjson2.write;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
+import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -163,5 +169,136 @@ public class NameLengthTest {
         readerUTF16.next();
         assertEquals('"', readerUTF16.current());
         assertEquals(2464933765545293346L, readerUTF16.getRawLong());
+    }
+
+    @Test
+    public void test8() {
+        String input = "{\"profile_background_image_url\":\"http://a3.twimg.com/a/1301071706/images/themes/theme1/bg.png\",\"profile_use_background_image\":\"true\"}";
+        Bean8 bean = JSON.parseObject(input, Bean8.class);
+        byte[] bytes = JSON.toJSONBytes(bean);
+        String str = new String(bytes);
+        assertEquals(input, str);
+        Bean8 bean1 = JSON.parseObject(bytes, Bean8.class);
+        assertEquals(str, new String(JSON.toJSONBytes(bean1)));
+    }
+
+    public static class Bean8 {
+        @JSONField(name = "profile_background_image_url")
+        public String profileBackgroundImageUrl;
+        @JSONField(name = "profile_use_background_image")
+        public String profileUseBackgroundImage;
+    }
+
+    @Test
+    public void test9() {
+        Bean9 bean = new Bean9();
+        JSONObject jsonObject = JSONObject.from(bean);
+        for (Iterator<Map.Entry<String, Object>> it = jsonObject.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<String, Object> entry = it.next();
+            entry.setValue(entry.getKey().length());
+        }
+
+        String str = jsonObject.toJSONString();
+        {
+            Bean9 bean1 = JSON.parseObject(str.getBytes(StandardCharsets.UTF_8), Bean9.class);
+            assertEquals(str, JSON.toJSONString(bean1));
+        }
+        {
+            Bean9 bean1 = JSON.parseObject(str.toCharArray(), Bean9.class);
+            assertEquals(str, JSON.toJSONString(bean1));
+        }
+    }
+
+    public static class Bean9 {
+        public int v2;
+        public int v32;
+        public int v423;
+        public int v5234;
+        public int v62345;
+        public int v723456;
+        public int v8234567;
+        public int v92345678;
+        public int v103456789;
+        public int v113456789A;
+        public int v123456789A1;
+        public int v133456789A23;
+        public int v143456789A234;
+        public int v153456789A2345;
+        public int v163456789A23456;
+        public int v173456789A234567;
+        public int v183456789A2345678;
+        public int v193456789A23456789;
+        public int v203456789A23456789A;
+    }
+
+    @Test
+    public void test10() {
+        Bean10 bean = new Bean10();
+        JSONObject jsonObject = JSONObject.from(bean);
+        for (Iterator<Map.Entry<String, Object>> it = jsonObject.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<String, Object> entry = it.next();
+            entry.setValue(entry.getKey().length());
+        }
+
+        String str = jsonObject.toJSONString();
+        {
+            Bean10 bean1 = JSON.parseObject(str.getBytes(StandardCharsets.UTF_8), Bean10.class);
+            assertEquals(str, JSON.toJSONString(bean1));
+        }
+        {
+            Bean10 bean1 = JSON.parseObject(str.toCharArray(), Bean10.class);
+            assertEquals(str, JSON.toJSONString(bean1));
+        }
+    }
+
+    public static class Bean10 {
+        public int v203456789A23456789A;
+        public int v213456789A23456789A1;
+        public int v223456789A23456789A12;
+        public int v233456789A23456789A123;
+        public int v243456789A23456789A1234;
+        public int v253456789A23456789A12345;
+        public int v263456789A23456789A123456;
+        public int v273456789A23456789A1234567;
+        public int v283456789A23456789A12345678;
+        public int v293456789A23456789A123456789;
+        public int v303456789A23456789A123456789A;
+    }
+
+    @Test
+    public void test11() {
+        Bean11 bean = new Bean11();
+        JSONObject jsonObject = JSONObject.from(bean);
+        for (Iterator<Map.Entry<String, Object>> it = jsonObject.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<String, Object> entry = it.next();
+            entry.setValue(entry.getKey().length());
+        }
+
+        String str = jsonObject.toJSONString();
+        {
+            Bean11 bean1 = JSON.parseObject(str.getBytes(StandardCharsets.UTF_8), Bean11.class);
+            assertEquals(str, JSON.toJSONString(bean1));
+        }
+        {
+            Bean11 bean1 = JSON.parseObject(str.toCharArray(), Bean11.class);
+            assertEquals(str, JSON.toJSONString(bean1));
+        }
+    }
+
+    public static class Bean11 {
+        public int v303456789A23456789A123456789A;
+        public int v313456789A23456789A123456789A1;
+        public int v323456789A23456789A123456789A12;
+        public int v333456789A23456789A123456789A123;
+        public int v343456789A23456789A123456789A1234;
+        public int v353456789A23456789A123456789A12345;
+        public int v363456789A23456789A123456789A123456;
+        public int v373456789A23456789A123456789A1234567;
+        public int v383456789A23456789A123456789A12345678;
+        public int v393456789A23456789A123456789A123456789;
+        public int v403456789A23456789A123456789A123456789A;
+        public int v413456789A23456789A123456789A123456789A1;
+        public int v423456789A23456789A123456789A123456789A12;
+        public int v433456789A23456789A123456789A123456789A123;
     }
 }

@@ -1283,13 +1283,1001 @@ class JSONReaderUTF8
     public final boolean nextIfName4Match11(long name1) {
         byte[] bytes = this.bytes;
         int offset = this.offset;
-        offset += 12;
+        offset += 13;
 
         if (offset >= end) {
             return false;
         }
 
         if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 10) != name1
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match12(long name1, byte c12) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 14;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 11) != name1
+                || bytes[offset - 3] != c12
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match13(long name1, int name2) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 15;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 12) != name1
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name2
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match14(long name1, int name2) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 16;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 13) != name1
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 5) != name2
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match15(long name1, int name2) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 17;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 14) != name1
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name2
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match16(long name1, int name2, byte c16) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 18;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 15) != name1
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name2
+                || bytes[offset - 3] != c16
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match17(long name1, long name2) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 19;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 16) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name2
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match18(long name1, long name2) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 20;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 17) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name2
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match19(long name1, long name2) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 21;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 18) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 10) != name2
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match20(long name1, long name2, byte c20) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 22;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 19) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 11) != name2
+                || bytes[offset - 3] != c20
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match21(long name1, long name2, int name3) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 23;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 20) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 12) != name2
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name3
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match22(long name1, long name2, int name3) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 24;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 21) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 13) != name2
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 5) != name3
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match23(long name1, long name2, int name3) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 25;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 22) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 14) != name2
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name3
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match24(long name1, long name2, int name3, byte c24) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 26;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 23) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 15) != name2
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name3
+                || bytes[offset - 3] != c24
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match25(long name1, long name2, long name3) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 27;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 24) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 16) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name3
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match26(long name1, long name2, long name3) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 28;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 25) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 17) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name3
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match27(long name1, long name2, long name3) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 29;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 26) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 18) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 10) != name3
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match28(long name1, long name2, long name3, byte c29) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 30;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 27) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 19) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 11) != name3
+                || bytes[offset - 3] != c29
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match29(long name1, long name2, long name3, int name4) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 31;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 28) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 20) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 12) != name3
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name4
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match30(long name1, long name2, long name3, int name4) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 32;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 29) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 21) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 13) != name3
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 5) != name4
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match31(long name1, long name2, long name3, int name4) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 33;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 30) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 22) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 14) != name3
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name4
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match32(long name1, long name2, long name3, int name4, byte c32) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 34;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 31) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 23) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 15) != name3
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name4
+                || bytes[offset - 3] != c32
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match33(long name1, long name2, long name3, long name4) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 35;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 32) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 24) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 16) != name3
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name4
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match34(long name1, long name2, long name3, long name4) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 36;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 33) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 25) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 17) != name3
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name4
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match35(long name1, long name2, long name3, long name4) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 37;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 34) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 26) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 18) != name3
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 10) != name4
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match36(long name1, long name2, long name3, long name4, byte c36) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 38;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 35) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 27) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 19) != name3
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 11) != name4
+                || bytes[offset - 3] != c36
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match37(long name1, long name2, long name3, long name4, int name5) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 39;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 36) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 28) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 20) != name3
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 12) != name4
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 4) != name5
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match38(long name1, long name2, long name3, long name4, int name5) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 40;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 37) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 29) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 21) != name3
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 13) != name4
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 5) != name5
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match39(long name1, long name2, long name3, long name4, int name5) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 41;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 38) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 30) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 22) != name3
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 14) != name4
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 6) != name5
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match40(long name1, long name2, long name3, long name4, int name5, byte c40) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 42;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 39) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 31) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 23) != name3
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 15) != name4
+                || UNSAFE.getInt(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 7) != name5
+                || bytes[offset - 3] != c40
+                || bytes[offset - 2] != '"'
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match41(long name1, long name2, long name3, long name4, long name5) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 43;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 40) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 32) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 24) != name3
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 16) != name4
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 8) != name5
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match42(long name1, long name2, long name3, long name4, long name5) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 44;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 41) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 33) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 25) != name3
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 17) != name4
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 9) != name5
+                || bytes[offset - 1] != ':'
+        ) {
+            return false;
+        }
+
+        byte c = bytes[offset];
+        while (c <= ' ' && ((1L << c) & SPACE) != 0) {
+            offset++;
+            c = bytes[offset];
+        }
+
+        this.offset = offset + 1;
+        this.ch = (char) c;
+
+        return true;
+    }
+
+    @Override
+    public final boolean nextIfName4Match43(long name1, long name2, long name3, long name4, long name5) {
+        byte[] bytes = this.bytes;
+        int offset = this.offset;
+        offset += 45;
+
+        if (offset >= end) {
+            return false;
+        }
+
+        if (UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 42) != name1
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 34) != name2
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 26) != name3
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 18) != name4
+                || UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + offset - 10) != name5
                 || bytes[offset - 2] != '"'
                 || bytes[offset - 1] != ':'
         ) {
