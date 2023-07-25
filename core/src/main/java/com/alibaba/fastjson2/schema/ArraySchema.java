@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.JSONObject;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Predicate;
 
 public final class ArraySchema
         extends JSONSchema {
@@ -496,5 +497,17 @@ public final class ArraySchema
             object.put("oneOf", oneOf);
         }
         return object;
+    }
+
+    public void accept(Predicate<JSONSchema> v) {
+        if (v.test(this)) {
+            if (itemSchema != null) {
+                itemSchema.accept(v);
+            }
+        }
+    }
+
+    public JSONSchema getItemSchema() {
+        return itemSchema;
     }
 }
