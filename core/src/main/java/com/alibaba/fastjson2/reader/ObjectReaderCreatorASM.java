@@ -1542,8 +1542,8 @@ public class ObjectReaderCreatorASM
                     for_inc_i_,
                     hashCode64Start
             );
-        } else if (fieldNameLengthMin >= 2 && fieldNameLengthMax <= 11) {
-            varIndex = genRead211(
+        } else if (fieldNameLengthMin >= 2 && fieldNameLengthMax <= 43) {
+            varIndex = genRead243(
                     context,
                     TYPE_OBJECT,
                     fieldReaderArray,
@@ -1833,7 +1833,7 @@ public class ObjectReaderCreatorASM
         mw.visitMaxs(5, 10);
     }
 
-    private int genRead211(
+    private int genRead243(
             ObjectWriteContext context,
             String TYPE_OBJECT,
             FieldReader[] fieldReaderArray,
@@ -1910,7 +1910,7 @@ public class ObjectReaderCreatorASM
             List<FieldReader> fieldReaders = name0Map.get(name0);
             for (int j = 0; j < fieldReaders.size(); j++) {
                 Label nextJ = null;
-                if (j > 0) {
+                if (j + 1 != fieldReaders.size()) {
                     nextJ = new Label();
                 }
 
@@ -1994,12 +1994,486 @@ public class ObjectReaderCreatorASM
                         break;
                     }
                     case 11: {
-                        byte[] bytes8 = new byte[8];
-                        System.arraycopy(fieldName, 3, bytes8, 0, 8);
-                        long name1 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
                         mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
                         mw.visitLdcInsn(name1);
                         mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match11", "(J)Z", false);
+                        break;
+                    }
+                    case 12: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(fieldName[11]);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match12", "(JB)Z", false);
+                        break;
+                    }
+                    case 13: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        byte[] bytes4 = new byte[4];
+                        bytes4[0] = fieldName[11];
+                        bytes4[1] = fieldName[12];
+                        bytes4[2] = '"';
+                        bytes4[3] = ':';
+                        int name2 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match13", "(JI)Z", false);
+                        break;
+                    }
+                    case 14: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        byte[] bytes4 = new byte[4];
+                        bytes4[0] = fieldName[11];
+                        bytes4[1] = fieldName[12];
+                        bytes4[2] = fieldName[13];
+                        bytes4[3] = '"';
+                        int name2 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match14", "(JI)Z", false);
+                        break;
+                    }
+                    case 15: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        int name2 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match15", "(JI)Z", false);
+                        break;
+                    }
+                    case 16: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        int name2 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(fieldName[15]);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match16", "(JIB)Z", false);
+                        break;
+                    }
+                    case 17: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+
+                        byte[] bytes8 = new byte[8];
+                        System.arraycopy(fieldName, 11, bytes8, 0, 6);
+                        bytes8[6] = '"';
+                        bytes8[7] = ':';
+                        long name2 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match17", "(JJ)Z", false);
+                        break;
+                    }
+                    case 18: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+
+                        byte[] bytes8 = new byte[8];
+                        System.arraycopy(fieldName, 11, bytes8, 0, 7);
+                        bytes8[7] = '"';
+                        long name2 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match18", "(JJ)Z", false);
+                        break;
+                    }
+                    case 19: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match19", "(JJ)Z", false);
+                        break;
+                    }
+                    case 20: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(fieldName[19]);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match20", "(JJB)Z", false);
+                        break;
+                    }
+                    case 21: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        byte[] bytes4 = new byte[4];
+                        bytes4[0] = fieldName[19];
+                        bytes4[1] = fieldName[20];
+                        bytes4[2] = '"';
+                        bytes4[3] = ':';
+                        int name3 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match21", "(JJI)Z", false);
+                        break;
+                    }
+                    case 22: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        byte[] bytes4 = new byte[4];
+                        bytes4[0] = fieldName[19];
+                        bytes4[1] = fieldName[20];
+                        bytes4[2] = fieldName[21];
+                        bytes4[3] = '"';
+                        int name3 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match22", "(JJI)Z", false);
+                        break;
+                    }
+                    case 23: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        int name3 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match23", "(JJI)Z", false);
+                        break;
+                    }
+                    case 24: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        int name3 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(fieldName[23]);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match24", "(JJIB)Z", false);
+                        break;
+                    }
+                    case 25: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+
+                        byte[] bytes8 = new byte[8];
+                        System.arraycopy(fieldName, 19, bytes8, 0, 6);
+                        bytes8[6] = '"';
+                        bytes8[7] = ':';
+                        long name3 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match25", "(JJJ)Z", false);
+                        break;
+                    }
+                    case 26: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+
+                        byte[] bytes8 = new byte[8];
+                        System.arraycopy(fieldName, 19, bytes8, 0, 7);
+                        bytes8[7] = '"';
+                        long name3 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match26", "(JJJ)Z", false);
+                        break;
+                    }
+                    case 27: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match27", "(JJJ)Z", false);
+                        break;
+                    }
+                    case 28: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(fieldName[27]);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match28", "(JJJB)Z", false);
+                        break;
+                    }
+                    case 29: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        byte[] bytes4 = new byte[4];
+                        bytes4[0] = fieldName[27];
+                        bytes4[1] = fieldName[28];
+                        bytes4[2] = '"';
+                        bytes4[3] = ':';
+                        int name4 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(name4);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match29", "(JJJI)Z", false);
+                        break;
+                    }
+                    case 30: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        byte[] bytes4 = new byte[4];
+                        bytes4[0] = fieldName[27];
+                        bytes4[1] = fieldName[28];
+                        bytes4[2] = fieldName[29];
+                        bytes4[3] = '"';
+                        int name4 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(name4);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match30", "(JJJI)Z", false);
+                        break;
+                    }
+                    case 31: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        int name4 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(name4);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match31", "(JJJI)Z", false);
+                        break;
+                    }
+                    case 32: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        int name4 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(name4);
+                        mw.visitLdcInsn(fieldName[31]);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match32", "(JJJIB)Z", false);
+                        break;
+                    }
+                    case 33: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        byte[] bytes8 = new byte[8];
+                        System.arraycopy(fieldName, 27, bytes8, 0, 6);
+                        bytes8[6] = '"';
+                        bytes8[7] = ':';
+                        long name4 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(name4);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match33", "(JJJJ)Z", false);
+                        break;
+                    }
+                    case 34: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        byte[] bytes8 = new byte[8];
+                        System.arraycopy(fieldName, 27, bytes8, 0, 7);
+                        bytes8[7] = '"';
+                        long name4 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(name4);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match34", "(JJJJ)Z", false);
+                        break;
+                    }
+                    case 35: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(name4);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match35", "(JJJJ)Z", false);
+                        break;
+                    }
+                    case 36: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(name4);
+                        mw.visitLdcInsn(fieldName[35]);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match36", "(JJJJB)Z", false);
+                        break;
+                    }
+                    case 37: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        byte[] bytes4 = new byte[4];
+                        bytes4[0] = fieldName[35];
+                        bytes4[1] = fieldName[36];
+                        bytes4[2] = '"';
+                        bytes4[3] = ':';
+                        int name5 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(name4);
+                        mw.visitLdcInsn(name5);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match37", "(JJJJI)Z", false);
+                        break;
+                    }
+                    case 38: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        byte[] bytes4 = new byte[4];
+                        bytes4[0] = fieldName[35];
+                        bytes4[1] = fieldName[36];
+                        bytes4[2] = fieldName[37];
+                        bytes4[3] = '"';
+                        int name5 = UNSAFE.getInt(bytes4, ARRAY_BYTE_BASE_OFFSET);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(name4);
+                        mw.visitLdcInsn(name5);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match38", "(JJJJI)Z", false);
+                        break;
+                    }
+                    case 39: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        int name5 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 35);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(name4);
+                        mw.visitLdcInsn(name5);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match39", "(JJJJI)Z", false);
+                        break;
+                    }
+                    case 40: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        int name5 = UNSAFE.getInt(fieldName, ARRAY_BYTE_BASE_OFFSET + 35);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(name4);
+                        mw.visitLdcInsn(name5);
+                        mw.visitLdcInsn(fieldName[39]);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match40", "(JJJJIB)Z", false);
+                        break;
+                    }
+                    case 41: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+
+                        byte[] bytes8 = new byte[8];
+                        System.arraycopy(fieldName, 35, bytes8, 0, 6);
+                        bytes8[6] = '"';
+                        bytes8[7] = ':';
+                        long name5 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(name4);
+                        mw.visitLdcInsn(name5);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match41", "(JJJJJ)Z", false);
+                        break;
+                    }
+                    case 42: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+
+                        byte[] bytes8 = new byte[8];
+                        System.arraycopy(fieldName, 35, bytes8, 0, 7);
+                        bytes8[7] = '"';
+                        long name5 = UNSAFE.getLong(bytes8, ARRAY_BYTE_BASE_OFFSET);
+
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(name4);
+                        mw.visitLdcInsn(name5);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match42", "(JJJJJ)Z", false);
+                        break;
+                    }
+                    case 43: {
+                        long name1 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 3);
+                        long name2 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 11);
+                        long name3 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 19);
+                        long name4 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 27);
+                        long name5 = UNSAFE.getLong(fieldName, ARRAY_BYTE_BASE_OFFSET + 35);
+                        mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+                        mw.visitLdcInsn(name1);
+                        mw.visitLdcInsn(name2);
+                        mw.visitLdcInsn(name3);
+                        mw.visitLdcInsn(name4);
+                        mw.visitLdcInsn(name5);
+                        mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_READER, "nextIfName4Match43", "(JJJJJ)Z", false);
                         break;
                     }
                     default:
@@ -2026,11 +2500,11 @@ public class ObjectReaderCreatorASM
                         TYPE_OBJECT
                 );
 
+                mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_);
+
                 if (nextJ != null) {
                     mw.visitLabel(nextJ);
                 }
-
-                mw.visitJumpInsn(Opcodes.GOTO, for_inc_i_);
             }
 
             mw.visitJumpInsn(Opcodes.GOTO, dflt);
