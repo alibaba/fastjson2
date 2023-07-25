@@ -7,7 +7,7 @@ import java.util.Set;
 
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 
-final class EnumSchema
+public final class EnumSchema
         extends JSONSchema {
     final Set<Object> items;
 

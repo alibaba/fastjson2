@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static com.alibaba.fastjson2.util.TypeUtils.*;
 
-final class IntegerSchema
+public final class IntegerSchema
         extends JSONSchema {
     final boolean typed;
     final long minimum;

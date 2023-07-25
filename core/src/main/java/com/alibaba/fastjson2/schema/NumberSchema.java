@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-final class NumberSchema
+public final class NumberSchema
         extends JSONSchema {
     final BigDecimal minimum;
     final long minimumLongValue;

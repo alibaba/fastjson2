@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-final class StringSchema
+public final class StringSchema
         extends JSONSchema {
     static final Pattern EMAIL_PATTERN = Pattern.compile("^\\s*?(.+)@(.+?)\\s*$");
     static final Pattern IP_DOMAIN_PATTERN = Pattern.compile("^\\[(.*)\\]$");

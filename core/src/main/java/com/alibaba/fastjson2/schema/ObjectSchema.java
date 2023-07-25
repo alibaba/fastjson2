@@ -10,6 +10,7 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import com.alibaba.fastjson2.writer.ObjectWriterAdapter;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public final class ObjectSchema
@@ -651,5 +652,11 @@ public final class ObjectSchema
         }
 
         return object;
+    }
+
+    public void accept(Predicate<JSONSchema> v) {
+        if (v.test(this)) {
+            this.properties.values().forEach(v::test);
+        }
     }
 }

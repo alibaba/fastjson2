@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 @JSONType(serializer = JSONSchema.JSONSchemaWriter.class)
 public abstract class JSONSchema {
@@ -130,7 +131,7 @@ public abstract class JSONSchema {
         JSONObject object = (JSONObject) not;
 
         if (object == null || object.isEmpty()) {
-            return new Not(null, new Type[] {Type.Any}, null);
+            return new Not(null, new Type[]{Type.Any}, null);
         }
 
         if (object.size() == 1) {
@@ -183,16 +184,59 @@ public abstract class JSONSchema {
             return null;
         }
 
+        if (value instanceof Collection) {
+            Collection collection = (Collection) value;
+            if (collection.isEmpty()) {
+                return new ArraySchema(JSONObject.of("type", "array"), root);
+            }
+
+            Object firstItem = null;
+            Class firstItemClass = null;
+            boolean sameClass = true;
+            for (Object item : collection) {
+                if (item != null) {
+                    if (firstItem == null) {
+                        firstItem = item;
+                    }
+
+                    if (firstItemClass == null) {
+                        firstItemClass = item.getClass();
+                    } else if (firstItemClass != item.getClass()) {
+                        sameClass = false;
+                    }
+                }
+            }
+
+            if (sameClass) {
+                JSONSchema itemSchema;
+                if (Map.class.isAssignableFrom(firstItemClass)) {
+                    itemSchema = ofValue(firstItem, root);
+                } else {
+                    itemSchema = of(firstItemClass, root);
+                }
+                ArraySchema schema = new ArraySchema(JSONObject.of("type", "array"), root);
+                schema.itemSchema = itemSchema;
+                return schema;
+            }
+        }
+
         if (value instanceof Map) {
             JSONObject object = JSONObject.of("type", "object");
             ObjectSchema schema = new ObjectSchema(object, root);
 
             Map map = (Map) value;
-            for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
+            for (Iterator it = map.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry entry = (Map.Entry) it.next();
                 Object entryKey = entry.getKey();
+                Object entryValue = entry.getValue();
+
                 if (entryKey instanceof String) {
-                    JSONSchema valueSchema = ofValue(entry.getValue(), root == null ? schema : root);
+                    JSONSchema valueSchema;
+                    if (entryValue == null) {
+                        valueSchema = new StringSchema(JSONObject.of());
+                    } else {
+                        valueSchema = ofValue(entryValue, root == null ? schema : root);
+                    }
                     schema.properties.put((String) entryKey, valueSchema);
                 }
             }
@@ -881,5 +925,9 @@ public abstract class JSONSchema {
             JSONObject jsonObject = ((JSONSchema) object).toJSONObject();
             jsonWriter.write(jsonObject);
         }
+    }
+
+    public void accept(Predicate<JSONSchema> v) {
+        v.test(this);
     }
 }

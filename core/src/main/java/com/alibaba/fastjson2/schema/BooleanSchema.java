@@ -2,7 +2,7 @@ package com.alibaba.fastjson2.schema;
 
 import com.alibaba.fastjson2.JSONObject;
 
-final class BooleanSchema
+public final class BooleanSchema
         extends JSONSchema {
     BooleanSchema(JSONObject input) {
         super(input);

@@ -102,6 +102,6 @@ public class FromClass {
     public void fromValueList() {
         List list = new ArrayList();
         list.add("xxx");
-        assertEquals("{\"type\":\"array\"}", JSONSchema.ofValue(list).toString());
+        assertEquals("{\"type\":\"array\",\"items\":{\"type\":\"string\"}}", JSONSchema.ofValue(list).toString());
     }
 }
