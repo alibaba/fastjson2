@@ -91,8 +91,8 @@ public class SimpleBeanTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2_test();
+        fastjson2_test();
 //        jackson_test();
-        wastjson_test();
+//        wastjson_test();
     }
 }

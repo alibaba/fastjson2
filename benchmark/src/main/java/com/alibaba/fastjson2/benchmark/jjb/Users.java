@@ -1,7 +1,9 @@
 package com.alibaba.fastjson2.benchmark.jjb;
 
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.dslplatform.json.CompiledJson;
 import com.dslplatform.json.JsonAttribute;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -22,6 +24,8 @@ public class Users {
         private String id;
         private int index;
         private String guid;
+        @JsonProperty("isActive")
+        @JSONField(name = "isActive")
         private boolean isActive;
         private String balance;
         private String picture;

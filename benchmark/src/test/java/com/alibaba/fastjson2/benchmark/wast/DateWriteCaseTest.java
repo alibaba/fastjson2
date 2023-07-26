@@ -37,7 +37,7 @@ public class DateWriteCaseTest {
     }
 
     public static void main(String[] args) throws Exception {
-//        fastjson2();
-        wastjson();
+        fastjson2();
+//        wastjson();
     }
 }
