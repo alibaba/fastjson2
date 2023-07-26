@@ -1828,12 +1828,12 @@ public class ObjectWriterCreatorASM
 
             int REF_DETECT = mwc.var("REF_DETECT");
 
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
             if (fieldClass == Object.class) {
+                mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
                 mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
                 mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isRefDetect", "(Ljava/lang/Object;)Z", false);
             } else {
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isRefDetect", "()Z", false);
+                mwc.genIsEnabled(JSONWriter.Feature.ReferenceDetection.mask, null);
             }
             mw.visitInsn(Opcodes.DUP);
             mw.visitVarInsn(Opcodes.ISTORE, REF_DETECT);
@@ -2520,12 +2520,12 @@ public class ObjectWriterCreatorASM
 
             int REF_DETECT = mwc.var("REF_DETECT");
 
-            mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
             if (fieldClass == Object.class) {
+                mw.visitVarInsn(Opcodes.ALOAD, JSON_WRITER);
                 mw.visitVarInsn(Opcodes.ALOAD, FIELD_VALUE);
                 mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isRefDetect", "(Ljava/lang/Object;)Z", false);
             } else {
-                mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_JSON_WRITER, "isRefDetect", "()Z", false);
+                mwc.genIsEnabled(JSONWriter.Feature.ReferenceDetection.mask, null);
             }
             mw.visitInsn(Opcodes.DUP);
             mw.visitVarInsn(Opcodes.ISTORE, REF_DETECT);
@@ -3714,7 +3714,9 @@ public class ObjectWriterCreatorASM
             mw.visitInsn(Opcodes.LAND);
             mw.visitInsn(Opcodes.LCONST_0);
             mw.visitInsn(Opcodes.LCMP);
-            mw.visitJumpInsn(Opcodes.IFEQ, elseLabel);
+            if (elseLabel != null) {
+                mw.visitJumpInsn(Opcodes.IFEQ, elseLabel);
+            }
         }
 
         void genIsDisabled(long features, Label elseLabel) {
