@@ -1850,18 +1850,6 @@ public class ObjectReaderCreatorASM
             Label for_inc_i_,
             Label hashCode64Start
     ) {
-        Integer RAW_INT = variants.get("RAW_INT");
-        if (RAW_INT == null) {
-            variants.put("RAW_INT", RAW_INT = varIndex);
-            varIndex++;
-        }
-
-        Integer RAW_INT_1 = variants.get("RAW_INT_1");
-        if (RAW_INT_1 == null) {
-            variants.put("RAW_INT_1", RAW_INT_1 = varIndex);
-            varIndex++;
-        }
-
         IdentityHashMap<FieldReader, Integer> readerIndexMap = new IdentityHashMap<>();
         Map<Integer, List<FieldReader>> name0Map = new TreeMap<>();
         for (int i = 0; i < fieldReaderArray.length; ++i) {
