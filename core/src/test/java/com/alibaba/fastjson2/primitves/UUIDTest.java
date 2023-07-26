@@ -61,9 +61,9 @@ public class UUIDTest {
 
     @Test
     public void test_utf8() {
-        for (UUID dateTime : values) {
+        for (UUID uuid : values) {
             UUID1 vo = new UUID1();
-            vo.setId(dateTime);
+            vo.setId(uuid);
             byte[] utf8Bytes = JSON.toJSONBytes(vo);
 
             UUID1 v1 = JSON.parseObject(utf8Bytes, UUID1.class);
@@ -72,10 +72,18 @@ public class UUIDTest {
     }
 
     @Test
+    public void test_utf8_1() {
+        String str = "d9ac58be-c854-496b-b550-56f0b773d241";
+        UUID uuid = UUID.fromString(str);
+        byte[] utf8Bytes = JSON.toJSONBytes(uuid);
+        assertEquals("\"d9ac58be-c854-496b-b550-56f0b773d241\"", new String(utf8Bytes));
+    }
+
+    @Test
     public void test_str() {
-        for (UUID dateTime : values) {
+        for (UUID uuid : values) {
             UUID1 vo = new UUID1();
-            vo.setId(dateTime);
+            vo.setId(uuid);
             String str = JSON.toJSONString(vo);
 
             UUID1 v1 = JSON.parseObject(str, UUID1.class);
