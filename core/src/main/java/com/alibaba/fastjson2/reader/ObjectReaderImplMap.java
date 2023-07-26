@@ -156,6 +156,20 @@ public final class ObjectReaderImplMap
                 return new ObjectReaderImplMap(instanceType, features, Collections.EMPTY_MAP);
             }
             default:
+                Type genericSuperclass = instanceType.getGenericSuperclass();
+                if (mapType != JSONObject.class && genericSuperclass instanceof ParameterizedType) {
+                    ParameterizedType parameterizedType = (ParameterizedType) genericSuperclass;
+                    Type[] arguments = parameterizedType.getActualTypeArguments();
+                    if (arguments.length == 2) {
+                        Type arg0 = arguments[0];
+                        Type arg1 = arguments[1];
+                        boolean typed = !(arg0 instanceof TypeVariable || arg1 instanceof TypeVariable);
+                        if (typed) {
+                            return new ObjectReaderImplMapTyped(mapType, instanceType, arg0, arg1, 0, builder);
+                        }
+                    }
+                }
+
                 if (instanceType == JSONObject1O.class) {
                     builder = createObjectSupplier(CLASS_JSON_OBJECT_1x);
                     instanceType = LinkedHashMap.class;
