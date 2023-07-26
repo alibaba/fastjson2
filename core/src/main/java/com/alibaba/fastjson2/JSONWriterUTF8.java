@@ -21,6 +21,22 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
 class JSONWriterUTF8
         extends JSONWriter {
     static final byte[] REF_PREF = "{\"$ref\":".getBytes(StandardCharsets.ISO_8859_1);
+    static final short[] HEX256;
+
+    static {
+        short[] digits = new short[16 * 16];
+
+        for (int i = 0; i < 16; i++) {
+            short hi = (short) (i < 10 ? i + '0' : i - 10 + 'a');
+
+            for (int j = 0; j < 16; j++) {
+                short lo = (short) (j < 10 ? j + '0' : j - 10 + 'a');
+                digits[(i << 4) + j] = BIG_ENDIAN ? (short) ((hi << 8) | lo) : (short) (hi | (lo << 8));
+            }
+        }
+
+        HEX256 = digits;
+    }
 
     final CacheItem cacheItem;
     protected byte[] bytes;
@@ -1407,6 +1423,30 @@ class JSONWriterUTF8
         this.off = off + 1;
     }
 
+    /**
+     * Return a big-endian packed integer for the 4 ASCII bytes for an input unsigned 2-byte integer.
+     * {@code b0} is the most significant byte and {@code b1} is the least significant byte.
+     * The integer is passed byte-wise to allow reordering of execution.
+     */
+    static int packDigits(int b0, int b1) {
+        int v = HEX256[b0 & 0xff] | (HEX256[b1 & 0xff] << 16);
+        return BIG_ENDIAN ? Integer.reverseBytes(v) : v;
+    }
+
+    /**
+     * Return a big-endian packed long for the 8 ASCII bytes for an input unsigned 4-byte integer.
+     * {@code b0} is the most significant byte and {@code b3} is the least significant byte.
+     * The integer is passed byte-wise to allow reordering of execution.
+     */
+    static long packDigits(int b0, int b1, int b2, int b3) {
+        short[] digits = HEX256;
+        long v = (digits[b0 & 0xff]
+                | (((long) digits[b1 & 0xff]) << 16)
+                | (((long) digits[b2 & 0xff]) << 32))
+                | (((long) digits[b3 & 0xff]) << 48);
+        return BIG_ENDIAN ? Long.reverseBytes(v) : v;
+    }
+
     @Override
     public final void writeUUID(UUID value) {
         if (value == null) {
@@ -1414,72 +1454,48 @@ class JSONWriterUTF8
             return;
         }
 
-        long hi = value.getMostSignificantBits();
-        long lo = value.getLeastSignificantBits();
+        long msb = value.getMostSignificantBits();
+        long lsb = value.getLeastSignificantBits();
 
         int minCapacity = off + 38;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
 
-        final char[] lookup = JSONFactory.UUID_LOOKUP;
-        final byte[] bytes = this.bytes;
+        final byte[] buf = this.bytes;
         final int off = this.off;
-        bytes[off] = '"';
-        int i = lookup[((int) (hi >> 56)) & 255];
-        int i1 = lookup[((int) (hi >> 48)) & 255];
-        int i2 = lookup[((int) (hi >> 40)) & 255];
-        int i3 = lookup[((int) (hi >> 32)) & 255];
-        int i4 = lookup[(((int) hi) >> 24) & 255];
-        int i5 = lookup[(((int) hi) >> 16) & 255];
-        int i6 = lookup[(((int) hi) >> 8) & 255];
-        int i7 = lookup[((int) hi) & 255];
-        int i8 = lookup[(((int) (lo >> 56))) & 255];
-        int i9 = lookup[(((int) (lo >> 48))) & 255];
-        int i10 = lookup[(((int) (lo >> 40))) & 255];
-        int i11 = lookup[((int) (lo >> 32)) & 255];
-        int i12 = lookup[(((int) lo) >> 24) & 255];
-        int i13 = lookup[(((int) lo) >> 16) & 255];
-        int i14 = lookup[(((int) lo) >> 8) & 255];
-        int i15 = lookup[((int) lo) & 255];
+        buf[off] = '"';
 
-        bytes[off + 1] = (byte) (i >> 8);
-        bytes[off + 2] = (byte) i;
-        bytes[off + 3] = (byte) (i1 >> 8);
-        bytes[off + 4] = (byte) i1;
-        bytes[off + 5] = (byte) (i2 >> 8);
-        bytes[off + 6] = (byte) i2;
-        bytes[off + 7] = (byte) (i3 >> 8);
-        bytes[off + 8] = (byte) i3;
-        bytes[off + 9] = '-';
-        bytes[off + 10] = (byte) (i4 >> 8);
-        bytes[off + 11] = (byte) i4;
-        bytes[off + 12] = (byte) (i5 >> 8);
-        bytes[off + 13] = (byte) i5;
-        bytes[off + 14] = '-';
-        bytes[off + 15] = (byte) (i6 >> 8);
-        bytes[off + 16] = (byte) i6;
-        bytes[off + 17] = (byte) (i7 >> 8);
-        bytes[off + 18] = (byte) i7;
-        bytes[off + 19] = '-';
-        bytes[off + 20] = (byte) (i8 >> 8);
-        bytes[off + 21] = (byte) i8;
-        bytes[off + 22] = (byte) (i9 >> 8);
-        bytes[off + 23] = (byte) i9;
-        bytes[off + 24] = '-';
-        bytes[off + 25] = (byte) (i10 >> 8);
-        bytes[off + 26] = (byte) i10;
-        bytes[off + 27] = (byte) (i11 >> 8);
-        bytes[off + 28] = (byte) i11;
-        bytes[off + 29] = (byte) (i12 >> 8);
-        bytes[off + 30] = (byte) i12;
-        bytes[off + 31] = (byte) (i13 >> 8);
-        bytes[off + 32] = (byte) i13;
-        bytes[off + 33] = (byte) (i14 >> 8);
-        bytes[off + 34] = (byte) i14;
-        bytes[off + 35] = (byte) (i15 >> 8);
-        bytes[off + 36] = (byte) i15;
-        bytes[off + 37] = '"';
+        UNSAFE.putLong(
+                buf,
+                ARRAY_BYTE_BASE_OFFSET + off + 1,
+                packDigits((int) (msb >> 56), (int) (msb >> 48), (int) (msb >> 40), (int) (msb >> 32))
+        );
+        buf[off + 9] = '-';
+        UNSAFE.putLong(
+                buf,
+                ARRAY_BYTE_BASE_OFFSET + off + 10,
+                packDigits(((int) msb) >> 24, ((int) msb) >> 16));
+        buf[off + 14] = '-';
+        UNSAFE.putLong(
+                buf,
+                ARRAY_BYTE_BASE_OFFSET + off + 15,
+                packDigits(((int) msb) >> 8, (int) msb));
+        buf[off + 19] = '-';
+        UNSAFE.putLong(
+                buf,
+                ARRAY_BYTE_BASE_OFFSET + off + 20,
+                packDigits((int) (lsb >> 56), (int) (lsb >> 48)));
+        buf[off + 24] = '-';
+        UNSAFE.putLong(
+                buf,
+                ARRAY_BYTE_BASE_OFFSET + off + 25,
+                packDigits(((int) (lsb >> 40)), (int) (lsb >> 32), ((int) lsb) >> 24, ((int) lsb) >> 16));
+        UNSAFE.putLong(
+                buf,
+                ARRAY_BYTE_BASE_OFFSET + off + 33,
+                packDigits(((int) lsb) >> 8, (int) lsb));
+        buf[off + 37] = '"';
         this.off += 38;
     }
 
