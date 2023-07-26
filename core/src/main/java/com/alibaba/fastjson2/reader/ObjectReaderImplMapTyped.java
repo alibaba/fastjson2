@@ -7,10 +7,7 @@ import com.alibaba.fastjson2.util.TypeUtils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -261,6 +258,9 @@ class ObjectReaderImplMapTyped
         }
 
         if (builder != null) {
+            if (builder == ObjectReaderImplMap.ENUM_MAP_BUILDER && object.isEmpty()) {
+                return new EnumMap((Class) keyType);
+            }
             return builder.apply(object);
         }
 

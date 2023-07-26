@@ -18,6 +18,7 @@ import static com.alibaba.fastjson2.util.TypeUtils.CLASS_JSON_OBJECT_1x;
 
 public final class ObjectReaderImplMap
         implements ObjectReader {
+    static final Function ENUM_MAP_BUILDER = e -> new EnumMap((Map) e);
     static Function UNSAFE_OBJECT_CREATOR;
     static final Class CLASS_SINGLETON_MAP = Collections.singletonMap(1, 1).getClass();
     static final Class CLASS_EMPTY_MAP = Collections.EMPTY_MAP.getClass();
@@ -171,7 +172,7 @@ public final class ObjectReaderImplMap
                     };
                 } else if (mapType == EnumMap.class) {
                     instanceType = LinkedHashMap.class;
-                    builder = e -> new EnumMap((Map) e);
+                    builder = ENUM_MAP_BUILDER;
                 }
         }
 
