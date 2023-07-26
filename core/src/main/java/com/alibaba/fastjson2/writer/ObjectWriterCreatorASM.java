@@ -1874,6 +1874,11 @@ public class ObjectWriterCreatorASM
             mw.visitJumpInsn(Opcodes.GOTO, notNull_);
 
             mw.visitLabel(endDetect_);
+
+            if ("this$0".equals(fieldName) || "this$1".equals(fieldName) || "this$2".equals(fieldName)) {
+                mw.visitVarInsn(Opcodes.ILOAD, REF_DETECT);
+                mw.visitJumpInsn(Opcodes.IFEQ, notNull_);
+            }
         }
 
         if (Object[].class.isAssignableFrom(fieldClass)) {
@@ -2561,6 +2566,11 @@ public class ObjectWriterCreatorASM
             mw.visitJumpInsn(Opcodes.GOTO, endIfNull_);
 
             mw.visitLabel(endDetect_);
+
+            if ("this$0".equals(fieldName) || "this$1".equals(fieldName) || "this$2".equals(fieldName)) {
+                mw.visitVarInsn(Opcodes.ILOAD, REF_DETECT);
+                mw.visitJumpInsn(Opcodes.IFEQ, endIfNull_);
+            }
         }
 
         gwFieldName(mwc, fieldWriter, i);
