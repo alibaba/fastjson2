@@ -211,7 +211,7 @@ abstract class FieldWriterList<T>
                 itemObjectWriter = previousObjectWriter;
                 itemRefDetect = previousItemRefDetect;
             } else {
-                itemRefDetect = jsonWriter.isRefDetect();
+                itemRefDetect = (features & ReferenceDetection.mask) != 0;
                 itemObjectWriter = getItemWriter(jsonWriter, itemClass);
                 previousClass = itemClass;
                 previousObjectWriter = itemObjectWriter;

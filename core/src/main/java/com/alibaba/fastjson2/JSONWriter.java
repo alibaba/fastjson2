@@ -254,10 +254,6 @@ public abstract class JSONWriter
                 && !ObjectWriterProvider.isNotReferenceDetect(object.getClass());
     }
 
-    public final void vv() {
-        System.out.println("");
-    }
-
     public final boolean containsReference(Object value) {
         return refs != null && refs.containsKey(value);
     }
