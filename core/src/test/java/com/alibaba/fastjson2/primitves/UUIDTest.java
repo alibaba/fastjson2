@@ -92,6 +92,14 @@ public class UUIDTest {
     }
 
     @Test
+    public void test_str_1() {
+        String str = "d9ac58be-c854-496b-b550-56f0b773d241";
+        UUID uuid = UUID.fromString(str);
+        String json = JSON.toJSONString(uuid);
+        assertEquals("\"d9ac58be-c854-496b-b550-56f0b773d241\"", json);
+    }
+
+    @Test
     public void test_ascii() {
         for (UUID dateTime : values) {
             UUID1 vo = new UUID1();

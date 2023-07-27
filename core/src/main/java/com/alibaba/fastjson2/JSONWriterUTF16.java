@@ -22,6 +22,27 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
 class JSONWriterUTF16
         extends JSONWriter {
     static final char[] REF_PREF = "{\"$ref\":".toCharArray();
+    static final int[] HEX256;
+    static {
+        int[] digits = new int[16 * 16];
+
+        for (int i = 0; i < 16; i++) {
+            int hi = (short) (i < 10 ? i + '0' : i - 10 + 'a');
+
+            for (int j = 0; j < 16; j++) {
+                int lo = (short) (j < 10 ? j + '0' : j - 10 + 'a');
+                digits[(i << 4) + j] = (hi | (lo << 16));
+            }
+        }
+
+        if (BIG_ENDIAN) {
+            for (int i = 0; i < digits.length; i++) {
+                digits[i] = Integer.reverseBytes(digits[i] << 8);
+            }
+        }
+
+        HEX256 = digits;
+    }
 
     protected char[] chars;
     final CacheItem cacheItem;
@@ -1290,6 +1311,15 @@ class JSONWriterUTF16
         this.off = off;
     }
 
+    static void putLong(char[] buf, int off, int b0, int b1) {
+        long v = HEX256[b0 & 0xff] | (((long) HEX256[b1 & 0xff]) << 32);
+        UNSAFE.putLong(
+                buf,
+                ARRAY_BYTE_BASE_OFFSET + (off << 1),
+                BIG_ENDIAN ? Long.reverseBytes(v << 8) : v
+        );
+    }
+
     @Override
     public final void writeUUID(UUID value) {
         if (value == null) {
@@ -1297,72 +1327,30 @@ class JSONWriterUTF16
             return;
         }
 
-        long hi = value.getMostSignificantBits();
-        long lo = value.getLeastSignificantBits();
+        long msb = value.getMostSignificantBits();
+        long lsb = value.getLeastSignificantBits();
 
         int minCapacity = off + 38;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
 
-        final char[] lookup = JSONFactory.UUID_LOOKUP;
-        final char[] bytes = this.chars;
+        final char[] buf = this.chars;
         final int off = this.off;
-        bytes[off] = '"';
-        int i = lookup[((int) (hi >> 56)) & 255];
-        int i1 = lookup[((int) (hi >> 48)) & 255];
-        int i2 = lookup[((int) (hi >> 40)) & 255];
-        int i3 = lookup[((int) (hi >> 32)) & 255];
-        int i4 = lookup[(((int) hi) >> 24) & 255];
-        int i5 = lookup[(((int) hi) >> 16) & 255];
-        int i6 = lookup[(((int) hi) >> 8) & 255];
-        int i7 = lookup[((int) hi) & 255];
-        int i8 = lookup[(((int) (lo >> 56))) & 255];
-        int i9 = lookup[(((int) (lo >> 48))) & 255];
-        int i10 = lookup[(((int) (lo >> 40))) & 255];
-        int i11 = lookup[((int) (lo >> 32)) & 255];
-        int i12 = lookup[(((int) lo) >> 24) & 255];
-        int i13 = lookup[(((int) lo) >> 16) & 255];
-        int i14 = lookup[(((int) lo) >> 8) & 255];
-        int i15 = lookup[((int) lo) & 255];
-
-        bytes[off + 1] = (char) (byte) (i >> 8);
-        bytes[off + 2] = (char) (byte) i;
-        bytes[off + 3] = (char) (byte) (i1 >> 8);
-        bytes[off + 4] = (char) (byte) i1;
-        bytes[off + 5] = (char) (byte) (i2 >> 8);
-        bytes[off + 6] = (char) (byte) i2;
-        bytes[off + 7] = (char) (byte) (i3 >> 8);
-        bytes[off + 8] = (char) (byte) i3;
-        bytes[off + 9] = '-';
-        bytes[off + 10] = (char) (byte) (i4 >> 8);
-        bytes[off + 11] = (char) (byte) i4;
-        bytes[off + 12] = (char) (byte) (i5 >> 8);
-        bytes[off + 13] = (char) (byte) i5;
-        bytes[off + 14] = '-';
-        bytes[off + 15] = (char) (byte) (i6 >> 8);
-        bytes[off + 16] = (char) (byte) i6;
-        bytes[off + 17] = (char) (byte) (i7 >> 8);
-        bytes[off + 18] = (char) (byte) i7;
-        bytes[off + 19] = '-';
-        bytes[off + 20] = (char) (byte) (i8 >> 8);
-        bytes[off + 21] = (char) (byte) i8;
-        bytes[off + 22] = (char) (byte) (i9 >> 8);
-        bytes[off + 23] = (char) (byte) i9;
-        bytes[off + 24] = '-';
-        bytes[off + 25] = (char) (byte) (i10 >> 8);
-        bytes[off + 26] = (char) (byte) i10;
-        bytes[off + 27] = (char) (byte) (i11 >> 8);
-        bytes[off + 28] = (char) (byte) i11;
-        bytes[off + 29] = (char) (byte) (i12 >> 8);
-        bytes[off + 30] = (char) (byte) i12;
-        bytes[off + 31] = (char) (byte) (i13 >> 8);
-        bytes[off + 32] = (char) (byte) i13;
-        bytes[off + 33] = (char) (byte) (i14 >> 8);
-        bytes[off + 34] = (char) (byte) i14;
-        bytes[off + 35] = (char) (byte) (i15 >> 8);
-        bytes[off + 36] = (char) (byte) i15;
-        bytes[off + 37] = '"';
+        buf[off] = '"';
+        putLong(buf, off + 1, (int) (msb >> 56), (int) (msb >> 48));
+        putLong(buf, off + 5, (int) (msb >> 40), (int) (msb >> 32));
+        buf[off + 9] = '-';
+        putLong(buf, off + 10, ((int) msb) >> 24, ((int) msb) >> 16);
+        buf[off + 14] = '-';
+        putLong(buf, off + 15, ((int) msb) >> 8, (int) msb);
+        buf[off + 19] = '-';
+        putLong(buf, off + 20, (int) (lsb >> 56), (int) (lsb >> 48));
+        buf[off + 24] = '-';
+        putLong(buf, off + 25, ((int) (lsb >> 40)), (int) (lsb >> 32));
+        putLong(buf, off + 29, ((int) lsb) >> 24, ((int) lsb) >> 16);
+        putLong(buf, off + 33, ((int) lsb) >> 8, (int) lsb);
+        buf[off + 37] = '"';
         this.off += 38;
     }
 
