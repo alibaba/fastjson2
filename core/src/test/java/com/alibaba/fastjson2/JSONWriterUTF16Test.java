@@ -11,6 +11,7 @@ import java.util.Date;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.NullAsDefaultValue;
 import static com.alibaba.fastjson2.JSONWriter.Feature.PrettyFormat;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -534,5 +535,45 @@ public class JSONWriterUTF16Test {
         String str = new String(bytes, 0, bytes.length, StandardCharsets.ISO_8859_1);
         Object parse = JSON.parse(json);
         assertEquals(str, parse);
+    }
+
+    @Test
+    public void testHex256() {
+        if (BIG_ENDIAN) {
+            return;
+        }
+
+        char[] buf = new char[4];
+        int b0 = 0xab, b1 = 0xcd;
+        int[] hex256 = JSONWriterUTF16.HEX256;
+        long v = hex256[b0 & 0xff] | (((long) hex256[b1 & 0xff]) << 32);
+        UNSAFE.putLong(
+                buf,
+                ARRAY_CHAR_BASE_OFFSET,
+                v
+        );
+        assertEquals("abcd", new String(buf));
+    }
+
+    @Test
+    public void testLHex256BigEndian() {
+        if (!BIG_ENDIAN) {
+            return;
+        }
+
+        char[] buf = new char[4];
+        int b0 = 0xab, b1 = 0xcd;
+        int[] hex256 = JSONWriterUTF16.HEX256.clone();
+        for (int i = 0; i < hex256.length; i++) {
+            hex256[i] = Integer.reverseBytes(hex256[i] << 8);
+        }
+        long v = hex256[b0 & 0xff]
+                | (((long) hex256[b1 & 0xff]) << 32);
+        UNSAFE.putLong(
+                buf,
+                ARRAY_CHAR_BASE_OFFSET,
+                Long.reverseBytes(v << 8)
+        );
+        assertEquals("abcd", new String(buf));
     }
 }
