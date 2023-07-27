@@ -1132,11 +1132,28 @@ public class ObjectReaderProvider
             Supplier<T> supplier,
             FieldConsumer<T> c
     ) {
+        return createObjectReader(names, types, null, supplier, c);
+    }
+
+    public <T> ObjectReader<T> createObjectReader(
+            String[] names,
+            Type[] types,
+            long[] features,
+            Supplier<T> supplier,
+            FieldConsumer<T> c
+    ) {
         FieldReader[] fieldReaders = new FieldReader[names.length];
         for (int i = 0; i < names.length; i++) {
             Type fieldType = types[i];
             Class fieldClass = TypeUtils.getClass(fieldType);
-            fieldReaders[i] = ObjectReaders.fieldReader(names[i], fieldType, fieldClass, new FieldBiConsumer(i, c));
+            long feature = features != null && i < features.length ? features[i] : 0;
+            fieldReaders[i] = creator.createFieldReader(
+                    names[i],
+                    fieldType,
+                    fieldClass,
+                    feature,
+                    new FieldBiConsumer(i, c)
+            );
         }
 
         return creator.createObjectReader(

@@ -1,7 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.reader.FieldReader;
-import com.alibaba.fastjson2.reader.ObjectReaderCreator;
+import com.alibaba.fastjson2.reader.ObjectReaderAdapter;
 import com.alibaba.fastjson2.util.TypeUtils;
 import com.alibaba.fastjson2.writer.FieldWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -9,7 +9,6 @@ import com.alibaba.fastjson2.writer.ObjectWriter;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.Map;
 
 class JSONPathTypedMultiNames
@@ -17,9 +16,8 @@ class JSONPathTypedMultiNames
     final JSONPath prefix;
     final JSONPath[] namePaths;
     final String[] names;
-    final long[] hashCodes;
-    final short[] mapping;
     final FieldReader[] fieldReaders;
+    final ObjectReaderAdapter<Object[]> objectReader;
 
     JSONPathTypedMultiNames(
             JSONPath[] paths,
@@ -35,50 +33,52 @@ class JSONPathTypedMultiNames
         this.prefix = prefix;
         this.namePaths = namePaths;
         this.names = new String[paths.length];
-
-        long[] hashCodes = new long[paths.length];
-        fieldReaders = new FieldReader[paths.length];
         for (int i = 0; i < paths.length; i++) {
             JSONPathSingleName jsonPathSingleName = (JSONPathSingleName) namePaths[i];
             String fieldName = jsonPathSingleName.name;
             names[i] = fieldName;
-            hashCodes[i] = jsonPathSingleName.nameHashCode;
-            String format = formats != null ? formats[i] : null;
-
-            Type fieldType = types[i];
-            Class fieldClass = TypeUtils.getClass(fieldType);
-
-            long fieldFeatures = 0;
-            if (ignoreError(i)) {
-                fieldFeatures |= JSONReader.Feature.NullOnError.mask;
+        }
+        long[] fieldReaderFeatures = new long[names.length];
+        if (pathFeatures != null) {
+            for (int i = 0; i < pathFeatures.length; i++) {
+                if ((pathFeatures[i] & Feature.NullOnError.mask) != 0) {
+                    fieldReaderFeatures[i] |= JSONReader.Feature.NullOnError.mask;
+                }
             }
-            fieldReaders[i] = ObjectReaderCreator.INSTANCE.createFieldReader(
-                    null,
-                    null,
-                    fieldName,
-                    fieldType,
-                    fieldClass,
-                    i,
-                    fieldFeatures,
-                    format,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
-            );
         }
 
-        this.hashCodes = Arrays.copyOf(hashCodes, hashCodes.length);
-        Arrays.sort(this.hashCodes);
-
-        mapping = new short[this.hashCodes.length];
-        for (int i = 0; i < hashCodes.length; i++) {
-            long hashCode = hashCodes[i];
-            int index = Arrays.binarySearch(this.hashCodes, hashCode);
-            mapping[index] = (short) i;
+        Type[] fieldTypes = types.clone();
+        for (int i = 0; i < fieldTypes.length; i++) {
+            Type fieldType = fieldTypes[i];
+            if (fieldType == boolean.class) {
+                fieldTypes[i] = Boolean.class;
+            } else if (fieldType == char.class) {
+                fieldTypes[i] = Character.class;
+            } else if (fieldType == byte.class) {
+                fieldTypes[i] = Byte.class;
+            } else if (fieldType == short.class) {
+                fieldTypes[i] = Short.class;
+            } else if (fieldType == int.class) {
+                fieldTypes[i] = Integer.class;
+            } else if (fieldType == long.class) {
+                fieldTypes[i] = Long.class;
+            } else if (fieldType == float.class) {
+                fieldTypes[i] = Float.class;
+            } else if (fieldType == double.class) {
+                fieldTypes[i] = Double.class;
+            }
         }
+
+        final int length = names.length;
+        objectReader = (ObjectReaderAdapter<Object[]>) JSONFactory.getDefaultObjectReaderProvider()
+                .createObjectReader(
+                        names,
+                        fieldTypes,
+                        fieldReaderFeatures,
+                        () -> new Object[length],
+                        (o, i, v) -> o[i] = v
+                );
+        this.fieldReaders = objectReader.getFieldReaders();
     }
 
     @Override
@@ -100,23 +100,7 @@ class JSONPathTypedMultiNames
         }
 
         if (object instanceof Map) {
-            Map map = (Map) object;
-            for (int i = 0; i < names.length; i++) {
-                Object result = map.get(names[i]);
-                Type type = types[i];
-                if (result != null && result.getClass() != type) {
-                    if (type == Long.class) {
-                        result = TypeUtils.toLong(result);
-                    } else if (type == BigDecimal.class) {
-                        result = TypeUtils.toBigDecimal(result);
-//                    } else if (type == String[].class) {
-//                        result = TypeUtils.toStringArray(result);
-                    } else {
-                        result = TypeUtils.cast(result, type);
-                    }
-                }
-                array[i] = result;
-            }
+            return objectReader.createInstance((Map) object, 0);
         } else {
             ObjectWriter objectReader = JSONFactory.defaultObjectWriterProvider
                     .getObjectWriter(
@@ -165,30 +149,6 @@ class JSONPathTypedMultiNames
             throw new JSONException(jsonReader.info("illegal input, expect '[', but " + jsonReader.current()));
         }
 
-        Object[] values = new Object[paths.length];
-        while (!jsonReader.nextIfObjectEnd()) {
-            long nameHashCode = jsonReader.readFieldNameHashCode();
-
-            int m = Arrays.binarySearch(hashCodes, nameHashCode);
-            if (m < 0) {
-                jsonReader.skipValue();
-                continue;
-            }
-
-            int index = this.mapping[m];
-            FieldReader fieldReader = fieldReaders[index];
-            Object fieldValue;
-            try {
-                fieldValue = fieldReader.readFieldValue(jsonReader);
-            } catch (Exception e) {
-                if (!ignoreError(index)) {
-                    throw e;
-                }
-                fieldValue = null;
-            }
-            values[index] = fieldValue;
-        }
-
-        return values;
+        return objectReader.readObject(jsonReader, null, null, 0);
     }
 }

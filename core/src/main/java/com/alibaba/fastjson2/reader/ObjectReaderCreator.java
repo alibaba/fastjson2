@@ -2651,6 +2651,16 @@ public class ObjectReaderCreator {
             String fieldName,
             Type fieldType,
             Class<V> fieldClass,
+            long features,
+            BiConsumer<T, V> function
+    ) {
+        return createFieldReader(null, null, fieldName, fieldType, fieldClass, 0, features, null, null, null, null, null, function, null);
+    }
+
+    public <T, V> FieldReader createFieldReader(
+            String fieldName,
+            Type fieldType,
+            Class<V> fieldClass,
             Method method,
             BiConsumer<T, V> function
     ) {
