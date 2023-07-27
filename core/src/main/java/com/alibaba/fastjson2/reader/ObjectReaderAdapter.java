@@ -415,6 +415,11 @@ public class ObjectReaderAdapter<T>
         return fieldReaders[index];
     }
 
+    public int getFieldOrdinal(long hashCode) {
+        int m = Arrays.binarySearch(hashCodes, hashCode);
+        return m < 0 ? -1 : this.mapping[m];
+    }
+
     @Override
     public FieldReader getFieldReaderLCase(long hashCode) {
         int m = Arrays.binarySearch(hashCodesLCase, hashCode);

@@ -2,7 +2,6 @@ package com.alibaba.fastjson2;
 
 import java.lang.reflect.Type;
 import java.time.ZoneId;
-import java.util.Arrays;
 
 public class JSONPathTypedMultiNamesPrefixName2
         extends JSONPathTypedMultiNames {
@@ -89,40 +88,7 @@ public class JSONPathTypedMultiNamesPrefixName2
             return new Object[paths.length];
         }
 
-        if (!jsonReader.nextIfObjectStart()) {
-            throw error(jsonReader);
-        }
-
-        Object[] values = new Object[paths.length];
-        while (!jsonReader.nextIfObjectEnd()) {
-            if (jsonReader.isEnd()) {
-                throw error(jsonReader);
-            }
-
-            int m = Arrays.binarySearch(
-                    hashCodes,
-                    jsonReader.readFieldNameHashCode()
-            );
-
-            if (m < 0) {
-                jsonReader.skipValue();
-                continue;
-            }
-
-            int index = this.mapping[m];
-            Object fieldValue;
-            try {
-                fieldValue = fieldReaders[index].readFieldValue(jsonReader);
-            } catch (Exception e) {
-                if (!ignoreError(index)) {
-                    throw e;
-                }
-                fieldValue = null;
-            }
-            values[index] = fieldValue;
-        }
-
-        return values;
+        return objectReader.readObject(jsonReader);
     }
 
     private static JSONException error(JSONReader jsonReader) {

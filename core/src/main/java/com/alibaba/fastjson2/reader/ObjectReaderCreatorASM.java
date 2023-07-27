@@ -604,7 +604,11 @@ public class ObjectReaderCreatorASM
             return (ObjectReaderBean) constructor
                     .newInstance(objectClass, supplier, fieldReaderArray);
         } catch (Throwable e) {
-            throw new JSONException("create objectReader error, objectType " + objectType.getTypeName(), e);
+            throw new JSONException(
+                    "create objectReader error"
+                            + (objectType == null ? "" : ", objectType " + objectType.getTypeName()),
+                    e
+            );
         }
     }
 
@@ -2725,6 +2729,15 @@ public class ObjectReaderCreatorASM
         String format = fieldReader.format;
         Type itemType = fieldReader.itemType;
 
+        if ((fieldFeatures & JSONReader.Feature.NullOnError.mask) != 0) {
+            mw.visitVarInsn(Opcodes.ALOAD, THIS);
+            mw.visitFieldInsn(Opcodes.GETFIELD, classNameType, fieldReader(i), DESC_FIELD_READER);
+            mw.visitVarInsn(Opcodes.ALOAD, JSON_READER);
+            mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
+            mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, TYPE_FIELD_READE, "readFieldValue", METHOD_DESC_READ_FIELD_VALUE, false);
+            return varIndex;
+        }
+
         Field field = fieldReader.field;
         Method method = fieldReader.method;
 
@@ -2850,7 +2863,7 @@ public class ObjectReaderCreatorASM
                 mw.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/String", "equals", "(Ljava/lang/Object;)Z", false);
                 mw.visitJumpInsn(Opcodes.IFEQ, addResolveTask_);
 
-                if (fieldClass.isAssignableFrom(objectClass)) {
+                if (objectClass != null && fieldClass.isAssignableFrom(objectClass)) {
                     mw.visitVarInsn(Opcodes.ALOAD, OBJECT);
 //                    mw.visitTypeInsn(CHECKCAST, TYPE_FIELD_CLASS); // cast
                     mw.visitJumpInsn(Opcodes.GOTO, endObject_);
@@ -2980,7 +2993,8 @@ public class ObjectReaderCreatorASM
                         );
                     }
 
-                    if (method != null || (Modifier.isPublic(objectClass.getModifiers())
+                    if (method != null
+                            || ((objectClass == null || Modifier.isPublic(objectClass.getModifiers()))
                             && Modifier.isPublic(fieldModifier)
                             && !Modifier.isFinal(fieldModifier)
                             && !classLoader.isExternalClass(objectClass))

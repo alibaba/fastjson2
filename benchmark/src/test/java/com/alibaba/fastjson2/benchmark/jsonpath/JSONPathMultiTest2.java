@@ -41,11 +41,12 @@ public class JSONPathMultiTest2 {
             long millis = System.currentTimeMillis() - start;
             System.out.println("JSONPathMultiBenchmark2-extract millis : " + millis);
         }
-        /// zulu8.62.0.19 : 792
+        /// zulu8.62.0.19 : 792 541
     }
 
     public static void main(String[] args) throws Exception {
 //        eval();
-        evalMulti();
+//        evalMulti();
+        extract();
     }
 }

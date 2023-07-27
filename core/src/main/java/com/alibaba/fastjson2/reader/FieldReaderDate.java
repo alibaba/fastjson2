@@ -59,7 +59,15 @@ final class FieldReaderDate<T>
 
     @Override
     public void readFieldValue(JSONReader jsonReader, T object) {
-        Date date = (Date) dateReader.readObject(jsonReader, fieldType, fieldName, features);
+        Date date;
+        try {
+            date = (Date) dateReader.readObject(jsonReader, fieldType, fieldName, features);
+        } catch (Exception e) {
+            if ((features & JSONReader.Feature.NullOnError.mask) == 0) {
+                throw e;
+            }
+            date = null;
+        }
         accept(object, date);
     }
 
