@@ -1315,7 +1315,7 @@ class JSONWriterUTF16
         long v = HEX256[b0 & 0xff] | (((long) HEX256[b1 & 0xff]) << 32);
         UNSAFE.putLong(
                 buf,
-                ARRAY_BYTE_BASE_OFFSET + (off << 1),
+                ARRAY_CHAR_BASE_OFFSET + (off << 1),
                 BIG_ENDIAN ? Long.reverseBytes(v << 8) : v
         );
     }
