@@ -138,4 +138,9 @@ final class FieldWriterListFunc<T>
         }
         jsonWriter.endArray();
     }
+
+    @Override
+    public Function getFunction() {
+        return function;
+    }
 }

@@ -76,4 +76,9 @@ final class FieldWriterDoubleFunc<T>
         }
         return true;
     }
+
+    @Override
+    public Function getFunction() {
+        return function;
+    }
 }

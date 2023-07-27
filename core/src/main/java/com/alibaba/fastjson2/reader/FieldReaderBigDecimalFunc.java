@@ -94,4 +94,9 @@ final class FieldReaderBigDecimalFunc<T, V>
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readBigDecimal();
     }
+
+    @Override
+    public BiConsumer getFunction() {
+        return function;
+    }
 }

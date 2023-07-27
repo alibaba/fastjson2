@@ -63,4 +63,9 @@ final class FieldReaderBoolFunc<T, V>
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readBool();
     }
+
+    @Override
+    public BiConsumer getFunction() {
+        return function;
+    }
 }

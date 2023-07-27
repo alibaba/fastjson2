@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.lang.reflect.*;
 import java.time.*;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
@@ -527,6 +528,10 @@ public abstract class FieldReader<T>
                     break;
             }
         }
+        return null;
+    }
+
+    public BiConsumer getFunction() {
         return null;
     }
 }

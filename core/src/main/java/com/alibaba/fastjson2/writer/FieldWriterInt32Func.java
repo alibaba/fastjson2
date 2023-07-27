@@ -24,4 +24,9 @@ final class FieldWriterInt32Func<T>
     public Object getFieldValue(T object) {
         return function.apply(object);
     }
+
+    @Override
+    public Function getFunction() {
+        return function;
+    }
 }

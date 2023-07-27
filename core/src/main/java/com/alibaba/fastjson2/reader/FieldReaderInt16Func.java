@@ -64,4 +64,9 @@ final class FieldReaderInt16Func<T, V>
     public Object readFieldValue(JSONReader jsonReader) {
         return (short) jsonReader.readInt32Value();
     }
+
+    @Override
+    public BiConsumer getFunction() {
+        return function;
+    }
 }

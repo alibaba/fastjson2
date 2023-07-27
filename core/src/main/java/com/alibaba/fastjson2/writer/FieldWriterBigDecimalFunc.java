@@ -57,4 +57,9 @@ final class FieldWriterBigDecimalFunc<T>
         jsonWriter.writeDecimal(value, features, decimalFormat);
         return true;
     }
+
+    @Override
+    public Function getFunction() {
+        return function;
+    }
 }

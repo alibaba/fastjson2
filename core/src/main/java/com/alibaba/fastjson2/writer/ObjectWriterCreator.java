@@ -6,13 +6,11 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.filter.*;
-import com.alibaba.fastjson2.function.ToByteFunction;
-import com.alibaba.fastjson2.function.ToCharFunction;
-import com.alibaba.fastjson2.function.ToFloatFunction;
-import com.alibaba.fastjson2.function.ToShortFunction;
+import com.alibaba.fastjson2.function.*;
 import com.alibaba.fastjson2.modules.ObjectWriterModule;
 import com.alibaba.fastjson2.util.BeanUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
+import com.alibaba.fastjson2.util.TypeUtils;
 
 import java.lang.invoke.*;
 import java.lang.reflect.*;
@@ -56,7 +54,19 @@ public class ObjectWriterCreator {
     }
 
     public ObjectWriter createObjectWriter(FieldWriter... fieldWriters) {
-        return new ObjectWriterAdapter(null, null, null, 0, Arrays.asList(fieldWriters));
+        return createObjectWriter(Arrays.asList(fieldWriters));
+    }
+
+    public <T> ObjectWriter<T> createObjectWriter(String[] names, Type[] types, FieldSupplier<T> supplier) {
+        FieldWriter[] fieldWriters = new FieldWriter[names.length];
+        for (int i = 0; i < names.length; i++) {
+            String fieldName = names[i];
+            Type fieldType = types[i];
+            int fieldIndex = i;
+            Function<T, Object> function = new FieldSupplierFunction<T>(supplier, fieldIndex);
+            fieldWriters[i] = createFieldWriter(fieldName, fieldType, TypeUtils.getClass(fieldType), function);
+        }
+        return createObjectWriter(fieldWriters);
     }
 
     public ObjectWriter createObjectWriter(Class objectType) {

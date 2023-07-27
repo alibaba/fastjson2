@@ -91,4 +91,9 @@ final class FieldReaderStringFunc<T, V>
     public boolean supportAcceptType(Class valueClass) {
         return true;
     }
+
+    @Override
+    public BiConsumer getFunction() {
+        return function;
+    }
 }

@@ -67,4 +67,9 @@ final class FieldReaderDoubleFunc<T>
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readDouble();
     }
+
+    @Override
+    public BiConsumer getFunction() {
+        return function;
+    }
 }
