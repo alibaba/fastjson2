@@ -42,7 +42,7 @@
         <arrow.version>12.0.1</arrow.version>
 
         <!-- Requires kotlin minor version less than the latest version -->
-        <kotlin.version>1.6.21</kotlin.version>
+        <kotlin.version>1.8.22</kotlin.version>
         <!-- https://kotlinlang.org/docs/maven.html#attributes-specific-to-jvm -->
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <!-- https://kotlinlang.org/docs/maven.html#specifying-compiler-options -->
