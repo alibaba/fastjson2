@@ -58,4 +58,9 @@ final class FieldWriterUUIDFunc<T>
         }
         return true;
     }
+
+    @Override
+    public Function getFunction() {
+        return function;
+    }
 }

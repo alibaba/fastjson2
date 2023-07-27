@@ -57,4 +57,9 @@ final class FieldWriterDateFunc<T>
         writeDate(jsonWriter, value.getTime());
         return true;
     }
+
+    @Override
+    public Function getFunction() {
+        return function;
+    }
 }

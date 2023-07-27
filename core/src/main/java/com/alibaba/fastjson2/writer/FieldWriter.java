@@ -13,6 +13,7 @@ import java.text.DecimalFormat;
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.function.Function;
 import java.util.zip.GZIPOutputStream;
 
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
@@ -847,6 +848,10 @@ public abstract class FieldWriter<T>
             }
         }
 
+        return null;
+    }
+
+    public Function getFunction() {
         return null;
     }
 }

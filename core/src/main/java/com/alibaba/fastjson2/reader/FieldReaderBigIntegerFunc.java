@@ -96,4 +96,9 @@ final class FieldReaderBigIntegerFunc<T, V>
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readBigInteger();
     }
+
+    @Override
+    public BiConsumer getFunction() {
+        return function;
+    }
 }

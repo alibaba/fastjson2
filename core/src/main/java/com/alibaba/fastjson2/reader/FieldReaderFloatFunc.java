@@ -63,4 +63,9 @@ final class FieldReaderFloatFunc<T>
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readFloat();
     }
+
+    @Override
+    public BiConsumer getFunction() {
+        return function;
+    }
 }

@@ -93,4 +93,9 @@ final class FieldWriterStringFunc<T>
             }
         }
     }
+
+    @Override
+    public Function getFunction() {
+        return function;
+    }
 }

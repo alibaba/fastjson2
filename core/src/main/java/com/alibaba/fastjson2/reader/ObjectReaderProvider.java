@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.JSONReader.AutoTypeBeforeHandler;
 import com.alibaba.fastjson2.codec.BeanInfo;
 import com.alibaba.fastjson2.codec.FieldInfo;
+import com.alibaba.fastjson2.function.FieldBiConsumer;
+import com.alibaba.fastjson2.function.FieldConsumer;
 import com.alibaba.fastjson2.modules.ObjectCodecProvider;
 import com.alibaba.fastjson2.modules.ObjectReaderAnnotationProcessor;
 import com.alibaba.fastjson2.modules.ObjectReaderModule;
@@ -1122,5 +1124,25 @@ public class ObjectReaderProvider
         }
 
         return null;
+    }
+
+    public <T> ObjectReader<T> createObjectReader(
+            String[] names,
+            Type[] types,
+            Supplier<T> supplier,
+            FieldConsumer<T> c
+    ) {
+        FieldReader[] fieldReaders = new FieldReader[names.length];
+        for (int i = 0; i < names.length; i++) {
+            Type fieldType = types[i];
+            Class fieldClass = TypeUtils.getClass(fieldType);
+            fieldReaders[i] = ObjectReaders.fieldReader(names[i], fieldType, fieldClass, new FieldBiConsumer(i, c));
+        }
+
+        return creator.createObjectReader(
+                null,
+                supplier,
+                fieldReaders
+        );
     }
 }

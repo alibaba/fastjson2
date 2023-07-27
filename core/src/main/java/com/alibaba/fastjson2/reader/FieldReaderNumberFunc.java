@@ -78,4 +78,9 @@ final class FieldReaderNumberFunc<T, V>
     public Object readFieldValue(JSONReader jsonReader) {
         return jsonReader.readNumber();
     }
+
+    @Override
+    public BiConsumer getFunction() {
+        return function;
+    }
 }

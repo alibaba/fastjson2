@@ -35,4 +35,9 @@ final class FieldWriterObjectFunc<T>
     public Object getFieldValue(Object object) {
         return function.apply(object);
     }
+
+    @Override
+    public Function getFunction() {
+        return function;
+    }
 }

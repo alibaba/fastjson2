@@ -321,4 +321,9 @@ public class FieldReaderObject<T>
 
         jsonReader.skipValue();
     }
+
+    @Override
+    public BiConsumer getFunction() {
+        return function;
+    }
 }

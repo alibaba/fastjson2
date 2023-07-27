@@ -59,4 +59,9 @@ final class FieldWriterCalendarFunc<T>
         writeDate(jsonWriter, value.getTimeInMillis());
         return true;
     }
+
+    @Override
+    public Function getFunction() {
+        return function;
+    }
 }

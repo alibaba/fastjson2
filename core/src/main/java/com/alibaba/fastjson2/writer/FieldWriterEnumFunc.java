@@ -27,4 +27,9 @@ final class FieldWriterEnumFunc
     public Object getFieldValue(Object object) {
         return function.apply(object);
     }
+
+    @Override
+    public Function getFunction() {
+        return function;
+    }
 }

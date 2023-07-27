@@ -47,4 +47,9 @@ final class FieldWriterBigIntFunc<T>
         jsonWriter.writeBigInt(value, features);
         return true;
     }
+
+    @Override
+    public Function getFunction() {
+        return function;
+    }
 }
