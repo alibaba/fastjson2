@@ -323,17 +323,10 @@ public final class JSONFactory {
     static final ObjectReader<JSONArray> ARRAY_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONArray.class);
     static final ObjectReader<JSONObject> OBJECT_READER = JSONFactory.getDefaultObjectReaderProvider().getObjectReader(JSONObject.class);
 
-    static final char[] UUID_LOOKUP;
     static final byte[] UUID_VALUES;
 
     static {
-        UUID_LOOKUP = new char[256];
         UUID_VALUES = new byte['f' + 1 - '0'];
-        for (int i = 0; i < 256; i++) {
-            int hi = (i >> 4) & 15;
-            int lo = i & 15;
-            UUID_LOOKUP[i] = (char) (((hi < 10 ? '0' + hi : 'a' + hi - 10) << 8) + (lo < 10 ? '0' + lo : 'a' + lo - 10));
-        }
         for (char c = '0'; c <= '9'; c++) {
             UUID_VALUES[c - '0'] = (byte) (c - '0');
         }
