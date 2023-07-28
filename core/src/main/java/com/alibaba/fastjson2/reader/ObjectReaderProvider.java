@@ -444,7 +444,8 @@ public class ObjectReaderProvider
         }
     }
 
-    public ObjectReader register(Type type, ObjectReader objectReader) {
+    public ObjectReader register(Type type, ObjectReader objectReader, boolean fieldBased) {
+        ConcurrentMap<Type, ObjectReader> cache = fieldBased ? this.cacheFieldBased : this.cache;
         if (objectReader == null) {
             return cache.remove(type);
         }
@@ -452,15 +453,34 @@ public class ObjectReaderProvider
         return cache.put(type, objectReader);
     }
 
+    public ObjectReader register(Type type, ObjectReader objectReader) {
+        return register(type, objectReader, false);
+    }
+
     public ObjectReader registerIfAbsent(Type type, ObjectReader objectReader) {
+        return registerIfAbsent(type, objectReader, false);
+    }
+
+    public ObjectReader registerIfAbsent(Type type, ObjectReader objectReader, boolean fieldBased) {
+        ConcurrentMap<Type, ObjectReader> cache = fieldBased ? this.cacheFieldBased : this.cache;
         return cache.putIfAbsent(type, objectReader);
     }
 
     public ObjectReader unregisterObjectReader(Type type) {
+        return unregisterObjectReader(type, false);
+    }
+
+    public ObjectReader unregisterObjectReader(Type type, boolean fieldBased) {
+        ConcurrentMap<Type, ObjectReader> cache = fieldBased ? this.cacheFieldBased : this.cache;
         return cache.remove(type);
     }
 
     public boolean unregisterObjectReader(Type type, ObjectReader reader) {
+        return unregisterObjectReader(type, reader, false);
+    }
+
+    public boolean unregisterObjectReader(Type type, ObjectReader reader, boolean fieldBased) {
+        ConcurrentMap<Type, ObjectReader> cache = fieldBased ? this.cacheFieldBased : this.cache;
         return cache.remove(type, reader);
     }
 

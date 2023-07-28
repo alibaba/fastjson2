@@ -155,30 +155,39 @@ public class ObjectWriterProvider
             }
         }
 
+        ConcurrentMap<Type, ObjectWriter> cache = fieldBased ? this.cacheFieldBased : this.cache;
+
         if (objectWriter == null) {
-            if (fieldBased) {
-                return cacheFieldBased.remove(type);
-            } else {
-                return cache.remove(type);
-            }
+            return cache.remove(type);
         }
 
-        if (fieldBased) {
-            return cacheFieldBased.put(type, objectWriter);
-        } else {
-            return cache.put(type, objectWriter);
-        }
+        return cache.put(type, objectWriter);
     }
 
     public ObjectWriter registerIfAbsent(Type type, ObjectWriter objectWriter) {
+        return registerIfAbsent(type, objectWriter, false);
+    }
+
+    public ObjectWriter registerIfAbsent(Type type, ObjectWriter objectWriter, boolean fieldBased) {
+        ConcurrentMap<Type, ObjectWriter> cache = fieldBased ? this.cacheFieldBased : this.cache;
         return cache.putIfAbsent(type, objectWriter);
     }
 
     public ObjectWriter unregister(Type type) {
+        return unregister(type, false);
+    }
+
+    public ObjectWriter unregister(Type type, boolean fieldBased) {
+        ConcurrentMap<Type, ObjectWriter> cache = fieldBased ? this.cacheFieldBased : this.cache;
         return cache.remove(type);
     }
 
     public boolean unregister(Type type, ObjectWriter objectWriter) {
+        return unregister(type, objectWriter, false);
+    }
+
+    public boolean unregister(Type type, ObjectWriter objectWriter, boolean fieldBased) {
+        ConcurrentMap<Type, ObjectWriter> cache = fieldBased ? this.cacheFieldBased : this.cache;
         return cache.remove(type, objectWriter);
     }
 

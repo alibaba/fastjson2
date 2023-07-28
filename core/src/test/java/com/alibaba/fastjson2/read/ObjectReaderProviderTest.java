@@ -50,6 +50,7 @@ public class ObjectReaderProviderTest {
         assertSame(reader1, provider.unregisterObjectReader(Bean.class));
         assertNull(provider.unregisterObjectReader(Bean.class));
 
+        JSON.register(Bean.class, (ObjectReader<?>) null);
         assertNull(JSON.register(Bean.class, reader));
         assertSame(reader, JSON.register(Bean.class, reader));
         assertSame(reader, JSON.register(Bean.class, reader1));
@@ -74,6 +75,62 @@ public class ObjectReaderProviderTest {
 
         assertFalse(provider.unregister(modoule));
         assertFalse(provider.unregister(modoule1));
+    }
+
+    @Test
+    public void testReader1() {
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+
+        BeanReader reader = new BeanReader();
+        BeanReader reader1 = new BeanReader();
+
+        assertNull(provider.unregisterObjectReader(Bean.class, true));
+        assertNull(provider.register(Bean.class, reader, true));
+
+        assertSame(reader, provider.register(Bean.class, reader1, true));
+        assertFalse(provider.unregisterObjectReader(Bean.class, reader, true));
+        assertTrue(provider.unregisterObjectReader(Bean.class, reader1, true));
+
+        assertNull(provider.register(Bean.class, reader1, true));
+        assertSame(reader1, provider.unregisterObjectReader(Bean.class, true));
+        assertNull(provider.unregisterObjectReader(Bean.class, true));
+
+        JSON.register(Bean.class, (ObjectReader<?>) null, true);
+        assertNull(JSON.register(Bean.class, reader, true));
+        assertSame(reader, JSON.register(Bean.class, reader, true));
+        assertSame(reader, JSON.register(Bean.class, reader1, true));
+
+        assertSame(reader1, JSON.registerIfAbsent(Bean.class, reader1, true));
+        assertSame(reader1, JSON.registerIfAbsent(Bean.class, reader1, true));
+        assertSame(reader1, JSON.registerIfAbsent(Bean.class, reader, true));
+    }
+
+    @Test
+    public void testReader2() {
+        ObjectReaderProvider provider = new ObjectReaderProvider();
+
+        BeanReader reader = new BeanReader();
+        BeanReader reader1 = new BeanReader();
+
+        assertNull(provider.unregisterObjectReader(Bean.class, false));
+        assertNull(provider.register(Bean.class, reader, false));
+
+        assertSame(reader, provider.register(Bean.class, reader1, false));
+        assertFalse(provider.unregisterObjectReader(Bean.class, reader, false));
+        assertTrue(provider.unregisterObjectReader(Bean.class, reader1, false));
+
+        JSON.register(Bean.class, (ObjectReader<?>) null, false);
+        assertNull(provider.register(Bean.class, reader1, false));
+        assertSame(reader1, provider.unregisterObjectReader(Bean.class, false));
+        assertNull(provider.unregisterObjectReader(Bean.class, false));
+
+        assertNull(JSON.register(Bean.class, reader, false));
+        assertSame(reader, JSON.register(Bean.class, reader, false));
+        assertSame(reader, JSON.register(Bean.class, reader1, false));
+
+        assertSame(reader1, JSON.registerIfAbsent(Bean.class, reader1, false));
+        assertSame(reader1, JSON.registerIfAbsent(Bean.class, reader1, false));
+        assertSame(reader1, JSON.registerIfAbsent(Bean.class, reader, false));
     }
 
     public static class Bean {
