@@ -329,9 +329,17 @@ public abstract class TypeReference<T> {
 
     public static Type mapType(
             Class<? extends Map> mapClass,
-            Class<?> keyClass, Class<?> valueClass
+            Class<?> keyClass,
+            Class<?> valueClass
     ) {
         return new ParameterizedTypeImpl(mapClass, keyClass, valueClass);
+    }
+
+    public static Type mapType(
+            Class<?> keyClass,
+            Type valueType
+    ) {
+        return new ParameterizedTypeImpl(Map.class, keyClass, valueType);
     }
 
     public static Type parametricType(Class<?> parametrized, Class<?>... parameterClasses) {

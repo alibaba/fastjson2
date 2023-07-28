@@ -5175,6 +5175,18 @@ final class JSONReaderJSONB
     }
 
     @Override
+    protected LocalTime readLocalTime9() {
+        LocalTime time;
+        if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 8
+                || (time = DateUtils.parseLocalTime8(bytes, offset + 1)) == null
+        ) {
+            throw new JSONException("date only support string input");
+        }
+        offset += 10;
+        return time;
+    }
+
+    @Override
     protected LocalTime readLocalTime12() {
         LocalTime time;
         if (bytes[offset] != BC_STR_ASCII_FIX_MIN + 12
