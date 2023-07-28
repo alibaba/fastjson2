@@ -7,18 +7,18 @@ import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class Issue1686 {
+public class Issue1686_1 {
     @Test
     public void test_nest_map_subclass() {
         A a = new A();
         a.put("a", new B());
-        a.get("a").put("b", "1");
+        a.get("a").put("1", "b");
 
         String jsonString = JSON.toJSONString(a);
-        assertEquals(jsonString, "{\"a\":{\"b\":\"1\"}}");
+        assertEquals(jsonString, "{\"a\":{\"1\":\"b\"}}");
 
         A a1 = JSON.parseObject(jsonString, A.class);
-        assertEquals(a1.get("a").get("b"), "1");
+        assertEquals(a1.get("a").get("1"), "b");
     }
 
     public static class A
@@ -27,5 +27,8 @@ public class Issue1686 {
 
     public static class B
             extends HashMap<String, String> {
+        public String get(Integer number) {
+            return get(String.valueOf(number));
+        }
     }
 }
