@@ -3521,6 +3521,17 @@ public interface JSON {
     }
 
     /**
+     * Register an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
+     *
+     * @see JSONFactory#getDefaultObjectReaderProvider()
+     * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#register(Type, ObjectReader)
+     * @since 2.0.38
+     */
+    static ObjectReader<?> register(Type type, ObjectReader<?> objectReader, boolean fieldBased) {
+        return JSONFactory.getDefaultObjectReaderProvider().register(type, objectReader, fieldBased);
+    }
+
+    /**
      * Register if absent an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
      *
      * @see JSONFactory#getDefaultObjectReaderProvider()
@@ -3529,6 +3540,17 @@ public interface JSON {
      */
     static ObjectReader<?> registerIfAbsent(Type type, ObjectReader<?> objectReader) {
         return JSONFactory.getDefaultObjectReaderProvider().registerIfAbsent(type, objectReader);
+    }
+
+    /**
+     * Register if absent an {@link ObjectReader} for {@link Type} in default {@link com.alibaba.fastjson2.reader.ObjectReaderProvider}
+     *
+     * @see JSONFactory#getDefaultObjectReaderProvider()
+     * @see com.alibaba.fastjson2.reader.ObjectReaderProvider#registerIfAbsent(Type, ObjectReader)
+     * @since 2.0.38
+     */
+    static ObjectReader<?> registerIfAbsent(Type type, ObjectReader<?> objectReader, boolean fieldBased) {
+        return JSONFactory.getDefaultObjectReaderProvider().registerIfAbsent(type, objectReader, fieldBased);
     }
 
     /**
@@ -3573,6 +3595,17 @@ public interface JSON {
     }
 
     /**
+     * Register an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
+     *
+     * @see JSONFactory#getDefaultObjectWriterProvider()
+     * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#register(Type, ObjectWriter)
+     * @since 2.0.38
+     */
+    static ObjectWriter<?> register(Type type, ObjectWriter<?> objectWriter, boolean fieldBased) {
+        return JSONFactory.getDefaultObjectWriterProvider().register(type, objectWriter, fieldBased);
+    }
+
+    /**
      * Register if absent an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
      *
      * @see JSONFactory#getDefaultObjectWriterProvider()
@@ -3581,6 +3614,17 @@ public interface JSON {
      */
     static ObjectWriter<?> registerIfAbsent(Type type, ObjectWriter<?> objectWriter) {
         return JSONFactory.getDefaultObjectWriterProvider().registerIfAbsent(type, objectWriter);
+    }
+
+    /**
+     * Register if absent an {@link ObjectWriter} for {@link Type} in default {@link  com.alibaba.fastjson2.writer.ObjectWriterProvider}
+     *
+     * @see JSONFactory#getDefaultObjectWriterProvider()
+     * @see com.alibaba.fastjson2.writer.ObjectWriterProvider#registerIfAbsent(Type, ObjectWriter)
+     * @since 2.0.6
+     */
+    static ObjectWriter<?> registerIfAbsent(Type type, ObjectWriter<?> objectWriter, boolean fieldBased) {
+        return JSONFactory.getDefaultObjectWriterProvider().registerIfAbsent(type, objectWriter, fieldBased);
     }
 
     /**
