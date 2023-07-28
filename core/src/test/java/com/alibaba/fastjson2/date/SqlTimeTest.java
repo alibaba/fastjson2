@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import org.junit.jupiter.api.Test;
 
+import java.sql.Time;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlTimeTest {
@@ -82,5 +84,21 @@ public class SqlTimeTest {
     public static class Student4 {
         @JSONField(format = "unixtime")
         public java.sql.Time birthday;
+    }
+
+    @Test
+    public void test5() throws Exception {
+        Time time = JSON.parseObject("\"12:12:43Z\"", Time.class);
+        String str = JSON.toJSONString(time);
+        Time time1 = JSON.parseObject(str, Time.class);
+        assertEquals(time, time1);
+    }
+
+    @Test
+    public void test6() throws Exception {
+        Time time = JSON.parseObject("\"12:12:43\"", Time.class);
+        String str = JSON.toJSONString(time);
+        Time time1 = JSON.parseObject(str, Time.class);
+        assertEquals(time, time1);
     }
 }

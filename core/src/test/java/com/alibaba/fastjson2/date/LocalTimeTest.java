@@ -88,4 +88,12 @@ public class LocalTimeTest {
             this.time = time;
         }
     }
+
+    @Test
+    public void test5() throws Exception {
+        LocalTime time = JSON.parseObject("\"12:12:43Z\"", LocalTime.class);
+        String str = JSON.toJSONString(time);
+        LocalTime time1 = JSON.parseObject(str, LocalTime.class);
+        assertEquals(time, time1);
+    }
 }

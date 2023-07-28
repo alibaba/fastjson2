@@ -258,14 +258,30 @@ public class JdbcSupport {
             } else {
                 String str = jsonReader.readString();
                 if ("0000-00-00".equals(str) || "0000-00-00 00:00:00".equals(str)) {
-                    return function.apply(0);
+                    millis = 0;
+                } else {
+                    if (str.length() == 9 && str.charAt(8) == 'Z') {
+                        LocalTime localTime = DateUtils.parseLocalTime(
+                                str.charAt(0),
+                                str.charAt(1),
+                                str.charAt(2),
+                                str.charAt(3),
+                                str.charAt(4),
+                                str.charAt(5),
+                                str.charAt(6),
+                                str.charAt(7)
+                        );
+                        millis = LocalDateTime.of(DateUtils.LOCAL_DATE_19700101, localTime)
+                                .atZone(DateUtils.DEFAULT_ZONE_ID)
+                                .toInstant()
+                                .toEpochMilli();
+                    } else {
+                        if (str.isEmpty() || "null".equals(str)) {
+                            return null;
+                        }
+                        return functionValueOf.apply(str);
+                    }
                 }
-
-                if (str.isEmpty() || "null".equals(str)) {
-                    return null;
-                }
-
-                return functionValueOf.apply(str);
             }
 
             return function.apply(millis);

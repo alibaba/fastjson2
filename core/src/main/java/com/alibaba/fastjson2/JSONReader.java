@@ -1527,6 +1527,8 @@ public abstract class JSONReader
                 return readLocalTime5();
             case 8:
                 return readLocalTime8();
+            case 9:
+                return readLocalTime9();
             case 10:
                 return readLocalTime10();
             case 11:
@@ -1781,6 +1783,8 @@ public abstract class JSONReader
     protected abstract LocalTime readLocalTime5();
 
     protected abstract LocalTime readLocalTime8();
+
+    protected abstract LocalTime readLocalTime9();
 
     protected abstract LocalTime readLocalTime10();
 
