@@ -1472,6 +1472,12 @@ public class ObjectWriterBaseModule
         }
 
         BeanInfo beanInfo = new BeanInfo();
+
+        Class[] interfaces = enumClass.getInterfaces();
+        for (int i = 0; i < interfaces.length; i++) {
+            annotationProcessor.getBeanInfo(beanInfo, interfaces[i]);
+        }
+
         annotationProcessor.getBeanInfo(beanInfo, enumClass);
         if (beanInfo.writeEnumAsJavaBean) {
             return null;
