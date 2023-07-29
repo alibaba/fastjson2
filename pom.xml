@@ -61,8 +61,10 @@
         <module>adapter</module>
         -->
         <module>benchmark</module>
+        <!--
         <module>codegen</module>
         <module>codegen-test</module>
+        -->
         <module>core</module>
         <!--
             <module>example-graalvm-native</module>
