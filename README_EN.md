@@ -47,7 +47,7 @@ Related Documents:
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2</artifactId>
-    <version>2.0.37</version>
+    <version>2.0.39-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -55,7 +55,7 @@ Related Documents:
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2:2.0.37'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.39-SNAPSHOT'
 }
 ```
 
@@ -73,7 +73,7 @@ If you are using `fastjson 1.2.x`, you can use the compatibility package. The co
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
-    <version>2.0.37</version>
+    <version>2.0.39-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -81,7 +81,7 @@ If you are using `fastjson 1.2.x`, you can use the compatibility package. The co
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba:fastjson:2.0.37'
+    implementation 'com.alibaba:fastjson:2.0.39-SNAPSHOT'
 }
 ```
 
@@ -95,7 +95,7 @@ If your project uses `kotlin`, you can use the `Fastjson-Kotlin` module, and use
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-kotlin</artifactId>
-    <version>2.0.37</version>
+    <version>2.0.39-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -117,7 +117,7 @@ If your project uses `kotlin`, you can use the `Fastjson-Kotlin` module, and use
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.37")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.39-SNAPSHOT")
 }
 ```
 
@@ -138,7 +138,7 @@ If your project uses a framework such as `SpringFramework`, you can use the `fas
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension</artifactId>
-    <version>2.0.37</version>
+    <version>2.0.39-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -146,7 +146,7 @@ If your project uses a framework such as `SpringFramework`, you can use the `fas
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.37'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension:2.0.39-SNAPSHOT'
 }
 ```
 
