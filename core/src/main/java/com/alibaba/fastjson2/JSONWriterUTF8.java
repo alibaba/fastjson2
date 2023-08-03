@@ -21,22 +21,6 @@ import static com.alibaba.fastjson2.util.JDKUtils.*;
 class JSONWriterUTF8
         extends JSONWriter {
     static final byte[] REF_PREF = "{\"$ref\":".getBytes(StandardCharsets.ISO_8859_1);
-    static final short[] HEX256;
-
-    static {
-        short[] digits = new short[16 * 16];
-
-        for (int i = 0; i < 16; i++) {
-            short hi = (short) (i < 10 ? i + '0' : i - 10 + 'a');
-
-            for (int j = 0; j < 16; j++) {
-                short lo = (short) (j < 10 ? j + '0' : j - 10 + 'a');
-                digits[(i << 4) + j] = BIG_ENDIAN ? (short) ((hi << 8) | lo) : (short) (hi | (lo << 8));
-            }
-        }
-
-        HEX256 = digits;
-    }
 
     final CacheItem cacheItem;
     protected byte[] bytes;
@@ -1423,30 +1407,6 @@ class JSONWriterUTF8
         this.off = off + 1;
     }
 
-    /**
-     * Return a big-endian packed integer for the 4 ASCII bytes for an input unsigned 2-byte integer.
-     * {@code b0} is the most significant byte and {@code b1} is the least significant byte.
-     * The integer is passed byte-wise to allow reordering of execution.
-     */
-    static int packDigits(int b0, int b1) {
-        int v = HEX256[b0 & 0xff] | (HEX256[b1 & 0xff] << 16);
-        return BIG_ENDIAN ? Integer.reverseBytes(v) : v;
-    }
-
-    /**
-     * Return a big-endian packed long for the 8 ASCII bytes for an input unsigned 4-byte integer.
-     * {@code b0} is the most significant byte and {@code b3} is the least significant byte.
-     * The integer is passed byte-wise to allow reordering of execution.
-     */
-    static long packDigits(int b0, int b1, int b2, int b3) {
-        short[] digits = HEX256;
-        long v = (digits[b0 & 0xff]
-                | (((long) digits[b1 & 0xff]) << 16)
-                | (((long) digits[b2 & 0xff]) << 32))
-                | (((long) digits[b3 & 0xff]) << 48);
-        return BIG_ENDIAN ? Long.reverseBytes(v) : v;
-    }
-
     @Override
     public final void writeUUID(UUID value) {
         if (value == null) {
@@ -1818,7 +1778,7 @@ class JSONWriterUTF8
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
-        int minCapacity = off + values.length * 13 + 2;
+        int minCapacity = off + values.length * 14 + 2;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
@@ -1848,7 +1808,7 @@ class JSONWriterUTF8
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
-        int minCapacity = off + 5;
+        int minCapacity = off + 7;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
@@ -1869,7 +1829,7 @@ class JSONWriterUTF8
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
-        int minCapacity = off + 7;
+        int minCapacity = off + 9;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
@@ -1899,7 +1859,7 @@ class JSONWriterUTF8
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
-        int minCapacity = off + 13;
+        int minCapacity = off + 14;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
@@ -1925,7 +1885,7 @@ class JSONWriterUTF8
         int size = values.size();
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
         int off = this.off;
-        int minCapacity = off + 2 + size * 23;
+        int minCapacity = off + 2 + size * 14;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
@@ -2050,7 +2010,7 @@ class JSONWriterUTF8
         boolean writeAsString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0
                 || ((features & BrowserCompatible.mask) != 0 && (i > 9007199254740991L || i < -9007199254740991L));
         int off = this.off;
-        int minCapacity = off + 23;
+        int minCapacity = off + 24;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
@@ -2219,32 +2179,31 @@ class JSONWriterUTF8
         }
 
         final byte[] bytes = this.bytes;
-        bytes[off] = (byte) quote;
         if (year < 0 || year > 9999) {
             throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
         }
         final int q = year / 1000;
-        int v = DIGITS_K[year - q * 1000];
-        bytes[off + 1] = (byte) (q + '0');
-        bytes[off + 2] = (byte) (v >> 16);
-        bytes[off + 3] = (byte) (v >> 8);
-        bytes[off + 4] = (byte) v;
-        v = DIGITS_K[month];
-        bytes[off + 5] = (byte) (v >> 8);
-        bytes[off + 6] = (byte) v;
-        v = DIGITS_K[dayOfMonth];
-        bytes[off + 7] = (byte) (v >> 8);
-        bytes[off + 8] = (byte) v;
-        v = DIGITS_K[hour];
-        bytes[off + 9] = (byte) (v >> 8);
-        bytes[off + 10] = (byte) v;
-        v = DIGITS_K[minute];
-        bytes[off + 11] = (byte) (v >> 8);
-        bytes[off + 12] = (byte) v;
-        v = DIGITS_K[second];
-        bytes[off + 13] = (byte) (v >> 8);
-        bytes[off + 14] = (byte) v;
-        bytes[off + 15] = (byte) quote;
+
+        bytes[off] = (byte) quote;
+        int v = DIGITS_K[dayOfMonth];
+        putLong(
+                bytes,
+                off,
+                quote
+                        + ((q + '0') << 8)
+                        + ((DIGITS_K[year - q * 1000] & 0xffffff00L) << 8)
+                        + ((DIGITS_K[month] & 0xffff0000L) << 24)
+                        + ((v & 0xff_0000L) << 40)
+        );
+        putLong(
+                bytes,
+                off + 8,
+                ((v & 0xff000000L) >> 24)
+                        + ((DIGITS_K[hour] & 0xffff0000L) >> 8)
+                        + ((DIGITS_K[minute] & 0xffff0000L) << 8)
+                        + ((DIGITS_K[second] & 0xffff0000L) << 24)
+                        + (((long) quote) << 56)
+        );
         this.off = off + 16;
     }
 
@@ -2263,36 +2222,37 @@ class JSONWriterUTF8
         }
 
         final byte[] bytes = this.bytes;
-        bytes[off] = (byte) quote;
+
         if (year < 0 || year > 9999) {
             throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
         }
         final int q = year / 1000;
-        int v = DIGITS_K[year - q * 1000];
-        bytes[off + 1] = (byte) (q + '0');
-        bytes[off + 2] = (byte) (v >> 16);
-        bytes[off + 3] = (byte) (v >> 8);
-        bytes[off + 4] = (byte) v;
-        bytes[off + 5] = '-';
-        v = DIGITS_K[month];
-        bytes[off + 6] = (byte) (v >> 8);
-        bytes[off + 7] = (byte) v;
-        bytes[off + 8] = '-';
-        v = DIGITS_K[dayOfMonth];
-        bytes[off + 9] = (byte) (v >> 8);
-        bytes[off + 10] = (byte) v;
-        bytes[off + 11] = ' ';
-        v = DIGITS_K[hour];
-        bytes[off + 12] = (byte) (v >> 8);
-        bytes[off + 13] = (byte) v;
-        bytes[off + 14] = ':';
-        v = DIGITS_K[minute];
-        bytes[off + 15] = (byte) (v >> 8);
-        bytes[off + 16] = (byte) v;
-        bytes[off + 17] = ':';
-        v = DIGITS_K[second];
-        bytes[off + 18] = (byte) (v >> 8);
-        bytes[off + 19] = (byte) v;
+
+        putLong(
+                bytes,
+                off,
+                quote
+                        + ((q + '0') << 8)
+                        + ((DIGITS_K[year - q * 1000] & 0xffffff00L) << 8)
+                        + 0x2d00_0000_0000L
+                        + ((DIGITS_K[month] & 0xffff0000L) << 32)
+        );
+
+        putInt(
+                bytes,
+                off + 8,
+                0x2000_002d
+                        + ((DIGITS_K[dayOfMonth] & 0xffff0000) >> 8)
+        );
+
+        putLong(
+                bytes,
+                off + 12,
+                ((DIGITS_K[hour] & 0xffff0000L) >> 16)
+                        + 0x3a00003a0000L
+                        + ((DIGITS_K[minute] & 0xffff0000L) << 8)
+                        + ((DIGITS_K[second] & 0xffff0000L) << 32)
+        );
         bytes[off + 20] = (byte) quote;
         this.off = off + 21;
     }
@@ -2355,17 +2315,14 @@ class JSONWriterUTF8
             throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
         }
         final int q = year / 1000;
-        int v = DIGITS_K[year - q * 1000];
-        bytes[off + 1] = (byte) (q + '0');
-        bytes[off + 2] = (byte) (v >> 16);
-        bytes[off + 3] = (byte) (v >> 8);
-        bytes[off + 4] = (byte) v;
-        v = DIGITS_K[month];
-        bytes[off + 5] = (byte) (v >> 8);
-        bytes[off + 6] = (byte) v;
-        v = DIGITS_K[dayOfMonth];
-        bytes[off + 7] = (byte) (v >> 8);
-        bytes[off + 8] = (byte) v;
+        putLong(
+                bytes,
+                off + 1,
+                +(q + '0')
+                        + (DIGITS_K[year - q * 1000] & 0xffffff00L)
+                        + ((DIGITS_K[month] & 0xffff_0000L) << 16)
+                        + ((DIGITS_K[dayOfMonth] & 0xffff0000L) << 32)
+        );
         bytes[off + 9] = (byte) quote;
         this.off = off + 10;
     }
@@ -2395,17 +2352,16 @@ class JSONWriterUTF8
 
         final byte[] bytes = this.bytes;
         bytes[off] = (byte) quote;
-        int v = DIGITS_K[hour];
-        bytes[off + 1] = (byte) (v >> 8);
-        bytes[off + 2] = (byte) v;
-        bytes[off + 3] = ':';
-        v = DIGITS_K[minute];
-        bytes[off + 4] = (byte) (v >> 8);
-        bytes[off + 5] = (byte) v;
-        bytes[off + 6] = ':';
-        v = DIGITS_K[second];
-        bytes[off + 7] = (byte) (v >> 8);
-        bytes[off + 8] = (byte) v;
+
+        putLong(
+                bytes,
+                off + 1,
+                ((DIGITS_K[hour] & 0xffff0000L) >> 16)
+                        + 0x3a00003a0000L
+                        + ((DIGITS_K[minute] & 0xffff0000L) << 8)
+                        + ((DIGITS_K[second] & 0xffff0000L) << 32)
+        );
+
         bytes[off + 9] = (byte) quote;
         this.off = off + 10;
     }
@@ -2555,14 +2511,7 @@ class JSONWriterUTF8
             int offsetSeconds,
             boolean timeZone
     ) {
-        int zonelen;
-        if (timeZone) {
-            zonelen = offsetSeconds == 0 ? 1 : 6;
-        } else {
-            zonelen = 0;
-        }
-
-        int minCapacity = off + 25 + zonelen;
+        int minCapacity = off + 32;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
@@ -2571,46 +2520,41 @@ class JSONWriterUTF8
         int off = this.off;
         bytes[off] = (byte) quote;
         off = IOUtils.writeInt32(bytes, off + 1, year);
-        bytes[off] = '-';
-        int v = DIGITS_K[month];
-        bytes[off + 1] = (byte) (v >> 8);
-        bytes[off + 2] = (byte) v;
-        bytes[off + 3] = '-';
-        v = DIGITS_K[dayOfMonth];
-        bytes[off + 4] = (byte) (v >> 8);
-        bytes[off + 5] = (byte) v;
-        bytes[off + 6] = (byte) (timeZone ? 'T' : ' ');
-        v = DIGITS_K[hour];
-        bytes[off + 7] = (byte) (v >> 8);
-        bytes[off + 8] = (byte) v;
-        bytes[off + 9] = ':';
-        v = DIGITS_K[minute];
-        bytes[off + 10] = (byte) (v >> 8);
-        bytes[off + 11] = (byte) v;
-        bytes[off + 12] = ':';
-        v = DIGITS_K[second];
-        bytes[off + 13] = (byte) (v >> 8);
-        bytes[off + 14] = (byte) v;
+
+        putLong(
+                bytes,
+                off,
+                ((DIGITS_K[month] & 0xffff0000L) >> 8)
+                        + ((DIGITS_K[dayOfMonth] & 0xffff0000L) << 16)
+                        + (timeZone ? 0x54_0000_2d00_002dL : 0x20_0000_2d00_002dL)
+        );
+
+        putLong(
+                bytes,
+                off + 7,
+                ((DIGITS_K[hour] & 0xffff0000L) >> 16)
+                        + 0x3a00003a_0000L
+                        + ((DIGITS_K[minute] & 0xffff0000L) << 8)
+                        + ((DIGITS_K[second] & 0xffff0000L) << 32)
+        );
+
         off += 15;
 
         if (millis > 0) {
-            bytes[off++] = '.';
             int div = millis / 10;
             int div2 = div / 10;
             final int rem1 = millis - div * 10;
 
             if (rem1 != 0) {
-                v = DIGITS_K[millis];
-                bytes[off] = (byte) (v >> 16);
-                bytes[off + 1] = (byte) (v >> 8);
-                bytes[off + 2] = (byte) v;
-                off += 3;
+                putInt(bytes, off, '.' + (DIGITS_K[millis] & 0xffffff00));
+                off += 4;
             } else {
+                bytes[off++] = '.';
                 final int rem2 = div - div2 * 10;
                 if (rem2 != 0) {
-                    v = DIGITS_K[div];
-                    bytes[off] = (byte) (v >> 8);
-                    bytes[off + 1] = (byte) v;
+                    int v = DIGITS_K[div];
+                    bytes[off] = (byte) (v >> 16);
+                    bytes[off + 1] = (byte) (v >> 24);
                     off += 2;
                 } else {
                     bytes[off++] = (byte) (div2 + '0');
@@ -2625,17 +2569,17 @@ class JSONWriterUTF8
             } else {
                 int offsetAbs = Math.abs(offset);
                 bytes[off] = offset >= 0 ? (byte) '+' : (byte) '-';
-                v = DIGITS_K[offsetAbs];
-                bytes[off + 1] = (byte) (v >> 8);
-                bytes[off + 2] = (byte) v;
+                int v = DIGITS_K[offsetAbs];
+                bytes[off + 1] = (byte) (v >> 16);
+                bytes[off + 2] = (byte) (v >> 24);
                 bytes[off + 3] = ':';
                 int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
                 if (offsetMinutes < 0) {
                     offsetMinutes = -offsetMinutes;
                 }
                 v = DIGITS_K[offsetMinutes];
-                bytes[off + 4] = (byte) (v >> 8);
-                bytes[off + 5] = (byte) v;
+                bytes[off + 4] = (byte) (v >> 16);
+                bytes[off + 5] = (byte) (v >> 24);
                 off += 6;
             }
         }
@@ -2666,7 +2610,7 @@ class JSONWriterUTF8
                 && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0));
 
         int off = this.off;
-        int minCapacity = off + precision + 7;
+        int minCapacity = off + precision + 8;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }

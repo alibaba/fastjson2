@@ -1279,7 +1279,7 @@ class JSONWriterUTF16
                 && (value.compareTo(LOW) < 0 || value.compareTo(HIGH) > 0));
 
         int off = this.off;
-        int minCapacity = off + precision + 7;
+        int minCapacity = off + precision + 8;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -1573,7 +1573,7 @@ class JSONWriterUTF16
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
-        int minCapacity = off + value.length * 13 + 2;
+        int minCapacity = off + value.length * 13 + 3;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -1624,7 +1624,7 @@ class JSONWriterUTF16
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
-        int minCapacity = off + 7;
+        int minCapacity = off + 9;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -1645,7 +1645,7 @@ class JSONWriterUTF16
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
 
         int off = this.off;
-        int minCapacity = off + 13;
+        int minCapacity = off + 14;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -1682,7 +1682,7 @@ class JSONWriterUTF16
         boolean nonStringAsString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
 
         int off = this.off;
-        int minCapacity = off + 2 + values.length * 23;
+        int minCapacity = off + 3 + values.length * 23;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -1720,7 +1720,7 @@ class JSONWriterUTF16
         int size = values.size();
         boolean writeAsString = (context.features & Feature.WriteNonStringValueAsString.mask) != 0;
         int off = this.off;
-        int minCapacity = off + 2 + size * 23;
+        int minCapacity = off + 3 + size * 13;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -1768,7 +1768,7 @@ class JSONWriterUTF16
         boolean browserCompatible = (features & BrowserCompatible.mask) != 0;
         boolean nonStringAsString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0;
         int off = this.off;
-        int minCapacity = off + 2 + size * 23;
+        int minCapacity = off + 3 + size * 23;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -1812,7 +1812,7 @@ class JSONWriterUTF16
         boolean writeAsString = (features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask)) != 0
                 || ((features & BrowserCompatible.mask) != 0 && (i > 9007199254740991L || i < -9007199254740991L));
         int off = this.off;
-        int minCapacity = off + 23;
+        int minCapacity = off + 24;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -2026,33 +2026,33 @@ class JSONWriterUTF16
             ensureCapacity(minCapacity);
         }
 
-        final char[] bytes = this.chars;
-        bytes[off] = quote;
+        final char[] chars = this.chars;
+        chars[off] = quote;
         if (year < 0 || year > 9999) {
             throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
         }
         final int q = year / 1000;
         int v = DIGITS_K[year - q * 1000];
-        bytes[off + 1] = (char) (byte) (q + '0');
-        bytes[off + 2] = (char) (byte) (v >> 16);
-        bytes[off + 3] = (char) (byte) (v >> 8);
-        bytes[off + 4] = (char) (byte) v;
+        chars[off + 1] = (char) (byte) (q + '0');
+        chars[off + 2] = (char) (byte) (v >> 8);
+        chars[off + 3] = (char) (byte) (v >> 16);
+        chars[off + 4] = (char) (byte) (v >> 24);
         v = DIGITS_K[month];
-        bytes[off + 5] = (char) (byte) (v >> 8);
-        bytes[off + 6] = (char) (byte) v;
+        chars[off + 5] = (char) (byte) (v >> 16);
+        chars[off + 6] = (char) (byte) (v >> 24);
         v = DIGITS_K[dayOfMonth];
-        bytes[off + 7] = (char) (byte) (v >> 8);
-        bytes[off + 8] = (char) (byte) v;
+        chars[off + 7] = (char) (byte) (v >> 16);
+        chars[off + 8] = (char) (byte) (v >> 24);
         v = DIGITS_K[hour];
-        bytes[off + 9] = (char) (byte) (v >> 8);
-        bytes[off + 10] = (char) (byte) v;
+        chars[off + 9] = (char) (byte) (v >> 16);
+        chars[off + 10] = (char) (byte) (v >> 24);
         v = DIGITS_K[minute];
-        bytes[off + 11] = (char) (byte) (v >> 8);
-        bytes[off + 12] = (char) (byte) v;
+        chars[off + 11] = (char) (byte) (v >> 16);
+        chars[off + 12] = (char) (byte) (v >> 24);
         v = DIGITS_K[second];
-        bytes[off + 13] = (char) (byte) (v >> 8);
-        bytes[off + 14] = (char) (byte) v;
-        bytes[off + 15] = quote;
+        chars[off + 13] = (char) (byte) (v >> 16);
+        chars[off + 14] = (char) (byte) (v >> 24);
+        chars[off + 15] = quote;
         this.off = off + 16;
     }
 
@@ -2075,29 +2075,29 @@ class JSONWriterUTF16
         final int q = year / 1000;
         int v = DIGITS_K[year - q * 1000];
         chars[off + 1] = (char) (byte) (q + '0');
-        chars[off + 2] = (char) (byte) (v >> 16);
-        chars[off + 3] = (char) (byte) (v >> 8);
-        chars[off + 4] = (char) (byte) v;
+        chars[off + 2] = (char) (byte) (v >> 8);
+        chars[off + 3] = (char) (byte) (v >> 16);
+        chars[off + 4] = (char) (byte) (v >> 24);
         chars[off + 5] = '-';
         v = DIGITS_K[month];
-        chars[off + 6] = (char) (byte) (v >> 8);
-        chars[off + 7] = (char) (byte) v;
+        chars[off + 6] = (char) (byte) (v >> 16);
+        chars[off + 7] = (char) (byte) (v >> 24);
         chars[off + 8] = '-';
         v = DIGITS_K[dayOfMonth];
-        chars[off + 9] = (char) (byte) (v >> 8);
-        chars[off + 10] = (char) (byte) v;
+        chars[off + 9] = (char) (byte) (v >> 16);
+        chars[off + 10] = (char) (byte) (v >> 24);
         chars[off + 11] = ' ';
         v = DIGITS_K[hour];
-        chars[off + 12] = (char) (byte) (v >> 8);
-        chars[off + 13] = (char) (byte) v;
+        chars[off + 12] = (char) (byte) (v >> 16);
+        chars[off + 13] = (char) (byte) (v >> 24);
         chars[off + 14] = ':';
         v = DIGITS_K[minute];
-        chars[off + 15] = (char) (byte) (v >> 8);
-        chars[off + 16] = (char) (byte) v;
+        chars[off + 15] = (char) (byte) (v >> 16);
+        chars[off + 16] = (char) (byte) (v >> 24);
         chars[off + 17] = ':';
         v = DIGITS_K[second];
-        chars[off + 18] = (char) (byte) (v >> 8);
-        chars[off + 19] = (char) (byte) v;
+        chars[off + 18] = (char) (byte) (v >> 16);
+        chars[off + 19] = (char) (byte) (v >> 24);
         chars[off + 20] = (char) (byte) quote;
         this.off = off + 21;
     }
@@ -2131,7 +2131,7 @@ class JSONWriterUTF16
     @Override
     public final void writeLocalDateTime(LocalDateTime dateTime) {
         int off = this.off;
-        int minCapacity = off + 38;
+        int minCapacity = off + 37;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -2166,7 +2166,7 @@ class JSONWriterUTF16
         }
 
         int off = this.off;
-        int minCapacity = off + 25 + zonelen;
+        int minCapacity = off + 26 + zonelen;
         if (off + minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -2176,24 +2176,24 @@ class JSONWriterUTF16
         off = IOUtils.writeInt32(bytes, off + 1, year);
         bytes[off] = '-';
         int v = DIGITS_K[month];
-        bytes[off + 1] = (char) (byte) (v >> 8);
-        bytes[off + 2] = (char) (byte) v;
+        bytes[off + 1] = (char) (byte) (v >> 16);
+        bytes[off + 2] = (char) (byte) (v >> 24);
         bytes[off + 3] = '-';
         v = DIGITS_K[dayOfMonth];
-        bytes[off + 4] = (char) (byte) (v >> 8);
-        bytes[off + 5] = (char) (byte) v;
+        bytes[off + 4] = (char) (byte) (v >> 16);
+        bytes[off + 5] = (char) (byte) (v >> 24);
         bytes[off + 6] = (char) (byte) (timeZone ? 'T' : ' ');
         v = DIGITS_K[hour];
-        bytes[off + 7] = (char) (byte) (v >> 8);
-        bytes[off + 8] = (char) (byte) v;
+        bytes[off + 7] = (char) (byte) (v >> 16);
+        bytes[off + 8] = (char) (byte) (v >> 24);
         bytes[off + 9] = ':';
         v = DIGITS_K[minute];
-        bytes[off + 10] = (char) (byte) (v >> 8);
-        bytes[off + 11] = (char) (byte) v;
+        bytes[off + 10] = (char) (byte) (v >> 16);
+        bytes[off + 11] = (char) (byte) (v >> 24);
         bytes[off + 12] = ':';
         v = DIGITS_K[second];
-        bytes[off + 13] = (char) (byte) (v >> 8);
-        bytes[off + 14] = (char) (byte) v;
+        bytes[off + 13] = (char) (byte) (v >> 16);
+        bytes[off + 14] = (char) (byte) (v >> 24);
         off += 15;
 
         if (millis > 0) {
@@ -2204,16 +2204,16 @@ class JSONWriterUTF16
 
             if (rem1 != 0) {
                 v = DIGITS_K[millis];
-                bytes[off] = (char) (byte) (v >> 16);
-                bytes[off + 1] = (char) (byte) (v >> 8);
-                bytes[off + 2] = (char) (byte) v;
+                bytes[off] = (char) (byte) (v >> 8);
+                bytes[off + 1] = (char) (byte) (v >> 16);
+                bytes[off + 2] = (char) (byte) (v >> 24);
                 off += 3;
             } else {
                 final int rem2 = div - div2 * 10;
                 if (rem2 != 0) {
                     v = DIGITS_K[div];
-                    bytes[off] = (char) (byte) (v >> 8);
-                    bytes[off + 1] = (char) (byte) v;
+                    bytes[off] = (char) (byte) (v >> 16);
+                    bytes[off + 1] = (char) (byte) (v >> 24);
                     off += 2;
                 } else {
                     bytes[off++] = (char) (byte) (div2 + '0');
@@ -2229,16 +2229,16 @@ class JSONWriterUTF16
                 int offsetAbs = Math.abs(offset);
                 bytes[off] = offset >= 0 ? '+' : '-';
                 v = DIGITS_K[offsetAbs];
-                bytes[off + 1] = (char) (byte) (v >> 8);
-                bytes[off + 2] = (char) (byte) v;
+                bytes[off + 1] = (char) (byte) (v >> 16);
+                bytes[off + 2] = (char) (byte) (v >> 24);
                 bytes[off + 3] = ':';
                 int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
                 if (offsetMinutes < 0) {
                     offsetMinutes = -offsetMinutes;
                 }
                 v = DIGITS_K[offsetMinutes];
-                bytes[off + 4] = (char) (byte) (v >> 8);
-                bytes[off + 5] = (char) (byte) v;
+                bytes[off + 4] = (char) (byte) (v >> 16);
+                bytes[off + 5] = (char) (byte) (v >> 24);
                 off += 6;
             }
         }
@@ -2262,15 +2262,15 @@ class JSONWriterUTF16
         final int q = year / 1000;
         int v = DIGITS_K[year - q * 1000];
         chars[off + 1] = (char) (byte) (q + '0');
-        chars[off + 2] = (char) (byte) (v >> 16);
-        chars[off + 3] = (char) (byte) (v >> 8);
-        chars[off + 4] = (char) (byte) v;
+        chars[off + 2] = (char) (byte) (v >> 8);
+        chars[off + 3] = (char) (byte) (v >> 16);
+        chars[off + 4] = (char) (byte) (v >> 24);
         v = DIGITS_K[month];
-        chars[off + 5] = (char) (byte) (v >> 8);
-        chars[off + 6] = (char) (byte) v;
+        chars[off + 5] = (char) (byte) (v >> 16);
+        chars[off + 6] = (char) (byte) (v >> 24);
         v = DIGITS_K[dayOfMonth];
-        chars[off + 7] = (char) (byte) (v >> 8);
-        chars[off + 8] = (char) (byte) v;
+        chars[off + 7] = (char) (byte) (v >> 16);
+        chars[off + 8] = (char) (byte) (v >> 24);
         chars[off + 9] = quote;
         this.off = off + 10;
     }
@@ -2301,16 +2301,16 @@ class JSONWriterUTF16
         final char[] chars = this.chars;
         chars[off] = (char) (byte) quote;
         int v = DIGITS_K[hour];
-        chars[off + 1] = (char) (byte) (v >> 8);
-        chars[off + 2] = (char) (byte) v;
+        chars[off + 1] = (char) (byte) (v >> 16);
+        chars[off + 2] = (char) (byte) (v >> 24);
         chars[off + 3] = ':';
         v = DIGITS_K[minute];
-        chars[off + 4] = (char) (byte) (v >> 8);
-        chars[off + 5] = (char) (byte) v;
+        chars[off + 4] = (char) (byte) (v >> 16);
+        chars[off + 5] = (char) (byte) (v >> 24);
         chars[off + 6] = ':';
         v = DIGITS_K[second];
-        chars[off + 7] = (char) (byte) (v >> 8);
-        chars[off + 8] = (char) (byte) v;
+        chars[off + 7] = (char) (byte) (v >> 16);
+        chars[off + 8] = (char) (byte) (v >> 24);
         chars[off + 9] = (char) (byte) quote;
         this.off = off + 10;
     }
@@ -2318,7 +2318,7 @@ class JSONWriterUTF16
     @Override
     public final void writeLocalTime(LocalTime time) {
         int off = this.off;
-        int minCapacity = off + 20;
+        int minCapacity = off + 21;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -2352,7 +2352,7 @@ class JSONWriterUTF16
         }
 
         int off = this.off;
-        int minCapacity = off + zoneSize + 38;
+        int minCapacity = off + zoneSize + 39;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -2395,7 +2395,7 @@ class JSONWriterUTF16
         }
 
         int off = this.off;
-        int minCapacity = off + zoneIdLength + 40;
+        int minCapacity = off + zoneIdLength + 41;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }

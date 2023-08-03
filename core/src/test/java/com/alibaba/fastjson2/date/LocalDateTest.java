@@ -28,9 +28,9 @@ public class LocalDateTest {
     @Test
     public void test0_x() {
         Bean bean = new Bean();
-        bean.date = LocalDate.of(2017, 9, 11);
+        bean.date = LocalDate.of(2017, 9, 12);
         String str = JSON.toJSONString(bean);
-        assertEquals("{\"date\":\"2017-09-11\"}", str);
+        assertEquals("{\"date\":\"2017-09-12\"}", str);
     }
 
     @Test

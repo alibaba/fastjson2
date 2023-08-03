@@ -43,7 +43,7 @@ public class CodeGenUtils {
                 int size = IOUtils.stringSize(i);
                 char[] chars = new char[baseSize + size];
                 base.getChars(0, baseSize, chars, 0);
-                IOUtils.writeInt32(chars, baseSize, i);
+                IOUtils.getChars(i, chars.length, chars);
                 return new String(chars);
         }
     }

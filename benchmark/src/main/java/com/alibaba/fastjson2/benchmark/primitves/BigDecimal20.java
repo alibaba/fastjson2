@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.benchmark.primitves;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.primitves.vo.BigDecimal20Field;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
@@ -27,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BigDecimal20 {
     static String str;
+    static BigDecimal20Field bean;
     static byte[] jsonbBytes;
     static ObjectMapper mapper = new ObjectMapper();
     static Gson gson = new Gson();
@@ -47,7 +49,7 @@ public class BigDecimal20 {
         try {
             InputStream is = BigDecimal20.class.getClassLoader().getResourceAsStream("data/dec20.json");
             str = IOUtils.toString(is, "UTF-8");
-            BigDecimal20Field bean = JSON.parseObject(str, BigDecimal20Field.class);
+            bean = JSON.parseObject(str, BigDecimal20Field.class);
             jsonbBytes = JSONB.toBytes(bean);
 
             kryo = new Kryo();
@@ -83,6 +85,12 @@ public class BigDecimal20 {
     public void fastjson2(Blackhole bh) {
         bh.consume(
                 JSON.parseObject(str, BigDecimal20Field.class)
+        );
+    }
+
+    public void fastjson2_ser(Blackhole bh) {
+        bh.consume(
+                JSON.toJSONBytes(bean, JSONWriter.Feature.BeanToArray)
         );
     }
 

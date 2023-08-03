@@ -28,6 +28,21 @@ public class BigDecimal200Test {
         }
     }
 
+    public static void fastjson2_ser() {
+        for (int j = 0; j < 10; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000 * 1000; ++i) {
+                benchmark.fastjson2_ser(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("BigDecimal20-fastjson2 : " + millis);
+
+            // zulu8.68.0.21 :
+            // zulu11.52.13 :
+            // zulu17.32.13 : 242
+        }
+    }
+
     public static void fastjson2_jsonb() {
         for (int j = 0; j < 10; j++) {
             long start = System.currentTimeMillis();
@@ -99,8 +114,9 @@ public class BigDecimal200Test {
 
     public static void main(String[] args) throws Exception {
 //        fastjson2();
+        fastjson2_ser();
 //        fastjson2_jsonb();
 //        jackson();
-        wastjson();
+//        wastjson();
     }
 }

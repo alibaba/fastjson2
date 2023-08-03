@@ -13,6 +13,9 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
+import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
+
 public class BytesAsciiCheck {
     static byte[] bytes;
 
@@ -50,6 +53,11 @@ public class BytesAsciiCheck {
         bh.consume(hasNegatives_8(bytes, 0, bytes.length));
     }
 
+    @Benchmark
+    public void direct8u(Blackhole bh) throws Throwable {
+        bh.consume(hasNegatives_8u(bytes, 0, bytes.length));
+    }
+
     public static boolean hasNegatives(byte[] ba, int off, int len) {
         for (int i = off; i < off + len; i++) {
             if (ba[i] < 0) {
@@ -71,6 +79,23 @@ public class BytesAsciiCheck {
             byte b6 = bytes[6];
             byte b7 = bytes[6];
             if (b0 < 0 || b1 < 0 || b2 < 0 || b3 < 0 || b4 < 0 || b5 < 0 || b6 < 0 || b7 < 0) {
+                return true;
+            }
+            i += 8;
+        }
+
+        for (; i < off + len; i++) {
+            if (bytes[i] < 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasNegatives_8u(byte[] bytes, int off, int len) {
+        int i = off;
+        while (i + 8 <= off + len) {
+            if ((UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + off) & 0x8080808080808080L) != 0) {
                 return true;
             }
             i += 8;

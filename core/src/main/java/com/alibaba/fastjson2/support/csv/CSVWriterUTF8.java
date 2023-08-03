@@ -13,12 +13,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import static com.alibaba.fastjson2.util.IOUtils.DIGITS_K;
+import static com.alibaba.fastjson2.util.IOUtils.putLong;
 
 final class CSVWriterUTF8
         extends CSVWriter {
     static final byte[] BYTES_TRUE = "true".getBytes();
     static final byte[] BYTES_FALSE = "false".getBytes();
-    static final byte[] BYTES_LONG_MIN = "-9223372036854775808".getBytes();
 
     final OutputStream out;
     final Charset charset;
@@ -103,17 +103,14 @@ final class CSVWriterUTF8
         int off = this.off;
         off = IOUtils.writeLocalDate(bytes, off, year, month, dayOfMonth);
         bytes[off] = ' ';
-        int v = DIGITS_K[hour];
-        bytes[off + 1] = (byte) (v >> 8);
-        bytes[off + 2] = (byte) v;
-        bytes[off + 3] = ':';
-        v = DIGITS_K[minute];
-        bytes[off + 4] = (byte) (v >> 8);
-        bytes[off + 5] = (byte) v;
-        bytes[off + 6] = ':';
-        v = DIGITS_K[second];
-        bytes[off + 7] = (byte) (v >> 8);
-        bytes[off + 8] = (byte) v;
+        putLong(
+                bytes,
+                off + 1,
+                ((DIGITS_K[hour] & 0xffff0000L) >> 16)
+                        + 0x3a00003a0000L
+                        + ((DIGITS_K[minute] & 0xffff0000L) << 8)
+                        + ((DIGITS_K[second] & 0xffff0000L) << 32)
+        );
         this.off = off + 9;
     }
 
@@ -130,7 +127,7 @@ final class CSVWriterUTF8
     }
 
     public void writeInt32(int intValue) {
-        int minCapacity = off + 11;
+        int minCapacity = off + 12;
         if (minCapacity - this.bytes.length > 0) {
             flush();
         }
@@ -239,7 +236,7 @@ final class CSVWriterUTF8
             return;
         }
 
-        int minCapacity = off + 24;
+        int minCapacity = off + 25;
         if (minCapacity - this.bytes.length > 0) {
             flush();
         }

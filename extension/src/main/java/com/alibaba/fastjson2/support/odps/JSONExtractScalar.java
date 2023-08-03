@@ -59,11 +59,8 @@ public class JSONExtractScalar
 
         @Override
         public void accept(int val) {
-            int size = (val < 0) ? IOUtils.stringSize(-val) + 1 : IOUtils.stringSize(val);
-            text.setCapacity(size, false);
-            byte[] bytes = text.bytes;
-            IOUtils.getChars(val, size, bytes);
-            text.length = size;
+            text.setCapacity(13, false);
+            text.length = IOUtils.writeInt32(text.bytes, 0, val);
         }
 
         @Override

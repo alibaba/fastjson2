@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.benchmark.primitves;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.primitves.vo.Int20Field;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
@@ -20,6 +21,7 @@ public class IntValue20 {
     static final Class OBJECT_CLASS = Int20Field.class;
     static String str;
     static byte[] jsonbBytes;
+    static Object object;
     static ObjectMapper mapper = new ObjectMapper();
 
     public IntValue20() {
@@ -29,6 +31,7 @@ public class IntValue20 {
             jsonbBytes = JSONB.toBytes(
                     JSON.parseObject(str, OBJECT_CLASS)
             );
+            object = JSON.parseObject(str, OBJECT_CLASS);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -52,6 +55,12 @@ public class IntValue20 {
     public void fastjson2(Blackhole bh) {
         bh.consume(
                 JSON.parseObject(str, OBJECT_CLASS)
+        );
+    }
+
+    public void fastjson2_ser(Blackhole bh) {
+        bh.consume(
+                JSON.toJSONBytes(object, JSONWriter.Feature.BeanToArray)
         );
     }
 

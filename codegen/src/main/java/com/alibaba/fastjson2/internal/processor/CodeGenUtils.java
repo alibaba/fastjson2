@@ -226,7 +226,7 @@ public class CodeGenUtils {
         int size = IOUtils.stringSize(i);
         byte[] chars = new byte[baseSize + size];
         base.getBytes(0, baseSize, chars, 0);
-        IOUtils.writeInt32(chars, baseSize, i);
+        IOUtils.getChars(i, chars.length, chars);
         return new String(chars);
     }
 

@@ -18,7 +18,6 @@ final class CSVWriterUTF16
         extends CSVWriter {
     static final char[] BYTES_TRUE = "true".toCharArray();
     static final char[] BYTES_FALSE = "false".toCharArray();
-    static final char[] BYTES_LONG_MIN = "-9223372036854775808".toCharArray();
 
     final Writer out;
     final char[] chars;
@@ -100,16 +99,16 @@ final class CSVWriterUTF16
         off = IOUtils.writeLocalDate(chars, off, year, month, dayOfMonth);
         chars[off] = ' ';
         int v = DIGITS_K[hour];
-        chars[off + 1] = (char) (byte) (v >> 8);
-        chars[off + 2] = (char) (byte) v;
+        chars[off + 1] = (char) (byte) (v >> 16);
+        chars[off + 2] = (char) (byte) (v >> 24);
         chars[off + 3] = ':';
         v = DIGITS_K[minute];
-        chars[off + 4] = (char) (byte) (v >> 8);
-        chars[off + 5] = (char) (byte) v;
+        chars[off + 4] = (char) (byte) (v >> 16);
+        chars[off + 5] = (char) (byte) (v >> 24);
         chars[off + 6] = ':';
         v = DIGITS_K[second];
-        chars[off + 7] = (char) (byte) (v >> 8);
-        chars[off + 8] = (char) (byte) v;
+        chars[off + 7] = (char) (byte) (v >> 16);
+        chars[off + 8] = (char) (byte) (v >> 24);
         this.off = off + 9;
     }
 
@@ -167,7 +166,7 @@ final class CSVWriterUTF16
     }
 
     public void writeInt32(int intValue) {
-        int minCapacity = off + 11;
+        int minCapacity = off + 12;
         if (minCapacity - this.chars.length > 0) {
             flush();
         }
@@ -236,7 +235,7 @@ final class CSVWriterUTF16
             return;
         }
 
-        int minCapacity = off + 24;
+        int minCapacity = off + 25;
         if (minCapacity - this.chars.length > 0) {
             flush();
         }
@@ -262,6 +261,11 @@ final class CSVWriterUTF16
     public void writeLocalDateTime(LocalDateTime ldt) {
         if (ldt == null) {
             return;
+        }
+
+        int minCapacity = off + 16;
+        if (minCapacity - this.chars.length > 0) {
+            flush();
         }
 
         off = IOUtils.writeLocalDate(chars, off, ldt.getYear(), ldt.getMonthValue(), ldt.getDayOfMonth());
