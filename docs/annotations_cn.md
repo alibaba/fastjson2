@@ -180,6 +180,35 @@ public static class Bean {
 }
 ```
 
+### 2.2 配置序列化时保持原生类字段顺序
+
+从2.0.13版本开始，您可以通过`@JSONType(alphabetic = false)`配置序列化时保持原生类字段顺序。
+
+```java
+@Slf4j
+public class JSONTypeAlphabetic {
+
+    @JSONType(alphabetic = false)
+    public static class Bean {
+        public int f3;
+        public int f1;
+        public int f2;
+        public int f0;
+    }
+
+    @Test
+    public void test() {
+        Bean bean = new Bean();
+        bean.f0 = 101;
+        bean.f1 = 102;
+        bean.f2 = 103;
+        bean.f3 = 104;
+        log.info(JSON.toJSONString(bean));
+        //{"f3":104,"f1":102,"f2":103,"f0":101}
+    }
+}
+```
+
 # 3. 基于mixin机制注入Annotation
 当你需要定制化序列化一些LIB里面的类，你无法修改这些类的代码，你可以使用FASTJSON2的Minxin功能注入Annotation。
 具体使用介绍参考这里： [https://alibaba.github.io/fastjson2/mixin_cn](https://alibaba.github.io/fastjson2/mixin_cn)
