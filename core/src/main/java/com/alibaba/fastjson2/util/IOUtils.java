@@ -17,42 +17,55 @@ public class IOUtils {
 
     public static final int ALSE = BIG_ENDIAN ? 0x616c7365 : 0x65736c61;
     public static final long ALSE_64 = BIG_ENDIAN ? 0x61006c00730065L : 0x650073006c0061L;
-//
-//    static {
-//        {
-//            long int64 = (((long) 't') << 48) | (((long) 'r') << 32) | (((long) 'u') << 16) | 'e';
-//            System.out.println(Long.toHexString(int64));
-//            if (!BIG_ENDIAN) {
-//                int64 <<= 8;
-//                int64 = Long.reverseBytes(int64);
-//            }
-//            System.out.println(Long.toHexString(int64));
-//        }
-//    }
-
-    static final byte[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
-            'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
-
-    static final byte[] DigitTens = {'0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '1',
-            '1', '1', '1', '1', '2', '2', '2', '2', '2', '2', '2', '2', '2', '2', '3', '3', '3', '3', '3', '3', '3',
-            '3', '3', '3', '4', '4', '4', '4', '4', '4', '4', '4', '4', '4', '5', '5', '5', '5', '5', '5', '5', '5',
-            '5', '5', '6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '7', '7', '7', '7', '7', '7', '7', '7', '7',
-            '7', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9'};
-
-    static final byte[] DigitOnes = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5',
-            '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6',
-            '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7',
-            '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8',
-            '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
     static final int[] sizeTable = {9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999, Integer.MAX_VALUE};
     public static final int[] DIGITS_K = new int[1000];
+
     private static final byte[] MIN_INT_BYTES = "-2147483648".getBytes();
     private static final char[] MIN_INT_CHARS = "-2147483648".toCharArray();
     private static final byte[] MIN_LONG = "-9223372036854775808".getBytes();
 
+    public static final short[] PACKED_DIGITS;
+    public static final int[] PACKED_DIGITS_UTF16;
+
     static {
-        for (int i = 0; i < DIGITS_K.length; i++) {
+        short[] shorts = new short[]{
+                0x3030, 0x3130, 0x3230, 0x3330, 0x3430, 0x3530, 0x3630, 0x3730, 0x3830, 0x3930,
+                0x3031, 0x3131, 0x3231, 0x3331, 0x3431, 0x3531, 0x3631, 0x3731, 0x3831, 0x3931,
+                0x3032, 0x3132, 0x3232, 0x3332, 0x3432, 0x3532, 0x3632, 0x3732, 0x3832, 0x3932,
+                0x3033, 0x3133, 0x3233, 0x3333, 0x3433, 0x3533, 0x3633, 0x3733, 0x3833, 0x3933,
+                0x3034, 0x3134, 0x3234, 0x3334, 0x3434, 0x3534, 0x3634, 0x3734, 0x3834, 0x3934,
+                0x3035, 0x3135, 0x3235, 0x3335, 0x3435, 0x3535, 0x3635, 0x3735, 0x3835, 0x3935,
+                0x3036, 0x3136, 0x3236, 0x3336, 0x3436, 0x3536, 0x3636, 0x3736, 0x3836, 0x3936,
+                0x3037, 0x3137, 0x3237, 0x3337, 0x3437, 0x3537, 0x3637, 0x3737, 0x3837, 0x3937,
+                0x3038, 0x3138, 0x3238, 0x3338, 0x3438, 0x3538, 0x3638, 0x3738, 0x3838, 0x3938,
+                0x3039, 0x3139, 0x3239, 0x3339, 0x3439, 0x3539, 0x3639, 0x3739, 0x3839, 0x3939
+        };
+        int[] digits = new int[]{
+                0x300030, 0x310030, 0x320030, 0x330030, 0x340030, 0x350030, 0x360030, 0x370030, 0x380030, 0x390030,
+                0x300031, 0x310031, 0x320031, 0x330031, 0x340031, 0x350031, 0x360031, 0x370031, 0x380031, 0x390031,
+                0x300032, 0x310032, 0x320032, 0x330032, 0x340032, 0x350032, 0x360032, 0x370032, 0x380032, 0x390032,
+                0x300033, 0x310033, 0x320033, 0x330033, 0x340033, 0x350033, 0x360033, 0x370033, 0x380033, 0x390033,
+                0x300034, 0x310034, 0x320034, 0x330034, 0x340034, 0x350034, 0x360034, 0x370034, 0x380034, 0x390034,
+                0x300035, 0x310035, 0x320035, 0x330035, 0x340035, 0x350035, 0x360035, 0x370035, 0x380035, 0x390035,
+                0x300036, 0x310036, 0x320036, 0x330036, 0x340036, 0x350036, 0x360036, 0x370036, 0x380036, 0x390036,
+                0x300037, 0x310037, 0x320037, 0x330037, 0x340037, 0x350037, 0x360037, 0x370037, 0x380037, 0x390037,
+                0x300038, 0x310038, 0x320038, 0x330038, 0x340038, 0x350038, 0x360038, 0x370038, 0x380038, 0x390038,
+                0x300039, 0x310039, 0x320039, 0x330039, 0x340039, 0x350039, 0x360039, 0x370039, 0x380039, 0x390039
+        };
+
+        if (BIG_ENDIAN) {
+            for (int i = 0; i < shorts.length; i++) {
+                shorts[i] = Short.reverseBytes(shorts[i]);
+            }
+            for (int i = 0; i < digits.length; i++) {
+                digits[i] = Integer.reverseBytes(digits[i] << 8);
+            }
+        }
+        PACKED_DIGITS = shorts;
+        PACKED_DIGITS_UTF16 = digits;
+
+        for (int i = 0; i < 1000; i++) {
             DIGITS_K[i] = (i < 10 ? (2 << 24) : i < 100 ? (1 << 24) : 0)
                     + (((i / 100) + '0') << 16)
                     + ((((i / 10) % 10) + '0') << 8)
@@ -80,156 +93,169 @@ public class IOUtils {
     }
 
     public static void getChars(int i, int index, byte[] buf) {
-        int q, r, p = index;
-        byte sign = 0;
+        int q, r;
+        int charPos = index;
 
-        if (i < 0) {
-            sign = '-';
+        boolean negative = i < 0;
+        if (!negative) {
             i = -i;
         }
 
-        while (i >= 65536) {
+        // Generate two digits per iteration
+        while (i <= -100) {
             q = i / 100;
-            // really: r = i - (q * 100);
-            r = i - ((q << 6) + (q << 5) + (q << 2));
+            r = (q * 100) - i;
             i = q;
-            buf[--p] = DigitOnes[r];
-            buf[--p] = DigitTens[r];
+            charPos -= 2;
+            UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + charPos, PACKED_DIGITS[r]);
         }
 
-        // Fall thru to fast mode for smaller numbers
-        // assert(i <= 65536, i);
-        do {
-            q = (i * 52429) >>> (16 + 3);
-            r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
-            buf[--p] = DIGITS[r];
-            i = q;
-        } while (i != 0);
-        if (sign != 0) {
-            buf[--p] = sign;
+        // We know there are at most two digits left at this point.
+        if (i < -9) {
+            charPos -= 2;
+            UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + charPos, PACKED_DIGITS[-i]);
+        } else {
+            buf[--charPos] = (byte) ('0' - i);
+        }
+
+        if (negative) {
+            buf[charPos - 1] = (byte) '-';
         }
     }
 
     public static void getChars(int i, int index, char[] buf) {
-        int q, r, p = index;
-        char sign = 0;
+        int q, r;
+        int charPos = index;
 
-        if (i < 0) {
-            sign = '-';
+        boolean negative = (i < 0);
+        if (!negative) {
             i = -i;
         }
 
-        while (i >= 65536) {
+        // Get 2 digits/iteration using ints
+        while (i <= -100) {
             q = i / 100;
-            // really: r = i - (q * 100);
-            r = i - ((q << 6) + (q << 5) + (q << 2));
+            r = (q * 100) - i;
             i = q;
-            buf[--p] = (char) DigitOnes[r];
-            buf[--p] = (char) DigitTens[r];
+
+            charPos -= 2;
+            UNSAFE.putInt(
+                    buf,
+                    ARRAY_CHAR_BASE_OFFSET + (charPos << 1),
+                    PACKED_DIGITS_UTF16[r]);
         }
 
-        // Fall thru to fast mode for smaller numbers
-        // assert(i <= 65536, i);
-        do {
-            q = (i * 52429) >>> (16 + 3);
-            r = i - ((q << 3) + (q << 1)); // r = i-(q*10) ...
-            buf[--p] = (char) DIGITS[r];
-            i = q;
-        } while (i != 0);
-        if (sign != 0) {
-            buf[--p] = sign;
+        // We know there are at most two digits left at this point.
+        if (i < -9) {
+            charPos -= 2;
+            UNSAFE.putInt(
+                    buf,
+                    ARRAY_CHAR_BASE_OFFSET + (charPos << 1),
+                    PACKED_DIGITS_UTF16[-i]);
+        } else {
+            buf[--charPos] = (char) ('0' - i);
+        }
+
+        if (negative) {
+            buf[charPos - 1] = '-';
         }
     }
 
     public static void getChars(long i, int index, byte[] buf) {
         long q;
-        int r;
         int charPos = index;
-        byte sign = 0;
 
-        if (i < 0) {
-            sign = '-';
+        boolean negative = (i < 0);
+        if (!negative) {
             i = -i;
         }
 
         // Get 2 digits/iteration using longs until quotient fits into an int
-        while (i > Integer.MAX_VALUE) {
+        while (i <= Integer.MIN_VALUE) {
             q = i / 100;
-            // really: r = i - (q * 100);
-            r = (int) (i - ((q << 6) + (q << 5) + (q << 2)));
+            charPos -= 2;
+            UNSAFE.putShort(
+                    buf,
+                    ARRAY_BYTE_BASE_OFFSET + charPos,
+                    PACKED_DIGITS[(int) ((q * 100) - i)]);
             i = q;
-            buf[--charPos] = DigitOnes[r];
-            buf[--charPos] = DigitTens[r];
         }
 
         // Get 2 digits/iteration using ints
         int q2;
         int i2 = (int) i;
-        while (i2 >= 65536) {
+        while (i2 <= -100) {
             q2 = i2 / 100;
-            // really: r = i2 - (q * 100);
-            r = i2 - ((q2 << 6) + (q2 << 5) + (q2 << 2));
+            charPos -= 2;
+            UNSAFE.putShort(
+                    buf,
+                    ARRAY_BYTE_BASE_OFFSET + charPos,
+                    PACKED_DIGITS[(q2 * 100) - i2]);
             i2 = q2;
-            buf[--charPos] = DigitOnes[r];
-            buf[--charPos] = DigitTens[r];
         }
 
-        // Fall thru to fast mode for smaller numbers
-        // assert(i2 <= 65536, i2);
-        do {
-            q2 = (i2 * 52429) >>> (16 + 3);
-            r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
-            buf[--charPos] = DIGITS[r];
-            i2 = q2;
-        } while (i2 != 0);
-        if (sign != 0) {
-            buf[--charPos] = sign;
+        // We know there are at most two digits left at this point.
+        if (i2 < -9) {
+            charPos -= 2;
+            UNSAFE.putShort(
+                    buf,
+                    ARRAY_BYTE_BASE_OFFSET + charPos,
+                    PACKED_DIGITS[-i2]);
+        } else {
+            buf[--charPos] = (byte) ('0' - i2);
+        }
+
+        if (negative) {
+            buf[charPos - 1] = (byte) '-';
         }
     }
 
     public static void getChars(long i, int index, char[] buf) {
         long q;
-        int r;
         int charPos = index;
-        char sign = 0;
 
-        if (i < 0) {
-            sign = '-';
+        boolean negative = (i < 0);
+        if (!negative) {
             i = -i;
         }
 
         // Get 2 digits/iteration using longs until quotient fits into an int
-        while (i > Integer.MAX_VALUE) {
+        while (i <= Integer.MIN_VALUE) {
             q = i / 100;
-            // really: r = i - (q * 100);
-            r = (int) (i - ((q << 6) + (q << 5) + (q << 2)));
+            charPos -= 2;
+            UNSAFE.putInt(
+                    buf,
+                    ARRAY_CHAR_BASE_OFFSET + (charPos << 1),
+                    PACKED_DIGITS_UTF16[(int) ((q * 100) - i)]);
             i = q;
-            buf[--charPos] = (char) DigitOnes[r];
-            buf[--charPos] = (char) DigitTens[r];
         }
 
         // Get 2 digits/iteration using ints
         int q2;
         int i2 = (int) i;
-        while (i2 >= 65536) {
+        while (i2 <= -100) {
             q2 = i2 / 100;
-            // really: r = i2 - (q * 100);
-            r = i2 - ((q2 << 6) + (q2 << 5) + (q2 << 2));
+            charPos -= 2;
+            UNSAFE.putInt(
+                    buf,
+                    ARRAY_CHAR_BASE_OFFSET + (charPos << 1),
+                    PACKED_DIGITS_UTF16[(q2 * 100) - i2]);
             i2 = q2;
-            buf[--charPos] = (char) DigitOnes[r];
-            buf[--charPos] = (char) DigitTens[r];
         }
 
-        // Fall thru to fast mode for smaller numbers
-        // assert(i2 <= 65536, i2);
-        do {
-            q2 = (i2 * 52429) >>> (16 + 3);
-            r = i2 - ((q2 << 3) + (q2 << 1)); // r = i2-(q2*10) ...
-            buf[--charPos] = (char) DIGITS[r];
-            i2 = q2;
-        } while (i2 != 0);
-        if (sign != 0) {
-            buf[--charPos] = sign;
+        // We know there are at most two digits left at this point.
+        if (i2 < -9) {
+            charPos -= 2;
+            UNSAFE.putInt(
+                    buf,
+                    ARRAY_CHAR_BASE_OFFSET + (charPos << 1),
+                    PACKED_DIGITS_UTF16[-i2]);
+        } else {
+            buf[--charPos] = (char) ('0' - i2);
+        }
+
+        if (negative) {
+            buf[--charPos] = '-';
         }
     }
 
@@ -737,16 +763,10 @@ public class IOUtils {
         }
 
         bytes[off] = '-';
-        int v = DIGITS_K[month];
-        bytes[off + 1] = (byte) (v >> 8);
-        bytes[off + 2] = (byte) (v);
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 1, PACKED_DIGITS[month]);
         bytes[off + 3] = '-';
-        v = DIGITS_K[dayOfMonth];
-        bytes[off + 4] = (byte) (v >> 8);
-        bytes[off + 5] = (byte) (v);
-        off += 6;
-
-        return off;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 4, PACKED_DIGITS[dayOfMonth]);
+        return off + 6;
     }
 
     public static int writeLocalDate(char[] chars, int off, int year, int month, int dayOfMonth) {
@@ -784,26 +804,18 @@ public class IOUtils {
         chars[off + 1] = (char) (byte) (v >> 8);
         chars[off + 2] = (char) (byte) (v);
         chars[off + 3] = '-';
-        v = DIGITS_K[dayOfMonth];
-        chars[off + 4] = (char) (byte) (v >> 8);
-        chars[off + 5] = (char) (byte) (v);
+        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 4) << 1), PACKED_DIGITS_UTF16[dayOfMonth]);
         off += 6;
 
         return off;
     }
 
     public static int writeLocalTime(byte[] bytes, int off, LocalTime time) {
-        int v = DIGITS_K[time.getHour()];
-        bytes[off] = (byte) (v >> 8);
-        bytes[off + 1] = (byte) (v);
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off, PACKED_DIGITS[time.getHour()]);
         bytes[off + 2] = ':';
-        v = DIGITS_K[time.getMinute()];
-        bytes[off + 3] = (byte) (v >> 8);
-        bytes[off + 4] = (byte) (v);
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 3, PACKED_DIGITS[time.getMinute()]);
         bytes[off + 5] = ':';
-        v = DIGITS_K[time.getSecond()];
-        bytes[off + 6] = (byte) (v >> 8);
-        bytes[off + 7] = (byte) (v);
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 6, PACKED_DIGITS[time.getSecond()]);
         off += 8;
 
         int nano = time.getNano();
@@ -813,7 +825,7 @@ public class IOUtils {
             final int rem1 = nano - div * 1000;
 
             bytes[off] = '.';
-            v = DIGITS_K[div2];
+            int v = DIGITS_K[div2];
             bytes[off + 1] = (byte) (v >> 16);
             bytes[off + 2] = (byte) (v >> 8);
             bytes[off + 3] = (byte) v;
@@ -989,7 +1001,6 @@ public class IOUtils {
                 buf[pos++] = (byte) (v4 >> 8);
             }
             buf[pos] = (byte) v4;
-
             buf[pos + 1] = (byte) (v3 >> 16);
             buf[pos + 2] = (byte) (v3 >> 8);
             buf[pos + 3] = (byte) v3;

@@ -2229,21 +2229,11 @@ class JSONWriterUTF8
         bytes[off + 2] = (byte) (v >> 16);
         bytes[off + 3] = (byte) (v >> 8);
         bytes[off + 4] = (byte) v;
-        v = DIGITS_K[month];
-        bytes[off + 5] = (byte) (v >> 8);
-        bytes[off + 6] = (byte) v;
-        v = DIGITS_K[dayOfMonth];
-        bytes[off + 7] = (byte) (v >> 8);
-        bytes[off + 8] = (byte) v;
-        v = DIGITS_K[hour];
-        bytes[off + 9] = (byte) (v >> 8);
-        bytes[off + 10] = (byte) v;
-        v = DIGITS_K[minute];
-        bytes[off + 11] = (byte) (v >> 8);
-        bytes[off + 12] = (byte) v;
-        v = DIGITS_K[second];
-        bytes[off + 13] = (byte) (v >> 8);
-        bytes[off + 14] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 5, PACKED_DIGITS[month]);
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 7, PACKED_DIGITS[dayOfMonth]);
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 9, PACKED_DIGITS[hour]);
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 11, PACKED_DIGITS[minute]);
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 13, PACKED_DIGITS[second]);
         bytes[off + 15] = (byte) quote;
         this.off = off + 16;
     }
@@ -2274,25 +2264,15 @@ class JSONWriterUTF8
         bytes[off + 3] = (byte) (v >> 8);
         bytes[off + 4] = (byte) v;
         bytes[off + 5] = '-';
-        v = DIGITS_K[month];
-        bytes[off + 6] = (byte) (v >> 8);
-        bytes[off + 7] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 6, PACKED_DIGITS[month]);
         bytes[off + 8] = '-';
-        v = DIGITS_K[dayOfMonth];
-        bytes[off + 9] = (byte) (v >> 8);
-        bytes[off + 10] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 9, PACKED_DIGITS[dayOfMonth]);
         bytes[off + 11] = ' ';
-        v = DIGITS_K[hour];
-        bytes[off + 12] = (byte) (v >> 8);
-        bytes[off + 13] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 12, PACKED_DIGITS[hour]);
         bytes[off + 14] = ':';
-        v = DIGITS_K[minute];
-        bytes[off + 15] = (byte) (v >> 8);
-        bytes[off + 16] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 15, PACKED_DIGITS[minute]);
         bytes[off + 17] = ':';
-        v = DIGITS_K[second];
-        bytes[off + 18] = (byte) (v >> 8);
-        bytes[off + 19] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 18, PACKED_DIGITS[second]);
         bytes[off + 20] = (byte) quote;
         this.off = off + 21;
     }
@@ -2360,12 +2340,8 @@ class JSONWriterUTF8
         bytes[off + 2] = (byte) (v >> 16);
         bytes[off + 3] = (byte) (v >> 8);
         bytes[off + 4] = (byte) v;
-        v = DIGITS_K[month];
-        bytes[off + 5] = (byte) (v >> 8);
-        bytes[off + 6] = (byte) v;
-        v = DIGITS_K[dayOfMonth];
-        bytes[off + 7] = (byte) (v >> 8);
-        bytes[off + 8] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 5, PACKED_DIGITS[month]);
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 7, PACKED_DIGITS[dayOfMonth]);
         bytes[off + 9] = (byte) quote;
         this.off = off + 10;
     }
@@ -2395,17 +2371,11 @@ class JSONWriterUTF8
 
         final byte[] bytes = this.bytes;
         bytes[off] = (byte) quote;
-        int v = DIGITS_K[hour];
-        bytes[off + 1] = (byte) (v >> 8);
-        bytes[off + 2] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 1, PACKED_DIGITS[hour]);
         bytes[off + 3] = ':';
-        v = DIGITS_K[minute];
-        bytes[off + 4] = (byte) (v >> 8);
-        bytes[off + 5] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 4, PACKED_DIGITS[minute]);
         bytes[off + 6] = ':';
-        v = DIGITS_K[second];
-        bytes[off + 7] = (byte) (v >> 8);
-        bytes[off + 8] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 7, PACKED_DIGITS[second]);
         bytes[off + 9] = (byte) quote;
         this.off = off + 10;
     }
@@ -2572,25 +2542,15 @@ class JSONWriterUTF8
         bytes[off] = (byte) quote;
         off = IOUtils.writeInt32(bytes, off + 1, year);
         bytes[off] = '-';
-        int v = DIGITS_K[month];
-        bytes[off + 1] = (byte) (v >> 8);
-        bytes[off + 2] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 1, PACKED_DIGITS[month]);
         bytes[off + 3] = '-';
-        v = DIGITS_K[dayOfMonth];
-        bytes[off + 4] = (byte) (v >> 8);
-        bytes[off + 5] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 4, PACKED_DIGITS[dayOfMonth]);
         bytes[off + 6] = (byte) (timeZone ? 'T' : ' ');
-        v = DIGITS_K[hour];
-        bytes[off + 7] = (byte) (v >> 8);
-        bytes[off + 8] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 7, PACKED_DIGITS[hour]);
         bytes[off + 9] = ':';
-        v = DIGITS_K[minute];
-        bytes[off + 10] = (byte) (v >> 8);
-        bytes[off + 11] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 10, PACKED_DIGITS[minute]);
         bytes[off + 12] = ':';
-        v = DIGITS_K[second];
-        bytes[off + 13] = (byte) (v >> 8);
-        bytes[off + 14] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 13, PACKED_DIGITS[second]);
         off += 15;
 
         if (millis > 0) {
@@ -2600,7 +2560,7 @@ class JSONWriterUTF8
             final int rem1 = millis - div * 10;
 
             if (rem1 != 0) {
-                v = DIGITS_K[millis];
+                int v = DIGITS_K[millis];
                 bytes[off] = (byte) (v >> 16);
                 bytes[off + 1] = (byte) (v >> 8);
                 bytes[off + 2] = (byte) v;
@@ -2608,9 +2568,7 @@ class JSONWriterUTF8
             } else {
                 final int rem2 = div - div2 * 10;
                 if (rem2 != 0) {
-                    v = DIGITS_K[div];
-                    bytes[off] = (byte) (v >> 8);
-                    bytes[off + 1] = (byte) v;
+                    UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off, PACKED_DIGITS[div]);
                     off += 2;
                 } else {
                     bytes[off++] = (byte) (div2 + '0');
@@ -2625,17 +2583,13 @@ class JSONWriterUTF8
             } else {
                 int offsetAbs = Math.abs(offset);
                 bytes[off] = offset >= 0 ? (byte) '+' : (byte) '-';
-                v = DIGITS_K[offsetAbs];
-                bytes[off + 1] = (byte) (v >> 8);
-                bytes[off + 2] = (byte) v;
+                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 1, PACKED_DIGITS[offsetAbs]);
                 bytes[off + 3] = ':';
                 int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
                 if (offsetMinutes < 0) {
                     offsetMinutes = -offsetMinutes;
                 }
-                v = DIGITS_K[offsetMinutes];
-                bytes[off + 4] = (byte) (v >> 8);
-                bytes[off + 5] = (byte) v;
+                UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 4, PACKED_DIGITS[offsetMinutes]);
                 off += 6;
             }
         }
