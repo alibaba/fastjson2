@@ -28,7 +28,7 @@ public class AlongWriteBinaryArrayMappingTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("AlongWriteBinaryArrayMapping-fastjson2_jsonb millis : " + millis);
             // zulu8.68.0.21 :
-            // zulu11.52.13 : 1046
+            // zulu11.52.13 : 1046 1007
             // zulu17.32.13 :
         }
     }

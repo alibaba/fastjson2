@@ -12,7 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-import static com.alibaba.fastjson2.util.IOUtils.DIGITS_K;
+import static com.alibaba.fastjson2.util.IOUtils.*;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
 
 final class CSVWriterUTF8
         extends CSVWriter {
@@ -103,17 +104,11 @@ final class CSVWriterUTF8
         int off = this.off;
         off = IOUtils.writeLocalDate(bytes, off, year, month, dayOfMonth);
         bytes[off] = ' ';
-        int v = DIGITS_K[hour];
-        bytes[off + 1] = (byte) (v >> 8);
-        bytes[off + 2] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 1, PACKED_DIGITS[hour]);
         bytes[off + 3] = ':';
-        v = DIGITS_K[minute];
-        bytes[off + 4] = (byte) (v >> 8);
-        bytes[off + 5] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 4, PACKED_DIGITS[minute]);
         bytes[off + 6] = ':';
-        v = DIGITS_K[second];
-        bytes[off + 7] = (byte) (v >> 8);
-        bytes[off + 8] = (byte) v;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 7, PACKED_DIGITS[second]);
         this.off = off + 9;
     }
 

@@ -12,13 +12,14 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-import static com.alibaba.fastjson2.util.IOUtils.DIGITS_K;
+import static com.alibaba.fastjson2.util.IOUtils.PACKED_DIGITS_UTF16;
+import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_CHAR_BASE_OFFSET;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
 
 final class CSVWriterUTF16
         extends CSVWriter {
     static final char[] BYTES_TRUE = "true".toCharArray();
     static final char[] BYTES_FALSE = "false".toCharArray();
-    static final char[] BYTES_LONG_MIN = "-9223372036854775808".toCharArray();
 
     final Writer out;
     final char[] chars;
@@ -99,17 +100,11 @@ final class CSVWriterUTF16
         int off = this.off;
         off = IOUtils.writeLocalDate(chars, off, year, month, dayOfMonth);
         chars[off] = ' ';
-        int v = DIGITS_K[hour];
-        chars[off + 1] = (char) (byte) (v >> 8);
-        chars[off + 2] = (char) (byte) v;
+        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 1) << 1), PACKED_DIGITS_UTF16[hour]);
         chars[off + 3] = ':';
-        v = DIGITS_K[minute];
-        chars[off + 4] = (char) (byte) (v >> 8);
-        chars[off + 5] = (char) (byte) v;
+        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 4) << 1), PACKED_DIGITS_UTF16[minute]);
         chars[off + 6] = ':';
-        v = DIGITS_K[second];
-        chars[off + 7] = (char) (byte) (v >> 8);
-        chars[off + 8] = (char) (byte) v;
+        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 7) << 1), PACKED_DIGITS_UTF16[second]);
         this.off = off + 9;
     }
 
