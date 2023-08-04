@@ -3,8 +3,10 @@
 ## 1. JSONField
 JSONField是作用在Field、Method、Parameter上的Annotation，可以用来指定序列化字段的顺序、名字、格式、是否忽略、配置JSONReader/JSONWriter的Features等。
 
-### 1.1 定制名字序列化和反序列化
+### 1.1 定制序列化和反序列化时的属性名
+
 可以通过JSONField.name来配置序列化输出的字段名和反序列化是映射的字段名。
+
 * 配置在public field上
 ```java
 public class A {
@@ -36,10 +38,10 @@ public class VO {
 }
 ```
 
-### 1.3 忽略字段
+### 1.3 序列化/反序列化时忽略字段
 可以通过JSONField.serialize配置该字段是否要序列化，通过JSONField.deserialize配置该字段是否需要反序列化。
 
-* 配置序列化反序列化忽略特定字段
+* 配置序列化时忽略特定字段
 ```java
 public class VO {
       @JSONField(serialize = false)
@@ -158,11 +160,25 @@ public void test1() {
 }
 ```
 
-## 2. JSONType
-JSONType是配置在Class/Interface上的Annotation，可以配置改类型的所有字段的NamingStrategy、序列化和反序列化忽略的字段、JSONReader/JSONWriter的Features等。
+## 2. @JSONType
+JSONType是配置在类/接口上的注解，可以配置改类的所有字段的NamingStrategy、序列化和反序列化忽略的字段、JSONReader/JSONWriter的Features等。
 
-### 2.1 配置序列化和反序列化忽略的字段
+| JSONType注解支持方法      | 简介                                                        |
+|---------------------|-----------------------------------------------------------|
+| ignores             | 序列化时忽略某些字段                                                |
+| alphabetic          | 配置序列化时保持原生类字段顺序                                           |
+| serializeFeatures   | 配置序列化时`JSONWriter`的`Featrues`                             |
+| deserializeFeatures | 配置反序列化时`JSONReader`的`Featrues`                            |
+| orders              | 配置序列化时的字段顺序                                               |
+| naming              | 配置字段名的`NamingStrategy`,详细内容请参考`PropertyNamingStrategy`枚举类 |
+| serializer          | 自定义序列化行为                                                  |
+| deserializer        | 自定义反序列化行为                                                 |
+| serializeFilters    | 通过自定义列化`Filters`控制序列化行为                                   |
+
+### 2.1 配置序列化和反序列化时忽略某些字段
+
 在下面的例子中，序列化输出只包括id1，忽略id2和id3。
+
 ```java
 @JSONType(ignores = {"id2", "id3"})
 public static class Bean {
@@ -205,6 +221,70 @@ public class JSONTypeAlphabetic {
         bean.f3 = 104;
         log.info(JSON.toJSONString(bean));
         //{"f3":104,"f1":102,"f2":103,"f0":101}
+    }
+}
+```
+
+### 2.3 配置序列化时的`JSONReader`/`JSONWriter`的`Features`
+
+您可以通过`@JSONType(serialzeFeatures= ...)`或`@JSONType(deserializeFeatures = ...)`注解配置序列化和反序列时`JSONWriter`/`JSONReader`的`Features`。
+
+更多`Features`配置请参考 [features_cn.md](features_cn.md) 。
+
+```java
+@Slf4j
+public class JSONTypeFeatures {
+
+    // 反序列化时对字符串进行trim
+    // 序列化时输出为null的字段
+    @JSONType(deserializeFeatures = JSONReader.Feature.TrimString, serializeFeatures = JSONWriter.Feature.WriteNulls)
+    public static class OrdersBean {
+        public String filed1;
+        public String filed2;
+    }
+
+    @Test
+    public void test() {
+        OrdersBean bean = new OrdersBean();
+        bean.filed1 = "fastjson2";
+        
+        log.info(JSON.toJSONString(bean));
+        //{"filed1":"fastjson2","filed2":null}
+        String json="{\"filed1\":\"   fastjson2   \",\"filed2\":\"2\"}";
+        
+        OrdersBean bean2 = JSON.parseObject(json, OrdersBean.class);
+        log.info(bean2.filed1);
+        //fastjson2
+    }
+}
+```
+
+### 2.4 配置序列化时字段顺序
+
+您可以通过`@JSONType(orders = {"filed1", "filed2"})`注解指定序列化时的字段顺序。
+
+```java
+@Slf4j
+public class JSONTypeOrders {
+
+    @JSONType(orders = {"filed4", "filed3", "filed2", "filed1"})
+    public static class OrdersBean {
+        public String filed1;
+        public String filed2;
+        public String filed3;
+        public String filed4;
+  
+    }
+
+    @Test
+    public void test() {
+        OrdersBean bean = new OrdersBean();
+        bean.filed1 = "1";
+        bean.filed2 = "2";
+        bean.filed3 = "3";
+        bean.filed4 = "4";
+        log.info(JSON.toJSONString(bean));
+        //{"filed4":"4","filed3":"3","filed2":"2","filed1":"1"}
     }
 }
 ```
