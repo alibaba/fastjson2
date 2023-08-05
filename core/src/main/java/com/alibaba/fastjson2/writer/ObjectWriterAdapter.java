@@ -497,18 +497,24 @@ public class ObjectWriterAdapter<T>
             }
 
             if (contextNameFilter != null) {
-                beanContext = new BeanContext(
-                        objectClass,
-                        fieldWriter.method,
-                        field,
-                        fieldWriter.fieldName,
-                        fieldWriter.label,
-                        fieldWriter.fieldClass,
-                        fieldWriter.fieldType,
-                        fieldWriter.features,
-                        fieldWriter.format
-                );
-                filteredName = contextNameFilter.process(beanContext, object, filteredName, fieldValue);
+                if (beanContext == null) {
+                    if (field == null && fieldWriter.method != null) {
+                        field = BeanUtils.getDeclaredField(objectClass, fieldWriter.fieldName);
+                    }
+
+                    beanContext = new BeanContext(
+                            objectClass,
+                            fieldWriter.method,
+                            field,
+                            fieldWriter.fieldName,
+                            fieldWriter.label,
+                            fieldWriter.fieldClass,
+                            fieldWriter.fieldType,
+                            fieldWriter.features,
+                            fieldWriter.format
+                    );
+                    filteredName = contextNameFilter.process(beanContext, object, filteredName, fieldValue);
+                }
             }
 
             // property filter
