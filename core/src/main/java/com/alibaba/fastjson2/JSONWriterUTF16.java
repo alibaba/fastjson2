@@ -2031,12 +2031,10 @@ class JSONWriterUTF16
         if (year < 0 || year > 9999) {
             throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
         }
-        final int q = year / 1000;
-        int v = DIGITS_K[year - q * 1000];
-        bytes[off + 1] = (char) (byte) (q + '0');
-        bytes[off + 2] = (char) (byte) (v >> 16);
-        bytes[off + 3] = (char) (byte) (v >> 8);
-        bytes[off + 4] = (char) (byte) v;
+        int y01 = year / 100;
+        int y23 = year - y01 * 100;
+        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 1) << 1), PACKED_DIGITS_UTF16[y01]);
+        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 3) << 1), PACKED_DIGITS_UTF16[y23]);
         UNSAFE.putInt(bytes, ARRAY_CHAR_BASE_OFFSET + ((off + 5) << 1), PACKED_DIGITS_UTF16[month]);
         UNSAFE.putInt(bytes, ARRAY_CHAR_BASE_OFFSET + ((off + 7) << 1), PACKED_DIGITS_UTF16[dayOfMonth]);
         UNSAFE.putInt(bytes, ARRAY_CHAR_BASE_OFFSET + ((off + 9) << 1), PACKED_DIGITS_UTF16[hour]);
@@ -2062,24 +2060,11 @@ class JSONWriterUTF16
         if (year < 0 || year > 9999) {
             throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
         }
-        final int q = year / 1000;
-        int v = DIGITS_K[year - q * 1000];
-        chars[off + 1] = (char) (byte) (q + '0');
-        chars[off + 2] = (char) (byte) (v >> 16);
-        chars[off + 3] = (char) (byte) (v >> 8);
-        chars[off + 4] = (char) (byte) v;
-        chars[off + 5] = '-';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 6) << 1), PACKED_DIGITS_UTF16[month]);
-        chars[off + 8] = '-';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 9) << 1), PACKED_DIGITS_UTF16[dayOfMonth]);
-        chars[off + 11] = ' ';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 12) << 1), PACKED_DIGITS_UTF16[hour]);
-        chars[off + 14] = ':';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 15) << 1), PACKED_DIGITS_UTF16[minute]);
-        chars[off + 17] = ':';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 18) << 1), PACKED_DIGITS_UTF16[second]);
-        chars[off + 20] = (char) (byte) quote;
-        this.off = off + 21;
+        off = IOUtils.writeLocalDate(chars, off + 1, year, month, dayOfMonth);
+        chars[off] = ' ';
+        IOUtils.writeLocalTime(chars, off + 1, hour, minute, second);
+        chars[off + 9] = quote;
+        this.off = off + 10;
     }
 
     @Override
@@ -2151,40 +2136,29 @@ class JSONWriterUTF16
             ensureCapacity(minCapacity);
         }
 
-        final char[] bytes = this.chars;
-        bytes[off] = quote;
-        off = IOUtils.writeInt32(bytes, off + 1, year);
-        bytes[off] = '-';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 1) << 1), PACKED_DIGITS_UTF16[month]);
-        bytes[off + 3] = '-';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 4) << 1), PACKED_DIGITS_UTF16[dayOfMonth]);
-        bytes[off + 6] = (char) (byte) (timeZone ? 'T' : ' ');
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 7) << 1), PACKED_DIGITS_UTF16[hour]);
-        bytes[off + 9] = ':';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 10) << 1), PACKED_DIGITS_UTF16[minute]);
-        bytes[off + 12] = ':';
-        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 13) << 1), PACKED_DIGITS_UTF16[second]);
-        off += 15;
+        final char[] chars = this.chars;
+        chars[off] = quote;
+        off = IOUtils.writeLocalDate(chars, off + 1, year, month, dayOfMonth);
+        chars[off] = timeZone ? 'T' : ' ';
+        IOUtils.writeLocalTime(chars, off + 1, hour, minute, second);
+        off += 9;
 
         if (millis > 0) {
-            bytes[off++] = '.';
             int div = millis / 10;
             int div2 = div / 10;
             final int rem1 = millis - div * 10;
 
             if (rem1 != 0) {
-                int v = DIGITS_K[millis];
-                bytes[off] = (char) (byte) (v >> 16);
-                bytes[off + 1] = (char) (byte) (v >> 8);
-                bytes[off + 2] = (char) (byte) v;
-                off += 3;
+                IOUtils.putLong(chars, off, (DIGITS_K_64[millis] & 0xffffffffffff0000L) | DOT_X0);
+                off += 4;
             } else {
+                chars[off++] = '.';
                 final int rem2 = div - div2 * 10;
                 if (rem2 != 0) {
-                    UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + (off << 1), PACKED_DIGITS_UTF16[div]);
+                    UNSAFE.putInt(this.chars, ARRAY_CHAR_BASE_OFFSET + (off << 1), PACKED_DIGITS_UTF16[div]);
                     off += 2;
                 } else {
-                    bytes[off++] = (char) (byte) (div2 + '0');
+                    chars[off++] = (char) (byte) (div2 + '0');
                 }
             }
         }
@@ -2192,21 +2166,21 @@ class JSONWriterUTF16
         if (timeZone) {
             int offset = offsetSeconds / 3600;
             if (offsetSeconds == 0) {
-                bytes[off++] = 'Z';
+                chars[off++] = 'Z';
             } else {
                 int offsetAbs = Math.abs(offset);
-                bytes[off] = offset >= 0 ? '+' : '-';
-                UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 1) << 1), PACKED_DIGITS_UTF16[offsetAbs]);
-                bytes[off + 3] = ':';
+                chars[off] = offset >= 0 ? '+' : '-';
+                UNSAFE.putInt(this.chars, ARRAY_CHAR_BASE_OFFSET + ((off + 1) << 1), PACKED_DIGITS_UTF16[offsetAbs]);
+                chars[off + 3] = ':';
                 int offsetMinutes = (offsetSeconds - offset * 3600) / 60;
                 if (offsetMinutes < 0) {
                     offsetMinutes = -offsetMinutes;
                 }
-                UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 4) << 1), PACKED_DIGITS_UTF16[offsetMinutes]);
+                UNSAFE.putInt(this.chars, ARRAY_CHAR_BASE_OFFSET + ((off + 4) << 1), PACKED_DIGITS_UTF16[offsetMinutes]);
                 off += 6;
             }
         }
-        bytes[off] = quote;
+        chars[off] = quote;
         this.off = off + 1;
     }
 
@@ -2223,12 +2197,10 @@ class JSONWriterUTF16
         if (year < 0 || year > 9999) {
             throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
         }
-        final int q = year / 1000;
-        int v = DIGITS_K[year - q * 1000];
-        chars[off + 1] = (char) (byte) (q + '0');
-        chars[off + 2] = (char) (byte) (v >> 16);
-        chars[off + 3] = (char) (byte) (v >> 8);
-        chars[off + 4] = (char) (byte) v;
+        int y01 = year / 100;
+        int y23 = year - y01 * 100;
+        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 1) << 1), PACKED_DIGITS_UTF16[y01]);
+        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 3) << 1), PACKED_DIGITS_UTF16[y23]);
         UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 5) << 1), PACKED_DIGITS_UTF16[month]);
         UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 7) << 1), PACKED_DIGITS_UTF16[dayOfMonth]);
         chars[off + 9] = quote;
@@ -2360,8 +2332,7 @@ class JSONWriterUTF16
         LocalDate date = ldt.toLocalDate();
         off = IOUtils.writeLocalDate(chars, off, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
         chars[off++] = 'T';
-        LocalTime time = ldt.toLocalTime();
-        off = IOUtils.writeLocalTime(chars, off, time);
+        off = IOUtils.writeLocalTime(chars, off, ldt.toLocalTime());
         if (utc) {
             chars[off++] = 'Z';
         } else {

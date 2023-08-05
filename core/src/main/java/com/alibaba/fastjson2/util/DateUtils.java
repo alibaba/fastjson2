@@ -11390,42 +11390,12 @@ public class DateUtils {
         }
 
         int len = 19 + millislen + zonelen;
-        int y0 = year / 1000 + '0';
-        int y1 = (year / 100) % 10 + '0';
-        int y2 = (year / 10) % 10 + '0';
-        int y3 = year % 10 + '0';
-        int m0 = month / 10 + '0';
-        int m1 = month % 10 + '0';
-        int d0 = dayOfMonth / 10 + '0';
-        int d1 = dayOfMonth % 10 + '0';
-        int h0 = hour / 10 + '0';
-        int h1 = hour % 10 + '0';
-        int i0 = minute / 10 + '0';
-        int i1 = minute % 10 + '0';
-        int s0 = second / 10 + '0';
-        int s1 = second % 10 + '0';
 
         if (STRING_CREATOR_JDK8 != null) {
             char[] chars = new char[len];
-            chars[0] = (char) y0;
-            chars[1] = (char) y1;
-            chars[2] = (char) y2;
-            chars[3] = (char) y3;
-            chars[4] = '-';
-            chars[5] = (char) m0;
-            chars[6] = (char) m1;
-            chars[7] = '-';
-            chars[8] = (char) d0;
-            chars[9] = (char) d1;
+            IOUtils.writeLocalDate(chars, 0, year, month, dayOfMonth);
             chars[10] = ' ';
-            chars[11] = (char) h0;
-            chars[12] = (char) h1;
-            chars[13] = ':';
-            chars[14] = (char) i0;
-            chars[15] = (char) i1;
-            chars[16] = ':';
-            chars[17] = (char) s0;
-            chars[18] = (char) s1;
+            IOUtils.writeLocalTime(chars, 11, hour, minute, second);
             if (millislen > 0) {
                 chars[19] = '.';
                 for (int i = 20; i < len; ++i) {
@@ -11471,25 +11441,9 @@ public class DateUtils {
         }
 
         byte[] bytes = new byte[len];
-        bytes[0] = (byte) y0;
-        bytes[1] = (byte) y1;
-        bytes[2] = (byte) y2;
-        bytes[3] = (byte) y3;
-        bytes[4] = '-';
-        bytes[5] = (byte) m0;
-        bytes[6] = (byte) m1;
-        bytes[7] = '-';
-        bytes[8] = (byte) d0;
-        bytes[9] = (byte) d1;
+        IOUtils.writeLocalDate(bytes, 0, year, month, dayOfMonth);
         bytes[10] = ' ';
-        bytes[11] = (byte) h0;
-        bytes[12] = (byte) h1;
-        bytes[13] = ':';
-        bytes[14] = (byte) i0;
-        bytes[15] = (byte) i1;
-        bytes[16] = ':';
-        bytes[17] = (byte) s0;
-        bytes[18] = (byte) s1;
+        IOUtils.writeLocalTime(bytes, 11, hour, minute, second);
         if (millislen > 0) {
             bytes[19] = '.';
             for (int i = 20; i < len; ++i) {

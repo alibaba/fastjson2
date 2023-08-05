@@ -45,6 +45,11 @@ public class AlongWriteBinaryArrayMapping {
         bh.consume(JSON.toJSONBytes(mc, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.FieldBased));
     }
 
+    @Benchmark
+    public void jsonStr(Blackhole bh) {
+        bh.consume(JSON.toJSONString(mc, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.FieldBased));
+    }
+
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
                 .include(AlongWriteBinaryArrayMapping.class.getName())

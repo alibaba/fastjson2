@@ -2223,12 +2223,10 @@ class JSONWriterUTF8
         if (year < 0 || year > 9999) {
             throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
         }
-        final int q = year / 1000;
-        int v = DIGITS_K[year - q * 1000];
-        bytes[off + 1] = (byte) (q + '0');
-        bytes[off + 2] = (byte) (v >> 16);
-        bytes[off + 3] = (byte) (v >> 8);
-        bytes[off + 4] = (byte) v;
+        int y01 = year / 100;
+        int y23 = year - y01 * 100;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 1, PACKED_DIGITS[y01]);
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 3, PACKED_DIGITS[y23]);
         UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 5, PACKED_DIGITS[month]);
         UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 7, PACKED_DIGITS[dayOfMonth]);
         UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 9, PACKED_DIGITS[hour]);
@@ -2254,27 +2252,11 @@ class JSONWriterUTF8
 
         final byte[] bytes = this.bytes;
         bytes[off] = (byte) quote;
-        if (year < 0 || year > 9999) {
-            throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
-        }
-        final int q = year / 1000;
-        int v = DIGITS_K[year - q * 1000];
-        bytes[off + 1] = (byte) (q + '0');
-        bytes[off + 2] = (byte) (v >> 16);
-        bytes[off + 3] = (byte) (v >> 8);
-        bytes[off + 4] = (byte) v;
-        bytes[off + 5] = '-';
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 6, PACKED_DIGITS[month]);
-        bytes[off + 8] = '-';
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 9, PACKED_DIGITS[dayOfMonth]);
-        bytes[off + 11] = ' ';
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 12, PACKED_DIGITS[hour]);
-        bytes[off + 14] = ':';
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 15, PACKED_DIGITS[minute]);
-        bytes[off + 17] = ':';
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 18, PACKED_DIGITS[second]);
-        bytes[off + 20] = (byte) quote;
-        this.off = off + 21;
+        off = IOUtils.writeLocalDate(bytes, off + 1, year, month, dayOfMonth);
+        bytes[off] = ' ';
+        IOUtils.writeLocalTime(bytes, off + 1, hour, minute, second);
+        bytes[off + 9] = (byte) quote;
+        this.off = off + 10;
     }
 
     @Override
@@ -2334,12 +2316,10 @@ class JSONWriterUTF8
         if (year < 0 || year > 9999) {
             throw new IllegalArgumentException("Only 4 digits numbers are supported. Provided: " + year);
         }
-        final int q = year / 1000;
-        int v = DIGITS_K[year - q * 1000];
-        bytes[off + 1] = (byte) (q + '0');
-        bytes[off + 2] = (byte) (v >> 16);
-        bytes[off + 3] = (byte) (v >> 8);
-        bytes[off + 4] = (byte) v;
+        int y01 = year / 100;
+        int y23 = year - y01 * 100;
+        UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + off + 1, PACKED_DIGITS[y01]);
+        UNSAFE.putInt(bytes, ARRAY_BYTE_BASE_OFFSET + off + 3, PACKED_DIGITS[y23]);
         UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 5, PACKED_DIGITS[month]);
         UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 7, PACKED_DIGITS[dayOfMonth]);
         bytes[off + 9] = (byte) quote;
@@ -2371,11 +2351,7 @@ class JSONWriterUTF8
 
         final byte[] bytes = this.bytes;
         bytes[off] = (byte) quote;
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 1, PACKED_DIGITS[hour]);
-        bytes[off + 3] = ':';
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 4, PACKED_DIGITS[minute]);
-        bytes[off + 6] = ':';
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 7, PACKED_DIGITS[second]);
+        IOUtils.writeLocalTime(bytes, off + 1, hour, minute, second);
         bytes[off + 9] = (byte) quote;
         this.off = off + 10;
     }
@@ -2474,8 +2450,7 @@ class JSONWriterUTF8
         LocalDate date = ldt.toLocalDate();
         off = IOUtils.writeLocalDate(bytes, off, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
         bytes[off++] = 'T';
-        LocalTime time = ldt.toLocalTime();
-        off = IOUtils.writeLocalTime(bytes, off, time);
+        off = IOUtils.writeLocalTime(bytes, off, ldt.toLocalTime());
         if (utc) {
             bytes[off++] = 'Z';
         } else {
@@ -2540,32 +2515,21 @@ class JSONWriterUTF8
         final byte[] bytes = this.bytes;
         int off = this.off;
         bytes[off] = (byte) quote;
-        off = IOUtils.writeInt32(bytes, off + 1, year);
-        bytes[off] = '-';
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 1, PACKED_DIGITS[month]);
-        bytes[off + 3] = '-';
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 4, PACKED_DIGITS[dayOfMonth]);
-        bytes[off + 6] = (byte) (timeZone ? 'T' : ' ');
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 7, PACKED_DIGITS[hour]);
-        bytes[off + 9] = ':';
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 10, PACKED_DIGITS[minute]);
-        bytes[off + 12] = ':';
-        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 13, PACKED_DIGITS[second]);
-        off += 15;
+        off = IOUtils.writeLocalDate(bytes, off + 1, year, month, dayOfMonth);
+        bytes[off] = (byte) (timeZone ? 'T' : ' ');
+        IOUtils.writeLocalTime(bytes, off + 1, hour, minute, second);
+        off += 9;
 
         if (millis > 0) {
-            bytes[off++] = '.';
             int div = millis / 10;
             int div2 = div / 10;
             final int rem1 = millis - div * 10;
 
             if (rem1 != 0) {
-                int v = DIGITS_K[millis];
-                bytes[off] = (byte) (v >> 16);
-                bytes[off + 1] = (byte) (v >> 8);
-                bytes[off + 2] = (byte) v;
-                off += 3;
+                putInt(bytes, off, DIGITS_K_32[millis] & 0xffffff00 | '.');
+                off += 4;
             } else {
+                bytes[off++] = '.';
                 final int rem2 = div - div2 * 10;
                 if (rem2 != 0) {
                     UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off, PACKED_DIGITS[div]);
