@@ -28,13 +28,28 @@ public class AlongWriteBinaryArrayMappingTest {
             long millis = System.currentTimeMillis() - start;
             System.out.println("AlongWriteBinaryArrayMapping-fastjson2_jsonb millis : " + millis);
             // zulu8.68.0.21 :
-            // zulu11.52.13 : 1046 1007
+            // zulu11.52.13 : 1046 1007 1004
+            // zulu17.32.13 :
+        }
+    }
+
+    public static void jsonStr() throws Exception {
+        for (int j = 0; j < 5; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1_000_000; ++i) {
+                benchmark.jsonStr(BH);
+            }
+            long millis = System.currentTimeMillis() - start;
+            System.out.println("AlongWriteBinaryArrayMapping-fastjson2_jsonStr millis : " + millis);
+            // zulu8.68.0.21 :
+            // zulu11.52.13 : 1032
             // zulu17.32.13 :
         }
     }
 
     public static void main(String[] args) throws Exception {
 //        jsonb();
-        json();
+//        json();
+        jsonStr();
     }
 }
