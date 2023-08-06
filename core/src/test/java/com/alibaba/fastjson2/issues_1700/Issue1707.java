@@ -1,16 +1,14 @@
 package com.alibaba.fastjson2.issues_1700;
 
 import com.alibaba.fastjson2.JSON;
+import lombok.Getter;
+import lombok.Setter;
+import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
-
-import lombok.Getter;
-import lombok.Setter;
-
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
