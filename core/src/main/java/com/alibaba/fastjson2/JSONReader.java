@@ -2376,7 +2376,6 @@ public abstract class JSONReader
             return null;
         }
 
-        List list = new ArrayList();
         if (!nextIfArrayStart()) {
             throw new JSONException(info("syntax error : " + ch));
         }
@@ -2384,11 +2383,12 @@ public abstract class JSONReader
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = context.provider.getObjectReader(itemType, fieldBased);
 
-        while (!nextIfArrayEnd()) {
-            Object item = objectReader.readObject(this, null, null, 0);
-            list.add(item);
+        List list = new ArrayList();
+        for (Object item; !nextIfArrayEnd(); list.add(item)) {
+            int mark = offset;
+            item = objectReader.readObject(this, null, null, 0);
 
-            if (ch == '}' || ch == EOI) {
+            if (mark == offset || ch == '}' || ch == EOI) {
                 throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
             }
         }
@@ -2405,22 +2405,24 @@ public abstract class JSONReader
             return null;
         }
 
-        List list = new ArrayList(types.length);
         if (!nextIfArrayStart()) {
             throw new JSONException("syntax error : " + ch);
         }
 
-        for (int i = 0; ; ++i) {
-            if (nextIfArrayEnd()) {
-                break;
-            }
-            Type itemType = types[i];
-            Object item = read(itemType);
-            list.add(item);
+        int i = 0, max = types.length;
+        List list = new ArrayList(max);
 
-            if (ch == '}' || ch == EOI) {
+        for (Object item; !nextIfArrayEnd() && i < max; list.add(item)) {
+            int mark = offset;
+            item = read(types[i++]);
+
+            if (mark == offset || ch == '}' || ch == EOI) {
                 throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
             }
+        }
+
+        if (i != max) {
+            throw new JSONException(info("element length mismatch"));
         }
 
         if (comma = (ch == ',')) {
@@ -2439,30 +2441,26 @@ public abstract class JSONReader
             throw new JSONException(info("syntax error"));
         }
 
-        boolean arrayEnd = false;
-        Object[] list = new Object[types.length];
-        for (int i = 0; i < types.length; i++) {
-            if (i != 0) {
-                if (nextIfArrayEnd()) {
-                    arrayEnd = true;
-                    break;
-                } else if (isEnd()) {
-                    break;
-                }
-            }
+        int i = 0, max = types.length;
+        Object[] list = new Object[max];
 
-            Type itemType = types[i];
-            Object item = read(itemType);
-            list[i] = item;
+        for (Object item; !nextIfArrayEnd() && i < max; list[i++] = item) {
+            int mark = offset;
+            item = read(types[i]);
 
-            if (i == types.length - 1) {
-                arrayEnd = true;
+            if (mark == offset || ch == '}' || ch == EOI) {
+                throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
             }
         }
 
-        if (!arrayEnd) {
-            throw new JSONException(info("syntax error"));
+        if (i != max) {
+            throw new JSONException(info("element length mismatch"));
         }
+
+        if (comma = (ch == ',')) {
+            next();
+        }
+
         return list;
     }
 
