@@ -1590,8 +1590,6 @@ public class ObjectReaderBaseModule
             case "org.springframework.security.web.authentication.WebAuthenticationDetails":
                 internalMixin = "org.springframework.security.web.jackson2.WebAuthenticationDetailsMixin";
                 break;
-            default:
-                break;
         }
 
         if (internalMixin != null) {
@@ -1950,12 +1948,14 @@ public class ObjectReaderBaseModule
                     return typedMap((Class) rawType, ConcurrentSkipListMap.class, actualTypeParam0, actualTypeParam1);
                 }
 
-                if (rawType == LinkedHashMap.class || rawType == TreeMap.class) {
+                if (rawType == LinkedHashMap.class
+                        || rawType == TreeMap.class
+                        || rawType == Hashtable.class) {
                     return typedMap((Class) rawType, (Class) rawType, actualTypeParam0, actualTypeParam1);
                 }
 
                 if (rawType == Map.Entry.class) {
-                    return new ObjectReaderImplMapEntry(actualTypeArguments[0], actualTypeArguments[1]);
+                    return new ObjectReaderImplMapEntry(actualTypeParam0, actualTypeParam1);
                 }
 
                 switch (rawType.getTypeName()) {
@@ -1969,12 +1969,8 @@ public class ObjectReaderBaseModule
                     case "org.apache.commons.lang3.tuple.Pair":
                     case "org.apache.commons.lang3.tuple.ImmutablePair":
                         return new ApacheLang3Support.PairReader((Class) rawType, actualTypeParam0, actualTypeParam1);
-                    default:
-                        break;
                 }
-            }
-
-            if (actualTypeArguments.length == 1) {
+            } else if (actualTypeArguments.length == 1) {
                 Type itemType = actualTypeArguments[0];
                 Class itemClass = TypeUtils.getMapping(itemType);
 
@@ -2048,8 +2044,6 @@ public class ObjectReaderBaseModule
                     case "com.google.common.collect.ImmutableSet":
                     case "com.google.common.collect.SingletonImmutableSet":
                         return ObjectReaderImplList.of(type, null, 0);
-                    default:
-                        break;
                 }
 
                 if (rawType == Optional.class) {
