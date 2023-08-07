@@ -24,7 +24,7 @@ final class ConstructorFunction<T>
 
     final Parameter[] parameters;
     final String[] paramNames;
-    final boolean kotlinMaker;
+    final boolean marker;
     final long[] hashCodes;
     final List<Constructor> alternateConstructors;
     Map<Set<Long>, Constructor> alternateConstructorMap;
@@ -40,10 +40,10 @@ final class ConstructorFunction<T>
             Constructor markerConstructor,
             String... paramNames
     ) {
-        this.kotlinMaker = markerConstructor != null;
         this.function = function;
         this.biFunction = biFunction;
-        this.constructor = kotlinMaker ? markerConstructor : constructor;
+        this.marker = markerConstructor != null;
+        this.constructor = marker ? markerConstructor : constructor;
         this.parameters = constructor.getParameters();
         this.paramNames = paramNames;
         this.hashCodes = new long[parameters.length];
@@ -179,7 +179,7 @@ final class ConstructorFunction<T>
         final int size = parameters.length;
         Object[] args = new Object[constructor.getParameterCount()];
 
-        if (kotlinMaker) {
+        if (marker) {
             int i = 0, flag = 0;
             for (int n; i < size; i = n) {
                 Object arg = values.get(hashCodes[i]);
