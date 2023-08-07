@@ -14,6 +14,9 @@ If your project uses `kotlin`, you can use the` Fastjson-Kotlin` module, and use
 </dependency>
 ```
 
+Add standard library(kotlin-stdlib) and reflection library(kotlin-reflect) as appropriate.
+If the data class is used or the parameters are passed in through constructor, then add reflection library.
+
 ```xml
 <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
