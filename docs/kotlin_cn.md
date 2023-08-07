@@ -14,6 +14,9 @@
 </dependency>
 ```
 
+酌情添加标准库(kotlin-stdlib)、反射库(kotlin-reflect)，
+其中若使用数据类(data class)、通过构造函数传入参数则添加反射库。
+
 ```xml
 <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
