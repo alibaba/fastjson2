@@ -15,7 +15,7 @@ import java.util.List;
  * @since 2.0.39
  */
 public class KotlinUtils {
-    public final static int STATE;
+    public static final int STATE;
 
     static {
         int state = 0;
