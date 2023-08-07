@@ -152,8 +152,7 @@ public class ObjectWriterBaseModule
                         break;
                     case "kotlin.Metadata":
                         beanInfo.kotlin = true;
-                        BeanUtils.getKotlinConstructor(objectClass, beanInfo);
-                        beanInfo.createParameterNames = BeanUtils.getKotlinConstructorParameters(objectClass);
+                        KotlinUtils.getConstructor(objectClass, beanInfo);
                         break;
                     default:
                         break;
