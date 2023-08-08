@@ -292,7 +292,8 @@ class JSONReaderUTF8
             ch = bytes[offset++];
         }
 
-        if (ch < 0) validate:{
+        validate:
+        if (ch < 0) {
             ch &= 0xFF;
             switch (ch >> 4) {
                 case 12:
@@ -372,7 +373,8 @@ class JSONReaderUTF8
             }
         }
 
-        if (ch < 0) validate:{
+        validate:
+        if (ch < 0) {
             ch &= 0xFF;
             switch (ch >> 4) {
                 case 12:
@@ -500,7 +502,8 @@ class JSONReaderUTF8
             ch = bytes[offset++];
         }
 
-        if (ch < 0) validate:{
+        validate:
+        if (ch < 0) {
             ch &= 0xFF;
             switch (ch >> 4) {
                 case 12:
@@ -580,38 +583,34 @@ class JSONReaderUTF8
             }
         }
 
+        validate:
         if (ch < 0) {
             ch &= 0xFF;
             switch (ch >> 4) {
                 case 12:
                 case 13: {
-                    /* 110x xxxx   10xx xxxx*/
-                    offset += 1;
-                    int char2 = bytes[offset - 1];
-                    if ((char2 & 0xC0) != 0x80) {
-                        throw new JSONException(
-                                "malformed input around byte " + offset);
+                    int c2 = bytes[offset];
+                    if ((c2 & 0xC0) != 0x80) {
+                        break;
+                    } else {
+                        ch = ((ch & 0x1F) << 6) | (c2 & 0x3F);
+                        offset += 1;
+                        break validate;
                     }
-                    ch = ((ch & 0x1F) << 6) | (char2 & 0x3F);
-                    break;
                 }
                 case 14: {
-                    /* 1110 xxxx  10xx xxxx  10xx xxxx */
-                    offset += 2;
-                    int char2 = bytes[offset - 2];
-                    int char3 = bytes[offset - 1];
-                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
-                        throw new JSONException("malformed input around byte " + (offset - 1));
+                    int c2 = bytes[offset];
+                    int c3 = bytes[offset + 1];
+                    if (((c2 & 0xC0) != 0x80) || ((c3 & 0xC0) != 0x80)) {
+                        break;
+                    } else {
+                        ch = (((ch & 0x0F) << 12) | ((c2 & 0x3F) << 6) | (c3 & 0x3F));
+                        offset += 2;
+                        break validate;
                     }
-                    ch = (((ch & 0x0F) << 12) |
-                            ((char2 & 0x3F) << 6) |
-                            (char3 & 0x3F));
-                    break;
                 }
-                default:
-                    /* 10xx xxxx,  1111 xxxx */
-                    throw new JSONException("malformed input around byte " + offset);
             }
+            throw new JSONException("malformed input around byte " + offset);
         }
 
         this.ch = (char) ch;
