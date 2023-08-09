@@ -13,6 +13,9 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
+import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_BYTE_BASE_OFFSET;
+import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
+
 public class BytesAsciiCheck {
     static byte[] bytes;
 
@@ -62,15 +65,7 @@ public class BytesAsciiCheck {
     public static boolean hasNegatives_8(byte[] bytes, int off, int len) {
         int i = off;
         while (i + 8 <= off + len) {
-            byte b0 = bytes[0];
-            byte b1 = bytes[1];
-            byte b2 = bytes[2];
-            byte b3 = bytes[3];
-            byte b4 = bytes[4];
-            byte b5 = bytes[5];
-            byte b6 = bytes[6];
-            byte b7 = bytes[6];
-            if (b0 < 0 || b1 < 0 || b2 < 0 || b3 < 0 || b4 < 0 || b5 < 0 || b6 < 0 || b7 < 0) {
+            if ((UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + i) & 0x8080808080808080L) != 0) {
                 return true;
             }
             i += 8;
