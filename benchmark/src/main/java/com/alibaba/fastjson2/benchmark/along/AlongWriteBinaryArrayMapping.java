@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.along.vo.SkillFire_S2C_Msg;
+import io.fury.Fury;
+import io.fury.Language;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -18,36 +20,53 @@ import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 public class AlongWriteBinaryArrayMapping {
-    static SkillFire_S2C_Msg mc;
+    static SkillFire_S2C_Msg object;
+    static Fury fury;
 
     static {
         try {
             InputStream is = AlongWriteBinaryArrayMapping.class.getClassLoader().getResourceAsStream("data/along.json");
             String str = IOUtils.toString(is, "UTF-8");
-            mc = JSONReader.of(str)
+            object = JSONReader.of(str)
                     .read(SkillFire_S2C_Msg.class);
+
+            fury = Fury.builder()
+                    .withLanguage(Language.JAVA)
+                    .withRefTracking(false)
+                    .requireClassRegistration(false)
+                    .withNumberCompressed(true)
+                    .build();
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
     }
 
     public int jsonbSize() {
-        return JSONB.toBytes(mc, JSONWriter.Feature.BeanToArray).length;
+        return JSONB.toBytes(object, JSONWriter.Feature.BeanToArray).length;
     }
 
     @Benchmark
     public void jsonb(Blackhole bh) {
-        bh.consume(JSONB.toBytes(mc, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.FieldBased));
+        bh.consume(JSONB.toBytes(object, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.FieldBased));
     }
 
     @Benchmark
+    public void fury(Blackhole bh) {
+        bh.consume(fury.serialize(object));
+    }
+
+    public int furySize() {
+        return fury.serialize(object).length;
+    }
+
+//    @Benchmark
     public void json(Blackhole bh) {
-        bh.consume(JSON.toJSONBytes(mc, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.FieldBased));
+        bh.consume(JSON.toJSONBytes(object, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.FieldBased));
     }
 
-    @Benchmark
+//    @Benchmark
     public void jsonStr(Blackhole bh) {
-        bh.consume(JSON.toJSONString(mc, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.FieldBased));
+        bh.consume(JSON.toJSONString(object, JSONWriter.Feature.BeanToArray, JSONWriter.Feature.FieldBased));
     }
 
     public static void main(String[] args) throws RunnerException {

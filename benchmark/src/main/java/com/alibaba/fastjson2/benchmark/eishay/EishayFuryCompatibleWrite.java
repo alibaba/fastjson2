@@ -2,6 +2,8 @@ package com.alibaba.fastjson2.benchmark.eishay;
 
 import com.alibaba.fastjson2.*;
 import com.alibaba.fastjson2.benchmark.eishay.vo.MediaContent;
+import io.fury.Fury;
+import io.fury.ThreadSafeFury;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -30,13 +32,13 @@ public class EishayFuryCompatibleWrite {
     static JSONWriter.Context context = new JSONWriter.Context(
             JSONFactory.getDefaultObjectWriterProvider(), features
     );
-//
-//    static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
-//            .withLanguage(io.fury.Language.JAVA)
-//            .withReferenceTracking(true)
-//            .disableSecureMode()
-//            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
-//            .buildThreadSafeFury();
+
+    static ThreadSafeFury furyCompatible = Fury.builder()
+            .withLanguage(io.fury.Language.JAVA)
+            .withRefTracking(true)
+            .requireClassRegistration(false)
+            .withCompatibleMode(io.fury.serializer.CompatibleMode.COMPATIBLE)
+            .buildThreadSafeFury();
 
     static {
         try {
@@ -59,10 +61,10 @@ public class EishayFuryCompatibleWrite {
         return JSONB.toBytes(mc, context).length;
     }
 
-//    @Benchmark
+    @Benchmark
     public void fury(Blackhole bh) {
-//        byte[] bytes = furyCompatible.serialize(mc);
-//        bh.consume(bytes);
+        byte[] bytes = furyCompatible.serialize(mc);
+        bh.consume(bytes);
     }
 
     public int furySize() {

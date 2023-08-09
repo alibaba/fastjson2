@@ -31,13 +31,13 @@ public class EishayFuryCompatibleParse {
 
     static byte[] jsonbBytes;
     static byte[] furyCompatibleBytes;
-//
-//    static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
-//            .withLanguage(io.fury.Language.JAVA)
-//            .withReferenceTracking(true)
-//            .disableSecureMode()
-//            .withCompatibleMode(io.fury.serializers.CompatibleMode.COMPATIBLE)
-//            .buildThreadSafeFury();
+
+    static io.fury.ThreadSafeFury furyCompatible = io.fury.Fury.builder()
+            .withLanguage(io.fury.Language.JAVA)
+            .withRefTracking(true)
+            .requireClassRegistration(false)
+            .withCompatibleMode(io.fury.serializer.CompatibleMode.COMPATIBLE)
+            .buildThreadSafeFury();
 
     static {
         try {
@@ -47,7 +47,7 @@ public class EishayFuryCompatibleParse {
                     .read(MediaContent.class);
 
             jsonbBytes = JSONB.toBytes(mc, EishayFuryCompatibleWrite.features);
-//            furyCompatibleBytes = furyCompatible.serialize(mc);
+            furyCompatibleBytes = furyCompatible.serialize(mc);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -59,10 +59,10 @@ public class EishayFuryCompatibleParse {
         bh.consume(object);
     }
 
-//    @Benchmark
+    @Benchmark
     public void fury(Blackhole bh) {
-//        Object object = furyCompatible.deserialize(furyCompatibleBytes);
-//        bh.consume(object);
+        Object object = furyCompatible.deserialize(furyCompatibleBytes);
+        bh.consume(object);
     }
 
     public static void main(String[] args) throws Exception {

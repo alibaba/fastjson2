@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.along.vo.SkillFire_S2C_Msg;
+import io.fury.Fury;
+import io.fury.Language;
 import org.apache.commons.io.IOUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -19,15 +21,26 @@ import static com.alibaba.fastjson2.JSONReader.Feature.FieldBased;
 import static com.alibaba.fastjson2.JSONReader.Feature.SupportArrayToBean;
 
 public class AlongParseBinaryArrayMapping {
-    static SkillFire_S2C_Msg mc;
+    static Fury fury;
+
+    static SkillFire_S2C_Msg object;
     static byte[] fastjson2JSONBBytes;
+    static byte[] furyBytes;
 
     static {
         try {
             InputStream is = AlongParseBinaryArrayMapping.class.getClassLoader().getResourceAsStream("data/along.json");
             String str = IOUtils.toString(is, "UTF-8");
-            mc = JSONReader.of(str).read(SkillFire_S2C_Msg.class);
-            fastjson2JSONBBytes = JSONB.toBytes(mc, JSONWriter.Feature.BeanToArray);
+            object = JSONReader.of(str).read(SkillFire_S2C_Msg.class);
+
+            fury = Fury.builder().withLanguage(Language.JAVA)
+                    .withRefTracking(false)
+                    .requireClassRegistration(false)
+                    .withNumberCompressed(true)
+                    .build();
+
+            fastjson2JSONBBytes = JSONB.toBytes(object, JSONWriter.Feature.BeanToArray);
+            furyBytes = fury.serialize(object);
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
@@ -36,6 +49,11 @@ public class AlongParseBinaryArrayMapping {
     @Benchmark
     public void jsonb(Blackhole bh) {
         bh.consume(JSONB.parseObject(fastjson2JSONBBytes, SkillFire_S2C_Msg.class, SupportArrayToBean, FieldBased));
+    }
+
+    @Benchmark
+    public void fury(Blackhole bh) {
+        bh.consume(fury.deserializeJavaObject(furyBytes, SkillFire_S2C_Msg.class));
     }
 
     public static void main(String[] args) throws Exception {

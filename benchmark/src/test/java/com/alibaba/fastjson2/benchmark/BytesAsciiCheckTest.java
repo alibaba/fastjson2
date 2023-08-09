@@ -1,5 +1,7 @@
 package com.alibaba.fastjson2.benchmark;
 
+import org.junit.jupiter.api.Test;
+
 import static com.alibaba.fastjson2.benchmark.JMH.BH;
 
 public class BytesAsciiCheckTest {
@@ -58,9 +60,20 @@ public class BytesAsciiCheckTest {
         }
     }
 
+    @Test
+    public void test() {
+//        System.out.println(Integer.toHexString(-1) + "\t" + Integer.toBinaryString(-1));
+//        System.out.println(Integer.toHexString(-2) + "\t" + Integer.toBinaryString(-2));
+//        System.out.println(Integer.toHexString(Integer.MIN_VALUE) + "\t" + Integer.toBinaryString(Integer.MIN_VALUE));
+//        System.out.println(Integer.toHexString(Integer.MIN_VALUE + 1) + "\t" + Integer.toBinaryString(Integer.MIN_VALUE + 1));
+        long x = 0x8080808080808080L;
+        System.out.println(Long.toBinaryString(x));
+        System.out.println(x);
+    }
+
     public static void main(String[] args) throws Throwable {
 //        handler();
-        lambda();
+//        lambda();
 //        direct();
 //        direct8();
     }
