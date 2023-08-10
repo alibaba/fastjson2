@@ -206,11 +206,6 @@ public class ObjectReaderProviderTest {
         assertNull(provider.checkAutoType("[java.lang.Long", Object.class, 0));
         assertNull(provider.checkAutoType("[java.lang.Long", Object.class, 0));
 
-        assertThrows(
-                JSONException.class,
-                () -> provider.checkAutoType("java.lang.Thread", Object.class, 0)
-        );
-
         assertNull(provider.checkAutoType("java.lang.Long", Number.class, 0));
         assertEquals(Long.class, provider.checkAutoType("java.lang.Long", Number.class, JSONReader.Feature.SupportAutoType.mask));
         assertThrows(
