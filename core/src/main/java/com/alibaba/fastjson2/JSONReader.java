@@ -4415,6 +4415,10 @@ public abstract class JSONReader
         ErrorOnNoneSerializable(1 << 2),
         SupportArrayToBean(1 << 3),
         InitStringFieldAsEmpty(1 << 4),
+        /**
+         * It is not safe to explicitly turn on autoType, it is recommended to use AutoTypeBeforeHandler
+         */
+        @Deprecated
         SupportAutoType(1 << 5),
         SupportSmartMatch(1 << 6),
         UseNativeObject(1 << 7),
