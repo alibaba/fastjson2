@@ -396,7 +396,9 @@ public class ObjectWriterAdapter<T>
         }
 
         JSONWriter.Context context = jsonWriter.context;
-        boolean ignoreNonFieldGetter = ((context.getFeatures() | features) & IgnoreNonFieldGetter.mask) != 0;
+        long features2 = context.getFeatures() | features;
+        boolean refDetect = (features2 & ReferenceDetection.mask) != 0;
+        boolean ignoreNonFieldGetter = (features2 & IgnoreNonFieldGetter.mask) != 0;
 
         BeforeFilter beforeFilter = context.getBeforeFilter();
         if (beforeFilter != null) {
@@ -485,6 +487,10 @@ public class ObjectWriterAdapter<T>
             }
 
             if (fieldValue == null && !jsonWriter.isWriteNulls()) {
+                continue;
+            }
+
+            if (!refDetect && ("this$0".equals(fieldWriterFieldName) || "this$1".equals(fieldWriterFieldName) || "this$2".equals(fieldWriterFieldName))) {
                 continue;
             }
 
