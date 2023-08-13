@@ -10,34 +10,33 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Issue1713 {
-    @Data
-    public static class Bean {
-        private String filed1;
-        public String filed2;
-    }
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+public class Issue1713 {
     @Test
     public void test() {
-        Bean bean = new Bean();
-        bean.filed1 = "1";
-        bean.filed2 = "2";
+        UserInfo userInfo = new UserInfo();
+        userInfo.setMobile("13012345678");
+        userInfo.setUserId(123L);
         List<Filter> filters = new ArrayList<>();
         filters.add((ContextValueFilter) (context, object, name, value) -> {
-            System.out.println("ContextValueFilter field: " + context.getField());
+            assertNotNull(context.getField());
             return value;
         });
-
         filters.add((ContextNameFilter) (context, object, name, value) -> {
-            System.out.println("ContextNameFilter field: " + context.getField());
+            assertNotNull(context.getField());
             return name;
         });
+        assertEquals(
+                "{\"mobile\":\"13012345678\",\"userId\":123}",
+                JSON.toJSONString(userInfo, filters.toArray(new Filter[0]))
+        );
+    }
 
-        System.out.print(JSON.toJSONString(bean, filters.toArray(new Filter[1])));
-//        ContextNameFilter field: private java.lang.String com.alibaba.fastjson2.issuse_1700.Issue1713$Bean.filed1
-//        ContextValueFilter field: private java.lang.String com.alibaba.fastjson2.issuse_1700.Issue1713$Bean.filed1
-//        ContextNameFilter field: public java.lang.String com.alibaba.fastjson2.issuse_1700.Issue1713$Bean.filed2
-//        ContextValueFilter field: public java.lang.String com.alibaba.fastjson2.issuse_1700.Issue1713$Bean.filed2
-//        {"filed1":"1","filed2":"2"}
+    @Data
+    public static class UserInfo{
+        private String mobile;
+        private long userId;
     }
 }
