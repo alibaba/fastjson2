@@ -424,7 +424,7 @@ public abstract class FieldReader<T>
                 ObjectReader initReader = getInitReader();
                 if (initReader != null) {
                     String fieldValueJson = JSON.toJSONString(fieldValue);
-                    typedFieldValue = initReader.readObject(JSONReader.of(fieldValueJson), null, null, features);
+                    typedFieldValue = initReader.readObject(JSONReader.of(fieldValueJson), fieldType, fieldName, features);
                 } else {
                     typedFieldValue = TypeUtils.cast(fieldValue, fieldClass, provider);
                 }
