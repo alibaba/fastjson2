@@ -1384,17 +1384,42 @@ public class ObjectWriterBaseModule
             }
 
             if (StackTraceElement.class == clazz) {
+                // return createFieldWriter(null, null, fieldName, 0, 0, null, null, fieldClass, fieldClass, null, function);
                 if (STACK_TRACE_ELEMENT_WRITER == null) {
+                    ObjectWriterCreator creator = provider.getCreator();
                     STACK_TRACE_ELEMENT_WRITER = new ObjectWriterAdapter(
                             StackTraceElement.class,
                             null,
                             null,
                             0,
                             Arrays.asList(
-                                    ObjectWriters.fieldWriter("fileName", String.class, StackTraceElement::getFileName),
-                                    ObjectWriters.fieldWriter("lineNumber", StackTraceElement::getLineNumber),
-                                    ObjectWriters.fieldWriter("className", String.class, StackTraceElement::getClassName),
-                                    ObjectWriters.fieldWriter("methodName", String.class, StackTraceElement::getMethodName)
+                                    creator.createFieldWriter(
+                                            "fileName",
+                                            String.class,
+                                            BeanUtils.getDeclaredField(StackTraceElement.class, "fileName"),
+                                            BeanUtils.getMethod(StackTraceElement.class, "getFileName"),
+                                            StackTraceElement::getFileName
+                                    ),
+                                    creator.createFieldWriter(
+                                            "lineNumber",
+                                            BeanUtils.getDeclaredField(StackTraceElement.class, "lineNumber"),
+                                            BeanUtils.getMethod(StackTraceElement.class, "getLineNumber"),
+                                            StackTraceElement::getLineNumber
+                                    ),
+                                    creator.createFieldWriter(
+                                            "className",
+                                            String.class,
+                                            BeanUtils.getDeclaredField(StackTraceElement.class, "declaringClass"),
+                                            BeanUtils.getMethod(StackTraceElement.class, "getClassName"),
+                                            StackTraceElement::getClassName
+                                    ),
+                                    creator.createFieldWriter(
+                                            "methodName",
+                                            String.class,
+                                            BeanUtils.getDeclaredField(StackTraceElement.class, "methodName"),
+                                            BeanUtils.getMethod(StackTraceElement.class, "getMethodName"),
+                                            StackTraceElement::getMethodName
+                                    )
                             )
                     );
                 }

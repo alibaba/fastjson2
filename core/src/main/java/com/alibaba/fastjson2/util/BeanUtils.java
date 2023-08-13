@@ -1197,7 +1197,16 @@ public abstract class BeanUtils {
             });
         }
 
-        return fields[0] != null ? fields[0] : fields[1];
+        Field field = fields[0] != null ? fields[0] : fields[1];
+        if (Throwable.class.isAssignableFrom(objectClass)) {
+            if (returnType == String.class && (field == null && methodName.equals("getMessage") || field == null && methodName.equals("getLocalizedMessage"))) {
+                field = getDeclaredField(objectClass, "detailMessage");
+            } else if (returnType == Throwable[].class && methodName.equals("getSuppressed")) {
+                field = getDeclaredField(objectClass, "suppressedExceptions");
+            }
+        }
+
+        return field;
     }
 
     public static String getterName(String methodName, String namingStrategy) {

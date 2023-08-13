@@ -968,6 +968,10 @@ public class ObjectWriterCreator {
         return new FieldWriterInt32ValFunc(fieldName, 0, 0, null, null, null, null, function);
     }
 
+    public <T> FieldWriter createFieldWriter(String fieldName, Field field, Method method, ToIntFunction<T> function) {
+        return new FieldWriterInt32ValFunc(fieldName, 0, 0, null, null, field, method, function);
+    }
+
     public <T> FieldWriter createFieldWriter(String fieldName, ToShortFunction<T> function) {
         return new FieldWriterInt16ValFunc(fieldName, 0, 0, null, null, null, null, function);
     }
@@ -994,6 +998,16 @@ public class ObjectWriterCreator {
             Function<T, V> function
     ) {
         return createFieldWriter(null, null, fieldName, 0, 0, null, null, fieldClass, fieldClass, null, function);
+    }
+
+    public <T, V> FieldWriter createFieldWriter(
+            String fieldName,
+            Class fieldClass,
+            Field field,
+            Method method,
+            Function<T, V> function
+    ) {
+        return createFieldWriter(null, null, fieldName, 0, 0, null, null, fieldClass, fieldClass, field, method, function);
     }
 
     public <T, V> FieldWriter createFieldWriter(
@@ -1310,6 +1324,6 @@ public class ObjectWriterCreator {
         }
 
         Function function = (Function) lambda;
-        return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, label, fieldType, fieldClass, method, function);
+        return createFieldWriter(provider, objectClass, fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method, function);
     }
 }
