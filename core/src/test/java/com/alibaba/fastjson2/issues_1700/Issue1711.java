@@ -22,8 +22,6 @@ public class Issue1711 {
                 JSON.toJSONString(bean),
                 new String(JSON.toJSONBytes(bean))
         );
-
-        System.out.println(JSON.toJSONString(bean));
     }
 
     public static class MyBean {
