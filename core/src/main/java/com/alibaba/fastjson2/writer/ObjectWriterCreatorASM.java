@@ -436,6 +436,8 @@ public class ObjectWriterCreatorASM
             return super.createObjectWriter(objectClass, features, provider);
         }
 
+        setDefaultValue(fieldWriters, objectClass);
+
         return jitWriter(objectClass, provider, beanInfo, fieldWriters, writerFeatures);
     }
 
@@ -3045,12 +3047,13 @@ public class ObjectWriterCreatorASM
         mw.visitInsn(Opcodes.LCMP);
         mw.visitJumpInsn(Opcodes.IFNE, notDefaultValue_);
 
-        mw.visitVarInsn(Opcodes.ILOAD, WRITE_DEFAULT_VALUE);
-        mw.visitJumpInsn(Opcodes.IFEQ, notDefaultValue_);
-
-        mw.visitJumpInsn(Opcodes.GOTO, endWriteValue_);
-
+        if (fieldWriter.defaultValue == null) {
+            mw.visitVarInsn(Opcodes.ILOAD, WRITE_DEFAULT_VALUE);
+            mw.visitJumpInsn(Opcodes.IFEQ, notDefaultValue_);
+            mw.visitJumpInsn(Opcodes.GOTO, endWriteValue_);
+        }
         mw.visitLabel(notDefaultValue_);
+
         boolean iso8601 = "iso8601".equals(format);
         if (iso8601 || (fieldWriter.features & (WriteNonStringValueAsString.mask | WriteLongAsString.mask | BrowserCompatible.mask)) != 0) {
             mw.visitVarInsn(Opcodes.ALOAD, THIS);
@@ -3143,11 +3146,11 @@ public class ObjectWriterCreatorASM
         mw.visitVarInsn(Opcodes.ISTORE, FIELD_VALUE);
         mw.visitJumpInsn(Opcodes.IFNE, notDefaultValue_);
 
-        mw.visitVarInsn(Opcodes.ILOAD, WRITE_DEFAULT_VALUE);
-        mw.visitJumpInsn(Opcodes.IFEQ, notDefaultValue_);
-
-        mw.visitJumpInsn(Opcodes.GOTO, endWriteValue_);
-
+        if (fieldWriter.defaultValue == null) {
+            mw.visitVarInsn(Opcodes.ILOAD, WRITE_DEFAULT_VALUE);
+            mw.visitJumpInsn(Opcodes.IFEQ, notDefaultValue_);
+            mw.visitJumpInsn(Opcodes.GOTO, endWriteValue_);
+        }
         mw.visitLabel(notDefaultValue_);
 
         gwFieldName(mwc, fieldWriter, i);
@@ -3190,11 +3193,11 @@ public class ObjectWriterCreatorASM
         mw.visitVarInsn(Opcodes.ISTORE, FIELD_VALUE);
         mw.visitJumpInsn(Opcodes.IFNE, notDefaultValue_);
 
-        mw.visitVarInsn(Opcodes.ILOAD, WRITE_DEFAULT_VALUE);
-        mw.visitJumpInsn(Opcodes.IFEQ, notDefaultValue_);
-
-        mw.visitJumpInsn(Opcodes.GOTO, endWriteValue_);
-
+        if (fieldWriter.defaultValue == null) {
+            mw.visitVarInsn(Opcodes.ILOAD, WRITE_DEFAULT_VALUE);
+            mw.visitJumpInsn(Opcodes.IFEQ, notDefaultValue_);
+            mw.visitJumpInsn(Opcodes.GOTO, endWriteValue_);
+        }
         mw.visitLabel(notDefaultValue_);
 
         mw.visitVarInsn(Opcodes.ALOAD, THIS);
@@ -3263,7 +3266,10 @@ public class ObjectWriterCreatorASM
         }
 
         mw.visitLabel(writeNull_);
-        mwc.genIsDisabled(NotWriteDefaultValue.mask, endIfNull_);
+
+        if (fieldWriter.defaultValue == null) {
+            mwc.genIsDisabled(NotWriteDefaultValue.mask, endIfNull_);
+        }
 
         // writeFieldName(w);
         gwFieldName(mwc, fieldWriter, i);
@@ -3529,7 +3535,7 @@ public class ObjectWriterCreatorASM
             if (declaringClass == Throwable.class && "stackTrace".equals(fieldName)) {
                 try {
                     Method method = Throwable.class.getMethod("getStackTrace");
-                    return new FieldWriterObjectArrayMethod(fieldName, itemClass, ordinal, features, format, label, fieldType, fieldClass, method);
+                    return new FieldWriterObjectArrayMethod(fieldName, itemClass, ordinal, features, format, label, fieldType, fieldClass, field, method);
                 } catch (NoSuchMethodException ignored) {
                 }
             }
@@ -3564,7 +3570,7 @@ public class ObjectWriterCreatorASM
         Class objectClass = mwc.objectClass;
         final String TYPE_OBJECT = objectClass == null ? "java/lang/Object" : ASMUtils.type(objectClass);
         Class fieldClass = fieldWriter.fieldClass;
-        Member member = fieldWriter.field != null ? fieldWriter.field : fieldWriter.method;
+        Member member = fieldWriter.method != null ? fieldWriter.method : fieldWriter.field;
         Function function = fieldWriter.getFunction();
 
         if (member == null && function != null) {

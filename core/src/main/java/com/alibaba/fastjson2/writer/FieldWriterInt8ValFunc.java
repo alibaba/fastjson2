@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.function.ToByteFunction;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 final class FieldWriterInt8ValFunc
@@ -15,10 +16,11 @@ final class FieldWriterInt8ValFunc
             long features,
             String format,
             String label,
+            Field field,
             Method method,
             ToByteFunction function
     ) {
-        super(fieldName, ordinal, features, format, label, byte.class, null, method);
+        super(fieldName, ordinal, features, format, label, byte.class, field, method);
         this.function = function;
     }
 

@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.function.ToShortFunction;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 final class FieldWriterInt16ValFunc
@@ -15,10 +16,11 @@ final class FieldWriterInt16ValFunc
             long features,
             String format,
             String label,
+            Field field,
             Method method,
             ToShortFunction function
     ) {
-        super(fieldName, ordinal, features, format, label, short.class, null, method);
+        super(fieldName, ordinal, features, format, label, short.class, field, method);
         this.function = function;
     }
 

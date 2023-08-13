@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -15,9 +16,10 @@ final class FieldWriterMillisMethod<T>
             String dateTimeFormat,
             String label,
             Class fieldClass,
+            Field field,
             Method method
     ) {
-        super(fieldName, ordinal, features, dateTimeFormat, label, fieldClass, fieldClass, null, method);
+        super(fieldName, ordinal, features, dateTimeFormat, label, fieldClass, fieldClass, field, method);
     }
 
     @Override

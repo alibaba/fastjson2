@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.function.ToFloatFunction;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 final class FieldWriterFloatValueFunc
@@ -15,10 +16,11 @@ final class FieldWriterFloatValueFunc
             long features,
             String format,
             String label,
+            Field field,
             Method method,
             ToFloatFunction function
     ) {
-        super(fieldName, ordinal, features, format, label, float.class, float.class, null, method);
+        super(fieldName, ordinal, features, format, label, float.class, float.class, field, method);
         this.function = function;
     }
 

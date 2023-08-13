@@ -1,5 +1,6 @@
 package com.alibaba.fastjson2.writer;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -20,10 +21,11 @@ final class FieldWriterObjectFunc<T>
             String label,
             Type fieldType,
             Class fieldClass,
+            Field field,
             Method method,
             Function function
     ) {
-        super(name, ordinal, features, format, label, fieldType, fieldClass, null, method);
+        super(name, ordinal, features, format, label, fieldType, fieldClass, field, method);
         this.function = function;
         isArray = fieldClass == AtomicIntegerArray.class
                 || fieldClass == AtomicLongArray.class

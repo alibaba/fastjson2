@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.*;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.codec.FieldInfo;
 import com.alibaba.fastjson2.util.*;
 
@@ -51,6 +52,7 @@ public abstract class FieldWriter<T>
 
     transient JSONWriter.Path path;
     volatile ObjectWriter initObjectWriter;
+    Object defaultValue;
 
     static final AtomicReferenceFieldUpdater<FieldWriter, ObjectWriter>
             initObjectWriterUpdater = AtomicReferenceFieldUpdater.newUpdater(
@@ -269,6 +271,51 @@ public abstract class FieldWriter<T>
         return fieldName;
     }
 
+    void setDefaultValue(T object) {
+        Object fieldValue = null;
+
+        if (Iterable.class.isAssignableFrom(fieldClass)
+                || Map.class.isAssignableFrom(fieldClass)
+        ) {
+            return;
+        }
+
+        if (field != null && object != null) {
+            try {
+                field.setAccessible(true);
+                fieldValue = field.get(object);
+            } catch (Throwable ignored) {
+                // ignored
+            }
+        }
+
+        if (fieldValue == null) {
+            return;
+        }
+
+        if (fieldClass == boolean.class) {
+            if (fieldValue == Boolean.FALSE) {
+                return;
+            }
+        } else if (fieldClass == byte.class
+                || fieldClass == short.class
+                || fieldClass == int.class
+                || fieldClass == long.class
+                || fieldClass == float.class
+                || fieldClass == double.class
+        ) {
+            if (((Number) fieldValue).doubleValue() == 0) {
+                return;
+            }
+        } else if (fieldClass == char.class) {
+            if (((Character) fieldValue).charValue() == '\0') {
+                return;
+            }
+        }
+
+        defaultValue = fieldValue;
+    }
+
     public Object getFieldValue(T object) {
         if (object == null) {
             throw new JSONException("field.get error, " + fieldName);
@@ -310,8 +357,18 @@ public abstract class FieldWriter<T>
             return nameCompare;
         }
 
-        Member thisMember = this.field != null ? this.field : this.method;
-        Member otherMember = other.field != null ? other.field : other.method;
+        Member thisMember;
+        Member otherMember;
+        if (this.method == null || (this.field != null && Modifier.isPublic(this.field.getModifiers()))) {
+            thisMember = this.field;
+        } else {
+            thisMember = this.method;
+        }
+        if (other.method == null || (other.field != null && Modifier.isPublic(other.field.getModifiers()))) {
+            otherMember = other.field;
+        } else {
+            otherMember = other.method;
+        }
 
         if (thisMember != null && otherMember != null) {
             Class otherDeclaringClass = otherMember.getDeclaringClass();
@@ -322,6 +379,26 @@ public abstract class FieldWriter<T>
                 } else if (otherDeclaringClass.isAssignableFrom(thisDeclaringClass)) {
                     return -1;
                 }
+            }
+
+            JSONField thisField = null;
+            JSONField otherField = null;
+            if (thisMember instanceof Field) {
+                thisField = ((Field) thisMember).getAnnotation(JSONField.class);
+            } else if (thisMember instanceof Method) {
+                thisField = ((Method) thisMember).getAnnotation(JSONField.class);
+            }
+            if (otherMember instanceof Field) {
+                otherField = ((Field) otherMember).getAnnotation(JSONField.class);
+            } else if (thisMember instanceof Method) {
+                otherField = ((Method) otherMember).getAnnotation(JSONField.class);
+            }
+
+            if (thisField != null && otherField == null) {
+                return -1;
+            }
+            if (thisField == null && otherField != null) {
+                return 1;
             }
         }
 

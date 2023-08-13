@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.function.Function;
@@ -16,6 +17,7 @@ final class FieldWriterBigIntFunc<T>
             long features,
             String format,
             String label,
+            Field field,
             Method method,
             Function<T, BigInteger> function
     ) {
