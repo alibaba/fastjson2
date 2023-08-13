@@ -295,8 +295,12 @@ abstract class FieldWriterDate<T>
             formatter = ctx.getDateFormatter();
         }
 
-        String str = formatter.format(zdt);
-
-        jsonWriter.writeString(str);
+        if (formatter != null) {
+            jsonWriter.writeString(
+                    formatter.format(zdt)
+            );
+        } else {
+            jsonWriter.writeZonedDateTime(zdt);
+        }
     }
 }
