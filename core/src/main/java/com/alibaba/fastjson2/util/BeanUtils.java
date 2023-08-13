@@ -356,7 +356,11 @@ public abstract class BeanUtils {
             constructorCache.putIfAbsent(objectClass, constructors);
         }
 
+        boolean record = isRecord(objectClass);
         for (Constructor constructor : constructors) {
+            if (record && constructor.getParameterCount() == 0) {
+                continue;
+            }
             constructorConsumer.accept(constructor);
         }
     }
@@ -372,7 +376,7 @@ public abstract class BeanUtils {
     }
 
     public static Constructor getDefaultConstructor(Class objectClass, boolean includeNoneStaticMember) {
-        if (objectClass == StackTraceElement.class && JVM_VERSION >= 9) {
+        if ((objectClass == StackTraceElement.class && JVM_VERSION >= 9) || (isRecord(objectClass))) {
             return null;
         }
 
