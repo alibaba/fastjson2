@@ -402,11 +402,17 @@ public abstract class FieldWriter<T>
             }
         }
 
-        if (thisMember instanceof Field && otherMember instanceof Method) {
+        if (thisMember instanceof Field
+                && otherMember instanceof Method
+                && ((Field) thisMember).getType() == ((Method) otherMember).getReturnType()
+        ) {
             return -1;
         }
 
-        if (thisMember instanceof Method && otherMember instanceof Field) {
+        if (thisMember instanceof Method
+                && otherMember instanceof Field
+                && ((Method) thisMember).getReturnType() == ((Field) otherMember).getType()
+        ) {
             return 1;
         }
 
@@ -452,6 +458,22 @@ public abstract class FieldWriter<T>
                     return -1;
                 }
             }
+        }
+
+        if (thisFieldClass.isPrimitive() && !otherFieldClass.isPrimitive()) {
+            return -1;
+        }
+
+        if (!thisFieldClass.isPrimitive() && otherFieldClass.isPrimitive()) {
+            return 1;
+        }
+
+        if (thisFieldClass.getName().startsWith("java.") && !otherFieldClass.getName().startsWith("java.")) {
+            return -1;
+        }
+
+        if (!thisFieldClass.getName().startsWith("java.") && otherFieldClass.getName().startsWith("java.")) {
+            return 1;
         }
 
         return nameCompare;
