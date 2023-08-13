@@ -742,16 +742,20 @@ public class IOUtils {
     }
 
     public static int writeLocalDate(byte[] bytes, int off, int year, int month, int dayOfMonth) {
-        if (year >= 1000 && year < 10000) {
+        if (year < 0) {
+            bytes[off++] = '-';
+            year = -year;
+        } else if (year > 9999) {
+            bytes[off++] = '+';
+        }
+
+        if (year < 10000) {
             int y01 = year / 100;
             int y23 = year - y01 * 100;
             UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off, PACKED_DIGITS[y01]);
             UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 2, PACKED_DIGITS[y23]);
             off += 4;
         } else {
-            if (year > 9999) {
-                bytes[off++] = '+';
-            }
             off = IOUtils.writeInt32(bytes, off, year);
         }
 
@@ -763,16 +767,20 @@ public class IOUtils {
     }
 
     public static int writeLocalDate(char[] chars, int off, int year, int month, int dayOfMonth) {
-        if (year >= 1000 && year < 10000) {
+        if (year < 0) {
+            chars[off++] = '-';
+            year = -year;
+        } else if (year > 9999) {
+            chars[off++] = '+';
+        }
+
+        if (year < 10000) {
             int y01 = year / 100;
             int y23 = year - y01 * 100;
             UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + (off << 1), PACKED_DIGITS_UTF16[y01]);
             UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 2) << 1), PACKED_DIGITS_UTF16[y23]);
             off += 4;
         } else {
-            if (year > 9999) {
-                chars[off++] = '+';
-            }
             off = IOUtils.writeInt32(chars, off, year);
         }
 
