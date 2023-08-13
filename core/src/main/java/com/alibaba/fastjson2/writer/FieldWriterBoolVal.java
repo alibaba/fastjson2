@@ -36,7 +36,7 @@ abstract class FieldWriterBoolVal
 
         if (!value) {
             long features = this.features | jsonWriter.getFeatures();
-            if ((features & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0) {
+            if (defaultValue == null && (features & JSONWriter.Feature.NotWriteDefaultValue.mask) != 0) {
                 return false;
             }
         }

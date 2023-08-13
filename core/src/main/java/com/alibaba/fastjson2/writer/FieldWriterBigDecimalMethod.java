@@ -3,6 +3,7 @@ package com.alibaba.fastjson2.writer;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -15,6 +16,7 @@ final class FieldWriterBigDecimalMethod<T>
             long features,
             String format,
             String label,
+            Field field,
             Method method
     ) {
         super(fieldName, ordinal, features, format, label, BigDecimal.class, BigDecimal.class, null, method);

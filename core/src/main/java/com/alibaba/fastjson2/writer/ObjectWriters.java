@@ -67,6 +67,7 @@ public class ObjectWriters {
                         null,
                         null,
                         null,
+                        null,
                         function
                 )
         );
@@ -78,6 +79,7 @@ public class ObjectWriters {
                         "toLong",
                         0,
                         FieldInfo.VALUE_MASK,
+                        null,
                         null,
                         null,
                         null,

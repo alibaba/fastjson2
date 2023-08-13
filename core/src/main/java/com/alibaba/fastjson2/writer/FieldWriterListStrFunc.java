@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -19,12 +20,13 @@ final class FieldWriterListStrFunc<T>
             long features,
             String format,
             String label,
+            Field field,
             Method method,
             Function<T, List> function,
             Type fieldType,
             Class fieldClass
     ) {
-        super(fieldName, ordinal, features, format, label, fieldType, fieldClass, null, method);
+        super(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method);
         this.function = function;
     }
 

@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.function.Function;
@@ -16,10 +17,11 @@ final class FieldWriterDateFunc<T>
             long features,
             String dateTimeFormat,
             String label,
+            Field field,
             Method method,
             Function<T, Date> function
     ) {
-        super(fieldName, ordinal, features, dateTimeFormat, label, Date.class, Date.class, null, method);
+        super(fieldName, ordinal, features, dateTimeFormat, label, Date.class, Date.class, field, method);
         this.function = function;
     }
 

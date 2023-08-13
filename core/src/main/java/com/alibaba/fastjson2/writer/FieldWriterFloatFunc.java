@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.writer;
 
 import com.alibaba.fastjson2.JSONWriter;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
@@ -15,10 +16,11 @@ final class FieldWriterFloatFunc<T>
             long features,
             String format,
             String label,
+            Field field,
             Method method,
             Function<T, Float> function
     ) {
-        super(fieldName, ordinal, features, format, label, Float.class, Float.class, null, method);
+        super(fieldName, ordinal, features, format, label, Float.class, Float.class, field, method);
         this.function = function;
     }
 

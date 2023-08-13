@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.util.TypeUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -26,9 +27,10 @@ final class FieldWriterObjectArrayMethod<T>
             String label,
             Type fieldType,
             Class fieldClass,
+            Field field,
             Method method
     ) {
-        super(fieldName, ordinal, features, format, label, fieldType, fieldClass, null, method);
+        super(fieldName, ordinal, features, format, label, fieldType, fieldClass, field, method);
         this.itemType = itemType;
         if (itemType instanceof Class) {
             itemClass = (Class) itemType;
