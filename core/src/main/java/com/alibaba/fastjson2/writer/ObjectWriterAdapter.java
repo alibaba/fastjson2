@@ -629,6 +629,21 @@ public class ObjectWriterAdapter<T>
                 }
                 continue;
             }
+
+            if (fieldValue != null) {
+                String fieldValueClassName = fieldValue.getClass().getName();
+                if (Collection.class.isAssignableFrom(fieldClass)
+                        && (fieldValueClassName.startsWith("java.util.ImmutableCollections$") || fieldValueClassName.startsWith("java.util.Collections$"))
+                ) {
+                    Collection collection = (Collection) fieldValue;
+                    JSONArray array = new JSONArray(collection.size());
+                    for (Object item : collection) {
+                        array.add(JSON.toJSON(item));
+                    }
+                    fieldValue = array;
+                }
+            }
+
             jsonObject.put(fieldWriter.fieldName, fieldValue);
         }
 
