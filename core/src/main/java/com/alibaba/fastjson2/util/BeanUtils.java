@@ -129,6 +129,26 @@ public abstract class BeanUtils {
         return null;
     }
 
+    public static Method fluentSetter(Class objectClass, String methodName, Class paramType) {
+        Method[] methods = methodCache.get(objectClass);
+        if (methods == null) {
+            methods = getMethods(objectClass);
+            methodCache.putIfAbsent(objectClass, methods);
+        }
+
+        for (Method method : methods) {
+            if (method.getName().equals(methodName)
+                    && method.getReturnType() == objectClass
+                    && method.getParameterCount() == 1
+                    && method.getParameterTypes()[0] == paramType
+            ) {
+                return method;
+            }
+        }
+
+        return null;
+    }
+
     public static Method getMethod(Class objectClass, Method signature) {
         if (objectClass == null
                 || objectClass == Object.class
@@ -430,6 +450,7 @@ public abstract class BeanUtils {
             }
 
             int paramCount = method.getParameterCount();
+            Class<?> returnType = method.getReturnType();
 
             // read only getter
             if (paramCount == 0) {
@@ -437,7 +458,6 @@ public abstract class BeanUtils {
                     continue;
                 }
 
-                Class<?> returnType = method.getReturnType();
                 if (returnType == AtomicInteger.class
                         || returnType == AtomicLong.class
                         || returnType == AtomicBoolean.class
@@ -493,7 +513,7 @@ public abstract class BeanUtils {
             }
 
             final int methodNameLength = methodName.length();
-            boolean nameMatch = methodNameLength > 3 && methodName.startsWith("set");
+            boolean nameMatch = methodNameLength > 3 && (methodName.startsWith("set") || returnType == objectClass);
             if (!nameMatch) {
                 if (mixin != null) {
                     Method mixinMethod = getMethod(mixin, method);
@@ -947,6 +967,10 @@ public abstract class BeanUtils {
                         nameMatch = true;
                     }
                 }
+            }
+
+            if (!nameMatch && fluentSetter(objectClass, methodName, returnClass) != null) {
+                nameMatch = true;
             }
 
             if (!nameMatch) {
