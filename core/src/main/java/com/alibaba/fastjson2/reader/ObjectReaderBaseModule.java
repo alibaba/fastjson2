@@ -19,6 +19,8 @@ import java.math.BigInteger;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
@@ -1521,6 +1523,13 @@ public class ObjectReaderBaseModule
 
         if (type == File.class) {
             return new ObjectReaderImplFromString<>(File.class, File::new);
+        }
+
+        if (type == Path.class) {
+            return new ObjectReaderImplFromString<>(
+                    Path.class,
+                    Paths::get
+            );
         }
 
         if (type == URL.class) {
