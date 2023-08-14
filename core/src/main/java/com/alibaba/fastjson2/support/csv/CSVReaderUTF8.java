@@ -114,18 +114,6 @@ final class CSVReaderUTF8<T>
             lineTerminated = false;
 
             for (int i = off; i < end; i++) {
-                if (i + 4 < end) {
-                    byte b0 = buf[i];
-                    byte b1 = buf[i + 1];
-                    byte b2 = buf[i + 2];
-                    byte b3 = buf[i + 3];
-                    if (b0 > '"' && b1 > '"' && b2 > '"' && b3 > '"') {
-                        lineSize += 4;
-                        i += 3;
-                        continue;
-                    }
-                }
-
                 byte ch = buf[i];
                 if (ch == '"') {
                     lineSize++;
@@ -697,10 +685,12 @@ final class CSVReaderUTF8<T>
                 }
 
                 if (ch == ',') {
+                    byte[] columnBuf = buf;
+                    int columnStart = 0;
+                    int columnSize = valueSize;
                     if (quote) {
                         if (escapeCount == 0) {
-//                            value = new String(buf, valueStart + 1, valueSize, charset);
-                            consumer.accept(rowCount, columnIndex, buf, valueStart + 1, valueSize, charset);
+                            columnStart = valueStart + 1;
                         } else {
                             byte[] bytes = new byte[valueSize - escapeCount];
                             int valueEnd = valueStart + valueSize;
@@ -712,11 +702,13 @@ final class CSVReaderUTF8<T>
                                 }
                             }
 
-                            consumer.accept(rowCount, columnIndex, bytes, 0, bytes.length, charset);
+                            columnBuf = bytes;
+                            columnSize = bytes.length;
                         }
                     } else {
-                        consumer.accept(rowCount, columnIndex, buf, valueStart, valueSize, charset);
+                        columnStart = valueStart;
                     }
+                    consumer.accept(rowCount, columnIndex, columnBuf, columnStart, columnSize, charset);
 
                     quote = false;
                     valueStart = i + 1;
@@ -730,10 +722,12 @@ final class CSVReaderUTF8<T>
             }
 
             if (valueSize > 0) {
+                byte[] columnBuf = buf;
+                int columnStart = 0;
+                int columnSize = valueSize;
                 if (quote) {
                     if (escapeCount == 0) {
-//                        value = new String(buf, valueStart + 1, valueSize, charset);
-                        consumer.accept(rowCount, columnIndex, buf, valueStart + 1, valueSize, charset);
+                        columnStart = valueStart + 1;
                     } else {
                         byte[] bytes = new byte[valueSize - escapeCount];
                         int valueEnd = lineEnd;
@@ -745,13 +739,13 @@ final class CSVReaderUTF8<T>
                             }
                         }
 
-//                        value = new String(bytes, 0, bytes.length, charset);
-                        consumer.accept(rowCount, columnIndex, bytes, 0, bytes.length, charset);
+                        columnBuf = bytes;
+                        columnSize = bytes.length;
                     }
                 } else {
-//                    value = new String(buf, valueStart, valueSize, charset);
-                    consumer.accept(rowCount, columnIndex, buf, valueStart, valueSize, charset);
+                    columnStart = valueStart;
                 }
+                consumer.accept(rowCount, columnIndex, columnBuf, columnStart, columnSize, charset);
             }
             consumer.afterRow(rowCount);
         }
