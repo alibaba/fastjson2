@@ -41,7 +41,7 @@
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2</artifactId>
-    <version>2.0.39-SNAPSHOT</version>
+    <version>2.0.39</version>
 </dependency>
 ```
 
@@ -49,7 +49,7 @@
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2:2.0.39-SNAPSHOT'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.39'
 }
 ```
 
@@ -67,7 +67,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>fastjson</artifactId>
-    <version>2.0.39-SNAPSHOT</version>
+    <version>2.0.39</version>
 </dependency>
 ```
 
@@ -75,7 +75,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba:fastjson:2.0.39-SNAPSHOT'
+    implementation 'com.alibaba:fastjson:2.0.39'
 }
 ```
 
@@ -89,7 +89,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-kotlin</artifactId>
-    <version>2.0.39-SNAPSHOT</version>
+    <version>2.0.39</version>
 </dependency>
 ```
 
@@ -114,7 +114,7 @@ dependencies {
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.39-SNAPSHOT")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.39")
 }
 ```
 
@@ -135,7 +135,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension-spring5</artifactId>
-    <version>2.0.39-SNAPSHOT</version>
+    <version>2.0.39</version>
 </dependency>
 ```
 
@@ -143,7 +143,7 @@ dependencies {
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-extension-spring6</artifactId>
-    <version>2.0.39-SNAPSHOT</version>
+    <version>2.0.39</version>
 </dependency>
 ```
 
@@ -151,14 +151,14 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.39-SNAPSHOT'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring5:2.0.39'
 }
 ```
 
 
 ```groovy
 dependencies {
-    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.39-SNAPSHOT'
+    implementation 'com.alibaba.fastjson2:fastjson2-extension-spring6:2.0.39'
 }
 ```
 

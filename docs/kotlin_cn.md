@@ -10,7 +10,7 @@
 <dependency>
     <groupId>com.alibaba.fastjson2</groupId>
     <artifactId>fastjson2-kotlin</artifactId>
-    <version>2.0.39-SNAPSHOT</version>
+    <version>2.0.39</version>
 </dependency>
 ```
 
@@ -35,7 +35,7 @@
 
 ```kotlin
 dependencies {
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.39-SNAPSHOT")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.39")
 }
 ```
 
