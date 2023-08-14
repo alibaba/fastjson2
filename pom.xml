@@ -158,7 +158,7 @@
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
-                <version>5.8.17</version>
+                <version>5.8.21</version>
             </dependency>
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
