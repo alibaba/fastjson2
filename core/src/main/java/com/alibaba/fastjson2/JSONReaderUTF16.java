@@ -2263,7 +2263,7 @@ class JSONReaderUTF16
                             && (c7 & 0xFF) == c7
                             && (c8 & 0xFF) == c8
                             && (c9 & 0xFF) == c9) {
-                        nameValue0 = c1 << 8
+                        nameValue0 = (c1 << 8)
                                 + c0;
                         nameValue1
                                 = (((long) c9) << 56)
@@ -2300,7 +2300,7 @@ class JSONReaderUTF16
                             && (c9 & 0xFF) == c9
                             && (c10 & 0xFF) == c10) {
                         nameValue0
-                                = c2 << 16
+                                = (c2 << 16)
                                 + (c1 << 8)
                                 + c0;
                         nameValue1
