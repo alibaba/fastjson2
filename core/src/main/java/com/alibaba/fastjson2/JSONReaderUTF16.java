@@ -2340,7 +2340,7 @@ class JSONReaderUTF16
                             && (c10 & 0xFF) == c10
                             && (c11 & 0xFF) == c11) {
                         nameValue0
-                                = c3 << 24
+                                = (c3 << 24)
                                 + (c2 << 16)
                                 + (c1 << 8)
                                 + c0;
