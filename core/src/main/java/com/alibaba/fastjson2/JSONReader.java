@@ -1968,7 +1968,6 @@ public abstract class JSONReader
             return null;
         }
 
-        List list = new ArrayList();
         if (!nextIfArrayStart()) {
             throw new JSONException(info("syntax error : " + ch));
         }
@@ -1976,15 +1975,12 @@ public abstract class JSONReader
         boolean fieldBased = (context.features & Feature.FieldBased.mask) != 0;
         ObjectReader objectReader = context.provider.getObjectReader(itemType, fieldBased);
 
-        for (; ; ) {
-            if (nextIfArrayEnd()) {
-                break;
-            }
+        List list = new ArrayList();
+        for (Object item; !nextIfArrayEnd(); list.add(item)) {
+            int mark = offset;
+            item = objectReader.readObject(this, null, null, 0);
 
-            Object item = objectReader.readObject(this, null, null, 0);
-            list.add(item);
-
-            if (ch == '}' || ch == EOI) {
+            if (mark == offset || ch == '}' || ch == EOI) {
                 throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
             }
         }
@@ -2001,22 +1997,24 @@ public abstract class JSONReader
             return null;
         }
 
-        List list = new ArrayList(types.length);
         if (!nextIfArrayStart()) {
             throw new JSONException("syntax error : " + ch);
         }
 
-        for (int i = 0; ; ++i) {
-            if (nextIfArrayEnd()) {
-                break;
-            }
-            Type itemType = types[i];
-            Object item = read(itemType);
-            list.add(item);
+        int i = 0, max = types.length;
+        List list = new ArrayList(max);
 
-            if (ch == '}' || ch == EOI) {
+        for (Object item; !nextIfArrayEnd() && i < max; list.add(item)) {
+            int mark = offset;
+            item = read(types[i++]);
+
+            if (mark == offset || ch == '}' || ch == EOI) {
                 throw new JSONException("illegal input : " + ch + ", offset " + getOffset());
             }
+        }
+
+        if (i != max) {
+            throw new JSONException(info("element length mismatch"));
         }
 
         if (comma = (ch == ',')) {

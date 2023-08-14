@@ -299,7 +299,13 @@ abstract class FieldWriterDate<T>
             formatter = ctx.getDateFormatter();
         }
 
-        String str = formatter.format(new Date(timeMillis));
+        Date date = new Date(timeMillis);
+        String str;
+        if (formatter != null) {
+            str = formatter.format(date);
+        } else {
+            str = DateUtils.formatYMDHMS19(date, jsonWriter.context.getZoneId());
+        }
         jsonWriter.writeString(str);
     }
 }

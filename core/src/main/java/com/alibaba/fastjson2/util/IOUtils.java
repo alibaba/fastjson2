@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import static com.alibaba.fastjson2.util.JDKUtils.*;
+import static com.alibaba.fastjson2.util.JDKUtils.ARRAY_CHAR_BASE_OFFSET;
 
 public class IOUtils {
     public static final Charset US_ASCII = Charset.forName("US-ASCII");
@@ -28,7 +29,46 @@ public class IOUtils {
     static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
     static final int[] IA = new int[256];
 
+    public static final short[] PACKED_DIGITS;
+    public static final int[] PACKED_DIGITS_UTF16;
+
     static {
+        short[] shorts = new short[]{
+                0x3030, 0x3130, 0x3230, 0x3330, 0x3430, 0x3530, 0x3630, 0x3730, 0x3830, 0x3930,
+                0x3031, 0x3131, 0x3231, 0x3331, 0x3431, 0x3531, 0x3631, 0x3731, 0x3831, 0x3931,
+                0x3032, 0x3132, 0x3232, 0x3332, 0x3432, 0x3532, 0x3632, 0x3732, 0x3832, 0x3932,
+                0x3033, 0x3133, 0x3233, 0x3333, 0x3433, 0x3533, 0x3633, 0x3733, 0x3833, 0x3933,
+                0x3034, 0x3134, 0x3234, 0x3334, 0x3434, 0x3534, 0x3634, 0x3734, 0x3834, 0x3934,
+                0x3035, 0x3135, 0x3235, 0x3335, 0x3435, 0x3535, 0x3635, 0x3735, 0x3835, 0x3935,
+                0x3036, 0x3136, 0x3236, 0x3336, 0x3436, 0x3536, 0x3636, 0x3736, 0x3836, 0x3936,
+                0x3037, 0x3137, 0x3237, 0x3337, 0x3437, 0x3537, 0x3637, 0x3737, 0x3837, 0x3937,
+                0x3038, 0x3138, 0x3238, 0x3338, 0x3438, 0x3538, 0x3638, 0x3738, 0x3838, 0x3938,
+                0x3039, 0x3139, 0x3239, 0x3339, 0x3439, 0x3539, 0x3639, 0x3739, 0x3839, 0x3939
+        };
+        int[] digits = new int[]{
+                0x300030, 0x310030, 0x320030, 0x330030, 0x340030, 0x350030, 0x360030, 0x370030, 0x380030, 0x390030,
+                0x300031, 0x310031, 0x320031, 0x330031, 0x340031, 0x350031, 0x360031, 0x370031, 0x380031, 0x390031,
+                0x300032, 0x310032, 0x320032, 0x330032, 0x340032, 0x350032, 0x360032, 0x370032, 0x380032, 0x390032,
+                0x300033, 0x310033, 0x320033, 0x330033, 0x340033, 0x350033, 0x360033, 0x370033, 0x380033, 0x390033,
+                0x300034, 0x310034, 0x320034, 0x330034, 0x340034, 0x350034, 0x360034, 0x370034, 0x380034, 0x390034,
+                0x300035, 0x310035, 0x320035, 0x330035, 0x340035, 0x350035, 0x360035, 0x370035, 0x380035, 0x390035,
+                0x300036, 0x310036, 0x320036, 0x330036, 0x340036, 0x350036, 0x360036, 0x370036, 0x380036, 0x390036,
+                0x300037, 0x310037, 0x320037, 0x330037, 0x340037, 0x350037, 0x360037, 0x370037, 0x380037, 0x390037,
+                0x300038, 0x310038, 0x320038, 0x330038, 0x340038, 0x350038, 0x360038, 0x370038, 0x380038, 0x390038,
+                0x300039, 0x310039, 0x320039, 0x330039, 0x340039, 0x350039, 0x360039, 0x370039, 0x380039, 0x390039
+        };
+
+        if (BIG_ENDIAN) {
+            for (int i = 0; i < shorts.length; i++) {
+                shorts[i] = Short.reverseBytes(shorts[i]);
+            }
+            for (int i = 0; i < digits.length; i++) {
+                digits[i] = Integer.reverseBytes(digits[i] << 8);
+            }
+        }
+        PACKED_DIGITS = shorts;
+        PACKED_DIGITS_UTF16 = digits;
+
         Arrays.fill(IA, -1);
         for (int i = 0, iS = CA.length; i < iS; i++) {
             IA[CA[i]] = i;
@@ -536,83 +576,53 @@ public class IOUtils {
     }
 
     public static int writeLocalDate(byte[] bytes, int off, int year, int month, int dayOfMonth) {
-        if (year >= 1000 && year < 10000) {
-            final byte y0;
-            final int yyy;
-            if (year < 3000) {
-                if (year < 2000) {
-                    yyy = year - 1000;
-                    y0 = '1';
-                } else {
-                    yyy = year - 2000;
-                    y0 = '2';
-                }
-            } else {
-                final int q = year / 1000;
-                yyy = year - q * 1000;
-                y0 = (byte) (q + '0');
-            }
-            bytes[off] = y0;
-            final int v = DIGITS_K[yyy];
-            bytes[off + 1] = (byte) (v >> 16);
-            bytes[off + 2] = (byte) (v >> 8);
-            bytes[off + 3] = (byte) v;
+        if (year < 0) {
+            bytes[off++] = '-';
+            year = -year;
+        } else if (year > 9999) {
+            bytes[off++] = '+';
+        }
+
+        if (year < 10000) {
+            int y01 = year / 100;
+            int y23 = year - y01 * 100;
+            UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off, PACKED_DIGITS[y01]);
+            UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 2, PACKED_DIGITS[y23]);
             off += 4;
         } else {
             off = IOUtils.writeInt32(bytes, off, year);
         }
 
         bytes[off] = '-';
-        int v = DIGITS_K[month];
-        bytes[off + 1] = (byte) (v >> 8);
-        bytes[off + 2] = (byte) (v);
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 1, PACKED_DIGITS[month]);
         bytes[off + 3] = '-';
-        v = DIGITS_K[dayOfMonth];
-        bytes[off + 4] = (byte) (v >> 8);
-        bytes[off + 5] = (byte) (v);
-        off += 6;
-
-        return off;
+        UNSAFE.putShort(bytes, ARRAY_BYTE_BASE_OFFSET + off + 4, PACKED_DIGITS[dayOfMonth]);
+        return off + 6;
     }
 
     public static int writeLocalDate(char[] chars, int off, int year, int month, int dayOfMonth) {
-        if (year >= 1000 && year < 10000) {
-            final char y0;
-            final int yyy;
-            if (year < 3000) {
-                if (year < 2000) {
-                    yyy = year - 1000;
-                    y0 = '1';
-                } else {
-                    yyy = year - 2000;
-                    y0 = '2';
-                }
-            } else {
-                final int q = year / 1000;
-                yyy = year - q * 1000;
-                y0 = (char) (byte) (q + '0');
-            }
-            chars[off] = y0;
-            final int v = DIGITS_K[yyy];
-            chars[off + 1] = (char) (byte) (v >> 16);
-            chars[off + 2] = (char) (byte) (v >> 8);
-            chars[off + 3] = (char) (byte) v;
+        if (year < 0) {
+            chars[off++] = '-';
+            year = -year;
+        } else if (year > 9999) {
+            chars[off++] = '+';
+        }
+
+        if (year < 10000) {
+            int y01 = year / 100;
+            int y23 = year - y01 * 100;
+            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + (off << 1), PACKED_DIGITS_UTF16[y01]);
+            UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 2) << 1), PACKED_DIGITS_UTF16[y23]);
             off += 4;
         } else {
             off = IOUtils.writeInt32(chars, off, year);
         }
 
         chars[off] = '-';
-        int v = DIGITS_K[month];
-        chars[off + 1] = (char) (byte) (v >> 8);
-        chars[off + 2] = (char) (byte) (v);
+        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 1) << 1), PACKED_DIGITS_UTF16[month]);
         chars[off + 3] = '-';
-        v = DIGITS_K[dayOfMonth];
-        chars[off + 4] = (char) (byte) (v >> 8);
-        chars[off + 5] = (char) (byte) (v);
-        off += 6;
-
-        return off;
+        UNSAFE.putInt(chars, ARRAY_CHAR_BASE_OFFSET + ((off + 4) << 1), PACKED_DIGITS_UTF16[dayOfMonth]);
+        return off + 6;
     }
 
     public static int writeLocalTime(byte[] bytes, int off, LocalTime time) {
