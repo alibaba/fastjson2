@@ -291,6 +291,21 @@ public class IOUtils {
             for (int i = 0; i < -insertionPoint; i++) {
                 buf[off++] = '0';
             }
+        } else if (scale == 2) {
+            final long div = unscaledVal / 100;
+            off = IOUtils.writeInt64(buf, off, div);
+            buf[off] = '.';
+            UNSAFE.putShort(buf, ARRAY_BYTE_BASE_OFFSET + off + 1, PACKED_DIGITS[(int) (unscaledVal - div * 100)]);
+            return off + 3;
+        } else if (scale == 3) {
+            final long div = unscaledVal / 1000;
+            int v = DIGITS_K_32[(int) (unscaledVal - div * 1000)];
+            off = IOUtils.writeInt64(buf, off, div);
+            buf[off] = '.';
+            buf[off + 1] = (byte) (v >> 8);
+            buf[off + 2] = (byte) (v >> 16);
+            buf[off + 3] = (byte) (v >> 24);
+            return off + 4;
         }
 
         off = IOUtils.writeInt64(buf, off, unscaledVal);
@@ -328,6 +343,21 @@ public class IOUtils {
             for (int i = 0; i < -insertionPoint; i++) {
                 buf[off++] = '0';
             }
+        } else if (scale == 2) {
+            final long div = unscaledVal / 100;
+            off = IOUtils.writeInt64(buf, off, div);
+            buf[off] = '.';
+            UNSAFE.putInt(buf, ARRAY_BYTE_BASE_OFFSET + ((off + 1) << 1), PACKED_DIGITS_UTF16[(int) (unscaledVal - div * 100)]);
+            return off + 3;
+        } else if (scale == 3) {
+            final long div = unscaledVal / 1000;
+            long v = DIGITS_K_64[(int) (unscaledVal - div * 1000)];
+            off = IOUtils.writeInt64(buf, off, div);
+            buf[off] = '.';
+            buf[off + 1] = (char) (v >> 16);
+            buf[off + 2] = (char) (v >> 32);
+            buf[off + 3] = (char) (v >> 48);
+            return off + 4;
         }
 
         off = IOUtils.writeInt64(buf, off, unscaledVal);
