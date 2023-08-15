@@ -314,4 +314,29 @@ public class BigDecimalTest {
         assertEquals(str, JSON.toJSONString(decimal));
         assertEquals(str, new String(JSON.toJSONBytes(decimal)));
     }
+
+    @Test
+    public void test_decimal_8() {
+        String[] strings = new String[] {
+                "345.6",
+                "345.67",
+                "345.678",
+                "345.6789",
+                "345.67891",
+                "345.678912",
+                "345.6789123",
+                "-345.6",
+                "-345.67",
+                "-345.678",
+                "-345.6789",
+                "-345.67891",
+                "-345.678912",
+                "-345.6789123"
+        };
+        for (String str : strings) {
+            BigDecimal decimal = new BigDecimal(str);
+            assertEquals(str, JSON.toJSONString(decimal));
+            assertEquals(str, new String(JSON.toJSONBytes(decimal)));
+        }
+    }
 }
