@@ -116,7 +116,7 @@ public class DateTest {
         JSONWriter jw = JSONWriter.of();
         jw.writeAny(
                 OffsetTime.of(12, 13, 14, 0, ZoneOffset.ofHours(0)));
-        assertEquals("\"12:13:14\"", jw.toString());
+        assertEquals("\"12:13:14Z\"", jw.toString());
     }
 
     @Test

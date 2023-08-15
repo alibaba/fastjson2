@@ -6,7 +6,6 @@ import com.alibaba.fastjson2.codec.DateTimeCodec;
 import java.lang.reflect.Type;
 import java.time.OffsetTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
 import java.util.Locale;
 
 final class ObjectWriterImplOffsetTime
@@ -35,10 +34,7 @@ final class ObjectWriterImplOffsetTime
         }
 
         if (formatter == null) {
-            int hour = time.get(ChronoField.HOUR_OF_DAY);
-            int minute = time.get(ChronoField.MINUTE_OF_HOUR);
-            int second = time.get(ChronoField.SECOND_OF_MINUTE);
-            jsonWriter.writeTimeHHMMSS8(hour, minute, second);
+            jsonWriter.writeOffsetTime(time);
         } else {
             String str = formatter.format(time);
             jsonWriter.writeString(str);
