@@ -30,7 +30,7 @@ public class DateFormat19Test {
             long millis = System.currentTimeMillis() - start;
             System.out.println("DateFormat19-formatYMDHMS19 millis : " + millis);
             // zulu8.58.0.13 : 3161 3589
-            // zulu11.52.13 : 3410
+            // zulu11.52.13 : 3410 3623 1589 1559
             // zulu17.38.21 :
         }
     }
@@ -44,7 +44,7 @@ public class DateFormat19Test {
             long millis = System.currentTimeMillis() - start;
             System.out.println("DateFormat19-fastjsonFormat2 millis : " + millis);
             // zulu8.58.0.13 :
-            // zulu11.52.13 :
+            // zulu11.52.13 : 3501 2386 2078
             // zulu17.38.21 :
         }
     }
@@ -81,8 +81,8 @@ public class DateFormat19Test {
     public static void main(String[] args) throws Throwable {
 //        fastjsonFormat();
 //        formatYMDHMS19();
-//        fastjsonFormat2();
+        fastjsonFormat2();
 //        javaTimeDateFormatter();
-        simpleParseX();
+//        simpleParseX();
     }
 }
