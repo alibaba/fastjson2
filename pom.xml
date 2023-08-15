@@ -163,7 +163,7 @@
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
                 <artifactId>odps-sdk-core</artifactId>
-                <version>0.43.4-public</version>
+                <version>0.45.1-public</version>
             </dependency>
             <dependency>
                 <groupId>com.aliyun.odps</groupId>
