@@ -18,6 +18,7 @@ import static com.alibaba.fastjson2.JSONFactory.*;
 import static com.alibaba.fastjson2.JSONWriter.Feature.*;
 import static com.alibaba.fastjson2.util.IOUtils.*;
 import static com.alibaba.fastjson2.util.JDKUtils.*;
+import static com.alibaba.fastjson2.util.TypeUtils.isInt64;
 
 class JSONWriterUTF16
         extends JSONWriter {
@@ -1230,6 +1231,11 @@ class JSONWriterUTF16
     public final void writeBigInt(BigInteger value, long features) {
         if (value == null) {
             writeNumberNull();
+            return;
+        }
+
+        if (isInt64(value) && features == 0) {
+            writeInt64(value.longValue());
             return;
         }
 

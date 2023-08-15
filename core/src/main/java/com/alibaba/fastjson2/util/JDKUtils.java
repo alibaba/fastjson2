@@ -6,6 +6,7 @@ import java.lang.invoke.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.ByteOrder;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,6 +28,7 @@ public class JDKUtils {
     public static volatile boolean FIELD_STRING_VALUE_ERROR;
 
     public static final long FIELD_DECIMAL_INT_COMPACT_OFFSET;
+    public static final long FIELD_BIGINTEGER_MAG_OFFSET;
 
     public static final Field FIELD_STRING_CODER;
     public static final long FIELD_STRING_CODER_OFFSET;
@@ -181,6 +183,17 @@ public class JDKUtils {
                 // ignored
             }
             FIELD_DECIMAL_INT_COMPACT_OFFSET = fieldOffset;
+        }
+
+        {
+            long fieldOffset = -1;
+            try {
+                Field field = BigInteger.class.getDeclaredField("mag");
+                fieldOffset = UNSAFE.objectFieldOffset(field);
+            } catch (Throwable ignored) {
+                // ignored
+            }
+            FIELD_BIGINTEGER_MAG_OFFSET = fieldOffset;
         }
 
         BIG_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
