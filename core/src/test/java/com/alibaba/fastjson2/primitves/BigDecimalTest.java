@@ -298,4 +298,20 @@ public class BigDecimalTest {
         JSON.parse("{\"doubleval\": 1.123E300}");
         JSON.parse("{\"doubleval\": 123.123E256}");
     }
+
+    @Test
+    public void test_decimal_6() {
+        String str = "345.67";
+        BigDecimal decimal = new BigDecimal(str);
+        assertEquals(str, JSON.toJSONString(decimal));
+        assertEquals(str, new String(JSON.toJSONBytes(decimal)));
+    }
+
+    @Test
+    public void test_decimal_7() {
+        String str = "345.678";
+        BigDecimal decimal = new BigDecimal(str);
+        assertEquals(str, JSON.toJSONString(decimal));
+        assertEquals(str, new String(JSON.toJSONBytes(decimal)));
+    }
 }
