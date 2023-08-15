@@ -1792,7 +1792,7 @@ class JSONWriterUTF16
 
             long v = item.longValue();
             boolean writeAsString = nonStringAsString
-                    || (browserCompatible && v <= 9007199254740991L && v >= -9007199254740991L);
+                    || (browserCompatible && !(v <= 9007199254740991L && v >= -9007199254740991L));
             if (writeAsString) {
                 chars[off++] = this.quote;
             }
