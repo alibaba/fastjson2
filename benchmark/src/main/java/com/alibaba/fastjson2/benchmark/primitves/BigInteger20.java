@@ -2,6 +2,7 @@ package com.alibaba.fastjson2.benchmark.primitves;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.benchmark.primitves.vo.BigInteger20Field;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -46,6 +47,12 @@ public class BigInteger20 {
     public void fastjson2(Blackhole bh) {
         bh.consume(
                 JSON.toJSONString(bean)
+        );
+    }
+
+    public void fastjson2_array_bytes(Blackhole bh) {
+        bh.consume(
+                JSON.toJSONBytes(bean, JSONWriter.Feature.BeanToArray)
         );
     }
 

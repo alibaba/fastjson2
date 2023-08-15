@@ -19,8 +19,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.*;
 
-import static com.alibaba.fastjson2.util.JDKUtils.FIELD_DECIMAL_INT_COMPACT_OFFSET;
-import static com.alibaba.fastjson2.util.JDKUtils.UNSAFE;
+import static com.alibaba.fastjson2.util.JDKUtils.*;
+import static com.alibaba.fastjson2.util.JDKUtils.FIELD_BIGINTEGER_MAG_OFFSET;
 import static java.lang.invoke.MethodType.methodType;
 
 public class TypeUtils {
@@ -1883,6 +1883,12 @@ public class TypeUtils {
     }
 
     public static boolean isInt64(BigInteger value) {
+        if (FIELD_BIGINTEGER_MAG_OFFSET != -1) {
+            int[] mag = (int[]) UNSAFE.getObject(value, FIELD_BIGINTEGER_MAG_OFFSET);
+            if (mag.length == 1 || (mag.length == 2 && mag[0] >= 0)) {
+                return true;
+            }
+        }
         return value.compareTo(BIGINT_INT64_MIN) >= 0 && value.compareTo(BIGINT_INT64_MAX) <= 0;
     }
 
