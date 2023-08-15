@@ -118,7 +118,7 @@ JSON.toJSONString(obj, format);
 ```
 
 ## 4.5 ## SerializerFeature.DisableCircularReferenceDetect在fastjson2的替代方案
-在fastjson2中，代替的是JSONWriter.Feature.ReferenceDetection，但语义相反，缺省不一样。fastjson2中的JSONWriter.Feature.ReferenceDetection缺省是关闭的，而fastjson1是现实打开的。
+在fastjson2中，代替的是JSONWriter.Feature.ReferenceDetection，但语义相反，缺省不一样。fastjson2中的JSONWriter.Feature.ReferenceDetection缺省是关闭的，而fastjson1缺省是打开的。
 
 ## 4.6 SerializerFeature.SortField在fastjson2的替代方案
 不需要，在fastjson2中，JSONObject继承自LinkedHashMap，不需要配置这个Feature
