@@ -288,7 +288,7 @@
             <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-core</artifactId>
-                <version>3.5.8</version>
+                <version>3.5.9</version>
             </dependency>
             <dependency>
                 <groupId>io.springfox</groupId>
