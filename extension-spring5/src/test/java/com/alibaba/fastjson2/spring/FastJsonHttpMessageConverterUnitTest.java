@@ -7,6 +7,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.ServletServerHttpResponse;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -60,6 +62,42 @@ public class FastJsonHttpMessageConverterUnitTest {
                 return new HttpHeaders();
             }
         });
+    }
+
+    @Test
+    public void testContentLengthHeader() throws Exception {
+        FastJsonHttpMessageConverter messageConverter = new FastJsonHttpMessageConverter();
+        messageConverter.setFastJsonConfig(new FastJsonConfig());
+        assertNotNull(messageConverter.getFastJsonConfig());
+        assertTrue(messageConverter.canRead(VO.class, VO.class, MediaType.APPLICATION_JSON));
+        assertTrue(messageConverter.canWrite(VO.class, VO.class, MediaType.APPLICATION_JSON));
+
+        messageConverter.setSupportedMediaTypes(Arrays
+            .asList(new MediaType[]{MediaType.APPLICATION_JSON}));
+        assertEquals(1, messageConverter.getSupportedMediaTypes().size());
+
+        Method method = FastJsonHttpMessageConverter.class.getDeclaredMethod(
+            "supports", Class.class);
+        method.setAccessible(true);
+        method.invoke(messageConverter, int.class);
+
+        VO vo = (VO) messageConverter.read(VO.class, VO.class, new HttpInputMessage() {
+            @Override
+            public InputStream getBody() {
+                return new ByteArrayInputStream("{\"id\":123}".getBytes(Charset.forName("UTF-8")));
+            }
+
+            @Override
+            public HttpHeaders getHeaders() {
+                return new HttpHeaders();
+            }
+        });
+        assertEquals(vo.getId(), 123);
+
+        final MockHttpServletResponse mockHttpServletResponse = new MockHttpServletResponse();
+        messageConverter.write(vo, VO.class, MediaType.APPLICATION_JSON, new ServletServerHttpResponse(mockHttpServletResponse));
+        final String contentLength = mockHttpServletResponse.getHeader(HttpHeaders.CONTENT_LENGTH);
+        assertEquals("10", contentLength);
     }
 
     public static class VO {
