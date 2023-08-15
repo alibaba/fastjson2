@@ -2428,18 +2428,7 @@ class JSONWriterUTF8
         }
 
         ZoneOffset offset = dateTime.getOffset();
-        String zoneId = offset.getId();
-        final int zoneIdLength;
-        boolean utc = ZoneOffset.UTC == offset
-                || ("UTC".equals(zoneId) || "Z".equals(zoneId));
-        if (utc) {
-            zoneId = "Z";
-            zoneIdLength = 1;
-        } else {
-            zoneIdLength = zoneId.length();
-        }
-
-        int minCapacity = off + zoneIdLength + 40;
+        int minCapacity = off + 45;
         if (minCapacity >= bytes.length) {
             ensureCapacity(minCapacity);
         }
@@ -2452,11 +2441,39 @@ class JSONWriterUTF8
         off = IOUtils.writeLocalDate(bytes, off, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
         bytes[off++] = 'T';
         off = IOUtils.writeLocalTime(bytes, off, ldt.toLocalTime());
-        if (utc) {
+        if (offset.getTotalSeconds() == 0) {
             bytes[off++] = 'Z';
         } else {
-            zoneId.getBytes(0, zoneIdLength, bytes, off);
-            off += zoneIdLength;
+            String zoneId = offset.getId();
+            zoneId.getBytes(0, zoneId.length(), bytes, off);
+            off += zoneId.length();
+        }
+        bytes[off] = (byte) quote;
+        this.off = off + 1;
+    }
+
+    public final void writeOffsetTime(OffsetTime time) {
+        if (time == null) {
+            writeNull();
+            return;
+        }
+
+        ZoneOffset offset = time.getOffset();
+        int minCapacity = off + 45;
+        if (minCapacity >= bytes.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final byte[] bytes = this.bytes;
+        int off = this.off;
+        bytes[off++] = (byte) quote;
+        off = IOUtils.writeLocalTime(bytes, off, time.toLocalTime());
+        if (offset.getTotalSeconds() == 0) {
+            bytes[off++] = 'Z';
+        } else {
+            String zoneId = offset.getId();
+            zoneId.getBytes(0, zoneId.length(), bytes, off);
+            off += zoneId.length();
         }
         bytes[off] = (byte) quote;
         this.off = off + 1;

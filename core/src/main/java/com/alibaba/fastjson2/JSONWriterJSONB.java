@@ -1,6 +1,7 @@
 package com.alibaba.fastjson2;
 
 import com.alibaba.fastjson2.internal.trove.map.hash.TLongIntHashMap;
+import com.alibaba.fastjson2.util.DateUtils;
 import com.alibaba.fastjson2.util.Fnv;
 import com.alibaba.fastjson2.util.IOUtils;
 import com.alibaba.fastjson2.util.JDKUtils;
@@ -1759,6 +1760,18 @@ final class JSONWriterJSONB
         } else {
             writeString(zoneIdStr);
         }
+    }
+
+    @Override
+    public void writeOffsetTime(OffsetTime offsetTime) {
+        if (offsetTime == null) {
+            writeNull();
+            return;
+        }
+
+        writeOffsetDateTime(
+                OffsetDateTime.of(DateUtils.LOCAL_DATE_19700101, offsetTime.toLocalTime(), offsetTime.getOffset())
+        );
     }
 
     @Override

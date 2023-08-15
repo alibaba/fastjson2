@@ -5866,6 +5866,91 @@ class JSONReaderUTF16
     }
 
     @Override
+    public final OffsetTime readOffsetTime() {
+        final char[] chars = this.chars;
+        final int offset = this.offset;
+        final Context context = this.context;
+        if (this.ch == '"' || this.ch == '\'') {
+            if (context.dateFormat == null) {
+                char quote = this.ch;
+                int off10 = offset + 8;
+                if (off10 < chars.length
+                        && off10 < end
+                        && chars[offset + 2] == ':'
+                        && chars[offset + 5] == ':'
+                ) {
+                    char h0 = chars[offset];
+                    char h1 = chars[offset + 1];
+                    char i0 = chars[offset + 3];
+                    char i1 = chars[offset + 4];
+                    char s0 = chars[offset + 6];
+                    char s1 = chars[offset + 7];
+
+                    int hour;
+                    if (h0 >= '0' && h0 <= '9'
+                            && h1 >= '0' && h1 <= '9'
+                    ) {
+                        hour = (h0 - '0') * 10 + (h1 - '0');
+                    } else {
+                        throw new JSONException(this.info("illegal offsetTime"));
+                    }
+
+                    int minute;
+                    if (i0 >= '0' && i0 <= '9'
+                            && i1 >= '0' && i1 <= '9'
+                    ) {
+                        minute = (i0 - '0') * 10 + (i1 - '0');
+                    } else {
+                        throw new JSONException(this.info("illegal offsetTime"));
+                    }
+
+                    int second;
+                    if (s0 >= '0' && s0 <= '9'
+                            && s1 >= '0' && s1 <= '9'
+                    ) {
+                        second = (s0 - '0') * 10 + (s1 - '0');
+                    } else {
+                        throw new JSONException(this.info("illegal offsetTime"));
+                    }
+
+                    int nanoSize = -1;
+                    int len = 0;
+                    for (int start = offset + 8, i = start, end = offset + 25; i < end && i < this.end && i < chars.length; ++i) {
+                        char b = chars[i];
+                        if (nanoSize == -1 && (b == 'Z' || b == '+' || b == '-')) {
+                            nanoSize = i - start - 1;
+                        }
+                        if (b == quote) {
+                            len = i - offset;
+                            break;
+                        }
+                    }
+
+                    int nano = nanoSize <= 0 ? 0 : DateUtils.readNanos(chars, nanoSize, offset + 9);
+
+                    ZoneOffset zoneOffset;
+                    int zoneOffsetSize = len - 9 - nanoSize;
+                    if (zoneOffsetSize <= 1) {
+                        zoneOffset = ZoneOffset.UTC;
+                    } else {
+                        String zonedId = new String(chars, offset + 9 + nanoSize, zoneOffsetSize);
+                        zoneOffset = ZoneOffset.of(zonedId);
+                    }
+                    LocalTime localTime = LocalTime.of(hour, minute, second, nano);
+                    OffsetTime oft = OffsetTime.of(localTime, zoneOffset);
+                    this.offset += len + 2;
+                    next();
+                    if (comma = (this.ch == ',')) {
+                        next();
+                    }
+                    return oft;
+                }
+            }
+        }
+        throw new JSONException(this.info("illegal offsetTime"));
+    }
+
+    @Override
     protected final ZonedDateTime readZonedDateTimeX(int len) {
         if (this.ch != '"' && this.ch != '\'') {
             throw new JSONException("date only support string input");

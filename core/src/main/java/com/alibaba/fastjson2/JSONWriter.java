@@ -1251,6 +1251,8 @@ public abstract class JSONWriter
 
     public abstract void writeOffsetDateTime(OffsetDateTime dateTime);
 
+    public abstract void writeOffsetTime(OffsetTime dateTime);
+
     public void writeInstant(Instant instant) {
         if (instant == null) {
             writeNull();

@@ -2318,16 +2318,8 @@ class JSONWriterUTF16
         }
 
         ZoneOffset offset = dateTime.getOffset();
-        String zoneId = offset.getId();
-        int zoneIdLength = zoneId.length();
-        boolean utc = ZoneOffset.UTC == offset
-                || (zoneIdLength <= 3 && ("UTC".equals(zoneId) || "Z".equals(zoneId)));
-        if (utc) {
-            zoneId = "Z";
-        }
-
         int off = this.off;
-        int minCapacity = off + zoneIdLength + 40;
+        int minCapacity = off + 45;
         if (minCapacity >= chars.length) {
             ensureCapacity(minCapacity);
         }
@@ -2339,11 +2331,40 @@ class JSONWriterUTF16
         off = IOUtils.writeLocalDate(chars, off, date.getYear(), date.getMonthValue(), date.getDayOfMonth());
         chars[off++] = 'T';
         off = IOUtils.writeLocalTime(chars, off, ldt.toLocalTime());
-        if (utc) {
+        if (offset.getTotalSeconds() == 0) {
             chars[off++] = 'Z';
         } else {
-            zoneId.getChars(0, zoneIdLength, chars, off);
-            off += zoneIdLength;
+            String zoneId = offset.getId();
+            zoneId.getChars(0, zoneId.length(), chars, off);
+            off += zoneId.length();
+        }
+        chars[off] = quote;
+        this.off = off + 1;
+    }
+
+    @Override
+    public final void writeOffsetTime(OffsetTime time) {
+        if (time == null) {
+            writeNull();
+            return;
+        }
+
+        ZoneOffset offset = time.getOffset();
+        int off = this.off;
+        int minCapacity = off + 25;
+        if (minCapacity >= chars.length) {
+            ensureCapacity(minCapacity);
+        }
+
+        final char[] chars = this.chars;
+        chars[off++] = quote;
+        off = IOUtils.writeLocalTime(chars, off, time.toLocalTime());
+        if (offset.getTotalSeconds() == 0) {
+            chars[off++] = 'Z';
+        } else {
+            String zoneId = offset.getId();
+            zoneId.getChars(0, zoneId.length(), chars, off);
+            off += zoneId.length();
         }
         chars[off] = quote;
         this.off = off + 1;
