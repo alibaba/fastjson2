@@ -10768,7 +10768,24 @@ public class DateUtils {
         int hour = ldt.getHour();
         int minute = ldt.getMinute();
         int second = ldt.getSecond();
-        return format(year, month, dayOfMonth, hour, minute, second, DATE_TIME_FORMAT_19_DASH);
+
+        if (STRING_CREATOR_JDK11 != null) {
+            byte[] bytes = new byte[19];
+            IOUtils.writeLocalDate(bytes, 0, year, month, dayOfMonth);
+            bytes[10] = ' ';
+            IOUtils.writeLocalTime(bytes, 11, hour, minute, second);
+            return STRING_CREATOR_JDK11.apply(bytes, LATIN1);
+        }
+
+        char[] chars = new char[19];
+        byte[] bytes = new byte[19];
+        IOUtils.writeLocalDate(bytes, 0, year, month, dayOfMonth);
+        bytes[10] = ' ';
+        IOUtils.writeLocalTime(chars, 11, hour, minute, second);
+        if (STRING_CREATOR_JDK8 != null) {
+            return STRING_CREATOR_JDK8.apply(chars, Boolean.TRUE);
+        }
+        return new String(chars);
     }
 
     public static String format(LocalDateTime ldt, String format) {
