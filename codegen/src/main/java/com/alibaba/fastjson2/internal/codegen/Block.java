@@ -224,7 +224,7 @@ public class Block {
             return lables.length;
         }
 
-        public Block lable(int index) {
+        public Block label(int index) {
             return lables[index];
         }
 
