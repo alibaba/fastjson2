@@ -3,7 +3,7 @@ fastjson2会使用codegen来优化反序列化的性能，用到的codegen技术
 * ASM 基于内置asm 9.2裁剪版实现的动态字节码生成类
 * Annotation Process Tools(APT)
 
-## 实现算法介绍
+## 1. 实现算法介绍
 
 我们要将json反序列化为如下的Image类
 ```java
@@ -17,7 +17,7 @@ public class Image {
 }
 ```
 
-需要生成如下的代码来快速将json中的name和字段关联起来：
+生成如下的代码来快速将json中的name和字段关联起来：
 ```java
 public final class Image_FASTJOSNReader
     extends com.alibaba.fastjson2.reader.ObjectReader5 {
@@ -123,3 +123,13 @@ class JSONReaderUTF8 implements JSONReader {
     }
 }
 ```
+
+这样的实现好处是，不需要将key读取出来，也不需要将使用JSONReader#readFieldNameHashCode，通过key的前缀3个字符读取一个int值，使用switch来路由到相应字段的处理。
+
+## 2. 算法实现代码
+生成代码的实现：
+* ASM实现 com.alibaba.fastjson2.reader.ObjectReaderCreatorASM#genRead243
+* APT实现 com.alibaba.fastjson2.internal.processor.JSONCompiledAnnotationProcessor.genRead243
+
+
+
