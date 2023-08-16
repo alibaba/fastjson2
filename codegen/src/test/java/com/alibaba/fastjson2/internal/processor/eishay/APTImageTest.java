@@ -1,4 +1,6 @@
-package com.alibaba.fastjson2.internal.processor;
+package com.alibaba.fastjson2.internal.processor.eishay;
+
+import com.alibaba.fastjson2.internal.processor.JSONCompiledAnnotationProcessor;
 
 import javax.tools.*;
 
@@ -8,7 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class APTTest0 {
+public class APTImageTest {
     @org.junit.jupiter.api.Test
     public void test() throws Exception {
         Path dir = new File("/Users/wenshao/Work/git/fastjson2/codegen/target/generated-sources")
@@ -19,7 +21,7 @@ public class APTTest0 {
         fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Arrays.asList(dir.toFile()));
         fileManager.setLocation(StandardLocation.SOURCE_OUTPUT, Arrays.asList(dir.toFile()));
 
-        File file = new File("src/test/java/com/alibaba/fastjson2/internal/processor/Bean.java");
+        File file = new File("src/test/java/com/alibaba/fastjson2/internal/processor/eishay/Image.java");
         Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjects(file);
 
         List<String> options = Arrays.asList("-source", "1.8");

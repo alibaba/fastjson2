@@ -444,6 +444,11 @@ public class Opcodes {
                 return;
             }
 
+            if (value instanceof Byte) {
+                buf.append("(byte) ").append(((Byte) value).intValue());
+                return;
+            }
+
             if (value instanceof Integer) {
                 buf.append(((Integer) value).intValue());
                 return;
