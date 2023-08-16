@@ -5,6 +5,10 @@ fastjson2会使用codegen来优化反序列化的性能，用到的codegen技术
 
 ## 1. 实现算法介绍
 
+![image](reader_codegen_01.png)
+
+上图中算法1是常规实现；算法2是fastjson2的实现（最初是dsljson引入，被fastjson借鉴）；算法3是新引入的实现
+
 我们要将json反序列化为如下的Image类
 ```java
 @Data
