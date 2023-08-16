@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class APTTest0 {
-    @org.junit.jupiter.api.Test
+//    @org.junit.jupiter.api.Test
     public void test() throws Exception {
         Path dir = new File("/Users/wenshao/Work/git/fastjson2/codegen/target/generated-sources")
                 .toPath();
